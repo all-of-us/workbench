@@ -173,21 +173,6 @@ const compareDataprocNumberOfWorkers = (oldRuntime: RuntimeConfig, newRuntime: R
   };
 };
 
-const compareDataprocConfig = (oldRuntime, newRuntime) => {
-  return [compareWorkerCpu, compareWorkerMemory, compareDataprocWorkerDiskSize,
-    compareDataprocNumberOfPreemptibleWorkers, compareDataprocNumberOfWorkers]
-    .map(compareFn => compareFn(oldRuntime, newRuntime))
-    .filter(diff => diff !== null)
-    .filter(diff => diff.differenceType !== RuntimeDiffState.NO_CHANGE);
-};
-
-const compareMachineConfig = (oldRuntime, newRuntime) => {
-  return [compareComputeTypes, compareMachineCpu, compareMachineMemory, compareDiskSize]
-    .map(compareFn => compareFn(oldRuntime, newRuntime))
-    .filter(diff => diff !== null)
-    .filter(diff => diff.differenceType !== RuntimeDiffState.NO_CHANGE);
-};
-
 const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
   if (runtime.gceConfig) {
     return {
@@ -207,7 +192,12 @@ const toRuntimeConfig = (runtime: Runtime): RuntimeConfig => {
 };
 
 export const getRuntimeConfigDiffs = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff[] => {
-  return compareDataprocConfig(oldRuntime, newRuntime).concat(compareMachineConfig(oldRuntime, newRuntime));
+  return [compareWorkerCpu, compareWorkerMemory, compareDataprocWorkerDiskSize,
+    compareDataprocNumberOfPreemptibleWorkers, compareDataprocNumberOfWorkers,
+    compareComputeTypes, compareMachineCpu, compareMachineMemory, compareDiskSize]
+    .map(compareFn => compareFn(oldRuntime, newRuntime))
+    .filter(diff => diff !== null)
+    .filter(diff => diff.differenceType !== RuntimeDiffState.NO_CHANGE);
 };
 
 const getRuntimeDiffs = (oldRuntime: Runtime, newRuntime: Runtime): RuntimeDiff[] => {

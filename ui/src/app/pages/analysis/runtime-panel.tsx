@@ -553,10 +553,10 @@ const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelCont
 
   return <div style={styles.controlSection}>
     <CostInfo runtimeChanged={false}
-                          runtimeConfig={runtimeConfig}
-                          currentUser={profile.username}
-                          workspace={workspace}
-                          creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
+              runtimeConfig={runtimeConfig}
+              currentUser={profile.username}
+              workspace={workspace}
+              creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
     />
     <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
       <h3 style={{...styles.sectionHeader, ...styles.bold}}>Recommended Environment for {displayName}</h3>
@@ -588,6 +588,65 @@ const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelCont
       </div>
     </Fragment>}
   </div>;
+};
+
+const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, updateButton}) => {
+  return <React.Fragment>
+    <div style={styles.controlSection}>
+      <h3 style={{...styles.baseHeader, ...styles.sectionHeader, marginTop: '.1rem', marginBottom: '.2rem'}}>Editing your environment</h3>
+      <div>
+        You're about to apply the following changes to your environment:
+      </div>
+      <ul>
+        {getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig).map(diff =>
+          <li>
+            {diff.desc} from <b>{diff.previous}</b> to <b>{diff.new}</b>
+          </li>
+        )
+        }
+      </ul>
+      <FlexRow style={{marginTop: '.5rem'}}>
+        <div style={{marginRight: '1rem'}}>
+          <b style={{fontSize: 10}}>New estimated cost</b>
+          <div style={{...styles.costPredictor, padding: '.25rem .5rem'}}>
+            <CostEstimator runtimeParameters={newRuntimeConfig}/>
+          </div>
+        </div>
+        <div>
+          <b style={{fontSize: 10}}>Previous estimated cost</b>
+          <div style={{...styles.costPredictor,
+            padding: '.25rem .5rem',
+            color: 'grey',
+            backgroundColor: ''}}>
+            <CostEstimator runtimeParameters={initialRuntimeConfig} costTextColor='grey'/>
+          </div>
+        </div>
+      </FlexRow>
+    </div>
+
+    <WarningMessage>
+      <TextColumn>
+        <div>
+          You've made changes that can only take effect upon deletion and re-creation of your cloud environment.
+        </div>
+        <div style={{marginTop: '0.5rem'}}>
+          Any in-memory state and local file modifications will be erased. Data stored in workspace buckets
+          is never affected by changes to your cloud environment.
+        </div>
+      </TextColumn>
+    </WarningMessage>
+
+    <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
+      <Button
+        type='secondary'
+        aria-label='Cancel'
+        style={{marginRight: '.25rem'}}
+        onClick={onCancel}>
+        Cancel
+      </Button>
+      {updateButton}
+    </FlexRow>
+  </React.Fragment>;
 };
 
 export const RuntimePanel = fp.flow(
@@ -691,15 +750,17 @@ export const RuntimePanel = fp.flow(
     return runtimeRequest;
   };
 
+  const runtimeCanBeUpdated = () => {
+    return runtimeChanged
+    // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
+    // where we get 'status' from
+    && [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus);
+  };
+
   const renderUpdateButton = () => {
     return <Button
       aria-label='Update'
-      disabled={
-        !runtimeChanged
-        // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
-        // where we get 'status' from
-        || ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)
-      }
+      disabled={!runtimeCanBeUpdated()}
       onClick={() => {
         setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
         onUpdate();
@@ -713,6 +774,7 @@ export const RuntimePanel = fp.flow(
       aria-label='Create'
       onClick={() => {
         setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
+        onUpdate();
       }}>
       Create
     </Button>;
@@ -721,72 +783,12 @@ export const RuntimePanel = fp.flow(
   const renderNextButton = () => {
     return <Button
       aria-label='Next'
+      disabled={!runtimeCanBeUpdated()}
       onClick={() => {
         setPanelContent(PanelContent.Confirm);
       }}>
       Next
     </Button>;
-  };
-
-  const renderConfirmUpdate = () => {
-    return <React.Fragment>
-      <div style={styles.controlSection}>
-        <h3 style={{...styles.baseHeader, ...styles.sectionHeader, marginTop: '.1rem', marginBottom: '.2rem'}}>Editing your environment</h3>
-        <div>
-          You're about to apply the following changes to your environment:
-        </div>
-        <ul>
-          {runtimeDiffs.map(diff =>
-              <li>
-                {diff.desc} from <b>{diff.previous}</b> to <b>{diff.new}</b>
-              </li>
-            )
-          }
-        </ul>
-        <FlexRow style={{marginTop: '.5rem'}}>
-          <div style={{marginRight: '1rem'}}>
-            <b style={{fontSize: 10}}>New estimated cost</b>
-            <div style={{...styles.costPredictor, padding: '.25rem .5rem'}}>
-              <CostEstimator runtimeParameters={newRuntimeConfig}/>
-            </div>
-          </div>
-          <div>
-            <b style={{fontSize: 10}}>Previous estimated cost</b>
-            <div style={{...styles.costPredictor,
-              padding: '.25rem .5rem',
-              color: 'grey',
-              backgroundColor: ''}}>
-              <CostEstimator runtimeParameters={initialRuntimeConfig} costTextColor='grey'/>
-            </div>
-          </div>
-        </FlexRow>
-      </div>
-
-      <WarningMessage>
-        <TextColumn>
-          <div>
-            You've made changes that can only take effect upon deletion and re-creation of your cloud environment.
-          </div>
-          <div style={{marginTop: '0.5rem'}}>
-            Any in-memory state and local file modifications will be erased. Data stored in workspace buckets
-            is never affected by changes to your cloud environment.
-          </div>
-        </TextColumn>
-      </WarningMessage>
-
-      <FlexRow style={{justifyContent: 'flex-end', marginTop: '.75rem'}}>
-        <Button
-          type='secondary'
-          aria-label='Cancel'
-          style={{marginRight: '.25rem'}}
-          onClick={() => {
-            setPanelContent(PanelContent.Customize);
-          }}>
-          Cancel
-        </Button>
-        {renderUpdateButton()}
-      </FlexRow>
-    </React.Fragment>;
   };
 
   return <div data-test-id='runtime-panel'>
@@ -884,6 +886,12 @@ export const RuntimePanel = fp.flow(
          }
        </FlexRow>
      </Fragment>],
-      [PanelContent.Confirm, () => renderConfirmUpdate()])}
+      [PanelContent.Confirm, () => <ConfirmUpdatePanel initialRuntimeConfig={initialRuntimeConfig}
+                                                       newRuntimeConfig={newRuntimeConfig}
+                                                       onCancel={() => {
+                                                         setPanelContent(PanelContent.Customize);
+                                                       }}
+                                                       updateButton={renderUpdateButton()}
+      />])}
   </div>;
 });

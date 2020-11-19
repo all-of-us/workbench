@@ -56,11 +56,8 @@ describe('RuntimePanel', () => {
 
   afterEach(() => {
     act(() => clearCompoundRuntimeOperations());
+    jest.useRealTimers();
   });
-
-  const getDropdownOption = (wrapper, id) => {
-    return wrapper.find(id).first().prop('value');
-  };
 
   const pickDropdownOption = async(wrapper, id, label) => {
     wrapper.find(id).first().simulate('click');
@@ -74,7 +71,7 @@ describe('RuntimePanel', () => {
     await waitOneTickAndUpdate(wrapper);
   };
 
-  const getNumberInput = (wrapper, id) => {
+  const getInputValue = (wrapper, id) => {
     return wrapper.find(id).first().prop('value');
   };
 
@@ -84,30 +81,30 @@ describe('RuntimePanel', () => {
     await waitOneTickAndUpdate(wrapper);
   };
 
-  const getMainCpu = (wrapper) => getDropdownOption(wrapper, '#runtime-cpu');
+  const getMainCpu = (wrapper) => getInputValue(wrapper, '#runtime-cpu');
   const pickMainCpu = (wrapper, cpu) => pickDropdownOption(wrapper, '#runtime-cpu', cpu);
 
-  const getMainRam = (wrapper) => getDropdownOption(wrapper, '#runtime-ram');
+  const getMainRam = (wrapper) => getInputValue(wrapper, '#runtime-ram');
   const pickMainRam = (wrapper, ram) => pickDropdownOption(wrapper, '#runtime-ram', ram);
 
-  const getMainDiskSize = (wrapper) => getNumberInput(wrapper, '#runtime-disk');
+  const getMainDiskSize = (wrapper) => getInputValue(wrapper, '#runtime-disk');
   const pickMainDiskSize = (wrapper, diskSize) => enterNumberInput(wrapper, '#runtime-disk', diskSize);
 
   const pickComputeType = (wrapper, computeType) => pickDropdownOption(wrapper, '#runtime-compute', computeType);
 
-  const getWorkerCpu = (wrapper) => getDropdownOption(wrapper, '#worker-cpu');
+  const getWorkerCpu = (wrapper) => getInputValue(wrapper, '#worker-cpu');
   const pickWorkerCpu = (wrapper, cpu) => pickDropdownOption(wrapper, '#worker-cpu', cpu);
 
-  const getWorkerRam = (wrapper) => getDropdownOption(wrapper, '#worker-ram');
+  const getWorkerRam = (wrapper) => getInputValue(wrapper, '#worker-ram');
   const pickWorkerRam = (wrapper, ram) => pickDropdownOption(wrapper, '#worker-ram', ram);
 
-  const getWorkerDiskSize = (wrapper) => getNumberInput(wrapper, '#worker-disk');
+  const getWorkerDiskSize = (wrapper) => getInputValue(wrapper, '#worker-disk');
   const pickWorkerDiskSize = (wrapper, diskSize) => enterNumberInput(wrapper, '#worker-disk', diskSize);
 
-  const getNumWorkers = (wrapper) => getNumberInput(wrapper, '#num-workers');
+  const getNumWorkers = (wrapper) => getInputValue(wrapper, '#num-workers');
   const pickNumWorkers = (wrapper, n) => enterNumberInput(wrapper, '#num-workers', n);
 
-  const getNumPreemptibleWorkers = (wrapper) => getNumberInput(wrapper, '#num-preemptible');
+  const getNumPreemptibleWorkers = (wrapper) => getInputValue(wrapper, '#num-preemptible');
   const pickNumPreemptibleWorkers = (wrapper, n) => enterNumberInput(wrapper, '#num-preemptible', n);
 
   const pickPreset = async(wrapper, {displayName}) => {
@@ -380,7 +377,7 @@ describe('RuntimePanel', () => {
 
   it('should enable the Update button if there are updates that do not require delete and runtime is running - number of workers', async() => {
     const runtime = {...runtimeApiStub.runtime, gceConfig: null, dataprocConfig: defaultDataprocConfig(), configurationType: RuntimeConfigurationType.UserOverride};
-    act(() => {runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace}); });
+    runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
 
@@ -482,15 +479,8 @@ describe('RuntimePanel', () => {
     await pickNumWorkers(wrapper, 5);
     await pickWorkerDiskSize(wrapper, 100);
 
-    act(() => {
-      wrapper.find(Button).find({'aria-label': 'Next'}).first().simulate('click');
-    });
-    await waitOneTickAndUpdate(wrapper);
-
-    act(() => {
-      wrapper.find(Button).find({'aria-label': 'Cancel'}).first().simulate('click');
-    });
-    await waitOneTickAndUpdate(wrapper);
+    mustClickButton(wrapper, 'Next');
+    mustClickButton(wrapper, 'Cancel');
 
     expect(getMainDiskSize(wrapper)).toBe(75);
     expect(getMainCpu(wrapper)).toBe(8);
@@ -529,14 +519,12 @@ describe('RuntimePanel', () => {
   it('should send a delete call if an update requires delete', async() => {
     const wrapper = await component();
 
-    const spy = jest.spyOn(runtimeApi(), 'deleteRuntime');
-
     await pickMainCpu(wrapper, 8);
 
     await mustClickButton(wrapper, 'Next');
     await mustClickButton(wrapper, 'Update');
 
-    expect(spy).toHaveBeenCalled();
+    expect(runtimeApiStub.runtime.status).toEqual('Deleting');
   });
 
   it('should show create button if runtime is deleted', async() => {
