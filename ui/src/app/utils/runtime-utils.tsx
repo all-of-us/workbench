@@ -7,6 +7,7 @@ import * as fp from 'lodash/fp';
 
 import * as React from 'react';
 import {ComputeType, findMachineByName, Machine} from './machines';
+import {leoRuntimesApi} from "../services/notebooks-swagger-fetch-clients";
 
 const {useState, useEffect} = React;
 
@@ -279,10 +280,10 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
               throw e;
             }
           }
-        },
-        RuntimeStatusRequest.Start, async() => {
+        }],
+        [RuntimeStatusRequest.Start, async() => {
           try {
-            await LeoRuntimeInitializer.initialize({workspaceNamespace: currentWorkspaceNamespace, maxCreateCount: 0});
+            await LeoRuntimeInitializer.initialize({workspaceNamespace: currentWorkspaceNamespace, maxCreateCount: 0, maxPauseCount: 0});
           } catch (e) {
             // ExceededActionCountError is expected, as we exceed our create limit of 0.
             if (!(e instanceof ExceededActionCountError ||
@@ -290,10 +291,10 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
               throw e;
             }
           }
-        },
-        RuntimeStatusRequest.Stop, async() => {
+        }],
+        [RuntimeStatusRequest.Stop, async() => {
           try {
-            await LeoRuntimeInitializer.initialize({workspaceNamespace: currentWorkspaceNamespace, maxCreateCount: 0});
+            await LeoRuntimeInitializer.initialize({workspaceNamespace: currentWorkspaceNamespace, maxCreateCount: 0, maxPauseCount: 1, maxResumeCount: 0});
           } catch (e) {
             // ExceededActionCountError is expected, as we exceed our create limit of 0.
             if (!(e instanceof ExceededActionCountError ||
@@ -301,24 +302,24 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
               throw e;
             }
           }
-        }
-      ]);
+        }]
+      );
     }
 
   }, [runtimeStatus]);
 
   const setStatusRequest = async(req) => {
-    await switchCase(req, [
-      RuntimeStatusRequest.Delete, () => {
+    await switchCase(req,
+      [RuntimeStatusRequest.Delete, () => {
         return runtimeApi().deleteRuntime(currentWorkspaceNamespace);
-      },
-      RuntimeStatusRequest.Start, () => {
-        return runtimeApi().startRuntime(currentWorkspaceNamespace);
-      },
-      RuntimeStatusRequest.Stop, () => {
-        return runtimeApi().stopRuntime(currentWorkspaceNamespace);
-      }
-    ]);
+      }],
+      [RuntimeStatusRequest.Start, () => {
+        return leoRuntimesApi().startRuntime(currentWorkspaceNamespace, runtime.runtimeName);
+      }],
+      [RuntimeStatusRequest.Stop, () => {
+        return leoRuntimesApi().stopRuntime(currentWorkspaceNamespace, runtime.runtimeName);
+      }]
+    );
     setRuntimeStatus(req);
   };
   return [runtime ? runtime.status : undefined, setStatusRequest];

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="36px" height="36px" viewBox="0 0 36 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>4540139F-2946-4B48-9E7A-7021ABC97485</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="icons" transform="translate(-56.000000, -1125.000000)">
+            <g id="NO-ENVIRONMENT" transform="translate(19.000000, 1025.000000)">
+                <g id="Icons/16x16/Compute/Paused-Copy-4" transform="translate(37.000000, 100.000000)">
+                    <rect id="Bounding-box" x="0" y="0" width="36" height="36"></rect>
+                    <path d="M18,36 C27.9410676,36 36,27.9410676 36,18 C36,8.0589324 27.9411385,0 18,0 C8.0589324,0 0,8.05886152 0,18 C0,27.9411385 8.0589324,36 18,36 Z M28.9440839,25.6593845 L10.3405447,7.05598696 C15.4360037,3.47373519 22.6956984,3.80913716 27.4433515,8.5566485 C32.1935563,13.3069241 32.5239967,20.5673986 28.9440839,25.6593845 Z M8.5566485,27.4433515 C3.80644374,22.6930759 3.47600334,15.4326014 7.05591608,10.3406155 L25.6594553,28.944013 C20.5640672,32.5262648 13.3043016,32.1909337 8.5566485,27.4433515 Z" id="" fill="#4D72AA" fill-rule="nonzero"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

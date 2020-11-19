@@ -18,6 +18,8 @@ const DEFAULT_MAX_POLLING_DELAY = 15000;
 const DEFAULT_MAX_CREATE_COUNT = 2;
 const DEFAULT_MAX_DELETE_COUNT = 2;
 const DEFAULT_MAX_RESUME_COUNT = 2;
+// Pause is the exception. We only want to pause through explicit action of the user.
+const DEFAULT_MAX_PAUSE_COUNT = 0;
 // We allow a certain # of server errors to occur before we error-out of the initialization flow.
 const DEFAULT_MAX_SERVER_ERROR_COUNT = 10;
 const DEFAULT_RUNTIME_CONFIG = runtimePresets.generalAnalysis.runtimeTemplate;
@@ -80,6 +82,7 @@ export interface LeoRuntimeInitializerOptions {
   overallTimeout?: number;
   maxCreateCount?: number;
   maxDeleteCount?: number;
+  maxPauseCount?: number;
   maxResumeCount?: number;
   maxServerErrorCount?: number;
   targetRuntime?: Runtime;
@@ -93,6 +96,7 @@ const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
   overallTimeout: DEFAULT_OVERALL_TIMEOUT,
   maxCreateCount: DEFAULT_MAX_CREATE_COUNT,
   maxDeleteCount: DEFAULT_MAX_DELETE_COUNT,
+  maxPauseCount: DEFAULT_MAX_PAUSE_COUNT,
   maxResumeCount: DEFAULT_MAX_RESUME_COUNT,
   maxServerErrorCount: DEFAULT_MAX_SERVER_ERROR_COUNT,
   targetRuntime: DEFAULT_RUNTIME_CONFIG,
@@ -129,6 +133,7 @@ export class LeoRuntimeInitializer {
   private readonly overallTimeout: number;
   private readonly maxCreateCount: number;
   private readonly maxDeleteCount: number;
+  private readonly maxPauseCount: number;
   private readonly maxResumeCount: number;
   private readonly maxServerErrorCount: number;
 
@@ -136,6 +141,7 @@ export class LeoRuntimeInitializer {
   private currentDelay: number;
   private createCount = 0;
   private deleteCount = 0;
+  private pauseCount = 0;
   private resumeCount = 0;
   private serverErrorCount = 0;
   private initializeStartTime?: number;
@@ -185,6 +191,7 @@ export class LeoRuntimeInitializer {
     this.overallTimeout = options.overallTimeout;
     this.maxCreateCount = options.maxCreateCount;
     this.maxDeleteCount = options.maxDeleteCount;
+    this.maxPauseCount = options.maxPauseCount;
     this.maxResumeCount = options.maxResumeCount;
     this.maxServerErrorCount = options.maxServerErrorCount;
     this.targetRuntime = options.targetRuntime;
@@ -210,6 +217,15 @@ export class LeoRuntimeInitializer {
       runtime,
       {signal: this.pollAbortSignal});
     this.createCount++;
+  }
+
+  private async pauseRuntime(): Promise<void> {
+    if (this.pauseCount >= this.maxPauseCount) {
+      throw new ExceededActionCountError(`Reached max runtime pause count (${this.maxPauseCount})`, this.currentRuntime);
+    }
+    await leoRuntimesApi().stopRuntime(
+        this.currentRuntime.googleProject, this.currentRuntime.runtimeName, {signal: this.pollAbortSignal});
+    this.pauseCount++;
   }
 
   private async resumeRuntime(): Promise<void> {
@@ -343,9 +359,13 @@ export class LeoRuntimeInitializer {
           `Runtime ${this.currentRuntime.googleProject}/${this.currentRuntime.runtimeName}` +
           ` has reached an ERROR status`);
         await this.deleteRuntime();
-      } else if (this.reachedResolution()) {
-        // We've reached the goal - resolve the Promise.
-        return this.resolve(this.currentRuntime);
+      } else if (this.isRuntimeRunning()) {
+        if (this.pauseCount < this.maxPauseCount) {
+          await this.pauseRuntime();
+        } else {
+          // We've reached the goal - resolve the Promise.
+          return this.resolve(this.currentRuntime);
+        }
       }
     } catch (e) {
       if (isAbortError(e)) {

@@ -689,54 +689,6 @@ paths:
           description: No runtime exists for this user and workspace.
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/runtimes/{workspaceNamespace}/start":
-    post:
-      summary: Restarts a paused runtime.
-      description: 'If a runtime for this workspace is currently paused, restart it.'
-      operationId: startRuntime
-      tags:
-      - runtime
-      consumes:
-      - application/json
-      parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      responses:
-        200:
-          description: Success
-          schema:
-            "$ref": "#/definitions/EmptyResponse"
-        404:
-          description: No runtime exists for this user and workspace.
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-  "/v1/runtimes/{workspaceNamespace}/stop":
-    post:
-      summary: Pauses a running runtime.
-      description: 'If a runtime for this workspace is currently running, pause it.'
-      operationId: stopRuntime
-      tags:
-        - runtime
-      consumes:
-        - application/json
-      parameters:
-        - "$ref": "#/parameters/workspaceNamespace"
-      responses:
-        200:
-          description: Success
-          schema:
-            "$ref": "#/definitions/EmptyResponse"
-        404:
-          description: No runtime exists for this user and workspace.
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
   "/v1/runtimes/{workspaceNamespace}/localize":
     post:
       summary: Localize files to the user's runtime.

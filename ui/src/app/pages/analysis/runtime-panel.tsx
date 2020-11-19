@@ -49,11 +49,18 @@ import * as fp from 'lodash/fp';
 
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import {formatUsd} from 'app/utils/numbers';
+import {
+  BillingAccountType,
+  CdrVersionListResponse,
+  DataprocConfig,
+  Runtime,
+  RuntimeConfigurationType,
+  RuntimeStatus
+} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {faSyncAlt} from "@fortawesome/free-solid-svg-icons/faSyncAlt";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faPauseCircle} from "@fortawesome/free-solid-svg-icons/faPauseCircle";
-import {faPlayCircle} from "@fortawesome/free-solid-svg-icons/faPlayCircle";
 
 const {useState, useEffect, Fragment} = React;
 
@@ -395,16 +402,63 @@ const PresetSelector = ({hasMicroarrayData, setSelectedDiskSize, setSelectedMach
 
 const StartStopRuntimeButton = ({workspace, containerStyle}) => {
   const [status, setRuntimeStatus] = useRuntimeStatus(workspace.namespace);
-  const {clickable, iconShape, iconColor} = fp.cond([
-    [(s) => s === RuntimeStatus.Creating, () => ({clickable: false, iconShape: faSyncAlt, iconColor: colors.runtimeStatus.starting})],
-    [(s) => s === RuntimeStatus.Deleting, () => ({clickable: false, iconShape: faSyncAlt, iconColor: colors.runtimeStatus.stopping})],
-    [(s) => s === RuntimeStatus.Running, () => ({clickable: true, iconShape: faPauseCircle, iconColor: colors.runtimeStatus.running})],
-    [(s) => s === RuntimeStatus.Starting, () => ({clickable: false, iconShape: faSyncAlt, iconColor: colors.runtimeStatus.starting})],
-    [(s) => s === RuntimeStatus.Stopped, () => ({clickable: true, iconShape: faPlayCircle, iconColor: colors.runtimeStatus.stopped})],
-    [(s) => s === RuntimeStatus.Stopping, () => ({clickable: false, iconShape: faSyncAlt, iconColor: colors.runtimeStatus.stopping})],
-    [(s) => s === RuntimeStatus.Updating, () => ({clickable: false, iconShape: faSyncAlt, iconColor: colors.runtimeStatus.starting})]
+
+  const rotateStyle = {animation: 'rotation 2s infinite linear'};
+  const {clickable = false, iconShape = null, styleOverrides = {}, onClick = () => {}} = fp.cond([
+    [
+      (s) => s === RuntimeStatus.Creating,
+      () => ({clickable: false, iconShape: 'compute-starting', styleOverrides: rotateStyle, onClick: () => {}})
+    ],
+    [
+      (s) => s === RuntimeStatus.Running,
+      () => ({
+        clickable: true,
+        iconShape: 'compute-running',
+        styleOverrides: {},
+        onClick: () => {setRuntimeStatus(RuntimeStatusRequest.Stop)}
+      })
+    ],
+    [
+      (s) => s === RuntimeStatus.Updating,
+      () => ({clickable: false, iconShape: 'compute-starting', styleOverrides: rotateStyle, onClick: () => {}})
+    ],
+    [
+      (s) => s === RuntimeStatus.Error,
+      () => ({clickable: false, iconShape: 'compute-error', styleOverrides: {}, onClick: () => {}})
+    ],
+    [
+      (s) => s === RuntimeStatus.Stopping,
+      () => ({clickable: false, iconShape: 'compute-stopping', styleOverrides: rotateStyle, onClick: () => {}})
+    ],
+    [
+      (s) => s === RuntimeStatus.Stopped,
+      () => ({
+        clickable: true,
+        iconShape: 'compute-stopped',
+        styleOverrides: {},
+        onClick: () => {setRuntimeStatus(RuntimeStatusRequest.Start)}
+      })
+    ],
+    [
+      (s) => s === RuntimeStatus.Starting,
+      () => ({clickable: false, iconShape: 'compute-starting', styleOverrides: rotateStyle, onClick: () => {}})
+    ],
+    [
+      (s) => s === RuntimeStatus.Deleting,
+      () => ({clickable: false, iconShape: 'compute-stopping', styleOverrides: rotateStyle, onClick: () => {}})
+    ],
+    [
+      (s) => s === RuntimeStatus.Deleted,
+      () => ({clickable: false, iconShape: 'compute-none', styleOverrides: {}, onClick: () => {}})
+    ],
+    [
+      (s) => s === RuntimeStatus.Unknown,
+      () => ({clickable: false, iconShape: 'compute-none', styleOverrides: {}, onClick: () => {}})
+    ],
+    [() => true, () => ({clickable: false, iconShape: 'compute-none', styleOverrides: {}, onClick: () => {}})]
   ])(status);
-  const iconRotateStyle = (iconShape) => iconShape === faSyncAlt ? {animation: 'rotation 2s infinite linear'} : {};
+
+  const iconSrc = `/assets/icons/${iconShape}.svg`
 
   return <FlexRow style={{
     backgroundColor: addOpacity(colors.primary, 0.1),
@@ -413,21 +467,11 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
     padding: '0 1rem',
     ...containerStyle
   }}>
-    {/* this div should be a white circle around the icon; radius 1.6rem / 2 */}
-    <FlexRow style={{
-      width: '1.5rem',
-      height: '1.5rem',
-      backgroundColor: colors.white,
-      borderRadius: '.75rem',
-      justifyContent: 'space-around',
-      alignItems: 'center',
-      ...iconRotateStyle(iconShape)
-    }}>
-      <FontAwesomeIcon
-          icon={iconShape}
-          style={{width: '1rem', height: '1rem', color: iconColor}}
-      />
-    </FlexRow>
+    {/* TODO: actually make API changes when click, fix alt text */}
+    {clickable && <Clickable onClick={() => onClick()}>
+      <img alt={'TODO TODO TODO'} src={iconSrc} style={styleOverrides}/>
+    </Clickable>}
+    {!clickable && <img alt={'TODO TODO TODO'} src={iconSrc} style={styleOverrides}/>}
   </FlexRow>
 }
 
@@ -571,12 +615,15 @@ const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelCont
   const workerDiskSize = computeType === ComputeType.Dataproc ? dataprocConfig.workerDiskSize : null;
 
   return <div style={styles.controlSection}>
-    <CostInfo runtimeChanged={false}
-              runtimeConfig={runtimeConfig}
-              currentUser={profile.username}
-              workspace={workspace}
-              creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
-    />
+    <FlexRow style={styles.costPredictorWrapper}>
+      <StartStopRuntimeButton workspace={workspace} containerStyle={{borderRadius: '5px 0 0 5px'}}/>
+      <CostInfo runtimeChanged={false}
+                runtimeConfig={runtimeConfig}
+                currentUser={profile.username}
+                workspace={workspace}
+                creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
+      />
+    </FlexRow>
     <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
       <h3 style={{...styles.sectionHeader, ...styles.bold}}>Recommended Environment for {displayName}</h3>
       <Button
