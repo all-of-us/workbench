@@ -6,7 +6,7 @@ import OldCdrVersionModal from 'app/page/old-cdr-version-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import Navigation, {NavLink} from 'app/component/navigation';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
-import WorkspacesPage from '../../app/page/workspaces-page';
+import WorkspacesPage from 'app/page/workspaces-page';
 
 describe('Duplicate workspace, changing CDR versions', () => {
     beforeEach(async () => {

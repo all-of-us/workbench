@@ -4,7 +4,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import Navigation, {NavLink} from 'app/component/navigation';
 import WorkspaceCard from 'app/component/workspace-card';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
-import WorkspacesPage from '../../app/page/workspaces-page';
+import WorkspacesPage from 'app/page/workspaces-page';
 
 describe('Duplicate workspace', () => {
   beforeEach(async () => {
