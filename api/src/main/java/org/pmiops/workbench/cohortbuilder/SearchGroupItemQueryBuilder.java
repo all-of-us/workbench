@@ -76,7 +76,7 @@ public final class SearchGroupItemQueryBuilder {
       "is_standard = %s and concept_id in (select distinct c.concept_id\n"
           + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
           + "join (${childLookup}) a\n"
-          + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id))\n"
+          + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id) or c.path like concat(a.id, '.%%'))\n"
           + "where domain_id = %s\n"
           + "and is_standard = %s\n"
           + "and is_selectable = 1)\n";
