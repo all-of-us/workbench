@@ -415,7 +415,7 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
         clickable: true,
         iconShape: 'compute-running',
         styleOverrides: {},
-        onClick: () => {setRuntimeStatus(RuntimeStatusRequest.Stop)}
+        onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Stop); }
       })
     ],
     [
@@ -436,7 +436,7 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
         clickable: true,
         iconShape: 'compute-stopped',
         styleOverrides: {},
-        onClick: () => {setRuntimeStatus(RuntimeStatusRequest.Start)}
+        onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Start); }
       })
     ],
     [
@@ -458,7 +458,7 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
     [() => true, () => ({clickable: false, iconShape: 'compute-none', styleOverrides: {}, onClick: () => {}})]
   ])(status);
 
-  const iconSrc = `/assets/icons/${iconShape}.svg`
+  const iconSrc = `/assets/icons/${iconShape}.svg`;
 
   return <FlexRow style={{
     backgroundColor: addOpacity(colors.primary, 0.1),
@@ -472,8 +472,8 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
       <img alt={'TODO TODO TODO'} src={iconSrc} style={styleOverrides}/>
     </Clickable>}
     {!clickable && <img alt={'TODO TODO TODO'} src={iconSrc} style={styleOverrides}/>}
-  </FlexRow>
-}
+  </FlexRow>;
+};
 
 const CostEstimator = ({
   runtimeParameters,

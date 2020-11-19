@@ -5,6 +5,7 @@ import {compoundRuntimeOpStore, markCompoundRuntimeOperationCompleted, registerC
 import {DataprocConfig, Runtime, RuntimeStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 
+import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import * as React from 'react';
 import {ComputeType, findMachineByName, Machine} from './machines';
 import {leoRuntimesApi} from "../services/notebooks-swagger-fetch-clients";
@@ -269,8 +270,7 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
     // Additional status changes can be put here
     if (!!runtimeStatus) {
       switchCase(runtimeStatus,
-      [
-        RuntimeStatusRequest.Delete, async() => {
+        [RuntimeStatusRequest.Delete, async() => {
           try {
             await LeoRuntimeInitializer.initialize({workspaceNamespace: currentWorkspaceNamespace, maxCreateCount: 0});
           } catch (e) {
@@ -294,7 +294,12 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
         }],
         [RuntimeStatusRequest.Stop, async() => {
           try {
-            await LeoRuntimeInitializer.initialize({workspaceNamespace: currentWorkspaceNamespace, maxCreateCount: 0, maxPauseCount: 1, maxResumeCount: 0});
+            await LeoRuntimeInitializer.initialize({
+              workspaceNamespace: currentWorkspaceNamespace,
+              maxCreateCount: 0,
+              maxPauseCount: 1,
+              maxResumeCount: 0
+            });
           } catch (e) {
             // ExceededActionCountError is expected, as we exceed our create limit of 0.
             if (!(e instanceof ExceededActionCountError ||

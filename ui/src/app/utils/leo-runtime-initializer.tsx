@@ -224,7 +224,7 @@ export class LeoRuntimeInitializer {
       throw new ExceededActionCountError(`Reached max runtime pause count (${this.maxPauseCount})`, this.currentRuntime);
     }
     await leoRuntimesApi().stopRuntime(
-        this.currentRuntime.googleProject, this.currentRuntime.runtimeName, {signal: this.pollAbortSignal});
+      this.currentRuntime.googleProject, this.currentRuntime.runtimeName, {signal: this.pollAbortSignal});
     this.pauseCount++;
   }
 
