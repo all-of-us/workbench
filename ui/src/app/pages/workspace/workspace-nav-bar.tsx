@@ -81,17 +81,19 @@ const stylesFunction = {
 const USER_DISMISSED_ALERT_VALUE = 'DISMISSED';
 
 const CdrVersion = (props: {workspace: Workspace, cdrVersionListResponse: CdrVersionListResponse}) => {
-  const [showModal, setShowModal] = useState(false);
-  const [userHasDismissedAlert, setUserHasDismissedAlert] = useState(false);
-
   const {workspace, cdrVersionListResponse} = props;
   const {namespace, id} = workspace;
 
   const localStorageKey = `${namespace}-${id}-user-dismissed-cdr-version-update-alert`;
 
+  const dismissedInLocalStorage = () => localStorage.getItem(localStorageKey) === USER_DISMISSED_ALERT_VALUE;
+
+  const [userHasDismissedAlert, setUserHasDismissedAlert] = useState(dismissedInLocalStorage());
+  const [showModal, setShowModal] = useState(false);
+
   // check whether the user has previously dismissed the alert in localStorage, to determine icon color
   useEffect(() =>
-      setUserHasDismissedAlert(localStorage.getItem(localStorageKey) === USER_DISMISSED_ALERT_VALUE)
+      setUserHasDismissedAlert(dismissedInLocalStorage())
   );
 
   const NewVersionFlag = () => <Clickable
