@@ -76,8 +76,8 @@ export class ResetRuntimeButton extends React.Component<Props, State> {
         pollAbortSignal: this.pollAborter.signal,
         // For the reset button, we never want to affect the runtime state. With the maxFooCount set
         // to zero, the initializer will reject the promise when it reaches a non-transitional state.
-        maxCreateCount: maxActionCount,
         maxDeleteCount: maxActionCount,
+        maxCreateCount: maxActionCount,
         maxResumeCount: maxActionCount,
       });
       this.setState({isPollingRuntime: false});
