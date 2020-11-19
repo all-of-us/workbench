@@ -16,6 +16,7 @@ export const environment: Environment = {
   gaUserAgentDimension: 'dimension1',
   gaLoggedInDimension: 'dimension2',
   zendeskEnv: ZendeskEnv.Sandbox,
+  shibbolethUrl: 'http://mock-nih.dev.test.firecloud.org',
   inactivityTimeoutSeconds: 99999999999,
   inactivityWarningBeforeSeconds: 5 * 60,
   enableCaptcha: true,
