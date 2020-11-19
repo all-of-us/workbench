@@ -146,8 +146,10 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     if (!!this.props.autocompleteSelection) {
       this.checkAutocomplete();
     }
-    const {offsetWidth, scrollWidth} = this.name;
-    this.setState({truncated: scrollWidth > offsetWidth});
+    if (!!this.name) {
+      const {offsetWidth, scrollWidth} = this.name;
+      this.setState({truncated: scrollWidth > offsetWidth});
+    }
   }
 
   componentDidUpdate(prevProps: Readonly<TreeNodeProps>): void {
@@ -350,12 +352,11 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
               shape={'angle ' + (expanded ? 'down' : 'right')}
               size='16'/>}
         </button>}
-        {(!hasAttributes || source === 'criteria') &&
         <div style={hover ? {...styles.treeNodeContent, background: colors.light} : styles.treeNodeContent}
           onMouseEnter={() => this.setState({hover: true})}
           onMouseLeave={() => this.setState({hover: false})}>
           {(selectable && (source === 'criteria' || node.subtype !== 'ANSWER')) && <button style={styles.iconButton}>
-            {hasAttributes
+            {hasAttributes && source === 'criteria'
               ? <ClrIcon style={{color: colors.accent}}
                   shape='slider' dir='right' size='20'
                   onClick={(e) => this.setAttributes(e, node)}/>
@@ -378,7 +379,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
           {this.showCount && <div style={{whiteSpace: 'nowrap'}}>
             <span style={styles.count}>{count.toLocaleString()}</span>
           </div>}
-        </div>}
+        </div>
       </div>
       {!!nodeChildren && nodeChildren.length > 0 &&
         <div style={{display: expanded ? 'block' : 'none', marginLeft: nodeChildren[0].group ? '0.875rem' : '2rem'}}>
