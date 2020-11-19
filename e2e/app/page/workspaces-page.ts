@@ -11,6 +11,7 @@ import WorkspaceDataPage from './workspace-data-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
 import {config} from 'resources/workbench-config';
 import {UseFreeCredits} from './workspace-base';
+import OldCdrVersionModal from './old-cdr-version-modal';
 
 const faker = require('faker/locale/en_US');
 export const PageTitle = 'View Workspace';
@@ -78,15 +79,33 @@ export default class WorkspacesPage extends WorkspaceEditPage {
      billingAccount: string = UseFreeCredits,
      reviewRequest: boolean = false): Promise<string[]> {
 
+    const editPage = await this.fillOutRequiredCreationFields(workspaceName, billingAccount, reviewRequest);
+
+    // select the chosen CDR Version
+    await editPage.selectCdrVersion(cdrVersionName);
+
+    // if the CDR Version is not the default, consent to the necessary restrictions
+    if (cdrVersionName !== config.defaultCdrVersionName) {
+      const modal = new OldCdrVersionModal(page);
+      await modal.consentToOldCdrRestrictions();
+    }
+
+    // click CREATE WORKSPACE button
+    const createButton = await this.getCreateWorkspaceButton();
+    await createButton.waitUntilEnabled();
+    return editPage.clickCreateFinishButton(createButton);
+  }
+
+  async fillOutRequiredCreationFields (
+      workspaceName: string,
+      billingAccount: string = UseFreeCredits,
+      reviewRequest: boolean = false): Promise<WorkspaceEditPage> {
     const editPage = await this.clickCreateNewWorkspace();
     // wait for Billing Account default selected value
     await waitForText(this.page, UseFreeCredits);
 
     await (await editPage.getWorkspaceNameTextbox()).type(workspaceName);
     await (await editPage.getWorkspaceNameTextbox()).pressTab();
-
-    // select the chosen CDR Version
-    await editPage.selectCdrVersion(cdrVersionName);
 
     // select Billing Account
     await editPage.selectBillingAccount(billingAccount);
@@ -121,10 +140,7 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     // 6. Request for Review of Research Purpose Description. Using default value
     await editPage.requestForReviewRadiobutton(reviewRequest);
 
-    // click CREATE WORKSPACE button
-    const createButton = await this.getCreateWorkspaceButton();
-    await createButton.waitUntilEnabled();
-    return editPage.clickCreateFinishButton(createButton);
+    return editPage;
   }
 
   /**
@@ -162,5 +178,4 @@ export default class WorkspacesPage extends WorkspaceEditPage {
     await waitWhileLoading(this.page);
     return selectMenu.getSelectedOption();
   }
-
 }

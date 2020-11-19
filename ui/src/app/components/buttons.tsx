@@ -194,11 +194,11 @@ const computeStyle = ({style = {}, hover = {}, disabledStyle = {}}, {disabled}) 
   };
 };
 
-// Set data test id = '' in the child to prevent it from propegating to all children
-export const Clickable = ({as = 'div', disabled = false, onClick = null, ...props}) => {
+export const Clickable = ({as = 'div', disabled = false, onClick = null, propagateDataTestId = false, ...props}) => {
+  // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
+  const childProps = propagateDataTestId ? props : fp.omit(['data-test-id'], props);
   return <Interactive
-    // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
-    as={as} {...fp.omit(['data-test-id'], props)}
+    as={as} {...childProps}
     onClick={(...args) => onClick && !disabled && onClick(...args)}
   />;
 };

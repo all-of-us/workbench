@@ -62,7 +62,6 @@ export const LabelAlias = {
   SHARE_WITH_COLLABORATORS: 'Share workspace with the same set of collaborators', // visible when clone workspace
 };
 
-
 export const FIELD = {
   createWorkspaceButton: {
     textOption: {name: LinkText.CreateWorkspace}

@@ -8,7 +8,6 @@ import {makeWorkspaceName} from 'utils/str-utils';
 import {UseFreeCredits} from 'app/page/workspace-base';
 
 describe('Creating new workspaces', () => {
-
   beforeEach(async () => {
     await signIn(page);
   });
@@ -81,5 +80,4 @@ describe('Creating new workspaces', () => {
     await workspaceLink.waitForXPath({visible: true});
     expect(await workspaceLink.isVisible()).toBe(true);
   }
-
 });

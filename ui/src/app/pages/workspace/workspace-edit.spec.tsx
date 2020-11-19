@@ -249,6 +249,9 @@ describe('WorkspaceEdit', () => {
 
     // upgrade message does not appear
     expect(wrapper.find('[data-test-id="cdr-version-upgrade"]').exists()).toBeFalsy();
+
+    // old CDR Version warning does not appear
+    expect(wrapper.find('[data-test-id="old-cdr-version-warning"]').exists()).toBeFalsy();
   });
 
   // regression test for RW-5132

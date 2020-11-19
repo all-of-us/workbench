@@ -69,6 +69,7 @@ import {
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 import {OverlayPanel} from 'primereact/overlaypanel';
+import {OldCdrVersionModal} from './old-cdr-version-modal';
 
 export const styles = reactStyles({
   categoryRow: {
@@ -236,23 +237,24 @@ export interface WorkspaceEditProps {
 }
 
 export interface WorkspaceEditState {
+  billingAccounts: Array<BillingAccount>;
   cdrVersionItems: Array<CdrVersion>;
+  cloneUserRole: boolean;
+  loading: boolean;
+  populationChecked: boolean;
   selectResearchPurpose: boolean;
+  showCdrVersionModal: boolean;
+  showConfirmationModal: boolean;
+  showCreateBillingAccountModal: boolean;
+  showResearchPurpose: boolean;
+  showStigmatizationDetails: boolean;
+  showUnderservedPopulationDetails: boolean;
   workspace: Workspace;
   workspaceCreationConflictError: boolean;
   workspaceCreationError: boolean;
   workspaceCreationErrorMessage: string;
   workspaceNewAclDelayed: boolean;
   workspaceNewAclDelayedContinueFn: Function;
-  cloneUserRole: boolean;
-  loading: boolean;
-  showUnderservedPopulationDetails: boolean;
-  showStigmatizationDetails: boolean;
-  showResearchPurpose: boolean;
-  billingAccounts: Array<BillingAccount>;
-  showCreateBillingAccountModal: boolean;
-  showConfirmationModal: boolean;
-  populationChecked: boolean;
 }
 
 export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace(), withCdrVersions(), withUserProfile())(
@@ -260,23 +262,24 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     constructor(props: WorkspaceEditProps) {
       super(props);
       this.state = {
+        billingAccounts: [],
         cdrVersionItems: this.createInitialCdrVersionsList(),
-        workspace: this.createInitialWorkspaceState(),
+        cloneUserRole: false,
+        loading: false,
+        populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : undefined,
         selectResearchPurpose: this.updateSelectedResearch(),
+        showCdrVersionModal: false,
+        showConfirmationModal: false,
+        showCreateBillingAccountModal: false,
         showResearchPurpose: this.updateSelectedResearch(),
+        showStigmatizationDetails: false,
+        showUnderservedPopulationDetails: false,
+        workspace: this.createInitialWorkspaceState(),
         workspaceCreationConflictError: false,
         workspaceCreationError: false,
         workspaceCreationErrorMessage: '',
         workspaceNewAclDelayed: false,
         workspaceNewAclDelayedContinueFn: () => {},
-        cloneUserRole: false,
-        loading: false,
-        showUnderservedPopulationDetails: false,
-        showStigmatizationDetails: false,
-        billingAccounts: [],
-        showCreateBillingAccountModal: false,
-        showConfirmationModal: false,
-        populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : undefined,
       };
     }
 
@@ -987,6 +990,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         cdrVersionItems,
         loading,
         populationChecked,
+        showCdrVersionModal,
         showConfirmationModal,
         showCreateBillingAccountModal,
         showResearchPurpose,
@@ -995,7 +999,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         workspaceCreationErrorMessage,
         workspaceNewAclDelayed
       } = this.state;
-      const {freeTierDollarQuota, freeTierUsage} = this.props.profileState.profile;
+      const {cdrVersionListResponse, profileState: {profile: {freeTierDollarQuota, freeTierUsage}}} = this.props;
       const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
       // defined below in the OverlayPanel declaration
       let freeTierBalancePanel: OverlayPanel;
@@ -1004,10 +1008,18 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <div style={{width: '1120px'}}>
           {loading && <SpinnerOverlay overrideStylesOverlay={styles.spinner}/>}
+          {!hasDefaultCdrVersion(this.state.workspace, cdrVersionListResponse) && showCdrVersionModal &&
+            <OldCdrVersionModal
+                onCancel={() => {
+                  this.setState(fp.set(['workspace', 'cdrVersionId'], cdrVersionListResponse.defaultCdrVersionId));
+                  this.setState({showCdrVersionModal: false});
+                }}
+                onContinue={() => this.setState({showCdrVersionModal: false})}
+            />}
           {this.isCdrVersionUpgrade() && <CdrVersionUpgrade
               srcWorkspace={this.props.workspace}
               destWorkspace={this.state.workspace}
-              cdrVersionListResponse={this.props.cdrVersionListResponse}
+              cdrVersionListResponse={cdrVersionListResponse}
           />}
           <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
                                 style={{marginTop: '24px'}} largeHeader
@@ -1024,7 +1036,9 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                   height: '1.5rem', width: '12rem'}}
                   value={cdrVersionId}
                   onChange={(v: React.FormEvent<HTMLSelectElement>) => {
-                    this.setState(fp.set(['workspace', 'cdrVersionId'], v.currentTarget.value));
+                    const selectedVersion = v.currentTarget.value;
+                    this.setState(fp.set(['workspace', 'cdrVersionId'], selectedVersion));
+                    this.setState({showCdrVersionModal: selectedVersion !== cdrVersionListResponse.defaultCdrVersionId});
                   }}
                   disabled={this.isMode(WorkspaceEditMode.Edit)}>
                     {cdrVersionItems.map((version, i) => (
@@ -1348,7 +1362,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             } disabled={!errors}>
               <Button type='primary'
                       onClick={() => this.setState({showConfirmationModal: true})}
-                      disabled={errors || loading}
+                      disabled={errors || loading || showCdrVersionModal}
                       data-test-id='workspace-save-btn'>
                 {this.renderButtonText()}
               </Button>
@@ -1440,7 +1454,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               </Button>
               <Button
                   type='primary'
-                  disabled={errors || loading}
+                  disabled={errors || loading || showCdrVersionModal}
                   onClick={() => this.onSaveClick()}
                   data-test-id='workspace-confirm-save-btn'>
                 Confirm

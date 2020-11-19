@@ -1,8 +1,11 @@
 import {Component, Input} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {useEffect, useState} from 'react';
 
 import {Clickable} from 'app/components/buttons';
+import {FlexRow} from 'app/components/flex';
+import {ClrIcon} from 'app/components/icons';
 import colors from 'app/styles/colors';
 import {
   reactStyles,
@@ -11,9 +14,11 @@ import {
   withCurrentWorkspace,
   withUrlParams
 } from 'app/utils';
-import {getCdrVersion} from 'app/utils/cdr-versions';
+import {getCdrVersion, getDefaultCdrVersion, hasDefaultCdrVersion} from 'app/utils/cdr-versions';
 import {NavStore} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/navigation';
+import {CdrVersionListResponse, Workspace} from 'generated/fetch';
+import {CdrVersionUpgradeModal} from './cdr-version-upgrade-modal';
 
 const styles = reactStyles({
   container: {
@@ -56,8 +61,64 @@ const styles = reactStyles({
   },
   disabled: {
     color: colors.disabled
-  }
+  },
 });
+
+const stylesFunction = {
+  cdrVersionFlagCircle: (alert: boolean): React.CSSProperties => {
+    return {
+      border: 'solid 1px',
+      borderRadius: '50%',
+      height: '50px',
+      width: '50px',
+      marginLeft: '12px',
+      padding: '4px',
+      backgroundColor: alert ? colors.danger : colors.secondary,
+    };
+  }
+};
+
+const USER_DISMISSED_ALERT_VALUE = 'DISMISSED';
+
+const CdrVersion = (props: {workspace: Workspace, cdrVersionListResponse: CdrVersionListResponse}) => {
+  const {workspace, cdrVersionListResponse} = props;
+  const {namespace, id} = workspace;
+
+  const localStorageKey = `${namespace}-${id}-user-dismissed-cdr-version-update-alert`;
+
+  const dismissedInLocalStorage = () => localStorage.getItem(localStorageKey) === USER_DISMISSED_ALERT_VALUE;
+
+  const [userHasDismissedAlert, setUserHasDismissedAlert] = useState(dismissedInLocalStorage());
+  const [showModal, setShowModal] = useState(false);
+
+  // check whether the user has previously dismissed the alert in localStorage, to determine icon color
+  useEffect(() =>
+      setUserHasDismissedAlert(dismissedInLocalStorage())
+  );
+
+  const NewVersionFlag = () => <Clickable
+      data-test-id='new-version-flag'
+      propagateDataTestId={true}
+      onClick={() => {
+        localStorage.setItem(localStorageKey, USER_DISMISSED_ALERT_VALUE);
+        setUserHasDismissedAlert(true);
+        setShowModal(true);
+      }}>
+    <span style={stylesFunction.cdrVersionFlagCircle(!userHasDismissedAlert)}>
+      <ClrIcon shape='flag' class='is-solid'/>
+    </span>
+  </Clickable>;
+
+  return <FlexRow data-test-id='cdr-version' style={{textTransform: 'none'}}>
+    {getCdrVersion(workspace, cdrVersionListResponse).name}
+    {!hasDefaultCdrVersion(workspace, cdrVersionListResponse) && <NewVersionFlag/>}
+    {showModal && <CdrVersionUpgradeModal
+        defaultCdrVersionName={getDefaultCdrVersion(cdrVersionListResponse).name}
+        onClose={() => setShowModal(false)}
+        upgrade={() => NavStore.navigate(['/workspaces', namespace, id, 'duplicate'])}
+    />}
+  </FlexRow>;
+};
 
 const tabs = [
   {name: 'Data', link: 'data'},
@@ -103,9 +164,7 @@ export const WorkspaceNavBarReact = fp.flow(
     {activeTabIndex > 0 && navSeparator}
     {fp.map(tab => navTab(tab, restrictTab(props.workspace, tab)), tabs)}
     <div style={{flexGrow: 1}}/>
-    {workspace && <div data-test-id='cdr-version' style={{textTransform: 'none'}}>
-      {getCdrVersion(workspace, cdrVersionListResponse).name}
-    </div>}
+    {workspace && <CdrVersion workspace={workspace} cdrVersionListResponse={cdrVersionListResponse}/>}
   </div>;
 });
 

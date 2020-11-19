@@ -1,3 +1,5 @@
+import {Page} from 'puppeteer';
+
 import DataResourceCard from 'app/component/data-resource-card';
 import Modal from 'app/component/modal';
 import Link from 'app/element/link';
@@ -6,11 +8,11 @@ import Textbox from 'app/element/textbox';
 import {LinkText, Option, ResourceCard} from 'app/text-labels';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
-import {Page} from 'puppeteer';
 import {waitForAttributeEquality, waitWhileLoading} from 'utils/waits-utils';
 import SnowmanMenu from 'app/component/snowman-menu';
 import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
+import BaseElement from 'app/element/base-element';
 
 export const UseFreeCredits = 'Use All of Us free credits';
 
@@ -247,7 +249,6 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     return this.dismissDeleteWorkspaceModal();
   }
 
-
   /**
    * Dismss Delete Workspace Confirmation modal by click a button.
    * @return {LinkText} clickButtonText Button to click.
@@ -260,11 +261,21 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     return contentText;
   }
 
-   /** 
+   /**
     * Edit workspace via Workspace Actions snowman menu "Edit" option.
     */
   async editWorkspace(): Promise<void> {
     await this.selectWorkspaceAction(Option.Edit);
   }
 
+  async getCdrVersion(): Promise<string> {
+    const xpath = '//*[@data-test-id="cdr-version"]';
+    const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath));
+    return element.getTextContent();
+  }
+
+  async getNewCdrVersionFlag(): Promise<BaseElement> {
+    const xpath = '//*[@data-test-id="new-version-flag"]';
+    return BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath));
+  }
 }

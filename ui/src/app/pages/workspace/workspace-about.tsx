@@ -28,7 +28,6 @@ import {
   WorkspaceAccessLevel
 } from 'generated/fetch';
 
-
 interface WorkspaceProps {
   profileState: {profile: Profile, reload: Function, updateCache: Function};
   cdrVersionListResponse: CdrVersionListResponse;
