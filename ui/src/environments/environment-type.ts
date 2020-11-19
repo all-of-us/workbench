@@ -42,8 +42,6 @@ export interface Environment {
   // The URL to forward users to for the public UI (aka Data Browser).
   // Example value: 'https://aou-db-stable.appspot.com'
   publicUiUrl: string;
-  // The Shibboleth URL for linking eRA Commons accounts.
-  shibbolethUrl: string;
   // The url for Moodle integration
   // Example value: https://aoudev.nnlm.gov
   trainingUrl: string;

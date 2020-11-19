@@ -13,7 +13,6 @@ export const environment: Environment = {
   gaUserAgentDimension: 'dimension1',
   gaLoggedInDimension: 'dimension2',
   zendeskEnv: ZendeskEnv.Prod,
-  shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
   trainingUrl: 'https://aou.nnlm.gov',
   inactivityTimeoutSeconds: 30 * 60,
   inactivityWarningBeforeSeconds: 5 * 60,
