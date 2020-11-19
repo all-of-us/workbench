@@ -56,9 +56,9 @@ export default class CohortParticipantDetailPage extends AuthenticatedPage {
     await this.page.waitForXPath(iconXpath, {visible: true}).then(icon => icon.click());
   }
 
-  // click on pi-angle-right button to go to next participant
+  // click on pi-angle-left button to go to prior participant
   async getGoToThePriorParticipant(): Promise<void> {
-    const iconXpath = '//button[@title ="Go To the Next Participant"]';
+    const iconXpath = '//button[@title ="Go To the Prior Participant"]';
     await this.page.waitForXPath(iconXpath, {visible: true}).then(icon => icon.click());
   }
 
