@@ -408,7 +408,7 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
     [
       (s) => s === RuntimeStatus.Creating,
       () => ({
-        altText: "Runtime creation in progress",
+        altText: 'Runtime creation in progress',
         clickable: false,
         iconShape: 'compute-starting',
         styleOverrides: rotateStyle,
@@ -418,7 +418,7 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
     [
       (s) => s === RuntimeStatus.Running,
       () => ({
-        altText: "Runtime running, click to pause",
+        altText: 'Runtime running, click to pause',
         clickable: true,
         iconShape: 'compute-running',
         styleOverrides: {},
@@ -428,7 +428,7 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
     [
       (s) => s === RuntimeStatus.Updating,
       () => ({
-        altText: "Runtime update in progress",
+        altText: 'Runtime update in progress',
         clickable: false,
         iconShape: 'compute-starting',
         styleOverrides: rotateStyle,
@@ -438,7 +438,7 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
     [
       (s) => s === RuntimeStatus.Error,
       () => ({
-        altText: "Runtime in error state",
+        altText: 'Runtime in error state',
         clickable: false,
         iconShape: 'compute-error',
         styleOverrides: {},
@@ -448,7 +448,7 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
     [
       (s) => s === RuntimeStatus.Stopping,
       () => ({
-        altText: "Runtime pause in progress",
+        altText: 'Runtime pause in progress',
         clickable: false,
         iconShape: 'compute-stopping',
         styleOverrides: rotateStyle,
@@ -458,7 +458,7 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
     [
       (s) => s === RuntimeStatus.Stopped,
       () => ({
-        altText: "Runtime paused, click to resume",
+        altText: 'Runtime paused, click to resume',
         clickable: true,
         iconShape: 'compute-stopped',
         styleOverrides: {},
@@ -468,7 +468,7 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
     [
       (s) => s === RuntimeStatus.Starting,
       () => ({
-        altText: "Runtime resume in progress",
+        altText: 'Runtime resume in progress',
         clickable: false, iconShape: 'compute-starting',
         styleOverrides: rotateStyle,
         onClick: () => {}
@@ -477,7 +477,7 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
     [
       (s) => s === RuntimeStatus.Deleting,
       () => ({
-        altText: "Runtime deletion in progress",
+        altText: 'Runtime deletion in progress',
         clickable: false,
         iconShape: 'compute-stopping',
         styleOverrides: rotateStyle,
@@ -487,7 +487,7 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
     [
       (s) => s === RuntimeStatus.Deleted,
       () => ({
-        altText: "Runtime has been deleted",
+        altText: 'Runtime has been deleted',
         clickable: false,
         iconShape: 'compute-none',
         styleOverrides: {},
@@ -497,7 +497,7 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
     [
       (s) => s === RuntimeStatus.Unknown,
       () => ({
-        altText: "Runtime status unknown",
+        altText: 'Runtime status unknown',
         clickable: false,
         iconShape: 'compute-none',
         styleOverrides: {},
@@ -507,7 +507,7 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
     [
       () => true,
       () => ({
-        altText: "No runtime found",
+        altText: 'No runtime found',
         clickable: false,
         iconShape: 'compute-none',
         styleOverrides: {},
@@ -529,12 +529,12 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
     {
       clickable && <TooltipTrigger content={<div>{altText}</div>} side='left'>
         <Clickable onClick={() => onClick()}>
-          <img alt={altText} src={iconSrc} style={styleOverrides}/>
+          <img alt={altText} src={iconSrc} style={styleOverrides} data-test-id='runtime-status-icon'/>
         </Clickable>
       </TooltipTrigger>
     }
     {!clickable && <TooltipTrigger content={<div>{altText}</div>} side='left'>
-        <img alt={altText} src={iconSrc} style={styleOverrides}/>
+        <img alt={altText} src={iconSrc} style={styleOverrides} data-test-id='runtime-status-icon'/>
       </TooltipTrigger>
     }
   </FlexRow>;

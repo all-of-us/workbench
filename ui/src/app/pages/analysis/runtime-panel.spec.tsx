@@ -25,6 +25,8 @@ describe('RuntimePanel', () => {
   let runtimeApiStub: RuntimeApiStub;
   let workspacesApiStub: WorkspacesApiStub;
 
+  const iconsDir = '/assets/icons';
+
   const component = async() => {
     const c = mount(<RuntimePanel {...props}/>);
     await waitOneTickAndUpdate(c);
@@ -625,5 +627,20 @@ describe('RuntimePanel', () => {
     // Runtime should still be active, and confirm page should no longer be visible.
     expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Running);
     expect(wrapper.find(ConfirmDelete).exists()).toBeFalsy();
+  });
+
+  it('should display the Running runtime status icon in state Running', async() => {
+    const wrapper = await component();
+
+    const runtimeStatusIcon = () => wrapper.find('[data-test-id="runtime-status-icon"]').first();
+    expect(runtimeStatusIcon().prop('src')).toBe(`${iconsDir}/compute-running.svg`);
+  });
+
+  it('should display a compute-none when there is no runtime', async() => {
+    runtimeApiStub.runtime = null;
+    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
+    const wrapper = await component();
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="runtime-status-icon"]').first().prop('src')).toBe(`${iconsDir}/compute-none.svg`);
   });
 });

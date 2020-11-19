@@ -18,6 +18,7 @@ let mockGetRuntime: SpyInstance;
 let mockCreateRuntime: SpyInstance;
 let mockDeleteRuntime: SpyInstance;
 let mockStartRuntime: SpyInstance;
+let mockStopRuntime: SpyInstance;
 
 const baseRuntime: Runtime = {
   runtimeName: 'aou-rw-3',
@@ -42,6 +43,7 @@ describe('RuntimeInitializer', () => {
     mockCreateRuntime = jest.spyOn(runtimeApi(), 'createRuntime');
     mockDeleteRuntime = jest.spyOn(runtimeApi(), 'deleteRuntime');
     mockStartRuntime = jest.spyOn(leoRuntimesApi(), 'startRuntime');
+    mockStopRuntime = jest.spyOn(leoRuntimesApi(), 'stopRuntime');
 
     serverConfigStore.next({gsuiteDomain: 'researchallofus.org', enableCustomRuntimes: false});
   });
@@ -313,6 +315,29 @@ describe('RuntimeInitializer', () => {
     } catch (error) {
       expect(mockCreateRuntime).not.toHaveBeenCalled();
       expect(error.message).toMatch(/max runtime resume count/i);
+    }
+  });
+
+  it('should respect the maxPauseCount default', async() => {
+    mockGetRuntimeCalls([
+      {status: RuntimeStatus.Running},
+    ]);
+    try {
+      await runInitializerAndTimers();
+    } catch (error) {
+      expect(mockStopRuntime).not.toHaveBeenCalled();
+      expect(error.message).toMatch(/max runtime pause count/i);
+    }
+  });
+
+  it('should attempt pause if maxPauseCount overridden', async() => {
+    mockGetRuntimeCalls([
+      {status: RuntimeStatus.Running},
+    ]);
+    try {
+      await runInitializerAndTimers({maxPauseCount: 0});
+    } catch (error) {
+      expect(mockStopRuntime).toHaveBeenCalled();
     }
   });
 });
