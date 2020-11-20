@@ -1,13 +1,17 @@
 package org.pmiops.workbench.db.model;
 
 import java.util.Objects;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.Table;
 
 @Embeddable
+@Table(name = "concept_set_concept_id")
 public class DbConceptSetConceptId {
   private Long conceptId;
   private Boolean standard;
 
+  @Column(name = "concept_id")
   public Long getConceptId() {
     return conceptId;
   }
@@ -16,6 +20,7 @@ public class DbConceptSetConceptId {
     this.conceptId = conceptId;
   }
 
+  @Column(name = "is_standard")
   public Boolean getStandard() {
     return standard;
   }
