@@ -47,9 +47,14 @@ export const allMachineTypes: Machine[] = fp.map(({ price, preemptiblePrice, ...
   ...details
 }), machineBases); // adding prices for ephemeral IP's, per https://cloud.google.com/compute/network-pricing#ipaddress
 
-// There are issues launching Leo runtimes with <4GB ram.
-// See https://broadworkbench.atlassian.net/browse/SATURN-1337
-export const validLeonardoMachineTypes = allMachineTypes.filter(({memory}) => memory >= 4);
+// Following constraints follow findings on RW-5763, last tested 11/19/20. Using
+// machine types below this limit results in either an immediate ERROR status,
+// or a delayed ERROR status after the runtime times out in the CREATING state.
+// See also https://broadworkbench.atlassian.net/browse/SATURN-1337, where the
+// determination was made for Dataproc master machines only.
+export const validLeoGceMachineTypes = allMachineTypes.filter(({memory}) => memory >= 2);
+export const validLeoDataprocMasterMachineTypes = allMachineTypes.filter(({memory}) => memory > 4);
+export const validLeoDataprocWorkerMachineTypes = allMachineTypes.filter(({memory}) => memory >= 3);
 
 export const findMachineByName = (machineToFind: string) => fp.find(({name}) => name === machineToFind, allMachineTypes);
 

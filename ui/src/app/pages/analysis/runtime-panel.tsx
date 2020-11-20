@@ -24,7 +24,9 @@ import {
   machineRunningCostBreakdown,
   machineStorageCost,
   machineStorageCostBreakdown,
-  validLeonardoMachineTypes
+  validLeoGceMachineTypes,
+  validLeoDataprocMasterMachineTypes,
+  validLeoDataprocWorkerMachineTypes
 } from 'app/utils/machines';
 import {formatUsd} from 'app/utils/numbers';
 import {runtimePresets} from 'app/utils/runtime-presets';
@@ -214,8 +216,8 @@ export const ConfirmDelete = ({onCancel, onConfirm}) => {
   </Fragment>;
 };
 
-const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPrefix}) => {
-  const initialMachineType = fp.find(({name}) => name === machineType, allMachineTypes) || defaultMachineType;
+const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPrefix, validMachineTypes}) => {
+  const initialMachineType = findMachineByName(machineType) || defaultMachineType;
   const {cpu, memory} = selectedMachine || initialMachineType;
 
   return <Fragment>
@@ -229,12 +231,12 @@ const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPr
           // Union also makes the CPU values unique.
           fp.union([cpu]),
           fp.sortBy(fp.identity)
-        )(validLeonardoMachineTypes)}
+        )(validMachineTypes)}
         onChange={
           ({value}) => fp.flow(
             fp.sortBy('memory'),
             fp.find({cpu: value}),
-            onChange)(validLeonardoMachineTypes)
+            onChange)(validMachineTypes)
         }
         disabled={disabled}
         value={cpu}/>
@@ -247,15 +249,15 @@ const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPr
           // See above comment on CPU union.
           fp.union([memory]),
           fp.sortBy(fp.identity)
-        )(validLeonardoMachineTypes)}
+        )(validMachineTypes)}
         onChange={
           ({value}) => fp.flow(
             fp.find({cpu, memory: value}),
             // If the selected machine is not different from the current machine return null
             // maybeGetMachine,
             onChange
-            )(validLeonardoMachineTypes) }
-        disabled={disabled}
+            )(validMachineTypes) }
+        disabled={disabled}        
         value={memory}
         />
   </Fragment>;
@@ -331,13 +333,12 @@ const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
         onChange={({value}) => setSelectedPreemptible(value)}
         min={0}/>
       <div style={{gridColumnEnd: 'span 2'}}/>
-      {/* TODO: Do the worker nodes have the same minimum requirements as the master node?
-       to https://precisionmedicineinitiative.atlassian.net/browse/RW-5763 */}
       <MachineSelector
         machineType={workerMachineType}
         onChange={setSelectedWorkerMachine}
         selectedMachine={selectedWorkerMachine}
         disabled={disabled}
+        validMachineTypes={validLeoDataprocWorkerMachineTypes}
         idPrefix='worker'/>
       <DiskSizeSelector
         diskSize={workerDiskSize}
@@ -671,6 +672,17 @@ export const RuntimePanel = fp.flow(
   const [selectedCompute, setSelectedCompute] = useState<ComputeType>(initialCompute);
   const [selectedDataprocConfig, setSelectedDataprocConfig] = useState<DataprocConfig | null>(dataprocConfig);
 
+  const validMainMachineTypes = selectedCompute === ComputeType.Standard ?
+      validLeoGceMachineTypes : validLeoDataprocMasterMachineTypes;
+  // The compute type affects the set of valid machine types, so revert to the
+  // default machine type if switching compute types would invalidate the main
+  // machine type choice.
+  useEffect(() => {
+    if (!validMainMachineTypes.find(({name}) => name === selectedMachine)) {
+      setSelectedMachine(initialMasterMachine);
+    }
+  }, [selectedCompute]);
+
   const runtimeExists = (status && ![RuntimeStatus.Deleted, RuntimeStatus.Error].includes(status)) || !!pendingRuntime;
   const disableControls = runtimeExists && ![RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus);
 
@@ -828,6 +840,7 @@ export const RuntimePanel = fp.flow(
               disabled={disableControls}
               selectedMachine={selectedMachine}
               onChange={(value) => setSelectedMachine(value)}
+              validMachineTypes={validMainMachineTypes}
               machineType={machineName}/>
             <DiskSizeSelector
                 idPrefix='runtime'
