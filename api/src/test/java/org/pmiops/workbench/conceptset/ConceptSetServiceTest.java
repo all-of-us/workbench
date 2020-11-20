@@ -57,7 +57,7 @@ public class ConceptSetServiceTest {
     DbConceptSet copiedConceptSet =
         conceptSetService.cloneConceptSetAndConceptIds(fromConceptSet, mockDbWorkspace, false);
     assertNotNull(copiedConceptSet);
-    assertEquals(copiedConceptSet.getConceptIds().size(), 5);
+    assertEquals(copiedConceptSet.getConceptSetConceptIds().size(), 5);
     assertEquals(copiedConceptSet.getWorkspaceId(), mockDbWorkspace.getWorkspaceId());
   }
 
@@ -65,7 +65,7 @@ public class ConceptSetServiceTest {
     Set conceptIdsSet = Stream.of(1, 2, 3, 4, 5).collect(Collectors.toCollection(HashSet::new));
 
     DbConceptSet conceptSet = new DbConceptSet();
-    conceptSet.setConceptIds(conceptIdsSet);
+    conceptSet.setConceptSetConceptIds(conceptIdsSet);
     conceptSet.setConceptSetId(1);
     conceptSet.setName("Mock Concept Set");
     conceptSet.setDomainEnum(Domain.CONDITION);

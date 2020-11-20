@@ -1,6 +1,7 @@
 package org.pmiops.workbench.conceptset.mapper;
 
 import java.sql.Timestamp;
+import java.util.stream.Collectors;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
@@ -9,6 +10,7 @@ import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
@@ -68,7 +70,7 @@ public interface ConceptSetMapper {
   @Mapping(target = "surveysEnum", source = "conceptSet.survey")
   @Mapping(target = "version", source = "conceptSet.etag", qualifiedByName = "etagToCdrVersion")
   @Mapping(target = "workspaceId", ignore = true)
-  @Mapping(target = "conceptIds", ignore = true)
+  @Mapping(target = "conceptSetConceptIds", ignore = true)
   DbConceptSet clientToDbModel(
       CreateConceptSetRequest source,
       @Context Long workspaceId,
@@ -84,11 +86,26 @@ public interface ConceptSetMapper {
       @Context ConceptBigQueryService conceptBigQueryService) {
     dbConceptSet.setWorkspaceId(workspaceId);
     dbConceptSet.setCreator(creator);
-    dbConceptSet.getConceptIds().addAll(source.getAddedIds());
+    dbConceptSet
+        .getConceptSetConceptIds()
+        .addAll(
+            source.getAddedConceptSetConceptIds().stream()
+                .map(
+                    c -> {
+                      DbConceptSetConceptId dbConceptSetConceptId = new DbConceptSetConceptId();
+                      dbConceptSetConceptId.setConceptId(c.getConceptId());
+                      dbConceptSetConceptId.setStandard(c.getStandard());
+                      return dbConceptSetConceptId;
+                    })
+                .collect(Collectors.toList()));
     String omopTable = BigQueryTableInfo.getTableName(source.getConceptSet().getDomain());
     dbConceptSet.setParticipantCount(
         conceptBigQueryService.getParticipantCountForConcepts(
-            dbConceptSet.getDomainEnum(), omopTable, dbConceptSet.getConceptIds()));
+            dbConceptSet.getDomainEnum(),
+            omopTable,
+            dbConceptSet.getConceptSetConceptIds().stream()
+                .map(DbConceptSetConceptId::getConceptId)
+                .collect(Collectors.toSet())));
   }
 
   /**

@@ -24,6 +24,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -161,24 +162,48 @@ public class ConceptSetService {
       throw new ConflictException("Attempted to modify outdated concept set version");
     }
 
-    if (request.getAddedIds() != null) {
-      dbConceptSet.getConceptIds().addAll(request.getAddedIds());
+    if (request.getAddedConceptSetConceptIds() != null) {
+      dbConceptSet
+          .getConceptSetConceptIds()
+          .addAll(
+              request.getAddedConceptSetConceptIds().stream()
+                  .map(
+                      c -> {
+                        DbConceptSetConceptId dbConceptSetConceptId = new DbConceptSetConceptId();
+                        dbConceptSetConceptId.setConceptId(c.getConceptId());
+                        dbConceptSetConceptId.setStandard(c.getStandard());
+                        return dbConceptSetConceptId;
+                      })
+                  .collect(Collectors.toList()));
     }
-    if (request.getRemovedIds() != null) {
-      dbConceptSet.getConceptIds().removeAll(request.getRemovedIds());
+    if (request.getRemovedConceptSetConceptIds() != null) {
+      dbConceptSet
+          .getConceptSetConceptIds()
+          .removeAll(
+              request.getRemovedConceptSetConceptIds().stream()
+                  .map(
+                      c -> {
+                        DbConceptSetConceptId dbConceptSetConceptId = new DbConceptSetConceptId();
+                        dbConceptSetConceptId.setConceptId(c.getConceptId());
+                        dbConceptSetConceptId.setStandard(c.getStandard());
+                        return dbConceptSetConceptId;
+                      })
+                  .collect(Collectors.toList()));
     }
-    if (dbConceptSet.getConceptIds().size() > MAX_CONCEPTS_PER_SET) {
+    if (dbConceptSet.getConceptSetConceptIds().size() > MAX_CONCEPTS_PER_SET) {
       throw new ConflictException(
           String.format("Exceeded %d concept set limit", MAX_CONCEPTS_PER_SET));
     }
-    if (dbConceptSet.getConceptIds().isEmpty()) {
+    if (dbConceptSet.getConceptSetConceptIds().isEmpty()) {
       dbConceptSet.setParticipantCount(0);
     } else {
       dbConceptSet.setParticipantCount(
           conceptBigQueryService.getParticipantCountForConcepts(
               dbConceptSet.getDomainEnum(),
               BigQueryTableInfo.getTableName(dbConceptSet.getDomainEnum()),
-              dbConceptSet.getConceptIds()));
+              dbConceptSet.getConceptSetConceptIds().stream()
+                  .map(DbConceptSetConceptId::getConceptId)
+                  .collect(Collectors.toSet())));
     }
 
     dbConceptSet.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
@@ -239,7 +264,11 @@ public class ConceptSetService {
       String omopTable = BigQueryTableInfo.getTableName(dbConceptSet.getDomainEnum());
       dbConceptSetClone.setParticipantCount(
           conceptBigQueryService.getParticipantCountForConcepts(
-              dbConceptSet.getDomainEnum(), omopTable, dbConceptSet.getConceptIds()));
+              dbConceptSet.getDomainEnum(),
+              omopTable,
+              dbConceptSet.getConceptSetConceptIds().stream()
+                  .map(DbConceptSetConceptId::getConceptId)
+                  .collect(Collectors.toSet())));
     }
     return conceptSetDao.save(dbConceptSetClone);
   }
@@ -251,14 +280,18 @@ public class ConceptSetService {
   }
 
   private ConceptSet toHydratedConcepts(ConceptSet conceptSet) {
-    Set<Long> conceptIds = conceptSetDao.findOne(conceptSet.getId()).getConceptIds();
+    Set<DbConceptSetConceptId> dbConceptSetConceptIds =
+        conceptSetDao.findOne(conceptSet.getId()).getConceptSetConceptIds();
+    List<Long> conceptIds =
+        dbConceptSetConceptIds.stream()
+            .map(DbConceptSetConceptId::getConceptId)
+            .collect(Collectors.toList());
     if (configProvider.get().featureFlags.enableConceptSetSearchV2) {
       List<Criteria> criteriaList = new ArrayList<Criteria>();
       if (!conceptSet.getDomain().equals(Domain.PHYSICAL_MEASUREMENT)) {
         criteriaList =
             cohortBuilderService.findCriteriaByDomainIdAndConceptIds(
-                conceptSet.getDomain().toString(),
-                conceptIds.stream().map(String::valueOf).collect(Collectors.toList()));
+                conceptSet.getDomain().toString(), dbConceptSetConceptIds);
       } else {
         criteriaList.addAll(
             StreamSupport.stream(conceptDao.findAll(conceptIds).spliterator(), false)

@@ -14,6 +14,7 @@ import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.ConceptSet;
+import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.Surveys;
@@ -79,9 +80,19 @@ public class ConceptSetMapperTest {
   @Test
   public void clientToDbModel() {
     ConceptSet clientConceptSet = conceptSetMapper.dbModelToClient(dbConceptSet);
+    ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
+    conceptSetConceptId1.setConceptId(1L);
+    conceptSetConceptId1.setStandard(true);
+    ConceptSetConceptId conceptSetConceptId2 = new ConceptSetConceptId();
+    conceptSetConceptId2.setConceptId(2L);
+    conceptSetConceptId2.setStandard(true);
+    ConceptSetConceptId conceptSetConceptId3 = new ConceptSetConceptId();
+    conceptSetConceptId3.setConceptId(3L);
+    conceptSetConceptId3.setStandard(true);
     CreateConceptSetRequest conceptSetRequest = new CreateConceptSetRequest();
     conceptSetRequest.setConceptSet(clientConceptSet);
-    conceptSetRequest.setAddedIds(Arrays.asList(1l, 2l, 3l));
+    conceptSetRequest.setAddedConceptSetConceptIds(
+        Arrays.asList(conceptSetConceptId1, conceptSetConceptId2, conceptSetConceptId3));
     conceptSetMapper.clientToDbModel(
         conceptSetRequest, 1l, dbConceptSet.getCreator(), conceptBigQueryService);
     assertThat(clientConceptSet.getId()).isEqualTo(dbConceptSet.getConceptSetId());

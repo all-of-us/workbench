@@ -76,6 +76,7 @@ import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
+import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
@@ -705,17 +706,22 @@ public class CohortsControllerTest {
             .createCohort(workspace.getNamespace(), workspace.getId(), cohort)
             .getBody();
     ConceptSet conceptSet = new ConceptSet().domain(Domain.CONDITION).name(CONCEPT_SET_NAME);
-    conceptSet =
-        conceptSetsController
-            .createConceptSet(
-                workspace.getNamespace(),
-                workspace.getId(),
-                new CreateConceptSetRequest()
-                    .conceptSet(conceptSet)
-                    .addedIds(
-                        ImmutableList.of(
-                            CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
-            .getBody();
+
+    ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
+    conceptSetConceptId1.setConceptId(CLIENT_CONCEPT_1.getConceptId());
+    conceptSetConceptId1.setStandard(true);
+    ConceptSetConceptId conceptSetConceptId2 = new ConceptSetConceptId();
+    conceptSetConceptId2.setConceptId(CLIENT_CONCEPT_2.getConceptId());
+    conceptSetConceptId2.setStandard(true);
+    conceptSetsController
+        .createConceptSet(
+            workspace.getNamespace(),
+            workspace.getId(),
+            new CreateConceptSetRequest()
+                .conceptSet(conceptSet)
+                .addedConceptSetConceptIds(
+                    ImmutableList.of(conceptSetConceptId1, conceptSetConceptId2)))
+        .getBody();
 
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());
@@ -746,17 +752,22 @@ public class CohortsControllerTest {
             .createCohort(workspace.getNamespace(), workspace.getId(), cohort)
             .getBody();
     ConceptSet conceptSet = new ConceptSet().domain(Domain.CONDITION).name(CONCEPT_SET_NAME);
-    conceptSet =
-        conceptSetsController
-            .createConceptSet(
-                workspace.getNamespace(),
-                workspace.getId(),
-                new CreateConceptSetRequest()
-                    .conceptSet(conceptSet)
-                    .addedIds(
-                        ImmutableList.of(
-                            CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
-            .getBody();
+
+    ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
+    conceptSetConceptId1.setConceptId(CLIENT_CONCEPT_1.getConceptId());
+    conceptSetConceptId1.setStandard(true);
+    ConceptSetConceptId conceptSetConceptId2 = new ConceptSetConceptId();
+    conceptSetConceptId2.setConceptId(CLIENT_CONCEPT_2.getConceptId());
+    conceptSetConceptId2.setStandard(true);
+    conceptSetsController
+        .createConceptSet(
+            workspace.getNamespace(),
+            workspace.getId(),
+            new CreateConceptSetRequest()
+                .conceptSet(conceptSet)
+                .addedConceptSetConceptIds(
+                    ImmutableList.of(conceptSetConceptId1, conceptSetConceptId2)))
+        .getBody();
 
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());

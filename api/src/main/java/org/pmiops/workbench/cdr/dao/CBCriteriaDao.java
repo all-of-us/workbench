@@ -86,9 +86,11 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select c from DbCriteria c where domainId = :domainId and conceptId in (:conceptIds) and match(fullText, concat('+[', :domainId, '_rank1]')) > 0")
+          "select c from DbCriteria c where domainId = :domainId and standard = :standard and conceptId in (:conceptIds) and match(fullText, concat('+[', :domainId, '_rank1]')) > 0")
   List<DbCriteria> findCriteriaByDomainIdAndConceptIds(
-      @Param("domainId") String domainId, @Param("conceptIds") Collection<String> conceptIds);
+      @Param("domainId") String domainId,
+      @Param("standard") Boolean standard,
+      @Param("conceptIds") Collection<String> conceptIds);
 
   /** This query returns all parents matching the parentConceptIds. */
   @Query(

@@ -166,7 +166,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   private void validateCreateConceptSetRequest(CreateConceptSetRequest request) {
     Optional.ofNullable(request.getConceptSet().getDomain())
         .orElseThrow(() -> new BadRequestException("Domain cannot be null"));
-    if (CollectionUtils.isEmpty(request.getAddedIds())) {
+    if (CollectionUtils.isEmpty(request.getAddedConceptSetConceptIds())) {
       throw new BadRequestException("Cannot create a concept set with no concepts");
     }
   }

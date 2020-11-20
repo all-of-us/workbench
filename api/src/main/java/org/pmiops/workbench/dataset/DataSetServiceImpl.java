@@ -47,6 +47,7 @@ import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbDatasetValue;
@@ -300,7 +301,10 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         Domain.SURVEY.equals(request.getDomain())
             ? conceptBigQueryService.getSurveyQuestionConceptIds()
             : conceptSetDao.findAllByConceptSetIdIn(request.getConceptSetIds()).stream()
-                .flatMap(cs -> cs.getConceptIds().stream())
+                .flatMap(
+                    cs ->
+                        cs.getConceptSetConceptIds().stream()
+                            .map(DbConceptSetConceptId::getConceptId))
                 .collect(Collectors.toList());
 
     if (supportsConceptSets(domain)) {
@@ -633,20 +637,21 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   // domain-specific rules.
   private Optional<String> buildConceptIdSqlInClause(
       Domain domain, List<DbConceptSet> conceptSets) {
-    final String conceptSetIDs =
+    final String conceptIds =
         conceptSets.stream()
             .filter(cs -> domain == cs.getDomainEnum())
-            .flatMap(cs -> cs.getConceptIds().stream().map(cid -> Long.toString(cid)))
+            .flatMap(
+                cs -> cs.getConceptSetConceptIds().stream().map(c -> c.getConceptId().toString()))
             .collect(Collectors.joining(", "));
-    if (conceptSetIDs.isEmpty()) {
+    if (conceptIds.isEmpty()) {
       return Optional.empty();
     } else {
       if (workbenchConfigProvider.get().featureFlags.enableConceptSetSearchV2) {
         String conceptIdInClause = BigQueryDataSetTableInfo.getConceptIdIn(domain);
         return Optional.of(
-            conceptIdInClause.replaceAll("unnest", "").replaceAll("(@conceptIds)", conceptSetIDs));
+            conceptIdInClause.replaceAll("unnest", "").replaceAll("(@conceptIds)", conceptIds));
       }
-      return Optional.of(String.format(" IN (%s)", conceptSetIDs));
+      return Optional.of(String.format(" IN (%s)", conceptIds));
     }
   }
 
@@ -675,7 +680,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         .collect(Collectors.groupingBy(DbConceptSet::getDomain, Collectors.toList()))
         .values()
         .stream()
-        .map(csl -> csl.stream().mapToLong(cs -> cs.getConceptIds().size()).sum())
+        .map(csl -> csl.stream().mapToLong(cs -> cs.getConceptSetConceptIds().size()).sum())
         .allMatch(count -> count > 0);
   }
 
@@ -1159,7 +1164,16 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final DbConceptSet surveyConceptSet = new DbConceptSet();
     surveyConceptSet.setName("All Surveys");
     surveyConceptSet.setDomain(DbStorageEnums.domainToStorage(Domain.SURVEY));
-    surveyConceptSet.setConceptIds(ImmutableSet.copyOf(conceptIds));
+    surveyConceptSet.setConceptSetConceptIds(
+        conceptIds.stream()
+            .map(
+                c -> {
+                  DbConceptSetConceptId dbConceptSetConceptId = new DbConceptSetConceptId();
+                  dbConceptSetConceptId.setConceptId(c);
+                  dbConceptSetConceptId.setStandard(false);
+                  return dbConceptSetConceptId;
+                })
+            .collect(Collectors.toSet()));
     return surveyConceptSet;
   }
 

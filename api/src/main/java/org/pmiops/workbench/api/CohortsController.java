@@ -27,6 +27,7 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -286,7 +287,9 @@ public class CohortsController implements CohortsApiDelegate {
                 "Can't use concept set for domain %s with table %s",
                 conceptSet.getDomainEnum(), tableQuery.getTableName()));
       }
-      return conceptSet.getConceptIds();
+      return conceptSet.getConceptSetConceptIds().stream()
+          .map(DbConceptSetConceptId::getConceptId)
+          .collect(Collectors.toSet());
     }
     return null;
   }

@@ -4,10 +4,13 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -39,19 +42,25 @@ public class ConceptSetDaoTest {
     creator = userDao.save(creator);
 
     Timestamp now = new Timestamp(System.currentTimeMillis());
-    dbConceptSet =
-        conceptSetDao.save(
-            new DbConceptSet(
-                "conceptSet",
-                1,
-                DbStorageEnums.domainToStorage(Domain.CONDITION),
-                DbStorageEnums.surveysToStorage(Surveys.THE_BASICS),
-                "descr",
-                ws.getWorkspaceId(),
-                creator,
-                now,
-                now,
-                200));
+    DbConceptSetConceptId dbConceptSetConceptId = new DbConceptSetConceptId();
+    dbConceptSetConceptId.setConceptId(1L);
+    dbConceptSetConceptId.setStandard(true);
+    Set<DbConceptSetConceptId> conceptSetConceptIds = new HashSet<>();
+    conceptSetConceptIds.add(dbConceptSetConceptId);
+    DbConceptSet dbConceptSet =
+        new DbConceptSet(
+            "conceptSet",
+            1,
+            DbStorageEnums.domainToStorage(Domain.CONDITION),
+            DbStorageEnums.surveysToStorage(Surveys.THE_BASICS),
+            "descr",
+            ws.getWorkspaceId(),
+            creator,
+            now,
+            now,
+            200);
+    dbConceptSet.setConceptSetConceptIds(conceptSetConceptIds);
+    this.dbConceptSet = conceptSetDao.save(dbConceptSet);
   }
 
   @Test
