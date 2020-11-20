@@ -44,7 +44,7 @@ const OldCdrVersionModal = (props: Props) => {
             <FlexColumn>
                 <div style={styles.text}>
                     Use of older dataset versions is <StyledAnchorTag
-                    href='https://www.researchallofus.org/data-use-policies/'>
+                    href='https://www.researchallofus.org/data-tools/data-access/'>
                     permitted</StyledAnchorTag> only to complete a study that was started using that older
                     version, or to replicate a previous study. You must confirm the following to continue.
                 </div>
