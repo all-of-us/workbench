@@ -397,7 +397,7 @@ const BoxHeader = ({step = '', header =  '', subHeader = '', style = {}, ...prop
 enum PrepackagedConceptSet {
   PERSON = 'Demographics',
   SURVEYS = 'All Surveys',
-  FITIBITHEARTRATE = 'Fitbit Hear Rate',
+  FITIBITHEARTRATE = 'Fitbit Heart Rate',
   FITBITHEARTACTIVITY = 'Fitbit Heart Activity',
   FITBITHEARTRATELEVEL = 'Fitbit Heart Rate Level',
   FITBITINTRADAYSTEPS = 'Fitbit Intra Day Steps'
