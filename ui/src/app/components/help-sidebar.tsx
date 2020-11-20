@@ -596,7 +596,10 @@ export const HelpSidebar = fp.flow(
         // If a compound operation is still pending, and we're transitioning
         // through the "Deleted" phase of the runtime, we want to keep showing
         // an activity spinner. Avoids an awkward UX during a delete/create cycle.
-        status = RuntimeStatus.Deleting;
+        // There also be some lag during the runtime creation flow between when
+        // the compound operation starts, and the runtime is set in the store; for
+        // this reason use Creating rather than Deleting here.
+        status = RuntimeStatus.Creating;
       }
 
       // We always want to show the thunderstorm icon.
