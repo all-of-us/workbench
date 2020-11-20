@@ -4,6 +4,7 @@ import {ClrIcon} from 'app/components/icons';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
+import {WarningMessage} from 'app/components/warning-message';
 
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
@@ -389,29 +390,6 @@ const PresetSelector = ({hasMicroarrayData, setSelectedDiskSize, setSelectedMach
   </PopupTrigger>;
 };
 
-const WarningMessage = ({children}) => {
-  return <FlexRow
-    style={{
-      backgroundColor: colorWithWhiteness(colors.warning, .9),
-      border: `1px solid ${colors.warning}`,
-      borderRadius: '5px',
-      color: colors.dark,
-      marginTop: '.5rem',
-      padding: '.5rem 0px'
-    }}
-  >
-    <ClrIcon
-      style={{color: colors.warning, marginLeft: '.5rem'}}
-      shape={'warning-standard'}
-      size={30}
-      class={'is-solid'}
-    />
-    <div style={{paddingLeft: '0.5rem', paddingRight: '0.5rem'}}>
-      {children}
-    </div>
-  </FlexRow>;
-};
-
 const CostEstimator = ({
   runtimeParameters,
   costTextColor = colors.accent
@@ -601,8 +579,8 @@ const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, u
         You're about to apply the following changes to your environment:
       </div>
       <ul>
-        {runtimeDiffs.map(diff =>
-          <li>
+        {runtimeDiffs.map((diff, i) =>
+          <li key={i}>
             {diff.desc} from <b>{diff.previous}</b> to <b>{diff.new}</b>
           </li>
         )}
@@ -718,6 +696,7 @@ export const RuntimePanel = fp.flow(
 
   const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig);
   const runtimeChanged = runtimeDiffs.length > 0;
+  const needsDelete = runtimeDiffs.map(diff => diff.differenceType).includes(RuntimeDiffState.NEEDS_DELETE);
 
   const [creatorFreeCreditsRemaining, setCreatorFreeCreditsRemaining] = useState(0);
   useEffect(() => {
@@ -762,23 +741,19 @@ export const RuntimePanel = fp.flow(
 
     return runtimeRequest;
   };
-
-  const runtimeCanBeUpdated = () => {
-    return runtimeChanged
-    // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
-    // where we get 'status' from
-    && [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus);
-  };
+  // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
+  // where we get 'status' from
+  const runtimeCanBeUpdated = runtimeChanged && [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus);
 
   const renderUpdateButton = () => {
     return <Button
       aria-label='Update'
-      disabled={!runtimeCanBeUpdated()}
+      disabled={!runtimeCanBeUpdated}
       onClick={() => {
         setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
         onUpdate();
       }}>
-      Update
+      {needsDelete ? 'APPLY & RECREATE' : 'APPLY & REBOOT'}
     </Button>;
   };
 
@@ -796,7 +771,7 @@ export const RuntimePanel = fp.flow(
   const renderNextButton = () => {
     return <Button
       aria-label='Next'
-      disabled={!runtimeCanBeUpdated()}
+      disabled={!runtimeCanBeUpdated}
       onClick={() => {
         setPanelContent(PanelContent.Confirm);
       }}>

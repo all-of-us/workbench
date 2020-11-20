@@ -332,7 +332,8 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
                 workspaceNamespace,
                 targetRuntime: requestedRuntime,
                 resolutionCondition: r => r.status !== RuntimeStatus.Running,
-                pollAbortSignal: aborter.signal
+                pollAbortSignal: aborter.signal,
+                overallTimeout: 1000 * 60 // The switch to a non running status should occur quickly
               });
             }
           } else {

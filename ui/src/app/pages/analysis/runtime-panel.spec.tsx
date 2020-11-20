@@ -4,6 +4,7 @@ import * as React from 'react';
 
 import {Button, Link} from 'app/components/buttons';
 import {Spinner} from 'app/components/spinners';
+import {WarningMessage} from 'app/components/warning-message';
 import {ConfirmDelete, RuntimePanel, Props} from 'app/pages/analysis/runtime-panel';
 import {registerApiClient, runtimeApi} from 'app/services/swagger-fetch-clients';
 import {ComputeType} from 'app/utils/machines';
@@ -18,7 +19,6 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {defaultDataprocConfig, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
-import {TextColumn} from '../../components/text-column';
 
 describe('RuntimePanel', () => {
   let props: Props;
@@ -373,9 +373,9 @@ describe('RuntimePanel', () => {
     const wrapper = await component();
 
     await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) + 10);
-    mustClickButton(wrapper, 'Next');
+    await mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(TextColumn).text().includes('reboot')).toBeTruthy();
+    expect(wrapper.find(WarningMessage).text().includes('reboot')).toBeTruthy();
   });
 
   it('should warn user about reboot if there are updates that require one - number of workers', async() => {
@@ -385,9 +385,9 @@ describe('RuntimePanel', () => {
     const wrapper = await component();
 
     await pickNumWorkers(wrapper, getNumWorkers(wrapper) + 2);
-    mustClickButton(wrapper, 'Next');
+    await mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(TextColumn).text().includes('reboot')).toBeTruthy();
+    expect(wrapper.find(WarningMessage).text().includes('reboot')).toBeTruthy();
   });
 
   it('should warn user about reboot if there are updates that require one - number of preemptible workers', async() => {
@@ -397,18 +397,18 @@ describe('RuntimePanel', () => {
     const wrapper = await component();
 
     await pickNumPreemptibleWorkers(wrapper, getNumPreemptibleWorkers(wrapper) + 2);
-    mustClickButton(wrapper, 'Next');
+    await mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(TextColumn).text().includes('reboot')).toBeTruthy();
+    expect(wrapper.find(WarningMessage).text().includes('reboot')).toBeTruthy();
   });
 
   it('should warn user about reboot if there are updates that require one - CPU', async() => {
     const wrapper = await component();
 
     await pickMainCpu(wrapper, getMainCpu(wrapper) + 4);
-    mustClickButton(wrapper, 'Next');
+    await mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(TextColumn).text().includes('reboot')).toBeTruthy();
+    expect(wrapper.find(WarningMessage).text().includes('reboot')).toBeTruthy();
   });
 
   it('should warn user about reboot if there are updates that require one - Memory', async() => {
@@ -416,27 +416,27 @@ describe('RuntimePanel', () => {
 
     // 15 GB -> 26 GB
     await pickMainRam(wrapper, 26);
-    mustClickButton(wrapper, 'Next');
+    await mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(TextColumn).text().includes('reboot')).toBeTruthy();
+    expect(wrapper.find(WarningMessage).text().includes('reboot')).toBeTruthy();
   });
 
   it('should warn user about deletion if there are updates that require one - Compute Type', async() => {
     const wrapper = await component();
 
     await pickComputeType(wrapper, ComputeType.Dataproc);
-    mustClickButton(wrapper, 'Next');
+    await mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(TextColumn).text().includes('deletion')).toBeTruthy();
+    expect(wrapper.find(WarningMessage).text().includes('deletion')).toBeTruthy();
   });
 
   it('should warn user about deletion if there are updates that require one - Decrease Disk', async() => {
     const wrapper = await component();
 
     await pickMainDiskSize(wrapper, getMainDiskSize(wrapper) - 5);
-    mustClickButton(wrapper, 'Next');
+    await mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(TextColumn).text().includes('deletion')).toBeTruthy();
+    expect(wrapper.find(WarningMessage).text().includes('deletion')).toBeTruthy();
   });
 
   it('should warn the user about deletion if there are updates that require one - Worker CPU', async() => {
@@ -447,9 +447,9 @@ describe('RuntimePanel', () => {
 
     // 4 -> 8
     await pickWorkerCpu(wrapper, 8);
-    mustClickButton(wrapper, 'Next');
+    await mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(TextColumn).text().includes('deletion')).toBeTruthy();
+    expect(wrapper.find(WarningMessage).text().includes('deletion')).toBeTruthy();
   });
 
   it('should warn the user about deletion if there are updates that require one - Worker RAM', async() => {
@@ -460,9 +460,9 @@ describe('RuntimePanel', () => {
 
     // 15 -> 26
     await pickWorkerRam(wrapper, 26);
-    mustClickButton(wrapper, 'Next');
+    await mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(TextColumn).text().includes('deletion')).toBeTruthy();
+    expect(wrapper.find(WarningMessage).text().includes('deletion')).toBeTruthy();
   });
 
   it('should warn the user about deletion if there are updates that require one - Worker Disk', async() => {
@@ -471,9 +471,9 @@ describe('RuntimePanel', () => {
 
     const wrapper = await component();
     await pickWorkerDiskSize(wrapper, getWorkerDiskSize(wrapper) + 10);
-    mustClickButton(wrapper, 'Next');
+    await mustClickButton(wrapper, 'Next');
 
-    expect(wrapper.find(TextColumn).text().includes('deletion')).toBeTruthy();
+    expect(wrapper.find(WarningMessage).text().includes('deletion')).toBeTruthy();
   });
 
   it('should retain original inputs when hitting cancel from the Confirm panel', async() => {
@@ -491,8 +491,8 @@ describe('RuntimePanel', () => {
     await pickNumWorkers(wrapper, 5);
     await pickWorkerDiskSize(wrapper, 100);
 
-    mustClickButton(wrapper, 'Next');
-    mustClickButton(wrapper, 'Cancel');
+    await mustClickButton(wrapper, 'Next');
+    await mustClickButton(wrapper, 'Cancel');
 
     expect(getMainDiskSize(wrapper)).toBe(75);
     expect(getMainCpu(wrapper)).toBe(8);
