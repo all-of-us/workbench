@@ -5,7 +5,7 @@ define([
     'base/js/dialog',
     'base/js/namespace'
 ], ($, dialogLib, Jupyter) => {
-  const policyUrl = 'https://www.researchallofus.org/data-use-policies';
+  const policyUrl = 'https://www.researchallofus.org/data-tools/data-access/';
 
   const load = () => {
     $('#download_menu li a').click((e) => {
