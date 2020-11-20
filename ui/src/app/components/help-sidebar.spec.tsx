@@ -185,16 +185,16 @@ describe('HelpSidebar', () => {
 
   });
 
-  it('should display "stopping" UX during compound runtime op', async() => {
-    setRuntimeStatus(RuntimeStatus.Running);
+  it('should display "starting" UX during compound runtime op with no runtime', async() => {
+    setRuntimeStatus(RuntimeStatus.Deleting);
     registerCompoundRuntimeOperation(workspaceDataStub.namespace, {aborter: new AbortController()})
     const wrapper = await component();
     await waitForFakeTimersAndUpdate(wrapper);
 
-    expect(statusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.running);
+    expect(statusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.stopping);
 
     act(() => clearRuntime());
     await waitForFakeTimersAndUpdate(wrapper);
-    expect(statusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.stopping);
+    expect(statusIcon(wrapper).prop('style').color).toEqual(colors.runtimeStatus.starting);
   });
 });
