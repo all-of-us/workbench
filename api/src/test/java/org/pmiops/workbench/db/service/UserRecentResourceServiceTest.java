@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import com.google.common.collect.ImmutableSet;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -19,6 +20,7 @@ import org.pmiops.workbench.db.dao.UserRecentResourceServiceImpl;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -70,8 +72,12 @@ public class UserRecentResourceServiceTest {
     cohort.setWorkspaceId(workspace.getWorkspaceId());
     cohort = cohortDao.save(cohort);
 
+    DbConceptSetConceptId dbConceptSetConceptId = new DbConceptSetConceptId();
+    dbConceptSetConceptId.setConceptId(1L);
+    dbConceptSetConceptId.setStandard(true);
     conceptSet = new DbConceptSet();
     conceptSet.setWorkspaceId(workspace.getWorkspaceId());
+    conceptSet.setConceptSetConceptIds(ImmutableSet.of(dbConceptSetConceptId));
     conceptSet = conceptSetDao.save(conceptSet);
   }
 
@@ -236,12 +242,16 @@ public class UserRecentResourceServiceTest {
     userRecentResourceService.updateNotebookEntry(
         workspace.getWorkspaceId(), user.getUserId(), "gs://someDirectory1/notebooks/notebook2");
 
+    userRecentResourceService.updateConceptSetEntry(
+        workspace.getWorkspaceId(), user.getUserId(), conceptSet.getConceptSetId());
+
     List<DbUserRecentResource> resources =
         userRecentResourceService.findAllResourcesByUser(user.getUserId());
 
-    assertEquals(resources.size(), 3);
+    assertEquals(resources.size(), 4);
     assertEquals(resources.get(0).getNotebookName(), "gs://someDirectory1/notebooks/notebook2");
-    assertEquals(resources.get(1).getCohort().getCohortId(), cohort.getCohortId());
-    assertEquals(resources.get(2).getNotebookName(), "gs://someDirectory1/notebooks/notebook1");
+    assertEquals(resources.get(1).getConceptSet(), conceptSet);
+    assertEquals(resources.get(2).getCohort().getCohortId(), cohort.getCohortId());
+    assertEquals(resources.get(3).getNotebookName(), "gs://someDirectory1/notebooks/notebook1");
   }
 }
