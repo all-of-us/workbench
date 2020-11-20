@@ -397,8 +397,8 @@ const BoxHeader = ({step = '', header =  '', subHeader = '', style = {}, ...prop
 enum PrepackagedConceptSet {
   PERSON = 'Demographics',
   SURVEYS = 'All Surveys',
-  FITIBITHEARTRATE = 'Fitbit Heart Rate',
-  FITBITHEARTACTIVITY = 'Fitbit Heart Activity',
+  FITIBITHEARTRATESUMMARY = 'Fitbit Heart Rate Summary',
+  FITBITACTIVITY = 'Fitbit Activity',
   FITBITHEARTRATELEVEL = 'Fitbit Heart Rate Level',
   FITBITINTRADAYSTEPS = 'Fitbit Intra Day Steps'
 }
@@ -410,8 +410,8 @@ const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
 
 const PREPACKAGED_WITH_FITBIT_DOMAINS = {
   ...PREPACKAGED_SURVEY_PERSON_DOMAIN,
-  [PrepackagedConceptSet.FITIBITHEARTRATE]: Domain.FITBITHEARTRATESUMMARY,
-  [PrepackagedConceptSet.FITBITHEARTACTIVITY]: Domain.FITBITACTIVITY,
+  [PrepackagedConceptSet.FITIBITHEARTRATESUMMARY]: Domain.FITBITHEARTRATESUMMARY,
+  [PrepackagedConceptSet.FITBITACTIVITY]: Domain.FITBITACTIVITY,
   [PrepackagedConceptSet.FITBITHEARTRATELEVEL]: Domain.FITBITHEARTRATELEVEL,
   [PrepackagedConceptSet.FITBITINTRADAYSTEPS]: Domain.FITBITINTRADAYSTEPS,
 };
@@ -791,7 +791,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
               break;
             }
             case PrePackagedConceptSetEnum.FITBITHEARTRATESUMMARY: {
-              re.add(PrepackagedConceptSet.FITIBITHEARTRATE);
+              re.add(PrepackagedConceptSet.FITIBITHEARTRATESUMMARY);
               break;
             }
             case PrePackagedConceptSetEnum.FITBITHEARTRATELEVEL: {
@@ -803,7 +803,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
               break;
             }
             case PrePackagedConceptSetEnum.FITBITACTIVITY: {
-              re.add(PrepackagedConceptSet.FITBITHEARTACTIVITY);
+              re.add(PrepackagedConceptSet.FITBITACTIVITY);
               break;
             }
             case PrePackagedConceptSetEnum.NONE:
@@ -827,13 +827,13 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
           case PrepackagedConceptSet.SURVEYS:
             selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.SURVEY);
             break;
-          case PrepackagedConceptSet.FITBITHEARTACTIVITY:
+          case PrepackagedConceptSet.FITBITACTIVITY:
             selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.FITBITACTIVITY);
             break;
           case PrepackagedConceptSet.FITBITINTRADAYSTEPS:
             selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.FITBITINTRADAYSTEPS);
             break;
-          case PrepackagedConceptSet.FITIBITHEARTRATE:
+          case PrepackagedConceptSet.FITIBITHEARTRATESUMMARY:
             selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.FITBITHEARTRATESUMMARY);
             break;
           case PrepackagedConceptSet.FITBITHEARTRATELEVEL:
