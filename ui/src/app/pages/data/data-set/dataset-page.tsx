@@ -398,7 +398,7 @@ enum PrepackagedConceptSet {
   PERSON = 'Demographics',
   SURVEYS = 'All Surveys',
   FITIBITHEARTRATESUMMARY = 'Fitbit Heart Rate Summary',
-  FITBITACTIVITY = 'Fitbit Activity',
+  FITBITACTIVITY = 'Fitbit Activity Summary',
   FITBITHEARTRATELEVEL = 'Fitbit Heart Rate Level',
   FITBITINTRADAYSTEPS = 'Fitbit Intra Day Steps'
 }
