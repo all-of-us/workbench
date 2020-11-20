@@ -94,12 +94,12 @@ export const ConceptSurveyAddModal = withCurrentWorkspace()
     const {workspace: {namespace, id}, onSave} = this.props;
     const {selectedSet, addingToExistingSet, newSetDescription, name} = this.state;
     this.setState({saving: true});
-    const conceptIds = this.props.selectedSurvey.map((surveys) => surveys.conceptId);
+    const conceptIds = this.props.selectedSurvey.map((surveys) => ({conceptId: surveys.conceptId, standard: false}));
 
     if (addingToExistingSet) {
       const updateConceptSetReq: UpdateConceptSetRequest = {
         etag: selectedSet.etag,
-        addedIds: conceptIds
+        addedConceptSetConceptIds: conceptIds
       };
       try {
         const conceptSet = await conceptSetsApi().updateConceptSetConcepts(
@@ -125,7 +125,7 @@ export const ConceptSurveyAddModal = withCurrentWorkspace()
       };
       const request: CreateConceptSetRequest = {
         conceptSet: conceptSet,
-        addedIds: conceptIds
+        addedConceptSetConceptIds: conceptIds
       };
       try {
         const createdConceptSet =

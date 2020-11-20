@@ -40,7 +40,7 @@ import {
   ConceptSet,
   CopyRequest,
   Domain,
-  ResourceType,
+  ResourceType, UpdateConceptSetRequest,
   WorkspaceAccessLevel
 } from 'generated/fetch';
 
@@ -228,8 +228,11 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
       const {selectedConcepts, conceptSet} = this.state;
       this.setState({removeSubmitting: true});
       try {
-        const updatedSet = await conceptSetsApi().updateConceptSetConcepts(ns, wsid, csid,
-          {etag: conceptSet.etag, removedIds: selectedConcepts.map(c => c.conceptId)});
+        const updateConceptSetReq: UpdateConceptSetRequest = {
+          etag: conceptSet.etag,
+          removedConceptSetConceptIds: selectedConcepts.map(c => ({conceptId: c.conceptId, standard: true}))
+        };
+        const updatedSet = await conceptSetsApi().updateConceptSetConcepts(ns, wsid, csid, updateConceptSetReq);
         this.setState({conceptSet: updatedSet, selectedConcepts: []});
       } catch (error) {
         console.log(error);

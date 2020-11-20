@@ -52,7 +52,7 @@ const styles = reactStyles({
 const getConceptIdsToAddOrRemove = (conceptsToFilter: Array<Criteria>, conceptsToCompare: Array<Criteria>) => {
   return conceptsToFilter.reduce((conceptIds, concept) => {
     if (!conceptsToCompare.find(con => con.conceptId === concept.conceptId)) {
-      conceptIds.push(concept.conceptId);
+      conceptIds.push({conceptId: concept.conceptId, standard: concept.isStandard});
     }
     return conceptIds;
   }, []);
@@ -83,13 +83,13 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
       conceptSetUpdating.next(true);
       this.setState({updating: true});
       // Selections that don't exist on the existing concept set are added
-      const addedIds = getConceptIdsToAddOrRemove(concept, conceptSet.criteriums);
+      const addedConceptSetConceptIds = getConceptIdsToAddOrRemove(concept, conceptSet.criteriums);
       // Concept ids on the existing concept set that don't exist on the selections get removed
-      const removedIds = getConceptIdsToAddOrRemove(conceptSet.criteriums, concept);
+      const removedConceptSetConceptIds = getConceptIdsToAddOrRemove(conceptSet.criteriums, concept);
       const updateConceptSetReq: UpdateConceptSetRequest = {
         etag: conceptSet.etag,
-        addedIds,
-        removedIds
+        addedConceptSetConceptIds,
+        removedConceptSetConceptIds
       };
       try {
         const updatedConceptSet = await conceptSetsApi().updateConceptSetConcepts(namespace, id, conceptSet.id, updateConceptSetReq);
