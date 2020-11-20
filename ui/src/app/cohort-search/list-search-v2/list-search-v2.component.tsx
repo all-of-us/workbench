@@ -466,8 +466,16 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
             </div>
           </TooltipTrigger>
         </td>
-        <td style={{...columnBodyStyle, paddingLeft: '0.2rem'}}>{row.code}</td>
-        <td style={columnBodyStyle}>{!brand && row.type}</td>
+        <td style={{...columnBodyStyle, paddingLeft: '0.2rem', paddingRight: '0.5rem'}}>
+          <TooltipTrigger disabled={hoverId !== elementId} content={<div>{row.code}</div>}>
+            <div data-test-id='code-column-value'
+                 style={styles.nameDiv}
+                 onMouseOver={(e) => this.onNameHover(e.target as HTMLDivElement, elementId)}
+                 onMouseOut={() => this.setState({hoverId: undefined})}>
+              {row.code}
+            </div>
+          </TooltipTrigger></td>
+        <td style={{...columnBodyStyle}}>{!brand && row.type}</td>
         <td style={{...columnBodyStyle, width: '10%', paddingRight: '0.5rem'}}>{row.isStandard ? 'Standard' : 'Source'}</td>
         <td style={{...columnBodyStyle, width: '10%', paddingRight: '0.5rem'}}>{row.conceptId}</td>
         <td style={{...columnBodyStyle, paddingLeft: '0.2rem'}}>{row.parentCount > -1 && row.parentCount.toLocaleString()}</td>
