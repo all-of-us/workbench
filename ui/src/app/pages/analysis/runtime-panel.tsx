@@ -257,7 +257,7 @@ const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPr
             // maybeGetMachine,
             onChange
             )(validMachineTypes) }
-        disabled={disabled}        
+        disabled={disabled}
         value={memory}
         />
   </Fragment>;
@@ -384,7 +384,7 @@ const PresetSelector = ({
                                       presetCompute: ComputeType.Dataproc
                                     })]
                                   ])(runtimeTemplate);
-                                  const presetMachineType = fp.find(({name}) => name === presetMachineName, validLeonardoMachineTypes);
+                                  const presetMachineType = findMachineByName(presetMachineName);
 
                                   setSelectedDiskSize(presetDiskSize);
                                   setSelectedMachine(presetMachineType);
@@ -678,7 +678,7 @@ export const RuntimePanel = fp.flow(
   // default machine type if switching compute types would invalidate the main
   // machine type choice.
   useEffect(() => {
-    if (!validMainMachineTypes.find(({name}) => name === selectedMachine)) {
+    if (!validMainMachineTypes.find(({name}) => name === selectedMachine.name)) {
       setSelectedMachine(initialMasterMachine);
     }
   }, [selectedCompute]);
