@@ -83,6 +83,7 @@ export interface LeoRuntimeInitializerOptions {
   maxResumeCount?: number;
   maxServerErrorCount?: number;
   targetRuntime?: Runtime;
+  resolutionCondition?: (Runtime) => boolean;
 }
 
 const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
@@ -94,8 +95,10 @@ const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
   maxDeleteCount: DEFAULT_MAX_DELETE_COUNT,
   maxResumeCount: DEFAULT_MAX_RESUME_COUNT,
   maxServerErrorCount: DEFAULT_MAX_SERVER_ERROR_COUNT,
-  targetRuntime: DEFAULT_RUNTIME_CONFIG
+  targetRuntime: DEFAULT_RUNTIME_CONFIG,
+  resolutionCondition: (runtime) => runtime.status === RuntimeStatus.Running
 };
+
 
 /**
  * A controller class implementing client-side logic to initialize a Leonardo runtime. This class
@@ -118,6 +121,7 @@ export class LeoRuntimeInitializer {
   private readonly workspaceNamespace: string;
   private readonly onPoll: (Runtime?) => void;
   private readonly pollAbortSignal?: AbortSignal;
+  private readonly resolutionCondition: (Runtime) => boolean;
 
   // Properties to track & control the polling loop. We use a capped exponential backoff strategy
   // and a series of "maxFoo" limits to ensure the initialization flow doesn't get out of control.
@@ -184,6 +188,7 @@ export class LeoRuntimeInitializer {
     this.maxResumeCount = options.maxResumeCount;
     this.maxServerErrorCount = options.maxServerErrorCount;
     this.targetRuntime = options.targetRuntime;
+    this.resolutionCondition = options.resolutionCondition;
   }
 
   private async createRuntime(): Promise<void> {
@@ -226,12 +231,12 @@ export class LeoRuntimeInitializer {
     this.deleteCount++;
   }
 
-  private isRuntimeDeleted(): boolean {
-    return this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Deleted;
+  private reachedResolution(): boolean {
+    return this.currentRuntime && this.resolutionCondition(this.currentRuntime);
   }
 
-  private isRuntimeRunning(): boolean {
-    return this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Running;
+  private isRuntimeDeleted(): boolean {
+    return this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Deleted;
   }
 
   private isRuntimeStopped(): boolean {
@@ -282,6 +287,7 @@ export class LeoRuntimeInitializer {
   }
 
   private async poll() {
+
     // Overall strategy: continue polling the get-runtime endpoint, with capped exponential backoff,
     // until we either reach our goal state (a RUNNING runtime) or run up against the overall
     // timeout threshold.
@@ -337,7 +343,7 @@ export class LeoRuntimeInitializer {
           `Runtime ${this.currentRuntime.googleProject}/${this.currentRuntime.runtimeName}` +
           ` has reached an ERROR status`);
         await this.deleteRuntime();
-      } else if (this.isRuntimeRunning()) {
+      } else if (this.reachedResolution()) {
         // We've reached the goal - resolve the Promise.
         return this.resolve(this.currentRuntime);
       }

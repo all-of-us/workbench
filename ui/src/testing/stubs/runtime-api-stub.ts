@@ -1,4 +1,5 @@
 import {
+  DataprocConfig, GceConfig,
   Runtime,
   RuntimeApi,
   RuntimeConfigurationType,
@@ -8,6 +9,21 @@ import {
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
+export const defaultGceConfig = (): GceConfig => ({
+  diskSize: 80,
+  machineType: 'n1-standard-4'
+});
+
+export const defaultDataprocConfig = (): DataprocConfig => ({
+  masterMachineType: 'n1-standard-4',
+  masterDiskSize: 80,
+  workerDiskSize: 40,
+  workerMachineType: 'n1-standard-4',
+  numberOfWorkers: 1,
+  numberOfPreemptibleWorkers: 2,
+  numberOfWorkerLocalSSDs: 0
+});
+
 export const defaultRuntime = () => ({
   runtimeName: 'Runtime Name',
   googleProject: 'Namespace',
@@ -15,11 +31,7 @@ export const defaultRuntime = () => ({
   createdDate: '08/08/2018',
   toolDockerImage: 'broadinstitute/terra-jupyter-aou:1.0.999',
   configurationType: RuntimeConfigurationType.GeneralAnalysis,
-  dataprocConfig: {
-    masterMachineType: 'n1-standard-4',
-    masterDiskSize: 80,
-    numberOfWorkers: 0
-  }
+  gceConfig: defaultGceConfig()
 });
 
 export class RuntimeApiStub extends RuntimeApi {
@@ -46,6 +58,15 @@ export class RuntimeApiStub extends RuntimeApi {
   deleteRuntime(workspaceNamespace: string, options?: any): Promise<{}> {
     return new Promise<{}>(resolve => {
       this.runtime.status = RuntimeStatus.Deleting;
+      resolve({});
+    });
+  }
+
+  updateRuntime(workspaceNamespace: string, options?: any): Promise<{}> {
+    return new Promise<{}>(resolve => {
+      // Setting it to Running doesn't really make sense but it reflects
+      // what is currently happening in the product.
+      this.runtime.status = RuntimeStatus.Running;
       resolve({});
     });
   }

@@ -300,7 +300,7 @@ public class RuntimeController implements RuntimeApiDelegate {
 
     leonardoNotebooksClient.updateRuntime(runtimeRequest.getRuntime());
 
-    return ResponseEntity.accepted().build();
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
