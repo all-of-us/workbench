@@ -37,7 +37,6 @@ import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership.CreationStatusEnum;
-import org.pmiops.workbench.firecloud.model.FirecloudJWTWrapper;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -363,11 +362,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> syncComplianceTrainingStatus() {
     try {
-      if (workbenchConfigProvider.get().featureFlags.enableMoodleV2Api) {
-        userService.syncComplianceTrainingStatusV2();
-      } else {
-        userService.syncComplianceTrainingStatusV1();
-      }
+      userService.syncComplianceTrainingStatusV2();
     } catch (NotFoundException ex) {
       throw ex;
     } catch (ApiException e) {
@@ -597,11 +592,7 @@ public class ProfileController implements ProfileApiDelegate {
       throw new BadRequestException("Token is required.");
     }
 
-    if (workbenchConfigProvider.get().featureFlags.useNewShibbolethService) {
-      shibbolethService.updateShibbolethToken(token.getJwt());
-    } else {
-      fireCloudService.postNihCallback(new FirecloudJWTWrapper().jwt(token.getJwt()));
-    }
+    shibbolethService.updateShibbolethToken(token.getJwt());
 
     userService.syncEraCommonsStatus();
     return getProfileResponse(userProvider.get());

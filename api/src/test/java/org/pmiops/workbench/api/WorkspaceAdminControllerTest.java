@@ -19,7 +19,6 @@ import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -48,7 +47,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -117,15 +115,7 @@ public class WorkspaceAdminControllerTest {
     CohortService.class,
     Clock.class
   })
-  static class Configuration {
-    @Bean
-    WorkbenchConfig workbenchConfig() {
-      WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
-      workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
-      workbenchConfig.featureFlags.enableBillingLockout = false;
-      return workbenchConfig;
-    }
-  }
+  static class Configuration {}
 
   @Before
   public void setUp() {

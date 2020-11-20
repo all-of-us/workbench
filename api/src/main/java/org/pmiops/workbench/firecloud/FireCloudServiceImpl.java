@@ -3,7 +3,6 @@ package org.pmiops.workbench.firecloud;
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.client.http.HttpTransport;
 import com.google.auth.oauth2.OAuth2Credentials;
-import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -16,7 +15,6 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.pmiops.workbench.auth.Constants;
 import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -32,7 +30,6 @@ import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
-import org.pmiops.workbench.firecloud.model.FirecloudJWTWrapper;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupRef;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
@@ -68,7 +65,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<StaticNotebooksApi> serviceAccountStaticNotebooksApiProvider;
   private final FirecloudRetryHandler retryHandler;
 
-  private final Provider<ServiceAccountCredentials> fcAdminCredsProvider;
   private final IamCredentialsClient iamCredentialsClient;
   private final HttpTransport httpTransport;
 
@@ -120,8 +116,6 @@ public class FireCloudServiceImpl implements FireCloudService {
       @Qualifier(FireCloudConfig.SERVICE_ACCOUNT_STATIC_NOTEBOOKS_API)
           Provider<StaticNotebooksApi> serviceAccountStaticNotebooksApiProvider,
       FirecloudRetryHandler retryHandler,
-      @Qualifier(Constants.FIRECLOUD_ADMIN_CREDS)
-          Provider<ServiceAccountCredentials> fcAdminCredsProvider,
       IamCredentialsClient iamCredentialsClient,
       HttpTransport httpTransport) {
     this.configProvider = configProvider;
@@ -133,7 +127,6 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.serviceAccountWorkspaceApiProvider = serviceAccountWorkspaceApiProvider;
     this.statusApiProvider = statusApiProvider;
     this.retryHandler = retryHandler;
-    this.fcAdminCredsProvider = fcAdminCredsProvider;
     this.endUserStaticNotebooksApiProvider = endUserStaticNotebooksApiProvider;
     this.serviceAccountStaticNotebooksApiProvider = serviceAccountStaticNotebooksApiProvider;
     this.iamCredentialsClient = iamCredentialsClient;
@@ -151,23 +144,14 @@ public class FireCloudServiceImpl implements FireCloudService {
    * @return
    */
   public ApiClient getApiClientWithImpersonation(String userEmail) throws IOException {
-    final OAuth2Credentials delegatedCreds;
-    if (configProvider.get().featureFlags.useKeylessDelegatedCredentials) {
-      delegatedCreds =
-          new DelegatedUserCredentials(
-              ServiceAccounts.getServiceAccountEmail(
-                  ADMIN_SERVICE_ACCOUNT_NAME, configProvider.get().server.projectId),
-              userEmail,
-              FIRECLOUD_API_OAUTH_SCOPES,
-              iamCredentialsClient,
-              httpTransport);
-    } else {
-      delegatedCreds =
-          fcAdminCredsProvider
-              .get()
-              .createScoped(FIRECLOUD_API_OAUTH_SCOPES)
-              .createDelegated(userEmail);
-    }
+    final OAuth2Credentials delegatedCreds =
+        new DelegatedUserCredentials(
+            ServiceAccounts.getServiceAccountEmail(
+                ADMIN_SERVICE_ACCOUNT_NAME, configProvider.get().server.projectId),
+            userEmail,
+            FIRECLOUD_API_OAUTH_SCOPES,
+            iamCredentialsClient,
+            httpTransport);
     delegatedCreds.refreshIfExpired();
 
     ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
@@ -248,19 +232,14 @@ public class FireCloudServiceImpl implements FireCloudService {
               projectName, WORKSPACE_DELIMITER));
     }
 
-    boolean enableVpcFlowLogs = configProvider.get().featureFlags.enableVpcFlowLogs;
     FirecloudCreateRawlsBillingProjectFullRequest request =
         new FirecloudCreateRawlsBillingProjectFullRequest()
             .billingAccount(configProvider.get().billing.freeTierBillingAccountName())
             .projectName(projectName)
-            .highSecurityNetwork(enableVpcFlowLogs)
-            .enableFlowLogs(enableVpcFlowLogs)
-            .privateIpGoogleAccess(true);
-
-    boolean enableVpcServicePerimeter = configProvider.get().featureFlags.enableVpcServicePerimeter;
-    if (enableVpcServicePerimeter) {
-      request.servicePerimeter(configProvider.get().firecloud.vpcServicePerimeterName);
-    }
+            .highSecurityNetwork(true)
+            .enableFlowLogs(true)
+            .privateIpGoogleAccess(true)
+            .servicePerimeter(configProvider.get().firecloud.vpcServicePerimeterName);
 
     BillingApi billingApi = billingApiProvider.get();
     retryHandler.run(
@@ -509,15 +488,6 @@ public class FireCloudServiceImpl implements FireCloudService {
               throw e;
             }
           }
-        });
-  }
-
-  @Override
-  public void postNihCallback(FirecloudJWTWrapper wrapper) {
-    NihApi nihApi = nihApiProvider.get();
-    retryHandler.run(
-        (context) -> {
-          return nihApi.nihCallback(wrapper);
         });
   }
 }

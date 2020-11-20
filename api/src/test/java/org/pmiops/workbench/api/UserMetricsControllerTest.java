@@ -52,7 +52,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -89,15 +88,7 @@ public class UserMetricsControllerTest {
   @TestConfiguration
   @Import({CohortMapperImpl.class, CommonMappers.class, FirecloudMapperImpl.class})
   @MockBean({Clock.class})
-  static class Configuration {
-    @Bean
-    WorkbenchConfig workbenchConfig() {
-      WorkbenchConfig workbenchConfig = new WorkbenchConfig();
-      workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
-      workbenchConfig.featureFlags.enableBillingLockout = true;
-      return workbenchConfig;
-    }
-  }
+  static class Configuration {}
 
   @Before
   public void setUp() {

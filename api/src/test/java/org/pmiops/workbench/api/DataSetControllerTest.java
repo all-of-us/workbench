@@ -276,8 +276,6 @@ public class DataSetControllerTest {
     @Bean
     WorkbenchConfig workbenchConfig() {
       WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
-      workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
-      workbenchConfig.featureFlags.enableBillingLockout = true;
       workbenchConfig.billing = new WorkbenchConfig.BillingConfig();
       workbenchConfig.billing.accountId = "free-tier";
       return workbenchConfig;

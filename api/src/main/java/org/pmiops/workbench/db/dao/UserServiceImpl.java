@@ -54,7 +54,6 @@ import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
-import org.pmiops.workbench.moodle.model.BadgeDetailsV1;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -628,101 +627,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             .map(DbStorageEnums::dataAccessLevelToStorage)
             .collect(Collectors.toList());
     return userDao.findUsersByDataAccessLevelsAndSearchString(dataAccessLevels, term, sort);
-  }
-
-  /** Syncs the current user's training status from Moodle. */
-  @Override
-  @Deprecated
-  public DbUser syncComplianceTrainingStatusV1()
-      throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
-    DbUser user = userProvider.get();
-    return syncComplianceTrainingStatusV1(user, Agent.asUser(user));
-  }
-
-  /**
-   * Updates the given user's training status from Moodle.
-   *
-   * <p>We can fetch Moodle data for arbitrary users since we use an API key to access Moodle,
-   * rather than user-specific OAuth tokens.
-   *
-   * <p>Overall flow: 1. Check if user have moodle_id, a. if not retrieve it from MOODLE API and
-   * save it in the Database 2. Using the MOODLE_ID get user's Badge update the database with a.
-   * training completion time as current time b. training expiration date with as returned from
-   * MOODLE. 3. If there are no badges for a user set training completion time and expiration date
-   * as null
-   */
-  @Override
-  @Deprecated
-  public DbUser syncComplianceTrainingStatusV1(DbUser dbUser, Agent agent)
-      throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
-    if (isServiceAccount(dbUser)) {
-      // Skip sync for service account user rows.
-      return dbUser;
-    }
-
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    try {
-      Integer moodleId = dbUser.getMoodleId();
-      if (moodleId == null) {
-        moodleId = complianceService.getMoodleId(dbUser.getUsername());
-        if (moodleId == null) {
-          // User has not yet created/logged into MOODLE
-          return dbUser;
-        }
-        dbUser.setMoodleId(moodleId);
-      }
-
-      List<BadgeDetailsV1> badgeResponse = complianceService.getUserBadgeV1(moodleId);
-      // The assumption here is that the User will always get 1 badge which will be AoU
-      if (badgeResponse != null && badgeResponse.size() > 0) {
-        BadgeDetailsV1 badge = badgeResponse.get(0);
-        Timestamp badgeExpiration =
-            badge.getDateexpire() == null
-                ? null
-                : new Timestamp(Long.parseLong(badge.getDateexpire()));
-
-        if (dbUser.getComplianceTrainingCompletionTime() == null) {
-          // This is the user's first time with a Moodle badge response, so we reset the completion
-          // time.
-          dbUser.setComplianceTrainingCompletionTime(now);
-        } else if (badgeExpiration != null
-            && !badgeExpiration.equals(dbUser.getComplianceTrainingExpirationTime())) {
-          // The badge has a new expiration date, suggesting some sort of course completion change.
-          // Reset the completion time.
-          dbUser.setComplianceTrainingCompletionTime(now);
-        }
-
-        dbUser.setComplianceTrainingExpirationTime(badgeExpiration);
-      } else {
-        // Moodle has returned zero badges for the given user -- we should clear the user's
-        // training completion & expiration time.
-        dbUser.setComplianceTrainingCompletionTime(null);
-        dbUser.setComplianceTrainingExpirationTime(null);
-      }
-
-      return updateUserWithRetries(
-          u -> {
-            u.setMoodleId(u.getMoodleId());
-            u.setComplianceTrainingExpirationTime(u.getComplianceTrainingExpirationTime());
-            u.setComplianceTrainingCompletionTime(u.getComplianceTrainingCompletionTime());
-            return u;
-          },
-          dbUser,
-          agent);
-
-    } catch (NumberFormatException e) {
-      log.severe("Incorrect date expire format from Moodle");
-      throw e;
-    } catch (org.pmiops.workbench.moodle.ApiException ex) {
-      if (ex.getCode() == HttpStatus.NOT_FOUND.value()) {
-        log.severe(
-            String.format(
-                "Error while retrieving Badge for user %s: %s ",
-                dbUser.getUserId(), ex.getMessage()));
-        throw new NotFoundException(ex.getMessage());
-      }
-      throw ex;
-    }
   }
 
   /** Syncs the current user's training status from Moodle. */

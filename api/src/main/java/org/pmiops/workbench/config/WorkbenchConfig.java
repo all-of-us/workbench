@@ -191,7 +191,7 @@ public class WorkbenchConfig {
   public static class MoodleConfig {
     public String host;
     public boolean enableMoodleBackend;
-    public String credentialsKeyV1;
+    @Deprecated public String credentialsKeyV1;
     public String credentialsKeyV2;
   }
 

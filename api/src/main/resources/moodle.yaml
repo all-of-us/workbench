@@ -63,41 +63,6 @@ paths:
       security:
         - AdminSecurity: []
 
-  /server.php?wsfunction=core_badges_get_user_badges:
-   get:
-     summary: Get information of badges earned/completed by user.
-     tags:
-       - Moodle
-     consumes:
-       - application/json
-     operationId: getMoodleBadgeV1
-     parameters:
-       - name: moodlewsrestformat
-         in: query
-         description: Format of the response which will be json for AoU
-         type: string
-         required: true
-       - name: userid
-         in: query
-         type: integer
-       - name: wstoken
-         in: query
-         description: Secret Token associated with All of us
-         type: string
-         required: true
-
-     responses:
-       200:
-         description: Badge /error response
-         schema:
-           $ref: '#/definitions/UserBadgeResponseV1'
-       400:
-         description: Bad request
-       500:
-         description: Moodle Internal Error
-     security:
-       - AdminSecurity: []
-
   /server.php?wsfunction=local_workbenchapiv2_check_user_badge:
     get:
       summary: Get information of badges earned/completed by user.
@@ -161,21 +126,6 @@ definitions:
         confirmed:
           type: boolean
 
-    UserBadgeResponseV1:
-      required:
-        - badges
-      properties:
-        badges:
-          type: array
-          items:
-            $ref: '#/definitions/BadgeDetailsV1'
-        exception:
-          type: string
-        errorcode:
-          type: string
-        message:
-          type: string
-
     UserBadgeResponseV2:
       properties:
         id:
@@ -218,22 +168,3 @@ definitions:
           type: integer
           format: int64
           description: Global expiration, overrides badge expiration date. As a stringy epoch in SECONDS.
-
-    BadgeDetailsV1:
-      properties:
-        name:
-          type: string
-          description: Name of the badge earned
-        description:
-          type: string
-          description: Description of the badge earned
-        badgeurl:
-          type: string
-        issuername:
-          type: string
-        dateissued:
-          type: string
-          description: When was the badge issued
-        dateexpire:
-          type: string
-          description: Expiry date of badge issued, null if set to never

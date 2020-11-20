@@ -398,7 +398,6 @@ public class WorkspacesControllerTest {
   public void setUp() {
     workbenchConfig = new WorkbenchConfig();
     workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
-    workbenchConfig.featureFlags.enableBillingLockout = true;
     workbenchConfig.featureFlags.enableBillingUpgrade = true;
 
     workbenchConfig.firecloud = new WorkbenchConfig.FireCloudConfig();

@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
-import org.pmiops.workbench.firecloud.model.FirecloudJWTWrapper;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
@@ -114,10 +113,6 @@ public interface FireCloudService {
    * <p>Returns null if the FireCloud user is not found or if the user has no NIH linkage.
    */
   FirecloudNihStatus getNihStatus();
-
-  // Submits a Shibboleth JWT for verification and update using the old-style Shibboleth service
-  // (via Firecloud Orchestration API).
-  void postNihCallback(FirecloudJWTWrapper wrapper);
 
   ApiClient getApiClientWithImpersonation(String email) throws IOException;
 }
