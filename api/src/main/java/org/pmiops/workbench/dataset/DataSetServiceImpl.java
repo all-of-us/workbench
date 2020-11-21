@@ -50,7 +50,6 @@ import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.db.model.DbDataset;
-import org.pmiops.workbench.db.model.DbDatasetValue;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -86,15 +85,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private static final Map<KernelTypeEnum, String> KERNEL_TYPE_TO_ENV_VARIABLE_MAP =
       ImmutableMap.of(
           KernelTypeEnum.R, R_CDR_ENV_VARIABLE, KernelTypeEnum.PYTHON, PYTHON_CDR_ENV_VARIABLE);
-
   private static final String PREVIEW_QUERY =
       "SELECT ${columns} \nFROM `${projectId}.${dataSetId}.${tableName}`";
   private static final String LIMIT_20 = " LIMIT 20";
-
-  private static final ImmutableSet<PrePackagedConceptSetEnum>
-      CONCEPT_SETS_NEEDING_PREPACKAGED_SURVEY =
-          ImmutableSet.of(SURVEY, PrePackagedConceptSetEnum.BOTH);
-
   private static final String PERSON_ID_COLUMN_NAME = "PERSON_ID";
 
   @Override
@@ -118,8 +111,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @VisibleForTesting
   private static class ValuesLinkingPair {
 
-    private List<String> selects;
-    private List<String> joins;
+    private final List<String> selects;
+    private final List<String> joins;
 
     private ValuesLinkingPair(List<String> selects, List<String> joins) {
       this.selects = selects;
@@ -138,8 +131,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       return new ValuesLinkingPair(Collections.emptyList(), Collections.emptyList());
     }
 
-    static final String JOIN_VALUE_KEY = "JOIN_VALUE";
-
     public String formatJoins() {
       return getJoins().stream().distinct().collect(Collectors.joining(" "));
     }
@@ -150,8 +141,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
    */
   private static class DomainConceptIdInfo {
 
-    private String sourceConceptIdColumn;
-    private String standardConceptIdColumn;
+    private final String sourceConceptIdColumn;
+    private final String standardConceptIdColumn;
 
     DomainConceptIdInfo(String sourceConceptIdColumn, String standardConceptIdColumn) {
       this.sourceConceptIdColumn = sourceConceptIdColumn;
@@ -303,12 +294,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             Domain.SURVEY.equals(request.getDomain())
                 ? conceptBigQueryService.getSurveyQuestionConceptIds().stream()
                     .map(
-                        c -> {
-                          DbConceptSetConceptId dbConceptSetConceptId = new DbConceptSetConceptId();
-                          dbConceptSetConceptId.setConceptId(c);
-                          dbConceptSetConceptId.setStandard(false);
-                          return dbConceptSetConceptId;
-                        })
+                        c ->
+                            DbConceptSetConceptId.builder()
+                                .addConceptId(c)
+                                .addStandard(false)
+                                .build())
                     .collect(Collectors.toList())
                 : conceptSetDao.findAllByConceptSetIdIn(request.getConceptSetIds()).stream()
                     .flatMap(cs -> cs.getConceptSetConceptIds().stream())
@@ -323,10 +313,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           mergedQueryParameterValues.put(
               "standardConceptIds",
               QueryParameterValue.array(
-                  standard.stream()
-                      .map(DbConceptSetConceptId::getConceptId)
-                      .collect(Collectors.toList())
-                      .toArray(new Long[0]),
+                  standard.stream().map(DbConceptSetConceptId::getConceptId).toArray(Long[]::new),
                   Long.class));
           queryBuilder.append(BigQueryDataSetTableInfo.getConceptIdIn(domain, true));
         }
@@ -334,10 +321,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           mergedQueryParameterValues.put(
               "sourceConceptIds",
               QueryParameterValue.array(
-                  source.stream()
-                      .map(DbConceptSetConceptId::getConceptId)
-                      .collect(Collectors.toList())
-                      .toArray(new Long[0]),
+                  source.stream().map(DbConceptSetConceptId::getConceptId).toArray(Long[]::new),
                   Long.class));
           if (!standard.isEmpty()) {
             queryBuilder.append(" OR ");
@@ -411,7 +395,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final ImmutableList<DomainValuePair> domainValuePairs =
         ImmutableList.copyOf(
             dbDataset.getValues().stream()
-                .map(value -> dataSetMapper.createDomainValuePair(value))
+                .map(dataSetMapper::createDomainValuePair)
                 .collect(Collectors.toList()));
 
     final ImmutableList<DbConceptSet> expandedSelectedConceptSets =
@@ -738,13 +722,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         .setNamedParameters(namedCohortParameters)
         .setUseLegacySql(false)
         .build();
-  }
-
-  private QueryJobConfiguration buildAndFilterQueryJobConfiguration(
-      Map<String, QueryParameterValue> namedCohortParameters, String query) {
-    // This runs filterBigQueryConfig as well, to make a runnable query.
-    return bigQueryService.filterBigQueryConfig(
-        buildQueryJobConfiguration(namedCohortParameters, query));
   }
 
   @VisibleForTesting
@@ -1095,12 +1072,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final ImmutableList<String> valueSelects =
         valuesLinkingTableResult.stream()
             .filter(fieldValue -> !fieldValue.getOmopSql().equals("CORE_TABLE_FOR_DOMAIN"))
-            .map(fieldValue -> fieldValue.getOmopSql())
+            .map(DbDSLinking::getOmopSql)
             .collect(ImmutableList.toImmutableList());
 
     final ImmutableList<String> valueJoins =
         valuesLinkingTableResult.stream()
-            .map(fieldValue -> fieldValue.getJoinValue())
+            .map(DbDSLinking::getJoinValue)
             .collect(ImmutableList.toImmutableList());
 
     return new ValuesLinkingPair(valueSelects, valueJoins);
@@ -1243,20 +1220,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     surveyConceptSet.setDomain(DbStorageEnums.domainToStorage(Domain.SURVEY));
     surveyConceptSet.setConceptSetConceptIds(
         conceptIds.stream()
-            .map(
-                c -> {
-                  DbConceptSetConceptId dbConceptSetConceptId = new DbConceptSetConceptId();
-                  dbConceptSetConceptId.setConceptId(c);
-                  dbConceptSetConceptId.setStandard(false);
-                  return dbConceptSetConceptId;
-                })
+            .map(c -> DbConceptSetConceptId.builder().addConceptId(c).addStandard(false).build())
             .collect(Collectors.toSet()));
     return surveyConceptSet;
-  }
-
-  private DbDatasetValue getDataSetValuesFromDomainValueSet(DomainValuePair domainValuePair) {
-    return new DbDatasetValue(
-        DbStorageEnums.domainToStorage(domainValuePair.getDomain()).toString(),
-        domainValuePair.getValue());
   }
 }

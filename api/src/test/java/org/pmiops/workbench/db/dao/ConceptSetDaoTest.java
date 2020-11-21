@@ -42,9 +42,8 @@ public class ConceptSetDaoTest {
     creator = userDao.save(creator);
 
     Timestamp now = new Timestamp(System.currentTimeMillis());
-    DbConceptSetConceptId dbConceptSetConceptId = new DbConceptSetConceptId();
-    dbConceptSetConceptId.setConceptId(1L);
-    dbConceptSetConceptId.setStandard(true);
+    DbConceptSetConceptId dbConceptSetConceptId =
+        DbConceptSetConceptId.builder().addConceptId(1L).addStandard(true).build();
     Set<DbConceptSetConceptId> conceptSetConceptIds = new HashSet<>();
     conceptSetConceptIds.add(dbConceptSetConceptId);
     DbConceptSet dbConceptSet =

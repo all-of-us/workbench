@@ -1769,9 +1769,11 @@ public class WorkspacesControllerTest {
 
     originalConceptSet.setDescription(expectedConceptSetDescription);
     originalConceptSet.setDomainEnum(Domain.CONDITION);
-    DbConceptSetConceptId dbConceptSetConceptId = new DbConceptSetConceptId();
-    dbConceptSetConceptId.setConceptId(CLIENT_CONCEPT_1.getConceptId());
-    dbConceptSetConceptId.setStandard(true);
+    DbConceptSetConceptId dbConceptSetConceptId =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_1.getConceptId())
+            .addStandard(true)
+            .build();
     originalConceptSet.setConceptSetConceptIds(Collections.singleton(dbConceptSetConceptId));
     originalConceptSet.setWorkspaceId(dbWorkspace.getWorkspaceId());
     originalConceptSet = conceptSetDao.save(originalConceptSet);

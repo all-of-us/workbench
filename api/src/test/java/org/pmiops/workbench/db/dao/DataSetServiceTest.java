@@ -177,13 +177,7 @@ public class DataSetServiceTest {
     result.setDomain(domainToStorage(domain));
     result.setConceptSetConceptIds(
         conceptIds.stream()
-            .map(
-                c -> {
-                  DbConceptSetConceptId dbConceptSetConceptId = new DbConceptSetConceptId();
-                  dbConceptSetConceptId.setConceptId(c);
-                  dbConceptSetConceptId.setStandard(standard);
-                  return dbConceptSetConceptId;
-                })
+            .map(c -> DbConceptSetConceptId.builder().addConceptId(c).addStandard(standard).build())
             .collect(Collectors.toSet()));
     return result;
   }
@@ -227,29 +221,23 @@ public class DataSetServiceTest {
   public void testAcceptsTwoDomainsWithConcepts() {
     final DbConceptSet conceptSet1 = new DbConceptSet();
     conceptSet1.setDomain((short) Domain.DEVICE.ordinal());
-    DbConceptSetConceptId dbConceptSetConceptId1 = new DbConceptSetConceptId();
-    dbConceptSetConceptId1.setConceptId(1L);
-    dbConceptSetConceptId1.setStandard(true);
-    DbConceptSetConceptId dbConceptSetConceptId2 = new DbConceptSetConceptId();
-    dbConceptSetConceptId2.setConceptId(2L);
-    dbConceptSetConceptId2.setStandard(true);
-    DbConceptSetConceptId dbConceptSetConceptId3 = new DbConceptSetConceptId();
-    dbConceptSetConceptId3.setConceptId(3L);
-    dbConceptSetConceptId3.setStandard(true);
+    DbConceptSetConceptId dbConceptSetConceptId1 =
+        DbConceptSetConceptId.builder().addConceptId(1L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId2 =
+        DbConceptSetConceptId.builder().addConceptId(2L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId3 =
+        DbConceptSetConceptId.builder().addConceptId(3L).addStandard(true).build();
     conceptSet1.setConceptSetConceptIds(
         ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2, dbConceptSetConceptId3));
 
     final DbConceptSet conceptSet2 = new DbConceptSet();
     conceptSet2.setDomain((short) Domain.PERSON.ordinal());
-    DbConceptSetConceptId dbConceptSetConceptId4 = new DbConceptSetConceptId();
-    dbConceptSetConceptId4.setConceptId(41L);
-    dbConceptSetConceptId4.setStandard(true);
-    DbConceptSetConceptId dbConceptSetConceptId5 = new DbConceptSetConceptId();
-    dbConceptSetConceptId5.setConceptId(5L);
-    dbConceptSetConceptId5.setStandard(true);
-    DbConceptSetConceptId dbConceptSetConceptId6 = new DbConceptSetConceptId();
-    dbConceptSetConceptId6.setConceptId(6L);
-    dbConceptSetConceptId6.setStandard(true);
+    DbConceptSetConceptId dbConceptSetConceptId4 =
+        DbConceptSetConceptId.builder().addConceptId(4L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId5 =
+        DbConceptSetConceptId.builder().addConceptId(5L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId6 =
+        DbConceptSetConceptId.builder().addConceptId(6L).addStandard(true).build();
     conceptSet2.setConceptSetConceptIds(
         ImmutableSet.of(dbConceptSetConceptId4, dbConceptSetConceptId5, dbConceptSetConceptId6));
 
@@ -263,29 +251,23 @@ public class DataSetServiceTest {
   public void testRejectsSomeDomainsWithConceptsSomeWithout() {
     final DbConceptSet conceptSet1 = new DbConceptSet();
     conceptSet1.setDomain((short) Domain.DEVICE.ordinal());
-    DbConceptSetConceptId dbConceptSetConceptId1 = new DbConceptSetConceptId();
-    dbConceptSetConceptId1.setConceptId(1L);
-    dbConceptSetConceptId1.setStandard(true);
-    DbConceptSetConceptId dbConceptSetConceptId2 = new DbConceptSetConceptId();
-    dbConceptSetConceptId2.setConceptId(2L);
-    dbConceptSetConceptId2.setStandard(true);
-    DbConceptSetConceptId dbConceptSetConceptId3 = new DbConceptSetConceptId();
-    dbConceptSetConceptId3.setConceptId(3L);
-    dbConceptSetConceptId3.setStandard(true);
+    DbConceptSetConceptId dbConceptSetConceptId1 =
+        DbConceptSetConceptId.builder().addConceptId(1L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId2 =
+        DbConceptSetConceptId.builder().addConceptId(2L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId3 =
+        DbConceptSetConceptId.builder().addConceptId(3L).addStandard(true).build();
     conceptSet1.setConceptSetConceptIds(
         ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2, dbConceptSetConceptId3));
 
     final DbConceptSet conceptSet2 = new DbConceptSet();
     conceptSet2.setDomain((short) Domain.PERSON.ordinal());
-    DbConceptSetConceptId dbConceptSetConceptId4 = new DbConceptSetConceptId();
-    dbConceptSetConceptId4.setConceptId(41L);
-    dbConceptSetConceptId4.setStandard(true);
-    DbConceptSetConceptId dbConceptSetConceptId5 = new DbConceptSetConceptId();
-    dbConceptSetConceptId5.setConceptId(5L);
-    dbConceptSetConceptId5.setStandard(true);
-    DbConceptSetConceptId dbConceptSetConceptId6 = new DbConceptSetConceptId();
-    dbConceptSetConceptId6.setConceptId(6L);
-    dbConceptSetConceptId6.setStandard(true);
+    DbConceptSetConceptId dbConceptSetConceptId4 =
+        DbConceptSetConceptId.builder().addConceptId(4L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId5 =
+        DbConceptSetConceptId.builder().addConceptId(5L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId6 =
+        DbConceptSetConceptId.builder().addConceptId(6L).addStandard(true).build();
     conceptSet2.setConceptSetConceptIds(
         ImmutableSet.of(dbConceptSetConceptId4, dbConceptSetConceptId5, dbConceptSetConceptId6));
 
@@ -303,29 +285,23 @@ public class DataSetServiceTest {
   public void testAcceptsEmptyConceptSetIfDomainIsPopulated() {
     final DbConceptSet conceptSet1 = new DbConceptSet();
     conceptSet1.setDomain((short) Domain.DEVICE.ordinal());
-    DbConceptSetConceptId dbConceptSetConceptId1 = new DbConceptSetConceptId();
-    dbConceptSetConceptId1.setConceptId(1L);
-    dbConceptSetConceptId1.setStandard(true);
-    DbConceptSetConceptId dbConceptSetConceptId2 = new DbConceptSetConceptId();
-    dbConceptSetConceptId2.setConceptId(2L);
-    dbConceptSetConceptId2.setStandard(true);
-    DbConceptSetConceptId dbConceptSetConceptId3 = new DbConceptSetConceptId();
-    dbConceptSetConceptId3.setConceptId(3L);
-    dbConceptSetConceptId3.setStandard(true);
+    DbConceptSetConceptId dbConceptSetConceptId1 =
+        DbConceptSetConceptId.builder().addConceptId(1L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId2 =
+        DbConceptSetConceptId.builder().addConceptId(2L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId3 =
+        DbConceptSetConceptId.builder().addConceptId(3L).addStandard(true).build();
     conceptSet1.setConceptSetConceptIds(
         ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2, dbConceptSetConceptId3));
 
     final DbConceptSet conceptSet2 = new DbConceptSet();
     conceptSet2.setDomain((short) Domain.PERSON.ordinal());
-    DbConceptSetConceptId dbConceptSetConceptId4 = new DbConceptSetConceptId();
-    dbConceptSetConceptId4.setConceptId(41L);
-    dbConceptSetConceptId4.setStandard(true);
-    DbConceptSetConceptId dbConceptSetConceptId5 = new DbConceptSetConceptId();
-    dbConceptSetConceptId5.setConceptId(5L);
-    dbConceptSetConceptId5.setStandard(true);
-    DbConceptSetConceptId dbConceptSetConceptId6 = new DbConceptSetConceptId();
-    dbConceptSetConceptId6.setConceptId(6L);
-    dbConceptSetConceptId6.setStandard(true);
+    DbConceptSetConceptId dbConceptSetConceptId4 =
+        DbConceptSetConceptId.builder().addConceptId(4L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId5 =
+        DbConceptSetConceptId.builder().addConceptId(5L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId6 =
+        DbConceptSetConceptId.builder().addConceptId(6L).addStandard(true).build();
     conceptSet2.setConceptSetConceptIds(
         ImmutableSet.of(dbConceptSetConceptId4, dbConceptSetConceptId5, dbConceptSetConceptId6));
 

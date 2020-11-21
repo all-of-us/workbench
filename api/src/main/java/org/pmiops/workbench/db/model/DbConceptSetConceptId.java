@@ -45,4 +45,32 @@ public class DbConceptSetConceptId {
   public int hashCode() {
     return Objects.hash(conceptId, standard);
   }
+
+  public static DbConceptSetConceptId.Builder builder() {
+    return new DbConceptSetConceptId.Builder();
+  }
+
+  public static class Builder {
+    private Long conceptId;
+    private Boolean standard;
+
+    private Builder() {}
+
+    public DbConceptSetConceptId.Builder addConceptId(long conceptId) {
+      this.conceptId = conceptId;
+      return this;
+    }
+
+    public DbConceptSetConceptId.Builder addStandard(boolean standard) {
+      this.standard = standard;
+      return this;
+    }
+
+    public DbConceptSetConceptId build() {
+      DbConceptSetConceptId dbConceptSetConceptId = new DbConceptSetConceptId();
+      dbConceptSetConceptId.setConceptId(this.conceptId);
+      dbConceptSetConceptId.setStandard(this.standard);
+      return dbConceptSetConceptId;
+    }
+  }
 }

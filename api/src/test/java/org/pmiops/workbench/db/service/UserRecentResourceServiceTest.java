@@ -72,9 +72,8 @@ public class UserRecentResourceServiceTest {
     cohort.setWorkspaceId(workspace.getWorkspaceId());
     cohort = cohortDao.save(cohort);
 
-    DbConceptSetConceptId dbConceptSetConceptId = new DbConceptSetConceptId();
-    dbConceptSetConceptId.setConceptId(1L);
-    dbConceptSetConceptId.setStandard(true);
+    DbConceptSetConceptId dbConceptSetConceptId =
+        DbConceptSetConceptId.builder().addConceptId(1L).addStandard(true).build();
     conceptSet = new DbConceptSet();
     conceptSet.setWorkspaceId(workspace.getWorkspaceId());
     conceptSet.setConceptSetConceptIds(ImmutableSet.of(dbConceptSetConceptId));

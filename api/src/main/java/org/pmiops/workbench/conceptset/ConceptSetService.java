@@ -168,12 +168,11 @@ public class ConceptSetService {
           .addAll(
               request.getAddedConceptSetConceptIds().stream()
                   .map(
-                      c -> {
-                        DbConceptSetConceptId dbConceptSetConceptId = new DbConceptSetConceptId();
-                        dbConceptSetConceptId.setConceptId(c.getConceptId());
-                        dbConceptSetConceptId.setStandard(c.getStandard());
-                        return dbConceptSetConceptId;
-                      })
+                      c ->
+                          DbConceptSetConceptId.builder()
+                              .addConceptId(c.getConceptId())
+                              .addStandard(c.getStandard())
+                              .build())
                   .collect(Collectors.toList()));
     }
     if (request.getRemovedConceptSetConceptIds() != null) {
@@ -182,12 +181,11 @@ public class ConceptSetService {
           .removeAll(
               request.getRemovedConceptSetConceptIds().stream()
                   .map(
-                      c -> {
-                        DbConceptSetConceptId dbConceptSetConceptId = new DbConceptSetConceptId();
-                        dbConceptSetConceptId.setConceptId(c.getConceptId());
-                        dbConceptSetConceptId.setStandard(c.getStandard());
-                        return dbConceptSetConceptId;
-                      })
+                      c ->
+                          DbConceptSetConceptId.builder()
+                              .addConceptId(c.getConceptId())
+                              .addStandard(c.getStandard())
+                              .build())
                   .collect(Collectors.toList()));
     }
     if (dbConceptSet.getConceptSetConceptIds().size() > MAX_CONCEPTS_PER_SET) {

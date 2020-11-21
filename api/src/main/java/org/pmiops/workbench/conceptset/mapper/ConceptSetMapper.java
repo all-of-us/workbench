@@ -91,12 +91,11 @@ public interface ConceptSetMapper {
         .addAll(
             source.getAddedConceptSetConceptIds().stream()
                 .map(
-                    c -> {
-                      DbConceptSetConceptId dbConceptSetConceptId = new DbConceptSetConceptId();
-                      dbConceptSetConceptId.setConceptId(c.getConceptId());
-                      dbConceptSetConceptId.setStandard(c.getStandard());
-                      return dbConceptSetConceptId;
-                    })
+                    c ->
+                        DbConceptSetConceptId.builder()
+                            .addConceptId(c.getConceptId())
+                            .addStandard(c.getStandard())
+                            .build())
                 .collect(Collectors.toList()));
     String omopTable = BigQueryTableInfo.getTableName(source.getConceptSet().getDomain());
     dbConceptSet.setParticipantCount(
