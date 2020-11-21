@@ -88,7 +88,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           KernelTypeEnum.R, R_CDR_ENV_VARIABLE, KernelTypeEnum.PYTHON, PYTHON_CDR_ENV_VARIABLE);
 
   private static final String PREVIEW_QUERY =
-      "SELECT ${columns} FROM `${projectId}.${dataSetId}.${tableName}`";
+      "SELECT ${columns} \nFROM `${projectId}.${dataSetId}.${tableName}`";
   private static final String LIMIT_20 = " LIMIT 20";
 
   private static final ImmutableSet<PrePackagedConceptSetEnum>
@@ -297,25 +297,68 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 .replace("${columns}", String.join(", ", filteredDomainColumns))
                 .replace("${tableName}", BigQueryDataSetTableInfo.getTableName(domain)));
 
-    final List<Long> conceptIds =
-        Domain.SURVEY.equals(request.getDomain())
-            ? conceptBigQueryService.getSurveyQuestionConceptIds()
-            : conceptSetDao.findAllByConceptSetIdIn(request.getConceptSetIds()).stream()
-                .flatMap(
-                    cs ->
-                        cs.getConceptSetConceptIds().stream()
-                            .map(DbConceptSetConceptId::getConceptId))
-                .collect(Collectors.toList());
-
     if (supportsConceptSets(domain)) {
-      mergedQueryParameterValues.put(
-          "conceptIds", QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
-      queryBuilder
-          .append(" WHERE ")
-          .append(
-              workbenchConfigProvider.get().featureFlags.enableConceptSetSearchV2
-                  ? BigQueryDataSetTableInfo.getConceptIdIn(domain)
-                  : BigQueryDataSetTableInfo.getConceptIdInOld(domain));
+      if (workbenchConfigProvider.get().featureFlags.enableConceptSetSearchV2) {
+        final List<DbConceptSetConceptId> dbConceptSetConceptIds =
+            Domain.SURVEY.equals(request.getDomain())
+                ? conceptBigQueryService.getSurveyQuestionConceptIds().stream()
+                    .map(
+                        c -> {
+                          DbConceptSetConceptId dbConceptSetConceptId = new DbConceptSetConceptId();
+                          dbConceptSetConceptId.setConceptId(c);
+                          dbConceptSetConceptId.setStandard(false);
+                          return dbConceptSetConceptId;
+                        })
+                    .collect(Collectors.toList())
+                : conceptSetDao.findAllByConceptSetIdIn(request.getConceptSetIds()).stream()
+                    .flatMap(cs -> cs.getConceptSetConceptIds().stream())
+                    .collect(Collectors.toList());
+        Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
+            dbConceptSetConceptIds.stream()
+                .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
+        List<DbConceptSetConceptId> standard = partitionSourceAndStandard.get(true);
+        List<DbConceptSetConceptId> source = partitionSourceAndStandard.get(false);
+        queryBuilder.append(" \nWHERE (");
+        if (!standard.isEmpty()) {
+          mergedQueryParameterValues.put(
+              "standardConceptIds",
+              QueryParameterValue.array(
+                  standard.stream()
+                      .map(DbConceptSetConceptId::getConceptId)
+                      .collect(Collectors.toList())
+                      .toArray(new Long[0]),
+                  Long.class));
+          queryBuilder.append(BigQueryDataSetTableInfo.getConceptIdIn(domain, true));
+        }
+        if (!source.isEmpty()) {
+          mergedQueryParameterValues.put(
+              "sourceConceptIds",
+              QueryParameterValue.array(
+                  source.stream()
+                      .map(DbConceptSetConceptId::getConceptId)
+                      .collect(Collectors.toList())
+                      .toArray(new Long[0]),
+                  Long.class));
+          if (!standard.isEmpty()) {
+            queryBuilder.append(" OR ");
+          }
+          queryBuilder.append(BigQueryDataSetTableInfo.getConceptIdIn(domain, false));
+        }
+        queryBuilder.append(")");
+      } else {
+        final List<Long> conceptIds =
+            Domain.SURVEY.equals(request.getDomain())
+                ? conceptBigQueryService.getSurveyQuestionConceptIds()
+                : conceptSetDao.findAllByConceptSetIdIn(request.getConceptSetIds()).stream()
+                    .flatMap(
+                        cs ->
+                            cs.getConceptSetConceptIds().stream()
+                                .map(DbConceptSetConceptId::getConceptId))
+                    .collect(Collectors.toList());
+        mergedQueryParameterValues.put(
+            "conceptIds", QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
+        queryBuilder.append(" WHERE ").append(BigQueryDataSetTableInfo.getConceptIdInOld(domain));
+      }
     }
 
     if (!request.getIncludesAllParticipants()) {
@@ -637,21 +680,55 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   // domain-specific rules.
   private Optional<String> buildConceptIdSqlInClause(
       Domain domain, List<DbConceptSet> conceptSets) {
-    final String conceptIds =
-        conceptSets.stream()
-            .filter(cs -> domain == cs.getDomainEnum())
-            .flatMap(
-                cs -> cs.getConceptSetConceptIds().stream().map(c -> c.getConceptId().toString()))
-            .collect(Collectors.joining(", "));
-    if (conceptIds.isEmpty()) {
-      return Optional.empty();
-    } else {
-      if (workbenchConfigProvider.get().featureFlags.enableConceptSetSearchV2) {
-        String conceptIdInClause = BigQueryDataSetTableInfo.getConceptIdIn(domain);
-        return Optional.of(
-            conceptIdInClause.replaceAll("unnest", "").replaceAll("(@conceptIds)", conceptIds));
+    if (workbenchConfigProvider.get().featureFlags.enableConceptSetSearchV2) {
+      final List<DbConceptSetConceptId> dbConceptSetConceptIds =
+          conceptSets.stream()
+              .flatMap(cs -> cs.getConceptSetConceptIds().stream())
+              .collect(Collectors.toList());
+      if (dbConceptSetConceptIds.isEmpty()) {
+        return Optional.empty();
+      } else {
+        StringBuilder queryBuilder = new StringBuilder();
+        Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
+            dbConceptSetConceptIds.stream()
+                .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
+        String standardConceptIds =
+            partitionSourceAndStandard.get(true).stream()
+                .map(c -> c.getConceptId().toString())
+                .collect(Collectors.joining(", "));
+        String sourceConceptIds =
+            partitionSourceAndStandard.get(false).stream()
+                .map(c -> c.getConceptId().toString())
+                .collect(Collectors.joining(", "));
+        if (!standardConceptIds.isEmpty()) {
+          queryBuilder.append(
+              BigQueryDataSetTableInfo.getConceptIdIn(domain, true)
+                  .replaceAll("unnest", "")
+                  .replaceAll("(@standardConceptIds)", standardConceptIds));
+        }
+        if (!sourceConceptIds.isEmpty()) {
+          if (!standardConceptIds.isEmpty()) {
+            queryBuilder.append(" OR ");
+          }
+          queryBuilder.append(
+              BigQueryDataSetTableInfo.getConceptIdIn(domain, false)
+                  .replaceAll("unnest", "")
+                  .replaceAll("(@sourceConceptIds)", sourceConceptIds));
+        }
+        return Optional.of("(" + queryBuilder.toString() + ")");
       }
-      return Optional.of(String.format(" IN (%s)", conceptIds));
+    } else {
+      final String conceptIds =
+          conceptSets.stream()
+              .filter(cs -> domain == cs.getDomainEnum())
+              .flatMap(
+                  cs -> cs.getConceptSetConceptIds().stream().map(c -> c.getConceptId().toString()))
+              .collect(Collectors.joining(", "));
+      if (conceptIds.isEmpty()) {
+        return Optional.empty();
+      } else {
+        return Optional.of(String.format(" IN (%s)", conceptIds));
+      }
     }
   }
 

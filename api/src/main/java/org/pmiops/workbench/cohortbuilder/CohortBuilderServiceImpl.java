@@ -131,9 +131,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
           cbCriteriaDao.findCriteriaByDomainIdAndConceptIds(
               domainId,
               false,
-              standard.stream()
-                  .map(c -> c.getConceptId().toString())
-                  .collect(Collectors.toList())));
+              source.stream().map(c -> c.getConceptId().toString()).collect(Collectors.toList())));
     }
     return criteriaList.stream()
         .map(cohortBuilderMapper::dbModelToClient)
