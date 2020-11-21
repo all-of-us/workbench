@@ -14,11 +14,13 @@ import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.ReportingCohort;
+import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.DatasetColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer;
 import org.pmiops.workbench.reporting.insertion.InstitutionColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
@@ -28,17 +30,18 @@ import org.springframework.stereotype.Service;
 
 @Service("REPORTING_UPLOAD_SERVICE_STREAMING_IMPL")
 public class ReportingUploadServiceStreamingImpl implements ReportingUploadService {
+  private static final Logger log =
+      Logger.getLogger(ReportingUploadServiceStreamingImpl.class.getName());
   private static final InsertAllRequestPayloadTransformer<ReportingCohort> cohortRequestBuilder =
       CohortColumnValueExtractor::values;
   private static final InsertAllRequestPayloadTransformer<ReportingInstitution>
       institutionRequestBuilder = InstitutionColumnValueExtractor::values;
-
-  private static final Logger log =
-      Logger.getLogger(ReportingUploadServiceStreamingImpl.class.getName());
   private static final InsertAllRequestPayloadTransformer<ReportingUser> userRequestBuilder =
       UserColumnValueExtractor::values;
   private static final InsertAllRequestPayloadTransformer<ReportingWorkspace>
       workspaceRequestBuilder = WorkspaceColumnValueExtractor::values;
+  private static final InsertAllRequestPayloadTransformer<ReportingDataset> datasetRequestBuilder =
+      DatasetColumnValueExtractor::values;
 
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> configProvider;
@@ -89,6 +92,10 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
             cohortRequestBuilder.build(
                 getTableId(CohortColumnValueExtractor.TABLE_NAME),
                 reportingSnapshot.getCohorts(),
+                fixedValues),
+            datasetRequestBuilder.build(
+                getTableId(DatasetColumnValueExtractor.TABLE_NAME),
+                reportingSnapshot.getDatasets(),
                 fixedValues),
             institutionRequestBuilder.build(
                 getTableId(InstitutionColumnValueExtractor.TABLE_NAME),

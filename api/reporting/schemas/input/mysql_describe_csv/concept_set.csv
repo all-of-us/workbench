@@ -1,0 +1,10 @@
+concept_set_id,bigint(20),NO,PRI,NULL,auto_increment
+workspace_id,bigint(20),NO,MUL,NULL,
+name,varchar(80),NO,,NULL,
+description,longtext,YES,,NULL,
+domain,tinyint(4),NO,,NULL,
+creator_id,bigint(20),YES,MUL,NULL,
+creation_time,datetime,NO,,NULL,
+last_modified_time,datetime,NO,,NULL,
+participant_count,int(11),YES,,NULL,
+survey,tinyint(4),YES,,NULL,

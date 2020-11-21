@@ -12,13 +12,12 @@ import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampQpvToOffsetDateTime;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.INSTITUTION__SHORT_NAME;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.USER__CITY;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.USER__INSTITUTION_ID;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.countPopulatedTables;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createEmptySnapshot;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingCohort;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingInstitution;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingUser;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__CITY;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTION_ID;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
 import com.google.cloud.bigquery.InsertAllRequest;
@@ -46,6 +45,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
@@ -55,6 +56,7 @@ import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
+import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -88,6 +90,8 @@ public class ReportingUploadServiceTest {
   @Qualifier("REPORTING_UPLOAD_SERVICE_STREAMING_IMPL")
   private ReportingUploadService reportingUploadServiceStreamingImpl;
 
+  @Autowired
+  private ReportingTestFixture<DbUser, ProjectedReportingUser, ReportingUser> userFixture;
   @Captor private ArgumentCaptor<QueryJobConfiguration> queryJobConfigurationCaptor;
   @Captor private ArgumentCaptor<InsertAllRequest> insertAllRequestCaptor;
 
@@ -107,13 +111,13 @@ public class ReportingUploadServiceTest {
   @Before
   public void setup() {
     reportingSnapshot =
-        new ReportingSnapshot()
+        createEmptySnapshot()
             .captureTimestamp(NOW.toEpochMilli())
             .cohorts(ImmutableList.of(createReportingCohort()))
             .institutions(ImmutableList.of(createReportingInstitution()))
             .users(
                 ImmutableList.of(
-                    createReportingUser(),
+                    userFixture.createDto(),
                     new ReportingUser()
                         .username("ted@aou.biz")
                         .givenName("Ted")
@@ -124,7 +128,7 @@ public class ReportingUploadServiceTest {
                         .givenName("So-Crates")
                         .disabled(false)
                         .userId(303L),
-                    createReportingUser()))
+                    userFixture.createDto()))
             .workspaces(
                 ImmutableList.of(
                     new ReportingWorkspace()
@@ -150,7 +154,7 @@ public class ReportingUploadServiceTest {
             .institutions(ImmutableList.of(createReportingInstitution().displayName(null)))
             .users(
                 ImmutableList.of(
-                    createReportingUser(),
+                    userFixture.createDto(),
                     new ReportingUser()
                         .username("america@usa.gov")
                         .givenName(null)

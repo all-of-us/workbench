@@ -1,0 +1,23 @@
+concept_set:
+  concept_set_id: >
+    PK for concept_set table. Globally unique.
+  creation_time: >
+    Time concept set was created by a user.
+  creator_id: >
+    FK into user table for creator of this concept set.
+  description: >
+    User-provided plain text description for this concept set.
+  domain: >
+    The subject area to which all concepts in this set belongs.
+  last_modified_time: >
+    Time of last user modification of this concept set.
+  name: >
+    User-defined name for this concept set
+  participant_count: >
+    Number of participants in the corpus that match one or  more concepts in this
+    set.
+  survey: >
+    If present, name of survey supplying concepts in this concept set. Pre-defined
+    list of choices.
+  workspace_id: >
+    FK into workspace table. ID of the workspace owning this concept set.

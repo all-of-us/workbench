@@ -8228,6 +8228,10 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ReportingCohort"
+      datasets:
+        type: array
+        items:
+          "$ref": "#/definitions/ReportingDataset"
       institutions:
         type: array
         items:
@@ -8646,3 +8650,91 @@ definitions:
         description: |-
           A unique string identifier used in the API to map a user affiliation to an institution. (Database
           identifiers are not typically exposed in the workbench API).
+  ReportingDataset:
+    x-aou-note: |-
+      This code was generated using reporting-wizard.rb at 2020-11-05T14:31:23-05:00.
+      Manual modification should be avoided if possible as this is a one-time generation
+      and does not run on every build and updates must be merged manually for now.
+    type: object
+    properties:
+      creationTime:
+        type: string
+        format: date-time
+        description: Timestamp of dataset creation
+      creatorId:
+        type: integer
+        format: int64
+        description: FK into user table for user who created this dataset
+      datasetId:
+        type: integer
+        format: int64
+        description: PK in dataset table
+      description:
+        type: string
+        description: User-provided description for the dataset.
+      includesAllParticipants:
+        type: boolean
+        description: If true, this dataset contains data from all participants available
+          instead a single cohort..
+      lastModifiedTime:
+        type: string
+        format: date-time
+        description: Last user-visible modification to the dataset
+      name:
+        type: string
+        description: User-provided name for this Dataset. Unique within the owning workspace.
+      prePackagedConceptSet:
+        type: integer
+        format: int32
+        description: If true, this dataset refers to a pre-packaged concept set.
+      workspaceId:
+        type: integer
+        format: int64
+        description: ID of workspace containing this dataset. FK into workspace table.
+  ReportingDatasetCohort:
+    x-aou-note: |-
+      This code was generated using reporting-wizard.rb at 2020-11-10T11:12:09-05:00.
+      Manual modification should be avoided if possible as this is a one-time generation
+      and does not run on every build and updates must be merged manually for now.
+    type: object
+    properties:
+      cohortId:
+        type: integer
+        format: int64
+        description: ''
+      datasetId:
+        type: integer
+        format: int64
+        description: ''
+  ReportingDatasetConceptSet:
+    x-aou-note: |-
+      This code was generated using reporting-wizard.rb at 2020-11-10T11:12:09-05:00.
+      Manual modification should be avoided if possible as this is a one-time generation
+      and does not run on every build and updates must be merged manually for now.
+    type: object
+    properties:
+      conceptSetId:
+        type: integer
+        format: int64
+        description: Unique concept set identifier. FK into concept_set table.
+      datasetId:
+        type: integer
+        format: int64
+        description: FK for dataset table.
+  ReportingDatasetDomainIdValue:
+    x-aou-note: |-
+      This code was generated using reporting-wizard.rb at 2020-11-10T11:12:09-05:00.
+      Manual modification should be avoided if possible as this is a one-time generation
+      and does not run on every build and updates must be merged manually for now.
+    type: object
+    properties:
+      datasetId:
+        type: integer
+        format: int64
+        description: ''
+      domainId:
+        type: string
+        description: Numerical ID for domain associated with a value (column) name.
+      value:
+        type: string
+        description: Human-readable name in ALL CAPS for this column (value).

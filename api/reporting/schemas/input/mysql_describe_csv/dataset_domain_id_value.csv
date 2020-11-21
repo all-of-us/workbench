@@ -1,0 +1,3 @@
+dataset_id,bigint(20),NO,MUL,NULL,
+domain_id,varchar(20),NO,,NULL,
+value,varchar(400),NO,,NULL,

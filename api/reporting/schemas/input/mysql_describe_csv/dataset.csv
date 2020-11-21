@@ -1,4 +1,4 @@
-data_set_id,bigint(20),NO,PRI,,auto_increment
+dataset_id,bigint(20),NO,PRI,,auto_increment
 workspace_id,bigint(20),NO,MUL,,""
 name,varchar(80),NO,MUL,,""
 description,longtext,YES,"",,""

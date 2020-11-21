@@ -14,10 +14,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohorts.CohortService;
+import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingDataset;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingInstitution;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
@@ -25,6 +28,7 @@ import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
+import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,11 +44,13 @@ public class ReportingSnapshotServiceTest {
   private static final Instant NOW_INSTANT = Instant.ofEpochMilli(NOW_EPOCH_MILLI);
 
   @MockBean private CohortService mockCohortService;
+  @MockBean private DataSetService mockDataSetService;
   @MockBean private InstitutionService mockInstitutionService;
   @MockBean private UserService mockUserService;
   @MockBean private WorkspaceService mockWorkspaceService;
 
   @Autowired private ReportingSnapshotService reportingSnapshotService;
+  @Autowired private ReportingTestFixture<DbUser, ProjectedReportingUser, ReportingUser> userFixture;
 
   @TestConfiguration
   @Import({
@@ -79,6 +85,7 @@ public class ReportingSnapshotServiceTest {
     mockUsers();
     mockWorkspaces();
     mockCohorts();
+    mockDatasets();
     mockInstitutions();
 
     final ReportingSnapshot snapshot = reportingSnapshotService.takeSnapshot();
@@ -89,7 +96,7 @@ public class ReportingSnapshotServiceTest {
 
     assertThat(snapshot.getUsers()).hasSize(2);
     final ReportingUser user = snapshot.getUsers().get(0);
-    assertDtoUserFields(user);
+    userFixture.assertDTOFieldsMatchConstants(user);
 
     assertThat(snapshot.getWorkspaces()).hasSize(1);
     final ReportingWorkspace workspace = snapshot.getWorkspaces().get(0);
@@ -101,7 +108,7 @@ public class ReportingSnapshotServiceTest {
 
   private void mockUsers() {
     final List<ProjectedReportingUser> users =
-        ImmutableList.of(mockProjectedUser(), mockProjectedUser());
+        ImmutableList.of(userFixture.mockProjection(), userFixture.mockProjection());
     doReturn(users).when(mockUserService).getReportingUsers();
   }
 
@@ -114,6 +121,11 @@ public class ReportingSnapshotServiceTest {
   private void mockCohorts() {
     final ProjectedReportingCohort mockCohort = mockProjectedReportingCohort();
     doReturn(ImmutableList.of(mockCohort)).when(mockCohortService).getReportingCohorts();
+  }
+
+  private void mockDatasets() {
+    final ProjectedReportingDataset mockDataset = mockProjectedReportingDataset();
+    doReturn(ImmutableList.of(mockDataset)).when(mockDataSetService).getReportingDatasets();
   }
 
   private void mockInstitutions() {
