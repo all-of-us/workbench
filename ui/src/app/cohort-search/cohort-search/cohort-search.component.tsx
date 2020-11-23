@@ -5,9 +5,10 @@ import {DemographicsV2} from 'app/cohort-search/demographics/demographics-v2.com
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {generateId, typeToTitle} from 'app/cohort-search/utils';
-import {Button} from 'app/components/buttons';
+import {Button, Clickable} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
 import {CriteriaSearch} from 'app/pages/data/criteria-search';
+import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withCurrentCohortSearchContext} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {
@@ -20,6 +21,20 @@ import {
 import {Criteria, CriteriaType, Domain, TemporalMention, TemporalTime} from 'generated/fetch';
 
 const styles = reactStyles({
+  arrowIcon: {
+    height: '21px',
+    marginTop: '-0.2rem',
+    width: '18px'
+  },
+  backArrow: {
+    background: `${addOpacity(colors.accent, 0.15)}`,
+    borderRadius: '50%',
+    display: 'inline-block',
+    height: '1.5rem',
+    lineHeight: '1.6rem',
+    textAlign: 'center',
+    width: '1.5rem',
+  },
   finishButton: {
     marginTop: '1.5rem',
     borderRadius: '5px',
@@ -58,8 +73,22 @@ const styles = reactStyles({
     padding: '0 0.5rem',
     position: 'relative',
     width: '100%'
+  },
+  titleBar: {
+    color: colors.primary,
+    display: 'table',
+    margin: '1rem 0 0.25rem',
+    width: '65%',
+    height: '1.5rem',
+  },
+  titleHeader: {
+    display: 'inline-block',
+    lineHeight: '1.5rem',
+    margin: '0 0 0 0.75rem'
   }
 });
+
+const arrowIcon = '/assets/icons/arrow-left-regular.svg';
 
 function initGroup(role: string, item: any) {
   return {
@@ -292,19 +321,25 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
   }
 
   render() {
-    const {cohortContext} = this.props;
+    const {cohortContext, cohortContext: {domain, type}} = this.props;
     const {count, selectedIds, selections} = this.state;
     return !!cohortContext && <FlexRowWrap style={styles.searchContainer}>
       <div id='cohort-search-container' style={styles.searchContent}>
+        {domain === Domain.PERSON && <div style={styles.titleBar}>
+          <Clickable style={styles.backArrow} onClick={() => this.closeSearch()}>
+            <img src={arrowIcon} style={styles.arrowIcon} alt='Go back' />
+          </Clickable>
+          <h2 style={styles.titleHeader}>{typeToTitle(type)}</h2>
+        </div>}
         <div style={
-          (cohortContext.domain === Domain.PERSON && cohortContext.type !== CriteriaType.AGE)
+          (domain === Domain.PERSON && type !== CriteriaType.AGE)
             ? {marginBottom: '3.5rem'}
             : {height: 'calc(100% - 3.5rem)'}
         }>
-          {cohortContext.domain === Domain.PERSON ? <div style={{flex: 1, overflow: 'auto'}}>
+          {domain === Domain.PERSON ? <div style={{flex: 1, overflow: 'auto'}}>
               <DemographicsV2
                 count={count}
-                criteriaType={cohortContext.type}
+                criteriaType={type}
                 select={this.addSelection}
                 selectedIds={selectedIds}
                 selections={selections}/>
