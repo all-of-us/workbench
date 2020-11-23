@@ -151,6 +151,7 @@
   <include file="changelog/db.changelog-140-add-prePackagedConcept-table.xml"/>
   <include file="changelog/db.changelog-141-populate-prePackagedConcept-table.xml"/>
   <include file="changelog/db.changelog-142-cdr-version-hasCopeSurvey-field.xml"/>
+  <include file="changelog/db.changelog-143-alter-concept-set-concept-id.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
