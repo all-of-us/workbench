@@ -296,7 +296,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
     get itemName() {
       const {item: {name, searchParameters, type}} = this.props;
       if (type === Domain.FITBIT.toString()) {
-        return searchParameters[0].name;
+        return !!name ? name : searchParameters[0].name;
       } else {
         const codeDisplay = searchParameters.length > 1 ? 'Codes' : 'Code';
         const titleDisplay = type === Domain.PERSON.toString() ? typeToTitle(searchParameters[0].type) : domainToTitle(type);
