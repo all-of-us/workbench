@@ -282,8 +282,12 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
   }
 
   get domainTitle() {
-    const {cohortContext: {domain, type}} = this.props;
-    return domain === Domain.PERSON ? typeToTitle(type) : domainToTitle(domain);
+    const {cohortContext: {domain, type}, selectedSurvey} = this.props;
+    if (!!selectedSurvey) {
+      return selectedSurvey;
+    } else {
+      return domain === Domain.PERSON ? typeToTitle(type) : domainToTitle(domain);
+    }
   }
 
   render() {
