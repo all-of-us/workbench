@@ -8,7 +8,6 @@ import {Button, Clickable, SlidingFabReact} from 'app/components/buttons';
 import {DomainCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {Header} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -16,6 +15,7 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {ConceptAddModal} from 'app/pages/data/concept/concept-add-modal';
 import {ConceptSurveyAddModal} from 'app/pages/data/concept/concept-survey-add-modal';
 import {ConceptTable} from 'app/pages/data/concept/concept-table';
+import {SurveyDetails} from 'app/pages/data/concept/survey-details';
 import {CriteriaSearch} from 'app/pages/data/criteria-search';
 import {cohortBuilderApi, conceptsApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
@@ -40,7 +40,6 @@ import {WorkspacePermissions} from 'app/utils/workspace-permissions';
 import {environment} from 'environments/environment';
 import {Concept, ConceptSet, Domain, DomainCount, DomainInfo, StandardConceptFilter, SurveyModule, SurveyQuestions} from 'generated/fetch';
 import {Key} from 'ts-key-enum';
-import {SurveyDetails} from './survey-details';
 
 const styles = reactStyles({
   arrowIcon: {
@@ -221,7 +220,6 @@ interface State {
   conceptDomainCounts: Array<DomainCount>;
   // Array of domains and their metadata
   conceptDomainList: Array<DomainInfo>;
-  conceptsSavedText: string;
   // Array of surveys
   conceptSurveysList: Array<SurveyModule>;
   // True if the domainCounts call fails
@@ -289,7 +287,6 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
         conceptDomainList: [],
         concepts: [],
         conceptsCache: [],
-        conceptsSavedText: '',
         conceptSurveysList: [],
         countsError: false,
         countsLoading: false,
@@ -750,55 +747,42 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
     }
 
     render() {
-      const {activeDomainTab, browsingSurvey, conceptAddModalOpen, conceptDomainList, conceptsSavedText, conceptSurveysList,
-        currentInputString, currentSearchString, domainInfoError, domainsLoading, inputErrors, loadingDomains, onModalCancel,
-        onModalDiscardChanges, surveyInfoError, standardConceptsOnly, showSearchError, searching, selectedDomain, selectedSurvey,
-        selectedConceptDomainMap, selectedSurveyQuestions, showUnsavedModal, surveyAddModalOpen, surveysLoading} = this.state;
+      const {activeDomainTab, browsingSurvey, conceptAddModalOpen, conceptDomainList, conceptSurveysList, currentInputString,
+        currentSearchString, domainInfoError, domainsLoading, inputErrors, loadingDomains, onModalCancel, onModalDiscardChanges,
+        surveyInfoError, standardConceptsOnly, showSearchError, searching, selectedSurvey, selectedConceptDomainMap,
+        selectedSurveyQuestions, showUnsavedModal, surveyAddModalOpen, surveysLoading} = this.state;
       const conceptDomainCards = conceptDomainList.filter(domain => domain.domain !== Domain.PHYSICALMEASUREMENT);
       const physicalMeasurementsCard = conceptDomainList.find(domain => domain.domain === Domain.PHYSICALMEASUREMENT);
       return <React.Fragment>
         <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
-          <FlexRow>
-            {(selectedSurvey || selectedDomain) &&
-            <Clickable style={styles.backArrow} onClick={() => this.back()}>
-              <img src='/assets/icons/arrow-left-regular.svg' style={styles.arrowIcon}
-                   alt='Go back'/>
+          {!(this.isConceptSetFlagEnable() && searching) && <div style={{display: 'flex', alignItems: 'center'}}>
+            <ClrIcon shape='search' style={{position: 'absolute', height: '1rem', width: '1rem',
+              fill: colors.accent, left: 'calc(1rem + 3.5%)'}}/>
+            <TextInput style={styles.searchBar} data-test-id='concept-search-input'
+                       placeholder='Search concepts in domain'
+                       value={currentInputString}
+                       onChange={(e) => this.setState({currentInputString: e})}
+                       onKeyPress={(e) => this.handleSearchKeyPress(e)}/>
+            {currentSearchString !== '' && <Clickable onClick={() => this.clearSearch()}
+                                                      data-test-id='clear-search'>
+                <ClrIcon shape='times-circle' style={styles.clearSearchIcon}/>
             </Clickable>}
-            <Header style={{fontSize: '24px', marginTop: 0, fontWeight: 600, paddingLeft: '0.4rem', paddingTop: '0.2rem'}}>
-              Search {selectedDomain ? (selectedSurvey ? selectedSurvey : activeDomainTab.name) : 'Concepts'}
-            </Header>
-          </FlexRow>
-          <div style={{margin: '1rem 0'}}>
-            {!(this.isConceptSetFlagEnable() && searching) && <div style={{display: 'flex', alignItems: 'center'}}>
-              <ClrIcon shape='search' style={{position: 'absolute', height: '1rem', width: '1rem',
-                fill: colors.accent, left: 'calc(1rem + 3.5%)'}}/>
-              <TextInput style={styles.searchBar} data-test-id='concept-search-input'
-                         placeholder='Search concepts in domain'
-                         value={currentInputString}
-                         onChange={(e) => this.setState({currentInputString: e})}
-                         onKeyPress={(e) => this.handleSearchKeyPress(e)}/>
-              {currentSearchString !== '' && <Clickable onClick={() => this.clearSearch()}
-                                                        data-test-id='clear-search'>
-                  <ClrIcon shape='times-circle' style={styles.clearSearchIcon}/>
-              </Clickable>}
-              {!this.isConceptSetFlagEnable() && <CheckBox checked={standardConceptsOnly}
-                        label='Standard concepts only'
-                        labelStyle={{marginLeft: '0.2rem'}}
-                        data-test-id='standardConceptsCheckBox'
-                        style={{marginLeft: '0.5rem', height: '16px', width: '16px'}}
-                        manageOwnState={false}
-                        onChange={() => this.handleCheckboxChange()}/>}
-            </div>}
-            {inputErrors.map((error, e) => <AlertDanger key={e} style={styles.inputAlert}>
-              <span data-test-id='input-error-alert'>{error}</span>
-            </AlertDanger>)}
-            {showSearchError && <AlertDanger style={styles.inputAlert}>
-                Minimum concept search length is three characters.
-                <AlertClose style={{width: 'unset'}}
-                            onClick={() => this.setState({showSearchError: false})}/>
-            </AlertDanger>}
-            <div style={{marginTop: '0.5rem'}}>{conceptsSavedText}</div>
-          </div>
+            {!this.isConceptSetFlagEnable() && <CheckBox checked={standardConceptsOnly}
+                      label='Standard concepts only'
+                      labelStyle={{marginLeft: '0.2rem'}}
+                      data-test-id='standardConceptsCheckBox'
+                      style={{marginLeft: '0.5rem', height: '16px', width: '16px'}}
+                      manageOwnState={false}
+                      onChange={() => this.handleCheckboxChange()}/>}
+          </div>}
+          {inputErrors.map((error, e) => <AlertDanger key={e} style={styles.inputAlert}>
+            <span data-test-id='input-error-alert'>{error}</span>
+          </AlertDanger>)}
+          {showSearchError && <AlertDanger style={styles.inputAlert}>
+              Minimum concept search length is three characters.
+              <AlertClose style={{width: 'unset'}}
+                          onClick={() => this.setState({showSearchError: false})}/>
+          </AlertDanger>}
           {browsingSurvey && <div><SurveyDetails surveyName={selectedSurvey}
                                                  surveySelected={(selectedQuestion) =>
                                                    this.setState(

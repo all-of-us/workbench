@@ -6,6 +6,7 @@ import {Subscription} from 'rxjs/Subscription';
 import {ListSearchV2} from 'app/cohort-search/list-search-v2/list-search-v2.component';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
+import {domainToTitle, typeToTitle} from 'app/cohort-search/utils';
 import {Clickable, StyledAnchorTag} from 'app/components/buttons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
@@ -18,7 +19,6 @@ import {
 } from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {Criteria, Domain} from 'generated/fetch';
-import {domainToTitle, typeToTitle} from '../../cohort-search/utils';
 
 const styles = reactStyles({
   arrowIcon: {
@@ -55,7 +55,7 @@ const styles = reactStyles({
   titleBar: {
     color: colors.primary,
     display: 'table',
-    margin: '1rem 0 0.25rem',
+    margin: '0 0.25rem',
     width: '65%',
     height: '1.5rem',
   },
@@ -290,10 +290,10 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
     const {backFn, cohortContext, conceptSearchTerms, selectedSurvey, source} = this.props;
     const {autocompleteSelection, groupSelections, hierarchyNode, loadingSubtree,
       treeSearchTerms, growlVisible} = this.state;
-    return <div id='criteria-search-container'>`
+    return <div id='criteria-search-container'>
       {loadingSubtree && <SpinnerOverlay/>}
       <Growl ref={(el) => this.growl = el} style={!growlVisible ? {...styles.growl, display: 'none'} : styles.growl}/>
-      <div style={styles.titleBar}>
+      <div style={{...styles.titleBar, marginTop: source === 'criteria' ? '1rem' : 0}}>
         <Clickable style={styles.backArrow} onClick={() => backFn()}>
           <img src={arrowIcon} style={styles.arrowIcon} alt='Go back' />
         </Clickable>
