@@ -100,11 +100,7 @@ public interface ConceptSetMapper {
     String omopTable = BigQueryTableInfo.getTableName(source.getConceptSet().getDomain());
     dbConceptSet.setParticipantCount(
         conceptBigQueryService.getParticipantCountForConcepts(
-            dbConceptSet.getDomainEnum(),
-            omopTable,
-            dbConceptSet.getConceptSetConceptIds().stream()
-                .map(DbConceptSetConceptId::getConceptId)
-                .collect(Collectors.toSet())));
+            dbConceptSet.getDomainEnum(), omopTable, dbConceptSet.getConceptSetConceptIds()));
   }
 
   /**

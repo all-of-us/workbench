@@ -199,9 +199,7 @@ public class ConceptSetService {
           conceptBigQueryService.getParticipantCountForConcepts(
               dbConceptSet.getDomainEnum(),
               BigQueryTableInfo.getTableName(dbConceptSet.getDomainEnum()),
-              dbConceptSet.getConceptSetConceptIds().stream()
-                  .map(DbConceptSetConceptId::getConceptId)
-                  .collect(Collectors.toSet())));
+              dbConceptSet.getConceptSetConceptIds()));
     }
 
     dbConceptSet.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
@@ -262,11 +260,7 @@ public class ConceptSetService {
       String omopTable = BigQueryTableInfo.getTableName(dbConceptSet.getDomainEnum());
       dbConceptSetClone.setParticipantCount(
           conceptBigQueryService.getParticipantCountForConcepts(
-              dbConceptSet.getDomainEnum(),
-              omopTable,
-              dbConceptSet.getConceptSetConceptIds().stream()
-                  .map(DbConceptSetConceptId::getConceptId)
-                  .collect(Collectors.toSet())));
+              dbConceptSet.getDomainEnum(), omopTable, dbConceptSet.getConceptSetConceptIds()));
     }
     return conceptSetDao.save(dbConceptSetClone);
   }

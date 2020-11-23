@@ -119,7 +119,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     List<DbConceptSetConceptId> source = partitionSourceAndStandard.get(false);
     if (!standard.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndConceptIds(
+          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(
               domainId,
               true,
               standard.stream()
@@ -128,7 +128,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     }
     if (!source.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndConceptIds(
+          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(
               domainId,
               false,
               source.stream().map(c -> c.getConceptId().toString()).collect(Collectors.toList())));
