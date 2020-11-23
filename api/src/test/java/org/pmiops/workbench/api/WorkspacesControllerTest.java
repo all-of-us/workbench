@@ -1855,7 +1855,7 @@ public class WorkspacesControllerTest {
     assertThat(conceptSets.get(0).getDescription()).isEqualTo(expectedConceptSetDescription);
     assertThat(conceptSets.get(0).getDomainEnum()).isEqualTo(Domain.CONDITION);
     assertThat(conceptSets.get(0).getConceptSetConceptIds())
-        .isEqualTo(Collections.singleton(CLIENT_CONCEPT_1.getConceptId()));
+        .isEqualTo(Collections.singleton(dbConceptSetConceptId));
     assertThat(conceptSets.get(0).getConceptSetId())
         .isNotEqualTo(originalConceptSet.getConceptSetId());
 

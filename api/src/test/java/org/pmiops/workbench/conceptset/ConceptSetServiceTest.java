@@ -19,6 +19,7 @@ import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,10 +63,27 @@ public class ConceptSetServiceTest {
   }
 
   private DbConceptSet mockConceptSet() {
-    Set conceptIdsSet = Stream.of(1, 2, 3, 4, 5).collect(Collectors.toCollection(HashSet::new));
+    ConceptSetConceptId conceptSetConceptId1 =
+        new ConceptSetConceptId().conceptId(1L).standard(true);
+    ConceptSetConceptId conceptSetConceptId2 =
+        new ConceptSetConceptId().conceptId(2L).standard(true);
+    ConceptSetConceptId conceptSetConceptId3 =
+        new ConceptSetConceptId().conceptId(3L).standard(true);
+    ConceptSetConceptId conceptSetConceptId4 =
+        new ConceptSetConceptId().conceptId(4L).standard(true);
+    ConceptSetConceptId conceptSetConceptId5 =
+        new ConceptSetConceptId().conceptId(5L).standard(true);
+    Set conceptSetConceptIds =
+        Stream.of(
+                conceptSetConceptId1,
+                conceptSetConceptId2,
+                conceptSetConceptId3,
+                conceptSetConceptId4,
+                conceptSetConceptId5)
+            .collect(Collectors.toCollection(HashSet::new));
 
     DbConceptSet conceptSet = new DbConceptSet();
-    conceptSet.setConceptSetConceptIds(conceptIdsSet);
+    conceptSet.setConceptSetConceptIds(conceptSetConceptIds);
     conceptSet.setConceptSetId(1);
     conceptSet.setName("Mock Concept Set");
     conceptSet.setDomainEnum(Domain.CONDITION);

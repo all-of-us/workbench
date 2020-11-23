@@ -331,7 +331,7 @@ public class DataSetServiceTest {
     Optional<String> listClauseMaybe =
         dataSetServiceImpl.buildConceptIdListClause(
             domain1, ImmutableList.of(conceptSet1, conceptSet2));
-    assertThat(listClauseMaybe.map(String::trim).orElse("")).isEqualTo("IN (1, 2, 3, 4, 5, 6)");
+    assertThat(listClauseMaybe.map(String::trim).orElse("")).isEqualTo("IN (3, 2, 1, 6, 5, 4)");
   }
 
   @Test
@@ -342,7 +342,7 @@ public class DataSetServiceTest {
     Optional<String> listClauseMaybe =
         dataSetServiceImpl.buildConceptIdListClause(
             Domain.CONDITION, ImmutableList.of(conceptSet1, conceptSet2));
-    assertThat(listClauseMaybe.map(String::trim).orElse("")).isEqualTo("IN (1, 2, 3)");
+    assertThat(listClauseMaybe.map(String::trim).orElse("")).isEqualTo("IN (3, 2, 1)");
   }
 
   @Test

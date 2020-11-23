@@ -777,17 +777,8 @@ public class ConceptSetsControllerTest {
   private ConceptSet makeConceptSet1(Long... addedIds) {
     List<ConceptSetConceptId> conceptSetConceptIdList =
         Arrays.stream(addedIds)
-            .map(
-                c -> {
-                  ConceptSetConceptId conceptSetConceptId = new ConceptSetConceptId();
-                  conceptSetConceptId.setConceptId(c);
-                  conceptSetConceptId.setStandard(true);
-                  return conceptSetConceptId;
-                })
+            .map(c -> new ConceptSetConceptId().conceptId(c).standard(true))
             .collect(Collectors.toList());
-    ConceptSetConceptId conceptSetConceptId = new ConceptSetConceptId();
-    conceptSetConceptId.setConceptId(CLIENT_SURVEY_CONCEPT_1.getConceptId());
-    conceptSetConceptId.setStandard(true);
     ConceptSet conceptSet = new ConceptSet();
     conceptSet.setDescription("desc 1");
     conceptSet.setName("concept set 1");
@@ -795,7 +786,10 @@ public class ConceptSetsControllerTest {
     CreateConceptSetRequest request =
         new CreateConceptSetRequest()
             .conceptSet(conceptSet)
-            .addAddedConceptSetConceptIdsItem(conceptSetConceptId);
+            .addAddedConceptSetConceptIdsItem(
+                new ConceptSetConceptId()
+                    .conceptId(CLIENT_CONCEPT_1.getConceptId())
+                    .standard(true));
     if (addedIds.length > 0) {
       request = request.addedConceptSetConceptIds(conceptSetConceptIdList);
     }

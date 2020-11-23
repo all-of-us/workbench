@@ -195,7 +195,7 @@ public class CBCriteriaDaoTest {
   public void findCriteriaByDomainIdAndConceptIds() {
     assertThat(
             cbCriteriaDao.findCriteriaByDomainIdAndConceptIds(
-                "CONDITION", true, ImmutableList.of("12")))
+                "CONDITION", false, ImmutableList.of("12")))
         .containsExactly(sourceCriteria);
   }
 
