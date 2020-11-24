@@ -20,6 +20,7 @@ import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
@@ -50,12 +51,26 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
 
   private ConceptBigQueryService conceptBigQueryService;
 
+  private DbConceptSetConceptId dbConceptSetConceptId1;
+  private DbConceptSetConceptId dbConceptSetConceptId2;
+  private DbConceptSetConceptId dbConceptSetConceptId3;
+  private DbConceptSetConceptId dbConceptSetConceptId4;
+
   @Before
   public void setUp() {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
+
+    dbConceptSetConceptId1 =
+        DbConceptSetConceptId.builder().addConceptId(1L).addStandard(true).build();
+    dbConceptSetConceptId2 =
+        DbConceptSetConceptId.builder().addConceptId(6L).addStandard(true).build();
+    dbConceptSetConceptId3 =
+        DbConceptSetConceptId.builder().addConceptId(13L).addStandard(true).build();
+    dbConceptSetConceptId4 =
+        DbConceptSetConceptId.builder().addConceptId(192819L).addStandard(true).build();
 
     ConceptService conceptService = new ConceptService(conceptDao, domainInfoDao, surveyModuleDao);
     conceptBigQueryService =
@@ -68,7 +83,13 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
   public void testGetConceptCountNoConceptsSaved() {
     assertThat(
             conceptBigQueryService.getParticipantCountForConcepts(
-                Domain.CONDITION, "condition_occurrence", ImmutableSet.of(1L, 6L, 13L, 192819L)))
+                Domain.CONDITION,
+                "condition_occurrence",
+                ImmutableSet.of(
+                    dbConceptSetConceptId1,
+                    dbConceptSetConceptId2,
+                    dbConceptSetConceptId3,
+                    dbConceptSetConceptId4)))
         .isEqualTo(0);
   }
 
@@ -82,7 +103,13 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
 
     assertThat(
             conceptBigQueryService.getParticipantCountForConcepts(
-                Domain.CONDITION, "condition_occurrence", ImmutableSet.of(1L, 6L, 13L, 192819L)))
+                Domain.CONDITION,
+                "condition_occurrence",
+                ImmutableSet.of(
+                    dbConceptSetConceptId1,
+                    dbConceptSetConceptId2,
+                    dbConceptSetConceptId3,
+                    dbConceptSetConceptId4)))
         .isEqualTo(2);
   }
 
@@ -99,7 +126,7 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
 
   @Override
   public List<String> getTableNames() {
-    return ImmutableList.of("condition_occurrence");
+    return ImmutableList.of("condition_occurrence", "cb_criteria");
   }
 
   @Override

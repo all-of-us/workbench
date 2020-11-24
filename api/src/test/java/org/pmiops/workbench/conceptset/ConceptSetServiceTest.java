@@ -18,8 +18,8 @@ import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,27 +63,27 @@ public class ConceptSetServiceTest {
   }
 
   private DbConceptSet mockConceptSet() {
-    ConceptSetConceptId conceptSetConceptId1 =
-        new ConceptSetConceptId().conceptId(1L).standard(true);
-    ConceptSetConceptId conceptSetConceptId2 =
-        new ConceptSetConceptId().conceptId(2L).standard(true);
-    ConceptSetConceptId conceptSetConceptId3 =
-        new ConceptSetConceptId().conceptId(3L).standard(true);
-    ConceptSetConceptId conceptSetConceptId4 =
-        new ConceptSetConceptId().conceptId(4L).standard(true);
-    ConceptSetConceptId conceptSetConceptId5 =
-        new ConceptSetConceptId().conceptId(5L).standard(true);
-    Set conceptSetConceptIds =
+    DbConceptSetConceptId dbConceptSetConceptId1 =
+        DbConceptSetConceptId.builder().addConceptId(1L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId2 =
+        DbConceptSetConceptId.builder().addConceptId(2L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId3 =
+        DbConceptSetConceptId.builder().addConceptId(3L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId4 =
+        DbConceptSetConceptId.builder().addConceptId(4L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId5 =
+        DbConceptSetConceptId.builder().addConceptId(5L).addStandard(true).build();
+    Set<DbConceptSetConceptId> dbConceptSetConceptIds =
         Stream.of(
-                conceptSetConceptId1,
-                conceptSetConceptId2,
-                conceptSetConceptId3,
-                conceptSetConceptId4,
-                conceptSetConceptId5)
+                dbConceptSetConceptId1,
+                dbConceptSetConceptId2,
+                dbConceptSetConceptId3,
+                dbConceptSetConceptId4,
+                dbConceptSetConceptId5)
             .collect(Collectors.toCollection(HashSet::new));
 
     DbConceptSet conceptSet = new DbConceptSet();
-    conceptSet.setConceptSetConceptIds(conceptSetConceptIds);
+    conceptSet.setConceptSetConceptIds(dbConceptSetConceptIds);
     conceptSet.setConceptSetId(1);
     conceptSet.setName("Mock Concept Set");
     conceptSet.setDomainEnum(Domain.CONDITION);

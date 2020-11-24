@@ -1499,10 +1499,20 @@ public class WorkspacesControllerTest {
                     .cohortReviewId(cr2.getCohortReviewId()))
             .getBody();
 
+    DbConceptSetConceptId dbConceptSetConceptId1 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_1.getConceptId())
+            .addStandard(true)
+            .build();
+    DbConceptSetConceptId dbConceptSetConceptId2 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_2.getConceptId())
+            .addStandard(true)
+            .build();
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION,
             "condition_occurrence",
-            ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
+            ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
         .thenReturn(123);
     ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
     conceptSetConceptId1.setConceptId(CONCEPT_1.getConceptId());
@@ -1683,10 +1693,20 @@ public class WorkspacesControllerTest {
     cdrVersion2.setCdrDbName("");
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
 
+    DbConceptSetConceptId dbConceptSetConceptId1 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_1.getConceptId())
+            .addStandard(true)
+            .build();
+    DbConceptSetConceptId dbConceptSetConceptId2 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_2.getConceptId())
+            .addStandard(true)
+            .build();
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION,
             "condition_occurrence",
-            ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
+            ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
         .thenReturn(123);
 
     ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
@@ -1726,7 +1746,7 @@ public class WorkspacesControllerTest {
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION,
             "condition_occurrence",
-            ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
+            ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
         .thenReturn(456);
 
     mockBillingProjectBuffer("cloned-ns");

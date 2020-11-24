@@ -49,6 +49,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -524,15 +525,23 @@ public class ConceptSetsControllerTest {
   @Test
   public void testUpdateConceptSetConceptsAddAndRemove() {
     saveConcepts();
+    DbConceptSetConceptId dbConceptSetConceptId1 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_1.getConceptId())
+            .addStandard(true)
+            .build();
+    DbConceptSetConceptId dbConceptSetConceptId2 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_3.getConceptId())
+            .addStandard(true)
+            .build();
     when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION,
-            "condition_occurrence",
-            ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId())))
+            Domain.CONDITION, "condition_occurrence", ImmutableSet.of(dbConceptSetConceptId1)))
         .thenReturn(123);
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION,
             "condition_occurrence",
-            ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_3.getConceptId())))
+            ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
         .thenReturn(246);
     ConceptSet conceptSet = makeConceptSet1();
     ConceptSet updated =
@@ -564,14 +573,27 @@ public class ConceptSetsControllerTest {
   @Test
   public void testUpdateConceptSetConceptsAddMany() {
     saveConcepts();
+    DbConceptSetConceptId dbConceptSetConceptId1 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_1.getConceptId())
+            .addStandard(true)
+            .build();
+    DbConceptSetConceptId dbConceptSetConceptId2 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_3.getConceptId())
+            .addStandard(true)
+            .build();
+    DbConceptSetConceptId dbConceptSetConceptId3 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_4.getConceptId())
+            .addStandard(true)
+            .build();
     ConceptSetService.MAX_CONCEPTS_PER_SET = 1000;
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION,
             "condition_occurrence",
             ImmutableSet.of(
-                CLIENT_CONCEPT_1.getConceptId(),
-                CLIENT_CONCEPT_3.getConceptId(),
-                CLIENT_CONCEPT_4.getConceptId())))
+                dbConceptSetConceptId1, dbConceptSetConceptId2, dbConceptSetConceptId3)))
         .thenReturn(456);
     ConceptSet conceptSet = makeConceptSet1();
     ConceptSet updated =
@@ -592,9 +614,7 @@ public class ConceptSetsControllerTest {
     assertThat(updated.getParticipantCount()).isEqualTo(456);
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION,
-            "condition_occurrence",
-            ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId())))
+            Domain.CONDITION, "condition_occurrence", ImmutableSet.of(dbConceptSetConceptId1)))
         .thenReturn(123);
     ConceptSet removed =
         conceptSetsController
@@ -616,13 +636,26 @@ public class ConceptSetsControllerTest {
   @Test
   public void testUpdateConceptSetConceptsAddManyOnCreate() {
     saveConcepts();
+    DbConceptSetConceptId dbConceptSetConceptId1 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_1.getConceptId())
+            .addStandard(true)
+            .build();
+    DbConceptSetConceptId dbConceptSetConceptId2 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_3.getConceptId())
+            .addStandard(true)
+            .build();
+    DbConceptSetConceptId dbConceptSetConceptId3 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_4.getConceptId())
+            .addStandard(true)
+            .build();
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION,
             "condition_occurrence",
             ImmutableSet.of(
-                CLIENT_CONCEPT_1.getConceptId(),
-                CLIENT_CONCEPT_3.getConceptId(),
-                CLIENT_CONCEPT_4.getConceptId())))
+                dbConceptSetConceptId1, dbConceptSetConceptId2, dbConceptSetConceptId3)))
         .thenReturn(456);
     ConceptSet conceptSet =
         makeConceptSet1(
