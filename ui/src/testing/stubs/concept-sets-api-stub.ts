@@ -149,14 +149,14 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
       if (!target.concepts) {
         target.concepts = [];
       }
-      for (const id of req.removedIds || []) {
-        const index = target.concepts.findIndex(c => c.conceptId === id);
+      for (const id of req.removedConceptSetConceptIds || []) {
+        const index = target.concepts.findIndex(c => c.conceptId === id.conceptId);
         if (index >= 0) {
-          target.concepts = target.concepts.filter(concept => concept.conceptId !== id);
+          target.concepts = target.concepts.filter(concept => concept.conceptId !== id.conceptId);
         }
       }
-      for (const id of req.addedIds || []) {
-        const concept = this.conceptsStub.concepts.find(c => c.conceptId === id);
+      for (const id of req.addedConceptSetConceptIds || []) {
+        const concept = this.conceptsStub.concepts.find(c => c.conceptId === id.conceptId);
         if (!concept) {
           throw Error(`concept ${id} not found`);
         }
