@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.api.BigQueryService;
-import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService.ConceptColumns;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
@@ -24,7 +23,6 @@ public class ConceptBigQueryService {
 
   private final BigQueryService bigQueryService;
   private final CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
-  private final ConceptService conceptService;
   private static final ImmutableList<Domain> CHILD_LOOKUP_DOMAINS =
       ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE, Domain.MEASUREMENT);
   private static final String SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE =
@@ -34,11 +32,9 @@ public class ConceptBigQueryService {
   @Autowired
   public ConceptBigQueryService(
       BigQueryService bigQueryService,
-      CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService,
-      ConceptService conceptService) {
+      CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService) {
     this.bigQueryService = bigQueryService;
     this.cdrBigQuerySchemaConfigService = cdrBigQuerySchemaConfigService;
-    this.conceptService = conceptService;
   }
 
   public int getParticipantCountForConcepts(

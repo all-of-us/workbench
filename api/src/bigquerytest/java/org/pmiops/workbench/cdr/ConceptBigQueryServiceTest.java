@@ -14,10 +14,7 @@ import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.BigQueryTestService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.dao.DomainInfoDao;
-import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
-import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
@@ -40,10 +37,6 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
 
   @Autowired private ConceptDao conceptDao;
-
-  @Autowired private DomainInfoDao domainInfoDao;
-
-  @Autowired private SurveyModuleDao surveyModuleDao;
 
   @Autowired private BigQueryService bigQueryService;
 
@@ -72,9 +65,8 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
     dbConceptSetConceptId4 =
         DbConceptSetConceptId.builder().addConceptId(192819L).addStandard(true).build();
 
-    ConceptService conceptService = new ConceptService(conceptDao, domainInfoDao, surveyModuleDao);
     conceptBigQueryService =
-        new ConceptBigQueryService(bigQueryService, cdrBigQuerySchemaConfigService, conceptService);
+        new ConceptBigQueryService(bigQueryService, cdrBigQuerySchemaConfigService);
 
     conceptDao.deleteAll();
   }
