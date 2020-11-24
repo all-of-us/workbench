@@ -248,7 +248,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
 
   getListSearchSelectedIds() {
     const {selectedCriteriaList} = this.state;
-    const value = fp.map(selected => ('param' + selected.conceptId + selected.code), selectedCriteriaList);
+    const value = fp.map(selected => ('param' + selected.conceptId + selected.code + selected.isStandard), selectedCriteriaList);
     return value;
   }
 
