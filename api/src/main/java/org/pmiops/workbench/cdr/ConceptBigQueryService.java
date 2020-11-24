@@ -98,11 +98,27 @@ public class ConceptBigQueryService {
               + "where concept_id in unnest(@"
               + conceptIdsParam
               + ")\n"
-              + "and domain_id = @domain\n"
-              + "and is_standard = @standard) a\n"
+              + "and domain_id = @"
+              + (standardOrSource == 1 ? "standard" : "source")
+              + "Domain\n"
+              + "and is_standard = @"
+              + (standardOrSource == 1 ? "standard" : "source")
+              + ") a\n"
               + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id))\n"
-              + "and domain_id = @domain\n"
-              + "and is_standard = @standard)");
+              + "and domain_id = @"
+              + (standardOrSource == 1 ? "standard" : "source")
+              + "Domain\n"
+              + "and is_standard = @"
+              + (standardOrSource == 1 ? "standard" : "source")
+              + ")");
+      paramMap.put(
+          conceptIdsParam, QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
+      paramMap.put(
+          (standardOrSource == 1 ? "standardDomain" : "sourceDomain"),
+          QueryParameterValue.string(domain.toString()));
+      paramMap.put(
+          (standardOrSource == 1 ? "standard" : "source"),
+          QueryParameterValue.int64(standardOrSource));
     } else if (Domain.DRUG.equals(domain)) {
       sqlBuilder.append(
           " in (select distinct ca.descendant_id\n"
@@ -111,22 +127,30 @@ public class ConceptBigQueryService {
               + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
               + "join (select cast(cr.id as string) as id\n"
               + "from `${projectId}.${dataSetId}.cb_criteria` cr\n"
-              + "where domain_id = @domain\n"
+              + "where domain_id = @"
+              + (standardOrSource == 1 ? "standard" : "source")
+              + "Domain\n"
               + "and concept_id in unnest(@"
               + conceptIdsParam
               + ")\n"
               + ") a\n"
               + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id))\n"
-              + "and domain_id = @domain\n"
+              + "and domain_id = @"
+              + (standardOrSource == 1 ? "standard" : "source")
+              + "Domain\n"
               + ") b on (ca.ancestor_id = b.concept_id))");
+      paramMap.put(
+          conceptIdsParam, QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
+      paramMap.put(
+          (standardOrSource == 1 ? "standardDomain" : "sourceDomain"),
+          QueryParameterValue.string(domain.toString()));
+      paramMap.put(
+          (standardOrSource == 1 ? "standard" : "source"),
+          QueryParameterValue.int64(standardOrSource));
     } else {
       sqlBuilder.append(" in unnest(@" + conceptIdsParam + ")");
-    }
-    paramMap.put(
-        conceptIdsParam, QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
-    if (CHILD_LOOKUP_DOMAINS.contains(domain) || Domain.DRUG.equals(domain)) {
-      paramMap.put("domain", QueryParameterValue.string(domain.toString()));
-      paramMap.put("standard", QueryParameterValue.int64(standardOrSource));
+      paramMap.put(
+          conceptIdsParam, QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
     }
   }
 
