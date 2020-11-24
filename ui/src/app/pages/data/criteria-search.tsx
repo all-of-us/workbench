@@ -8,6 +8,7 @@ import {Selection} from 'app/cohort-search/selection-list/selection-list.compone
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
 import {domainToTitle, typeToTitle} from 'app/cohort-search/utils';
 import {Clickable, StyledAnchorTag} from 'app/components/buttons';
+import {FlexRowWrap} from 'app/components/flex';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
@@ -29,14 +30,14 @@ const styles = reactStyles({
   backArrow: {
     background: `${addOpacity(colors.accent, 0.15)}`,
     borderRadius: '50%',
-    display: 'inline-block',
     height: '1.5rem',
     lineHeight: '1.6rem',
     textAlign: 'center',
     width: '1.5rem',
   },
   externalLinks: {
-    display: 'table-cell',
+    flex: '0 0 calc(55% - 1.25rem)',
+    maxWidth: 'calc(55% - 1.25rem)',
     lineHeight: '0.75rem',
     textAlign: 'right',
     verticalAlign: 'middle'
@@ -53,15 +54,16 @@ const styles = reactStyles({
     opacity: 0.3
   },
   titleBar: {
+    alignItems: 'center',
     color: colors.primary,
-    display: 'table',
     margin: '0 0.25rem',
-    width: '65%',
-    height: '1.5rem',
+    width: '80%',
+    height: '2rem',
   },
   titleHeader: {
-    display: 'inline-block',
-    lineHeight: '1.5rem',
+    flex: '0 0 calc(45% - 1rem)',
+    maxWidth: 'calc(45% - 1rem)',
+    lineHeight: '1rem',
     margin: '0 0 0 0.75rem'
   }
 });
@@ -297,7 +299,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
     return <div id='criteria-search-container'>
       {loadingSubtree && <SpinnerOverlay/>}
       <Growl ref={(el) => this.growl = el} style={!growlVisible ? {...styles.growl, display: 'none'} : styles.growl}/>
-      <div style={{...styles.titleBar, marginTop: source === 'criteria' ? '1rem' : 0}}>
+      <FlexRowWrap style={{...styles.titleBar, marginTop: source === 'criteria' ? '1rem' : 0}}>
         <Clickable style={styles.backArrow} onClick={() => backFn()}>
           <img src={arrowIcon} style={styles.arrowIcon} alt='Go back' />
         </Clickable>
@@ -331,7 +333,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
             </StyledAnchorTag>
           </div>}
         </div>
-      </div>
+      </FlexRowWrap>
       <div style={loadingSubtree ? styles.loadingSubTree : {height: '100%', minHeight: '15rem'}}>
         <style>{css}</style>
         <Growl ref={(el) => this.growl = el}

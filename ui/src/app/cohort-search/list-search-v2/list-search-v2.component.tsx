@@ -32,7 +32,7 @@ import {
 const borderStyle = `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`;
 const styles = reactStyles({
   searchContainer: {
-    width: '65%',
+    width: '80%',
     padding: '0.4rem 0',
     zIndex: 10,
   },
