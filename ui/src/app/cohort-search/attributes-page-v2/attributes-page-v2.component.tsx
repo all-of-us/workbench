@@ -12,7 +12,7 @@ import {
   stripHtml,
   subTypeToTitle
 } from 'app/cohort-search/utils';
-import {Button} from 'app/components/buttons';
+import {Button, StyledAnchorTag} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox, NumberInput} from 'app/components/inputs';
@@ -743,7 +743,12 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
                versions.
             </div>
             <div style={styles.moreInfo}>
-              More info
+              <StyledAnchorTag
+                href='https://www.researchallofus.org/data-tools/survey-explorer/cope-survey/'
+                target='_blank'
+                rel='noopener noreferrer'>
+                More info
+              </StyledAnchorTag>
             </div>
           </div> : <h3 style={{fontWeight: 600, margin: '0 0 0.5rem', textTransform: 'capitalize'}}>
             {this.isPhysicalMeasurement ? name : domainId.toString().toLowerCase()} Detail
