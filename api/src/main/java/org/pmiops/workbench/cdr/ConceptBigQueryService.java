@@ -103,10 +103,6 @@ public class ConceptBigQueryService {
               + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id))\n"
               + "and domain_id = @domain\n"
               + "and is_standard = @standard)");
-      paramMap.put(
-          conceptIdsParam, QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
-      paramMap.put("domain", QueryParameterValue.string(domain.toString()));
-      paramMap.put("standard", QueryParameterValue.int64(standardOrSource));
     } else if (Domain.DRUG.equals(domain)) {
       sqlBuilder.append(
           " in (select distinct ca.descendant_id\n"
@@ -123,14 +119,14 @@ public class ConceptBigQueryService {
               + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id))\n"
               + "and domain_id = @domain\n"
               + ") b on (ca.ancestor_id = b.concept_id))");
-      paramMap.put(
-          conceptIdsParam, QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
-      paramMap.put("domain", QueryParameterValue.string(domain.toString()));
-      paramMap.put("standard", QueryParameterValue.int64(standardOrSource));
     } else {
       sqlBuilder.append(" in unnest(@" + conceptIdsParam + ")");
-      paramMap.put(
-          conceptIdsParam, QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
+    }
+    paramMap.put(
+        conceptIdsParam, QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
+    if (CHILD_LOOKUP_DOMAINS.contains(domain) || Domain.DRUG.equals(domain)) {
+      paramMap.put("domain", QueryParameterValue.string(domain.toString()));
+      paramMap.put("standard", QueryParameterValue.int64(standardOrSource));
     }
   }
 
