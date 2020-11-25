@@ -263,7 +263,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       </div>}
       {node.domainId !== Domain.VISIT.toString() &&
         <div style={serverConfigStore.getValue().enableCohortBuilderV2
-          ? {...styles.searchBarContainer, backgroundColor: 'transparent', width: '65%'}
+          ? {...styles.searchBarContainer, backgroundColor: 'transparent', width: '80%'}
           : styles.searchBarContainer}>
           <SearchBar node={node}
                      searchTerms={searchTerms}
