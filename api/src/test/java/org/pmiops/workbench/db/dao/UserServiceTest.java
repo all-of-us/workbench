@@ -21,6 +21,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
+import org.pmiops.workbench.compliance.MoodleBadge;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
@@ -121,8 +122,8 @@ public class UserServiceTest {
     retBadge.setDateexpire(expiry);
     retBadge.setValid(true);
 
-    Map<String, BadgeDetailsV2> userBadgesByName = new HashMap<>();
-    userBadgesByName.put(mockComplianceService.getResearchEthicsTrainingField(), retBadge);
+    Map<MoodleBadge, BadgeDetailsV2> userBadgesByName = new HashMap<>();
+    userBadgesByName.put(MoodleBadge.RESEARCH_ETHICS_TRAINING, retBadge);
 
     when(mockComplianceService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
 
@@ -149,8 +150,8 @@ public class UserServiceTest {
     retBadge.setDateexpire(expiry);
     retBadge.setValid(true);
 
-    Map<String, BadgeDetailsV2> userBadgesByName = new HashMap<>();
-    userBadgesByName.put(mockComplianceService.getResearchEthicsTrainingField(), retBadge);
+    Map<MoodleBadge, BadgeDetailsV2> userBadgesByName = new HashMap<>();
+    userBadgesByName.put(MoodleBadge.RESEARCH_ETHICS_TRAINING, retBadge);
 
     when(mockComplianceService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
 
@@ -206,7 +207,7 @@ public class UserServiceTest {
     userDao.save(user);
 
     // An empty map should be returned when we have no badge information.
-    Map<String, BadgeDetailsV2> userBadgesByName = new HashMap<>();
+    Map<MoodleBadge, BadgeDetailsV2> userBadgesByName = Collections.emptyMap();
 
     when(mockComplianceService.getUserBadgesByBadgeName(USERNAME)).thenReturn(userBadgesByName);
 

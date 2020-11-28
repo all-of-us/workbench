@@ -1,6 +1,8 @@
 package org.pmiops.workbench.config;
 
 import java.util.ArrayList;
+import java.util.Set;
+import org.pmiops.workbench.access.policies.AccessPolicy;
 
 /**
  * A class representing the main workbench configuration; parsed from JSON stored in the database.
@@ -11,7 +13,7 @@ public class WorkbenchConfig {
 
   public FireCloudConfig firecloud;
   public AuthConfig auth;
-  public CdrConfig cdr;
+  public CdrDebugConfig cdr;
   public GoogleCloudStorageServiceConfig googleCloudStorageService;
   public GoogleDirectoryServiceConfig googleDirectoryService;
   public ServerConfig server;
@@ -27,6 +29,7 @@ public class WorkbenchConfig {
   public RdrExportConfig rdrExport;
   public CaptchaConfig captcha;
   public ReportingConfig reporting;
+  public Set<TierConfig> tiers;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -35,7 +38,7 @@ public class WorkbenchConfig {
     config.admin = new AdminConfig();
     config.auth = new AuthConfig();
     config.auth.serviceAccountApiUsers = new ArrayList<>();
-    config.cdr = new CdrConfig();
+    config.cdr = new CdrDebugConfig();
     config.elasticsearch = new ElasticsearchConfig();
     config.featureFlags = new FeatureFlagsConfig();
     config.firecloud = new FireCloudConfig();
@@ -144,7 +147,7 @@ public class WorkbenchConfig {
     public ArrayList<String> serviceAccountApiUsers;
   }
 
-  public static class CdrConfig {
+  public static class CdrDebugConfig {
     public boolean debugQueries;
   }
 
@@ -310,5 +313,23 @@ public class WorkbenchConfig {
     public String dataset;
     public Integer maxRowsPerInsert;
     public String uploadMethod;
+  }
+
+  public static class AccessModuleConfig {
+    public String evaluator;
+    public String displayName;
+  }
+
+  public static class AccessPolicyConfig {
+    public String key;
+    public String displayName;
+    public Set<AccessModuleConfig> accessModules;
+  }
+
+  public static class TierConfig {
+    public String key;
+    public String displayName;
+    public AccessPolicy accessPolicy;
+    public String terraPerimeterName;
   }
 }
