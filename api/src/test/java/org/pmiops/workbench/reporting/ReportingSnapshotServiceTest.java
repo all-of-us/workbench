@@ -22,6 +22,8 @@ import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.reporting.snapshot.ReportingSnapshotService;
+import org.pmiops.workbench.reporting.snapshot.ReportingSnapshotServiceImpl;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;

@@ -1,4 +1,4 @@
-package org.pmiops.workbench.reporting;
+package org.pmiops.workbench.reporting.snapshot;
 
 import org.pmiops.workbench.model.ReportingSnapshot;
 

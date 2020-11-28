@@ -50,7 +50,9 @@ import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer;
+import org.pmiops.workbench.reporting.insertion.ReportingUploadService;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
@@ -93,8 +95,8 @@ public class ReportingUploadServiceTest {
 
   @TestConfiguration
   @Import({
-    ReportingUploadServiceDmlImpl.class,
-    ReportingUploadServiceStreamingImpl.class,
+    CohortColumnValueExtractor.ReportingUploadServiceDmlImpl.class,
+    ReportingUploadService.ReportingUploadServiceStreamingImpl.class,
     ReportingTestConfig.class
   })
   public static class config {

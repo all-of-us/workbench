@@ -3,6 +3,7 @@ package org.pmiops.workbench.reporting;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.ReportingSnapshot;
+import org.pmiops.workbench.reporting.insertion.ReportingUploadService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 

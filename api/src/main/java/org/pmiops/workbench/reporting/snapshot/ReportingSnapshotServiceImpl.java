@@ -1,4 +1,4 @@
-package org.pmiops.workbench.reporting;
+package org.pmiops.workbench.reporting.snapshot;
 
 import com.google.common.base.Stopwatch;
 import java.time.Clock;
@@ -8,6 +8,7 @@ import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.ReportingSnapshot;
+import org.pmiops.workbench.reporting.ReportingMapper;
 import org.pmiops.workbench.utils.LogFormatters;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.stereotype.Service;

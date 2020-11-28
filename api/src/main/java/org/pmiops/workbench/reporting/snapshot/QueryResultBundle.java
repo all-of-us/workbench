@@ -1,4 +1,4 @@
-package org.pmiops.workbench.reporting;
+package org.pmiops.workbench.reporting.snapshot;
 
 import java.util.List;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
