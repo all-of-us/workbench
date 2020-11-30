@@ -5,20 +5,20 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="nehasa" id="changelog-144-remove-concept-set-concept-id-primarykeyconstraint">
-    <dropForeignKeyConstraint baseTableName="concept_set_concept_id" 
+    <dropForeignKeyConstraint baseTableName="concept_set_concept_id"
       constraintName="fk_concept_set_concept_id_concept_set_id"/>
 
-    <dropPrimaryKey  tableName="concept_set_concept_id"/>       
+    <dropPrimaryKey tableName="concept_set_concept_id"/>
 
-    <addPrimaryKey  columnNames="concept_set_id"  
+    <addPrimaryKey columnNames="concept_set_id, concept_id, is_standard"
       constraintName="pk_concept_set_id"
-      tableName="concept_set_concept_id" /> 
-      
+      tableName="concept_set_concept_id"/>
+
     <addForeignKeyConstraint baseColumnNames="concept_set_id"
-        baseTableName="concept_set_concept_id"
-        constraintName="fk_concept_set_concept_id_concept_set_id"
-        onDelete="CASCADE"
-        referencedColumnNames="concept_set_id"
-        referencedTableName="concept_set"/>
+      baseTableName="concept_set_concept_id"
+      constraintName="fk_concept_set_concept_id_concept_set_id"
+      onDelete="CASCADE"
+      referencedColumnNames="concept_set_id"
+      referencedTableName="concept_set"/>
   </changeSet>
 </databaseChangeLog>
