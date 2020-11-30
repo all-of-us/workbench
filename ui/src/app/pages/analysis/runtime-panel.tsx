@@ -16,7 +16,6 @@ import {
   withUserProfile
 } from 'app/utils';
 import {
-  allMachineTypes,
   ComputeType,
   findMachineByName,
   Machine,
@@ -24,9 +23,9 @@ import {
   machineRunningCostBreakdown,
   machineStorageCost,
   machineStorageCostBreakdown,
-  validLeoGceMachineTypes,
   validLeoDataprocMasterMachineTypes,
-  validLeoDataprocWorkerMachineTypes
+  validLeoDataprocWorkerMachineTypes,
+  validLeoGceMachineTypes
 } from 'app/utils/machines';
 import {formatUsd} from 'app/utils/numbers';
 import {runtimePresets} from 'app/utils/runtime-presets';
