@@ -147,7 +147,7 @@ const WorkbenchFooter = withUserProfile()(
               </FlexColumn>
             </FlexRow>
           </FooterSection>
-          <FooterSection style={styles.workbenchFooterItem} header='User Support'>
+          <FooterSection style={styles.workbenchFooterItem} header='User Support Hub'>
             <FlexRow>
               <FlexColumn style={{width: '50%'}}>
                 <NewTabFooterAnchorTag href={supportUrls.gettingStarted} analyticsFn={tracker.GettingStarted}>
