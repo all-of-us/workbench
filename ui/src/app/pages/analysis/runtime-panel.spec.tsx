@@ -138,7 +138,7 @@ describe('RuntimePanel', () => {
 
   it('should show Create panel when no runtime', async() => {
     runtimeApiStub.runtime = null;
-    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
+    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
 
@@ -149,7 +149,7 @@ describe('RuntimePanel', () => {
 
   it('should allow creation when no runtime exists with defaults', async() => {
     runtimeApiStub.runtime = null;
-    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
+    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
 
@@ -161,7 +161,7 @@ describe('RuntimePanel', () => {
 
   it('should allow creation when runtime has error status', async() => {
     runtimeApiStub.runtime.status = RuntimeStatus.Error;
-    act(() => { runtimeStore.set({runtime: runtimeApiStub.runtime, workspaceNamespace: workspaceStubs[0].namespace}) });
+    runtimeStore.set({runtime: runtimeApiStub.runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
 
@@ -171,9 +171,20 @@ describe('RuntimePanel', () => {
     expect(runtimeApiStub.runtime.status).toEqual('Deleting');
   });
 
+  it('should disable controls when runtime has non-updateable status', async() => {
+    runtimeApiStub.runtime.status = RuntimeStatus.Stopping;
+    runtimeStore.set({runtime: runtimeApiStub.runtime, workspaceNamespace: workspaceStubs[0].namespace});
+
+    const wrapper = await component();
+
+    expect(wrapper.find({'data-test-id': 'runtime-presets-menu'}).first().prop('disabled')).toBeTruthy();
+    expect(wrapper.find('#runtime-cpu').first().prop('disabled')).toBeTruthy();
+    expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeTruthy();
+  });
+
   it('should allow creation with GCE config', async() => {
     runtimeApiStub.runtime = null;
-    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}); });
+    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});;
 
     const wrapper = await component();
 
@@ -197,7 +208,7 @@ describe('RuntimePanel', () => {
 
   it('should allow creation with Dataproc config', async() => {
     runtimeApiStub.runtime = null;
-    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
+    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
 
@@ -235,7 +246,7 @@ describe('RuntimePanel', () => {
 
   it('should allow configuration via GCE preset', async() => {
     runtimeApiStub.runtime = null;
-    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
+    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
 
@@ -260,7 +271,7 @@ describe('RuntimePanel', () => {
 
   it('should allow configuration via dataproc preset', async() => {
     runtimeApiStub.runtime = null;
-    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
+    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
 
@@ -280,7 +291,7 @@ describe('RuntimePanel', () => {
 
   it('should allow configuration via dataproc preset from modified form', async() => {
     runtimeApiStub.runtime = null;
-    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
+    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
 
@@ -312,7 +323,7 @@ describe('RuntimePanel', () => {
 
   it('should tag as user override after preset modification', async() => {
     runtimeApiStub.runtime = null;
-    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
+    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
 
@@ -331,7 +342,7 @@ describe('RuntimePanel', () => {
 
   it('should tag as preset if configuration matches', async() => {
     runtimeApiStub.runtime = null;
-    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
+    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
     await mustClickButton(wrapper, 'Customize');
