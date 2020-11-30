@@ -1,14 +1,13 @@
+import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {switchCase, withAsyncErrorHandling} from 'app/utils';
 import {ExceededActionCountError, LeoRuntimeInitializationAbortedError, LeoRuntimeInitializer, } from 'app/utils/leo-runtime-initializer';
+import {ComputeType, findMachineByName, Machine} from 'app/utils/machines';
 import {compoundRuntimeOpStore, markCompoundRuntimeOperationCompleted, registerCompoundRuntimeOperation, runtimeStore, useStore} from 'app/utils/stores';
+
 import {DataprocConfig, Runtime, RuntimeStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
-
-import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import * as React from 'react';
-import {ComputeType, findMachineByName, Machine} from './machines';
-import {leoRuntimesApi} from "../services/notebooks-swagger-fetch-clients";
 
 const {useState, useEffect} = React;
 

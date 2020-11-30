@@ -251,6 +251,10 @@ export class LeoRuntimeInitializer {
     return this.currentRuntime && this.resolutionCondition(this.currentRuntime);
   }
 
+  private isRuntimeRunning(): boolean {
+    return this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Running;
+  }
+
   private isRuntimeDeleted(): boolean {
     return this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Deleted;
   }
@@ -362,7 +366,7 @@ export class LeoRuntimeInitializer {
       } else if (this.isRuntimeRunning()) {
         if (this.pauseCount < this.maxPauseCount) {
           await this.pauseRuntime();
-        } else {
+        } else if (this.reachedResolution()) {
           // We've reached the goal - resolve the Promise.
           return this.resolve(this.currentRuntime);
         }
