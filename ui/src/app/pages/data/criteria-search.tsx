@@ -22,6 +22,8 @@ import {
 import {environment} from 'environments/environment';
 import {Criteria, Domain} from 'generated/fetch';
 
+const LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS = 'CURRENT_CRITERIA_SELECTIONS';
+
 const styles = reactStyles({
   arrowIcon: {
     height: '21px',
@@ -173,6 +175,9 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
       backMode = 'tree';
       mode = 'tree';
     }
+    if (localStorage.getItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS)) {
+      this.setState({selectedCriteriaList: JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS))});
+    }
     this.setState({backMode, hierarchyNode, mode});
     if (source === 'cohort') {
       this.subscription = currentCohortCriteriaStore.subscribe(currentCohortCriteria => {
@@ -249,6 +254,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
     } else {
       criteriaList =  [selectCriteria];
     }
+    localStorage.setItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS, JSON.stringify(criteriaList));
     this.setState({selectedCriteriaList: criteriaList});
     this.isConcept ?  currentConceptStore.next(criteriaList) : currentCohortCriteriaStore.next(criteriaList);
     const growlMessage = this.isConcept ? 'Concept Added' : 'Criteria Added';
