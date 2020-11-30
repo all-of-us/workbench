@@ -9,6 +9,7 @@ import {WarningMessage} from 'app/components/warning-message';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {
+  DEFAULT,
   reactStyles,
   switchCase,
   withCdrVersions,
@@ -389,121 +390,96 @@ const PresetSelector = ({hasMicroarrayData, setSelectedDiskSize, setSelectedMach
   </PopupTrigger>;
 };
 
-const StartStopRuntimeButton = ({workspace, containerStyle}) => {
-  const [status, setRuntimeStatus] = useRuntimeStatus(workspace.namespace);
+const StartStopRuntimeButton = ({workspaceNamespace}) => {
+  const [status, setRuntimeStatus] = useRuntimeStatus(workspaceNamespace);
 
   const rotateStyle = {animation: 'rotation 2s infinite linear'};
-  const {altText, clickable = false, iconShape = null, styleOverrides = {}, onClick = () => {}, } = fp.cond([
+  const {altText, iconShape = null, styleOverrides = {}, onClick = null, } = switchCase(status,
     [
-      (s) => s === RuntimeStatus.Creating,
+      RuntimeStatus.Creating,
       () => ({
         altText: 'Runtime creation in progress',
-        clickable: false,
         iconShape: 'compute-starting',
-        styleOverrides: rotateStyle,
-        onClick: () => {}
+        styleOverrides: rotateStyle
       })
     ],
     [
-      (s) => s === RuntimeStatus.Running,
+      RuntimeStatus.Running,
       () => ({
         altText: 'Runtime running, click to pause',
-        clickable: true,
         iconShape: 'compute-running',
-        styleOverrides: {},
         onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Stop); }
       })
     ],
     [
-      (s) => s === RuntimeStatus.Updating,
+      RuntimeStatus.Updating,
       () => ({
         altText: 'Runtime update in progress',
-        clickable: false,
         iconShape: 'compute-starting',
-        styleOverrides: rotateStyle,
-        onClick: () => {}
+        styleOverrides: rotateStyle
       })
     ],
     [
-      (s) => s === RuntimeStatus.Error,
+      RuntimeStatus.Error,
       () => ({
         altText: 'Runtime in error state',
-        clickable: false,
-        iconShape: 'compute-error',
-        styleOverrides: {},
-        onClick: () => {}
+        iconShape: 'compute-error'
       })
     ],
     [
-      (s) => s === RuntimeStatus.Stopping,
+      RuntimeStatus.Stopping,
       () => ({
         altText: 'Runtime pause in progress',
-        clickable: false,
         iconShape: 'compute-stopping',
-        styleOverrides: rotateStyle,
-        onClick: () => {}
+        styleOverrides: rotateStyle
       })
     ],
     [
-      (s) => s === RuntimeStatus.Stopped,
+      RuntimeStatus.Stopped,
       () => ({
         altText: 'Runtime paused, click to resume',
-        clickable: true,
         iconShape: 'compute-stopped',
-        styleOverrides: {},
         onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Start); }
       })
     ],
     [
-      (s) => s === RuntimeStatus.Starting,
+      RuntimeStatus.Starting,
       () => ({
         altText: 'Runtime resume in progress',
-        clickable: false, iconShape: 'compute-starting',
-        styleOverrides: rotateStyle,
-        onClick: () => {}
+        iconShape: 'compute-starting',
+        styleOverrides: rotateStyle
       })
     ],
     [
-      (s) => s === RuntimeStatus.Deleting,
+      RuntimeStatus.Deleting,
       () => ({
         altText: 'Runtime deletion in progress',
-        clickable: false,
         iconShape: 'compute-stopping',
         styleOverrides: rotateStyle,
-        onClick: () => {}
       })
     ],
     [
-      (s) => s === RuntimeStatus.Deleted,
+      RuntimeStatus.Deleted,
       () => ({
         altText: 'Runtime has been deleted',
-        clickable: false,
-        iconShape: 'compute-none',
-        styleOverrides: {},
-        onClick: () => {}
+        iconShape: 'compute-none'
       })
     ],
     [
-      (s) => s === RuntimeStatus.Unknown,
+      RuntimeStatus.Unknown,
       () => ({
         altText: 'Runtime status unknown',
-        clickable: false,
-        iconShape: 'compute-none',
-        styleOverrides: {},
-        onClick: () => {}
+        iconShape: 'compute-none'
       })
     ],
     [
-      () => true,
+      DEFAULT,
       () => ({
         altText: 'No runtime found',
-        clickable: false,
-        iconShape: 'compute-none',
-        styleOverrides: {},
-        onClick: () => {}
+        iconShape: 'compute-none'
       })
     ]
-  ])(status);
+  );
 
   const iconSrc = `/assets/icons/${iconShape}.svg`;
 
@@ -512,17 +488,17 @@ const StartStopRuntimeButton = ({workspace, containerStyle}) => {
     justifyContent: 'space-around',
     alignItems: 'center',
     padding: '0 1rem',
-    ...containerStyle
+    borderRadius: '5px 0 0 5px'
   }}>
     {/* TooltipTrigger inside the conditionals because it doesn't handle fragments well */}
     {
-      clickable && <TooltipTrigger content={<div>{altText}</div>} side='left'>
+      onClick && <TooltipTrigger content={<div>{altText}</div>} side='left'>
         <Clickable onClick={() => onClick()}>
           <img alt={altText} src={iconSrc} style={styleOverrides} data-test-id='runtime-status-icon'/>
         </Clickable>
       </TooltipTrigger>
     }
-    {!clickable && <TooltipTrigger content={<div>{altText}</div>} side='left'>
+    {!onClick && <TooltipTrigger content={<div>{altText}</div>} side='left'>
         <img alt={altText} src={iconSrc} style={styleOverrides} data-test-id='runtime-status-icon'/>
       </TooltipTrigger>
     }
@@ -670,7 +646,7 @@ const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelCont
 
   return <div style={styles.controlSection}>
     <FlexRow style={styles.costPredictorWrapper}>
-      <StartStopRuntimeButton workspace={workspace} containerStyle={{borderRadius: '5px 0 0 5px'}}/>
+      <StartStopRuntimeButton workspaceNamespace={workspace.namespace}/>
       <CostInfo runtimeChanged={false}
                 runtimeConfig={runtimeConfig}
                 currentUser={profile.username}
@@ -954,7 +930,7 @@ export const RuntimePanel = fp.flow(
       [PanelContent.Customize, () => <Fragment>
         <div style={styles.controlSection}>
           <FlexRow style={styles.costPredictorWrapper}>
-            {currentRuntime && <StartStopRuntimeButton workspace={workspace} containerStyle={{borderRadius: '5px 0 0 5px'}}/>}
+            <StartStopRuntimeButton workspaceNamespace={workspace.namespace}/>
             <CostInfo runtimeChanged={runtimeChanged}
               runtimeConfig={newRuntimeConfig}
               currentUser={profile.username}

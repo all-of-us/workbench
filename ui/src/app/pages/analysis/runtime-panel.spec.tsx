@@ -632,15 +632,13 @@ describe('RuntimePanel', () => {
   it('should display the Running runtime status icon in state Running', async() => {
     const wrapper = await component();
 
-    const runtimeStatusIcon = () => wrapper.find('[data-test-id="runtime-status-icon"]').first();
-    expect(runtimeStatusIcon().prop('src')).toBe(`${iconsDir}/compute-running.svg`);
+    expect(wrapper.find('[data-test-id="runtime-status-icon"]').first().prop('src')).toBe(`${iconsDir}/compute-running.svg`);
   });
 
   it('should display a compute-none when there is no runtime', async() => {
     runtimeApiStub.runtime = null;
     act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
     const wrapper = await component();
-    await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="runtime-status-icon"]').first().prop('src')).toBe(`${iconsDir}/compute-none.svg`);
   });
 });

@@ -267,49 +267,28 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
 
   useEffect(() => {
     // Additional status changes can be put here
-    if (!!runtimeStatus) {
-      switchCase(runtimeStatus,
-        [RuntimeStatusRequest.Delete, async() => {
-          try {
-            await LeoRuntimeInitializer.initialize({workspaceNamespace: currentWorkspaceNamespace, maxCreateCount: 0});
-          } catch (e) {
-            // ExceededActionCountError is expected, as we exceed our create limit of 0.
-            if (!(e instanceof ExceededActionCountError ||
-                  e instanceof LeoRuntimeInitializationAbortedError)) {
-              throw e;
-            }
+    const targetStatus = switchCase(runtimeStatus,
+        [RuntimeStatusRequest.Delete, () => RuntimeStatus.Deleted],
+        [RuntimeStatusRequest.Start, () => RuntimeStatus.Running],
+        [RuntimeStatusRequest.Stop, () => RuntimeStatus.Stopped]
+    );
+    const initializePolling = async() => {
+      if (!!runtimeStatus) {
+        try {
+          await LeoRuntimeInitializer.initialize({
+            workspaceNamespace: currentWorkspaceNamespace,
+            resolutionCondition: (r) => r.status === targetStatus
+          });
+        } catch (e) {
+          // ExceededActionCountError is expected, as we exceed our create limit of 0.
+          if (!(e instanceof ExceededActionCountError ||
+              e instanceof LeoRuntimeInitializationAbortedError)) {
+            throw e;
           }
-        }],
-        [RuntimeStatusRequest.Start, async() => {
-          try {
-            await LeoRuntimeInitializer.initialize({workspaceNamespace: currentWorkspaceNamespace, maxCreateCount: 0, maxPauseCount: 0});
-          } catch (e) {
-            // ExceededActionCountError is expected, as we exceed our create limit of 0.
-            if (!(e instanceof ExceededActionCountError ||
-                e instanceof LeoRuntimeInitializationAbortedError)) {
-              throw e;
-            }
-          }
-        }],
-        [RuntimeStatusRequest.Stop, async() => {
-          try {
-            await LeoRuntimeInitializer.initialize({
-              workspaceNamespace: currentWorkspaceNamespace,
-              maxCreateCount: 0,
-              maxPauseCount: 1,
-              maxResumeCount: 0
-            });
-          } catch (e) {
-            // ExceededActionCountError is expected, as we exceed our create limit of 0.
-            if (!(e instanceof ExceededActionCountError ||
-                e instanceof LeoRuntimeInitializationAbortedError)) {
-              throw e;
-            }
-          }
-        }]
-      );
-    }
-
+        }
+      }
+    };
+    initializePolling();
   }, [runtimeStatus]);
 
   const setStatusRequest = async(req) => {
