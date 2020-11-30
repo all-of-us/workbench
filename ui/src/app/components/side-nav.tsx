@@ -307,7 +307,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
       />
       <SideNavItem
         icon='help'
-        content={'User Support'}
+        content={'User Support Hub'}
         onToggleSideNav={() => this.props.onToggleSideNav()}
         parentOnClick={() => this.redirectToZendesk()}
         disabled={!hasRegisteredAccessFetch(profile.dataAccessLevel)}

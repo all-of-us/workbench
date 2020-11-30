@@ -31,7 +31,7 @@ describe('SideNav', () => {
       dataAccessLevel: DataAccessLevel.Unregistered}}/>);
     wrapper.setState({showUserOptions: true});
     // These are our expected items to be disabled when you are not registered
-    let disabledItemText = ['Profile', 'Your Workspaces', 'Featured Workspaces', 'User Support'];
+    let disabledItemText = ['Profile', 'Your Workspaces', 'Featured Workspaces', 'User Support Hub'];
     const sideNavItems = wrapper.find(SideNavItem);
     let disabledItems = sideNavItems.filterWhere(sideNavItem => sideNavItem.props().disabled);
     sideNavItems.forEach(sideNavItem => {
