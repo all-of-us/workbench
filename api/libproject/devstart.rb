@@ -53,7 +53,7 @@ ENVIRONMENTS = {
     :config_json => "config_test.json",
     :cdr_versions_json => "cdr_versions_test.json",
     :featured_workspaces_json => "featured_workspaces_test.json",
-    :gae_vars => make_gae_vars(0, 10, 'F4_1G')
+    :gae_vars => make_gae_vars(0, 10, 'F4')
   },
   "all-of-us-rw-staging" => {
     :env_name => "staging",
