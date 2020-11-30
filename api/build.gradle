@@ -394,7 +394,7 @@ dependencies {
   compile "com.google.cloud:google-cloud-storage:1.113.1"
   compile "com.google.cloud:google-cloud-tasks:1.30.4"
   compile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
-  compile "com.google.guava:guava:26.0-jre"
+  compile "com.google.guava:guava:30.0-jre"
   compile "com.google.http-client:google-http-client-apache:2.0.0"
   compile "com.google.oauth-client:google-oauth-client-jetty:1.30.6"
   compile "com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1"
