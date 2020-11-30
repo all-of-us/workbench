@@ -421,4 +421,4 @@ export const researchOutcomes = [
 export const RequestForReviewFooter = 'Note: The RAB is available to you at any time to help ' +
     'address questions about potentially stigmatizing research. As your research progresses, ' +
     'should any new concerns arise based on study outcomes, please contact the RAB for ' +
-    'assistance through the User Support menu in your workspace.';
+    'assistance through the User Support Hub menu in your workspace.';
