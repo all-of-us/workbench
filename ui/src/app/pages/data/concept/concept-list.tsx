@@ -51,7 +51,7 @@ const styles = reactStyles({
 
 const getConceptIdsToAddOrRemove = (conceptsToFilter: Array<Criteria>, conceptsToCompare: Array<Criteria>) => {
   return conceptsToFilter.reduce((conceptIds, concept) => {
-    if (!conceptsToCompare.find(con => con.conceptId === concept.conceptId)) {
+    if (!conceptsToCompare.find(con => con.conceptId === concept.conceptId && con.isStandard === concept.isStandard)) {
       conceptIds.push({conceptId: concept.conceptId, standard: concept.isStandard});
     }
     return conceptIds;
