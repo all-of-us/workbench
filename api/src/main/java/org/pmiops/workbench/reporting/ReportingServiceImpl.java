@@ -46,6 +46,18 @@ public class ReportingServiceImpl implements ReportingService {
     getConfiguredUploadService().uploadSnapshot(snapshot);
   }
 
+  @Override
+  public void uploadReportingSnapshotDml() {
+    final ReportingSnapshot snapshot = reportingSnapshotService.takeSnapshot();
+    reportingUploadServiceDmlImpl.uploadSnapshot(snapshot);
+  }
+
+  @Override
+  public void uploadReportingSnapshotStreaming() {
+    final ReportingSnapshot snapshot = reportingSnapshotService.takeSnapshot();
+    reportingUploadServiceStreamingImpl.uploadSnapshot(snapshot);
+  }
+
   /*
    * Currently, we can't access appplication config values at initialization time (since they're
    * all request-scoped). This method is a workaround, and selects the upload service implementation
