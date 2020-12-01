@@ -13,7 +13,6 @@ const defaultServerConfig: ConfigResponse = {
   defaultFreeCreditsDollarLimit: 300,
   enableBillingUpgrade: true,
   requireInvitationKey: true,
-  useNewShibbolethService: false,
 };
 
 export default defaultServerConfig;

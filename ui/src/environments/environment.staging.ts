@@ -14,7 +14,6 @@ export const environment: Environment = {
   gaLoggedInDimension: 'dimension2',
   trainingUrl: 'https://aoudev.nnlm.gov',
   zendeskEnv: ZendeskEnv.Sandbox,
-  shibbolethUrl: 'https://shibboleth.dsde-prod.broadinstitute.org',
   inactivityTimeoutSeconds: 30 * 60,
   inactivityWarningBeforeSeconds: 5 * 60,
   enableCaptcha: true,
