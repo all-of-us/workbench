@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="36px" height="36px" viewBox="0 0 36 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>9DCF889C-1F13-4785-9D19-0573E593567F</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="icons" transform="translate(-56.000000, -524.000000)">
+            <g id="RUNNING" transform="translate(19.000000, 424.000000)">
+                <g id="Icons/16x16/Compute/Paused-Copy" transform="translate(37.000000, 100.000000)">
+                    <rect id="Bounding-box" x="0" y="0" width="36" height="36"></rect>
+                    <g id="Group">
+                        <circle id="Oval" fill="#FFFFFF" cx="18" cy="18" r="18"></circle>
+                        <circle id="Oval" fill="#74AE43" cx="17.8010108" cy="17.8010108" r="14.653371"></circle>
+                        <path d="M15.5892857,24.75 C16.3878348,24.75 17.0357143,24.1021205 17.0357143,23.3035714 L17.0357143,12.6964286 C17.0357143,11.8978795 16.3878348,11.25 15.5892857,11.25 L12.6964286,11.25 C11.8978795,11.25 11.25,11.8978795 11.25,12.6964286 L11.25,23.3035714 C11.25,24.1021205 11.8978795,24.75 12.6964286,24.75 L15.5892857,24.75 Z M23.3035714,24.75 C24.1021205,24.75 24.75,24.1021205 24.75,23.3035714 L24.75,12.6964286 C24.75,11.8978795 24.1021205,11.25 23.3035714,11.25 L20.4107143,11.25 C19.6121652,11.25 18.9642857,11.8978795 18.9642857,12.6964286 L18.9642857,23.3035714 C18.9642857,24.1021205 19.6121652,24.75 20.4107143,24.75 L23.3035714,24.75 Z" id="" fill="#FFFFFF" fill-rule="nonzero"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

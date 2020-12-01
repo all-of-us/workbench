@@ -9,6 +9,7 @@ import {WarningMessage} from 'app/components/warning-message';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {
+  DEFAULT,
   reactStyles,
   switchCase,
   withCdrVersions,
@@ -38,6 +39,7 @@ import {
   useRuntimeStatus
 } from 'app/utils/runtime-utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
+
 import {
   BillingAccountType,
   CdrVersionListResponse,
@@ -47,7 +49,6 @@ import {
   RuntimeStatus
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
-
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 import * as React from 'react';
@@ -101,7 +102,7 @@ const styles = reactStyles({
     padding: '0.5rem',
     borderRadius: '0.5em'
   },
-  costPredictor: {
+  costPredictorWrapper: {
     backgroundColor: colorWithWhiteness(colors.accent, 0.85),
     // Not using shorthand here because react doesn't like it when you mix shorthand and non-shorthand,
     // and the border color changes when the runtime does
@@ -109,8 +110,7 @@ const styles = reactStyles({
     borderStyle: 'solid',
     borderColor: colorWithWhiteness(colors.dark, .5),
     borderRadius: '5px',
-    color: colors.dark,
-    marginBottom: '.5rem',
+    color: colors.dark
   },
   costsDrawnFrom: {
     borderLeft: `1px solid ${colorWithWhiteness(colors.dark, .5)}`,
@@ -408,6 +408,135 @@ const PresetSelector = ({
   </PopupTrigger>;
 };
 
+const StartStopRuntimeButton = ({workspaceNamespace}) => {
+  const [status, setRuntimeStatus] = useRuntimeStatus(workspaceNamespace);
+
+  const rotateStyle = {animation: 'rotation 2s infinite linear'};
+  const {altText, iconShape = null, styleOverrides = {}, onClick = null } = switchCase(status,
+    [
+      RuntimeStatus.Creating,
+      () => ({
+        altText: 'Runtime creation in progress',
+        iconShape: 'compute-starting',
+        styleOverrides: rotateStyle
+      })
+    ],
+    [
+      RuntimeStatus.Running,
+      () => ({
+        altText: 'Runtime running, click to pause',
+        iconShape: 'compute-running',
+        onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Stop); }
+      })
+    ],
+    [
+      RuntimeStatus.Updating,
+      () => ({
+        altText: 'Runtime update in progress',
+        iconShape: 'compute-starting',
+        styleOverrides: rotateStyle
+      })
+    ],
+    [
+      RuntimeStatus.Error,
+      () => ({
+        altText: 'Runtime in error state',
+        iconShape: 'compute-error'
+      })
+    ],
+    [
+      RuntimeStatus.Stopping,
+      () => ({
+        altText: 'Runtime pause in progress',
+        iconShape: 'compute-stopping',
+        styleOverrides: rotateStyle
+      })
+    ],
+    [
+      RuntimeStatus.Stopped,
+      () => ({
+        altText: 'Runtime paused, click to resume',
+        iconShape: 'compute-stopped',
+        onClick: () => { setRuntimeStatus(RuntimeStatusRequest.Start); }
+      })
+    ],
+    [
+      RuntimeStatus.Starting,
+      () => ({
+        altText: 'Runtime resume in progress',
+        iconShape: 'compute-starting',
+        styleOverrides: rotateStyle
+      })
+    ],
+    [
+      RuntimeStatus.Deleting,
+      () => ({
+        altText: 'Runtime deletion in progress',
+        iconShape: 'compute-stopping',
+        styleOverrides: rotateStyle,
+      })
+    ],
+    [
+      RuntimeStatus.Deleted,
+      () => ({
+        altText: 'Runtime has been deleted',
+        iconShape: 'compute-none'
+      })
+    ],
+    [
+      RuntimeStatus.Unknown,
+      () => ({
+        altText: 'Runtime status unknown',
+        iconShape: 'compute-none'
+      })
+    ],
+    [
+      DEFAULT,
+      () => ({
+        altText: 'No runtime found',
+        iconShape: 'compute-none'
+      })
+    ]
+  );
+
+  const iconSrc = `/assets/icons/${iconShape}.svg`;
+
+  {/* height/width of the icon wrapper are set so that the img element can rotate inside it */}
+  {/* without making it larger. the svg is 36 x 36 px, per pythagorean theorem the diagonal */}
+  {/* is 50.9px, so we round up */}
+  const iconWrapperStyle = {
+    height: '51px',
+    width: '51px',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  };
+
+  return <FlexRow style={{
+    backgroundColor: addOpacity(colors.primary, 0.1),
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    padding: '0 1rem',
+    borderRadius: '5px 0 0 5px'
+  }}>
+    {/* TooltipTrigger inside the conditionals because it doesn't handle fragments well. */}
+    {
+      onClick && <TooltipTrigger content={<div>{altText}</div>} side='left'>
+        <FlexRow style={iconWrapperStyle}>
+          <Clickable onClick={() => onClick()}>
+            <img alt={altText} src={iconSrc} style={styleOverrides} data-test-id='runtime-status-icon'/>
+          </Clickable>
+        </FlexRow>
+      </TooltipTrigger>
+    }
+    {!onClick && <TooltipTrigger content={<div>{altText}</div>} side='left'>
+        <FlexRow style={iconWrapperStyle}>
+          <img alt={altText} src={iconSrc} style={styleOverrides} data-test-id='runtime-status-icon'/>
+        </FlexRow>
+      </TooltipTrigger>
+    }
+  </FlexRow>;
+};
+
 const CostEstimator = ({
   runtimeParameters,
   costTextColor = colors.accent
@@ -478,8 +607,8 @@ const CostInfo = ({runtimeChanged, runtimeConfig, currentUser, workspace, creato
   return <FlexRow
     style={
       runtimeChanged
-        ? {...styles.costPredictor, backgroundColor: colorWithWhiteness(colors.warning, .9), borderColor: colors.warning}
-        : styles.costPredictor
+        ? {backgroundColor: colorWithWhiteness(colors.warning, .9), borderColor: colors.warning}
+        : {}
     }
     data-test-id='cost-estimator'
   >
@@ -523,12 +652,15 @@ const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelCont
   const workerDiskSize = computeType === ComputeType.Dataproc ? dataprocConfig.workerDiskSize : null;
 
   return <div style={styles.controlSection}>
-    <CostInfo runtimeChanged={false}
-              runtimeConfig={runtimeConfig}
-              currentUser={profile.username}
-              workspace={workspace}
-              creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
-    />
+    <FlexRow style={styles.costPredictorWrapper}>
+      <StartStopRuntimeButton workspaceNamespace={workspace.namespace}/>
+      <CostInfo runtimeChanged={false}
+                runtimeConfig={runtimeConfig}
+                currentUser={profile.username}
+                workspace={workspace}
+                creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
+      />
+    </FlexRow>
     <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
       <h3 style={{...styles.sectionHeader, ...styles.bold}}>Recommended Environment for {displayName}</h3>
       <Button
@@ -581,13 +713,13 @@ const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, u
       <FlexRow style={{marginTop: '.5rem'}}>
         <div style={{marginRight: '1rem'}}>
           <b style={{fontSize: 10}}>New estimated cost</b>
-          <div style={{...styles.costPredictor, padding: '.25rem .5rem'}}>
+          <div style={{...styles.costPredictorWrapper, padding: '.25rem .5rem'}}>
             <CostEstimator runtimeParameters={newRuntimeConfig}/>
           </div>
         </div>
         <div>
           <b style={{fontSize: 10}}>Previous estimated cost</b>
-          <div style={{...styles.costPredictor,
+          <div style={{...styles.costPredictorWrapper,
             padding: '.25rem .5rem',
             color: 'grey',
             backgroundColor: ''}}>
@@ -816,13 +948,15 @@ export const RuntimePanel = fp.flow(
       />],
       [PanelContent.Customize, () => <Fragment>
         <div style={styles.controlSection}>
-          <CostInfo runtimeChanged={runtimeChanged}
-                                runtimeConfig={newRuntimeConfig}
-                                currentUser={profile.username}
-                                workspace={workspace}
-                                creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
-          />
-
+          <FlexRow style={styles.costPredictorWrapper}>
+            <StartStopRuntimeButton workspaceNamespace={workspace.namespace}/>
+            <CostInfo runtimeChanged={runtimeChanged}
+              runtimeConfig={newRuntimeConfig}
+              currentUser={profile.username}
+              workspace={workspace}
+              creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
+              />
+          </FlexRow>
           <PresetSelector
             hasMicroarrayData={hasMicroarrayData}
             disabled={disableControls}

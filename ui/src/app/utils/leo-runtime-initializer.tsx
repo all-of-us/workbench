@@ -333,7 +333,10 @@ export class LeoRuntimeInitializer {
 
     // Attempt to take the appropriate next action given the current runtime status.
     try {
-      if (this.currentRuntime === null || this.isRuntimeDeleted()) {
+      if (this.reachedResolution()) {
+        // We've reached the goal - resolve the Promise.
+        return this.resolve(this.currentRuntime);
+      } else if (this.currentRuntime === null || this.isRuntimeDeleted()) {
         await this.createRuntime();
       } else if (this.isRuntimeStopped()) {
         await this.resumeRuntime();
@@ -343,9 +346,6 @@ export class LeoRuntimeInitializer {
           `Runtime ${this.currentRuntime.googleProject}/${this.currentRuntime.runtimeName}` +
           ` has reached an ERROR status`);
         await this.deleteRuntime();
-      } else if (this.reachedResolution()) {
-        // We've reached the goal - resolve the Promise.
-        return this.resolve(this.currentRuntime);
       }
     } catch (e) {
       if (isAbortError(e)) {

@@ -315,4 +315,10 @@ describe('RuntimeInitializer', () => {
       expect(error.message).toMatch(/max runtime resume count/i);
     }
   });
+
+  it('should respect custom resolutionCondition', async() => {
+    mockGetRuntimeCalls([{status: RuntimeStatus.Stopped}]);
+    await runInitializerAndTimers({resolutionCondition: (runtime) => runtime.status === RuntimeStatus.Stopped});
+    expect(mockStartRuntime).not.toHaveBeenCalled();
+  })
 });
