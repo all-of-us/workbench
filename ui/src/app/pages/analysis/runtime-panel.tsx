@@ -491,7 +491,7 @@ const StartStopRuntimeButton = ({workspaceNamespace}) => {
     width: '51px',
     justifyContent: 'space-around',
     alignItems: 'center',
-  }
+  };
 
   return <FlexRow style={{
     backgroundColor: addOpacity(colors.primary, 0.1),
