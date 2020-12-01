@@ -333,7 +333,9 @@ export class LeoRuntimeInitializer {
 
     // Attempt to take the appropriate next action given the current runtime status.
     try {
+      console.log(this.currentRuntime);
       if (this.currentRuntime === null || this.isRuntimeDeleted()) {
+        console.log('creating runtime');
         await this.createRuntime();
       } else if (this.isRuntimeStopped()) {
         await this.resumeRuntime();

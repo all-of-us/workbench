@@ -19,6 +19,8 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {defaultDataprocConfig, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
+import {defaultGceConfig} from '../../../testing/stubs/runtime-api-stub';
+import {findMachineByName} from '../../utils/machines';
 
 describe('RuntimePanel', () => {
   let props: Props;
@@ -159,6 +161,28 @@ describe('RuntimePanel', () => {
     expect(runtimeApiStub.runtime.gceConfig.machineType).toEqual('n1-standard-4');
   });
 
+  it('should create runtime with preset values instead of getRuntime values if configurationType is GeneralAnalysis', async() => {
+    const gceConfig = defaultGceConfig();
+    gceConfig.machineType = 'n1-standard-16';
+    gceConfig.diskSize = 1000;
+    const runtime = {...runtimeApiStub.runtime,
+      status: RuntimeStatus.Deleted,
+      configurationType: RuntimeConfigurationType.GeneralAnalysis,
+      gceConfig: gceConfig,
+      dataprocConfig: null
+    };
+    runtimeApiStub.runtime = runtime;
+    act(() => { runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace}); });
+
+    const wrapper = await component();
+
+    await mustClickButton(wrapper, 'Create');
+
+    expect(runtimeApiStub.runtime.status).toEqual('Creating');
+    expect(runtimeApiStub.runtime.gceConfig.machineType).toEqual(runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType);
+    expect(runtimeApiStub.runtime.gceConfig.diskSize).toEqual(runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.diskSize);
+  });
+
   it('should allow creation when runtime has error status', async() => {
     runtimeApiStub.runtime.status = RuntimeStatus.Error;
     act(() => { runtimeStore.set({runtime: runtimeApiStub.runtime, workspaceNamespace: workspaceStubs[0].namespace}) });
@@ -276,6 +300,28 @@ describe('RuntimePanel', () => {
     expect(runtimeApiStub.runtime.dataprocConfig)
       .toEqual(runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig);
     expect(runtimeApiStub.runtime.gceConfig).toBeFalsy();
+  });
+
+  it('should set runtime preset values in customize panel instead of getRuntime values if configurationType is GeneralAnalysis', async() => {
+    const gceConfig = defaultGceConfig();
+    gceConfig.machineType = 'n1-standard-16';
+    gceConfig.diskSize = 1000;
+    const runtime = {...runtimeApiStub.runtime,
+      status: RuntimeStatus.Deleted,
+      configurationType: RuntimeConfigurationType.GeneralAnalysis,
+      gceConfig: gceConfig,
+      dataprocConfig: null
+    };
+    runtimeApiStub.runtime = runtime;
+    act(() => { runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace}); });
+
+    const wrapper = await component();
+
+    await mustClickButton(wrapper, 'Customize');
+
+    expect(getMainCpu(wrapper)).toEqual(findMachineByName(runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType).cpu);
+    expect(getMainRam(wrapper)).toEqual(findMachineByName(runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType).memory);
+    expect(getMainDiskSize(wrapper)).toEqual(runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.diskSize);
   });
 
   it('should allow configuration via dataproc preset from modified form', async() => {

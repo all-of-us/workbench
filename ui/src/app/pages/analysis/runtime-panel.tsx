@@ -516,7 +516,7 @@ const CostInfo = ({runtimeChanged, runtimeConfig, currentUser, workspace, creato
   </FlexRow>;
 };
 
-const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelContent, workspace, runtimeConfig}) => {
+const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelContent, workspace}) => {
   const {
     displayName,
     runtimeTemplate: {gceConfig = null, dataprocConfig = null}
@@ -531,7 +531,12 @@ const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelCont
 
   return <div style={styles.controlSection}>
     <CostInfo runtimeChanged={false}
-              runtimeConfig={runtimeConfig}
+              runtimeConfig={{
+                computeType,
+                diskSize: masterDiskSize,
+                machine: findMachineByName(masterMachineType),
+                dataprocConfig: dataprocConfig
+              }}
               currentUser={profile.username}
               workspace={workspace}
               creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
@@ -558,7 +563,7 @@ const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelCont
         <b> {dataprocConfig.numberOfWorkers} worker(s) </b>
         {
           dataprocConfig.numberOfPreemptibleWorkers > 0 &&
-          <b>and {dataprocConfig.numberOfPreemptibleWorkers}  preemptible worker(s) </b>
+          <b>and {dataprocConfig.numberOfPreemptibleWorkers} preemptible worker(s) </b>
         }
         each with compute size of <b>{workerMachine.cpu} CPUs</b>,
         <b> {workerMachine.memory} GB memory</b>, and a
@@ -652,6 +657,17 @@ export const RuntimePanel = fp.flow(
   const {hasMicroarrayData} = fp.find({cdrVersionId}, cdrVersionListResponse.items) || {hasMicroarrayData: false};
   const [{currentRuntime, pendingRuntime}, setRequestedRuntime] = useCustomRuntime(namespace);
 
+  // if runtime configuration type is a default, override its config with preset values
+  if (!!currentRuntime && currentRuntime.status === RuntimeStatus.Deleted) {
+    if (currentRuntime.configurationType === RuntimeConfigurationType.GeneralAnalysis) {
+      currentRuntime.gceConfig = runtimePresets.generalAnalysis.runtimeTemplate.gceConfig;
+      currentRuntime.dataprocConfig = null;
+    } else if (currentRuntime.configurationType === RuntimeConfigurationType.HailGenomicAnalysis) {
+      currentRuntime.dataprocConfig = runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig;
+      currentRuntime.gceConfig = null;
+    }
+  }
+
   // Prioritize the "pendingRuntime", if any. When an update is pending, we want
   // to render the target runtime details, which  may not match the current runtime.
   const {dataprocConfig = null, gceConfig = {diskSize: defaultDiskSize}} = pendingRuntime || currentRuntime || {} as Partial<Runtime>;
@@ -667,11 +683,17 @@ export const RuntimePanel = fp.flow(
     // currentRuntime being undefined means the first `getRuntime` has still not completed.
     [([r, ]) => r === undefined, () => PanelContent.Customize],
     [([r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
+    [([r, ]) => r.status === RuntimeStatus.Deleted &&
+      (r.configurationType === RuntimeConfigurationType.GeneralAnalysis || r.configurationType === RuntimeConfigurationType.HailGenomicAnalysis),
+      () => PanelContent.Create],
     [() => true, () => PanelContent.Customize]
   ])([currentRuntime, status]);
   const [panelContent, setPanelContent] = useState<PanelContent>(initialPanelContent);
 
-  const initialPreset = runtimePresets.generalAnalysis;
+  const initialPreset = !currentRuntime ? runtimePresets.generalAnalysis :
+    currentRuntime.configurationType === RuntimeConfigurationType.GeneralAnalysis ? runtimePresets.generalAnalysis :
+    currentRuntime.configurationType === RuntimeConfigurationType.HailGenomicAnalysis ? runtimePresets.hailAnalysis :
+    runtimePresets.generalAnalysis;
 
   const [selectedDiskSize, setSelectedDiskSize] = useState(diskSize);
   const [selectedMachine, setSelectedMachine] = useState(initialMasterMachine);
@@ -761,6 +783,7 @@ export const RuntimePanel = fp.flow(
     return <Button
       aria-label='Create'
       onClick={() => {
+        console.log('Create Clicked');
         setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
         onUpdate();
       }}>
@@ -795,7 +818,6 @@ export const RuntimePanel = fp.flow(
               profile={profile}
               setPanelContent={(value) => setPanelContent(value)}
               workspace={workspace}
-              runtimeConfig={newRuntimeConfig}
           />
           <FlexRow style={{justifyContent: 'flex-end', marginTop: '1rem'}}>
             {renderCreateButton()}

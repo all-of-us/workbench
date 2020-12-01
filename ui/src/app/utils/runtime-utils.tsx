@@ -341,6 +341,8 @@ export const useCustomRuntime = (currentWorkspaceNamespace):
           }
         }
 
+        console.log(runtime);
+        console.log('awaiting');
         await LeoRuntimeInitializer.initialize({
           workspaceNamespace,
           targetRuntime: requestedRuntime,
