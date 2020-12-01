@@ -37,6 +37,7 @@ import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
+import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.ConceptIdName;
@@ -109,8 +110,30 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   @Override
   public List<Criteria> findCriteriaByDomainIdAndConceptIds(
-      String domainId, Collection<String> conceptIds) {
-    return cbCriteriaDao.findCriteriaByDomainIdAndConceptIds(domainId, conceptIds).stream()
+      String domainId, Collection<DbConceptSetConceptId> dbConceptSetConceptIds) {
+    List<DbCriteria> criteriaList = new ArrayList<>();
+    Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
+        dbConceptSetConceptIds.stream()
+            .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
+    List<DbConceptSetConceptId> standard = partitionSourceAndStandard.get(true);
+    List<DbConceptSetConceptId> source = partitionSourceAndStandard.get(false);
+    if (!standard.isEmpty()) {
+      criteriaList.addAll(
+          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(
+              domainId,
+              true,
+              standard.stream()
+                  .map(c -> c.getConceptId().toString())
+                  .collect(Collectors.toList())));
+    }
+    if (!source.isEmpty()) {
+      criteriaList.addAll(
+          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(
+              domainId,
+              false,
+              source.stream().map(c -> c.getConceptId().toString()).collect(Collectors.toList())));
+    }
+    return criteriaList.stream()
         .map(cohortBuilderMapper::dbModelToClient)
         .sorted(Ordering.from(String.CASE_INSENSITIVE_ORDER).onResultOf(Criteria::getName))
         .collect(Collectors.toList());

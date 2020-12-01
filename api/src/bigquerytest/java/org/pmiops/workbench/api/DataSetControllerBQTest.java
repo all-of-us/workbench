@@ -51,6 +51,7 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -337,7 +338,10 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private DbConceptSet createConceptSet(Domain domain, long workspaceId) {
     DbConceptSet dbConceptSet = new DbConceptSet();
     dbConceptSet.setDomain(DbStorageEnums.domainToStorage(domain));
-    dbConceptSet.setConceptIds(new HashSet<>(Collections.singletonList(1L)));
+    DbConceptSetConceptId dbConceptSetConceptId =
+        DbConceptSetConceptId.builder().addConceptId(1L).addStandard(true).build();
+    dbConceptSet.setConceptSetConceptIds(
+        new HashSet<>(Collections.singletonList(dbConceptSetConceptId)));
     dbConceptSet.setWorkspaceId(workspaceId);
     return dbConceptSet;
   }

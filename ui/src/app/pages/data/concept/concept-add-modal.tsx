@@ -107,7 +107,10 @@ export const ConceptAddModal = withCurrentWorkspace()
     const {selectedSet, addingToExistingSet, newSetDescription, name, selectedConceptsInDomain} = this.state;
     conceptSetUpdating.next(true);
     this.setState({saving: true});
-    const conceptIds = fp.map(selected => selected.conceptId, selectedConceptsInDomain);
+    const conceptIds = fp.map(
+      selected => ({conceptId: selected.conceptId, standard: selected.isStandard}),
+      selectedConceptsInDomain
+    );
 
     // This is added temporary until users can create concept sets of Domain PERSON,
     // in the meantime there will be default Demogrpahics Concept Set on DATASET PAGE
@@ -122,7 +125,7 @@ export const ConceptAddModal = withCurrentWorkspace()
     if (addingToExistingSet) {
       const updateConceptSetReq: UpdateConceptSetRequest = {
         etag: selectedSet.etag,
-        addedIds: conceptIds
+        addedConceptSetConceptIds: conceptIds
       };
       try {
         const conceptSet = await conceptSetsApi().updateConceptSetConcepts(namespace, id, selectedSet.id, updateConceptSetReq);
@@ -133,7 +136,7 @@ export const ConceptAddModal = withCurrentWorkspace()
       }
     } else {
       const conceptSet: ConceptSet = {name, description: newSetDescription, domain};
-      const request: CreateConceptSetRequest = {conceptSet, addedIds: conceptIds};
+      const request: CreateConceptSetRequest = {conceptSet, addedConceptSetConceptIds: conceptIds};
       try {
         const createdConceptSet = await conceptSetsApi().createConceptSet(namespace, id, request);
         this.setState({saving: false});

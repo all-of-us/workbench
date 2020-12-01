@@ -399,7 +399,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
     }
 
     getParamId(row: any) {
-      return `param${row.conceptId ? (row.conceptId + row.code) : row.id}`;
+      return `param${row.conceptId ? (row.conceptId + row.code) : row.id}${row.isStandard}`;
     }
 
     trackEvent = (label: string) => {

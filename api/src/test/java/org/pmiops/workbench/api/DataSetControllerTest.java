@@ -102,6 +102,7 @@ import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
+import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DataSetExportRequest;
@@ -360,10 +361,20 @@ public class DataSetControllerTest {
             .domain(Domain.CONDITION)
             .concepts(conceptList);
 
+    List<ConceptSetConceptId> conceptSetConceptIds =
+        conceptList.stream()
+            .map(
+                c -> {
+                  ConceptSetConceptId conceptSetConceptId = new ConceptSetConceptId();
+                  conceptSetConceptId.setConceptId(c.getConceptId());
+                  conceptSetConceptId.setStandard(true);
+                  return conceptSetConceptId;
+                })
+            .collect(Collectors.toList());
     CreateConceptSetRequest conceptSetRequest =
         new CreateConceptSetRequest()
             .conceptSet(conceptSet)
-            .addedIds(conceptList.stream().map(Concept::getConceptId).collect(Collectors.toList()));
+            .addedConceptSetConceptIds(conceptSetConceptIds);
 
     conceptSet =
         conceptSetsController
@@ -396,7 +407,7 @@ public class DataSetControllerTest {
     CreateConceptSetRequest conceptSetRequest1 =
         new CreateConceptSetRequest()
             .conceptSet(conceptSurveySet)
-            .addedIds(conceptList.stream().map(Concept::getConceptId).collect(Collectors.toList()));
+            .addedConceptSetConceptIds(conceptSetConceptIds);
 
     conceptSurveySet =
         conceptSetsController
@@ -414,7 +425,7 @@ public class DataSetControllerTest {
     CreateConceptSetRequest conceptSetTwoRequest =
         new CreateConceptSetRequest()
             .conceptSet(conceptSetTwo)
-            .addedIds(conceptList.stream().map(Concept::getConceptId).collect(Collectors.toList()));
+            .addedConceptSetConceptIds(conceptSetConceptIds);
 
     conceptSetTwo =
         conceptSetsController

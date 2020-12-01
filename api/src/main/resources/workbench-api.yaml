@@ -4803,6 +4803,18 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/Criteria"
+  ConceptSetConceptId:
+    type: object
+    required:
+    - conceptId
+    - standard
+    properties:
+      conceptId:
+        type: integer
+        format: int64
+      standard:
+        type: boolean
+        default: true
   CreateConceptSetRequest:
     type: object
     required:
@@ -4811,12 +4823,11 @@ definitions:
       conceptSet:
         description: Concept set to be created; concepts is ignored
         "$ref": "#/definitions/ConceptSet"
-      addedIds:
+      addedConceptSetConceptIds:
         type: array
         description: The IDs of concepts to be added to the concept set.
         items:
-          type: integer
-          format: int64
+          "$ref": "#/definitions/ConceptSetConceptId"
   UpdateConceptSetRequest:
     type: object
     required:
@@ -4826,18 +4837,16 @@ definitions:
         type: string
         description: 'Etag of the concept set being modified. Validates that the concept
           set has not been modified since this etag was retrieved.'
-      addedIds:
+      addedConceptSetConceptIds:
         type: array
-        description: 'The IDs of concepts to be added to the concept set.'
+        description: The IDs of concepts to be added to the concept set.
         items:
-          type: integer
-          format: int64
-      removedIds:
+          "$ref": "#/definitions/ConceptSetConceptId"
+      removedConceptSetConceptIds:
         type: array
-        description: 'The IDs of concepts to be removed from the concept set.'
+        description: The IDs of concepts to be added to the concept set.
         items:
-          type: integer
-          format: int64
+          "$ref": "#/definitions/ConceptSetConceptId"
   DataSetRequest:
     type: object
     required:

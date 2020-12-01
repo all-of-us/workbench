@@ -3,6 +3,7 @@ package org.pmiops.workbench.cohortbuilder;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.Criteria;
@@ -21,7 +22,7 @@ import org.pmiops.workbench.model.SurveyVersion;
 public interface CohortBuilderService {
 
   List<Criteria> findCriteriaByDomainIdAndConceptIds(
-      String domainId, Collection<String> conceptIds);
+      String domainId, Collection<DbConceptSetConceptId> dbConceptSetConceptIds);
 
   Long countParticipants(SearchRequest request);
 

@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
@@ -52,6 +53,7 @@ import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
@@ -168,11 +170,15 @@ public class DataSetServiceTest {
     return cohortDbModel;
   }
 
-  private DbConceptSet buildConceptSet(long conceptSetId, Domain domain, Set<Long> conceptIds) {
+  private DbConceptSet buildConceptSet(
+      long conceptSetId, Domain domain, boolean standard, Set<Long> conceptIds) {
     DbConceptSet result = new DbConceptSet();
     result.setConceptSetId(conceptSetId);
     result.setDomain(domainToStorage(domain));
-    result.setConceptIds(conceptIds);
+    result.setConceptSetConceptIds(
+        conceptIds.stream()
+            .map(c -> DbConceptSetConceptId.builder().addConceptId(c).addStandard(standard).build())
+            .collect(Collectors.toSet()));
     return result;
   }
 
@@ -204,7 +210,7 @@ public class DataSetServiceTest {
   public void testRejectsConceptSetListWithNoConcepts() {
     final DbConceptSet conceptSet1 = new DbConceptSet();
     conceptSet1.setDomain((short) Domain.DEVICE.ordinal());
-    conceptSet1.setConceptIds(Collections.emptySet());
+    conceptSet1.setConceptSetConceptIds(Collections.emptySet());
     final boolean isValid =
         dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
             ImmutableList.of(conceptSet1));
@@ -215,11 +221,25 @@ public class DataSetServiceTest {
   public void testAcceptsTwoDomainsWithConcepts() {
     final DbConceptSet conceptSet1 = new DbConceptSet();
     conceptSet1.setDomain((short) Domain.DEVICE.ordinal());
-    conceptSet1.setConceptIds(ImmutableSet.of(1L, 2L, 3L));
+    DbConceptSetConceptId dbConceptSetConceptId1 =
+        DbConceptSetConceptId.builder().addConceptId(1L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId2 =
+        DbConceptSetConceptId.builder().addConceptId(2L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId3 =
+        DbConceptSetConceptId.builder().addConceptId(3L).addStandard(true).build();
+    conceptSet1.setConceptSetConceptIds(
+        ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2, dbConceptSetConceptId3));
 
     final DbConceptSet conceptSet2 = new DbConceptSet();
     conceptSet2.setDomain((short) Domain.PERSON.ordinal());
-    conceptSet2.setConceptIds(ImmutableSet.of(4L, 5L, 6L));
+    DbConceptSetConceptId dbConceptSetConceptId4 =
+        DbConceptSetConceptId.builder().addConceptId(4L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId5 =
+        DbConceptSetConceptId.builder().addConceptId(5L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId6 =
+        DbConceptSetConceptId.builder().addConceptId(6L).addStandard(true).build();
+    conceptSet2.setConceptSetConceptIds(
+        ImmutableSet.of(dbConceptSetConceptId4, dbConceptSetConceptId5, dbConceptSetConceptId6));
 
     final boolean isValid =
         dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
@@ -231,15 +251,29 @@ public class DataSetServiceTest {
   public void testRejectsSomeDomainsWithConceptsSomeWithout() {
     final DbConceptSet conceptSet1 = new DbConceptSet();
     conceptSet1.setDomain((short) Domain.DEVICE.ordinal());
-    conceptSet1.setConceptIds(ImmutableSet.of(1L, 2L, 3L));
+    DbConceptSetConceptId dbConceptSetConceptId1 =
+        DbConceptSetConceptId.builder().addConceptId(1L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId2 =
+        DbConceptSetConceptId.builder().addConceptId(2L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId3 =
+        DbConceptSetConceptId.builder().addConceptId(3L).addStandard(true).build();
+    conceptSet1.setConceptSetConceptIds(
+        ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2, dbConceptSetConceptId3));
 
     final DbConceptSet conceptSet2 = new DbConceptSet();
     conceptSet2.setDomain((short) Domain.PERSON.ordinal());
-    conceptSet2.setConceptIds(ImmutableSet.of(4L, 5L, 6L));
+    DbConceptSetConceptId dbConceptSetConceptId4 =
+        DbConceptSetConceptId.builder().addConceptId(4L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId5 =
+        DbConceptSetConceptId.builder().addConceptId(5L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId6 =
+        DbConceptSetConceptId.builder().addConceptId(6L).addStandard(true).build();
+    conceptSet2.setConceptSetConceptIds(
+        ImmutableSet.of(dbConceptSetConceptId4, dbConceptSetConceptId5, dbConceptSetConceptId6));
 
     final DbConceptSet conceptSet3 = new DbConceptSet();
     conceptSet3.setDomain((short) Domain.DRUG.ordinal());
-    conceptSet3.setConceptIds(Collections.emptySet());
+    conceptSet3.setConceptSetConceptIds(Collections.emptySet());
 
     final boolean isValid =
         dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
@@ -251,15 +285,29 @@ public class DataSetServiceTest {
   public void testAcceptsEmptyConceptSetIfDomainIsPopulated() {
     final DbConceptSet conceptSet1 = new DbConceptSet();
     conceptSet1.setDomain((short) Domain.DEVICE.ordinal());
-    conceptSet1.setConceptIds(ImmutableSet.of(1L, 2L, 3L));
+    DbConceptSetConceptId dbConceptSetConceptId1 =
+        DbConceptSetConceptId.builder().addConceptId(1L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId2 =
+        DbConceptSetConceptId.builder().addConceptId(2L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId3 =
+        DbConceptSetConceptId.builder().addConceptId(3L).addStandard(true).build();
+    conceptSet1.setConceptSetConceptIds(
+        ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2, dbConceptSetConceptId3));
 
     final DbConceptSet conceptSet2 = new DbConceptSet();
     conceptSet2.setDomain((short) Domain.PERSON.ordinal());
-    conceptSet2.setConceptIds(ImmutableSet.of(4L, 5L, 6L));
+    DbConceptSetConceptId dbConceptSetConceptId4 =
+        DbConceptSetConceptId.builder().addConceptId(4L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId5 =
+        DbConceptSetConceptId.builder().addConceptId(5L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId6 =
+        DbConceptSetConceptId.builder().addConceptId(6L).addStandard(true).build();
+    conceptSet2.setConceptSetConceptIds(
+        ImmutableSet.of(dbConceptSetConceptId4, dbConceptSetConceptId5, dbConceptSetConceptId6));
 
     final DbConceptSet conceptSet3 = new DbConceptSet();
     conceptSet3.setDomain((short) Domain.DEVICE.ordinal());
-    conceptSet3.setConceptIds(Collections.emptySet());
+    conceptSet3.setConceptSetConceptIds(Collections.emptySet());
 
     final boolean isValid =
         dataSetServiceImpl.conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
@@ -278,28 +326,30 @@ public class DataSetServiceTest {
   @Test
   public void testBuildConceptIdListClause_same() {
     Domain domain1 = Domain.CONDITION;
-    DbConceptSet conceptSet1 = buildConceptSet(1L, domain1, ImmutableSet.of(1L, 2L, 3L));
-    DbConceptSet conceptSet2 = buildConceptSet(2L, domain1, ImmutableSet.of(4L, 5L, 6L));
+    DbConceptSet conceptSet1 = buildConceptSet(1L, domain1, true, ImmutableSet.of(1L, 2L, 3L));
+    DbConceptSet conceptSet2 = buildConceptSet(2L, domain1, true, ImmutableSet.of(4L, 5L, 6L));
     Optional<String> listClauseMaybe =
         dataSetServiceImpl.buildConceptIdListClause(
             domain1, ImmutableList.of(conceptSet1, conceptSet2));
-    assertThat(listClauseMaybe.map(String::trim).orElse("")).isEqualTo("IN (1, 2, 3, 4, 5, 6)");
+    assertThat(listClauseMaybe.map(String::trim).orElse("")).isEqualTo("IN (3, 2, 1, 6, 5, 4)");
   }
 
   @Test
   public void testBuildConceptIdListClause_differentDomains() {
-    DbConceptSet conceptSet1 = buildConceptSet(1L, Domain.CONDITION, ImmutableSet.of(1L, 2L, 3L));
-    DbConceptSet conceptSet2 = buildConceptSet(2L, Domain.DRUG, ImmutableSet.of(4L, 5L, 6L));
+    DbConceptSet conceptSet1 =
+        buildConceptSet(1L, Domain.CONDITION, true, ImmutableSet.of(1L, 2L, 3L));
+    DbConceptSet conceptSet2 = buildConceptSet(2L, Domain.DRUG, true, ImmutableSet.of(4L, 5L, 6L));
     Optional<String> listClauseMaybe =
         dataSetServiceImpl.buildConceptIdListClause(
             Domain.CONDITION, ImmutableList.of(conceptSet1, conceptSet2));
-    assertThat(listClauseMaybe.map(String::trim).orElse("")).isEqualTo("IN (1, 2, 3)");
+    assertThat(listClauseMaybe.map(String::trim).orElse("")).isEqualTo("IN (3, 2, 1)");
   }
 
   @Test
   public void testBuildConceptIdListClause_noClauseForPersonDomain() {
-    DbConceptSet conceptSet1 = buildConceptSet(1L, Domain.CONDITION, ImmutableSet.of(1L, 2L, 3L));
-    DbConceptSet conceptSet2 = buildConceptSet(2L, Domain.DRUG, ImmutableSet.of(4L, 5L, 6L));
+    DbConceptSet conceptSet1 =
+        buildConceptSet(1L, Domain.CONDITION, true, ImmutableSet.of(1L, 2L, 3L));
+    DbConceptSet conceptSet2 = buildConceptSet(2L, Domain.DRUG, true, ImmutableSet.of(4L, 5L, 6L));
     Optional<String> listClauseMaybe =
         dataSetServiceImpl.buildConceptIdListClause(
             Domain.PERSON, ImmutableList.of(conceptSet1, conceptSet2));

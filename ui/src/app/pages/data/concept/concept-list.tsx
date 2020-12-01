@@ -33,6 +33,14 @@ const styles = reactStyles({
     overflowX: 'hidden',
     overflowY: 'auto',
   },
+  selectionHeader: {
+    borderBottom: `1px solid ${colors.disabled}`,
+    color: colors.primary,
+    display: 'inline-block',
+    fontSize: '13px',
+    fontWeight: 600,
+    paddingRight: '0.25rem'
+  },
   removeSelection: {
     background: 'none',
     border: 0,
@@ -51,8 +59,8 @@ const styles = reactStyles({
 
 const getConceptIdsToAddOrRemove = (conceptsToFilter: Array<Criteria>, conceptsToCompare: Array<Criteria>) => {
   return conceptsToFilter.reduce((conceptIds, concept) => {
-    if (!conceptsToCompare.find(con => con.conceptId === concept.conceptId)) {
-      conceptIds.push(concept.conceptId);
+    if (!conceptsToCompare.find(con => con.conceptId === concept.conceptId && con.isStandard === concept.isStandard)) {
+      conceptIds.push({conceptId: concept.conceptId, standard: concept.isStandard});
     }
     return conceptIds;
   }, []);
@@ -83,13 +91,13 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
       conceptSetUpdating.next(true);
       this.setState({updating: true});
       // Selections that don't exist on the existing concept set are added
-      const addedIds = getConceptIdsToAddOrRemove(concept, conceptSet.criteriums);
+      const addedConceptSetConceptIds = getConceptIdsToAddOrRemove(concept, conceptSet.criteriums);
       // Concept ids on the existing concept set that don't exist on the selections get removed
-      const removedIds = getConceptIdsToAddOrRemove(conceptSet.criteriums, concept);
+      const removedConceptSetConceptIds = getConceptIdsToAddOrRemove(conceptSet.criteriums, concept);
       const updateConceptSetReq: UpdateConceptSetRequest = {
         etag: conceptSet.etag,
-        addedIds,
-        removedIds
+        addedConceptSetConceptIds,
+        removedConceptSetConceptIds
       };
       try {
         const updatedConceptSet = await conceptSetsApi().updateConceptSetConcepts(namespace, id, conceptSet.id, updateConceptSetReq);
@@ -141,26 +149,53 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
       setSidebarActiveIconStore.next(undefined);
     }
 
+    renderSelection(selection: any, index: number) {
+      return <FlexRow key={index} style={{lineHeight: '1.25rem'}}>
+        <button style={styles.removeSelection} onClick={() => this.removeSelection(selection)}>
+          <ClrIcon shape='times-circle'/>
+        </button>
+        <b style={{paddingRight: '0.25rem'}}>{selection.conceptCode}</b>
+        {selection.name ? selection.name : selection.question}
+      </FlexRow>;
+    }
+
+    renderSelections() {
+      const {concept} = this.props;
+      if ([Domain.CONDITION, Domain.PROCEDURE].includes(concept[0].domainId)) {
+        // Separate selections by standard and source concepts for Condition and Procedures
+        const standardConcepts = concept.filter(con => con.isStandard);
+        const sourceConcepts = concept.filter(con => !con.isStandard);
+        return <React.Fragment>
+          {standardConcepts.length > 0 && <div style={{marginBottom: '0.5rem'}}>
+            <div style={styles.selectionHeader}>Standard Concepts</div>
+            {standardConcepts.map((con, index) => this.renderSelection(con, index))}
+          </div>}
+          {sourceConcepts.length > 0 && <div>
+            <div style={styles.selectionHeader}>Source Concepts</div>
+            {sourceConcepts.map((con, index) => this.renderSelection(con, index))}
+          </div>}
+        </React.Fragment>;
+      } else {
+        return concept.map((con, index) => this.renderSelection(con, index));
+      }
+    }
+
     render() {
+      const {concept} = this.props;
       const {conceptAddModalOpen, updating} = this.state;
       return <div>
-        <FlexRow><h3 style={styles.sectionTitle}>Selected Concepts</h3>
+        <FlexRow>
+          <h3 style={styles.sectionTitle}>Selected Concepts</h3>
           <Clickable style={{marginRight: '1rem', position: 'absolute', right: '0px'}}
                      onClick={() => setSidebarActiveIconStore.next(undefined)}>
             <img src={'/assets/icons/times-light.svg'}
                  style={{height: '27px', width: '17px'}}
                  alt='Close'/>
-          </Clickable></FlexRow>
-
+          </Clickable>
+        </FlexRow>
         <div style={styles.selectionContainer}>
           {updating && <SpinnerOverlay/>}
-          {this.props.concept.map((con, index) => <FlexRow key={index} style={{lineHeight: '1.25rem'}}>
-            <button style={styles.removeSelection} onClick={() => this.removeSelection(con)}>
-              <ClrIcon shape='times-circle'/>
-            </button>
-            <b style={{paddingRight: '0.25rem'}}>{con.conceptCode}</b>
-            {con.name ? con.name : con.question}
-          </FlexRow>)}
+          {!!concept && concept.length > 0 && this.renderSelections()}
         </div>
         <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '1rem'}}>
           <Button type='primary'

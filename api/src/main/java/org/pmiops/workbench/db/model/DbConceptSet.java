@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -35,7 +36,7 @@ public class DbConceptSet {
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
   private int participantCount;
-  private Set<Long> conceptIds = new HashSet<>();
+  private Set<DbConceptSetConceptId> dbConceptSetConceptIds = new HashSet<>();
 
   public DbConceptSet() {
     setVersion(DbConceptSet.INITIAL_VERSION);
@@ -75,7 +76,7 @@ public class DbConceptSet {
     setCreationTime(cs.getCreationTime());
     setLastModifiedTime(cs.getLastModifiedTime());
     setParticipantCount(cs.getParticipantCount());
-    setConceptIds(new HashSet<>(cs.getConceptIds()));
+    setConceptSetConceptIds(new HashSet<>(cs.getConceptSetConceptIds()));
   }
 
   @Id
@@ -204,11 +205,49 @@ public class DbConceptSet {
       name = "concept_set_concept_id",
       joinColumns = @JoinColumn(name = "concept_set_id"))
   @Column(name = "concept_id")
-  public Set<Long> getConceptIds() {
-    return conceptIds;
+  public Set<DbConceptSetConceptId> getConceptSetConceptIds() {
+    return dbConceptSetConceptIds;
   }
 
-  public void setConceptIds(Set<Long> conceptIds) {
-    this.conceptIds = conceptIds;
+  public void setConceptSetConceptIds(Set<DbConceptSetConceptId> dbConceptSetConceptIds) {
+    this.dbConceptSetConceptIds = dbConceptSetConceptIds;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    DbConceptSet that = (DbConceptSet) o;
+    return version == that.version
+        && domain == that.domain
+        && workspaceId == that.workspaceId
+        && participantCount == that.participantCount
+        && Objects.equals(name, that.name)
+        && Objects.equals(survey, that.survey)
+        && Objects.equals(description, that.description)
+        && Objects.equals(creator, that.creator)
+        && Objects.equals(creationTime, that.creationTime)
+        && Objects.equals(lastModifiedTime, that.lastModifiedTime)
+        && Objects.equals(dbConceptSetConceptIds, that.dbConceptSetConceptIds);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        version,
+        name,
+        domain,
+        survey,
+        description,
+        workspaceId,
+        creator,
+        creationTime,
+        lastModifiedTime,
+        participantCount,
+        dbConceptSetConceptIds);
   }
 }

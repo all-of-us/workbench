@@ -111,6 +111,7 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbConceptSet;
+import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
@@ -139,6 +140,7 @@ import org.pmiops.workbench.model.CohortAnnotationDefinitionListResponse;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
+import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.CreateReviewRequest;
@@ -1497,11 +1499,24 @@ public class WorkspacesControllerTest {
                     .cohortReviewId(cr2.getCohortReviewId()))
             .getBody();
 
+    DbConceptSetConceptId dbConceptSetConceptId1 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_1.getConceptId())
+            .addStandard(true)
+            .build();
+    DbConceptSetConceptId dbConceptSetConceptId2 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_2.getConceptId())
+            .addStandard(true)
+            .build();
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION,
             "condition_occurrence",
-            ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
+            ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
         .thenReturn(123);
+    ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
+    conceptSetConceptId1.setConceptId(CONCEPT_1.getConceptId());
+    conceptSetConceptId1.setStandard(true);
     ConceptSet conceptSet1 =
         conceptSetsController
             .createConceptSet(
@@ -1510,8 +1525,11 @@ public class WorkspacesControllerTest {
                 new CreateConceptSetRequest()
                     .conceptSet(
                         new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
-                    .addAddedIdsItem(CONCEPT_1.getConceptId()))
+                    .addAddedConceptSetConceptIdsItem(conceptSetConceptId1))
             .getBody();
+    ConceptSetConceptId conceptSetConceptId2 = new ConceptSetConceptId();
+    conceptSetConceptId2.setConceptId(CONCEPT_3.getConceptId());
+    conceptSetConceptId2.setStandard(true);
     ConceptSet conceptSet2 =
         conceptSetsController
             .createConceptSet(
@@ -1520,8 +1538,14 @@ public class WorkspacesControllerTest {
                 new CreateConceptSetRequest()
                     .conceptSet(
                         new ConceptSet().name("cs2").description("d2").domain(Domain.MEASUREMENT))
-                    .addAddedIdsItem(CONCEPT_3.getConceptId()))
+                    .addAddedConceptSetConceptIdsItem(conceptSetConceptId2))
             .getBody();
+    ConceptSetConceptId conceptSetConceptId3 = new ConceptSetConceptId();
+    conceptSetConceptId3.setConceptId(CLIENT_CONCEPT_1.getConceptId());
+    conceptSetConceptId3.setStandard(true);
+    ConceptSetConceptId conceptSetConceptId4 = new ConceptSetConceptId();
+    conceptSetConceptId4.setConceptId(CLIENT_CONCEPT_2.getConceptId());
+    conceptSetConceptId4.setStandard(true);
     conceptSet1 =
         conceptSetsController
             .updateConceptSetConcepts(
@@ -1530,9 +1554,8 @@ public class WorkspacesControllerTest {
                 conceptSet1.getId(),
                 new UpdateConceptSetRequest()
                     .etag(conceptSet1.getEtag())
-                    .addedIds(
-                        ImmutableList.of(
-                            CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
+                    .addedConceptSetConceptIds(
+                        ImmutableList.of(conceptSetConceptId3, conceptSetConceptId4)))
             .getBody();
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
@@ -1670,11 +1693,28 @@ public class WorkspacesControllerTest {
     cdrVersion2.setCdrDbName("");
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
 
+    DbConceptSetConceptId dbConceptSetConceptId1 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_1.getConceptId())
+            .addStandard(true)
+            .build();
+    DbConceptSetConceptId dbConceptSetConceptId2 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_2.getConceptId())
+            .addStandard(true)
+            .build();
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION,
             "condition_occurrence",
-            ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
+            ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
         .thenReturn(123);
+
+    ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
+    conceptSetConceptId1.setConceptId(CLIENT_CONCEPT_1.getConceptId());
+    conceptSetConceptId1.setStandard(true);
+    ConceptSetConceptId conceptSetConceptId2 = new ConceptSetConceptId();
+    conceptSetConceptId2.setConceptId(CLIENT_CONCEPT_2.getConceptId());
+    conceptSetConceptId2.setStandard(true);
     ConceptSet conceptSet1 =
         conceptSetsController
             .createConceptSet(
@@ -1683,9 +1723,8 @@ public class WorkspacesControllerTest {
                 new CreateConceptSetRequest()
                     .conceptSet(
                         new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
-                    .addedIds(
-                        ImmutableList.of(
-                            CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
+                    .addedConceptSetConceptIds(
+                        ImmutableList.of(conceptSetConceptId1, conceptSetConceptId2)))
             .getBody();
 
     CloneWorkspaceRequest req = new CloneWorkspaceRequest();
@@ -1707,7 +1746,7 @@ public class WorkspacesControllerTest {
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION,
             "condition_occurrence",
-            ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_2.getConceptId())))
+            ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
         .thenReturn(456);
 
     mockBillingProjectBuffer("cloned-ns");
@@ -1750,7 +1789,12 @@ public class WorkspacesControllerTest {
 
     originalConceptSet.setDescription(expectedConceptSetDescription);
     originalConceptSet.setDomainEnum(Domain.CONDITION);
-    originalConceptSet.setConceptIds(Collections.singleton(CLIENT_CONCEPT_1.getConceptId()));
+    DbConceptSetConceptId dbConceptSetConceptId =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_1.getConceptId())
+            .addStandard(true)
+            .build();
+    originalConceptSet.setConceptSetConceptIds(Collections.singleton(dbConceptSetConceptId));
     originalConceptSet.setWorkspaceId(dbWorkspace.getWorkspaceId());
     originalConceptSet = conceptSetDao.save(originalConceptSet);
 
@@ -1830,8 +1874,8 @@ public class WorkspacesControllerTest {
     assertThat(conceptSets.get(0).getName()).isEqualTo(expectedConceptSetName);
     assertThat(conceptSets.get(0).getDescription()).isEqualTo(expectedConceptSetDescription);
     assertThat(conceptSets.get(0).getDomainEnum()).isEqualTo(Domain.CONDITION);
-    assertThat(conceptSets.get(0).getConceptIds())
-        .isEqualTo(Collections.singleton(CLIENT_CONCEPT_1.getConceptId()));
+    assertThat(conceptSets.get(0).getConceptSetConceptIds())
+        .isEqualTo(Collections.singleton(dbConceptSetConceptId));
     assertThat(conceptSets.get(0).getConceptSetId())
         .isNotEqualTo(originalConceptSet.getConceptSetId());
 
@@ -3180,6 +3224,10 @@ public class WorkspacesControllerTest {
                 cdrVersion.getCdrVersionId(),
                 new CreateReviewRequest().size(1))
             .getBody();
+
+    ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
+    conceptSetConceptId1.setConceptId(CONCEPT_1.getConceptId());
+    conceptSetConceptId1.setStandard(true);
     ConceptSet conceptSet =
         conceptSetsController
             .createConceptSet(
@@ -3188,7 +3236,7 @@ public class WorkspacesControllerTest {
                 new CreateConceptSetRequest()
                     .conceptSet(
                         new ConceptSet().name("cs1").description("d1").domain(Domain.CONDITION))
-                    .addAddedIdsItem(CONCEPT_1.getConceptId()))
+                    .addAddedConceptSetConceptIdsItem(conceptSetConceptId1))
             .getBody();
     DataSet dataSet =
         dataSetController

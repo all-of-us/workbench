@@ -6,15 +6,17 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,6 +49,7 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -59,6 +62,7 @@ import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
+import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
@@ -350,6 +354,9 @@ public class ConceptSetsControllerTest {
 
   @Test
   public void testCreateConceptSet() {
+    ConceptSetConceptId conceptSetConceptId = new ConceptSetConceptId();
+    conceptSetConceptId.setConceptId(CLIENT_CONCEPT_1.getConceptId());
+    conceptSetConceptId.setStandard(true);
     ConceptSet conceptSet = new ConceptSet();
     conceptSet.setDescription("desc 1");
     conceptSet.setName("concept set 1");
@@ -361,7 +368,7 @@ public class ConceptSetsControllerTest {
                 WORKSPACE_NAME,
                 new CreateConceptSetRequest()
                     .conceptSet(conceptSet)
-                    .addAddedIdsItem(CLIENT_CONCEPT_1.getConceptId()))
+                    .addAddedConceptSetConceptIdsItem(conceptSetConceptId))
             .getBody();
     assertThat(conceptSet.getConcepts()).isNotNull();
     assertThat(conceptSet.getCreationTime()).isEqualTo(NOW.toEpochMilli());
@@ -518,15 +525,23 @@ public class ConceptSetsControllerTest {
   @Test
   public void testUpdateConceptSetConceptsAddAndRemove() {
     saveConcepts();
+    DbConceptSetConceptId dbConceptSetConceptId1 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_1.getConceptId())
+            .addStandard(true)
+            .build();
+    DbConceptSetConceptId dbConceptSetConceptId2 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_3.getConceptId())
+            .addStandard(true)
+            .build();
     when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION,
-            "condition_occurrence",
-            ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId())))
+            Domain.CONDITION, "condition_occurrence", ImmutableSet.of(dbConceptSetConceptId1)))
         .thenReturn(123);
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION,
             "condition_occurrence",
-            ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId(), CLIENT_CONCEPT_3.getConceptId())))
+            ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
         .thenReturn(246);
     ConceptSet conceptSet = makeConceptSet1();
     ConceptSet updated =
@@ -558,14 +573,27 @@ public class ConceptSetsControllerTest {
   @Test
   public void testUpdateConceptSetConceptsAddMany() {
     saveConcepts();
+    DbConceptSetConceptId dbConceptSetConceptId1 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_1.getConceptId())
+            .addStandard(true)
+            .build();
+    DbConceptSetConceptId dbConceptSetConceptId2 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_3.getConceptId())
+            .addStandard(true)
+            .build();
+    DbConceptSetConceptId dbConceptSetConceptId3 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_4.getConceptId())
+            .addStandard(true)
+            .build();
     ConceptSetService.MAX_CONCEPTS_PER_SET = 1000;
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION,
             "condition_occurrence",
             ImmutableSet.of(
-                CLIENT_CONCEPT_1.getConceptId(),
-                CLIENT_CONCEPT_3.getConceptId(),
-                CLIENT_CONCEPT_4.getConceptId())))
+                dbConceptSetConceptId1, dbConceptSetConceptId2, dbConceptSetConceptId3)))
         .thenReturn(456);
     ConceptSet conceptSet = makeConceptSet1();
     ConceptSet updated =
@@ -586,9 +614,7 @@ public class ConceptSetsControllerTest {
     assertThat(updated.getParticipantCount()).isEqualTo(456);
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION,
-            "condition_occurrence",
-            ImmutableSet.of(CLIENT_CONCEPT_1.getConceptId())))
+            Domain.CONDITION, "condition_occurrence", ImmutableSet.of(dbConceptSetConceptId1)))
         .thenReturn(123);
     ConceptSet removed =
         conceptSetsController
@@ -610,13 +636,26 @@ public class ConceptSetsControllerTest {
   @Test
   public void testUpdateConceptSetConceptsAddManyOnCreate() {
     saveConcepts();
+    DbConceptSetConceptId dbConceptSetConceptId1 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_1.getConceptId())
+            .addStandard(true)
+            .build();
+    DbConceptSetConceptId dbConceptSetConceptId2 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_3.getConceptId())
+            .addStandard(true)
+            .build();
+    DbConceptSetConceptId dbConceptSetConceptId3 =
+        DbConceptSetConceptId.builder()
+            .addConceptId(CLIENT_CONCEPT_4.getConceptId())
+            .addStandard(true)
+            .build();
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION,
             "condition_occurrence",
             ImmutableSet.of(
-                CLIENT_CONCEPT_1.getConceptId(),
-                CLIENT_CONCEPT_3.getConceptId(),
-                CLIENT_CONCEPT_4.getConceptId())))
+                dbConceptSetConceptId1, dbConceptSetConceptId2, dbConceptSetConceptId3)))
         .thenReturn(456);
     ConceptSet conceptSet =
         makeConceptSet1(
@@ -704,20 +743,53 @@ public class ConceptSetsControllerTest {
   }
 
   private UpdateConceptSetRequest addConceptsRequest(String etag, Long... conceptIds) {
+    List<ConceptSetConceptId> conceptSetConceptIdList =
+        Arrays.stream(conceptIds)
+            .map(
+                c -> {
+                  ConceptSetConceptId conceptSetConceptId = new ConceptSetConceptId();
+                  conceptSetConceptId.setConceptId(c);
+                  conceptSetConceptId.setStandard(true);
+                  return conceptSetConceptId;
+                })
+            .collect(Collectors.toList());
     UpdateConceptSetRequest request = new UpdateConceptSetRequest();
     request.setEtag(etag);
-    request.setAddedIds(ImmutableList.copyOf(conceptIds));
+    request.setAddedConceptSetConceptIds(conceptSetConceptIdList);
     return request;
   }
 
   private UpdateConceptSetRequest removeConceptsRequest(String etag, Long... conceptIds) {
+    List<ConceptSetConceptId> conceptSetConceptIdList =
+        Arrays.stream(conceptIds)
+            .map(
+                c -> {
+                  ConceptSetConceptId conceptSetConceptId = new ConceptSetConceptId();
+                  conceptSetConceptId.setConceptId(c);
+                  conceptSetConceptId.setStandard(true);
+                  return conceptSetConceptId;
+                })
+            .collect(Collectors.toList());
     UpdateConceptSetRequest request = new UpdateConceptSetRequest();
     request.setEtag(etag);
-    request.setRemovedIds(ImmutableList.copyOf(conceptIds));
+    request.setRemovedConceptSetConceptIds(conceptSetConceptIdList);
     return request;
   }
 
   private ConceptSet makeSurveyConceptSet1(Long... addedIds) {
+    List<ConceptSetConceptId> conceptSetConceptIdList =
+        Arrays.stream(addedIds)
+            .map(
+                c -> {
+                  ConceptSetConceptId conceptSetConceptId = new ConceptSetConceptId();
+                  conceptSetConceptId.setConceptId(c);
+                  conceptSetConceptId.setStandard(true);
+                  return conceptSetConceptId;
+                })
+            .collect(Collectors.toList());
+    ConceptSetConceptId conceptSetConceptId = new ConceptSetConceptId();
+    conceptSetConceptId.setConceptId(CLIENT_SURVEY_CONCEPT_1.getConceptId());
+    conceptSetConceptId.setStandard(true);
     ConceptSet conceptSet = new ConceptSet();
     conceptSet.setDescription("description 1");
     conceptSet.setName("Survey Concept set 1");
@@ -726,9 +798,9 @@ public class ConceptSetsControllerTest {
     CreateConceptSetRequest request =
         new CreateConceptSetRequest()
             .conceptSet(conceptSet)
-            .addAddedIdsItem(CLIENT_SURVEY_CONCEPT_1.getConceptId());
+            .addAddedConceptSetConceptIdsItem(conceptSetConceptId);
     if (addedIds.length > 0) {
-      request = request.addedIds(ImmutableList.copyOf(addedIds));
+      request = request.addedConceptSetConceptIds(conceptSetConceptIdList);
     }
     return conceptSetsController
         .createConceptSet(workspace.getNamespace(), WORKSPACE_NAME, request)
@@ -736,6 +808,10 @@ public class ConceptSetsControllerTest {
   }
 
   private ConceptSet makeConceptSet1(Long... addedIds) {
+    List<ConceptSetConceptId> conceptSetConceptIdList =
+        Arrays.stream(addedIds)
+            .map(c -> new ConceptSetConceptId().conceptId(c).standard(true))
+            .collect(Collectors.toList());
     ConceptSet conceptSet = new ConceptSet();
     conceptSet.setDescription("desc 1");
     conceptSet.setName("concept set 1");
@@ -743,9 +819,12 @@ public class ConceptSetsControllerTest {
     CreateConceptSetRequest request =
         new CreateConceptSetRequest()
             .conceptSet(conceptSet)
-            .addAddedIdsItem(CLIENT_CONCEPT_1.getConceptId());
+            .addAddedConceptSetConceptIdsItem(
+                new ConceptSetConceptId()
+                    .conceptId(CLIENT_CONCEPT_1.getConceptId())
+                    .standard(true));
     if (addedIds.length > 0) {
-      request = request.addedIds(ImmutableList.copyOf(addedIds));
+      request = request.addedConceptSetConceptIds(conceptSetConceptIdList);
     }
     return conceptSetsController
         .createConceptSet(workspace.getNamespace(), WORKSPACE_NAME, request)
@@ -753,6 +832,9 @@ public class ConceptSetsControllerTest {
   }
 
   private ConceptSet makeConceptSet2() {
+    ConceptSetConceptId conceptSetConceptId = new ConceptSetConceptId();
+    conceptSetConceptId.setConceptId(CLIENT_CONCEPT_2.getConceptId());
+    conceptSetConceptId.setStandard(true);
     ConceptSet conceptSet = new ConceptSet();
     conceptSet.setDescription("desc 2");
     conceptSet.setName("concept set 2");
@@ -763,7 +845,7 @@ public class ConceptSetsControllerTest {
             WORKSPACE_NAME,
             new CreateConceptSetRequest()
                 .conceptSet(conceptSet)
-                .addAddedIdsItem(CLIENT_CONCEPT_2.getConceptId()))
+                .addAddedConceptSetConceptIdsItem(conceptSetConceptId))
         .getBody();
   }
 

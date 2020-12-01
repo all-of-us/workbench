@@ -622,7 +622,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     private getDomainsFromConceptSets(
       conceptSets: ConceptSet[], prepackagedConceptSets: Set<PrepackagedConceptSet>): Set<Domain> {
       const domains =
-        conceptSets.map(cs => cs.domain).concat(
+        conceptSets.map(cs => cs.domain === Domain.PHYSICALMEASUREMENT ?  Domain.MEASUREMENT : cs.domain).concat(
           Array.from(prepackagedConceptSets).map(p => PREPACKAGED_DOMAINS[p]));
       return new Set(domains);
     }

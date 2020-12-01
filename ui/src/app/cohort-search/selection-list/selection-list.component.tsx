@@ -135,9 +135,12 @@ const styles = reactStyles({
     width: '100%',
   },
   selectionHeader: {
+    borderBottom: `1px solid ${colors.disabled}`,
     color: colors.primary,
+    display: 'inline-block',
+    fontSize: '13px',
     fontWeight: 600,
-    marginTop: '0.5rem'
+    paddingRight: '0.25rem'
   },
   backButton: {
     border: '0px',
@@ -440,6 +443,36 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
       return attributesSelection || showModifiersSlide;
     }
 
+    renderSelections() {
+      const {criteria} = this.props;
+      if ([Domain.CONDITION.toString(), Domain.PROCEDURE.toString()].includes(criteria[0].domainId)) {
+        // Separate selections by standard and source concepts for Condition and Procedures
+        const standardConcepts = criteria.filter(con => con.isStandard);
+        const sourceConcepts = criteria.filter(con => !con.isStandard);
+        return <React.Fragment>
+          {standardConcepts.length > 0 && <div style={{marginBottom: '0.5rem'}}>
+            <div style={styles.selectionHeader}>Standard Concepts</div>
+            {standardConcepts.map((selection, index) => <SelectionInfo key={index}
+                                                                       index={index}
+                                                                       selection={selection}
+                                                                       removeSelection={() => this.removeCriteria(selection)}/>)}
+          </div>}
+          {sourceConcepts.length > 0 && <div>
+            <div style={styles.selectionHeader}>Source Concepts</div>
+            {sourceConcepts.map((selection, index) => <SelectionInfo key={index}
+                                                                     index={index}
+                                                                     selection={selection}
+                                                                     removeSelection={() => this.removeCriteria(selection)}/>)}
+          </div>}
+        </React.Fragment>;
+      } else {
+        return criteria.map((selection, index) => <SelectionInfo key={index}
+                                                                 index={index}
+                                                                 selection={selection}
+                                                                 removeSelection={() => this.removeCriteria(selection)}/>);
+      }
+    }
+
     render() {
       const {back, cohortContext, criteria} = this.props;
       const {attributesSelection, disableSave, showModifiersSlide} = this.state;
@@ -466,11 +499,7 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
               {!!criteria && <div style={this.showModifierButton
                 ? {...styles.selectionList, height: 'calc(100% - 2rem)'}
                 : styles.selectionList}>
-                {criteria.map((selection, s) => <SelectionInfo key={s}
-                  index={s}
-                  selection={selection}
-                  removeSelection={() => this.removeCriteria(selection)}/>
-                )}
+                {!!criteria && criteria.length > 0 && this.renderSelections()}
               </div>}
               {this.showModifierButton && <div style={styles.modifierButtonContainer}>
                 <Button type='secondaryLight' style={styles.modifierButton}
