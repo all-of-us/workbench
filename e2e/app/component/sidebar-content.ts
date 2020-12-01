@@ -57,7 +57,7 @@ export default class SidebarContent extends  HelpSidebar {
     }
   
     async getAnnotationsButton(): Promise<ClrIconLink> {
-      return ClrIconLink.findByName(this.page, {iconShape: 'plus-circle'});
+      return ClrIconLink.findByName(this.page, {containsText: 'Annotations', iconShape: 'plus-circle'});
     }
 
  
