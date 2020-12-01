@@ -9,6 +9,7 @@ import {
   navigate,
   nextWorkspaceWarmupStore,
   routeConfigDataStore,
+  setSidebarActiveIconStore,
   urlParamsStore,
   userProfileStore
 } from 'app/utils/navigation';
@@ -97,6 +98,8 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
           this.setHelpContentKeyAndMaybeSetNotebookStyles();
           // Close sidebar on route change unless navigating between participants in cohort review
           if (this.helpContentKey !== 'reviewParticipantDetail') {
+            // Reset store to prevent blank sidebar on notebook pages
+            setSidebarActiveIconStore.next(null);
             this.setSidebarState(false);
           }
         }));
