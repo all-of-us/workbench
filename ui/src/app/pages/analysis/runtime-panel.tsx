@@ -483,6 +483,16 @@ const StartStopRuntimeButton = ({workspaceNamespace}) => {
 
   const iconSrc = `/assets/icons/${iconShape}.svg`;
 
+  {/* height/width of the icon wrapper are set so that the img element can rotate inside it */}
+  {/* without making it larger. the svg is 36 x 36 px, per pythagorean theorem the diagonal */}
+  {/* is 50.9px, so we round up */}
+  const iconWrapperStyle = {
+    height: '51px',
+    width: '51px',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  }
+
   return <FlexRow style={{
     backgroundColor: addOpacity(colors.primary, 0.1),
     justifyContent: 'space-around',
@@ -490,16 +500,20 @@ const StartStopRuntimeButton = ({workspaceNamespace}) => {
     padding: '0 1rem',
     borderRadius: '5px 0 0 5px'
   }}>
-    {/* TooltipTrigger inside the conditionals because it doesn't handle fragments well */}
+    {/* TooltipTrigger inside the conditionals because it doesn't handle fragments well. */}
     {
       onClick && <TooltipTrigger content={<div>{altText}</div>} side='left'>
-        <Clickable onClick={() => onClick()}>
-          <img alt={altText} src={iconSrc} style={styleOverrides} data-test-id='runtime-status-icon'/>
-        </Clickable>
+        <FlexRow style={iconWrapperStyle}>
+          <Clickable onClick={() => onClick()}>
+            <img alt={altText} src={iconSrc} style={styleOverrides} data-test-id='runtime-status-icon'/>
+          </Clickable>
+        </FlexRow>
       </TooltipTrigger>
     }
     {!onClick && <TooltipTrigger content={<div>{altText}</div>} side='left'>
-        <img alt={altText} src={iconSrc} style={styleOverrides} data-test-id='runtime-status-icon'/>
+        <FlexRow style={iconWrapperStyle}>
+          <img alt={altText} src={iconSrc} style={styleOverrides} data-test-id='runtime-status-icon'/>
+        </FlexRow>
       </TooltipTrigger>
     }
   </FlexRow>;
