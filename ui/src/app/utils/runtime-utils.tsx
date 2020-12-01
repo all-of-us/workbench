@@ -267,17 +267,18 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
 
   useEffect(() => {
     // Additional status changes can be put here
-    const targetStatus = switchCase(runtimeStatus,
-        [RuntimeStatusRequest.Delete, () => RuntimeStatus.Deleted],
-        [RuntimeStatusRequest.Start, () => RuntimeStatus.Running],
-        [RuntimeStatusRequest.Stop, () => RuntimeStatus.Stopped]
+    const resolutionCondition: (r: Runtime) => boolean = switchCase(runtimeStatus,
+        [RuntimeStatusRequest.Delete, () => (r) => r === null || r.status === RuntimeStatus.Deleted],
+        [RuntimeStatusRequest.Start, () => (r) => r.status === RuntimeStatus.Running],
+        [RuntimeStatusRequest.Stop, () => (r) => r.status === RuntimeStatus.Stopped]
     );
     const initializePolling = async() => {
       if (!!runtimeStatus) {
         try {
           await LeoRuntimeInitializer.initialize({
             workspaceNamespace: currentWorkspaceNamespace,
-            resolutionCondition: (r) => r.status === targetStatus
+            maxCreateCount: 0,
+            resolutionCondition: (r) => resolutionCondition(r)
           });
         } catch (e) {
           // ExceededActionCountError is expected, as we exceed our create limit of 0.

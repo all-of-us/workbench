@@ -394,7 +394,7 @@ const StartStopRuntimeButton = ({workspaceNamespace}) => {
   const [status, setRuntimeStatus] = useRuntimeStatus(workspaceNamespace);
 
   const rotateStyle = {animation: 'rotation 2s infinite linear'};
-  const {altText, iconShape = null, styleOverrides = {}, onClick = null, } = switchCase(status,
+  const {altText, iconShape = null, styleOverrides = {}, onClick = null } = switchCase(status,
     [
       RuntimeStatus.Creating,
       () => ({
@@ -784,7 +784,7 @@ export const RuntimePanel = fp.flow(
   const initialPanelContent = fp.cond([
     // currentRuntime being undefined means the first `getRuntime` has still not completed.
     [([r, ]) => r === undefined, () => PanelContent.Customize],
-    [([r, s]) => r === null || s === RuntimeStatus.Unknown || s === RuntimeStatus.Deleted, () => PanelContent.Create],
+    [([r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
     [() => true, () => PanelContent.Customize]
   ])([currentRuntime, status]);
   const [panelContent, setPanelContent] = useState<PanelContent>(initialPanelContent);
