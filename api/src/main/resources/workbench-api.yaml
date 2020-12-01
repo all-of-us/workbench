@@ -1639,8 +1639,8 @@ paths:
         - offlineReporting
         - cron
       description: >
-        Capture a reporting snapshot and upload to BigQuery reporting dataset using the configured
-        upload method (currently one of DML (insert query) or Streaming).
+        Capture a reporting snapshot and upload to BigQuery reporting dataset using the insert
+        query implementation.
       operationId: uploadReportingSnapshotQuery
       security: []
       responses:
