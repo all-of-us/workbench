@@ -274,7 +274,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
       const {conceptSet} = this.state;
       return conceptSet.domain === Domain.PHYSICALMEASUREMENT
           ? 'Physical Measurements' :
-          conceptSet.domain === Domain.SURVEY ?
+          !this.isConceptFlagEnable && conceptSet.domain === Domain.SURVEY ?
             fp.capitalize(conceptSet.domain.toString()) + ' - ' + fp.startCase(fp.toLower(conceptSet.survey.toString()))
             : fp.capitalize(conceptSet.domain.toString()) ;
     }

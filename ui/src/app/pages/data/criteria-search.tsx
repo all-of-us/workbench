@@ -35,6 +35,12 @@ const styles = reactStyles({
     textAlign: 'center',
     width: '1.5rem',
   },
+  detailExternalLinks: {
+    width: '100%',
+    lineHeight: '0.75rem',
+    textAlign: 'right',
+    verticalAlign: 'middle'
+  },
   externalLinks: {
     flex: '0 0 calc(55% - 1.25rem)',
     maxWidth: 'calc(55% - 1.25rem)',
@@ -300,11 +306,13 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
       {loadingSubtree && <SpinnerOverlay/>}
       <Growl ref={(el) => this.growl = el} style={!growlVisible ? {...styles.growl, display: 'none'} : styles.growl}/>
       <FlexRowWrap style={{...styles.titleBar, marginTop: source === 'criteria' ? '1rem' : 0}}>
-        <Clickable style={styles.backArrow} onClick={() => backFn()}>
-          <img src={arrowIcon} style={styles.arrowIcon} alt='Go back' />
-        </Clickable>
-        <h2 style={styles.titleHeader}>{this.domainTitle}</h2>
-        <div style={styles.externalLinks}>
+        {source !== 'conceptSetDetails' && <React.Fragment>
+          <Clickable style={styles.backArrow} onClick={() => backFn()}>
+            <img src={arrowIcon} style={styles.arrowIcon} alt='Go back' />
+          </Clickable>
+          <h2 style={styles.titleHeader}>{this.domainTitle}</h2>
+        </React.Fragment>}
+        <div style={source === 'conceptSetDetails' ? styles.detailExternalLinks : styles.externalLinks}>
           {cohortContext.domain === Domain.DRUG && <div>
             <StyledAnchorTag
                 href='https://mor.nlm.nih.gov/RxNav/'
