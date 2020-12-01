@@ -1,5 +1,7 @@
 package org.pmiops.workbench.reporting;
 
+import static org.pmiops.workbench.reporting.insertion.ColumnValueExtractorUtils.getBigQueryTableName;
+
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.base.Stopwatch;
@@ -52,19 +54,19 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
             .uploads(
                 ImmutableList.of(
                     getUploadResult(
-                        UserColumnValueExtractor.TABLE_NAME,
+                        getBigQueryTableName(UserColumnValueExtractor.class),
                         snapshot.getCaptureTimestamp(),
                         snapshot.getUsers().size()),
                     getUploadResult(
-                        WorkspaceColumnValueExtractor.TABLE_NAME,
+                        getBigQueryTableName(WorkspaceColumnValueExtractor.class),
                         snapshot.getCaptureTimestamp(),
                         snapshot.getWorkspaces().size()),
                     getUploadResult(
-                        CohortColumnValueExtractor.TABLE_NAME,
+                        getBigQueryTableName(CohortColumnValueExtractor.class),
                         snapshot.getCaptureTimestamp(),
                         snapshot.getCohorts().size()),
                     getUploadResult(
-                        InstitutionColumnValueExtractor.TABLE_NAME,
+                        getBigQueryTableName(InstitutionColumnValueExtractor.class),
                         snapshot.getCaptureTimestamp(),
                         snapshot.getInstitutions().size())));
     verifyStopwatch.stop();

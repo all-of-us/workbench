@@ -61,21 +61,4 @@ public interface DataSetDao extends CrudRepository<DbDataset, Long> {
           + "  d.workspaceId\n"
           + "FROM DbDataset d")
   List<ProjectedReportingDataset> getReportingDatasets();
-
-  // This JPQL query corresponds to the projection interface ProjectedReportingDatasetCohort. Its
-  // types and argument order must match the column names selected exactly, in name,
-  // type, and order. Note that in some cases a projection query should JOIN one or more
-  // other tables. Currently this is done by hand (with suitable renamings of the other entries
-  //  in the projection
-
-  // This code was generated using reporting-wizard.rb at 2020-11-10T11:18:15-05:00.
-  // Manual modification should be avoided if possible as this is a one-time generation
-  // and does not run on every build and updates must be merged manually for now.
-
-  //  @Query("SELECT\n"
-  //      + "  dc.cohortId,\n"
-  //      + "  d.datasetId\n"
-  //      + "FROM DbDataSet d,\n"
-  //      + "INNER JOIN  DbDatasetCohort dc ON d.dataSetId = dc.datasetId")
-  //  List<ProjectedReportingDatasetCohort> getReportingDatasetCohorts();
 }

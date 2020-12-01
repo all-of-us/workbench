@@ -952,7 +952,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       Set<Long> cohortIds,
       Set<Long> conceptSetIds,
       List<Short> prePackagedConceptSets) {
-    DbDataset toDataSet = dataSetMapper.copy(fromDataSet);
+    DbDataset toDataSet = new DbDataset(fromDataSet);
     toDataSet.setWorkspaceId(toWorkspace.getWorkspaceId());
     toDataSet.setCreatorId(toWorkspace.getCreator().getUserId());
     toDataSet.setLastModifiedTime(toWorkspace.getLastModifiedTime());

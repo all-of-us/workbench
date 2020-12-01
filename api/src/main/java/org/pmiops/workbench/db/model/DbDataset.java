@@ -190,7 +190,7 @@ public class DbDataset {
 
   @ElementCollection
   @CollectionTable(name = "data_set_values", joinColumns = @JoinColumn(name = "data_set_id"))
-  @Column(name = "value")
+  @Column(name = "values")
   public List<DbDatasetValue> getValues() {
     return values;
   }
