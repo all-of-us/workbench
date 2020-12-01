@@ -660,8 +660,7 @@ public class RuntimeControllerTest {
                     .auditInfo(new LeonardoAuditInfo().createdDate(olderTimestamp))
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
-    assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody().getRuntimeName())
-        .isEqualTo("expected-runtime");
+    assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(BILLING_PROJECT_ID));
   }
 
   @Test
