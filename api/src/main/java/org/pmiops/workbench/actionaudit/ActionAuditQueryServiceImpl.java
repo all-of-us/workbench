@@ -75,7 +75,6 @@ public class ActionAuditQueryServiceImpl implements ActionAuditQueryService {
             .build();
 
     final TableResult tableResult = bigQueryService.executeQuery(queryJobConfiguration);
-
     final List<AuditLogEntry> logEntries = auditLogEntryMapper.tableResultToLogEntries(tableResult);
     final String queryHeader =
         String.format(

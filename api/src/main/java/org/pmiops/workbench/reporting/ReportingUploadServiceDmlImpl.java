@@ -60,6 +60,7 @@ public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
   private static final long MAX_WAIT_TIME = Duration.ofSeconds(60).toMillis();
 
   private final BigQueryService bigQueryService;
+  private ReportingVerificationService reportingVerificationService;
   private final Provider<Stopwatch> stopwatchProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
@@ -76,9 +77,11 @@ public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
 
   public ReportingUploadServiceDmlImpl(
       BigQueryService bigQueryService,
+      ReportingVerificationService reportingVerificationService,
       Provider<Stopwatch> stopwatchProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.bigQueryService = bigQueryService;
+    this.reportingVerificationService = reportingVerificationService;
     this.stopwatchProvider = stopwatchProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
@@ -106,6 +109,11 @@ public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
     logger.info(
         LogFormatters.rate(
             "DML Insert", uploadStopwatch.elapsed(), insertJobs.size(), "Insert Queries"));
+
+    // verify correct number of rows. I don't believe this should ever be off for this
+    // implementation,
+    // outside of an error condition that would have already thrown.
+    reportingVerificationService.verifyAndLog(reportingSnapshot);
   }
 
   private TableResult executeWithTimeout(QueryJobConfiguration job) {

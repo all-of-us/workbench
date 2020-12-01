@@ -41,14 +41,17 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
       workspaceRequestBuilder = WorkspaceColumnValueExtractor::values;
 
   private final BigQueryService bigQueryService;
+  private final ReportingVerificationService reportingVerificationService;
   private final Provider<WorkbenchConfig> configProvider;
   private final Provider<Stopwatch> stopwatchProvider;
 
   public ReportingUploadServiceStreamingImpl(
       BigQueryService bigQueryService,
+      ReportingVerificationService reportingVerificationService,
       Provider<WorkbenchConfig> configProvider,
       Provider<Stopwatch> stopwatchProvider) {
     this.bigQueryService = bigQueryService;
+    this.reportingVerificationService = reportingVerificationService;
     this.configProvider = configProvider;
     this.stopwatchProvider = stopwatchProvider;
   }
@@ -59,20 +62,30 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
     final ImmutableMap.Builder<TableId, InsertAllResponse> responseMapBuilder =
         ImmutableMap.builder();
     final List<InsertAllRequest> insertAllRequests = getInsertAllRequests(reportingSnapshot);
+    final StringBuilder performanceStringBuilder = new StringBuilder();
     for (InsertAllRequest request : insertAllRequests) {
       stopwatch.start();
       final InsertAllResponse currentResponse = bigQueryService.insertAll(request);
       responseMapBuilder.put(request.getTable(), currentResponse);
       stopwatch.stop();
-      log.info(
+      performanceStringBuilder.append(
           LogFormatters.rate(
-              String.format("Streaming upload into %s table", request.getTable().getTable()),
-              stopwatch.elapsed(),
-              request.getRows().size(),
-              "rows"));
+                  String.format("Streaming upload into %s table", request.getTable().getTable()),
+                  stopwatch.elapsed(),
+                  request.getRows().size(),
+                  "rows")
+              + "\n");
       stopwatch.reset();
     }
-    checkResults(responseMapBuilder.build());
+    log.info(performanceStringBuilder.toString());
+    checkResponseAndRowCounts(reportingSnapshot, responseMapBuilder.build());
+  }
+
+  private void checkResponseAndRowCounts(
+      ReportingSnapshot reportingSnapshot, ImmutableMap<TableId, InsertAllResponse> responseMap) {
+    checkResponse(responseMap);
+
+    reportingVerificationService.verifyAndLog(reportingSnapshot);
   }
 
   private TableId getTableId(String tableName) {
@@ -107,7 +120,7 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
         .collect(ImmutableList.toImmutableList());
   }
 
-  private void checkResults(Map<TableId, InsertAllResponse> tableIdToResponse) {
+  private void checkResponse(Map<TableId, InsertAllResponse> tableIdToResponse) {
     final boolean anyErrors =
         tableIdToResponse.values().stream().anyMatch(InsertAllResponse::hasErrors);
 

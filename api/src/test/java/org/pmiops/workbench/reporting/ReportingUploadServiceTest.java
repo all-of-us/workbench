@@ -97,6 +97,7 @@ public class ReportingUploadServiceTest {
     ReportingUploadServiceStreamingImpl.class,
     ReportingTestConfig.class
   })
+  @MockBean({ReportingVerificationService.class})
   public static class config {
     @Bean
     public Clock getClock() {

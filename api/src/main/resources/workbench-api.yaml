@@ -8240,6 +8240,37 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ReportingWorkspace"
+  ReportingUploadDetails:
+    type: object
+    properties:
+      snapshotTimestamp:
+        description: Snapshot timestamp for this upload, in Epoch millis
+        type: integer
+        format: int64
+      projectId:
+        description: Project containing the BigQuery dataset
+        type: string
+      dataset:
+        description: Reporting Dataset
+        type: string
+      uploads:
+        type: array
+        items:
+          "$ref": "#/definitions/ReportingUploadResult"
+  ReportingUploadResult:
+    type: object
+    properties:
+      tableName:
+        description: BigQuery table name
+        type: string
+      sourceRowCount:
+        description: Number of rows in source to be insertted
+        type: integer
+        format: int64
+      destinationRowCount:
+        description: Number of rows present in query
+        type: integer
+        format: int64
   ReportingUser:
     x-aou-note: |-
       This code was generated using reporting-wizard.rb at 2020-09-30T16:18:29-04:00.
