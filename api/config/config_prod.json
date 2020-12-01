@@ -108,11 +108,11 @@
     "useNewShibbolethService": true,
     "enableResearchPurposePrompt": false,
     "enableCohortBuilderV2": true,
-    "enableConceptSetSearchV2": false,
+    "enableConceptSetSearchV2": true,
     "enableReportingUploadCron": true,
-    "enableCOPESurvey": false,
+    "enableCOPESurvey": true,
     "enableCustomRuntimes": false,
-    "enableFitbit": false
+    "enableFitbit": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",
