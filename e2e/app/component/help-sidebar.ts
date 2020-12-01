@@ -14,6 +14,10 @@ enum SectionSelectors {
   AttributesForm = '//*[@id="attributes-form"]',
   ModifiersForm = '//*[@id="modifiers-form"]',
   SelectionList = '//*[@id="selection-list"]',
+  RuntimePanel = '//*[@data-test-id="runtime-panel"]'
+}
+enum HelpSidebarTab {
+  ComputeConfiguration = '//*[@data-test-id="help-sidebar-icon-runtime"]'
 }
 
 export default class HelpSidebar extends Container {
@@ -80,6 +84,12 @@ export default class HelpSidebar extends Container {
     return participantResult;
   }
 
+  async maybeCreateRuntimeAndGetState(): Promise<string> {
+    await this.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await this.waitUntilSectionVisible(SectionSelectors.RuntimePanel);
+    return "lol"
+  }
+
   async clickSidebarButton(buttonLabel: LinkText): Promise<void> {
     await this.findSidebarButton(buttonLabel).then(butn => butn.click());
     await waitWhileLoading(this.page);
@@ -106,6 +116,12 @@ export default class HelpSidebar extends Container {
   async waitForParticipantResult(): Promise<string> {
     const selector = `${this.xpath}//*[./*[contains(text(), "Number of Participants")]]`;
     return waitForNumericalString(this.page, selector);
+  }
+
+  async clickSidebarTab(tab: HelpSidebarTab): Promise<void> {
+    const t = await this.page.waitForXPath(tab);
+    console.log(t)
+    t.click();
   }
 
   waitUntilSectionVisible(xpath: string): Promise<ElementHandle> {
