@@ -222,7 +222,9 @@ public class RuntimeController implements RuntimeApiDelegate {
     Map<String, String> runtimeLabels = (Map<String, String>) mostRecentRuntime.getLabels();
 
     if (runtimeLabels != null
-        && LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.values().contains(runtimeLabels.get(LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG))) {
+        && LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
+            .values()
+            .contains(runtimeLabels.get(LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG))) {
       try {
         Runtime runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
         if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {
