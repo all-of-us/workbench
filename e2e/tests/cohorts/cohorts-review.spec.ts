@@ -96,7 +96,7 @@ describe('Cohort review tests', () => {
     await participantDetailPage.clickPenIconHelpSideBar();
 
     // navigate to the next participant
-    await participantDetailPage.getGoToTheNextParticipant();
+    await participantDetailPage.goToTheNextParticipant();
     await participantDetailPage.waitForLoad();
    
     // get the participant ID on the detail page

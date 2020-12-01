@@ -51,13 +51,13 @@ export default class CohortParticipantDetailPage extends AuthenticatedPage {
   }
 
   // click on pi-angle-right button to go to next participant
-  async getGoToTheNextParticipant(): Promise<void> {
+  async goToTheNextParticipant(): Promise<void> {
      const iconXpath = '//button[@title ="Go To the Next Participant"]';
     await this.page.waitForXPath(iconXpath, {visible: true}).then(icon => icon.click());
   }
 
   // click on pi-angle-left button to go to prior participant
-  async getGoToThePriorParticipant(): Promise<void> {
+  async goToThePriorParticipant(): Promise<void> {
     const iconXpath = '//button[@title ="Go To the Prior Participant"]';
     await this.page.waitForXPath(iconXpath, {visible: true}).then(icon => icon.click());
   }
