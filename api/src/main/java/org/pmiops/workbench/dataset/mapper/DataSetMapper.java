@@ -14,6 +14,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.NullValueCheckStrategy;
+import org.mapstruct.ValueMapping;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
@@ -135,4 +136,7 @@ public interface DataSetMapper {
 
   @Mapping(target = "cdrVersionId", source = "dbModel.cdrVersion.cdrVersionId")
   DataDictionaryEntry dbModelToClient(DbDataDictionaryEntry dbModel);
+
+  @ValueMapping(source = "DbDataset.INITIAL_VERSION", target = "version")
+  DbDataset copy(DbDataset source);
 }

@@ -122,7 +122,7 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
 
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
   // as enums can't be abstract or extend abstract classes.
-  public static final String TABLE_NAME = "user";
+  private static final String TABLE_NAME = "user";
   private final String parameterName;
   private final Function<ReportingUser, Object> objectValueFunction;
   private final Function<ReportingUser, QueryParameterValue> parameterValueFunction;
@@ -134,6 +134,11 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
     this.parameterName = parameterName;
     this.objectValueFunction = objectValueFunction;
     this.parameterValueFunction = parameterValueFunction;
+  }
+
+  @Override
+  public String getBigQueryTableName() {
+    return TABLE_NAME;
   }
 
   @Override

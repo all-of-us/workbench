@@ -12,13 +12,13 @@ import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampQpvToOffsetDateTime;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.INSTITUTION__SHORT_NAME;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.USER__CITY;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.USER__INSTITUTION_ID;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.countPopulatedTables;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createEmptySnapshot;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingCohort;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingDataset;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingInstitution;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingUser;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__CITY;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTION_ID;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
 import com.google.cloud.bigquery.InsertAllRequest;
@@ -46,6 +46,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
@@ -55,6 +57,7 @@ import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
+import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -82,18 +85,21 @@ public class ReportingUploadServiceTest {
 
   @Autowired
   @Qualifier("REPORTING_UPLOAD_SERVICE_DML_IMPL")
-  private ReportingUploadService reportingUploadServiceDmlImpl;
+  private ReportingUploadService reportingUploadServiceinsertQueryImpl;
 
   @Autowired
   @Qualifier("REPORTING_UPLOAD_SERVICE_STREAMING_IMPL")
   private ReportingUploadService reportingUploadServiceStreamingImpl;
+
+  @Autowired
+  private ReportingTestFixture<DbUser, ProjectedReportingUser, ReportingUser> userFixture;
 
   @Captor private ArgumentCaptor<QueryJobConfiguration> queryJobConfigurationCaptor;
   @Captor private ArgumentCaptor<InsertAllRequest> insertAllRequestCaptor;
 
   @TestConfiguration
   @Import({
-    ReportingUploadServiceDmlImpl.class,
+    ReportingUploadServiceInsertQueryImpl.class,
     ReportingUploadServiceStreamingImpl.class,
     ReportingTestConfig.class
   })
@@ -108,13 +114,14 @@ public class ReportingUploadServiceTest {
   @Before
   public void setup() {
     reportingSnapshot =
-        new ReportingSnapshot()
+        createEmptySnapshot()
             .captureTimestamp(NOW.toEpochMilli())
             .cohorts(ImmutableList.of(createReportingCohort()))
+            .datasets(ImmutableList.of(createReportingDataset()))
             .institutions(ImmutableList.of(createReportingInstitution()))
             .users(
                 ImmutableList.of(
-                    createReportingUser(),
+                    userFixture.createDto(),
                     new ReportingUser()
                         .username("ted@aou.biz")
                         .givenName("Ted")
@@ -125,7 +132,7 @@ public class ReportingUploadServiceTest {
                         .givenName("So-Crates")
                         .disabled(false)
                         .userId(303L),
-                    createReportingUser()))
+                    userFixture.createDto()))
             .workspaces(
                 ImmutableList.of(
                     new ReportingWorkspace()
@@ -147,11 +154,10 @@ public class ReportingUploadServiceTest {
     snapshotWithNulls =
         createEmptySnapshot()
             .captureTimestamp(NOW.toEpochMilli())
-            .cohorts(Collections.emptyList())
             .institutions(ImmutableList.of(createReportingInstitution().displayName(null)))
             .users(
                 ImmutableList.of(
-                    createReportingUser(),
+                    userFixture.createDto(),
                     new ReportingUser()
                         .username("america@usa.gov")
                         .givenName(null)
@@ -192,23 +198,24 @@ public class ReportingUploadServiceTest {
   }
 
   @Test
-  public void testUploadSnapshot_dml() {
-    testUploadSnapshot_dml(reportingSnapshot, 3);
+  public void testUploadSnapshot_insertQuery() {
+    testUploadSnapshot_insertQuery(reportingSnapshot, 4);
   }
 
   @Test
-  public void testUploadSnapshot_dml_with_nulls() {
-    testUploadSnapshot_dml(snapshotWithNulls, 2);
+  public void testUploadSnapshot_insertQuery_with_nulls() {
+    testUploadSnapshot_insertQuery(snapshotWithNulls, 2);
   }
 
   @Test
-  public void testUploadSnapshot_dml_empty() {
-    reportingUploadServiceDmlImpl.uploadSnapshot(ReportingTestUtils.EMPTY_SNAPSHOT);
+  public void testUploadSnapshot_insertQuery_empty() {
+    reportingUploadServiceinsertQueryImpl.uploadSnapshot(ReportingTestUtils.EMPTY_SNAPSHOT);
     verify(mockBigQueryService, never()).executeQuery(any(), anyLong());
   }
 
-  private void testUploadSnapshot_dml(ReportingSnapshot snapshot, int expectedWorkspaceJobIndex) {
-    reportingUploadServiceDmlImpl.uploadSnapshot(snapshot);
+  private void testUploadSnapshot_insertQuery(
+      ReportingSnapshot snapshot, int expectedWorkspaceJobIndex) {
+    reportingUploadServiceinsertQueryImpl.uploadSnapshot(snapshot);
     verify(mockBigQueryService, times(ReportingTestUtils.countPopulatedTables(snapshot)))
         .executeQuery(queryJobConfigurationCaptor.capture(), anyLong());
 
@@ -231,7 +238,7 @@ public class ReportingUploadServiceTest {
   }
 
   @Test
-  public void testUploadSnapshot_dmlBatchInserts() {
+  public void testUploadSnapshot_insertQueryBatchInserts() {
     final ReportingSnapshot largeSnapshot =
         createEmptySnapshot()
             .captureTimestamp(NOW.toEpochMilli())
@@ -255,7 +262,7 @@ public class ReportingUploadServiceTest {
             .cohorts(ImmutableList.of(ReportingTestUtils.createReportingCohort()))
             .institutions(ImmutableList.of(ReportingTestUtils.createReportingInstitution()));
 
-    reportingUploadServiceDmlImpl.uploadSnapshot(largeSnapshot);
+    reportingUploadServiceinsertQueryImpl.uploadSnapshot(largeSnapshot);
     final int expectedInsertions = 8;
     verify(mockBigQueryService, times(expectedInsertions))
         .executeQuery(queryJobConfigurationCaptor.capture(), anyLong());

@@ -13,7 +13,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public interface DmlInsertJobBuilder<T> extends BigQueryInsertionPayloadTransformer<T> {
+public interface InsertQueryJobBuilder<T> extends BigQueryInsertionPayloadTransformer<T> {
 
   default String getColumnNameList() {
     return Arrays.stream(getQueryParameterColumns())

@@ -3,16 +3,15 @@ package org.pmiops.workbench.reporting.insertion;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.USER__DISABLED;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.USER__PROFESSIONAL_URL;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__CDR_VERSION_ID;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__LAST_ACCESSED_TIME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__NAME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__PUBLISHED;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoWorkspace;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingUser;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__DISABLED;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__PROFESSIONAL_URL;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
@@ -30,8 +29,15 @@ import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.testconfig.ReportingTestConfig;
+import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -57,6 +63,12 @@ public class InsertAllRequestBuilderTest {
           new ReportingUser().username(null).givenName(null).disabled(true).userId(313L));
   private static final TableId TABLE_ID = TableId.of("project ID", "dataset", "researcher");
   public static final int INCOMPLETE_USER_SIZE = 5; // includes snapshot_timestamp
+
+  @Autowired ReportingTestFixture<DbUser, ProjectedReportingUser, ReportingUser> userFixture;
+
+  @TestConfiguration
+  @Import({ReportingTestConfig.class})
+  public static class Config {}
 
   // regression test for RW-5437
   @Test
@@ -87,7 +99,7 @@ public class InsertAllRequestBuilderTest {
 
   @Test
   public void testBuildUser_AllFields() {
-    final ReportingUser user_all_fields = createReportingUser();
+    final ReportingUser user_all_fields = userFixture.createDto();
     final InsertAllRequest request =
         USER_INSERT_ALL_REQUEST_BUILDER.build(
             TABLE_ID, ImmutableList.of(user_all_fields), FIXED_VALUES);

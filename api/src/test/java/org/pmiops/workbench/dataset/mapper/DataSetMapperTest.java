@@ -103,7 +103,7 @@ public class DataSetMapperTest {
     dbDataset.setInvalid(false);
     dbDataset.setWorkspaceId(1L);
     dbDataset.setPrePackagedConceptSet(
-        Arrays.asList(
+        Collections.singletonList(
             DbStorageEnums.prePackagedConceptSetsToStorage(PrePackagedConceptSetEnum.NONE)));
     dbDataset.setCohortIds(ImmutableList.of(1L));
     dbDataset.setConceptSetIds(ImmutableList.of(1L));
@@ -180,8 +180,8 @@ public class DataSetMapperTest {
 
   @Test
   public void testDataSetRequestToDbWithNullSourceDB() {
-    List<Long> conceptIds = ImmutableList.of(4l, 5l, 6l);
-    List<Long> cohortIds = ImmutableList.of(1l, 2l, 3l);
+    List<Long> conceptIds = ImmutableList.of(4L, 5L, 6L);
+    List<Long> cohortIds = ImmutableList.of(1L, 2L, 3L);
 
     DomainValuePair domainValuePair = new DomainValuePair();
     domainValuePair.setDomain(Domain.PERSON);

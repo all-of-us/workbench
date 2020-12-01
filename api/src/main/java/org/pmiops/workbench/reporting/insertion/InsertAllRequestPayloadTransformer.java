@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import org.pmiops.workbench.utils.RandomUtils;
 
-/*
+/**
  * Class with InsertAllRequest payload-specific implementation to change model objects
  * (e.g. ReportingUser) into RowToInsert instances. A different template specialization of this
  * interface with corresponding object (possibly of an anonymous class) should be used for each

@@ -14,6 +14,14 @@ import org.jetbrains.annotations.NotNull;
  * of this interface is as a contract for enum classes, one per table.
  */
 public interface ColumnValueExtractor<MODEL_T> {
+
+  /**
+   * Name for the table in BigQuery. This will be the same for all columns in the table, so the way
+   * to grab it statically is just CohortColumnValueExtractor.values()[0].getBigQueryTableName(),;
+   * This shoule always work, since a a useful enum must always have at least one entry.
+   */
+  String getBigQueryTableName();
+
   // Parameter name (without any @ sign). The convention is snake_case. This value is used in
   // creating named parameter keys (with a numerical suffix) for DML statements and map keys for
   // RowToInsert objects.

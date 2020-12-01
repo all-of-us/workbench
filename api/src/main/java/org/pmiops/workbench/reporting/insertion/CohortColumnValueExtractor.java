@@ -42,6 +42,11 @@ public enum CohortColumnValueExtractor implements ColumnValueExtractor<Reporting
   }
 
   @Override
+  public String getBigQueryTableName() {
+    return "cohort";
+  }
+
+  @Override
   public String getParameterName() {
     return parameterName;
   }

@@ -1,5 +1,7 @@
 package org.pmiops.workbench.reporting;
 
+import static org.pmiops.workbench.reporting.insertion.ColumnValueExtractorUtils.getBigQueryTableName;
+
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
@@ -9,17 +11,16 @@ import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Lists;
 import java.time.Duration;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.model.ReportingCohort;
-import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingSnapshot;
-import org.pmiops.workbench.model.ReportingUser;
-import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.DmlInsertJobBuilder;
+import org.pmiops.workbench.reporting.insertion.DatasetCohortColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.DatasetColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.InsertQueryJobBuilder;
 import org.pmiops.workbench.reporting.insertion.InstitutionColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
@@ -29,12 +30,12 @@ import org.springframework.stereotype.Service;
 
 @Service("REPORTING_UPLOAD_SERVICE_DML_IMPL")
 @Primary
-public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
+public class ReportingUploadServiceInsertQueryImpl implements ReportingUploadService {
 
   private static class JobInfo {
-    private String tableName;
-    private int rowCount;
-    private QueryJobConfiguration queryJobConfiguration;
+    private final String tableName;
+    private final int rowCount;
+    private final QueryJobConfiguration queryJobConfiguration;
 
     public JobInfo(String tableName, int rowCount, QueryJobConfiguration queryJobConfiguration) {
       this.tableName = tableName;
@@ -53,10 +54,29 @@ public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
     public QueryJobConfiguration getQueryJobConfiguration() {
       return queryJobConfiguration;
     }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (!(o instanceof JobInfo)) {
+        return false;
+      }
+      JobInfo jobInfo = (JobInfo) o;
+      return getRowCount() == jobInfo.getRowCount()
+          && Objects.equals(getTableName(), jobInfo.getTableName())
+          && Objects.equals(getQueryJobConfiguration(), jobInfo.getQueryJobConfiguration());
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(getTableName(), getRowCount(), getQueryJobConfiguration());
+    }
   }
 
   private static final Logger logger =
-      Logger.getLogger(ReportingUploadServiceDmlImpl.class.getName());
+      Logger.getLogger(ReportingUploadServiceInsertQueryImpl.class.getName());
   private static final long MAX_WAIT_TIME = Duration.ofSeconds(60).toMillis();
 
   private final BigQueryService bigQueryService;
@@ -64,18 +84,7 @@ public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
   private final Provider<Stopwatch> stopwatchProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
-  private static final DmlInsertJobBuilder<ReportingUser> userJobBuilder =
-      UserColumnValueExtractor::values;
-
-  private static final DmlInsertJobBuilder<ReportingCohort> cohortJobBuilder =
-      CohortColumnValueExtractor::values;
-  private static final DmlInsertJobBuilder<ReportingInstitution> institutionJobBuilder =
-      InstitutionColumnValueExtractor::values;
-
-  private static final DmlInsertJobBuilder<ReportingWorkspace> workspaceJobBuilder =
-      WorkspaceColumnValueExtractor::values;
-
-  public ReportingUploadServiceDmlImpl(
+  public ReportingUploadServiceInsertQueryImpl(
       BigQueryService bigQueryService,
       ReportingVerificationService reportingVerificationService,
       Provider<Stopwatch> stopwatchProvider,
@@ -127,32 +136,45 @@ public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
     final QueryParameterValue snapshotTimestamp = getTimestampValue(reportingSnapshot);
     final ImmutableList.Builder<JobInfo> resultBuilder = new Builder<>();
 
-    resultBuilder.addAll(
-        getJobsForDTOs(
-            CohortColumnValueExtractor.TABLE_NAME,
-            cohortJobBuilder,
-            snapshotTimestamp,
-            reportingSnapshot.getCohorts()));
-    resultBuilder.addAll(
-        getJobsForDTOs(
-            InstitutionColumnValueExtractor.TABLE_NAME,
-            institutionJobBuilder,
-            snapshotTimestamp,
-            reportingSnapshot.getInstitutions()));
-    resultBuilder.addAll(
-        getJobsForDTOs(
-            UserColumnValueExtractor.TABLE_NAME,
-            userJobBuilder,
-            snapshotTimestamp,
-            reportingSnapshot.getUsers()));
-    resultBuilder.addAll(
-        getJobsForDTOs(
-            WorkspaceColumnValueExtractor.TABLE_NAME,
-            workspaceJobBuilder,
-            snapshotTimestamp,
-            reportingSnapshot.getWorkspaces()));
-
-    final List<JobInfo> result = resultBuilder.build();
+    final List<JobInfo> result =
+        resultBuilder
+            .addAll(
+                getJobsForDTOs(
+                    getBigQueryTableName(CohortColumnValueExtractor.class),
+                    CohortColumnValueExtractor::values,
+                    snapshotTimestamp,
+                    reportingSnapshot.getCohorts()))
+            .addAll(
+                getJobsForDTOs(
+                    getBigQueryTableName(DatasetCohortColumnValueExtractor.class),
+                    DatasetColumnValueExtractor::values,
+                    snapshotTimestamp,
+                    reportingSnapshot.getDatasets()))
+            .addAll(
+                getJobsForDTOs(
+                    getBigQueryTableName(DatasetCohortColumnValueExtractor.class),
+                    DatasetCohortColumnValueExtractor::values,
+                    snapshotTimestamp,
+                    reportingSnapshot.getDatasetCohorts()))
+            .addAll(
+                getJobsForDTOs(
+                    getBigQueryTableName(InstitutionColumnValueExtractor.class),
+                    InstitutionColumnValueExtractor::values,
+                    snapshotTimestamp,
+                    reportingSnapshot.getInstitutions()))
+            .addAll(
+                getJobsForDTOs(
+                    getBigQueryTableName(UserColumnValueExtractor.class),
+                    UserColumnValueExtractor::values,
+                    snapshotTimestamp,
+                    reportingSnapshot.getUsers()))
+            .addAll(
+                getJobsForDTOs(
+                    getBigQueryTableName(WorkspaceColumnValueExtractor.class),
+                    WorkspaceColumnValueExtractor::values,
+                    snapshotTimestamp,
+                    reportingSnapshot.getWorkspaces()))
+            .build();
     buildJobsStopwatch.stop();
     logger.info(
         LogFormatters.duration(
@@ -162,7 +184,7 @@ public class ReportingUploadServiceDmlImpl implements ReportingUploadService {
 
   private <T> List<JobInfo> getJobsForDTOs(
       String tableName,
-      DmlInsertJobBuilder<T> jobBuilder,
+      InsertQueryJobBuilder<T> jobBuilder,
       QueryParameterValue snapshotTimestamp,
       List<T> dtos) {
     final int partitionSize = workbenchConfigProvider.get().reporting.maxRowsPerInsert;

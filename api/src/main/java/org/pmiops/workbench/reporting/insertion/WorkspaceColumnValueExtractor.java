@@ -124,7 +124,7 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
       w -> toTimestampQpv(w.getRpTimeRequested())),
   WORKSPACE_ID("workspace_id", ReportingWorkspace::getWorkspaceId, w -> int64(w.getWorkspaceId()));
 
-  public static final String TABLE_NAME = "workspace";
+  private static final String TABLE_NAME = "workspace";
   private final String parameterName;
   private final Function<ReportingWorkspace, Object> rowToInsertValueFunction;
   private final Function<ReportingWorkspace, QueryParameterValue> parameterValueFunction;
@@ -136,6 +136,11 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
     this.parameterName = parameterName;
     this.rowToInsertValueFunction = rowToInsertValueFunction;
     this.parameterValueFunction = parameterValueFunction;
+  }
+
+  @Override
+  public String getBigQueryTableName() {
+    return TABLE_NAME;
   }
 
   @Override
