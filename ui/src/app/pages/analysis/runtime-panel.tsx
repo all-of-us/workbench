@@ -670,7 +670,7 @@ export const RuntimePanel = fp.flow(
     [([r, ]) => r === undefined, () => PanelContent.Customize],
     [([r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
     [([r, ]) => r.status === RuntimeStatus.Deleted &&
-      (r.configurationType === RuntimeConfigurationType.GeneralAnalysis || r.configurationType === RuntimeConfigurationType.HailGenomicAnalysis),
+      ([RuntimeConfigurationType.GeneralAnalysis, RuntimeConfigurationType.HailGenomicAnalysis].includes(r.configurationType)),
       () => PanelContent.Create],
     [() => true, () => PanelContent.Customize]
   ])([currentRuntime, status]);
