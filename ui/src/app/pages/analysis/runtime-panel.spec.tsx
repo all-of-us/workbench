@@ -380,6 +380,32 @@ describe('RuntimePanel', () => {
     expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeTruthy();
   });
 
+  it('should respect divergent sets of valid machine types across compute types', async() => {
+    const wrapper = await component();
+
+    await pickMainCpu(wrapper, 1);
+    await pickMainRam(wrapper, 3.75);
+
+    await pickComputeType(wrapper, ComputeType.Dataproc);
+
+    // n1-standard-1 is illegal for Dataproc, so it should restore the default.
+    expect(getMainCpu(wrapper)).toBe(4);
+    expect(getMainRam(wrapper)).toBe(15);
+  });
+
+  it('should carry over valid main machine type across compute types', async() => {
+    const wrapper = await component();
+
+    await pickMainCpu(wrapper, 2);
+    await pickMainRam(wrapper, 7.5);
+
+    await pickComputeType(wrapper, ComputeType.Dataproc);
+
+    // n1-standard-2 is legal for Dataproc, so it should remain.
+    expect(getMainCpu(wrapper)).toBe(2);
+    expect(getMainRam(wrapper)).toBe(7.5);
+  });
+
   it('should warn user about reboot if there are updates that require one - increase disk size', async() => {
     const wrapper = await component();
 
