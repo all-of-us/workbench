@@ -644,7 +644,7 @@ export const RuntimePanel = fp.flow(
   const [{currentRuntime, pendingRuntime}, setRequestedRuntime] = useCustomRuntime(namespace);
 
   // if runtime configuration type is a default, override its config with preset values
-  if (!!currentRuntime && currentRuntime.status === RuntimeStatus.Deleted) {
+  if (currentRuntime && currentRuntime.status === RuntimeStatus.Deleted) {
     if (currentRuntime.configurationType === RuntimeConfigurationType.GeneralAnalysis) {
       currentRuntime.gceConfig = runtimePresets.generalAnalysis.runtimeTemplate.gceConfig;
       currentRuntime.dataprocConfig = null;

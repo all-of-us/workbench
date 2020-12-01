@@ -1,6 +1,7 @@
 import {mount} from 'enzyme';
 import {act} from 'react-dom/test-utils';
 import * as React from 'react';
+import * as fp from 'lodash/fp';
 
 import {Button, Link} from 'app/components/buttons';
 import {Spinner} from 'app/components/spinners';
@@ -160,53 +161,69 @@ describe('RuntimePanel', () => {
   });
 
   it('should create runtime with preset values instead of getRuntime values if configurationType is GeneralAnalysis', async() => {
-    const gceConfig = defaultGceConfig();
-    gceConfig.machineType = 'n1-standard-16';
-    gceConfig.diskSize = 1000;
+    // In the case where the user's latest runtime is a preset (GeneralAnalysis in this case)
+    // we should ignore the other runtime config values that were delivered with the getRuntime response
+    // and instead, defer to the preset values defined in runtime-presets.ts when creating a new runtime
+
     const runtime = {...runtimeApiStub.runtime,
       status: RuntimeStatus.Deleted,
       configurationType: RuntimeConfigurationType.GeneralAnalysis,
-      gceConfig: gceConfig,
+      gceConfig: {
+        ...defaultGceConfig(),
+        machineType: 'n1-standard-16',
+        diskSize: 1000
+      },
       dataprocConfig: null
     };
     runtimeApiStub.runtime = runtime;
-    act(() => { runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace}); });
+    runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
-
     await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expect(runtimeApiStub.runtime.gceConfig.machineType).toEqual(runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType);
-    expect(runtimeApiStub.runtime.gceConfig.diskSize).toEqual(runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.diskSize);
+    expect(compareFields(
+      runtimeApiStub.runtime.gceConfig,
+      runtimePresets.generalAnalysis.runtimeTemplate.gceConfig,
+      ['machineType', 'diskSize']
+    )).toBeTruthy();
   });
 
   it('should create runtime with preset values instead of getRuntime values if configurationType is HailGenomicsAnalysis', async() => {
-    const dataprocConfig = defaultDataprocConfig();
-    dataprocConfig.masterMachineType = 'n1-standard-16';
-    dataprocConfig.masterDiskSize = 999;
-    dataprocConfig.workerDiskSize = 444;
-    dataprocConfig.numberOfWorkers = 5;
+    // In the case where the user's latest runtime is a preset (HailGenomicsAnalysis in this case)
+    // we should ignore the other runtime config values that were delivered with the getRuntime response
+    // and instead, defer to the preset values defined in runtime-presets.ts when creating a new runtime
 
     const runtime = {...runtimeApiStub.runtime,
       status: RuntimeStatus.Deleted,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       gceConfig: null,
-      dataprocConfig: dataprocConfig
+      dataprocConfig: {
+        ...defaultDataprocConfig(),
+        masterMachineType: 'n1-standard-16',
+        masterDiskSize: 999,
+        workerDiskSize: 444,
+        numberOfWorkers: 5
+      }
     };
     runtimeApiStub.runtime = runtime;
-    act(() => { runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace}); });
+    runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
-
     await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expect(runtimeApiStub.runtime.dataprocConfig.masterMachineType).toEqual(runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig.masterMachineType);
-    expect(runtimeApiStub.runtime.dataprocConfig.masterDiskSize).toEqual(runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig.masterDiskSize);
-    expect(runtimeApiStub.runtime.dataprocConfig.workerDiskSize).toEqual(runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig.workerDiskSize);
-    expect(runtimeApiStub.runtime.dataprocConfig.numberOfWorkers).toEqual(runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig.numberOfWorkers);
+    expect(compareFields(
+      runtimeApiStub.runtime.dataprocConfig,
+      runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig,
+      ['masterMachineType', 'masterDiskSize', 'workerDiskSize', 'numberOfWorkers']
+    )).toBeTruthy();
   });
+
+  const compareFields = (a, b, fieldNames) => {
+    const pick = fp.flow(fp.pick(fieldNames));
+    return fp.isEqual(pick(a) , pick(b));
+  };
 
   it('should allow creation when runtime has error status', async() => {
     runtimeApiStub.runtime.status = RuntimeStatus.Error;
@@ -328,20 +345,21 @@ describe('RuntimePanel', () => {
   });
 
   it('should set runtime preset values in customize panel instead of getRuntime values if configurationType is GeneralAnalysis', async() => {
-    const gceConfig = defaultGceConfig();
-    gceConfig.machineType = 'n1-standard-16';
-    gceConfig.diskSize = 1000;
-    const runtime = {...runtimeApiStub.runtime,
+    const runtime = {
+      ...runtimeApiStub.runtime,
       status: RuntimeStatus.Deleted,
       configurationType: RuntimeConfigurationType.GeneralAnalysis,
-      gceConfig: gceConfig,
+      gceConfig: {
+        ...defaultGceConfig(),
+        machineType: 'n1-standard-16',
+        diskSize: 1000
+      },
       dataprocConfig: null
     };
     runtimeApiStub.runtime = runtime;
-    act(() => { runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace}); });
+    runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
-
     await mustClickButton(wrapper, 'Customize');
 
     expect(getMainCpu(wrapper)).toEqual(findMachineByName(runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType).cpu);
@@ -350,23 +368,22 @@ describe('RuntimePanel', () => {
   });
 
   it('should set runtime preset values in customize panel instead of getRuntime values if configurationType is HailGenomicsAnalysis', async() => {
-    const dataprocConfig = defaultDataprocConfig();
-    dataprocConfig.masterMachineType = 'n1-standard-16';
-    dataprocConfig.masterDiskSize = 999;
-    dataprocConfig.workerDiskSize = 444;
-    dataprocConfig.numberOfWorkers = 5;
-
     const runtime = {...runtimeApiStub.runtime,
       status: RuntimeStatus.Deleted,
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       gceConfig: null,
-      dataprocConfig: dataprocConfig
+      dataprocConfig: {
+        ...defaultDataprocConfig(),
+        masterMachineType: 'n1-standard-16',
+        masterDiskSize: 999,
+        workerDiskSize: 444,
+        numberOfWorkers: 5
+      }
     };
     runtimeApiStub.runtime = runtime;
-    act(() => { runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace}); });
+    runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace});
 
     const wrapper = await component();
-
     await mustClickButton(wrapper, 'Customize');
 
     expect(getMainCpu(wrapper)).toEqual(findMachineByName(runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig.masterMachineType).cpu);

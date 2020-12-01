@@ -12,7 +12,7 @@ export const runtimePresets: {
       gceConfig: {
         machineType: 'n1-standard-4',
         diskSize: 50
-      }
+      },
     }
   },
   hailAnalysis: {
