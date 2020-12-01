@@ -23,8 +23,8 @@ export default class AnnotationFieldModal extends Modal {
   }
 
   async waitForLoad(): Promise<this> {
+    await super.waitForLoad();
     try {
-      await super.waitForLoad();
       await waitForText(this.page, modalTitle, {xpath: this.getXpath()});
     } catch (e) {
       await savePageToFile(this.page);
