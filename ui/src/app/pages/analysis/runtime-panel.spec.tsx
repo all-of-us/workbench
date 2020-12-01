@@ -7,7 +7,7 @@ import {Spinner} from 'app/components/spinners';
 import {WarningMessage} from 'app/components/warning-message';
 import {ConfirmDelete, RuntimePanel, Props} from 'app/pages/analysis/runtime-panel';
 import {registerApiClient, runtimeApi} from 'app/services/swagger-fetch-clients';
-import {ComputeType} from 'app/utils/machines';
+import {findMachineByName, ComputeType} from 'app/utils/machines';
 import {clearCompoundRuntimeOperations} from 'app/utils/stores';
 import {cdrVersionStore, serverConfigStore} from 'app/utils/navigation';
 import {runtimePresets} from 'app/utils/runtime-presets';
@@ -17,10 +17,8 @@ import {RuntimeApi} from 'generated/fetch/api';
 import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
-import {defaultDataprocConfig, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
+import {defaultGceConfig, defaultDataprocConfig, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
-import {defaultGceConfig} from '../../../testing/stubs/runtime-api-stub';
-import {findMachineByName} from '../../utils/machines';
 
 describe('RuntimePanel', () => {
   let props: Props;

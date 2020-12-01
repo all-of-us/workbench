@@ -516,27 +516,13 @@ const CostInfo = ({runtimeChanged, runtimeConfig, currentUser, workspace, creato
   </FlexRow>;
 };
 
-const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelContent, workspace}) => {
-  const {
-    displayName,
-    runtimeTemplate: {gceConfig = null, dataprocConfig = null}
-  } = preset;
-  const computeType = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
-  const masterMachineType = computeType === ComputeType.Dataproc ? dataprocConfig.masterMachineType : gceConfig.machineType;
-  const masterMachine = findMachineByName(masterMachineType);
-  const masterDiskSize = computeType === ComputeType.Dataproc ? dataprocConfig.masterDiskSize : gceConfig.diskSize;
-  const workerMachineType = computeType === ComputeType.Dataproc ? dataprocConfig.workerMachineType : null;
-  const workerMachine = workerMachineType ? findMachineByName(workerMachineType) : null;
-  const workerDiskSize = computeType === ComputeType.Dataproc ? dataprocConfig.workerDiskSize : null;
+const CreatePanel = ({creatorFreeCreditsRemaining, profile, setPanelContent, workspace, runtimeConfig}) => {
+  const displayName = runtimeConfig.computeType === ComputeType.Dataproc ?
+    runtimePresets.hailAnalysis.displayName : runtimePresets.generalAnalysis.displayName;
 
   return <div style={styles.controlSection}>
     <CostInfo runtimeChanged={false}
-              runtimeConfig={{
-                computeType,
-                diskSize: masterDiskSize,
-                machine: findMachineByName(masterMachineType),
-                dataprocConfig: dataprocConfig
-              }}
+              runtimeConfig={runtimeConfig}
               currentUser={profile.username}
               workspace={workspace}
               creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
@@ -553,21 +539,21 @@ const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelCont
     </FlexRow>
     <label htmlFor='compute-resources' style={{...styles.bold, marginTop: '1rem'}}>Compute Resources</label>
     <div id='compute-resources'>- Default: compute size of
-      <b> {masterMachine.cpu} CPUs</b>,
-      <b> {masterMachine.memory} GB memory</b>, and a
-      <b> {masterDiskSize} GB disk</b>
+      <b> {runtimeConfig.machine.cpu} CPUs</b>,
+      <b> {runtimeConfig.machine.memory} GB memory</b>, and a
+      <b> {runtimeConfig.diskSize} GB disk</b>
     </div>
-    {computeType === ComputeType.Dataproc && <Fragment>
+    {runtimeConfig.computeType === ComputeType.Dataproc && <Fragment>
       <label htmlFor='worker-configuration' style={{...styles.bold, marginTop: '1rem'}}>Worker Configuration</label>
       <div id='worker-configuration'>- Default:
-        <b> {dataprocConfig.numberOfWorkers} worker(s) </b>
+        <b> {runtimeConfig.dataprocConfig.numberOfWorkers} worker(s) </b>
         {
-          dataprocConfig.numberOfPreemptibleWorkers > 0 &&
-          <b>and {dataprocConfig.numberOfPreemptibleWorkers} preemptible worker(s) </b>
+          runtimeConfig.dataprocConfig.numberOfPreemptibleWorkers > 0 &&
+          <b>and {runtimeConfig.dataprocConfig.numberOfPreemptibleWorkers} preemptible worker(s) </b>
         }
-        each with compute size of <b>{workerMachine.cpu} CPUs</b>,
-        <b> {workerMachine.memory} GB memory</b>, and a
-        <b> {workerDiskSize} GB disk</b>
+        each with compute size of <b>{findMachineByName(runtimeConfig.dataprocConfig.workerMachineType).cpu} CPUs</b>,
+        <b> {findMachineByName(runtimeConfig.dataprocConfig.workerMachineType).memory} GB memory</b>, and a
+        <b> {runtimeConfig.dataprocConfig.workerDiskSize} GB disk</b>
       </div>
     </Fragment>}
   </div>;
@@ -690,11 +676,6 @@ export const RuntimePanel = fp.flow(
   ])([currentRuntime, status]);
   const [panelContent, setPanelContent] = useState<PanelContent>(initialPanelContent);
 
-  const initialPreset = !currentRuntime ? runtimePresets.generalAnalysis :
-    currentRuntime.configurationType === RuntimeConfigurationType.GeneralAnalysis ? runtimePresets.generalAnalysis :
-    currentRuntime.configurationType === RuntimeConfigurationType.HailGenomicAnalysis ? runtimePresets.hailAnalysis :
-    runtimePresets.generalAnalysis;
-
   const [selectedDiskSize, setSelectedDiskSize] = useState(diskSize);
   const [selectedMachine, setSelectedMachine] = useState(initialMasterMachine);
   const [selectedCompute, setSelectedCompute] = useState<ComputeType>(initialCompute);
@@ -783,7 +764,6 @@ export const RuntimePanel = fp.flow(
     return <Button
       aria-label='Create'
       onClick={() => {
-        console.log('Create Clicked');
         setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
         onUpdate();
       }}>
@@ -814,10 +794,10 @@ export const RuntimePanel = fp.flow(
         <Fragment>
           <CreatePanel
               creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
-              preset={initialPreset}
               profile={profile}
               setPanelContent={(value) => setPanelContent(value)}
               workspace={workspace}
+              runtimeConfig={newRuntimeConfig}
           />
           <FlexRow style={{justifyContent: 'flex-end', marginTop: '1rem'}}>
             {renderCreateButton()}
