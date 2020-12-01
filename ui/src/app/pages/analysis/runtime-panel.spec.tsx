@@ -181,6 +181,33 @@ describe('RuntimePanel', () => {
     expect(runtimeApiStub.runtime.gceConfig.diskSize).toEqual(runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.diskSize);
   });
 
+  it('should create runtime with preset values instead of getRuntime values if configurationType is HailGenomicsAnalysis', async() => {
+    const dataprocConfig = defaultDataprocConfig();
+    dataprocConfig.masterMachineType = 'n1-standard-16';
+    dataprocConfig.masterDiskSize = 999;
+    dataprocConfig.workerDiskSize = 444;
+    dataprocConfig.numberOfWorkers = 5;
+
+    const runtime = {...runtimeApiStub.runtime,
+      status: RuntimeStatus.Deleted,
+      configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+      gceConfig: null,
+      dataprocConfig: dataprocConfig
+    };
+    runtimeApiStub.runtime = runtime;
+    act(() => { runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace}); });
+
+    const wrapper = await component();
+
+    await mustClickButton(wrapper, 'Create');
+
+    expect(runtimeApiStub.runtime.status).toEqual('Creating');
+    expect(runtimeApiStub.runtime.dataprocConfig.masterMachineType).toEqual(runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig.masterMachineType);
+    expect(runtimeApiStub.runtime.dataprocConfig.masterDiskSize).toEqual(runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig.masterDiskSize);
+    expect(runtimeApiStub.runtime.dataprocConfig.workerDiskSize).toEqual(runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig.workerDiskSize);
+    expect(runtimeApiStub.runtime.dataprocConfig.numberOfWorkers).toEqual(runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig.numberOfWorkers);
+  });
+
   it('should allow creation when runtime has error status', async() => {
     runtimeApiStub.runtime.status = RuntimeStatus.Error;
     act(() => { runtimeStore.set({runtime: runtimeApiStub.runtime, workspaceNamespace: workspaceStubs[0].namespace}) });
@@ -320,6 +347,33 @@ describe('RuntimePanel', () => {
     expect(getMainCpu(wrapper)).toEqual(findMachineByName(runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType).cpu);
     expect(getMainRam(wrapper)).toEqual(findMachineByName(runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType).memory);
     expect(getMainDiskSize(wrapper)).toEqual(runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.diskSize);
+  });
+
+  it('should set runtime preset values in customize panel instead of getRuntime values if configurationType is HailGenomicsAnalysis', async() => {
+    const dataprocConfig = defaultDataprocConfig();
+    dataprocConfig.masterMachineType = 'n1-standard-16';
+    dataprocConfig.masterDiskSize = 999;
+    dataprocConfig.workerDiskSize = 444;
+    dataprocConfig.numberOfWorkers = 5;
+
+    const runtime = {...runtimeApiStub.runtime,
+      status: RuntimeStatus.Deleted,
+      configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
+      gceConfig: null,
+      dataprocConfig: dataprocConfig
+    };
+    runtimeApiStub.runtime = runtime;
+    act(() => { runtimeStore.set({runtime: runtime, workspaceNamespace: workspaceStubs[0].namespace}); });
+
+    const wrapper = await component();
+
+    await mustClickButton(wrapper, 'Customize');
+
+    expect(getMainCpu(wrapper)).toEqual(findMachineByName(runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig.masterMachineType).cpu);
+    expect(getMainRam(wrapper)).toEqual(findMachineByName(runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig.masterMachineType).memory);
+    expect(getMainDiskSize(wrapper)).toEqual(runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig.masterDiskSize);
+    expect(getWorkerDiskSize(wrapper)).toEqual(runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig.workerDiskSize);
+    expect(getNumWorkers(wrapper)).toEqual(runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig.numberOfWorkers);
   });
 
   it('should allow configuration via dataproc preset from modified form', async() => {
