@@ -1,8 +1,8 @@
-import {ZendeskEnv} from 'environments/environment-type';
+import {EnvironmentBase, ZendeskEnv} from 'environments/environment-type';
 
 // The values are shared across the deployed test env as well as the local dev
 // environments.
-export const testEnvironmentBase = {
+export const testEnvironmentBase: EnvironmentBase = {
   allOfUsApiUrl: 'https://api-dot-all-of-us-workbench-test.appspot.com',
   clientId: '602460048110-5uk3vds3igc9qo0luevroc2uc3okgbkt.apps.googleusercontent.com',
   // Captcha Site key for test is same as that of local since both point to the same server keys

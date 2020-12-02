@@ -5,7 +5,7 @@ export enum ZendeskEnv {
   Sandbox = 'sandbox'
 }
 
-export interface Environment {
+export interface EnvironmentBase {
   // Permanent environment variables.
   //
   // The URL to use when making API requests against the AoU API. This is used
@@ -15,13 +15,6 @@ export interface Environment {
   // The OAuth2 client ID. Used by the sign-in module to authenticate the user.
   // Example value: '56507752110-ovdus1lkreopsfhlovejvfgmsosveda6.apps.googleusercontent.com'
   clientId: string;
-  // Indicates that the current server is a local server where client-side
-  // debugging should be enabled (e.g. console.log, or devtools APIs).
-  debug: boolean;
-  // A prefix to add to the site title (shown in the tab title).
-  // Example value: 'Test' would cause the following full title:
-  // "Homepage | [Test] All of Us Researcher Workbench"
-  displayTag: string;
   // Indicates if the displayTag should be shown in the web app. If it is true,
   // a small label will be added under the "All of Us" logo in the header.
   shouldShowDisplayTag: boolean;
@@ -68,4 +61,14 @@ export interface Environment {
   //
   // The UI environment config should be restricted to truly UI-specific environment variables, such
   // as server API endpoints and client IDs.
+}
+
+export interface Environment extends EnvironmentBase {
+  // Indicates that the current server is a local server where client-side
+  // debugging should be enabled (e.g. console.log, or devtools APIs).
+  debug: boolean;
+  // A prefix to add to the site title (shown in the tab title).
+  // Example value: 'Test' would cause the following full title:
+  // "Homepage | [Test] All of Us Researcher Workbench"
+  displayTag: string;
 }
