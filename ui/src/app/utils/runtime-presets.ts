@@ -1,6 +1,5 @@
 import {Runtime, RuntimeConfigurationType} from 'generated/fetch';
 
-
 export const runtimePresets: {
   [runtimePresetName: string]: {displayName: string, runtimeTemplate: Runtime}
 } = {

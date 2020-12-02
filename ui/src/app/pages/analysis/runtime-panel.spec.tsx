@@ -182,11 +182,11 @@ describe('RuntimePanel', () => {
     await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expect(compareFields(
+    expectEqualFields(
       runtimeApiStub.runtime.gceConfig,
       runtimePresets.generalAnalysis.runtimeTemplate.gceConfig,
       ['machineType', 'diskSize']
-    )).toBeTruthy();
+    );
   });
 
   it('should create runtime with preset values instead of getRuntime values if configurationType is HailGenomicsAnalysis', async() => {
@@ -213,16 +213,16 @@ describe('RuntimePanel', () => {
     await mustClickButton(wrapper, 'Create');
 
     expect(runtimeApiStub.runtime.status).toEqual('Creating');
-    expect(compareFields(
+    expectEqualFields(
       runtimeApiStub.runtime.dataprocConfig,
       runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig,
       ['masterMachineType', 'masterDiskSize', 'workerDiskSize', 'numberOfWorkers']
-    )).toBeTruthy();
+    );
   });
 
-  const compareFields = (a, b, fieldNames) => {
+  const expectEqualFields = (a, b, fieldNames) => {
     const pick = fp.flow(fp.pick(fieldNames));
-    return fp.isEqual(pick(a) , pick(b));
+    expect(pick(a)).toEqual(pick(b));
   };
 
   it('should allow creation when runtime has error status', async() => {

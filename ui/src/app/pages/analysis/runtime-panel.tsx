@@ -645,12 +645,12 @@ export const RuntimePanel = fp.flow(
 
   // if runtime configuration type is a default, override its config with preset values
   if (currentRuntime && currentRuntime.status === RuntimeStatus.Deleted) {
-    if (currentRuntime.configurationType === RuntimeConfigurationType.GeneralAnalysis) {
-      currentRuntime.gceConfig = runtimePresets.generalAnalysis.runtimeTemplate.gceConfig;
-      currentRuntime.dataprocConfig = null;
-    } else if (currentRuntime.configurationType === RuntimeConfigurationType.HailGenomicAnalysis) {
-      currentRuntime.dataprocConfig = runtimePresets.hailAnalysis.runtimeTemplate.dataprocConfig;
-      currentRuntime.gceConfig = null;
+    const runtimePresetKey = fp.keys(runtimePresets)
+      .find(key => runtimePresets[key].runtimeTemplate.configurationType === currentRuntime.configurationType);
+
+    if (runtimePresetKey) {
+      currentRuntime.gceConfig = runtimePresets[runtimePresetKey].runtimeTemplate.gceConfig;
+      currentRuntime.dataprocConfig = runtimePresets[runtimePresetKey].runtimeTemplate.dataprocConfig;
     }
   }
 
