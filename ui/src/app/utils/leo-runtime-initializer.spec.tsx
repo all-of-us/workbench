@@ -12,7 +12,9 @@ import {RuntimesApi as LeoRuntimesApi} from 'notebooks-generated/fetch';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
 import {RuntimeConfigurationType} from 'generated/fetch';
+import {defaultGceConfig, defaultRuntime} from '../../testing/stubs/runtime-api-stub';
 import {serverConfigStore} from "./navigation";
+import any = jasmine.any;
 
 let mockGetRuntime: SpyInstance;
 let mockCreateRuntime: SpyInstance;
@@ -161,6 +163,31 @@ describe('RuntimeInitializer', () => {
 
     expect(mockCreateRuntime).toHaveBeenCalled();
     expect(runtime.status).toEqual(RuntimeStatus.Running);
+  });
+
+  it('should lazily create user\'s most runtime if a valid one exists', async() => {
+    serverConfigStore.next({gsuiteDomain: 'researchallofus.org', enableCustomRuntimes: true});
+    mockGetRuntime.mockImplementation(namespace => {
+      return {
+        ...defaultRuntime(),
+        gceConfig: {
+          diskSize: 777,
+          machineType: 'n1-standard-16'
+        },
+        status: RuntimeStatus.Deleted
+      }; });
+
+    LeoRuntimeInitializer.initialize({
+      workspaceNamespace: workspaceNamespace,
+    });
+    await new Promise(setImmediate);
+
+    expect(mockCreateRuntime).toHaveBeenCalledWith(workspaceNamespace, jasmine.objectContaining({
+      gceConfig: {
+        diskSize: 777,
+        machineType: 'n1-standard-16'
+      }
+    }), jasmine.any(Object));
   });
 
   it('should delete runtime if in an error state', async() => {
