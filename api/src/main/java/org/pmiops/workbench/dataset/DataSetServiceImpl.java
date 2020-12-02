@@ -566,10 +566,17 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final ValuesLinkingPair valuesLinkingPair =
         getValueSelectsAndJoins(domainValuePairsForCurrentDomain);
 
-    queryBuilder
-        .append(String.join(", ", valuesLinkingPair.getSelects()))
-        .append(" from ( SELECT * ")
-        .append(valuesLinkingPair.getDomainTable());
+    if (domain.equals(Domain.SURVEY)) {
+      queryBuilder
+          .append(String.join(", ", valuesLinkingPair.getSelects()))
+          .append(" ")
+          .append(valuesLinkingPair.getDomainTable());
+    } else {
+      queryBuilder
+          .append(String.join(", ", valuesLinkingPair.getSelects()))
+          .append(" from ( SELECT * ")
+          .append(valuesLinkingPair.getDomainTable());
+    }
 
     final Optional<String> conceptSetSqlInClauseMaybe =
         buildConceptIdListClause(domain, conceptSetsSelected);
@@ -639,9 +646,13 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         queryBuilder.append(", DATE");
       }
     }
-    queryBuilder
-        .append(") " + valuesLinkingPair.getTableAlias() + " ")
-        .append(valuesLinkingPair.formatJoins());
+
+    if (!domain.equals(Domain.SURVEY)) {
+      queryBuilder.append(") " + valuesLinkingPair.getTableAlias());
+      if (!valuesLinkingPair.formatJoins().equals("")) {
+        queryBuilder.append(" " + valuesLinkingPair.formatJoins());
+      }
+    }
     return buildQueryJobConfiguration(cohortParameters, queryBuilder.toString());
   }
 
