@@ -1100,12 +1100,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             .map(DbDSLinking::getOmopSql)
             .collect(ImmutableList.toImmutableList());
 
-    final String domainTable =
+    final ImmutableList<String> coreTable =
         valuesLinkingTableResult.stream()
             .filter(fieldValue -> fieldValue.getOmopSql().equals("CORE_TABLE_FOR_DOMAIN"))
             .map(DbDSLinking::getJoinValue)
-            .findFirst()
-            .get();
+            .collect(ImmutableList.toImmutableList());
+    String domainTable = coreTable.isEmpty() ? "" : coreTable.get(0);
 
     final ImmutableList<String> valueJoins =
         valuesLinkingTableResult.stream()
