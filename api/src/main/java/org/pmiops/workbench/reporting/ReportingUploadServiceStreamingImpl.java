@@ -141,7 +141,7 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
                 getTableId(DatasetConceptSetColumnValueExtractor.class),
                 reportingSnapshot.getDatasetConceptSets(),
                 fixedValues),
-          datasetDomainIIdValueRequestBuilder.build(
+            datasetDomainIIdValueRequestBuilder.build(
                 getTableId(DatasetDomainColumnValueExtractor.class),
                 reportingSnapshot.getDatasetDomainIdValues(),
                 fixedValues),

@@ -47,8 +47,7 @@ public interface ReportingMapper {
 
   List<ReportingDataset> toReportingDatasetList(Collection<ProjectedReportingDataset> datasets);
 
-  default ReportingSnapshot toReportingSnapshot(
-      QueryResultBundle bundle, long snapshotTimestamp) {
+  default ReportingSnapshot toReportingSnapshot(QueryResultBundle bundle, long snapshotTimestamp) {
     return new ReportingSnapshot()
         .captureTimestamp(snapshotTimestamp)
         .cohorts(toReportingCohortList(bundle.getCohorts()))

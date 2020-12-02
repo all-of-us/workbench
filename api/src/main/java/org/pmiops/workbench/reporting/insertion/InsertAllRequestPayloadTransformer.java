@@ -14,18 +14,18 @@ import java.util.Objects;
 import org.pmiops.workbench.utils.RandomUtils;
 
 /**
- * Class with InsertAllRequest payload-specific implementation to change model objects
- * (e.g. ReportingUser) into RowToInsert instances. A different template specialization of this
- * interface with corresponding object (possibly of an anonymous class) should be used for each
- * destination table in the upload. In order to construct such an instance, it's only necessary to
- * override the method getQueryParameterColumns() with a method returning an array of instances.
- * Enum#values() is very useful here.
+ * Class with InsertAllRequest payload-specific implementation to change model objects (e.g.
+ * ReportingUser) into RowToInsert instances. A different template specialization of this interface
+ * with corresponding object (possibly of an anonymous class) should be used for each destination
+ * table in the upload. In order to construct such an instance, it's only necessary to override the
+ * method getQueryParameterColumns() with a method returning an array of instances. Enum#values() is
+ * very useful here.
  *
- * In order to instantiate a table-specific object implementing this instance, just do something like
- * @code{
- *  InsertAllRequestPayloadTransformer<ReportingUser> userTransformer =
- *    UserColumnValueExtractor::values;
- * }
+ * <p>In order to instantiate a table-specific object implementing this instance, just do something
+ * like
+ *
+ * @code{ InsertAllRequestPayloadTransformer<ReportingUser> userTransformer =
+ *     UserColumnValueExtractor::values; }
  */
 public interface InsertAllRequestPayloadTransformer<MODEL_T>
     extends BigQueryInsertionPayloadTransformer<MODEL_T> {
