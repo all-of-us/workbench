@@ -304,7 +304,7 @@ public class WorkbenchConfig {
     public String tierLabel;
     // VPC-SC service perimeter / folder
     public String servicePerimeterName;
-    // Terra Authorization Domain for workspaces in thie tier
+    // Terra Authorization Domain for workspaces in this tier
     public String authDomainName;
     // Terra Group / Google Group corresponding to the auth domain
     public String authDomainGroupEmail;
