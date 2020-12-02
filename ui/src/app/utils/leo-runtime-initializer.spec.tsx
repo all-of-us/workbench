@@ -9,12 +9,10 @@ import {RuntimeApi} from 'generated/fetch/api';
 import SpyInstance = jest.SpyInstance;
 import expect = jest.Expect;
 import {RuntimesApi as LeoRuntimesApi} from 'notebooks-generated/fetch';
-import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
+import {defaultRuntime, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
 import {RuntimeConfigurationType} from 'generated/fetch';
-import {defaultGceConfig, defaultRuntime} from '../../testing/stubs/runtime-api-stub';
 import {serverConfigStore} from "./navigation";
-import any = jasmine.any;
 
 let mockGetRuntime: SpyInstance;
 let mockCreateRuntime: SpyInstance;

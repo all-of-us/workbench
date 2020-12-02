@@ -293,6 +293,7 @@ export class LeoRuntimeInitializer {
   }
 
   private async poll() {
+
     // Overall strategy: continue polling the get-runtime endpoint, with capped exponential backoff,
     // until we either reach our goal state (a RUNNING runtime) or run up against the overall
     // timeout threshold.
