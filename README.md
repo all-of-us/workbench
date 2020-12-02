@@ -500,11 +500,11 @@ gcloud auth list # confirm it's what you expect
 You should see a file `sa-key.json` in the current directory
 The following shows how to make an authenticated backend request as the shared
 workbench test service account against Firecloud dev. It retrieves required authorizaiton
-scopes of `email`, `profile`, and `cloud-billing`.
+scopes of `userinfo.email`, `userinfo.profile`, and `cloud-billing`.
 
 ```Shell
 # From the "api" directory, use `oauth2l` to retrieve an authorization header:
-`~/go/bin/oauth2l header --json ./sa-key.json email profile cloud-billing`
+`~/go/bin/oauth2l header --json ./sa-key.json userinfo.email userinfo.profile cloud-billing`
 ```
 
 Now we'll demonstrate calling Firecloud's [profile/billing API](https://api.firecloud.org/#!/Profile/billing)
@@ -512,7 +512,7 @@ with the service account credentials.
 ```Shell
 # call Firecloud Billing API, format the JSON output and view in less
 
-curl -X GET -H "`~/go/bin/oauth2l header --json ./sa-key.json email profile cloud-billing`" \
+curl -X GET -H "`~/go/bin/oauth2l header --json ./sa-key.json userinfo.email userinfo.profile cloud-billing`" \
     -H "Content-Type: application/json" \
     "https://firecloud-orchestration.dsde-dev.broadinstitute.org/api/profile/billing" \
     | jq | less
