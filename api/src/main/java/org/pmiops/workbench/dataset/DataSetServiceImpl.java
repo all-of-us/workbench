@@ -291,7 +291,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     if (supportsConceptSets(domain)) {
       if (workbenchConfigProvider.get().featureFlags.enableConceptSetSearchV2) {
         final List<DbConceptSetConceptId> dbConceptSetConceptIds =
-            Domain.SURVEY.equals(request.getDomain())
+            request.getPrePackagedConceptSet().contains(SURVEY)
                 ? conceptBigQueryService.getSurveyQuestionConceptIds().stream()
                     .map(
                         c ->
@@ -301,6 +301,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                                 .build())
                     .collect(Collectors.toList())
                 : conceptSetDao.findAllByConceptSetIdIn(request.getConceptSetIds()).stream()
+                    .filter(
+                        cs ->
+                            cs.getDomainEnum().equals(domain)
+                                || (cs.getDomainEnum().equals(Domain.PHYSICAL_MEASUREMENT)
+                                    && domain.equals(Domain.MEASUREMENT)))
                     .flatMap(cs -> cs.getConceptSetConceptIds().stream())
                     .collect(Collectors.toList());
         Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
@@ -665,8 +670,16 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private Optional<String> buildConceptIdSqlInClause(
       Domain domain, List<DbConceptSet> conceptSets) {
     if (workbenchConfigProvider.get().featureFlags.enableConceptSetSearchV2) {
-      final List<DbConceptSetConceptId> dbConceptSetConceptIds =
+      final List<DbConceptSet> dbConceptSets =
           conceptSets.stream()
+              .filter(
+                  cs ->
+                      cs.getDomainEnum().equals(domain)
+                          || (cs.getDomainEnum().equals(Domain.PHYSICAL_MEASUREMENT)
+                              && domain.equals(Domain.MEASUREMENT)))
+              .collect(Collectors.toList());
+      final List<DbConceptSetConceptId> dbConceptSetConceptIds =
+          dbConceptSets.stream()
               .flatMap(cs -> cs.getConceptSetConceptIds().stream())
               .collect(Collectors.toList());
       if (dbConceptSetConceptIds.isEmpty()) {
