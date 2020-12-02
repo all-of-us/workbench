@@ -462,7 +462,7 @@ public class RuntimeControllerTest {
   }
 
   @Test
-  public void testGetRuntime_fromListRuntimes_invalidRutime() throws ApiException {
+  public void testGetRuntime_fromListRuntimes_invalidRuntime() throws ApiException {
     dataprocConfigObj.put("cloudService", "notACloudService");
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new ApiException(404, "Not found"));
@@ -661,6 +661,24 @@ public class RuntimeControllerTest {
                     .labels(ImmutableMap.of("all-of-us-config", "default"))));
 
     assertThrows(NotFoundException.class, () -> runtimeController.getRuntime(BILLING_PROJECT_ID));
+  }
+
+  @Test
+  public void testGetRuntime_fromListRuntime_returnPresets() throws ApiException {
+    String timestamp = "2020-11-30T19:19:57.347Z";
+
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenThrow(new ApiException(404, "Not found"));
+    when(userRuntimesApi.listRuntimesByProject(BILLING_PROJECT_ID, null, true))
+        .thenReturn(
+            ImmutableList.of(
+                new LeonardoListRuntimeResponse()
+                    .runtimeName("preset-runtime")
+                    .auditInfo(new LeonardoAuditInfo().createdDate(timestamp))
+                    .labels(ImmutableMap.of("all-of-us-config", "preset-general-analysis"))));
+
+    assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody().getRuntimeName())
+        .isEqualTo("preset-runtime");
   }
 
   @Test

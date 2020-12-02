@@ -1,6 +1,5 @@
 import {Runtime, RuntimeConfigurationType} from 'generated/fetch';
 
-
 export const runtimePresets: {
   [runtimePresetName: string]: {displayName: string, runtimeTemplate: Runtime}
 } = {
@@ -12,7 +11,7 @@ export const runtimePresets: {
       gceConfig: {
         machineType: 'n1-standard-4',
         diskSize: 50
-      }
+      },
     }
   },
   hailAnalysis: {

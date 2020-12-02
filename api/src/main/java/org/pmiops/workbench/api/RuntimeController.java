@@ -39,7 +39,6 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.Runtime;
-import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.model.RuntimeLocalizeRequest;
 import org.pmiops.workbench.model.RuntimeLocalizeResponse;
 import org.pmiops.workbench.model.RuntimeStatus;
@@ -218,15 +217,14 @@ public class RuntimeController implements RuntimeApiDelegate {
     }
 
     LeonardoListRuntimeResponse mostRecentRuntime = mostRecentRuntimeMaybe.get();
-    final String OVERRIDE_LABEL =
-        LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
-            RuntimeConfigurationType.USEROVERRIDE);
+
     @SuppressWarnings("unchecked")
     Map<String, String> runtimeLabels = (Map<String, String>) mostRecentRuntime.getLabels();
 
     if (runtimeLabels != null
-        && OVERRIDE_LABEL.equals(runtimeLabels.get(LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG))) {
-
+        && LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP
+            .values()
+            .contains(runtimeLabels.get(LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG))) {
       try {
         Runtime runtime = leonardoMapper.toApiRuntime(mostRecentRuntime);
         if (!RuntimeStatus.DELETED.equals(runtime.getStatus())) {

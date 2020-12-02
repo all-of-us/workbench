@@ -638,18 +638,9 @@ const CostInfo = ({runtimeChanged, runtimeConfig, currentUser, workspace, creato
   </FlexRow>;
 };
 
-const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelContent, workspace, runtimeConfig}) => {
-  const {
-    displayName,
-    runtimeTemplate: {gceConfig = null, dataprocConfig = null}
-  } = preset;
-  const computeType = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
-  const masterMachineType = computeType === ComputeType.Dataproc ? dataprocConfig.masterMachineType : gceConfig.machineType;
-  const masterMachine = findMachineByName(masterMachineType);
-  const masterDiskSize = computeType === ComputeType.Dataproc ? dataprocConfig.masterDiskSize : gceConfig.diskSize;
-  const workerMachineType = computeType === ComputeType.Dataproc ? dataprocConfig.workerMachineType : null;
-  const workerMachine = workerMachineType ? findMachineByName(workerMachineType) : null;
-  const workerDiskSize = computeType === ComputeType.Dataproc ? dataprocConfig.workerDiskSize : null;
+const CreatePanel = ({creatorFreeCreditsRemaining, profile, setPanelContent, workspace, runtimeConfig}) => {
+  const displayName = runtimeConfig.computeType === ComputeType.Dataproc ?
+    runtimePresets.hailAnalysis.displayName : runtimePresets.generalAnalysis.displayName;
 
   return <div style={styles.controlSection}>
     <FlexRow style={styles.costPredictorWrapper}>
@@ -673,21 +664,21 @@ const CreatePanel = ({creatorFreeCreditsRemaining, preset, profile, setPanelCont
     </FlexRow>
     <label htmlFor='compute-resources' style={{...styles.bold, marginTop: '1rem'}}>Compute Resources</label>
     <div id='compute-resources'>- Default: compute size of
-      <b> {masterMachine.cpu} CPUs</b>,
-      <b> {masterMachine.memory} GB memory</b>, and a
-      <b> {masterDiskSize} GB disk</b>
+      <b> {runtimeConfig.machine.cpu} CPUs</b>,
+      <b> {runtimeConfig.machine.memory} GB memory</b>, and a
+      <b> {runtimeConfig.diskSize} GB disk</b>
     </div>
-    {computeType === ComputeType.Dataproc && <Fragment>
+    {runtimeConfig.computeType === ComputeType.Dataproc && <Fragment>
       <label htmlFor='worker-configuration' style={{...styles.bold, marginTop: '1rem'}}>Worker Configuration</label>
       <div id='worker-configuration'>- Default:
-        <b> {dataprocConfig.numberOfWorkers} worker(s) </b>
+        <b> {runtimeConfig.dataprocConfig.numberOfWorkers} worker(s) </b>
         {
-          dataprocConfig.numberOfPreemptibleWorkers > 0 &&
-          <b>and {dataprocConfig.numberOfPreemptibleWorkers}  preemptible worker(s) </b>
+          runtimeConfig.dataprocConfig.numberOfPreemptibleWorkers > 0 &&
+          <b>and {runtimeConfig.dataprocConfig.numberOfPreemptibleWorkers} preemptible worker(s) </b>
         }
-        each with compute size of <b>{workerMachine.cpu} CPUs</b>,
-        <b> {workerMachine.memory} GB memory</b>, and a
-        <b> {workerDiskSize} GB disk</b>
+        each with compute size of <b>{findMachineByName(runtimeConfig.dataprocConfig.workerMachineType).cpu} CPUs</b>,
+        <b> {findMachineByName(runtimeConfig.dataprocConfig.workerMachineType).memory} GB memory</b>, and a
+        <b> {runtimeConfig.dataprocConfig.workerDiskSize} GB disk</b>
       </div>
     </Fragment>}
   </div>;
@@ -777,6 +768,17 @@ export const RuntimePanel = fp.flow(
   const {hasMicroarrayData} = fp.find({cdrVersionId}, cdrVersionListResponse.items) || {hasMicroarrayData: false};
   const [{currentRuntime, pendingRuntime}, setRequestedRuntime] = useCustomRuntime(namespace);
 
+  // if runtime configuration type is a default, override its config with preset values
+  if (currentRuntime && currentRuntime.status === RuntimeStatus.Deleted) {
+    const runtimePresetKey = fp.keys(runtimePresets)
+      .find(key => runtimePresets[key].runtimeTemplate.configurationType === currentRuntime.configurationType);
+
+    if (runtimePresetKey) {
+      currentRuntime.gceConfig = runtimePresets[runtimePresetKey].runtimeTemplate.gceConfig;
+      currentRuntime.dataprocConfig = runtimePresets[runtimePresetKey].runtimeTemplate.dataprocConfig;
+    }
+  }
+
   // Prioritize the "pendingRuntime", if any. When an update is pending, we want
   // to render the target runtime details, which  may not match the current runtime.
   const {dataprocConfig = null, gceConfig = {diskSize: defaultDiskSize}} = pendingRuntime || currentRuntime || {} as Partial<Runtime>;
@@ -792,11 +794,12 @@ export const RuntimePanel = fp.flow(
     // currentRuntime being undefined means the first `getRuntime` has still not completed.
     [([r, ]) => r === undefined, () => PanelContent.Customize],
     [([r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
+    [([r, ]) => r.status === RuntimeStatus.Deleted &&
+      ([RuntimeConfigurationType.GeneralAnalysis, RuntimeConfigurationType.HailGenomicAnalysis].includes(r.configurationType)),
+      () => PanelContent.Create],
     [() => true, () => PanelContent.Customize]
   ])([currentRuntime, status]);
   const [panelContent, setPanelContent] = useState<PanelContent>(initialPanelContent);
-
-  const initialPreset = runtimePresets.generalAnalysis;
 
   const [selectedDiskSize, setSelectedDiskSize] = useState(diskSize);
   const [selectedMachine, setSelectedMachine] = useState(initialMasterMachine);
@@ -928,7 +931,6 @@ export const RuntimePanel = fp.flow(
         <Fragment>
           <CreatePanel
               creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
-              preset={initialPreset}
               profile={profile}
               setPanelContent={(value) => setPanelContent(value)}
               workspace={workspace}
