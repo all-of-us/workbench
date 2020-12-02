@@ -736,5 +736,14 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     fitbitHeartRateLinking_personId.setDenormalizedName("PERSON_ID");
 
     dsLinkingDao.save(fitbitHeartRateLinking_personId);
+
+    DbDSLinking fitbitHeartRateLinking_coreTable = new DbDSLinking();
+    fitbitHeartRateLinking_coreTable.setOmopSql("CORE_TABLE_FOR_DOMAIN");
+    fitbitHeartRateLinking_coreTable.setJoinValue(
+        "from `${projectId}.${dataSetId}.heart_rate_minute_level` heart_rate_minute_level");
+    fitbitHeartRateLinking_coreTable.setDomain("Fitbit_heart_rate_level");
+    fitbitHeartRateLinking_coreTable.setDenormalizedName("CORE_TABLE_FOR_DOMAIN");
+
+    dsLinkingDao.save(fitbitHeartRateLinking_coreTable);
   }
 }
