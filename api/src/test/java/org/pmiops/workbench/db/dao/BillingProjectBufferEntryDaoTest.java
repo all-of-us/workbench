@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao.StatusToCountResult;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,17 @@ public class BillingProjectBufferEntryDaoTest {
           BufferEntryStatus.AVAILABLE, 2L,
           BufferEntryStatus.ERROR, 1L);
 
+  @Autowired private AccessTierDao accessTierDao;
   @Autowired private BillingProjectBufferEntryDao billingProjectBufferEntryDao;
+
+  private final String TEST_TIER = "registered";
+  private final String TEST_PERIMETER = "the/registered/tier/service/perimeter";
+  private final DbAccessTier DB_TIER =
+      accessTierDao.save(
+          new DbAccessTier()
+              .setShortName(TEST_TIER)
+              .setDisplayName(TEST_TIER)
+              .setServicePerimeter(TEST_PERIMETER));
 
   @Before
   public void setup() {
@@ -69,29 +80,36 @@ public class BillingProjectBufferEntryDaoTest {
 
   @Test
   public void testGetCurrentBufferSizeForAccessTier_invalidTier() {
-    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier("invalid"))
+    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(DB_TIER))
         .isEqualTo(0);
   }
 
   @Test
   public void testGetCurrentBufferSizeForAccessTier_defaultTier() {
-    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier("default"))
+    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(DB_TIER))
         .isEqualTo(STATUS_TO_COUNT_INPUT.get(BufferEntryStatus.AVAILABLE));
   }
 
   @Test
   public void testGetCurrentBufferSizeForAccessTier_multiTier() {
     // add one available project in an alternate tier
+    String altTierName = "other";
+    DbAccessTier altTier =
+        accessTierDao.save(
+            new DbAccessTier()
+                .setShortName(altTierName)
+                .setDisplayName(altTierName)
+                .setServicePerimeter("other perim"));
 
     DbBillingProjectBufferEntry altEntry = new DbBillingProjectBufferEntry();
     altEntry.setStatusEnum(BufferEntryStatus.AVAILABLE, () -> NOW);
-    altEntry.setAccessTier("other");
+    altEntry.setAccessTier(altTier.getShortName());
     billingProjectBufferEntryDao.save(altEntry);
 
-    // no change to existing default tier
-    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier("default"))
+    // no change to existing tier
+    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(DB_TIER))
         .isEqualTo(STATUS_TO_COUNT_INPUT.get(BufferEntryStatus.AVAILABLE));
-    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier("other"))
+    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(altTier))
         .isEqualTo(1);
   }
 
@@ -101,7 +119,7 @@ public class BillingProjectBufferEntryDaoTest {
           for (int i = 0; i < count; ++i) {
             DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
             entry.setStatusEnum(status, () -> NOW);
-            entry.setAccessTier("default");
+            entry.setAccessTier(TEST_TIER);
             entry = billingProjectBufferEntryDao.save(entry);
           }
         });

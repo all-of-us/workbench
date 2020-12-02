@@ -230,7 +230,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void createAllOfUsBillingProject(String projectName, String accessTier) {
+  public void createAllOfUsBillingProject(String projectName, String servicePerimeter) {
     if (projectName.contains(WORKSPACE_DELIMITER)) {
       throw new IllegalArgumentException(
           String.format(
@@ -245,8 +245,7 @@ public class FireCloudServiceImpl implements FireCloudService {
             .highSecurityNetwork(true)
             .enableFlowLogs(true)
             .privateIpGoogleAccess(true)
-            .servicePerimeter(
-                configProvider.get().accessTiers.get(accessTier).servicePerimeterName);
+            .servicePerimeter(servicePerimeter);
 
     BillingApi billingApi = billingApiProvider.get();
     retryHandler.run(
@@ -315,22 +314,27 @@ public class FireCloudServiceImpl implements FireCloudService {
         });
   }
 
+  // FOR PROTOTYPE ONLY
+  private final String PROTO_RT_AUTH_DOMAIN_GROUP = "all-of-us-registered-test";
+  private final String PROTO_TIER2_AUTH_DOMAIN_GROUP = "all-of-us-test-prototype-3";
+
+  private List<FirecloudManagedGroupRef> authDomainForPrototype(String workspaceName) {
+    final String authDomainName =
+        workspaceName.toLowerCase(Locale.US).contains("tier2")
+            ? PROTO_TIER2_AUTH_DOMAIN_GROUP
+            : PROTO_RT_AUTH_DOMAIN_GROUP;
+
+    return ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName));
+  }
+
   @Override
   public FirecloudWorkspace createWorkspace(String projectName, String workspaceName) {
-
-    // for prototype
-    final String tierName =
-        workspaceName.toLowerCase(Locale.US).contains("tier2") ? "tier2" : "registered";
-    final String authDomainName = configProvider.get().accessTiers.get(tierName).authDomainName;
-    final List<FirecloudManagedGroupRef> authDomain =
-        ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName));
-
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     FirecloudWorkspaceIngest workspaceIngest =
         new FirecloudWorkspaceIngest()
             .namespace(projectName)
             .name(workspaceName)
-            .authorizationDomain(authDomain);
+            .authorizationDomain(authDomainForPrototype(workspaceName));
 
     return retryHandler.run((context) -> workspacesApi.createWorkspace(workspaceIngest));
   }
@@ -338,14 +342,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public FirecloudWorkspace cloneWorkspace(
       String fromProject, String fromName, String toProject, String toName) {
-
-    // for prototype
-    final String tierName =
-        toName.toLowerCase(Locale.US).contains("tier2") ? "tier2" : "registered";
-    final String authDomainName = configProvider.get().accessTiers.get(tierName).authDomainName;
-    final List<FirecloudManagedGroupRef> authDomain =
-        ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName));
-
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     FirecloudWorkspaceRequestClone cloneRequest =
         new FirecloudWorkspaceRequestClone()
@@ -354,7 +350,7 @@ public class FireCloudServiceImpl implements FireCloudService {
             // We copy only the notebooks/ subdirectory as a heuristic to avoid unintentionally
             // propagating copies of large data files elswhere in the bucket.
             .copyFilesWithPrefix("notebooks/")
-            .authorizationDomain(authDomain);
+            .authorizationDomain(authDomainForPrototype(toName));
 
     return retryHandler.run(
         (context) -> workspacesApi.cloneWorkspace(fromProject, fromName, cloneRequest));

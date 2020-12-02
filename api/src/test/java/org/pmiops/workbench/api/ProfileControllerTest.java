@@ -217,7 +217,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     super.setUp();
 
     config.googleDirectoryService.gSuiteDomain = GSUITE_DOMAIN;
-    config.accessTiers = Collections.emptyMap();
 
     Profile profile = new Profile();
     profile.setContactEmail(CONTACT_EMAIL);

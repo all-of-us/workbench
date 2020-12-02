@@ -153,6 +153,7 @@
   <include file="changelog/db.changelog-142-cdr-version-hasCopeSurvey-field.xml"/>
   <include file="changelog/db.changelog-143-alter-concept-set-concept-id.xml"/>
   <include file="changelog/db.changelog-144-remove-concept-set-concept-id-primarykeyconstraint.xml"/>
+  <include file="changelog/db.changelog-14x-access-tier-table.xml"/>
   <include file="changelog/db.changelog-14x-add-access-tier-to-billing-buffer.xml"/>
   <include file="changelog/db.changelog-14x-add-access-tier-to-cdr-version.xml"/>
   <!--

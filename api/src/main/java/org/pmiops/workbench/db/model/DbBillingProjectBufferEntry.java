@@ -27,6 +27,7 @@ public class DbBillingProjectBufferEntry {
   private Timestamp lastStatusChangedTime;
   private Short status;
   private DbUser assignedUser;
+  // TODO FK to DbAccessTier
   private String accessTier;
 
   public enum BufferEntryStatus {

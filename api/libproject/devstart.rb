@@ -2413,20 +2413,12 @@ def get_server_config(project)
   return get_config(project)["server"]
 end
 
-def get_access_tier_config(project, tier)
-  return get_config(project)["accessTiers"][tier]
-end
-
 def get_billing_project_prefix(project)
   return get_billing_config(project)["projectNamePrefix"]
 end
 
 def get_leo_api_url(project)
   return get_fc_config(project)["leoBaseUrl"]
-end
-
-def get_auth_domain(project, tier)
-  return get_access_tier_config(project, tier)["authDomainName"]
 end
 
 def get_firecloud_base_url(project)

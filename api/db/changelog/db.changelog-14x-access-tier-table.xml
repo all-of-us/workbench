@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="thibault" id="changelog-14x-access-tier-table">
+    <createTable tableName="access_tier">
+      <column name="access_tier_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="short_name" type="VARCHAR(40)">
+        <constraints unique="true" nullable="false"/>
+      </column>
+      <column name="display_name" type="VARCHAR(80)">
+        <constraints unique="true" nullable="false"/>
+      </column>
+      <column name="service_perimeter" type="VARCHAR(80)">
+        <constraints unique="true" nullable="false"/>
+      </column>
+      <column name="auth_domain_name" type="VARCHAR(80)">
+        <constraints unique="true" nullable="false"/>
+      </column>
+      <column name="auth_domain_group_email" type="VARCHAR(80)">
+        <constraints unique="true" nullable="false"/>
+      </column>
+  </createTable>
+  </changeSet>
+</databaseChangeLog>

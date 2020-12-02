@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.api.client.http.HttpTransport;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
-import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Rule;
@@ -17,7 +16,6 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.AccessTierConfig;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -170,14 +168,9 @@ public class FireCloudServiceImplTest {
   @Test
   public void testCreateAllOfUsBillingProjectInPerimeter() throws Exception {
     final String servicePerimeter = "a-cloud-with-a-fence-around-it";
-    final String tierName = "registered";
-    final AccessTierConfig tierConfig = new AccessTierConfig();
-    tierConfig.servicePerimeterName = servicePerimeter;
-
     workbenchConfig.firecloud.vpcServicePerimeterName = servicePerimeter;
-    workbenchConfig.accessTiers = ImmutableMap.of(tierName, tierConfig);
 
-    service.createAllOfUsBillingProject("project-name", tierName);
+    service.createAllOfUsBillingProject("project-name", servicePerimeter);
 
     ArgumentCaptor<FirecloudCreateRawlsBillingProjectFullRequest> captor =
         ArgumentCaptor.forClass(FirecloudCreateRawlsBillingProjectFullRequest.class);

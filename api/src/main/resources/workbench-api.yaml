@@ -8860,3 +8860,27 @@ definitions:
         type: integer
         format: int64
         description: ''
+  AccessTier:
+    type: object
+    required:
+      - shortName
+      - displayName
+      - servicePerimeter
+      - authDomainName
+      - authDomainGroupEmail;
+    properties:
+      shortName:
+        type: string
+        description: ''
+      displayName:
+        type: string
+        description: ''
+      servicePerimeter:
+        type: string
+        description: ''
+      authDomainName:
+        type: string
+        description: ''
+      authDomainGroupEmail:
+        type: string
+        description: ''

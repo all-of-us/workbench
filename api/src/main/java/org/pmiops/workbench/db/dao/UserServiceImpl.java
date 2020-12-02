@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,7 +29,6 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.AccessTierConfig;
 import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbAdminActionHistory;
@@ -222,7 +222,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
   }
 
-  // tmp for prototype: change these to add/remove from all Auth Domain Groups
+  // tmp for prototype: add/remove from all Auth Domain Groups
+  private final List<String> authDomainNames = ImmutableList.of("all-of-us-registered-test", "all-of-us-test-prototype-3");
 
   //  private void addToRegisteredTierGroupIdempotent(DbUser user) {
   //    if (!isUserMemberOfRegisteredTierGroup(user)) {
@@ -248,38 +249,30 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   private void addToAllAuthDomainsIdempotent(DbUser user) {
     final String username = user.getUsername();
-    configProvider.get().accessTiers.forEach(addToDomain(username));
+    authDomainNames.forEach(addToDomain(username));
   }
 
   @NotNull
-  private BiConsumer<String, AccessTierConfig> addToDomain(String username) {
-    return (tierName, tierConfig) -> {
-      final String authDomain = tierConfig.authDomainName;
+  private Consumer<String> addToDomain(String username) {
+    return authDomain -> {
       if (!this.fireCloudService.isUserMemberOfGroup(username, authDomain)) {
         this.fireCloudService.addUserToGroup(username, authDomain);
-        log.info(
-            String.format(
-                "Added user %s to the auth domain %s for tier %s.",
-                username, authDomain, tierName));
+        log.info(String.format("Added user %s to the auth domain %s.", username, authDomain));
       }
     };
   }
 
   private void removeFromAllAuthDomainsIdempotent(DbUser user) {
     final String username = user.getUsername();
-    configProvider.get().accessTiers.forEach(removeFromDomain(username));
+    authDomainNames.forEach(removeFromDomain(username));
   }
 
   @NotNull
-  private BiConsumer<String, AccessTierConfig> removeFromDomain(String username) {
-    return (tierName, tierConfig) -> {
-      final String authDomain = tierConfig.authDomainName;
+  private Consumer<String> removeFromDomain(String username) {
+    return authDomain -> {
       if (this.fireCloudService.isUserMemberOfGroup(username, authDomain)) {
         this.fireCloudService.removeUserFromGroup(username, authDomain);
-        log.info(
-            String.format(
-                "Removed user %s from the auth domain %s for tier %s.",
-                username, authDomain, tierName));
+        log.info(String.format("Removed user %s from the auth domain %s.", username, authDomain));
       }
     };
   }

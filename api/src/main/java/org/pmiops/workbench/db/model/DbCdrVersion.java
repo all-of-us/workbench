@@ -22,6 +22,7 @@ public class DbCdrVersion {
   private String name;
   @Deprecated // use accessTier
   private Short dataAccessLevel;
+  // TODO FK to DbAccessTier
   private String accessTier;
   private short releaseNumber;
   private short archivalStatus;
