@@ -20,7 +20,6 @@ const DEFAULT_MAX_DELETE_COUNT = 2;
 const DEFAULT_MAX_RESUME_COUNT = 2;
 // We allow a certain # of server errors to occur before we error-out of the initialization flow.
 const DEFAULT_MAX_SERVER_ERROR_COUNT = 10;
-const DEFAULT_RUNTIME_CONFIG = runtimePresets.generalAnalysis.runtimeTemplate;
 
 export class LeoRuntimeInitializationFailedError extends Error {
   constructor(message: string, public readonly runtime?: Runtime) {
@@ -95,7 +94,6 @@ const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
   maxDeleteCount: DEFAULT_MAX_DELETE_COUNT,
   maxResumeCount: DEFAULT_MAX_RESUME_COUNT,
   maxServerErrorCount: DEFAULT_MAX_SERVER_ERROR_COUNT,
-  targetRuntime: DEFAULT_RUNTIME_CONFIG,
   resolutionCondition: (runtime) => runtime.status === RuntimeStatus.Running
 };
 
@@ -204,7 +202,15 @@ export class LeoRuntimeInitializer {
       // - the user's most recent UserOverride config, if any
       // - (maybe) the user's most recently selected preset, if any
       // - general analysis
-      runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
+
+      if (this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Deleted) {
+        // A little unintuitive but a Deleted currentRuntime means that getRuntime
+        // determined that the user's most recent runtime was a valid config and returned
+        // it instead of returning a 404.
+        runtime = this.currentRuntime;
+      } else {
+        runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
+      }
     }
     await runtimeApi().createRuntime(this.workspaceNamespace,
       runtime,
@@ -287,7 +293,6 @@ export class LeoRuntimeInitializer {
   }
 
   private async poll() {
-
     // Overall strategy: continue polling the get-runtime endpoint, with capped exponential backoff,
     // until we either reach our goal state (a RUNNING runtime) or run up against the overall
     // timeout threshold.
