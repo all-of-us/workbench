@@ -113,10 +113,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     private final List<String> selects;
     private final List<String> joins;
+    private final String domainTable;
 
-    private ValuesLinkingPair(List<String> selects, List<String> joins) {
+    private ValuesLinkingPair(List<String> selects, List<String> joins, String domainTable) {
       this.selects = selects;
       this.joins = joins;
+      this.domainTable = domainTable;
     }
 
     private List<String> getSelects() {
@@ -128,11 +130,20 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     }
 
     static ValuesLinkingPair emptyPair() {
-      return new ValuesLinkingPair(Collections.emptyList(), Collections.emptyList());
+      return new ValuesLinkingPair(Collections.emptyList(), Collections.emptyList(), "");
     }
 
     public String formatJoins() {
       return getJoins().stream().distinct().collect(Collectors.joining(" "));
+    }
+
+    public String getDomainTable() {
+      return domainTable;
+    }
+
+    public String getTableAlias() {
+      String[] parts = domainTable.split(" ");
+      return parts[parts.length - 1];
     }
   }
 
@@ -557,8 +568,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     queryBuilder
         .append(String.join(", ", valuesLinkingPair.getSelects()))
-        .append(" ")
-        .append(valuesLinkingPair.formatJoins());
+        .append(" from ( SELECT * ")
+        .append(valuesLinkingPair.getDomainTable());
 
     final Optional<String> conceptSetSqlInClauseMaybe =
         buildConceptIdListClause(domain, conceptSetsSelected);
@@ -628,6 +639,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         queryBuilder.append(", DATE");
       }
     }
+    queryBuilder
+        .append(") " + valuesLinkingPair.getTableAlias() + " ")
+        .append(valuesLinkingPair.formatJoins());
     return buildQueryJobConfiguration(cohortParameters, queryBuilder.toString());
   }
 
@@ -1075,12 +1089,20 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             .map(DbDSLinking::getOmopSql)
             .collect(ImmutableList.toImmutableList());
 
+    final String domainTable =
+        valuesLinkingTableResult.stream()
+            .filter(fieldValue -> fieldValue.getOmopSql().equals("CORE_TABLE_FOR_DOMAIN"))
+            .map(DbDSLinking::getJoinValue)
+            .findFirst()
+            .get();
+
     final ImmutableList<String> valueJoins =
         valuesLinkingTableResult.stream()
+            .filter(fieldValue -> !fieldValue.getJoinValue().equals(domainTable))
             .map(DbDSLinking::getJoinValue)
             .collect(ImmutableList.toImmutableList());
 
-    return new ValuesLinkingPair(valueSelects, valueJoins);
+    return new ValuesLinkingPair(valueSelects, valueJoins, domainTable);
   }
 
   // Capitalizes the first letter of a string and lowers the remaining ones.
