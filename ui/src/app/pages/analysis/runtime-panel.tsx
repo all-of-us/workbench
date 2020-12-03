@@ -795,7 +795,7 @@ export const RuntimePanel = fp.flow(
     // If there's a pendingRuntime, this means there's already a create/update
     // in progress, even if the runtime store doesn't actively reflect this yet.
     // Show the customize panel in this event.
-    [([r, ]) => r === undefined || !pendingRuntime, () => PanelContent.Customize],
+    [([r, ]) => r === undefined || !!pendingRuntime, () => PanelContent.Customize],
     [([r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
     [([r, ]) => r.status === RuntimeStatus.Deleted &&
       ([RuntimeConfigurationType.GeneralAnalysis, RuntimeConfigurationType.HailGenomicAnalysis].includes(r.configurationType)),
