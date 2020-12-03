@@ -281,7 +281,9 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
       } else if (this.isMeasurement) {
         this.getAttributes();
       } else {
-        options.unshift({label: optionUtil.ANY.display, value: AttrName[AttrName.ANY]});
+        if (!options.find(opt => opt.value === AttrName.ANY.toString())) {
+          options.unshift({label: optionUtil.ANY.display, value: AttrName[AttrName.ANY]});
+        }
         form.num = subtype === CriteriaSubType[CriteriaSubType.BP]
           ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
           : [{name: subtype, operator: 'ANY', operands: []}];
