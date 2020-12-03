@@ -14,9 +14,8 @@ enum SectionSelectors {
   AttributesForm = '//*[@id="attributes-form"]',
   ModifiersForm = '//*[@id="modifiers-form"]',
   SelectionList = '//*[@id="selection-list"]',
-  RuntimePanel = '//*[@data-test-id="runtime-panel"]'
 }
-enum HelpSidebarTab {
+export enum HelpSidebarTab {
   ComputeConfiguration = '//*[@data-test-id="help-sidebar-icon-runtime"]'
 }
 
@@ -84,12 +83,6 @@ export default class HelpSidebar extends Container {
     return participantResult;
   }
 
-  async maybeCreateRuntimeAndGetState(): Promise<string> {
-    await this.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
-    await this.waitUntilSectionVisible(SectionSelectors.RuntimePanel);
-    return "lol"
-  }
-
   async clickSidebarButton(buttonLabel: LinkText): Promise<void> {
     await this.findSidebarButton(buttonLabel).then(butn => butn.click());
     await waitWhileLoading(this.page);
@@ -118,10 +111,12 @@ export default class HelpSidebar extends Container {
     return waitForNumericalString(this.page, selector);
   }
 
-  async clickSidebarTab(tab: HelpSidebarTab): Promise<void> {
-    const t = await this.page.waitForXPath(tab);
-    console.log(t)
-    t.click();
+  async clickSidebarTab(helpSidebarTab: HelpSidebarTab): Promise<void> {
+    await this.page.waitForXPath(helpSidebarTab).then(tab => tab.click());
+  }
+
+  async getRuntimeStatusIcon(): Promise<ElementHandle> {
+    return this.page.waitForXPath('//*[@data-test-id="runtime-status-icon-container"]/node()');
   }
 
   waitUntilSectionVisible(xpath: string): Promise<ElementHandle> {

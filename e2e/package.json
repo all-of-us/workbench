@@ -9,7 +9,7 @@
     "test": "cross-env jest --maxWorkers=5",
     "test:debugTest": "cross-env PUPPETEER_HEADLESS=false DEBUG=true node --inspect-brk node_modules/.bin/jest",
     "test:debug": "cross-env PUPPETEER_HEADLESS=false DEBUG=true jest --detectOpenHandles",
-    "test-local": "cross-env WORKBENCH_ENV=local DEBUG=true jest --maxWorkers=3",
+    "test-local": "cross-env WORKBENCH_ENV=local DEBUG=true jest",
     "test-local:debug": "cross-env WORKBENCH_ENV=local PUPPETEER_HEADLESS=false DEBUG=true jest --maxWorkers=3",
     "test-staging": "cross-env WORKBENCH_ENV=staging jest --maxWorkers=3",
     "test-staging:debug": "cross-env WORKBENCH_ENV=staging PUPPETEER_HEADLESS=false DEBUG=true jest --maxWorkers=1",

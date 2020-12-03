@@ -199,6 +199,7 @@ export default class BaseElement extends Container {
    * Clear value in textbox.
    */
   async clear(options: ClickOptions = { clickCount: 3 }): Promise<void> {
+    console.log(this.xpath);
     const elemt = await this.asElementHandle();
     await elemt.focus();
     await elemt.click(options);
