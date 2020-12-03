@@ -291,7 +291,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     if (supportsConceptSets(domain)) {
       if (workbenchConfigProvider.get().featureFlags.enableConceptSetSearchV2) {
         final List<DbConceptSetConceptId> dbConceptSetConceptIds =
-            request.getPrePackagedConceptSet().contains(SURVEY)
+            (domain.equals(Domain.SURVEY) && request.getPrePackagedConceptSet().contains(SURVEY))
                 ? conceptBigQueryService.getSurveyQuestionConceptIds().stream()
                     .map(
                         c ->
