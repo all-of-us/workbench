@@ -162,6 +162,18 @@ describe('RuntimePanel', () => {
     expect(runtimeApiStub.runtime.gceConfig.machineType).toEqual('n1-standard-4');
   });
 
+  it('should show customize after create', async() => {
+    runtimeApiStub.runtime = null;
+    runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace});
+
+    const wrapperBefore = await component();
+
+    await mustClickButton(wrapperBefore, 'Create');
+
+    const wrapperAfter = await component();
+    expect(wrapperAfter.find('#runtime-cpu').exists()).toBeTruthy();
+  });
+
   it('should create runtime with preset values instead of getRuntime values if configurationType is GeneralAnalysis', async() => {
     // In the case where the user's latest runtime is a preset (GeneralAnalysis in this case)
     // we should ignore the other runtime config values that were delivered with the getRuntime response

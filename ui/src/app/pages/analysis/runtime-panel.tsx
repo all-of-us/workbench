@@ -792,7 +792,10 @@ export const RuntimePanel = fp.flow(
   // It's unclear how often that would actually happen.
   const initialPanelContent = fp.cond([
     // currentRuntime being undefined means the first `getRuntime` has still not completed.
-    [([r, ]) => r === undefined, () => PanelContent.Customize],
+
+    // in progress, even if the runtime store doesn't actively reflect this yet.
+    // Show the customize panel in this event.
+    [([r, ]) => r === undefined || !!pendingRuntime, () => PanelContent.Customize],
     [([r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
     [([r, ]) => r.status === RuntimeStatus.Deleted &&
       ([RuntimeConfigurationType.GeneralAnalysis, RuntimeConfigurationType.HailGenomicAnalysis].includes(r.configurationType)),
