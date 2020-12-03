@@ -35,7 +35,7 @@ export default class RuntimePanel extends Container {
   }
 
   async pickDiskGbs(diskGbs: number): Promise<void> {
-    const diskInput = new InputNumber(this.page, '//*[@id="runtime-disk"]');
+    const diskInput = new InputNumber(this.page, '//*[@id="runtime-disk"]/input');
     await diskInput.type(diskGbs.toString());
   }
 }
