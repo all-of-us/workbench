@@ -29,9 +29,8 @@ import {
   validLeoGceMachineTypes
 } from 'app/utils/machines';
 import {formatUsd} from 'app/utils/numbers';
-import {runtimePresets} from 'app/utils/runtime-presets';
+import {applyPresetOverride, runtimePresets} from 'app/utils/runtime-presets';
 import {
-  applyPresetOverride,
   getRuntimeConfigDiffs,
   RuntimeConfig,
   RuntimeDiffState,
@@ -791,6 +790,8 @@ export const RuntimePanel = fp.flow(
       () => PanelContent.Create],
     [() => true, () => PanelContent.Customize]
   ])([currentRuntime, status]);
+  console.log(currentRuntime);
+  console.log(initialPanelContent);
   const [panelContent, setPanelContent] = useState<PanelContent>(initialPanelContent);
 
   const [selectedDiskSize, setSelectedDiskSize] = useState(diskSize);
