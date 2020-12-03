@@ -22,7 +22,7 @@ import {
 import {environment} from 'environments/environment';
 import {Criteria, Domain} from 'generated/fetch';
 
-const LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS = 'CURRENT_CRITERIA_SELECTIONS';
+export const LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS = 'CURRENT_CRITERIA_SELECTIONS';
 
 const styles = reactStyles({
   arrowIcon: {
@@ -163,31 +163,23 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
 
   componentDidMount(): void {
     const {cohortContext: {domain, standard, source, type}} = this.props;
-    let {backMode, mode} = this.state;
-    let hierarchyNode;
     if (this.initTree) {
-      hierarchyNode = {
-        domainId: domain,
-        type: type,
-        isStandard: standard,
-        id: 0,
-      };
-      backMode = 'tree';
-      mode = 'tree';
-    }
-    if (localStorage.getItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS)) {
-      this.setState({selectedCriteriaList: JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS))});
-    }
-    this.setState({backMode, hierarchyNode, mode});
-    if (source === 'cohort') {
-      this.subscription = currentCohortCriteriaStore.subscribe(currentCohortCriteria => {
-        this.setState({selectedCriteriaList: currentCohortCriteria});
+      this.setState({
+        backMode: 'tree',
+        hierarchyNode: {
+          domainId: domain,
+          type: type,
+          isStandard: standard,
+          id: 0,
+        } as Criteria,
+        mode: 'tree'
       });
-    } else {
-      this.subscription = currentConceptStore.subscribe(currentConcepts => {
-        const value = fp.map(selected => selected.conceptId + '', currentConcepts);
-        this.setState({selectedCriteriaList: currentConcepts, selectedIds: value});
-      });
+    }
+    const currentCriteriaStore = source === 'criteria' ? currentCohortCriteriaStore : currentConceptStore;
+    this.subscription = currentCriteriaStore.subscribe(selectedCriteriaList => this.setState({selectedCriteriaList}));
+    const existingCriteria = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS));
+    if (!!existingCriteria && existingCriteria[0].domainId === domain) {
+      currentCriteriaStore.next(existingCriteria);
     }
   }
 
