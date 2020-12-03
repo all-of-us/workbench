@@ -93,14 +93,10 @@ public class MailServiceImplTest {
   }
 
   private WorkbenchConfig createWorkbenchConfig() {
-    WorkbenchConfig workbenchConfig = new WorkbenchConfig();
-    workbenchConfig.mandrill = new WorkbenchConfig.MandrillConfig();
+    WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.mandrill.fromEmail = "test-donotreply@fake-research-aou.org";
     workbenchConfig.mandrill.sendRetries = 3;
-    workbenchConfig.googleCloudStorageService =
-        new WorkbenchConfig.GoogleCloudStorageServiceConfig();
     workbenchConfig.googleCloudStorageService.credentialsBucketName = "test-bucket";
-    workbenchConfig.admin = new WorkbenchConfig.AdminConfig();
     workbenchConfig.admin.loginUrl = "http://localhost:4200/";
     return workbenchConfig;
   }

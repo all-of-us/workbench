@@ -71,10 +71,8 @@ public class AuthDomainControllerTest {
     adminUser.setUserId(0L);
     when(fireCloudService.createGroup(any())).thenReturn(new FirecloudManagedGroupWithMembers());
     when(userProvider.get()).thenReturn(adminUser);
-    WorkbenchConfig config = new WorkbenchConfig();
-    config.firecloud = new WorkbenchConfig.FireCloudConfig();
+    WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
     config.firecloud.registeredDomainName = "";
-    config.access = new WorkbenchConfig.AccessConfig();
     config.access.enableDataUseAgreement = true;
     FakeClock clock = new FakeClock(Instant.now());
     UserService userService =
