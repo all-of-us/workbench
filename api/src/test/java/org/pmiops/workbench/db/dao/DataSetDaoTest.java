@@ -62,7 +62,7 @@ public class DataSetDaoTest {
   }
 
   @Test
-  public void testGague() {
+  public void testGauge() {
     insertDatasetForGauge(true, workspace.getWorkspaceId());
     insertDatasetForGauge(true, workspace.getWorkspaceId());
     insertDatasetForGauge(false, workspace.getWorkspaceId());
@@ -73,6 +73,7 @@ public class DataSetDaoTest {
     assertThat(map.get(false)).isEqualTo(1L);
   }
 
+  // TODO(jaycarlton): add coverage for concept sets and domains
   @Test
   public void testGetReportingDatasets() {
     final DbDataset dataset1 =
