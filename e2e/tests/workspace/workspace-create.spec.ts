@@ -7,6 +7,7 @@ import * as testData from 'resources/data/workspace-data';
 import {makeWorkspaceName} from 'utils/str-utils';
 import {UseFreeCredits} from 'app/page/workspace-base';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
+import {config} from 'resources/workbench-config';
 
 describe('Creating new workspaces', () => {
   beforeEach(async () => {
@@ -26,7 +27,13 @@ describe('Creating new workspaces', () => {
     expect(modalTextContent).toContain('Primary purpose of your project (Question 1)Summary of research purpose (Question 2)Population of interest (Question 5)');
     expect(modalTextContent).toContain('You can also make changes to your answers after you create your workspace.');
 
-    await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
+    const dataPage = await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
+
+    // Verify the CDR version displays in the workspace navigation bar
+    expect(await dataPage.getCdrVersion()).toBe(config.defaultCdrVersionName);
+
+    // cleanup
+    await dataPage.deleteWorkspace();
   });
 
   test('User can create a workspace using all inputs', async () => {
@@ -75,12 +82,13 @@ describe('Creating new workspaces', () => {
   });
 
   // helper function to check visible workspace link on Data page
-  async function verifyWorkspaceLinkOnDataPage(workspaceName: string) {
+  async function verifyWorkspaceLinkOnDataPage(workspaceName: string): Promise<WorkspaceDataPage> {
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.waitForLoad();
 
     const workspaceLink = new Link(page, `//a[text()='${workspaceName}']`);
     await workspaceLink.waitForXPath({visible: true});
     expect(await workspaceLink.isVisible()).toBe(true);
+    return dataPage;
   }
 });

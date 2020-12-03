@@ -80,7 +80,7 @@ export default class Modal extends Container {
   }
 
   async waitUntilClose(): Promise<void> {
-    await this.page.waitForXPath(this.xpath, {hidden: true, timeout: 45000});
+    await this.page.waitForXPath(this.xpath, {hidden: true, timeout: 55000});
   }
 
   async waitUntilVisible(): Promise<ElementHandle> {
