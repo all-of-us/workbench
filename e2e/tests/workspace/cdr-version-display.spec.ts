@@ -10,17 +10,6 @@ describe('Workspace CDR Version display', () => {
         await signIn(page);
     });
 
-    test('The CDR version displays in the workspace navigation bar', async () => {
-        const workspaceCard: WorkspaceCard = await createWorkspace(page);
-        await workspaceCard.clickWorkspaceName();
-
-        const workspacePage: WorkspaceBase = new WorkspaceDataPage(page);
-        expect(await workspacePage.getCdrVersion()).toBe(config.defaultCdrVersionName)
-
-        // cleanup
-        await workspacePage.deleteWorkspace()
-    });
-
     test('The CDR version upgrade flag appears in the workspace navigation bar for an old CDR', async () => {
         const workspaceCard: WorkspaceCard = await createWorkspace(page, config.altCdrVersionName);
         await workspaceCard.clickWorkspaceName();

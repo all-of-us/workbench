@@ -87,7 +87,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
 
     // if the CDR Version is not the default, consent to the necessary restrictions
     if (cdrVersionName !== config.defaultCdrVersionName) {
-      const modal = new OldCdrVersionModal(page);
+      const modal = new OldCdrVersionModal(this.page);
       await modal.consentToOldCdrRestrictions();
     }
 

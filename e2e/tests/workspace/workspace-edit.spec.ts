@@ -85,8 +85,7 @@ describe('Editing workspace via workspace card snowman menu', () => {
 
   test('User as OWNER can edit workspace via workspace action menu', async () => {
     const workspaceCard = await findOrCreateWorkspace(page);
-    const workspaceName = await workspaceCard.getWorkspaceName();
-    console.log(workspaceName);
+    await workspaceCard.getWorkspaceName();
 
     // Verify Workspace Access Level is OWNER.
     const accessLevel = await workspaceCard.getWorkspaceAccessLevel();
