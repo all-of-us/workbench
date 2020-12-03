@@ -5,6 +5,7 @@ import {runtimePresets} from 'app/utils/runtime-presets';
 import {runtimeStore} from 'app/utils/stores';
 import {Runtime, RuntimeStatus} from 'generated/fetch';
 import {serverConfigStore} from './navigation';
+import {applyPresetOverride} from './runtime-utils';
 
 // We're only willing to wait 20 minutes total for a runtime to initialize. After that we return
 // a rejected promise no matter what.
@@ -197,21 +198,12 @@ export class LeoRuntimeInitializer {
     let runtime: Runtime;
     if (serverConfigStore.getValue().enableCustomRuntimes && this.targetRuntime) {
       runtime = this.targetRuntime;
+    } else if (this.currentRuntime) {
+      runtime = applyPresetOverride(this.currentRuntime);
     } else {
-      // TODO(RW-5921): In lazy initialization mode, this should default to:
-      // - the user's most recent UserOverride config, if any
-      // - (maybe) the user's most recently selected preset, if any
-      // - general analysis
-
-      if (this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Deleted) {
-        // A little unintuitive but a Deleted currentRuntime means that getRuntime
-        // determined that the user's most recent runtime was a valid config and returned
-        // it instead of returning a 404.
-        runtime = this.currentRuntime;
-      } else {
-        runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
-      }
+      runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
     }
+
     await runtimeApi().createRuntime(this.workspaceNamespace,
       runtime,
       {signal: this.pollAbortSignal});

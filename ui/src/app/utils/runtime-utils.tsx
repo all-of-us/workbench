@@ -8,6 +8,7 @@ import {compoundRuntimeOpStore, markCompoundRuntimeOperationCompleted, registerC
 import {DataprocConfig, Runtime, RuntimeStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {runtimePresets} from './runtime-presets';
 
 const {useState, useEffect} = React;
 
@@ -307,6 +308,25 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
     setRuntimeStatus(req);
   };
   return [runtime ? runtime.status : undefined, setStatusRequest];
+};
+
+export const applyPresetOverride = (runtime) => {
+  const newRuntime = {...runtime};
+
+  // if runtime configuration type is a default, override its config with preset values
+  // The Deleted check is so that we only update the user's runtime to the latest preset values
+  // after they delete their runtime (ex. not while its actively in use).
+  if (newRuntime && newRuntime.status === RuntimeStatus.Deleted) {
+    const runtimePresetKey = fp.keys(runtimePresets)
+    .find(key => runtimePresets[key].runtimeTemplate.configurationType === newRuntime.configurationType);
+
+    if (runtimePresetKey) {
+      newRuntime.gceConfig = runtimePresets[runtimePresetKey].runtimeTemplate.gceConfig;
+      newRuntime.dataprocConfig = runtimePresets[runtimePresetKey].runtimeTemplate.dataprocConfig;
+    }
+  }
+
+  return newRuntime;
 };
 
 // useCustomRuntime Hook can request a new runtime config

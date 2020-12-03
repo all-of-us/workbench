@@ -13,6 +13,7 @@ import {defaultRuntime, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
 import {RuntimeConfigurationType} from 'generated/fetch';
 import {serverConfigStore} from "./navigation";
+import {runtimePresets} from './runtime-presets';
 
 let mockGetRuntime: SpyInstance;
 let mockCreateRuntime: SpyInstance;
@@ -168,6 +169,7 @@ describe('RuntimeInitializer', () => {
     mockGetRuntime.mockImplementation(namespace => {
       return {
         ...defaultRuntime(),
+        configurationType: RuntimeConfigurationType.UserOverride,
         gceConfig: {
           diskSize: 777,
           machineType: 'n1-standard-16'
@@ -184,6 +186,32 @@ describe('RuntimeInitializer', () => {
       gceConfig: {
         diskSize: 777,
         machineType: 'n1-standard-16'
+      }
+    }), jasmine.any(Object));
+  });
+
+  it('should use preset values during lazy runtime instantiation if a preset was selected', async() => {
+    serverConfigStore.next({gsuiteDomain: 'researchallofus.org', enableCustomRuntimes: true});
+    mockGetRuntime.mockImplementation(namespace => {
+      return {
+        ...defaultRuntime(),
+        configurationType: RuntimeConfigurationType.GeneralAnalysis,
+        gceConfig: {
+          diskSize: 777,
+          machineType: 'n1-standard-16'
+        },
+        status: RuntimeStatus.Deleted
+      }; });
+
+    LeoRuntimeInitializer.initialize({
+      workspaceNamespace: workspaceNamespace,
+    });
+    await new Promise(setImmediate);
+
+    expect(mockCreateRuntime).toHaveBeenCalledWith(workspaceNamespace, jasmine.objectContaining({
+      gceConfig: {
+        diskSize: runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.diskSize,
+        machineType: runtimePresets.generalAnalysis.runtimeTemplate.gceConfig.machineType
       }
     }), jasmine.any(Object));
   });
