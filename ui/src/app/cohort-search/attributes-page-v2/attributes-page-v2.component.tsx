@@ -540,7 +540,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
               operator: Operator.IN,
               operands: catOperands
             });
-          } else {
+          } else if (!isCOPESurvey) {
             attrs.push({
               name: AttrName.CAT,
               operator: Operator.IN,
@@ -548,14 +548,14 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
             });
           }
         }
-        if (isCOPESurvey && subtype === CriteriaSubType.ANSWER && !!value) {
-          attrs.push({
-            name: AttrName.CAT,
-            operator: Operator.IN,
-            operands: [value]
-          });
-        }
         paramName = this.paramName;
+      }
+      if (isCOPESurvey && subtype === CriteriaSubType.ANSWER && !!value) {
+        attrs.push({
+          name: AttrName.CAT,
+          operator: Operator.IN,
+          operands: [value]
+        });
       }
       return {...node, parameterId: this.paramId, name: paramName, attributes: attrs};
     }
