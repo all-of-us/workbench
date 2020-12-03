@@ -17,7 +17,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.FireCloudConfig;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
@@ -55,7 +54,6 @@ public class OfflineRuntimeControllerTest {
     @Bean
     public WorkbenchConfig workbenchConfig() {
       WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
-      config.firecloud = new FireCloudConfig();
       config.firecloud.notebookRuntimeMaxAgeDays = (int) MAX_AGE.toDays();
       config.firecloud.notebookRuntimeIdleMaxAgeDays = (int) IDLE_MAX_AGE.toDays();
       return config;

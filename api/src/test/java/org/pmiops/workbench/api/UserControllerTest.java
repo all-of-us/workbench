@@ -24,8 +24,6 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.FeatureFlagsConfig;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -61,7 +59,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class UserControllerTest {
 
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
-  private static WorkbenchConfig config = new WorkbenchConfig();
+  private static final WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
   private static DbUser user = new DbUser();
   private static long incrementedUserId = 1;
   private static final Cloudbilling testCloudbilling = TestMockFactory.createMockedCloudbilling();
@@ -117,9 +115,6 @@ public class UserControllerTest {
 
   @Before
   public void setUp() {
-    config.firecloud = new WorkbenchConfig.FireCloudConfig();
-    config.featureFlags = new FeatureFlagsConfig();
-
     saveFamily();
   }
 
@@ -297,7 +292,6 @@ public class UserControllerTest {
 
   @Test
   public void listBillingAccounts_upgradeYES_freeYES_cloudYES() throws IOException {
-    config.billing = new BillingConfig();
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = true;
 
@@ -319,7 +313,6 @@ public class UserControllerTest {
 
   @Test
   public void listBillingAccounts_upgradeYES_freeYES_cloudNO() throws IOException {
-    config.billing = new BillingConfig();
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = true;
 
@@ -340,7 +333,6 @@ public class UserControllerTest {
 
   @Test
   public void listBillingAccounts_upgradeYES_freeNO_cloudYES() throws IOException {
-    config.billing = new BillingConfig();
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = true;
 
@@ -360,7 +352,6 @@ public class UserControllerTest {
 
   @Test
   public void listBillingAccounts_upgradeYES_freeNO_cloudNO() throws IOException {
-    config.billing = new BillingConfig();
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = true;
 
@@ -378,7 +369,6 @@ public class UserControllerTest {
 
   @Test
   public void listBillingAccounts_upgradeNO_freeYES_cloudYES() throws IOException {
-    config.billing = new BillingConfig();
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = false;
 
@@ -399,7 +389,6 @@ public class UserControllerTest {
 
   @Test
   public void listBillingAccounts_upgradeNO_freeYES_cloudNO() throws IOException {
-    config.billing = new BillingConfig();
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = false;
 
@@ -420,7 +409,6 @@ public class UserControllerTest {
 
   @Test
   public void listBillingAccounts_upgradeNO_freeNO_cloudYES() throws IOException {
-    config.billing = new BillingConfig();
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = false;
 
@@ -445,7 +433,6 @@ public class UserControllerTest {
 
   @Test
   public void listBillingAccounts_upgradeNO_freeNO_cloudNO() throws IOException {
-    config.billing = new BillingConfig();
     config.billing.accountId = "free-tier";
     config.featureFlags.enableBillingUpgrade = false;
 

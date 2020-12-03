@@ -89,8 +89,7 @@ public class WorkspaceServiceTest {
   static class Configuration {
     @Bean
     WorkbenchConfig workbenchConfig() {
-      WorkbenchConfig workbenchConfig = new WorkbenchConfig();
-      workbenchConfig.billing = new WorkbenchConfig.BillingConfig();
+      WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
       workbenchConfig.billing.accountId = "free-tier-account";
       return workbenchConfig;
     }

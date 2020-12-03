@@ -203,7 +203,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Before
   public void setUp() {
-    workbenchConfigProvider.get().featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
     dataSetServiceImpl =
         new DataSetServiceImpl(
             bigQueryService,

@@ -165,9 +165,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Before
   public void setUp() {
-    WorkbenchConfig testConfig = new WorkbenchConfig();
-    testConfig.elasticsearch = new WorkbenchConfig.ElasticsearchConfig();
+    WorkbenchConfig testConfig = WorkbenchConfig.createEmptyConfig();
     testConfig.elasticsearch.enableElasticsearchBackend = false;
+
     when(configProvider.get()).thenReturn(testConfig);
 
     when(firecloudService.isUserMemberOfGroup(anyString(), anyString())).thenReturn(true);

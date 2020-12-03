@@ -24,7 +24,6 @@ import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.CdrConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -108,8 +107,7 @@ public class CohortMaterializationServiceTest {
 
     @Bean
     public WorkbenchConfig workbenchConfig() {
-      WorkbenchConfig workbenchConfig = new WorkbenchConfig();
-      workbenchConfig.cdr = new CdrConfig();
+      WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
       workbenchConfig.cdr.debugQueries = false;
       return workbenchConfig;
     }

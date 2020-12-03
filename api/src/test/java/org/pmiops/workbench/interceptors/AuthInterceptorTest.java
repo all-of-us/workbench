@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import com.google.api.client.http.HttpMethods;
 import com.google.api.services.oauth2.model.Userinfoplus;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
@@ -27,8 +26,6 @@ import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.api.ProfileApi;
 import org.pmiops.workbench.auth.UserInfoService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.AuthConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.GoogleDirectoryServiceConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
@@ -94,10 +91,7 @@ public class AuthInterceptorTest {
   @Before
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
-    workbenchConfig.googleDirectoryService = new GoogleDirectoryServiceConfig();
     workbenchConfig.googleDirectoryService.gSuiteDomain = "fake-domain.org";
-    workbenchConfig.auth = new AuthConfig();
-    workbenchConfig.auth.serviceAccountApiUsers = new ArrayList<>();
     workbenchConfig.auth.serviceAccountApiUsers.add("service-account@appspot.gserviceaccount.com");
     user = new DbUser();
     user.setUserId(USER_ID);
