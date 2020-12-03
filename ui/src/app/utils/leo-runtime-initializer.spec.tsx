@@ -190,7 +190,7 @@ describe('RuntimeInitializer', () => {
     }), jasmine.any(Object));
   });
 
-  it('should use preset values during lazy runtime instantiation if a preset was selected', async() => {
+  it('should use preset values during lazy runtime creation if a preset was selected', async() => {
     serverConfigStore.next({gsuiteDomain: 'researchallofus.org', enableCustomRuntimes: true});
     mockGetRuntime.mockImplementation(namespace => {
       return {
