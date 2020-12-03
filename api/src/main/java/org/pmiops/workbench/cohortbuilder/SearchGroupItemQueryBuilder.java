@@ -212,18 +212,22 @@ public final class SearchGroupItemQueryBuilder {
       } else {
         StringBuilder bpSql = new StringBuilder(BP_SQL);
         List<Long> bpConceptIds = new ArrayList<>();
-        for (Attribute attribute : param.getAttributes()) {
-          validateAttribute(attribute);
-          if (attribute.getConceptId() != null) {
-            // attribute.conceptId is unique to blood pressure attributes
-            // this indicates we need to build a blood pressure sql statement
-            bpConceptIds.add(attribute.getConceptId());
-            processBloodPressureSql(queryParams, bpSql, attribute);
-          } else if (AttrName.NUM.equals(attribute.getName())) {
-            queryParts.add(processNumericalSql(queryParams, param, attribute));
-          } else if (AttrName.CAT.equals(attribute.getName())
-              || AttrName.SURVEY_VERSION_CONCEPT_ID.equals(attribute.getName())) {
-            queryParts.add(processCategoricalSql(queryParams, param, attribute));
+        if (Domain.fromValue(domain).equals(Domain.SURVEY) && param.getAttributes().size() >= 2) {
+          queryParts.add(processCopeSql(queryParams, param));
+        } else {
+          for (Attribute attribute : param.getAttributes()) {
+            validateAttribute(attribute);
+            if (attribute.getConceptId() != null) {
+              // attribute.conceptId is unique to blood pressure attributes
+              // this indicates we need to build a blood pressure sql statement
+              bpConceptIds.add(attribute.getConceptId());
+              processBloodPressureSql(queryParams, bpSql, attribute);
+            } else if (AttrName.NUM.equals(attribute.getName())) {
+              queryParts.add(processNumericalSql(queryParams, param, attribute));
+            } else if (AttrName.CAT.equals(attribute.getName())
+                || AttrName.SURVEY_VERSION_CONCEPT_ID.equals(attribute.getName())) {
+              queryParts.add(processCategoricalSql(queryParams, param, attribute));
+            }
           }
         }
         if (!bpConceptIds.isEmpty()) {
@@ -441,6 +445,114 @@ public final class SearchGroupItemQueryBuilder {
         conceptIdParam,
         OperatorUtils.getSqlOperator(attribute.getOperator()),
         getOperandsExpression(queryParams, attribute));
+  }
+
+  private static String processCopeSql(
+      Map<String, QueryParameterValue> queryParams,
+      SearchParameter parameter,
+      Attribute numOrCat,
+      Attribute version) {
+    String standardParam =
+        QueryParameterUtil.addQueryParameterValue(
+            queryParams, QueryParameterValue.int64(parameter.getStandard() ? 1 : 0));
+    String conceptIdParam =
+        QueryParameterUtil.addQueryParameterValue(
+            queryParams, QueryParameterValue.int64(parameter.getConceptId()));
+    String numsOrCatParam =
+        numOrCat.getName().equals(AttrName.CAT)
+            ? QueryParameterUtil.addQueryParameterValue(
+                queryParams,
+                QueryParameterValue.array(
+                    numOrCat.getOperands().stream().map(Long::parseLong).toArray(Long[]::new),
+                    Long.class))
+            : QueryParameterUtil.addQueryParameterValue(
+                queryParams,
+                QueryParameterValue.int64(Long.valueOf(numOrCat.getOperands().get(0))));
+    String versionParam =
+        QueryParameterUtil.addQueryParameterValue(
+            queryParams,
+            QueryParameterValue.array(
+                version.getOperands().stream().map(Long::parseLong).toArray(Long[]::new),
+                Long.class));
+    // if the search parameter is ppi/survey then we need to use different column.
+    String sqlString =
+        numOrCat.getName().equals(AttrName.CAT) ? VALUE_SOURCE_CONCEPT_ID : VALUE_AS_NUMBER;
+    sqlString = sqlString + " and survey_version_concept_id %s unnest(%s)";
+
+    return String.format(
+        sqlString,
+        standardParam,
+        conceptIdParam,
+        OperatorUtils.getSqlOperator(numOrCat.getOperator()),
+        numsOrCatParam,
+        OperatorUtils.getSqlOperator(version.getOperator()),
+        versionParam);
+  }
+
+  private static String processCopeSql(
+      Map<String, QueryParameterValue> queryParams, SearchParameter parameter) {
+    String numsParam = "";
+    String catsParam = "";
+    String versionParam = "";
+    List<Attribute> cats =
+        parameter.getAttributes().stream()
+            .filter(attr -> attr.getName().equals(AttrName.CAT))
+            .collect(Collectors.toList());
+    List<Attribute> nums =
+        parameter.getAttributes().stream()
+            .filter(attr -> attr.getName().equals(AttrName.NUM))
+            .collect(Collectors.toList());
+    List<Attribute> versions =
+        parameter.getAttributes().stream()
+            .filter(attr -> attr.getName().equals(AttrName.SURVEY_VERSION_CONCEPT_ID))
+            .collect(Collectors.toList());
+    String standardParam =
+        QueryParameterUtil.addQueryParameterValue(
+            queryParams, QueryParameterValue.int64(parameter.getStandard() ? 1 : 0));
+    String conceptIdParam =
+        QueryParameterUtil.addQueryParameterValue(
+            queryParams, QueryParameterValue.int64(parameter.getConceptId()));
+    String sqlString =
+        String.format("is_standard = %s and concept_id = %s", standardParam, conceptIdParam);
+    if (!nums.isEmpty()) {
+      numsParam =
+          QueryParameterUtil.addQueryParameterValue(
+              queryParams,
+              QueryParameterValue.int64(Long.valueOf(nums.get(0).getOperands().get(0))));
+      sqlString =
+          sqlString
+              + String.format(
+                  " and value_as_number %s %s",
+                  OperatorUtils.getSqlOperator(nums.get(0).getOperator()), numsParam);
+    }
+    if (!cats.isEmpty()) {
+      catsParam =
+          QueryParameterUtil.addQueryParameterValue(
+              queryParams,
+              QueryParameterValue.array(
+                  cats.get(0).getOperands().stream().map(Long::parseLong).toArray(Long[]::new),
+                  Long.class));
+      sqlString =
+          sqlString
+              + String.format(
+                  " and value_source_concept_id %s unnest(%s)",
+                  OperatorUtils.getSqlOperator(cats.get(0).getOperator()), catsParam);
+    }
+    if (!versions.isEmpty()) {
+      versionParam =
+          QueryParameterUtil.addQueryParameterValue(
+              queryParams,
+              QueryParameterValue.array(
+                  versions.get(0).getOperands().stream().map(Long::parseLong).toArray(Long[]::new),
+                  Long.class));
+      sqlString =
+          sqlString
+              + String.format(
+                  " and survey_version_concept_id %s unnest(%s)",
+                  OperatorUtils.getSqlOperator(versions.get(0).getOperator()), versionParam);
+    }
+
+    return sqlString;
   }
 
   /** Helper method to create sql statement for attributes of categorical type. */
