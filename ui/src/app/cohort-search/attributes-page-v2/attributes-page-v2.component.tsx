@@ -268,6 +268,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         // A different node has been selected, so we reset the form and load the new attributes
         this.setState({
           form: {anyValue: false, anyVersion: false, num: [], cat: []},
+          formErrors: [],
           loading: true
         }, () => this.initAttributeForm());
       }
@@ -380,9 +381,10 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
       let {node: {count}} = this.props;
       form.anyValue = checked;
       if (checked) {
-        form.num = form.num.map(attr =>
-          ({...attr, operator: this.isPhysicalMeasurement ? 'ANY' : null, operands: []}));
-        form.cat = form.cat.map(attr => ({...attr, checked: false}));
+        form.num = form.num.map(attr => ({...attr, operator: this.isPhysicalMeasurement ? 'ANY' : null, operands: []}));
+        if (this.isMeasurement) {
+          form.cat = form.cat.map(attr => ({...attr, checked: false}));
+        }
       }
       if (!checked || count === -1) {
         count = null;
@@ -473,7 +475,12 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         }, new Set());
         // The second condition sets formValid to false if this is a Measurements or COPE attribute with no operator selected from the
         // dropdown and no categorical checkboxes checked
-        formValid = formValid && !((this.isMeasurement || isCOPESurvey) && !operatorSelected && !form.cat.some(attr => attr.checked));
+        if (this.isMeasurement && formValid) {
+          formValid = operatorSelected || form.cat.some(attr => attr.checked);
+        }
+        if (isCOPESurvey && formValid) {
+          formValid = (form.anyValue || operatorSelected) && (form.anyVersion || form.cat.some(attr => attr.checked));
+        }
         this.setState({formErrors: Array.from(formErrors), formValid});
       }
     }
