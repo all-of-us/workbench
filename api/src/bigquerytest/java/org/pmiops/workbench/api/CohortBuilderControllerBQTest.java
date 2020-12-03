@@ -628,6 +628,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     return new SearchParameter()
         .domain(Domain.SURVEY.toString())
         .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.SURVEY.toString())
+        .ancestorData(false)
+        .standard(false)
+        .group(true)
+        .conceptId(44L);
+  }
+
+  private static SearchParameter copeSurveyQuestion() {
+    return new SearchParameter()
+        .domain(Domain.SURVEY.toString())
+        .type(CriteriaType.PPI.toString())
         .subtype(CriteriaSubType.QUESTION.toString())
         .ancestorData(false)
         .standard(false)
@@ -640,8 +651,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                     .operator(Operator.IN)
                     .operands(ImmutableList.of("100", "101")),
                 new Attribute()
-                    .name(AttrName.NUM)
-                    .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+                    .name(AttrName.CAT)
+                    .operator(Operator.IN)
                     .operands(ImmutableList.of("10"))));
   }
 
@@ -1949,6 +1960,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(
             Domain.SURVEY.toString(), ImmutableList.of(copeSurvey()), new ArrayList<>());
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    assertParticipants(response, 1);
+  }
+
+  @Test
+  public void countSubjectsCopeSurveyQuestion() {
+    // Cope Survey
+    SearchRequest searchRequest =
+        createSearchRequests(
+            Domain.SURVEY.toString(), ImmutableList.of(copeSurveyQuestion()), new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     assertParticipants(response, 1);
