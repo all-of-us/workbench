@@ -769,7 +769,7 @@ export const RuntimePanel = fp.flow(
   let [{currentRuntime, pendingRuntime}, setRequestedRuntime] = useCustomRuntime(namespace);
 
   // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
-  if (currentRuntime.status === RuntimeStatus.Deleted) {
+  if (currentRuntime && currentRuntime.status === RuntimeStatus.Deleted) {
     currentRuntime = applyPresetOverride(currentRuntime);
   }
 

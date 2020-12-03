@@ -1,4 +1,4 @@
-import {Runtime, RuntimeConfigurationType, RuntimeStatus} from 'generated/fetch';
+import {Runtime, RuntimeConfigurationType} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 
 export const runtimePresets: {
