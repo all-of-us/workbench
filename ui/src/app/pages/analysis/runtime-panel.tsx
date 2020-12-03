@@ -768,7 +768,10 @@ export const RuntimePanel = fp.flow(
   const {hasMicroarrayData} = fp.find({cdrVersionId}, cdrVersionListResponse.items) || {hasMicroarrayData: false};
   let [{currentRuntime, pendingRuntime}, setRequestedRuntime] = useCustomRuntime(namespace);
 
-  currentRuntime = applyPresetOverride(currentRuntime);
+  // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
+  if (currentRuntime.status === RuntimeStatus.Deleted) {
+    currentRuntime = applyPresetOverride(currentRuntime);
+  }
 
   // Prioritize the "pendingRuntime", if any. When an update is pending, we want
   // to render the target runtime details, which  may not match the current runtime.
@@ -790,8 +793,6 @@ export const RuntimePanel = fp.flow(
       () => PanelContent.Create],
     [() => true, () => PanelContent.Customize]
   ])([currentRuntime, status]);
-  console.log(currentRuntime);
-  console.log(initialPanelContent);
   const [panelContent, setPanelContent] = useState<PanelContent>(initialPanelContent);
 
   const [selectedDiskSize, setSelectedDiskSize] = useState(diskSize);

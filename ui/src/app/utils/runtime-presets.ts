@@ -38,17 +38,12 @@ export const applyPresetOverride = (runtime) => {
 
   const newRuntime = {...runtime};
 
-  // if runtime configuration type is a default, override its config with preset values
-  // The Deleted check is so that we only update the user's runtime to the latest preset values
-  // after they delete their runtime (ex. not while its actively in use).
-  if (newRuntime && newRuntime.status === RuntimeStatus.Deleted) {
-    const runtimePresetKey = fp.keys(runtimePresets)
+  const runtimePresetKey = fp.keys(runtimePresets)
     .find(key => runtimePresets[key].runtimeTemplate.configurationType === newRuntime.configurationType);
 
-    if (runtimePresetKey) {
-      newRuntime.gceConfig = runtimePresets[runtimePresetKey].runtimeTemplate.gceConfig;
-      newRuntime.dataprocConfig = runtimePresets[runtimePresetKey].runtimeTemplate.dataprocConfig;
-    }
+  if (runtimePresetKey) {
+    newRuntime.gceConfig = runtimePresets[runtimePresetKey].runtimeTemplate.gceConfig;
+    newRuntime.dataprocConfig = runtimePresets[runtimePresetKey].runtimeTemplate.dataprocConfig;
   }
 
   return newRuntime;

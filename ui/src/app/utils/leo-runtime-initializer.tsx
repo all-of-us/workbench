@@ -198,7 +198,8 @@ export class LeoRuntimeInitializer {
     let runtime: Runtime;
     if (serverConfigStore.getValue().enableCustomRuntimes && this.targetRuntime) {
       runtime = this.targetRuntime;
-    } else if (this.currentRuntime) {
+    } else if (this.currentRuntime && this.currentRuntime.status === RuntimeStatus.Deleted) {
+      // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
       runtime = applyPresetOverride(this.currentRuntime);
     } else {
       runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};

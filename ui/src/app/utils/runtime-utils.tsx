@@ -281,7 +281,7 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
             resolutionCondition: (r) => resolutionCondition(r)
           });
         } catch (e) {
-          // gxceededActionCountError is expected, as we exceed our create limit of 0.
+          // ExceededActionCountError is expected, as we exceed our create limit of 0.
           if (!(e instanceof ExceededActionCountError ||
               e instanceof LeoRuntimeInitializationAbortedError)) {
             throw e;
