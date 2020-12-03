@@ -6,8 +6,9 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
+import org.pmiops.workbench.model.AuthDomainCreatedResponse;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.UpdateUserDisabledRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,9 +37,13 @@ public class AuthDomainController implements AuthDomainApiDelegate {
 
   @AuthorityRequired({Authority.DEVELOPER})
   @Override
-  public ResponseEntity<EmptyResponse> createAuthDomain(String groupName) {
-    fireCloudService.createGroup(groupName);
-    return ResponseEntity.ok(new EmptyResponse());
+  public ResponseEntity<AuthDomainCreatedResponse> createAuthDomain(String authDomainName) {
+    final FirecloudManagedGroupWithMembers group = fireCloudService.createGroup(authDomainName);
+    final AuthDomainCreatedResponse response =
+        new AuthDomainCreatedResponse()
+            .authDomainName(authDomainName)
+            .groupEmail(group.getGroupEmail());
+    return ResponseEntity.ok(response);
   }
 
   @Override

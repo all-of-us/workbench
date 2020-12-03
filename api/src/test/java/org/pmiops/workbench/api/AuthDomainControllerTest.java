@@ -26,7 +26,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.AuthDomainCreatedResponse;
 import org.pmiops.workbench.model.UpdateUserDisabledRequest;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -65,11 +65,15 @@ public class AuthDomainControllerTest {
 
   private AuthDomainController authDomainController;
 
+  private final String testGroupEmail = "test-group@google.com";
+  private final FirecloudManagedGroupWithMembers testGroup =
+      new FirecloudManagedGroupWithMembers().groupEmail(testGroupEmail);
+
   @Before
   public void setUp() {
     DbUser adminUser = new DbUser();
     adminUser.setUserId(0L);
-    when(fireCloudService.createGroup(any())).thenReturn(new FirecloudManagedGroupWithMembers());
+    when(fireCloudService.createGroup(any())).thenReturn(testGroup);
     when(userProvider.get()).thenReturn(adminUser);
     WorkbenchConfig config = new WorkbenchConfig();
     config.firecloud = new WorkbenchConfig.FireCloudConfig();
@@ -99,8 +103,13 @@ public class AuthDomainControllerTest {
 
   @Test
   public void testCreateAuthDomain() {
-    ResponseEntity<EmptyResponse> response = this.authDomainController.createAuthDomain("");
+    final String testDomain = "my-auth-domain";
+    final ResponseEntity<AuthDomainCreatedResponse> response =
+        this.authDomainController.createAuthDomain(testDomain);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody())
+        .isEqualTo(
+            new AuthDomainCreatedResponse().authDomainName(testDomain).groupEmail(testGroupEmail));
   }
 
   @Test
