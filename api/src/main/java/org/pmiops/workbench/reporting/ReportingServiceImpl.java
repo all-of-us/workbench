@@ -15,27 +15,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReportingServiceImpl implements ReportingService {
 
-  // Describe whether to upload via Data Manipulation Language (DML, i.e. Insert
-  // QueryJobConfiguration) or Streaming upload via InsertAllRequest.
-  private enum UploadMethod {
-    DML,
-    STREAMING;
-  }
-
   private final ReportingSnapshotService reportingSnapshotService;
-  private final ReportingUploadService reportingUploadServiceDmlImpl;
-  private final ReportingUploadService reportingUploadServiceStreamingImpl;
+  private final ReportingUploadService reportingUploadService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   public ReportingServiceImpl(
-      @Qualifier("REPORTING_UPLOAD_SERVICE_DML_IMPL")
-          ReportingUploadService reportingUploadServiceDmlImpl,
       @Qualifier("REPORTING_UPLOAD_SERVICE_STREAMING_IMPL")
-          ReportingUploadService reportingUploadServiceStreamingImpl,
+          ReportingUploadService reportingUploadService,
       ReportingSnapshotService reportingSnapshotService,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
-    this.reportingUploadServiceDmlImpl = reportingUploadServiceDmlImpl;
-    this.reportingUploadServiceStreamingImpl = reportingUploadServiceStreamingImpl;
+    this.reportingUploadService = reportingUploadService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.reportingSnapshotService = reportingSnapshotService;
   }
@@ -43,35 +32,6 @@ public class ReportingServiceImpl implements ReportingService {
   @Override
   public void takeAndUploadSnapshot() {
     final ReportingSnapshot snapshot = reportingSnapshotService.takeSnapshot();
-    getConfiguredUploadService().uploadSnapshot(snapshot);
-  }
-
-  @Override
-  public void uploadReportingSnapshotDml() {
-    final ReportingSnapshot snapshot = reportingSnapshotService.takeSnapshot();
-    reportingUploadServiceDmlImpl.uploadSnapshot(snapshot);
-  }
-
-  @Override
-  public void uploadReportingSnapshotStreaming() {
-    final ReportingSnapshot snapshot = reportingSnapshotService.takeSnapshot();
-    reportingUploadServiceStreamingImpl.uploadSnapshot(snapshot);
-  }
-
-  /*
-   * Currently, we can't access appplication config values at initialization time (since they're
-   * all request-scoped). This method is a workaround, and selects the upload service implementation
-   * whenever a request comes in. The main cost is an extra configured Bean in the ApplicationContext.
-   */
-  private ReportingUploadService getConfiguredUploadService() {
-    final String uploadMethod = workbenchConfigProvider.get().reporting.uploadMethod;
-    if (UploadMethod.DML.name().equals(uploadMethod)) {
-      return reportingUploadServiceDmlImpl;
-    } else if (UploadMethod.STREAMING.name().equals(uploadMethod)) {
-      return reportingUploadServiceStreamingImpl;
-    } else {
-      throw new IllegalArgumentException(
-          String.format("Unrecognized upload method %s", uploadMethod));
-    }
+    reportingUploadService.uploadSnapshot(snapshot);
   }
 }

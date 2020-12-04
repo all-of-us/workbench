@@ -1616,40 +1616,6 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/uploadReportingSnapshotStreaming":
-    get:
-      tags:
-        - offlineReporting
-        - cron
-      description: >
-        Capture a reporting snapshot and begin the upload task to BigQuery reporting dataset via
-        the streaming implementation.
-      operationId: uploadReportingSnapshotStreaming
-      security: []
-      responses:
-        204:
-          description: No content
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/uploadReportingSnapshotQuery":
-    get:
-      tags:
-        - offlineReporting
-        - cron
-      description: >
-        Capture a reporting snapshot and upload to BigQuery reporting dataset using the insert
-        query implementation.
-      operationId: uploadReportingSnapshotQuery
-      security: []
-      responses:
-        204:
-          description: No content
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
   "/v1/cron/updateResearchPurposeReviewPrompt":
     get:
       tags:

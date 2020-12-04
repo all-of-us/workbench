@@ -7,8 +7,4 @@ package org.pmiops.workbench.reporting;
  */
 public interface ReportingService {
   void takeAndUploadSnapshot();
-
-  void uploadReportingSnapshotDml();
-
-  void uploadReportingSnapshotStreaming();
 }
