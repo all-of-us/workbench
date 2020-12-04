@@ -508,12 +508,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
       }, '');
       const paramConceptId = isCOPESurvey && !!value ? value : conceptId;
       // make sure param ID is unique for different checkbox combinations
-      const catValues = form.cat.reduce((cat, acc) => {
-        if (cat.checked) {
-          acc += cat.valueAsConceptId;
-        }
-        return acc;
-      }, '');
+      const catValues = form.cat.filter(c => c.checked).map(c => c.valueAsConceptId).join('');
       return `param${(paramConceptId || id) + code + catValues}`;
     }
 
