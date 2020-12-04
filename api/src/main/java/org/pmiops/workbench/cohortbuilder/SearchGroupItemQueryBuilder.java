@@ -448,48 +448,6 @@ public final class SearchGroupItemQueryBuilder {
   }
 
   private static String processCopeSql(
-      Map<String, QueryParameterValue> queryParams,
-      SearchParameter parameter,
-      Attribute numOrCat,
-      Attribute version) {
-    String standardParam =
-        QueryParameterUtil.addQueryParameterValue(
-            queryParams, QueryParameterValue.int64(parameter.getStandard() ? 1 : 0));
-    String conceptIdParam =
-        QueryParameterUtil.addQueryParameterValue(
-            queryParams, QueryParameterValue.int64(parameter.getConceptId()));
-    String numsOrCatParam =
-        numOrCat.getName().equals(AttrName.CAT)
-            ? QueryParameterUtil.addQueryParameterValue(
-                queryParams,
-                QueryParameterValue.array(
-                    numOrCat.getOperands().stream().map(Long::parseLong).toArray(Long[]::new),
-                    Long.class))
-            : QueryParameterUtil.addQueryParameterValue(
-                queryParams,
-                QueryParameterValue.int64(Long.valueOf(numOrCat.getOperands().get(0))));
-    String versionParam =
-        QueryParameterUtil.addQueryParameterValue(
-            queryParams,
-            QueryParameterValue.array(
-                version.getOperands().stream().map(Long::parseLong).toArray(Long[]::new),
-                Long.class));
-    // if the search parameter is ppi/survey then we need to use different column.
-    String sqlString =
-        numOrCat.getName().equals(AttrName.CAT) ? VALUE_SOURCE_CONCEPT_ID : VALUE_AS_NUMBER;
-    sqlString = sqlString + " and survey_version_concept_id %s unnest(%s)";
-
-    return String.format(
-        sqlString,
-        standardParam,
-        conceptIdParam,
-        OperatorUtils.getSqlOperator(numOrCat.getOperator()),
-        numsOrCatParam,
-        OperatorUtils.getSqlOperator(version.getOperator()),
-        versionParam);
-  }
-
-  private static String processCopeSql(
       Map<String, QueryParameterValue> queryParams, SearchParameter parameter) {
     String numsParam;
     String catsParam;
