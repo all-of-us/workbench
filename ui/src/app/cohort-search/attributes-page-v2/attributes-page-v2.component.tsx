@@ -247,7 +247,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         countError: false,
         form: {anyValue: false, anyVersion: false, num: [], cat: []},
         formErrors: [],
-        formValid: true,
+        formValid: false,
         isCOPESurvey: false,
         loading: true,
         options: [
@@ -288,7 +288,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         form.num = subtype === CriteriaSubType[CriteriaSubType.BP]
           ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
           : [{name: subtype, operator: 'ANY', operands: []}];
-        this.setState({form, count: this.nodeCount, loading: false, options});
+        this.setState({count: this.nodeCount, form, formValid: true, loading: false, options});
       }
     }
 
@@ -436,7 +436,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
 
     validateForm() {
       const {form, isCOPESurvey} = this.state;
-      if ((form.anyValue || form.num.length === 0) && (!isCOPESurvey || form.anyVersion)) {
+      if ((form.anyValue || (isCOPESurvey && form.num.length === 0)) && (!isCOPESurvey || form.anyVersion)) {
         this.setState({formValid: true, formErrors: []});
       } else {
         let formValid = true, operatorSelected = form.num.length !== 0;
