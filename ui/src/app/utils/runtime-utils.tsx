@@ -126,7 +126,7 @@ const compareWorkerMemory = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfi
 };
 
 const compareDataprocWorkerDiskSize = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
-  if (oldRuntime.dataprocConfig === null || newRuntime.dataprocConfig === null) {
+  if (!oldRuntime.dataprocConfig || !newRuntime.dataprocConfig) {
     return null;
   }
 
@@ -143,7 +143,7 @@ const compareDataprocWorkerDiskSize = (oldRuntime: RuntimeConfig, newRuntime: Ru
 };
 
 const compareDataprocNumberOfPreemptibleWorkers = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
-  if (oldRuntime.dataprocConfig === null || newRuntime.dataprocConfig === null) {
+  if (!oldRuntime.dataprocConfig || !newRuntime.dataprocConfig) {
     return null;
   }
 
@@ -160,7 +160,7 @@ const compareDataprocNumberOfPreemptibleWorkers = (oldRuntime: RuntimeConfig, ne
 };
 
 const compareDataprocNumberOfWorkers = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): RuntimeDiff => {
-  if (oldRuntime.dataprocConfig === null || newRuntime.dataprocConfig === null) {
+  if (!oldRuntime.dataprocConfig || !newRuntime.dataprocConfig) {
     return null;
   }
 
