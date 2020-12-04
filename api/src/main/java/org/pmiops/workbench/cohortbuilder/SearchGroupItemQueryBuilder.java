@@ -212,7 +212,7 @@ public final class SearchGroupItemQueryBuilder {
       } else {
         StringBuilder bpSql = new StringBuilder(BP_SQL);
         List<Long> bpConceptIds = new ArrayList<>();
-        if (Domain.fromValue(domain).equals(Domain.SURVEY) && param.getAttributes().size() >= 2) {
+        if (Domain.SURVEY.toString().equals(domain) && param.getAttributes().size() >= 2) {
           queryParts.add(processCopeSql(queryParams, param));
         } else {
           for (Attribute attribute : param.getAttributes()) {
