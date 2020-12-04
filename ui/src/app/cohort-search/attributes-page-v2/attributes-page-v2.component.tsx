@@ -747,7 +747,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
     }
 
     render() {
-      const {back, node: {domainId, name, parentId, subtype}} = this.props;
+      const {back, node: {domainId, name, parentId, subtype, value}} = this.props;
       const {calculating, count, countError, form, formErrors, isCOPESurvey, loading} = this.state;
       return (loading ?
         <SpinnerOverlay/> :
@@ -790,11 +790,11 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
           {isCOPESurvey
             ? <div>
               {this.renderCategoricalAttributes()}
-              {form.num.length > 0 && form.cat.length > 0 && <div style={{position: 'relative'}}>
+              {!value && form.num.length > 0 && form.cat.length > 0 && <div style={{position: 'relative'}}>
                 <div style={styles.andCircle}>AND</div>
                 <div style={styles.andDivider}/>
               </div>}
-              {this.renderNumericalAttributes()}
+              {!value && this.renderNumericalAttributes()}
             </div>
             : <div>
               {this.isMeasurement && <div>
