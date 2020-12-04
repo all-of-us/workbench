@@ -342,8 +342,8 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
     }
 
     getAttributes() {
-      const {node: {conceptId, subtype, value}} = this.props;
-      const{form, isCOPESurvey} = this.state;
+      const {node: {conceptId}} = this.props;
+      const{form} = this.state;
       const {cdrVersionId} = currentWorkspaceStore.getValue();
       cohortBuilderApi().findCriteriaAttributeByConceptId(+cdrVersionId, conceptId).then(resp => {
         resp.items.forEach(attr => {
