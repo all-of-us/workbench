@@ -61,12 +61,14 @@ public class DbDataset {
     this.invalid = invalid;
   }
 
+  //   TODO(jaycarlton): use MapStruct to generate a copy ctor for us
   public DbDataset(DbDataset dataSet) {
     setName(dataSet.getName());
     setVersion(DbDataset.INITIAL_VERSION);
     setDescription(dataSet.getDescription());
     setInvalid(dataSet.getInvalid());
     setIncludesAllParticipants(dataSet.getIncludesAllParticipants());
+
     setValues(dataSet.getValues().stream().map(DbDatasetValue::new).collect(Collectors.toList()));
     setPrePackagedConceptSet(dataSet.getPrePackagedConceptSet());
   }

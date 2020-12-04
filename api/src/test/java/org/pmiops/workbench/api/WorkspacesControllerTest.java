@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
 import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
+import static org.pmiops.workbench.config.WorkbenchConfig.createEmptyConfig;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.BillingAccount;
@@ -92,7 +93,6 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.BillingConfig;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
@@ -398,14 +398,9 @@ public class WorkspacesControllerTest {
 
   @Before
   public void setUp() {
-    workbenchConfig = new WorkbenchConfig();
-    workbenchConfig.featureFlags = new WorkbenchConfig.FeatureFlagsConfig();
+    workbenchConfig = createEmptyConfig();
     workbenchConfig.featureFlags.enableBillingUpgrade = true;
-
-    workbenchConfig.firecloud = new WorkbenchConfig.FireCloudConfig();
     workbenchConfig.firecloud.registeredDomainName = "allUsers";
-
-    workbenchConfig.billing = new BillingConfig();
     workbenchConfig.billing.accountId = "free-tier";
 
     testMockFactory = new TestMockFactory();

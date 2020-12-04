@@ -2,25 +2,43 @@ package org.pmiops.workbench.reporting;
 
 import java.util.List;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingDataset;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingInstitution;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
+import org.pmiops.workbench.model.ReportingDatasetCohort;
+import org.pmiops.workbench.model.ReportingDatasetConceptSet;
+import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
 
 // Define immutable value class to hold results of queries within a transaction. Mapping to
-// Reporting DTO classes will happen outside the transaction.
+// Reporting DTO classes will happen outside the transaction. The main reason for this class
+// is to support fine-graining performance measurement by separating the queries from the DTO
+// conversion.
 public class QueryResultBundle {
 
   private final List<ProjectedReportingCohort> cohorts;
+  private final List<ProjectedReportingDataset> datasets;
+  private final List<ReportingDatasetCohort> datasetCohorts;
+  private final List<ReportingDatasetConceptSet> datasetConceptSets;
+  private final List<ReportingDatasetDomainIdValue> datasetDomainIdValues;
   private final List<ProjectedReportingUser> users;
   private final List<ProjectedReportingInstitution> institutions;
   private final List<ProjectedReportingWorkspace> workspaces;
 
   public QueryResultBundle(
       List<ProjectedReportingCohort> cohorts,
+      List<ProjectedReportingDataset> datasets,
+      List<ReportingDatasetCohort> datasetCohorts,
+      List<ReportingDatasetConceptSet> datasetConceptSets,
+      List<ReportingDatasetDomainIdValue> datasetDomainIdValues,
       List<ProjectedReportingInstitution> institutions,
       List<ProjectedReportingUser> users,
       List<ProjectedReportingWorkspace> workspaces) {
     this.cohorts = cohorts;
+    this.datasets = datasets;
+    this.datasetCohorts = datasetCohorts;
+    this.datasetConceptSets = datasetConceptSets;
+    this.datasetDomainIdValues = datasetDomainIdValues;
     this.users = users;
     this.workspaces = workspaces;
     this.institutions = institutions;
@@ -28,6 +46,20 @@ public class QueryResultBundle {
 
   public List<ProjectedReportingCohort> getCohorts() {
     return cohorts;
+  }
+
+  // Since the DatasetCohorts "dao" creates DTOs directly, we don't need to work with
+  // a projection class for these.
+  public List<ReportingDatasetCohort> getDatasetCohorts() {
+    return datasetCohorts;
+  }
+
+  public List<ReportingDatasetConceptSet> getDatasetConceptSets() {
+    return datasetConceptSets;
+  }
+
+  public List<ReportingDatasetDomainIdValue> getDatasetDomainIdValues() {
+    return datasetDomainIdValues;
   }
 
   public List<ProjectedReportingInstitution> getInstitutions() {
@@ -40,5 +72,9 @@ public class QueryResultBundle {
 
   public List<ProjectedReportingWorkspace> getWorkspaces() {
     return workspaces;
+  }
+
+  public List<ProjectedReportingDataset> getDatasets() {
+    return datasets;
   }
 }

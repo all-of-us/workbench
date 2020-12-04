@@ -1,9 +1,13 @@
 package org.pmiops.workbench.reporting;
 
+import static org.pmiops.workbench.reporting.insertion.ColumnValueExtractorUtils.getBigQueryTableName;
+
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
+import java.util.List;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
@@ -14,6 +18,11 @@ import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUploadDetails;
 import org.pmiops.workbench.model.ReportingUploadResult;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.ColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.DatasetCohortColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.DatasetColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.DatasetConceptSetColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.DatasetDomainColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.InstitutionColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
@@ -43,7 +52,6 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
   public ReportingUploadDetails getUploadDetails(ReportingSnapshot snapshot) {
     final Stopwatch verifyStopwatch = stopwatchProvider.get();
     verifyStopwatch.start();
-
     final ReportingUploadDetails result =
         new ReportingUploadDetails()
             .snapshotTimestamp(snapshot.getCaptureTimestamp())
@@ -52,21 +60,33 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
             .uploads(
                 ImmutableList.of(
                     getUploadResult(
-                        UserColumnValueExtractor.TABLE_NAME,
-                        snapshot.getCaptureTimestamp(),
-                        snapshot.getUsers().size()),
+                        snapshot, UserColumnValueExtractor.class, ReportingSnapshot::getUsers),
                     getUploadResult(
-                        WorkspaceColumnValueExtractor.TABLE_NAME,
-                        snapshot.getCaptureTimestamp(),
-                        snapshot.getWorkspaces().size()),
+                        snapshot,
+                        WorkspaceColumnValueExtractor.class,
+                        ReportingSnapshot::getWorkspaces),
                     getUploadResult(
-                        CohortColumnValueExtractor.TABLE_NAME,
-                        snapshot.getCaptureTimestamp(),
-                        snapshot.getCohorts().size()),
+                        snapshot, CohortColumnValueExtractor.class, ReportingSnapshot::getCohorts),
                     getUploadResult(
-                        InstitutionColumnValueExtractor.TABLE_NAME,
-                        snapshot.getCaptureTimestamp(),
-                        snapshot.getInstitutions().size())));
+                        snapshot,
+                        InstitutionColumnValueExtractor.class,
+                        ReportingSnapshot::getInstitutions),
+                    getUploadResult(
+                        snapshot,
+                        DatasetColumnValueExtractor.class,
+                        ReportingSnapshot::getDatasets),
+                    getUploadResult(
+                        snapshot,
+                        DatasetCohortColumnValueExtractor.class,
+                        ReportingSnapshot::getDatasetCohorts),
+                    getUploadResult(
+                        snapshot,
+                        DatasetDomainColumnValueExtractor.class,
+                        ReportingSnapshot::getDatasetDomainIdValues),
+                    getUploadResult(
+                        snapshot,
+                        DatasetConceptSetColumnValueExtractor.class,
+                        ReportingSnapshot::getDatasetConceptSets)));
     verifyStopwatch.stop();
     logger.info(LogFormatters.duration("Verification queries", verifyStopwatch.elapsed()));
     return result;
@@ -119,6 +139,16 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
         .tableName(tableName)
         .sourceRowCount(sourceRowCount)
         .destinationRowCount(getActualRowCount(tableName, snapshotTimestamp));
+  }
+
+  private <T, E extends Enum<E> & ColumnValueExtractor<T>> ReportingUploadResult getUploadResult(
+      ReportingSnapshot snapshot,
+      Class<E> extractorClass,
+      Function<ReportingSnapshot, List<T>> collectionExtractor) {
+    return getUploadResult(
+        getBigQueryTableName(extractorClass),
+        snapshot.getCaptureTimestamp(),
+        collectionExtractor.apply(snapshot).size());
   }
 
   private Long getActualRowCount(String tableName, long snapshotTimestamp) {

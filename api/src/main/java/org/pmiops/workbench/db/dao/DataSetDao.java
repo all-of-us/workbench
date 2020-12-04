@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.dao;
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import java.util.Map;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingDataset;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -35,4 +36,29 @@ public interface DataSetDao extends CrudRepository<DbDataset, Long> {
   }
 
   int countByWorkspaceId(long workspaceId);
+
+  // This JPQL query corresponds to the projection interface ProjectedReportingDataset. Its
+  // types and argument order must match the column names selected exactly, in name,
+  // type, and order. Note that in some cases a projection query should JOIN one or more
+  // other tables. Currently this is done by hand (with suitable renamings of the other entries
+  //  in the projection
+
+  // This code was generated using reporting-wizard.rb at 2020-11-18T22:19:46-05:00.
+  // Manual modification should be avoided if possible as this is a one-time generation
+  // and does not run on every build and updates must be merged manually for now.
+
+  @Query(
+      "SELECT\n"
+          + "  d.creationTime,\n"
+          + "  d.creatorId,\n"
+          + "  d.dataSetId,\n"
+          + "  d.description,\n"
+          + "  d.includesAllParticipants,\n"
+          + "  d.invalid,\n"
+          + "  d.lastModifiedTime,\n"
+          + "  d.name,\n"
+          + "  d.version,\n"
+          + "  d.workspaceId\n"
+          + "FROM DbDataset d")
+  List<ProjectedReportingDataset> getReportingDatasets();
 }

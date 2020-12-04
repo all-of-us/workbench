@@ -5,7 +5,9 @@ import java.time.Clock;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.cohorts.CohortService;
+import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.jdbc.ReportingNativeQueryService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.utils.LogFormatters;
@@ -19,6 +21,8 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
 
   private final Clock clock;
   private final CohortService cohortService;
+  private final ReportingNativeQueryService datasetCohortNativeDao;
+  private final DataSetService dataSetService;
   private final InstitutionService institutionService;
   private final ReportingMapper reportingMapper;
   private final Provider<Stopwatch> stopwatchProvider;
@@ -28,6 +32,8 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
   public ReportingSnapshotServiceImpl(
       Clock clock,
       CohortService cohortService,
+      ReportingNativeQueryService datasetCohortNativeDao,
+      DataSetService dataSetService,
       InstitutionService institutionService,
       ReportingMapper reportingMapper,
       Provider<Stopwatch> stopwatchProvider,
@@ -35,6 +41,8 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
       WorkspaceService workspaceService) {
     this.clock = clock;
     this.cohortService = cohortService;
+    this.datasetCohortNativeDao = datasetCohortNativeDao;
+    this.dataSetService = dataSetService;
     this.institutionService = institutionService;
     this.reportingMapper = reportingMapper;
     this.stopwatchProvider = stopwatchProvider;
@@ -47,7 +55,7 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
   @Transactional(readOnly = true)
   @Override
   public ReportingSnapshot takeSnapshot() {
-    final QueryResultBundle queryResultBundle = getApplicationDbData();
+    final QueryResultBundle queryResultBundle = getApplicationDatabaseRecords();
     return convertToReportingSnapshot(queryResultBundle);
   }
 
@@ -65,11 +73,15 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
    * them all together for conversion all at once, and also to allow timing the downloads separately
    * from the conversion
    */
-  private QueryResultBundle getApplicationDbData() {
+  private QueryResultBundle getApplicationDatabaseRecords() {
     final Stopwatch stopwatch = stopwatchProvider.get().start();
     final QueryResultBundle result =
         new QueryResultBundle(
             cohortService.getReportingCohorts(),
+            dataSetService.getReportingDatasets(),
+            datasetCohortNativeDao.getReportingDatasetCohorts(),
+            datasetCohortNativeDao.getReportingDatasetConceptSets(),
+            datasetCohortNativeDao.getReportingDatasetDomainIdValues(),
             institutionService.getReportingInstitutions(),
             userService.getReportingUsers(),
             workspaceService.getReportingWorkspaces());

@@ -44,6 +44,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingDataset;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -1049,6 +1050,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
               + cdrVersion);
     }
     return dataSetMapper.dbModelToClient(dataDictionaryEntries.get(0));
+  }
+
+  @Override
+  public List<ProjectedReportingDataset> getReportingDatasets() {
+    return dataSetDao.getReportingDatasets();
   }
 
   private String getColumnName(CdrBigQuerySchemaConfig.TableConfig config, String type) {

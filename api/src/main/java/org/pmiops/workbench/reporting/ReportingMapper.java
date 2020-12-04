@@ -3,12 +3,15 @@ package org.pmiops.workbench.reporting;
 import java.util.Collection;
 import java.util.List;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
+import org.pmiops.workbench.db.dao.projection.ProjectedReportingDataset;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingInstitution;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.ReportingCohort;
+import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
@@ -39,13 +42,21 @@ public interface ReportingMapper {
 
   List<ReportingCohort> toReportingCohortList(Collection<ProjectedReportingCohort> cohorts);
 
-  default ReportingSnapshot toReportingSnapshot(
-      QueryResultBundle queryResultBundle, long snapshotTimestamp) {
+  @Mapping(source = "dataSetId", target = "datasetId")
+  ReportingDataset toReportingDataset(ProjectedReportingDataset projectedReportingDataset);
+
+  List<ReportingDataset> toReportingDatasetList(Collection<ProjectedReportingDataset> datasets);
+
+  default ReportingSnapshot toReportingSnapshot(QueryResultBundle bundle, long snapshotTimestamp) {
     return new ReportingSnapshot()
         .captureTimestamp(snapshotTimestamp)
-        .cohorts(toReportingCohortList(queryResultBundle.getCohorts()))
-        .institutions(toReportingInstitutionList(queryResultBundle.getInstitutions()))
-        .users(toReportingUserList(queryResultBundle.getUsers()))
-        .workspaces(toReportingWorkspaceList(queryResultBundle.getWorkspaces()));
+        .cohorts(toReportingCohortList(bundle.getCohorts()))
+        .datasets(toReportingDatasetList(bundle.getDatasets()))
+        .datasetConceptSets(bundle.getDatasetConceptSets())
+        .datasetDomainIdValues(bundle.getDatasetDomainIdValues())
+        .datasetCohorts(bundle.getDatasetCohorts())
+        .institutions(toReportingInstitutionList(bundle.getInstitutions()))
+        .users(toReportingUserList(bundle.getUsers()))
+        .workspaces(toReportingWorkspaceList(bundle.getWorkspaces()));
   }
 }

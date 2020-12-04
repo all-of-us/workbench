@@ -28,7 +28,7 @@ public enum InstitutionColumnValueExtractor implements ColumnValueExtractor<Repo
 
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
   // as enums can't be abstract or extend abstract classes.
-  public static final String TABLE_NAME = "institution";
+  private static final String TABLE_NAME = "institution";
   private final String parameterName;
   private final Function<ReportingInstitution, Object> objectValueFunction;
   private final Function<ReportingInstitution, QueryParameterValue> parameterValueFunction;
@@ -40,6 +40,11 @@ public enum InstitutionColumnValueExtractor implements ColumnValueExtractor<Repo
     this.parameterName = parameterName;
     this.objectValueFunction = objectValueFunction;
     this.parameterValueFunction = parameterValueFunction;
+  }
+
+  @Override
+  public String getBigQueryTableName() {
+    return TABLE_NAME;
   }
 
   @Override

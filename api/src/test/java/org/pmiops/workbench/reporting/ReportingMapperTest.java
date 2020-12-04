@@ -7,12 +7,14 @@ import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingInstitution;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
+import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
+import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -23,6 +25,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class ReportingMapperTest {
   @Autowired ReportingMapper reportingMapper;
+
+  @Autowired
+  ReportingTestFixture<DbUser, ProjectedReportingUser, ReportingUser> reportingUserFixture;
 
   @TestConfiguration
   @Import({CommonMappers.class, ReportingMapperImpl.class, ReportingTestConfig.class})
@@ -48,9 +53,9 @@ public class ReportingMapperTest {
 
   @Test
   public void testToReportingUser() {
-    final ProjectedReportingUser prjUser = ReportingTestUtils.mockProjectedUser();
+    final ProjectedReportingUser prjUser = reportingUserFixture.mockProjection();
     final ReportingUser dtoUser = reportingMapper.toReportingUser(prjUser);
-    ReportingTestUtils.assertDtoUserFields(dtoUser);
+    reportingUserFixture.assertDTOFieldsMatchConstants(dtoUser);
   }
 
   @Test
