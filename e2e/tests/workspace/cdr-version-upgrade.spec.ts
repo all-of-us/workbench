@@ -18,7 +18,7 @@ describe('Workspace CDR Version upgrade', () => {
         await workspaceCard.clickWorkspaceName();
 
         const workspacePage: WorkspaceBase = new WorkspaceDataPage(page);
-
+        expect(await workspacePage.getCdrVersion()).toBe(config.altCdrVersionName)
         const newVersionFlag = await workspacePage.getNewCdrVersionFlag();
         await newVersionFlag.click();
 
