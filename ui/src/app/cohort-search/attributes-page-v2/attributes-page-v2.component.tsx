@@ -247,7 +247,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         countError: false,
         form: {anyValue: false, anyVersion: false, num: [], cat: []},
         formErrors: [],
-        formValid: true,
+        formValid: false,
         isCOPESurvey: false,
         loading: true,
         options: [
@@ -268,6 +268,8 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         // A different node has been selected, so we reset the form and load the new attributes
         this.setState({
           form: {anyValue: false, anyVersion: false, num: [], cat: []},
+          formErrors: [],
+          formValid: this.isPhysicalMeasurement,
           loading: true
         }, () => this.initAttributeForm());
       }
@@ -287,7 +289,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         form.num = subtype === CriteriaSubType[CriteriaSubType.BP]
           ? JSON.parse(JSON.stringify(PREDEFINED_ATTRIBUTES.BP_DETAIL))
           : [{name: subtype, operator: 'ANY', operands: []}];
-        this.setState({form, count: this.nodeCount, loading: false, options});
+        this.setState({count: this.nodeCount, form, formValid: true, loading: false, options});
       }
     }
 
@@ -380,9 +382,10 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
       let {node: {count}} = this.props;
       form.anyValue = checked;
       if (checked) {
-        form.num = form.num.map(attr =>
-          ({...attr, operator: this.isPhysicalMeasurement ? 'ANY' : null, operands: []}));
-        form.cat = form.cat.map(attr => ({...attr, checked: false}));
+        form.num = form.num.map(attr => ({...attr, operator: this.isPhysicalMeasurement ? 'ANY' : null, operands: []}));
+        if (this.isMeasurement) {
+          form.cat = form.cat.map(attr => ({...attr, checked: false}));
+        }
       }
       if (!checked || count === -1) {
         count = null;
@@ -434,7 +437,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
 
     validateForm() {
       const {form, isCOPESurvey} = this.state;
-      if ((form.anyValue || form.num.length === 0) && (!isCOPESurvey || form.anyVersion)) {
+      if ((form.anyValue || (isCOPESurvey && form.num.length === 0)) && (!isCOPESurvey || form.anyVersion)) {
         this.setState({formValid: true, formErrors: []});
       } else {
         let formValid = true, operatorSelected = form.num.length !== 0;
@@ -473,7 +476,13 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         }, new Set());
         // The second condition sets formValid to false if this is a Measurements or COPE attribute with no operator selected from the
         // dropdown and no categorical checkboxes checked
-        formValid = formValid && !((this.isMeasurement || isCOPESurvey) && !operatorSelected && !form.cat.some(attr => attr.checked));
+        if (this.isMeasurement && formValid) {
+          formValid = operatorSelected || form.cat.some(attr => attr.checked);
+        }
+        if (isCOPESurvey && formValid) {
+          formValid = (form.num.length === 0 || form.anyValue || operatorSelected)
+            && (form.anyVersion || form.cat.some(attr => attr.checked));
+        }
         this.setState({formErrors: Array.from(formErrors), formValid});
       }
     }
@@ -489,15 +498,18 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
     }
 
     get paramId() {
-      const {node: {conceptId, id}} = this.props;
-      const {form} = this.state;
+      const {node: {conceptId, id, value}} = this.props;
+      const {form, isCOPESurvey} = this.state;
       const code = form.anyValue ? 'Any' : form.num.reduce((acc, attr) => {
         if (attr.operator) {
           acc += optionUtil[attr.operator].code;
         }
         return acc;
       }, '');
-      return `param${(conceptId || id) + code}`;
+      const paramConceptId = isCOPESurvey && !!value ? value : conceptId;
+      // make sure param ID is unique for different checkbox combinations
+      const catValues = form.cat.filter(c => c.checked).map(c => c.valueAsConceptId).join('');
+      return `param${(paramConceptId || id) + code + catValues}`;
     }
 
     get displayName() {
@@ -589,7 +601,9 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         selectionDisplay.push(name);
       }
       form.cat.filter(ca => ca.checked).forEach(attr => selectionDisplay.push(attr.conceptName));
-      const nodeName = node.subtype === CriteriaSubType.ANSWER ? ppiQuestions.getValue()[node.parentId].name : node.name;
+      const nodeName = node.domainId === Domain.SURVEY && !node.group
+        ? `${ppiQuestions.getValue()[node.parentId].name} - ${node.name}`
+        : node.name;
       return nodeName + ' (' + selectionDisplay.join(', ') +
         (this.hasUnits && form.num[0].operator !== AttrName.ANY ? ' ' + PM_UNITS[node.subtype] : '') + ')';
     }
