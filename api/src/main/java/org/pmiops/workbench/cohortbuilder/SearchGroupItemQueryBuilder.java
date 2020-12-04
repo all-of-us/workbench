@@ -491,9 +491,9 @@ public final class SearchGroupItemQueryBuilder {
 
   private static String processCopeSql(
       Map<String, QueryParameterValue> queryParams, SearchParameter parameter) {
-    String numsParam = "";
-    String catsParam = "";
-    String versionParam = "";
+    String numsParam;
+    String catsParam;
+    String versionParam;
     List<Attribute> cats =
         parameter.getAttributes().stream()
             .filter(attr -> attr.getName().equals(AttrName.CAT))
