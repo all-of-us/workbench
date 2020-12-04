@@ -319,7 +319,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
           estCount: attr.itemCount,
           valueAsConceptId: attr.surveyVersionConceptId
         }));
-        if (numericalAttributes) {
+        if (numericalAttributes && !(subtype === CriteriaSubType.ANSWER.toString() && !!value)) {
           numericalAttributes.items.forEach(attr => {
             if (!form.num.length) {
               form.num.push({
@@ -342,8 +342,8 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
     }
 
     getAttributes() {
-      const {node: {conceptId}} = this.props;
-      const{form} = this.state;
+      const {node: {conceptId, subtype, value}} = this.props;
+      const{form, isCOPESurvey} = this.state;
       const {cdrVersionId} = currentWorkspaceStore.getValue();
       cohortBuilderApi().findCriteriaAttributeByConceptId(+cdrVersionId, conceptId).then(resp => {
         resp.items.forEach(attr => {
@@ -747,7 +747,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
     }
 
     render() {
-      const {back, node: {domainId, name, parentId, subtype, value}} = this.props;
+      const {back, node: {domainId, name, parentId, subtype}} = this.props;
       const {calculating, count, countError, form, formErrors, isCOPESurvey, loading} = this.state;
       return (loading ?
         <SpinnerOverlay/> :
@@ -790,11 +790,11 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
           {isCOPESurvey
             ? <div>
               {this.renderCategoricalAttributes()}
-              {!value && form.num.length > 0 && form.cat.length > 0 && <div style={{position: 'relative'}}>
+              {form.num.length > 0 && form.cat.length > 0 && <div style={{position: 'relative'}}>
                 <div style={styles.andCircle}>AND</div>
                 <div style={styles.andDivider}/>
               </div>}
-              {!value && this.renderNumericalAttributes()}
+              {this.renderNumericalAttributes()}
             </div>
             : <div>
               {this.isMeasurement && <div>
