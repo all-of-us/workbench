@@ -321,7 +321,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
           estCount: attr.itemCount,
           valueAsConceptId: attr.surveyVersionConceptId
         }));
-        if (numericalAttributes) {
+        if (numericalAttributes && !(subtype === CriteriaSubType.ANSWER.toString() && !!value)) {
           numericalAttributes.items.forEach(attr => {
             if (!form.num.length) {
               form.num.push({
@@ -506,7 +506,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
     }
 
     get paramWithAttributes() {
-      const {node, node: {name, subtype}} = this.props;
+      const {node, node: {name, subtype, value}} = this.props;
       const {form, isCOPESurvey} = this.state;
       let paramName;
       const attrs = [];
@@ -536,13 +536,28 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
             }
             return checked;
           }, []);
-          attrs.push({
-            name: isCOPESurvey ? AttrName.SURVEYVERSIONCONCEPTID : AttrName.CAT,
-            operator: Operator.IN,
-            operands: catOperands
-          });
+          if (isCOPESurvey && !form.anyVersion) {
+            attrs.push({
+              name: AttrName.SURVEYVERSIONCONCEPTID,
+              operator: Operator.IN,
+              operands: catOperands
+            });
+          } else if (!isCOPESurvey) {
+            attrs.push({
+              name: AttrName.CAT,
+              operator: Operator.IN,
+              operands: catOperands
+            });
+          }
         }
         paramName = this.paramName;
+      }
+      if (isCOPESurvey && subtype === CriteriaSubType.ANSWER && !!value) {
+        attrs.push({
+          name: AttrName.CAT,
+          operator: Operator.IN,
+          operands: [value]
+        });
       }
       return {...node, parameterId: this.paramId, name: paramName, attributes: attrs};
     }
@@ -552,6 +567,9 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
       const {form} = this.state;
       const selectionDisplay = [];
       let name = '';
+      if (form.anyVersion) {
+        selectionDisplay.push('Any version');
+      }
       form.num.filter(at => at.operator).forEach((attr, i) => {
         if (attr.operator === 'ANY') {
           if (i === 0) {

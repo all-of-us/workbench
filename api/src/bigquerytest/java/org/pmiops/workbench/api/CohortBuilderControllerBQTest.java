@@ -624,7 +624,24 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .conceptId(22L);
   }
 
-  private static SearchParameter copeSurvey() {
+  private static SearchParameter copeSurveyQuestion() {
+    return new SearchParameter()
+        .domain(Domain.SURVEY.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.QUESTION.toString())
+        .ancestorData(false)
+        .standard(false)
+        .group(true)
+        .conceptId(44L)
+        .attributes(
+            ImmutableList.of(
+                new Attribute()
+                    .name(AttrName.SURVEY_VERSION_CONCEPT_ID)
+                    .operator(Operator.IN)
+                    .operands(ImmutableList.of("100", "101"))));
+  }
+
+  private static SearchParameter copeSurveyAnswer() {
     return new SearchParameter()
         .domain(Domain.SURVEY.toString())
         .type(CriteriaType.PPI.toString())
@@ -640,8 +657,33 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                     .operator(Operator.IN)
                     .operands(ImmutableList.of("100", "101")),
                 new Attribute()
+                    .name(AttrName.CAT)
+                    .operator(Operator.IN)
+                    .operands(ImmutableList.of("10"))));
+  }
+
+  private static SearchParameter copeSurveyCatAndNum() {
+    return new SearchParameter()
+        .domain(Domain.SURVEY.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.QUESTION.toString())
+        .ancestorData(false)
+        .standard(false)
+        .group(true)
+        .conceptId(44L)
+        .attributes(
+            ImmutableList.of(
+                new Attribute()
+                    .name(AttrName.SURVEY_VERSION_CONCEPT_ID)
+                    .operator(Operator.IN)
+                    .operands(ImmutableList.of("100", "101")),
+                new Attribute()
+                    .name(AttrName.CAT)
+                    .operator(Operator.IN)
+                    .operands(ImmutableList.of("10")),
+                new Attribute()
                     .name(AttrName.NUM)
-                    .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
+                    .operator(Operator.EQUAL)
                     .operands(ImmutableList.of("10"))));
   }
 
@@ -1944,11 +1986,33 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countSubjectsCopeSurvey() {
+  public void countSubjectsCopeSurveyQuestion() {
     // Cope Survey
     SearchRequest searchRequest =
         createSearchRequests(
-            Domain.SURVEY.toString(), ImmutableList.of(copeSurvey()), new ArrayList<>());
+            Domain.SURVEY.toString(), ImmutableList.of(copeSurveyQuestion()), new ArrayList<>());
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    assertParticipants(response, 1);
+  }
+
+  @Test
+  public void countSubjectsCopeSurveyAnswer() {
+    // Cope Survey
+    SearchRequest searchRequest =
+        createSearchRequests(
+            Domain.SURVEY.toString(), ImmutableList.of(copeSurveyAnswer()), new ArrayList<>());
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    assertParticipants(response, 1);
+  }
+
+  @Test
+  public void countSubjectsCopeSurveyCatAndNum() {
+    // Cope Survey
+    SearchRequest searchRequest =
+        createSearchRequests(
+            Domain.SURVEY.toString(), ImmutableList.of(copeSurveyCatAndNum()), new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     assertParticipants(response, 1);
