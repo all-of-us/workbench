@@ -1,4 +1,5 @@
 import {Runtime, RuntimeConfigurationType} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 
 export const runtimePresets: {
   [runtimePresetName: string]: {displayName: string, runtimeTemplate: Runtime}
@@ -28,4 +29,22 @@ export const runtimePresets: {
       }
     }
   }
+};
+
+export const applyPresetOverride = (runtime) => {
+  if (!runtime) {
+    return runtime;
+  }
+
+  const newRuntime = {...runtime};
+
+  const runtimePresetKey = fp.keys(runtimePresets)
+    .find(key => runtimePresets[key].runtimeTemplate.configurationType === newRuntime.configurationType);
+
+  if (runtimePresetKey) {
+    newRuntime.gceConfig = runtimePresets[runtimePresetKey].runtimeTemplate.gceConfig;
+    newRuntime.dataprocConfig = runtimePresets[runtimePresetKey].runtimeTemplate.dataprocConfig;
+  }
+
+  return newRuntime;
 };

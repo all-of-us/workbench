@@ -1,7 +1,7 @@
 import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {isAbortError, reportError} from 'app/utils/errors';
-import {runtimePresets} from 'app/utils/runtime-presets';
+import {applyPresetOverride, runtimePresets} from 'app/utils/runtime-presets';
 import {runtimeStore} from 'app/utils/stores';
 import {Runtime, RuntimeStatus} from 'generated/fetch';
 import {serverConfigStore} from './navigation';
@@ -20,7 +20,6 @@ const DEFAULT_MAX_DELETE_COUNT = 2;
 const DEFAULT_MAX_RESUME_COUNT = 2;
 // We allow a certain # of server errors to occur before we error-out of the initialization flow.
 const DEFAULT_MAX_SERVER_ERROR_COUNT = 10;
-const DEFAULT_RUNTIME_CONFIG = runtimePresets.generalAnalysis.runtimeTemplate;
 
 export class LeoRuntimeInitializationFailedError extends Error {
   constructor(message: string, public readonly runtime?: Runtime) {
@@ -95,7 +94,6 @@ const DEFAULT_OPTIONS: Partial<LeoRuntimeInitializerOptions> = {
   maxDeleteCount: DEFAULT_MAX_DELETE_COUNT,
   maxResumeCount: DEFAULT_MAX_RESUME_COUNT,
   maxServerErrorCount: DEFAULT_MAX_SERVER_ERROR_COUNT,
-  targetRuntime: DEFAULT_RUNTIME_CONFIG,
   resolutionCondition: (runtime) => runtime.status === RuntimeStatus.Running
 };
 
@@ -196,16 +194,16 @@ export class LeoRuntimeInitializer {
       throw new ExceededActionCountError(
         `Reached max runtime create count (${this.maxCreateCount})`, this.currentRuntime);
     }
+
     let runtime: Runtime;
     if (serverConfigStore.getValue().enableCustomRuntimes && this.targetRuntime) {
       runtime = this.targetRuntime;
+    } else if (this.currentRuntime) {
+      runtime = applyPresetOverride(this.currentRuntime);
     } else {
-      // TODO(RW-5921): In lazy initialization mode, this should default to:
-      // - the user's most recent UserOverride config, if any
-      // - (maybe) the user's most recently selected preset, if any
-      // - general analysis
       runtime = {...runtimePresets.generalAnalysis.runtimeTemplate};
     }
+
     await runtimeApi().createRuntime(this.workspaceNamespace,
       runtime,
       {signal: this.pollAbortSignal});

@@ -29,7 +29,7 @@ import {
   validLeoGceMachineTypes
 } from 'app/utils/machines';
 import {formatUsd} from 'app/utils/numbers';
-import {runtimePresets} from 'app/utils/runtime-presets';
+import {applyPresetOverride, runtimePresets} from 'app/utils/runtime-presets';
 import {
   getRuntimeConfigDiffs,
   RuntimeConfig,
@@ -766,17 +766,11 @@ export const RuntimePanel = fp.flow(
   const {profile} = profileState;
 
   const {hasMicroarrayData} = fp.find({cdrVersionId}, cdrVersionListResponse.items) || {hasMicroarrayData: false};
-  const [{currentRuntime, pendingRuntime}, setRequestedRuntime] = useCustomRuntime(namespace);
+  let [{currentRuntime, pendingRuntime}, setRequestedRuntime] = useCustomRuntime(namespace);
 
-  // if runtime configuration type is a default, override its config with preset values
+  // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
   if (currentRuntime && currentRuntime.status === RuntimeStatus.Deleted) {
-    const runtimePresetKey = fp.keys(runtimePresets)
-      .find(key => runtimePresets[key].runtimeTemplate.configurationType === currentRuntime.configurationType);
-
-    if (runtimePresetKey) {
-      currentRuntime.gceConfig = runtimePresets[runtimePresetKey].runtimeTemplate.gceConfig;
-      currentRuntime.dataprocConfig = runtimePresets[runtimePresetKey].runtimeTemplate.dataprocConfig;
-    }
+    currentRuntime = applyPresetOverride(currentRuntime);
   }
 
   // Prioritize the "pendingRuntime", if any. When an update is pending, we want
