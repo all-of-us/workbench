@@ -269,6 +269,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         this.setState({
           form: {anyValue: false, anyVersion: false, num: [], cat: []},
           formErrors: [],
+          formValid: this.isPhysicalMeasurement,
           loading: true
         }, () => this.initAttributeForm());
       }
@@ -479,7 +480,8 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
           formValid = operatorSelected || form.cat.some(attr => attr.checked);
         }
         if (isCOPESurvey && formValid) {
-          formValid = (form.anyValue || operatorSelected) && (form.anyVersion || form.cat.some(attr => attr.checked));
+          formValid = (form.num.length === 0 || form.anyValue || operatorSelected)
+            && (form.anyVersion || form.cat.some(attr => attr.checked));
         }
         this.setState({formErrors: Array.from(formErrors), formValid});
       }
@@ -496,15 +498,23 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
     }
 
     get paramId() {
-      const {node: {conceptId, id}} = this.props;
-      const {form} = this.state;
+      const {node: {conceptId, id, value}} = this.props;
+      const {form, isCOPESurvey} = this.state;
       const code = form.anyValue ? 'Any' : form.num.reduce((acc, attr) => {
         if (attr.operator) {
           acc += optionUtil[attr.operator].code;
         }
         return acc;
       }, '');
-      return `param${(conceptId || id) + code}`;
+      const paramConceptId = isCOPESurvey && !!value ? value : conceptId;
+      // make sure param ID is unique for different checkbox combinations
+      const catValues = form.cat.reduce((cat, acc) => {
+        if (cat.checked) {
+          acc += cat.valueAsConceptId;
+        }
+        return acc;
+      }, '');
+      return `param${(paramConceptId || id) + code + catValues}`;
     }
 
     get displayName() {
@@ -596,7 +606,9 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         selectionDisplay.push(name);
       }
       form.cat.filter(ca => ca.checked).forEach(attr => selectionDisplay.push(attr.conceptName));
-      const nodeName = node.subtype === CriteriaSubType.ANSWER ? ppiQuestions.getValue()[node.parentId].name : node.name;
+      const nodeName = node.domainId === Domain.SURVEY && !node.group
+        ? `${ppiQuestions.getValue()[node.parentId].name} - ${node.name}`
+        : node.name;
       return nodeName + ' (' + selectionDisplay.join(', ') +
         (this.hasUnits && form.num[0].operator !== AttrName.ANY ? ' ' + PM_UNITS[node.subtype] : '') + ')';
     }
