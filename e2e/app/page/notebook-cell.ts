@@ -56,7 +56,7 @@ export default class NotebookCell {
         console.warn('Notebook body is not in edit_mode.');
         return cell;
       }
-      await this.page.waitFor(3000); // Pause 3 seconds then retry
+      await this.page.waitForTimeout(3000); // Pause 3 seconds then retry
       return clickAndCheck(iframe);
     };
 

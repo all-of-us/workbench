@@ -36,7 +36,7 @@ export default class Checkbox extends BaseElement {
          async () => {
            await this.focus();
            await this.clickWithEval();
-           await this.page.waitFor(500);
+           await this.page.waitForTimeout(500);
            await this.isChecked();
          },
          intervalMillis,
@@ -56,7 +56,7 @@ export default class Checkbox extends BaseElement {
     if (is) {
       await this.focus();
       await this.clickWithEval();
-      await this.page.waitFor(500);
+      await this.page.waitForTimeout(500);
     }
   }
 

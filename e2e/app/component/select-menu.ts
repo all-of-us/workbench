@@ -79,7 +79,7 @@ export default class SelectMenu extends Container {
         return;
       }
       maxAttempts--;
-      await this.page.waitFor(1000).then(click); // one second pause before try again
+      await this.page.waitForTimeout(1000).then(click); // one second pause before try again
     };
     return click();
   }

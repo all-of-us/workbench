@@ -94,7 +94,7 @@ export default class CriteriaSearchPage extends AuthenticatedPage {
     await link.click();
     
     // Delay to make sure correct sidebar content is showing
-    await this.page.waitFor(1000);
+    await this.page.waitForTimeout(1000);
 
     const helpSidebar = new HelpSidebar(this.page);
     const participantResult = await helpSidebar.getPhysicalMeasurementParticipantResult(filterSign, filterValue);

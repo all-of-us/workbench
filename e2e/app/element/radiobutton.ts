@@ -29,7 +29,7 @@ export default class RadioButton extends BaseElement {
     const is = await this.isSelected();
     if (!is) {
       await this.click();
-      await this.page.waitFor(500);
+      await this.page.waitForTimeout(500);
     }
   }
 
@@ -40,7 +40,7 @@ export default class RadioButton extends BaseElement {
     const is = await this.isSelected();
     if (is) {
       await this.click();
-      await this.page.waitFor(500);
+      await this.page.waitForTimeout(500);
     }
   }
 

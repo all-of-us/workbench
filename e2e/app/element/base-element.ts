@@ -170,7 +170,7 @@ export default class BaseElement extends Container {
         throw new Error(`BaseElement.type("${textValue}") failed. Actual text: "${actualValue}"`);
       }
       maxRetries--;
-      return await this.page.waitFor(1000).then(typeAndCheck); // one second pause and retry type
+      return await this.page.waitForTimeout(1000).then(typeAndCheck); // one second pause and retry type
     };
 
     await typeAndCheck();

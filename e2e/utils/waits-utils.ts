@@ -264,8 +264,8 @@ export async function waitWhileLoading(page: Page, timeOut: number = 90000): Pro
   const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
   const spinElementsSelector = '[style*="running spin"], .spinner:empty, svg[style*="running rotation"]:not([aria-hidden="true"])';
 
+  // To prevent checking on blank page, wait for elements exist in DOM.
   await Promise.race([
-    // To prevent checking on blank page, wait for elements exist in DOM.
     page.waitForSelector(notBlankPageSelector),
     page.waitForSelector(spinElementsSelector),
   ]);
