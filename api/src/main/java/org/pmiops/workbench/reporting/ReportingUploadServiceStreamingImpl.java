@@ -37,7 +37,7 @@ import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.utils.LogFormatters;
 import org.springframework.stereotype.Service;
 
-@Service("REPORTING_UPLOAD_SERVICE_STREAMING_IMPL")
+@Service
 public class ReportingUploadServiceStreamingImpl implements ReportingUploadService {
   private static final Logger log =
       Logger.getLogger(ReportingUploadServiceStreamingImpl.class.getName());

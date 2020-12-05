@@ -10,7 +10,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
-import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.timestampQpvToOffsetDateTime;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.INSTITUTION__SHORT_NAME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.countPopulatedTables;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createEmptySnapshot;
@@ -25,7 +24,6 @@ import com.google.cloud.bigquery.InsertAllRequest;
 import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
 import com.google.cloud.bigquery.InsertAllResponse;
 import com.google.cloud.bigquery.QueryJobConfiguration;
-import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -38,14 +36,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.IntStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.api.BigQueryService;
-import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.BillingStatus;
@@ -59,7 +55,6 @@ import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
 import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -83,13 +78,7 @@ public class ReportingUploadServiceTest {
 
   @MockBean private BigQueryService mockBigQueryService;
 
-  @Autowired
-  @Qualifier("REPORTING_UPLOAD_SERVICE_DML_IMPL")
-  private ReportingUploadService reportingUploadServiceinsertQueryImpl;
-
-  @Autowired
-  @Qualifier("REPORTING_UPLOAD_SERVICE_STREAMING_IMPL")
-  private ReportingUploadService reportingUploadServiceStreamingImpl;
+  @Autowired private ReportingUploadService reportingUploadServiceStreamingImpl;
 
   @Autowired
   private ReportingTestFixture<DbUser, ProjectedReportingUser, ReportingUser> userFixture;
@@ -98,11 +87,7 @@ public class ReportingUploadServiceTest {
   @Captor private ArgumentCaptor<InsertAllRequest> insertAllRequestCaptor;
 
   @TestConfiguration
-  @Import({
-    ReportingUploadServiceInsertQueryImpl.class,
-    ReportingUploadServiceStreamingImpl.class,
-    ReportingTestConfig.class
-  })
+  @Import({ReportingUploadServiceStreamingImpl.class, ReportingTestConfig.class})
   @MockBean({ReportingVerificationService.class})
   public static class config {
     @Bean
@@ -195,92 +180,6 @@ public class ReportingUploadServiceTest {
     doReturn(mockInsertAllResponse)
         .when(mockBigQueryService)
         .insertAll(any(InsertAllRequest.class));
-  }
-
-  @Test
-  public void testUploadSnapshot_insertQuery() {
-    testUploadSnapshot_insertQuery(reportingSnapshot, 4);
-  }
-
-  @Test
-  public void testUploadSnapshot_insertQuery_with_nulls() {
-    testUploadSnapshot_insertQuery(snapshotWithNulls, 2);
-  }
-
-  @Test
-  public void testUploadSnapshot_insertQuery_empty() {
-    reportingUploadServiceinsertQueryImpl.uploadSnapshot(ReportingTestUtils.EMPTY_SNAPSHOT);
-    verify(mockBigQueryService, never()).executeQuery(any(), anyLong());
-  }
-
-  private void testUploadSnapshot_insertQuery(
-      ReportingSnapshot snapshot, int expectedWorkspaceJobIndex) {
-    reportingUploadServiceinsertQueryImpl.uploadSnapshot(snapshot);
-    verify(mockBigQueryService, times(ReportingTestUtils.countPopulatedTables(snapshot)))
-        .executeQuery(queryJobConfigurationCaptor.capture(), anyLong());
-
-    final List<QueryJobConfiguration> jobs = queryJobConfigurationCaptor.getAllValues();
-    assertThat(jobs).hasSize(countPopulatedTables(snapshot)); // assumes small payload
-
-    final QueryJobConfiguration job0 = jobs.get(0);
-    final String query0 = job0.getQuery();
-    assertThat(query0).isNotEmpty();
-
-    final String expandedQuery =
-        QueryParameterValues.formatQuery(QueryParameterValues.replaceNamedParameters(job0));
-    assertThat(expandedQuery).containsMatch("INSERT\\s+INTO");
-
-    final QueryJobConfiguration workspaceJob = jobs.get(expectedWorkspaceJobIndex);
-    final Optional<OffsetDateTime> creationTime0 =
-        timestampQpvToOffsetDateTime(workspaceJob.getNamedParameters().get("creation_time__0"));
-    assertThat(creationTime0).isPresent();
-    assertTimeApprox(creationTime0.get(), THEN);
-  }
-
-  @Test
-  public void testUploadSnapshot_insertQueryBatchInserts() {
-    final ReportingSnapshot largeSnapshot =
-        createEmptySnapshot()
-            .captureTimestamp(NOW.toEpochMilli())
-            .users(
-                IntStream.range(0, 21)
-                    .mapToObj(
-                        id ->
-                            new ReportingUser()
-                                .username("bill@aou.biz")
-                                .givenName("Bill")
-                                .disabled(false)
-                                .userId((long) id))
-                    .collect(ImmutableList.toImmutableList()))
-            .workspaces(
-                ImmutableList.of(
-                    new ReportingWorkspace()
-                        .workspaceId(303L)
-                        .name("Circle K")
-                        .creationTime(THEN)
-                        .creatorId(101L)))
-            .cohorts(ImmutableList.of(ReportingTestUtils.createReportingCohort()))
-            .institutions(ImmutableList.of(ReportingTestUtils.createReportingInstitution()));
-
-    reportingUploadServiceinsertQueryImpl.uploadSnapshot(largeSnapshot);
-    final int expectedInsertions = 8;
-    verify(mockBigQueryService, times(expectedInsertions))
-        .executeQuery(queryJobConfigurationCaptor.capture(), anyLong());
-
-    final List<QueryJobConfiguration> jobs = queryJobConfigurationCaptor.getAllValues();
-    assertThat(jobs).hasSize(expectedInsertions);
-
-    // Since null values are omitted, map sizes will vary
-    assertThat(jobs.get(0).getNamedParameters()).isNotEmpty();
-    assertThat(jobs.get(4).getNamedParameters()).isNotEmpty();
-
-    final QueryParameterValue creationTime =
-        jobs.get(7).getNamedParameters().get("creation_time__0");
-    assertThat(creationTime).isNotNull();
-    final Optional<OffsetDateTime> creationOdt =
-        QueryParameterValues.timestampQpvToOffsetDateTime(creationTime);
-    assertThat(creationOdt).isPresent();
-    assertTimeApprox(creationOdt.get(), THEN);
   }
 
   @Test
