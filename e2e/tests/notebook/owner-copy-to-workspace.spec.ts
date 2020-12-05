@@ -5,6 +5,7 @@ import {LinkText, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {createWorkspace, findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {config} from 'resources/workbench-config';
+import WorkspaceCard from 'app/component/workspace-card';
 
 // Notebook server start may take a long time. Set maximum test running time to 20 minutes.
 jest.setTimeout(20 * 60 * 1000);
@@ -18,64 +19,88 @@ jest.setTimeout(20 * 60 * 1000);
  * - Verify copied notebook is in destination Workspace.
  * - Open copied notebook and run code to print WORKSPACE_NAMESPACE. It should match destination Workspace namespace.
  * - Delete notebooks.
+ *
+ * @param {string} sourceWorkspaceName: Source workspace name
+ * @param {string} to create new destination workspace with CDR Version
  */
-async function copyNotebookTest(srcCdrVersionName: string, destCdrVersionName: string) {
-  const destWorkspace = await createWorkspace(page, destCdrVersionName).then(card => card.getWorkspaceName());
+async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName: string) {
 
-  await createWorkspace(page, srcCdrVersionName).then(card => card.clickWorkspaceName());
+   const destWorkspace = await createWorkspace(page, destCdrVersionName).then(card => card.getWorkspaceName());
 
-  // Create notebook in copy-from workspace.
-  const sourceNotebookName = makeRandomName('pytest');
-  const dataPage = new WorkspaceDataPage(page);
+   // Open source workspace Data page.
+   const workspaceCard = await WorkspaceCard.findCard(page, sourceWorkspaceName);
+   await workspaceCard.clickWorkspaceName();
 
-  const sourceWorkspacePage = await dataPage.createNotebook(sourceNotebookName);
+   // Create notebook in source workspace.
+   const sourceNotebookName = makeRandomName('pytest');
+   const dataPage = new WorkspaceDataPage(page);
 
-  // Exit notebook and returns to the Workspace Analysis tab.
-  const analysisPage = await sourceWorkspacePage.goAnalysisPage();
+   const sourceWorkspacePage = await dataPage.createNotebook(sourceNotebookName);
 
-  // Copy to destination Workspace and give notebook a new name.
-  const copiedNotebookName = makeRandomName('copy-of');
-  await analysisPage.copyNotebookToWorkspace(sourceNotebookName, destWorkspace, copiedNotebookName);
+   // Exit notebook and returns to the Workspace Analysis tab.
+   const analysisPage = await sourceWorkspacePage.goAnalysisPage();
 
-  // Verify Copy Success modal.
-  const modal = new Modal(page);
-  await modal.waitForButton(LinkText.GoToCopiedNotebook);
-  const textContent = await modal.getTextContent();
-  const successMsg = `Successfully copied ${sourceNotebookName}  to ${destWorkspace} . Do you want to view the copied Notebook?`;
-  expect(textContent).toContain(successMsg);
-  // Dismiss modal.
-  await modal.clickButton(LinkText.StayHere, {waitForClose: true});
+   // Copy to destination Workspace and give notebook a new name.
+   const copiedNotebookName = makeRandomName('copy-of');
+   await analysisPage.copyNotebookToWorkspace(sourceNotebookName, destWorkspace, copiedNotebookName);
 
-  // Delete notebook
-  const deleteModalTextContent = await analysisPage.deleteResource(sourceNotebookName, ResourceCard.Notebook);
-  expect(deleteModalTextContent).toContain(`Are you sure you want to delete Notebook: ${sourceNotebookName}?`);
+   // Verify Copy Success modal.
+   const modal = new Modal(page);
+   await modal.waitForButton(LinkText.GoToCopiedNotebook);
+   const textContent = await modal.getTextContent();
+   const successMsg = `Successfully copied ${sourceNotebookName}  to ${destWorkspace} . Do you want to view the copied Notebook?`;
+   expect(textContent).toContain(successMsg);
+   // Dismiss modal.
+   await modal.clickButton(LinkText.StayHere, {waitForClose: true});
 
-  // Perform actions in copied notebook.
-  // Open destination Workspace
-  await findOrCreateWorkspace(page, {workspaceName: destWorkspace}).then(card => card.clickWorkspaceName());
+   // Delete notebook
+   const deleteModalTextContent = await analysisPage.deleteResource(sourceNotebookName, ResourceCard.Notebook);
+   expect(deleteModalTextContent).toContain(`Are you sure you want to delete Notebook: ${sourceNotebookName}?`);
 
-  // Verify copy-to notebook exists in destination Workspace
-  await dataPage.openAnalysisPage();
-  const dataResourceCard = new DataResourceCard(page);
-  const notebookCard = await dataResourceCard.findCard(copiedNotebookName, ResourceCard.Notebook);
-  expect(notebookCard).toBeTruthy();
+   // Perform actions in copied notebook.
+   // Open destination Workspace
+   await findOrCreateWorkspace(page, {workspaceName: destWorkspace}).then(card => card.clickWorkspaceName());
 
-  // Delete notebook
-  const modalTextContent = await analysisPage.deleteResource(copiedNotebookName, ResourceCard.Notebook);
-  expect(modalTextContent).toContain('This will permanently delete the Notebook.');
+   // Verify copy-to notebook exists in destination Workspace
+   await dataPage.openAnalysisPage();
+   const dataResourceCard = new DataResourceCard(page);
+   const notebookCard = await dataResourceCard.findCard(copiedNotebookName, ResourceCard.Notebook);
+   expect(notebookCard).toBeTruthy();
+
+   // Delete notebook
+   const modalTextContent = await analysisPage.deleteResource(copiedNotebookName, ResourceCard.Notebook);
+   expect(modalTextContent).toContain('This will permanently delete the Notebook.');
+
+   // Delete destination workspace
+   await analysisPage.deleteWorkspace();
 }
+
+async function createCustomCdrVersionWorkspace(cdrVersion: string): Promise<string> {
+   const workspace = await createWorkspace(page, cdrVersion);
+   return workspace.getWorkspaceName();
+}
+
+// Reuse same source workspace for all tests in this file, in order to reduce test playback time.
+// Workspace to be created in first test. If first test fails, next test will create it.
+let srcWorkspace: string;
 
 describe('Workspace owner Jupyter notebook action tests', () => {
 
-  beforeEach(async () => {
-    await signIn(page);
-  });
+   beforeEach(async () => {
+      await signIn(page);
+   });
 
-  test('Copy notebook to another Workspace when CDR versions match', async () => {
-    await copyNotebookTest(config.defaultCdrVersionName, config.defaultCdrVersionName);
-  })
+   test('Copy notebook to another Workspace when CDR versions match', async () => {
+      // reuse same source workspace for all tests, always create new destination workspace.
+      srcWorkspace = await createCustomCdrVersionWorkspace(config.defaultCdrVersionName);
+      await copyNotebookTest(srcWorkspace, config.defaultCdrVersionName);
+   })
 
-  test('Copy notebook to another Workspace when CDR versions differ', async () => {
-    await copyNotebookTest(config.defaultCdrVersionName, config.altCdrVersionName);
-  })
+   test('Copy notebook to another Workspace when CDR versions differ', async () => {
+      // reuse same source workspace for all tests, always create new destination workspace.
+      if (srcWorkspace === undefined) {
+         srcWorkspace = await createCustomCdrVersionWorkspace(config.defaultCdrVersionName);
+      }
+      await copyNotebookTest(srcWorkspace, config.altCdrVersionName);
+   })
 });
