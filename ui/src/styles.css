@@ -217,3 +217,12 @@ iframe#launcher {
 .pdf-page > canvas {
   margin: auto;
 }
+
+/*
+ * The Prime React dropdown selector cannot be styled through its API. Force an
+ * override here to match the mocks within the runtime panel. This can be
+ * generalized to the rest of the application if needed later.
+ */
+#runtime-panel .p-dropdown .p-inputtext {
+  color: #262262 !important
+}
