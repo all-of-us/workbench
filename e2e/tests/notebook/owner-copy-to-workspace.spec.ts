@@ -27,7 +27,7 @@ async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName:
 
    const destWorkspace = await createWorkspace(page, destCdrVersionName).then(card => card.getWorkspaceName());
 
-   // Open source workspace Data page.
+   // Find and open source workspace Data page.
    const workspaceCard = await WorkspaceCard.findCard(page, sourceWorkspaceName);
    await workspaceCard.clickWorkspaceName();
 
@@ -81,7 +81,7 @@ async function createCustomCdrVersionWorkspace(cdrVersion: string): Promise<stri
 }
 
 // Reuse same source workspace for all tests in this file, in order to reduce test playback time.
-// Workspace to be created in first test. If first test fails, next test will create it.
+// Workspace to be created in first test. If create failed in first test, next test will try create it.
 let srcWorkspace: string;
 
 describe('Workspace owner Jupyter notebook action tests', () => {
@@ -91,13 +91,12 @@ describe('Workspace owner Jupyter notebook action tests', () => {
    });
 
    test('Copy notebook to another Workspace when CDR versions match', async () => {
-      // reuse same source workspace for all tests, always create new destination workspace.
       srcWorkspace = await createCustomCdrVersionWorkspace(config.defaultCdrVersionName);
       await copyNotebookTest(srcWorkspace, config.defaultCdrVersionName);
    })
 
    test('Copy notebook to another Workspace when CDR versions differ', async () => {
-      // reuse same source workspace for all tests, always create new destination workspace.
+      // reuse same source workspace for all tests, but always create new destination workspace.
       if (srcWorkspace === undefined) {
          srcWorkspace = await createCustomCdrVersionWorkspace(config.defaultCdrVersionName);
       }
