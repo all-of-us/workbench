@@ -3,7 +3,6 @@ package org.pmiops.workbench.reporting;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.ReportingSnapshot;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /*
@@ -20,8 +19,7 @@ public class ReportingServiceImpl implements ReportingService {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   public ReportingServiceImpl(
-      @Qualifier("REPORTING_UPLOAD_SERVICE_STREAMING_IMPL")
-          ReportingUploadService reportingUploadService,
+      ReportingUploadService reportingUploadService,
       ReportingSnapshotService reportingSnapshotService,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.reportingUploadService = reportingUploadService;
