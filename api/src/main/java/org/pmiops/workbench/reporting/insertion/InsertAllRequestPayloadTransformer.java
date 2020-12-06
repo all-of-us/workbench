@@ -5,6 +5,7 @@ import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
 import com.google.cloud.bigquery.TableId;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,11 +28,19 @@ import org.pmiops.workbench.utils.RandomUtils;
  * @code{ InsertAllRequestPayloadTransformer<ReportingUser> userTransformer =
  *     UserColumnValueExtractor::values; }
  */
+@FunctionalInterface
 public interface InsertAllRequestPayloadTransformer<MODEL_T>
     extends BigQueryInsertionPayloadTransformer<MODEL_T> {
   String INSERT_ID_CHARS = "abcdefghijklmnopqrstuvwxyz";
   int INSERT_ID_LENGTH = 16;
+  int MAX_ROWS_PER_INSERT_ALL_REQUEST = 1000;
 
+  default List<InsertAllRequest> buildBatchedRequests(
+      TableId tableId, List<MODEL_T> models, Map<String, Object> fixedValues, int batchSize) {
+    return Lists.partition(models, Math.min(batchSize, MAX_ROWS_PER_INSERT_ALL_REQUEST)).stream()
+        .map(batch -> build(tableId, batch, fixedValues))
+        .collect(ImmutableList.toImmutableList());
+  }
   /*
    * Construct an InsertAllRequest from all of the provided models, one row per model. The fixedValues
    * argument is to allow a value (like snapshot_timestamp) to span all rows in its column.

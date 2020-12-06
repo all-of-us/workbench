@@ -26,16 +26,18 @@ import com.google.cloud.bigquery.InsertAllResponse;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.stream.IntStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -87,13 +89,17 @@ public class ReportingUploadServiceTest {
   @Captor private ArgumentCaptor<InsertAllRequest> insertAllRequestCaptor;
 
   @TestConfiguration
-  @Import({ReportingUploadServiceStreamingImpl.class, ReportingTestConfig.class})
+  @Import({
+      ReportingUploadServiceImpl.class,
+      ReportingTestConfig.class
+  })
   @MockBean({ReportingVerificationService.class})
   public static class config {
     @Bean
     public Clock getClock() {
       return new FakeClock(NOW);
     }
+
   }
 
   @Before
@@ -183,58 +189,45 @@ public class ReportingUploadServiceTest {
   }
 
   @Test
-  public void testUploadSnapshot_streaming() {
-    testUploadSnapshot_streaming(reportingSnapshot);
-  }
-
-  @Test
-  public void testUploadSnapshot_streaming_with_nulls() {
-    testUploadSnapshot_streaming(snapshotWithNulls);
-  }
-
-  @Test
-  public void testUploadSnapshot_streaming_empty() {
-    reportingUploadServiceStreamingImpl.uploadSnapshot(ReportingTestUtils.EMPTY_SNAPSHOT);
-    verify(mockBigQueryService, never()).insertAll(any());
-  }
-
-  private void testUploadSnapshot_streaming(ReportingSnapshot snapshot) {
+  public void testUploadSnapshot() {
     final InsertAllResponse mockInsertAllResponse = mock(InsertAllResponse.class);
     doReturn(Collections.emptyMap()).when(mockInsertAllResponse).getInsertErrors();
 
     doReturn(mockInsertAllResponse)
         .when(mockBigQueryService)
         .insertAll(any(InsertAllRequest.class));
-    reportingUploadServiceStreamingImpl.uploadSnapshot(snapshot);
+    reportingUploadServiceStreamingImpl.uploadSnapshot(reportingSnapshot);
 
-    verify(mockBigQueryService, times(countPopulatedTables(snapshot)))
+    verify(mockBigQueryService, times(7))
         .insertAll(insertAllRequestCaptor.capture());
     final List<InsertAllRequest> requests = insertAllRequestCaptor.getAllValues();
 
-    assertThat(requests).hasSize(countPopulatedTables(snapshot));
+    // assume we need at least one split collection
+    assertThat(requests.size()).isGreaterThan(countPopulatedTables(reportingSnapshot));
 
-    final Map<String, InsertAllRequest> tableIdToInsertAllRequest =
-        requests.stream()
-            .collect(
-                ImmutableMap.toImmutableMap(r -> r.getTable().getTable(), Function.identity()));
+    final Multimap<String, InsertAllRequest> tableIdToInsertAllRequest =
+        Multimaps.index(requests, r -> r.getTable().getTable());
+//        requests.stream()
+//            .collect(
+//                ImmutableMap.toImmutableMap(r -> r.getTable().getTable(), Function.identity()));
 
-    final InsertAllRequest userRequest = tableIdToInsertAllRequest.get("user");
-    assertThat(userRequest).isNotNull();
+    final Collection<InsertAllRequest> userRequests = tableIdToInsertAllRequest.get("user");
+    assertThat(userRequests).isNotEmpty();
 
-    final List<RowToInsert> userRows = userRequest.getRows();
-    assertThat(userRows).hasSize(snapshot.getUsers().size());
+    final List<RowToInsert> userRows = userRequests.stream().findFirst().get().getRows();
+    assertThat(userRows).hasSize(2); // batch size
     assertThat(userRows.get(0).getId())
         .hasLength(InsertAllRequestPayloadTransformer.INSERT_ID_LENGTH);
     final Map<String, Object> userColumnToValue = userRows.get(0).getContent();
     assertThat((String) userColumnToValue.get("city")).isEqualTo(USER__CITY);
     assertThat((long) userColumnToValue.get("institution_id")).isEqualTo(USER__INSTITUTION_ID);
 
-    final InsertAllRequest workspaceRequest = tableIdToInsertAllRequest.get("workspace");
-    assertThat(workspaceRequest).isNotNull();
-    assertThat(workspaceRequest.getRows()).hasSize(3);
+    final Optional<InsertAllRequest> workspaceRequest = tableIdToInsertAllRequest.get("workspace").stream().findFirst();
+    assertThat(workspaceRequest).isPresent();
+    assertThat(workspaceRequest.get().getRows()).hasSize(2);
 
     final Map<String, Object> workspaceColumnValues =
-        workspaceRequest.getRows().get(0).getContent();
+        workspaceRequest.get().getRows().get(0).getContent();
     assertThat(
             workspaceColumnValues.get(
                 WorkspaceColumnValueExtractor.WORKSPACE_ID.getParameterName()))
@@ -250,12 +243,81 @@ public class ReportingUploadServiceTest {
             workspaceColumnValues.get(WorkspaceColumnValueExtractor.CREATOR_ID.getParameterName()))
         .isEqualTo(101L);
 
-    final InsertAllRequest institutionRequest = tableIdToInsertAllRequest.get("institution");
-    assertThat(institutionRequest).isNotNull();
-    assertThat(institutionRequest.getRows()).hasSize(1);
-    final RowToInsert firstInstitutionRow = institutionRequest.getRows().get(0);
+    final Optional<InsertAllRequest> institutionRequest = tableIdToInsertAllRequest.get("institution").stream().findFirst();
+    assertThat(institutionRequest).isPresent();
+    assertThat(institutionRequest.get().getRows()).hasSize(1);
+    final RowToInsert firstInstitutionRow = institutionRequest.get().getRows().get(0);
     assertThat(firstInstitutionRow.getContent().get("short_name"))
         .isEqualTo(INSTITUTION__SHORT_NAME);
+  }
+
+  @Test
+  public void testUploadSnapshot_streaming_with_nulls() {
+    final InsertAllResponse mockInsertAllResponse = mock(InsertAllResponse.class);
+    doReturn(Collections.emptyMap()).when(mockInsertAllResponse).getInsertErrors();
+
+    doReturn(mockInsertAllResponse)
+        .when(mockBigQueryService)
+        .insertAll(any(InsertAllRequest.class));
+    reportingUploadServiceStreamingImpl.uploadSnapshot(snapshotWithNulls);
+
+    verify(mockBigQueryService, times(5))
+        .insertAll(insertAllRequestCaptor.capture());
+    final List<InsertAllRequest> requests = insertAllRequestCaptor.getAllValues();
+
+    // assume we need at least one split collection
+    assertThat(requests.size()).isGreaterThan(countPopulatedTables(snapshotWithNulls));
+
+    final Multimap<String, InsertAllRequest> tableIdToInsertAllRequest =
+        Multimaps.index(requests, r -> r.getTable().getTable());
+//        requests.stream()
+//            .collect(
+//                ImmutableMap.toImmutableMap(r -> r.getTable().getTable(), Function.identity()));
+
+    final Collection<InsertAllRequest> userRequests = tableIdToInsertAllRequest.get("user");
+    assertThat(userRequests).isNotEmpty();
+
+    final List<RowToInsert> userRows = userRequests.stream().findFirst().get().getRows();
+    assertThat(userRows).hasSize(2); // batch size
+    assertThat(userRows.get(0).getId())
+        .hasLength(InsertAllRequestPayloadTransformer.INSERT_ID_LENGTH);
+    final Map<String, Object> userColumnToValue = userRows.get(0).getContent();
+    assertThat((String) userColumnToValue.get("city")).isEqualTo(USER__CITY);
+    assertThat((long) userColumnToValue.get("institution_id")).isEqualTo(USER__INSTITUTION_ID);
+
+    final Optional<InsertAllRequest> workspaceRequest = tableIdToInsertAllRequest.get("workspace").stream().findFirst();
+    assertThat(workspaceRequest).isPresent();
+    assertThat(workspaceRequest.get().getRows()).hasSize(2);
+
+    final Map<String, Object> workspaceColumnValues =
+        workspaceRequest.get().getRows().get(0).getContent();
+    assertThat(
+            workspaceColumnValues.get(
+                WorkspaceColumnValueExtractor.WORKSPACE_ID.getParameterName()))
+        .isEqualTo(201L);
+    final Optional<OffsetDateTime> creationTime =
+        rowToInsertStringToOffsetTimestamp(
+            (String)
+                workspaceColumnValues.get(
+                    WorkspaceColumnValueExtractor.CREATION_TIME.getParameterName()));
+    assertThat(creationTime).isPresent();
+    assertTimeApprox(creationTime.get(), THEN);
+    assertThat(
+            workspaceColumnValues.get(WorkspaceColumnValueExtractor.CREATOR_ID.getParameterName()))
+        .isEqualTo(101L);
+
+    final Optional<InsertAllRequest> institutionRequest = tableIdToInsertAllRequest.get("institution").stream().findFirst();
+    assertThat(institutionRequest).isPresent();
+    assertThat(institutionRequest.get().getRows()).hasSize(1);
+    final RowToInsert firstInstitutionRow = institutionRequest.get().getRows().get(0);
+    assertThat(firstInstitutionRow.getContent().get("short_name"))
+        .isEqualTo(INSTITUTION__SHORT_NAME);
+  }
+
+  @Test
+  public void testUploadSnapshot_streaming_empty() {
+    reportingUploadServiceStreamingImpl.uploadSnapshot(ReportingTestUtils.EMPTY_SNAPSHOT);
+    verify(mockBigQueryService, never()).insertAll(any());
   }
 
   @Test
@@ -274,5 +336,36 @@ public class ReportingUploadServiceTest {
     assertThat(content).hasSize(2);
     assertThat(content.getOrDefault("billing_status", BillingStatus.INACTIVE))
         .isEqualTo(BillingStatus.INACTIVE);
+  }
+
+  @Test
+  public void testUploadWithManyBatches() {
+    final ReportingSnapshot largeSnapshot =
+        createEmptySnapshot()
+            .captureTimestamp(NOW.toEpochMilli())
+            .users(
+                IntStream.range(0, 21)
+                    .mapToObj(
+                        id ->
+                            new ReportingUser()
+                                .username("bill@aou.biz")
+                                .givenName("Bill")
+                                .disabled(false)
+                                .userId((long) id))
+                    .collect(ImmutableList.toImmutableList()))
+            .workspaces(
+                ImmutableList.of(
+                    new ReportingWorkspace()
+                        .workspaceId(303L)
+                        .name("Circle K")
+                        .creationTime(THEN)
+                        .creatorId(101L)))
+            .cohorts(ImmutableList.of(ReportingTestUtils.createReportingCohort()))
+            .institutions(ImmutableList.of(ReportingTestUtils.createReportingInstitution()));
+
+    reportingUploadServiceStreamingImpl.uploadSnapshot(largeSnapshot);
+    verify(mockBigQueryService, times(14)).insertAll(insertAllRequestCaptor.capture());
+
+
   }
 }
