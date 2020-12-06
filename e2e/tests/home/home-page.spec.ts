@@ -3,7 +3,6 @@ import HomePage from 'app/page/home-page';
 import WorkspaceCard from 'app/component/workspace-card';
 import {signIn} from 'utils/test-utils';
 
-
 describe('Home page ui tests', () => {
 
   beforeEach(async () => {
@@ -11,10 +10,13 @@ describe('Home page ui tests', () => {
   });
 
   test('Check visibility of Workspace cards', async () => {
-    const cards = await WorkspaceCard.findAllCards(page);
+
+    await checkCreateNewWorkspaceLink();
+
+    const allCards = await WorkspaceCard.findAllCards(page);
     let width;
     let height;
-    for (const card of cards) {
+    for (const card of allCards) {
       const cardElem = BaseElement.asBaseElement(page, card.asElementHandle());
       expect(await cardElem.isVisible()).toBe(true);
       const size = await cardElem.getSize();
@@ -43,22 +45,21 @@ describe('Home page ui tests', () => {
     }
   });
 
-  test('Check Create New Workspace link on Home page', async () => {
-    const homePage = new HomePage(page);
-    const plusIcon = await homePage.getCreateNewWorkspaceLink();
-    expect(plusIcon).toBeTruthy();
-    const classname = await plusIcon.getProperty<string>('className');
-    expect(classname).toBe('is-solid');
-    const shape = await plusIcon.getAttribute('shape');
-    expect(shape).toBe('plus-circle');
-    const hasShape = await plusIcon.hasAttribute('shape');
-    expect(hasShape).toBe(true);
-    const disabled = await plusIcon.isDisabled();
-    expect(disabled).toBe(false);
-    const cursor = await plusIcon.getComputedStyle('cursor');
-    expect(cursor).toBe('pointer');
-    expect(await plusIcon.isVisible()).toBe(true);
-  });
-
-
 });
+
+async function checkCreateNewWorkspaceLink(): Promise<void> {
+  const homePage = new HomePage(page);
+  const plusIcon = await homePage.getCreateNewWorkspaceLink();
+  expect(plusIcon).toBeTruthy();
+  const classname = await plusIcon.getProperty<string>('className');
+  expect(classname).toBe('is-solid');
+  const shape = await plusIcon.getAttribute('shape');
+  expect(shape).toBe('plus-circle');
+  const hasShape = await plusIcon.hasAttribute('shape');
+  expect(hasShape).toBe(true);
+  const disabled = await plusIcon.isDisabled();
+  expect(disabled).toBe(false);
+  const cursor = await plusIcon.getComputedStyle('cursor');
+  expect(cursor).toBe('pointer');
+  expect(await plusIcon.isVisible()).toBe(true);
+}
