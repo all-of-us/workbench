@@ -82,7 +82,7 @@ async function createCustomCdrVersionWorkspace(cdrVersion: string): Promise<stri
 
 // Reuse same source workspace for all tests in this file, in order to reduce test playback time.
 // Workspace to be created in first test. If create failed in first test, next test will try create it.
-let srcWorkspace: string;
+let defaultCdrWorkspace: string;
 
 describe('Workspace owner Jupyter notebook action tests', () => {
 
@@ -91,15 +91,15 @@ describe('Workspace owner Jupyter notebook action tests', () => {
    });
 
    test('Copy notebook to another Workspace when CDR versions match', async () => {
-      srcWorkspace = await createCustomCdrVersionWorkspace(config.defaultCdrVersionName);
-      await copyNotebookTest(srcWorkspace, config.defaultCdrVersionName);
+      defaultCdrWorkspace = await createCustomCdrVersionWorkspace(config.defaultCdrVersionName);
+      await copyNotebookTest(defaultCdrWorkspace, config.defaultCdrVersionName);
    })
 
    test('Copy notebook to another Workspace when CDR versions differ', async () => {
       // reuse same source workspace for all tests, but always create new destination workspace.
-      if (srcWorkspace === undefined) {
-         srcWorkspace = await createCustomCdrVersionWorkspace(config.defaultCdrVersionName);
+      if (defaultCdrWorkspace === undefined) {
+         defaultCdrWorkspace = await createCustomCdrVersionWorkspace(config.defaultCdrVersionName);
       }
-      await copyNotebookTest(srcWorkspace, config.altCdrVersionName);
+      await copyNotebookTest(defaultCdrWorkspace, config.altCdrVersionName);
    })
 });
