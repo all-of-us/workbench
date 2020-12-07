@@ -1,16 +1,11 @@
 package org.pmiops.workbench.reporting.insertion;
 
-import static com.google.cloud.bigquery.QueryParameterValue.int64;
-import static com.google.cloud.bigquery.QueryParameterValue.string;
-
-import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
 
 public enum DatasetDomainColumnValueExtractor
     implements ColumnValueExtractor<ReportingDatasetDomainIdValue> {
-  DATASET_ID(
-      "dataset_id", ReportingDatasetDomainIdValue::getDatasetId),
+  DATASET_ID("dataset_id", ReportingDatasetDomainIdValue::getDatasetId),
   DOMAIN_ID("domain_id", ReportingDatasetDomainIdValue::getDomainId),
   VALUE("value", ReportingDatasetDomainIdValue::getValue);
 
@@ -21,8 +16,7 @@ public enum DatasetDomainColumnValueExtractor
   private final Function<ReportingDatasetDomainIdValue, Object> objectValueFunction;
 
   DatasetDomainColumnValueExtractor(
-      String parameterName,
-      Function<ReportingDatasetDomainIdValue, Object> objectValueFunction) {
+      String parameterName, Function<ReportingDatasetDomainIdValue, Object> objectValueFunction) {
     this.parameterName = parameterName;
     this.objectValueFunction = objectValueFunction;
   }

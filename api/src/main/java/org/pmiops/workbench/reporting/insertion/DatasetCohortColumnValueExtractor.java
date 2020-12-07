@@ -1,8 +1,5 @@
 package org.pmiops.workbench.reporting.insertion;
 
-import static com.google.cloud.bigquery.QueryParameterValue.int64;
-
-import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
 
@@ -18,8 +15,7 @@ public enum DatasetCohortColumnValueExtractor
   private final Function<ReportingDatasetCohort, Object> objectValueFunction;
 
   DatasetCohortColumnValueExtractor(
-      String parameterName,
-      Function<ReportingDatasetCohort, Object> objectValueFunction) {
+      String parameterName, Function<ReportingDatasetCohort, Object> objectValueFunction) {
     this.parameterName = parameterName;
     this.objectValueFunction = objectValueFunction;
   }

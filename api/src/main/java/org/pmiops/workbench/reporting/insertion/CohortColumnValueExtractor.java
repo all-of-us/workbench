@@ -1,25 +1,17 @@
 package org.pmiops.workbench.reporting.insertion;
 
-import static com.google.cloud.bigquery.QueryParameterValue.int64;
-import static com.google.cloud.bigquery.QueryParameterValue.string;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toInsertRowString;
-import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toTimestampQpv;
 
-import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;
 import org.pmiops.workbench.model.ReportingCohort;
 
 public enum CohortColumnValueExtractor implements ColumnValueExtractor<ReportingCohort> {
   COHORT_ID("cohort_id", ReportingCohort::getCohortId),
-  CREATION_TIME(
-      "creation_time",
-      c -> toInsertRowString(c.getCreationTime())),
+  CREATION_TIME("creation_time", c -> toInsertRowString(c.getCreationTime())),
   CREATOR_ID("creator_id", ReportingCohort::getCreatorId),
   CRITERIA("criteria", ReportingCohort::getCriteria),
   DESCRIPTION("description", ReportingCohort::getDescription),
-  LAST_MODIFIED_TIME(
-      "last_modified_time",
-      c -> toInsertRowString(c.getLastModifiedTime())),
+  LAST_MODIFIED_TIME("last_modified_time", c -> toInsertRowString(c.getLastModifiedTime())),
   NAME("name", ReportingCohort::getName),
   WORKSPACE_ID("workspace_id", ReportingCohort::getWorkspaceId);
 
@@ -30,8 +22,7 @@ public enum CohortColumnValueExtractor implements ColumnValueExtractor<Reporting
   private final Function<ReportingCohort, Object> objectValueFunction;
 
   CohortColumnValueExtractor(
-      String parameterName,
-      Function<ReportingCohort, Object> objectValueFunction) {
+      String parameterName, Function<ReportingCohort, Object> objectValueFunction) {
     this.parameterName = parameterName;
     this.objectValueFunction = objectValueFunction;
   }

@@ -1,6 +1,5 @@
 package org.pmiops.workbench.reporting.insertion;
 
-import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
