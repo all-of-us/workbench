@@ -2,13 +2,13 @@ package org.pmiops.workbench.reporting;
 
 import java.util.List;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingDataset;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingInstitution;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
+import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingDatasetConceptSet;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
+import org.pmiops.workbench.model.ReportingWorkspace;
 
 // Define immutable value class to hold results of queries within a transaction. Mapping to
 // Reporting DTO classes will happen outside the transaction. The main reason for this class
@@ -17,23 +17,23 @@ import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
 public class QueryResultBundle {
 
   private final List<ProjectedReportingCohort> cohorts;
-  private final List<ProjectedReportingDataset> datasets;
+  private final List<ReportingDataset> datasets;
   private final List<ReportingDatasetCohort> datasetCohorts;
   private final List<ReportingDatasetConceptSet> datasetConceptSets;
   private final List<ReportingDatasetDomainIdValue> datasetDomainIdValues;
   private final List<ProjectedReportingUser> users;
   private final List<ProjectedReportingInstitution> institutions;
-  private final List<ProjectedReportingWorkspace> workspaces;
+  private final List<ReportingWorkspace> workspaces;
 
   public QueryResultBundle(
       List<ProjectedReportingCohort> cohorts,
-      List<ProjectedReportingDataset> datasets,
+      List<ReportingDataset> datasets,
       List<ReportingDatasetCohort> datasetCohorts,
       List<ReportingDatasetConceptSet> datasetConceptSets,
       List<ReportingDatasetDomainIdValue> datasetDomainIdValues,
       List<ProjectedReportingInstitution> institutions,
       List<ProjectedReportingUser> users,
-      List<ProjectedReportingWorkspace> workspaces) {
+      List<ReportingWorkspace> workspaces) {
     this.cohorts = cohorts;
     this.datasets = datasets;
     this.datasetCohorts = datasetCohorts;
@@ -70,11 +70,11 @@ public class QueryResultBundle {
     return users;
   }
 
-  public List<ProjectedReportingWorkspace> getWorkspaces() {
+  public List<ReportingWorkspace> getWorkspaces() {
     return workspaces;
   }
 
-  public List<ProjectedReportingDataset> getDatasets() {
+  public List<ReportingDataset> getDatasets() {
     return datasets;
   }
 }

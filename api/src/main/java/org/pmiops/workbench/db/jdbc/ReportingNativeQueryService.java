@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.jdbc;
 
 import java.util.List;
+import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingDatasetConceptSet;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
@@ -10,6 +11,8 @@ import org.pmiops.workbench.model.ReportingWorkspace;
 public interface ReportingNativeQueryService {
 
   List<ReportingWorkspace> getReportingWorkspaces();
+
+  List<ReportingDataset> getReportingDatasets();
 
   List<ReportingDatasetCohort> getReportingDatasetCohorts();
 
