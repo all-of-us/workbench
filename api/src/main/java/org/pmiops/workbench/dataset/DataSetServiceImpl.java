@@ -90,6 +90,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       "SELECT ${columns} \nFROM `${projectId}.${dataSetId}.${tableName}`";
   private static final String LIMIT_20 = " LIMIT 20";
   private static final String PERSON_ID_COLUMN_NAME = "PERSON_ID";
+  private static final ImmutableList<Domain> OUTER_QUERY_DOMAIN =
+      ImmutableList.of(
+          Domain.CONDITION, Domain.DRUG, Domain.MEASUREMENT, Domain.OBSERVATION, Domain.PROCEDURE);
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
@@ -114,10 +117,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     private final List<String> selects;
     private final List<String> joins;
+    private final String domainTable;
 
-    private ValuesLinkingPair(List<String> selects, List<String> joins) {
+    private ValuesLinkingPair(List<String> selects, List<String> joins, String domainTable) {
       this.selects = selects;
       this.joins = joins;
+      this.domainTable = domainTable;
     }
 
     private List<String> getSelects() {
@@ -129,11 +134,20 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     }
 
     static ValuesLinkingPair emptyPair() {
-      return new ValuesLinkingPair(Collections.emptyList(), Collections.emptyList());
+      return new ValuesLinkingPair(Collections.emptyList(), Collections.emptyList(), "");
     }
 
     public String formatJoins() {
       return getJoins().stream().distinct().collect(Collectors.joining(" "));
+    }
+
+    public String getDomainTable() {
+      return domainTable;
+    }
+
+    public String getTableAlias() {
+      String[] parts = domainTable.split(" ");
+      return parts[parts.length - 1];
     }
   }
 
@@ -561,10 +575,17 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final ValuesLinkingPair valuesLinkingPair =
         getValueSelectsAndJoins(domainValuePairsForCurrentDomain);
 
-    queryBuilder
-        .append(String.join(", ", valuesLinkingPair.getSelects()))
-        .append(" ")
-        .append(valuesLinkingPair.formatJoins());
+    if (OUTER_QUERY_DOMAIN.contains(domain)) {
+      queryBuilder
+          .append(String.join(", ", valuesLinkingPair.getSelects()))
+          .append(" from ( SELECT * ")
+          .append(valuesLinkingPair.getDomainTable());
+    } else {
+      queryBuilder
+          .append(String.join(", ", valuesLinkingPair.getSelects()))
+          .append(" ")
+          .append(valuesLinkingPair.getDomainTable());
+    }
 
     final Optional<String> conceptSetSqlInClauseMaybe =
         buildConceptIdListClause(domain, conceptSetsSelected);
@@ -632,6 +653,13 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       if (valuesLinkingPair.getSelects().stream().filter(select -> select.contains("DATE")).count()
           == 1) {
         queryBuilder.append(", DATE");
+      }
+    }
+
+    if (OUTER_QUERY_DOMAIN.contains(domain)) {
+      queryBuilder.append(") " + valuesLinkingPair.getTableAlias());
+      if (!valuesLinkingPair.formatJoins().equals("")) {
+        queryBuilder.append(" " + valuesLinkingPair.formatJoins());
       }
     }
     return buildQueryJobConfiguration(cohortParameters, queryBuilder.toString());
@@ -1094,12 +1122,20 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             .map(DbDSLinking::getOmopSql)
             .collect(ImmutableList.toImmutableList());
 
+    final ImmutableList<String> coreTable =
+        valuesLinkingTableResult.stream()
+            .filter(fieldValue -> fieldValue.getOmopSql().equals("CORE_TABLE_FOR_DOMAIN"))
+            .map(DbDSLinking::getJoinValue)
+            .collect(ImmutableList.toImmutableList());
+    String domainTable = coreTable.isEmpty() ? "" : coreTable.get(0);
+
     final ImmutableList<String> valueJoins =
         valuesLinkingTableResult.stream()
+            .filter(fieldValue -> !fieldValue.getJoinValue().equals(domainTable))
             .map(DbDSLinking::getJoinValue)
             .collect(ImmutableList.toImmutableList());
 
-    return new ValuesLinkingPair(valueSelects, valueJoins);
+    return new ValuesLinkingPair(valueSelects, valueJoins, domainTable);
   }
 
   // Capitalizes the first letter of a string and lowers the remaining ones.
