@@ -10,24 +10,21 @@ import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
 public enum DatasetDomainColumnValueExtractor
     implements ColumnValueExtractor<ReportingDatasetDomainIdValue> {
   DATASET_ID(
-      "dataset_id", ReportingDatasetDomainIdValue::getDatasetId, d -> int64(d.getDatasetId())),
-  DOMAIN_ID("domain_id", ReportingDatasetDomainIdValue::getDomainId, d -> string(d.getDomainId())),
-  VALUE("value", ReportingDatasetDomainIdValue::getValue, d -> string(d.getValue()));
+      "dataset_id", ReportingDatasetDomainIdValue::getDatasetId),
+  DOMAIN_ID("domain_id", ReportingDatasetDomainIdValue::getDomainId),
+  VALUE("value", ReportingDatasetDomainIdValue::getValue);
 
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
   // as enums can't be abstract or extend abstract classes.
   private static final String TABLE_NAME = "dataset_domain_value";
   private final String parameterName;
   private final Function<ReportingDatasetDomainIdValue, Object> objectValueFunction;
-  private final Function<ReportingDatasetDomainIdValue, QueryParameterValue> parameterValueFunction;
 
   DatasetDomainColumnValueExtractor(
       String parameterName,
-      Function<ReportingDatasetDomainIdValue, Object> objectValueFunction,
-      Function<ReportingDatasetDomainIdValue, QueryParameterValue> parameterValueFunction) {
+      Function<ReportingDatasetDomainIdValue, Object> objectValueFunction) {
     this.parameterName = parameterName;
     this.objectValueFunction = objectValueFunction;
-    this.parameterValueFunction = parameterValueFunction;
   }
 
   @Override
@@ -43,11 +40,5 @@ public enum DatasetDomainColumnValueExtractor
   @Override
   public Function<ReportingDatasetDomainIdValue, Object> getRowToInsertValueFunction() {
     return objectValueFunction;
-  }
-
-  @Override
-  public Function<ReportingDatasetDomainIdValue, QueryParameterValue>
-      getQueryParameterValueFunction() {
-    return parameterValueFunction;
   }
 }

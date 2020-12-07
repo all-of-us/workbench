@@ -11,35 +11,30 @@ import org.pmiops.workbench.model.ReportingInstitution;
 
 public enum InstitutionColumnValueExtractor implements ColumnValueExtractor<ReportingInstitution> {
   DISPLAY_NAME(
-      "display_name", ReportingInstitution::getDisplayName, i -> string(i.getDisplayName())),
+      "display_name", ReportingInstitution::getDisplayName),
   DUA_TYPE_ENUM(
-      "dua_type_enum", i -> enumToString(i.getDuaTypeEnum()), i -> enumToQpv(i.getDuaTypeEnum())),
+      "dua_type_enum", i -> enumToString(i.getDuaTypeEnum())),
   INSTITUTION_ID(
-      "institution_id", ReportingInstitution::getInstitutionId, i -> int64(i.getInstitutionId())),
+      "institution_id", ReportingInstitution::getInstitutionId),
   ORGANIZATION_TYPE_ENUM(
       "organization_type_enum",
-      i -> enumToString(i.getOrganizationTypeEnum()),
-      i -> enumToQpv(i.getOrganizationTypeEnum())),
+      i -> enumToString(i.getOrganizationTypeEnum())),
   ORGANIZATION_TYPE_OTHER_TEXT(
       "organization_type_other_text",
-      ReportingInstitution::getOrganizationTypeOtherText,
-      i -> string(i.getOrganizationTypeOtherText())),
-  SHORT_NAME("short_name", ReportingInstitution::getShortName, i -> string(i.getShortName()));
+      ReportingInstitution::getOrganizationTypeOtherText),
+  SHORT_NAME("short_name", ReportingInstitution::getShortName);
 
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
   // as enums can't be abstract or extend abstract classes.
   private static final String TABLE_NAME = "institution";
   private final String parameterName;
   private final Function<ReportingInstitution, Object> objectValueFunction;
-  private final Function<ReportingInstitution, QueryParameterValue> parameterValueFunction;
 
   InstitutionColumnValueExtractor(
       String parameterName,
-      Function<ReportingInstitution, Object> objectValueFunction,
-      Function<ReportingInstitution, QueryParameterValue> parameterValueFunction) {
+      Function<ReportingInstitution, Object> objectValueFunction) {
     this.parameterName = parameterName;
     this.objectValueFunction = objectValueFunction;
-    this.parameterValueFunction = parameterValueFunction;
   }
 
   @Override
@@ -55,10 +50,5 @@ public enum InstitutionColumnValueExtractor implements ColumnValueExtractor<Repo
   @Override
   public Function<ReportingInstitution, Object> getRowToInsertValueFunction() {
     return objectValueFunction;
-  }
-
-  @Override
-  public Function<ReportingInstitution, QueryParameterValue> getQueryParameterValueFunction() {
-    return parameterValueFunction;
   }
 }
