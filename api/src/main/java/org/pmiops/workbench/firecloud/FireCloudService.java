@@ -115,4 +115,6 @@ public interface FireCloudService {
   FirecloudNihStatus getNihStatus();
 
   ApiClient getApiClientWithImpersonation(String email) throws IOException;
+
+  void addProjectToServicePerimeter(String servicePerimeterName, String billingProject);
 }

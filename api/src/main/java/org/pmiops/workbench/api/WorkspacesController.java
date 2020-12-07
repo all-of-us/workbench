@@ -208,18 +208,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     validateWorkspaceApiModel(workspace);
 
     DbUser user = userProvider.get();
-    String workspaceNamespace;
-    DbBillingProjectBufferEntry bufferedBillingProject;
+    final DbBillingProjectBufferEntry bufferedBillingProject;
     try {
       bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
     } catch (EmptyBufferException e) {
       throw new TooManyRequestsException();
     }
-    workspaceNamespace = bufferedBillingProject.getFireCloudProjectName();
+    final String billingProject = bufferedBillingProject.getFireCloudProjectName();
 
     // Note: please keep any initialization logic here in sync with CloneWorkspace().
     FirecloudWorkspaceId workspaceId =
-        generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());
+        generateFirecloudWorkspaceId(billingProject, workspace.getName());
     FirecloudWorkspace fcWorkspace = attemptFirecloudWorkspaceCreation(workspaceId);
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());

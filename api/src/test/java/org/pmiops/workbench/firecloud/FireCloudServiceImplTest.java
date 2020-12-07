@@ -24,6 +24,7 @@ import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
+import org.pmiops.workbench.firecloud.api.ServicePerimetersApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
@@ -54,6 +55,7 @@ public class FireCloudServiceImplTest {
   @MockBean private NihApi nihApi;
   @MockBean private ProfileApi profileApi;
   @MockBean private StatusApi statusApi;
+  @MockBean private ServicePerimetersApi servicePerimetersApi;
 
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
@@ -166,10 +168,26 @@ public class FireCloudServiceImplTest {
   }
 
   @Test
-  public void testCreateAllOfUsBillingProject() throws Exception {
+  public void testAddProjectToServicePerimeter() throws ApiException {
     final String servicePerimeter = "a-cloud-with-a-fence-around-it";
-    workbenchConfig.firecloud.vpcServicePerimeterName = servicePerimeter;
+    final String projectName = "The Alan Parsons Project";
 
+    service.addProjectToServicePerimeter(servicePerimeter, projectName);
+
+    ArgumentCaptor<String> projectNameCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<String> servicePerimeterCaptor = ArgumentCaptor.forClass(String.class);
+    verify(servicePerimetersApi)
+        .addProjectToServicePerimeter(
+            servicePerimeterCaptor.capture(), projectNameCaptor.capture());
+    String invokedPerimeterName = servicePerimeterCaptor.getValue();
+    String invokedProjectName = projectNameCaptor.getValue();
+
+    assertThat(invokedPerimeterName).isEqualTo(servicePerimeter);
+    assertThat(invokedProjectName).isEqualTo(projectName);
+  }
+
+  @Test
+  public void testCreateAllOfUsBillingProject() throws Exception {
     service.createAllOfUsBillingProject("project-name");
 
     ArgumentCaptor<FirecloudCreateRawlsBillingProjectFullRequest> captor =
@@ -185,6 +203,8 @@ public class FireCloudServiceImplTest {
     assertThat(request.getBillingAccount()).isEqualTo("billingAccounts/test-billing-account");
     assertThat(request.getEnableFlowLogs()).isTrue();
     assertThat(request.getHighSecurityNetwork()).isTrue();
-    assertThat(request.getServicePerimeter()).isEqualTo(servicePerimeter);
+    // we assigned the service perimeter at creation time before RW-5987.
+    // Confirm that we don't anymore.
+    assertThat(request.getServicePerimeter()).isNull();
   }
 }
