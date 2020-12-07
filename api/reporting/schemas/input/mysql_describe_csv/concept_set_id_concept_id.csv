@@ -1,0 +1,2 @@
+concept_set_id,bigint(20),NO,PRI,NULL,
+concept_id,bigint(20),NO,PRI,NULL,

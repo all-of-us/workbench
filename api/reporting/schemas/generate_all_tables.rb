@@ -10,7 +10,9 @@ def table_name(filename)
   File.basename(filename, '.csv')
 end
 
-Dir.each_child(describe_csv_dir) do |file|
+files = Dir.each_child(describe_csv_dir).sort_by { |f | f }
+
+files.each do |file|
   full_cmd = "./reporting-wizard.rb #{table_name(file)} #{input_dir} #{output_dir}"
   _stdout, output, _status = Open3.capture3(full_cmd)
   puts output if output

@@ -1,0 +1,2 @@
+dataset_id,bigint(20),NO,MUL,NULL,
+cohort_id,bigint(20),NO,MUL,NULL,
