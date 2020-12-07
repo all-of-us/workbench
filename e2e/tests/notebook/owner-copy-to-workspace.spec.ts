@@ -59,7 +59,7 @@ async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName:
 
    // Perform actions in copied notebook.
    // Open destination Workspace
-   await findOrCreateWorkspace(page, {workspaceName: destWorkspace}).then(card => card.clickWorkspaceName());
+   await findOrCreateWorkspace(page, {workspaceName: destWorkspace});
 
    // Verify copy-to notebook exists in destination Workspace
    await dataPage.openAnalysisPage();
