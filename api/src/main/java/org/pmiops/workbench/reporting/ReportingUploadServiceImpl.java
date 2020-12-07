@@ -41,8 +41,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ReportingUploadServiceImpl implements ReportingUploadService {
-  private static final Logger log =
-      Logger.getLogger(ReportingUploadServiceImpl.class.getName());
+  private static final Logger log = Logger.getLogger(ReportingUploadServiceImpl.class.getName());
   private static final InsertAllRequestPayloadTransformer<ReportingCohort> cohortRequestBuilder =
       CohortColumnValueExtractor::values;
   private static final InsertAllRequestPayloadTransformer<ReportingDatasetCohort>
@@ -88,11 +87,14 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
       final InsertAllResponse currentResponse = bigQueryService.insertAll(request);
       responseMapBuilder.put(request.getTable(), currentResponse);
       stopwatch.stop();
-      performanceStringBuilder.append(LogFormatters.rate(
-          String.format("Streaming upload into %s table", request.getTable().getTable()),
-          stopwatch.elapsed(),
-          request.getRows().size(),
-          "rows")).append("\n");
+      performanceStringBuilder
+          .append(
+              LogFormatters.rate(
+                  String.format("Streaming upload into %s table", request.getTable().getTable()),
+                  stopwatch.elapsed(),
+                  request.getRows().size(),
+                  "rows"))
+          .append("\n");
       stopwatch.reset();
     }
     log.info(performanceStringBuilder.toString());
@@ -123,12 +125,6 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     final int batchSize = configProvider.get().reporting.maxRowsPerInsert;
     final ImmutableList.Builder<InsertAllRequest> resultBuilder = ImmutableList.builder();
 
-//    final TriConsumer<InsertAllRequestPayloadTransformer<MODEL_T>, Class<E extends Enum<E> & ColumnValueExtractor<?>> List<MODEL_T>> addInsertRequests =
-//        (transformer, columnValueExtractorClass, models) -> {
-//          resultBuilder.addAll(
-//              transformer
-//          );
-//    };
     resultBuilder.addAll(
         cohortRequestBuilder.buildBatchedRequests(
             getTableId(CohortColumnValueExtractor.class),

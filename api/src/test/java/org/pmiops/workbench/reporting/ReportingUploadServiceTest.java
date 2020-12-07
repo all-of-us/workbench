@@ -89,17 +89,13 @@ public class ReportingUploadServiceTest {
   @Captor private ArgumentCaptor<InsertAllRequest> insertAllRequestCaptor;
 
   @TestConfiguration
-  @Import({
-      ReportingUploadServiceImpl.class,
-      ReportingTestConfig.class
-  })
+  @Import({ReportingUploadServiceImpl.class, ReportingTestConfig.class})
   @MockBean({ReportingVerificationService.class})
   public static class config {
     @Bean
     public Clock getClock() {
       return new FakeClock(NOW);
     }
-
   }
 
   @Before
@@ -198,8 +194,7 @@ public class ReportingUploadServiceTest {
         .insertAll(any(InsertAllRequest.class));
     reportingUploadServiceStreamingImpl.uploadSnapshot(reportingSnapshot);
 
-    verify(mockBigQueryService, times(7))
-        .insertAll(insertAllRequestCaptor.capture());
+    verify(mockBigQueryService, times(7)).insertAll(insertAllRequestCaptor.capture());
     final List<InsertAllRequest> requests = insertAllRequestCaptor.getAllValues();
 
     // assume we need at least one split collection
@@ -207,10 +202,6 @@ public class ReportingUploadServiceTest {
 
     final Multimap<String, InsertAllRequest> tableIdToInsertAllRequest =
         Multimaps.index(requests, r -> r.getTable().getTable());
-//        requests.stream()
-//            .collect(
-//                ImmutableMap.toImmutableMap(r -> r.getTable().getTable(), Function.identity()));
-
     final Collection<InsertAllRequest> userRequests = tableIdToInsertAllRequest.get("user");
     assertThat(userRequests).isNotEmpty();
 
@@ -222,7 +213,8 @@ public class ReportingUploadServiceTest {
     assertThat((String) userColumnToValue.get("city")).isEqualTo(USER__CITY);
     assertThat((long) userColumnToValue.get("institution_id")).isEqualTo(USER__INSTITUTION_ID);
 
-    final Optional<InsertAllRequest> workspaceRequest = tableIdToInsertAllRequest.get("workspace").stream().findFirst();
+    final Optional<InsertAllRequest> workspaceRequest =
+        tableIdToInsertAllRequest.get("workspace").stream().findFirst();
     assertThat(workspaceRequest).isPresent();
     assertThat(workspaceRequest.get().getRows()).hasSize(2);
 
@@ -243,7 +235,8 @@ public class ReportingUploadServiceTest {
             workspaceColumnValues.get(WorkspaceColumnValueExtractor.CREATOR_ID.getParameterName()))
         .isEqualTo(101L);
 
-    final Optional<InsertAllRequest> institutionRequest = tableIdToInsertAllRequest.get("institution").stream().findFirst();
+    final Optional<InsertAllRequest> institutionRequest =
+        tableIdToInsertAllRequest.get("institution").stream().findFirst();
     assertThat(institutionRequest).isPresent();
     assertThat(institutionRequest.get().getRows()).hasSize(1);
     final RowToInsert firstInstitutionRow = institutionRequest.get().getRows().get(0);
@@ -261,8 +254,7 @@ public class ReportingUploadServiceTest {
         .insertAll(any(InsertAllRequest.class));
     reportingUploadServiceStreamingImpl.uploadSnapshot(snapshotWithNulls);
 
-    verify(mockBigQueryService, times(5))
-        .insertAll(insertAllRequestCaptor.capture());
+    verify(mockBigQueryService, times(5)).insertAll(insertAllRequestCaptor.capture());
     final List<InsertAllRequest> requests = insertAllRequestCaptor.getAllValues();
 
     // assume we need at least one split collection
@@ -270,9 +262,6 @@ public class ReportingUploadServiceTest {
 
     final Multimap<String, InsertAllRequest> tableIdToInsertAllRequest =
         Multimaps.index(requests, r -> r.getTable().getTable());
-//        requests.stream()
-//            .collect(
-//                ImmutableMap.toImmutableMap(r -> r.getTable().getTable(), Function.identity()));
 
     final Collection<InsertAllRequest> userRequests = tableIdToInsertAllRequest.get("user");
     assertThat(userRequests).isNotEmpty();
@@ -285,7 +274,8 @@ public class ReportingUploadServiceTest {
     assertThat((String) userColumnToValue.get("city")).isEqualTo(USER__CITY);
     assertThat((long) userColumnToValue.get("institution_id")).isEqualTo(USER__INSTITUTION_ID);
 
-    final Optional<InsertAllRequest> workspaceRequest = tableIdToInsertAllRequest.get("workspace").stream().findFirst();
+    final Optional<InsertAllRequest> workspaceRequest =
+        tableIdToInsertAllRequest.get("workspace").stream().findFirst();
     assertThat(workspaceRequest).isPresent();
     assertThat(workspaceRequest.get().getRows()).hasSize(2);
 
@@ -306,7 +296,8 @@ public class ReportingUploadServiceTest {
             workspaceColumnValues.get(WorkspaceColumnValueExtractor.CREATOR_ID.getParameterName()))
         .isEqualTo(101L);
 
-    final Optional<InsertAllRequest> institutionRequest = tableIdToInsertAllRequest.get("institution").stream().findFirst();
+    final Optional<InsertAllRequest> institutionRequest =
+        tableIdToInsertAllRequest.get("institution").stream().findFirst();
     assertThat(institutionRequest).isPresent();
     assertThat(institutionRequest.get().getRows()).hasSize(1);
     final RowToInsert firstInstitutionRow = institutionRequest.get().getRows().get(0);
@@ -365,7 +356,5 @@ public class ReportingUploadServiceTest {
 
     reportingUploadServiceStreamingImpl.uploadSnapshot(largeSnapshot);
     verify(mockBigQueryService, times(14)).insertAll(insertAllRequestCaptor.capture());
-
-
   }
 }
