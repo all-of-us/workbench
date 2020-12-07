@@ -39,11 +39,10 @@ public class AuthDomainController implements AuthDomainApiDelegate {
   @Override
   public ResponseEntity<AuthDomainCreatedResponse> createAuthDomain(String authDomainName) {
     final FirecloudManagedGroupWithMembers group = fireCloudService.createGroup(authDomainName);
-    final AuthDomainCreatedResponse response =
+    return ResponseEntity.ok(
         new AuthDomainCreatedResponse()
             .authDomainName(authDomainName)
-            .groupEmail(group.getGroupEmail());
-    return ResponseEntity.ok(response);
+            .groupEmail(group.getGroupEmail()));
   }
 
   @Override
