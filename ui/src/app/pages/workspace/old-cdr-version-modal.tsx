@@ -38,7 +38,7 @@ const OldCdrVersionModal = (props: Props) => {
 
   return <Modal width={550}>
         <ModalTitle data-test-id='old-cdr-version-modal' style={{fontSize: '16px'}}>
-            You have selected to use an older version of the dataset.
+            You have selected an older version of the dataset.
         </ModalTitle>
         <ModalBody>
             <FlexColumn>
