@@ -67,10 +67,12 @@ export default class WorkspaceCard extends CardBase {
       const handle = card.asElementHandle();
       const children = await handle.$x(selector);
       if (children.length > 0) {
+        console.log(`Found "${workspaceName}" workspace card`);
         return card; // matched workspace name, found the Workspace card.
       }
       await handle.dispose(); // not it, dispose the ElementHandle.
     }
+    console.log(`"${workspaceName}" workspace card not found`);
     return null; // not found
   }
 
