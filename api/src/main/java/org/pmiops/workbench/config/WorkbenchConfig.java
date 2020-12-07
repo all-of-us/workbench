@@ -170,6 +170,10 @@ public class WorkbenchConfig {
     // whether we only trace at the default frequency.
     public boolean traceAllRequests;
     public String appEngineLocationId;
+
+    public boolean isProductionEnv() {
+      return projectId.equals("all-of-us-rw-prod") || projectId.equals("all-of-us-rw-preprod");
+    }
   }
 
   public static class AdminConfig {
