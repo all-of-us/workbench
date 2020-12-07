@@ -2429,8 +2429,8 @@ def get_auth_domain(project, tier)
   return get_access_tier_config(project, tier)["authDomainName"]
 end
 
-# TODO for CDR DB
-def get_auth_domain_group(project)
+# TODO currently broken for CDR DB
+def get_auth_domain_group_email(project)
   return get_access_tier_config(project, "registered")["authDomainGroupEmail"]
 end
 
