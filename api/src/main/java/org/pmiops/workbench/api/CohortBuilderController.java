@@ -24,6 +24,7 @@ import org.pmiops.workbench.model.CriteriaAttributeListResponse;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
 import org.pmiops.workbench.model.CriteriaMenuOptionsListResponse;
+import org.pmiops.workbench.model.CriteriaRequest;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataFiltersResponse;
@@ -132,6 +133,18 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     validateDomain(domain, surveyName);
     return ResponseEntity.ok(
         cohortBuilderService.findCriteriaByDomainAndSearchTerm(domain, term, surveyName, limit));
+  }
+
+  @Override
+  public ResponseEntity<CriteriaListResponse> findCriteriaForCohortEdit(
+      Long cdrVersionId, String domain, CriteriaRequest request) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
+    validateDomain(domain);
+    return ResponseEntity.ok(
+        new CriteriaListResponse()
+            .items(
+                cohortBuilderService.findCriteriaByDomainIdAndConceptIds(
+                    domain, request.getSourceConceptIds(), request.getStandardConceptIds())));
   }
 
   @Override

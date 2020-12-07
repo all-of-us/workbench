@@ -46,8 +46,10 @@ import org.pmiops.workbench.google.CloudStorageServiceImpl;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
+import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaMenuOption;
 import org.pmiops.workbench.model.CriteriaMenuSubOption;
+import org.pmiops.workbench.model.CriteriaRequest;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataFilter;
@@ -203,6 +205,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .addDomainId(Domain.CONDITION.toString())
                 .addType(CriteriaType.ICD9CM.toString())
                 .addStandard(false)
+                .addConceptId("44823922")
+                .addFullText("+[CONDITION_rank1]")
                 .build());
     icd10 =
         cbCriteriaDao.save(
@@ -217,6 +221,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .addDomainId(Domain.CONDITION.toString())
                 .addType(CriteriaType.SNOMED.toString())
                 .addStandard(true)
+                .addConceptId("44823923")
+                .addFullText("+[CONDITION_rank1]")
                 .build());
     snomedSource =
         cbCriteriaDao.save(
@@ -2142,6 +2148,25 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     assertEquals(
         new DemoChartInfo().name("MALE").race("Caucasian").ageRange("18-44").count(1L),
         response.getItems().get(1));
+  }
+
+  @Test
+  public void findCriteriaForCohortEdit() {
+    ImmutableList<Long> sourceConceptIds = ImmutableList.of(44823922L);
+    ImmutableList<Long> standardConceptIds = ImmutableList.of(44823923L);
+    CriteriaRequest request =
+        new CriteriaRequest()
+            .sourceConceptIds(sourceConceptIds)
+            .standardConceptIds(standardConceptIds);
+    List<Criteria> criteriaList =
+        controller
+            .findCriteriaForCohortEdit(
+                cdrVersion.getCdrVersionId(), Domain.CONDITION.toString(), request)
+            .getBody()
+            .getItems();
+    assertThat(criteriaList).hasSize(2);
+    assertThat(criteriaList.get(0).getId()).isEqualTo(icd9.getId());
+    assertThat(criteriaList.get(1).getId()).isEqualTo(snomedStandard.getId());
   }
 
   @Test
