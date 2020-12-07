@@ -119,8 +119,7 @@ public class LoadDataDictionary {
                       + "where dde.data_dictionary_entry_id is null")
               .getResultList();
 
-      if (workbenchConfigProvider.get().server.projectId.equals("all-of-us-rw-prod")
-          && missingCdrVersions.size() > 0) {
+      if (workbenchConfigProvider.get().server.isProductionEnv() && missingCdrVersions.size() > 0) {
         throw new RuntimeException(
             "No data dictionary found for following CDR Versions: "
                 + String.join(",", missingCdrVersions));
