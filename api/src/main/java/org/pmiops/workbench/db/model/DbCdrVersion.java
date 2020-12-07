@@ -20,7 +20,9 @@ public class DbCdrVersion {
   private long cdrVersionId;
   private boolean isDefault;
   private String name;
+  @Deprecated // use accessTier
   private Short dataAccessLevel;
+  private String accessTier;
   private short releaseNumber;
   private short archivalStatus;
   private String bigqueryProject;
@@ -62,6 +64,7 @@ public class DbCdrVersion {
     this.name = name;
   }
 
+  @Deprecated // use accessTier
   @Column(name = "data_access_level")
   public Short getDataAccessLevel() {
     return dataAccessLevel;
@@ -78,6 +81,15 @@ public class DbCdrVersion {
 
   public void setDataAccessLevelEnum(DataAccessLevel dataAccessLevel) {
     setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
+  }
+
+  @Column(name = "access_tier")
+  public String getAccessTier() {
+    return accessTier;
+  }
+
+  public void setAccessTier(String accessTier) {
+    this.accessTier = accessTier;
   }
 
   @Column(name = "archival_status")
