@@ -1584,6 +1584,21 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/monitoring/billingProjectBufferStatusByTier":
+    get:
+      tags:
+        - monitoring
+      description: Return statistics about the billing buffer, split by Access Tier.
+      operationId: getBillingProjectBufferStatusByTier
+      responses:
+        200:
+          description: No Error
+          schema:
+            "$ref": "#/definitions/BillingProjectBufferStatusByTier"
+        500:
+          description: Internal Error
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
   "/v1/cron/monitoring/updateGaugeMetrics":
     get:
       tags:
@@ -5811,10 +5826,21 @@ definitions:
     type: object
     properties:
       bufferSize:
-        description: 'Current size of the billing buffer, i.e. the number of projects
-          ready to be claimed.'
+        description: 'Current size of the billing buffer, i.e. the number of projects ready to be claimed.'
         type: integer
         format: int64
+  BillingProjectBufferStatusByTier:
+    type: array
+    items:
+      type: object
+      properties:
+        accessTier:
+          description: 'Name of the Access Tier associated with these billing buffer entries'
+          type: string
+        bufferSize:
+          description: 'Current size of the billing buffer per Access Tier, i.e. the number of projects ready to be claimed.'
+          type: integer
+          format: int64
   StatusAlert:
     type: object
     properties:

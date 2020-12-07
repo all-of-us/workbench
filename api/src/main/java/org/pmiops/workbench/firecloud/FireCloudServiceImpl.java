@@ -7,8 +7,10 @@ import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,18 +55,23 @@ public class FireCloudServiceImpl implements FireCloudService {
   private static final Logger log = Logger.getLogger(FireCloudServiceImpl.class.getName());
 
   private final Provider<WorkbenchConfig> configProvider;
-  private final Provider<ProfileApi> profileApiProvider;
+
   private final Provider<BillingApi> billingApiProvider;
   private final Provider<GroupsApi> groupsApiProvider;
   private final Provider<NihApi> nihApiProvider;
+  private final Provider<ProfileApi> profileApiProvider;
+  private final Provider<StatusApi> statusApiProvider;
+
+  // We call some of the endpoints in these APIs with the user's credentials
+  // and others with the app's Service Account credentials
+
+  private final Provider<StaticNotebooksApi> endUserStaticNotebooksApiProvider;
+  private final Provider<StaticNotebooksApi> serviceAccountStaticNotebooksApiProvider;
+
   private final Provider<WorkspacesApi> endUserWorkspacesApiProvider;
   private final Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider;
 
-  private final Provider<StatusApi> statusApiProvider;
-  private final Provider<StaticNotebooksApi> endUserStaticNotebooksApiProvider;
-  private final Provider<StaticNotebooksApi> serviceAccountStaticNotebooksApiProvider;
   private final FirecloudRetryHandler retryHandler;
-
   private final IamCredentialsClient iamCredentialsClient;
   private final HttpTransport httpTransport;
 
@@ -224,13 +231,19 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void createAllOfUsBillingProject(String projectName) {
+  public void createAllOfUsBillingProject(String projectName, String accessTier) {
     if (projectName.contains(WORKSPACE_DELIMITER)) {
       throw new IllegalArgumentException(
           String.format(
               "Attempting to create billing project with name (%s) that contains workspace delimiter (%s)",
               projectName, WORKSPACE_DELIMITER));
     }
+
+    // hardcoded for prototype
+    final Map<String, String> servicePerimeters =
+        ImmutableMap.of(
+            "registered", "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test",
+            "tier2", "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test_2");
 
     FirecloudCreateRawlsBillingProjectFullRequest request =
         new FirecloudCreateRawlsBillingProjectFullRequest()
@@ -239,7 +252,7 @@ public class FireCloudServiceImpl implements FireCloudService {
             .highSecurityNetwork(true)
             .enableFlowLogs(true)
             .privateIpGoogleAccess(true)
-            .servicePerimeter(configProvider.get().firecloud.vpcServicePerimeterName);
+            .servicePerimeter(servicePerimeters.get(accessTier));
 
     BillingApi billingApi = billingApiProvider.get();
     retryHandler.run(

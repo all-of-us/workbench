@@ -166,11 +166,13 @@ public class FireCloudServiceImplTest {
   }
 
   @Test
-  public void testCreateAllOfUsBillingProject() throws Exception {
+  public void testCreateAllOfUsBillingProjectInPerimeter() throws Exception {
     final String servicePerimeter = "a-cloud-with-a-fence-around-it";
+    final String tierName = "registered";
+
     workbenchConfig.firecloud.vpcServicePerimeterName = servicePerimeter;
 
-    service.createAllOfUsBillingProject("project-name");
+    service.createAllOfUsBillingProject("project-name", tierName);
 
     ArgumentCaptor<FirecloudCreateRawlsBillingProjectFullRequest> captor =
         ArgumentCaptor.forClass(FirecloudCreateRawlsBillingProjectFullRequest.class);
@@ -185,6 +187,7 @@ public class FireCloudServiceImplTest {
     assertThat(request.getBillingAccount()).isEqualTo("billingAccounts/test-billing-account");
     assertThat(request.getEnableFlowLogs()).isTrue();
     assertThat(request.getHighSecurityNetwork()).isTrue();
+
     assertThat(request.getServicePerimeter()).isEqualTo(servicePerimeter);
   }
 }

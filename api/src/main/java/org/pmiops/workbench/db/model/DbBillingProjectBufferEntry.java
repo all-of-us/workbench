@@ -27,6 +27,7 @@ public class DbBillingProjectBufferEntry {
   private Timestamp lastStatusChangedTime;
   private Short status;
   private DbUser assignedUser;
+  private String accessTier;
 
   public enum BufferEntryStatus {
     // Sent a request to FireCloud to create a BillingProject. Status of BillingProject is TBD
@@ -100,6 +101,15 @@ public class DbBillingProjectBufferEntry {
     this.assignedUser = assignedUser;
   }
 
+  @Column(name = "access_tier")
+  private String getAccessTier() {
+    return accessTier;
+  }
+
+  public void setAccessTier(String accessTier) {
+    this.accessTier = accessTier;
+  }
+
   @Transient
   public BufferEntryStatus getStatusEnum() {
     return DbStorageEnums.billingProjectBufferEntryStatusFromStorage(status);
@@ -150,6 +160,8 @@ public class DbBillingProjectBufferEntry {
         + getStatusEnum()
         + ", assignedUser="
         + Optional.ofNullable(assignedUser).map(u -> Long.toString(u.getUserId())).orElse("n/a")
+        + ", accessTier="
+        + Optional.ofNullable(accessTier).orElse("n/a")
         + '}';
   }
 

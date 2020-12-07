@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -207,19 +208,22 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private Workspace createWorkspaceImpl(Workspace workspace) {
     validateWorkspaceApiModel(workspace);
 
+    // for prototype
+    final String accessTier =
+        workspace.getName().toLowerCase(Locale.US).contains("tier2") ? "tier2" : "registered";
+
     DbUser user = userProvider.get();
-    String workspaceNamespace;
-    DbBillingProjectBufferEntry bufferedBillingProject;
+    final DbBillingProjectBufferEntry bufferedBillingProject;
     try {
-      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user, accessTier);
     } catch (EmptyBufferException e) {
       throw new TooManyRequestsException();
     }
-    workspaceNamespace = bufferedBillingProject.getFireCloudProjectName();
+    final String billingProject = bufferedBillingProject.getFireCloudProjectName();
 
     // Note: please keep any initialization logic here in sync with CloneWorkspace().
     FirecloudWorkspaceId workspaceId =
-        generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());
+        generateFirecloudWorkspaceId(billingProject, workspace.getName());
     FirecloudWorkspace fcWorkspace = attemptFirecloudWorkspaceCreation(workspaceId);
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
@@ -435,10 +439,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     DbUser user = userProvider.get();
 
+    // for prototype
+    final String accessTier =
+        toWorkspace.getName().toLowerCase(Locale.US).contains("tier2") ? "tier2" : "registered";
+
     String toWorkspaceName;
     DbBillingProjectBufferEntry bufferedBillingProject;
     try {
-      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user, accessTier);
     } catch (EmptyBufferException e) {
       throw new TooManyRequestsException();
     }

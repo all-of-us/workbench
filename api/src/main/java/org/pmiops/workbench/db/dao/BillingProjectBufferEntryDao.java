@@ -22,17 +22,23 @@ public interface BillingProjectBufferEntryDao
 
   DbBillingProjectBufferEntry findByFireCloudProjectName(String fireCloudProjectName);
 
-  @Query("SELECT COUNT(*) FROM DbBillingProjectBufferEntry WHERE status IN (0, 2)")
-  Long getCurrentBufferSize();
+  @Query(
+      "SELECT COUNT(*) FROM DbBillingProjectBufferEntry WHERE status IN (0, 2) AND access_tier = (:tier)")
+  Long getCurrentBufferSizeForAccessTier(@Param("tier") String accessTier);
 
+  // TODO: decide if we care about potential "tier bias" here; it does not take tiers into account
   List<DbBillingProjectBufferEntry> findAllByStatusAndLastStatusChangedTimeLessThan(
       short status, Timestamp timestamp);
 
+  // TODO: decide if we care about potential "tier bias" here; it does not take tiers into account
   List<DbBillingProjectBufferEntry> findTop5ByStatusOrderByLastSyncRequestTimeAsc(short status);
 
-  DbBillingProjectBufferEntry findFirstByStatusOrderByCreationTimeAsc(short status);
+  DbBillingProjectBufferEntry findFirstByStatusAndAccessTierOrderByCreationTimeAsc(
+      short status, String accessTier);
 
   Long countByStatus(short status);
+
+  Long countByStatusAndAccessTier(short status, String accessTier);
 
   default Map<BufferEntryStatus, Long> getCountByStatusMap() {
     return computeProjectCountByStatus().stream()

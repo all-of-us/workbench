@@ -463,7 +463,7 @@ public class WorkspacesControllerTest {
   private void mockBillingProjectBuffer(String projectName) {
     DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
     doReturn(projectName).when(entry).getFireCloudProjectName();
-    doReturn(entry).when(billingProjectBufferService).assignBillingProject(any());
+    doReturn(entry).when(billingProjectBufferService).assignBillingProject(any(), anyString());
   }
 
   private void stubFcUpdateWorkspaceACL() {
