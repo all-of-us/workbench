@@ -2,7 +2,7 @@ import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
-import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
+import {findWorkspace, signIn} from 'utils/test-utils';
 
 describe('Dataset test', () => {
 
@@ -20,8 +20,8 @@ describe('Dataset test', () => {
    */
   // disabled temporarily to merge fitbit concept sets, will fix with RW-5932
   xtest('Can create and rename Dataset', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+
+    await findWorkspace(page);
 
     // Click Add Datasets button
     const dataPage = new WorkspaceDataPage(page);

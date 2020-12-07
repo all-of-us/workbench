@@ -2,7 +2,7 @@ import CohortBuildPage from 'app/page/cohort-build-page';
 import {PhysicalMeasurementsCriteria} from 'app/page/criteria-search-page';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
+import {findWorkspace, signIn} from 'utils/test-utils';
 import {TabLabels} from 'app/page/workspace-base';
 
 describe('Cohorts UI tests', () => {
@@ -18,8 +18,8 @@ describe('Cohorts UI tests', () => {
    * Confirm Discard Changes.
    */
   test('Discard Changes', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+
+    await findWorkspace(page);
 
     // Wait for the Data page.
     const dataPage = new WorkspaceDataPage(page);

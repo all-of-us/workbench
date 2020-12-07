@@ -177,24 +177,20 @@ export async function performAction(
 
 }
 
-export async function createWorkspace(page: Page, cdrVersionName: string = config.defaultCdrVersionName): Promise<WorkspaceCard> {
+export async function createWorkspace(page: Page, workspaceName: string = makeWorkspaceName(), cdrVersionName: string = config.defaultCdrVersionName): Promise<WorkspaceCard> {
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
 
-  const name = makeWorkspaceName();
-
-  await workspacesPage.createWorkspace(name, cdrVersionName);
-  console.log(`Created workspace "${name}" with CDR Version "${cdrVersionName}"`);
+  await workspacesPage.createWorkspace(workspaceName, cdrVersionName);
+  console.log(`Created workspace "${workspaceName}" with CDR version "${cdrVersionName}"`);
   await workspacesPage.load();
 
   const workspaceCard = new WorkspaceCard(page);
-  return workspaceCard.findCard(name);
+  return workspaceCard.findCard(workspaceName);
 }
 
 /**
  * Find a suitable existing workspace, or create one if it does not exist.
- *
- * TODO: this function does a lot of different things.  refactor and split up according to use cases.
  *
  * If the caller specifies a workspace name and it can be found, return it.
  *
@@ -206,13 +202,10 @@ export async function createWorkspace(page: Page, cdrVersionName: string = confi
  * Else choose one of the suitable workspaces randomly.
  *
  * @param page
- * @param opts (all are optional)
- *  alwaysCreate - create a new workspace, regardless of whether a suitable workspace exists
- *  workspaceName - return the workspace with this name if it can be found; default behavior otherwise
+ * @param workspaceName Returns the workspace with this name if it can be found.
+ *  Otherwise, create a new workspace with this name.
  */
-export async function findOrCreateWorkspace(page: Page, opts: {alwaysCreate?: boolean, workspaceName?: string} = {}): Promise<WorkspaceCard> {
-  const {alwaysCreate = false, workspaceName} = opts;
-
+export async function findOrCreateWorkspace(page: Page, workspaceName?: string): Promise<WorkspaceCard> {
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
 
@@ -221,15 +214,15 @@ export async function findOrCreateWorkspace(page: Page, opts: {alwaysCreate?: bo
   if (workspaceName !== undefined) {
     const cardFound = await workspaceCard.findCard(workspaceName);
     if (cardFound != null) {
-      // Workspace card found
+      console.log(`Found workspace "${workspaceName}"`);
       return cardFound;
     }
+    console.warn(`Failed to find workspace "${workspaceName}"`);
   }
 
-  // workspace name not found, or none was specified
-
+  // Workspace name not found, or none was specified
   const existingWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.Owner);
-  if (alwaysCreate || existingWorkspaces.length === 0) {
+  if (existingWorkspaces.length === 0) {
     // Create new workspace
     const name = workspaceName || makeWorkspaceName();
     await workspacesPage.createWorkspace(name);
@@ -238,11 +231,21 @@ export async function findOrCreateWorkspace(page: Page, opts: {alwaysCreate?: bo
     return workspaceCard.findCard(name);
   }
 
-  // Returns one random selected Workspace card.
+  // Default behavior: Returns one random selected Workspace card.
   const oneWorkspaceCard = fp.shuffle(existingWorkspaces)[0];
   const workspaceCardName = await oneWorkspaceCard.getWorkspaceName();
   console.log(`Found workspace "${workspaceCardName}"`);
   return oneWorkspaceCard;
+}
+
+/**
+ * Find the workspace and Open Workspace Data page.
+ * @param {Page} page
+ * @param {string} workspaceName
+ */
+export async function findWorkspace(page: Page, workspaceName?: string): Promise<string> {
+  const workspaceCard = await findOrCreateWorkspace(page, workspaceName);
+  return workspaceCard.clickWorkspaceName();
 }
 
 export async function centerPoint(element: ElementHandle): Promise<[number, number]> {

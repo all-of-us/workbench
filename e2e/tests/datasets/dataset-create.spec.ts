@@ -3,7 +3,7 @@ import ClrIconLink from 'app/element/clr-icon-link';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {Option, ResourceCard} from 'app/text-labels';
-import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
+import {findWorkspace, signIn} from 'utils/test-utils';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 
 describe('Dataset test', () => {
@@ -22,8 +22,8 @@ describe('Dataset test', () => {
    * - Delete Dataset.
    */
   test('Can create Dataset with user-defined Cohorts', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+
+    await findWorkspace(page);
 
     // Click Add Cohorts button
     const dataPage = new WorkspaceDataPage(page);

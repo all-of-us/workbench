@@ -1,10 +1,8 @@
 import {Page} from 'puppeteer';
-
 import Button from 'app/element/button';
 import {Language, LinkText, PageUrl} from 'app/text-labels';
 import WorkspaceEditPage, {FIELD as EDIT_FIELD} from 'app/page/workspace-edit-page';
 import RadioButton from 'app/element/radiobutton';
-import {findOrCreateWorkspace} from 'utils/test-utils';
 import {waitForDocumentTitle, waitForText, waitWhileLoading} from 'utils/waits-utils';
 import ReactSelect from 'app/element/react-select';
 import WorkspaceDataPage from './workspace-data-page';
@@ -152,8 +150,8 @@ export default class WorkspacesPage extends AuthenticatedPage {
    */
   async createNotebook(opts: {workspaceName: string, notebookName: string, lang?: Language}): Promise<WorkspaceAnalysisPage> {
     const {workspaceName, notebookName, lang} = opts;
-    const workspaceCard = await findOrCreateWorkspace(this.page, {workspaceName, alwaysCreate: true});
-    await workspaceCard.clickWorkspaceName();
+    await this.createWorkspace(workspaceName);
+    console.log(`Created workspace "${workspaceName}"`);
 
     const dataPage = new WorkspaceDataPage(this.page);
     const notebookPage = await dataPage.createNotebook(notebookName, lang); // Python 3 is the default
