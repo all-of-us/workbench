@@ -108,7 +108,7 @@ public class WorkbenchConfig {
     public Integer notebookRuntimeDefaultDiskSizeGb;
     @Deprecated // replaced by AccessTierConfig.authDomainName
     public String registeredDomainName;
-    @Deprecated // replaced by AccessTierConfig.authDomainGroup
+    @Deprecated // replaced by AccessTierConfig.authDomainGroupEmail
     public String registeredDomainGroup;
     public String leoBaseUrl;
     // This value specifies the information we hand to Terra as our AppId header.
@@ -307,6 +307,6 @@ public class WorkbenchConfig {
     // Terra Authorization Domain for workspaces in thie tier
     public String authDomainName;
     // Terra Group / Google Group corresponding to the auth domain
-    public String authDomainGroup;
+    public String authDomainGroupEmail;
   }
 }

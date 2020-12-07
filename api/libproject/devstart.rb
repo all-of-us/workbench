@@ -2431,7 +2431,7 @@ end
 
 # TODO for CDR DB
 def get_auth_domain_group(project)
-  return get_access_tier_config(project, "registered")["authDomainGroup"]
+  return get_access_tier_config(project, "registered")["authDomainGroupEmail"]
 end
 
 def get_firecloud_base_url(project)
