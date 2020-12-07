@@ -75,7 +75,6 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
 
     const notebook = new NotebookPage(this.page, notebookName);
     await notebook.waitForLoad();
-    await notebook.waitForKernelIdle();
     return notebook;
   }
 
@@ -107,7 +106,8 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     const notebookCard = await resourceCard.findCard(notebookName, ResourceCard.Notebook);
     await notebookCard.selectSnowmanMenu(Option.CopyToAnotherWorkspace, {waitForNav: false});
     // Fill out modal fields.
-    const copyModal = await new CopyModal(this.page);
+    const copyModal = new CopyModal(this.page);
+    await copyModal.waitForLoad();
     await copyModal.copyToAnotherWorkspace(destinationWorkspace, destinationNotebookName);
   }
 

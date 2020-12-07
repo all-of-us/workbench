@@ -8,8 +8,9 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {Option, Language, LinkText, ResourceCard, WorkspaceAccessLevel} from 'app/text-labels';
 import {config} from 'resources/workbench-config';
 import {makeRandomName} from 'utils/str-utils';
-import {createWorkspace, signIn, signInAs, signOut} from 'utils/test-utils';
+import {createWorkspace, findOrCreateWorkspace, signIn, signInAs, signOut} from 'utils/test-utils';
 import {waitWhileLoading} from 'utils/waits-utils';
+import WorkspacesPage from 'app/page/workspaces-page';
 
 jest.setTimeout(20 * 60 * 1000);
 
@@ -33,7 +34,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
   test('Workspace reader copy notebook to another workspace', async () => {
     const workspaceName = await createWorkspace(page).then(card => card.clickWorkspaceName());
 
-    const dataPage = new WorkspaceDataPage(page);
+    let dataPage = new WorkspaceDataPage(page);
     const notebookName = makeRandomName('py');
     const notebook = await dataPage.createNotebook(notebookName, Language.Python);
 
@@ -43,8 +44,17 @@ describe('Workspace reader Jupyter notebook action tests', () => {
     expect(Number.parseInt(cellOutput, 10)).toEqual(2);
     await notebook.save();
 
-    const analysisPage = await notebook.goAnalysisPage();
-    await analysisPage.openAboutPage();
+    await notebook.goAnalysisPage();
+
+    // Reload workspace: workaround for https://precisionmedicineinitiative.atlassian.net/browse/RW-6002
+    await page.waitFor(10000);
+    const workspacesPage = new WorkspacesPage(page);
+    await workspacesPage.load();
+    await WorkspaceCard.findCard(page, workspaceName).then(card => card.clickWorkspaceName());
+
+    dataPage = new WorkspaceDataPage(page);
+    await dataPage.openAboutPage();
+    // End of workaround
 
     const aboutPage = new WorkspaceAboutPage(page);
     await aboutPage.waitForLoad();
@@ -56,10 +66,10 @@ describe('Workspace reader Jupyter notebook action tests', () => {
     await signOut(page);
 
     // Sign in as collaborator in new Incognito page.
-    const newPage = await signInAs(page, config.collaboratorUsername, config.userPassword);
+    const newPage = await signInAs(config.collaboratorUsername, config.userPassword);
 
     // Create a new Workspace. This is the copy to workspace.
-    const collaboratorWorkspaceName = await createWorkspace(newPage).then(card => card.getWorkspaceName());
+    const collaboratorWorkspaceName = await findOrCreateWorkspace(newPage).then((card) => card.getWorkspaceName());
 
     // Verify shared Workspace Access Level is READER.
     const workspaceCard = await WorkspaceCard.findCard(newPage, workspaceName);

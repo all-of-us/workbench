@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import {Frame, Page} from 'puppeteer';
+import {ElementHandle, Frame, Page} from 'puppeteer';
 import {getPropValue} from 'utils/element-utils';
 import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 import {ResourceCard} from 'app/text-labels';
@@ -45,7 +45,13 @@ export default class NotebookPage extends AuthenticatedPage {
 
   async isLoaded(): Promise<boolean> {
     await waitForDocumentTitle(this.page, this.documentTitle);
-    await this.waitForKernelIdle(30000);
+    try {
+      await this.findRunButton(120000);
+    } catch (err) {
+      console.log(`Reloading "${this.documentTitle}" because cannot find the Run button`);
+      await this.page.reload({waitUntil: ['networkidle0', 'load']});
+    }
+    await this.waitForKernelIdle(120000);
     return true;
   }
 
@@ -68,9 +74,9 @@ export default class NotebookPage extends AuthenticatedPage {
    * Run focused cell and insert a new cell below. Click Run button in toolbar.
    */
   async run(): Promise<void> {
-    const frame = await this.getIFrame();
-    const runButton = await frame.waitForSelector(CssSelector.runCellButton, {visible: true});
+    const runButton = await this.findRunButton();
     await runButton.click();
+    await this.page.waitFor(1000);
     await runButton.dispose();
   }
 
@@ -235,6 +241,11 @@ export default class NotebookPage extends AuthenticatedPage {
   private async getIFrame(): Promise<Frame> {
     const frame = await this.page.waitForSelector('iframe[src*="notebooks"]');
     return frame.contentFrame();
+  }
+
+  private async findRunButton(timeout?: number): Promise<ElementHandle> {
+    const frame = await this.getIFrame();
+    return frame.waitForSelector(CssSelector.runCellButton, {visible: true, timeout});
   }
 
   // ****************************************************************************

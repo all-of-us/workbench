@@ -64,4 +64,13 @@ export default class SnowmanMenu extends Container {
     return new Link(this.page, selector);
   }
 
+  async existsMenu(): Promise<boolean> {
+    try {
+      await this.page.waitForXPath(this.getXpath(), {visible: true});
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
 }
