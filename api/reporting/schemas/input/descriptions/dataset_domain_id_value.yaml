@@ -1,0 +1,7 @@
+dataset_domain_id_value:
+  data_set_id: >
+    Foreign key into dataset table. Uniquely associates this Domain ID/Value pair with this dataset.
+  domain_id: >
+    Numerical ID for domain associated with a value (column) name.
+  value: >
+    Human-readable name in ALL CAPS for this column (value).

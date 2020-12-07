@@ -1,0 +1,5 @@
+dataset_concept_set:
+  concept_set_id: >
+    Unique concept set identifier. FK into concept_set table.
+  dataset_id: >
+    FK for dataset table.
