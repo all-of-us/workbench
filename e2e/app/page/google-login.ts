@@ -174,7 +174,7 @@ export default class GoogleLoginPage {
       await Promise.all([
         this.page.waitForNavigation({waitUntil: ['networkidle2', 'load'], timeout: 30000}),
         this.page.keyboard.press(String.fromCharCode(13)), // press Enter key
-        this.page.waitForSelector('app-signed-in', {timeout: 30000}),
+        this.page.waitForSelector('app-signed-in', {timeout: 0}),
       ]);
       await elementHandle.dispose();
       return true;
