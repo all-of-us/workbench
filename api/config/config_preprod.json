@@ -118,7 +118,7 @@
   },
   "reporting": {
     "dataset": "reporting_preprod",
-    "maxRowsPerInsert": 200,
+    "maxRowsPerInsert": 800,
     "uploadMethod": "STREAMING"
   }
 }
