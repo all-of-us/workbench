@@ -15,7 +15,7 @@ export default class CdrVersionUpgradeModal extends Modal {
     async isLoaded(): Promise<boolean> {
         const xpath = '//*[@data-test-id="cdr-version-upgrade-modal"]';
         await Promise.all([
-            this.page.waitForXPath(xpath),
+            this.page.waitForXPath(xpath, {visible: true}),
             waitWhileLoading(this.page),
         ]);
         return true;

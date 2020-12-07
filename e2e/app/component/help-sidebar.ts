@@ -94,11 +94,13 @@ export default class HelpSidebar extends Container {
   async clickSaveCriteriaButton(): Promise<void> {
     await this.clickSidebarButton(LinkText.SaveCriteria);
     await this.waitUntilSectionHidden(SectionSelectors.SelectionList);
+    await this.page.waitForXPath(this.xpath, {visible: false});
   }
 
   async clickSaveConceptSetButton(): Promise<void> {
     await this.clickSidebarButton(LinkText.SaveConceptSet);
     await this.waitUntilSectionHidden(SectionSelectors.SelectionList);
+    await this.page.waitForXPath(this.xpath, {visible: false});
   }
 
   async waitForParticipantResult(): Promise<string> {
@@ -111,6 +113,6 @@ export default class HelpSidebar extends Container {
   }
 
   waitUntilSectionHidden(xpath: string): Promise<ElementHandle> {
-    return this.page.waitForXPath(xpath, {hidden: true});
+    return this.page.waitForXPath(xpath, {hidden: true, visible: false});
   }
 }

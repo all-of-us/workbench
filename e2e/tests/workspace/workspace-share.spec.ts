@@ -78,7 +78,7 @@ describe('Share workspace', () => {
       await signOut(page);
 
       // To verify READER role assigned correctly, user with READER role will sign in in new Incognito page.
-      const newPage = await signInAs(page, config.collaboratorUsername, config.userPassword);
+      const newPage = await signInAs(config.collaboratorUsername, config.userPassword);
 
       const homePage = new HomePage(newPage);
       await homePage.getSeeAllWorkspacesLink().then((link) => link.click());

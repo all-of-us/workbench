@@ -20,24 +20,25 @@ export default class HomePage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await Promise.all([
-      waitForDocumentTitle(this.page, PageTitle),
-      waitWhileLoading(this.page)
+    await waitForDocumentTitle(this.page, PageTitle);
+    // Look for "See All Workspaces" link.
+    await this.getSeeAllWorkspacesLink().then( (element) => element.asElementHandle());
+    await waitWhileLoading(this.page);
+    // Look for either a workspace card or the "Create your first workspace" msg.
+    await Promise.race([
+      this.page.waitForXPath('//*[@data-test-id="workspace-card"]', {visible: true}),
+      this.page.waitForXPath('//text()[contains(., "Create your first workspace")]', {visible: true}),
     ]);
-    await Promise.all([
-      // Look for "See All Workspaces" link.
-      this.getSeeAllWorkspacesLink().then( (element) => element.asElementHandle()),
-      // Look for either a workspace card or the "Create your first workspace" msg.
-      Promise.race([
-        this.page.waitForXPath('//*[@data-test-id="workspace-card"]', {visible: true}),
-        this.page.waitForXPath('//text()[contains(., "Create your first workspace")]', {visible: true}),
-      ]),
+    try {
       // Look for either the recent-resources table or the getting-started msg.
-      Promise.race([
+      await Promise.race([
         this.page.waitForXPath('//*[@data-test-id="recent-resources-table"]', {visible: true}),
         this.page.waitForXPath('//*[@data-test-id="getting-started"]', {visible: true}),
-      ]),
-    ]);
+      ]);
+    } catch (err) {
+      // Bug https://precisionmedicineinitiative.atlassian.net/browse/RW-6005
+      // ignore error
+    }
     return true;
   }
 

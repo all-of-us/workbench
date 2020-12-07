@@ -37,7 +37,6 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
 
     const notebookPage = new NotebookPage(this.page, notebookName);
     await notebookPage.waitForLoad();
-    await notebookPage.waitForKernelIdle();
     return notebookPage;
   }
 

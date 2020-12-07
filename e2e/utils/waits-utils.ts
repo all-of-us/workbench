@@ -71,8 +71,7 @@ export async function waitForPropertyEquality(page: Page,
 }
 
 export async function waitForNumericalString(page: Page, xpath: string, timeOut?: number): Promise<string> {
-  await page.waitForXPath(xpath, {visible: true});
-
+  await page.waitForXPath(xpath, {visible: true, timeout: timeOut});
   const numbers =  await page.waitForFunction( xpathSelector => {
     const node = document.evaluate(xpathSelector, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
     if (node !== null) {
@@ -242,7 +241,7 @@ export async function waitForText(page: Page,
     }
   } else {
     try {
-      await page.waitForXPath(selector.xpath, {visible: true});
+      await page.waitForXPath(selector.xpath, {visible: true, timeout:  timeOut});
       const jsHandle = await page.waitForFunction((xpath, expText) => {
         const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
         return element && element.textContent.includes(expText);

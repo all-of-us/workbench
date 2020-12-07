@@ -11,6 +11,10 @@ describe('Editing workspace via workspace card snowman menu', () => {
     await signIn(page);
   });
 
+  // Reuse same Workspace for all tests in this file to reduce test playback time.
+  // Workspace to be created in first test. If first test fails, next test will create it.
+  let workspaceName: string;
+
   /**
    * Test:
    * - Find an existing workspace. Create a new workspace if none exists.
@@ -20,6 +24,7 @@ describe('Editing workspace via workspace card snowman menu', () => {
    */
   test('User as OWNER can edit workspace', async () => {
     const workspaceCard = await createWorkspace(page);
+    workspaceName = await workspaceCard.getWorkspaceName();
     await workspaceCard.selectSnowmanMenu(Option.Edit);
 
     const workspaceEditPage = new WorkspaceEditPage(page);
@@ -84,7 +89,7 @@ describe('Editing workspace via workspace card snowman menu', () => {
    */
 
   test('User as OWNER can edit workspace via workspace action menu', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page);
+    const workspaceCard = await findOrCreateWorkspace(page, {workspaceName});
     await workspaceCard.getWorkspaceName();
 
     // Verify Workspace Access Level is OWNER.
