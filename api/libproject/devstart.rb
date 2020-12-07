@@ -1286,12 +1286,18 @@ def create_auth_domain(cmd_name, args)
   op.add_option(
     "--project [project]",
     ->(opts, v) { opts.project = v},
-    "Project to create the authorization domain"
+    "Workbench Project (environment) for creating the authorization domain"
   )
+  op.add_option(
+    "--user [user]",
+    ->(opts, v) { opts.user = v},
+    "A Workbench user you control with DEVELOPER Authority in the environment"
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.user}
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{gcloud auth login}
+  common.run_inline %W{gcloud auth login #{op.opts.user}}
   token = common.capture_stdout %W{gcloud auth print-access-token}
   token = token.chomp
   header = "Authorization: Bearer #{token}"
