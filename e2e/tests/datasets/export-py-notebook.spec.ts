@@ -4,7 +4,7 @@ import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {Option, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
-import {findWorkspace, signIn} from 'utils/test-utils';
+import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 
 describe('Create Dataset', () => {
@@ -20,7 +20,7 @@ describe('Create Dataset', () => {
    // disabled temporarily to merge fitbit concept sets, will fix with RW-5932
   xtest('Export dataset to notebook in Python language', async () => {
 
-    await findWorkspace(page);
+    await findOrCreateWorkspace(page);
 
     // Click Add Datasets button.
     const dataPage = new WorkspaceDataPage(page);
@@ -83,7 +83,7 @@ describe('Create Dataset', () => {
   // disabled temporarily to merge fitbit concept sets, will fix with RW-5932
   xtest('Export dataset to notebook thru snowman menu', async () => {
 
-    await findWorkspace(page);
+    await findOrCreateWorkspace(page);
 
     // Click Add Datasets button.
     const dataPage = new WorkspaceDataPage(page);

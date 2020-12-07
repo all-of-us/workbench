@@ -1,7 +1,7 @@
 import NotebookDownloadModal from 'app/page/notebook-download-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {makeRandomName} from 'utils/str-utils';
-import {findWorkspace, signIn} from 'utils/test-utils';
+import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {getPropValue} from 'utils/element-utils';
 import {waitForFn} from 'utils/waits-utils';
 
@@ -45,7 +45,7 @@ describe('Jupyter notebook download test', () => {
    */
   test('download notebook with policy warnings', async () => {
 
-    await findWorkspace(page);
+    await findOrCreateWorkspace(page);
 
     const dataPage = new WorkspaceDataPage(page);
     const notebookName = makeRandomName('py');

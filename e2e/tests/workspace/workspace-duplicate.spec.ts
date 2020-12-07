@@ -1,4 +1,4 @@
-import {findWorkspace, findOrCreateWorkspace, signIn} from 'utils/test-utils';
+import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {Option} from 'app/text-labels';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import Navigation, {NavLink} from 'app/component/navigation';
@@ -51,7 +51,7 @@ describe('Duplicate workspace', () => {
     });
 
   test('OWNER can duplicate workspace via Workspace action menu', async () => {
-      await findWorkspace(page);
+      await findOrCreateWorkspace(page);
 
       const dataPage = new WorkspaceDataPage(page);
       await dataPage.selectWorkspaceAction(Option.Duplicate);

@@ -205,7 +205,10 @@ export async function createWorkspace(page: Page, workspaceName: string = makeWo
  * @param workspaceName Returns the workspace with this name if it can be found.
  *  Otherwise, create a new workspace with this name.
  */
-export async function findOrCreateWorkspace(page: Page, workspaceName?: string): Promise<WorkspaceCard> {
+export async function findOrCreateWorkspace(page: Page, opts: { workspaceName?: string, openWorkspace?: boolean } = {} ): Promise<WorkspaceCard | null> {
+
+  const {openWorkspace = true, workspaceName} = opts;
+
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
 
@@ -215,7 +218,7 @@ export async function findOrCreateWorkspace(page: Page, workspaceName?: string):
     const cardFound = await workspaceCard.findCard(workspaceName);
     if (cardFound != null) {
       console.log(`Found workspace "${workspaceName}"`);
-      return cardFound;
+      if (openWorkspace) await cardFound.clickWorkspaceName(); else return cardFound;
     }
     console.warn(`Failed to find workspace "${workspaceName}"`);
   }
@@ -227,25 +230,17 @@ export async function findOrCreateWorkspace(page: Page, workspaceName?: string):
     const name = workspaceName || makeWorkspaceName();
     await workspacesPage.createWorkspace(name);
     console.log(`Created workspace "${name}"`);
-    await workspacesPage.load();
-    return workspaceCard.findCard(name);
+    if (!openWorkspace) {
+      await workspacesPage.load();
+      return workspaceCard.findCard(name);
+    }
   }
 
   // Default behavior: Returns one random selected Workspace card.
   const oneWorkspaceCard = fp.shuffle(existingWorkspaces)[0];
   const workspaceCardName = await oneWorkspaceCard.getWorkspaceName();
   console.log(`Found workspace "${workspaceCardName}"`);
-  return oneWorkspaceCard;
-}
-
-/**
- * Find the workspace and Open Workspace Data page.
- * @param {Page} page
- * @param {string} workspaceName
- */
-export async function findWorkspace(page: Page, workspaceName?: string): Promise<string> {
-  const workspaceCard = await findOrCreateWorkspace(page, workspaceName);
-  return workspaceCard.clickWorkspaceName();
+  if (openWorkspace) await oneWorkspaceCard.clickWorkspaceName(); else return oneWorkspaceCard;
 }
 
 export async function centerPoint(element: ElementHandle): Promise<[number, number]> {

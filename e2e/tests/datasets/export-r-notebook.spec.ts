@@ -3,7 +3,7 @@ import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import {makeRandomName} from 'utils/str-utils';
-import {findWorkspace, signIn} from 'utils/test-utils';
+import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import {Ethnicity} from 'app/page/cohort-search-page';
@@ -23,7 +23,8 @@ describe('Create Dataset', () => {
   // disabled temporarily to merge fitbit concept sets, will fix with RW-5932
   xtest('Export dataset to notebook in R language', async () => {
 
-    const workspaceName = await findWorkspace(page);
+    const card = await findOrCreateWorkspace(page, {openWorkspace: false});
+    const workspaceName = await card.clickWorkspaceName();
 
     // Click Add Datasets button
     const dataPage = new WorkspaceDataPage(page);

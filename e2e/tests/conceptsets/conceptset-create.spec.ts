@@ -2,7 +2,7 @@ import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
 import DataResourceCard from 'app/component/data-resource-card';
 import ConceptSetActionsPage from 'app/page/conceptset-actions-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {findWorkspace, signIn} from 'utils/test-utils';
+import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import {ResourceCard} from 'app/text-labels';
 
@@ -20,7 +20,7 @@ describe('Create Concept Sets from Domains', () => {
   // disabled temporarily to merge fitbit concept sets, will fix with RW-5932
   xtest('Create Concept Set from Conditions domain', async () => {
 
-    await findWorkspace(page);
+    await findOrCreateWorkspace(page);
 
     // Click Add Datasets button.
     const dataPage = new WorkspaceDataPage(page);
@@ -83,7 +83,7 @@ describe('Create Concept Sets from Domains', () => {
   // disabled temporarily to merge fitbit concept sets, will fix with RW-5932
   xtest('Create Concept Sets from Drug Exposures and Measurements domains', async () => {
 
-    await findWorkspace(page);
+    await findOrCreateWorkspace(page);
 
     // Click Add Datasets button.
     const dataPage = new WorkspaceDataPage(page);
