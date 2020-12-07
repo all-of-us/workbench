@@ -49,6 +49,7 @@ OUTPUTS = {
     :bigquery_insertion_payload_transformer => to_output_path('query_parameter_columns', 'java'),
     :dto_decl => to_output_path('dto_decl',  'java'),
     :entity_decl => to_output_path('entity_decl',  'java'),
+    :row_mapper => to_output_path('row_mapper', 'java'),
     :yaml_template => to_output_path('yaml_template', 'yaml'),
     :yaml_everything => to_output_path('yaml_everything', 'yaml')
 }.freeze
@@ -79,7 +80,8 @@ MYSQL_TYPE_TO_SIMPLE_TYPE = {
         :swagger => {
             'type' => 'string',
             'format' => 'date-time'
-        }
+        },
+        'dto' => 'OffsetDateTime'
     },
     'bigint' => {
         :bigquery => 'INTEGER',
@@ -300,6 +302,12 @@ def to_property_name(column_name)
   to_swagger_name(column_name, false)
 end
 
+SWAGGER_TYPE_TO_RESULT_SET_METHOD = {
+    'long' => 'getLong',
+    'int' => 'getInt',
+    'String' => 'getString'
+}
+
 DESCRIPTIONS = File.exist?(INPUTS[:descriptions]) ?
                    YAML.load_file(INPUTS[:descriptions])[TABLE_HASH[:name]] :
                    {}
@@ -354,7 +362,7 @@ FIXED_COLUMNS = [
 ]
 
 BIG_QUERY_SCHEMA = FIXED_COLUMNS.concat(COLUMNS.map do |col|
-  { :name => col[:name], :type => col[:big_query_type], :description => col[:description].strip}
+  { :name => col[:name], :type => col[:big_query_type], :description => col[:description].strip }
 end).freeze
 
 schema_json = JSON.pretty_generate(BIG_QUERY_SCHEMA)
@@ -607,6 +615,32 @@ ENTITY_DECL = ("final #{TABLE_HASH[:entity_class]} #{TABLE_HASH[:instance_name]}
 
 write_output(OUTPUTS[:entity_decl], ENTITY_DECL, "Entity Class Instance Declaration")
 
+def result_set_function(column)
+  if (column[:is_enum])
+    'getShort'
+  else
+    "get#{column[:projection_type]}" # mostly works
+  end
+end
+
+### RowMapper
+#
+ROW_MAPPERS = 'return jdbcTemplate.query(' + "\n" +
+    '"SELECT \n"' + COLUMNS.map do |col| \
+      "  + \"  #{col[:name]}" \
+end.join(",\\n\"\n") +
+      "\\n\"\n" +
+      "+ \"FROM #{TABLE_HASH[:name]}).\"\n" +
+    "(rs, unused) ->\n" +
+    "new #{TABLE_HASH[:dto_class]}()\n" +
+    COLUMNS.map do |col| \
+        "    .#{col[:swagger_property_name]}(" +
+        "rs.#{result_set_function(col)}(\"#{col[:name]}\")" +
+        ")"
+    end.join("\n") +
+    ' )'
+
+write_output(OUTPUTS[:row_mapper], ROW_MAPPERS, 'Row Mappeers')
 ### Empty schema description input file
 
 DESCRIPTION_YAML_TEMPLATE = {
