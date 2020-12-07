@@ -1,7 +1,7 @@
-import {Button, Clickable, Link, MenuItem} from 'app/components/buttons';
+import {Button, Clickable, Link} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
-import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
+import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
 import {WarningMessage} from 'app/components/warning-message';
@@ -353,59 +353,46 @@ const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
 const PresetSelector = ({
   hasMicroarrayData, setSelectedDiskSize, setSelectedMachine,
   setSelectedCompute, setSelectedDataprocConfig, disabled}) => {
-  return <PopupTrigger side='bottom'
-                closeOnClick
-                disabled={disabled}
-                content={
-                  <React.Fragment>
-                    {
-                      fp.flow(
-                        fp.filter(({runtimeTemplate}) => hasMicroarrayData || !runtimeTemplate.dataprocConfig),
-                        fp.toPairs,
-                        fp.map(([i, preset]) => {
-                          return <MenuItem
-                                style={styles.presetMenuItem}
-                                key={i}
-                                aria-label={preset.displayName}
-                                onClick={() => {
-                                  // renaming to avoid shadowing
-                                  const {runtimeTemplate} = preset;
-                                  const {presetDiskSize, presetMachineName, presetCompute} = fp.cond([
-                                    // Can't destructure due to shadowing.
-                                    [() => !!runtimeTemplate.gceConfig, (tmpl: Runtime) => ({
-                                      presetDiskSize: tmpl.gceConfig.diskSize,
-                                      presetMachineName: tmpl.gceConfig.machineType,
-                                      presetCompute: ComputeType.Standard
-                                    })],
-                                    [() => !!runtimeTemplate.dataprocConfig, ({dataprocConfig: {masterDiskSize, masterMachineType}}) => ({
-                                      presetDiskSize: masterDiskSize,
-                                      presetMachineName: masterMachineType,
-                                      presetCompute: ComputeType.Dataproc
-                                    })]
-                                  ])(runtimeTemplate);
-                                  const presetMachineType = findMachineByName(presetMachineName);
+  return <Dropdown
+    id='runtime-presets-menu'
+    disabled={disabled}
+    style={{marginTop: '21px', display: 'inline-block', color: colors.primary}}
+    placeholder='Recommended environments'
+    options={fp.flow(
+      fp.values,
+      fp.filter(({runtimeTemplate}) => hasMicroarrayData || !runtimeTemplate.dataprocConfig),
+      fp.map(({displayName, runtimeTemplate}) => ({label: displayName, value: runtimeTemplate}))
+      )(runtimePresets)
+    }
+    onChange={({value}) => {
+      const {presetDiskSize, presetMachineName, presetCompute} = fp.cond([
+        // Can't destructure due to shadowing.
+        [() => !!value.gceConfig, (tmpl: Runtime) => ({
+          presetDiskSize: tmpl.gceConfig.diskSize,
+          presetMachineName: tmpl.gceConfig.machineType,
+          presetCompute: ComputeType.Standard
+        })],
+        [() => !!value.dataprocConfig, ({dataprocConfig: {masterDiskSize, masterMachineType}}) => ({
+          presetDiskSize: masterDiskSize,
+          presetMachineName: masterMachineType,
+          presetCompute: ComputeType.Dataproc
+        })]
+      ])(value);
 
-                                  setSelectedDiskSize(presetDiskSize);
-                                  setSelectedMachine(presetMachineType);
-                                  setSelectedCompute(presetCompute);
-                                  setSelectedDataprocConfig(runtimeTemplate.dataprocConfig);
-                                }}>
-                              {preset.displayName}
-                            </MenuItem>;
-                        })
-                      )(runtimePresets)
-                    }
-                  </React.Fragment>
-                }>
-    {/* inline-block aligns the popup menu beneath the clickable content, rather than the middle of the panel */}
-    <Clickable
-      disabled={disabled}
-      data-test-id='runtime-presets-menu'
-      style={{display: 'inline-block', ...(disabled ?
-        {color: colorWithWhiteness(colors.dark, .4)} : {})}}>
-      Recommended environments <ClrIcon shape='caret down'/>
-    </Clickable>
-  </PopupTrigger>;
+      const presetMachineType = findMachineByName(presetMachineName);
+      setSelectedDiskSize(presetDiskSize);
+      setSelectedMachine(presetMachineType);
+      setSelectedCompute(presetCompute);
+      setSelectedDataprocConfig(value.dataprocConfig);
+
+      // Return false to skip the normal handling of the value selection. We're
+      // abusing the dropdown here to act as if it were a menu instead.
+      // Therefore, we never want the empty "placeholder" text to change to a
+      // selected value (it should always read "recommended environments"). The presets
+      // are not persistent state, they just snap the rest of the form to a particular configuration.
+      // See RW-5996 for more details.
+      return false;
+    }} />;
 };
 
 const StartStopRuntimeButton = ({workspaceNamespace}) => {
@@ -916,7 +903,7 @@ export const RuntimePanel = fp.flow(
     </Button>;
   };
 
-  return <div data-test-id='runtime-panel'>
+  return <div id='runtime-panel'>
     <h3 style={{...styles.baseHeader, ...styles.bold, ...styles.sectionHeader}}>Cloud analysis environment</h3>
     <div>
       Your analysis environment consists of an application and compute resources.

@@ -111,11 +111,7 @@ describe('RuntimePanel', () => {
   const getNumPreemptibleWorkers = (wrapper) => getInputValue(wrapper, '#num-preemptible');
   const pickNumPreemptibleWorkers = (wrapper, n) => enterNumberInput(wrapper, '#num-preemptible', n);
 
-  const pickPreset = async(wrapper, {displayName}) => {
-    wrapper.find({'data-test-id': 'runtime-presets-menu'}).first().simulate('click');
-    act(() => {(document.querySelector(`#popup-root [aria-label="${displayName}"]`) as HTMLElement).click()});
-    await waitOneTickAndUpdate(wrapper);
-  };
+  const pickPreset = (wrapper, {displayName}) => pickDropdownOption(wrapper, '#runtime-presets-menu', displayName);
 
   const mustClickButton = async(wrapper, label) => {
     const createButton = wrapper.find(Button).find({'aria-label': label}).first();
@@ -130,12 +126,12 @@ describe('RuntimePanel', () => {
     const wrapper = await component();
 
     // Check before ticking - stub returns the runtime asynchronously.
-    expect(!wrapper.exists({'data-test-id': 'runtime-panel'}));
+    expect(!wrapper.exists('#runtime-panel'));
     expect(wrapper.exists(Spinner));
 
     // Now getRuntime returns.
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.exists({'data-test-id': 'runtime-panel'}));
+    expect(wrapper.exists('#runtime-panel'));
     expect(!wrapper.exists(Spinner));
   });
 
@@ -257,7 +253,7 @@ describe('RuntimePanel', () => {
 
     const wrapper = await component();
 
-    expect(wrapper.find({'data-test-id': 'runtime-presets-menu'}).first().prop('disabled')).toBeTruthy();
+    expect(wrapper.find('#runtime-presets-menu').first().prop('disabled')).toBeTruthy();
     expect(wrapper.find('#runtime-cpu').first().prop('disabled')).toBeTruthy();
     expect(wrapper.find(Button).find({'aria-label': 'Next'}).first().prop('disabled')).toBeTruthy();
   });
