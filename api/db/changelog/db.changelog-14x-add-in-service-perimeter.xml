@@ -4,7 +4,7 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-  <changeSet author="thibault" id="changelog-145-add-in-service-perimeter">
+  <changeSet author="thibault" id="changelog-14x-add-in-service-perimeter">
     <addColumn tableName="billing_project_buffer_entry">
       <column name="in_service_perimeter" type="BOOLEAN" defaultValueBoolean="true"/>
     </addColumn>
