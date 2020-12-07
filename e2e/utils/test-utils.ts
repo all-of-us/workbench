@@ -177,7 +177,7 @@ export async function performAction(
 
 }
 
-export async function createWorkspace(page: Page, workspaceName: string = makeWorkspaceName(), cdrVersionName: string = config.defaultCdrVersionName): Promise<WorkspaceCard> {
+export async function createWorkspace(page: Page, cdrVersionName: string = config.defaultCdrVersionName, workspaceName: string = makeWorkspaceName()): Promise<WorkspaceCard> {
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
 
