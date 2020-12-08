@@ -249,4 +249,8 @@ describe('Updating runtime parameters', () => {
     expect(await runtimePanel.getRamGbs()).toBe("30");
     expect(await runtimePanel.getDiskGbs()).toBe(60);
   });
+
+  // TODO: pause/resume
+  // TODO: changes that don't require destroy/create - GCE
+  // TODO: changes that don't require destroy/create - Dataproc
 });
