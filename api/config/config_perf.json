@@ -126,7 +126,7 @@
   },
   "reporting": {
     "dataset": "reporting_perf",
-    "maxRowsPerInsert": 800,
+    "maxRowsPerInsert": 9999,
     "uploadMethod": "STREAMING"
   }
 }
