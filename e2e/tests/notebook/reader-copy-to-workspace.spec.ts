@@ -47,7 +47,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
     await notebook.goAnalysisPage();
 
     // Reload workspace: workaround for https://precisionmedicineinitiative.atlassian.net/browse/RW-6002
-    await page.waitFor(10000);
+    await page.waitForTimeout(10000);
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
     await WorkspaceCard.findCard(page, workspaceName).then(card => card.clickWorkspaceName());

@@ -49,7 +49,7 @@ export default class SelectMenu extends Container {
       if (maxAttempts <= 0) {
         return null;
       }
-      return await this.page.waitFor(2000).then(clickAndCheck); // two seconds pause and retry
+      return await this.page.waitForTimeout(2000).then(clickAndCheck); // two seconds pause and retry
     };
 
     await clickAndCheck();

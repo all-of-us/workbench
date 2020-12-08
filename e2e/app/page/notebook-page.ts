@@ -76,7 +76,7 @@ export default class NotebookPage extends AuthenticatedPage {
   async run(): Promise<void> {
     const runButton = await this.findRunButton();
     await runButton.click();
-    await this.page.waitFor(1000);
+    await this.page.waitForTimeout(1000);
     await runButton.dispose();
   }
 
