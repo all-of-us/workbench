@@ -9,6 +9,8 @@ import com.google.cloud.bigquery.TableId;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -38,9 +40,8 @@ import org.pmiops.workbench.utils.LogFormatters;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ReportingUploadServiceStreamingImpl implements ReportingUploadService {
-  private static final Logger log =
-      Logger.getLogger(ReportingUploadServiceStreamingImpl.class.getName());
+public class ReportingUploadServiceImpl implements ReportingUploadService {
+  private static final Logger log = Logger.getLogger(ReportingUploadServiceImpl.class.getName());
   private static final InsertAllRequestPayloadTransformer<ReportingCohort> cohortRequestBuilder =
       CohortColumnValueExtractor::values;
   private static final InsertAllRequestPayloadTransformer<ReportingDatasetCohort>
@@ -63,7 +64,7 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
   private final Provider<WorkbenchConfig> configProvider;
   private final Provider<Stopwatch> stopwatchProvider;
 
-  public ReportingUploadServiceStreamingImpl(
+  public ReportingUploadServiceImpl(
       BigQueryService bigQueryService,
       ReportingVerificationService reportingVerificationService,
       Provider<WorkbenchConfig> configProvider,
@@ -77,8 +78,8 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
   @Override
   public void uploadSnapshot(ReportingSnapshot reportingSnapshot) {
     final Stopwatch stopwatch = stopwatchProvider.get();
-    final ImmutableMap.Builder<TableId, InsertAllResponse> responseMapBuilder =
-        ImmutableMap.builder();
+    final ImmutableMultimap.Builder<TableId, InsertAllResponse> responseMapBuilder =
+        ImmutableMultimap.builder();
     final List<InsertAllRequest> insertAllRequests = getInsertAllRequests(reportingSnapshot);
     final StringBuilder performanceStringBuilder = new StringBuilder();
     for (InsertAllRequest request : insertAllRequests) {
@@ -86,13 +87,14 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
       final InsertAllResponse currentResponse = bigQueryService.insertAll(request);
       responseMapBuilder.put(request.getTable(), currentResponse);
       stopwatch.stop();
-      performanceStringBuilder.append(
-          LogFormatters.rate(
+      performanceStringBuilder
+          .append(
+              LogFormatters.rate(
                   String.format("Streaming upload into %s table", request.getTable().getTable()),
                   stopwatch.elapsed(),
                   request.getRows().size(),
-                  "rows")
-              + "\n");
+                  "rows"))
+          .append("\n");
       stopwatch.reset();
     }
     log.info(performanceStringBuilder.toString());
@@ -100,16 +102,11 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
   }
 
   private void checkResponseAndRowCounts(
-      ReportingSnapshot reportingSnapshot, ImmutableMap<TableId, InsertAllResponse> responseMap) {
+      ReportingSnapshot reportingSnapshot,
+      ImmutableMultimap<TableId, InsertAllResponse> responseMap) {
     checkResponse(responseMap);
 
     reportingVerificationService.verifyAndLog(reportingSnapshot);
-  }
-
-  private TableId getTableId(String tableName) {
-    final String projectId = configProvider.get().server.projectId;
-    final String dataset = configProvider.get().reporting.dataset;
-    return TableId.of(projectId, dataset, tableName);
   }
 
   private <E extends Enum<E> & ColumnValueExtractor<?>> TableId getTableId(
@@ -123,51 +120,70 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
   private List<InsertAllRequest> getInsertAllRequests(ReportingSnapshot reportingSnapshot) {
     final Map<String, Object> fixedValues =
         ImmutableMap.of("snapshot_timestamp", reportingSnapshot.getCaptureTimestamp());
+    // The maxRowsForInsert parameter is in use by the insert query implementation, but that code is
+    // being removed, freeing it to be used here.
+    final int batchSize = configProvider.get().reporting.maxRowsPerInsert;
+    final ImmutableList.Builder<InsertAllRequest> resultBuilder = ImmutableList.builder();
 
-    return ImmutableList.of(
-            cohortRequestBuilder.build(
-                getTableId(CohortColumnValueExtractor.class),
-                reportingSnapshot.getCohorts(),
-                fixedValues),
-            datasetRequestBuilder.build(
-                getTableId(DatasetColumnValueExtractor.class),
-                reportingSnapshot.getDatasets(),
-                fixedValues),
-            datasetCohortRequestBuilder.build(
-                getTableId(DatasetCohortColumnValueExtractor.class),
-                reportingSnapshot.getDatasetCohorts(),
-                fixedValues),
-            datasetConceptSetRequestBuilder.build(
-                getTableId(DatasetConceptSetColumnValueExtractor.class),
-                reportingSnapshot.getDatasetConceptSets(),
-                fixedValues),
-            datasetDomainIIdValueRequestBuilder.build(
-                getTableId(DatasetDomainColumnValueExtractor.class),
-                reportingSnapshot.getDatasetDomainIdValues(),
-                fixedValues),
-            institutionRequestBuilder.build(
-                getTableId(InstitutionColumnValueExtractor.class),
-                reportingSnapshot.getInstitutions(),
-                fixedValues),
-            userRequestBuilder.build(
-                getTableId(UserColumnValueExtractor.class),
-                reportingSnapshot.getUsers(),
-                fixedValues),
-            workspaceRequestBuilder.build(
-                getTableId(WorkspaceColumnValueExtractor.class),
-                reportingSnapshot.getWorkspaces(),
-                fixedValues))
-        .stream()
+    resultBuilder.addAll(
+        cohortRequestBuilder.buildBatchedRequests(
+            getTableId(CohortColumnValueExtractor.class),
+            reportingSnapshot.getCohorts(),
+            fixedValues,
+            batchSize));
+    resultBuilder.addAll(
+        datasetRequestBuilder.buildBatchedRequests(
+            getTableId(DatasetColumnValueExtractor.class),
+            reportingSnapshot.getDatasets(),
+            fixedValues,
+            batchSize));
+    resultBuilder.addAll(
+        datasetCohortRequestBuilder.buildBatchedRequests(
+            getTableId(DatasetCohortColumnValueExtractor.class),
+            reportingSnapshot.getDatasetCohorts(),
+            fixedValues,
+            batchSize));
+    resultBuilder.addAll(
+        datasetConceptSetRequestBuilder.buildBatchedRequests(
+            getTableId(DatasetConceptSetColumnValueExtractor.class),
+            reportingSnapshot.getDatasetConceptSets(),
+            fixedValues,
+            batchSize));
+    resultBuilder.addAll(
+        datasetDomainIIdValueRequestBuilder.buildBatchedRequests(
+            getTableId(DatasetDomainColumnValueExtractor.class),
+            reportingSnapshot.getDatasetDomainIdValues(),
+            fixedValues,
+            batchSize));
+    resultBuilder.addAll(
+        institutionRequestBuilder.buildBatchedRequests(
+            getTableId(InstitutionColumnValueExtractor.class),
+            reportingSnapshot.getInstitutions(),
+            fixedValues,
+            batchSize));
+    resultBuilder.addAll(
+        userRequestBuilder.buildBatchedRequests(
+            getTableId(UserColumnValueExtractor.class),
+            reportingSnapshot.getUsers(),
+            fixedValues,
+            batchSize));
+    resultBuilder.addAll(
+        workspaceRequestBuilder.buildBatchedRequests(
+            getTableId(WorkspaceColumnValueExtractor.class),
+            reportingSnapshot.getWorkspaces(),
+            fixedValues,
+            batchSize));
+    return resultBuilder.build().stream()
         .filter(r -> r.getRows().size() > 0)
         .collect(ImmutableList.toImmutableList());
   }
 
-  private void checkResponse(Map<TableId, InsertAllResponse> tableIdToResponse) {
+  private void checkResponse(Multimap<TableId, InsertAllResponse> tableIdToResponses) {
     final boolean anyErrors =
-        tableIdToResponse.values().stream().anyMatch(InsertAllResponse::hasErrors);
+        tableIdToResponses.values().stream().anyMatch(InsertAllResponse::hasErrors);
 
     if (anyErrors) {
-      for (Map.Entry<TableId, InsertAllResponse> entry : tableIdToResponse.entrySet()) {
+      for (Map.Entry<TableId, InsertAllResponse> entry : tableIdToResponses.entries()) {
         final TableId tableId = entry.getKey();
         final InsertAllResponse response = entry.getValue();
         if (response.hasErrors()) {
@@ -190,7 +206,7 @@ public class ReportingUploadServiceStreamingImpl implements ReportingUploadServi
       throw new RuntimeException(
           String.format(
               "Encountered errors in %d tables in upload to BigQuery.",
-              tableIdToResponse.keySet().size()));
+              tableIdToResponses.keySet().size()));
     }
   }
 }

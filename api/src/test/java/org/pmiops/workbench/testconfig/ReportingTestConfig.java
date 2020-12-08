@@ -21,7 +21,7 @@ public class ReportingTestConfig {
   public WorkbenchConfig workbenchConfig() {
     final WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.reporting.dataset = "wb_reporting";
-    workbenchConfig.reporting.maxRowsPerInsert = 5;
+    workbenchConfig.reporting.maxRowsPerInsert = 2;
     workbenchConfig.server.projectId = "rw-wb-unit-test";
     return workbenchConfig;
   }

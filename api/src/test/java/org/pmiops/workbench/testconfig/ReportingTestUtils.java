@@ -438,6 +438,9 @@ public class ReportingTestUtils {
   public static int countPopulatedTables(ReportingSnapshot reportingSnapshot) {
     return oneForNonEmpty(reportingSnapshot.getCohorts())
         + oneForNonEmpty(reportingSnapshot.getDatasets())
+        + oneForNonEmpty(reportingSnapshot.getDatasetCohorts())
+        + oneForNonEmpty(reportingSnapshot.getDatasetConceptSets())
+        + oneForNonEmpty(reportingSnapshot.getDatasetDomainIdValues())
         + oneForNonEmpty(reportingSnapshot.getInstitutions())
         + oneForNonEmpty(reportingSnapshot.getUsers())
         + oneForNonEmpty(reportingSnapshot.getWorkspaces());
