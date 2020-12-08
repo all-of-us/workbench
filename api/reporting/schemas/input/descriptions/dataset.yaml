@@ -1,0 +1,13 @@
+dataset:
+  creation_time: Timestamp of dataset creation
+  creator_id: FK into user table for user who created this dataset
+  dataset_id: PK in dataset table
+  description: User-provided description for the dataset.
+  includes_all_participants: >
+    If true, this dataset contains data from all participants available instead a single cohort..
+  last_modified_time: >
+    Last user-visible modification to the dataset
+  name: User-provided name for this Dataset. Unique within the owning workspace.
+  pre_packaged_concept_set: >
+    If true, this dataset refers to a pre-packaged concept set.
+  workspace_id: ID of workspace containing this dataset. FK into workspace table.
