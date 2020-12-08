@@ -7,12 +7,10 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingDataset;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -102,9 +100,5 @@ public class DataSetDaoTest {
     assertThat(dataset2.getCohortIds())
         .containsExactly(dbCohort1.getCohortId(), dbCohort2.getCohortId());
     assertThat(dataset2.getCohortIds()).doesNotContain(0);
-    final List<ProjectedReportingDataset> projections = dataSetDao.getReportingDatasets();
-    assertThat(projections).hasSize(2);
-    ReportingTestUtils.assertDatasetFields(projections.get(0));
-    assertThat(projections.get(1).getName()).isEqualTo(dataset2.getName());
   }
 }
