@@ -13,7 +13,11 @@ public enum BigQueryTableInfo {
   PERSON(Domain.PERSON, "person"),
   OBSERVATION(Domain.OBSERVATION, "observation"),
   VISIT(Domain.VISIT, "visit_occurrence"),
-  PHYSICALMEASUREMENT(Domain.PHYSICAL_MEASUREMENT, "measurement");
+  PHYSICALMEASUREMENT(Domain.PHYSICAL_MEASUREMENT, "measurement"),
+  FITBITHEARTRATESUMMARY(Domain.FITBIT_HEART_RATE_SUMMARY, "heart_rate_summary"),
+  FITBITHEARTRATELEVEL(Domain.FITBIT_HEART_RATE_LEVEL, "heart_rate_minute_level"),
+  FITBITACTIVITY(Domain.FITBIT_ACTIVITY, "activity_summary"),
+  FITBITINTRADAYSTEPS(Domain.FITBIT_INTRADAY_STEPS, "steps_intraday");
 
   private final Domain domain;
   private final String tableName;
