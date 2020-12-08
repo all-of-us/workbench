@@ -49,7 +49,7 @@ export default class SelectMenu extends Container {
       if (maxAttempts <= 0) {
         return null;
       }
-      return await this.page.waitFor(2000).then(clickAndCheck); // two seconds pause and retry
+      return await this.page.waitForTimeout(2000).then(clickAndCheck); // two seconds pause and retry
     };
 
     await clickAndCheck();
@@ -79,7 +79,7 @@ export default class SelectMenu extends Container {
         return;
       }
       maxAttempts--;
-      await this.page.waitFor(1000).then(click); // one second pause before try again
+      await this.page.waitForTimeout(1000).then(click); // one second pause before try again
     };
     return click();
   }

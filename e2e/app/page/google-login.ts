@@ -147,9 +147,9 @@ export default class GoogleLoginPage {
     await this.loginButton().then(button => button.click());
 
     await this.enterEmail(user);
-    await this.page.waitFor(500); // Reduces probablity of getting Google login captcha
+    await this.page.waitForTimeout(500); // Reduces probablity of getting Google login captcha
     await this.enterPassword(pwd);
-    await this.page.waitFor(500);
+    await this.page.waitForTimeout(500);
     await this.submit();
   }
 

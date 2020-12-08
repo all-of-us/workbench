@@ -25,7 +25,7 @@ export default abstract class AuthenticatedPage extends BasePage {
    * Method to be implemented by children classes.
    * Check whether current page has specified web elements.
    */
-  abstract async isLoaded(): Promise<boolean>
+  abstract isLoaded(): Promise<boolean>
 
   /**
    * Wait until current page is loaded and without spinners spinning.

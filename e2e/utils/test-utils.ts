@@ -45,7 +45,7 @@ export async function signInAs(userId: string, passwd: string, opts: {reset?: bo
 
 export async function signOut(page: Page) {
   await Navigation.navMenu(page, NavLink.SIGN_OUT);
-  await page.waitFor(1000);
+  await page.waitForTimeout(1000);
 }
 
 
@@ -256,13 +256,13 @@ export async function dragDrop(page: Page, element: ElementHandle, destinationPo
   const {x, y} = destinationPoint;
   const mouse = page.mouse;
   await mouse.move(x0, y0);
-  await page.waitFor(100);
+  await page.waitForTimeout(100);
   await mouse.down();
-  await page.waitFor(100);
+  await page.waitForTimeout(100);
   await mouse.move(x, y, {steps: 10});
-  await page.waitFor(100);
+  await page.waitForTimeout(100);
   await mouse.up();
-  await page.waitFor(1000);
+  await page.waitForTimeout(1000);
 }
 
 /**

@@ -108,6 +108,7 @@ export default class CreateAccountPage extends BasePage {
     const iframe = await findIframe(this.page, 'terms of service agreement');
     const bodyHandle = await iframe.$('body');
     await iframe.evaluate(body =>  body.scrollTo(0, body.scrollHeight), bodyHandle);
+    await this.page.waitForTimeout(1000);
     return iframe;
   }
 

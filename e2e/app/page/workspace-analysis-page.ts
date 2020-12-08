@@ -71,7 +71,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     ]);
 
     // Waiting up to 15 minutes
-    await waitWhileLoading(this.page, 60 * 15 * 1000);
+    await waitWhileLoading(this.page, (15 * 60 * 1000));
 
     const notebook = new NotebookPage(this.page, notebookName);
     await notebook.waitForLoad();
@@ -106,8 +106,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     const notebookCard = await resourceCard.findCard(notebookName, ResourceCard.Notebook);
     await notebookCard.selectSnowmanMenu(Option.CopyToAnotherWorkspace, {waitForNav: false});
     // Fill out modal fields.
-    const copyModal = new CopyModal(this.page);
-    await copyModal.waitForLoad();
+    const copyModal = await new CopyModal(this.page);
     await copyModal.copyToAnotherWorkspace(destinationWorkspace, destinationNotebookName);
   }
 

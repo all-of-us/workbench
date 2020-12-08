@@ -10,7 +10,7 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
 
   async teardown() {
     // time for screenshots
-    await this.global.page.waitFor(1000);
+    await this.global.page.waitForTimeout(1000);
     await super.teardown();
   }
 
@@ -31,12 +31,16 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
     switch (event.name) {
       case 'test_fn_failure':
       case 'hook_failure':
-        const testParentName = state.currentlyRunningTest.parent.name.replace(/\W/g, '-');
-        const testName = state.currentlyRunningTest.name.replace(/\W/g, '-');
-        console.error(`Failed test:  "${testParentName}/${testName}"\n${event.error}`);
+        const runningTest = state.currentlyRunningTest;
+        let testName;
+        if (runningTest != null) {
+          testName = state.currentlyRunningTest.name.replace(/\W/g, '-');
+        } else {
+          testName = event.test.name.replace(/\W/g, '-');
+        }
 
-        const screenshotDir = `logs/screenshot/${testParentName}`;
-        const htmlDir = `logs/html/${testParentName}`;
+        const screenshotDir = `logs/screenshot`;
+        const htmlDir = `logs/html`;
         await fs.ensureDir(screenshotDir);
         await fs.ensureDir(htmlDir);
 
