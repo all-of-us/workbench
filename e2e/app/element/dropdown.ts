@@ -1,5 +1,5 @@
-import BaseElement from "app/element/base-element";
-import {ElementHandle, Page} from "puppeteer";
+import BaseElement from 'app/element/base-element';
+import {ElementHandle, Page} from 'puppeteer';
 
 export default class Dropdown extends BaseElement {
   constructor(page: Page, xpath?: string) {
@@ -7,14 +7,14 @@ export default class Dropdown extends BaseElement {
   }
 
   async selectOption(optionText: string): Promise<void> {
-    await this.page.waitForXPath(this.getXpath()).then(d => d.click({delay: 20}));
+    await this.click({delay: 20});
     const option = await this.waitForOption(optionText);
-    await option.click({delay: 20});
+    return await option.click({delay: 20});
   }
 
   async waitForOption(optionText: string): Promise<ElementHandle> {
     const selector = this.getOptionXpath(optionText);
-    return this.page.waitForXPath(selector, {visible: true});
+    return await this.page.waitForXPath(selector, {visible: true, timeout: 150000});
   }
 
   private getOptionXpath(optionText?: string): string {

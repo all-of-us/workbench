@@ -119,6 +119,10 @@ export default class HelpSidebar extends Container {
     return this.page.waitForXPath('//*[@data-test-id="runtime-status-icon-container"]/node()');
   }
 
+  async waitForRuntimeStatusIconHidden(): Promise<ElementHandle> {
+    return this.page.waitForXPath('//*[@data-test-id="runtime-status-icon-container"]/node()', {hidden: true});
+  }
+
   waitUntilSectionVisible(xpath: string): Promise<ElementHandle> {
     return this.page.waitForXPath(xpath, {visible: true});
   }
