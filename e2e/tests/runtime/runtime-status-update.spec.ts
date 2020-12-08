@@ -19,7 +19,7 @@ describe('Updating runtime parameters', () => {
     await workspaceCard.clickWorkspaceName();
 
     // Pause a bit to wait for getRuntime to complete
-    await page.waitFor(2000);
+    await page.waitForTimeout(2000);
   });
 
   test('Create a default runtime', async() => {
@@ -122,7 +122,7 @@ describe('Updating runtime parameters', () => {
     // Wait for indicator to go green in side-nav
     await runtimePanel.clickNextButton();
     await runtimePanel.clickApplyAndRecreateButton();
-    await page.waitFor(2000);
+    await page.waitForTimeout(2000);
     await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Stopping);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Starting);
@@ -178,7 +178,7 @@ describe('Updating runtime parameters', () => {
     await runtimePanel.clickCreateButton();
 
     // Wait until status shows green in side-nav
-    await page.waitFor(2000);
+    await page.waitForTimeout(2000);
     await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Running);
 
@@ -204,7 +204,7 @@ describe('Updating runtime parameters', () => {
     await runtimePanel.clickApplyAndRecreateButton();
 
     // Wait for indicator to go green in side-nav
-    await page.waitFor(2000);
+    await page.waitForTimeout(2000);
     await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Running);
 
