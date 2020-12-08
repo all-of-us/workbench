@@ -24,4 +24,10 @@ export default class Dropdown extends BaseElement {
     }
     return `${this.getXpath()}//li[contains(text(), "")]`;
   }
+
+  async getDropdownValue(): Promise<string> {
+    const selectedValue = await this.page.waitForXPath(`${this.getXpath()}/label`);
+    const baseElement = await BaseElement.asBaseElement(page, selectedValue);
+    return await baseElement.getTextContent();
+  }
 }

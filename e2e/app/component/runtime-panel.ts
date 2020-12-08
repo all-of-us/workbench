@@ -23,6 +23,11 @@ export enum ComputeType {
   Dataproc = 'Dataproc Cluster'
 }
 
+export enum RuntimePreset {
+  GeneralAnalysis = 'General Analysis',
+  HailGenomicsAnalysis = 'Hail Genomics Analysis'
+}
+
 export default class RuntimePanel extends Container {
   constructor(page: Page, xpath: string = defaultXpath) {
     super(page, xpath);
@@ -67,14 +72,29 @@ export default class RuntimePanel extends Container {
     return await cpusDropdown.selectOption(cpus.toString());
   }
 
+  async getCpus(): Promise<string> {
+    const cpusDropdown = new Dropdown(this.page, '//*[@id="runtime-cpu"]');
+    return await cpusDropdown.getDropdownValue();
+  }
+
   async pickRamGbs(ramGbs: number): Promise<void> {
     const ramDropdown = new Dropdown(this.page, '//*[@id="runtime-ram"]');
     return await ramDropdown.selectOption(ramGbs.toString());
   }
 
+  async getRamGbs(): Promise<string> {
+    const ramDropdown = new Dropdown(this.page, '//*[@id="runtime-ram"]');
+    return await ramDropdown.getDropdownValue();
+  }
+
   async pickDiskGbs(diskGbs: number): Promise<void> {
     const diskInput = new PrimereactInputNumber(this.page, '//*[@id="runtime-disk"]');
     return await diskInput.setValue(diskGbs);
+  }
+
+  async getDiskGbs(): Promise<number> {
+    const diskInput = new PrimereactInputNumber(this.page, '//*[@id="runtime-disk"]');
+    return await diskInput.getInputValue();
   }
 
   async pickComputeType(computeType: ComputeType): Promise<void> {
@@ -98,9 +118,19 @@ export default class RuntimePanel extends Container {
     return await dataprocNumPreemptibleWorkers.setValue(numPreemptibleWorkers);
   }
 
+  async getDataprocNumPreemptibleWorkers(): Promise<number> {
+    const dataprocNumPreemptibleWorkers = new PrimereactInputNumber(this.page, '//*[@id="num-preemptible"]');
+    return await dataprocNumPreemptibleWorkers.getInputValue();
+  }
+
   async pickWorkerCpus(workerCpus: number): Promise<void> {
     const workerCpusDropdown = new Dropdown(this.page, '//*[@id="worker-cpu"]');
     return await workerCpusDropdown.selectOption(workerCpus.toString());
+  }
+
+  async getWorkerCpus(): Promise<string> {
+    const workerCpusDropdown = new Dropdown(this.page, '//*[@id="worker-cpu"]');
+    return await workerCpusDropdown.getDropdownValue();
   }
 
   async pickWorkerRamGbs(workerRamGbs: number): Promise<void> {
@@ -109,9 +139,24 @@ export default class RuntimePanel extends Container {
     return await workerRamDropdown.selectOption(workerRamGbs.toString());
   }
 
+  async getWorkerRamGbs(): Promise<string> {
+    const workerRamDropdown = new Dropdown(this.page, '//*[@id="worker-ram"]');
+    return await workerRamDropdown.getDropdownValue();
+  }
+
   async pickWorkerDisk(workerDiskGbs: number): Promise<void> {
     const workerDiskInput = new PrimereactInputNumber(this.page, '//*[@id="worker-disk"]');
     return await workerDiskInput.setValue(workerDiskGbs);
+  }
+
+  async getWorkerDisk(): Promise<number> {
+    const workerDiskInput = new PrimereactInputNumber(this.page, '//*[@id="worker-disk"]');
+    return await workerDiskInput.getInputValue();
+  }
+
+  async pickRuntimePreset(runtimePreset: RuntimePreset): Promise<void> {
+    const runtimePresetMenu = new Dropdown(this.page, '//*[@id="runtime-preset-menu"]');
+    return await runtimePresetMenu.selectOption(runtimePreset);
   }
 
   buildStatusIconSrc = (startStopIconState: StartStopIconState) => {
