@@ -575,8 +575,8 @@ jobs:
     steps:
       - checkout-code
       - steps: << parameters.optional_steps >>
-      #- halt-test-check:
-          #dir_names: "api ui e2e"
+      - halt-test-check:
+          dir_names: "api ui e2e"
       - run:
           name: Update test user environment variables
           command: |
