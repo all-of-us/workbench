@@ -1,65 +1,67 @@
 {
   "featuredWorkspaces": [
     {
-      "name": "Understanding the OMOP Common Data Model v1",
-      "namespace": "aou-rw-e7bedcf6",
-      "id": "duplicateoffeaturedworkspaceunderstandingtheomopcommondatamodelv1",
-      "category": "TUTORIAL_WORKSPACES"
-    },
-    {
       "name": "How to Work with All of Us Survey Data",
-      "namespace": "aou-rw-4afd24c8",
-      "id": "allofussurveycodebookandfrequencydistributionsv2",
+      "namespace": "aou-rw-cd85862c",
+      "id": "howtoworkwithallofussurveydata",
       "category": "TUTORIAL_WORKSPACES"
     },
     {
       "name": "How to Work with All of Us Physical Measurements Data",
-      "namespace": "aou-rw-6f2f1945",
-      "id": "duplicateofworkingwithallofusphysicalmeasurementsdatav1",
-      "category": "TUTORIAL_WORKSPACES"
-    },
-    {
-      "name": "Versioning notebooks and intermediate results",
-      "namespace": "aou-rw-c73447b2",
-      "id": "featuredworkspaceversioningnotebooksandintermediateresults",
+      "namespace": "aou-rw-6a434c52",
+      "id": "howtoworkwithallofusphysicalmeasurementsdata",
       "category": "TUTORIAL_WORKSPACES"
     },
     {
       "name": "How to Get Started with Registered Tier Data",
-      "namespace": "aou-rw-c27c1d93",
-      "id": "generalmetrics",
+      "namespace": "aou-rw-28ce3c37",
+      "id": "howtogetstartedwithregisteredtierdata",
       "category": "TUTORIAL_WORKSPACES"
     },
     {
-      "name": "Type 2 Diabetes Phenotype",
-      "namespace": "aou-rw-cbbc55ff",
-      "id": "duplicateoftype2diabetesphenotypev2",
+      "name": "How to Work With Wearable Device Data",
+      "namespace": "aou-rw-263e8603",
+      "id": "howtoworkwithwearabledevicedata",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+    {
+      "name": "How to Backup Notebooks and Intermediate Results",
+      "namespace": "aou-rw-c73447b2",
+      "id": "featuredworkspaceversioningnotebooksandintermediateresults",
+      "category": "TUTORIAL_WORKSPACES"
+    },
+
+    {
+      "name": "Phenotype - Breast Cancer",
+      "namespace": "aou-rw-88722095",
+      "id": "phenotypebreastcancer",
       "category": "PHENOTYPE_LIBRARY"
     },
     {
-      "name": "Depression Phenotype",
-      "namespace": "aou-rw-c2194402",
-      "id": "duplicateofdepressionphenotypev2",
+      "name": "Phenotype - Dementia",
+      "namespace": "aou-rw-1219e893",
+      "id": "phenotypedementia",
       "category": "PHENOTYPE_LIBRARY"
     },
     {
-      "name": "Dementia Phenotype",
-      "namespace": "aou-rw-57d9e914",
-      "id": "duplicateofdementiaphenotypev2",
+      "name": "Phenotype - Depression",
+      "namespace": "aou-rw-536bb70b",
+      "id": "phenotypedepression",
       "category": "PHENOTYPE_LIBRARY"
     },
     {
-      "name": "Ischemic Heart Disease Phenotype",
-      "namespace": "aou-rw-b4991ce0",
-      "id": "duplicateofischemicheartdiseasephenotypev2",
+      "name": "Phenotype - Ischemic Heart Disease",
+      "namespace": "aou-rw-eef0793a",
+      "id": "phenotypeischemicheartdisease",
       "category": "PHENOTYPE_LIBRARY"
     },
     {
-      "name": "Breast Cancer Phenotype",
-      "namespace": "aou-rw-e5dfb446",
-      "id": "duplicateofbreastcancerphenotypev2",
+      "name": "Phenotype - Type 2 Diabetes",
+      "namespace": "aou-rw-c697f47e",
+      "id": "phenotypetype2diabetes",
       "category": "PHENOTYPE_LIBRARY"
     },
+
     {
       "name": "Demo - Medication Sequencing",
       "namespace": "aou-rw-e8aeecf1",
@@ -76,6 +78,12 @@
       "name": "Demo - Cardiovascular Risk Scoring",
       "namespace": "aou-rw-6b2c20d6",
       "id": "democardiovascularriskscoring",
+      "category": "DEMO_PROJECTS"
+    },
+    {
+      "name": "Demo - All of Us Descriptive Statistics",
+      "namespace": "aou-rw-f24ea988",
+      "id": "allofusdescriptivestatisticsdemo",
       "category": "DEMO_PROJECTS"
     }
   ]
