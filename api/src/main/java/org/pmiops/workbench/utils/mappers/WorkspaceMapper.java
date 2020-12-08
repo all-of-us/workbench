@@ -69,7 +69,7 @@ public interface WorkspaceMapper {
     return toApiWorkspaceResponse(
         toApiWorkspace(dbWorkspace, firecloudWorkspaceResponse.getWorkspace()),
         firecloudWorkspaceResponse.getAccessLevel());
-  };
+  }
 
   @Mapping(target = "timeReviewed", ignore = true)
   @Mapping(target = "populationDetails", source = "specificPopulationsEnum")
@@ -121,6 +121,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "disseminateResearchSet", ignore = true)
   @Mapping(target = "firecloudName", ignore = true)
   @Mapping(target = "firecloudUuid", ignore = true)
+  @Mapping(target = "freeTierUsage", ignore = true)
   @Mapping(target = "lastAccessedTime", ignore = true)
   @Mapping(target = "lastModifiedTime", ignore = true)
   @Mapping(target = "name", ignore = true)
