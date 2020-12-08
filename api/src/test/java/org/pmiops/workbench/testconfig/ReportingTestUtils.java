@@ -12,7 +12,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingDataset;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingInstitution;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -522,39 +521,6 @@ public class ReportingTestUtils {
         .lastModifiedTime(offsetDateTimeUtc(DATASET__LAST_MODIFIED_TIME))
         .name(DATASET__NAME)
         .workspaceId(DATASET__WORKSPACE_ID);
-  }
-
-  public static ProjectedReportingDataset mockProjectedReportingDataset() {
-    // Projection interface query objects can't be instantiated and must be mocked instead.
-    // This is slightly unfortunate, as the most common issue with projections is a column/type
-    // mismatch
-    // in the query, which only shows up when calling the accessors on the proxy. So live DAO tests
-    // are
-    //  essential as well.
-
-    // This code was generated using reporting-wizard.rb at 2020-11-05T14:31:23-05:00.
-    // Manual modification should be avoided if possible as this is a one-time generation
-    // and does not run on every build and updates must be merged manually for now.
-
-    final ProjectedReportingDataset mockDataset = mock(ProjectedReportingDataset.class);
-    doReturn(DATASET__CREATION_TIME).when(mockDataset).getCreationTime();
-    doReturn(DATASET__CREATOR_ID).when(mockDataset).getCreatorId();
-    doReturn(DATASET__DATASET_ID).when(mockDataset).getDataSetId();
-    doReturn(DATASET__DESCRIPTION).when(mockDataset).getDescription();
-    doReturn(DATASET__INCLUDES_ALL_PARTICIPANTS).when(mockDataset).getIncludesAllParticipants();
-    doReturn(DATASET__LAST_MODIFIED_TIME).when(mockDataset).getLastModifiedTime();
-    doReturn(DATASET__NAME).when(mockDataset).getName();
-    doReturn(DATASET__WORKSPACE_ID).when(mockDataset).getWorkspaceId();
-    return mockDataset;
-  }
-
-  public static void assertDatasetFields(ProjectedReportingDataset dataset) {
-    assertTimeApprox(dataset.getCreationTime(), DATASET__CREATION_TIME);
-    assertThat(dataset.getCreatorId()).isEqualTo(DATASET__CREATOR_ID);
-    assertThat(dataset.getDescription()).isEqualTo(DATASET__DESCRIPTION);
-    assertThat(dataset.getIncludesAllParticipants()).isEqualTo(DATASET__INCLUDES_ALL_PARTICIPANTS);
-    assertTimeApprox(dataset.getLastModifiedTime(), DATASET__LAST_MODIFIED_TIME);
-    assertThat(dataset.getName()).isEqualTo(DATASET__NAME);
   }
 
   public static void assertDatasetFields(ReportingDataset dataset) {

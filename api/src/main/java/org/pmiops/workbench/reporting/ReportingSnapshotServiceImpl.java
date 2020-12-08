@@ -5,13 +5,11 @@ import java.time.Clock;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.jdbc.ReportingNativeQueryService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.utils.LogFormatters;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,33 +19,27 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
 
   private final Clock clock;
   private final CohortService cohortService;
-  private final ReportingNativeQueryService datasetCohortNativeDao;
-  private final DataSetService dataSetService;
+  private final ReportingNativeQueryService reportingNativeQueryService;
   private final InstitutionService institutionService;
   private final ReportingMapper reportingMapper;
   private final Provider<Stopwatch> stopwatchProvider;
   private final UserService userService;
-  private final WorkspaceService workspaceService;
 
   public ReportingSnapshotServiceImpl(
       Clock clock,
       CohortService cohortService,
-      ReportingNativeQueryService datasetCohortNativeDao,
-      DataSetService dataSetService,
+      ReportingNativeQueryService reportingNativeQueryService,
       InstitutionService institutionService,
       ReportingMapper reportingMapper,
       Provider<Stopwatch> stopwatchProvider,
-      UserService userService,
-      WorkspaceService workspaceService) {
+      UserService userService) {
     this.clock = clock;
     this.cohortService = cohortService;
-    this.datasetCohortNativeDao = datasetCohortNativeDao;
-    this.dataSetService = dataSetService;
+    this.reportingNativeQueryService = reportingNativeQueryService;
     this.institutionService = institutionService;
     this.reportingMapper = reportingMapper;
     this.stopwatchProvider = stopwatchProvider;
     this.userService = userService;
-    this.workspaceService = workspaceService;
   }
 
   // Retrieve all the data we need from the MySQL database in a single transaction for
@@ -78,13 +70,13 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
     final QueryResultBundle result =
         new QueryResultBundle(
             cohortService.getReportingCohorts(),
-            dataSetService.getReportingDatasets(),
-            datasetCohortNativeDao.getReportingDatasetCohorts(),
-            datasetCohortNativeDao.getReportingDatasetConceptSets(),
-            datasetCohortNativeDao.getReportingDatasetDomainIdValues(),
+            reportingNativeQueryService.getReportingDatasets(),
+            reportingNativeQueryService.getReportingDatasetCohorts(),
+            reportingNativeQueryService.getReportingDatasetConceptSets(),
+            reportingNativeQueryService.getReportingDatasetDomainIdValues(),
             institutionService.getReportingInstitutions(),
             userService.getReportingUsers(),
-            workspaceService.getReportingWorkspaces());
+            reportingNativeQueryService.getReportingWorkspaces());
     stopwatch.stop();
     log.info(LogFormatters.duration("Application DB Queries", stopwatch.elapsed()));
     return result;
