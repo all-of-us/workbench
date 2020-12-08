@@ -24,6 +24,9 @@ public interface CohortBuilderService {
   List<Criteria> findCriteriaByDomainIdAndConceptIds(
       String domainId, Collection<DbConceptSetConceptId> dbConceptSetConceptIds);
 
+  List<Criteria> findCriteriaByDomainIdAndConceptIds(
+      String domainId, Collection<Long> sourceConceptIds, Collection<Long> standardConceptIds);
+
   Long countParticipants(SearchRequest request);
 
   List<AgeTypeCount> findAgeTypeCounts();

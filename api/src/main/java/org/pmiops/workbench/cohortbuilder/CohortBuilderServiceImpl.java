@@ -140,6 +140,31 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
+  public List<Criteria> findCriteriaByDomainIdAndConceptIds(
+      String domainId, Collection<Long> sourceConceptIds, Collection<Long> standardConceptIds) {
+    List<Criteria> criteriaList = new ArrayList<>();
+    List<String> sourceIds =
+        sourceConceptIds.stream().map(l -> l.toString()).collect(Collectors.toList());
+    List<String> standardIds =
+        standardConceptIds.stream().map(l -> l.toString()).collect(Collectors.toList());
+    if (!sourceIds.isEmpty()) {
+      criteriaList.addAll(
+          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
+              .stream()
+              .map(cohortBuilderMapper::dbModelToClient)
+              .collect(Collectors.toList()));
+    }
+    if (!standardConceptIds.isEmpty()) {
+      criteriaList.addAll(
+          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
+              .stream()
+              .map(cohortBuilderMapper::dbModelToClient)
+              .collect(Collectors.toList()));
+    }
+    return criteriaList;
+  }
+
+  @Override
   public Long countParticipants(SearchRequest request) {
     QueryJobConfiguration qjc =
         bigQueryService.filterBigQueryConfig(

@@ -3368,6 +3368,30 @@ paths:
           description: A collection of criteria
           schema:
             "$ref": "#/definitions/CriteriaListResponse"
+    post:
+      tags:
+      - cohortBuilder
+      consumes:
+      - application/json
+      description: Lookup criteria based on domain, standard and conceptId.
+      operationId: findCriteriaForCohortEdit
+      parameters:
+      - in: path
+        name: domain
+        type: string
+        required: true
+        description: the specific domain of criteria to get
+      - in: body
+        name: request
+        description: Domain with collection of source/standard conceptIdsd.
+        schema:
+          "$ref": "#/definitions/CriteriaRequest"
+        required: true
+      responses:
+        200:
+          description: A collection of criteria
+          schema:
+            "$ref": "#/definitions/CriteriaListResponse"
   "/v1/cohortbuilder/{cdrVersionId}/criteria/{domain}/search":
     parameters:
     - "$ref": "#/parameters/cdrVersionId"
@@ -7535,6 +7559,23 @@ definitions:
         - - type: A Crit Type
             searchParameters:
             - value: A value
+  CriteriaRequest:
+    description: 'The CriteriaRequest represents any domain specific conceptIds grouped by
+      Source/standard flags. This request has been created specifically for use within edit
+      function of Cohort Definitions, since Cohort Definitions are not able to save criteria id
+      Because this varies from CDR to CDR.'
+    type: object
+    properties:
+      sourceConceptIds:
+        type: array
+        items:
+          type: integer
+          format: int64
+      standardConceptIds:
+        type: array
+        items:
+          type: integer
+          format: int64
   SearchGroup:
     description: 'A SearchGroup is a container for groups of criteria which are `OR`ed
       together.'
