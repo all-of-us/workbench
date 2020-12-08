@@ -1,6 +1,5 @@
 package org.pmiops.workbench.reporting.insertion;
 
-import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
@@ -34,20 +33,9 @@ public interface ColumnValueExtractor<MODEL_T> {
   // on the model.
   Function<MODEL_T, Object> getRowToInsertValueFunction();
 
-  // Provide a function that constructs a QueryParameterValue object of the appropriate type
-  // for the column. Expected number and String formats for InsertAllRequest.RowToInsert don't
-  //  always match those for QueryParameterValue. For missing values, a QueryParameterValue
-  // object of the correct type should be returned containing the value null.
-  Function<MODEL_T, QueryParameterValue> getQueryParameterValueFunction();
-
   // A friendly method to call the instance-provided rowToInsertValueFunction. Returns
   // a map value (or null) for a RowToInsert object.
   default @Nullable Object getRowToInsertValue(@NotNull MODEL_T model) {
     return getRowToInsertValueFunction().apply(model);
-  }
-
-  // A friendly method to call the instance-proviced queryParameterValueFunction.
-  default @NotNull QueryParameterValue toParameterValue(@NotNull MODEL_T model) {
-    return getQueryParameterValueFunction().apply(model);
   }
 }

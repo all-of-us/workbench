@@ -86,8 +86,7 @@ cron:
   timezone: America/Chicago
   target: api
 - description: >
-    Compile a snapshot of workbench data for reporting and upload it to  BigQuery. Uses reporting.uploadMethod
-    in config to determine upload implementation.
+    Compile a snapshot of workbench data for reporting and upload it to  BigQuery.
   url: /v1/cron/uploadReportingSnapshot
   schedule: every day 19:00
   timezone: America/Chicago

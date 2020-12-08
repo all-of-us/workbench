@@ -1,44 +1,30 @@
 package org.pmiops.workbench.reporting.insertion;
 
-import static com.google.cloud.bigquery.QueryParameterValue.int64;
-import static com.google.cloud.bigquery.QueryParameterValue.string;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toInsertRowString;
-import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toTimestampQpv;
 
-import com.google.cloud.bigquery.QueryParameterValue;
 import java.util.function.Function;
 import org.pmiops.workbench.model.ReportingCohort;
 
 public enum CohortColumnValueExtractor implements ColumnValueExtractor<ReportingCohort> {
-  COHORT_ID("cohort_id", ReportingCohort::getCohortId, c -> int64(c.getCohortId())),
-  CREATION_TIME(
-      "creation_time",
-      c -> toInsertRowString(c.getCreationTime()),
-      c -> toTimestampQpv(c.getCreationTime())),
-  CREATOR_ID("creator_id", ReportingCohort::getCreatorId, c -> int64(c.getCreatorId())),
-  CRITERIA("criteria", ReportingCohort::getCriteria, c -> string(c.getCriteria())),
-  DESCRIPTION("description", ReportingCohort::getDescription, c -> string(c.getDescription())),
-  LAST_MODIFIED_TIME(
-      "last_modified_time",
-      c -> toInsertRowString(c.getLastModifiedTime()),
-      c -> toTimestampQpv(c.getLastModifiedTime())),
-  NAME("name", ReportingCohort::getName, c -> string(c.getName())),
-  WORKSPACE_ID("workspace_id", ReportingCohort::getWorkspaceId, c -> int64(c.getWorkspaceId()));
+  COHORT_ID("cohort_id", ReportingCohort::getCohortId),
+  CREATION_TIME("creation_time", c -> toInsertRowString(c.getCreationTime())),
+  CREATOR_ID("creator_id", ReportingCohort::getCreatorId),
+  CRITERIA("criteria", ReportingCohort::getCriteria),
+  DESCRIPTION("description", ReportingCohort::getDescription),
+  LAST_MODIFIED_TIME("last_modified_time", c -> toInsertRowString(c.getLastModifiedTime())),
+  NAME("name", ReportingCohort::getName),
+  WORKSPACE_ID("workspace_id", ReportingCohort::getWorkspaceId);
 
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
   // as enums can't be abstract or extend abstract classes.
   private static final String TABLE_NAME = "cohort";
   private final String parameterName;
   private final Function<ReportingCohort, Object> objectValueFunction;
-  private final Function<ReportingCohort, QueryParameterValue> parameterValueFunction;
 
   CohortColumnValueExtractor(
-      String parameterName,
-      Function<ReportingCohort, Object> objectValueFunction,
-      Function<ReportingCohort, QueryParameterValue> parameterValueFunction) {
+      String parameterName, Function<ReportingCohort, Object> objectValueFunction) {
     this.parameterName = parameterName;
     this.objectValueFunction = objectValueFunction;
-    this.parameterValueFunction = parameterValueFunction;
   }
 
   @Override
@@ -54,10 +40,5 @@ public enum CohortColumnValueExtractor implements ColumnValueExtractor<Reporting
   @Override
   public Function<ReportingCohort, Object> getRowToInsertValueFunction() {
     return objectValueFunction;
-  }
-
-  @Override
-  public Function<ReportingCohort, QueryParameterValue> getQueryParameterValueFunction() {
-    return parameterValueFunction;
   }
 }
