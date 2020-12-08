@@ -209,8 +209,6 @@ describe('Updating runtime parameters', () => {
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Running);
 
     // Go back to the notebook:
-    const analysisPage = new WorkspaceAnalysisPage(page);
-    await analysisPage.openNotebook(notebookName);
     const notebookPreviewPage = new NotebookPreviewPage(page);
     await notebookPreviewPage.openEditMode(notebookName);
 
