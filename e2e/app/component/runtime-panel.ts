@@ -5,6 +5,8 @@ import {ElementHandle, Page} from 'puppeteer';
 import Dropdown from 'app/element/dropdown';
 import {waitForAttributeEquality} from '../../utils/waits-utils';
 import PrimereactInputNumber from '../element/primereact-input-number';
+import SelectMenu from "./select-menu";
+import {ElementType} from "../xpath-options";
 
 const defaultXpath = '//*[@data-test-id="runtime-panel"]';
 const startStopIconXpath = '//*[@data-test-id="runtime-status-icon"]';
@@ -155,8 +157,10 @@ export default class RuntimePanel extends Container {
   }
 
   async pickRuntimePreset(runtimePreset: RuntimePreset): Promise<void> {
-    const runtimePresetMenu = new Dropdown(this.page, '//*[@id="runtime-preset-menu"]');
-    return await runtimePresetMenu.selectOption(runtimePreset);
+    const dropdown = await SelectMenu.findByName(this.page, {
+      type:ElementType.Dropdown, name:'Recommended environments', ancestorLevel:1
+    });
+    return dropdown.clickMenuItem(runtimePreset);
   }
 
   buildStatusIconSrc = (startStopIconState: StartStopIconState) => {
