@@ -9,17 +9,17 @@ import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingWorkspace;
 
 /** Expose handy, performant queries that don't require Dao, Entity, or Projection classes. */
-public interface ReportingNativeQueryService {
+public interface ReportingQueryService {
 
-  List<ReportingWorkspace> getReportingWorkspaces();
+  List<ReportingWorkspace> getWorkspaces();
 
-  List<ReportingDataset> getReportingDatasets();
+  List<ReportingDataset> getDatasets();
 
-  List<ReportingDatasetCohort> getReportingDatasetCohorts();
+  List<ReportingDatasetCohort> getDatasetCohorts();
 
-  List<ReportingDatasetConceptSet> getReportingDatasetConceptSets();
+  List<ReportingDatasetConceptSet> getDatasetConceptSets();
 
-  List<ReportingDatasetDomainIdValue> getReportingDatasetDomainIdValues();
+  List<ReportingDatasetDomainIdValue> getDatasetDomainIdValues();
 
-  List<ReportingInstitution> getReportingInstitutions();
+  List<ReportingInstitution> getInstitutions();
 }

@@ -41,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 public class ReportingNativeQueryServiceTest {
 
-  @Autowired private ReportingNativeQueryService reportingNativeQueryService;
+  @Autowired private ReportingQueryService reportingNativeQueryService;
 
   // It's necessary to bring in several Dao classes, since we aim to populate join tables
   // that have neither entities of their own nor stand-alone DAOs.
@@ -74,7 +74,7 @@ public class ReportingNativeQueryServiceTest {
     entityManager.flush();
 
     final List<ReportingDatasetCohort> datasetCohorts =
-        reportingNativeQueryService.getReportingDatasetCohorts();
+        reportingNativeQueryService.getDatasetCohorts();
     assertThat(datasetCohorts).hasSize(1);
     assertThat(datasetCohorts.get(0).getCohortId()).isEqualTo(cohort1.getCohortId());
     assertThat(datasetCohorts.get(0).getDatasetId()).isEqualTo(dataset1.getDataSetId());
@@ -96,7 +96,7 @@ public class ReportingNativeQueryServiceTest {
   public DbCohort createCohort(DbUser user1, DbWorkspace workspace1) {
     final DbCohort cohort1 = cohortDao.save(ReportingTestUtils.createDbCohort(user1, workspace1));
     assertThat(cohortDao.count()).isEqualTo(1);
-    assertThat(reportingNativeQueryService.getReportingDatasetCohorts()).isEmpty();
+    assertThat(reportingNativeQueryService.getDatasetCohorts()).isEmpty();
     return cohort1;
   }
 

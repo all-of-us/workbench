@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.jdbc.ReportingNativeQueryService;
+import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.utils.LogFormatters;
@@ -19,7 +19,7 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
 
   private final Clock clock;
   private final CohortService cohortService;
-  private final ReportingNativeQueryService reportingNativeQueryService;
+  private final ReportingQueryService queryService;
   private final InstitutionService institutionService;
   private final ReportingMapper reportingMapper;
   private final Provider<Stopwatch> stopwatchProvider;
@@ -28,14 +28,14 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
   public ReportingSnapshotServiceImpl(
       Clock clock,
       CohortService cohortService,
-      ReportingNativeQueryService reportingNativeQueryService,
+      ReportingQueryService queryService,
       InstitutionService institutionService,
       ReportingMapper reportingMapper,
       Provider<Stopwatch> stopwatchProvider,
       UserService userService) {
     this.clock = clock;
     this.cohortService = cohortService;
-    this.reportingNativeQueryService = reportingNativeQueryService;
+    this.queryService = queryService;
     this.institutionService = institutionService;
     this.reportingMapper = reportingMapper;
     this.stopwatchProvider = stopwatchProvider;
@@ -47,36 +47,17 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
   @Transactional(readOnly = true)
   @Override
   public ReportingSnapshot takeSnapshot() {
-    final QueryResultBundle queryResultBundle = getApplicationDatabaseRecords();
-    return convertToReportingSnapshot(queryResultBundle);
-  }
-
-  public ReportingSnapshot convertToReportingSnapshot(QueryResultBundle queryResultBundle) {
     final Stopwatch stopwatch = stopwatchProvider.get().start();
     final ReportingSnapshot result =
-        reportingMapper.toReportingSnapshot(queryResultBundle, clock.millis());
-    stopwatch.stop();
-    log.info(LogFormatters.duration("Conversion to ReportingSnapshot", stopwatch.elapsed()));
-    return result;
-  }
-
-  /*
-   * Gather all the projection instances from the DB rows needed for the current snapshot. Bundle
-   * them all together for conversion all at once, and also to allow timing the downloads separately
-   * from the conversion
-   */
-  private QueryResultBundle getApplicationDatabaseRecords() {
-    final Stopwatch stopwatch = stopwatchProvider.get().start();
-    final QueryResultBundle result =
-        new QueryResultBundle(
-            cohortService.getReportingCohorts(),
-            reportingNativeQueryService.getReportingDatasets(),
-            reportingNativeQueryService.getReportingDatasetCohorts(),
-            reportingNativeQueryService.getReportingDatasetConceptSets(),
-            reportingNativeQueryService.getReportingDatasetDomainIdValues(),
-            reportingNativeQueryService.getReportingInstitutions(),
-            userService.getReportingUsers(),
-            reportingNativeQueryService.getReportingWorkspaces());
+        new ReportingSnapshot()
+            .cohorts(queryService.getReportingCohorts())
+            .datasets(queryService.getDatasets())
+            .datasetCohorts(queryService.getDatasetCohorts())
+            .datasetConceptSets(queryService.getDatasetConceptSets())
+            .datasetDomainIdValues(queryService.getDatasetDomainIdValues())
+            .institutions(queryService.getInstitutions())
+            .users(userService.getReportingUsers())
+            .workspaces(queryService.getReportingWorkspaces());
     stopwatch.stop();
     log.info(LogFormatters.duration("Application DB Queries", stopwatch.elapsed()));
     return result;

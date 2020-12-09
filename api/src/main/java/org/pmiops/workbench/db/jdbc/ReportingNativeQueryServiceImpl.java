@@ -17,7 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ReportingNativeQueryServiceImpl implements ReportingNativeQueryService {
+public class ReportingNativeQueryServiceImpl implements ReportingQueryService {
 
   private final JdbcTemplate jdbcTemplate;
 
@@ -104,7 +104,7 @@ public class ReportingNativeQueryServiceImpl implements ReportingNativeQueryServ
   }
 
   @Override
-  public List<ReportingDataset> getReportingDatasets() {
+  public List<ReportingDataset> getDatasets() {
     return jdbcTemplate.query(
         "SELECT \n"
             + "  creation_time,\n"
@@ -129,7 +129,7 @@ public class ReportingNativeQueryServiceImpl implements ReportingNativeQueryServ
   }
 
   @Override
-  public List<ReportingDatasetCohort> getReportingDatasetCohorts() {
+  public List<ReportingDatasetCohort> getDatasetCohorts() {
     return jdbcTemplate.query(
         "SELECT data_set_id, cohort_id\n"
             + "FROM data_set_cohort\n"
@@ -141,7 +141,7 @@ public class ReportingNativeQueryServiceImpl implements ReportingNativeQueryServ
   }
 
   @Override
-  public List<ReportingDatasetConceptSet> getReportingDatasetConceptSets() {
+  public List<ReportingDatasetConceptSet> getDatasetConceptSets() {
     return jdbcTemplate.query(
         "SELECT data_set_id, concept_set_id\n"
             + "FROM data_set_concept_set\n"
@@ -153,7 +153,7 @@ public class ReportingNativeQueryServiceImpl implements ReportingNativeQueryServ
   }
 
   @Override
-  public List<ReportingDatasetDomainIdValue> getReportingDatasetDomainIdValues() {
+  public List<ReportingDatasetDomainIdValue> getDatasetDomainIdValues() {
     return jdbcTemplate.query(
         "SELECT data_set_id, domain_id, value\n"
             + "FROM data_set_values\n"
@@ -166,7 +166,7 @@ public class ReportingNativeQueryServiceImpl implements ReportingNativeQueryServ
   }
 
   @Override
-  public List<ReportingInstitution> getReportingInstitutions() {
+  public List<ReportingInstitution> getInstitutions() {
     return jdbcTemplate.query(
         "SELECT \n"
             + "  display_name,\n"

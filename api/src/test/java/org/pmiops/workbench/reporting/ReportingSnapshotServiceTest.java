@@ -16,7 +16,7 @@ import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
-import org.pmiops.workbench.db.jdbc.ReportingNativeQueryService;
+import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.ReportingDataset;
@@ -45,7 +45,7 @@ public class ReportingSnapshotServiceTest {
   @MockBean private CohortService mockCohortService;
   @MockBean private InstitutionService mockInstitutionService;
   @MockBean private UserService mockUserService;
-  @MockBean private ReportingNativeQueryService mockReportingNativeQueryService;
+  @MockBean private ReportingQueryService mockReportingNativeQueryService;
 
   @Autowired private ReportingSnapshotService reportingSnapshotService;
 
@@ -130,9 +130,7 @@ public class ReportingSnapshotServiceTest {
 
   private void mockDatasets() {
     final ReportingDataset dataset = createReportingDataset();
-    doReturn(ImmutableList.of(dataset))
-        .when(mockReportingNativeQueryService)
-        .getReportingDatasets();
+    doReturn(ImmutableList.of(dataset)).when(mockReportingNativeQueryService).getDatasets();
   }
 
   private void mockDatasetCohorts() {
@@ -142,13 +140,13 @@ public class ReportingSnapshotServiceTest {
         new ReportingDatasetCohort().cohortId(303L).datasetId(404L);
     doReturn(ImmutableList.of(reportingDatasetCohort1, reportingDatasetCohort2))
         .when(mockReportingNativeQueryService)
-        .getReportingDatasetCohorts();
+        .getDatasetCohorts();
   }
 
   private void mockInstitutions() {
     final ReportingInstitution reportingInstitution = createReportingInstitution();
     doReturn(ImmutableList.of(reportingInstitution))
         .when(mockReportingNativeQueryService)
-        .getReportingInstitutions();
+        .getInstitutions();
   }
 }

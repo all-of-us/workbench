@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingInstitution;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -182,96 +181,6 @@ public class ReportingTestUtils {
   public static void assertDtoWorkspaceFields(ReportingWorkspace workspace) {
     assertDtoWorkspaceFields(
         workspace, WORKSPACE__WORKSPACE_ID, WORKSPACE__CDR_VERSION_ID, WORKSPACE__CREATOR_ID);
-  }
-
-  // TODO: put these override values into the scaffold script
-  public static void assertPrjWorkspaceFields(
-      ProjectedReportingWorkspace workspace,
-      long expectedWorkspaceId,
-      long expectedCdrVersionId,
-      long expectedCreatorId) {
-    assertThat(workspace.getBillingAccountType()).isEqualTo(WORKSPACE__BILLING_ACCOUNT_TYPE);
-    assertThat(workspace.getBillingStatus()).isEqualTo(WORKSPACE__BILLING_STATUS);
-    assertThat(workspace.getCdrVersionId()).isEqualTo(expectedCdrVersionId);
-    assertTimeApprox(workspace.getCreationTime(), WORKSPACE__CREATION_TIME);
-    assertThat(workspace.getCreatorId()).isEqualTo(expectedCreatorId);
-    assertThat(workspace.getDisseminateResearchOther())
-        .isEqualTo(WORKSPACE__DISSEMINATE_RESEARCH_OTHER);
-    assertTimeApprox(workspace.getLastAccessedTime(), WORKSPACE__LAST_ACCESSED_TIME);
-    assertTimeApprox(workspace.getLastModifiedTime(), WORKSPACE__LAST_MODIFIED_TIME);
-    assertThat(workspace.getName()).isEqualTo(WORKSPACE__NAME);
-    assertThat(workspace.getNeedsRpReviewPrompt()).isEqualTo(WORKSPACE__NEEDS_RP_REVIEW_PROMPT);
-    assertThat(workspace.getPublished()).isEqualTo(WORKSPACE__PUBLISHED);
-    assertThat(workspace.getRpAdditionalNotes()).isEqualTo(WORKSPACE__RP_ADDITIONAL_NOTES);
-    assertThat(workspace.getRpAncestry()).isEqualTo(WORKSPACE__RP_ANCESTRY);
-    assertThat(workspace.getRpAnticipatedFindings()).isEqualTo(WORKSPACE__RP_ANTICIPATED_FINDINGS);
-    assertThat(workspace.getRpApproved()).isEqualTo(WORKSPACE__RP_APPROVED);
-    assertThat(workspace.getRpCommercialPurpose()).isEqualTo(WORKSPACE__RP_COMMERCIAL_PURPOSE);
-    assertThat(workspace.getRpControlSet()).isEqualTo(WORKSPACE__RP_CONTROL_SET);
-    assertThat(workspace.getRpDiseaseFocusedResearch())
-        .isEqualTo(WORKSPACE__RP_DISEASE_FOCUSED_RESEARCH);
-    assertThat(workspace.getRpDiseaseOfFocus()).isEqualTo(WORKSPACE__RP_DISEASE_OF_FOCUS);
-    assertThat(workspace.getRpDrugDevelopment()).isEqualTo(WORKSPACE__RP_DRUG_DEVELOPMENT);
-    assertThat(workspace.getRpEducational()).isEqualTo(WORKSPACE__RP_EDUCATIONAL);
-    assertThat(workspace.getRpEthics()).isEqualTo(WORKSPACE__RP_ETHICS);
-    assertThat(workspace.getRpIntendedStudy()).isEqualTo(WORKSPACE__RP_INTENDED_STUDY);
-    assertThat(workspace.getRpMethodsDevelopment()).isEqualTo(WORKSPACE__RP_METHODS_DEVELOPMENT);
-    assertThat(workspace.getRpOtherPopulationDetails())
-        .isEqualTo(WORKSPACE__RP_OTHER_POPULATION_DETAILS);
-    assertThat(workspace.getRpOtherPurpose()).isEqualTo(WORKSPACE__RP_OTHER_PURPOSE);
-    assertThat(workspace.getRpOtherPurposeDetails()).isEqualTo(WORKSPACE__RP_OTHER_PURPOSE_DETAILS);
-    assertThat(workspace.getRpPopulationHealth()).isEqualTo(WORKSPACE__RP_POPULATION_HEALTH);
-    assertThat(workspace.getRpReasonForAllOfUs()).isEqualTo(WORKSPACE__RP_REASON_FOR_ALL_OF_US);
-    assertThat(workspace.getRpReviewRequested()).isEqualTo(WORKSPACE__RP_REVIEW_REQUESTED);
-    assertThat(workspace.getRpScientificApproach()).isEqualTo(WORKSPACE__RP_SCIENTIFIC_APPROACH);
-    assertThat(workspace.getRpSocialBehavioral()).isEqualTo(WORKSPACE__RP_SOCIAL_BEHAVIORAL);
-    assertTimeApprox(workspace.getRpTimeRequested(), WORKSPACE__RP_TIME_REQUESTED);
-    assertThat(workspace.getWorkspaceId()).isEqualTo(expectedWorkspaceId);
-  }
-
-  public static ProjectedReportingWorkspace mockProjectedWorkspace() {
-    final ProjectedReportingWorkspace mockWorkspace = mock(ProjectedReportingWorkspace.class);
-    doReturn(WORKSPACE__BILLING_ACCOUNT_TYPE).when(mockWorkspace).getBillingAccountType();
-    doReturn(WORKSPACE__BILLING_STATUS).when(mockWorkspace).getBillingStatus();
-    doReturn(WORKSPACE__CDR_VERSION_ID).when(mockWorkspace).getCdrVersionId();
-    doReturn(WORKSPACE__CREATION_TIME).when(mockWorkspace).getCreationTime();
-    doReturn(WORKSPACE__CREATOR_ID).when(mockWorkspace).getCreatorId();
-    doReturn(WORKSPACE__DISSEMINATE_RESEARCH_OTHER)
-        .when(mockWorkspace)
-        .getDisseminateResearchOther();
-    doReturn(WORKSPACE__LAST_ACCESSED_TIME).when(mockWorkspace).getLastAccessedTime();
-    doReturn(WORKSPACE__LAST_MODIFIED_TIME).when(mockWorkspace).getLastModifiedTime();
-    doReturn(WORKSPACE__NAME).when(mockWorkspace).getName();
-    doReturn(WORKSPACE__NEEDS_RP_REVIEW_PROMPT).when(mockWorkspace).getNeedsRpReviewPrompt();
-    doReturn(WORKSPACE__PUBLISHED).when(mockWorkspace).getPublished();
-    doReturn(WORKSPACE__RP_ADDITIONAL_NOTES).when(mockWorkspace).getRpAdditionalNotes();
-    doReturn(WORKSPACE__RP_ANCESTRY).when(mockWorkspace).getRpAncestry();
-    doReturn(WORKSPACE__RP_ANTICIPATED_FINDINGS).when(mockWorkspace).getRpAnticipatedFindings();
-    doReturn(WORKSPACE__RP_APPROVED).when(mockWorkspace).getRpApproved();
-    doReturn(WORKSPACE__RP_COMMERCIAL_PURPOSE).when(mockWorkspace).getRpCommercialPurpose();
-    doReturn(WORKSPACE__RP_CONTROL_SET).when(mockWorkspace).getRpControlSet();
-    doReturn(WORKSPACE__RP_DISEASE_FOCUSED_RESEARCH)
-        .when(mockWorkspace)
-        .getRpDiseaseFocusedResearch();
-    doReturn(WORKSPACE__RP_DISEASE_OF_FOCUS).when(mockWorkspace).getRpDiseaseOfFocus();
-    doReturn(WORKSPACE__RP_DRUG_DEVELOPMENT).when(mockWorkspace).getRpDrugDevelopment();
-    doReturn(WORKSPACE__RP_EDUCATIONAL).when(mockWorkspace).getRpEducational();
-    doReturn(WORKSPACE__RP_ETHICS).when(mockWorkspace).getRpEthics();
-    doReturn(WORKSPACE__RP_INTENDED_STUDY).when(mockWorkspace).getRpIntendedStudy();
-    doReturn(WORKSPACE__RP_METHODS_DEVELOPMENT).when(mockWorkspace).getRpMethodsDevelopment();
-    doReturn(WORKSPACE__RP_OTHER_POPULATION_DETAILS)
-        .when(mockWorkspace)
-        .getRpOtherPopulationDetails();
-    doReturn(WORKSPACE__RP_OTHER_PURPOSE).when(mockWorkspace).getRpOtherPurpose();
-    doReturn(WORKSPACE__RP_OTHER_PURPOSE_DETAILS).when(mockWorkspace).getRpOtherPurposeDetails();
-    doReturn(WORKSPACE__RP_POPULATION_HEALTH).when(mockWorkspace).getRpPopulationHealth();
-    doReturn(WORKSPACE__RP_REASON_FOR_ALL_OF_US).when(mockWorkspace).getRpReasonForAllOfUs();
-    doReturn(WORKSPACE__RP_REVIEW_REQUESTED).when(mockWorkspace).getRpReviewRequested();
-    doReturn(WORKSPACE__RP_SCIENTIFIC_APPROACH).when(mockWorkspace).getRpScientificApproach();
-    doReturn(WORKSPACE__RP_SOCIAL_BEHAVIORAL).when(mockWorkspace).getRpSocialBehavioral();
-    doReturn(WORKSPACE__RP_TIME_REQUESTED).when(mockWorkspace).getRpTimeRequested();
-    doReturn(WORKSPACE__WORKSPACE_ID).when(mockWorkspace).getWorkspaceId();
-    return mockWorkspace;
   }
 
   public static ReportingWorkspace createDtoWorkspace() {
