@@ -141,9 +141,10 @@ export default class BaseElement extends Container {
   }
 
   async click(options?: ClickOptions): Promise<void> {
-    return this.asElementHandle()
+    await this.focus();
+    await this.asElementHandle()
       .then(elemt => {
-        return elemt.click(options);
+          elemt.click(options);
       });
   }
 
