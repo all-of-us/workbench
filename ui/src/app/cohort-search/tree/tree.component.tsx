@@ -152,7 +152,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
       const parentId = domainId === Domain.PHYSICALMEASUREMENT.toString() ? null : id;
       const promises = [cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, parentId)];
-      if (source === 'criteria' && currentCohortCriteriaStore.getValue().some(crit => !crit.id)) {
+      if (this.criteriaIdLookupNeeded) {
         const criteriaRequest = {
           sourceConceptIds: currentCohortCriteriaStore.getValue().filter(s => !s.isStandard).map(s => s.conceptId),
           standardConceptIds: currentCohortCriteriaStore.getValue().filter(s => s.isStandard).map(s => s.conceptId),
@@ -207,6 +207,12 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
     } finally {
       this.setState({loading: false});
     }
+  }
+
+  get criteriaIdLookupNeeded() {
+    return this.props.source === 'criteria'
+      &&  ![Domain.PHYSICALMEASUREMENT.toString(), Domain.VISIT.toString()].includes(this.props.node.domainId)
+      &&  currentCohortCriteriaStore.getValue().some(crit => !crit.id);
   }
 
   updatePpiSurveys(resp, selectedSurveyChild) {
