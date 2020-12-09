@@ -35,13 +35,13 @@ export default class RuntimePanel extends Container {
   async clickCreateButton(): Promise<void> {
     const button = await Button.findByName(this.page, {name: LinkText.Create});
     await button.click();
-    return await page.waitForTimeout(1000);
+    return await page.waitForTimeout(2000);
   }
 
   async clickCustomizeButton(): Promise<void> {
     const button = await Button.findByName(this.page, {name: LinkText.Customize});
     await button.click();
-    return await page.waitForTimeout(1000);
+    return await page.waitForTimeout(2000);
   }
 
   async clickNextButton(): Promise<void> {
@@ -52,7 +52,7 @@ export default class RuntimePanel extends Container {
   async clickApplyAndRecreateButton(): Promise<void> {
     const button = await Button.findByName(this.page, {name: LinkText.Update});
     await button.click();
-    return await page.waitForTimeout(1000);
+    return await page.waitForTimeout(2000);
   }
 
   async clickDeleteEnvironmentButton(): Promise<void> {
@@ -63,7 +63,7 @@ export default class RuntimePanel extends Container {
   async clickDeleteButton(): Promise<void> {
     const button = await Button.findByName(this.page, {name: LinkText.Delete});
     await button.click();
-    return await page.waitForTimeout(1000);
+    return await page.waitForTimeout(2000);
   }
 
   async pickCpus(cpus: number): Promise<void> {

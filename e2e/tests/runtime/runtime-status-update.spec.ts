@@ -66,6 +66,25 @@ describe('Updating runtime parameters', () => {
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Starting);
   });
 
+  test('Delete environment', async() => {
+    // Open the runtime panel
+    const helpSidebar = new HelpSidebar(page);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+
+    // Click “create“ , from the default “create panel”
+    const runtimePanel = new RuntimePanel(page);
+    await runtimePanel.clickCreateButton();
+
+    // Wait until status shows green in side-nav
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await runtimePanel.waitForStartStopIconState(StartStopIconState.Starting);
+    await runtimePanel.waitForStartStopIconState(StartStopIconState.Running);
+
+    // Click 'delete environment'
+    await runtimePanel.clickDeleteEnvironmentButton();
+    await runtimePanel.clickDeleteButton();
+  });
+
 
   test('Switch from GCE to dataproc', async() => {
     // This one is going to take a long time.
@@ -75,7 +94,8 @@ describe('Updating runtime parameters', () => {
     await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
 
     // Click “create“ , from the default “create panel”
-    const runtimePanel = new RuntimePanel(page);
+    // using let here instead of const because we navigate during the test and must reinstantiate
+    let runtimePanel = new RuntimePanel(page);
     await runtimePanel.clickCreateButton();
 
     // Wait until status shows green in side-nav
@@ -133,25 +153,28 @@ describe('Updating runtime parameters', () => {
 
     // Open runtime panel
     await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    const runtimePanel2 = new RuntimePanel(page);
 
     // Click 'delete environment'
-    await runtimePanel.clickDeleteEnvironmentButton();
-    await runtimePanel.clickDeleteButton();
+    await runtimePanel2.clickDeleteEnvironmentButton();
+    await runtimePanel2.clickDeleteButton();
 
     // wait until status indicator disappears
     await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
-    await runtimePanel.waitForStartStopIconState(StartStopIconState.None);
+    await runtimePanel2.waitForStartStopIconState(StartStopIconState.None);
 
     // Refresh page, and reopen the panel
     await page.reload({ waitUntil: ['networkidle0', 'domcontentloaded'] });
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    const helpSidebar2 = new HelpSidebar(page);
+    await helpSidebar2.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    const runtimePanel3 = new RuntimePanel(page);
 
     // Verify that dataproc settings are still shown
-    expect(await runtimePanel.getDataprocNumWorkers()).toBe(3);
-    expect(await runtimePanel.getDataprocNumPreemptibleWorkers()).toBe(1);
-    expect(await runtimePanel.getWorkerCpus()).toBe("1");
-    expect(await runtimePanel.getWorkerRamGbs()).toBe("3.75");
-    expect(await runtimePanel.getWorkerDisk()).toBe(60);
+    expect(await runtimePanel3.getDataprocNumWorkers()).toBe(3);
+    expect(await runtimePanel3.getDataprocNumPreemptibleWorkers()).toBe(1);
+    expect(await runtimePanel3.getWorkerCpus()).toBe("1");
+    expect(await runtimePanel3.getWorkerRamGbs()).toBe("3.75");
+    expect(await runtimePanel3.getWorkerDisk()).toBe(60);
   });
 
   test('Switch from dataproc to GCE', async() => {
@@ -163,7 +186,8 @@ describe('Updating runtime parameters', () => {
     await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
 
     // Click “customize“ , from the default “create panel”
-    const runtimePanel = new RuntimePanel(page);
+    // using let here instead of const because we navigate during the test and must reinstantiate
+    let runtimePanel = new RuntimePanel(page);
     await runtimePanel.clickCustomizeButton();
 
     // Use the preset selector to pick “Hail genomics analysis“
@@ -222,6 +246,7 @@ describe('Updating runtime parameters', () => {
 
     // Open runtime panel
     await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    runtimePanel = new RuntimePanel(page);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Running);
 
     // Click ''delete environment”
