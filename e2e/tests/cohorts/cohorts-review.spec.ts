@@ -1,4 +1,4 @@
-import {findOrCreateWorkspace, isValidDate, signIn} from 'utils/test-utils';
+import {createWorkspace, isValidDate, signIn} from 'utils/test-utils';
 import {Option, LinkText, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
@@ -27,7 +27,7 @@ describe('Cohort review tests', () => {
   test('Create Cohort and a Review Set for 100 participants', async () => {
     const reviewSetNumberOfParticipants = 100;
 
-    await findOrCreateWorkspace(page).then(card => card.clickWorkspaceName());
+    await createWorkspace(page).then(card => card.clickWorkspaceName());
 
     const dataPage = new WorkspaceDataPage(page);
     const cohortCard = await dataPage.createCohort();
@@ -105,6 +105,8 @@ describe('Cohort review tests', () => {
      // Verify Delete Cohort Review successful.
      expect(await DataResourceCard.findCard(page, newCohortReviewName, 5000)).toBeFalsy();
 
+     // Delete workspace
+    await dataPage.deleteWorkspace();
   });
 
 });

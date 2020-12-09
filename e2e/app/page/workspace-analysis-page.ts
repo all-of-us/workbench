@@ -107,6 +107,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     await notebookCard.selectSnowmanMenu(Option.CopyToAnotherWorkspace, {waitForNav: false});
     // Fill out modal fields.
     const copyModal = await new CopyModal(this.page);
+    await copyModal.waitForLoad();
     await copyModal.copyToAnotherWorkspace(destinationWorkspace, destinationNotebookName);
   }
 
