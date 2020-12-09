@@ -4,12 +4,10 @@ import java.time.Clock;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingInstitution;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.ReportingCohort;
-import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
@@ -40,15 +38,6 @@ public class ReportingMapperTest {
         ReportingTestUtils.mockProjectedReportingCohort();
     final ReportingCohort cohort = reportingMapper.toReportingCohort(projectedReportingCohort);
     ReportingTestUtils.assertCohortFields(cohort);
-  }
-
-  @Test
-  public void testReportingInstitution() {
-    final ProjectedReportingInstitution projectedReportingInstitution =
-        ReportingTestUtils.mockProjectedReportingInstitution();
-    final ReportingInstitution reportingInstitution =
-        reportingMapper.toReportingInstitution(projectedReportingInstitution);
-    ReportingTestUtils.assertInstitutionFields(reportingInstitution);
   }
 
   @Test

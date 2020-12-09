@@ -444,29 +444,6 @@ public class ReportingTestUtils {
         + oneForNonEmpty(reportingSnapshot.getUsers())
         + oneForNonEmpty(reportingSnapshot.getWorkspaces());
   }
-  // Projection interface query objects can't be instantiated and must be mocked instead.
-  // This is slightly unfortunate, as the most common issue with projections is a column/type
-  // mismatch
-  // in the query, which only shows up when calling the accessors on the proxy. So live DAO tests
-  // are
-  //  essential as well.
-
-  // This code was generated using reporting-wizard.rb at 2020-10-01T12:18:28-04:00.
-  // Manual modification should be avoided if possible as this is a one-time generation
-  // and does not run on every build and updates must be merged manually for now.
-
-  public static ProjectedReportingInstitution mockProjectedReportingInstitution() {
-    final ProjectedReportingInstitution mockInstitution = mock(ProjectedReportingInstitution.class);
-    doReturn(INSTITUTION__DISPLAY_NAME).when(mockInstitution).getDisplayName();
-    doReturn(INSTITUTION__DUA_TYPE_ENUM).when(mockInstitution).getDuaTypeEnum();
-    doReturn(INSTITUTION__INSTITUTION_ID).when(mockInstitution).getInstitutionId();
-    doReturn(INSTITUTION__ORGANIZATION_TYPE_ENUM).when(mockInstitution).getOrganizationTypeEnum();
-    doReturn(INSTITUTION__ORGANIZATION_TYPE_OTHER_TEXT)
-        .when(mockInstitution)
-        .getOrganizationTypeOtherText();
-    doReturn(INSTITUTION__SHORT_NAME).when(mockInstitution).getShortName();
-    return mockInstitution;
-  }
 
   public static ReportingInstitution createReportingInstitution() {
     return new ReportingInstitution()

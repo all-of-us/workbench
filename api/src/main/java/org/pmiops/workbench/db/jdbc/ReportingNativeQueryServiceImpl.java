@@ -2,6 +2,8 @@ package org.pmiops.workbench.db.jdbc;
 
 import static org.pmiops.workbench.db.model.DbStorageEnums.billingAccountTypeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.billingStatusFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.institutionDUATypeFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.organizationTypeFromStorage;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
 import java.util.List;
@@ -165,6 +167,23 @@ public class ReportingNativeQueryServiceImpl implements ReportingNativeQueryServ
 
   @Override
   public List<ReportingInstitution> getReportingInstitutions() {
-    return null;
+    return jdbcTemplate.query(
+        "SELECT \n"
+            + "  display_name,\n"
+            + "  dua_type_enum,\n"
+            + "  institution_id,\n"
+            + "  organization_type_enum,\n"
+            + "  organization_type_other_text,\n"
+            + "  short_name\n"
+            + "FROM institution",
+        (rs, unused) ->
+            new ReportingInstitution()
+                .displayName(rs.getString("display_name"))
+                .duaTypeEnum(institutionDUATypeFromStorage(rs.getShort("dua_type_enum")))
+                .institutionId(rs.getLong("institution_id"))
+                .organizationTypeEnum(
+                    organizationTypeFromStorage(rs.getShort("organization_type_enum")))
+                .organizationTypeOtherText(rs.getString("organization_type_other_text"))
+                .shortName(rs.getString("short_name")));
   }
 }

@@ -15,13 +15,13 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingInstitution;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.jdbc.ReportingNativeQueryService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
+import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
@@ -146,10 +146,9 @@ public class ReportingSnapshotServiceTest {
   }
 
   private void mockInstitutions() {
-    final ProjectedReportingInstitution mockInstitution =
-        ReportingTestUtils.mockProjectedReportingInstitution();
-    doReturn(ImmutableList.of(mockInstitution))
-        .when(mockInstitutionService)
+    final ReportingInstitution reportingInstitution = createReportingInstitution();
+    doReturn(ImmutableList.of(reportingInstitution))
+        .when(mockReportingNativeQueryService)
         .getReportingInstitutions();
   }
 }

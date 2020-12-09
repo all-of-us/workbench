@@ -74,7 +74,7 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
             reportingNativeQueryService.getReportingDatasetCohorts(),
             reportingNativeQueryService.getReportingDatasetConceptSets(),
             reportingNativeQueryService.getReportingDatasetDomainIdValues(),
-            institutionService.getReportingInstitutions(),
+            reportingNativeQueryService.getReportingInstitutions(),
             userService.getReportingUsers(),
             reportingNativeQueryService.getReportingWorkspaces());
     stopwatch.stop();

@@ -2,12 +2,12 @@ package org.pmiops.workbench.reporting;
 
 import java.util.List;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingInstitution;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingDatasetConceptSet;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
+import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingWorkspace;
 
 // Define immutable value class to hold results of queries within a transaction. Mapping to
@@ -22,7 +22,7 @@ public class QueryResultBundle {
   private final List<ReportingDatasetConceptSet> datasetConceptSets;
   private final List<ReportingDatasetDomainIdValue> datasetDomainIdValues;
   private final List<ProjectedReportingUser> users;
-  private final List<ProjectedReportingInstitution> institutions;
+  private final List<ReportingInstitution> institutions;
   private final List<ReportingWorkspace> workspaces;
 
   public QueryResultBundle(
@@ -31,7 +31,7 @@ public class QueryResultBundle {
       List<ReportingDatasetCohort> datasetCohorts,
       List<ReportingDatasetConceptSet> datasetConceptSets,
       List<ReportingDatasetDomainIdValue> datasetDomainIdValues,
-      List<ProjectedReportingInstitution> institutions,
+      List<ReportingInstitution> institutions,
       List<ProjectedReportingUser> users,
       List<ReportingWorkspace> workspaces) {
     this.cohorts = cohorts;
@@ -62,7 +62,7 @@ public class QueryResultBundle {
     return datasetDomainIdValues;
   }
 
-  public List<ProjectedReportingInstitution> getInstitutions() {
+  public List<ReportingInstitution> getInstitutions() {
     return institutions;
   }
 
