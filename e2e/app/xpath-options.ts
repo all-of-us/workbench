@@ -7,6 +7,7 @@ export interface XPathOptions {
   iconShape?: string;
   startsWith?: string;
   dataTestId? : string;
+  id?: string;
 }
 
 export enum ElementType {

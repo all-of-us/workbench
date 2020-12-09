@@ -1,10 +1,10 @@
 import Container from 'app/container';
 import {LinkText} from 'app/text-labels';
 import Button from 'app/element/button';
-import {ElementHandle, Page} from 'puppeteer';
-import Dropdown from 'app/element/dropdown';
+import {Page} from 'puppeteer';
 import {waitForAttributeEquality} from '../../utils/waits-utils';
 import PrimereactInputNumber from '../element/primereact-input-number';
+import SelectMenu from "./select-menu";
 
 const defaultXpath = '//*[@data-test-id="runtime-panel"]';
 const startStopIconXpath = '//*[@data-test-id="runtime-status-icon"]';
@@ -31,10 +31,6 @@ export enum RuntimePreset {
 export default class RuntimePanel extends Container {
   constructor(page: Page, xpath: string = defaultXpath) {
     super(page, xpath);
-  }
-
-  async getStartStopIcon(): Promise<ElementHandle> {
-    return this.page.waitForXPath(startStopIconXpath);
   }
 
   async clickCreateButton(): Promise<void> {
@@ -68,23 +64,23 @@ export default class RuntimePanel extends Container {
   }
 
   async pickCpus(cpus: number): Promise<void> {
-    const cpusDropdown = new Dropdown(this.page, '//*[@id="runtime-cpu"]');
-    return await cpusDropdown.selectOption(cpus.toString());
+    const cpusDropdown = await SelectMenu.findByName(this.page, {id: 'runtime-cpu'});
+    return await cpusDropdown.clickMenuItem(cpus.toString());
   }
 
   async getCpus(): Promise<string> {
-    const cpusDropdown = new Dropdown(this.page, '//*[@id="runtime-cpu"]');
-    return await cpusDropdown.getDropdownValue();
+    const cpusDropdown = await SelectMenu.findByName(this.page, {id: 'runtime-cpu'});
+    return await cpusDropdown.getSelectedValue();
   }
 
   async pickRamGbs(ramGbs: number): Promise<void> {
-    const ramDropdown = new Dropdown(this.page, '//*[@id="runtime-ram"]');
-    return await ramDropdown.selectOption(ramGbs.toString());
+    const ramDropdown = await SelectMenu.findByName(this.page, {id: 'runtime-ram'});
+    return await ramDropdown.clickMenuItem(ramGbs.toString());
   }
 
   async getRamGbs(): Promise<string> {
-    const ramDropdown = new Dropdown(this.page, '//*[@id="runtime-ram"]');
-    return await ramDropdown.getDropdownValue();
+    const ramDropdown = await SelectMenu.findByName(this.page, {id: 'runtime-ram'});
+    return await ramDropdown.getSelectedValue();
   }
 
   async pickDiskGbs(diskGbs: number): Promise<void> {
@@ -98,9 +94,8 @@ export default class RuntimePanel extends Container {
   }
 
   async pickComputeType(computeType: ComputeType): Promise<void> {
-    await this.page.waitForXPath('//*[@id="runtime-compute"]');
-    const computeTypeDropdown = new Dropdown(this.page, '//*[@id="runtime-compute"]');
-    return await computeTypeDropdown.selectOption(computeType);
+    const computeTypeDropdown = await SelectMenu.findByName(this.page, {id: 'runtime-compute'});
+    return await computeTypeDropdown.clickMenuItem(computeType);
   }
 
   async pickDataprocNumWorkers(numWorkers: number): Promise<void> {
@@ -124,24 +119,23 @@ export default class RuntimePanel extends Container {
   }
 
   async pickWorkerCpus(workerCpus: number): Promise<void> {
-    const workerCpusDropdown = new Dropdown(this.page, '//*[@id="worker-cpu"]');
-    return await workerCpusDropdown.selectOption(workerCpus.toString());
+    const workerCpusDropdown = await SelectMenu.findByName(this.page, {id: 'worker-cpu'});
+    return await workerCpusDropdown.clickMenuItem(workerCpus.toString());
   }
 
   async getWorkerCpus(): Promise<string> {
-    const workerCpusDropdown = new Dropdown(this.page, '//*[@id="worker-cpu"]');
-    return await workerCpusDropdown.getDropdownValue();
+    const workerCpusDropdown = await SelectMenu.findByName(this.page, {id: 'worker-cpu'});
+    return await workerCpusDropdown.getSelectedValue();
   }
 
   async pickWorkerRamGbs(workerRamGbs: number): Promise<void> {
-    await this.page.waitForXPath('//*[@id="worker-ram"]');
-    const workerRamDropdown = new Dropdown(this.page, '//*[@id="worker-ram"]');
-    return await workerRamDropdown.selectOption(workerRamGbs.toString());
+    const workerRamDropdown = await SelectMenu.findByName(this.page, {id: 'worker-ram'});
+    return await workerRamDropdown.clickMenuItem(workerRamGbs.toString());
   }
 
   async getWorkerRamGbs(): Promise<string> {
-    const workerRamDropdown = new Dropdown(this.page, '//*[@id="worker-ram"]');
-    return await workerRamDropdown.getDropdownValue();
+    const workerRamDropdown = await SelectMenu.findByName(this.page, {id: 'worker-ram'});
+    return await workerRamDropdown.getSelectedValue();
   }
 
   async pickWorkerDisk(workerDiskGbs: number): Promise<void> {
@@ -155,8 +149,8 @@ export default class RuntimePanel extends Container {
   }
 
   async pickRuntimePreset(runtimePreset: RuntimePreset): Promise<void> {
-    const runtimePresetMenu = new Dropdown(this.page, '//*[@id="runtime-preset-menu"]');
-    return await runtimePresetMenu.selectOption(runtimePreset);
+    const runtimePresetMenu = await SelectMenu.findByName(this.page, {id: 'runtime-preset-menu'});
+    return await runtimePresetMenu.clickMenuItem(runtimePreset);
   }
 
   buildStatusIconSrc = (startStopIconState: StartStopIconState) => {
