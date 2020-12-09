@@ -287,10 +287,6 @@ export default class BaseElement extends Container {
     return { width, height };
   }
 
-  async dispose(): Promise<void> {
-    return this.element.dispose();
-  }
-
   // try this method when click() is not working
   async clickWithEval(): Promise<void> {
     return this.asElementHandle()

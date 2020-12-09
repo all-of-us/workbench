@@ -45,7 +45,6 @@ export default class SnowmanMenu extends Container {
     } else {
       await link.click();
     }
-    await link.dispose();
   }
 
   /**
@@ -55,7 +54,6 @@ export default class SnowmanMenu extends Container {
   async isOptionDisabled(option: Option): Promise<boolean> {
     const link = this.findOptionLink(option);
     const cursorNotAllowed = await link.isCursorNotAllowed();
-    await link.dispose();
     return cursorNotAllowed;
   }
 

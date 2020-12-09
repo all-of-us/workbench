@@ -110,7 +110,6 @@ export default class GoogleLoginPage {
         submitButton.click(),
       ]);
       await this.page.waitForSelector('app-signed-in', {timeout: 60000});
-      await submitButton.dispose();
     } catch (err) {
       // Two main reasons why error is throw are caused by "Enter Recovery Email" page or login captcha.
       // At this time, we can only handle "Enter Recover Email" page if it exists.

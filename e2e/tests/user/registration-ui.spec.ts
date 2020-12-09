@@ -81,7 +81,6 @@ describe('User registration UI tests:', () => {
       expect(isDisabled).toBe(false);
       const value = await elem.getTextContent();
       expect(value).toBe(''); // empty value
-      await elem.dispose();
     }
 
     // the NEXT button on User Information page should be disabled until all required fields are filled

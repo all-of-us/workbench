@@ -103,7 +103,6 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
       return; // Tab is already open.
     }
     waitPageChange ? await tab.clickAndWait() : await tab.click();
-    await tab.dispose();
     return waitWhileLoading(this.page);
   }
 
