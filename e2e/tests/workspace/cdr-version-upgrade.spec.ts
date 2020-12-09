@@ -24,8 +24,8 @@ describe('Workspace CDR Version Upgrade modal', () => {
       let modal = await launchCdrUpgradeModal(page);
 
       // Clicking the Cancel
-      let cancelButton = await modal.getCancelButton();
-      await cancelButton.click();
+      const modalCancelButton = await modal.getCancelButton();
+      await modalCancelButton.click();
 
       // CDR version flag remains
       await workspacePage.getNewCdrVersionFlag();
@@ -40,8 +40,8 @@ describe('Workspace CDR Version Upgrade modal', () => {
       expect(upgradeMessage).toContain(workspaceName);
       expect(upgradeMessage).toContain(`${config.altCdrVersionName} to ${config.defaultCdrVersionName}.`);
 
-      cancelButton = await duplicationPage.getCancelButton();
-      await cancelButton.clickAndWait();
+      const editCancelButton = await duplicationPage.getCancelButton();
+      await editCancelButton.clickAndWait();
 
       // cleanup
       await workspacePage.deleteWorkspace()
