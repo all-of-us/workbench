@@ -127,9 +127,9 @@ describe('Updating runtime parameters', () => {
     await notebookPreviewPage.openEditMode(notebookName);
 
     // Run notebook to validate runtime settings. Use import hail … hail.spark_context() in Python to verify Spark (see above for other settings)
-    // const sparkOutputText = await notebook.runCodeCell(1, {codeFile: 'resources/python-code/spark-context.py'});
-    // TODO: analyze this
-    // console.log(sparkOutputText);
+    const workersOutputText = await notebook.runCodeCell(1, {codeFile: 'resources/python-code/count-workers.py'});
+    // Spark config always seems to start at this and then scale if you need additional threads.
+    expect(workersOutputText).toBe('\'2\'');
 
     // Open runtime panel
     await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
@@ -139,7 +139,8 @@ describe('Updating runtime parameters', () => {
     await runtimePanel.clickDeleteButton();
 
     // wait until status indicator disappears
-    await helpSidebar.waitForRuntimeStatusIconHidden();
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await runtimePanel.waitForStartStopIconState(StartStopIconState.None);
 
     // Refresh page, and reopen the panel
     await page.reload({ waitUntil: ['networkidle0', 'domcontentloaded'] });
@@ -180,9 +181,9 @@ describe('Updating runtime parameters', () => {
     const notebook = await dataPage.createNotebook(notebookName);
 
     // Run notebook to validate runtime settings. Use import hail … hail.spark_context() in Python to verify Spark (see above for other settings)
-    // const sparkOutputText = await notebook.runCodeCell(1, {codeFile: 'resources/python-code/spark-context.py'});
-    // TODO: analyze this
-    // console.log(sparkOutputText);
+    const workersOutputText = await notebook.runCodeCell(1, {codeFile: 'resources/python-code/count-workers.py'});
+    // Spark config always seems to start at this and then scale if you need additional threads.
+    expect(workersOutputText).toBe('\'2\'');
 
     // Open runtime panel
     await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
@@ -228,7 +229,8 @@ describe('Updating runtime parameters', () => {
     await runtimePanel.clickDeleteButton();
 
     // wait until status indicator disappears
-    await helpSidebar.waitForRuntimeStatusIconHidden();
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await runtimePanel.waitForStartStopIconState(StartStopIconState.None);
 
     // Refresh page, reopen the panel
     await page.reload({ waitUntil: ['networkidle0', 'domcontentloaded'] });

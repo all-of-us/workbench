@@ -115,14 +115,6 @@ export default class HelpSidebar extends Container {
     await this.page.waitForXPath(helpSidebarTab).then(tab => tab.click());
   }
 
-  async getRuntimeStatusIcon(): Promise<ElementHandle> {
-    return this.page.waitForXPath('//*[@data-test-id="runtime-status-icon-container"]/node()');
-  }
-
-  async waitForRuntimeStatusIconHidden(): Promise<ElementHandle> {
-    return this.page.waitForXPath('//*[@data-test-id="runtime-status-icon-container"]/node()', {hidden: true});
-  }
-
   waitUntilSectionVisible(xpath: string): Promise<ElementHandle> {
     return this.page.waitForXPath(xpath, {visible: true});
   }
