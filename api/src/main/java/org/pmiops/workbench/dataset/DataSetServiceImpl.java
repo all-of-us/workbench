@@ -583,7 +583,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       queryBuilder
           .append(String.join(", ", valuesLinkingPair.getSelects()))
           .append(" ")
-          .append(valuesLinkingPair.getDomainTable());
+          .append(valuesLinkingPair.getDomainTable())
+          .append(" ")
+          .append(valuesLinkingPair.formatJoins());
     }
 
     final Optional<String> conceptSetSqlInClauseMaybe =
