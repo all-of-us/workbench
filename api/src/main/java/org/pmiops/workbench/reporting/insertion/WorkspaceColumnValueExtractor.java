@@ -1,5 +1,6 @@
 package org.pmiops.workbench.reporting.insertion;
 
+import static com.google.cloud.bigquery.QueryParameterValue.float64;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.enumToString;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toInsertRowString;
 
@@ -17,6 +18,7 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
   CREATOR_ID("creator_id", ReportingWorkspace::getCreatorId),
   DISSEMINATE_RESEARCH_OTHER(
       "disseminate_research_other", ReportingWorkspace::getDisseminateResearchOther),
+  FREE_TIER_BILLING_USAGE("free_tier_billing_usage", w -> float64(w.getFreeTierBillingUsage())),
   LAST_ACCESSED_TIME("last_accessed_time", w -> toInsertRowString(w.getLastAccessedTime())),
   LAST_MODIFIED_TIME("last_modified_time", w -> toInsertRowString(w.getLastModifiedTime())),
   NAME("name", ReportingWorkspace::getName),
