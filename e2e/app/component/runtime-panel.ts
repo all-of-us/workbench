@@ -5,6 +5,10 @@ import {Page} from 'puppeteer';
 import {waitForAttributeEquality} from '../../utils/waits-utils';
 import PrimereactInputNumber from '../element/primereact-input-number';
 import SelectMenu from "./select-menu";
+<<<<<<< HEAD
+=======
+import {ElementType} from "../xpath-options";
+>>>>>>> 3eec91c9b15df636f5e2910947c8251f0ba51ede
 
 const defaultXpath = '//*[@data-test-id="runtime-panel"]';
 const startStopIconXpath = '//*[@data-test-id="runtime-status-icon"]';

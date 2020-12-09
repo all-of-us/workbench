@@ -174,7 +174,7 @@ describe('Updating runtime parameters', () => {
     await runtimePanel.clickCustomizeButton();
 
     // Use the preset selector to pick “Hail genomics analysis“
-    runtimePanel.pickRuntimePreset(RuntimePreset.HailGenomicsAnalysis);
+    await runtimePanel.pickRuntimePreset(RuntimePreset.HailGenomicsAnalysis);
     await runtimePanel.clickCreateButton();
 
     // Wait until status shows green in side-nav
