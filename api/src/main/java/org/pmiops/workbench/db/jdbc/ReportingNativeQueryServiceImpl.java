@@ -9,6 +9,7 @@ import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingDatasetConceptSet;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
+import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -160,5 +161,10 @@ public class ReportingNativeQueryServiceImpl implements ReportingNativeQueryServ
                 .datasetId(rs.getLong("data_set_id"))
                 .domainId(rs.getString("domain_id"))
                 .value(rs.getString("value")));
+  }
+
+  @Override
+  public List<ReportingInstitution> getReportingInstitutions() {
+    return null;
   }
 }
