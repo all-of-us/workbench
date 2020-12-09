@@ -18,6 +18,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
@@ -39,6 +41,7 @@ import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
+import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupRef;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
@@ -527,5 +530,59 @@ public class FireCloudServiceImpl implements FireCloudService {
           perimetersApi.addProjectToServicePerimeter(doublyEncodedName, billingProject);
           return null;
         });
+  }
+
+  // TODO
+  final long projectReadyPollingIncrementSeconds = 3;
+  final long projectReadyTimeoutSeconds = 60;
+  // I'd love to use our existing Spring retry system but this does not seem to be possible
+  // as it can only react to Exceptions
+  private final Retryer<FirecloudBillingProjectStatus> terminalStatusRetryer =
+      RetryerBuilder.<FirecloudBillingProjectStatus>newBuilder()
+          .retryIfResult(
+              status -> {
+                boolean willRetry =
+                    status.getCreationStatus() != CreationStatusEnum.READY
+                        && status.getCreationStatus() != CreationStatusEnum.ERROR;
+                if (willRetry) {
+                  log.info(
+                      String.format(
+                          "Waiting for billing project %s terminal status - currently %s, retrying",
+                          status.getProjectName(), status.getCreationStatus().getValue()));
+                }
+                return willRetry;
+              })
+          .withWaitStrategy(
+              WaitStrategies.incrementingWait(
+                  projectReadyPollingIncrementSeconds,
+                  TimeUnit.SECONDS,
+                  projectReadyPollingIncrementSeconds,
+                  TimeUnit.SECONDS))
+          .withStopStrategy(
+              StopStrategies.stopAfterDelay(projectReadyTimeoutSeconds, TimeUnit.SECONDS))
+          .build();
+
+  @Override
+  public void waitForReadyProject(String billingProject) throws WorkbenchException {
+    log.info(String.format("Waiting for billing project %s to become READY", billingProject));
+    try {
+      final CreationStatusEnum status =
+          terminalStatusRetryer
+              .call(() -> getBillingProjectStatus(billingProject))
+              .getCreationStatus();
+
+      if (status == CreationStatusEnum.READY) {
+        log.info(String.format("Billing project %s is READY", billingProject));
+      } else {
+        throw new WorkbenchException(
+            String.format("Billing project %s has %s status", billingProject, status.getValue()));
+      }
+    } catch (RetryException | ExecutionException e) {
+      throw new WorkbenchException(
+          String.format(
+              "Timed out waiting for billing project %s to transition to READY status after %d seconds",
+              billingProject, projectReadyTimeoutSeconds),
+          e);
+    }
   }
 }

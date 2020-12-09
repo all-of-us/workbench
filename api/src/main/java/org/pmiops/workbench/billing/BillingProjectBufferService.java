@@ -255,6 +255,9 @@ public class BillingProjectBufferService implements GaugeDataCollector {
         workbenchConfigProvider.get().firecloud.vpcServicePerimeterName,
         bufferEntry.getFireCloudProjectName());
 
+    // it takes some time to add the project to the perimeter
+    fireCloudService.waitForReadyProject(bufferEntry.getFireCloudProjectName());
+
     bufferEntry.setStatusEnum(BufferEntryStatus.ASSIGNED, this::getCurrentTimestamp);
     bufferEntry.setAssignedUser(dbUser);
 
