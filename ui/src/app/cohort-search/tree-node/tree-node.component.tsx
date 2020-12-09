@@ -319,7 +319,8 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       ? currentCohortCriteriaStore.getValue().some(crit =>
         crit.parameterId === this.paramId()
           || (![Domain.PHYSICALMEASUREMENT.toString(), Domain.VISIT.toString()].includes(domainId)
-          && path.split('.').includes(crit.id.toString())))
+          && !!crit.id && path.split('.').includes(crit.id.toString()))
+      )
       : currentConceptStore.getValue().some(crit =>
         this.paramId(crit) === this.paramId() || path.split('.').includes(crit.id.toString()));
   }

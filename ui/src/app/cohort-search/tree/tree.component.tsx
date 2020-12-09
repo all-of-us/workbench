@@ -146,13 +146,13 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
 
   async loadRootNodes() {
     try {
-      const {node: {domainId, id, isStandard, type}, selectedSurvey, source} = this.props;
+      const {node: {domainId, id, isStandard, type}, selectedSurvey} = this.props;
       this.setState({loading: true});
-      const {cdrVersionId} = (currentWorkspaceStore.getValue());
+      const {cdrVersionId} = currentWorkspaceStore.getValue();
       const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
       const parentId = domainId === Domain.PHYSICALMEASUREMENT.toString() ? null : id;
       const promises = [cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, parentId)];
-      if (this.criteriaIdLookupNeeded) {
+      if (this.criteriaLookupNeeded) {
         const criteriaRequest = {
           sourceConceptIds: currentCohortCriteriaStore.getValue().filter(s => !s.isStandard).map(s => s.conceptId),
           standardConceptIds: currentCohortCriteriaStore.getValue().filter(s => s.isStandard).map(s => s.conceptId),
@@ -161,18 +161,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       }
       const [rootNodes, criteriaLookup] = await Promise.all(promises);
       if (criteriaLookup) {
-        const updatedSelections = currentCohortCriteriaStore.getValue().map(sel => {
-          const criteriaMatch = criteriaLookup.items.find(item => item.conceptId === sel.conceptId
-            && item.isStandard === sel.isStandard
-            && (domainId !== Domain.SURVEY.toString() || item.subtype === sel.subtype)
-            && (sel.subtype !== CriteriaSubType.ANSWER.toString() || (item.value === sel.code))
-          );
-          if (criteriaMatch) {
-            sel.id = criteriaMatch.id;
-          }
-          return sel;
-        });
-        currentCohortCriteriaStore.next(updatedSelections);
+        this.updateCriteriaSelectionStore(criteriaLookup.items);
       }
       if (domainId === Domain.PHYSICALMEASUREMENT.toString()) {
         let children = [];
@@ -209,10 +198,26 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
     }
   }
 
-  get criteriaIdLookupNeeded() {
+  get criteriaLookupNeeded() {
     return this.props.source === 'criteria'
       &&  ![Domain.PHYSICALMEASUREMENT.toString(), Domain.VISIT.toString()].includes(this.props.node.domainId)
       &&  currentCohortCriteriaStore.getValue().some(crit => !crit.id);
+  }
+
+  updateCriteriaSelectionStore(criteriaLookupItems: Criteria[]) {
+    const {node: {domainId}} = this.props;
+    const updatedSelections = currentCohortCriteriaStore.getValue().map(sel => {
+      const criteriaMatch = criteriaLookupItems.find(item => item.conceptId === sel.conceptId
+        && item.isStandard === sel.isStandard
+        && (domainId !== Domain.SURVEY.toString() || item.subtype === sel.subtype)
+        && (sel.subtype !== CriteriaSubType.ANSWER.toString() || (item.value === sel.code))
+      );
+      if (criteriaMatch) {
+        sel.id = criteriaMatch.id;
+      }
+      return sel;
+    });
+    currentCohortCriteriaStore.next(updatedSelections);
   }
 
   updatePpiSurveys(resp, selectedSurveyChild) {
