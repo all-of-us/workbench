@@ -98,7 +98,7 @@ ENVIRONMENTS = {
     :config_json => "config_prod.json",
     :cdr_versions_json => "cdr_versions_prod.json",
     :featured_workspaces_json => "featured_workspaces_prod.json",
-    :gae_vars => make_gae_vars(8, 64)
+    :gae_vars => make_gae_vars(8, 64, 'F4')
   }
 }
 
