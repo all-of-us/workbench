@@ -682,7 +682,7 @@ public class DbWorkspace {
   @OneToOne
   @JoinColumn(name = "workspace_id")
   public DbWorkspaceFreeTierUsage getFreeTierUsage() {
-    return getFreeTierUsage();
+    return freeTierUsage;
   }
 
   public void setFreeTierUsage(DbWorkspaceFreeTierUsage freeTierUsage) {
