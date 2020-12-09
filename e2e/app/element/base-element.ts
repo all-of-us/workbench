@@ -33,7 +33,7 @@ export default class BaseElement extends Container {
   async waitForXPath(waitOptions: WaitForSelectorOptions = {visible: true}): Promise<ElementHandle> {
     if (this.element !== undefined) return this.element.asElement();
     try {
-      return this.page.waitForXPath(this.xpath, waitOptions).then(elemt => this.element = elemt.asElement());
+      return this.page.waitForXPath(this.xpath, waitOptions).then(elemt => elemt.asElement());
     } catch (err) {
       console.error(`waitForXpath('${this.xpath}') encountered ${err}`);
       // Debugging pause
