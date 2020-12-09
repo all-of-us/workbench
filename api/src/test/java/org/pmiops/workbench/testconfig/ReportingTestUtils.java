@@ -15,6 +15,7 @@ import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DuaType;
@@ -215,6 +216,15 @@ public class ReportingTestUtils {
         .rpSocialBehavioral(WORKSPACE__RP_SOCIAL_BEHAVIORAL)
         .rpTimeRequested(offsetDateTimeUtc(WORKSPACE__RP_TIME_REQUESTED))
         .workspaceId(WORKSPACE__WORKSPACE_ID);
+  }
+
+  public static DbWorkspaceFreeTierUsage createDbWorkspaceFreeTierUsage(
+      DbWorkspace workspace, DbUser user) {
+    final DbWorkspaceFreeTierUsage freeTierUsage = new DbWorkspaceFreeTierUsage();
+    freeTierUsage.setWorkspace(workspace);
+    freeTierUsage.setUser(user);
+    freeTierUsage.setCost(WORKSPACE__FREE_TIER_BILLING_USAGE);
+    return freeTierUsage;
   }
 
   public static DbWorkspace createDbWorkspace(DbUser creator, DbCdrVersion cdrVersion) {
