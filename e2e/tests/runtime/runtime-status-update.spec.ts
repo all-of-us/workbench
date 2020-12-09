@@ -9,8 +9,6 @@ import {createWorkspace, signIn} from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {makeRandomName} from 'utils/str-utils';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import NotebookPage from '../../app/page/notebook-page';
-import WorkspaceAnalysisPage from '../../app/page/workspace-analysis-page';
 
 describe('Updating runtime parameters', () => {
   beforeEach(async () => {
@@ -105,10 +103,6 @@ describe('Updating runtime parameters', () => {
     expect(parseInt(diskOutputText)).toBeGreaterThanOrEqual(45 * 1000 * 1000 * 1000);
     expect(parseInt(diskOutputText)).toBeLessThanOrEqual(55 * 1000 * 1000 * 1000);
 
-    // Go back to the analysis page in the hopes that maybe the dataproc dropdown will behave
-    const notebookPage = new NotebookPage(page, notebookName);
-    await notebookPage.goAnalysisPage();
-
     // Open runtime panel
     await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
 
@@ -129,15 +123,13 @@ describe('Updating runtime parameters', () => {
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Running);
 
     // Go back to the notebook:
-    const analysisPage = new WorkspaceAnalysisPage(page);
-    await analysisPage.openNotebook(notebookName);
     const notebookPreviewPage = new NotebookPreviewPage(page);
     await notebookPreviewPage.openEditMode(notebookName);
 
     // Run notebook to validate runtime settings. Use import hail … hail.spark_context() in Python to verify Spark (see above for other settings)
-    const sparkOutputText = await notebook.runCodeCell(4, {codeFile: 'resources/python-code/spark-context.py'});
+    // const sparkOutputText = await notebook.runCodeCell(1, {codeFile: 'resources/python-code/spark-context.py'});
     // TODO: analyze this
-    console.log(sparkOutputText);
+    // console.log(sparkOutputText);
 
     // Open runtime panel
     await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
@@ -188,9 +180,9 @@ describe('Updating runtime parameters', () => {
     const notebook = await dataPage.createNotebook(notebookName);
 
     // Run notebook to validate runtime settings. Use import hail … hail.spark_context() in Python to verify Spark (see above for other settings)
-    const sparkOutputText = await notebook.runCodeCell(1, {codeFile: 'resources/python-code/spark-context.py'});
+    // const sparkOutputText = await notebook.runCodeCell(1, {codeFile: 'resources/python-code/spark-context.py'});
     // TODO: analyze this
-    console.log(sparkOutputText);
+    // console.log(sparkOutputText);
 
     // Open runtime panel
     await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);

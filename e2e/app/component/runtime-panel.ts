@@ -5,11 +5,6 @@ import {Page} from 'puppeteer';
 import {waitForAttributeEquality} from '../../utils/waits-utils';
 import PrimereactInputNumber from '../element/primereact-input-number';
 import SelectMenu from "./select-menu";
-<<<<<<< HEAD
-=======
-import {ElementType} from "../xpath-options";
->>>>>>> 3eec91c9b15df636f5e2910947c8251f0ba51ede
-
 const defaultXpath = '//*[@data-test-id="runtime-panel"]';
 const startStopIconXpath = '//*[@data-test-id="runtime-status-icon"]';
 
@@ -39,12 +34,14 @@ export default class RuntimePanel extends Container {
 
   async clickCreateButton(): Promise<void> {
     const button = await Button.findByName(this.page, {name: LinkText.Create});
-    return await button.click();
+    await button.click();
+    return await page.waitForTimeout(1000);
   }
 
   async clickCustomizeButton(): Promise<void> {
     const button = await Button.findByName(this.page, {name: LinkText.Customize});
-    return await button.click();
+    await button.click();
+    return await page.waitForTimeout(1000);
   }
 
   async clickNextButton(): Promise<void> {
@@ -54,7 +51,8 @@ export default class RuntimePanel extends Container {
 
   async clickApplyAndRecreateButton(): Promise<void> {
     const button = await Button.findByName(this.page, {name: LinkText.Update});
-    return await button.click();
+    await button.click();
+    return await page.waitForTimeout(1000);
   }
 
   async clickDeleteEnvironmentButton(): Promise<void> {
@@ -64,7 +62,8 @@ export default class RuntimePanel extends Container {
 
   async clickDeleteButton(): Promise<void> {
     const button = await Button.findByName(this.page, {name: LinkText.Delete});
-    return await button.click();
+    await button.click();
+    return await page.waitForTimeout(1000);
   }
 
   async pickCpus(cpus: number): Promise<void> {
