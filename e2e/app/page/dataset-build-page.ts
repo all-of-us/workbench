@@ -1,3 +1,4 @@
+import {Page} from 'puppeteer';
 import Table from 'app/component/table';
 import Button from 'app/element/button';
 import Checkbox from 'app/element/checkbox';
@@ -10,7 +11,7 @@ import CohortBuildPage from './cohort-build-page';
 import ConceptSetSearchPage from './conceptset-search-page';
 import DatasetSaveModal from './dataset-save-modal';
 
-const PageTitle = 'Dataset Page';
+const pageTitle = 'Dataset Page';
 
 enum LabelAlias {
   SelectValues = 'Select Values',
@@ -20,9 +21,13 @@ enum LabelAlias {
 
 export default class DatasetBuildPage extends AuthenticatedPage {
 
+  constructor(page: Page) {
+    super(page);
+  }
+
   async isLoaded(): Promise<boolean> {
     await Promise.all([
-      waitForDocumentTitle(this.page, PageTitle),
+      waitForDocumentTitle(this.page, pageTitle),
       waitWhileLoading(this.page),
     ]);
     return true;
