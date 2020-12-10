@@ -20,8 +20,8 @@ No, but it will automatically add a sorting step if it detects unsorted input. E
 ```
 
 ### How do you sort a VCF file?
-`bcftools sort unsorted.vcf > resorted.vcf`
-For testing, I unsorted the VCF file like so
+`bcftools sort unsorted.vcf > resorted.vcf`  
+For testing, I unsorted the VCF file like so  
 ```
 head -n 99 sorted.vcf > header.vcf
 tail -n +100 sorted.vcf > body.vcf
