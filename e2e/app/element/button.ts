@@ -1,8 +1,8 @@
 import {Page} from 'puppeteer';
 import Container from 'app/container';
 import {ElementType, XPathOptions} from 'app/xpath-options';
-import {getPropValue} from '../../utils/element-utils';
-import {waitForFn} from '../../utils/waits-utils';
+import {getPropValue} from 'utils/element-utils';
+import {waitForFn} from 'utils/waits-utils';
 import BaseElement from './base-element';
 import {buildXPath} from 'app/xpath-builders';
 
@@ -34,7 +34,7 @@ export default class Button extends BaseElement {
     const isCursorPointer = async(): Promise<boolean> => {
       return await getPropValue<string>(await this.asElementHandle(), 'cursor') === 'pointer';
     }
-    await waitForFn(isCursorPointer);
+    await waitForFn(isCursorPointer, 2000, 30000);
   }
 
 }
