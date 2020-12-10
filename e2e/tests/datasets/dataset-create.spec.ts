@@ -79,7 +79,7 @@ describe('Dataset test', () => {
     await datasetEditPage.waitForLoad();
     await datasetEditPage.selectCohorts(['All Participants']);
     await datasetEditPage.clickAnalyzeButton();
-    await jestPuppeteer.debug();
+    
     // Save Dataset in a new name.
     await saveModal.waitForLoad();
     datasetName = await saveModal.saveDataset({exportToNotebook: false}, true);
