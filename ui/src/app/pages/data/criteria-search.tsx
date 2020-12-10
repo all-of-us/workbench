@@ -360,7 +360,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
             selectOption={this.setAutocompleteSelection}
             setSearchTerms={this.setTreeSearchTerms}/>}
          {/*List View (using duplicated version of ListSearch) */}
-        <div style={this.searchContentStyle('list')}>
+        {!this.initTree && <div style={this.searchContentStyle('list')}>
           <ListSearchV2 source={source}
                         hierarchy={this.showHierarchy}
                         searchContext={cohortContext}
@@ -368,7 +368,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
                         select={this.addSelection}
                         selectedSurvey={selectedSurvey}
                         selectedIds={this.getListSearchSelectedIds()}/>
-        </div>
+        </div>}
       </div>
      </div>;
   }

@@ -10,7 +10,7 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentConcept, withCurrentWorkspace} from 'app/utils';
 import {getCdrVersion} from 'app/utils/cdr-versions';
-import {currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
+import {currentCohortCriteriaStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   CdrVersionListResponse,
@@ -144,47 +144,80 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
     }
   }
 
-  loadRootNodes() {
-    const {node: {domainId, id, isStandard, type}, selectedSurvey} = this.props;
-    this.setState({loading: true});
-    const {cdrVersionId} = (currentWorkspaceStore.getValue());
-    const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
-    const parentId = domainId === Domain.PHYSICALMEASUREMENT.toString() ? null : id;
-    cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, parentId)
-      .then(resp => {
-        if (domainId === Domain.PHYSICALMEASUREMENT.toString()) {
-          let children = [];
-          resp.items.forEach(child => {
-            child['children'] = [];
-            if (child.parentId === 0) {
-              children.push(child);
-            } else {
-              children = this.addChildToParent(child, children);
-            }
-          });
-          this.setState({children});
-        } else if (domainId === Domain.SURVEY.toString() && selectedSurvey) {
-          // Temp: This should be handle in API
-          this.updatePpiSurveys(resp, resp.items.filter(child => child.name === selectedSurvey));
-        } else if (domainId === Domain.SURVEY.toString() && this.props.source === 'conceptSetDetails') {
-          const selectedSurveyChild = resp.items.filter(child => child.id === this.props.node.parentId);
-          this.updatePpiSurveys(resp, selectedSurveyChild);
-        } else {
-          this.setState({children: resp.items});
-          if (domainId === Domain.SURVEY.toString()) {
-            const rootSurveys = ppiSurveys.getValue();
-            if (!rootSurveys[cdrVersionId]) {
-              rootSurveys[cdrVersionId] = resp.items;
-              ppiSurveys.next(rootSurveys);
-            }
+  async loadRootNodes() {
+    try {
+      const {node: {domainId, id, isStandard, type}, selectedSurvey} = this.props;
+      this.setState({loading: true});
+      const {cdrVersionId} = currentWorkspaceStore.getValue();
+      const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
+      const parentId = domainId === Domain.PHYSICALMEASUREMENT.toString() ? null : id;
+      const promises = [cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, parentId)];
+      if (this.criteriaLookupNeeded) {
+        const criteriaRequest = {
+          sourceConceptIds: currentCohortCriteriaStore.getValue().filter(s => !s.isStandard).map(s => s.conceptId),
+          standardConceptIds: currentCohortCriteriaStore.getValue().filter(s => s.isStandard).map(s => s.conceptId),
+        };
+        promises.push(cohortBuilderApi().findCriteriaForCohortEdit(+cdrVersionId, domainId, criteriaRequest));
+      }
+      const [rootNodes, criteriaLookup] = await Promise.all(promises);
+      if (criteriaLookup) {
+        this.updateCriteriaSelectionStore(criteriaLookup.items);
+      }
+      if (domainId === Domain.PHYSICALMEASUREMENT.toString()) {
+        let children = [];
+        rootNodes.items.forEach(child => {
+          child['children'] = [];
+          if (child.parentId === 0) {
+            children.push(child);
+          } else {
+            children = this.addChildToParent(child, children);
+          }
+        });
+        this.setState({children});
+      } else if (domainId === Domain.SURVEY.toString() && selectedSurvey) {
+        // Temp: This should be handle in API
+        this.updatePpiSurveys(rootNodes, rootNodes.items.filter(child => child.name === selectedSurvey));
+      } else if (domainId === Domain.SURVEY.toString() && this.props.source === 'conceptSetDetails') {
+        const selectedSurveyChild = rootNodes.items.filter(child => child.id === this.props.node.parentId);
+        this.updatePpiSurveys(rootNodes, selectedSurveyChild);
+      } else {
+        this.setState({children: rootNodes.items});
+        if (domainId === Domain.SURVEY.toString()) {
+          const rootSurveys = ppiSurveys.getValue();
+          if (!rootSurveys[cdrVersionId]) {
+            rootSurveys[cdrVersionId] = rootNodes.items;
+            ppiSurveys.next(rootSurveys);
           }
         }
-      })
-      .catch(error => {
-        console.error(error);
-        this.setState({error: true});
-      })
-      .finally(() => this.setState({loading: false}));
+      }
+    } catch (error) {
+      console.error(error);
+      this.setState({error: true});
+    } finally {
+      this.setState({loading: false});
+    }
+  }
+
+  get criteriaLookupNeeded() {
+    return this.props.source === 'criteria'
+      &&  ![Domain.PHYSICALMEASUREMENT.toString(), Domain.VISIT.toString()].includes(this.props.node.domainId)
+      &&  currentCohortCriteriaStore.getValue().some(crit => !crit.id);
+  }
+
+  updateCriteriaSelectionStore(criteriaLookupItems: Criteria[]) {
+    const {node: {domainId}} = this.props;
+    const updatedSelections = currentCohortCriteriaStore.getValue().map(sel => {
+      const criteriaMatch = criteriaLookupItems.find(item => item.conceptId === sel.conceptId
+        && item.isStandard === sel.isStandard
+        && (domainId !== Domain.SURVEY.toString() || item.subtype === sel.subtype)
+        && (sel.subtype !== CriteriaSubType.ANSWER.toString() || (item.value === sel.code))
+      );
+      if (criteriaMatch) {
+        sel.id = criteriaMatch.id;
+      }
+      return sel;
+    });
+    currentCohortCriteriaStore.next(updatedSelections);
   }
 
   updatePpiSurveys(resp, selectedSurveyChild) {
