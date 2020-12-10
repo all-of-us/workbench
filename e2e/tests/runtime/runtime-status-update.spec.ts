@@ -5,7 +5,7 @@ import RuntimePanel, {
   StartStopIconState
 } from 'app/component/runtime-panel';
 import {config} from 'resources/workbench-config';
-import {createWorkspace, findOrCreateWorkspace, signIn} from 'utils/test-utils';
+import {createWorkspace, signIn} from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {makeRandomName} from 'utils/str-utils';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
@@ -13,18 +13,10 @@ import NotebookPreviewPage from 'app/page/notebook-preview-page';
 // This one is going to take a long time.
 jest.setTimeout(60 * 30 * 1000);
 
-let workspaceName;
-
 describe('Updating runtime parameters', () => {
-  beforeAll(async() => {
-    await signIn(page);
-    const workspaceCard = await createWorkspace(page, config.altCdrVersionName);
-    workspaceName = workspaceCard.getWorkspaceName();
-  });
-
   beforeEach(async () => {
     await signIn(page);
-    const workspaceCard = await findOrCreateWorkspace(page, workspaceName);
+    const workspaceCard = await createWorkspace(page, config.altCdrVersionName);
     await workspaceCard.clickWorkspaceName();
 
     // Pause a bit to wait for getRuntime to complete

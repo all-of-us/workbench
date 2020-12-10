@@ -110,13 +110,4 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     await copyModal.copyToAnotherWorkspace(destinationWorkspace, destinationNotebookName);
   }
 
-  /**
-   * Given a notebook name, click on the resource card for that notebook in order to open the notebook.
-   * @param {string} notebookName The notebook to open
-   */
-  async openNotebook(notebookName: string): Promise<void> {
-    const resourceCard =new DataResourceCard(this.page);
-    const notebookCard = await resourceCard.findCard(notebookName, ResourceCard.Notebook);
-    await notebookCard.clickResourceName();
-  }
 }
