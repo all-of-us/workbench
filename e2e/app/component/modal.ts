@@ -83,10 +83,6 @@ export default class Modal extends Container {
     await this.page.waitForXPath(this.xpath, {hidden: true, timeout: 55000});
   }
 
-  async waitUntilVisible(): Promise<ElementHandle> {
-    return this.page.waitForXPath(this.xpath, {visible: true});
-  }
-
   /**
    * Returns true if Dialog exists on page.
    */

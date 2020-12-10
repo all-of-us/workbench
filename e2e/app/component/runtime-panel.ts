@@ -2,10 +2,12 @@ import Container from 'app/container';
 import {LinkText} from 'app/text-labels';
 import Button from 'app/element/button';
 import {Page} from 'puppeteer';
-import {waitForAttributeEquality} from '../../utils/waits-utils';
-import PrimereactInputNumber from '../element/primereact-input-number';
+import {waitForAttributeEquality, waitWhileLoading} from 'utils/waits-utils';
+import PrimereactInputNumber from 'app/element/primereact-input-number';
 import SelectMenu from "./select-menu";
-const defaultXpath = '//*[@data-test-id="runtime-panel"]';
+import {savePageToFile, takeScreenshot} from "../../utils/save-file-utils";
+
+const defaultXpath = '//*[@id="runtime-panel"]';
 const startStopIconXpath = '//*[@data-test-id="runtime-status-icon"]';
 
 export enum StartStopIconState {
@@ -33,35 +35,35 @@ export default class RuntimePanel extends Container {
   }
 
   async clickCreateButton(): Promise<void> {
-    const button = await Button.findByName(this.page, {name: LinkText.Create});
+    const button = await Button.findByName(this.page, {name: LinkText.Create}, this);
     await button.click();
     return await page.waitForTimeout(2000);
   }
 
   async clickCustomizeButton(): Promise<void> {
-    const button = await Button.findByName(this.page, {name: LinkText.Customize});
+    const button = await Button.findByName(this.page, {name: LinkText.Customize}, this);
     await button.click();
     return await page.waitForTimeout(2000);
   }
 
   async clickNextButton(): Promise<void> {
-    const button = await Button.findByName(this.page, {name: LinkText.Next});
+    const button = await Button.findByName(this.page, {name: LinkText.Next}, this);
     return await button.click();
   }
 
   async clickApplyAndRecreateButton(): Promise<void> {
-    const button = await Button.findByName(this.page, {name: LinkText.Update});
+    const button = await Button.findByName(this.page, {name: LinkText.Update}, this);
     await button.click();
     return await page.waitForTimeout(2000);
   }
 
   async clickDeleteEnvironmentButton(): Promise<void> {
-    const button = await Button.findByName(this.page, {name: LinkText.DeleteEnvironment});
+    const button = await Button.findByName(this.page, {name: LinkText.DeleteEnvironment}, this);
     return await button.click();
   }
 
   async clickDeleteButton(): Promise<void> {
-    const button = await Button.findByName(this.page, {name: LinkText.Delete});
+    const button = await Button.findByName(this.page, {name: LinkText.Delete}, this);
     await button.click();
     return await page.waitForTimeout(2000);
   }
@@ -168,5 +170,17 @@ export default class RuntimePanel extends Container {
         this.buildStatusIconSrc(startStopIconState),
         300000
     )
+  }
+
+  async waitForLoad(): Promise<this> {
+    try {
+      await this.waitUntilVisible();
+      await waitWhileLoading(this.page);
+    } catch (err) {
+      await savePageToFile(this.page);
+      await takeScreenshot(this.page);
+      throw err;
+    }
+    return this;
   }
 }

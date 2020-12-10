@@ -33,7 +33,7 @@ export default class PrimereactInputNumber extends BaseElement {
   }
 
   private async getInputElementHandle(): Promise<ElementHandle> {
-    return await this.page.waitForXPath(this.getInputXPath())
+    return await this.page.waitForXPath(this.getInputXPath(), {visible: true})
   }
 
   private getInputXPath(): string {

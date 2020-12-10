@@ -10,6 +10,8 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {makeRandomName} from 'utils/str-utils';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 
+// This one is going to take a long time.
+jest.setTimeout(60 * 30 * 1000);
 describe('Updating runtime parameters', () => {
   beforeEach(async () => {
     await signIn(page);
@@ -22,17 +24,17 @@ describe('Updating runtime parameters', () => {
 
   test('Create a default runtime', async() => {
     const helpSidebar = new HelpSidebar(page);
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
     const runtimePanel = new RuntimePanel(page);
     await runtimePanel.clickCreateButton();
 
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Starting);
   });
 
   test('Create a custom runtime', async() => {
     const helpSidebar = new HelpSidebar(page);
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
     const runtimePanel = new RuntimePanel(page);
     await runtimePanel.clickCustomizeButton();
 
@@ -41,13 +43,13 @@ describe('Updating runtime parameters', () => {
     await runtimePanel.pickDiskGbs(60);
     await runtimePanel.clickCreateButton();
 
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Starting);
   });
 
   test('Create a dataproc runtime', async() => {
     const helpSidebar = new HelpSidebar(page);
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
     const runtimePanel = new RuntimePanel(page);
     await runtimePanel.clickCustomizeButton();
 
@@ -62,21 +64,21 @@ describe('Updating runtime parameters', () => {
     await runtimePanel.pickWorkerDisk(60);
     await runtimePanel.clickCreateButton();
 
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Starting);
   });
 
   test('Delete environment', async() => {
     // Open the runtime panel
     const helpSidebar = new HelpSidebar(page);
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
 
     // Click “create“ , from the default “create panel”
     const runtimePanel = new RuntimePanel(page);
     await runtimePanel.clickCreateButton();
 
     // Wait until status shows green in side-nav
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Starting);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Running);
 
@@ -87,19 +89,17 @@ describe('Updating runtime parameters', () => {
 
 
   test('Switch from GCE to dataproc', async() => {
-    // This one is going to take a long time.
-    jest.setTimeout(60 * 20 * 1000);
     // Open the runtime panel
     const helpSidebar = new HelpSidebar(page);
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
 
     // Click “create“ , from the default “create panel”
     // using let here instead of const because we navigate during the test and must reinstantiate
-    let runtimePanel = new RuntimePanel(page);
+    const runtimePanel = new RuntimePanel(page);
     await runtimePanel.clickCreateButton();
 
     // Wait until status shows green in side-nav
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Starting);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Running);
 
@@ -124,7 +124,7 @@ describe('Updating runtime parameters', () => {
     expect(parseInt(diskOutputText)).toBeLessThanOrEqual(55 * 1000 * 1000 * 1000);
 
     // Open runtime panel
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
 
     // Switch to dataproc cluster with custom settings (e.g. 1 preemptible worker)
     await runtimePanel.pickComputeType(ComputeType.Dataproc);
@@ -137,7 +137,7 @@ describe('Updating runtime parameters', () => {
     await runtimePanel.clickNextButton();
     await runtimePanel.clickApplyAndRecreateButton();
     await page.waitForTimeout(2000);
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Stopping);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Starting);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Running);
@@ -152,42 +152,36 @@ describe('Updating runtime parameters', () => {
     expect(workersOutputText).toBe('\'2\'');
 
     // Open runtime panel
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
-    const runtimePanel2 = new RuntimePanel(page);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
 
     // Click 'delete environment'
-    await runtimePanel2.clickDeleteEnvironmentButton();
-    await runtimePanel2.clickDeleteButton();
+    await runtimePanel.clickDeleteEnvironmentButton();
+    await runtimePanel.clickDeleteButton();
 
     // wait until status indicator disappears
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
-    await runtimePanel2.waitForStartStopIconState(StartStopIconState.None);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
+    await runtimePanel.waitForStartStopIconState(StartStopIconState.None);
 
     // Refresh page, and reopen the panel
     await page.reload({ waitUntil: ['networkidle0', 'domcontentloaded'] });
-    const helpSidebar2 = new HelpSidebar(page);
-    await helpSidebar2.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
-    const runtimePanel3 = new RuntimePanel(page);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
 
     // Verify that dataproc settings are still shown
-    expect(await runtimePanel3.getDataprocNumWorkers()).toBe(3);
-    expect(await runtimePanel3.getDataprocNumPreemptibleWorkers()).toBe(1);
-    expect(await runtimePanel3.getWorkerCpus()).toBe("1");
-    expect(await runtimePanel3.getWorkerRamGbs()).toBe("3.75");
-    expect(await runtimePanel3.getWorkerDisk()).toBe(60);
+    expect(await runtimePanel.getDataprocNumWorkers()).toBe(3);
+    expect(await runtimePanel.getDataprocNumPreemptibleWorkers()).toBe(1);
+    expect(await runtimePanel.getWorkerCpus()).toBe("1");
+    expect(await runtimePanel.getWorkerRamGbs()).toBe("3.75");
+    expect(await runtimePanel.getWorkerDisk()).toBe(60);
   });
 
   test('Switch from dataproc to GCE', async() => {
-    // This one is going to take a long time.
-    jest.setTimeout(60 * 20 * 1000);
-
     // Open the runtime panel
     const helpSidebar = new HelpSidebar(page);
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
 
     // Click “customize“ , from the default “create panel”
     // using let here instead of const because we navigate during the test and must reinstantiate
-    let runtimePanel = new RuntimePanel(page);
+    const runtimePanel = new RuntimePanel(page);
     await runtimePanel.clickCustomizeButton();
 
     // Use the preset selector to pick “Hail genomics analysis“
@@ -196,7 +190,7 @@ describe('Updating runtime parameters', () => {
 
     // Wait until status shows green in side-nav
     await page.waitForTimeout(2000);
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Running);
 
     // Open a notebook
@@ -210,7 +204,7 @@ describe('Updating runtime parameters', () => {
     expect(workersOutputText).toBe('\'2\'');
 
     // Open runtime panel
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
 
     // Switch to a GCE VM with custom settings
     await runtimePanel.pickComputeType(ComputeType.Standard);
@@ -222,7 +216,7 @@ describe('Updating runtime parameters', () => {
 
     // Wait for indicator to go green in side-nav
     await page.waitForTimeout(2000);
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Running);
 
     // Go back to the notebook:
@@ -245,8 +239,7 @@ describe('Updating runtime parameters', () => {
     expect(parseInt(diskOutputText)).toBeLessThanOrEqual(55 * 1000 * 1000 * 1000);
 
     // Open runtime panel
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
-    runtimePanel = new RuntimePanel(page);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Running);
 
     // Click ''delete environment”
@@ -254,12 +247,12 @@ describe('Updating runtime parameters', () => {
     await runtimePanel.clickDeleteButton();
 
     // wait until status indicator disappears
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.None);
 
     // Refresh page, reopen the panel
     await page.reload({ waitUntil: ['networkidle0', 'domcontentloaded'] });
-    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
 
     // Verify GCE custom settings are still shown
     expect(await runtimePanel.getCpus()).toBe("8");
