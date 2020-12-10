@@ -112,7 +112,7 @@ export default class HelpSidebar extends Container {
   }
 
   async clickSidebarTab(helpSidebarTab: HelpSidebarTab): Promise<void> {
-    return await this.page.waitForXPath(helpSidebarTab).then(tab => tab.click());
+    return await this.page.waitForXPath(helpSidebarTab, {visible: true}).then(tab => tab.click());
   }
 
   waitUntilSectionVisible(xpath: string): Promise<ElementHandle> {

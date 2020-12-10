@@ -178,7 +178,7 @@ export async function waitForAttributeEquality(page: Page,
           return element.attributes[attributeName] && element.attributes[attributeName].value === attributeValue;
         }
         return false;
-      }, timeout ? {timeout} : {}, selector.css, attribute, value);
+      }, {timeout: timeout || 30000}, selector.css, attribute, value);
       return (await jsHandle.jsonValue()) as boolean;
     } catch (e) {
       console.error(`Wait for element matching CSS="${selector.css}" attribute:${attribute} value:${value} failed. ${e}`);
