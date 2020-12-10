@@ -276,3 +276,13 @@ export async function waitWhileLoading(page: Page, timeOut: number = 90000): Pro
     return elements && elements.length === 0;
   }, {polling: 'mutation', timeout: timeOut}, spinElementsSelector);
 }
+
+export async function waitUntilEnabled(page: Page, cssSelector: string): Promise<boolean> {
+  const jsHandle = await page.waitForFunction(xpathSelector => {
+    const elemt = document.evaluate(xpathSelector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    const style = window.getComputedStyle(elemt as Element);
+    const propValue = style.getPropertyValue('cursor');
+    return propValue === 'pointer';
+  }, {}, cssSelector);
+  return (await jsHandle.jsonValue()) as boolean;
+}
