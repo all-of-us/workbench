@@ -61,7 +61,7 @@ public final class SearchGroupItemQueryBuilder {
           CriteriaType.ETHNICITY, "ethnicity_concept_id");
 
   // sql parts to help construct BigQuery sql statements
-  private static final String OR = " or\n";
+  private static final String OR = " or ";
   private static final String AND = " and ";
   private static final String UNION_TEMPLATE = "union all\n";
   private static final String DESC = " desc";
@@ -96,15 +96,13 @@ public final class SearchGroupItemQueryBuilder {
           + "and is_standard = %s\n"
           + "and concept_id in unnest(%s)\n"
           + "and is_selectable = 1\n";
-  private static final String VALUE_AS_NUMBER =
-      "is_standard = %s and concept_id = %s and value_as_number %s %s";
-  private static final String VALUE_AS_CONCEPT_ID =
-      "is_standard = %s and concept_id = %s and value_as_concept_id %s unnest(%s)";
-  private static final String VALUE_SOURCE_CONCEPT_ID =
-      "is_standard = %s and concept_id = %s and value_source_concept_id %s unnest(%s)";
+  private static final String VALUE_AS_NUMBER = " value_as_number %s %s";
+  private static final String VALUE_AS_CONCEPT_ID = " value_as_concept_id %s unnest(%s)";
+  private static final String VALUE_SOURCE_CONCEPT_ID = " value_source_concept_id %s unnest(%s)";
   private static final String SOURCE_CONCEPT_SURVEY_ID =
-      "is_standard = %s and concept_id = %s and survey_version_concept_id %s unnest(%s)";
-  private static final String BP_SQL = "is_standard = %s and concept_id in unnest(%s)";
+      " and survey_version_concept_id %s unnest(%s)";
+  private static final String STANDARD_CONCEPT_SQL =
+      "is_standard = %s and concept_id in unnest(%s)";
   private static final String SYSTOLIC_SQL = " and systolic %s %s";
   private static final String DIASTOLIC_SQL = " and diastolic %s %s";
 
@@ -210,42 +208,13 @@ public final class SearchGroupItemQueryBuilder {
           sourceSearchParameters.add(param);
         }
       } else {
-        StringBuilder bpSql = new StringBuilder(BP_SQL);
-        List<Long> bpConceptIds = new ArrayList<>();
-        if (Domain.SURVEY.toString().equals(domain) && param.getAttributes().size() >= 2) {
-          queryParts.add(processCopeSql(queryParams, param));
-        } else {
-          for (Attribute attribute : param.getAttributes()) {
-            validateAttribute(attribute);
-            if (attribute.getConceptId() != null) {
-              // attribute.conceptId is unique to blood pressure attributes
-              // this indicates we need to build a blood pressure sql statement
-              bpConceptIds.add(attribute.getConceptId());
-              processBloodPressureSql(queryParams, bpSql, attribute);
-            } else if (AttrName.NUM.equals(attribute.getName())) {
-              queryParts.add(processNumericalSql(queryParams, param, attribute));
-            } else if (AttrName.CAT.equals(attribute.getName())
-                || AttrName.SURVEY_VERSION_CONCEPT_ID.equals(attribute.getName())) {
-              queryParts.add(processCategoricalSql(queryParams, param, attribute));
-            }
-          }
-        }
-        if (!bpConceptIds.isEmpty()) {
-          String standardParam =
-              QueryParameterUtil.addQueryParameterValue(
-                  queryParams, QueryParameterValue.int64(param.getStandard() ? 1 : 0));
-          // if blood pressure we need to add named parameters for concept ids
-          QueryParameterValue cids =
-              QueryParameterValue.array(bpConceptIds.toArray(new Long[0]), Long.class);
-          String conceptIdsParam = QueryParameterUtil.addQueryParameterValue(queryParams, cids);
-          queryParts.add(String.format(bpSql.toString(), standardParam, conceptIdsParam) + "\n");
-        }
+        queryParts.add(processAttributeSql(queryParams, param));
       }
     }
     addParamValueAndFormat(domain, queryParams, standardSearchParameters, queryParts, STANDARD);
     addParamValueAndFormat(domain, queryParams, sourceSearchParameters, queryParts, SOURCE);
     // need to OR all query parts together since they exist in the same search group item
-    String queryPartsSql = "(" + String.join(OR, queryParts) + ")";
+    String queryPartsSql = "(" + String.join(OR + "\n", queryParts) + ")";
     // format the base sql with all query parts
     String baseSql = BASE_SQL + queryPartsSql;
     // build modifier sql if modifiers exists
@@ -413,45 +382,36 @@ public final class SearchGroupItemQueryBuilder {
   }
 
   /** Helper method to build blood pressure sql. */
-  private static void processBloodPressureSql(
-      Map<String, QueryParameterValue> queryParams, StringBuilder sqlBuilder, Attribute attribute) {
-    if (!AttrName.ANY.equals(attribute.getName())) {
-      // this makes an assumption that the UI adds systolic attribute first. Otherwise we will have
-      // to hard code the conceptId which is not optimal.
-      String sqlTemplate =
-          sqlBuilder.toString().contains("systolic") ? DIASTOLIC_SQL : SYSTOLIC_SQL;
-      sqlBuilder.append(
-          String.format(
-              sqlTemplate,
-              OperatorUtils.getSqlOperator(attribute.getOperator()),
-              getOperandsExpression(queryParams, attribute)));
+  private static String processBloodPressureSql(
+      Map<String, QueryParameterValue> queryParams, List<Attribute> attributes) {
+    StringBuilder sqlBuilder = new StringBuilder();
+    for (Attribute attribute : attributes) {
+      if (!AttrName.ANY.equals(attribute.getName())) {
+        // this makes an assumption that the UI adds systolic attribute first. Otherwise we will
+        // have to hard code the conceptId which is not optimal.
+        String sqlTemplate =
+            sqlBuilder.toString().contains("systolic") ? DIASTOLIC_SQL : SYSTOLIC_SQL;
+        sqlBuilder.append(
+            String.format(
+                sqlTemplate,
+                OperatorUtils.getSqlOperator(attribute.getOperator()),
+                getOperandsExpression(queryParams, attribute)));
+      }
     }
+    return sqlBuilder.toString();
   }
 
-  /** Helper method to create sql statement for attributes of numerical type. */
-  private static String processNumericalSql(
-      Map<String, QueryParameterValue> queryParams,
-      SearchParameter parameter,
-      Attribute attribute) {
-    String standardParam =
-        QueryParameterUtil.addQueryParameterValue(
-            queryParams, QueryParameterValue.int64(parameter.getStandard() ? 1 : 0));
-    String conceptIdParam =
-        QueryParameterUtil.addQueryParameterValue(
-            queryParams, QueryParameterValue.int64(parameter.getConceptId()));
-    return String.format(
-        VALUE_AS_NUMBER,
-        standardParam,
-        conceptIdParam,
-        OperatorUtils.getSqlOperator(attribute.getOperator()),
-        getOperandsExpression(queryParams, attribute));
-  }
-
-  private static String processCopeSql(
+  private static String processAttributeSql(
       Map<String, QueryParameterValue> queryParams, SearchParameter parameter) {
+    parameter.getAttributes().forEach(attr -> validateAttribute(attr));
     String numsParam;
     String catsParam;
     String versionParam;
+    List<Long> conceptIds =
+        parameter.getAttributes().stream()
+            .filter(attr -> attr.getConceptId() != null)
+            .map(Attribute::getConceptId)
+            .collect(Collectors.toList());
     List<Attribute> cats =
         parameter.getAttributes().stream()
             .filter(attr -> attr.getName().equals(AttrName.CAT))
@@ -469,32 +429,46 @@ public final class SearchGroupItemQueryBuilder {
             queryParams, QueryParameterValue.int64(parameter.getStandard() ? 1 : 0));
     String conceptIdParam =
         QueryParameterUtil.addQueryParameterValue(
-            queryParams, QueryParameterValue.int64(parameter.getConceptId()));
-    String sqlString =
-        String.format("is_standard = %s and concept_id = %s", standardParam, conceptIdParam);
+            queryParams,
+            QueryParameterValue.array(
+                conceptIds.isEmpty()
+                    ? new Long[] {parameter.getConceptId()}
+                    : conceptIds.toArray(new Long[0]),
+                Long.class));
+    StringBuilder sqlBuilder =
+        new StringBuilder(String.format(STANDARD_CONCEPT_SQL, standardParam, conceptIdParam));
     if (!nums.isEmpty()) {
-      numsParam =
-          QueryParameterUtil.addQueryParameterValue(
-              queryParams,
-              QueryParameterValue.int64(Long.valueOf(nums.get(0).getOperands().get(0))));
-      sqlString =
-          sqlString
-              + String.format(
-                  " and value_as_number %s %s",
-                  OperatorUtils.getSqlOperator(nums.get(0).getOperator()), numsParam);
+      if (!conceptIds.isEmpty()) {
+        // attribute.conceptId is unique to blood pressure attributes
+        // this indicates we need to build a blood pressure sql statement
+        sqlBuilder.append(processBloodPressureSql(queryParams, nums));
+      } else {
+        String parens = cats.isEmpty() ? "" : "(";
+        sqlBuilder.append(
+            String.format(
+                AND + parens + VALUE_AS_NUMBER,
+                OperatorUtils.getSqlOperator(nums.get(0).getOperator()),
+                getOperandsExpression(queryParams, nums.get(0))));
+      }
     }
     if (!cats.isEmpty()) {
+      String andOrSql = nums.isEmpty() ? AND : OR;
+      String parens = nums.isEmpty() ? "" : ")";
       catsParam =
           QueryParameterUtil.addQueryParameterValue(
               queryParams,
               QueryParameterValue.array(
                   cats.get(0).getOperands().stream().map(Long::parseLong).toArray(Long[]::new),
                   Long.class));
-      sqlString =
-          sqlString
-              + String.format(
-                  " and value_source_concept_id %s unnest(%s)",
-                  OperatorUtils.getSqlOperator(cats.get(0).getOperator()), catsParam);
+      String catsSql =
+          Domain.SURVEY.toString().equals(parameter.getDomain())
+              ? VALUE_SOURCE_CONCEPT_ID
+              : VALUE_AS_CONCEPT_ID;
+      sqlBuilder.append(
+          String.format(
+              andOrSql + catsSql + parens,
+              OperatorUtils.getSqlOperator(cats.get(0).getOperator()),
+              catsParam));
     }
     if (!versions.isEmpty()) {
       versionParam =
@@ -503,48 +477,14 @@ public final class SearchGroupItemQueryBuilder {
               QueryParameterValue.array(
                   versions.get(0).getOperands().stream().map(Long::parseLong).toArray(Long[]::new),
                   Long.class));
-      sqlString =
-          sqlString
-              + String.format(
-                  " and survey_version_concept_id %s unnest(%s)",
-                  OperatorUtils.getSqlOperator(versions.get(0).getOperator()), versionParam);
+      sqlBuilder.append(
+          String.format(
+              SOURCE_CONCEPT_SURVEY_ID,
+              OperatorUtils.getSqlOperator(versions.get(0).getOperator()),
+              versionParam));
     }
 
-    return sqlString;
-  }
-
-  /** Helper method to create sql statement for attributes of categorical type. */
-  private static String processCategoricalSql(
-      Map<String, QueryParameterValue> queryParams,
-      SearchParameter parameter,
-      Attribute attribute) {
-    String standardParam =
-        QueryParameterUtil.addQueryParameterValue(
-            queryParams, QueryParameterValue.int64(parameter.getStandard() ? 1 : 0));
-    String conceptIdParam =
-        QueryParameterUtil.addQueryParameterValue(
-            queryParams, QueryParameterValue.int64(parameter.getConceptId()));
-    String operandsParam =
-        QueryParameterUtil.addQueryParameterValue(
-            queryParams,
-            QueryParameterValue.array(
-                attribute.getOperands().stream().map(Long::parseLong).toArray(Long[]::new),
-                Long.class));
-    // if the search parameter is ppi/survey then we need to use different column.
-    String sqlString =
-        Domain.SURVEY.toString().equals(parameter.getDomain())
-            ? VALUE_SOURCE_CONCEPT_ID
-            : VALUE_AS_CONCEPT_ID;
-    if (AttrName.SURVEY_VERSION_CONCEPT_ID.equals(attribute.getName())) {
-      sqlString = SOURCE_CONCEPT_SURVEY_ID;
-    }
-
-    return String.format(
-        sqlString,
-        standardParam,
-        conceptIdParam,
-        OperatorUtils.getSqlOperator(attribute.getOperator()),
-        operandsParam);
+    return sqlBuilder.toString();
   }
 
   /** Helper method to build the operand sql expression. */
