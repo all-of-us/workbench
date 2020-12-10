@@ -260,10 +260,10 @@ export async function waitForText(page: Page,
  * It usually indicates the page is ready for user interaction.
  * </pre>
  */
-export async function waitWhileLoading(page: Page, timeOut: number = 90000): Promise<void> {
+export async function waitWhileLoading(page: Page, timeout: number = 90000): Promise<void> {
   const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
   const spinElementsSelector = '[style*="running spin"], .spinner:empty, svg[style*="running rotation"]:not([aria-hidden="true"])';
-  
+
   // To prevent checking on blank page, wait for elements exist in DOM.
   await Promise.race([
     page.waitForSelector(notBlankPageSelector),
@@ -274,5 +274,15 @@ export async function waitWhileLoading(page: Page, timeOut: number = 90000): Pro
   await page.waitForFunction((css) => {
     const elements = document.querySelectorAll(css);
     return elements && elements.length === 0;
-  }, {polling: 'mutation', timeout: timeOut}, spinElementsSelector);
+  }, {polling: 'mutation', timeout}, spinElementsSelector);
+}
+
+export async function waitUntilEnabled(page: Page, cssSelector: string): Promise<boolean> {
+  const jsHandle = await page.waitForFunction(xpathSelector => {
+    const elemt = document.evaluate(xpathSelector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    const style = window.getComputedStyle(elemt as Element);
+    const propValue = style.getPropertyValue('cursor');
+    return propValue === 'pointer';
+  }, {}, cssSelector);
+  return (await jsHandle.jsonValue()) as boolean;
 }
