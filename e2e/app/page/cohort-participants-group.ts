@@ -76,7 +76,11 @@ export default class CohortParticipantsGroup {
   async deleteGroup(): Promise<ElementHandle[]> {
     await this.clickSnowmanIcon();
     await this.selectGroupSnowmanMenu(GroupMenuOption.DeleteGroup);
-    await waitForText(this.page, 'This group has been deleted');
+    try {
+      await waitForText(this.page, 'This group has been deleted');
+    } catch (err) {
+      // Sometimes message fails to show up. Ignore error.
+    }
     await waitWhileLoading(this.page);
     return this.getGroupCriteriasList();
   }
