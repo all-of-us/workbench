@@ -180,7 +180,6 @@ describe('Updating runtime parameters', () => {
     await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
 
     // Click “customize“ , from the default “create panel”
-    // using let here instead of const because we navigate during the test and must reinstantiate
     const runtimePanel = new RuntimePanel(page);
     await runtimePanel.clickCustomizeButton();
 
@@ -191,6 +190,7 @@ describe('Updating runtime parameters', () => {
     // Wait until status shows green in side-nav
     await page.waitForTimeout(2000);
     await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);
+    await runtimePanel.waitForStartStopIconState(StartStopIconState.Starting);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Running);
 
     // Open a notebook
@@ -225,18 +225,15 @@ describe('Updating runtime parameters', () => {
 
     // Run notebook to validate runtime settings (cpu, disk, memory)
     const cpusOutputText = await notebook.runCodeCell(2, {codeFile: 'resources/python-code/count-cpus.py'});
-    // Default CPU count is 4
-    expect(parseInt(cpusOutputText)).toBe(4);
+    expect(parseInt(cpusOutputText)).toBe(8);
     // This gets the amount of memory available to Python in bytes
     const memoryOutputText = await notebook.runCodeCell(3, {codeFile: 'resources/python-code/count-memory.py'});
-    // Default memory is 15 gibibytes, we'll check that it is between 14 billion and 16 billion bytes
-    expect(parseInt(memoryOutputText)).toBeGreaterThanOrEqual(14 * 1000 * 1000 * 1000);
-    expect(parseInt(memoryOutputText)).toBeLessThanOrEqual(16 * 1000 * 1000 * 1000);
+    expect(parseInt(memoryOutputText)).toBeGreaterThanOrEqual(29 * 1000 * 1000 * 1000);
+    expect(parseInt(memoryOutputText)).toBeLessThanOrEqual(31 * 1000 * 1000 * 1000);
     // This gets the disk space in bytes
     const diskOutputText = await notebook.runCodeCell(4, {codeFile: 'resources/python-code/count-disk-space.py'});
-    // Default disk is 50 gibibytes, we'll check that it is between 45 and 55 billion bytes
-    expect(parseInt(diskOutputText)).toBeGreaterThanOrEqual(45 * 1000 * 1000 * 1000);
-    expect(parseInt(diskOutputText)).toBeLessThanOrEqual(55 * 1000 * 1000 * 1000);
+    expect(parseInt(diskOutputText)).toBeGreaterThanOrEqual(55 * 1000 * 1000 * 1000);
+    expect(parseInt(diskOutputText)).toBeLessThanOrEqual(65 * 1000 * 1000 * 1000);
 
     // Open runtime panel
     await helpSidebar.clickSidebarTab(HelpSidebarTab.ComputeConfiguration, 1000);

@@ -154,7 +154,7 @@ export default class RuntimePanel extends Container {
   }
 
   async pickRuntimePreset(runtimePreset: RuntimePreset): Promise<void> {
-    const runtimePresetMenu = await SelectMenu.findByName(this.page, {id: 'runtime-preset-menu'});
+    const runtimePresetMenu = await SelectMenu.findByName(this.page, {id: 'runtime-presets-menu'});
     return await runtimePresetMenu.clickMenuItem(runtimePreset);
   }
 
