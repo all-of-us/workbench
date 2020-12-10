@@ -111,9 +111,8 @@ export default class HelpSidebar extends Container {
     return waitForNumericalString(this.page, selector);
   }
 
-  async clickSidebarTab(helpSidebarTab: HelpSidebarTab, timeout?: number): Promise<void> {
-    await this.page.waitForXPath(helpSidebarTab).then(tab => tab.click());
-    return await this.page.waitForTimeout(timeout || 0);
+  async clickSidebarTab(helpSidebarTab: HelpSidebarTab): Promise<void> {
+    return await this.page.waitForXPath(helpSidebarTab).then(tab => tab.click());
   }
 
   waitUntilSectionVisible(xpath: string): Promise<ElementHandle> {
@@ -122,5 +121,12 @@ export default class HelpSidebar extends Container {
 
   waitUntilSectionHidden(xpath: string): Promise<ElementHandle> {
     return this.page.waitForXPath(xpath, {hidden: true, visible: false});
+  }
+
+  async toggleRuntimePanel(): Promise<void> {
+    await this.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    // There's an animation on this panel opening, so we wait a second for it to finish
+    // opening before we try to do anything with it
+    return await this.page.waitForTimeout(1000);
   }
 }

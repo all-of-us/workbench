@@ -6,6 +6,7 @@ import {waitForAttributeEquality, waitWhileLoading} from 'utils/waits-utils';
 import PrimereactInputNumber from 'app/element/primereact-input-number';
 import SelectMenu from "./select-menu";
 import {savePageToFile, takeScreenshot} from "../../utils/save-file-utils";
+import BaseElement from "../element/base-element";
 
 const defaultXpath = '//*[@id="runtime-panel"]';
 const startStopIconXpath = '//*[@data-test-id="runtime-status-icon"]';
@@ -162,7 +163,7 @@ export default class RuntimePanel extends Container {
     return `/assets/icons/compute-${startStopIconState}.svg`;
   }
 
-  waitForStartStopIconState = async (startStopIconState: StartStopIconState): Promise<boolean> => {
+  async waitForStartStopIconState(startStopIconState: StartStopIconState): Promise<boolean> {
     return await waitForAttributeEquality(
         this.page,
         {xpath: startStopIconXpath},
@@ -170,6 +171,11 @@ export default class RuntimePanel extends Container {
         this.buildStatusIconSrc(startStopIconState),
         300000
     )
+  }
+
+  async clickStopStartIcon(): Promise<void> {
+    const startStopIconElement = BaseElement.asBaseElement(page, await this.page.waitForXPath(startStopIconXpath));
+    return await startStopIconElement.click();
   }
 
   async waitForLoad(): Promise<this> {
