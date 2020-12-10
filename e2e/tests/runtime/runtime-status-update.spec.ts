@@ -23,71 +23,6 @@ describe('Updating runtime parameters', () => {
     await page.waitForTimeout(2000);
   });
 
-  test('Create a default runtime', async() => {
-    const helpSidebar = new HelpSidebar(page);
-    const runtimePanel = new RuntimePanel(page);
-    await runtimePanel.clickCreateButton();
-
-    await helpSidebar.toggleRuntimePanel()
-    await runtimePanel.waitForStartStopIconState(StartStopIconState.Starting);
-  });
-
-  test('Create a custom runtime', async() => {
-    const helpSidebar = new HelpSidebar(page);
-    await helpSidebar.toggleRuntimePanel()
-    const runtimePanel = new RuntimePanel(page);
-    await runtimePanel.clickCustomizeButton();
-
-    await runtimePanel.pickCpus(8);
-    await runtimePanel.pickRamGbs(30);
-    await runtimePanel.pickDiskGbs(60);
-    await runtimePanel.clickCreateButton();
-
-    await helpSidebar.toggleRuntimePanel()
-    await runtimePanel.waitForStartStopIconState(StartStopIconState.Starting);
-  });
-
-  test('Create a dataproc runtime', async() => {
-    const helpSidebar = new HelpSidebar(page);
-    await helpSidebar.toggleRuntimePanel()
-    const runtimePanel = new RuntimePanel(page);
-    await runtimePanel.clickCustomizeButton();
-
-    await runtimePanel.pickCpus(8);
-    await runtimePanel.pickRamGbs(30);
-    await runtimePanel.pickDiskGbs(60);
-    await runtimePanel.pickComputeType(ComputeType.Dataproc);
-    await runtimePanel.pickDataprocNumWorkers(3);
-    await runtimePanel.pickDataprocNumPreemptibleWorkers(1);
-    await runtimePanel.pickWorkerCpus(2);
-    await runtimePanel.pickWorkerRamGbs(13);
-    await runtimePanel.pickWorkerDisk(60);
-    await runtimePanel.clickCreateButton();
-
-    await helpSidebar.toggleRuntimePanel()
-    await runtimePanel.waitForStartStopIconState(StartStopIconState.Starting);
-  });
-
-  test('Delete environment', async() => {
-    // Open the runtime panel
-    const helpSidebar = new HelpSidebar(page);
-    await helpSidebar.toggleRuntimePanel()
-
-    // Click “create“ , from the default “create panel”
-    const runtimePanel = new RuntimePanel(page);
-    await runtimePanel.clickCreateButton();
-
-    // Wait until status shows green in side-nav
-    await helpSidebar.toggleRuntimePanel()
-    await runtimePanel.waitForStartStopIconState(StartStopIconState.Starting);
-    await runtimePanel.waitForStartStopIconState(StartStopIconState.Running);
-
-    // Click 'delete environment'
-    await runtimePanel.clickDeleteEnvironmentButton();
-    await runtimePanel.clickDeleteButton();
-  });
-
-
   test('Switch from GCE to dataproc', async() => {
     // Open the runtime panel
     const helpSidebar = new HelpSidebar(page);
@@ -147,7 +82,7 @@ describe('Updating runtime parameters', () => {
     const notebookPreviewPage = new NotebookPreviewPage(page);
     await notebookPreviewPage.openEditMode(notebookName);
 
-    // Run notebook to validate runtime settings. Use import hail … hail.spark_context() in Python to verify Spark (see above for other settings)
+    // Run notebook to validate runtime settings
     const workersOutputText = await notebook.runCodeCell(1, {codeFile: 'resources/python-code/count-workers.py'});
     // Spark config always seems to start at this and then scale if you need additional threads.
     expect(workersOutputText).toBe('\'2\'');
@@ -201,7 +136,7 @@ describe('Updating runtime parameters', () => {
     const notebookName = makeRandomName('py');
     const notebook = await dataPage.createNotebook(notebookName);
 
-    // Run notebook to validate runtime settings. Use import hail … hail.spark_context() in Python to verify Spark (see above for other settings)
+    // Run notebook to validate runtime settings
     const workersOutputText = await notebook.runCodeCell(1, {codeFile: 'resources/python-code/count-workers.py'});
     // Spark config always seems to start at this and then scale if you need additional threads.
     expect(workersOutputText).toBe('\'2\'');
@@ -235,7 +170,7 @@ describe('Updating runtime parameters', () => {
     expect(parseInt(memoryOutputText)).toBeLessThanOrEqual(32 * 1000 * 1000 * 1000);
     // This gets the disk space in bytes
     const diskOutputText = await notebook.runCodeCell(4, {codeFile: 'resources/python-code/count-disk-space.py'});
-    // for whatever reason this always comes out at around 52 billion bytes.
+    // for whatever reason this always comes out at around 52 billion bytes despite definitely asking for 60
     expect(parseInt(diskOutputText)).toBeGreaterThanOrEqual(50 * 1000 * 1000 * 1000);
     expect(parseInt(diskOutputText)).toBeLessThanOrEqual(70 * 1000 * 1000 * 1000);
 
