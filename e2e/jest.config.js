@@ -17,6 +17,7 @@ module.exports = {
   ],
   "reporters": [
     "default",
+    "jest-junit",
     [
       "jest-stare", {
         "resultDir": "logs",
