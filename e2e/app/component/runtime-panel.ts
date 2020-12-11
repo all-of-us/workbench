@@ -4,12 +4,12 @@ import Button from 'app/element/button';
 import {Page} from 'puppeteer';
 import {waitForAttributeEquality, waitWhileLoading} from 'utils/waits-utils';
 import PrimereactInputNumber from 'app/element/primereact-input-number';
-import SelectMenu from "./select-menu";
-import {savePageToFile, takeScreenshot} from "../../utils/save-file-utils";
-import BaseElement from "../element/base-element";
+import SelectMenu from 'app/component/select-menu';
+import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
+import BaseElement from 'app/element/base-element';
 
 const defaultXpath = '//*[@id="runtime-panel"]';
-const startStopIconXpath = '//*[@data-test-id="runtime-status-icon"]';
+const statusIconXpath = '//*[@data-test-id="runtime-status-icon"]';
 
 export enum StartStopIconState {
   Error = 'error',
@@ -37,14 +37,12 @@ export default class RuntimePanel extends Container {
 
   async clickCreateButton(): Promise<void> {
     const button = await Button.findByName(this.page, {name: LinkText.Create}, this);
-    await button.click();
-    return await page.waitForTimeout(2000);
+    return await button.click();
   }
 
   async clickCustomizeButton(): Promise<void> {
     const button = await Button.findByName(this.page, {name: LinkText.Customize}, this);
-    await button.click();
-    return await page.waitForTimeout(2000);
+    return await button.click();
   }
 
   async clickNextButton(): Promise<void> {
@@ -54,8 +52,7 @@ export default class RuntimePanel extends Container {
 
   async clickApplyAndRecreateButton(): Promise<void> {
     const button = await Button.findByName(this.page, {name: LinkText.Update}, this);
-    await button.click();
-    return await page.waitForTimeout(2000);
+    return await button.click();
   }
 
   async clickDeleteEnvironmentButton(): Promise<void> {
@@ -65,8 +62,7 @@ export default class RuntimePanel extends Container {
 
   async clickDeleteButton(): Promise<void> {
     const button = await Button.findByName(this.page, {name: LinkText.Delete}, this);
-    await button.click();
-    return await page.waitForTimeout(2000);
+    return await button.click();
   }
 
   async pickCpus(cpus: number): Promise<void> {
@@ -166,15 +162,15 @@ export default class RuntimePanel extends Container {
   async waitForStartStopIconState(startStopIconState: StartStopIconState): Promise<boolean> {
     return await waitForAttributeEquality(
         this.page,
-        {xpath: startStopIconXpath},
+        {xpath: statusIconXpath},
         'src',
         this.buildStatusIconSrc(startStopIconState),
         300000
     )
   }
 
-  async clickStopStartIcon(): Promise<void> {
-    const startStopIconElement = BaseElement.asBaseElement(page, await this.page.waitForXPath(startStopIconXpath));
+  async clickStatusIcon(): Promise<void> {
+    const startStopIconElement = BaseElement.asBaseElement(page, await this.page.waitForXPath(statusIconXpath));
     return await startStopIconElement.click();
   }
 

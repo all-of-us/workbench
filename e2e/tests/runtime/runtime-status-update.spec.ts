@@ -107,8 +107,8 @@ describe('Updating runtime parameters', () => {
     // Verify that dataproc settings are still shown
     expect(await runtimePanel.getDataprocNumWorkers()).toBe(3);
     expect(await runtimePanel.getDataprocNumPreemptibleWorkers()).toBe(1);
-    expect(await runtimePanel.getWorkerCpus()).toBe("2");
-    expect(await runtimePanel.getWorkerRamGbs()).toBe("13");
+    expect(await runtimePanel.getWorkerCpus()).toBe('2');
+    expect(await runtimePanel.getWorkerRamGbs()).toBe('13');
     expect(await runtimePanel.getWorkerDisk()).toBe(60);
   });
 
@@ -193,8 +193,8 @@ describe('Updating runtime parameters', () => {
     await helpSidebar.toggleRuntimePanel()
 
     // Verify GCE custom settings are still shown
-    expect(await runtimePanel.getCpus()).toBe("8");
-    expect(await runtimePanel.getRamGbs()).toBe("30");
+    expect(await runtimePanel.getCpus()).toBe('8');
+    expect(await runtimePanel.getRamGbs()).toBe('30');
     expect(await runtimePanel.getDiskGbs()).toBe(60);
   });
 
@@ -208,11 +208,11 @@ describe('Updating runtime parameters', () => {
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Starting);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Running);
 
-    await runtimePanel.clickStopStartIcon();
+    await runtimePanel.clickStatusIcon();
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Stopping);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Stopped);
 
-    await runtimePanel.clickStopStartIcon();
+    await runtimePanel.clickStatusIcon();
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Starting);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Running);
   });
