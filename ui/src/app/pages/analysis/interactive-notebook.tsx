@@ -268,11 +268,11 @@ export const InteractiveNotebook = fp.flow(
           return 'Preparing your Jupyter environment. This may take up to 5 minutes.';
         case RuntimeStatus.Error:
           if (!enableCustomRuntimes) {
-            return 'Error creating your analysis environment. Please delete or ' +
-                   'recreate via the compute configuration panel in the sidebar.';
+            return 'Error creating your jupyter environment. Please try clicking' +
+                   ' the reset notebook server on Workspace About Page.';
           }
-          return 'Error creating your jupyter environment. Please try clicking' +
-                 ' the reset notebook server on Workspace About Page.';
+          return 'Error creating your analysis environment. Please delete or ' +
+                 'recreate via the compute configuration panel in the sidebar.';
         default:
           return 'Connecting to the notebook server';
 
