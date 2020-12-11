@@ -1706,7 +1706,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .operator(Operator.IN)
                 .operands(ImmutableList.of("1"))));
     SearchRequest searchRequest =
-        createSearchRequests(lab.getType(), ImmutableList.of(lab), new ArrayList<>());
+        createSearchRequests(lab.getDomain(), ImmutableList.of(lab), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -1726,7 +1726,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
             .operands(ImmutableList.of("1", "2"));
     lab.attributes(ImmutableList.of(numerical, categorical));
     SearchRequest searchRequest =
-        createSearchRequests(lab.getType(), ImmutableList.of(lab), new ArrayList<>());
+        createSearchRequests(lab.getDomain(), ImmutableList.of(lab), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -1771,7 +1771,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsBloodPressure() {
     SearchParameter pm = bloodPressure().attributes(bpAttributes());
     SearchRequest searchRequest =
-        createSearchRequests(pm.getType(), ImmutableList.of(pm), new ArrayList<>());
+        createSearchRequests(pm.getDomain(), ImmutableList.of(pm), new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -2050,7 +2050,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         survey().subtype(CriteriaSubType.ANSWER.toString()).conceptId(5L).attributes(attributes);
     SearchRequest searchRequest =
         createSearchRequests(
-            ppiValueAsConceptId.getType(),
+            ppiValueAsConceptId.getDomain(),
             ImmutableList.of(ppiValueAsConceptId),
             new ArrayList<>());
     ResponseEntity<Long> response =
@@ -2071,7 +2071,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         survey().subtype(CriteriaSubType.ANSWER.toString()).conceptId(5L).attributes(attributes);
     SearchRequest searchRequest =
         createSearchRequests(
-            ppiValueAsNumer.getType(), ImmutableList.of(ppiValueAsNumer), new ArrayList<>());
+            ppiValueAsNumer.getDomain(), ImmutableList.of(ppiValueAsNumer), new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     assertParticipants(response, 1);
