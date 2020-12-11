@@ -15,6 +15,7 @@ import static org.pmiops.workbench.cohortbuilder.util.ValidationPredicates.tempo
 import com.google.api.client.util.Sets;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ListMultimap;
 import java.util.ArrayList;
@@ -59,6 +60,8 @@ public final class SearchGroupItemQueryBuilder {
           CriteriaType.GENDER, "gender_concept_id",
           CriteriaType.SEX, "sex_at_birth_concept_id",
           CriteriaType.ETHNICITY, "ethnicity_concept_id");
+  private static final ImmutableList<Domain> SOURCE_STANDARD_DOMAINS =
+      ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE);
 
   // sql parts to help construct BigQuery sql statements
   private static final String OR = " or ";
@@ -144,9 +147,9 @@ public final class SearchGroupItemQueryBuilder {
       "select criteria.person_id from (%s) criteria\n";
   private static final String OCCURRENCES_SQL_TEMPLATE =
       "group by criteria.person_id, criteria.concept_id\n" + "having count(criteria.person_id) ";
-  private static final String AGE_AT_EVENT_SQL_TEMPLATE = "and age_at_event ";
-  private static final String EVENT_DATE_SQL_TEMPLATE = "and entry_date ";
-  private static final String ENCOUNTERS_SQL_TEMPLATE = "and visit_concept_id ";
+  private static final String AGE_AT_EVENT_SQL_TEMPLATE = " and age_at_event ";
+  private static final String EVENT_DATE_SQL_TEMPLATE = " and entry_date ";
+  private static final String ENCOUNTERS_SQL_TEMPLATE = " and visit_concept_id ";
 
   // sql parts to help construct demographic BigQuery sql
   private static final String DEC_SQL =
@@ -163,6 +166,9 @@ public final class SearchGroupItemQueryBuilder {
   private static final String FITBIT_SQL =
       "select person_id\n"
           + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere has_fitbit = 1\n";
+  private static final String CB_SEARCH_ALL_EVENTS_WHERE =
+      "select person_id from `${projectId}.${dataSetId}.cb_search_all_events`\nwhere ";
+  private static final String PERSON_ID_IN = "person_id in (";
 
   /** Build the inner most sql using search parameters, modifiers and attributes. */
   public static void buildQuery(
@@ -190,13 +196,13 @@ public final class SearchGroupItemQueryBuilder {
     Set<SearchParameter> standardSearchParameters = new HashSet<>();
     Set<SearchParameter> sourceSearchParameters = new HashSet<>();
     List<String> queryParts = new ArrayList<>();
-    String domain = searchGroupItem.getType();
+    Domain domain = Domain.fromValue(searchGroupItem.getType());
 
     // When building sql for demographics - we query against the person table
-    if (Domain.PERSON.toString().equals(domain)) {
+    if (Domain.PERSON.equals(domain)) {
       return buildDemoSql(queryParams, searchGroupItem);
     }
-    if (Domain.FITBIT.toString().equals(domain)) {
+    if (Domain.FITBIT.equals(domain)) {
       return FITBIT_SQL;
     }
     // Otherwise build sql against flat denormalized search table
@@ -211,10 +217,23 @@ public final class SearchGroupItemQueryBuilder {
         queryParts.add(processAttributeSql(queryParams, param));
       }
     }
-    addParamValueAndFormat(domain, queryParams, standardSearchParameters, queryParts, STANDARD);
-    addParamValueAndFormat(domain, queryParams, sourceSearchParameters, queryParts, SOURCE);
-    // need to OR all query parts together since they exist in the same search group item
-    String queryPartsSql = "(" + String.join(OR + "\n", queryParts) + ")";
+    addParamValueAndFormat(
+        domain.toString(), queryParams, standardSearchParameters, queryParts, STANDARD);
+    addParamValueAndFormat(
+        domain.toString(), queryParams, sourceSearchParameters, queryParts, SOURCE);
+
+    String queryPartsSql;
+    if (SOURCE_STANDARD_DOMAINS.contains(domain)
+        && !sourceSearchParameters.isEmpty()
+        && !standardSearchParameters.isEmpty()) {
+      queryPartsSql =
+          PERSON_ID_IN
+              + CB_SEARCH_ALL_EVENTS_WHERE
+              + String.join(UNION_TEMPLATE + CB_SEARCH_ALL_EVENTS_WHERE, queryParts)
+              + ")";
+    } else {
+      queryPartsSql = "(" + String.join(OR + "\n", queryParts) + ")";
+    }
     // format the base sql with all query parts
     String baseSql = BASE_SQL + queryPartsSql;
     // build modifier sql if modifiers exists
@@ -614,9 +633,6 @@ public final class SearchGroupItemQueryBuilder {
       List<String> queryParts,
       int standardOrSource) {
     if (!searchParameters.isEmpty()) {
-      String domainParam =
-          QueryParameterUtil.addQueryParameterValue(
-              queryParams, QueryParameterValue.string(domain));
       String standardOrSourceParam =
           QueryParameterUtil.addQueryParameterValue(
               queryParams, QueryParameterValue.int64(standardOrSource));
@@ -631,6 +647,9 @@ public final class SearchGroupItemQueryBuilder {
               .collect(Collectors.toList());
 
       if (!parents.isEmpty() || Domain.DRUG.toString().equals(domain)) {
+        String domainParam =
+            QueryParameterUtil.addQueryParameterValue(
+                queryParams, QueryParameterValue.string(domain));
         // Lookup child nodes
         String lookupSql =
             String.format(
