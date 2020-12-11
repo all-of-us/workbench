@@ -536,17 +536,14 @@ const CostEstimator = ({
   } = runtimeParameters;
   const {
     numberOfWorkers = 0,
-    masterMachineType = machine.name,
-    masterDiskSize = diskSize,
     workerMachineType = null,
     workerDiskSize = null,
     numberOfPreemptibleWorkers = 0
   } = dataprocConfig || {};
-  const masterMachine = findMachineByName(masterMachineType);
   const workerMachine = findMachineByName(workerMachineType);
 
   const costConfig = {
-    computeType, masterDiskSize, masterMachine,
+    computeType, masterMachine: machine, masterDiskSize: diskSize,
     numberOfWorkers, numberOfPreemptibleWorkers, workerDiskSize, workerMachine
   };
   const runningCost = machineRunningCost(costConfig);
@@ -785,9 +782,12 @@ export const RuntimePanel = fp.flow(
   ])([currentRuntime, status]);
   const [panelContent, setPanelContent] = useState<PanelContent>(initialPanelContent);
 
-  const [selectedDiskSize, setSelectedDiskSize] = useState(diskSize);
   const [selectedMachine, setSelectedMachine] = useState(initialMasterMachine);
+  const [selectedDiskSize, setSelectedDiskSize] = useState(diskSize);
   const [selectedCompute, setSelectedCompute] = useState<ComputeType>(initialCompute);
+  // Note: while the Dataproc config does contain masterMachineType and masterDiskSize,
+  // the source of truth for these values are selectedMachine, and selectedDiskSize, as
+  // these UI components are used for both Dataproc and standard VMs.
   const [selectedDataprocConfig, setSelectedDataprocConfig] = useState<DataprocConfig | null>(dataprocConfig);
 
   const validMainMachineTypes = selectedCompute === ComputeType.Standard ?
