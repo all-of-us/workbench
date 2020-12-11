@@ -1746,7 +1746,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   public void countSubjectsLabMoreThanOneSearchParameter() {
     SearchParameter lab1 = measurement();
     SearchParameter lab2 = measurement().conceptId(9L);
-    SearchParameter lab3 = measurement().conceptId(9L);
+    SearchParameter lab3 = measurement().conceptId(11L);
     Attribute labCategorical =
         new Attribute().name(AttrName.CAT).operator(Operator.IN).operands(ImmutableList.of("77"));
     lab3.attributes(ImmutableList.of(labCategorical));
