@@ -4,6 +4,7 @@ import {CSSProperties} from 'react';
 import {Key} from 'ts-key-enum';
 
 import {domainToTitle} from 'app/cohort-search/utils';
+import {AlertDanger} from 'app/components/alert';
 import {Clickable} from 'app/components/buttons';
 import {FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
@@ -12,13 +13,9 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withCdrVersions, withCurrentConcept, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, validateInputForMySQL, withCdrVersions, withCurrentConcept, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {
-  attributesSelectionStore,
-  currentConceptStore,
-  setSidebarActiveIconStore
-} from 'app/utils/navigation';
+import {attributesSelectionStore, currentConceptStore, setSidebarActiveIconStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   CdrVersion,
@@ -165,6 +162,11 @@ const styles = reactStyles({
     display: 'inline-block',
     float: 'right',
     marginTop: '0.25rem'
+  },
+  inputAlert: {
+    justifyContent: 'space-between',
+    padding: '0.2rem',
+    width: '64.3%',
   }
 });
 
@@ -221,6 +223,8 @@ const columns = [
   },
 ];
 
+const searchTrigger = 3;
+
 interface Props {
   cdrVersionListResponse: CdrVersionListResponse;
   concept?: Array<Criteria>;
@@ -236,11 +240,12 @@ interface Props {
 }
 
 interface State {
+  apiError: boolean;
   cdrVersion: CdrVersion;
   data: any;
-  error: boolean;
   hoverId: string;
   ingredients: any;
+  inputErrors: Array<string>;
   loading: boolean;
   searching: boolean;
   searchTerms: string;
@@ -261,10 +266,11 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
     constructor(props: Props) {
       super(props);
       this.state = {
+        apiError: false,
         cdrVersion: undefined,
         data: null,
-        error: false,
         ingredients: {},
+        inputErrors: [],
         hoverId: undefined,
         loading: false,
         searching: false,
@@ -301,17 +307,26 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
 
     handleInput = (event: any) => {
       const {key, target: {value}} = event;
-      if (key === Key.Enter && value !== '') {
-        const {searchContext: {domain}} = this.props;
-        triggerEvent(`Cohort Builder Search - ${domainToTitle(domain)}`, 'Search', value);
-        this.getResults(value);
+      if (key === Key.Enter) {
+        if (value.length < searchTrigger) {
+          this.setState({inputErrors: ['Minimum criteria search length is three characters']});
+        } else {
+          const inputErrors = validateInputForMySQL(value);
+          if (inputErrors.length > 0) {
+            this.setState({inputErrors});
+          } else {
+            const {searchContext: {domain}} = this.props;
+            triggerEvent(`Cohort Builder Search - ${domainToTitle(domain)}`, 'Search', value);
+            this.getResults(value);
+          }
+        }
       }
     }
 
     getResults = async(value: string) => {
       let sourceMatch;
       try {
-        this.setState({data: null, error: false, loading: true, searching: true, standardOnly: false});
+        this.setState({data: null, apiError: false, inputErrors: [], loading: true, searching: true, standardOnly: false});
         const {searchContext: {domain}, source, selectedSurvey, workspace: {cdrVersionId}} = this.props;
         const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(+cdrVersionId, domain, value.trim(), selectedSurvey);
         const data = source !== 'criteria' && this.isSurvey
@@ -326,7 +341,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
         }
         this.setState({data, totalCount: resp.totalCount});
       } catch (err) {
-        this.setState({error: true});
+        this.setState({apiError: true});
       } finally {
         this.setState({loading: false, sourceMatch});
       }
@@ -497,8 +512,8 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
 
     render() {
       const {concept, searchContext: {domain}, source} = this.props;
-      const {cdrVersion, data, error, ingredients, loading, searching, searchTerms, standardOnly, sourceMatch, standardData, totalCount}
-        = this.state;
+      const {apiError, cdrVersion, data, ingredients, inputErrors, loading, searching, searchTerms, standardOnly, sourceMatch, standardData,
+        totalCount} = this.state;
       const showStandardOption = !standardOnly && !!standardData && standardData.length > 0;
       const displayData = standardOnly ? standardData : data;
       return <div style={{overflow: 'auto'}}>
@@ -519,6 +534,9 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
               <ClrIcon size={24} shape='times-circle'/>
             </Clickable>}
           </div>
+          {inputErrors.map((error, e) => <AlertDanger key={e} style={styles.inputAlert}>
+            <span data-test-id='input-error-alert'>{error}</span>
+          </AlertDanger>)}
         </div>
         <div style={{display: 'table', height: '100%', width: '100%'}}>
           <div style={styles.helpText}>
@@ -597,7 +615,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
           {!standardOnly && !displayData.length && <div>No results found</div>}
         </div>}
         {loading && <SpinnerOverlay/>}
-        {error && <div style={{...styles.error, ...(domain === Domain.DRUG ? {marginTop: '3.75rem'} : {})}}>
+        {apiError && <div style={{...styles.error, ...(domain === Domain.DRUG ? {marginTop: '3.75rem'} : {})}}>
           <ClrIcon style={{margin: '0 0.5rem 0 0.25rem'}} className='is-solid' shape='exclamation-triangle' size='22'/>
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation.
           {standardOnly && <Clickable style={styles.vocabLink} onClick={() => this.getResults(sourceMatch.code)}>
