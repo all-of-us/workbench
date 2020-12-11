@@ -255,7 +255,7 @@ export const InteractiveNotebook = fp.flow(
     }
 
     private renderNotebookText() {
-      const {enableCustomRuntimes} = !serverConfigStore.getValue();
+      const {enableCustomRuntimes} = serverConfigStore.getValue();
       const {status = RuntimeStatus.Unknown} = this.props.runtimeStore.runtime || {};
       switch (status) {
         case RuntimeStatus.Starting:
