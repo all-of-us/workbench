@@ -762,6 +762,40 @@ describe('RuntimePanel', () => {
     expect(storageCost().text()).toEqual('$0.13/hr');
   });
 
+  it('should update the cost estimator when master machine changes', async() => {
+    const runtime = {...runtimeApiStub.runtime,
+      status: RuntimeStatus.Running,
+      configurationType: RuntimeConfigurationType.UserOverride,
+      gceConfig: null,
+      dataprocConfig: {
+        masterMachineType: 'n1-standard-4',
+        masterDiskSize: 1000,
+        numberOfWorkers: 2,
+        numberOfPreemptibleWorkers: 0,
+        workerMachineType: 'n1-standard-4',
+        workerDiskSize: 50
+      }
+    };
+    runtimeApiStub.runtime = runtime;
+    runtimeStore.set({runtime, workspaceNamespace: workspaceStubs[0].namespace});
+
+    const wrapper = await component();
+
+    const costEstimator = () => wrapper.find('[data-test-id="cost-estimator"]');
+    expect(costEstimator()).toBeTruthy();
+
+    const runningCost = () => costEstimator().find('[data-test-id="running-cost"]');
+    const storageCost = () => costEstimator().find('[data-test-id="storage-cost"]');
+    expect(runningCost().text()).toEqual('$0.76/hr');
+    expect(storageCost().text()).toEqual('$0.06/hr');
+
+    // Switch to n1-highmem-4, double disk size.
+    await pickMainRam(wrapper, 26);
+    await pickMainDiskSize(wrapper, 2000);
+    expect(runningCost().text()).toEqual('$0.86/hr');
+    expect(storageCost().text()).toEqual('$0.12/hr');
+  });
+
   it('should allow runtime deletion', async() => {
     const wrapper = await component();
 
