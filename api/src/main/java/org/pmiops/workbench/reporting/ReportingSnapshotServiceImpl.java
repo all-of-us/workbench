@@ -18,28 +18,16 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
   private static final Logger log = Logger.getLogger(ReportingSnapshotServiceImpl.class.getName());
 
   private final Clock clock;
-  private final CohortService cohortService;
-  private final ReportingQueryService queryService;
-  private final InstitutionService institutionService;
-  private final ReportingMapper reportingMapper;
+  private final ReportingQueryService reportingQueryService;
   private final Provider<Stopwatch> stopwatchProvider;
-  private final UserService userService;
 
   public ReportingSnapshotServiceImpl(
       Clock clock,
-      CohortService cohortService,
-      ReportingQueryService queryService,
-      InstitutionService institutionService,
-      ReportingMapper reportingMapper,
-      Provider<Stopwatch> stopwatchProvider,
-      UserService userService) {
+      ReportingQueryService reportingQueryService,
+      Provider<Stopwatch> stopwatchProvider) {
     this.clock = clock;
-    this.cohortService = cohortService;
-    this.queryService = queryService;
-    this.institutionService = institutionService;
-    this.reportingMapper = reportingMapper;
+    this.reportingQueryService = reportingQueryService;
     this.stopwatchProvider = stopwatchProvider;
-    this.userService = userService;
   }
 
   // Retrieve all the data we need from the MySQL database in a single transaction for
@@ -50,14 +38,14 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
     final Stopwatch stopwatch = stopwatchProvider.get().start();
     final ReportingSnapshot result =
         new ReportingSnapshot()
-            .cohorts(queryService.getReportingCohorts())
-            .datasets(queryService.getDatasets())
-            .datasetCohorts(queryService.getDatasetCohorts())
-            .datasetConceptSets(queryService.getDatasetConceptSets())
-            .datasetDomainIdValues(queryService.getDatasetDomainIdValues())
-            .institutions(queryService.getInstitutions())
-            .users(userService.getReportingUsers())
-            .workspaces(queryService.getReportingWorkspaces());
+            .cohorts(reportingQueryService.getCohorts())
+            .datasets(reportingQueryService.getDatasets())
+            .datasetCohorts(reportingQueryService.getDatasetCohorts())
+            .datasetConceptSets(reportingQueryService.getDatasetConceptSets())
+            .datasetDomainIdValues(reportingQueryService.getDatasetDomainIdValues())
+            .institutions(reportingQueryService.getInstitutions())
+            .users(reportingQueryService.getUsers())
+            .workspaces(reportingQueryService.getWorkspaces());
     stopwatch.stop();
     log.info(LogFormatters.duration("Application DB Queries", stopwatch.elapsed()));
     return result;
