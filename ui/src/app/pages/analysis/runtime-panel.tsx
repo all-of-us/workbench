@@ -165,7 +165,7 @@ enum PanelContent {
 export interface Props {
   workspace: WorkspaceData;
   cdrVersionListResponse?: CdrVersionListResponse;
-  onUpdate: () => void;
+  onClose: () => void;
 }
 
 // Exported for testing only.
@@ -747,7 +747,7 @@ export const RuntimePanel = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace(),
   withUserProfile()
-)(({cdrVersionListResponse, workspace, profileState, onUpdate = () => {}}) => {
+)(({cdrVersionListResponse, workspace, profileState, onClose = () => {}}) => {
   const {namespace, id, cdrVersionId} = workspace;
 
   const {profile} = profileState;
@@ -875,7 +875,7 @@ export const RuntimePanel = fp.flow(
       disabled={!runtimeCanBeUpdated}
       onClick={() => {
         setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
-        onUpdate();
+        onClose();
       }}>
       {needsDelete ? 'APPLY & RECREATE' : 'APPLY & REBOOT'}
     </Button>;
@@ -886,7 +886,7 @@ export const RuntimePanel = fp.flow(
       aria-label='Create'
       onClick={() => {
         setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
-        onUpdate();
+        onClose();
       }}>
       Create
     </Button>;
@@ -928,7 +928,7 @@ export const RuntimePanel = fp.flow(
       [PanelContent.Delete, () => <ConfirmDelete
         onConfirm={async() => {
           await setRuntimeStatus(RuntimeStatusRequest.Delete);
-          setPanelContent(PanelContent.Customize);
+          onClose();
         }}
         onCancel={() => setPanelContent(PanelContent.Customize)}
       />],

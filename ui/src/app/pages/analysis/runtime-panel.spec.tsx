@@ -25,6 +25,7 @@ describe('RuntimePanel', () => {
   let props: Props;
   let runtimeApiStub: RuntimeApiStub;
   let workspacesApiStub: WorkspacesApiStub;
+  let onClose: () => void;
 
   const iconsDir = '/assets/icons';
 
@@ -44,6 +45,7 @@ describe('RuntimePanel', () => {
     workspacesApiStub = new WorkspacesApiStub();
     registerApiClient(WorkspacesApi, workspacesApiStub);
 
+    onClose = jest.fn();
     runtimeStore.set({runtime: runtimeApiStub.runtime, workspaceNamespace: workspaceStubs[0].namespace});
     props = {
       workspace: {
@@ -52,7 +54,7 @@ describe('RuntimePanel', () => {
         cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
       },
       cdrVersionListResponse,
-      onUpdate: () => {}
+      onClose
     };
 
     jest.useFakeTimers();
@@ -770,9 +772,9 @@ describe('RuntimePanel', () => {
 
     await mustClickButton(wrapper, 'Delete');
 
-    // Runtime should be deleting, and confirm page should no longer be visible.
+    // Runtime should be deleting, and panel should have closed.
     expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Deleting);
-    expect(wrapper.find(ConfirmDelete).exists()).toBeFalsy();
+    expect(onClose).toHaveBeenCalled();
   });
 
   it('should allow cancelling runtime deletion', async() => {
@@ -787,6 +789,7 @@ describe('RuntimePanel', () => {
     // Runtime should still be active, and confirm page should no longer be visible.
     expect(runtimeApiStub.runtime.status).toEqual(RuntimeStatus.Running);
     expect(wrapper.find(ConfirmDelete).exists()).toBeFalsy();
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   it('should display the Running runtime status icon in state Running', async() => {
