@@ -314,7 +314,8 @@ export const NotebookRedirect = fp.flow(
           runtime !== undefined && (runtime === null || runtime.status !== RuntimeStatus.Running)) {
         navigate([
           'workspaces', workspace.namespace, workspace.id,
-          'notebooks', 'preview', encodeURIComponent(this.getFullNotebookName())
+          // navigate will encode the notebook name automatically
+          'notebooks', 'preview', this.getFullNotebookName()
         ]);
       }
     }
