@@ -273,7 +273,10 @@ const DiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskSize, idPre
       value={selectedDiskSize || diskSize}
       inputStyle={styles.inputNumber}
       onChange={({value}) => onChange(value)}
-      min={50 /* Runtime API has a minimum 50GB requirement. */}/>
+      step={10}
+      min={50 /* Runtime API has a minimum 50GB requirement. */}
+      max={4000 /* (4TB) Prevent accidental excessively large disks, should cover foreseeable use cases. */}
+    />
   </Fragment>;
 };
 
