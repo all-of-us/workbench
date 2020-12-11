@@ -168,7 +168,7 @@ export class SearchBar extends React.Component<Props, State> {
   }
 
   debounceInput = fp.debounce(300, (input: string) => {
-    if (input.length < searchTrigger) {
+    if (input.trim().length < searchTrigger) {
       this.setState({options: null});
     } else {
       const inputErrors = validateInputForMySQL(input);

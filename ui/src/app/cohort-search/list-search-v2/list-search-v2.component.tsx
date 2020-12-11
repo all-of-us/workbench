@@ -308,7 +308,7 @@ export const ListSearchV2 = fp.flow(withCdrVersions(), withCurrentWorkspace(), w
     handleInput = (event: any) => {
       const {key, target: {value}} = event;
       if (key === Key.Enter) {
-        if (value.length < searchTrigger) {
+        if (value.trim().length < searchTrigger) {
           this.setState({inputErrors: ['Minimum criteria search length is three characters']});
         } else {
           const inputErrors = validateInputForMySQL(value);
