@@ -198,7 +198,13 @@ def dev_up()
   at_exit do
     common.run_inline %W{docker-compose down}
   end
-  ensure_docker_sync()
+
+  # ensures that sa-key.json is included in the docker-sync image
+  # This is necessary because docker-compose exposes it as GOOGLE_APPLICATION_CREDENTIALS
+  # which is needed to construct the IamCredentialsClient Bean
+  ServiceAccountContext.new(TEST_PROJECT).run do
+    ensure_docker_sync()
+  end
 
   overall_bm = Benchmark.measure {
     common.status "Database startup..."
