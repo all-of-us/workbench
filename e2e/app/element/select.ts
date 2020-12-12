@@ -46,4 +46,12 @@ export default class Select extends BaseElement {
     return getPropValue<string>(displayedValue, 'innerText');
   }
 
+  /**
+   *
+   */
+  async getSelectedValue(): Promise<string> {
+    const selectedValue = await this.page.waitForXPath(`${this.getXpath()}/label`);
+    const baseElement = await BaseElement.asBaseElement(page, selectedValue);
+    return await baseElement.getTextContent();
+  }
 }

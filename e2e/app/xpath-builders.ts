@@ -12,13 +12,18 @@ export function iframeXpath(label: string) {
  */
 export function buildXPath(xOpts: XPathOptions, container?: Container): string {
 
-  const  { type, name, containsText, normalizeSpace, ancestorLevel = 1, iconShape, startsWith, dataTestId } = xOpts;
+  const  { type, name, containsText, normalizeSpace, ancestorLevel = 1, iconShape, startsWith, dataTestId, id } = xOpts;
 
   // optional function parameters check
   if (type === 'icon') {
     if (iconShape === undefined) {
       throw new Error(`Incorrect XPathOptions configuration for Icon: set "iconShape" value.`);
     }
+  }
+
+  // HTML id is unique throughout the page, so just return that if it's there
+  if (id) {
+    return `//*[@id="${id}"]`
   }
 
   let str = '';

@@ -168,7 +168,8 @@ export async function waitForHidden(page: Page, cssSelector: string): Promise<bo
 export async function waitForAttributeEquality(page: Page,
                                                selector: {xpath?: string, css?: string},
                                                attribute: string,
-                                               value: string): Promise<boolean> {
+                                               value: string,
+                                               timeout?: number): Promise<boolean> {
   if (selector.css !== undefined) {
     try {
       const jsHandle = await page.waitForFunction((css, attributeName, attributeValue) => {
@@ -177,7 +178,7 @@ export async function waitForAttributeEquality(page: Page,
           return element.attributes[attributeName] && element.attributes[attributeName].value === attributeValue;
         }
         return false;
-      }, {}, selector.css, attribute, value);
+      }, {timeout: timeout || 30000}, selector.css, attribute, value);
       return (await jsHandle.jsonValue()) as boolean;
     } catch (e) {
       console.error(`Wait for element matching CSS="${selector.css}" attribute:${attribute} value:${value} failed. ${e}`);
@@ -188,7 +189,7 @@ export async function waitForAttributeEquality(page: Page,
       const jsHandle = await page.waitForFunction((xpath, attributeName, attributeValue) => {
         const element: any = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
         return element && element.attributes[attributeName] && element.attributes[attributeName].value === attributeValue;
-      }, {}, selector.xpath, attribute, value);
+      }, timeout ? {timeout} : {}, selector.xpath, attribute, value);
       return (await jsHandle.jsonValue()) as boolean;
     } catch (e) {
       console.error(`Wait for element matching Xpath=${selector.xpath} attribute:${attribute} value:${value} failed. ${e}`);

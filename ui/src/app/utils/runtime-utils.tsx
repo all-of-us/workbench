@@ -87,8 +87,8 @@ const compareDiskSize = (oldRuntime: RuntimeConfig, newRuntime: RuntimeConfig): 
 
   return {
     desc: desc,
-    previous: oldRuntime.diskSize.toString() + ' GB',
-    new: newRuntime.diskSize.toString() + ' GB',
+    previous: oldRuntime.diskSize && oldRuntime.diskSize.toString() + ' GB',
+    new: newRuntime.diskSize && newRuntime.diskSize.toString() + ' GB',
     differenceType: diffType
   };
 };

@@ -1,4 +1,4 @@
-import {Page} from 'puppeteer';
+import {ElementHandle, Page} from 'puppeteer';
 
 /**
  * This is the super base class.
@@ -12,5 +12,7 @@ export default class Container {
     return this.xpath;
   }
 
-
+  async waitUntilVisible(): Promise<ElementHandle> {
+    return this.page.waitForXPath(this.xpath, {visible: true});
+  }
 }

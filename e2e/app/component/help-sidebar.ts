@@ -15,6 +15,9 @@ enum SectionSelectors {
   ModifiersForm = '//*[@id="modifiers-form"]',
   SelectionList = '//*[@id="selection-list"]',
 }
+export enum HelpSidebarTab {
+  ComputeConfiguration = '//*[@data-test-id="help-sidebar-icon-runtime"]'
+}
 
 export default class HelpSidebar extends Container {
 
@@ -108,11 +111,22 @@ export default class HelpSidebar extends Container {
     return waitForNumericalString(this.page, selector);
   }
 
+  async clickSidebarTab(helpSidebarTab: HelpSidebarTab): Promise<void> {
+    return await this.page.waitForXPath(helpSidebarTab, {visible: true}).then(tab => tab.click());
+  }
+
   waitUntilSectionVisible(xpath: string): Promise<ElementHandle> {
     return this.page.waitForXPath(xpath, {visible: true});
   }
 
   waitUntilSectionHidden(xpath: string): Promise<ElementHandle> {
     return this.page.waitForXPath(xpath, {hidden: true, visible: false});
+  }
+
+  async toggleRuntimePanel(): Promise<void> {
+    await this.clickSidebarTab(HelpSidebarTab.ComputeConfiguration);
+    // There's an animation on this panel opening, so we wait a second for it to finish
+    // opening before we try to do anything with it
+    return await this.page.waitForTimeout(1000);
   }
 }
