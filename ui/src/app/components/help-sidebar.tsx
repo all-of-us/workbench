@@ -747,7 +747,7 @@ export const HelpSidebar = fp.flow(
               }
             </div>}
             {activeIcon === 'runtime' && <div style={contentStyle('runtime')}>
-              {<RuntimePanel onUpdate={() => this.props.setSidebarState(false)}/>}
+              {<RuntimePanel onClose={() => this.props.setSidebarState(false)}/>}
             </div>}
             {activeIcon === 'annotations' && <div style={contentStyle('annotations')}>
               {participant && <SidebarContent />}
