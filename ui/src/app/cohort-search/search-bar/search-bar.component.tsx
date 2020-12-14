@@ -2,13 +2,14 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {domainToTitle} from 'app/cohort-search/utils';
+import {AlertDanger} from 'app/components/alert';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {highlightSearchTerm, reactStyles} from 'app/utils';
+import {highlightSearchTerm, reactStyles, validateInputForMySQL} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {Criteria, CriteriaType, Domain} from 'generated/fetch';
@@ -65,10 +66,15 @@ const styles = reactStyles({
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     width: '100%'
+  },
+  inputAlert: {
+    justifyContent: 'space-between',
+    padding: '0.2rem',
+    width: '64.3%',
   }
 });
 
-const trigger = 3;
+const searchTrigger = 3;
 
 interface OptionProps {
   onClick: Function;
@@ -137,11 +143,12 @@ interface Props {
 }
 
 interface State {
-  options: Array<any>;
-  loading: boolean;
-  optionSelected: boolean;
   error: boolean;
   highlightedOption: number;
+  inputErrors: Array<string>;
+  loading: boolean;
+  options: Array<any>;
+  optionSelected: boolean;
   subtype: string;
 }
 
@@ -150,20 +157,26 @@ export class SearchBar extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      options: null,
-      loading: false,
-      optionSelected: false,
       error: false,
       highlightedOption: null,
+      inputErrors: [],
+      loading: false,
+      options: null,
+      optionSelected: false,
       subtype: undefined,
     };
   }
 
   debounceInput = fp.debounce(300, (input: string) => {
-    if (input.length < trigger) {
-      this.setState({options: null});
+    if (input.trim().length < searchTrigger) {
+      this.setState({inputErrors: [], options: null});
     } else {
-      this.handleInput();
+      const inputErrors = validateInputForMySQL(input);
+      if (inputErrors.length > 0) {
+        this.setState({inputErrors, options: null});
+      } else {
+        this.handleInput();
+      }
     }
   });
 
@@ -191,7 +204,7 @@ export class SearchBar extends React.Component<Props, State> {
   handleInput() {
     const {node: {domainId, isStandard, type}, searchTerms} = this.props;
     triggerEvent(`Cohort Builder Search - ${domainToTitle(domainId)}`, 'Search', searchTerms);
-    this.setState({loading: true});
+    this.setState({inputErrors: [], loading: true});
     const {cdrVersionId} = currentWorkspaceStore.getValue();
     const apiCall = domainId === Domain.DRUG.toString()
       ? cohortBuilderApi().findDrugBrandOrIngredientByValue(+cdrVersionId, searchTerms)
@@ -274,7 +287,7 @@ export class SearchBar extends React.Component<Props, State> {
   }
 
   render() {
-    const {highlightedOption, loading, options} = this.state;
+    const {highlightedOption, inputErrors, loading, options} = this.state;
     const inputValue = highlightedOption !== null ? options[highlightedOption].name : this.props.searchTerms;
     return <div style={{position: 'relative', width: '100%'}}>
       <div style={styles.searchContainer}>
@@ -285,6 +298,9 @@ export class SearchBar extends React.Component<Props, State> {
             onChange={(e) => this.props.setInput(e)}
             onKeyDown={(e) => this.onKeyDown(e.key)}/>
         </div>
+        {inputErrors.map((error, e) => <AlertDanger key={e} style={styles.inputAlert}>
+          <span data-test-id='input-error-alert'>{error}</span>
+        </AlertDanger>)}
       </div>
       {options !== null && <div ref={(el) => this.dropdown = el} style={styles.dropdownMenu}>
         {options.length === 0

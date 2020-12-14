@@ -512,7 +512,7 @@ export function highlightSearchTerm(searchTerm: string, stringToHighlight: strin
     return stringToHighlight;
   }
   const words: string[] = [];
-  const matchString = new RegExp(searchTerm.trim(), 'i');
+  const matchString = new RegExp(searchTerm.replace(/([^a-zA-z0-9]+)/g, () => '').trim(), 'i');
   const matches = stringToHighlight.match(new RegExp(matchString, 'gi'));
   const splits = stringToHighlight.split(new RegExp(matchString, 'gi'));
   if (matches) {
