@@ -1,5 +1,4 @@
 import {Page} from 'puppeteer';
-
 import DataResourceCard from 'app/component/data-resource-card';
 import Modal from 'app/component/modal';
 import Link from 'app/element/link';
@@ -13,6 +12,7 @@ import SnowmanMenu from 'app/component/snowman-menu';
 import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
 import BaseElement from 'app/element/base-element';
+import ShareModal from 'app/component/share-modal';
 
 export const UseFreeCredits = 'Use All of Us free credits';
 
@@ -277,5 +277,15 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   async getNewCdrVersionFlag(): Promise<BaseElement> {
     const xpath = '//*[@data-test-id="new-version-flag"]';
     return BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, {visible: true}));
+  }
+
+  /**
+   * Share workspace via Workspace Actions snowman menu "Share" option.
+   */
+  async shareWorkspace(): Promise<ShareModal> {
+    await this.selectWorkspaceAction(Option.Share, { waitForNav: false });
+    const modal = new ShareModal(this.page);
+    await modal.waitUntilVisible();
+    return modal;
   }
 }
