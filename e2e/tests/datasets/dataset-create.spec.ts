@@ -5,6 +5,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {Option, ResourceCard} from 'app/text-labels';
 import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
+import DatasetEditPage from 'app/page/dataset-edit-page';
 
 describe('Dataset test', () => {
 
@@ -65,7 +66,6 @@ describe('Dataset test', () => {
     // Verify create successful.
     await dataPage.openDatasetsSubtab();
 
-
     const resourceCard = new DataResourceCard(page);
     const dataSetExists = await resourceCard.cardExists(datasetName, ResourceCard.Dataset);
     expect(dataSetExists).toBe(true);
@@ -75,10 +75,13 @@ describe('Dataset test', () => {
     await datasetCard.selectSnowmanMenu(Option.Edit);
     await waitWhileLoading(page);
 
-    await datasetPage.selectCohorts(['All Participants']);
-    await datasetPage.clickAnalyzeButton();
-
+    const datasetEditPage = new DatasetEditPage(page);
+    await datasetEditPage.waitForLoad();
+    await datasetEditPage.selectCohorts(['All Participants']);
+    await datasetEditPage.clickAnalyzeButton();
+    
     // Save Dataset in a new name.
+    await saveModal.waitForLoad();
     datasetName = await saveModal.saveDataset({exportToNotebook: false}, true);
     await dataPage.waitForLoad();
 
