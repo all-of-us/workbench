@@ -1,6 +1,5 @@
 import {ElementHandle, Page} from 'puppeteer';
 import * as fp from 'lodash/fp';
-
 import {Option, WorkspaceAccessLevel} from 'app/text-labels';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {getPropValue} from 'utils/element-utils';
