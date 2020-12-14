@@ -25,7 +25,6 @@ export default class SidebarContent extends  HelpSidebar {
     async getParticipantID(): Promise<string> {
         const selector = `${this.getXpath()}//div[1][text()="Participant "]`;
         const pID = await this.extractParticipantDetails(selector);
-        console.log(`Participant ID: ${pID}`);
         return pID;
     }
 

@@ -80,12 +80,12 @@ describe('Cohort review tests', () => {
     
     const sidebarContent = new SidebarContent(page);
     const reviewParticipantid1 = await sidebarContent.getParticipantID(); 
-    console.log(reviewParticipantid1);
+    console.log(`reviewParticipantid1: ${reviewParticipantid1}`);
     expect(dataTablepid1).toEqual(reviewParticipantid1);
     
     // select review status from dropdown option
     const participantStatus1 = await sidebarContent.selectReviewStatus(ReviewStatus.Excluded);
-    console.log(participantStatus1);
+    
     // click on the plus-icon next to annotations 
     await sidebarContent.getAnnotationsButton().then(btn => btn.click());
     // the annotations modal displays
@@ -112,7 +112,6 @@ describe('Cohort review tests', () => {
 
     // select a review status
     const participantStatus2 = await sidebarContent.selectReviewStatus(ReviewStatus.Included);
-    console.log(participantStatus2);
 
     // navigate to review set page and check if the status column is displaying the review status for both participants
     await participantDetailPage.getBackToReviewSetButton().then(btn => btn.click());
@@ -121,14 +120,14 @@ describe('Cohort review tests', () => {
     // Get the status of participant1
     const statusCell1 = await participantsTable.getCell(2, 8);
     const statusValue1 = await getPropValue<string>(statusCell1, 'textContent');
-    console.log(statusValue1);
     expect(statusValue1).toEqual(participantStatus1);
+    console.log(`${reviewParticipantid1}: ${statusValue1}`);
 
     // Get the status of participant2
     const statusCell2 = await participantsTable.getCell(3, 8);
     const statusValue2 = await getPropValue<string>(statusCell2, 'textContent');
-    console.log(statusValue2);
     expect(statusValue2).toEqual(participantStatus2);
+    console.log(`${reviewParticipantid2}: ${statusValue2}`);
 
     // return to cohort review page
     await cohortReviewPage.getBackToCohortButton().then(btn => btn.clickAndWait());
