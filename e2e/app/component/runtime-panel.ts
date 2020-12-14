@@ -170,7 +170,7 @@ export default class RuntimePanel extends Container {
   }
 
   async clickStatusIcon(): Promise<void> {
-    const startStopIconElement = BaseElement.asBaseElement(page, await this.page.waitForXPath(statusIconXpath));
+    const startStopIconElement = BaseElement.asBaseElement(page, await this.page.waitForXPath(statusIconXpath, {waitForVisible: true}));
     return await startStopIconElement.click();
   }
 
