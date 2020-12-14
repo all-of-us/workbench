@@ -83,7 +83,6 @@ export enum LinkText {
    Submit = 'Submit',
    Update = 'Update',
    Yes = 'Yes',
-   
 }
 
 // Notebook programming language.
