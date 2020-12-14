@@ -58,6 +58,7 @@ describe('Share workspace', () => {
       /**
        * Test:
        * - Create a new workspace.
+<<<<<<< HEAD
        * - Share with another user - assign role Writer/Reader.
        * - Log in as another user.
        * - Workspace share action should be disabled.
@@ -106,6 +107,7 @@ describe('Share workspace', () => {
         const accessLevel1 = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
         expect(accessLevel1).toBe(collab.accessLevel);
     
+
         const modal2 = await aboutPage.openShareModal();
         const searchInput = await modal2.waitForSearchBox();
         expect(await searchInput.isDisabled()).toBe(true);
@@ -115,6 +117,7 @@ describe('Share workspace', () => {
     
       });
   
+
   
     });
   
