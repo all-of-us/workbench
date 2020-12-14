@@ -25,7 +25,7 @@ export default class PrimereactInputNumber extends BaseElement {
 
   async getInputValue(): Promise<number> {
     const input = await this.getInputBaseElement();
-    return parseInt(await input.getProperty('value'));
+    return parseInt(await input.getProperty('value'), 10);
   }
 
   private async getInputBaseElement(): Promise<BaseElement> {
