@@ -1,4 +1,3 @@
-import Link from 'app/element/link';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import WorkspacesPage, {FieldSelector} from 'app/page/workspaces-page';
 import {signIn, performActions} from 'utils/test-utils';
