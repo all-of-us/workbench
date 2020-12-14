@@ -114,7 +114,6 @@ describe('Cohort review tests', () => {
     // select a review status
     const participantStatus2 = await sidebarContent.selectReviewStatus(ReviewStatus.Included);
 
-
     // navigate to review set page and check if the status column is displaying the review status for both participants
     await participantDetailPage.getBackToReviewSetButton().then(btn => btn.click());
     await waitWhileLoading(page);
@@ -130,7 +129,6 @@ describe('Cohort review tests', () => {
     const statusValue2 = await getPropValue<string>(statusCell2, 'textContent');
     expect(statusValue2).toEqual(participantStatus2);
     console.log(`${reviewParticipantid2}: ${statusValue2}`);
-
 
     // return to cohort review page
     await cohortReviewPage.getBackToCohortButton().then(btn => btn.clickAndWait());
