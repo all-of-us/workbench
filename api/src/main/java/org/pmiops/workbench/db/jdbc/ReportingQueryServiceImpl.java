@@ -2,31 +2,34 @@ package org.pmiops.workbench.db.jdbc;
 
 import static org.pmiops.workbench.db.model.DbStorageEnums.billingAccountTypeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.billingStatusFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.dataAccessLevelFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.institutionDUATypeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.organizationTypeFromStorage;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
 import java.util.List;
+import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingDatasetConceptSet;
 import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
 import org.pmiops.workbench.model.ReportingInstitution;
+import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ReportingNativeQueryServiceImpl implements ReportingQueryService {
+public class ReportingQueryServiceImpl implements ReportingQueryService {
 
   private final JdbcTemplate jdbcTemplate;
 
-  public ReportingNativeQueryServiceImpl(JdbcTemplate jdbcTemplate) {
+  public ReportingQueryServiceImpl(JdbcTemplate jdbcTemplate) {
     this.jdbcTemplate = jdbcTemplate;
   }
 
   @Override
-  public List<ReportingWorkspace> getReportingWorkspaces() {
+  public List<ReportingWorkspace> getWorkspaces() {
     return jdbcTemplate.query(
         "SELECT \n"
             + "  billing_account_type,\n"
@@ -101,6 +104,11 @@ public class ReportingNativeQueryServiceImpl implements ReportingQueryService {
                 .rpSocialBehavioral(rs.getBoolean("rp_social_behavioral"))
                 .rpTimeRequested(offsetDateTimeUtc(rs.getTimestamp("rp_time_requested")))
                 .workspaceId(rs.getLong("workspace_id")));
+  }
+
+  @Override
+  public List<ReportingCohort> getCohorts() {
+    return null;
   }
 
   @Override
@@ -185,5 +193,82 @@ public class ReportingNativeQueryServiceImpl implements ReportingQueryService {
                     organizationTypeFromStorage(rs.getShort("organization_type_enum")))
                 .organizationTypeOtherText(rs.getString("organization_type_other_text"))
                 .shortName(rs.getString("short_name")));
+  }
+
+  @Override
+  public List<ReportingUser> getUsers() {
+    return jdbcTemplate.query(
+        "SELECT \n"
+            + "  about_you,\n"
+            + "  area_of_research,\n"
+            + "  compliance_training_bypass_time,\n"
+            + "  compliance_training_completion_time,\n"
+            + "  compliance_training_expiration_time,\n"
+            + "  contact_email,\n"
+            + "  creation_time,\n"
+            + "  current_position,\n"
+            + "  data_access_level,\n"
+            + "  data_use_agreement_bypass_time,\n"
+            + "  data_use_agreement_completion_time,\n"
+            + "  data_use_agreement_signed_version,\n"
+            + "  demographic_survey_completion_time,\n"
+            + "  disabled,\n"
+            + "  era_commons_bypass_time,\n"
+            + "  era_commons_completion_time,\n"
+            + "  family_name,\n"
+            + "  first_registration_completion_time,\n"
+            + "  first_sign_in_time,\n"
+            + "  free_tier_credits_limit_days_override,\n"
+            + "  free_tier_credits_limit_dollars_override,\n"
+            + "  given_name,\n"
+            + "  last_modified_time,\n"
+            + "  professional_url,\n"
+            + "  two_factor_auth_bypass_time,\n"
+            + "  two_factor_auth_completion_time,\n"
+            + "  user_id,\n"
+            + "  username\n"
+            + "FROM user",
+        (rs, unused) ->
+            new ReportingUser()
+                .aboutYou(rs.getString("about_you"))
+                .areaOfResearch(rs.getString("area_of_research"))
+                .complianceTrainingBypassTime(
+                    offsetDateTimeUtc(rs.getTimestamp("compliance_training_bypass_time")))
+                .complianceTrainingCompletionTime(
+                    offsetDateTimeUtc(rs.getTimestamp("compliance_training_completion_time")))
+                .complianceTrainingExpirationTime(
+                    offsetDateTimeUtc(rs.getTimestamp("compliance_training_expiration_time")))
+                .contactEmail(rs.getString("contact_email"))
+                .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
+                .currentPosition(rs.getString("current_position"))
+                .dataAccessLevel(dataAccessLevelFromStorage(rs.getShort("data_access_level")))
+                .dataUseAgreementBypassTime(
+                    offsetDateTimeUtc(rs.getTimestamp("data_use_agreement_bypass_time")))
+                .dataUseAgreementCompletionTime(
+                    offsetDateTimeUtc(rs.getTimestamp("data_use_agreement_completion_time")))
+                .dataUseAgreementSignedVersion(rs.getInt("data_use_agreement_signed_version"))
+                .demographicSurveyCompletionTime(
+                    offsetDateTimeUtc(rs.getTimestamp("demographic_survey_completion_time")))
+                .disabled(rs.getBoolean("disabled"))
+                .eraCommonsBypassTime(offsetDateTimeUtc(rs.getTimestamp("era_commons_bypass_time")))
+                .eraCommonsCompletionTime(
+                    offsetDateTimeUtc(rs.getTimestamp("era_commons_completion_time")))
+                .familyName(rs.getString("family_name"))
+                .firstRegistrationCompletionTime(
+                    offsetDateTimeUtc(rs.getTimestamp("first_registration_completion_time")))
+                .firstSignInTime(offsetDateTimeUtc(rs.getTimestamp("first_sign_in_time")))
+                .freeTierCreditsLimitDaysOverride(
+                    (int) rs.getShort("free_tier_credits_limit_days_override"))
+                .freeTierCreditsLimitDollarsOverride(
+                    rs.getDouble("free_tier_credits_limit_dollars_override"))
+                .givenName(rs.getString("given_name"))
+                .lastModifiedTime(offsetDateTimeUtc(rs.getTimestamp("last_modified_time")))
+                .professionalUrl(rs.getString("professional_url"))
+                .twoFactorAuthBypassTime(
+                    offsetDateTimeUtc(rs.getTimestamp("two_factor_auth_bypass_time")))
+                .twoFactorAuthCompletionTime(
+                    offsetDateTimeUtc(rs.getTimestamp("two_factor_auth_completion_time")))
+                .userId(rs.getLong("user_id"))
+                .username(rs.getString("username")));
   }
 }

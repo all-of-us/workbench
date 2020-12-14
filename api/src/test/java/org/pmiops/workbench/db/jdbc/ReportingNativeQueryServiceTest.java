@@ -57,7 +57,7 @@ public class ReportingNativeQueryServiceTest {
   @Autowired private UserDao userDao;
   @Autowired private WorkspaceDao workspaceDao;
 
-  @Import({ReportingNativeQueryServiceImpl.class, ReportingUserFixture.class})
+  @Import({ReportingQueryServiceImpl.class, ReportingUserFixture.class})
   @TestConfiguration
   public static class config {}
 
