@@ -782,31 +782,22 @@ paths:
       responses:
         202:
           description: Successful request, check the project's status for completion
-          content: {}
         400:
           description: Project is already in perimeter or is not in 'Ready' state
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorReport'
+          schema:
+            $ref: '#/definitions/ErrorReport'
         403:
           description: Project does not exist or you do not have access
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorReport'
+          schema:
+            $ref: '#/definitions/ErrorReport'
         404:
           description: Service Perimeter does not exist or you do not have access
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorReport'
+          schema:
+            $ref: '#/definitions/ErrorReport'
         500:
           description: Rawls Internal Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorReport'
+          schema:
+            $ref: '#/definitions/ErrorReport'
 
 ##########################################################################################
 ## PARAMETERS
