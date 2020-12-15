@@ -3,9 +3,9 @@ import {Page} from 'puppeteer';
 import Button from 'app/element/button';
 import Modal from 'app/component/modal';
 import {waitWhileLoading} from 'utils/waits-utils';
-import {ElementType} from '../xpath-options';
-import {LinkText} from '../text-labels';
-import Checkbox from '../element/checkbox';
+import {ElementType} from 'app/xpath-options';
+import {LinkText} from 'app/text-labels';
+import Checkbox from 'app/element/checkbox';
 
 const LabelAlias = {
     WILL_USE_OLD_CDR_VERSION: 'I will use this workspace to complete an existing study or replicate a previous study.',
@@ -31,12 +31,10 @@ export default class OldCdrVersionModal extends Modal {
     }
 
     async isLoaded(): Promise<boolean> {
-        const xpath = '//*[@data-test-id="old-cdr-version-modal"]';
-        await Promise.all([
-            this.page.waitForXPath(xpath),
-            waitWhileLoading(this.page),
-        ]);
-        return true;
+      const xpath = '//*[@data-test-id="old-cdr-version-modal"]';
+      await this.page.waitForXPath(xpath, {visible: true});
+      await waitWhileLoading(this.page);
+      return true;
     }
 
     async getWillUseCheckbox(): Promise<Checkbox> {

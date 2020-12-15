@@ -253,7 +253,7 @@ export default class WorkspaceEditPage extends WorkspaceBase {
 
   async getCdrVersionUpgradeMessage(): Promise<string> {
     const xpath = '//*[@data-test-id="cdr-version-upgrade"]';
-    const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath));
+    const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, {visible: true}));
     return element.getTextContent();
   }
 

@@ -95,7 +95,7 @@ export default class SelectMenu extends Container {
   private async isOpen(): Promise<boolean> {
     const selector = this.xpath + '/*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown-panel ")]';
     try {
-      const panel = await this.page.waitForXPath(selector);
+      const panel = await this.page.waitForXPath(selector, {visible: true});
       const classNameString = await getPropValue<string>(panel, 'className');
       const splits = classNameString.toString().split(' ');
       await panel.dispose();

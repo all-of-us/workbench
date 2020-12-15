@@ -118,7 +118,7 @@ export default class WorkspaceCard extends CardBase {
    * @param {string} workspaceName
    */
   async getWorkspaceNameLink(workspaceName: string) : Promise<ElementHandle> {
-    return this.page.waitForXPath(this.workspaceNameLinkSelector(workspaceName));
+    return this.page.waitForXPath(this.workspaceNameLinkSelector(workspaceName), {visible: true});
   }
 
   async getWorkspaceMatchAccessLevel(level: WorkspaceAccessLevel = WorkspaceAccessLevel.Owner): Promise<WorkspaceCard[]> {
