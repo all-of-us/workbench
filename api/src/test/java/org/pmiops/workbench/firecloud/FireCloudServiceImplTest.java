@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import com.google.api.client.http.HttpTransport;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import java.util.Arrays;
+import java.util.Collections;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -262,7 +263,7 @@ public class FireCloudServiceImplTest {
             "project %s is already in service perimeter %s", projectName, servicePerimeter);
 
     // can't use when() on void-returning methods
-    doThrow(new ApiException(400, null, null, alreadyIn))
+    doThrow(new ApiException(400, "no message", Collections.emptyMap(), alreadyIn))
         .when(servicePerimetersApi)
         .addProjectToServicePerimeter(servicePerimeter, projectName);
 
@@ -288,7 +289,7 @@ public class FireCloudServiceImplTest {
             "project %s is already in service perimeter %s", projectName, servicePerimeter);
 
     // can't use when() on void-returning methods
-    doThrow(new ApiException(400, null, null, alreadyIn))
+    doThrow(new ApiException(400, "no message", Collections.emptyMap(), alreadyIn))
         .when(servicePerimetersApi)
         .addProjectToServicePerimeter(servicePerimeter, projectName);
 
@@ -314,7 +315,7 @@ public class FireCloudServiceImplTest {
         String.format("project %s is already in service perimeter %s", projectName, otherPerimeter);
 
     // can't use when() on void-returning methods
-    doThrow(new ApiException(400, null, null, alreadyIn))
+    doThrow(new ApiException(400, "no message", Collections.emptyMap(), alreadyIn))
         .when(servicePerimetersApi)
         .addProjectToServicePerimeter(servicePerimeter, projectName);
 
