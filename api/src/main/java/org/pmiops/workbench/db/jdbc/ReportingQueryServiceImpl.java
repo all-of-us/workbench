@@ -109,7 +109,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   @Override
   public List<ReportingCohort> getCohorts() {
     return jdbcTemplate.query(
-        "SELECT \n"  + "  cohort_id,\n"
+        "SELECT \n"
+            + "  cohort_id,\n"
             + "  creation_time,\n"
             + "  creator_id,\n"
             + "  criteria,\n"
