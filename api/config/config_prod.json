@@ -103,7 +103,6 @@
     "enableCohortBuilderV2": true,
     "enableConceptSetSearchV2": true,
     "enableReportingUploadCron": true,
-    "enableCOPESurvey": true,
     "enableCustomRuntimes": true
   },
   "actionAudit": {
