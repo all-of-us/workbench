@@ -35,6 +35,7 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
     final Stopwatch stopwatch = stopwatchProvider.get().start();
     final ReportingSnapshot result =
         new ReportingSnapshot()
+            .captureTimestamp(clock.millis())
             .cohorts(reportingQueryService.getCohorts())
             .datasets(reportingQueryService.getDatasets())
             .datasetCohorts(reportingQueryService.getDatasetCohorts())

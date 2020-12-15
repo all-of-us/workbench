@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -177,22 +176,5 @@ public class UserDaoTest {
     institution.setOrganizationTypeEnum(OrganizationType.EDUCATIONAL_INSTITUTION);
     institution.setDuaTypeEnum(DuaType.MASTER);
     return institutionDao.save(institution);
-  }
-
-  @Test
-  public void testGetReportingUsers() {
-    insertMultipleUsers();
-    final List<ProjectedReportingUser> projections = userDao.getReportingUsers();
-    assertThat(projections).isNotEmpty();
-    final ProjectedReportingUser user = projections.get(0);
-    assertThat(user.getFamilyName()).isEqualTo("Foo");
-    assertThat(user.getStreetAddress1()).isEqualTo(STREET_ADDRESS_1);
-    assertThat(user.getStreetAddress2()).isEqualTo(STREET_ADDRESS_2);
-    assertThat(user.getCity()).isEqualTo(CITY);
-    assertThat(user.getState()).isEqualTo(STATE);
-    assertThat(user.getCountry()).isEqualTo(COUNTRY);
-    assertThat(user.getInstitutionId()).isGreaterThan(0L);
-    assertThat(user.getInstitutionalRoleEnum()).isEqualTo(InstitutionalRole.FELLOW);
-    assertThat(user.getInstitutionalRoleOtherText()).isNull();
   }
 }

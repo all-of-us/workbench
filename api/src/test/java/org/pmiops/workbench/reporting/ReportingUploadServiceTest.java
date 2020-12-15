@@ -44,7 +44,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.api.BigQueryService;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ReportingSnapshot;
@@ -82,8 +81,7 @@ public class ReportingUploadServiceTest {
 
   @Autowired private ReportingUploadService reportingUploadServiceStreamingImpl;
 
-  @Autowired
-  private ReportingTestFixture<DbUser, ProjectedReportingUser, ReportingUser> userFixture;
+  @Autowired private ReportingTestFixture<DbUser, ReportingUser> userFixture;
 
   @Captor private ArgumentCaptor<QueryJobConfiguration> queryJobConfigurationCaptor;
   @Captor private ArgumentCaptor<InsertAllRequest> insertAllRequestCaptor;

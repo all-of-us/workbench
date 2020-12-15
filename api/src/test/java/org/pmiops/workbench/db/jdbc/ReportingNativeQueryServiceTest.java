@@ -14,7 +14,6 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -52,7 +51,7 @@ public class ReportingNativeQueryServiceTest {
 
   @Autowired
   @Qualifier("REPORTING_USER_TEST_FIXTURE")
-  ReportingTestFixture<DbUser, ProjectedReportingUser, ReportingUser> userFixture;
+  ReportingTestFixture<DbUser, ReportingUser> userFixture;
 
   @Autowired private UserDao userDao;
   @Autowired private WorkspaceDao workspaceDao;

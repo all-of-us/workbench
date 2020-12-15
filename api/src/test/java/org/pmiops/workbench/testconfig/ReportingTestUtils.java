@@ -12,7 +12,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingInstitution;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -373,17 +372,6 @@ public class ReportingTestUtils {
     institution.setOrganizationTypeOtherText(INSTITUTION__ORGANIZATION_TYPE_OTHER_TEXT);
     institution.setShortName(INSTITUTION__SHORT_NAME);
     return institution;
-  }
-
-  public static void assertInstitutionFields(ProjectedReportingInstitution institution) {
-    assertThat(institution.getDisplayName()).isEqualTo(INSTITUTION__DISPLAY_NAME);
-    assertThat(institution.getDuaTypeEnum()).isEqualTo(INSTITUTION__DUA_TYPE_ENUM);
-    assertThat(institution.getInstitutionId()).isEqualTo(INSTITUTION__INSTITUTION_ID);
-    assertThat(institution.getOrganizationTypeEnum())
-        .isEqualTo(INSTITUTION__ORGANIZATION_TYPE_ENUM);
-    assertThat(institution.getOrganizationTypeOtherText())
-        .isEqualTo(INSTITUTION__ORGANIZATION_TYPE_OTHER_TEXT);
-    assertThat(institution.getShortName()).isEqualTo(INSTITUTION__SHORT_NAME);
   }
 
   public static void assertInstitutionFields(ReportingInstitution institution) {
