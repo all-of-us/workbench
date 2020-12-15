@@ -3,7 +3,9 @@ package org.pmiops.workbench.db.jdbc;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.StreamSupport;
 import javax.persistence.EntityManager;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
@@ -21,6 +23,8 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingUser;
+import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
 import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
 import org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture;
@@ -29,6 +33,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +44,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @RunWith(SpringRunner.class)
 @DataJpaTest
-public class ReportingNativeQueryServiceTest {
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+public class ReportingQueryServiceTest {
 
   @Autowired private ReportingQueryService reportingNativeQueryService;
 
@@ -56,7 +63,7 @@ public class ReportingNativeQueryServiceTest {
   @Autowired private UserDao userDao;
   @Autowired private WorkspaceDao workspaceDao;
 
-  @Import({ReportingQueryServiceImpl.class, ReportingUserFixture.class})
+  @Import({ReportingQueryServiceImpl.class, ReportingUserFixture.class, ReportingTestConfig.class})
   @TestConfiguration
   public static class config {}
 
@@ -101,10 +108,11 @@ public class ReportingNativeQueryServiceTest {
 
   @Transactional
   public DbWorkspace createDbWorkspace(DbUser user1, DbCdrVersion cdrVersion1) {
+    final long initialWorkspaceCount = workspaceDao.count();
     final DbWorkspace workspace1 =
         workspaceDao.save(
             ReportingTestUtils.createDbWorkspace(user1, cdrVersion1)); // save cdr version too
-    assertThat(workspaceDao.count()).isEqualTo(1);
+    assertThat(workspaceDao.count()).isEqualTo(initialWorkspaceCount + 1);
     return workspace1;
   }
 
@@ -123,4 +131,73 @@ public class ReportingNativeQueryServiceTest {
     assertThat(userDao.count()).isEqualTo(1);
     return user1;
   }
+
+  @Test
+  public void testWorkspaceIterator_oneEntry() {
+    final DbUser user = createDbUser();
+    final DbCdrVersion cdrVersion = createCdrVersion();
+    final DbWorkspace workspace = createDbWorkspace(user, cdrVersion);
+
+    final Iterator<List<ReportingWorkspace>> iterator = reportingNativeQueryService.getWorkspaceBatchIterator();
+    assertThat(iterator.hasNext()).isTrue();
+
+    List<ReportingWorkspace> firstBatch = iterator.next();
+    assertThat(firstBatch).hasSize(1);
+    assertThat(firstBatch.get(0).getName()).isEqualTo(workspace.getName());
+    assertThat(iterator.hasNext()).isFalse();
+  }
+
+  @Test
+  public void testWorkspaceIterator_noEntries() {
+    final Iterator<List<ReportingWorkspace>> iterator = reportingNativeQueryService.getWorkspaceBatchIterator();
+    assertThat(iterator.hasNext()).isFalse();
+  }
+
+  @Test
+  public void testWorkspaceIIterator_twoAndAHalfBatches() {
+    createWorkspaces(5);
+
+    final Iterator<List<ReportingWorkspace>> iterator = reportingNativeQueryService
+        .getWorkspaceBatchIterator();
+    assertThat(iterator.hasNext()).isTrue();
+
+    final List<ReportingWorkspace> batch1 = iterator.next();
+    assertThat(batch1).hasSize(2);
+
+    assertThat(iterator.hasNext()).isTrue();
+    final List<ReportingWorkspace> batch2 = iterator.next();
+    assertThat(batch2).hasSize(2);
+
+    assertThat(iterator.hasNext()).isTrue();
+    final List<ReportingWorkspace> batch3 = iterator.next();
+    assertThat(batch3).hasSize(1);
+
+    assertThat(iterator.hasNext()).isFalse();
+  }
+
+  public void testIteratorStream() {
+    createWorkspaces(5);
+
+    final Iterator<List<ReportingWorkspace>> iterator = reportingNativeQueryService
+        .getWorkspaceBatchIterator();
+    final Iterable<List<ReportingWorkspace>> iterable = () -> iterator;
+
+    int totalPages = 0;
+    int.totalRows = 0;
+
+    StreamSupport.stream(iterable.spliterator(), false)
+        .map(page -> page.size())
+        .collect(sum)
+  }
+
+
+  private void createWorkspaces(int count) {
+    final DbUser user = createDbUser();
+    final DbCdrVersion cdrVersion = createCdrVersion();
+    for (int i = 0; i < count; ++i) {
+      createDbWorkspace(user, cdrVersion);
+    }
+    entityManager.flush();
+  }
+
 }

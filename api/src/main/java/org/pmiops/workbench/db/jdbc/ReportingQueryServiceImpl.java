@@ -8,6 +8,8 @@ import static org.pmiops.workbench.db.model.DbStorageEnums.organizationTypeFromS
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
 import java.util.List;
+import javax.inject.Provider;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
@@ -23,15 +25,28 @@ import org.springframework.stereotype.Service;
 public class ReportingQueryServiceImpl implements ReportingQueryService {
 
   private final JdbcTemplate jdbcTemplate;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
-  public ReportingQueryServiceImpl(JdbcTemplate jdbcTemplate) {
+  public ReportingQueryServiceImpl(
+      JdbcTemplate jdbcTemplate, Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.jdbcTemplate = jdbcTemplate;
+    this.workbenchConfigProvider = workbenchConfigProvider;
+  }
+
+  // It doesn't make sense to have more rows in memory than you want to upload, because the upload
+  // streaming limit of 10000 in BigQuery is  much more than the effective max number of workspaces
+  // we want to load (around 2500 to 5000). I don't yet want to deal with different batch sizes for
+  // each table depending on its memory use, so a single limit set to ~2500 is about right.
+  @Override
+  public long getQueryBatchSize() {
+    return workbenchConfigProvider.get().reporting.maxRowsPerInsert;
   }
 
   @Override
   public List<ReportingCohort> getCohorts() {
     return jdbcTemplate.query(
-        "SELECT \n"  + "  cohort_id,\n"
+        "SELECT \n"
+            + "  cohort_id,\n"
             + "  creation_time,\n"
             + "  creator_id,\n"
             + "  criteria,\n"
@@ -40,16 +55,16 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  name,\n"
             + "  workspace_id\n"
             + "FROM cohort",
-    (rs, unused) ->
-        new ReportingCohort()
-            .cohortId(rs.getLong("cohort_id"))
-            .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
-            .creatorId(rs.getLong("creator_id"))
-            .criteria(rs.getString("criteria"))
-            .description(rs.getString("description"))
-            .lastModifiedTime(offsetDateTimeUtc(rs.getTimestamp("last_modified_time")))
-            .name(rs.getString("name"))
-            .workspaceId(rs.getLong("workspace_id")));
+        (rs, unused) ->
+            new ReportingCohort()
+                .cohortId(rs.getLong("cohort_id"))
+                .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
+                .creatorId(rs.getLong("creator_id"))
+                .criteria(rs.getString("criteria"))
+                .description(rs.getString("description"))
+                .lastModifiedTime(offsetDateTimeUtc(rs.getTimestamp("last_modified_time")))
+                .name(rs.getString("name"))
+                .workspaceId(rs.getLong("workspace_id")));
   }
 
   @Override
@@ -216,42 +231,46 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   @Override
   public List<ReportingWorkspace> getWorkspaces(long limit, long offset) {
     return jdbcTemplate.query(
-        "SELECT \n"
-            + "  billing_account_type,\n"
-            + "  billing_status,\n"
-            + "  cdr_version_id,\n"
-            + "  creation_time,\n"
-            + "  creator_id,\n"
-            + "  disseminate_research_other,\n"
-            + "  last_accessed_time,\n"
-            + "  last_modified_time,\n"
-            + "  name,\n"
-            + "  needs_rp_review_prompt,\n"
-            + "  published,\n"
-            + "  rp_additional_notes,\n"
-            + "  rp_ancestry,\n"
-            + "  rp_anticipated_findings,\n"
-            + "  rp_approved,\n"
-            + "  rp_commercial_purpose,\n"
-            + "  rp_control_set,\n"
-            + "  rp_disease_focused_research,\n"
-            + "  rp_disease_of_focus,\n"
-            + "  rp_drug_development,\n"
-            + "  rp_educational,\n"
-            + "  rp_ethics,\n"
-            + "  rp_intended_study,\n"
-            + "  rp_methods_development,\n"
-            + "  rp_other_population_details,\n"
-            + "  rp_other_purpose,\n"
-            + "  rp_other_purpose_details,\n"
-            + "  rp_population_health,\n"
-            + "  rp_reason_for_all_of_us,\n"
-            + "  rp_review_requested,\n"
-            + "  rp_scientific_approach,\n"
-            + "  rp_social_behavioral,\n"
-            + "  rp_time_requested,\n"
-            + "  workspace_id\n"
-            + "FROM workspace",
+        String.format(
+            "SELECT \n"
+                + "  billing_account_type,\n"
+                + "  billing_status,\n"
+                + "  cdr_version_id,\n"
+                + "  creation_time,\n"
+                + "  creator_id,\n"
+                + "  disseminate_research_other,\n"
+                + "  last_accessed_time,\n"
+                + "  last_modified_time,\n"
+                + "  name,\n"
+                + "  needs_rp_review_prompt,\n"
+                + "  published,\n"
+                + "  rp_additional_notes,\n"
+                + "  rp_ancestry,\n"
+                + "  rp_anticipated_findings,\n"
+                + "  rp_approved,\n"
+                + "  rp_commercial_purpose,\n"
+                + "  rp_control_set,\n"
+                + "  rp_disease_focused_research,\n"
+                + "  rp_disease_of_focus,\n"
+                + "  rp_drug_development,\n"
+                + "  rp_educational,\n"
+                + "  rp_ethics,\n"
+                + "  rp_intended_study,\n"
+                + "  rp_methods_development,\n"
+                + "  rp_other_population_details,\n"
+                + "  rp_other_purpose,\n"
+                + "  rp_other_purpose_details,\n"
+                + "  rp_population_health,\n"
+                + "  rp_reason_for_all_of_us,\n"
+                + "  rp_review_requested,\n"
+                + "  rp_scientific_approach,\n"
+                + "  rp_social_behavioral,\n"
+                + "  rp_time_requested,\n"
+                + "  workspace_id\n"
+                + "FROM workspace\n"
+                + "LIMIT %d\n"
+                + "OFFSET %d",
+            limit, offset),
         (rs, unused) ->
             new ReportingWorkspace()
                 .billingAccountType(
