@@ -372,8 +372,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
             }
           }
         });
-        const count = this.isSurvey ? this.nodeCount : null;
-        this.setState({count, form, loading: false});
+        this.setState({count: null, form, loading: false});
       });
     }
 
@@ -419,7 +418,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         // delete second operand if it exists
         form.num[attributeIndex].operands.splice(1);
       }
-      const count = value === 'ANY' ? this.nodeCount : null;
+      const count = value === 'ANY' && !this.isSurvey ? this.nodeCount : null;
       this.setState({form, count}, () => this.validateForm());
     }
 
@@ -698,7 +697,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
       return calculating || !formValid
         || (form.anyValue && count !== null)
         || (isCOPESurvey && !form.anyVersion && !form.cat.some(attr => attr.checked))
-        || (form.num.length && form.num.every(attr => attr.operator === 'ANY'));
+        || (!this.isSurvey && form.num.length && form.num.every(attr => attr.operator === 'ANY'));
     }
 
     renderNumericalAttributes() {
