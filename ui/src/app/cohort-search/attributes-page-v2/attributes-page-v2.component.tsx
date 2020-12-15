@@ -341,7 +341,7 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         this.setState({count: null, form, isCOPESurvey: true, loading: false});
       } else {
         options.unshift({label: optionUtil.ANY.display, value: AttrName[AttrName.ANY]});
-        this.setState({isCOPESurvey: false, options}, () => this.getAttributes());
+        this.setState({formValid: true, isCOPESurvey: false, options}, () => this.getAttributes());
       }
     }
 
@@ -564,20 +564,15 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         }
         paramName = this.paramName;
       }
-      if (isCOPESurvey && subtype === CriteriaSubType.ANSWER) {
-        if (!!value) {
-          attrs.push({
-            name: AttrName.CAT,
-            operator: Operator.IN,
-            operands: [value]
-          });
-        } else if (form.anyValue) {
-          attrs.push({
-            name: AttrName.ANY,
-            operator: null,
-            operands: []
-          });
-        }
+      if (isCOPESurvey && subtype === CriteriaSubType.ANSWER && !!value) {
+        attrs.push({
+          name: AttrName.CAT,
+          operator: Operator.IN,
+          operands: [value]
+        });
+      }
+      if (subtype === CriteriaSubType.ANSWER && (form.anyValue || (form.num.length && form.num[0].operator === 'ANY')) && value === '') {
+        attrs.push({name: AttrName.ANY});
       }
       return {...node, parameterId: this.paramId, name: paramName, attributes: attrs};
     }
