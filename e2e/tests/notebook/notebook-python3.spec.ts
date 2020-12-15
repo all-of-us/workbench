@@ -71,6 +71,6 @@ describe('Jupyter notebook tests in Python language', () => {
     expect(newCellOutput).toEqual(cell1OutputText);
 
     await notebook.deleteNotebook(notebookName);
-  }, 20 * 60 * 1000);
+  }, 30 * 60 * 1000);
 
 })

@@ -5,8 +5,6 @@ import {LinkText, ResourceCard} from 'app/text-labels';
 import {makeRandomName, makeWorkspaceName} from 'utils/str-utils';
 import {signIn} from 'utils/test-utils';
 
-// Notebook server start may take a long time. Set maximum test running time to 20 minutes.
-jest.setTimeout(20 * 60 * 1000);
 
 describe('Workspace owner Jupyter notebook action tests', () => {
 
@@ -54,7 +52,7 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     expect(await workspaceAnalysisPage.isLoaded()).toBe(true);
 
     await workspaceAnalysisPage.deleteResource(notebookName, ResourceCard.Notebook);
-  })
+  }, 30 * 60 * 1000)
 
   test('Notebook can be duplicated by workspace owner', async () => {
     const workspacesPage = new WorkspacesPage(page);
@@ -64,7 +62,7 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     // Delete clone notebook.
     await workspaceAnalysisPage.deleteResource(duplNotebookName, ResourceCard.Notebook);
     await workspaceAnalysisPage.deleteResource(notebookName, ResourceCard.Notebook);
-  })
+  }, 30 * 60 * 1000)
 
   test('Notebook can be renamed by workspace owner', async () => {
     const workspacesPage = new WorkspacesPage(page);
@@ -83,7 +81,7 @@ describe('Workspace owner Jupyter notebook action tests', () => {
     expect(cardExists).toBe(false);
 
     await workspaceAnalysisPage.deleteResource(newName, ResourceCard.Notebook);
-  })
+  }, 30 * 60 * 1000)
 
 
 });

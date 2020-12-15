@@ -126,7 +126,13 @@ export default class GoogleLoginPage {
    */
   async load(): Promise<void> {
     const url = config.uiBaseUrl + config.loginUrlPath;
-    await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded', 'load'], timeout: 180000});
+    const response = await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded', 'load'], timeout: 0});
+    if (response && response.ok()) {
+      return;
+    }
+    // Retry load Login page.
+    console.warn(`Retry loading Login page`);
+    await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded', 'load'], timeout: 60000});
   }
 
   /**

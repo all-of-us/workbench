@@ -32,10 +32,15 @@ export default class WorkspacesPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await Promise.all([
-      waitForDocumentTitle(this.page, PageTitle),
-      waitWhileLoading(this.page)
-    ]);
+    await waitForDocumentTitle(this.page, PageTitle);
+
+    await waitWhileLoading(this.page, 120000)
+      .catch(async () => {
+        console.warn('Retry loading Workspaces page');
+        await this.page.reload({waitUntil: ['networkidle0', 'load']});
+        await waitWhileLoading(this.page);
+      });
+
     await Promise.all([
       this.page.waitForXPath('//a[text()="Workspaces"]', {visible: true}),
       this.page.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true})  // Texts above Filter By Select

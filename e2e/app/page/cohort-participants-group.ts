@@ -7,8 +7,8 @@ import CriteriaSearchPage, {FilterSign, PhysicalMeasurementsCriteria} from 'app/
 import TieredMenu from 'app/component/tiered-menu';
 import {LinkText} from 'app/text-labels';
 import {snowmanIconXpath} from 'app/component/snowman-menu';
-import Button from '../element/button';
-import HelpSidebar from '../component/help-sidebar';
+import Button from 'app/element/button';
+import HelpSidebar from 'app/component/help-sidebar';
 
 enum GroupMenuOption {
    EditGroupName  = 'Edit group name',
