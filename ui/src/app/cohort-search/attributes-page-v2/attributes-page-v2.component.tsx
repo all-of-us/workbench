@@ -564,12 +564,20 @@ export const AttributesPageV2 = fp.flow(withCurrentWorkspace(), withCurrentCohor
         }
         paramName = this.paramName;
       }
-      if (isCOPESurvey && subtype === CriteriaSubType.ANSWER && !!value) {
-        attrs.push({
-          name: AttrName.CAT,
-          operator: Operator.IN,
-          operands: [value]
-        });
+      if (isCOPESurvey && subtype === CriteriaSubType.ANSWER) {
+        if (!!value) {
+          attrs.push({
+            name: AttrName.CAT,
+            operator: Operator.IN,
+            operands: [value]
+          });
+        } else if (form.anyValue) {
+          attrs.push({
+            name: AttrName.ANY,
+            operator: null,
+            operands: []
+          });
+        }
       }
       return {...node, parameterId: this.paramId, name: paramName, attributes: attrs};
     }
