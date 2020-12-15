@@ -532,42 +532,40 @@ public class FireCloudServiceImpl implements FireCloudService {
         });
   }
 
-  // TODO
-  final long projectReadyPollingIncrementSeconds = 3;
-  final long projectReadyTimeoutSeconds = 60;
   // I'd love to use our existing Spring retry system but this does not seem to be possible
   // as it can only react to Exceptions
-  private final Retryer<FirecloudBillingProjectStatus> terminalStatusRetryer =
-      RetryerBuilder.<FirecloudBillingProjectStatus>newBuilder()
-          .retryIfResult(
-              status -> {
-                boolean willRetry =
-                    status.getCreationStatus() != CreationStatusEnum.READY
-                        && status.getCreationStatus() != CreationStatusEnum.ERROR;
-                if (willRetry) {
-                  log.info(
-                      String.format(
-                          "Waiting for billing project %s terminal status - currently %s, retrying",
-                          status.getProjectName(), status.getCreationStatus().getValue()));
-                }
-                return willRetry;
-              })
-          .withWaitStrategy(
-              WaitStrategies.incrementingWait(
-                  projectReadyPollingIncrementSeconds,
-                  TimeUnit.SECONDS,
-                  projectReadyPollingIncrementSeconds,
-                  TimeUnit.SECONDS))
-          .withStopStrategy(
-              StopStrategies.stopAfterDelay(projectReadyTimeoutSeconds, TimeUnit.SECONDS))
-          .build();
+  private final Retryer<FirecloudBillingProjectStatus> terminalStatusRetryer() {
+    // TODO config value?
+    final long addToPerimeterPollingIncrementSeconds = 2;
+
+    return RetryerBuilder.<FirecloudBillingProjectStatus>newBuilder()
+        .retryIfResult(
+            status -> {
+              boolean willRetry =
+                  status.getCreationStatus() != CreationStatusEnum.READY
+                      && status.getCreationStatus() != CreationStatusEnum.ERROR;
+              if (willRetry) {
+                log.info(
+                    String.format(
+                        "Waiting for billing project %s terminal status - currently %s, retrying",
+                        status.getProjectName(), status.getCreationStatus().getValue()));
+              }
+              return willRetry;
+            })
+        .withWaitStrategy(
+            WaitStrategies.fixedWait(addToPerimeterPollingIncrementSeconds, TimeUnit.SECONDS))
+        .withStopStrategy(
+            StopStrategies.stopAfterDelay(
+                configProvider.get().firecloud.timeoutInSeconds, TimeUnit.SECONDS))
+        .build();
+  }
 
   @Override
   public void waitForReadyProject(String billingProject) throws WorkbenchException {
     log.info(String.format("Waiting for billing project %s to become READY", billingProject));
     try {
       final CreationStatusEnum status =
-          terminalStatusRetryer
+          terminalStatusRetryer()
               .call(() -> getBillingProjectStatus(billingProject))
               .getCreationStatus();
 
@@ -581,7 +579,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       throw new WorkbenchException(
           String.format(
               "Timed out waiting for billing project %s to transition to READY status after %d seconds",
-              billingProject, projectReadyTimeoutSeconds),
+              billingProject, configProvider.get().firecloud.timeoutInSeconds),
           e);
     }
   }
