@@ -108,7 +108,26 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
 
   @Override
   public List<ReportingCohort> getCohorts() {
-    return null;
+    return jdbcTemplate.query(
+        "SELECT \n"  + "  cohort_id,\n"
+            + "  creation_time,\n"
+            + "  creator_id,\n"
+            + "  criteria,\n"
+            + "  description,\n"
+            + "  last_modified_time,\n"
+            + "  name,\n"
+            + "  workspace_id\n"
+            + "FROM cohort",
+        (rs, unused) ->
+            new ReportingCohort()
+                .cohortId(rs.getLong("cohort_id"))
+                .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
+                .creatorId(rs.getLong("creator_id"))
+                .criteria(rs.getString("criteria"))
+                .description(rs.getString("description"))
+                .lastModifiedTime(offsetDateTimeUtc(rs.getTimestamp("last_modified_time")))
+                .name(rs.getString("name"))
+                .workspaceId(rs.getLong("workspace_id")));
   }
 
   @Override
