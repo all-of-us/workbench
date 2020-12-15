@@ -11,7 +11,6 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -256,45 +255,6 @@ public class ReportingTestUtils {
     workspace.setTimeRequested(WORKSPACE__RP_TIME_REQUESTED);
     workspace.setWorkspaceId(WORKSPACE__WORKSPACE_ID);
     return workspace;
-  }
-
-  public static ProjectedReportingCohort mockProjectedReportingCohort() {
-    // Projection interface query objects can't be instantiated and must be mocked instead.
-    // This is slightly unfortunate, as the most common issue with projections is a column/type
-    // mismatch
-    // in the query, which only shows up when calling the accessors on the proxy. So live DAO tests
-    // are
-    //  essential as well.
-
-    // This code was generated using reporting-wizard.rb at 2020-09-24T13:40:02-04:00.
-    // Manual modification should be avoided if possible as this is a one-time generation
-    // and does not run on every build and updates must be merged manually for now.
-
-    final ProjectedReportingCohort mockCohort = mock(ProjectedReportingCohort.class);
-    doReturn(COHORT__COHORT_ID).when(mockCohort).getCohortId();
-    doReturn(COHORT__CREATION_TIME).when(mockCohort).getCreationTime();
-    doReturn(COHORT__CREATOR_ID).when(mockCohort).getCreatorId();
-    doReturn(COHORT__CRITERIA).when(mockCohort).getCriteria();
-    doReturn(COHORT__DESCRIPTION).when(mockCohort).getDescription();
-    doReturn(COHORT__LAST_MODIFIED_TIME).when(mockCohort).getLastModifiedTime();
-    doReturn(COHORT__NAME).when(mockCohort).getName();
-    doReturn(COHORT__WORKSPACE_ID).when(mockCohort).getWorkspaceId();
-    return mockCohort;
-  }
-
-  public static void assertCohortFields(
-      ProjectedReportingCohort cohort,
-      Long expectedCohortId,
-      Long expectedCreatorId,
-      Long expectedWorkspaceId) {
-    assertThat(cohort.getCohortId()).isEqualTo(expectedCohortId);
-    assertTimeApprox(cohort.getCreationTime(), COHORT__CREATION_TIME);
-    assertThat(cohort.getCreatorId()).isEqualTo(expectedCreatorId);
-    assertThat(cohort.getCriteria()).isEqualTo(COHORT__CRITERIA);
-    assertThat(cohort.getDescription()).isEqualTo(COHORT__DESCRIPTION);
-    assertTimeApprox(cohort.getLastModifiedTime(), COHORT__LAST_MODIFIED_TIME);
-    assertThat(cohort.getName()).isEqualTo(COHORT__NAME);
-    assertThat(cohort.getWorkspaceId()).isEqualTo(expectedWorkspaceId);
   }
 
   public static void assertCohortFields(ReportingCohort cohort) {
