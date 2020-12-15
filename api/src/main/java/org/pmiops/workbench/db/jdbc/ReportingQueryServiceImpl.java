@@ -159,9 +159,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   @Override
   public List<ReportingDatasetCohort> getDatasetCohorts() {
     return jdbcTemplate.query(
-        "SELECT data_set_id, cohort_id\n"
-            + "FROM data_set_cohort\n"
-            + "ORDER BY data_set_id, cohort_id;",
+        "SELECT data_set_id, cohort_id\n" + "FROM data_set_cohort",
         (rs, unused) ->
             new ReportingDatasetCohort()
                 .cohortId(rs.getLong("cohort_id"))
@@ -171,9 +169,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   @Override
   public List<ReportingDatasetConceptSet> getDatasetConceptSets() {
     return jdbcTemplate.query(
-        "SELECT data_set_id, concept_set_id\n"
-            + "FROM data_set_concept_set\n"
-            + "ORDER BY data_set_id, concept_set_id;",
+        "SELECT data_set_id, concept_set_id\n" + "FROM data_set_concept_set",
         (rs, unused) ->
             new ReportingDatasetConceptSet()
                 .datasetId(rs.getLong("data_set_id"))
@@ -183,9 +179,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   @Override
   public List<ReportingDatasetDomainIdValue> getDatasetDomainIdValues() {
     return jdbcTemplate.query(
-        "SELECT data_set_id, domain_id, value\n"
-            + "FROM data_set_values\n"
-            + "ORDER BY data_set_id, domain_id;",
+        "SELECT data_set_id, domain_id, value\n" + "FROM data_set_values",
         (rs, unused) ->
             new ReportingDatasetDomainIdValue()
                 .datasetId(rs.getLong("data_set_id"))
