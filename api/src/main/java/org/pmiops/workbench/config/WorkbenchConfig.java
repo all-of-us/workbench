@@ -250,6 +250,11 @@ public class WorkbenchConfig {
     public boolean enableReportingUploadCron;
     // Whether users should be able to customize notebook runtime settings.
     public boolean enableCustomRuntimes;
+    // Handles the timing of add billing projects to a VPC Service Perimeter / Tier.
+    // True (original setting):
+    // add projects to the Registered Tier perimeter when they are created in the Billing Buffer.
+    // False: add projects to a perimeter at workspace creation time, enabling multi-tier.
+    public boolean bufferBillingProjectsInPerimeter;
   }
 
   public static class ActionAuditConfig {

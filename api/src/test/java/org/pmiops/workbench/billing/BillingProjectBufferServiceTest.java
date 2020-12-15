@@ -427,8 +427,51 @@ public class BillingProjectBufferServiceTest {
         .isEqualTo(BufferEntryStatus.AVAILABLE);
   }
 
+  // assign a billing project which is already in a service perimeter
+
   @Test
-  public void assignBillingProject() {
+  public void assignBillingProjectWithPerimeter() {
+    workbenchConfig.featureFlags.bufferBillingProjectsInPerimeter = true;
+
+    DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
+    entry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
+    entry.setFireCloudProjectName("test-project-name");
+    entry.setCreationTime(getCurrentTimestamp());
+    billingProjectBufferEntryDao.save(entry);
+
+    DbUser user = mock(DbUser.class);
+    doReturn("fake-email@aou.org").when(user).getUsername();
+
+    DbBillingProjectBufferEntry assignedEntry =
+        billingProjectBufferService.assignBillingProject(user);
+
+    // verify addOwnerToBillingProject() arguments
+
+    ArgumentCaptor<String> userEmailCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<String> projectNameCaptor1 = ArgumentCaptor.forClass(String.class);
+    verify(mockFireCloudService)
+        .addOwnerToBillingProject(userEmailCaptor.capture(), projectNameCaptor1.capture());
+    String invokedEmail = userEmailCaptor.getValue();
+    String invokedProjectName1 = projectNameCaptor1.getValue();
+
+    assertThat(invokedEmail).isEqualTo("fake-email@aou.org");
+    assertThat(invokedProjectName1).isEqualTo("test-project-name");
+
+    // verify that addProjectToServicePerimeter() is not called
+
+    verify(mockFireCloudService, never()).addProjectToServicePerimeter(anyString(), anyString());
+
+    assertThat(billingProjectBufferEntryDao.findOne(assignedEntry.getId()).getStatusEnum())
+        .isEqualTo(BufferEntryStatus.ASSIGNED);
+  }
+
+  // assign a billing project which is not already in a service perimeter
+  // and therefore needs to be added to one
+
+  @Test
+  public void assignBillingProjectAddingPerimeter() {
+    workbenchConfig.featureFlags.bufferBillingProjectsInPerimeter = false;
+
     DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
     entry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
     entry.setFireCloudProjectName("test-project-name");

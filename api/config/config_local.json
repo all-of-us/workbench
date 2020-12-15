@@ -103,7 +103,8 @@
     "enableCohortBuilderV2": true,
     "enableConceptSetSearchV2": true,
     "enableReportingUploadCron": true,
-    "enableCustomRuntimes": true
+    "enableCustomRuntimes": true,
+    "bufferBillingProjectsInPerimeter": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",

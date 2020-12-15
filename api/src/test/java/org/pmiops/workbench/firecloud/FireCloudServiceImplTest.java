@@ -168,6 +168,54 @@ public class FireCloudServiceImplTest {
   }
 
   @Test
+  public void testCreateAllOfUsBillingProjectInPerimeter() throws Exception {
+    final String servicePerimeter = "a-cloud-with-a-fence-around-it";
+    workbenchConfig.firecloud.vpcServicePerimeterName = servicePerimeter;
+    workbenchConfig.featureFlags.bufferBillingProjectsInPerimeter = true;
+
+    service.createAllOfUsBillingProject("project-name");
+
+    ArgumentCaptor<FirecloudCreateRawlsBillingProjectFullRequest> captor =
+        ArgumentCaptor.forClass(FirecloudCreateRawlsBillingProjectFullRequest.class);
+    verify(billingApi).createBillingProjectFull(captor.capture());
+    FirecloudCreateRawlsBillingProjectFullRequest request = captor.getValue();
+
+    // N.B. FireCloudServiceImpl doesn't add the project prefix; this is done by callers such
+    // as BillingProjectBufferService.
+    assertThat(request.getProjectName()).isEqualTo("project-name");
+    // FireCloudServiceImpl always adds the "billingAccounts/" prefix to the billing account
+    // from config.
+    assertThat(request.getBillingAccount()).isEqualTo("billingAccounts/test-billing-account");
+    assertThat(request.getEnableFlowLogs()).isTrue();
+    assertThat(request.getHighSecurityNetwork()).isTrue();
+
+    assertThat(request.getServicePerimeter()).isEqualTo(servicePerimeter);
+  }
+
+  @Test
+  public void testCreateAllOfUsBillingProjectWithoutPerimeter() throws Exception {
+    workbenchConfig.featureFlags.bufferBillingProjectsInPerimeter = false;
+
+    service.createAllOfUsBillingProject("project-name");
+
+    ArgumentCaptor<FirecloudCreateRawlsBillingProjectFullRequest> captor =
+        ArgumentCaptor.forClass(FirecloudCreateRawlsBillingProjectFullRequest.class);
+    verify(billingApi).createBillingProjectFull(captor.capture());
+    FirecloudCreateRawlsBillingProjectFullRequest request = captor.getValue();
+
+    // N.B. FireCloudServiceImpl doesn't add the project prefix; this is done by callers such
+    // as BillingProjectBufferService.
+    assertThat(request.getProjectName()).isEqualTo("project-name");
+    // FireCloudServiceImpl always adds the "billingAccounts/" prefix to the billing account
+    // from config.
+    assertThat(request.getBillingAccount()).isEqualTo("billingAccounts/test-billing-account");
+    assertThat(request.getEnableFlowLogs()).isTrue();
+    assertThat(request.getHighSecurityNetwork()).isTrue();
+
+    assertThat(request.getServicePerimeter()).isNull();
+  }
+
+  @Test
   public void testAddProjectToServicePerimeter() throws ApiException {
     final String servicePerimeter = "a-cloud-with-a-fence-around-it";
     final String projectName = "The Alan Parsons Project";
@@ -184,27 +232,5 @@ public class FireCloudServiceImplTest {
 
     assertThat(invokedPerimeterName).isEqualTo(servicePerimeter);
     assertThat(invokedProjectName).isEqualTo(projectName);
-  }
-
-  @Test
-  public void testCreateAllOfUsBillingProject() throws Exception {
-    service.createAllOfUsBillingProject("project-name");
-
-    ArgumentCaptor<FirecloudCreateRawlsBillingProjectFullRequest> captor =
-        ArgumentCaptor.forClass(FirecloudCreateRawlsBillingProjectFullRequest.class);
-    verify(billingApi).createBillingProjectFull(captor.capture());
-    FirecloudCreateRawlsBillingProjectFullRequest request = captor.getValue();
-
-    // N.B. FireCloudServiceImpl doesn't add the project prefix; this is done by callers such
-    // as BillingProjectBufferService.
-    assertThat(request.getProjectName()).isEqualTo("project-name");
-    // FireCloudServiceImpl always adds the "billingAccounts/" prefix to the billing account
-    // from config.
-    assertThat(request.getBillingAccount()).isEqualTo("billingAccounts/test-billing-account");
-    assertThat(request.getEnableFlowLogs()).isTrue();
-    assertThat(request.getHighSecurityNetwork()).isTrue();
-    // we assigned the service perimeter at creation time before RW-5987.
-    // Confirm that we don't anymore.
-    assertThat(request.getServicePerimeter()).isNull();
   }
 }
