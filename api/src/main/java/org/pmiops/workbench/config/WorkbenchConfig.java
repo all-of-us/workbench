@@ -252,8 +252,6 @@ public class WorkbenchConfig {
     public boolean enableCOPESurvey;
     // Whether users should be able to customize notebook runtime settings.
     public boolean enableCustomRuntimes;
-    // Flag to indicate if whether to display FitBit data
-    public boolean enableFitbit;
   }
 
   public static class ActionAuditConfig {

@@ -4049,10 +4049,6 @@ definitions:
         type: boolean
         default: false
         description: Whether user should be able to customize notebook runtime settings.
-      enableFitbit:
-        type: boolean
-        default: false
-        description: Whether to display Fitbit Data
       runtimeImages:
         type: array
         items:
