@@ -46,7 +46,6 @@ public class ConfigController implements ConfigApiDelegate {
             .enableResearchReviewPrompt(config.featureFlags.enableResearchPurposePrompt)
             .enableCOPESurvey(config.featureFlags.enableCOPESurvey)
             .enableCustomRuntimes(config.featureFlags.enableCustomRuntimes)
-            .enableFitbit(config.featureFlags.enableFitbit)
             .runtimeImages(
                 Stream.concat(
                         config.firecloud.runtimeImages.dataproc.stream()
