@@ -1,6 +1,7 @@
 package org.pmiops.workbench.firecloud;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,6 +17,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -26,6 +28,8 @@ import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
 import org.pmiops.workbench.firecloud.api.ServicePerimetersApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
+import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
+import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
@@ -220,6 +224,12 @@ public class FireCloudServiceImplTest {
     final String servicePerimeter = "a-cloud-with-a-fence-around-it";
     final String projectName = "The Alan Parsons Project";
 
+    when(billingApi.billingProjectStatus(projectName))
+        .thenReturn(
+            new FirecloudBillingProjectStatus()
+                .projectName(projectName)
+                .creationStatus(CreationStatusEnum.READY));
+
     service.addProjectToServicePerimeter(servicePerimeter, projectName);
 
     ArgumentCaptor<String> projectNameCaptor = ArgumentCaptor.forClass(String.class);
@@ -232,5 +242,83 @@ public class FireCloudServiceImplTest {
 
     assertThat(invokedPerimeterName).isEqualTo(servicePerimeter);
     assertThat(invokedProjectName).isEqualTo(projectName);
+  }
+
+  @Test
+  public void testAddProjectToServicePerimeterAlreadyInOk() throws ApiException {
+    workbenchConfig.featureFlags.badRequestIsOkWhenAlreadyInPerimeter = true;
+
+    final String servicePerimeter = "a-cloud-with-a-fence-around-it";
+    final String projectName = "The Alan Parsons Project";
+
+    when(billingApi.billingProjectStatus(projectName))
+        .thenReturn(
+            new FirecloudBillingProjectStatus()
+                .projectName(projectName)
+                .creationStatus(CreationStatusEnum.READY));
+
+    final String alreadyIn =
+        String.format(
+            "project %s is already in service perimeter %s", projectName, servicePerimeter);
+
+    // can't use when() on void-returning methods
+    doThrow(new ApiException(400, null, null, alreadyIn))
+        .when(servicePerimetersApi)
+        .addProjectToServicePerimeter(servicePerimeter, projectName);
+
+    // exception is quashed
+    service.addProjectToServicePerimeter(servicePerimeter, projectName);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testAddProjectToServicePerimeterAlreadyInNotOk() throws ApiException {
+    workbenchConfig.featureFlags.badRequestIsOkWhenAlreadyInPerimeter = false;
+
+    final String servicePerimeter = "a-cloud-with-a-fence-around-it";
+    final String projectName = "The Alan Parsons Project";
+
+    when(billingApi.billingProjectStatus(projectName))
+        .thenReturn(
+            new FirecloudBillingProjectStatus()
+                .projectName(projectName)
+                .creationStatus(CreationStatusEnum.READY));
+
+    final String alreadyIn =
+        String.format(
+            "project %s is already in service perimeter %s", projectName, servicePerimeter);
+
+    // can't use when() on void-returning methods
+    doThrow(new ApiException(400, null, null, alreadyIn))
+        .when(servicePerimetersApi)
+        .addProjectToServicePerimeter(servicePerimeter, projectName);
+
+    // exception is thrown
+    service.addProjectToServicePerimeter(servicePerimeter, projectName);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testAddProjectToServicePerimeterAlreadyInOtherPerimeter() throws ApiException {
+    workbenchConfig.featureFlags.badRequestIsOkWhenAlreadyInPerimeter = true;
+
+    final String servicePerimeter = "a-cloud-with-a-fence-around-it";
+    final String projectName = "The Alan Parsons Project";
+    final String otherPerimeter = "Controlled Tier";
+
+    when(billingApi.billingProjectStatus(projectName))
+        .thenReturn(
+            new FirecloudBillingProjectStatus()
+                .projectName(projectName)
+                .creationStatus(CreationStatusEnum.READY));
+
+    final String alreadyIn =
+        String.format("project %s is already in service perimeter %s", projectName, otherPerimeter);
+
+    // can't use when() on void-returning methods
+    doThrow(new ApiException(400, null, null, alreadyIn))
+        .when(servicePerimetersApi)
+        .addProjectToServicePerimeter(servicePerimeter, projectName);
+
+    // exception is thrown
+    service.addProjectToServicePerimeter(servicePerimeter, projectName);
   }
 }

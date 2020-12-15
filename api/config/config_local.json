@@ -104,7 +104,8 @@
     "enableConceptSetSearchV2": true,
     "enableReportingUploadCron": true,
     "enableCustomRuntimes": true,
-    "bufferBillingProjectsInPerimeter": false
+    "bufferBillingProjectsInPerimeter": false,
+    "badRequestIsOkWhenAlreadyInPerimeter": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",
