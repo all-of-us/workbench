@@ -106,7 +106,9 @@
     "enableCohortBuilderV2": true,
     "enableConceptSetSearchV2": true,
     "enableReportingUploadCron": false,
-    "enableCustomRuntimes": true
+    "enableCustomRuntimes": true,
+    "bufferBillingProjectsInPerimeter": true,
+    "badRequestIsOkWhenAlreadyInPerimeter": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",
