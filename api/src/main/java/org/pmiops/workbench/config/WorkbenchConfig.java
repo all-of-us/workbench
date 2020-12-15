@@ -251,10 +251,9 @@ public class WorkbenchConfig {
     // Whether users should be able to customize notebook runtime settings.
     public boolean enableCustomRuntimes;
     // Handles the timing of adding billing projects to a VPC Service Perimeter / Tier.
-    // True (original setting):
-    // add projects to the Registered Tier perimeter when they are created in the Billing Buffer.
-    // False: add projects to a perimeter at workspace creation time, enabling multi-tier.
-    public boolean bufferBillingProjectsInPerimeter;
+    // False: add all projects to the Registered Tier perimeter when they are created in the Billing Buffer.
+    // True: add projects to a perimeter at workspace creation time, enabling multi-tier.
+    public boolean enableLazyPerimeterAssignment;
     // After we switch from buffering billing projects with a perimeter to without (see above)
     // there will be a period where we make redundant attempts to add projects from the billing
     // buffer to a perimeter they are already in, causing a 400 error from Terra.

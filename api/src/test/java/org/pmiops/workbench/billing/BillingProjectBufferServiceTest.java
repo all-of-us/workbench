@@ -431,7 +431,7 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void assignBillingProjectWithPerimeter() {
-    workbenchConfig.featureFlags.bufferBillingProjectsInPerimeter = true;
+    workbenchConfig.featureFlags.enableLazyPerimeterAssignment = false;
 
     DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
     entry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
@@ -470,7 +470,7 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void assignBillingProjectAddingPerimeter() {
-    workbenchConfig.featureFlags.bufferBillingProjectsInPerimeter = false;
+    workbenchConfig.featureFlags.enableLazyPerimeterAssignment = true;
 
     DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
     entry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);

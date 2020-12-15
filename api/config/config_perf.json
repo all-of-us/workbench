@@ -107,7 +107,7 @@
     "enableConceptSetSearchV2": true,
     "enableReportingUploadCron": false,
     "enableCustomRuntimes": true,
-    "bufferBillingProjectsInPerimeter": true,
+    "enableLazyPerimeterAssignment": false,
     "badRequestIsOkWhenAlreadyInPerimeter": true
   },
   "actionAudit": {

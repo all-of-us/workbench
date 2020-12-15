@@ -176,7 +176,7 @@ public class FireCloudServiceImplTest {
   public void testCreateAllOfUsBillingProjectInPerimeter() throws Exception {
     final String servicePerimeter = "a-cloud-with-a-fence-around-it";
     workbenchConfig.firecloud.vpcServicePerimeterName = servicePerimeter;
-    workbenchConfig.featureFlags.bufferBillingProjectsInPerimeter = true;
+    workbenchConfig.featureFlags.enableLazyPerimeterAssignment = false;
 
     service.createAllOfUsBillingProject("project-name");
 
@@ -199,7 +199,7 @@ public class FireCloudServiceImplTest {
 
   @Test
   public void testCreateAllOfUsBillingProjectWithoutPerimeter() throws Exception {
-    workbenchConfig.featureFlags.bufferBillingProjectsInPerimeter = false;
+    workbenchConfig.featureFlags.enableLazyPerimeterAssignment = true;
 
     service.createAllOfUsBillingProject("project-name");
 

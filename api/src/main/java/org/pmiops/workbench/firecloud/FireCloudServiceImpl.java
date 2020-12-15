@@ -261,7 +261,7 @@ public class FireCloudServiceImpl implements FireCloudService {
             .enableFlowLogs(true)
             .privateIpGoogleAccess(true);
 
-    if (configProvider.get().featureFlags.bufferBillingProjectsInPerimeter) {
+    if (!configProvider.get().featureFlags.enableLazyPerimeterAssignment) {
       request.servicePerimeter(configProvider.get().firecloud.vpcServicePerimeterName);
     }
 

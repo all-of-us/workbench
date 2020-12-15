@@ -251,7 +251,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     fireCloudService.addOwnerToBillingProject(
         dbUser.getUsername(), bufferEntry.getFireCloudProjectName());
 
-    if (!workbenchConfigProvider.get().featureFlags.bufferBillingProjectsInPerimeter) {
+    if (workbenchConfigProvider.get().featureFlags.enableLazyPerimeterAssignment) {
       fireCloudService.addProjectToServicePerimeter(
           workbenchConfigProvider.get().firecloud.vpcServicePerimeterName,
           bufferEntry.getFireCloudProjectName());
