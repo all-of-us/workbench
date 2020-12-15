@@ -6,7 +6,6 @@ import {waitForAttributeEquality, waitWhileLoading} from 'utils/waits-utils';
 import PrimereactInputNumber from 'app/element/primereact-input-number';
 import SelectMenu from 'app/component/select-menu';
 import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
-import BaseElement from 'app/element/base-element';
 
 const defaultXpath = '//*[@id="runtime-panel"]';
 const statusIconXpath = '//*[@data-test-id="runtime-status-icon"]';
@@ -170,8 +169,15 @@ export default class RuntimePanel extends Container {
   }
 
   async clickStatusIcon(): Promise<void> {
-    const startStopIconElement = BaseElement.asBaseElement(page, await this.page.waitForXPath(statusIconXpath, {visible: true}));
-    return await startStopIconElement.click();
+    const icon = await this.page.waitForXPath(statusIconXpath, {visible: true});
+
+    // Oddly, though the element is visible it is sometimes unclickable at this point.
+    // This *may* be because the click target is an image, which may or may not be loaded yet.
+    // Sleeping here is a hacky workaround found after attempting several approaches.
+    await this.page.waitForTimeout(1000);
+
+    await icon.focus();
+    await icon.click();
   }
 
   async waitForLoad(): Promise<this> {
