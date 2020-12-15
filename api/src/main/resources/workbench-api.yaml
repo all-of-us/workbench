@@ -4041,10 +4041,6 @@ definitions:
         type: boolean
         default: false
         description: Whether user should see a prompt if Workspace Research Purpose needs Review
-      enableCOPESurvey:
-        type: boolean
-        default: false
-        description: Whether user should see COPE Survey data
       enableCustomRuntimes:
         type: boolean
         default: false
