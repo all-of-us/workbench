@@ -106,10 +106,10 @@ export default class GoogleLoginPage {
     try {
       const submitButton = new Button(this.page, FieldSelector.SubmitButton);
       await Promise.all([
-        this.page.waitForNavigation({waitUntil: ['networkidle2', 'load'], timeout: 30000}),
+        this.page.waitForNavigation({waitUntil: ['networkidle0', 'load'], timeout: 0}),
         submitButton.click(),
       ]);
-      await this.page.waitForSelector('app-signed-in', {timeout: 60000});
+      await this.page.waitForSelector('app-signed-in', {timeout: 0});
       await submitButton.dispose();
     } catch (err) {
       // Two main reasons why error is throw are caused by "Enter Recovery Email" page or login captcha.
