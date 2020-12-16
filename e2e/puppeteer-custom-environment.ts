@@ -51,7 +51,9 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
 
         const htmlFile = `${htmlDir}/${testName}_${timestamp}.html`;
         await this.savePageToFile(htmlFile);
-        break;
+
+        throw new Error(event.error);
+
       default:
         break;
     }
