@@ -44,7 +44,7 @@ export default class CohortParticipantDetailPage extends AuthenticatedPage {
  
    // click on the pen icon located on the side bar
    async clickPenIconHelpSideBar(): Promise<void> {
-    const clickPenIcon = await this.page.waitForXPath(`//*[@data-test-id="help-sidebar-icon-annotations"]`);
+    const clickPenIcon = await this.page.waitForXPath(`//*[@data-test-id="help-sidebar-icon-annotations"]`, {visible: true});
     await clickPenIcon.click();
     await this.page.waitForXPath('//*[@data-test-id="sidebar-content"]', {visible: true});
     await waitWhileLoading(this.page);

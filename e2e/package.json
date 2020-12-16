@@ -13,7 +13,7 @@
     "test-local:debug": "cross-env WORKBENCH_ENV=local PUPPETEER_HEADLESS=false DEBUG=true jest --maxWorkers=3",
     "test-staging": "cross-env WORKBENCH_ENV=staging jest --maxWorkers=3",
     "test-staging:debug": "cross-env WORKBENCH_ENV=staging PUPPETEER_HEADLESS=false DEBUG=true jest --maxWorkers=1",
-    "test:ci": "jest --no-color --ci --maxWorkers=2",
+    "test:ci": "jest --no-color --ci --maxWorkers=2 --verbose=false",
     "test:ci:debug": "jest --ci --debug --maxWorkers=1 --bail 1",
     "lint": "tslint --project tsconfig.json",
     "lint:fix": "yarn compile && yarn run lint --fix",
