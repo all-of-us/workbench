@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -102,7 +101,6 @@ public class DataSetServiceTest {
   @Autowired private DataSetDao dataSetDao;
   @Autowired private DSLinkingDao dsLinkingDao;
   @Autowired private DataSetMapper dataSetMapper;
-  @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @MockBean private BigQueryService mockBigQueryService;
   @MockBean private CohortDao mockCohortDao;
@@ -148,8 +146,7 @@ public class DataSetServiceTest {
             dataSetDao,
             dsLinkingDao,
             dataSetMapper,
-            CLOCK,
-            workbenchConfigProvider);
+            CLOCK);
 
     final DbCohort cohort = buildSimpleCohort();
     when(cohortDao.findCohortByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(cohort);
