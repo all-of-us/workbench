@@ -104,7 +104,6 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableCohortBuilderV2": true,
-    "enableConceptSetSearchV2": true,
     "enableReportingUploadCron": false,
     "enableCustomRuntimes": true
   },

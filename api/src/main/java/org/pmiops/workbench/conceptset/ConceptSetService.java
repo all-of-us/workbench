@@ -278,27 +278,24 @@ public class ConceptSetService {
         dbConceptSetConceptIds.stream()
             .map(DbConceptSetConceptId::getConceptId)
             .collect(Collectors.toList());
-    if (configProvider.get().featureFlags.enableConceptSetSearchV2) {
-      List<Criteria> criteriaList = new ArrayList<Criteria>();
-      if (!conceptSet.getDomain().equals(Domain.PHYSICAL_MEASUREMENT)) {
-        criteriaList =
-            cohortBuilderService.findCriteriaByDomainIdAndConceptIds(
-                conceptSet.getDomain().toString(), dbConceptSetConceptIds);
-      } else {
-        criteriaList.addAll(
-            StreamSupport.stream(conceptDao.findAll(conceptIds).spliterator(), false)
-                .map(
-                    concept -> {
-                      boolean isStandard = STANDARD_CONCEPTS.contains(concept.getStandardConcept());
-                      return cohortBuilderMapper.dbModelToClient(
-                          concept,
-                          isStandard,
-                          isStandard ? concept.getCountValue() : concept.getSourceCountValue());
-                    })
-                .collect(Collectors.toList()));
-      }
-      return conceptSet.criteriums(criteriaList);
+    List<Criteria> criteriaList = new ArrayList<Criteria>();
+    if (!conceptSet.getDomain().equals(Domain.PHYSICAL_MEASUREMENT)) {
+      criteriaList =
+          cohortBuilderService.findCriteriaByDomainIdAndConceptIds(
+              conceptSet.getDomain().toString(), dbConceptSetConceptIds);
+    } else {
+      criteriaList.addAll(
+          StreamSupport.stream(conceptDao.findAll(conceptIds).spliterator(), false)
+              .map(
+                  concept -> {
+                    boolean isStandard = STANDARD_CONCEPTS.contains(concept.getStandardConcept());
+                    return cohortBuilderMapper.dbModelToClient(
+                        concept,
+                        isStandard,
+                        isStandard ? concept.getCountValue() : concept.getSourceCountValue());
+                  })
+              .collect(Collectors.toList()));
     }
-    return conceptSet.concepts(conceptService.findAll(conceptIds));
+    return conceptSet.criteriums(criteriaList);
   }
 }

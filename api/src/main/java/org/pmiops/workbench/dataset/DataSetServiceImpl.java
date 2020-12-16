@@ -303,65 +303,50 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 .replace("${tableName}", BigQueryDataSetTableInfo.getTableName(domain)));
 
     if (supportsConceptSets(domain)) {
-      if (workbenchConfigProvider.get().featureFlags.enableConceptSetSearchV2) {
-        final List<DbConceptSetConceptId> dbConceptSetConceptIds =
-            (domain.equals(Domain.SURVEY) && request.getPrePackagedConceptSet().contains(SURVEY))
-                ? conceptBigQueryService.getSurveyQuestionConceptIds().stream()
-                    .map(
-                        c ->
-                            DbConceptSetConceptId.builder()
-                                .addConceptId(c)
-                                .addStandard(false)
-                                .build())
-                    .collect(Collectors.toList())
-                : conceptSetDao.findAllByConceptSetIdIn(request.getConceptSetIds()).stream()
-                    .filter(
-                        cs ->
-                            cs.getDomainEnum().equals(domain)
-                                || (cs.getDomainEnum().equals(Domain.PHYSICAL_MEASUREMENT)
-                                    && domain.equals(Domain.MEASUREMENT)))
-                    .flatMap(cs -> cs.getConceptSetConceptIds().stream())
-                    .collect(Collectors.toList());
-        Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
-            dbConceptSetConceptIds.stream()
-                .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
-        List<DbConceptSetConceptId> standard = partitionSourceAndStandard.get(true);
-        List<DbConceptSetConceptId> source = partitionSourceAndStandard.get(false);
-        queryBuilder.append(" \nWHERE (");
-        if (!standard.isEmpty()) {
-          mergedQueryParameterValues.put(
-              "standardConceptIds",
-              QueryParameterValue.array(
-                  standard.stream().map(DbConceptSetConceptId::getConceptId).toArray(Long[]::new),
-                  Long.class));
-          queryBuilder.append(BigQueryDataSetTableInfo.getConceptIdIn(domain, true));
-        }
-        if (!source.isEmpty()) {
-          mergedQueryParameterValues.put(
-              "sourceConceptIds",
-              QueryParameterValue.array(
-                  source.stream().map(DbConceptSetConceptId::getConceptId).toArray(Long[]::new),
-                  Long.class));
-          if (!standard.isEmpty()) {
-            queryBuilder.append(" OR ");
-          }
-          queryBuilder.append(BigQueryDataSetTableInfo.getConceptIdIn(domain, false));
-        }
-        queryBuilder.append(")");
-      } else {
-        final List<Long> conceptIds =
-            Domain.SURVEY.equals(request.getDomain())
-                ? conceptBigQueryService.getSurveyQuestionConceptIds()
-                : conceptSetDao.findAllByConceptSetIdIn(request.getConceptSetIds()).stream()
-                    .flatMap(
-                        cs ->
-                            cs.getConceptSetConceptIds().stream()
-                                .map(DbConceptSetConceptId::getConceptId))
-                    .collect(Collectors.toList());
+      final List<DbConceptSetConceptId> dbConceptSetConceptIds =
+          (domain.equals(Domain.SURVEY) && request.getPrePackagedConceptSet().contains(SURVEY))
+              ? conceptBigQueryService.getSurveyQuestionConceptIds().stream()
+                  .map(
+                      c ->
+                          DbConceptSetConceptId.builder()
+                              .addConceptId(c)
+                              .addStandard(false)
+                              .build())
+                  .collect(Collectors.toList())
+              : conceptSetDao.findAllByConceptSetIdIn(request.getConceptSetIds()).stream()
+                  .filter(
+                      cs ->
+                          cs.getDomainEnum().equals(domain)
+                              || (cs.getDomainEnum().equals(Domain.PHYSICAL_MEASUREMENT)
+                                  && domain.equals(Domain.MEASUREMENT)))
+                  .flatMap(cs -> cs.getConceptSetConceptIds().stream())
+                  .collect(Collectors.toList());
+      Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
+          dbConceptSetConceptIds.stream()
+              .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
+      List<DbConceptSetConceptId> standard = partitionSourceAndStandard.get(true);
+      List<DbConceptSetConceptId> source = partitionSourceAndStandard.get(false);
+      queryBuilder.append(" \nWHERE (");
+      if (!standard.isEmpty()) {
         mergedQueryParameterValues.put(
-            "conceptIds", QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
-        queryBuilder.append(" WHERE ").append(BigQueryDataSetTableInfo.getConceptIdInOld(domain));
+            "standardConceptIds",
+            QueryParameterValue.array(
+                standard.stream().map(DbConceptSetConceptId::getConceptId).toArray(Long[]::new),
+                Long.class));
+        queryBuilder.append(BigQueryDataSetTableInfo.getConceptIdIn(domain, true));
       }
+      if (!source.isEmpty()) {
+        mergedQueryParameterValues.put(
+            "sourceConceptIds",
+            QueryParameterValue.array(
+                source.stream().map(DbConceptSetConceptId::getConceptId).toArray(Long[]::new),
+                Long.class));
+        if (!standard.isEmpty()) {
+          queryBuilder.append(" OR ");
+        }
+        queryBuilder.append(BigQueryDataSetTableInfo.getConceptIdIn(domain, false));
+      }
+      queryBuilder.append(")");
     }
 
     if (!request.getIncludesAllParticipants()) {
@@ -613,23 +598,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       // This adds the where clauses for cohorts and concept sets.
       conceptSetSqlInClauseMaybe.ifPresent(
           clause -> {
-            if (workbenchConfigProvider.get().featureFlags.enableConceptSetSearchV2) {
-              queryBuilder.append(" WHERE \n").append(clause);
-            } else {
-              queryBuilder
-                  .append(" WHERE \n(")
-                  .append(domainConceptIdInfo.getStandardConceptIdColumn())
-                  .append(clause);
-              if (Domain.SURVEY.equals(domain)) {
-                queryBuilder.append(")");
-              } else {
-                queryBuilder
-                    .append(" OR \n")
-                    .append(domainConceptIdInfo.getSourceConceptIdColumn())
-                    .append(clause)
-                    .append(")");
-              }
-            }
+            queryBuilder.append(" WHERE \n").append(clause);
           });
 
       if (!includesAllParticipants) {
@@ -699,63 +668,49 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   // domain-specific rules.
   private Optional<String> buildConceptIdSqlInClause(
       Domain domain, List<DbConceptSet> conceptSets) {
-    if (workbenchConfigProvider.get().featureFlags.enableConceptSetSearchV2) {
-      final List<DbConceptSet> dbConceptSets =
-          conceptSets.stream()
-              .filter(
-                  cs ->
-                      cs.getDomainEnum().equals(domain)
-                          || (cs.getDomainEnum().equals(Domain.PHYSICAL_MEASUREMENT)
-                              && domain.equals(Domain.MEASUREMENT)))
-              .collect(Collectors.toList());
-      final List<DbConceptSetConceptId> dbConceptSetConceptIds =
-          dbConceptSets.stream()
-              .flatMap(cs -> cs.getConceptSetConceptIds().stream())
-              .collect(Collectors.toList());
-      if (dbConceptSetConceptIds.isEmpty()) {
-        return Optional.empty();
-      } else {
-        StringBuilder queryBuilder = new StringBuilder();
-        Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
-            dbConceptSetConceptIds.stream()
-                .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
-        String standardConceptIds =
-            partitionSourceAndStandard.get(true).stream()
-                .map(c -> c.getConceptId().toString())
-                .collect(Collectors.joining(", "));
-        String sourceConceptIds =
-            partitionSourceAndStandard.get(false).stream()
-                .map(c -> c.getConceptId().toString())
-                .collect(Collectors.joining(", "));
-        if (!standardConceptIds.isEmpty()) {
-          queryBuilder.append(
-              BigQueryDataSetTableInfo.getConceptIdIn(domain, true)
-                  .replaceAll("unnest", "")
-                  .replaceAll("(@standardConceptIds)", standardConceptIds));
-        }
-        if (!sourceConceptIds.isEmpty()) {
-          if (!standardConceptIds.isEmpty()) {
-            queryBuilder.append(" OR ");
-          }
-          queryBuilder.append(
-              BigQueryDataSetTableInfo.getConceptIdIn(domain, false)
-                  .replaceAll("unnest", "")
-                  .replaceAll("(@sourceConceptIds)", sourceConceptIds));
-        }
-        return Optional.of("(" + queryBuilder.toString() + ")");
-      }
+    final List<DbConceptSet> dbConceptSets =
+        conceptSets.stream()
+            .filter(
+                cs ->
+                    cs.getDomainEnum().equals(domain)
+                        || (cs.getDomainEnum().equals(Domain.PHYSICAL_MEASUREMENT)
+                            && domain.equals(Domain.MEASUREMENT)))
+            .collect(Collectors.toList());
+    final List<DbConceptSetConceptId> dbConceptSetConceptIds =
+        dbConceptSets.stream()
+            .flatMap(cs -> cs.getConceptSetConceptIds().stream())
+            .collect(Collectors.toList());
+    if (dbConceptSetConceptIds.isEmpty()) {
+      return Optional.empty();
     } else {
-      final String conceptIds =
-          conceptSets.stream()
-              .filter(cs -> domain == cs.getDomainEnum())
-              .flatMap(
-                  cs -> cs.getConceptSetConceptIds().stream().map(c -> c.getConceptId().toString()))
+      StringBuilder queryBuilder = new StringBuilder();
+      Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
+          dbConceptSetConceptIds.stream()
+              .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
+      String standardConceptIds =
+          partitionSourceAndStandard.get(true).stream()
+              .map(c -> c.getConceptId().toString())
               .collect(Collectors.joining(", "));
-      if (conceptIds.isEmpty()) {
-        return Optional.empty();
-      } else {
-        return Optional.of(String.format(" IN (%s)", conceptIds));
+      String sourceConceptIds =
+          partitionSourceAndStandard.get(false).stream()
+              .map(c -> c.getConceptId().toString())
+              .collect(Collectors.joining(", "));
+      if (!standardConceptIds.isEmpty()) {
+        queryBuilder.append(
+            BigQueryDataSetTableInfo.getConceptIdIn(domain, true)
+                .replaceAll("unnest", "")
+                .replaceAll("(@standardConceptIds)", standardConceptIds));
       }
+      if (!sourceConceptIds.isEmpty()) {
+        if (!standardConceptIds.isEmpty()) {
+          queryBuilder.append(" OR ");
+        }
+        queryBuilder.append(
+            BigQueryDataSetTableInfo.getConceptIdIn(domain, false)
+                .replaceAll("unnest", "")
+                .replaceAll("(@sourceConceptIds)", sourceConceptIds));
+      }
+      return Optional.of("(" + queryBuilder.toString() + ")");
     }
   }
 

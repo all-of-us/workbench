@@ -4033,10 +4033,6 @@ definitions:
         type: boolean
         default: false
         description: Whether to use the Cohort Builder UI.
-      enableConceptSetSearchV2:
-        type: boolean
-        default: false
-        description: Whether to use new Concept Search.
       enableResearchReviewPrompt:
         type: boolean
         default: false
