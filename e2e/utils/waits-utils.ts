@@ -263,7 +263,7 @@ export async function waitForText(page: Page,
  */
 export async function waitWhileLoading(page: Page, timeout: number = 90000): Promise<void> {
   const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
-  const spinElementsSelector = '[style*="running spin"], .spinner:empty, svg[style*="running rotation"]:not([aria-hidden="true"])';
+  const spinElementsSelector = '[style*="running spin"], .spinner:empty, [style*="running rotation"]:not([aria-hidden="true"])';
 
   // To prevent checking on blank page, wait for elements exist in DOM.
   await Promise.race([
@@ -276,6 +276,8 @@ export async function waitWhileLoading(page: Page, timeout: number = 90000): Pro
     const elements = document.querySelectorAll(css);
     return elements && elements.length === 0;
   }, {polling: 'mutation', timeout}, spinElementsSelector);
+
+  await page.waitForTimeout(500);
 }
 
 export async function waitUntilEnabled(page: Page, cssSelector: string): Promise<boolean> {

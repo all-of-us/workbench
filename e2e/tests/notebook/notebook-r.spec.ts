@@ -43,6 +43,6 @@ describe('Jupyter notebook tests in R language', () => {
 
     // Delete R notebook
     await notebook.deleteNotebook(notebookName);
-  })
+  }, 30 * 60 * 1000)
 
 });

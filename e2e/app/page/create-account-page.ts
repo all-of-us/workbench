@@ -131,7 +131,7 @@ export default class CreateAccountPage extends BasePage {
   }
 
   async getUsernameDomain(): Promise<string> {
-    const elem = await this.page.waitForXPath('//*[./input[@id="username"]]/i');
+    const elem = await this.page.waitForXPath('//*[./input[@id="username"]]/i', {visible: true});
     return getPropValue<string>(elem, 'innerText');
   }
 

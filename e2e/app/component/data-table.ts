@@ -37,7 +37,7 @@ export default class DataTable extends Table {
     const selector = `${this.getPaginatorXpath()}/*[@class="p-paginator-current"]`;
     let textContent;
     try {
-      const elemt = await this.page.waitForXPath(selector);
+      const elemt = await this.page.waitForXPath(selector, {visible: true});
       textContent = await getPropValue<string>(elemt, 'textContent');
     } catch (e) {
       return [0, 0, 0];

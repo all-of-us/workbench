@@ -42,13 +42,15 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
 
     // Log notebook page heading.
     const pageHeadingCss = '[data-test-id="notebook-redirect"] > h2';
-    const pageHeading = await this.page.waitForSelector(pageHeadingCss, {visible: true});
-    console.log(await getPropValue<string>(pageHeading, 'textContent'));
+    const headingTextElement = await this.page.waitForSelector(pageHeadingCss, {visible: true});
+    const headingText = await getPropValue<string>(headingTextElement, 'textContent');
 
     // Log notebook progress text message
     const progressCss = '[data-test-id="current-progress-card"]';
-    const progressText = await this.page.waitForSelector(progressCss, {visible: true});
-    console.log(await getPropValue<string>(progressText, 'textContent'));
+    const progressTextElement = await this.page.waitForSelector(progressCss, {visible: true});
+    const progressText = await getPropValue<string>(progressTextElement, 'textContent');
+
+    console.log(`${headingText}. ${progressText}`);
 
     // Wait for existances of important messages.
     const warningTexts = 'You are prohibited from taking screenshots or attempting in any way to remove participant-level data from the workbench.';

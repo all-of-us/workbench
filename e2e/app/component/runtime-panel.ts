@@ -164,7 +164,7 @@ export default class RuntimePanel extends Container {
         {xpath: statusIconXpath},
         'src',
         this.buildStatusIconSrc(startStopIconState),
-        300000
+        600000
     )
   }
 

@@ -1,7 +1,6 @@
 import {Page} from 'puppeteer';
 import Container from 'app/container';
 import {ElementType, XPathOptions} from 'app/xpath-options';
-import {waitForFn} from 'utils/waits-utils';
 import BaseElement from './base-element';
 import {buildXPath} from 'app/xpath-builders';
 
@@ -29,22 +28,22 @@ export default class Checkbox extends BaseElement {
    * Click (check) checkbox element.
    */
   async check(maxAttempts: number = 2): Promise<void> {
+    const click = async () => {
+      await this.clickWithEval();
+      await this.page.waitForTimeout(500);
+      const isChecked = await this.isChecked();
+      if (isChecked) {
+        return;
+      }
+      if (maxAttempts <= 0) {
+        return;
+      }
+      maxAttempts--;
+      await this.page.waitForTimeout(2000).then(click); // Two seconds pause before try again
+    };
     const checked = await this.isChecked();
     if (!checked) {
-      const intervalMillis = 2000;
-      const result = await waitForFn(
-         async () => {
-           await this.focus();
-           await this.clickWithEval();
-           await this.page.waitForTimeout(500);
-           await this.isChecked();
-         },
-         intervalMillis,
-         intervalMillis * maxAttempts );
-
-      if (!result) {
-        throw new Error(`Checkbox ('${this.getXpath()}') check failed.`)
-      }
+      await click();
     }
   }
 

@@ -270,12 +270,12 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
 
   async getCdrVersion(): Promise<string> {
     const xpath = '//*[@data-test-id="cdr-version"]';
-    const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath));
+    const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, {visible: true}));
     return element.getTextContent();
   }
 
   async getNewCdrVersionFlag(): Promise<BaseElement> {
     const xpath = '//*[@data-test-id="new-version-flag"]';
-    return BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath));
+    return BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, {visible: true}));
   }
 }

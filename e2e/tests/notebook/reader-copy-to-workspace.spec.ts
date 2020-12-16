@@ -12,7 +12,6 @@ import {createWorkspace, findOrCreateWorkspace, signIn, signInAs, signOut} from 
 import {waitWhileLoading} from 'utils/waits-utils';
 import WorkspacesPage from 'app/page/workspaces-page';
 
-jest.setTimeout(20 * 60 * 1000);
 
 describe('Workspace reader Jupyter notebook action tests', () => {
 
@@ -127,6 +126,6 @@ describe('Workspace reader Jupyter notebook action tests', () => {
     await notebookCard.clickSnowmanIcon(); // close menu
 
     await newAnalysisPage.deleteResource(copiedNotebookName, ResourceCard.Notebook);
-  })
+  }, 30 * 60 * 1000)
 
 });

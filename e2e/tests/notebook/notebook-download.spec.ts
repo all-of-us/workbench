@@ -68,6 +68,6 @@ describe('Jupyter notebook download test', () => {
     // As of 9/25/20 I was unable to find a clear mechanism for accessing this.
 
     await notebook.deleteNotebook(notebookName);
-  }, 20 * 60 * 1000);
+  }, 30 * 60 * 1000);
 
 })
