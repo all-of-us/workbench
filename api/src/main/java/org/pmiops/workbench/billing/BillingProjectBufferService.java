@@ -255,9 +255,11 @@ public class BillingProjectBufferService implements GaugeDataCollector {
 
     if (workbenchConfigProvider.get().featureFlags.enableLazyPerimeterAssignment
         && bufferEntry.needsPerimeterAssignment()) {
+      // hardcoded for prototype
+      String perimeter =
+          workbenchConfigProvider.get().accessTiers.get("tier2").servicePerimeterName;
       fireCloudService.addProjectToServicePerimeter(
-          workbenchConfigProvider.get().firecloud.vpcServicePerimeterName,
-          bufferEntry.getFireCloudProjectName());
+          perimeter, bufferEntry.getFireCloudProjectName());
     }
 
     bufferEntry.setStatusEnum(BufferEntryStatus.ASSIGNED, this::getCurrentTimestamp);

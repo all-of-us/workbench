@@ -39,6 +39,7 @@ import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.CallsRealMethodsWithDelay;
 import org.pmiops.workbench.TestLock;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.AccessTierConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
@@ -472,6 +473,11 @@ public class BillingProjectBufferServiceTest {
   public void assignBillingProjectAddingPerimeter() {
     workbenchConfig.featureFlags.enableLazyPerimeterAssignment = true;
 
+    // hardcoded for prototype
+    AccessTierConfig tier2 = new AccessTierConfig();
+    tier2.servicePerimeterName = "test-perim";
+    workbenchConfig.accessTiers.put("tier2", tier2);
+
     DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
     entry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
     entry.setFireCloudProjectName("test-project-name");
@@ -508,7 +514,7 @@ public class BillingProjectBufferServiceTest {
     String invokedPerimeterName = servicePerimeterCaptor.getValue();
     String invokedProjectName2 = projectNameCaptor2.getValue();
 
-    assertThat(invokedPerimeterName).isEqualTo("we have secured the perimeter");
+    assertThat(invokedPerimeterName).isEqualTo("test-perim");
     assertThat(invokedProjectName2).isEqualTo("test-project-name");
 
     assertThat(billingProjectBufferEntryDao.findOne(assignedEntry.getId()).getStatusEnum())
