@@ -104,8 +104,7 @@
     "enableConceptSetSearchV2": true,
     "enableReportingUploadCron": true,
     "enableCustomRuntimes": true,
-    "enableLazyPerimeterAssignment": false,
-    "badRequestIsOkWhenAlreadyInPerimeter": true
+    "enableLazyPerimeterAssignment": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",

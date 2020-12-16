@@ -531,21 +531,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     ServicePerimetersApi perimetersApi = servicePerimetersApiProvider.get();
     retryHandler.run(
         (context) -> {
-          try {
-            perimetersApi.addProjectToServicePerimeter(doublyEncodedName, billingProject);
-          } catch (ApiException e) {
-            String alreadyInMsg =
-                String.format(
-                    "project %s is already in service perimeter %s",
-                    billingProject, servicePerimeterName);
-            if (configProvider.get().featureFlags.badRequestIsOkWhenAlreadyInPerimeter
-                && e.getCode() == 400
-                && e.getResponseBody().contains(alreadyInMsg)) {
-              log.info(alreadyInMsg);
-            } else {
-              throw e;
-            }
-          }
+          perimetersApi.addProjectToServicePerimeter(doublyEncodedName, billingProject);
           return null;
         });
 

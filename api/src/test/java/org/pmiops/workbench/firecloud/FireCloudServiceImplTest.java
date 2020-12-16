@@ -1,14 +1,12 @@
 package org.pmiops.workbench.firecloud;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.http.HttpTransport;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import java.util.Arrays;
-import java.util.Collections;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -18,7 +16,6 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -243,83 +240,5 @@ public class FireCloudServiceImplTest {
 
     assertThat(invokedPerimeterName).isEqualTo(servicePerimeter);
     assertThat(invokedProjectName).isEqualTo(projectName);
-  }
-
-  @Test
-  public void testAddProjectToServicePerimeterAlreadyInOk() throws ApiException {
-    workbenchConfig.featureFlags.badRequestIsOkWhenAlreadyInPerimeter = true;
-
-    final String servicePerimeter = "a-cloud-with-a-fence-around-it";
-    final String projectName = "The Alan Parsons Project";
-
-    when(billingApi.billingProjectStatus(projectName))
-        .thenReturn(
-            new FirecloudBillingProjectStatus()
-                .projectName(projectName)
-                .creationStatus(CreationStatusEnum.READY));
-
-    final String alreadyIn =
-        String.format(
-            "project %s is already in service perimeter %s", projectName, servicePerimeter);
-
-    // can't use when() on void-returning methods
-    doThrow(new ApiException(400, "no message", Collections.emptyMap(), alreadyIn))
-        .when(servicePerimetersApi)
-        .addProjectToServicePerimeter(servicePerimeter, projectName);
-
-    // exception is quashed
-    service.addProjectToServicePerimeter(servicePerimeter, projectName);
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void testAddProjectToServicePerimeterAlreadyInNotOk() throws ApiException {
-    workbenchConfig.featureFlags.badRequestIsOkWhenAlreadyInPerimeter = false;
-
-    final String servicePerimeter = "a-cloud-with-a-fence-around-it";
-    final String projectName = "The Alan Parsons Project";
-
-    when(billingApi.billingProjectStatus(projectName))
-        .thenReturn(
-            new FirecloudBillingProjectStatus()
-                .projectName(projectName)
-                .creationStatus(CreationStatusEnum.READY));
-
-    final String alreadyIn =
-        String.format(
-            "project %s is already in service perimeter %s", projectName, servicePerimeter);
-
-    // can't use when() on void-returning methods
-    doThrow(new ApiException(400, "no message", Collections.emptyMap(), alreadyIn))
-        .when(servicePerimetersApi)
-        .addProjectToServicePerimeter(servicePerimeter, projectName);
-
-    // exception is thrown
-    service.addProjectToServicePerimeter(servicePerimeter, projectName);
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void testAddProjectToServicePerimeterAlreadyInOtherPerimeter() throws ApiException {
-    workbenchConfig.featureFlags.badRequestIsOkWhenAlreadyInPerimeter = true;
-
-    final String servicePerimeter = "a-cloud-with-a-fence-around-it";
-    final String projectName = "The Alan Parsons Project";
-    final String otherPerimeter = "Controlled Tier";
-
-    when(billingApi.billingProjectStatus(projectName))
-        .thenReturn(
-            new FirecloudBillingProjectStatus()
-                .projectName(projectName)
-                .creationStatus(CreationStatusEnum.READY));
-
-    final String alreadyIn =
-        String.format("project %s is already in service perimeter %s", projectName, otherPerimeter);
-
-    // can't use when() on void-returning methods
-    doThrow(new ApiException(400, "no message", Collections.emptyMap(), alreadyIn))
-        .when(servicePerimetersApi)
-        .addProjectToServicePerimeter(servicePerimeter, projectName);
-
-    // exception is thrown
-    service.addProjectToServicePerimeter(servicePerimeter, projectName);
   }
 }
