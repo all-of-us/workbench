@@ -4,18 +4,14 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
-import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
-import org.pmiops.workbench.testconfig.ReportingTestUtils;
 import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -31,7 +27,7 @@ public class CohortDaoTest {
 
   @Autowired CohortDao cohortDao;
   @Autowired UserDao userDao;
-  @Autowired ReportingTestFixture<DbUser, ProjectedReportingUser, ReportingUser> userFixture;
+  @Autowired ReportingTestFixture<DbUser, ReportingUser> userFixture;
   @Autowired WorkspaceDao workspaceDao;
 
   private DbCohort dbCohort;
@@ -84,16 +80,5 @@ public class CohortDaoTest {
   @Test
   public void findByWorkspaceId() {
     assertThat(cohortDao.findByWorkspaceId(dbCohort.getWorkspaceId()).get(0)).isEqualTo(dbCohort);
-  }
-
-  @Test
-  public void testGetReportingCohorts() {
-    final DbCohort cohortToSave = ReportingTestUtils.createDbCohort(dbUser, dbWorkspace);
-    cohortDao.deleteAll();
-    final DbCohort cohort = cohortDao.save(cohortToSave);
-    final List<ProjectedReportingCohort> cohorts = cohortDao.getReportingCohorts();
-    assertThat(cohorts).hasSize(1);
-    ReportingTestUtils.assertCohortFields(
-        cohorts.get(0), cohort.getCohortId(), dbUser.getUserId(), dbWorkspace.getWorkspaceId());
   }
 }

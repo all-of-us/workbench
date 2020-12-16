@@ -1,14 +1,11 @@
 package org.pmiops.workbench.testconfig.fixtures;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
@@ -25,8 +22,7 @@ import org.springframework.stereotype.Service;
  */
 @Qualifier("REPORTING_USER_TEST_FIXTURE")
 @Service
-public class ReportingUserFixture
-    implements ReportingTestFixture<DbUser, ProjectedReportingUser, ReportingUser> {
+public class ReportingUserFixture implements ReportingTestFixture<DbUser, ReportingUser> {
   // All constant values, mocking statements, and assertions in this file are generated. The values
   // are chosen so that errors with transposed columns can be caught.
   // Mapping Short values with valid enums can be tricky, and currently there are
@@ -136,118 +132,6 @@ public class ReportingUserFixture
     assertThat(user.getInstitutionId()).isEqualTo(USER__INSTITUTION_ID);
     assertThat(user.getInstitutionalRoleEnum()).isEqualTo(USER__INSTITUTIONAL_ROLE_ENUM);
     assertThat(user.getInstitutionalRoleOtherText()).isEqualTo(USER__INSTITUTIONAL_ROLE_OTHER_TEXT);
-  }
-
-  @Override
-  public void assertProjectionFieldsMatchConstants(ProjectedReportingUser user) {
-    assertThat(user.getAboutYou()).isEqualTo(USER__ABOUT_YOU);
-    assertThat(user.getAreaOfResearch()).isEqualTo(USER__AREA_OF_RESEARCH);
-    assertTimeApprox(user.getComplianceTrainingBypassTime(), USER__COMPLIANCE_TRAINING_BYPASS_TIME);
-    assertTimeApprox(
-        user.getComplianceTrainingCompletionTime(), USER__COMPLIANCE_TRAINING_COMPLETION_TIME);
-    assertTimeApprox(
-        user.getComplianceTrainingExpirationTime(), USER__COMPLIANCE_TRAINING_EXPIRATION_TIME);
-    assertThat(user.getContactEmail()).isEqualTo(USER__CONTACT_EMAIL);
-    assertTimeApprox(user.getCreationTime(), USER__CREATION_TIME);
-    assertThat(user.getCurrentPosition()).isEqualTo(USER__CURRENT_POSITION);
-    assertThat(user.getDataAccessLevel())
-        .isEqualTo(
-            DbStorageEnums.dataAccessLevelFromStorage(
-                USER__DATA_ACCESS_LEVEL)); // manual adjustment
-    assertTimeApprox(user.getDataUseAgreementBypassTime(), USER__DATA_USE_AGREEMENT_BYPASS_TIME);
-    assertTimeApprox(
-        user.getDataUseAgreementCompletionTime(), USER__DATA_USE_AGREEMENT_COMPLETION_TIME);
-    assertThat(user.getDataUseAgreementSignedVersion())
-        .isEqualTo(USER__DATA_USE_AGREEMENT_SIGNED_VERSION);
-    assertTimeApprox(
-        user.getDemographicSurveyCompletionTime(), USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME);
-    assertThat(user.getDisabled()).isEqualTo(USER__DISABLED);
-    assertTimeApprox(user.getEraCommonsBypassTime(), USER__ERA_COMMONS_BYPASS_TIME);
-    assertTimeApprox(user.getEraCommonsCompletionTime(), USER__ERA_COMMONS_COMPLETION_TIME);
-    assertThat(user.getFamilyName()).isEqualTo(USER__FAMILY_NAME);
-    assertTimeApprox(
-        user.getFirstRegistrationCompletionTime(), USER__FIRST_REGISTRATION_COMPLETION_TIME);
-    assertTimeApprox(user.getFirstSignInTime(), USER__FIRST_SIGN_IN_TIME);
-    assertThat(user.getFreeTierCreditsLimitDaysOverride())
-        .isEqualTo(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE);
-    assertThat(user.getFreeTierCreditsLimitDollarsOverride())
-        .isEqualTo(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE);
-    assertThat(user.getGivenName()).isEqualTo(USER__GIVEN_NAME);
-    assertTimeApprox(user.getLastModifiedTime(), USER__LAST_MODIFIED_TIME);
-    assertThat(user.getProfessionalUrl()).isEqualTo(USER__PROFESSIONAL_URL);
-    assertTimeApprox(user.getTwoFactorAuthBypassTime(), USER__TWO_FACTOR_AUTH_BYPASS_TIME);
-    assertTimeApprox(user.getTwoFactorAuthCompletionTime(), USER__TWO_FACTOR_AUTH_COMPLETION_TIME);
-    assertThat(user.getUserId()).isEqualTo(USER__USER_ID);
-    assertThat(user.getUsername()).isEqualTo(USER__USERNAME);
-    assertThat(user.getInstitutionId()).isEqualTo(USER__INSTITUTION_ID);
-    assertThat(user.getInstitutionalRoleEnum()).isEqualTo(USER__INSTITUTIONAL_ROLE_ENUM);
-    assertThat(user.getInstitutionalRoleOtherText()).isEqualTo(USER__INSTITUTIONAL_ROLE_OTHER_TEXT);
-  }
-
-  @Override
-  public ProjectedReportingUser mockProjection() {
-    // This code was generated using reporting-wizard.rb at 2020-09-23T15:56:47-04:00.
-    // Manual modification should be avoided if possible as this is a one-time generation
-    // and does not run on every build and updates must be merged manually for now.
-    final ProjectedReportingUser mockUser = mock(ProjectedReportingUser.class);
-    doReturn(USER__ABOUT_YOU).when(mockUser).getAboutYou();
-    doReturn(USER__AREA_OF_RESEARCH).when(mockUser).getAreaOfResearch();
-    doReturn(USER__COMPLIANCE_TRAINING_BYPASS_TIME)
-        .when(mockUser)
-        .getComplianceTrainingBypassTime();
-    doReturn(USER__COMPLIANCE_TRAINING_COMPLETION_TIME)
-        .when(mockUser)
-        .getComplianceTrainingCompletionTime();
-    doReturn(USER__COMPLIANCE_TRAINING_EXPIRATION_TIME)
-        .when(mockUser)
-        .getComplianceTrainingExpirationTime();
-    doReturn(USER__CONTACT_EMAIL).when(mockUser).getContactEmail();
-    doReturn(USER__CREATION_TIME).when(mockUser).getCreationTime();
-    doReturn(USER__CURRENT_POSITION).when(mockUser).getCurrentPosition();
-    doReturn(USER__DATA_ACCESS_LEVEL).when(mockUser).getDataAccessLevel();
-    doReturn(USER__DATA_USE_AGREEMENT_BYPASS_TIME).when(mockUser).getDataUseAgreementBypassTime();
-    doReturn(USER__DATA_USE_AGREEMENT_COMPLETION_TIME)
-        .when(mockUser)
-        .getDataUseAgreementCompletionTime();
-    doReturn(USER__DATA_USE_AGREEMENT_SIGNED_VERSION)
-        .when(mockUser)
-        .getDataUseAgreementSignedVersion();
-    doReturn(USER__DEMOGRAPHIC_SURVEY_COMPLETION_TIME)
-        .when(mockUser)
-        .getDemographicSurveyCompletionTime();
-    doReturn(USER__DISABLED).when(mockUser).getDisabled();
-    doReturn(USER__ERA_COMMONS_BYPASS_TIME).when(mockUser).getEraCommonsBypassTime();
-    doReturn(USER__ERA_COMMONS_COMPLETION_TIME).when(mockUser).getEraCommonsCompletionTime();
-    doReturn(USER__FAMILY_NAME).when(mockUser).getFamilyName();
-    doReturn(USER__FIRST_REGISTRATION_COMPLETION_TIME)
-        .when(mockUser)
-        .getFirstRegistrationCompletionTime();
-    doReturn(USER__FIRST_SIGN_IN_TIME).when(mockUser).getFirstSignInTime();
-    doReturn(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE)
-        .when(mockUser)
-        .getFreeTierCreditsLimitDaysOverride();
-    doReturn(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE)
-        .when(mockUser)
-        .getFreeTierCreditsLimitDollarsOverride();
-    doReturn(USER__GIVEN_NAME).when(mockUser).getGivenName();
-    doReturn(USER__LAST_MODIFIED_TIME).when(mockUser).getLastModifiedTime();
-    doReturn(USER__PROFESSIONAL_URL).when(mockUser).getProfessionalUrl();
-    doReturn(USER__TWO_FACTOR_AUTH_BYPASS_TIME).when(mockUser).getTwoFactorAuthBypassTime();
-    doReturn(USER__TWO_FACTOR_AUTH_COMPLETION_TIME).when(mockUser).getTwoFactorAuthCompletionTime();
-    doReturn(USER__USER_ID).when(mockUser).getUserId();
-    doReturn(USER__USERNAME).when(mockUser).getUsername();
-    // address fields
-    doReturn(USER__CITY).when(mockUser).getCity();
-    doReturn(USER__COUNTRY).when(mockUser).getCountry();
-    doReturn(USER__STATE).when(mockUser).getState();
-    doReturn(USER__STREET_ADDRESS_1).when(mockUser).getStreetAddress1();
-    doReturn(USER__STREET_ADDRESS_2).when(mockUser).getStreetAddress2();
-    doReturn(USER__ZIP_CODE).when(mockUser).getZipCode();
-    // affiliation fields
-    doReturn(USER__INSTITUTION_ID).when(mockUser).getInstitutionId();
-    doReturn(USER__INSTITUTIONAL_ROLE_ENUM).when(mockUser).getInstitutionalRoleEnum();
-    doReturn(USER__INSTITUTIONAL_ROLE_OTHER_TEXT).when(mockUser).getInstitutionalRoleOtherText();
-    return mockUser;
   }
 
   @Override

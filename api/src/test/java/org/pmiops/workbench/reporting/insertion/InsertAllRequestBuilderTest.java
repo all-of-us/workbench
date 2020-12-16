@@ -29,7 +29,6 @@ import java.util.Optional;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cohortbuilder.util.QueryParameterValues;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
@@ -64,7 +63,7 @@ public class InsertAllRequestBuilderTest {
   private static final TableId TABLE_ID = TableId.of("project ID", "dataset", "researcher");
   public static final int INCOMPLETE_USER_SIZE = 5; // includes snapshot_timestamp
 
-  @Autowired ReportingTestFixture<DbUser, ProjectedReportingUser, ReportingUser> userFixture;
+  @Autowired ReportingTestFixture<DbUser, ReportingUser> userFixture;
 
   @TestConfiguration
   @Import({ReportingTestConfig.class})

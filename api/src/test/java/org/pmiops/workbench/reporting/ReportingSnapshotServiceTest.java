@@ -12,16 +12,12 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
-import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingInstitution;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingUser;
-import org.pmiops.workbench.db.jdbc.ReportingNativeQueryService;
+import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.institution.InstitutionService;
+import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
+import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
@@ -42,15 +38,11 @@ public class ReportingSnapshotServiceTest {
   private static final long NOW_EPOCH_MILLI = 1594404482000L;
   private static final Instant NOW_INSTANT = Instant.ofEpochMilli(NOW_EPOCH_MILLI);
 
-  @MockBean private CohortService mockCohortService;
-  @MockBean private InstitutionService mockInstitutionService;
-  @MockBean private UserService mockUserService;
-  @MockBean private ReportingNativeQueryService mockReportingNativeQueryService;
+  @MockBean private ReportingQueryService mockReportingQueryService;
 
   @Autowired private ReportingSnapshotService reportingSnapshotService;
 
-  @Autowired
-  private ReportingTestFixture<DbUser, ProjectedReportingUser, ReportingUser> userFixture;
+  @Autowired private ReportingTestFixture<DbUser, ReportingUser> userFixture;
 
   @TestConfiguration
   @Import({
@@ -112,27 +104,25 @@ public class ReportingSnapshotServiceTest {
   }
 
   private void mockUsers() {
-    final List<ProjectedReportingUser> users =
-        ImmutableList.of(userFixture.mockProjection(), userFixture.mockProjection());
-    doReturn(users).when(mockUserService).getReportingUsers();
+    final List<ReportingUser> users =
+        ImmutableList.of(userFixture.createDto(), userFixture.createDto());
+    doReturn(users).when(mockReportingQueryService).getUsers();
   }
 
   private void mockWorkspaces() {
     doReturn(ImmutableList.of(createDtoWorkspace()))
-        .when(mockReportingNativeQueryService)
-        .getReportingWorkspaces();
+        .when(mockReportingQueryService)
+        .getWorkspaces();
   }
 
   private void mockCohorts() {
-    final ProjectedReportingCohort mockCohort = mockProjectedReportingCohort();
-    doReturn(ImmutableList.of(mockCohort)).when(mockCohortService).getReportingCohorts();
+    final ReportingCohort mockCohort = createReportingCohort();
+    doReturn(ImmutableList.of(mockCohort)).when(mockReportingQueryService).getCohorts();
   }
 
   private void mockDatasets() {
     final ReportingDataset dataset = createReportingDataset();
-    doReturn(ImmutableList.of(dataset))
-        .when(mockReportingNativeQueryService)
-        .getReportingDatasets();
+    doReturn(ImmutableList.of(dataset)).when(mockReportingQueryService).getDatasets();
   }
 
   private void mockDatasetCohorts() {
@@ -141,15 +131,14 @@ public class ReportingSnapshotServiceTest {
     final ReportingDatasetCohort reportingDatasetCohort2 =
         new ReportingDatasetCohort().cohortId(303L).datasetId(404L);
     doReturn(ImmutableList.of(reportingDatasetCohort1, reportingDatasetCohort2))
-        .when(mockReportingNativeQueryService)
-        .getReportingDatasetCohorts();
+        .when(mockReportingQueryService)
+        .getDatasetCohorts();
   }
 
   private void mockInstitutions() {
-    final ProjectedReportingInstitution mockInstitution =
-        ReportingTestUtils.mockProjectedReportingInstitution();
-    doReturn(ImmutableList.of(mockInstitution))
-        .when(mockInstitutionService)
-        .getReportingInstitutions();
+    final ReportingInstitution reportingInstitution = createReportingInstitution();
+    doReturn(ImmutableList.of(reportingInstitution))
+        .when(mockReportingQueryService)
+        .getInstitutions();
   }
 }

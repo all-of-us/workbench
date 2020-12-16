@@ -46,7 +46,6 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao.ActiveStatusAndDataAccessLevelToCountResult;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -818,10 +817,5 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   public List<DbWorkspace> getAllActiveWorkspaces() {
     return workspaceDao.findAllByActiveStatusIn(
         DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
-  }
-
-  @Override
-  public List<ProjectedReportingWorkspace> getReportingWorkspaces() {
-    return workspaceDao.getReportingWorkspaces();
   }
 }
