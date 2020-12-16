@@ -6,23 +6,13 @@ import {ElementHandle, Page} from 'puppeteer';
  */
 export default class Container {
 
-  constructor(protected readonly page: Page,
-              protected xpath?: string,
-              protected readonly container?: Container) { }
+  constructor(protected readonly page: Page, protected xpath?: string) { }
 
   getXpath(): string {
-    if (this.container === undefined) {
-      return this.xpath;
-    }
-    return `${this.container.getXpath()}//${this.xpath}`;
+    return this.xpath;
   }
 
-  setXpath(newXpath: string): void {
-    this.xpath = newXpath;
+  async waitUntilVisible(): Promise<ElementHandle> {
+    return this.page.waitForXPath(this.xpath, {visible: true});
   }
-
-  async waitUntilVisible(timeout?: number): Promise<ElementHandle> {
-    return this.page.waitForXPath(this.xpath, {visible: true, timeout});
-  }
-
 }

@@ -49,6 +49,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     const progressCss = '[data-test-id="current-progress-card"]';
     const progressTextElement = await this.page.waitForSelector(progressCss, {visible: true});
     const progressText = await getPropValue<string>(progressTextElement, 'textContent');
+
     console.log(`${headingText}. ${progressText}`);
 
     // Wait for existances of important messages.

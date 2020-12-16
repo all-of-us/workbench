@@ -29,12 +29,13 @@ export default class Button extends BaseElement {
    * @throws Timeout exception if button is not enabled after waiting.
    */
   async waitUntilEnabled(xpathSelector?: string): Promise<void> {
+    const selector = xpathSelector || this.getXpath();
     await this.page.waitForFunction(xpath => {
       const elemt = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
       const style = window.getComputedStyle(elemt as Element);
       const propValue = style.getPropertyValue('cursor');
       return propValue === 'pointer';
-    }, {}, xpathSelector || this.getXpath()).catch((err) => {throw err;});
+    }, {}, selector).catch((err) => {throw err;});
   }
 
 }
