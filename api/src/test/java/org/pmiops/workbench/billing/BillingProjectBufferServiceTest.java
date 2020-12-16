@@ -476,6 +476,7 @@ public class BillingProjectBufferServiceTest {
     entry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
     entry.setFireCloudProjectName("test-project-name");
     entry.setCreationTime(getCurrentTimestamp());
+    entry.setInServicePerimeter(false);
     billingProjectBufferEntryDao.save(entry);
 
     DbUser user = mock(DbUser.class);
