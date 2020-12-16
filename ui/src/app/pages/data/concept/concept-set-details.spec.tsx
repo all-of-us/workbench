@@ -33,24 +33,6 @@ describe('ConceptSetDetails', () => {
     expect(wrapper).toBeTruthy();
   });
 
-  it('should render the concept table when the set has concepts in it', async () => {
-    const wrapper = mount(<ConceptSetDetails/>);
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="conceptTable"]').length).toBeGreaterThan(0);
-  });
-
-  it('should show the add concepts button when a set has no concepts in it', async () => {
-    conceptSet = ConceptSetsApiStub.stubConceptSets()[1];
-    urlParamsStore.next({
-      ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
-      wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
-      csid: conceptSet.id
-    });
-    const wrapper = mount(<ConceptSetDetails/>);
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="add-concepts"]').length).toBeGreaterThan(0);
-  });
-
   it('should display the participant count and domain name', async() => {
     const wrapper = mount(<ConceptSetDetails/>);
     await waitOneTickAndUpdate(wrapper);
@@ -107,25 +89,6 @@ describe('ConceptSetDetails', () => {
     wrapper.find('[data-test-id="cancel-edit-concept-set"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="concept-set-title"]').text()).toContain(conceptSet.name);
-  });
-
-  it('should remove concepts', async() => {
-    const numConceptsPlusHeader = conceptSet.concepts.length + 1;
-    const wrapper = mount(<ConceptSetDetails/>);
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('span.p-checkbox-icon.p-clickable').length)
-      .toEqual(numConceptsPlusHeader);
-    wrapper.find('span.p-checkbox-icon.p-clickable').at(1).simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="sliding-button"]')
-      .parent().props()['disable']).toBeFalsy();
-    expect(wrapper.find('[data-test-id="sliding-button"]').text()).toBe('Remove from set');
-    wrapper.find('[data-test-id="sliding-button"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="confirm-remove-concept"]').first().simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('span.p-checkbox-icon.p-clickable').length)
-      .toEqual(numConceptsPlusHeader - 1);
   });
 
   // TODO RW-2625: test edit and delete set from popup trigger menu

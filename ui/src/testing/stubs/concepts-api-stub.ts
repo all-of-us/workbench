@@ -1,91 +1,76 @@
 import {
-  Concept,
-  ConceptListResponse,
   ConceptsApi,
+  Criteria,
+  CriteriaType,
   Domain,
   DomainCount,
   DomainCountsListResponse,
   DomainInfo,
   DomainInfoResponse,
   SearchConceptsRequest,
-  StandardConceptFilter,
   SurveyModule, SurveyQuestions,
   SurveysResponse
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export class ConceptStubVariables {
-  static STUB_CONCEPTS: Concept[] = [
+  static STUB_CONCEPTS: Criteria[] = [
     {
-      conceptId: 1,
-      conceptName: 'Stub Concept 1',
-      domainId: 'Condition',
-      vocabularyId: 'SNOMED',
-      conceptCode: 'G8107',
-      conceptClassId: 'Ingredient',
-      standardConcept: true,
-      countValue: 1,
-      prevalence: 1,
-      conceptSynonyms: [
-        'blah', 'blahblah'
-      ]
+      id: 1,
+      parentId: 0,
+      group: true,
+      selectable: true,
+      hasAttributes: false,
+      name: 'Stub Concept 1',
+      domainId: Domain.CONDITION.toString(),
+      type: CriteriaType.SNOMED.toString(),
+      conceptId: 8107,
+      isStandard: true,
+      childCount: 1,
+      parentCount: 0
     },
     {
-      conceptId: 2,
-      conceptName: 'Stub Concept 2',
-      domainId: 'Condition',
-      vocabularyId: 'SNOMED',
-      conceptCode: 'G8107',
-      conceptClassId: 'Ingredient',
-      standardConcept: false,
-      countValue: 2,
-      prevalence: 2,
-      conceptSynonyms: [
-        'merp', 'kerp'
-      ]
+      id: 2,
+      parentId: 0,
+      group: true,
+      selectable: true,
+      hasAttributes: false,
+      name: 'Stub Concept 2',
+      domainId: Domain.CONDITION.toString(),
+      type: CriteriaType.SNOMED.toString(),
+      conceptId: 8107,
+      isStandard: true,
+      childCount: 2,
+      parentCount: 0
     },
     {
-      conceptId: 3,
-      conceptName: 'Stub Concept 3',
-      domainId: 'Measurement',
-      vocabularyId: 'SNOMED',
-      conceptCode: 'G8107',
-      conceptClassId: 'Ingredient',
-      standardConcept: true,
-      countValue: 1,
-      prevalence: 1,
-      conceptSynonyms: [
-        'measure', 'super measure'
-      ]
+      id: 3,
+      parentId: 0,
+      group: true,
+      selectable: true,
+      hasAttributes: false,
+      name: 'Stub Concept 3',
+      domainId: Domain.MEASUREMENT.toString(),
+      type: CriteriaType.LOINC.toString(),
+      conceptId: 1234,
+      isStandard: true,
+      childCount: 1,
+      parentCount: 0
     },
     {
-      conceptId: 4,
-      conceptName: 'Stub Concept 4',
-      domainId: 'Measurement',
-      vocabularyId: 'SNOMED',
-      conceptCode: 'G8107',
-      conceptClassId: 'Ingredient',
-      standardConcept: false,
-      countValue: 1,
-      prevalence: 1,
-      conceptSynonyms: [
-        'fake measure', 'very measure: wow'
-      ]
+      id: 4,
+      parentId: 0,
+      group: true,
+      selectable: true,
+      hasAttributes: false,
+      name: 'Stub Concept 4',
+      domainId: Domain.MEASUREMENT.toString(),
+      type: CriteriaType.LOINC.toString(),
+      conceptId: 2345,
+      isStandard: true,
+      childCount: 1,
+      parentCount: 0
     },
-    {
-      conceptId: 5,
-      conceptName: 'Stub Survey Question Concept 1',
-      domainId: 'Observation',
-      vocabularyId: 'SNOMED',
-      conceptCode: 'G8107',
-      conceptClassId: 'Ingredient',
-      standardConcept: true,
-      countValue: 1,
-      prevalence: 1,
-      conceptSynonyms: [
-        'blah', 'blahblah'
-      ]
-    }
   ];
 }
 export class SurveyStubVariables {
@@ -169,7 +154,7 @@ export class SurveyQuestionStubVariables {
 }
 
 export class ConceptsApiStub extends ConceptsApi {
-  public concepts?: Concept[];
+  public concepts?: Criteria[];
   constructor() {
     super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
 
@@ -192,7 +177,8 @@ export class ConceptsApiStub extends ConceptsApi {
   // This just returns static values rather than doing a real search.
   // Real search functionality should be tested at the API level.
   // This creates more predictable responses.
-  public searchConcepts(
+  // Need to update with new api calls
+  /*public searchConcepts(
     workspaceNamespace: string, workspaceId: string,
     request?: SearchConceptsRequest): Promise<ConceptListResponse> {
     return new Promise<ConceptListResponse>(resolve => {
@@ -230,28 +216,7 @@ export class ConceptsApiStub extends ConceptsApi {
       });
       resolve(response);
     });
-  }
-
-  private extendConceptListForHeaderText() {
-    // Starting with id as 6 to continue with this.concepts
-    for (let i = 6; i < 46; i++) {
-      const concept = {
-        conceptId: i,
-        conceptName: 'Stub Concept ' + i,
-        domainId: 'Condition',
-        vocabularyId: 'SNOMED',
-        conceptCode: 'G8107',
-        conceptClassId: 'Ingredient',
-        standardConcept: true,
-        countValue: 1,
-        prevalence: 1,
-        conceptSynonyms: [
-          'blah', 'blahblah'
-        ]
-      };
-      this.concepts = this.concepts.concat(concept);
-    }
-  }
+  }*/
 
   public searchSurveys(workspaceNamespace: string, workspaceId: string, request?: SearchConceptsRequest): Promise<Array<SurveyQuestions>> {
     return Promise.resolve(SurveyQuestionStubVariables.STUB_SURVEY_QUESTIONS);
