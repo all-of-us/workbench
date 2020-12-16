@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ReportingQueryServiceImpl implements ReportingQueryService {
-
+  private static final long MAX_ROWS_PER_INSERT_ALL_REQUEST = 10_000;
   private final JdbcTemplate jdbcTemplate;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
@@ -39,7 +39,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   // each table depending on its memory use, so a single limit set to ~2500 is about right.
   @Override
   public long getQueryBatchSize() {
-    return workbenchConfigProvider.get().reporting.maxRowsPerInsert;
+    return Math.min(MAX_ROWS_PER_INSERT_ALL_REQUEST,
+        workbenchConfigProvider.get().reporting.maxRowsPerInsert);
   }
 
   @Override
