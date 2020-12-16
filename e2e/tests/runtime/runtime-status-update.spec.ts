@@ -14,7 +14,7 @@ import NotebookPreviewPage from 'app/page/notebook-preview-page';
 jest.setTimeout(60 * 30 * 1000);
 
 // Flaky tests. Disable tests now to allow time to address the issue.
-xdescribe('Updating runtime parameters', () => {
+describe.skip('Updating runtime parameters', () => {
   beforeEach(async () => {
     await signIn(page);
     const workspaceCard = await createWorkspace(page, config.altCdrVersionName);
