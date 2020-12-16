@@ -35,7 +35,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
         domain: Domain.CONDITION,
         lastModifiedTime: new Date().getTime() - 8000,
         participantCount: ConceptStubVariables.STUB_CONCEPTS.length,
-        concepts: ConceptStubVariables.STUB_CONCEPTS
+        criteriums: ConceptStubVariables.STUB_CONCEPTS
       },  {
         id: 346,
         name: 'Mock Concept Set Measurement',
@@ -160,7 +160,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
         if (!concept) {
           throw Error(`concept ${id} not found`);
         }
-        target.concepts.push(concept);
+        target.criteriums.push(concept);
       }
       resolve(target);
     });

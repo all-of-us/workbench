@@ -37,7 +37,6 @@ describe('ConceptAddModal', () => {
   it('finds the correct number of concepts in the selected domain', async () => {
     const wrapper = component();
     const stubConceptsInDomain = stubConcepts.filter((c) => c.domainId === activeDomainTab.domain.toString());
-    console.log(stubConceptsInDomain);
     expect(wrapper.find('[data-test-id="add-concept-title"]').first().text())
         .toBe('Add ' + stubConceptsInDomain.length + ' Concepts to '
             + activeDomainTab.name + ' Concept Set');
