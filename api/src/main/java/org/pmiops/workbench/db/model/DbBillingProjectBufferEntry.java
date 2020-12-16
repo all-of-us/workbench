@@ -172,7 +172,7 @@ public class DbBillingProjectBufferEntry {
         + getStatusEnum()
         + ", assignedUser="
         + Optional.ofNullable(assignedUser).map(u -> Long.toString(u.getUserId())).orElse("n/a")
-        + ", inServicePerimete="
+        + ", inServicePerimeter="
         + Optional.ofNullable(inServicePerimeter).map(Object::toString).orElse("n/a")
         + '}';
   }
