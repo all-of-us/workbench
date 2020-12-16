@@ -278,6 +278,7 @@ export const useRuntimeStatus = (currentWorkspaceNamespace): [
           await LeoRuntimeInitializer.initialize({
             workspaceNamespace: currentWorkspaceNamespace,
             maxCreateCount: 0,
+            maxDeleteCount: 0,
             resolutionCondition: (r) => resolutionCondition(r)
           });
         } catch (e) {
