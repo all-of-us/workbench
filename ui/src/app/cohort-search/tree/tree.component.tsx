@@ -10,7 +10,7 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentConcept, withCurrentWorkspace} from 'app/utils';
 import {getCdrVersion} from 'app/utils/cdr-versions';
-import {currentCohortCriteriaStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
+import {currentCohortCriteriaStore, currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   CdrVersionListResponse,
@@ -49,11 +49,11 @@ const styles = reactStyles({
     padding: '0 0.5rem',
   },
   searchBarContainer: {
-    width: '95%',
+    width: '80%',
     marginTop: '-1px',
     display: 'flex',
     padding: '0.4rem 0',
-    backgroundColor: colors.white,
+    backgroundColor: 'transparent',
     zIndex: 1,
   },
   treeHeader: {
@@ -295,9 +295,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
         more.
       </div>}
       {node.domainId !== Domain.VISIT.toString() &&
-        <div style={serverConfigStore.getValue().enableCohortBuilderV2
-          ? {...styles.searchBarContainer, backgroundColor: 'transparent', width: '80%'}
-          : styles.searchBarContainer}>
+        <div style={styles.searchBarContainer}>
           <SearchBar node={node}
                      searchTerms={searchTerms}
                      selectOption={selectOption}

@@ -3,7 +3,7 @@ import {Growl} from 'primereact/growl';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
-import {ListSearchV2} from 'app/cohort-search/list-search-v2/list-search-v2.component';
+import {ListSearch} from 'app/cohort-search/list-search/list-search.component';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
 import {domainToTitle, typeToTitle} from 'app/cohort-search/utils';
@@ -361,13 +361,13 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
             setSearchTerms={this.setTreeSearchTerms}/>}
          {/*List View (using duplicated version of ListSearch) */}
         {!this.initTree && <div style={this.searchContentStyle('list')}>
-          <ListSearchV2 source={source}
-                        hierarchy={this.showHierarchy}
-                        searchContext={cohortContext}
-                        searchTerms={conceptSearchTerms}
-                        select={this.addSelection}
-                        selectedSurvey={selectedSurvey}
-                        selectedIds={this.getListSearchSelectedIds()}/>
+          <ListSearch source={source}
+                      hierarchy={this.showHierarchy}
+                      searchContext={cohortContext}
+                      searchTerms={conceptSearchTerms}
+                      select={this.addSelection}
+                      selectedSurvey={selectedSurvey}
+                      selectedIds={this.getListSearchSelectedIds()}/>
         </div>}
       </div>
      </div>;

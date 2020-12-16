@@ -3,7 +3,7 @@ import * as moment from 'moment';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';
 
-import {CalculateFooter} from 'app/cohort-search/attributes-page-v2/attributes-page-v2.component';
+import {CalculateFooter} from 'app/cohort-search/attributes-page/attributes-page.component';
 import {encountersStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, mapParameter} from 'app/cohort-search/utils';
 import {ClrIcon} from 'app/components/icons';

@@ -15,7 +15,6 @@ import {
   currentCohortCriteriaStore,
   currentConceptStore,
   currentWorkspaceStore,
-  serverConfigStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {AttrName, Criteria, CriteriaSubType, CriteriaType, Domain, Operator} from 'generated/fetch';
@@ -293,13 +292,9 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   setAttributes(event: Event, node: NodeProp) {
     event.stopPropagation();
-    if (serverConfigStore.getValue().enableCohortBuilderV2) {
-      delete node.children;
-      attributesSelectionStore.next(node);
-      setSidebarActiveIconStore.next('criteria');
-    } else {
-      this.props.setAttributes(node);
-    }
+    delete node.children;
+    attributesSelectionStore.next(node);
+    setSidebarActiveIconStore.next('criteria');
   }
 
   get isCOPESurvey() {
@@ -331,16 +326,11 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
   }
 
   render() {
-    const {autocompleteSelection, groupSelections, node,
-      node: {code, count, domainId, id, group, hasAttributes, name, parentId, selectable},
-      source, scrollToMatch, searchTerms, select, selectedIds,
-      setAttributes} = this.props;
+    const {autocompleteSelection, groupSelections, node, node: {code, count, domainId, id, group, hasAttributes, name, selectable},
+      source, scrollToMatch, searchTerms, select, selectedIds, setAttributes} = this.props;
     const {children, error, expanded, hover, loading, searchMatch} = this.state;
     const nodeChildren = domainId === Domain.PHYSICALMEASUREMENT.toString() ? node.children : children;
-    const selected = serverConfigStore.getValue().enableCohortBuilderV2
-      ? this.getSelectedValues()
-      : selectedIds.includes(this.paramId()) ||
-        groupSelections.includes(parentId);
+    const selected = this.getSelectedValues();
     const displayName = domainId === Domain.PHYSICALMEASUREMENT.toString() && !!searchTerms
       ? highlightSearchTerm(searchTerms, name, colors.success)
       : name;
