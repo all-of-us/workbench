@@ -268,7 +268,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       && domainId !== Domain.VISIT.toString();
   }
 
-  // Hides the tree node for COPE survey if enableCOPESurvey config flag is set to false
+  // Hides the tree node for COPE survey if config hasCopeSurveyData is set to false
   showNode(node: Criteria) {
     const {workspace, cdrVersionListResponse} = this.props;
     return node.subtype === CriteriaSubType.SURVEY.toString() && node.name.includes('COPE')

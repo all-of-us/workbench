@@ -5,7 +5,6 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.common.collect.ImmutableList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.StreamSupport;
 import javax.persistence.EntityManager;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
@@ -47,7 +46,8 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ReportingQueryServiceTest {
 
-  @Autowired private ReportingQueryService reportingNativeQueryService;
+  public static final int BATCH_SIZE = 2;
+  @Autowired private ReportingQueryService reportingQueryService;
 
   // It's necessary to bring in several Dao classes, since we aim to populate join tables
   // that have neither entities of their own nor stand-alone DAOs.
@@ -79,8 +79,7 @@ public class ReportingQueryServiceTest {
     final DbDataset dataset1 = createDataset(workspace1, cohort1);
     entityManager.flush();
 
-    final List<ReportingDatasetCohort> datasetCohorts =
-        reportingNativeQueryService.getDatasetCohorts();
+    final List<ReportingDatasetCohort> datasetCohorts = reportingQueryService.getDatasetCohorts();
     assertThat(datasetCohorts).hasSize(1);
     assertThat(datasetCohorts.get(0).getCohortId()).isEqualTo(cohort1.getCohortId());
     assertThat(datasetCohorts.get(0).getDatasetId()).isEqualTo(dataset1.getDataSetId());
@@ -102,7 +101,7 @@ public class ReportingQueryServiceTest {
   public DbCohort createCohort(DbUser user1, DbWorkspace workspace1) {
     final DbCohort cohort1 = cohortDao.save(ReportingTestUtils.createDbCohort(user1, workspace1));
     assertThat(cohortDao.count()).isEqualTo(1);
-    assertThat(reportingNativeQueryService.getDatasetCohorts()).isEmpty();
+    assertThat(reportingQueryService.getDatasetCohorts()).isEmpty();
     return cohort1;
   }
 
@@ -138,7 +137,8 @@ public class ReportingQueryServiceTest {
     final DbCdrVersion cdrVersion = createCdrVersion();
     final DbWorkspace workspace = createDbWorkspace(user, cdrVersion);
 
-    final Iterator<List<ReportingWorkspace>> iterator = reportingNativeQueryService.getWorkspaceBatchIterator();
+    final Iterator<List<ReportingWorkspace>> iterator =
+        reportingQueryService.getWorkspaceBatchIterator();
     assertThat(iterator.hasNext()).isTrue();
 
     List<ReportingWorkspace> firstBatch = iterator.next();
@@ -149,7 +149,8 @@ public class ReportingQueryServiceTest {
 
   @Test
   public void testWorkspaceIterator_noEntries() {
-    final Iterator<List<ReportingWorkspace>> iterator = reportingNativeQueryService.getWorkspaceBatchIterator();
+    final Iterator<List<ReportingWorkspace>> iterator =
+        reportingQueryService.getWorkspaceBatchIterator();
     assertThat(iterator.hasNext()).isFalse();
   }
 
@@ -157,16 +158,16 @@ public class ReportingQueryServiceTest {
   public void testWorkspaceIIterator_twoAndAHalfBatches() {
     createWorkspaces(5);
 
-    final Iterator<List<ReportingWorkspace>> iterator = reportingNativeQueryService
-        .getWorkspaceBatchIterator();
+    final Iterator<List<ReportingWorkspace>> iterator =
+        reportingQueryService.getWorkspaceBatchIterator();
     assertThat(iterator.hasNext()).isTrue();
 
     final List<ReportingWorkspace> batch1 = iterator.next();
-    assertThat(batch1).hasSize(2);
+    assertThat(batch1).hasSize(BATCH_SIZE);
 
     assertThat(iterator.hasNext()).isTrue();
     final List<ReportingWorkspace> batch2 = iterator.next();
-    assertThat(batch2).hasSize(2);
+    assertThat(batch2).hasSize(BATCH_SIZE);
 
     assertThat(iterator.hasNext()).isTrue();
     final List<ReportingWorkspace> batch3 = iterator.next();
@@ -175,21 +176,17 @@ public class ReportingQueryServiceTest {
     assertThat(iterator.hasNext()).isFalse();
   }
 
+  @Test
   public void testIteratorStream() {
-    createWorkspaces(5);
+    final int numWorkspaces = 5;
+    createWorkspaces(numWorkspaces);
 
-    final Iterator<List<ReportingWorkspace>> iterator = reportingNativeQueryService
-        .getWorkspaceBatchIterator();
-    final Iterable<List<ReportingWorkspace>> iterable = () -> iterator;
+    final int totalRows = reportingQueryService.getWorkspacesStream().mapToInt(List::size).sum();
+    assertThat(totalRows).isEqualTo(numWorkspaces);
 
-    int totalPages = 0;
-    int.totalRows = 0;
-
-    StreamSupport.stream(iterable.spliterator(), false)
-        .map(page -> page.size())
-        .collect(sum)
+    final long totalBatches = reportingQueryService.getWorkspacesStream().count();
+    assertThat(totalBatches).isEqualTo((long) Math.ceil(1.0 * numWorkspaces / BATCH_SIZE));
   }
-
 
   private void createWorkspaces(int count) {
     final DbUser user = createDbUser();
@@ -199,5 +196,4 @@ public class ReportingQueryServiceTest {
     }
     entityManager.flush();
   }
-
 }

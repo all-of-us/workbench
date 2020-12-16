@@ -647,6 +647,36 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                     .operands(ImmutableList.of("100", "101"))));
   }
 
+  private static SearchParameter copeSurveyQuestionAnyValue() {
+    return new SearchParameter()
+        .domain(Domain.SURVEY.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.QUESTION.toString())
+        .ancestorData(false)
+        .standard(false)
+        .group(true)
+        .conceptId(44L)
+        .attributes(ImmutableList.of(new Attribute().name(AttrName.ANY)));
+  }
+
+  private static SearchParameter copeSurveyQuestionVersionAndAnyValue() {
+    return new SearchParameter()
+        .domain(Domain.SURVEY.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.QUESTION.toString())
+        .ancestorData(false)
+        .standard(false)
+        .group(true)
+        .conceptId(44L)
+        .attributes(
+            ImmutableList.of(
+                new Attribute().name(AttrName.ANY),
+                new Attribute()
+                    .name(AttrName.SURVEY_VERSION_CONCEPT_ID)
+                    .operator(Operator.IN)
+                    .operands(ImmutableList.of("100", "101"))));
+  }
+
   private static SearchParameter copeSurveyAnswer() {
     return new SearchParameter()
         .domain(Domain.SURVEY.toString())
@@ -1997,6 +2027,30 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     SearchRequest searchRequest =
         createSearchRequests(
             Domain.SURVEY.toString(), ImmutableList.of(copeSurveyQuestion()), new ArrayList<>());
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    assertParticipants(response, 1);
+  }
+
+  @Test
+  public void countSubjectsCopeSurveyQuestionVersionAndAnyValue() {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            Domain.SURVEY.toString(),
+            ImmutableList.of(copeSurveyQuestionVersionAndAnyValue()),
+            new ArrayList<>());
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    assertParticipants(response, 1);
+  }
+
+  @Test
+  public void countSubjectsCopeSurveyQuestionAnyValue() {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            Domain.SURVEY.toString(),
+            ImmutableList.of(copeSurveyQuestionAnyValue()),
+            new ArrayList<>());
     ResponseEntity<Long> response =
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
     assertParticipants(response, 1);

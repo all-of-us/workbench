@@ -100,6 +100,7 @@ public final class SearchGroupItemQueryBuilder {
           + "and concept_id in unnest(%s)\n"
           + "and is_selectable = 1\n";
   private static final String VALUE_AS_NUMBER = " value_as_number %s %s";
+  private static final String VALUE_AS_NUMBER_IS_NOT_NULL = " and value_as_number is not null";
   private static final String VALUE_AS_CONCEPT_ID = " value_as_concept_id %s unnest(%s)";
   private static final String VALUE_SOURCE_CONCEPT_ID = " value_source_concept_id %s unnest(%s)";
   private static final String SOURCE_CONCEPT_SURVEY_ID =
@@ -439,6 +440,10 @@ public final class SearchGroupItemQueryBuilder {
         parameter.getAttributes().stream()
             .filter(attr -> attr.getName().equals(AttrName.NUM))
             .collect(Collectors.toList());
+    List<Attribute> any =
+        parameter.getAttributes().stream()
+            .filter(attr -> attr.getName().equals(AttrName.ANY))
+            .collect(Collectors.toList());
     List<Attribute> versions =
         parameter.getAttributes().stream()
             .filter(attr -> attr.getName().equals(AttrName.SURVEY_VERSION_CONCEPT_ID))
@@ -460,7 +465,7 @@ public final class SearchGroupItemQueryBuilder {
       if (!conceptIds.isEmpty()) {
         // attribute.conceptId is unique to blood pressure attributes
         // this indicates we need to build a blood pressure sql statement
-        sqlBuilder.append(processBloodPressureSql(queryParams, nums));
+        sqlBuilder.append(processBloodPressureSql(queryParams, parameter.getAttributes()));
       } else {
         String parens = cats.isEmpty() ? "" : "(";
         sqlBuilder.append(
@@ -501,6 +506,9 @@ public final class SearchGroupItemQueryBuilder {
               SOURCE_CONCEPT_SURVEY_ID,
               OperatorUtils.getSqlOperator(versions.get(0).getOperator()),
               versionParam));
+    }
+    if (!any.isEmpty() && parameter.getDomain().equals(Domain.SURVEY.toString())) {
+      sqlBuilder.append(VALUE_AS_NUMBER_IS_NOT_NULL);
     }
 
     return sqlBuilder.toString();

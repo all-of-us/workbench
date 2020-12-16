@@ -103,9 +103,7 @@
     "enableCohortBuilderV2": true,
     "enableConceptSetSearchV2": true,
     "enableReportingUploadCron": true,
-    "enableCOPESurvey": true,
-    "enableCustomRuntimes": true,
-    "enableFitbit": true
+    "enableCustomRuntimes": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-prod",

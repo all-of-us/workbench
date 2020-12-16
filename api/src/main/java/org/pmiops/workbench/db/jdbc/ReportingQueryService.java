@@ -4,6 +4,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
@@ -34,7 +36,11 @@ public interface ReportingQueryService {
   List<ReportingWorkspace> getWorkspaces(long limit, long offset);
 
   default List<ReportingWorkspace> getWorkspaces() {
-    return getWorkspaces(Long.MAX_VALUE, 0);
+    return getAll(this::getWorkspaces);
+  }
+
+  default Stream<List<ReportingWorkspace>> getWorkspacesStream() {
+    return getStream(this::getWorkspaces);
   }
 
   default <T> List<T> getBatchByIndex(BiFunction<Long, Long, List<T>> getter, long batchIndex) {
@@ -72,5 +78,16 @@ public interface ReportingQueryService {
 
   default Iterator<List<ReportingWorkspace>> getWorkspaceBatchIterator() {
     return getBatchIterator(this::getWorkspaces);
+  }
+
+  // Use the maximum batch to get in single batch
+  default <T> List<T> getAll(BiFunction<Long, Long, List<T>> getter) {
+    return getter.apply(Long.MAX_VALUE, 0L);
+  }
+
+  default <T> Stream<List<T>> getStream(BiFunction<Long, Long, List<T>> getter) {
+    final Iterator<List<T>> batchIterator = getBatchIterator(getter);
+    final Iterable<List<T>> iterable = () -> batchIterator;
+    return StreamSupport.stream(iterable.spliterator(), false);
   }
 }

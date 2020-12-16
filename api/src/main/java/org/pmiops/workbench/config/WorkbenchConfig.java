@@ -248,12 +248,8 @@ public class WorkbenchConfig {
     public boolean enableConceptSetSearchV2;
     // If true, reporting cron job will write data to configured BigQuery reporting dataset.
     public boolean enableReportingUploadCron;
-    // Flag to indicate whether to show COPE Survey data
-    public boolean enableCOPESurvey;
     // Whether users should be able to customize notebook runtime settings.
     public boolean enableCustomRuntimes;
-    // Flag to indicate if whether to display FitBit data
-    public boolean enableFitbit;
   }
 
   public static class ActionAuditConfig {
