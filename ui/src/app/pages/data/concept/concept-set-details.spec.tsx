@@ -10,8 +10,6 @@ import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
 import {workspaceDataStub, WorkspacesApiStub, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
 
 import {ConceptSetDetails} from 'app/pages/data/concept/concept-set-details';
-import {serverConfigStore} from 'app/utils/navigation';
-import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
 describe('ConceptSetDetails', () => {
@@ -27,10 +25,6 @@ describe('ConceptSetDetails', () => {
       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
       csid: conceptSet.id
-    });
-    serverConfigStore.next({
-      ...defaultServerConfig,
-      enableConceptSetSearchV2: false
     });
   });
 

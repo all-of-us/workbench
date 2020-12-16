@@ -9,8 +9,6 @@ import {ConceptAddModal} from './concept-add-modal';
 import {ConceptSetsApi} from 'generated/fetch/api';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
-import {serverConfigStore} from 'app/utils/navigation';
-import defaultServerConfig from 'testing/default-server-config';
 
 
 describe('ConceptAddModal', () => {
@@ -34,10 +32,6 @@ describe('ConceptAddModal', () => {
     conceptSetsApi = new ConceptSetsApiStub();
     registerApiClient(ConceptSetsApi, conceptSetsApi);
     currentWorkspaceStore.next(workspaceDataStub);
-    serverConfigStore.next({
-      ...defaultServerConfig,
-      enableConceptSetSearchV2: false
-    });
   });
 
   it('finds the correct number of concepts in the selected domain', async () => {

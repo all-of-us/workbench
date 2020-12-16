@@ -11,7 +11,7 @@ import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
-import {conceptSetUpdating, serverConfigStore} from 'app/utils/navigation';
+import {conceptSetUpdating} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet, CreateConceptSetRequest, Criteria, Domain, DomainCount, UpdateConceptSetRequest} from 'generated/fetch';
 import {validate} from 'validate.js';
@@ -27,16 +27,7 @@ const styles = reactStyles({
 });
 
 const filterConcepts = (concepts: any[], domain: Domain) => {
-  if (domain === Domain.SURVEY) {
-    if (serverConfigStore.getValue().enableConceptSetSearchV2) {
-      return concepts.filter(concept => concept.subtype === 'QUESTION');
-    } else {
-      return concepts.filter(concept => !!concept.question);
-    }
-  } else {
-    return serverConfigStore.getValue().enableConceptSetSearchV2 ? concepts
-      : concepts.filter(concept => concept.domainId.replace(' ', '').toLowerCase() === Domain[domain].toLowerCase());
-  }
+  return domain === Domain.SURVEY ? concepts.filter(concept => concept.subtype === 'QUESTION') : concepts;
 };
 
 const CONCEPT_SET_CONCEPT_LIMIT = 1000;
@@ -150,7 +141,7 @@ export const ConceptAddModal = withCurrentWorkspace()
 
   disableSave(errors) {
     const {addingToExistingSet, saving, selectedSet, selectedConceptsInDomain} = this.state;
-    if (serverConfigStore.getValue().enableConceptSetSearchV2 && addingToExistingSet) {
+    if (addingToExistingSet) {
       return selectedSet && selectedSet.criteriums &&
           ((selectedSet.criteriums.length + selectedConceptsInDomain.length) > CONCEPT_SET_CONCEPT_LIMIT);
     }
