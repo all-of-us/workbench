@@ -4,23 +4,19 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
-import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper.ConceptSetContext;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -49,33 +45,27 @@ public class ConceptSetService {
   private final ConceptDao conceptDao;
   private final ConceptSetDao conceptSetDao;
   private final ConceptBigQueryService conceptBigQueryService;
-  private final ConceptService conceptService;
   private final CohortBuilderService cohortBuilderService;
   private final ConceptSetMapper conceptSetMapper;
   private final Clock clock;
-  private final Provider<WorkbenchConfig> configProvider;
-  private CohortBuilderMapper cohortBuilderMapper;
+  private final CohortBuilderMapper cohortBuilderMapper;
 
   @Autowired
   public ConceptSetService(
       ConceptDao conceptDao,
       ConceptSetDao conceptSetDao,
       ConceptBigQueryService conceptBigQueryService,
-      ConceptService conceptService,
       CohortBuilderService cohortBuilderService,
       CohortBuilderMapper cohortBuilderMapper,
       ConceptSetMapper conceptSetMapper,
-      Clock clock,
-      Provider<WorkbenchConfig> configProvider) {
+      Clock clock) {
     this.conceptDao = conceptDao;
     this.conceptSetDao = conceptSetDao;
     this.conceptBigQueryService = conceptBigQueryService;
-    this.conceptService = conceptService;
     this.cohortBuilderService = cohortBuilderService;
     this.cohortBuilderMapper = cohortBuilderMapper;
     this.conceptSetMapper = conceptSetMapper;
     this.clock = clock;
-    this.configProvider = configProvider;
   }
 
   public ConceptSet copyAndSave(
@@ -278,13 +268,13 @@ public class ConceptSetService {
         dbConceptSetConceptIds.stream()
             .map(DbConceptSetConceptId::getConceptId)
             .collect(Collectors.toList());
-    List<Criteria> criteriaList = new ArrayList<Criteria>();
+    List<Criteria> criteriaList;
     if (!conceptSet.getDomain().equals(Domain.PHYSICAL_MEASUREMENT)) {
       criteriaList =
           cohortBuilderService.findCriteriaByDomainIdAndConceptIds(
               conceptSet.getDomain().toString(), dbConceptSetConceptIds);
     } else {
-      criteriaList.addAll(
+      criteriaList =
           StreamSupport.stream(conceptDao.findAll(conceptIds).spliterator(), false)
               .map(
                   concept -> {
@@ -294,7 +284,7 @@ public class ConceptSetService {
                         isStandard,
                         isStandard ? concept.getCountValue() : concept.getSourceCountValue());
                   })
-              .collect(Collectors.toList()));
+              .collect(Collectors.toList());
     }
     return conceptSet.criteriums(criteriaList);
   }
