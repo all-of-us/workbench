@@ -11,8 +11,6 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.reporting.ReportingMapper;
-import org.pmiops.workbench.reporting.ReportingMapperImpl;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,13 +34,12 @@ public class WorkspaceDaoTest {
   private static final String WORKSPACE_NAMESPACE = "aou-1";
 
   @Autowired WorkspaceDao workspaceDao;
-  @Autowired ReportingMapper reportingMapper;
 
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired UserDao userDao;
 
   @TestConfiguration
-  @Import({CommonMappers.class, ReportingMapperImpl.class, ReportingTestConfig.class})
+  @Import({CommonMappers.class, ReportingTestConfig.class})
   @MockBean({Clock.class})
   public static class conifg {}
 

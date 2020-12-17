@@ -1,6 +1,8 @@
 package org.pmiops.workbench.reporting;
 
+import java.util.List;
 import org.pmiops.workbench.model.ReportingSnapshot;
+import org.pmiops.workbench.model.ReportingWorkspace;
 
 /*
  * Service to upload a pre-compiled ReportingSnapshot to the appropriate Reporting dataset
@@ -9,4 +11,6 @@ import org.pmiops.workbench.model.ReportingSnapshot;
  */
 public interface ReportingUploadService {
   void uploadSnapshot(ReportingSnapshot reportingSnapshot);
+
+  void uploadBatch(List<ReportingWorkspace> batch, long captureTimestamp);
 }

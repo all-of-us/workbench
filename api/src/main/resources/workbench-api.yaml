@@ -8297,10 +8297,6 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ReportingUser"
-      workspaces:
-        type: array
-        items:
-          "$ref": "#/definitions/ReportingWorkspace"
   ReportingUploadDetails:
     type: object
     properties:

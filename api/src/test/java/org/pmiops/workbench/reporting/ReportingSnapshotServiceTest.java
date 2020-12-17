@@ -20,10 +20,8 @@ import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
-import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
-import org.pmiops.workbench.testconfig.ReportingTestUtils;
 import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,12 +43,7 @@ public class ReportingSnapshotServiceTest {
   @Autowired private ReportingTestFixture<DbUser, ReportingUser> userFixture;
 
   @TestConfiguration
-  @Import({
-    CommonMappers.class,
-    ReportingMapperImpl.class,
-    ReportingTestConfig.class,
-    ReportingSnapshotServiceImpl.class
-  })
+  @Import({CommonMappers.class, ReportingTestConfig.class, ReportingSnapshotServiceImpl.class})
   @MockBean({BigQueryService.class})
   public static class Configuration {
     @Bean
@@ -67,7 +60,6 @@ public class ReportingSnapshotServiceTest {
     assertThat(snapshot.getDatasets()).isEmpty();
     assertThat(snapshot.getInstitutions()).isEmpty();
     assertThat(snapshot.getUsers()).isEmpty();
-    assertThat(snapshot.getWorkspaces()).isEmpty();
   }
 
   @Test
@@ -94,10 +86,6 @@ public class ReportingSnapshotServiceTest {
     assertThat(snapshot.getUsers()).hasSize(2);
     final ReportingUser user = snapshot.getUsers().get(0);
     userFixture.assertDTOFieldsMatchConstants(user);
-
-    assertThat(snapshot.getWorkspaces()).hasSize(1);
-    final ReportingWorkspace workspace = snapshot.getWorkspaces().get(0);
-    ReportingTestUtils.assertDtoWorkspaceFields(workspace);
 
     assertThat(snapshot.getInstitutions()).hasSize(1);
     assertInstitutionFields(snapshot.getInstitutions().get(0));

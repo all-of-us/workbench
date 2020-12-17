@@ -307,8 +307,7 @@ public class ReportingTestUtils {
         + oneForNonEmpty(reportingSnapshot.getDatasetConceptSets())
         + oneForNonEmpty(reportingSnapshot.getDatasetDomainIdValues())
         + oneForNonEmpty(reportingSnapshot.getInstitutions())
-        + oneForNonEmpty(reportingSnapshot.getUsers())
-        + oneForNonEmpty(reportingSnapshot.getWorkspaces());
+        + oneForNonEmpty(reportingSnapshot.getUsers());
   }
 
   public static ReportingInstitution createReportingInstitution() {
@@ -387,7 +386,6 @@ public class ReportingTestUtils {
         .datasetDomainIdValues(new ArrayList<>())
         .datasetCohorts(new ArrayList<>())
         .institutions(new ArrayList<>())
-        .users(new ArrayList<>())
-        .workspaces(new ArrayList<>());
+        .users(new ArrayList<>());
   }
 }
