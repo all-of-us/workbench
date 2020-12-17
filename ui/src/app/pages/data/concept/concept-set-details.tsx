@@ -28,7 +28,6 @@ import {
   currentConceptSetStore,
   currentConceptStore,
   navigate,
-  navigateByUrl,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -202,17 +201,13 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
       try {
         this.setState({editSaving: true});
         await conceptSetsApi().updateConceptSet(ns, wsid, csid,
-          {...conceptSet, name: editName, description: editDescription, concepts: null});
+          {...conceptSet, name: editName, description: editDescription});
         await this.getConceptSet();
       } catch (error) {
         console.log(error);
       } finally {
         this.setState({editing: false, editSaving: false});
       }
-    }
-
-    onSelectConcepts(concepts) {
-      this.setState({selectedConcepts: concepts});
     }
 
     async onRemoveConcepts() {
@@ -252,14 +247,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
     }
 
     get conceptSetConceptsCount(): number {
-      return !!this.state.conceptSet && this.state.conceptSet.concepts ? this.state.conceptSet.concepts.length : 0;
-    }
-
-    addToConceptSet() {
-      const {workspace} = this.props;
-      const {conceptSet} = this.state;
-      const queryParams = conceptSet.survey ? '?survey=' +  conceptSet.survey : '?domain=' + conceptSet.domain;
-      navigateByUrl('workspaces/' + workspace.namespace + '/' + workspace.id + '/data/concepts' + queryParams);
+      return !!this.state.conceptSet && this.state.conceptSet.criteriums ? this.state.conceptSet.criteriums.length : 0;
     }
 
     get displayDomainName() {

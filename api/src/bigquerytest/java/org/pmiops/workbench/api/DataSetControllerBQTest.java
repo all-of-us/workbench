@@ -335,7 +335,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     DbConceptSet dbConceptSet = new DbConceptSet();
     dbConceptSet.setDomain(DbStorageEnums.domainToStorage(domain));
     DbConceptSetConceptId dbConceptSetConceptId =
-        DbConceptSetConceptId.builder().addConceptId(1L).addStandard(true).build();
+        DbConceptSetConceptId.builder().addConceptId(1L).addStandard(false).build();
     dbConceptSet.setConceptSetConceptIds(
         new HashSet<>(Collections.singletonList(dbConceptSetConceptId)));
     dbConceptSet.setWorkspaceId(workspaceId);

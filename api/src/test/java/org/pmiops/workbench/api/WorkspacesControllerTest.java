@@ -1903,7 +1903,7 @@ public class WorkspacesControllerTest {
             .getBody();
     assertThat(clonedConceptSet.getName()).isEqualTo(originalConceptSet.getName());
     assertThat(clonedConceptSet.getDomain()).isEqualTo(originalConceptSet.getDomain());
-    assertThat(clonedConceptSet.getConcepts()).isEqualTo(originalConceptSet.getConcepts());
+    assertThat(clonedConceptSet.getCriteriums()).isEqualTo(originalConceptSet.getCriteriums());
     assertThat(clonedConceptSet.getCreator()).isEqualTo(clonedWorkspace.getCreator());
     assertThat(clonedConceptSet.getCreationTime()).isEqualTo(clonedWorkspace.getCreationTime());
     assertThat(clonedConceptSet.getLastModifiedTime())
