@@ -1428,6 +1428,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               {this.renderButtonText()}
             </ModalTitle>
             <ModalBody style={{color: colors.primary, lineHeight: '1rem', marginTop: '0.25rem'}}>
+              {loading && <SpinnerOverlay overrideStylesOverlay={styles.spinner}/>}
               <div>Your responses to these questions:</div>
               <div style={{margin: '0.25rem 0 0.25rem 1rem'}}>
                 <span style={{fontWeight: 600}}>Primary purpose of your project</span> (Question 1)<br/>
