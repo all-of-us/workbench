@@ -188,6 +188,16 @@ public class ReportingQueryServiceTest {
     assertThat(totalBatches).isEqualTo((long) Math.ceil(1.0 * numWorkspaces / BATCH_SIZE));
   }
 
+  @Test
+  public void testEmptyStream() {
+    workspaceDao.deleteAll();
+    final int totalRows = reportingQueryService.getWorkspacesStream().mapToInt(List::size).sum();
+    assertThat(totalRows).isEqualTo(0);
+
+    final long totalBatches = reportingQueryService.getWorkspacesStream().count();
+    assertThat(totalBatches).isEqualTo(0);
+  }
+
   private void createWorkspaces(int count) {
     final DbUser user = createDbUser();
     final DbCdrVersion cdrVersion = createCdrVersion();

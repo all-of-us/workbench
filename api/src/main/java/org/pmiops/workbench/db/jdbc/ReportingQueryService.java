@@ -48,9 +48,16 @@ public interface ReportingQueryService {
     return getter.apply(getQueryBatchSize(), offset);
   }
 
+  /**
+   * Get an iterator to batches of rows
+   * @param getter - method to retrieve a batch, typically a method reference against this interface
+   * @param <T> - DTO type
+   * @return
+   */
   default <T> Iterator<List<T>> getBatchIterator(BiFunction<Long, Long, List<T>> getter) {
     return new Iterator<List<T>>() {
       private long batchIndex = 0;
+      private long lastResultSetSize = -1; // first call to hasNext() should return true
 
       @Override
       public void remove() {
@@ -66,12 +73,21 @@ public interface ReportingQueryService {
 
       @Override
       public boolean hasNext() {
-        return !getBatchByIndex(getter, batchIndex).isEmpty();
+        if (lastResultSetSize < 0) {
+          // query for one row. lastResultSetSize will be updated if there's at least one row and we
+          // call next().
+          final List<T> upToOneRow = getter.apply(1L, 0L);
+          return !upToOneRow.isEmpty();
+        } else {
+          return lastResultSetSize == getQueryBatchSize();
+        }
       }
 
       @Override
       public List<T> next() {
-        return getBatchByIndex(getter, batchIndex++);
+        final List<T> result = getBatchByIndex(getter, batchIndex++);
+        lastResultSetSize = result.size();
+        return result;
       }
     };
   }
