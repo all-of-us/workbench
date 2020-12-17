@@ -9,8 +9,6 @@ import {ConceptAddModal} from './concept-add-modal';
 import {ConceptSetsApi} from 'generated/fetch/api';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
-import {serverConfigStore} from 'app/utils/navigation';
-import defaultServerConfig from 'testing/default-server-config';
 
 
 describe('ConceptAddModal', () => {
@@ -27,22 +25,18 @@ describe('ConceptAddModal', () => {
     props = {
       onSave: () => {},
       onClose: () => {},
-      selectedConcepts: stubConcepts,
+      selectedConcepts: stubConcepts.filter((c) => c.domainId === activeDomainTab.domain.toString()),
       activeDomainTab: activeDomainTab
     };
 
     conceptSetsApi = new ConceptSetsApiStub();
     registerApiClient(ConceptSetsApi, conceptSetsApi);
     currentWorkspaceStore.next(workspaceDataStub);
-    serverConfigStore.next({
-      ...defaultServerConfig,
-      enableConceptSetSearchV2: false
-    });
   });
 
   it('finds the correct number of concepts in the selected domain', async () => {
     const wrapper = component();
-    const stubConceptsInDomain = stubConcepts.filter((c) => c.domainId === activeDomainTab.name);
+    const stubConceptsInDomain = stubConcepts.filter((c) => c.domainId === activeDomainTab.domain.toString());
     expect(wrapper.find('[data-test-id="add-concept-title"]').first().text())
         .toBe('Add ' + stubConceptsInDomain.length + ' Concepts to '
             + activeDomainTab.name + ' Concept Set');

@@ -74,7 +74,7 @@ public class ConceptSetMapperTest {
     assertThat(clientConceptSet.getLastModifiedTime())
         .isEqualTo(dbConceptSet.getLastModifiedTime().getTime());
     assertThat(clientConceptSet.getCreator()).isEqualTo(dbConceptSet.getCreator().getUsername());
-    assertThat(clientConceptSet.getConcepts()).isNull();
+    assertThat(clientConceptSet.getCriteriums()).isNull();
   }
 
   @Test
@@ -108,6 +108,6 @@ public class ConceptSetMapperTest {
     assertThat(clientConceptSet.getLastModifiedTime())
         .isEqualTo(dbConceptSet.getLastModifiedTime().getTime());
     assertThat(clientConceptSet.getCreator()).isEqualTo(dbConceptSet.getCreator().getUsername());
-    assertThat(clientConceptSet.getConcepts()).isNull();
+    assertThat(clientConceptSet.getCriteriums()).isNull();
   }
 }

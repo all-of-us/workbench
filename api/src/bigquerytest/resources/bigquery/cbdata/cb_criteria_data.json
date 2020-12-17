@@ -322,5 +322,23 @@
     "has_ancestor_data": 0,
     "path": "23487234.23487235.23487236",
     "synonyms": "Answer"
+  },
+  {
+    "id": 23746,
+    "parent_id": 6,
+    "domain_id": "PROCEDURE",
+    "is_standard": 0,
+    "type": "ICD9CM",
+    "concept_id": 1,
+    "code": "001.1",
+    "name": "Cholera due to vibrio cholerae",
+    "est_count": 2,
+    "is_group": 1,
+    "is_selectable": 1,
+    "has_attribute": 0,
+    "has_hierarchy": 1,
+    "has_ancestor_data": 0,
+    "path": "1.5.6.23746",
+    "synonyms": "Cholera due to vibrio cholerae|Cholera d/t vib cholerae|Cholera d/t vib cholerae|Cholera due to vibrio cholerae|Cholera due to vibrio cholerae|[condition_rank1]"
   }
 ]

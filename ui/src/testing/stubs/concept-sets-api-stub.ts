@@ -35,7 +35,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
         domain: Domain.CONDITION,
         lastModifiedTime: new Date().getTime() - 8000,
         participantCount: ConceptStubVariables.STUB_CONCEPTS.length,
-        concepts: ConceptStubVariables.STUB_CONCEPTS
+        criteriums: ConceptStubVariables.STUB_CONCEPTS
       },  {
         id: 346,
         name: 'Mock Concept Set Measurement',
@@ -146,13 +146,13 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
       if (!target) {
         throw Error(`concept set ${conceptSetId} not found`);
       }
-      if (!target.concepts) {
-        target.concepts = [];
+      if (!target.criteriums) {
+        target.criteriums = [];
       }
       for (const id of req.removedConceptSetConceptIds || []) {
-        const index = target.concepts.findIndex(c => c.conceptId === id.conceptId);
+        const index = target.criteriums.findIndex(c => c.conceptId === id.conceptId);
         if (index >= 0) {
-          target.concepts = target.concepts.filter(concept => concept.conceptId !== id.conceptId);
+          target.criteriums = target.criteriums.filter(concept => concept.conceptId !== id.conceptId);
         }
       }
       for (const id of req.addedConceptSetConceptIds || []) {
@@ -160,7 +160,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
         if (!concept) {
           throw Error(`concept ${id} not found`);
         }
-        target.concepts.push(concept);
+        target.criteriums.push(concept);
       }
       resolve(target);
     });
