@@ -1,20 +1,19 @@
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
-import {AttributesPageV2} from 'app/cohort-search/attributes-page-v2/attributes-page-v2.component';
+import {AttributesPage} from 'app/cohort-search/attributes-page/attributes-page.component';
 import {saveCriteria} from 'app/cohort-search/cohort-search/cohort-search.component';
 import {ModifierPage} from 'app/cohort-search/modifier-page/modifier-page.component';
-import {attributeDisplay, nameDisplay, typeDisplay} from 'app/cohort-search/utils';
+import {nameDisplay, typeDisplay} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {FlexColumn, FlexRow, FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
+import colors from 'app/styles/colors';
 import {reactStyles, withCurrentCohortCriteria, withCurrentCohortSearchContext} from 'app/utils';
 import {
   attributesSelectionStore,
   currentCohortCriteriaStore,
-  serverConfigStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {Attribute, Criteria, Domain, Modifier} from 'generated/fetch';
@@ -113,27 +112,6 @@ const styles = reactStyles({
     border: '0.1rem solid' + colors.accent,
     color: colors.accent
   },
-  // Remove the following styles once enableCohortBuilderV2 is set to true
-  selectionContainerModal: {
-    background: colors.white,
-    border: `2px solid ${colors.primary}`,
-    borderRadius: '5px',
-    height: 'calc(100% - 150px)',
-    overflowX: 'hidden',
-    overflowY: 'auto',
-    width: '95%',
-  },
-  selectionPanelModal: {
-    background: colorWithWhiteness(colors.black, 0.95),
-    height: '100%',
-    padding: '0.5rem 0 0 1rem',
-  },
-  selectionItemModal: {
-    display: 'flex',
-    fontSize: '14px',
-    padding: '0.2rem 0.5rem 0',
-    width: '100%',
-  },
   selectionHeader: {
     borderBottom: `1px solid ${colors.disabled}`,
     color: colors.primary,
@@ -141,12 +119,6 @@ const styles = reactStyles({
     fontSize: '13px',
     fontWeight: 600,
     paddingRight: '0.25rem'
-  },
-  backButton: {
-    border: '0px',
-    backgroundColor: 'none',
-    color: colors.accent,
-    marginRight: '1rem'
   },
   sectionTitle: {
     marginTop: '0.5rem',
@@ -187,55 +159,6 @@ interface SelectionInfoProps {
 
 interface SelectionInfoState {
   truncated: boolean;
-}
-
-// Delete once enableCohortBuilderV2 flag is removed
-export class SelectionInfoModal extends React.Component<SelectionInfoProps, SelectionInfoState> {
-  name: HTMLDivElement;
-  constructor(props: SelectionInfoProps) {
-    super(props);
-    this.state = {truncated: false};
-  }
-
-  componentDidMount(): void {
-    const {offsetWidth, scrollWidth} = this.name;
-    this.setState({truncated: scrollWidth > offsetWidth});
-  }
-
-  get showType() {
-    return ![
-      Domain.PHYSICALMEASUREMENT.toString(),
-      Domain.DRUG.toString(),
-      Domain.SURVEY.toString()
-    ].includes(this.props.selection.domainId);
-  }
-
-  get showOr() {
-    const {index, selection} = this.props;
-    return index > 0 && selection.domainId !== Domain.PERSON.toString();
-  }
-
-  render() {
-    const {selection, removeSelection} = this.props;
-    const itemName = <React.Fragment>
-      {this.showType && <strong>{typeDisplay(selection)}&nbsp;</strong>}
-      {nameDisplay(selection)} {attributeDisplay(selection)}
-    </React.Fragment>;
-    return <div style={styles.selectionItemModal}>
-      <button style={styles.removeSelection} onClick={() => removeSelection()}>
-        <ClrIcon shape='times-circle'/>
-      </button>
-      <div style={styles.itemInfo}>
-        {this.showOr && <strong>OR&nbsp;</strong>}
-        {!!selection.group && <span>Group&nbsp;</span>}
-        <TooltipTrigger disabled={!this.state.truncated} content={itemName}>
-          <div style={styles.itemName} ref={(e) => this.name = e}>
-            {itemName}
-          </div>
-        </TooltipTrigger>
-      </div>
-    </div>;
-  }
 }
 
 export class SelectionInfo extends React.Component<SelectionInfoProps, SelectionInfoState> {
@@ -301,62 +224,6 @@ interface State {
   disableSave: boolean;
   modifiers: Array<Modifier>;
   showModifiersSlide: boolean;
-}
-
-
-export class SelectionListModalVersion extends React.Component<Props> {
-  constructor(props: Props) {
-    super(props);
-  }
-
-  get showModifiers() {
-    return ![Domain.PHYSICALMEASUREMENT, Domain.PERSON, Domain.SURVEY].includes(this.props.domain);
-  }
-
-  get showNext() {
-    return this.showModifiers && this.props.view !== 'modifiers';
-  }
-
-  get showBack() {
-    return this.showModifiers && this.props.view === 'modifiers';
-  }
-
-  render() {
-    const {back, close, disableFinish, finish, removeSelection, selections, setView} = this.props;
-    return <div style={styles.selectionPanelModal}>
-      <h5 style={styles.selectionTitle}>Selected Criteria</h5>
-      <div style={styles.selectionContainerModal}>
-        {selections.map((selection, s) =>
-            <SelectionInfoModal key={s}
-                           index={s}
-                           selection={selection}
-                           removeSelection={() => removeSelection(selection)}/>
-        )}
-      </div>
-      {!serverConfigStore.getValue().enableCohortBuilderV2 && <div style={styles.buttonContainer}>
-        <Button type='link'
-          style={{...styles.button, color: colors.dark, fontSize: '14px'}}
-          onClick={() => close()}>
-          Cancel
-        </Button>
-        {this.showNext && <Button type='primary' onClick={() => setView('modifiers')}
-          style={styles.button}
-          disabled={!selections || selections.length === 0}>
-          Next
-        </Button>}
-        {this.showBack && <Button type='primary'
-          style={styles.button}
-          onClick={() => back()}>
-          Back
-        </Button>}
-        <Button type='primary' onClick={() => finish()}
-          style={styles.button}
-          disabled={!selections || selections.length === 0 || disableFinish}>
-          Finish
-        </Button>
-      </div>}
-    </div>;
-  }
 }
 
 export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCohortSearchContext())(
@@ -528,9 +395,9 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
                                                  this.setState({showModifiersSlide: false});
                                                  this.checkCriteriaChanges();
                                                }}/>}
-          {!!attributesSelection && <AttributesPageV2 back={() => this.closeSidebar()}
-                                                      close={() => attributesSelectionStore.next(undefined)}
-                                                      node={attributesSelection}/>}
+          {!!attributesSelection && <AttributesPage back={() => this.closeSidebar()}
+                                                    close={() => attributesSelectionStore.next(undefined)}
+                                                    node={attributesSelection}/>}
       </div>;
     }
   }

@@ -67,7 +67,6 @@ describe('HelpSidebar', () => {
     cohortReviewStore.next(cohortReviewStubs[0]);
     serverConfigStore.next({
       ...defaultServerConfig,
-      enableCohortBuilderV2: false,
       enableCustomRuntimes: true
     });
     runtimeStore.set({workspaceNamespace: workspaceDataStub.namespace, runtime: runtimeStub.runtime});

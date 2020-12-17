@@ -1,21 +1,17 @@
 import {mount, shallow} from 'enzyme';
 
-import {cohortBuilderApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
-import {
-  CohortBuilderApi, CohortsApi, Domain, ModifierType,
-  WorkspacesApi
-} from 'generated/fetch';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {currentCohortSearchContextStore, currentWorkspaceStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
+import {CohortBuilderApi, Domain, ModifierType, WorkspacesApi} from 'generated/fetch';
 import * as React from 'react';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
-import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
 import {workspaceDataStub, WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {ModifierPageModal} from './modifier-page-modal.component';
+import {ModifierPage} from './modifier-page.component';
 
 
-describe('ListModifierPage', () => {
+describe('ModifierPage', () => {
   beforeEach(() => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
@@ -26,7 +22,7 @@ describe('ListModifierPage', () => {
     });
     currentWorkspaceStore.next(workspaceDataStub);
     serverConfigStore.next({
-      enableEventDateModifier: true,
+      enableEventDateModifier: false,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
@@ -35,15 +31,13 @@ describe('ListModifierPage', () => {
   });
 
   it('should render', () => {
-    const wrapper = shallow(<ModifierPageModal disabled={() => {}} wizard={{}}/>);
+    const wrapper = shallow(<ModifierPage closeModifiers={() => {}} selections={[]}/>);
     expect(wrapper.exists()).toBeTruthy();
   });
 
   it('should display Only Age Event modifier for SURVEY', async() => {
-    const survey = Domain.SURVEY;
-    const wrapper = mount(<ModifierPageModal disabled={() => {
-    }} wizard={{}}
-                                        searchContext={{domain: survey, item: {modifiers: []}}}/>);
+    currentCohortSearchContextStore.next({domain: Domain.SURVEY, item: {modifiers: []}});
+    const wrapper = mount(<ModifierPage closeModifiers={() => {}} selections={[]}/>);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.exists()).toBeTruthy();
     expect(

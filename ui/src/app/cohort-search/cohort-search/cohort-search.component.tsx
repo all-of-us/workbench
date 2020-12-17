@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
-import {DemographicsV2} from 'app/cohort-search/demographics/demographics-v2.component';
+import {Demographics} from 'app/cohort-search/demographics/demographics.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {generateId, typeToTitle} from 'app/cohort-search/utils';
@@ -15,7 +15,6 @@ import {
   attributesSelectionStore,
   currentCohortCriteriaStore,
   currentCohortSearchContextStore,
-  serverConfigStore,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
 import {Criteria, CriteriaType, Domain, TemporalMention, TemporalTime} from 'generated/fetch';
@@ -169,10 +168,8 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
   }
 
   componentWillUnmount() {
-    if (serverConfigStore.getValue().enableCohortBuilderV2) {
-      this.subscription.unsubscribe();
-      currentCohortCriteriaStore.next(undefined);
-    }
+    this.subscription.unsubscribe();
+    currentCohortCriteriaStore.next(undefined);
   }
 
   componentDidMount(): void {
@@ -199,18 +196,16 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
       }
       this.setState({backMode, hierarchyNode, mode, selectedIds, selections});
     }
-    if (serverConfigStore.getValue().enableCohortBuilderV2) {
-      currentCohortCriteriaStore.next(selections);
-      this.subscription = currentCohortCriteriaStore.subscribe(newSelections => {
-        if (!!newSelections) {
-          this.setState({
-            groupSelections: newSelections.filter(s => s.group).map(s => s.id),
-            selectedIds: newSelections.map(s => s.parameterId),
-            selections: newSelections
-          });
-        }
-      });
-    }
+    currentCohortCriteriaStore.next(selections);
+    this.subscription = currentCohortCriteriaStore.subscribe(newSelections => {
+      if (!!newSelections) {
+        this.setState({
+          groupSelections: newSelections.filter(s => s.group).map(s => s.id),
+          selectedIds: newSelections.map(s => s.parameterId),
+          selections: newSelections
+        });
+      }
+    });
   }
 
   setScroll = (id: string) => {
@@ -337,7 +332,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
             : {height: 'calc(100% - 3.5rem)'}
         }>
           {domain === Domain.PERSON ? <div style={{flex: 1, overflow: 'auto'}}>
-              <DemographicsV2
+              <Demographics
                 count={count}
                 criteriaType={type}
                 select={this.addSelection}
