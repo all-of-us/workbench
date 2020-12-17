@@ -326,7 +326,19 @@ public class DataSetServiceTest {
     Optional<String> listClauseMaybe =
         dataSetServiceImpl.buildConceptIdListClause(
             domain1, ImmutableList.of(conceptSet1, conceptSet2));
-    assertThat(listClauseMaybe.map(String::trim).orElse("")).isEqualTo("IN (3, 2, 1, 6, 5, 4)");
+    assertThat(listClauseMaybe.map(String::trim).orElse(""))
+        .isEqualTo(
+            "( condition_concept_id in (select concept_id\n"
+                + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
+                + "join (select cast(id as string)  as id\n"
+                + "from `${projectId}.${dataSetId}.cb_criteria`\n"
+                + "where concept_id in (3, 2, 1, 6, 5, 4)\n"
+                + "and domain_id = 'CONDITION'\n"
+                + "and is_standard = 1) a\n"
+                + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id))\n"
+                + "and domain_id = 'CONDITION'\n"
+                + "and is_standard = 1)\n"
+                + " )");
   }
 
   @Test
