@@ -35,6 +35,7 @@ public interface ReportingQueryService {
 
   List<ReportingWorkspace> getWorkspaces(long limit, long offset);
 
+  // return all workspaces (replaces previous version)
   default List<ReportingWorkspace> getWorkspaces() {
     return getAll(this::getWorkspaces);
   }
@@ -50,6 +51,7 @@ public interface ReportingQueryService {
 
   /**
    * Get an iterator to batches of rows
+   *
    * @param getter - method to retrieve a batch, typically a method reference against this interface
    * @param <T> - DTO type
    * @return
@@ -71,6 +73,7 @@ public interface ReportingQueryService {
         }
       }
 
+      /** @return */
       @Override
       public boolean hasNext() {
         if (lastResultSetSize < 0) {
@@ -101,6 +104,13 @@ public interface ReportingQueryService {
     return getter.apply(Long.MAX_VALUE, 0L);
   }
 
+  /**
+   * Construct a Stream of batches from one of the query methods that takes a limit and offset
+   *
+   * @param getter - limit & offset versioin of query method (currently just getWorkspaces())
+   * @param <T> - DTO type
+   * @return
+   */
   default <T> Stream<List<T>> getStream(BiFunction<Long, Long, List<T>> getter) {
     final Iterator<List<T>> batchIterator = getBatchIterator(getter);
     final Iterable<List<T>> iterable = () -> batchIterator;

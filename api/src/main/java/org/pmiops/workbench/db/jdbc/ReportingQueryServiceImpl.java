@@ -39,8 +39,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   // each table depending on its memory use, so a single limit set to ~2500 is about right.
   @Override
   public long getQueryBatchSize() {
-    return Math.min(MAX_ROWS_PER_INSERT_ALL_REQUEST,
-        workbenchConfigProvider.get().reporting.maxRowsPerInsert);
+    return Math.min(
+        MAX_ROWS_PER_INSERT_ALL_REQUEST, workbenchConfigProvider.get().reporting.maxRowsPerInsert);
   }
 
   @Override
@@ -263,6 +263,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  rp_time_requested,\n"
                 + "  workspace_id\n"
                 + "FROM workspace\n"
+                + "ORDER BY workspace_id\n"
                 + "LIMIT %d\n"
                 + "OFFSET %d",
             limit, offset),

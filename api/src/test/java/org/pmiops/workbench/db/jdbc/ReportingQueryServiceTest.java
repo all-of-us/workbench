@@ -3,8 +3,10 @@ package org.pmiops.workbench.db.jdbc;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.EntityManager;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
@@ -186,6 +188,15 @@ public class ReportingQueryServiceTest {
 
     final long totalBatches = reportingQueryService.getWorkspacesStream().count();
     assertThat(totalBatches).isEqualTo((long) Math.ceil(1.0 * numWorkspaces / BATCH_SIZE));
+
+    // verify that we get all of them and they're distinct in terms of their PKs
+    final Set<Long> ids =
+        reportingQueryService
+            .getWorkspacesStream()
+            .flatMap(List::stream)
+            .map(ReportingWorkspace::getWorkspaceId)
+            .collect(ImmutableSet.toImmutableSet());
+    assertThat(ids).hasSize(numWorkspaces);
   }
 
   @Test
