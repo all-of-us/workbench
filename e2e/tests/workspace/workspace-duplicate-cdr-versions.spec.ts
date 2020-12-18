@@ -1,12 +1,12 @@
 import {createWorkspace, signIn} from 'utils/test-utils';
-import WorkspaceCard from 'app/component/workspace-card';
+import WorkspaceCard from 'src/app/component/workspace-card';
 import {config} from 'resources/workbench-config';
-import {Option} from 'app/text-labels';
-import OldCdrVersionModal from 'app/page/old-cdr-version-modal';
-import WorkspaceDataPage from 'app/page/workspace-data-page';
-import Navigation, {NavLink} from 'app/component/navigation';
-import WorkspaceEditPage from 'app/page/workspace-edit-page';
-import WorkspacesPage from 'app/page/workspaces-page';
+import {Option} from 'src/app/text-labels';
+import OldCdrVersionModal from 'src/app/page/old-cdr-version-modal';
+import WorkspaceDataPage from 'src/app/page/workspace-data-page';
+import Navigation, {NavLink} from 'src/app/component/navigation';
+import WorkspaceEditPage from 'src/app/page/workspace-edit-page';
+import WorkspacesPage from 'src/app/page/workspaces-page';
 
 describe('Duplicate workspace, changing CDR versions', () => {
     beforeEach(async () => {

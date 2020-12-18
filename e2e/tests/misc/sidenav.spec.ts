@@ -1,8 +1,8 @@
-import HomePage from 'app/page/home-page';
-import ProfilePage from 'app/page/profile-page';
-import WorkspacesPage from 'app/page/workspaces-page';
+import HomePage from 'src/app/page/home-page';
+import ProfilePage from 'src/app/page/profile-page';
+import WorkspacesPage from 'src/app/page/workspaces-page';
 import {signIn, signOut} from 'utils/test-utils';
-import Navigation, {NavLink} from 'app/component/navigation';
+import Navigation, {NavLink} from 'src/app/component/navigation';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 
 describe('Sidebar Navigation', () => {

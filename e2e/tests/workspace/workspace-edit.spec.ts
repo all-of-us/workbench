@@ -1,9 +1,9 @@
-import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {Option, WorkspaceAccessLevel} from 'app/text-labels';
+import WorkspaceDataPage from 'src/app/page/workspace-data-page';
+import {Option, WorkspaceAccessLevel} from 'src/app/text-labels';
 import * as testData from 'resources/data/workspace-data';
 import {createWorkspace, findOrCreateWorkspace, performActions, signIn} from 'utils/test-utils';
-import WorkspaceAboutPage from 'app/page/workspace-about-page';
-import WorkspaceEditPage from 'app/page/workspace-edit-page';
+import WorkspaceAboutPage from 'src/app/page/workspace-about-page';
+import WorkspaceEditPage from 'src/app/page/workspace-edit-page';
 
 describe('Editing workspace via workspace card snowman menu', () => {
 

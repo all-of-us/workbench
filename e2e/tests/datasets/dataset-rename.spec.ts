@@ -1,6 +1,6 @@
-import DataResourceCard from 'app/component/data-resource-card';
-import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {ResourceCard} from 'app/text-labels';
+import DataResourceCard from 'src/app/component/data-resource-card';
+import WorkspaceDataPage from 'src/app/page/workspace-data-page';
+import {ResourceCard} from 'src/app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 

@@ -1,7 +1,7 @@
-import WorkspacesPage from 'app/page/workspaces-page';
+import WorkspacesPage from 'src/app/page/workspaces-page';
 import {signIn} from 'utils/test-utils';
-import WorkspaceCard from 'app/component/workspace-card';
-import ReactSelect from 'app/element/react-select';
+import WorkspaceCard from 'src/app/component/workspace-card';
+import ReactSelect from 'src/app/element/react-select';
 import {config} from 'resources/workbench-config';
 
 describe('Workspaces Filter Select menu tests', () => {

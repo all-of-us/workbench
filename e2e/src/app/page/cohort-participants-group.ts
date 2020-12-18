@@ -1,0 +1,167 @@
+import {ElementHandle, Page} from 'puppeteer';
+import {FieldSelector} from 'src/app/page/cohort-build-page';
+import Modal from 'src/app/component/modal';
+import {waitForNumericalString, waitForText, waitWhileLoading} from 'utils/waits-utils';
+import CohortSearchPage from 'src/app/page/cohort-search-page';
+import CriteriaSearchPage, {FilterSign, PhysicalMeasurementsCriteria} from 'src/app/page/criteria-search-page';
+import TieredMenu from 'src/app/component/tiered-menu';
+import {LinkText} from 'src/app/text-labels';
+import {snowmanIconXpath} from 'src/app/component/snowman-menu';
+import Button from 'src/app/element/button';
+import HelpSidebar from 'src/app/component/help-sidebar';
+
+enum GroupMenuOption {
+   EditGroupName  = 'Edit group name',
+   SuppressGroupFromTotalCount = 'Suppress group from total count',
+   DeleteGroup = 'Delete group',
+}
+
+export default class CohortParticipantsGroup {
+
+  private rootXpath: string;
+
+  constructor(private readonly page: Page) {
+
+  }
+
+  setXpath(xpath: string): void {
+    this.rootXpath = xpath;
+  }
+
+  async exists(): Promise<boolean> {
+    return (await this.page.$x(this.rootXpath)).length > 0;
+  }
+
+  getAddCriteriaButtonXpath(): string {
+    return `${this.rootXpath}/ancestor::node()[1]/*[normalize-space()="Add Criteria"]/button`;
+  }
+
+  getGroupCountXpath(): string {
+    return `${this.rootXpath}/ancestor::node()[1]${FieldSelector.GroupCount}`;
+  }
+
+  async clickSnowmanIcon(): Promise<void> {
+    const iconXpath = `${this.rootXpath}${snowmanIconXpath}`;
+    await this.page.waitForXPath(iconXpath, {visible: true})
+       .then(icon => icon.click());
+  }
+
+  /**
+   * Build Cohort Criteria page: Group snowman menu
+   * @param {GroupMenuOption} option
+   */
+  async selectGroupSnowmanMenu(option: GroupMenuOption): Promise<void> {
+    const menu = new TieredMenu(this.page);
+    return menu.select([option.toString()]);
+  }
+
+  /**
+   * Update Group name.
+   * @param {string} newGroupName
+   * @return {boolean} Returns TRUE if rename was successful.
+   */
+  async editGroupName(newGroupName: string): Promise<void> {
+    await this.clickSnowmanIcon();
+    await this.selectGroupSnowmanMenu(GroupMenuOption.EditGroupName);
+    const modal = new Modal(this.page);
+    const textbox = await modal.waitForTextbox('New Name:');
+    await textbox.type(newGroupName);
+    await modal.clickButton(LinkText.Rename, {waitForClose: true});
+  }
+
+  /**
+   * Delete Group.
+   * @return Returns array of criterias in this group.
+   */
+  async deleteGroup(): Promise<ElementHandle[]> {
+    await this.clickSnowmanIcon();
+    await this.selectGroupSnowmanMenu(GroupMenuOption.DeleteGroup);
+    try {
+      await waitForText(this.page, 'This group has been deleted');
+    } catch (err) {
+      // Sometimes message fails to show up. Ignore error.
+    }
+    await waitWhileLoading(this.page);
+    return this.getGroupCriteriasList();
+  }
+
+  async includePhysicalMeasurement(criteriaName: PhysicalMeasurementsCriteria, value: number): Promise<string> {
+    await this.clickCriteriaMenuItems(['Physical Measurements']);
+    const searchPage = new CriteriaSearchPage(this.page);
+    await searchPage.waitForLoad();
+    return searchPage.filterPhysicalMeasurementValue(criteriaName, FilterSign.GreaterThanOrEqualTo, value);
+  }
+
+  async includeDemographicsDeceased(): Promise<string> {
+    await this.clickCriteriaMenuItems(['Demographics', 'Deceased']);
+    return this.getGroupCount();
+  }
+
+  async includeConditions(): Promise<CriteriaSearchPage> {
+    await this.clickCriteriaMenuItems(['Conditions']);
+    const searchPage = new CriteriaSearchPage(this.page);
+    await searchPage.waitForLoad();
+    return searchPage;
+  }
+
+  async includeDrugs(): Promise<CriteriaSearchPage> {
+    await this.clickCriteriaMenuItems(['Drugs']);
+    const searchPage = new CriteriaSearchPage(this.page);
+    await searchPage.waitForLoad();
+    return searchPage;
+  }
+
+  async includeEthnicity(): Promise<CohortSearchPage> {
+    await this.clickCriteriaMenuItems(['Demographics', 'Ethnicity']);
+    const searchPage = new CohortSearchPage(this.page);
+    await searchPage.waitForLoad();
+    return searchPage;
+  }
+
+  async getGroupCount(): Promise<string> {
+    return waitForNumericalString(this.page, this.getGroupCountXpath(), 60000);
+  }
+
+  async includeAge(minAge: number, maxAge: number): Promise<string> {
+    await this.clickCriteriaMenuItems(['Demographics', 'Age']);
+    const searchPage = new CohortSearchPage(this.page);
+    await searchPage.waitForLoad();
+    const results = await searchPage.addAge(minAge, maxAge);
+    await waitWhileLoading(this.page);
+    return results;
+  }
+
+  async includeVisits(): Promise<CriteriaSearchPage> {
+    await this.clickCriteriaMenuItems(['Visits']);
+    const searchPage = new CriteriaSearchPage(this.page);
+    await searchPage.waitForLoad();
+    return searchPage;
+  }
+
+  private async clickCriteriaMenuItems(menuItemLinks: string[]): Promise<void> {
+    const menu = await this.openTieredMenu();
+    await menu.select(menuItemLinks);
+  }
+
+  private async openTieredMenu(): Promise<TieredMenu> {
+    const addCriteriaButton = await this.page.waitForXPath(this.getAddCriteriaButtonXpath(), {visible: true});
+    await addCriteriaButton.click(); // Click dropdown trigger to open menu
+    return new TieredMenu(this.page);
+  }
+
+  async getGroupCriteriasList(): Promise<ElementHandle[]> {
+    const selector = `${this.rootXpath}//*[@data-test-id="item-list"]`;
+    return this.page.$x(selector);
+  }
+
+  async viewAndSaveCriteria(): Promise<void> {
+    const finishAndReviewButton = await Button.findByName(this.page, {name: LinkText.FinishAndReview});
+    await finishAndReviewButton.waitUntilEnabled();
+    await finishAndReviewButton.click();
+
+    // Click Save Criteria button in sidebar
+    const helpSidebar = new HelpSidebar(this.page);
+    await helpSidebar.clickSaveCriteriaButton();
+  }
+
+}

@@ -1,5 +1,5 @@
-import CookiePolicyPage from 'app/page/cookie-policy';
-import GoogleLoginPage, {FieldSelector} from 'app/page/google-login';
+import CookiePolicyPage from 'src/app/page/cookie-policy';
+import GoogleLoginPage, {FieldSelector} from 'src/app/page/google-login';
 import {config} from 'resources/workbench-config';
 import {waitForText} from 'utils/waits-utils';
 

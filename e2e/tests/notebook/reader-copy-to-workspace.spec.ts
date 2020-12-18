@@ -1,16 +1,16 @@
-import DataResourceCard from 'app/component/data-resource-card';
-import Modal from 'app/component/modal';
-import WorkspaceCard from 'app/component/workspace-card';
-import Link from 'app/element/link';
-import WorkspaceAboutPage from 'app/page/workspace-about-page';
-import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
-import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {Option, Language, LinkText, ResourceCard, WorkspaceAccessLevel} from 'app/text-labels';
+import DataResourceCard from 'src/app/component/data-resource-card';
+import Modal from 'src/app/component/modal';
+import WorkspaceCard from 'src/app/component/workspace-card';
+import Link from 'src/app/element/link';
+import WorkspaceAboutPage from 'src/app/page/workspace-about-page';
+import WorkspaceAnalysisPage from 'src/app/page/workspace-analysis-page';
+import WorkspaceDataPage from 'src/app/page/workspace-data-page';
+import {Option, Language, LinkText, ResourceCard, WorkspaceAccessLevel} from 'src/app/text-labels';
 import {config} from 'resources/workbench-config';
 import {makeRandomName} from 'utils/str-utils';
 import {createWorkspace, findOrCreateWorkspace, signIn, signInAs, signOut} from 'utils/test-utils';
 import {waitWhileLoading} from 'utils/waits-utils';
-import WorkspacesPage from 'app/page/workspaces-page';
+import WorkspacesPage from 'src/app/page/workspaces-page';
 
 
 describe('Workspace reader Jupyter notebook action tests', () => {

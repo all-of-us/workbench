@@ -1,16 +1,16 @@
 import {createWorkspace, isValidDate, signIn} from 'utils/test-utils';
-import {Option, LinkText, ResourceCard} from 'app/text-labels';
+import {Option, LinkText, ResourceCard} from 'src/app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
-import CohortBuildPage from 'app/page/cohort-build-page';
-import CohortParticipantDetailPage from 'app/page/cohort-participant-detail-page';
-import CohortReviewModal from 'app/page/cohort-review-modal';
-import CohortReviewPage from 'app/page/cohort-review-page';
-import DataResourceCard from 'app/component/data-resource-card';
-import WorkspaceDataPage from 'app/page/workspace-data-page';
+import CohortBuildPage from 'src/app/page/cohort-build-page';
+import CohortParticipantDetailPage from 'src/app/page/cohort-participant-detail-page';
+import CohortReviewModal from 'src/app/page/cohort-review-modal';
+import CohortReviewPage from 'src/app/page/cohort-review-page';
+import DataResourceCard from 'src/app/component/data-resource-card';
+import WorkspaceDataPage from 'src/app/page/workspace-data-page';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 import {getPropValue} from 'utils/element-utils';
-import SidebarContent, {ReviewStatus} from 'app/component/sidebar-content';
-import AnnotationFieldModal from 'app/component/annotation-field-modal';
+import SidebarContent, {ReviewStatus} from 'src/app/component/sidebar-content';
+import AnnotationFieldModal from 'src/app/component/annotation-field-modal';
 
 
 describe('Cohort review tests', () => {

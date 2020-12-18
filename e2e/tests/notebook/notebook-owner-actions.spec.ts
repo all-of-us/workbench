@@ -1,7 +1,7 @@
-import DataResourceCard from 'app/component/data-resource-card';
-import NewNotebookModal from 'app/component/new-notebook-modal';
-import WorkspacesPage from 'app/page/workspaces-page';
-import {LinkText, ResourceCard} from 'app/text-labels';
+import DataResourceCard from 'src/app/component/data-resource-card';
+import NewNotebookModal from 'src/app/component/new-notebook-modal';
+import WorkspacesPage from 'src/app/page/workspaces-page';
+import {LinkText, ResourceCard} from 'src/app/text-labels';
 import {makeRandomName, makeWorkspaceName} from 'utils/str-utils';
 import {signIn} from 'utils/test-utils';
 

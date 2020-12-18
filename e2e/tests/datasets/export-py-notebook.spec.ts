@@ -1,8 +1,8 @@
-import DataResourceCard from 'app/component/data-resource-card';
-import ExportToNotebookModal from 'app/component/export-to-notebook-modal';
-import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {Option, ResourceCard} from 'app/text-labels';
+import DataResourceCard from 'src/app/component/data-resource-card';
+import ExportToNotebookModal from 'src/app/component/export-to-notebook-modal';
+import NotebookPreviewPage from 'src/app/page/notebook-preview-page';
+import WorkspaceDataPage from 'src/app/page/workspace-data-page';
+import {Option, ResourceCard} from 'src/app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';

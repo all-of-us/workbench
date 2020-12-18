@@ -1,12 +1,12 @@
-import HelpSidebar from 'app/component/help-sidebar';
-import {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/criteria-search-page';
-import DataResourceCard from 'app/component/data-resource-card';
-import Button from 'app/element/button';
-import ClrIconLink from 'app/element/clr-icon-link';
-import Link from 'app/element/link';
-import {Option, LinkText, ResourceCard} from 'app/text-labels';
-import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
-import WorkspaceDataPage from 'app/page/workspace-data-page';
+import HelpSidebar from 'src/app/component/help-sidebar';
+import {FilterSign, PhysicalMeasurementsCriteria} from 'src/app/page/criteria-search-page';
+import DataResourceCard from 'src/app/component/data-resource-card';
+import Button from 'src/app/element/button';
+import ClrIconLink from 'src/app/element/clr-icon-link';
+import Link from 'src/app/element/link';
+import {Option, LinkText, ResourceCard} from 'src/app/text-labels';
+import CohortBuildPage, {FieldSelector} from 'src/app/page/cohort-build-page';
+import WorkspaceDataPage from 'src/app/page/workspace-data-page';
 import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 

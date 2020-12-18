@@ -1,6 +1,6 @@
-import BaseElement from 'app/element/base-element';
-import HomePage from 'app/page/home-page';
-import WorkspaceCard from 'app/component/workspace-card';
+import BaseElement from 'src/app/element/base-element';
+import HomePage from 'src/app/page/home-page';
+import WorkspaceCard from 'src/app/component/workspace-card';
 import {signIn} from 'utils/test-utils';
 
 describe('Home page ui tests', () => {

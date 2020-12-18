@@ -1,5 +1,5 @@
-import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {Language} from 'app/text-labels';
+import WorkspaceDataPage from 'src/app/page/workspace-data-page';
+import {Language} from 'src/app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 

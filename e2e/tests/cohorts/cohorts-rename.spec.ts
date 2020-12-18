@@ -1,9 +1,9 @@
-import DataResourceCard from 'app/component/data-resource-card';
-import Link from 'app/element/link';
-import CohortActionsPage from 'app/page/cohort-actions-page';
-import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
-import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {ResourceCard} from 'app/text-labels';
+import DataResourceCard from 'src/app/component/data-resource-card';
+import Link from 'src/app/element/link';
+import CohortActionsPage from 'src/app/page/cohort-actions-page';
+import CohortBuildPage, {FieldSelector} from 'src/app/page/cohort-build-page';
+import WorkspaceDataPage from 'src/app/page/workspace-data-page';
+import {ResourceCard} from 'src/app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {waitForNumericalString, waitForText} from 'utils/waits-utils';

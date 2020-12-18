@@ -1,11 +1,11 @@
 import {createWorkspace, signIn} from 'utils/test-utils';
-import WorkspaceCard from 'app/component/workspace-card';
+import WorkspaceCard from 'src/app/component/workspace-card';
 import {config} from 'resources/workbench-config';
-import {Option} from 'app/text-labels';
-import WorkspacesPage from 'app/page/workspaces-page';
+import {Option} from 'src/app/text-labels';
+import WorkspacesPage from 'src/app/page/workspaces-page';
 import {makeWorkspaceName} from 'utils/str-utils';
-import OldCdrVersionModal from 'app/page/old-cdr-version-modal';
-import WorkspaceEditPage from 'app/page/workspace-edit-page';
+import OldCdrVersionModal from 'src/app/page/old-cdr-version-modal';
+import WorkspaceEditPage from 'src/app/page/workspace-edit-page';
 
 describe('OldCdrVersion Modal restrictions', () => {
     beforeEach(async () => {

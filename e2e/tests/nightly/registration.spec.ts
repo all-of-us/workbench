@@ -1,5 +1,5 @@
-import CreateAccountPage from 'app/page/create-account-page';
-import GoogleLoginPage from 'app/page/google-login';
+import CreateAccountPage from 'src/app/page/create-account-page';
+import GoogleLoginPage from 'src/app/page/google-login';
 import {getPropValue} from 'utils/element-utils';
 
 

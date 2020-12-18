@@ -1,14 +1,14 @@
-import HelpSidebar from 'app/component/help-sidebar';
+import HelpSidebar from 'src/app/component/help-sidebar';
 import RuntimePanel, {
   ComputeType,
   RuntimePreset,
   StartStopIconState
-} from 'app/component/runtime-panel';
+} from 'src/app/component/runtime-panel';
 import {config} from 'resources/workbench-config';
 import {createWorkspace, signIn} from 'utils/test-utils';
-import WorkspaceDataPage from 'app/page/workspace-data-page';
+import WorkspaceDataPage from 'src/app/page/workspace-data-page';
 import {makeRandomName} from 'utils/str-utils';
-import NotebookPreviewPage from 'app/page/notebook-preview-page';
+import NotebookPreviewPage from 'src/app/page/notebook-preview-page';
 
 // This one is going to take a long time.
 jest.setTimeout(60 * 30 * 1000);

@@ -1,11 +1,11 @@
-import DataResourceCard from 'app/component/data-resource-card';
-import ClrIconLink from 'app/element/clr-icon-link';
-import CohortBuildPage from 'app/page/cohort-build-page';
-import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {Option, ResourceCard} from 'app/text-labels';
+import DataResourceCard from 'src/app/component/data-resource-card';
+import ClrIconLink from 'src/app/element/clr-icon-link';
+import CohortBuildPage from 'src/app/page/cohort-build-page';
+import WorkspaceDataPage from 'src/app/page/workspace-data-page';
+import {Option, ResourceCard} from 'src/app/text-labels';
 import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
-import DatasetEditPage from 'app/page/dataset-edit-page';
+import DatasetEditPage from 'src/app/page/dataset-edit-page';
 
 describe('Dataset test', () => {
 

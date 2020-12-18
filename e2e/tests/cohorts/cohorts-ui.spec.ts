@@ -1,9 +1,9 @@
-import CohortBuildPage from 'app/page/cohort-build-page';
-import {PhysicalMeasurementsCriteria} from 'app/page/criteria-search-page';
-import WorkspaceAboutPage from 'app/page/workspace-about-page';
-import WorkspaceDataPage from 'app/page/workspace-data-page';
+import CohortBuildPage from 'src/app/page/cohort-build-page';
+import {PhysicalMeasurementsCriteria} from 'src/app/page/criteria-search-page';
+import WorkspaceAboutPage from 'src/app/page/workspace-about-page';
+import WorkspaceDataPage from 'src/app/page/workspace-data-page';
 import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
-import {TabLabels} from 'app/page/workspace-base';
+import {TabLabels} from 'src/app/page/workspace-base';
 
 describe('Cohorts UI tests', () => {
 

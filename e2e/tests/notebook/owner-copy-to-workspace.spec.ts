@@ -1,11 +1,11 @@
-import DataResourceCard from 'app/component/data-resource-card';
-import Modal from 'app/component/modal';
-import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {LinkText, ResourceCard} from 'app/text-labels';
+import DataResourceCard from 'src/app/component/data-resource-card';
+import Modal from 'src/app/component/modal';
+import WorkspaceDataPage from 'src/app/page/workspace-data-page';
+import {LinkText, ResourceCard} from 'src/app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {createWorkspace, findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {config} from 'resources/workbench-config';
-import WorkspaceCard from 'app/component/workspace-card';
+import WorkspaceCard from 'src/app/component/workspace-card';
 
 
 /**

@@ -1,6 +1,6 @@
-import BaseElement from 'app/element/base-element';
-import CreateAccountPage from 'app/page/create-account-page';
-import GoogleLoginPage from 'app/page/google-login';
+import BaseElement from 'src/app/element/base-element';
+import CreateAccountPage from 'src/app/page/create-account-page';
+import GoogleLoginPage from 'src/app/page/google-login';
 import {config} from 'resources/workbench-config';
 import {waitForText} from 'utils/waits-utils';
 

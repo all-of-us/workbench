@@ -1,8 +1,8 @@
-import ProfilePage, {MissingErrorAlias} from 'app/page/profile-page';
+import ProfilePage, {MissingErrorAlias} from 'src/app/page/profile-page';
 import {signIn} from 'utils/test-utils';
-import navigation, {NavLink} from 'app/component/navigation';
+import navigation, {NavLink} from 'src/app/component/navigation';
 import {makeString, makeUrl} from 'utils/str-utils';
-import Button from 'app/element/button';
+import Button from 'src/app/element/button';
 
 describe('Profile', () => {
   // initialized in beforeEach()

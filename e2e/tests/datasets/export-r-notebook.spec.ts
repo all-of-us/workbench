@@ -1,13 +1,13 @@
-import Link from 'app/element/link';
-import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
-import WorkspaceDataPage from 'app/page/workspace-data-page';
-import NotebookPreviewPage from 'app/page/notebook-preview-page';
+import Link from 'src/app/element/link';
+import WorkspaceAnalysisPage from 'src/app/page/workspace-analysis-page';
+import WorkspaceDataPage from 'src/app/page/workspace-data-page';
+import NotebookPreviewPage from 'src/app/page/notebook-preview-page';
 import {makeRandomName} from 'utils/str-utils';
 import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
-import CohortActionsPage from 'app/page/cohort-actions-page';
-import {Ethnicity} from 'app/page/cohort-search-page';
-import {Language, ResourceCard} from 'app/text-labels';
+import CohortActionsPage from 'src/app/page/cohort-actions-page';
+import {Ethnicity} from 'src/app/page/cohort-search-page';
+import {Language, ResourceCard} from 'src/app/text-labels';
 
 describe('Create Dataset', () => {
 

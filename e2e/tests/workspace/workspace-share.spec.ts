@@ -1,13 +1,13 @@
-import ShareModal from 'app/component/share-modal';
-import WorkspaceCard from 'app/component/workspace-card';
-import Link from 'app/element/link';
-import HomePage from 'app/page/home-page';
-import WorkspaceAboutPage from 'app/page/workspace-about-page';
-import WorkspacesPage from 'app/page/workspaces-page';
-import {Option, LinkText, WorkspaceAccessLevel} from 'app/text-labels';
+import ShareModal from 'src/app/component/share-modal';
+import WorkspaceCard from 'src/app/component/workspace-card';
+import Link from 'src/app/element/link';
+import HomePage from 'src/app/page/home-page';
+import WorkspaceAboutPage from 'src/app/page/workspace-about-page';
+import WorkspacesPage from 'src/app/page/workspaces-page';
+import {Option, LinkText, WorkspaceAccessLevel} from 'src/app/text-labels';
 import {config} from 'resources/workbench-config';
 import {createWorkspace, findOrCreateWorkspace, signIn, signInAs, signOut} from 'utils/test-utils';
-import WorkspaceDataPage from 'app/page/workspace-data-page';
+import WorkspaceDataPage from 'src/app/page/workspace-data-page';
 import {waitWhileLoading} from 'utils/waits-utils';
 
 describe('Share workspace', () => {

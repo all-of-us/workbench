@@ -1,11 +1,11 @@
-import WorkspaceCard from 'app/component/workspace-card';
+import WorkspaceCard from 'src/app/component/workspace-card';
 import {Page} from 'puppeteer';
 import {createWorkspace, signIn} from 'utils/test-utils';
 import {config} from 'resources/workbench-config';
-import WorkspaceDataPage from 'app/page/workspace-data-page';
-import WorkspaceBase from 'app/page/workspace-base';
-import WorkspaceEditPage from 'app/page/workspace-edit-page';
-import CdrVersionUpgradeModal from 'app/page/cdr-version-upgrade-modal';
+import WorkspaceDataPage from 'src/app/page/workspace-data-page';
+import WorkspaceBase from 'src/app/page/workspace-base';
+import WorkspaceEditPage from 'src/app/page/workspace-edit-page';
+import CdrVersionUpgradeModal from 'src/app/page/cdr-version-upgrade-modal';
 
 describe('Workspace CDR Version Upgrade modal', () => {
     beforeEach(async () => {

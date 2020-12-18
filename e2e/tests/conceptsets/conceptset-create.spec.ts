@@ -1,10 +1,10 @@
-import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
-import DataResourceCard from 'app/component/data-resource-card';
-import ConceptSetActionsPage from 'app/page/conceptset-actions-page';
-import WorkspaceDataPage from 'app/page/workspace-data-page';
+import ConceptDomainCard, {Domain} from 'src/app/component/concept-domain-card';
+import DataResourceCard from 'src/app/component/data-resource-card';
+import ConceptSetActionsPage from 'src/app/page/conceptset-actions-page';
+import WorkspaceDataPage from 'src/app/page/workspace-data-page';
 import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
-import {ResourceCard} from 'app/text-labels';
+import {ResourceCard} from 'src/app/text-labels';
 
 describe('Create Concept Sets from Domains', () => {
 

@@ -1,9 +1,9 @@
-import BaseElement from 'app/element/base-element';
-import HomePage from 'app/page/home-page';
-import WorkspaceCard from 'app/component/workspace-card';
-import WorkspacesPage from 'app/page/workspaces-page';
+import BaseElement from 'src/app/element/base-element';
+import HomePage from 'src/app/page/home-page';
+import WorkspaceCard from 'src/app/component/workspace-card';
+import WorkspacesPage from 'src/app/page/workspaces-page';
 import {signIn} from 'utils/test-utils';
-import Navigation, {NavLink} from 'app/component/navigation';
+import Navigation, {NavLink} from 'src/app/component/navigation';
 
 describe('Workspace ui tests', () => {
 

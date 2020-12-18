@@ -1,11 +1,11 @@
-import WorkspaceDataPage from 'app/page/workspace-data-page';
-import WorkspacesPage, {FieldSelector} from 'app/page/workspaces-page';
+import WorkspaceDataPage from 'src/app/page/workspace-data-page';
+import WorkspacesPage, {FieldSelector} from 'src/app/page/workspaces-page';
 import {signIn, performActions} from 'utils/test-utils';
-import Button from 'app/element/button';
+import Button from 'src/app/element/button';
 import * as testData from 'resources/data/workspace-data';
 import {makeWorkspaceName} from 'utils/str-utils';
-import {UseFreeCredits} from 'app/page/workspace-base';
-import WorkspaceEditPage from 'app/page/workspace-edit-page';
+import {UseFreeCredits} from 'src/app/page/workspace-base';
+import WorkspaceEditPage from 'src/app/page/workspace-edit-page';
 import {config} from 'resources/workbench-config';
 
 describe('Creating new workspaces', () => {

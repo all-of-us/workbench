@@ -1,10 +1,10 @@
 import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
-import {Option} from 'app/text-labels';
-import WorkspaceDataPage from 'app/page/workspace-data-page';
-import Navigation, {NavLink} from 'app/component/navigation';
-import WorkspaceCard from 'app/component/workspace-card';
-import WorkspaceEditPage from 'app/page/workspace-edit-page';
-import WorkspacesPage from 'app/page/workspaces-page';
+import {Option} from 'src/app/text-labels';
+import WorkspaceDataPage from 'src/app/page/workspace-data-page';
+import Navigation, {NavLink} from 'src/app/component/navigation';
+import WorkspaceCard from 'src/app/component/workspace-card';
+import WorkspaceEditPage from 'src/app/page/workspace-edit-page';
+import WorkspacesPage from 'src/app/page/workspaces-page';
 
 describe('Duplicate workspace', () => {
   beforeEach(async () => {
