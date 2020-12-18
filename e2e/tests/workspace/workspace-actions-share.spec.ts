@@ -62,7 +62,7 @@ describe('Share workspace', () => {
        * - Log in as another user.
        * - Workspace share action should be disabled.
        */
-      test.each(collab)('AS %s, user cannot share, edit or delete workspace', async(collab) => {
+      test.each(collab)('As %s, user cannot share, edit or delete workspace', async(collab) => {
         const newWorkspaceName = makeWorkspaceName();
         const workspacesPage1 = new WorkspacesPage(page);
         await workspacesPage1.load();
@@ -89,7 +89,7 @@ describe('Share workspace', () => {
         const workspacesPage = new WorkspacesPage(newPage);
         await workspacesPage.waitForLoad();
     
-        // Verify Workspace Access Level is wRITER/READER.
+        // Verify Workspace Access Level is WRITER/READER.
         const workspaceCard2 = await WorkspaceCard.findCard(newPage, newWorkspaceName);
         const accessLevel = await workspaceCard2.getWorkspaceAccessLevel();
         expect(accessLevel).toBe(collab.accessLevel);
