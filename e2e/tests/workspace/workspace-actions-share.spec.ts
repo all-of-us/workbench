@@ -63,7 +63,6 @@ describe('Share workspace', () => {
        * - Workspace share action should be disabled.
        */
       test.each(collab)('As %s, user cannot share, edit or delete workspace', async(collab) => {
-
         const newWorkspaceName = makeWorkspaceName();
         const workspacesPage1 = new WorkspacesPage(page);
         await workspacesPage1.load();
