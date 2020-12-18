@@ -32,18 +32,20 @@ describe('Share workspace', () => {
 
       // This test is not hermetic - if the collaborator is already on this
       // workspace, just remove them before continuing.
-      let accessLevel = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
-      if (accessLevel !== null) {
-        await (await aboutPage.openShareModal()).removeUser(config.collaboratorUsername);
-        await waitWhileLoading(page);
-      }
+      // let accessLevel = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
+      // if (accessLevel !== null) {
+      //   await (await aboutPage.openShareModal()).removeUser(config.collaboratorUsername);
+      //   await waitWhileLoading(page);
+      // }
+       // if the collaborator is already on this workspace, just remove them before continuing.
+       await aboutPage.removeCollab();
 
       let shareModal = await aboutPage.openShareModal();
       await shareModal.shareWithUser(config.collaboratorUsername, WorkspaceAccessLevel.Owner);
       // Collab list is refreshed.
       await waitWhileLoading(page);
 
-      accessLevel = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
+      let accessLevel = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
       expect(accessLevel).toBe(WorkspaceAccessLevel.Owner);
 
       shareModal = await aboutPage.openShareModal();
@@ -92,13 +94,7 @@ describe('Share workspace', () => {
       expect(accessLevel).toBe(WorkspaceAccessLevel.Reader);
 
       // Share, Edit and Delete actions are not available for click.
-      const snowmanMenu = await workspaceCard2.getSnowmanMenu();
-      expect(await snowmanMenu.isOptionDisabled(Option.Share)).toBe(true);
-      expect(await snowmanMenu.isOptionDisabled(Option.Edit)).toBe(true);
-      expect(await snowmanMenu.isOptionDisabled(Option.Delete)).toBe(true);
-
-      // Duplicate action is available for click.
-      expect(await snowmanMenu.isOptionDisabled(Option.Duplicate)).toBe(false);
+      await workspaceCard2.workspaceCardMenuOptions();
 
       // Make sure the Search input-field in Share modal is disabled.
       await workspaceCard2.clickWorkspaceName();

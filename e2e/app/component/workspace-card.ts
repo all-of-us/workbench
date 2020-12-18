@@ -160,4 +160,13 @@ export default class WorkspaceCard extends CardBase {
     return `//*[@role='button'][./*[${WorkspaceCardSelector.cardNameXpath} and normalize-space(text())="${workspaceName}"]]`
   }
 
+  // function to verify if the snowman menu options for WRITER & READER are disabled except duplicate option
+  async workspaceCardMenuOptions(): Promise<void>{
+    const snowmanMenu = await this.getSnowmanMenu();
+    expect(await snowmanMenu.isOptionDisabled(Option.Share)).toBe(true);
+    expect(await snowmanMenu.isOptionDisabled(Option.Edit)).toBe(true);
+    expect(await snowmanMenu.isOptionDisabled(Option.Delete)).toBe(true);
+    expect(await snowmanMenu.isOptionDisabled(Option.Duplicate)).toBe(false);
+  }
+
 }
