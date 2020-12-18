@@ -10,9 +10,10 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {waitWhileLoading} from 'utils/waits-utils';
 
 
+
 const collab = [
-  {accessLevel: WorkspaceAccessLevel.Writer},
-  {accessLevel: WorkspaceAccessLevel.Reader}
+   {accessLevel: WorkspaceAccessLevel.Writer},
+   {accessLevel: WorkspaceAccessLevel.Reader}
 ]
 
 describe('Share workspace', () => {
@@ -22,8 +23,8 @@ describe('Share workspace', () => {
     });
   
     // Assume there is at least one workspace preexist
-    describe('From the workspace about or data page via workspace actions menu', () => {
-  
+    describe('Share workspace - each', () => {
+
       test('As OWNER, user can share a workspace', async () => {
   
         const workspaceCard = await findOrCreateWorkspace(page);
@@ -53,17 +54,9 @@ describe('Share workspace', () => {
         accessLevel = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
         expect(accessLevel).toBeNull();
       });
-  
-  
-      /**
-       * Test:
-       * - Create a new workspace.
-       * - Share with another user - assign role Writer/Reader.
-       * - Log in as another user.
-       * - Workspace share action should be disabled.
-       */
-      test.each(collab)('As %s, user cannot share, edit or delete workspace', async(collab) => {
 
+
+      test.each(collab)('AS %s, user cannot share, edit or delete workspace', async(collab) => {
         const newWorkspaceName = makeWorkspaceName();
         const workspacesPage1 = new WorkspacesPage(page);
         await workspacesPage1.load();
@@ -90,7 +83,7 @@ describe('Share workspace', () => {
         const workspacesPage = new WorkspacesPage(newPage);
         await workspacesPage.waitForLoad();
     
-        // Verify Workspace Access Level is WRITER/READER.
+        // Verify Workspace Access Level is wRITER/READER.
         const workspaceCard2 = await WorkspaceCard.findCard(newPage, newWorkspaceName);
         const accessLevel = await workspaceCard2.getWorkspaceAccessLevel();
         expect(accessLevel).toBe(collab.accessLevel);
@@ -115,7 +108,9 @@ describe('Share workspace', () => {
         await signOut(newPage);
     
       });
-  
     });
   
   });
+
+
+
