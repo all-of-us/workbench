@@ -6,7 +6,7 @@ This is intended to help folks onboard faster and get a solid understanding of t
 ## How to Use And Contribute To Tutorials
 These tutorials are meant to be living documents. If there is an issue with any tutorial, or something needs updating feel free to fix it and put up a PR.
 
-If you have learned something new and think it will help the next person feel free to add tasks to a tutorial or create a new one.
+If you have learned something new and think it will help the next person or see something that needs improvement file a PR to ensure other members - current and future - can benefit from what you have learned and your unique perspective.
 
 We should look to have a consistent view of each tutorial. As a dev ramps up on a topic they will not have to expend mental energy dealing with a new tutorial style - similar to linting our code and keeping the style consistent.
 
@@ -26,4 +26,4 @@ When creating a new tutorial please add the following sections to the document:
       1. As these types of tech debt issues crop up, we can identify them in stories and either have them addressed as learning/onboarding tasks or take care them if it looks like it will be a while before the team will be bringing on a new developer.
 5. **Comprehension Questions**
    1. This section should be comprised of open ended questions that the user should be able to answer at the end of the tutorial.
-   2. Thes can be difficult and may require the user to do some additional research to better understand the technology they just utilized.
+   2. These can be difficult and may require the user to do some additional research to better understand the technology they just utilized.
