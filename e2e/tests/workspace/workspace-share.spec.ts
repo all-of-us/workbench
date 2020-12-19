@@ -29,14 +29,6 @@ describe('Share workspace', () => {
 
       const aboutPage = new WorkspaceAboutPage(page);
       await aboutPage.waitForLoad();
-
-      // This test is not hermetic - if the collaborator is already on this
-      // workspace, just remove them before continuing.
-      // let accessLevel = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
-      // if (accessLevel !== null) {
-      //   await (await aboutPage.openShareModal()).removeUser(config.collaboratorUsername);
-      //   await waitWhileLoading(page);
-      // }
        // if the collaborator is already on this workspace, just remove them before continuing.
        await aboutPage.removeCollab();
 
