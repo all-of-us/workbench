@@ -112,7 +112,6 @@ function sortByCountThenName(critA, critB) {
 }
 
 interface Props {
-  count: number;
   criteriaType: CriteriaType;
   select: Function;
   selectedIds: Array<string>;
@@ -398,10 +397,10 @@ export class Demographics extends React.Component<Props, State> {
         : <React.Fragment>
           <div style={styles.selectList}>
             <div style={{margin: '0.25rem 0', overflow: 'auto', width: '100%'}}>
-              {nodes.map((opt, o) => <div key={o} style={styles.option} onClick={() => this.selectOption(opt)}>
+              {nodes.map((opt, o) => <div key={o} style={styles.option}>
                 {selectedIds.includes(opt.parameterId)
                   ? <ClrIcon shape='check-circle' size='20' style={{...styles.selectIcon, ...styles.selected}}/>
-                  : <ClrIcon shape='plus-circle'  size='20' style={styles.selectIcon}/>
+                  : <ClrIcon shape='plus-circle'  size='20' style={styles.selectIcon} onClick={() => this.selectOption(opt)}/>
                 }
                 {opt.name}
                 {!!opt.count && <span style={styles.count}>
