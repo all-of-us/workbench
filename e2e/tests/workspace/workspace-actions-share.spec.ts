@@ -76,7 +76,7 @@ describe('Share workspace', () => {
         const accessLevel1 = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
         expect(accessLevel1).toBe(assign.accessRole);
 
-        //verify if the search input field is disabled for Writer/reader and enabled for Owner
+        // verify if the search input field is disabled for Writer/reader and enabled for Owner
         await aboutPage.verifyCollabInputField();
     
         await signOut(newPage);

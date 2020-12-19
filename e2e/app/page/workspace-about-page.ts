@@ -85,7 +85,7 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
     }
   }
 
-  //to verify if the search input field is disabled for Writer/reader & enabled for Owner
+  // to verify if the search input field is disabled for Writer/reader & enabled for Owner
   async verifyCollabInputField(): Promise<void> {
     const modal = await this.openShareModal();
     const searchInput = await modal.waitForSearchBox();

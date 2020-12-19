@@ -160,7 +160,7 @@ export default class WorkspaceCard extends CardBase {
     return `//*[@role='button'][./*[${WorkspaceCardSelector.cardNameXpath} and normalize-space(text())="${workspaceName}"]]`
   }
 
-  // function to verify if the snowman menu options for WRITER & READER are disabled except duplicate option and all options are enabled for OWNER.
+  // if the snowman menu options for WRITER & READER are disabled except duplicate option and all options are enabled for OWNER.
   async workspaceCardMenuOptions(): Promise<void>{
     const snowmanMenu = await this.getSnowmanMenu();
     const accessLevel = await this.getWorkspaceAccessLevel();
