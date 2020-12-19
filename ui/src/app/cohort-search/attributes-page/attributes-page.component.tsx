@@ -406,8 +406,9 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
         // for blood pressure, either both operators have to be 'ANY' OR neither can be 'ANY'
         const otherAttribute = attributeIndex === 0 ? 1 : 0;
         if (value === 'ANY') {
+          form.num[attributeIndex].operands = [];
+          form.num[otherAttribute].operands = [];
           form.num[otherAttribute].operator = 'ANY';
-          form.num[otherAttribute].operands = form.num[attributeIndex].operands = [];
         } else if (form.num[otherAttribute].operator === 'ANY') {
           form.num[otherAttribute].operator = value;
         }
