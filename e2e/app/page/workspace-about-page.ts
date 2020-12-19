@@ -1,11 +1,12 @@
 import {Page} from 'puppeteer';
 import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
-import {WorkspaceAccessLevel} from 'app/text-labels';
+import {LinkText, WorkspaceAccessLevel} from 'app/text-labels';
 import {getPropValue} from 'utils/element-utils';
 import WorkspaceBase from './workspace-base';
 import Button from 'app/element/button';
 import ShareModal from 'app/component/share-modal';
 import {config} from 'resources/workbench-config';
+// import WorkspaceCard from 'app/component/workspace-card';
 
 export const PageTitle = 'View Workspace Details';
 
@@ -84,5 +85,17 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
     }
   }
 
+  //to verify if the search input field is disabled for Writer/reader & enabled for Owner
+  async verifyCollabInputField(): Promise<void> {
+    const modal = await this.openShareModal();
+    const searchInput = await modal.waitForSearchBox();
+    const accessLevel = await this.findUserInCollaboratorList(config.collaboratorUsername);
+    if (accessLevel !== WorkspaceAccessLevel.Owner){
+      expect(await searchInput.isDisabled()).toBe(true);
+       } else if (accessLevel === WorkspaceAccessLevel.Owner) {
+      expect(await searchInput.isDisabled()).toBe(false);
+   }
+     await modal.clickButton(LinkText.Cancel);
+ }
 
 }
