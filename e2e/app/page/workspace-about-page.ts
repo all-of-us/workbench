@@ -87,9 +87,9 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
 
   // to verify if the search input field is disabled for Writer/reader & enabled for Owner
   async verifyCollabInputField(): Promise<void> {
+    const accessLevel = await this.findUserInCollaboratorList(config.collaboratorUsername);
     const modal = await this.openShareModal();
     const searchInput = await modal.waitForSearchBox();
-    const accessLevel = await this.findUserInCollaboratorList(config.collaboratorUsername);
     if (accessLevel !== WorkspaceAccessLevel.Owner){
       expect(await searchInput.isDisabled()).toBe(true);
        } else if (accessLevel === WorkspaceAccessLevel.Owner) {
