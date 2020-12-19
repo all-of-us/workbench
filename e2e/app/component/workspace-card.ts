@@ -160,13 +160,20 @@ export default class WorkspaceCard extends CardBase {
     return `//*[@role='button'][./*[${WorkspaceCardSelector.cardNameXpath} and normalize-space(text())="${workspaceName}"]]`
   }
 
-  // function to verify if the snowman menu options for WRITER & READER are disabled except duplicate option
+  // function to verify if the snowman menu options for WRITER & READER are disabled except duplicate option and all options are enabled for OWNER.
   async workspaceCardMenuOptions(): Promise<void>{
     const snowmanMenu = await this.getSnowmanMenu();
-    expect(await snowmanMenu.isOptionDisabled(Option.Share)).toBe(true);
-    expect(await snowmanMenu.isOptionDisabled(Option.Edit)).toBe(true);
-    expect(await snowmanMenu.isOptionDisabled(Option.Delete)).toBe(true);
-    expect(await snowmanMenu.isOptionDisabled(Option.Duplicate)).toBe(false);
+    const accessLevel = await this.getWorkspaceAccessLevel();
+    if (accessLevel !== WorkspaceAccessLevel.Owner) {
+      expect(await snowmanMenu.isOptionDisabled(Option.Share)).toBe(true);
+      expect(await snowmanMenu.isOptionDisabled(Option.Edit)).toBe(true);
+      expect(await snowmanMenu.isOptionDisabled(Option.Delete)).toBe(true);
+      expect(await snowmanMenu.isOptionDisabled(Option.Duplicate)).toBe(false);
+      } else if (accessLevel === WorkspaceAccessLevel.Owner) { 
+      expect(await snowmanMenu.isOptionDisabled(Option.Share)).toBe(false);
+      expect(await snowmanMenu.isOptionDisabled(Option.Edit)).toBe(false);
+      expect(await snowmanMenu.isOptionDisabled(Option.Delete)).toBe(false);
+      expect(await snowmanMenu.isOptionDisabled(Option.Duplicate)).toBe(false);
   }
-
+  }
 }
