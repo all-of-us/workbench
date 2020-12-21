@@ -44,7 +44,8 @@ ENVIRONMENTS = {
     :config_json => "config_local.json",
     :cdr_versions_json => "cdr_versions_local.json",
     :featured_workspaces_json => "featured_workspaces_local.json",
-    :gae_vars => make_gae_vars
+    :gae_vars => make_gae_vars,
+    :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-workbench-test" => {
     :env_name => "test",
@@ -53,7 +54,8 @@ ENVIRONMENTS = {
     :config_json => "config_test.json",
     :cdr_versions_json => "cdr_versions_test.json",
     :featured_workspaces_json => "featured_workspaces_test.json",
-    :gae_vars => make_gae_vars(0, 10, 'F4')
+    :gae_vars => make_gae_vars(0, 10, 'F4'),
+    :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-rw-staging" => {
     :env_name => "staging",
@@ -62,7 +64,8 @@ ENVIRONMENTS = {
     :config_json => "config_staging.json",
     :cdr_versions_json => "cdr_versions_staging.json",
     :featured_workspaces_json => "featured_workspaces_staging.json",
-    :gae_vars => make_gae_vars
+    :gae_vars => make_gae_vars,
+    :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-rw-perf" => {
     :env_name => "perf",
@@ -71,7 +74,8 @@ ENVIRONMENTS = {
     :config_json => "config_perf.json",
     :cdr_versions_json => "cdr_versions_perf.json",
     :featured_workspaces_json => "featured_workspaces_perf.json",
-    :gae_vars => make_gae_vars(20, 20)
+    :gae_vars => make_gae_vars(20, 20),
+    :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-rw-stable" => {
     :env_name => "stable",
@@ -80,7 +84,8 @@ ENVIRONMENTS = {
     :config_json => "config_stable.json",
     :cdr_versions_json => "cdr_versions_stable.json",
     :featured_workspaces_json => "featured_workspaces_stable.json",
-    :gae_vars => make_gae_vars
+    :gae_vars => make_gae_vars,
+    :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-rw-preprod" => {
     :env_name => "preprod",
@@ -89,7 +94,8 @@ ENVIRONMENTS = {
     :config_json => "config_preprod.json",
     :cdr_versions_json => "cdr_versions_preprod.json",
     :featured_workspaces_json => "featured_workspaces_preprod.json",
-    :gae_vars => make_gae_vars
+    :gae_vars => make_gae_vars,
+    :source_cdr_project => "aou-res-curation-output-prod"
   },
   "all-of-us-rw-prod" => {
     :env_name => "prod",
@@ -98,7 +104,8 @@ ENVIRONMENTS = {
     :config_json => "config_prod.json",
     :cdr_versions_json => "cdr_versions_prod.json",
     :featured_workspaces_json => "featured_workspaces_prod.json",
-    :gae_vars => make_gae_vars(8, 64, 'F4')
+    :gae_vars => make_gae_vars(8, 64, 'F4'),
+    :source_cdr_project => "aou-res-curation-output-prod"
   }
 }
 
@@ -766,8 +773,62 @@ Common.register_command({
   :fn => ->() { run_local_rw_migrations() }
 })
 
+def circle_build_cdr_indices(cmd_name, args)
+  ensure_docker cmd_name, args
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.data_browser = false
+  op.opts.branch = "master"
+  op.add_option(
+    "--branch [--branch]",
+    ->(opts, v) { opts.branch = v},
+    "Branch. Optional - Default is master."
+  )
+  op.add_option(
+    "--project [--project]",
+    ->(opts, v) { opts.project = v},
+    "Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_option(
+    "--cdr-version [cdr-version]",
+    ->(opts, v) { opts.cdr_version = v},
+    "CDR version. Required."
+  )
+  op.add_option(
+    "--cdr-date [cdr-date]",
+    ->(opts, v) { opts.cdr_date = v},
+    "CDR date is Required. Please use the date from the source CDR. <YYYY-mm-dd>"
+  )
+  op.add_option(
+    "--data-browser [data-browser]",
+    ->(opts, v) { opts.data_browser = v},
+    "Generate for data browser. Optional - Default is false"
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.bq_dataset and opts.cdr_version and opts.cdr_date }
+  op.parse.validate
+
+  env = ENVIRONMENTS[op.opts.project]
+
+  common = Common.new
+  content_type = "Content-Type: application/json"
+  accept = "Accept: application/json"
+  circle_token = "Circle-Token: "
+  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_build_cdr_indices\": true, \"cdr_source_project\": \"#{env.fetch(:source_cdr_project)}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"cdr_sql_bucket\": \"all-of-us-workbench-private-cloudsql\", \"cdr_dest_project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"cdr_date\": \"#{op.opts.cdr_date}\", \"data_browser\": #{op.opts.data_browser} }}"
+  common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/workbench/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
+end
+
+Common.register_command({
+  :invocation => "circle-build-cdr-indices",
+  :description => "Build the CDR indices using CircleCi",
+  :fn => ->(*args) { circle_build_cdr_indices("circle-build-cdr-indices", args) }
+})
+
 def make_bq_denormalized_tables(cmd_name, *args)
-  ensure_docker_sync()
+  ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
   date = Time.new
   date = date.year.to_s + "-" + date.month.to_s + "-" + date.day.to_s
@@ -1031,7 +1092,7 @@ Generates the criteria table in big query. Used by cohort builder. Must be run o
 })
 
 def generate_private_cdr_counts(cmd_name, *args)
-  ensure_docker_sync()
+  ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
     "--bq-project [bq-project]",
