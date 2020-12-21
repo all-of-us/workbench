@@ -161,7 +161,7 @@ export default class WorkspaceCard extends CardBase {
   }
 
   // if the snowman menu options for WRITER & READER are disabled except duplicate option and all options are enabled for OWNER.
-  async workspaceCardMenuOptions(): Promise<void>{
+  async verifyWorkspaceCardMenuOptions(): Promise<void>{
     const snowmanMenu = await this.getSnowmanMenu();
     const accessLevel = await this.getWorkspaceAccessLevel();
     if (accessLevel !== WorkspaceAccessLevel.Owner) {
