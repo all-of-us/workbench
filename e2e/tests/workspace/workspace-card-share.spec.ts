@@ -86,7 +86,7 @@ describe('Share workspace', () => {
       expect(accessLevel).toBe(WorkspaceAccessLevel.Reader);
 
       // Share, Edit and Delete actions are not available for click.
-      await workspaceCard2.workspaceCardMenuOptions();
+      await workspaceCard2.verifyWorkspaceCardMenuOptions();
 
       // Make sure the Search input-field in Share modal is disabled.
       await workspaceCard2.clickWorkspaceName();
