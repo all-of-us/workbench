@@ -64,10 +64,10 @@ describe('Share workspace', () => {
         const accessLevel = await workspaceCard.getWorkspaceAccessLevel();
         expect(accessLevel).toBe(assign.accessRole);
     
-        // Share, Edit and Delete actions are disabled for Writer & Reader. enabled for Owner
-        await workspaceCard.workspaceCardMenuOptions();
+        // Share, Edit and Delete actions are disabled for Writer & Reader and enabled for Owner.
+        await workspaceCard.verifyWorkspaceCardMenuOptions();
     
-        // Make sure the Search input-field in Share modal is disabled for Writer & Reader. enabled for Owner
+        // Make sure the Search input-field in Share modal is disabled for Writer & Reader and enabled for Owner.
         await workspaceCard.clickWorkspaceName();
         await (new WorkspaceDataPage(newPage)).openAboutPage();
         const aboutPage = new WorkspaceAboutPage(newPage);
