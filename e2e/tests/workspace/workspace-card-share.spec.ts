@@ -29,14 +29,6 @@ describe('Share workspace', () => {
 
       const aboutPage = new WorkspaceAboutPage(page);
       await aboutPage.waitForLoad();
-
-      // This test is not hermetic - if the collaborator is already on this
-      // workspace, just remove them before continuing.
-      // let accessLevel = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
-      // if (accessLevel !== null) {
-      //   await (await aboutPage.openShareModal()).removeUser(config.collaboratorUsername);
-      //   await waitWhileLoading(page);
-      // }
        // if the collaborator is already on this workspace, just remove them before continuing.
        await aboutPage.removeCollab();
 
@@ -94,7 +86,7 @@ describe('Share workspace', () => {
       expect(accessLevel).toBe(WorkspaceAccessLevel.Reader);
 
       // Share, Edit and Delete actions are not available for click.
-      await workspaceCard2.workspaceCardMenuOptions();
+      await workspaceCard2.verifyWorkspaceCardMenuOptions();
 
       // Make sure the Search input-field in Share modal is disabled.
       await workspaceCard2.clickWorkspaceName();
