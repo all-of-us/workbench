@@ -547,9 +547,7 @@ public class FireCloudServiceImpl implements FireCloudService {
               .call(() -> getBillingProjectStatus(billingProject))
               .getCreationStatus();
 
-      if (status == CreationStatusEnum.ADDINGTOPERIMETER) {
-        log.info(String.format("Billing project %s is ADDINGTOPERIMETER", billingProject));
-      } else if (status == CreationStatusEnum.READY) {
+      if (status == CreationStatusEnum.READY) {
         log.info(String.format("Billing project %s is READY", billingProject));
       } else {
         throw new WorkbenchException(
@@ -575,8 +573,6 @@ public class FireCloudServiceImpl implements FireCloudService {
             status -> {
               boolean willRetry =
                   status.getCreationStatus() != CreationStatusEnum.READY
-                      // temp pretend this is a terminal status
-//                      && status.getCreationStatus() != CreationStatusEnum.ADDINGTOPERIMETER
                       && status.getCreationStatus() != CreationStatusEnum.ERROR;
               if (willRetry) {
                 log.info(

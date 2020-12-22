@@ -452,17 +452,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     FirecloudWorkspaceId toFcWorkspaceId =
         generateFirecloudWorkspaceId(toWorkspaceName, toWorkspace.getName());
-
-    // tmp hack to avoid 404 "project does not exist"
-    // 5000ms seems to be too short
-    // 7s failed twice
-    // 10s succeeded twice
-//    try {
-//      Thread.sleep(10000);
-//    } catch (InterruptedException e) {
-//      throw new ServerErrorException(e);
-//    }
-
     FirecloudWorkspace toFcWorkspace =
         fireCloudService.cloneWorkspace(
             fromWorkspaceNamespace,
