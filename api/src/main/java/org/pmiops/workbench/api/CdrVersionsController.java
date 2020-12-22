@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -10,7 +11,6 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.model.CdrVersionListResponse;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,14 +37,18 @@ public class CdrVersionsController implements CdrVersionsApiDelegate {
   public ResponseEntity<CdrVersionListResponse> getCdrVersions() {
     // TODO: Consider filtering this based on what is currently instantiated as a data source. Newly
     // added CDR versions will not function until a server restart.
-    DataAccessLevel accessLevel = userProvider.get().getDataAccessLevelEnum();
-    List<DbCdrVersion> cdrVersions = cdrVersionService.findAuthorizedCdrVersions(accessLevel);
+
+    // rm for prototype
+    // DataAccessLevel accessLevel = userProvider.get().getDataAccessLevelEnum();
+    // get all for prototype
+    List<DbCdrVersion> cdrVersions = ImmutableList.copyOf(cdrVersionService.listCdrVersions());
+
     if (cdrVersions.isEmpty()) {
       throw new ForbiddenException("User does not have access to any CDR versions");
     }
     List<Long> defaultVersions =
         cdrVersions.stream()
-            .filter(v -> v.getIsDefault())
+            .filter(DbCdrVersion::getIsDefault)
             .map(DbCdrVersion::getCdrVersionId)
             .collect(Collectors.toList());
     if (defaultVersions.isEmpty()) {

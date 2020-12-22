@@ -1,15 +1,10 @@
 package org.pmiops.workbench.cdr;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import java.util.List;
 import java.util.Optional;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -19,22 +14,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CdrVersionService {
-
-  private static final ImmutableSet<Short> REGISTERED_ONLY =
-      ImmutableSet.of(DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
-
-  private static final ImmutableSet<Short> REGISTERED_AND_PROTECTED =
-      ImmutableSet.of(
-          DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED),
-          DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.PROTECTED));
-
-  private static final ImmutableMap<DataAccessLevel, ImmutableSet<Short>>
-      DATA_ACCESS_LEVEL_TO_VISIBLE_VALUES =
-          ImmutableMap.<DataAccessLevel, ImmutableSet<Short>>builder()
-              .put(DataAccessLevel.REGISTERED, REGISTERED_ONLY)
-              .put(DataAccessLevel.PROTECTED, REGISTERED_AND_PROTECTED)
-              .build();
-
   private Provider<DbUser> userProvider;
   private Provider<WorkbenchConfig> configProvider;
   private FireCloudService fireCloudService;
@@ -97,6 +76,7 @@ public class CdrVersionService {
     return dbCdrVersion;
   }
 
+  // rm for prototype
   /**
    * Retrieve all the CDR versions visible to users with the specified data access level. When
    * {@link DataAccessLevel#PROTECTED} is provided, CDR versions for both {@link
@@ -108,13 +88,18 @@ public class CdrVersionService {
    * @param dataAccessLevel the data access level of the user
    * @return a list of {@link DbCdrVersion} in descending timestamp, data access level order.
    */
-  public List<DbCdrVersion> findAuthorizedCdrVersions(DataAccessLevel dataAccessLevel) {
-    ImmutableSet<Short> visibleValues = DATA_ACCESS_LEVEL_TO_VISIBLE_VALUES.get(dataAccessLevel);
-    if (visibleValues == null) {
-      return ImmutableList.of();
-    }
-    return cdrVersionDao.findByDataAccessLevelInOrderByCreationTimeDescDataAccessLevelDesc(
-        visibleValues);
+  //  public List<DbCdrVersion> findAuthorizedCdrVersions(DataAccessLevel dataAccessLevel) {
+  //    ImmutableSet<Short> visibleValues =
+  // DATA_ACCESS_LEVEL_TO_VISIBLE_VALUES.get(dataAccessLevel);
+  //    if (visibleValues == null) {
+  //      return ImmutableList.of();
+  //    }
+  //    return cdrVersionDao.findByDataAccessLevelInOrderByCreationTimeDescDataAccessLevelDesc(
+  //        visibleValues);
+  //  }
+
+  public Iterable<DbCdrVersion> listCdrVersions() {
+    return cdrVersionDao.findAll();
   }
 
   public Optional<DbCdrVersion> findByCdrVersionId(Long cdrVersionId) {
