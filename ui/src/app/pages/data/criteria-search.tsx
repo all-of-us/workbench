@@ -120,7 +120,6 @@ interface Props {
   cohortContext: any;
   conceptSearchTerms?: string;
   selectedSurvey?: string;
-  source: string;
   urlParams: any;
 }
 
@@ -155,13 +154,13 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
       selectedIds: [],
       selections: [],
       selectedCriteriaList: [],
-      treeSearchTerms: props.source !== 'criteria' ? props.conceptSearchTerms : '',
+      treeSearchTerms: props.cohortContext.source !== 'cohort' ? props.conceptSearchTerms : '',
       loadingSubtree: false
     };
   }
 
   componentDidMount(): void {
-    const {cohortContext: {domain, standard, type}, source} = this.props;
+    const {cohortContext: {domain, standard, source, type}} = this.props;
     let {backMode, mode} = this.state;
     let hierarchyNode;
     if (this.initTree) {
@@ -192,14 +191,15 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
   }
 
   get initTree() {
-    const {cohortContext: {domain}, source} = this.props;
+    const {cohortContext: {domain, source}} = this.props;
     return domain === Domain.VISIT
-      || (source === 'criteria' && domain === Domain.PHYSICALMEASUREMENT)
-      || (source === 'criteria' && domain === Domain.SURVEY);
+      || (source === 'cohort' && domain === Domain.PHYSICALMEASUREMENT)
+      || (source === 'cohort' && domain === Domain.SURVEY);
   }
 
   get isConcept() {
-    return this.props.source === 'concept' || this.props.source === 'conceptSetDetails';
+    const {cohortContext: {source}} = this.props;
+    return source === 'concept' || source === 'conceptSetDetails';
   }
 
   getGrowlStyle() {
@@ -299,20 +299,20 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
   }
 
   render() {
-    const {backFn, cohortContext, conceptSearchTerms, selectedSurvey, source} = this.props;
+    const {backFn, cohortContext, conceptSearchTerms, selectedSurvey} = this.props;
     const {autocompleteSelection, groupSelections, hierarchyNode, loadingSubtree,
       treeSearchTerms, growlVisible} = this.state;
     return <div id='criteria-search-container'>
       {loadingSubtree && <SpinnerOverlay/>}
       <Growl ref={(el) => this.growl = el} style={!growlVisible ? {...styles.growl, display: 'none'} : styles.growl}/>
-      <FlexRowWrap style={{...styles.titleBar, marginTop: source === 'criteria' ? '1rem' : 0}}>
-        {source !== 'conceptSetDetails' && <React.Fragment>
+      <FlexRowWrap style={{...styles.titleBar, marginTop: cohortContext.source === 'cohort' ? '1rem' : 0}}>
+        {cohortContext.source !== 'conceptSetDetails' && <React.Fragment>
           <Clickable style={styles.backArrow} onClick={() => backFn()}>
             <img src={arrowIcon} style={styles.arrowIcon} alt='Go back' />
           </Clickable>
           <h2 style={styles.titleHeader}>{this.domainTitle}</h2>
         </React.Fragment>}
-        <div style={source === 'conceptSetDetails' ? styles.detailExternalLinks : styles.externalLinks}>
+        <div style={cohortContext.source === 'conceptSetDetails' ? styles.detailExternalLinks : styles.externalLinks}>
           {cohortContext.domain === Domain.DRUG && <div>
             <StyledAnchorTag
                 href='https://mor.nlm.nih.gov/RxNav/'
@@ -347,7 +347,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
         <Growl ref={(el) => this.growl = el}
                style={!growlVisible ? {...this.getGrowlStyle(), display: 'none'} : this.getGrowlStyle()}/>
         {hierarchyNode && <CriteriaTree
-            source={source}
+            source={cohortContext.source}
             selectedSurvey={selectedSurvey}
             autocompleteSelection={autocompleteSelection}
             back={this.back}
@@ -361,8 +361,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
             setSearchTerms={this.setTreeSearchTerms}/>}
          {/*List View (using duplicated version of ListSearch) */}
         {!this.initTree && <div style={this.searchContentStyle('list')}>
-          <ListSearch source={source}
-                      hierarchy={this.showHierarchy}
+          <ListSearch hierarchy={this.showHierarchy}
                       searchContext={cohortContext}
                       searchTerms={conceptSearchTerms}
                       select={this.addSelection}

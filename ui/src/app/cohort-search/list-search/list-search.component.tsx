@@ -229,7 +229,6 @@ interface Props {
   cdrVersionListResponse: CdrVersionListResponse;
   concept?: Array<Criteria>;
   hierarchy: Function;
-  source: string;
   searchContext: any;
   searchTerms: string;
   select: Function;
@@ -282,7 +281,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
       };
     }
     componentDidMount(): void {
-      const {cdrVersionListResponse, searchTerms, source, workspace: {cdrVersionId}} = this.props;
+      const {cdrVersionListResponse, searchTerms, searchContext: {source}, workspace: {cdrVersionId}} = this.props;
       const cdrVersions = cdrVersionListResponse.items;
       this.setState({cdrVersion: cdrVersions.find(cdr => cdr.cdrVersionId === cdrVersionId)});
       if (source === 'conceptSetDetails') {
@@ -294,7 +293,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
     }
 
     componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any) {
-      const {concept, source} = this.props;
+      const {concept, searchContext: {source}} = this.props;
       const {searching} = this.state;
       if (source === 'conceptSetDetails' && prevProps.concept !== concept && !searching) {
         this.setState({data: concept});
@@ -327,7 +326,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
       let sourceMatch;
       try {
         this.setState({data: null, apiError: false, inputErrors: [], loading: true, searching: true, standardOnly: false});
-        const {searchContext: {domain}, source, selectedSurvey, workspace: {cdrVersionId}} = this.props;
+        const {searchContext: {domain, source}, selectedSurvey, workspace: {cdrVersionId}} = this.props;
         const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(+cdrVersionId, domain, value.trim(), selectedSurvey);
         const data = source !== 'criteria' && this.isSurvey
           ? resp.items.filter(survey => survey.subtype === CriteriaSubType.QUESTION.toString())
@@ -357,7 +356,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
     }
 
     selectIconDisabled() {
-      const {selectedIds, source} = this.props;
+      const {searchContext: {source}, selectedIds} = this.props;
       return source !== 'criteria' && selectedIds && selectedIds.length >= 1000;
     }
 
@@ -429,13 +428,13 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
     }
 
     get textInputPlaceholder() {
-      const {searchContext: {domain}, selectedSurvey, source} = this.props;
+      const {searchContext: {domain, source}, selectedSurvey} = this.props;
       switch (source) {
         case 'concept':
           return `Search ${!!selectedSurvey ? selectedSurvey : domainToTitle(domain)} by code or description`;
         case 'conceptSetDetails':
           return `Search ${this.isSurvey ? 'across all ' : ''}${domainToTitle(domain)} by code or description`;
-        case 'criteria':
+        case 'cohort':
           return `Search ${domainToTitle(domain)} by code or description`;
       }
     }
@@ -446,7 +445,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
 
     renderRow(row: any, child: boolean, elementId: string) {
       const {hoverId, ingredients} = this.state;
-      const attributes = this.props.source === 'criteria' && row.hasAttributes;
+      const attributes = this.props.searchContext.source === 'cohort' && row.hasAttributes;
       const brand = row.type === CriteriaType.BRAND;
       const displayName = row.name + (brand ? ' (BRAND NAME)' : '');
       const selected = !attributes && !brand && this.props.selectedIds.includes(this.getParamId(row));
@@ -511,7 +510,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
     }
 
     render() {
-      const {concept, searchContext: {domain}, source} = this.props;
+      const {concept, searchContext: {domain, source}} = this.props;
       const {apiError, cdrVersion, data, ingredients, inputErrors, loading, searching, searchTerms, standardOnly, sourceMatch, standardData,
         totalCount} = this.state;
       const showStandardOption = !standardOnly && !!standardData && standardData.length > 0;

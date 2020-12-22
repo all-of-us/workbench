@@ -156,15 +156,19 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
       setTimeout(() => this.setState({updateCount: this.state.updateCount + 1}));
     }
 
-    setSearchContext(context) {
+    setSearchContext(context: any) {
+      context.source = 'cohort';
       currentCohortSearchContextStore.next(context);
       this.setState({searchContext: context});
     }
 
-    render() {
+    get showCohortSearch() {
       const {cohortContext} = this.props;
-      const {cohort, cohortChanged, cohortError, criteria, loading, modalOpen, overview, updateCount, updateGroupListsCount}
-        = this.state;
+      return !!cohortContext && cohortContext.source === 'cohort';
+    }
+
+    render() {
+      const {cohort, cohortChanged, cohortError, criteria, loading, modalOpen, overview, updateCount, updateGroupListsCount} = this.state;
       return <React.Fragment>
         <div style={{minHeight: '28rem', padding: '0.5rem'}}>
           {cohortError
@@ -173,7 +177,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
               Sorry, the cohort could not be loaded. Please try again or contact Support in the left hand navigation.
             </div>
             : <React.Fragment>
-              <FlexRowWrap style={{margin: '1rem 0 2rem', ...(!!cohortContext ? {display: 'none'} : {})}}>
+              <FlexRowWrap style={{margin: '1rem 0 2rem', ...(this.showCohortSearch ? {display: 'none'} : {})}}>
                 <div style={colStyle('66.66667')}>
                   <FlexRowWrap style={{margin: '0 -0.5rem'}}>
                     {!!cohort && !!cohort.name && <div style={{height: '1.5rem', padding: '0 0.5rem', width: '100%'}}>
@@ -205,7 +209,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
                 </div>
                 {loading && <SpinnerOverlay/>}
               </FlexRowWrap>
-              {!!cohortContext && <CohortSearch/>}
+              {this.showCohortSearch && <CohortSearch/>}
             </React.Fragment>
           }
         </div>

@@ -249,8 +249,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
                 selections={selections}/>
             </div>
             : <CriteriaSearch backFn={() => this.closeSearch()}
-                              cohortContext={cohortContext}
-                              source={'criteria'}/>}
+                              cohortContext={cohortContext}/>}
         </div>
       </div>
       <Button type='primary'

@@ -59,7 +59,7 @@ describe('TreeNode', () => {
                                       searchTerms={''}
                                       select={() => {}}
                                       selectedIds={[]}
-                                      source ='criteria'
+                                      source ='cohort'
                                       setAttributes={() => {}}/>);
     expect(wrapper).toBeTruthy();
   });
