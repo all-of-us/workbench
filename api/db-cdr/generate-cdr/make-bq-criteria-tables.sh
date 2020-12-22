@@ -475,7 +475,7 @@ LEFT JOIN
         GROUP BY 1
     ) c on b.concept_id = c.concept_id
 WHERE a.type = 'ICD10CM'
-    AND a.code NOT LIKE 'U07%' -- removing U07 and children as parent doesn't have a concept id
+    AND (a.code NOT LIKE 'U07%' OR a.code is NULL) -- removing U07 and children as parent doesn't have a concept id
     AND
         (
             -- get all parents and get all children that have a count
