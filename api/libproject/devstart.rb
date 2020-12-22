@@ -774,10 +774,9 @@ Common.register_command({
 })
 
 def circle_build_cdr_indices(cmd_name, args)
-  ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser = false
-  op.opts.branch = "master"
+  op.opts.branch = "main"
   op.add_option(
     "--branch [--branch]",
     ->(opts, v) { opts.branch = v},
@@ -817,8 +816,8 @@ def circle_build_cdr_indices(cmd_name, args)
   content_type = "Content-Type: application/json"
   accept = "Accept: application/json"
   circle_token = "Circle-Token: "
-  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_build_cdr_indices\": true, \"cdr_source_project\": \"#{env.fetch(:source_cdr_project)}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"cdr_sql_bucket\": \"all-of-us-workbench-private-cloudsql\", \"cdr_dest_project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"cdr_date\": \"#{op.opts.cdr_date}\", \"data_browser\": #{op.opts.data_browser} }}"
-  common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/workbench/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
+  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_build_cdr_indices\": true, \"cdr_source_project\": \"#{env.fetch(:source_cdr_project)}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"cdr_sql_bucket\": \"all-of-us-workbench-private-cloudsql\", \"project\": \"#{op.opts.project}\", \"cdr_dest_project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"cdr_date\": \"#{op.opts.cdr_date}\", \"data_browser\": #{op.opts.data_browser} }}"
+  common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/cdr-indices/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
 end
 
 Common.register_command({
@@ -828,7 +827,6 @@ Common.register_command({
 })
 
 def make_bq_denormalized_tables(cmd_name, *args)
-  ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
   date = Time.new
   date = date.year.to_s + "-" + date.month.to_s + "-" + date.day.to_s
@@ -1092,7 +1090,6 @@ Generates the criteria table in big query. Used by cohort builder. Must be run o
 })
 
 def generate_private_cdr_counts(cmd_name, *args)
-  ensure_docker cmd_name, args
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
     "--bq-project [bq-project]",
