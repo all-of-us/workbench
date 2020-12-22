@@ -20,6 +20,7 @@ import {QueryReportComponent} from './pages/data/cohort-review/query-report.comp
 import {TablePage} from './pages/data/cohort-review/table-page';
 import {CohortActionsComponent} from './pages/data/cohort/cohort-actions';
 import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
+import {ConceptSearchComponent} from './pages/data/concept/concept-search';
 import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
 import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-details';
 import {ProfilePageComponent} from './pages/profile/profile-page';
@@ -257,13 +258,24 @@ const routes: Routes = [
                       },
                       {
                         path: 'concepts',
-                        component: ConceptHomepageComponent,
-                        canDeactivate: [CanDeactivateGuard],
-                        data: {
-                          title: 'Search Concepts',
-                          breadcrumb: BreadcrumbType.SearchConcepts,
-                          helpContentKey: 'conceptSets'
-                        }
+                        children: [{
+                          path: '',
+                          component: ConceptHomepageComponent,
+                          canDeactivate: [CanDeactivateGuard],
+                          data: {
+                            title: 'Search Concepts',
+                            breadcrumb: BreadcrumbType.SearchConcepts,
+                            helpContentKey: 'conceptSets'
+                          }
+                        }, {
+                          path: ':domain',
+                          component: ConceptSearchComponent,
+                          data: {
+                            title: 'Search Concepts',
+                            breadcrumb: BreadcrumbType.SearchConcepts,
+                            helpContentKey: 'conceptSets'
+                          }
+                        }]
                       },
                       {
                         path: 'concepts/sets',

@@ -25,6 +25,7 @@ import {
 } from 'app/utils';
 import {
   conceptSetUpdating,
+  currentCohortSearchContextStore,
   currentConceptSetStore,
   currentConceptStore,
   NavStore,
@@ -486,10 +487,9 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
     }
 
     browseDomain(domain: DomainInfo) {
-      const {conceptDomainCounts} = this.state;
-      const activeDomainTab = conceptDomainCounts.find(domainCount => domainCount.domain === domain.domain);
-      currentConceptStore.next([]);
-      this.setState({activeDomainTab: activeDomainTab, searching: true, selectedDomain: domain.domain});
+      const {namespace, id} = this.props.workspace;
+      currentCohortSearchContextStore.next({domain: domain.domain, type: 'PPI', standard: this.state.standardConceptsOnly});
+      NavStore.navigate(['workspaces', namespace, id, 'data', 'concepts', domain.domain]);
     }
 
     browseSurvey(surveyName) {

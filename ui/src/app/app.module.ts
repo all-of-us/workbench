@@ -36,6 +36,7 @@ import {QueryReportComponent} from './pages/data/cohort-review/query-report.comp
 import {TablePage} from './pages/data/cohort-review/table-page';
 import {CohortActionsComponent} from './pages/data/cohort/cohort-actions';
 import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
+import {ConceptSearchComponent} from './pages/data/concept/concept-search';
 import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
 import {ConceptSetDetailsComponent} from './pages/data/concept/concept-set-details';
 import {InitialErrorComponent} from './pages/initial-error/component';
@@ -137,6 +138,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ConceptSetActionsComponent,
     ConceptSetDetailsComponent,
     ConceptHomepageComponent,
+    ConceptSearchComponent,
     ConfirmDeleteModalComponent,
     DataPageComponent,
     DataSetPageComponent,
