@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
@@ -293,7 +294,7 @@ public class DataSetControllerTest {
     DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
     entry.setFireCloudProjectName(UUID.randomUUID().toString());
 
-    doReturn(entry).when(mockBillingProjectBufferService).assignBillingProject(any());
+    doReturn(entry).when(mockBillingProjectBufferService).assignBillingProject(any(), anyString());
     TestMockFactory.stubCreateFcWorkspace(fireCloudService);
 
     Gson gson = new Gson();

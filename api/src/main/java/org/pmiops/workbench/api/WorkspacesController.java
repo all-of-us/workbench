@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -208,9 +209,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     validateWorkspaceApiModel(workspace);
 
     DbUser user = userProvider.get();
+
+    // for prototype
+    final String accessTier =
+        workspace.getName().toLowerCase(Locale.US).contains("tier2") ? "tier2" : "registered";
+
     final DbBillingProjectBufferEntry bufferedBillingProject;
     try {
-      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user, accessTier);
     } catch (EmptyBufferException e) {
       throw new TooManyRequestsException();
     }
@@ -434,10 +440,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     DbUser user = userProvider.get();
 
+    // for prototype
+    final String accessTier =
+        toWorkspace.getName().toLowerCase(Locale.US).contains("tier2") ? "tier2" : "registered";
+
     String toWorkspaceName;
     DbBillingProjectBufferEntry bufferedBillingProject;
     try {
-      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user, accessTier);
     } catch (EmptyBufferException e) {
       throw new TooManyRequestsException();
     }

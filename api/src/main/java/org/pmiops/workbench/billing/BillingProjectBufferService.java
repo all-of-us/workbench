@@ -247,19 +247,24 @@ public class BillingProjectBufferService implements GaugeDataCollector {
         .collect(Collectors.toList());
   }
 
-  public DbBillingProjectBufferEntry assignBillingProject(DbUser dbUser) {
+  public DbBillingProjectBufferEntry assignBillingProject(DbUser dbUser, String accessTier) {
     DbBillingProjectBufferEntry bufferEntry = consumeBufferEntryForAssignment();
+    final String billingProject = bufferEntry.getFireCloudProjectName();
 
-    fireCloudService.addOwnerToBillingProject(
-        dbUser.getUsername(), bufferEntry.getFireCloudProjectName());
+    fireCloudService.addOwnerToBillingProject(dbUser.getUsername(), billingProject);
 
     if (workbenchConfigProvider.get().featureFlags.enableLazyPerimeterAssignment
         && bufferEntry.needsPerimeterAssignment()) {
-      // hardcoded for prototype
       String perimeter =
-          workbenchConfigProvider.get().accessTiers.get("tier2").servicePerimeterName;
-      fireCloudService.addProjectToServicePerimeter(
-          perimeter, bufferEntry.getFireCloudProjectName());
+          workbenchConfigProvider.get().accessTiers.get(accessTier).servicePerimeterName;
+
+      final String logMsg =
+          String.format(
+              "Assigning project %s to tier %s perimeter %s",
+              billingProject, accessTier, perimeter);
+      log.info(logMsg);
+
+      fireCloudService.addProjectToServicePerimeter(perimeter, billingProject);
     }
 
     bufferEntry.setStatusEnum(BufferEntryStatus.ASSIGNED, this::getCurrentTimestamp);

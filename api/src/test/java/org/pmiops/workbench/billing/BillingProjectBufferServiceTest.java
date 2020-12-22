@@ -122,6 +122,11 @@ public class BillingProjectBufferServiceTest {
     workbenchConfig.billing.bufferRefillProjectsPerTask = 1;
     workbenchConfig.firecloud.vpcServicePerimeterName = "we have secured the perimeter";
 
+    // hardcoded for prototype
+    AccessTierConfig tier2 = new AccessTierConfig();
+    tier2.servicePerimeterName = "test-perim";
+    workbenchConfig.accessTiers.put("tier2", tier2);
+
     CLOCK.setInstant(NOW);
 
     billingProjectBufferEntryDao = spy(billingProjectBufferEntryDao);
@@ -444,7 +449,7 @@ public class BillingProjectBufferServiceTest {
     doReturn("fake-email@aou.org").when(user).getUsername();
 
     DbBillingProjectBufferEntry assignedEntry =
-        billingProjectBufferService.assignBillingProject(user);
+        billingProjectBufferService.assignBillingProject(user, "tier2");
 
     // verify addOwnerToBillingProject() arguments
 
@@ -473,11 +478,6 @@ public class BillingProjectBufferServiceTest {
   public void assignBillingProjectAddingPerimeter() {
     workbenchConfig.featureFlags.enableLazyPerimeterAssignment = true;
 
-    // hardcoded for prototype
-    AccessTierConfig tier2 = new AccessTierConfig();
-    tier2.servicePerimeterName = "test-perim";
-    workbenchConfig.accessTiers.put("tier2", tier2);
-
     DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
     entry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
     entry.setFireCloudProjectName("test-project-name");
@@ -489,7 +489,7 @@ public class BillingProjectBufferServiceTest {
     doReturn("fake-email@aou.org").when(user).getUsername();
 
     DbBillingProjectBufferEntry assignedEntry =
-        billingProjectBufferService.assignBillingProject(user);
+        billingProjectBufferService.assignBillingProject(user, "tier2");
 
     // verify addOwnerToBillingProject() arguments
 
@@ -550,9 +550,9 @@ public class BillingProjectBufferServiceTest {
         .save(any(DbBillingProjectBufferEntry.class));
 
     Callable<DbBillingProjectBufferEntry> t1 =
-        () -> billingProjectBufferService.assignBillingProject(firstUser);
+        () -> billingProjectBufferService.assignBillingProject(firstUser, "tier2");
     Callable<DbBillingProjectBufferEntry> t2 =
-        () -> billingProjectBufferService.assignBillingProject(secondUser);
+        () -> billingProjectBufferService.assignBillingProject(secondUser, "tier2");
 
     List<Callable<DbBillingProjectBufferEntry>> callableTasks = new ArrayList<>();
     callableTasks.add(t1);
