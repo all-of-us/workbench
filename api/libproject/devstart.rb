@@ -2429,11 +2429,6 @@ def get_auth_domain(project, tier)
   return get_access_tier_config(project, tier)["authDomainName"]
 end
 
-# TODO currently broken for CDR DB
-def get_auth_domain_group_email(project)
-  return get_access_tier_config(project, "registered")["authDomainGroupEmail"]
-end
-
 def get_firecloud_base_url(project)
   return get_fc_config(project)["baseUrl"]
 end
