@@ -8,7 +8,7 @@ export class CdrVersionsStubVariables {
   static ALT_WORKSPACE_CDR_VERSION_ID = 'altCdrVersion';
 }
 
-export const cdrVersionListResponse = {
+export const cdrVersionListResponse: CdrVersionListResponse = {
   defaultCdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
   items: [
     {
@@ -17,7 +17,8 @@ export const cdrVersionListResponse = {
       dataAccessLevel: DataAccessLevel.Registered,
       archivalStatus: ArchivalStatus.LIVE,
       hasMicroarrayData: true,
-      creationTime: 0
+      creationTime: 0,
+      accessTier: 'registered',
     },
     {
       name: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION,
@@ -25,7 +26,8 @@ export const cdrVersionListResponse = {
       dataAccessLevel: DataAccessLevel.Registered,
       archivalStatus: ArchivalStatus.LIVE,
       hasMicroarrayData: false,
-      creationTime: 0
+      creationTime: 0,
+      accessTier: 'registered',
     },
   ]
 };

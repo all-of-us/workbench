@@ -1356,11 +1356,16 @@ def create_auth_domain(cmd_name, args)
     "Workbench Project (environment) for creating the authorization domain"
   )
   op.add_option(
+    "--tier [tier]",
+    ->(opts, v) { opts.tier = v},
+    "Access tier for creating the authorization domain"
+  )
+  op.add_option(
     "--user [user]",
     ->(opts, v) { opts.user = v},
     "A Workbench user you control with DEVELOPER Authority in the environment"
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.user}
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.user and opts.tier }
   op.parse.validate
 
   common = Common.new
@@ -1371,14 +1376,14 @@ def create_auth_domain(cmd_name, args)
   content_type = "Content-type: application/json"
   api_base_url = get_server_config(op.opts.project)["apiBaseUrl"]
 
-  domain_name = get_auth_domain(op.opts.project)
+  domain_name = get_auth_domain(op.opts.project, op.opts.tier)
   common.run_inline %W{curl -X POST -H #{header} -H #{content_type} -d {}
      #{api_base_url}/v1/auth-domain/#{domain_name}}
 end
 
 Common.register_command({
   :invocation => "create-auth-domain",
-  :description => "Creates an authorization domain in Firecloud for registered users",
+  :description => "Creates an authorization domain in Terra for users of the supplied tier",
     :fn => ->(*args) { create_auth_domain("create-auth-domain", args) }
 })
 
@@ -2408,6 +2413,10 @@ def get_server_config(project)
   return get_config(project)["server"]
 end
 
+def get_access_tier_config(project, tier)
+  return get_config(project)["accessTiers"][tier]
+end
+
 def get_billing_project_prefix(project)
   return get_billing_config(project)["projectNamePrefix"]
 end
@@ -2416,12 +2425,8 @@ def get_leo_api_url(project)
   return get_fc_config(project)["leoBaseUrl"]
 end
 
-def get_auth_domain(project)
-  return get_fc_config(project)["registeredDomainName"]
-end
-
-def get_auth_domain_group(project)
-  return get_fc_config(project)["registeredDomainGroup"]
+def get_auth_domain(project, tier)
+  return get_access_tier_config(project, tier)["authDomainName"]
 end
 
 def get_firecloud_base_url(project)

@@ -1,6 +1,8 @@
 package org.pmiops.workbench.config;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A class representing the main workbench configuration; parsed from JSON stored in the database.
@@ -27,6 +29,7 @@ public class WorkbenchConfig {
   public RdrExportConfig rdrExport;
   public CaptchaConfig captcha;
   public ReportingConfig reporting;
+  public Map<String, AccessTierConfig> accessTiers;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -50,6 +53,7 @@ public class WorkbenchConfig {
     config.rdrExport = new RdrExportConfig();
     config.captcha = new CaptchaConfig();
     config.reporting = new ReportingConfig();
+    config.accessTiers = new HashMap<>();
     return config;
   }
 
@@ -102,7 +106,9 @@ public class WorkbenchConfig {
     public Integer notebookRuntimeIdleMaxAgeDays;
     public String notebookRuntimeDefaultMachineType;
     public Integer notebookRuntimeDefaultDiskSizeGb;
+    @Deprecated // replaced by AccessTierConfig.authDomainName
     public String registeredDomainName;
+    @Deprecated // replaced by AccessTierConfig.authDomainGroupEmail
     public String registeredDomainGroup;
     public String leoBaseUrl;
     // This value specifies the information we hand to Terra as our AppId header.
@@ -110,6 +116,7 @@ public class WorkbenchConfig {
     public String xAppIdValue;
     // The name of the VPC service perimeter to create our Terra GCP projects inside,
     // if enabled.
+    @Deprecated // replaced by AccessTierConfig.servicePerimeterName
     public String vpcServicePerimeterName;
     // The length of our API HTTP client timeouts to firecloud
     public Integer timeoutInSeconds;
@@ -294,5 +301,17 @@ public class WorkbenchConfig {
     public String dataset;
     public Integer maxRowsPerInsert;
     public String uploadMethod;
+  }
+
+  // Second Tier Prototype; may change for production version
+  public static class AccessTierConfig {
+    // Public-facing name of the tier
+    public String tierLabel;
+    // VPC-SC service perimeter / folder
+    public String servicePerimeterName;
+    // Terra Authorization Domain for workspaces in thie tier
+    public String authDomainName;
+    // Terra Group / Google Group corresponding to the auth domain
+    public String authDomainGroupEmail;
   }
 }
