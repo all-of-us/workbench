@@ -3,47 +3,55 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
+import {FadeBox} from 'app/components/containers';
 import {CriteriaSearch} from 'app/pages/data/criteria-search';
 import {
   ReactWrapperBase,
+  withCurrentCohortSearchContext,
   withCurrentConcept,
   withCurrentWorkspace,
   withUrlParams
 } from 'app/utils';
-import {NavStore, setSidebarActiveIconStore} from 'app/utils/navigation';
+import {currentConceptStore, NavStore, setSidebarActiveIconStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Criteria, WorkspaceAccessLevel} from 'generated/fetch';
 
 interface Props {
+  cohortContext: any;
   concept: Array<Criteria>;
-  urlParams: any;
   workspace: WorkspaceData;
+  urlParams: any;
 }
 
-const ConceptSearch = fp.flow(withCurrentConcept(), withCurrentWorkspace(), withUrlParams())(class extends React.Component<Props> {
-  constructor(props: any) {
-    super(props);
-    this.state = {};
-  }
+const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurrentConcept(), withCurrentWorkspace(), withUrlParams())
+  (class extends React.Component<Props> {
+    constructor(props: any) {
+      super(props);
+      this.state = {};
+    }
 
-  get disableFinishButton() {
-    const {concept, workspace: {accessLevel}} = this.props;
-    return !concept || concept.length === 0 || ![WorkspaceAccessLevel.READER, WorkspaceAccessLevel.WRITER].includes(accessLevel);
-  }
+    componentDidMount() {
+      currentConceptStore.next([]);
+    }
 
-  render() {
-    const {urlParams: {domain}, workspace: {id, namespace}} = this.props;
-    return <React.Fragment>
-      <CriteriaSearch backFn={() => NavStore.navigate(['workspaces', namespace, id, 'data', 'concepts'])}
-                      cohortContext={{domain}}
-                      conceptSearchTerms={''}
-                      source='concept'/>
-      <Button style={{float: 'right', marginBottom: '2rem'}}
-              disabled={this.disableFinishButton}
-              onClick={() => setSidebarActiveIconStore.next('concept')}>Finish & Review</Button>
-    </React.Fragment>;
-  }
-});
+    get disableFinishButton() {
+      const {concept, workspace: {accessLevel}} = this.props;
+      return !concept || concept.length === 0 || ![WorkspaceAccessLevel.OWNER, WorkspaceAccessLevel.WRITER].includes(accessLevel);
+    }
+
+    render() {
+      const {cohortContext, urlParams: {domain}, workspace: {id, namespace}} = this.props;
+      return <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
+        <CriteriaSearch backFn={() => NavStore.navigate(['workspaces', namespace, id, 'data', 'concepts'])}
+                        cohortContext={{domain}}
+                        conceptSearchTerms={!!cohortContext ? cohortContext.searchTerms : ''}
+                        source='concept'/>
+        <Button style={{float: 'right', marginBottom: '2rem'}}
+                disabled={this.disableFinishButton}
+                onClick={() => setSidebarActiveIconStore.next('concept')}>Finish & Review</Button>
+      </FadeBox>;
+    }
+  });
 
 @Component({
   template: '<div #root></div>'

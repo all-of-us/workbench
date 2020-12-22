@@ -136,8 +136,8 @@ interface State {
   selectedIds: Array<string>;
   treeSearchTerms: string;
   loadingSubtree: boolean;
-
 }
+
 export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(class extends React.Component<Props, State>  {
   growl: any;
   growlTimer: NodeJS.Timer;

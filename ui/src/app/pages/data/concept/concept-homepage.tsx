@@ -20,6 +20,7 @@ import {
   reactStyles,
   ReactWrapperBase,
   validateInputForMySQL,
+  withCurrentCohortSearchContext,
   withCurrentConcept,
   withCurrentWorkspace
 } from 'app/utils';
@@ -197,6 +198,7 @@ interface Props {
   setShowUnsavedModal: (showUnsavedModal: () => Promise<boolean>) => void;
   setUnsavedConceptChanges: (unsavedConceptChanges: boolean) => void;
   workspace: WorkspaceData;
+  cohortContext: any;
   concept?: Array<Concept>;
 }
 
@@ -268,7 +270,7 @@ interface State {
   workspacePermissions: WorkspacePermissions;
 }
 
-export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcept())(
+export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCurrentConcept(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
     resolveUnsavedModal: Function;
     subscription: Subscription;
@@ -286,8 +288,8 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
         conceptSurveysList: [],
         countsError: false,
         countsLoading: false,
-        currentInputString: '',
-        currentSearchString: '',
+        currentInputString: props.cohortContext ? props.cohortContext.searchTerms : '',
+        currentSearchString: props.cohortContext ? props.cohortContext.searchTerms : '',
         domainErrors: [],
         domainInfoError: false,
         domainsLoading: [],
@@ -328,12 +330,11 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
     }
 
     componentWillUnmount() {
-      currentConceptStore.next(null);
       this.subscription.unsubscribe();
     }
 
     async loadDomainsAndSurveys() {
-      const {cdrVersionId} = this.props.workspace;
+      const {cohortContext, workspace: {cdrVersionId}} = this.props;
       const getDomainInfo = cohortBuilderApi().findDomainInfos(+cdrVersionId)
         .then(conceptDomainInfo => {
           let conceptsCache: ConceptCacheItem[] = conceptDomainInfo.items.map((domain) => ({
@@ -372,6 +373,9 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
           console.error(e);
         });
       await Promise.all([getDomainInfo, getSurveyInfo]);
+      if (cohortContext && cohortContext.searchTerms) {
+        this.updateCardCounts();
+      }
       this.browseDomainFromQueryParams();
       this.setState({loadingDomains: false});
     }
@@ -488,7 +492,7 @@ export const ConceptHomepage = fp.flow(withCurrentWorkspace(), withCurrentConcep
 
     browseDomain(domain: DomainInfo) {
       const {namespace, id} = this.props.workspace;
-      currentCohortSearchContextStore.next({domain: domain.domain, type: 'PPI', standard: this.state.standardConceptsOnly});
+      currentCohortSearchContextStore.next({domain: domain.domain, searchTerms: this.state.currentSearchString});
       NavStore.navigate(['workspaces', namespace, id, 'data', 'concepts', domain.domain]);
     }
 
