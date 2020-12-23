@@ -123,10 +123,6 @@ def publish_cdr(cmd_name, args)
     # bq init --delete_credentials as recommended in the output.
     # TODO(RW-3768): Find a better solution for Google credentials in docker.
 
-    # If you receive a prompt from "bq" for selecting a default project ID, just
-    # hit enter.
-    # TODO(RW-3768): Figure out how to prepopulate this value or disable interactivity.
-
     # Copy through an intermediate project and delete after (include TTL in case later steps fail).
     # See https://docs.google.com/document/d/1EHw5nisXspJjA9yeZput3W4-vSIcuLBU5dPizTnk1i0/edit
     common.run_inline %W{bq mk -f --default_table_expiration 7200 --dataset #{ingest_dataset}}
