@@ -299,7 +299,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
   }
 
   render() {
-    const {backFn, cohortContext, conceptSearchTerms, selectedSurvey} = this.props;
+    const {backFn, cohortContext, conceptSearchTerms} = this.props;
     const {autocompleteSelection, groupSelections, hierarchyNode, loadingSubtree,
       treeSearchTerms, growlVisible} = this.state;
     return <div id='criteria-search-container'>
