@@ -614,15 +614,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     renderHeader() {
-      switch (this.props.routeConfigData.mode) {
+      // use workspace name from props instead of state here
+      // because it's a record of the initial value
+      const {routeConfigData: {mode}, workspace: {name}} = this.props;
+      switch (mode) {
         case WorkspaceEditMode.Create:
           return 'Create a new workspace';
         case WorkspaceEditMode.Edit:
-          return 'Edit workspace \"' + this.state.workspace.name + '\"';
+          return 'Edit workspace \"' + name + '\"';
         case WorkspaceEditMode.Duplicate:
-          // use workspace name from props instead of state here
-          // because it's a record of the initial value
-          return 'Duplicate workspace \"' + this.props.workspace.name + '\"';
+          return 'Duplicate workspace \"' + name + '\"';
       }
     }
 
@@ -1026,7 +1027,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                                 required={!this.isMode(WorkspaceEditMode.Duplicate)}>
           <FlexRow style={{alignItems: 'baseline'}}>
             <TextInput type='text' style={styles.textInput} autoFocus placeholder='Workspace Name'
-              value = {name}
+              defaultValue = {name}
               onChange={v => this.setState(fp.set(['workspace', 'name'], v))}/>
             <TooltipTrigger
                 content='To use a different dataset version, duplicate or create a new workspace.'
