@@ -17,6 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -334,15 +335,20 @@ public class FireCloudServiceImpl implements FireCloudService {
 
   @Override
   public FirecloudWorkspace createWorkspace(String projectName, String workspaceName) {
+
+    // for prototype
+    final String tierName =
+        workspaceName.toLowerCase(Locale.US).contains("tier2") ? "tier2" : "registered";
+    final String authDomainName = configProvider.get().accessTiers.get(tierName).authDomainName;
+    final List<FirecloudManagedGroupRef> authDomain =
+        ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName));
+
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     FirecloudWorkspaceIngest workspaceIngest =
         new FirecloudWorkspaceIngest()
             .namespace(projectName)
             .name(workspaceName)
-            .authorizationDomain(
-                ImmutableList.of(
-                    new FirecloudManagedGroupRef()
-                        .membersGroupName(configProvider.get().firecloud.registeredDomainName)));
+            .authorizationDomain(authDomain);
 
     return retryHandler.run((context) -> workspacesApi.createWorkspace(workspaceIngest));
   }
@@ -350,6 +356,14 @@ public class FireCloudServiceImpl implements FireCloudService {
   @Override
   public FirecloudWorkspace cloneWorkspace(
       String fromProject, String fromName, String toProject, String toName) {
+
+    // for prototype
+    final String tierName =
+        toName.toLowerCase(Locale.US).contains("tier2") ? "tier2" : "registered";
+    final String authDomainName = configProvider.get().accessTiers.get(tierName).authDomainName;
+    final List<FirecloudManagedGroupRef> authDomain =
+        ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName));
+
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     FirecloudWorkspaceRequestClone cloneRequest =
         new FirecloudWorkspaceRequestClone()
@@ -358,10 +372,7 @@ public class FireCloudServiceImpl implements FireCloudService {
             // We copy only the notebooks/ subdirectory as a heuristic to avoid unintentionally
             // propagating copies of large data files elswhere in the bucket.
             .copyFilesWithPrefix("notebooks/")
-            .authorizationDomain(
-                ImmutableList.of(
-                    new FirecloudManagedGroupRef()
-                        .membersGroupName(configProvider.get().firecloud.registeredDomainName)));
+            .authorizationDomain(authDomain);
 
     return retryHandler.run(
         (context) -> workspacesApi.cloneWorkspace(fromProject, fromName, cloneRequest));
