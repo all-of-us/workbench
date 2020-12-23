@@ -43,9 +43,8 @@ const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurrentConce
       const {cohortContext, urlParams: {domain}, workspace: {id, namespace}} = this.props;
       return <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
         <CriteriaSearch backFn={() => NavStore.navigate(['workspaces', namespace, id, 'data', 'concepts'])}
-                        cohortContext={{domain}}
-                        conceptSearchTerms={!!cohortContext ? cohortContext.searchTerms : ''}
-                        source='concept'/>
+                        cohortContext={{domain, source: 'concept'}}
+                        conceptSearchTerms={!!cohortContext ? cohortContext.searchTerms : ''}/>
         <Button style={{float: 'right', marginBottom: '2rem'}}
                 disabled={this.disableFinishButton}
                 onClick={() => setSidebarActiveIconStore.next('concept')}>Finish & Review</Button>

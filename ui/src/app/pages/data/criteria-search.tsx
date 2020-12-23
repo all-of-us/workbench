@@ -290,7 +290,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
   }
 
   get domainTitle() {
-    const {cohortContext: {domain, type}, selectedSurvey} = this.props;
+    const {cohortContext: {domain, type, selectedSurvey}} = this.props;
     if (!!selectedSurvey) {
       return selectedSurvey;
     } else {
@@ -348,7 +348,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
                style={!growlVisible ? {...this.getGrowlStyle(), display: 'none'} : this.getGrowlStyle()}/>
         {hierarchyNode && <CriteriaTree
             source={cohortContext.source}
-            selectedSurvey={selectedSurvey}
+            selectedSurvey={cohortContext.selectedSurvey}
             autocompleteSelection={autocompleteSelection}
             back={this.back}
             groupSelections={groupSelections}
@@ -365,7 +365,6 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
                       searchContext={cohortContext}
                       searchTerms={conceptSearchTerms}
                       select={this.addSelection}
-                      selectedSurvey={selectedSurvey}
                       selectedIds={this.getListSearchSelectedIds()}/>
         </div>}
       </div>

@@ -15,7 +15,12 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, validateInputForMySQL, withCdrVersions, withCurrentConcept, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {attributesSelectionStore, currentConceptStore, setSidebarActiveIconStore} from 'app/utils/navigation';
+import {
+  attributesSelectionStore,
+  currentCohortSearchContextStore,
+  currentConceptStore,
+  setSidebarActiveIconStore
+} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   CdrVersion,
@@ -233,7 +238,6 @@ interface Props {
   searchTerms: string;
   select: Function;
   selectedIds: Array<string>;
-  selectedSurvey?: string;
   setAttributes: Function;
   workspace: WorkspaceData;
 }
@@ -314,8 +318,12 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
           if (inputErrors.length > 0) {
             this.setState({inputErrors});
           } else {
-            const {searchContext: {domain}} = this.props;
-            triggerEvent(`Cohort Builder Search - ${domainToTitle(domain)}`, 'Search', value);
+            const {searchContext} = this.props;
+            triggerEvent(`Cohort Builder Search - ${domainToTitle(searchContext.domain)}`, 'Search', value);
+            if (searchContext.source === 'concept') {
+              // Update search terms so they will persist if user returns to concept homepage
+              currentCohortSearchContextStore.next({...searchContext, searchTerms: value});
+            }
             this.getResults(value);
           }
         }
@@ -326,7 +334,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
       let sourceMatch;
       try {
         this.setState({data: null, apiError: false, inputErrors: [], loading: true, searching: true, standardOnly: false});
-        const {searchContext: {domain, source}, selectedSurvey, workspace: {cdrVersionId}} = this.props;
+        const {searchContext: {domain, source, selectedSurvey}, workspace: {cdrVersionId}} = this.props;
         const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(+cdrVersionId, domain, value.trim(), selectedSurvey);
         const data = source !== 'criteria' && this.isSurvey
           ? resp.items.filter(survey => survey.subtype === CriteriaSubType.QUESTION.toString())
@@ -363,7 +371,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
     selectItem = (row: any) => {
       let param = {parameterId: this.getParamId(row), ...row, attributes: []};
       if (row.domainId === Domain.SURVEY) {
-        param = {...param, surveyName: this.props.selectedSurvey};
+        param = {...param, surveyName: this.props.searchContext.selectedSurvey};
       }
       this.props.select(param);
     }
@@ -428,7 +436,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
     }
 
     get textInputPlaceholder() {
-      const {searchContext: {domain, source}, selectedSurvey} = this.props;
+      const {searchContext: {domain, source, selectedSurvey}} = this.props;
       switch (source) {
         case 'concept':
           return `Search ${!!selectedSurvey ? selectedSurvey : domainToTitle(domain)} by code or description`;
