@@ -13,7 +13,14 @@ import {
   withCurrentWorkspace,
   withUrlParams
 } from 'app/utils';
-import {conceptSetUpdating, currentConceptSetStore, currentConceptStore, NavStore, setSidebarActiveIconStore} from 'app/utils/navigation';
+import {
+  conceptSetUpdating,
+  currentConceptSetStore,
+  currentConceptStore,
+  NavStore,
+  queryParamsStore,
+  setSidebarActiveIconStore
+} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Criteria, WorkspaceAccessLevel} from 'generated/fetch';
 import {Subscription} from 'rxjs/Subscription';
@@ -79,10 +86,11 @@ const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurrentConce
     render() {
       const {cohortContext, urlParams: {domain}, workspace: {id, namespace}} = this.props;
       const {showUnsavedModal} = this.state;
+      const selectedSurvey = queryParamsStore.getValue().survey;
       return <React.Fragment>
         <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
           <CriteriaSearch backFn={() => NavStore.navigate(['workspaces', namespace, id, 'data', 'concepts'])}
-                          cohortContext={{domain, source: 'concept'}}
+                          cohortContext={{domain, selectedSurvey, source: 'concept'}}
                           conceptSearchTerms={!!cohortContext ? cohortContext.searchTerms : ''}/>
           <Button style={{float: 'right', marginBottom: '2rem'}}
                   disabled={this.disableFinishButton}

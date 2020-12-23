@@ -119,7 +119,6 @@ interface Props {
   backFn?: () => void;
   cohortContext: any;
   conceptSearchTerms?: string;
-  selectedSurvey?: string;
   urlParams: any;
 }
 
