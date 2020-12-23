@@ -22,11 +22,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.hibernate.exception.GenericJDBCException;
+import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.AccessTierConfig;
 import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbAdminActionHistory;
@@ -197,7 +199,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     final DataAccessLevel previousDataAccessLevel = dbUser.getDataAccessLevelEnum();
     final DataAccessLevel newDataAccessLevel;
     if (shouldUserBeRegistered(dbUser)) {
-      addToRegisteredTierGroupIdempotent(dbUser);
+      // tmp for prototype
+      addToAllAuthDomainsIdempotent(dbUser);
+      // addToRegisteredTierGroupIdempotent(dbUser);
       newDataAccessLevel = DataAccessLevel.REGISTERED;
 
       // if this is the first time the user has completed registration, record it
@@ -206,7 +210,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         dbUser.setFirstRegistrationCompletionTime();
       }
     } else {
-      removeFromRegisteredTierGroupIdempotent(dbUser);
+      // tmp for prototype
+      removeFromAllAuthDomainsIdempotent(dbUser);
+      // removeFromRegisteredTierGroupIdempotent(dbUser);
       newDataAccessLevel = DataAccessLevel.UNREGISTERED;
     }
     if (!newDataAccessLevel.equals(previousDataAccessLevel)) {
@@ -216,25 +222,66 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
   }
 
-  private void removeFromRegisteredTierGroupIdempotent(DbUser dbUser) {
-    if (isUserMemberOfRegisteredTierGroup(dbUser)) {
-      this.fireCloudService.removeUserFromGroup(
-          dbUser.getUsername(), configProvider.get().firecloud.registeredDomainName);
-      log.info(String.format("Removed user %s from registered-tier group.", dbUser.getUsername()));
-    }
+  // tmp for prototype: change these to add/remove from all Auth Domain Groups
+
+  //  private void addToRegisteredTierGroupIdempotent(DbUser user) {
+  //    if (!isUserMemberOfRegisteredTierGroup(user)) {
+  //      this.fireCloudService.addUserToGroup(
+  //          user.getUsername(), configProvider.get().firecloud.registeredDomainName);
+  //      log.info(String.format("Added user %s to registered-tier group.", user.getUsername()));
+  //    }
+  //  }
+  //
+  //  private void removeFromRegisteredTierGroupIdempotent(DbUser dbUser) {
+  //    if (isUserMemberOfRegisteredTierGroup(dbUser)) {
+  //      this.fireCloudService.removeUserFromGroup(
+  //          dbUser.getUsername(), configProvider.get().firecloud.registeredDomainName);
+  //      log.info(String.format("Removed user %s from registered-tier group.",
+  // dbUser.getUsername()));
+  //    }
+  //  }
+  //
+  //  private boolean isUserMemberOfRegisteredTierGroup(DbUser dbUser) {
+  //    return this.fireCloudService.isUserMemberOfGroup(
+  //        dbUser.getUsername(), configProvider.get().firecloud.registeredDomainName);
+  //  }
+
+  private void addToAllAuthDomainsIdempotent(DbUser user) {
+    final String username = user.getUsername();
+    configProvider.get().accessTiers.forEach(addToDomain(username));
   }
 
-  private boolean isUserMemberOfRegisteredTierGroup(DbUser dbUser) {
-    return this.fireCloudService.isUserMemberOfGroup(
-        dbUser.getUsername(), configProvider.get().firecloud.registeredDomainName);
+  @NotNull
+  private BiConsumer<String, AccessTierConfig> addToDomain(String username) {
+    return (tierName, tierConfig) -> {
+      final String authDomain = tierConfig.authDomainName;
+      if (!this.fireCloudService.isUserMemberOfGroup(username, authDomain)) {
+        this.fireCloudService.addUserToGroup(username, authDomain);
+        log.info(
+            String.format(
+                "Added user %s to the auth domain %s for tier %s.",
+                username, authDomain, tierName));
+      }
+    };
   }
 
-  private void addToRegisteredTierGroupIdempotent(DbUser user) {
-    if (!isUserMemberOfRegisteredTierGroup(user)) {
-      this.fireCloudService.addUserToGroup(
-          user.getUsername(), configProvider.get().firecloud.registeredDomainName);
-      log.info(String.format("Added user %s to registered-tier group.", user.getUsername()));
-    }
+  private void removeFromAllAuthDomainsIdempotent(DbUser user) {
+    final String username = user.getUsername();
+    configProvider.get().accessTiers.forEach(removeFromDomain(username));
+  }
+
+  @NotNull
+  private BiConsumer<String, AccessTierConfig> removeFromDomain(String username) {
+    return (tierName, tierConfig) -> {
+      final String authDomain = tierConfig.authDomainName;
+      if (this.fireCloudService.isUserMemberOfGroup(username, authDomain)) {
+        this.fireCloudService.removeUserFromGroup(username, authDomain);
+        log.info(
+            String.format(
+                "Removed user %s from the auth domain %s for tier %s.",
+                username, authDomain, tierName));
+      }
+    };
   }
 
   private boolean shouldUserBeRegistered(DbUser user) {
