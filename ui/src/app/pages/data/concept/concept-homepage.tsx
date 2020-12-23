@@ -1,18 +1,16 @@
 import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {Subscription} from 'rxjs/Subscription';
 
 import {AlertClose, AlertDanger} from 'app/components/alert';
-import {Button, Clickable} from 'app/components/buttons';
+import {Clickable} from 'app/components/buttons';
 import {DomainCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
 import {ClrIcon} from 'app/components/icons';
 import {TextInput} from 'app/components/inputs';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
-import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
+import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   reactStyles,
   ReactWrapperBase,
@@ -21,33 +19,13 @@ import {
   withCurrentConcept,
   withCurrentWorkspace
 } from 'app/utils';
-import {
-  conceptSetUpdating,
-  currentCohortSearchContextStore,
-  currentConceptSetStore,
-  currentConceptStore,
-  NavStore,
-} from 'app/utils/navigation';
+import {currentCohortSearchContextStore, currentConceptStore, NavStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {environment} from 'environments/environment';
 import {Concept, Domain, DomainInfo, SurveyModule} from 'generated/fetch';
 import {Key} from 'ts-key-enum';
 
 const styles = reactStyles({
-  arrowIcon: {
-    height: '21px',
-    marginTop: '-0.2rem',
-    width: '18px'
-  },
-  backArrow: {
-    background: `${addOpacity(colors.accent, 0.15)}`,
-    borderRadius: '50%',
-    display: 'inline-block',
-    height: '1.5rem',
-    lineHeight: '1.6rem',
-    textAlign: 'center',
-    width: '1.5rem'
-  },
   searchBar: {
     boxShadow: '0 4px 12px 0 rgba(0,0,0,0.15)', height: '3rem', width: '64.3%', lineHeight: '19px', paddingLeft: '2rem',
     backgroundColor: colorWithWhiteness(colors.secondary, 0.85), fontSize: '16px'
@@ -61,19 +39,6 @@ const styles = reactStyles({
   conceptText: {
     marginTop: '0.3rem', fontSize: '14px', fontWeight: 400, color: colors.primary,
     display: 'flex', flexDirection: 'column', marginBottom: '0.3rem'
-  },
-  domainHeaderLink: {
-    justifyContent: 'center', padding: '0.1rem 1rem', color: colors.accent,
-    lineHeight: '18px'
-  },
-  domainHeaderSelected: {
-    height: '4px', width: '100%', backgroundColor: colors.accent, border: 'none'
-  },
-  conceptCounts: {
-    backgroundColor: colors.white, height: '2rem', border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`, borderBottom: 0,
-    borderTopLeftRadius: '3px', borderTopRightRadius: '3px', marginTop: '-1px', paddingLeft: '0.5rem', display: 'flex',
-    justifyContent: 'flex-start', lineHeight: '15px', fontWeight: 600, fontSize: '14px',
-    color: colors.primary, alignItems: 'center'
   },
   clearSearchIcon: {
     fill: colors.accent, transform: 'translate(-1.5rem)', height: '1rem', width: '1rem'
@@ -89,17 +54,7 @@ const styles = reactStyles({
     marginTop: '2.5rem'
   },
   cardList: {
-    display: 'flex',
-    flexDirection: 'row',
-    width: '94.3%',
-    flexWrap: 'wrap'
-  },
-  backBtn: {
-    border: 0,
-    fontSize: '14px',
-    color: colors.accent,
-    background: 'transparent',
-    cursor: 'pointer'
+    display: 'flex', flexDirection: 'row', width: '94.3%', flexWrap: 'wrap'
   },
   error: {
     background: colors.warning,
@@ -113,9 +68,7 @@ const styles = reactStyles({
     padding: '8px',
   },
   inputAlert: {
-    justifyContent: 'space-between',
-    padding: '0.2rem',
-    width: '64.3%',
+    justifyContent: 'space-between', padding: '0.2rem', width: '64.3%',
   }
 });
 
@@ -177,9 +130,6 @@ const PhysicalMeasurementsCard: React.FunctionComponent<{physicalMeasurement: Do
     };
 
 interface Props {
-  setConceptSetUpdating: (conceptSetUpdating: boolean) => void;
-  setShowUnsavedModal: (showUnsavedModal: () => Promise<boolean>) => void;
-  setUnsavedConceptChanges: (unsavedConceptChanges: boolean) => void;
   workspace: WorkspaceData;
   cohortContext: any;
   concept?: Array<Concept>;
@@ -202,26 +152,16 @@ interface State {
   inputErrors: Array<string>;
   // If concept metadata is still being gathered for any domain
   loadingDomains: boolean;
-  // Function to execute when canceling navigation due to unsaved changes
-  onModalCancel: Function;
-  // Function to execute when discarding unsaved changes
-  onModalDiscardChanges: Function;
   // Show if a search error occurred
   showSearchError: boolean;
-  // Show if trying to navigate away with unsaved changes
-  showUnsavedModal: boolean;
   // True if the getSurveyInfo call fails
   surveyInfoError: boolean;
   // List of surveys loading updated counts for survey cards
   surveysLoading: Array<string>;
-  // True if there are unsaved concepts
-  unsavedChanges: boolean;
 }
 
 export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCurrentConcept(), withCurrentWorkspace())(
   class extends React.Component<Props, State> {
-    resolveUnsavedModal: Function;
-    subscription: Subscription;
     constructor(props) {
       super(props);
       this.state = {
@@ -233,34 +173,14 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
         domainsLoading: [],
         inputErrors: [],
         loadingDomains: true,
-        onModalCancel: undefined,
-        onModalDiscardChanges: undefined,
         showSearchError: false,
-        showUnsavedModal: false,
         surveyInfoError: false,
         surveysLoading: [],
-        unsavedChanges: false,
       };
-      this.showUnsavedModal = this.showUnsavedModal.bind(this);
     }
 
     componentDidMount() {
       this.loadDomainsAndSurveys();
-      this.subscription = currentConceptStore.subscribe(currentConcepts => {
-        if (![null, undefined].includes(currentConcepts)) {
-          const currentConceptSet = currentConceptSetStore.getValue();
-          const unsavedChanges = (!currentConceptSet && currentConcepts.length > 0)
-            || (!!currentConceptSet && JSON.stringify(currentConceptSet.criteriums.sort()) !== JSON.stringify(currentConcepts.sort()));
-          this.props.setUnsavedConceptChanges(unsavedChanges);
-          this.setState({unsavedChanges});
-        }
-      });
-      this.subscription.add(conceptSetUpdating.subscribe(updating => this.props.setConceptSetUpdating(updating)));
-      this.props.setShowUnsavedModal(this.showUnsavedModal);
-    }
-
-    componentWillUnmount() {
-      this.subscription.unsubscribe();
     }
 
     async loadDomainsAndSurveys() {
@@ -338,42 +258,10 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
       this.setState({loadingDomains: true}, () => this.loadDomainsAndSurveys());
     }
 
-    back() {
-      if (this.state.unsavedChanges) {
-        this.setState({
-          onModalCancel: () => this.setState({showUnsavedModal: false}),
-          onModalDiscardChanges: () => this.setState({
-            inputErrors: [],
-            showSearchError: false,
-            showUnsavedModal: false
-          }),
-          showUnsavedModal: true
-        });
-      } else {
-        this.setState({
-          inputErrors: [],
-          showSearchError: false,
-        });
-      }
-    }
-
     browseDomain(domain: Domain, surveyName?: string) {
       const {namespace, id} = this.props.workspace;
       currentCohortSearchContextStore.next({domain: domain, searchTerms: this.state.currentSearchString, surveyName});
       NavStore.navigate(['workspaces', namespace, id, 'data', 'concepts', domain]);
-    }
-
-    async showUnsavedModal() {
-      this.setState({
-        onModalCancel: () => this.getModalResponse(false),
-        onModalDiscardChanges: () => this.getModalResponse(true),
-        showUnsavedModal: true});
-      return await new Promise<boolean>((resolve => this.resolveUnsavedModal = resolve));
-    }
-
-    getModalResponse(res: boolean) {
-      this.setState({showUnsavedModal: false});
-      this.resolveUnsavedModal(res);
     }
 
     errorMessage() {
@@ -385,8 +273,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
 
     render() {
       const {conceptDomainList, conceptSurveysList, currentInputString, currentSearchString, domainInfoError, domainsLoading, inputErrors,
-        loadingDomains, onModalCancel, onModalDiscardChanges, surveyInfoError, showSearchError, showUnsavedModal, surveysLoading}
-        = this.state;
+        loadingDomains, surveyInfoError, showSearchError, surveysLoading} = this.state;
       const conceptDomainCards = conceptDomainList.filter(domain => domain.domain !== Domain.PHYSICALMEASUREMENT);
       const physicalMeasurementsCard = conceptDomainList.find(domain => domain.domain === Domain.PHYSICALMEASUREMENT);
       return <React.Fragment>
@@ -469,17 +356,6 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
             </div>
           }
         </FadeBox>
-        {showUnsavedModal && <Modal>
-          <ModalTitle>Warning! </ModalTitle>
-          <ModalBody>
-            Your concept set has not been saved. If you’d like to save your concepts, please click CANCEL
-            and save your changes in the right sidebar.
-          </ModalBody>
-          <ModalFooter>
-            <Button type='link' onClick={onModalCancel}>Cancel</Button>
-            <Button type='primary' onClick={onModalDiscardChanges}>Discard Changes</Button>
-          </ModalFooter>
-        </Modal>}
       </React.Fragment>;
     }
   }
@@ -489,29 +365,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
   template: '<div #root></div>'
 })
 export class ConceptHomepageComponent extends ReactWrapperBase {
-  conceptSetUpdating: boolean;
-  showUnsavedModal: () => Promise<boolean>;
-  unsavedConceptChanges: boolean;
   constructor() {
-    super(ConceptHomepage, ['setConceptSetUpdating', 'setShowUnsavedModal', 'setUnsavedConceptChanges']);
-    this.setConceptSetUpdating = this.setConceptSetUpdating.bind(this);
-    this.setShowUnsavedModal = this.setShowUnsavedModal.bind(this);
-    this.setUnsavedConceptChanges = this.setUnsavedConceptChanges.bind(this);
-  }
-
-  setShowUnsavedModal(showUnsavedModal: () => Promise<boolean>): void {
-    this.showUnsavedModal = showUnsavedModal;
-  }
-
-  setConceptSetUpdating(csUpdating: boolean): void {
-    this.conceptSetUpdating = csUpdating;
-  }
-
-  setUnsavedConceptChanges(unsavedConceptChanges: boolean): void {
-    this.unsavedConceptChanges = unsavedConceptChanges;
-  }
-
-  canDeactivate(): Promise<boolean> | boolean {
-    return !this.unsavedConceptChanges || this.conceptSetUpdating || this.showUnsavedModal();
+    super(ConceptHomepage, []);
   }
 }

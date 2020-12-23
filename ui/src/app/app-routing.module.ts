@@ -261,7 +261,6 @@ const routes: Routes = [
                         children: [{
                           path: '',
                           component: ConceptHomepageComponent,
-                          canDeactivate: [CanDeactivateGuard],
                           data: {
                             title: 'Search Concepts',
                             breadcrumb: BreadcrumbType.SearchConcepts,
@@ -270,6 +269,7 @@ const routes: Routes = [
                         }, {
                           path: ':domain',
                           component: ConceptSearchComponent,
+                          canDeactivate: [CanDeactivateGuard],
                           data: {
                             title: 'Search Concepts',
                             breadcrumb: BreadcrumbType.SearchConcepts,
