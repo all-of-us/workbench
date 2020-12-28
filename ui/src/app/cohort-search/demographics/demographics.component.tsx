@@ -259,12 +259,17 @@ export class Demographics extends React.Component<Props, State> {
     this.setState({maxAge: max, minAge: min}, () => this.calculateAgeFromNodes());
   }
 
+  get ageParameterId() {
+    const {ageType, maxAge, minAge} = this.state;
+    return `${ageType.toString()}-${minAge}-${maxAge}`;
+  }
+
   addAgeSelection() {
     const {ageType, maxAge, minAge} = this.state;
     const ageTypeLabel = ageTypes.find(at => at.type === ageType).label;
     const selectedNode = {
       ...ageNode,
-      parameterId: `${ageType.toString()}-${minAge}-${maxAge}`,
+      parameterId: this.ageParameterId,
       name: `${ageTypeLabel} In Range ${minAge} - ${maxAge}`,
       attributes: [{
         name: ageType.toString(),
@@ -377,6 +382,7 @@ export class Demographics extends React.Component<Props, State> {
             </div>
             <Button style={{marginLeft: '1rem'}}
                     type='primary'
+                    disabled={selectedIds.includes(this.ageParameterId)}
                     onClick={() => this.addAgeSelection()}>
               Add Selection
             </Button>
