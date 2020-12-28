@@ -1104,9 +1104,9 @@ def generate_private_cdr_counts(cmd_name, *args)
     "BQ dataset. Required."
   )
   op.add_option(
-    "--workbench-project [workbench-project]",
-    ->(opts, v) { opts.workbench_project = v},
-    "Workbench Project. Required."
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "Project. Required."
   )
   op.add_option(
     "--cdr-version [cdr-version]",
@@ -1118,7 +1118,7 @@ def generate_private_cdr_counts(cmd_name, *args)
     ->(opts, v) { opts.bucket = v},
     "GCS bucket. Required."
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.workbench_project and opts.cdr_version and opts.bucket }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.project and opts.cdr_version and opts.bucket }
   op.parse.validate
   gcc = GcloudContextV2.new(op)
   op.parse.validate
@@ -1127,15 +1127,15 @@ def generate_private_cdr_counts(cmd_name, *args)
   with_cloud_proxy_and_db(gcc) do
     common = Common.new
     Dir.chdir('db-cdr') do
-      common.run_inline %W{./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.workbench_project} #{op.opts.cdr_version} #{op.opts.bucket}}
+      common.run_inline %W{./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.project} #{op.opts.cdr_version} #{op.opts.bucket}}
     end
   end
 end
 
 Common.register_command({
   :invocation => "generate-private-cdr-counts",
-  :description => "generate-private-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT> \
- --cdr-version=<''|YYYYMMDD> --bucket <BUCKET>
+  :description => "generate-private-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --project <PROJECT> \
+ --cdr-version=<VERSION> --bucket <BUCKET>
 Generates databases in bigquery with data from a de-identified cdr that will be imported to mysql/cloudsql to be used by workbench.",
   :fn => ->(*args) { generate_private_cdr_counts("generate-private-cdr-counts", *args) }
 })
