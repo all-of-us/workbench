@@ -862,7 +862,9 @@ def make_bq_denormalized_tables(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.data_browser} #{op.opts.dry_run}}
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.data_browser} #{op.opts.dry_run}}
+  end
 end
 
 Common.register_command({
@@ -1118,10 +1120,15 @@ def generate_private_cdr_counts(cmd_name, *args)
   )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.workbench_project and opts.cdr_version and opts.bucket }
   op.parse.validate
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
 
-  ServiceAccountContext.new(op.opts.workbench_project).run do
+  with_cloud_proxy_and_db(gcc) do
     common = Common.new
-    common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.workbench_project} #{op.opts.cdr_version} #{op.opts.bucket}}
+    Dir.chdir('db-cdr') do
+      common.run_inline %W{./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.workbench_project} #{op.opts.cdr_version} #{op.opts.bucket}}
+    end
   end
 end
 
