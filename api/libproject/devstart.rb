@@ -1135,7 +1135,7 @@ end
 Common.register_command({
   :invocation => "generate-private-cdr-counts",
   :description => "generate-private-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --project <PROJECT> \
- --cdr-version=<''|YYYYMMDD> --bucket <BUCKET>
+ --cdr-version=<VERSION> --bucket <BUCKET>
 Generates databases in bigquery with data from a de-identified cdr that will be imported to mysql/cloudsql to be used by workbench.",
   :fn => ->(*args) { generate_private_cdr_counts("generate-private-cdr-counts", *args) }
 })
