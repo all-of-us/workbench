@@ -5,6 +5,9 @@ import ClrIconLink from 'app/element/clr-icon-link';
 import {getPropValue} from 'utils/element-utils';
 import ReactSelect from 'app/element/react-select';
 import {waitWhileLoading} from 'utils/waits-utils';
+import BaseElement from 'app/element/base-element';
+import {LinkText} from 'app/text-labels';
+import Button from 'app/element/button';
 
 
 const defaultXpath = '//*[@data-test-id="sidebar-content"]';
@@ -54,10 +57,17 @@ export default class SidebarContent extends  HelpSidebar {
       await waitWhileLoading(this.page);
       return selectMenu.getSelectedOption();
     }
-  
+
+    // click the plus button located next to Annotations on the sidebar panel
     async getAnnotationsButton(): Promise<ClrIconLink> {
       return ClrIconLink.findByName(this.page, {containsText: 'Annotations', iconShape: 'plus-circle'});
     }
+   
+    // get the annotations name displaying on the sidebar panel
+    async getAnnotationsName(): Promise<string> {
+      const xpath = '//*[contains(normalize-space(text()), "Annotations")]/following::div[4]';
+      const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, {visible: true}));
+      return element.getTextContent();
+    }
 
- 
 }
