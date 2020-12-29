@@ -112,7 +112,6 @@ function sortByCountThenName(critA, critB) {
 }
 
 interface Props {
-  count: number;
   criteriaType: CriteriaType;
   select: Function;
   selectedIds: Array<string>;
@@ -260,12 +259,17 @@ export class Demographics extends React.Component<Props, State> {
     this.setState({maxAge: max, minAge: min}, () => this.calculateAgeFromNodes());
   }
 
+  get ageParameterId() {
+    const {ageType, maxAge, minAge} = this.state;
+    return `${ageType.toString()}-${minAge}-${maxAge}`;
+  }
+
   addAgeSelection() {
     const {ageType, maxAge, minAge} = this.state;
     const ageTypeLabel = ageTypes.find(at => at.type === ageType).label;
     const selectedNode = {
       ...ageNode,
-      parameterId: `${ageType.toString()}-${minAge}-${maxAge}`,
+      parameterId: this.ageParameterId,
       name: `${ageTypeLabel} In Range ${minAge} - ${maxAge}`,
       attributes: [{
         name: ageType.toString(),
@@ -378,6 +382,7 @@ export class Demographics extends React.Component<Props, State> {
             </div>
             <Button style={{marginLeft: '1rem'}}
                     type='primary'
+                    disabled={selectedIds.includes(this.ageParameterId)}
                     onClick={() => this.addAgeSelection()}>
               Add Selection
             </Button>
@@ -398,10 +403,10 @@ export class Demographics extends React.Component<Props, State> {
         : <React.Fragment>
           <div style={styles.selectList}>
             <div style={{margin: '0.25rem 0', overflow: 'auto', width: '100%'}}>
-              {nodes.map((opt, o) => <div key={o} style={styles.option} onClick={() => this.selectOption(opt)}>
+              {nodes.map((opt, o) => <div key={o} style={styles.option}>
                 {selectedIds.includes(opt.parameterId)
                   ? <ClrIcon shape='check-circle' size='20' style={{...styles.selectIcon, ...styles.selected}}/>
-                  : <ClrIcon shape='plus-circle'  size='20' style={styles.selectIcon}/>
+                  : <ClrIcon shape='plus-circle'  size='20' style={styles.selectIcon} onClick={() => this.selectOption(opt)}/>
                 }
                 {opt.name}
                 {!!opt.count && <span style={styles.count}>

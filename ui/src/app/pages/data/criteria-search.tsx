@@ -73,7 +73,7 @@ const styles = reactStyles({
     margin: '0 0 0 0.75rem'
   }
 });
-const css = `
+export const growlCSS = `
   .p-growl {
     position: sticky;
   }
@@ -343,7 +343,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
         </div>
       </FlexRowWrap>
       <div style={loadingSubtree ? styles.loadingSubTree : {height: '100%', minHeight: '15rem'}}>
-        <style>{css}</style>
+        <style>{growlCSS}</style>
         <Growl ref={(el) => this.growl = el}
                style={!growlVisible ? {...this.getGrowlStyle(), display: 'none'} : this.getGrowlStyle()}/>
         {hierarchyNode && <CriteriaTree
