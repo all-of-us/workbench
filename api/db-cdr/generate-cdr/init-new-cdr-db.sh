@@ -30,7 +30,7 @@ fi
 
 
 # export for liquibase to use this
-#export CDR_DB_NAME
+export CDR_DB_NAME
 
 CREATE_DB_FILE=/tmp/create_db.sql
 
