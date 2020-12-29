@@ -6,9 +6,6 @@ import {getPropValue} from 'utils/element-utils';
 import ReactSelect from 'app/element/react-select';
 import {waitWhileLoading} from 'utils/waits-utils';
 import BaseElement from 'app/element/base-element';
-import {LinkText} from 'app/text-labels';
-import Button from 'app/element/button';
-
 
 const defaultXpath = '//*[@data-test-id="sidebar-content"]';
 
