@@ -3,6 +3,7 @@ import {savePageToFile, takeScreenshot} from 'utils/save-file-utils'
 import {LinkText} from 'app/text-labels';
 import Button from 'app/element/button';
 import Modal from './modal';
+import Textbox from 'app/element/textbox';
 import ReactSelect from 'app/element/react-select';
 import {waitWhileLoading, waitForText} from 'utils/waits-utils';
 
@@ -45,12 +46,31 @@ export default class AnnotationFieldModal extends Modal {
     return selectMenu.getSelectedOption();
   }
 
-
-  async createAnnotationButton(): Promise<Button> {
-    return Button.findByName(this.page, {name: LinkText.Create});
+  async getAnnotationFieldNameTextBox():  Promise<Textbox> {
+    return new Textbox(this.page, `${this.getXpath()}//*[contains(text(), "Name")]/ancestor::node()[1]/input[@type="text"]`);
   }
 
+  /**
+   * @param {string} newName New name.
+   */
+  async beginCreateNewAnnotationName(newName?: string): Promise<void> {
+    // Type new name.
+      const nameInput = await this.getAnnotationFieldNameTextBox();
+      await nameInput.type(newName);
+  }
 
+  /**
+   * @param {string} newName New name.
+   */
+  // create a Review-Wide Annotation Field name
+  async createNewAnnotationName(newName?: string): Promise<void> {
+    await this.beginCreateNewAnnotationName(newName);
+
+    await this.clickButton(LinkText.Create);
+    await waitWhileLoading(this.page);
+  }
+
+  // click cancel button of the anootation field modal
   async cancelAnnotationButton(): Promise<Button> {
     return Button.findByName(this.page, {name: LinkText.Cancel});
   }

@@ -10,7 +10,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 import {getPropValue} from 'utils/element-utils';
 import SidebarContent, {ReviewStatus} from 'app/component/sidebar-content';
-import AnnotationFieldModal from 'app/component/annotation-field-modal';
+import AnnotationFieldModal, {AnnotationType} from 'app/component/annotation-field-modal';
 
 
 describe('Cohort review tests', () => {
@@ -81,6 +81,7 @@ describe('Cohort review tests', () => {
     const sidebarContent = new SidebarContent(page);
     const reviewParticipantid1 = await sidebarContent.getParticipantID(); 
     console.log(`reviewParticipantid1: ${reviewParticipantid1}`);
+
     expect(dataTablepid1).toEqual(reviewParticipantid1);
     
     // select review status from dropdown option
@@ -89,9 +90,14 @@ describe('Cohort review tests', () => {
     // click on the plus-icon next to annotations 
     await sidebarContent.getAnnotationsButton().then(btn => btn.click());
     // the annotations modal displays
-    const annotationFieldModal = new AnnotationFieldModal(page);    
-    // click cancel button onthe annotation modal
-    await annotationFieldModal.cancelAnnotationButton().then(btn => btn.click());
+    const annotationFieldModal = new AnnotationFieldModal(page);  
+    
+    await annotationFieldModal.selectAnnotationType(AnnotationType.FreeText);
+
+    // create new annotation name
+    const newAnnotationName = makeRandomName();
+    await annotationFieldModal.createNewAnnotationName(newAnnotationName);
+
     // close the sidebar content 
     await participantDetailPage.clickPenIconHelpSideBar();
 
@@ -112,6 +118,10 @@ describe('Cohort review tests', () => {
 
     // select a review status
     const participantStatus2 = await sidebarContent.selectReviewStatus(ReviewStatus.Included);
+
+   // verify if the same Annotations Name also displays for the next Participant ID.
+    const annotationTextBoxName = await sidebarContent.getAnnotationsName();
+    expect(annotationTextBoxName).toEqual(newAnnotationName);
 
     // navigate to review set page and check if the status column is displaying the review status for both participants
     await participantDetailPage.getBackToReviewSetButton().then(btn => btn.click());
