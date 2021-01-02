@@ -172,6 +172,7 @@ export const CalculateFooter = (props: CalculateFooterProps) => {
     <FlexRowWrap style={styles.countPreview}>
       <div style={styles.resultsContainer}>
         <Button id='attributes-calculate'
+          data-test-id='attributes-calculate-btn'
           type='secondaryLight'
           disabled={disableCalculate}
           style={disableCalculate
@@ -189,6 +190,7 @@ export const CalculateFooter = (props: CalculateFooterProps) => {
     </FlexRowWrap>
     <FlexRowWrap style={{flexDirection: 'row-reverse', marginTop: '0.5rem'}}>
       <Button type='primary'
+              data-test-id='attributes-add-btn'
               disabled={disableAdd}
               style={styles.addButton}
               onClick={() => addFn()}>
@@ -218,7 +220,7 @@ interface AttributeForm {
   cat: Array<any>; // Categorical attributes (Measurements only)
 }
 
-interface Props {
+export interface Props {
   back: Function;
   close: Function;
   criteria: Array<Selection>;
@@ -713,14 +715,16 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
         {!(isCOPESurvey && form.anyValue) && form.num.map((attr, a) => <div key={a}>
           {this.isBloodPressure && <div style={styles.label}>{attr.name}</div>}
           {isCOPESurvey && <div style={styles.orCircle}>OR</div>}
-          <Dropdown style={{marginBottom: '0.5rem', width: '100%'}}
+          <Dropdown data-test-id={`numerical-dropdown-${a}`}
+                    style={{marginBottom: '0.5rem', width: '100%'}}
                     value={attr.operator}
                     options={options}
                     placeholder='Select Operator'
                     onChange={(e) => this.selectChange(a, e.value)}/>
           <FlexRowWrap>
             {![null, 'ANY'].includes(attr.operator) && <div style={{width: '33%'}}>
-              <NumberInput style={{padding: '0 0.25rem', ...(this.hasUnits ? {width: '70%'} : {})}}
+              <NumberInput data-test-id={`numerical-input-${a}-0`}
+                           style={{padding: '0 0.25rem', ...(this.hasUnits ? {width: '70%'} : {})}}
                            value={attr.operands[0] || ''}
                            min={attr.MIN} max={attr.MAX}
                            onChange={(v) => this.inputChange(v, a, 0)}/>
@@ -729,7 +733,8 @@ export const AttributesPage = fp.flow(withCurrentWorkspace(), withCurrentCohortC
             {attr.operator === Operator.BETWEEN && <React.Fragment>
               <div style={{padding: '0.2rem 1.5rem 0 1rem'}}>and</div>
               <div style={{width: '33%'}}>
-                <NumberInput style={{padding: '0 0.25rem', ...(this.hasUnits ? {width: '70%'} : {})}}
+                <NumberInput data-test-id={`numerical-input-${a}-1`}
+                             style={{padding: '0 0.25rem', ...(this.hasUnits ? {width: '70%'} : {})}}
                              value={attr.operands[1] || ''}
                              min={attr.MIN} max={attr.MAX}
                              onChange={(v) => this.inputChange(v, a, 1)}/>
