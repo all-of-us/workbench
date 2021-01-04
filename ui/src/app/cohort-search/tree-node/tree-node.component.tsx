@@ -310,7 +310,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   getSelectedValues() {
     const {node: {domainId, path}, source} = this.props;
-    return source === 'criteria'
+    return source === 'cohort'
       ? currentCohortCriteriaStore.getValue().some(crit =>
         crit.parameterId === this.paramId()
           || (![Domain.PHYSICALMEASUREMENT.toString(), Domain.VISIT.toString()].includes(domainId)
@@ -322,7 +322,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   selectIconDisabled() {
     const {selectedIds, source} = this.props;
-    return source !== 'criteria' && selectedIds && selectedIds.length >= 1000;
+    return source !== 'cohort' && selectedIds && selectedIds.length >= 1000;
   }
 
   render() {
@@ -348,8 +348,8 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
         <div style={hover ? {...styles.treeNodeContent, background: colors.light} : styles.treeNodeContent}
           onMouseEnter={() => this.setState({hover: true})}
           onMouseLeave={() => this.setState({hover: false})}>
-          {(selectable && (source === 'criteria' || node.subtype !== 'ANSWER')) && <button style={styles.iconButton}>
-            {hasAttributes && source === 'criteria'
+          {(selectable && (source === 'cohort' || node.subtype !== 'ANSWER')) && <button style={styles.iconButton}>
+            {hasAttributes && source === 'cohort'
               ? <ClrIcon style={{color: colors.accent}}
                   shape='slider' dir='right' size='20'
                   onClick={(e) => this.setAttributes(e, node)}/>

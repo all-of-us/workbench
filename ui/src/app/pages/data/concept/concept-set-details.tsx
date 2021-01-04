@@ -334,8 +334,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
               </FlexRow>
             </div>
             {!!conceptSet.criteriums && <React.Fragment>
-              <CriteriaSearch cohortContext={{domain: conceptSet.domain, type: 'PPI', standard: true}}
-                              source='conceptSetDetails' selectedSurvey={conceptSet.survey}/>
+              <CriteriaSearch cohortContext={{domain: conceptSet.domain, selectedSurvey: conceptSet.survey, source: 'conceptSetDetails'}}/>
               <Button style={{width: '6.5rem', alignSelf: 'flex-end', marginBottom: '2rem'}}
                       onClick={() => setSidebarActiveIconStore.next('concept')}>Finish & Review</Button>
             </React.Fragment>}
