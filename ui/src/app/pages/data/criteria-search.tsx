@@ -173,7 +173,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
       mode = 'tree';
     }
     this.setState({backMode, hierarchyNode, mode});
-    if (source === 'criteria') {
+    if (source === 'cohort') {
       this.subscription = currentCohortCriteriaStore.subscribe(currentCohortCriteria => {
         this.setState({selectedCriteriaList: currentCohortCriteria});
       });
@@ -298,21 +298,21 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
   }
 
   render() {
-    const {backFn, cohortContext, conceptSearchTerms} = this.props;
+    const {backFn, cohortContext, cohortContext: {domain, selectedSurvey, source}, conceptSearchTerms} = this.props;
     const {autocompleteSelection, groupSelections, hierarchyNode, loadingSubtree,
       treeSearchTerms, growlVisible} = this.state;
     return <div id='criteria-search-container'>
       {loadingSubtree && <SpinnerOverlay/>}
       <Growl ref={(el) => this.growl = el} style={!growlVisible ? {...styles.growl, display: 'none'} : styles.growl}/>
-      <FlexRowWrap style={{...styles.titleBar, marginTop: cohortContext.source === 'cohort' ? '1rem' : 0}}>
-        {cohortContext.source !== 'conceptSetDetails' && <React.Fragment>
+      <FlexRowWrap style={{...styles.titleBar, marginTop: source === 'cohort' ? '1rem' : 0}}>
+        {source !== 'conceptSetDetails' && <React.Fragment>
           <Clickable style={styles.backArrow} onClick={() => backFn()}>
             <img src={arrowIcon} style={styles.arrowIcon} alt='Go back' />
           </Clickable>
           <h2 style={styles.titleHeader}>{this.domainTitle}</h2>
         </React.Fragment>}
-        <div style={cohortContext.source === 'conceptSetDetails' ? styles.detailExternalLinks : styles.externalLinks}>
-          {cohortContext.domain === Domain.DRUG && <div>
+        <div style={source === 'conceptSetDetails' ? styles.detailExternalLinks : styles.externalLinks}>
+          {domain === Domain.DRUG && <div>
             <StyledAnchorTag
                 href='https://mor.nlm.nih.gov/RxNav/'
                 target='_blank'
@@ -321,7 +321,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
             </StyledAnchorTag>
             &nbsp;drugs by brand names outside of <AoU/>
           </div>}
-          {cohortContext.domain === Domain.SURVEY && <div>
+          {domain === Domain.SURVEY && <div>
             Find more information about each survey in the&nbsp;
             <StyledAnchorTag
                 href='https://www.researchallofus.org/survey-explorer/'
@@ -346,8 +346,8 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
         <Growl ref={(el) => this.growl = el}
                style={!growlVisible ? {...this.getGrowlStyle(), display: 'none'} : this.getGrowlStyle()}/>
         {hierarchyNode && <CriteriaTree
-            source={cohortContext.source}
-            selectedSurvey={cohortContext.selectedSurvey}
+            source={source}
+            selectedSurvey={selectedSurvey}
             autocompleteSelection={autocompleteSelection}
             back={this.back}
             groupSelections={groupSelections}

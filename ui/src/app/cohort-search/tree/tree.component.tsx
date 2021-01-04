@@ -199,7 +199,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
   }
 
   get criteriaLookupNeeded() {
-    return this.props.source === 'criteria'
+    return this.props.source === 'cohort'
       &&  ![Domain.PHYSICALMEASUREMENT.toString(), Domain.VISIT.toString()].includes(this.props.node.domainId)
       &&  currentCohortCriteriaStore.getValue().some(crit => !crit.id);
   }
@@ -263,7 +263,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
 
   get showHeader() {
     const {node: {domainId}, source} = this.props;
-    return !(source === 'criteria' && domainId === Domain.SURVEY.toString())
+    return !(source === 'cohort' && domainId === Domain.SURVEY.toString())
       && domainId !== Domain.PHYSICALMEASUREMENT.toString()
       && domainId !== Domain.VISIT.toString();
   }
@@ -278,7 +278,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
 
   selectIconDisabled() {
     const {selectedIds, source} = this.props;
-    return source !== 'criteria' && selectedIds && selectedIds.length >= 1000;
+    return source !== 'cohort' && selectedIds && selectedIds.length >= 1000;
   }
 
   render() {

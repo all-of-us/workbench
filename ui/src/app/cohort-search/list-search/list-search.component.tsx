@@ -336,7 +336,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
         this.setState({data: null, apiError: false, inputErrors: [], loading: true, searching: true, standardOnly: false});
         const {searchContext: {domain, source, selectedSurvey}, workspace: {cdrVersionId}} = this.props;
         const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(+cdrVersionId, domain, value.trim(), selectedSurvey);
-        const data = source !== 'criteria' && this.isSurvey
+        const data = source !== 'cohort' && this.isSurvey
           ? resp.items.filter(survey => survey.subtype === CriteriaSubType.QUESTION.toString())
           : resp.items;
         if (data.length && this.checkSource) {
@@ -365,7 +365,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
 
     selectIconDisabled() {
       const {searchContext: {source}, selectedIds} = this.props;
-      return source !== 'criteria' && selectedIds && selectedIds.length >= 1000;
+      return source !== 'cohort' && selectedIds && selectedIds.length >= 1000;
     }
 
     selectItem = (row: any) => {
