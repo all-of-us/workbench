@@ -66,7 +66,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  rp_scientific_approach,\n"
             + "  rp_social_behavioral,\n"
             + "  rp_time_requested,\n"
-            + "  workspace_id\n"
+            + "  workspace_id, \n"
+            + "  workspace_namespace \n"
             + "FROM workspace",
         (rs, unused) ->
             new ReportingWorkspace()
@@ -104,7 +105,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .rpScientificApproach(rs.getString("rp_scientific_approach"))
                 .rpSocialBehavioral(rs.getBoolean("rp_social_behavioral"))
                 .rpTimeRequested(offsetDateTimeUtc(rs.getTimestamp("rp_time_requested")))
-                .workspaceId(rs.getLong("workspace_id")));
+                .workspaceId(rs.getLong("workspace_id"))
+                .workspaceNamespace(rs.getString("workspace_namespace")));
   }
 
   @Override

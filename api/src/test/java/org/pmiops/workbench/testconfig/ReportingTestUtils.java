@@ -67,6 +67,7 @@ public class ReportingTestUtils {
   public static final Timestamp WORKSPACE__RP_TIME_REQUESTED =
       Timestamp.from(Instant.parse("2015-06-07T00:00:00.00Z"));
   public static final Long WORKSPACE__WORKSPACE_ID = 34L;
+  public static final String WORKSPACE__WORKSPACE_NAMESPACE = "aou-rw-12345";
 
   // This code was generated using reporting-wizard.rb at 2021-01-05T17:36:27-08:00.
   // Manual modification should be avoided if possible as this is a one-time generation
@@ -181,6 +182,7 @@ public class ReportingTestUtils {
     assertThat(workspace.getRpSocialBehavioral()).isEqualTo(WORKSPACE__RP_SOCIAL_BEHAVIORAL);
     assertTimeApprox(workspace.getRpTimeRequested(), WORKSPACE__RP_TIME_REQUESTED);
     assertThat(workspace.getWorkspaceId()).isEqualTo(expectedWorkspaceId);
+    assertThat(workspace.getWorkspaceNamespace()).isEqualTo(WORKSPACE__WORKSPACE_NAMESPACE);
   }
 
   public static void assertDtoWorkspaceFields(ReportingWorkspace workspace) {
@@ -223,7 +225,8 @@ public class ReportingTestUtils {
         .rpScientificApproach(WORKSPACE__RP_SCIENTIFIC_APPROACH)
         .rpSocialBehavioral(WORKSPACE__RP_SOCIAL_BEHAVIORAL)
         .rpTimeRequested(offsetDateTimeUtc(WORKSPACE__RP_TIME_REQUESTED))
-        .workspaceId(WORKSPACE__WORKSPACE_ID);
+        .workspaceId(WORKSPACE__WORKSPACE_ID)
+        .workspaceNamespace(WORKSPACE__WORKSPACE_NAMESPACE);
   }
 
   public static DbWorkspace createDbWorkspace(DbUser creator, DbCdrVersion cdrVersion) {
@@ -261,6 +264,7 @@ public class ReportingTestUtils {
     workspace.setSocialBehavioral(WORKSPACE__RP_SOCIAL_BEHAVIORAL);
     workspace.setTimeRequested(WORKSPACE__RP_TIME_REQUESTED);
     workspace.setWorkspaceId(WORKSPACE__WORKSPACE_ID);
+    workspace.setWorkspaceNamespace(WORKSPACE__WORKSPACE_NAMESPACE);
     return workspace;
   }
 

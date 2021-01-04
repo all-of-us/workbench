@@ -8447,6 +8447,11 @@ definitions:
         description: |-
           Prirmary key of the workspace table in Workrbench application database. Along with
           snapshot_timestamp, serves as a pseudo-primary key for this table.
+      workspaceNamespace:
+        type: string
+        description: |-
+          The workspace "namespace", which corresponds to the Google Cloud Project ID associated with
+          the workspace.
   ReportingWorkspaceFreeTierUsage:
     x-aou-note: |-
       This code was generated using reporting-wizard.rb at 2021-01-05T17:36:27-08:00.
