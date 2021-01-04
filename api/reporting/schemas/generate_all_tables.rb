@@ -13,7 +13,6 @@
 #
 require 'open3'
 
-# Ugly wrapper script for reporting-wizard.rb. Just use all the files in the csv directory
 input_dir = File.expand_path(ARGV[0])
 describe_csv_dir = File.join(input_dir, 'mysql_describe_csv')
 output_dir = File.expand_path(ARGV[1])
