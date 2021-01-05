@@ -11,6 +11,7 @@ import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 import {getPropValue} from 'utils/element-utils';
 import SidebarContent, {ReviewStatus} from 'app/component/sidebar-content';
 import AnnotationFieldModal, {AnnotationType} from 'app/component/annotation-field-modal';
+import EditDeleteAnnotationsModal from 'app/component/edit-delete-annotations-modal'
 
 
 describe('Cohort review tests', () => {
@@ -24,7 +25,7 @@ describe('Cohort review tests', () => {
    * Find an existing workspace or create a new workspace if none exists.
    * Create a new Cohort from Criteria: Visits -> Out-Patient Visit.
    * Create a Review Set for 100 participants.
-   * Verify some UI.
+   * Verify some UI: on Cohort review page and the Annotations side bar
    * Delete Cohort in Cohort Build page.
    */
   test('Create Cohort and a Review Set for 100 participants', async () => {
@@ -119,11 +120,38 @@ describe('Cohort review tests', () => {
     // select a review status
     const participantStatus2 = await sidebarContent.selectReviewStatus(ReviewStatus.Included);
 
-   // verify if the same Annotations Name also displays for the next Participant ID.
+    // verify if the same Annotations Name also displays for the next Participant ID.
     const annotationTextBoxName = await sidebarContent.getAnnotationsName();
     expect(annotationTextBoxName).toEqual(newAnnotationName);
 
+    // click on the annotations EDIT button
+    await sidebarContent.getAnnotationsEdit().then(btn => btn.click());
+
+     // create new annotation name
+     const newAnnotationRename = makeRandomName();
+
+    // the edit-delete annotations modal displays
+    const editDeleteAnnotationsFieldModal = new EditDeleteAnnotationsModal(page); 
+
+    // edit the annotation field name
+    await editDeleteAnnotationsFieldModal.clickRenameAnnotationsName(newAnnotationRename);
+
+    // verify that the Annotation textbox field is displaying the new name
+    const annotationNewTextBoxName = await sidebarContent.getAnnotationsName();
+    expect(annotationNewTextBoxName).toEqual(newAnnotationRename);
+
+    await participantDetailPage.goToThePriorParticipant();
+    await participantDetailPage.waitForLoad();
+
+    // verify that the prior participant is displaying the same annotation field name
+    expect(annotationNewTextBoxName).toEqual(newAnnotationRename);
+
+    // click the annotations edit  button to delete the annotation textbox field
+    // await sidebarContent.getAnnotationsEdit().then(btn => btn.click());
+    await editDeleteAnnotationsFieldModal.deleteAnnotationsName();
+
     // navigate to review set page and check if the status column is displaying the review status for both participants
+    await participantDetailPage.clickPenIconHelpSideBar();
     await participantDetailPage.getBackToReviewSetButton().then(btn => btn.click());
     await waitWhileLoading(page);
 
@@ -170,3 +198,4 @@ describe('Cohort review tests', () => {
   });
 
 });
+
