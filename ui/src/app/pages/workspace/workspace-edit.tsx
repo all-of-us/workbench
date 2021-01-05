@@ -1027,7 +1027,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                                 required={!this.isMode(WorkspaceEditMode.Duplicate)}>
           <FlexRow style={{alignItems: 'baseline'}}>
             <TextInput type='text' style={styles.textInput} autoFocus placeholder='Workspace Name'
-              defaultValue = {name}
+              value = {name}
               onChange={v => this.setState(fp.set(['workspace', 'name'], v))}/>
             <TooltipTrigger
                 content='To use a different dataset version, duplicate or create a new workspace.'
