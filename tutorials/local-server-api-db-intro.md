@@ -16,27 +16,15 @@ This will bring up a server with API endpoints and a local database.
 #### Dependencies
 You should have the following installed on your machine for this to work
 
-- Ruby installed
-- docker installed and running
-- docker-compose
-- docker-sync (`gem install docker-sync` or `gem install --user-install docker-sync` or non-root installs)
-
-Having ruby gems installed on your path is a good idea as well - adding this to your profile or rc file will help to find the ruby gems:
-
-```sh
-if which ruby >/dev/null && which gem >/dev/null; then
-  PATH="$(ruby -r rubygems -e 'puts Gem.user_dir')/bin:$PATH"
-fi
-```
+Ensure your system has the [required packages](https://github.com/all-of-us/workbench/blob/master/api/docs/developer-system-requirements.md) installed
 
 ### (LOCAL-SERVER-2) Using a REST client (e.g. insomnia) make a request to the local server
   1. Start with the /v1/profile endpoint (http://localhost:8081/v1/profile)
-  2. What was the response?
+  2. What error response did you get? Why?
 
 ### (LOCAL-SERVER-3) Repeat LOCAL-SERVER-2 With a Bearer Token
 
 Generate a bearer token and pass this along to the endpoint
-Ge
   1. What happened, what was the error code and response now?
   2. What do you think you need to do in order to log in?
 
@@ -45,15 +33,8 @@ Ge
   Run `./project.rb connect-to-db`
   This will connect to your local database
 
-  1. Run a query to display all of the tables in the database
+  1. Run a query to display all of the tables in the database (`show tables``)
   2. Which tables do you think are involved with the error you encountered in task LOCAL-SERVER-3?
-
-### (LOCAL-SERVER-5) Further DB and Endpoint Exploration
-
-  1. Using SQL, look at the schema of the `user` table
-  2. Insert a row with your test account data to the `user` table
-  3. Run the `/v1/profile` endpoint in your REST client
-  4. What is the response?
 
 ### Comprehension Questions
 
