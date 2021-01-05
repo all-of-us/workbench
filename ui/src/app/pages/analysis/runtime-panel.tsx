@@ -875,8 +875,8 @@ export const RuntimePanel = fp.flow(
         lessThanOrEqualTo: 4000,
         message: message
       }
-    }
-  }
+    };
+  };
 
   // 50 GB is the minimum GCP limit for disk size, 4000 GB is our arbitrary limit for not making a
   // disk that is way too big and expensive ($.22 an hour)
