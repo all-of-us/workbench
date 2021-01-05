@@ -304,10 +304,6 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
       }
     }
 
-    componentWillUnmount() {
-      currentConceptStore.next(null);
-    }
-
     handleInput = (event: any) => {
       const {key, target: {value}} = event;
       if (key === Key.Enter) {

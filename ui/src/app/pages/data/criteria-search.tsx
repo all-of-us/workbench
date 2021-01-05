@@ -175,7 +175,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
         mode: 'tree'
       });
     }
-    const currentCriteriaStore = source === 'criteria' ? currentCohortCriteriaStore : currentConceptStore;
+    const currentCriteriaStore = source === 'cohort' ? currentCohortCriteriaStore : currentConceptStore;
     this.subscription = currentCriteriaStore.subscribe(selectedCriteriaList => this.setState({selectedCriteriaList}));
     const existingCriteria = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS));
     if (!!existingCriteria && existingCriteria[0].domainId === domain) {

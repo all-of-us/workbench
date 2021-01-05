@@ -5,7 +5,7 @@ import * as React from 'react';
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
-import {CriteriaSearch} from 'app/pages/data/criteria-search';
+import {CriteriaSearch, LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS} from 'app/pages/data/criteria-search';
 import {
   ReactWrapperBase,
   withCurrentCohortSearchContext,
@@ -51,7 +51,9 @@ const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurrentConce
     }
 
     componentDidMount() {
-      currentConceptStore.next([]);
+      if (!currentConceptStore.getValue()) {
+        currentConceptStore.next([]);
+      }
       this.subscription = currentConceptStore.subscribe(currentConcepts => {
         if (![null, undefined].includes(currentConcepts)) {
           const currentConceptSet = currentConceptSetStore.getValue();
@@ -65,6 +67,8 @@ const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurrentConce
     }
 
     componentWillUnmount() {
+      localStorage.removeItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS);
+      currentConceptStore.next([]);
       this.subscription.unsubscribe();
     }
 
