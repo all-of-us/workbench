@@ -147,7 +147,7 @@ describe('Cohort review tests', () => {
     expect(annotationNewTextBoxName).toEqual(newAnnotationRename);
 
     // click the annotations edit  button to delete the annotation textbox field
-    // await sidebarContent.getAnnotationsEdit().then(btn => btn.click());
+    await sidebarContent.getAnnotationsEdit().then(btn => btn.click());
     await editDeleteAnnotationsFieldModal.deleteAnnotationsName();
 
     // navigate to review set page and check if the status column is displaying the review status for both participants
