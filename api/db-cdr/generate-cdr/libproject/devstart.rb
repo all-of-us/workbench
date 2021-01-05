@@ -165,6 +165,8 @@ def publish_cdr(cmd_name, args)
         json["access"].push(new_entry)
       end
 
+      # if the app SA's in too many groups, it won't gain READER transitively.
+      # add it directly, to make sure.
       if existing_users.include?(app_sa)
         common.status "#{app_sa} already in ACL, skipping..."
       else
