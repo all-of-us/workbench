@@ -16,7 +16,8 @@ import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {
   attributesSelectionStore,
   currentCohortCriteriaStore,
-  currentConceptStore
+  currentConceptStore,
+  setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {Criteria, Domain} from 'generated/fetch';
@@ -232,7 +233,16 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
     });
   }
 
+  closeSidebar() {
+    attributesSelectionStore.next(undefined);
+    setSidebarActiveIconStore.next(undefined);
+  }
+
   addSelection = (selectCriteria)  => {
+    // In case of Criteria/Cohort, close existing attribute sidebar before selecting a new value
+    if (!this.isConcept && !!attributesSelectionStore.getValue()) {
+      this.closeSidebar();
+    }
     let criteriaList = this.state.selectedCriteriaList;
     if (criteriaList && criteriaList.length > 0) {
       criteriaList.push(selectCriteria);
