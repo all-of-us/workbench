@@ -614,15 +614,16 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     renderHeader() {
-      switch (this.props.routeConfigData.mode) {
+      // use workspace name from props instead of state here
+      // because it's a record of the initial value
+      const {routeConfigData: {mode}, workspace} = this.props;
+      switch (mode) {
         case WorkspaceEditMode.Create:
           return 'Create a new workspace';
         case WorkspaceEditMode.Edit:
-          return 'Edit workspace \"' + this.state.workspace.name + '\"';
+          return 'Edit workspace \"' + workspace.name + '\"';
         case WorkspaceEditMode.Duplicate:
-          // use workspace name from props instead of state here
-          // because it's a record of the initial value
-          return 'Duplicate workspace \"' + this.props.workspace.name + '\"';
+          return 'Duplicate workspace \"' + workspace.name + '\"';
       }
     }
 
