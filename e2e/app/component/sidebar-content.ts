@@ -6,6 +6,8 @@ import {getPropValue} from 'utils/element-utils';
 import ReactSelect from 'app/element/react-select';
 import {waitWhileLoading} from 'utils/waits-utils';
 import BaseElement from 'app/element/base-element';
+import Button from 'app/element/button';
+import {LinkText} from 'app/text-labels';
 
 const defaultXpath = '//*[@data-test-id="sidebar-content"]';
 
@@ -67,4 +69,10 @@ export default class SidebarContent extends  HelpSidebar {
       return element.getTextContent();
     }
 
+     // click on the Annotations EDIT button to edit the annotations name
+     async getAnnotationsEdit(): Promise<Button>{
+      return Button.findByName(this.page, {name: LinkText.Edit});
+    }
+
+    
 }
