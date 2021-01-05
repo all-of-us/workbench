@@ -874,10 +874,10 @@ export const RuntimePanel = fp.flow(
       numericality: {
         greaterThanOrEqualTo: 50,
         lessThanOrEqualTo: 4000,
-        message: "^Disk size must be between 50 and 4000 GB"
+        message: '^Disk size must be between 50 and 4000 GB'
       }
     }
-  }
+  };
   // We don't clear dataproc config when we change compute type so we can't combine this with the
   // above or else we can end up with phantom validation fails
   const dataprocValidators = {
@@ -885,31 +885,36 @@ export const RuntimePanel = fp.flow(
       numericality: {
         greaterThanOrEqualTo: 50,
         lessThanOrEqualTo: 4000,
-        message: "must be between 50 and 4000 GB"
+        message: 'must be between 50 and 4000 GB'
       }
     },
     workerDiskSize: {
       numericality: {
         greaterThanOrEqualTo: 50,
         lessThanOrEqualTo: 4000,
-        message: "must be between 50 and 4000 GB"
+        message: 'must be between 50 and 4000 GB'
       }
     }
-  }
+  };
   const errors = validate({selectedDiskSize}, validators);
   const {masterDiskSize = null, workerDiskSize = null} = selectedDataprocConfig || {};
-  const dataprocErrors = selectedCompute === ComputeType.Dataproc ? validate({masterDiskSize, workerDiskSize}, dataprocValidators) : undefined;
+  const dataprocErrors = selectedCompute === ComputeType.Dataproc
+      ? validate({masterDiskSize, workerDiskSize}, dataprocValidators)
+      : undefined;
   const runtimeCanBeCreated = !errors && !dataprocErrors;
   // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
   // where we get 'status' from
-  const runtimeCanBeUpdated = runtimeChanged && [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus) && !errors && !dataprocErrors;
+  const runtimeCanBeUpdated = runtimeChanged
+      && [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)
+      && !errors
+      && !dataprocErrors;
 
   const getErrorsTooltipContent = () => {
-    let errorDivs = [];
-    errors && errorDivs.push(summarizeErrors(errors));
-    dataprocErrors && errorDivs.push(summarizeErrors(dataprocErrors));
+    const errorDivs = [];
+    errorDivs.push(summarizeErrors(errors));
+    errorDivs.push(summarizeErrors(dataprocErrors));
     return errorDivs;
-  }
+  };
 
   const renderUpdateButton = () => {
     return <Button
