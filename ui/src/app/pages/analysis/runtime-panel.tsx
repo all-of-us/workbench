@@ -10,7 +10,8 @@ import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {
   DEFAULT,
-  reactStyles, summarizeErrors,
+  reactStyles,
+  summarizeErrors,
   switchCase,
   withCdrVersions,
   withCurrentWorkspace,
@@ -867,34 +868,26 @@ export const RuntimePanel = fp.flow(
     return runtimeRequest;
   };
 
-  // 50 GB is the minimum GCP limit for disk size, 4000 GB is our arbitrary limit for not making a
-  // disk that is way too big and expensive ($.22 an hour)
-  const validators = {
-    selectedDiskSize: {
+  const diskSizeValidatorWithMessage = (message) => {
+    return {
       numericality: {
         greaterThanOrEqualTo: 50,
         lessThanOrEqualTo: 4000,
-        message: '^Disk size must be between 50 and 4000 GB'
+        message: message
       }
     }
+  }
+
+  // 50 GB is the minimum GCP limit for disk size, 4000 GB is our arbitrary limit for not making a
+  // disk that is way too big and expensive ($.22 an hour)
+  const validators = {
+    selectedDiskSize: diskSizeValidatorWithMessage('^Disk size must be between 50 and 4000 GB')
   };
   // We don't clear dataproc config when we change compute type so we can't combine this with the
   // above or else we can end up with phantom validation fails
   const dataprocValidators = {
-    masterDiskSize: {
-      numericality: {
-        greaterThanOrEqualTo: 50,
-        lessThanOrEqualTo: 4000,
-        message: 'must be between 50 and 4000 GB'
-      }
-    },
-    workerDiskSize: {
-      numericality: {
-        greaterThanOrEqualTo: 50,
-        lessThanOrEqualTo: 4000,
-        message: 'must be between 50 and 4000 GB'
-      }
-    }
+    masterDiskSize: diskSizeValidatorWithMessage('^Master disk size must be between 50 and 4000 GB'),
+    workerDiskSize: diskSizeValidatorWithMessage('^Worker disk size must be between 50 and 4000 GB')
   };
   const errors = validate({selectedDiskSize}, validators);
   const {masterDiskSize = null, workerDiskSize = null} = selectedDataprocConfig || {};

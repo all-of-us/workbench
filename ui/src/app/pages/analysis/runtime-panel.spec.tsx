@@ -859,6 +859,10 @@ describe('RuntimePanel', () => {
 
     await pickWorkerDiskSize(wrapper, 4900);
     expect(getCreateButton().prop('disabled')).toBeTruthy();
+
+    await pickMainDiskSize(wrapper, 50);
+    await pickWorkerDiskSize(wrapper, 50);
+    expect(getCreateButton().prop('disabled')).toBeFalsy();
   });
 
   it('should prevent runtime update when disk size is invalid', async() => {
@@ -878,5 +882,9 @@ describe('RuntimePanel', () => {
 
     await pickWorkerDiskSize(wrapper, 4900);
     expect(getNextButton().prop('disabled')).toBeTruthy();
+
+    await pickMainDiskSize(wrapper, 50);
+    await pickWorkerDiskSize(wrapper, 50);
+    expect(getNextButton().prop('disabled')).toBeFalsy();
   });
 });
