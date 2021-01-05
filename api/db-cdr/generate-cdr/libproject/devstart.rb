@@ -136,7 +136,7 @@ def publish_cdr(cmd_name, args)
         #{table_match_filter} #{table_skip_filter}}
 
     # Delete the intermediate dataset.
-    common.run_inline %W{bq rm -rf --dataset #{ingest_dataset}}
+    common.run_inline %W{bq rm -r -f --dataset #{ingest_dataset}}
 
     auth_domain_group = get_auth_domain_group(op.opts.project)
 

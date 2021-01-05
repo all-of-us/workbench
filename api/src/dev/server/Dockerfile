@@ -31,7 +31,7 @@ RUN apt-get update && \
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 
-ENV CLOUD_SDK_VERSION 260.0.0
+ENV CLOUD_SDK_VERSION 321.0.0
 ENV PATH /google-cloud-sdk/bin:$PATH
 
 RUN curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
