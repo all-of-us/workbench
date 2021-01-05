@@ -7,4 +7,3 @@ firecloud_name
 firecloud_uuid
 rp_population
 version
-workspace_namespace
