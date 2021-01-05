@@ -1,7 +1,11 @@
 ### Whole genome import and extraction demo
 
-Note:  *.inputs.json files contain additional comments for documentation but they will need to be parsed out in order 
+Notes:
+  - This demo is based off the quickstart written in this pull request, https://github.com/broadinstitute/gatk/pull/6993 
+  - *.inputs.json files contain additional comments for documentation but they will need to be parsed out in order 
 to create a valid JSON file. Run `cat [filename].inputs.json | grep -v '^[[:blank:]]\+//'` to filter out comments.
+  - I've copied over most of the files I used by either committing them or uploading them to the `all-of-us-workbench-test-genomics` bucket for 
+reproducability but note that the source for these files will probably change over time. 
 
 1. Run ReblockGVCF workflow on inputs
 	- WDL - api/genomics/wdl/ReblockGVCF.wdl
