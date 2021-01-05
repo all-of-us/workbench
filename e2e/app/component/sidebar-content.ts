@@ -5,7 +5,6 @@ import ClrIconLink from 'app/element/clr-icon-link';
 import {getPropValue} from 'utils/element-utils';
 import ReactSelect from 'app/element/react-select';
 import {waitWhileLoading} from 'utils/waits-utils';
-// import BaseElement from 'app/element/base-element';
 import Button from 'app/element/button';
 import {LinkText} from 'app/text-labels';
 import Textarea from 'app/element/textarea'
@@ -71,6 +70,7 @@ export default class SidebarContent extends  HelpSidebar {
     return annotationfieldLabel;
     }
 
+
     // get the xpath of the respective annotation field label
     private getFieldNameXpath(fieldName: string): string {
       return `//*[contains(normalize-space(text()), "Annotations")]/following::div[contains(normalize-space(), "${fieldName}")]`;
@@ -105,5 +105,4 @@ export default class SidebarContent extends  HelpSidebar {
           return null;
         }
     }
-  
 }
