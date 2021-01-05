@@ -50,7 +50,7 @@ def get_config(env)
   return JSON.parse(File.read("../../config/" + ENVIRONMENTS[env][:config_json]))
 end
 
-def get_auth_domain_group(project)
+def get_auth_domain_group_email(project)
   return get_config(project)["firecloud"]["registeredDomainGroup"]
 end
 
@@ -140,7 +140,7 @@ def publish_cdr(cmd_name, args)
     # Delete the intermediate dataset.
     common.run_inline %W{bq rm -r -f --dataset #{ingest_dataset}}
 
-    auth_domain_group = get_auth_domain_group(op.opts.project)
+    auth_domain_group_email = get_auth_domain_group_email(op.opts.project)
 
     config_file = Tempfile.new("#{op.opts.bq_dataset}-config.json")
     begin
@@ -157,11 +157,11 @@ def publish_cdr(cmd_name, args)
         end
       end
 
-      if existing_groups.include?(auth_domain_group)
-        common.status "#{auth_domain_group} already in ACL, skipping..."
+      if existing_groups.include?(auth_domain_group_email)
+        common.status "#{auth_domain_group_email} already in ACL, skipping..."
       else
-        common.status "Adding #{auth_domain_group} as a READER..."
-        new_entry = { "groupByEmail" => auth_domain_group, "role" => "READER"}
+        common.status "Adding #{auth_domain_group_email} as a READER..."
+        new_entry = { "groupByEmail" => auth_domain_group_email, "role" => "READER"}
         json["access"].push(new_entry)
       end
 
