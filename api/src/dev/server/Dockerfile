@@ -75,6 +75,9 @@ RUN curl -O https://bin.equinox.io/c/htRtQZagtfg/rainforest-cli-stable-linux-amd
   tar -xvf rainforest-cli-stable-linux-amd64.tgz && rm rainforest-cli-stable-linux-amd64.tgz && \
   mv rainforest /usr/local/bin
 
+# Prevent bq interactively asking us to choose a default project
+RUN touch .bigqueryrc
+
 COPY with-mysql-login.sh /usr/local/bin
 COPY with-uid.sh /usr/local/bin
 
