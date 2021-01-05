@@ -846,7 +846,6 @@ describe('RuntimePanel', () => {
     await mustClickButton(wrapper, 'Customize');
     const getCreateButton = () => wrapper.find({'aria-label': 'Create'}).first();
 
-    console.log("pick main disk size");
     await pickMainDiskSize(wrapper, 49);
     expect(getCreateButton().prop('disabled')).toBeTruthy();
 
