@@ -6,6 +6,7 @@ import * as React from 'react';
 export const WarningMessage = ({children}) => {
   return <FlexRow
     style={{
+      alignItems: 'center',
       backgroundColor: colorWithWhiteness(colors.warning, .9),
       border: `1px solid ${colors.warning}`,
       borderRadius: '5px',

@@ -1041,6 +1041,11 @@ export const RuntimePanel = fp.flow(
             <div>You've made changes that require recreating your environment to take effect.</div>
          </WarningMessage>
        }
+       {(errors || dataprocErrors) &&
+         <WarningMessage>
+           {getErrorsTooltipContent()}
+         </WarningMessage>
+       }
        <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
          <Link
            style={{...styles.deleteLink, ...(
@@ -1050,12 +1055,7 @@ export const RuntimePanel = fp.flow(
            aria-label='Delete Environment'
            disabled={disableControls || !runtimeExists}
            onClick={() => setPanelContent(PanelContent.Delete)}>Delete Environment</Link>
-         <TooltipTrigger
-             content={(errors || dataprocErrors) && getErrorsTooltipContent()}
-             side='left'
-         >
            {!runtimeExists ? renderCreateButton() : renderNextButton()}
-         </TooltipTrigger>
        </FlexRow>
      </Fragment>],
       [PanelContent.Confirm, () => <ConfirmUpdatePanel initialRuntimeConfig={initialRuntimeConfig}
