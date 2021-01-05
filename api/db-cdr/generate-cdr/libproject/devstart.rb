@@ -104,6 +104,8 @@ def publish_cdr(cmd_name, args)
   common = Common.new
   env = ENVIRONMENTS[op.opts.project]
   account = env.fetch(:publisher_account)
+  app_sa = "#{ENVIRONMENTS[op.opts.project]}@appspot.gserviceaccount.com"
+
   # TODO(RW-3208): Investigate using a temporary / impersonated SA credential instead of a key.
   key_file = Tempfile.new(["#{account}-key", ".json"], "/tmp")
   ServiceAccountContext.new(
@@ -145,11 +147,16 @@ def publish_cdr(cmd_name, args)
       json = JSON.parse(
         common.capture_stdout %{bq show --format=prettyjson #{dest_dataset}})
       existing_groups = Set[]
+      existing_users = Set[]
       for entry in json["access"]
         if entry.key?("groupByEmail")
           existing_groups.add(entry["groupByEmail"])
         end
+        if entry.key?("userByEmail")
+          existing_users.add(entry["userByEmail"])
+        end
       end
+
       if existing_groups.include?(auth_domain_group)
         common.status "#{auth_domain_group} already in ACL, skipping..."
       else
@@ -157,6 +164,15 @@ def publish_cdr(cmd_name, args)
         new_entry = { "groupByEmail" => auth_domain_group, "role" => "READER"}
         json["access"].push(new_entry)
       end
+
+      if existing_users.include?(app_sa)
+        common.status "#{app_sa} already in ACL, skipping..."
+      else
+        common.status "Adding #{app_sa} as a READER..."
+        new_entry = { "userByEmail" => app_sa, "role" => "READER"}
+        json["access"].push(new_entry)
+      end
+
       File.open(config_file.path, "w") do |f|
         f.write(JSON.pretty_generate(json))
       end
