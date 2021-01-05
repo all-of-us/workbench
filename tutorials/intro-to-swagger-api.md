@@ -42,7 +42,7 @@ Endpoints are defined in the Swagger/OpenAPI YAML format.  We run code generatio
        1. What happens?
        2. Re-create the generated code
 
-### Add/Remove A Parameter From An Endpoint 
+### (STEP-1) Add/Remove A Parameter From An Endpoint 
 In the previous task we generated the swagger java code and compile our handwritten code.
 Let's explore some of our handwritten code and see how it interacts with the Swagger/OpenAPI code
 1. Go to `src/main/java/org/pmiops/workbench/api/WorkspacesController.java`
@@ -51,13 +51,13 @@ Let's explore some of our handwritten code and see how it interacts with the Swa
    3. Did your IDE respond to the change? (If not check your IDE settings)
 2. Undo your changes above, this time remove a parameter from the method.
 
-### Bring up the server and inspect an unauthenticated endpoint
+### (STEP-2) Bring up the server and inspect an unauthenticated endpoint
 1. Run `./project.rb dev-up`
    This should bring up the API server allowing you to send requests to the API endpoints
 2. Using a tool like [insomnia](https://insomnia.rest/) query the endpoints
    1. To do this with curl : `curl http://localhost:8081/v1/config`
 3. An endpoint you can inspect is `http://localhost:8081/v1/config`
-### Bring up the server and inspect an authenticated endpoint
+### (STEP-3) Bring up the server and inspect an authenticated endpoint
 1. Run `./project.rb dev-up`
    This should bring up the API server allowing you to send requests to the API endpoints
 2. Using a tool like [insomnia](https://insomnia.rest/) query the endpoints.
@@ -68,7 +68,7 @@ Let's explore some of our handwritten code and see how it interacts with the Swa
 3. An endpoint you can inspect is `http://localhost:8081/v1/workspaces`
    This will return all workspaces in your account. If you have not created any workspaces yet it is a good idea to log in to the app and create a workspace so the endpoint will return some data.
 
-### Update the endpoint to accept a new parameter
+### (STEP-4) Update the endpoint to accept a new parameter
 1. Open the `workbench-api.yaml` and find the endpoint whose `operationId` is `getWorkspace`
    1. Examine the structure in the yaml file. Note the parameters.
 2. Check out the super implementation of `getWorkspace` (`api/build/swagger2/org/pmiops/workbench/api/WorkspacesApiDelegate.java`)
@@ -84,9 +84,9 @@ Let's explore some of our handwritten code and see how it interacts with the Swa
    1. When calling the endpoint, be sure to add your parameter to the JSON body: `{"test": "Hello"}`
    2. What happens when you omit this required parameter?
 
-### Add a new endpoint
+### (STEP-5) Add a new endpoint
 1. Open the `workbench-api.yaml` and find the beginning of the endpoint definitions.
-2. Create a path for your endpoint, for the purposes of this example I will call the endpoint `/v1/workspaces/thing`
+2. Create a path for your endpoint, for the purposes of this example I will call the endpoint `/v1/tutorial`
 3. Add the `get` method to your endpoint
 4. Add the `operationId` to your endpoint (I will call this `getThingWorkspace`)- this is the method that will be called
 5. Create a `responses` section in your yaml. 
@@ -100,9 +100,9 @@ Let's explore some of our handwritten code and see how it interacts with the Swa
    1.  Remember to generate a bearer token
    2.  Do you see your response?
 
-### Add a new parameter to your endpoint
-After completing (API-SWAG-5) we can add a parameter to your endpoint
-1. Similar to (API-SWAG-4) add a parameter to your new endpoint
+### (STEP-6) Add a new parameter to your endpoint
+After completing (STEP-5) we can add a parameter to your endpoint
+1. Similar to (STEP-4) add a parameter to your new endpoint
    1. Pass the parameter in the body, and have it be a string
    2. Return the parameter in the response
 2. Using [Insomnia Core](https://insomnia.rest/products/core) or similar, test our your API
