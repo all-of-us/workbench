@@ -167,6 +167,7 @@ def publish_cdr(cmd_name, args)
 
       # if the app SA's in too many groups, it won't gain READER transitively.
       # add it directly, to make sure.
+      # See discussion at https://pmi-engteam.slack.com/archives/CHRN2R51N/p1609869521078200?thread_ts=1609796171.063800&cid=CHRN2R51N
       if existing_users.include?(app_sa)
         common.status "#{app_sa} already in ACL, skipping..."
       else
