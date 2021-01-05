@@ -42,7 +42,6 @@ export default class EditDeleteAnnotationsModal extends Modal {
      const baseElement = BaseElement.asBaseElement(this.page, clearTextSelector);
      await baseElement.clearTextInput();
      await baseElement.type(newName);
-
      await this.clickButton(LinkText.Rename);
      await this.clickButton(LinkText.Close);
   }
@@ -50,5 +49,6 @@ export default class EditDeleteAnnotationsModal extends Modal {
   async deleteAnnotationsName(): Promise<void>{
     await this.clickButton(LinkText.Delete);
     await this.clickButton(LinkText.Yes, {waitForClose: true});
+
   }
 }
