@@ -3,9 +3,9 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.TestCase.fail;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -860,5 +860,25 @@ public class CohortsControllerTest {
                 .materializeCohort(workspace.getNamespace(), WORKSPACE_NAME, request)
                 .getBody())
         .isEqualTo(response);
+  }
+
+  public static DbConcept makeConcept(Concept concept) {
+    DbConcept result = new DbConcept();
+    result.setConceptId(concept.getConceptId());
+    result.setConceptName(concept.getConceptName());
+    result.setStandardConcept(
+        concept.getStandardConcept() == null ? "" : (concept.getStandardConcept() ? "S" : ""));
+    result.setConceptCode(concept.getConceptCode());
+    result.setConceptClassId(concept.getConceptClassId());
+    result.setVocabularyId(concept.getVocabularyId());
+    result.setDomainId(concept.getDomainId());
+    result.setCountValue(concept.getCountValue());
+    result.setSourceCountValue(concept.getCountValue());
+    result.setPrevalence(concept.getPrevalence());
+    result.setSynonymsStr(
+        String.valueOf(concept.getConceptId())
+            + '|'
+            + Joiner.on("|").join(concept.getConceptSynonyms()));
+    return result;
   }
 }
