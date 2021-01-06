@@ -15,7 +15,6 @@ import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.db.model.DbWorkspaceFreeTierUsage;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DuaType;
@@ -25,6 +24,7 @@ import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 
 public class ReportingTestUtils {
 
@@ -67,6 +67,14 @@ public class ReportingTestUtils {
   public static final Timestamp WORKSPACE__RP_TIME_REQUESTED =
       Timestamp.from(Instant.parse("2015-06-07T00:00:00.00Z"));
   public static final Long WORKSPACE__WORKSPACE_ID = 34L;
+
+  // This code was generated using reporting-wizard.rb at 2021-01-05T17:36:27-08:00.
+  // Manual modification should be avoided if possible as this is a one-time generation
+  // and does not run on every build and updates must be merged manually for now.
+
+  public static final Double WORKSPACE_FREE_TIER_USAGE__COST = 0.500000;
+  public static final Long WORKSPACE_FREE_TIER_USAGE__USER_ID = 1L;
+  public static final Long WORKSPACE_FREE_TIER_USAGE__WORKSPACE_ID = 2L;
 
   // All constant values, mocking statements, and assertions in this file are generated. The values
   // are chosen so that errors with transposed columns can be caught.
@@ -218,15 +226,6 @@ public class ReportingTestUtils {
         .workspaceId(WORKSPACE__WORKSPACE_ID);
   }
 
-  public static DbWorkspaceFreeTierUsage createDbWorkspaceFreeTierUsage(
-      DbWorkspace workspace, DbUser user) {
-    final DbWorkspaceFreeTierUsage freeTierUsage = new DbWorkspaceFreeTierUsage();
-    freeTierUsage.setWorkspace(workspace);
-    freeTierUsage.setUser(user);
-    freeTierUsage.setCost(WORKSPACE__FREE_TIER_BILLING_USAGE);
-    return freeTierUsage;
-  }
-
   public static DbWorkspace createDbWorkspace(DbUser creator, DbCdrVersion cdrVersion) {
     final DbWorkspace workspace = new DbWorkspace();
     workspace.setBillingAccountType(WORKSPACE__BILLING_ACCOUNT_TYPE);
@@ -263,6 +262,21 @@ public class ReportingTestUtils {
     workspace.setTimeRequested(WORKSPACE__RP_TIME_REQUESTED);
     workspace.setWorkspaceId(WORKSPACE__WORKSPACE_ID);
     return workspace;
+  }
+
+  public static void assertDtoWorkspaceFreeTierUsageFields(
+      ReportingWorkspaceFreeTierUsage workspaceFreeTierUsage) {
+    assertThat(workspaceFreeTierUsage.getCost()).isEqualTo(WORKSPACE_FREE_TIER_USAGE__COST);
+    assertThat(workspaceFreeTierUsage.getUserId()).isEqualTo(WORKSPACE_FREE_TIER_USAGE__USER_ID);
+    assertThat(workspaceFreeTierUsage.getWorkspaceId())
+        .isEqualTo(WORKSPACE_FREE_TIER_USAGE__WORKSPACE_ID);
+  }
+
+  public static ReportingWorkspaceFreeTierUsage createDtoWorkspaceFreeTierUsage() {
+    return new ReportingWorkspaceFreeTierUsage()
+        .cost(WORKSPACE_FREE_TIER_USAGE__COST)
+        .userId(WORKSPACE_FREE_TIER_USAGE__USER_ID)
+        .workspaceId(WORKSPACE_FREE_TIER_USAGE__WORKSPACE_ID);
   }
 
   public static void assertCohortFields(ReportingCohort cohort) {

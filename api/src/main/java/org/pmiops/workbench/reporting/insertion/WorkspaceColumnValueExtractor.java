@@ -17,7 +17,6 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
   CREATOR_ID("creator_id", ReportingWorkspace::getCreatorId),
   DISSEMINATE_RESEARCH_OTHER(
       "disseminate_research_other", ReportingWorkspace::getDisseminateResearchOther),
-  FREE_TIER_BILLING_USAGE("free_tier_billing_usage", ReportingWorkspace::getFreeTierBillingUsage),
   LAST_ACCESSED_TIME("last_accessed_time", w -> toInsertRowString(w.getLastAccessedTime())),
   LAST_MODIFIED_TIME("last_modified_time", w -> toInsertRowString(w.getLastModifiedTime())),
   NAME("name", ReportingWorkspace::getName),

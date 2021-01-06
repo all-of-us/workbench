@@ -2,7 +2,14 @@ package org.pmiops.workbench.reporting;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.*;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.assertCohortFields;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.assertDatasetFields;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.assertInstitutionFields;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoWorkspace;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoWorkspaceFreeTierUsage;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingCohort;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingDataset;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingInstitution;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
 import com.google.common.collect.ImmutableList;
@@ -74,6 +81,7 @@ public class ReportingSnapshotServiceTest {
   public void testGetSnapshot() {
     mockUsers();
     mockWorkspaces();
+    mockWorkspaceFreeTierUsage();
     mockCohorts();
     mockDatasets();
     mockDatasetCohorts();
@@ -99,6 +107,9 @@ public class ReportingSnapshotServiceTest {
     final ReportingWorkspace workspace = snapshot.getWorkspaces().get(0);
     ReportingTestUtils.assertDtoWorkspaceFields(workspace);
 
+    ReportingTestUtils.assertDtoWorkspaceFreeTierUsageFields(
+        snapshot.getWorkspaceFreeTierUsage().get(0));
+
     assertThat(snapshot.getInstitutions()).hasSize(1);
     assertInstitutionFields(snapshot.getInstitutions().get(0));
   }
@@ -113,6 +124,12 @@ public class ReportingSnapshotServiceTest {
     doReturn(ImmutableList.of(createDtoWorkspace()))
         .when(mockReportingQueryService)
         .getWorkspaces();
+  }
+
+  private void mockWorkspaceFreeTierUsage() {
+    doReturn(ImmutableList.of(createDtoWorkspaceFreeTierUsage()))
+        .when(mockReportingQueryService)
+        .getWorkspaceFreeTierUsage();
   }
 
   private void mockCohorts() {
