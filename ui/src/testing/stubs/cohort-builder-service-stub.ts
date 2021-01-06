@@ -2,7 +2,9 @@ import {
   CohortBuilderApi,
   Criteria,
   CriteriaAttributeListResponse,
-  CriteriaListResponse, CriteriaMenuOptionsListResponse,
+  CriteriaListResponse,
+  CriteriaMenuOptionsListResponse,
+  CriteriaSubType,
   CriteriaType,
   DemoChartInfoListResponse,
   Domain,
@@ -12,6 +14,7 @@ import {
 } from 'generated/fetch';
 import {DomainStubVariables, SurveyStubVariables} from 'testing/stubs/concepts-api-stub';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
+import {SurveyVersionListResponse} from '../../generated/fetch';
 
 export const cohortStub = {
   name: 'Test Cohort',
@@ -19,20 +22,235 @@ export const cohortStub = {
   type: '',
 };
 
-const criteriaStub = {
-  id: 1,
-  parentId: 0,
-  type: CriteriaType[CriteriaType.ICD9CM],
-  subtype: '',
-  code: '123',
-  name: 'Test',
-  count: 1,
-  group: false,
-  selectable: true,
-  conceptId: 123,
-  domainId: Domain[Domain.CONDITION],
-  hasAttributes: false,
-  path: '0',
+export const CriteriaStubVariables: Criteria[] = [
+  {
+    id: 1,
+    parentId: 0,
+    type: CriteriaType.ICD9CM.toString(),
+    subtype: '',
+    code: '123',
+    name: 'Test',
+    count: 1,
+    group: false,
+    selectable: true,
+    conceptId: 123,
+    domainId: Domain.CONDITION.toString(),
+    hasAttributes: false,
+    path: '0',
+  }
+];
+
+export const CriteriaWithAttributesStubVariables: Criteria[] = [
+  {
+    childCount: 197614,
+    code: '',
+    conceptId: 903133,
+    count: 197614,
+    domainId: Domain.PHYSICALMEASUREMENT.toString(),
+    group: false,
+    hasAncestorData: false,
+    hasAttributes: true,
+    hasHierarchy: true,
+    id: 328005,
+    isStandard: false,
+    name: 'Height',
+    parentCount: 0,
+    parentId: 0,
+    path: '',
+    selectable: true,
+    subtype: CriteriaSubType.HEIGHT.toString(),
+    type: CriteriaType.PPI.toString(),
+    value: '',
+  },
+  {
+    childCount: 196156,
+    code: '',
+    conceptId: null,
+    count: 196156,
+    domainId: Domain.PHYSICALMEASUREMENT.toString(),
+    group: false,
+    hasAncestorData: false,
+    hasAttributes: true,
+    hasHierarchy: true,
+    id: 327999,
+    isStandard: false,
+    name: 'Blood Pressure',
+    parentCount: 0,
+    parentId: 327994,
+    path: '',
+    selectable: true,
+    subtype: CriteriaSubType.BP.toString(),
+    type: CriteriaType.PPI.toString(),
+    value: '',
+  },
+  {
+    childCount: 197912,
+    code: '29463-7',
+    conceptId: 3025315,
+    count: 197912,
+    domainId: Domain.MEASUREMENT.toString(),
+    group: false,
+    hasAncestorData: false,
+    hasAttributes: true,
+    hasHierarchy: true,
+    id: 3623241,
+    isStandard: true,
+    name: 'Body weight',
+    parentCount: 0,
+    parentId: 3623181,
+    path: '3623174.3623181.3623241',
+    selectable: true,
+    subtype: CriteriaSubType.CLIN.toString(),
+    type: CriteriaType.LOINC.toString(),
+    value: '',
+  },
+  {
+    childCount: -1,
+    code: 'LivingSituation_HowManyPeople',
+    conceptId: 1585889,
+    count: -1,
+    domainId: Domain.SURVEY.toString(),
+    group: false,
+    hasAncestorData: false,
+    hasAttributes: true,
+    hasHierarchy: true,
+    id: 328048,
+    isStandard: false,
+    name: 'Select a value',
+    parentCount: -1,
+    parentId: 328047,
+    path: '328012.328047.328048',
+    selectable: true,
+    subtype: CriteriaSubType.ANSWER.toString(),
+    type: CriteriaType.PPI.toString(),
+    value: ''
+  },
+  {
+    childCount: 76023,
+    code: 'cdc_covid_19_21',
+    conceptId: 1333102,
+    count: 76023,
+    domainId: Domain.SURVEY.toString(),
+    group: true,
+    hasAncestorData: false,
+    hasAttributes: true,
+    hasHierarchy: true,
+    id: 331392,
+    isStandard: false,
+    name: 'In the past month, have recommendations for socially distancing caused stress for you?',
+    parentCount: 76023,
+    parentId: 331391,
+    path: '331390.331391.331392',
+    selectable: true,
+    subtype: CriteriaSubType.QUESTION.toString(),
+    type: CriteriaType.PPI.toString(),
+    value: ''
+  },
+  {
+    childCount: 8064,
+    code: 'cdc_covid_19_21',
+    conceptId: 1333102,
+    count: 8064,
+    domainId: Domain.SURVEY.toString(),
+    group: false,
+    hasAncestorData: false,
+    hasAttributes: true,
+    hasHierarchy: true,
+    id: 331393,
+    isStandard: false,
+    name: 'A lot',
+    parentCount: 0,
+    parentId: 331392,
+    path: '331390.331391.331392.331393',
+    selectable: true,
+    subtype: CriteriaSubType.ANSWER.toString(),
+    type: CriteriaType.PPI.toString(),
+    value: '1332897',
+  },
+  {
+    childCount: -1,
+    code: 'basics_xx',
+    conceptId: 1333015,
+    count: -1,
+    domainId: Domain.SURVEY.toString(),
+    group: false,
+    hasAncestorData: false,
+    hasAttributes: true,
+    hasHierarchy: true,
+    id: 331598,
+    isStandard: false,
+    name: 'Select a value',
+    parentCount: -1,
+    parentId: 331597,
+    path: '331390.331596.331597.331598',
+    selectable: true,
+    subtype: CriteriaSubType.ANSWER.toString(),
+    type: CriteriaType.PPI.toString(),
+    value: '',
+  }
+];
+
+export const RootSurveyStubVariables: Criteria[] = [
+  {
+    childCount: 0,
+    code: 'TheBasics',
+    conceptId: 1586134,
+    count: 234525,
+    domainId: Domain.SURVEY.toString(),
+    group: true,
+    hasAncestorData: false,
+    hasAttributes: false,
+    hasHierarchy: true,
+    id: 328012,
+    isStandard: false,
+    name: 'The Basics',
+    parentCount: 234525,
+    parentId: 0,
+    path: '328012',
+    selectable: true,
+    subtype: CriteriaSubType.SURVEY.toString(),
+    type: CriteriaType.PPI.toString(),
+    value: ''
+  },
+  {
+    childCount: 0,
+    code: 'cope',
+    conceptId: 1333342,
+    count: 76826,
+    domainId: Domain.SURVEY.toString(),
+    group: true,
+    hasAncestorData: false,
+    hasAttributes: false,
+    hasHierarchy: true,
+    id: 331390,
+    isStandard: false,
+    name: 'COVID-19 Participant Experience (COPE) Survey',
+    parentCount: 76826,
+    parentId: 0,
+    path: '331390',
+    selectable: true,
+    subtype: CriteriaSubType.SURVEY.toString(),
+    type: CriteriaType.PPI.toString(),
+    value: '',
+  }
+];
+
+export const SurveyQuestionStubVariables = {
+  328047: {
+    conceptId: 1585889,
+    count: 234517,
+    name: 'Not including yourself, how many other people live at home with you?',
+  },
+  331392: {
+    conceptId: 1333102,
+    count: 76023,
+    name: 'In the past month, have recommendations for socially distancing caused stress for you?',
+  },
+  331597: {
+    conceptId: 1333015,
+    count: 76003,
+    name: 'Not including yourself, how many other people live at home with you?',
+  },
 };
 
 const domainCountStub = {
@@ -81,7 +299,7 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
   }
 
   getPPICriteriaParent(): Promise<Criteria> {
-    return new Promise<Criteria>(resolve => resolve(criteriaStub));
+    return new Promise<Criteria>(resolve => resolve(CriteriaStubVariables[0]));
   }
 
   findParticipantDemographics(): Promise<ParticipantDemographics> {
@@ -106,5 +324,13 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
 
   findSurveyCount(): Promise<SurveyCount> {
     return new Promise<SurveyCount>(resolve => resolve(surveyCountStub));
+  }
+
+  findSurveyVersionByQuestionConceptId(): Promise<SurveyVersionListResponse> {
+    return new Promise<SurveyVersionListResponse>(resolve => resolve({items: []}));
+  }
+
+  findSurveyVersionByQuestionConceptIdAndAnswerConceptId(): Promise<SurveyVersionListResponse> {
+    return new Promise<SurveyVersionListResponse>(resolve => resolve({items: []}));
   }
 }
