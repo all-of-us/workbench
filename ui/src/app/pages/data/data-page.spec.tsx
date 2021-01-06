@@ -12,7 +12,6 @@ import {CohortReviewApi, CohortsApi, ConceptsApi, ConceptSetsApi, DataSetApi, Wo
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
-import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 import {WorkspacesApiStub, workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 
@@ -23,7 +22,6 @@ describe('DataPage', () => {
   beforeEach(() => {
     registerApiClient(CohortReviewApi, new CohortReviewServiceStub());
     registerApiClient(CohortsApi, new CohortsApiStub());
-    registerApiClient(ConceptsApi, new ConceptsApiStub());
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
     registerApiClient(DataSetApi, new DataSetApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());

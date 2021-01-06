@@ -2,24 +2,16 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {ConceptHomepage} from 'app/pages/data/concept/concept-homepage';
-import {conceptsApi, registerApiClient} from 'app/services/swagger-fetch-clients';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {
   CohortBuilderApi,
-  ConceptsApi,
   ConceptSetsApi,
-  DomainInfo,
   WorkspacesApi
 } from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
+import {CohortBuilderServiceStub, DomainStubVariables, SurveyStubVariables} from 'testing/stubs/cohort-builder-service-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
-import {
-  ConceptsApiStub,
-  ConceptStubVariables,
-  DomainStubVariables,
-  SurveyStubVariables
-} from 'testing/stubs/concepts-api-stub';
 import {
   workspaceDataStub,
   WorkspacesApiStub,
@@ -39,7 +31,6 @@ describe('ConceptHomepage', () => {
 
   beforeEach(() => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
-    registerApiClient(ConceptsApi, new ConceptsApiStub());
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     currentWorkspaceStore.next(workspaceDataStub);
