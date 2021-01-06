@@ -18,7 +18,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -119,7 +118,6 @@ public class DbWorkspace {
   private String disseminateResearchOther;
   private Set<Short> researchOutcomeSet = new HashSet<>();
 
-  private DbWorkspaceFreeTierUsage freeTierUsage;
   private Boolean reviewRequested;
   private Boolean approved;
   private Timestamp timeRequested;
@@ -677,16 +675,6 @@ public class DbWorkspace {
 
   public void setBillingAccountType(BillingAccountType billingAccountType) {
     this.billingAccountType = DbStorageEnums.billingAccountTypeToStorage(billingAccountType);
-  }
-
-  @OneToOne
-  @JoinColumn(name = "workspace_id")
-  public DbWorkspaceFreeTierUsage getFreeTierUsage() {
-    return freeTierUsage;
-  }
-
-  public void setFreeTierUsage(DbWorkspaceFreeTierUsage freeTierUsage) {
-    this.freeTierUsage = freeTierUsage;
   }
 
   @Column(name = "needs_rp_review_prompt")
