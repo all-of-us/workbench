@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import {ConceptNavigationBar} from 'app/pages/data/concept/concept-navigation-bar';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {ConceptsApi, ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
+import {ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';

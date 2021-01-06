@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
-import {ConceptsApi, ConceptSet, ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
+import {ConceptSet, ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {workspaceDataStub, WorkspacesApiStub, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
 

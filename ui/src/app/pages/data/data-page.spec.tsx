@@ -8,7 +8,7 @@ import {DataPage} from 'app/pages/data/data-page';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
-import {CohortReviewApi, CohortsApi, ConceptsApi, ConceptSetsApi, DataSetApi, WorkspacesApi} from 'generated/fetch';
+import {CohortReviewApi, CohortsApi, ConceptSetsApi, DataSetApi, WorkspacesApi} from 'generated/fetch';
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
