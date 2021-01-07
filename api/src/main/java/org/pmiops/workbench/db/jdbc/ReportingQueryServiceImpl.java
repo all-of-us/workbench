@@ -118,7 +118,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
         (rs, unused) ->
             new ReportingWorkspaceFreeTierUsage()
                 .cost(rs.getDouble("cost"))
-                .userId(rs.getLong("cohort_id"))
+                .userId(rs.getLong("user_id"))
                 .workspaceId(rs.getLong("workspace_id")));
   }
 
