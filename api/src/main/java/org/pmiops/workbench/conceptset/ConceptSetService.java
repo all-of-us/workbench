@@ -17,7 +17,6 @@ import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper.ConceptSetContext;
-import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
@@ -100,8 +99,7 @@ public class ConceptSetService {
 
   public ConceptSet createConceptSet(
       CreateConceptSetRequest request, DbUser creator, Long workspaceId) {
-    DbConceptSet dbConceptSet =
-        conceptSetMapper.clientToDbModel(request, workspaceId, creator, conceptBigQueryService);
+    DbConceptSet dbConceptSet = conceptSetMapper.clientToDbModel(request, workspaceId, creator);
     try {
       return toHydratedConcepts(conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSet)));
     } catch (DataIntegrityViolationException e) {
@@ -182,15 +180,6 @@ public class ConceptSetService {
       throw new ConflictException(
           String.format("Exceeded %d concept set limit", MAX_CONCEPTS_PER_SET));
     }
-    if (dbConceptSet.getConceptSetConceptIds().isEmpty()) {
-      dbConceptSet.setParticipantCount(0);
-    } else {
-      dbConceptSet.setParticipantCount(
-          conceptBigQueryService.getParticipantCountForConcepts(
-              dbConceptSet.getDomainEnum(),
-              BigQueryTableInfo.getTableName(dbConceptSet.getDomainEnum()),
-              dbConceptSet.getConceptSetConceptIds()));
-    }
 
     dbConceptSet.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
     try {
@@ -211,7 +200,8 @@ public class ConceptSetService {
                 () ->
                     new NotFoundException(
                         String.format("ConceptSet not found for concept id: %d", conceptSetId)));
-    return toHydratedConcepts(conceptSetMapper.dbModelToClient(dbConceptSet));
+    return toHydratedConcepts(
+        conceptSetMapper.dbModelToClient(dbConceptSet, conceptBigQueryService));
   }
 
   public List<ConceptSet> findAll(List<Long> conceptSetIds) {
@@ -246,12 +236,6 @@ public class ConceptSetService {
 
     DbConceptSet dbConceptSetClone =
         conceptSetMapper.dbModelToDbModel(dbConceptSet, conceptSetContext);
-    if (cdrVersionChanged) {
-      String omopTable = BigQueryTableInfo.getTableName(dbConceptSet.getDomainEnum());
-      dbConceptSetClone.setParticipantCount(
-          conceptBigQueryService.getParticipantCountForConcepts(
-              dbConceptSet.getDomainEnum(), omopTable, dbConceptSet.getConceptSetConceptIds()));
-    }
     return conceptSetDao.save(dbConceptSetClone);
   }
 

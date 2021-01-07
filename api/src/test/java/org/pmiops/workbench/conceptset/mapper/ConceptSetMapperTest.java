@@ -53,8 +53,7 @@ public class ConceptSetMapperTest {
             1,
             creator,
             now,
-            now,
-            200);
+            now);
     dbConceptSet.setConceptSetId(1);
   }
 
@@ -66,8 +65,6 @@ public class ConceptSetMapperTest {
     assertThat(clientConceptSet.getDomain()).isEqualTo(dbConceptSet.getDomainEnum());
     assertThat(clientConceptSet.getSurvey()).isEqualTo(dbConceptSet.getSurveysEnum());
     assertThat(clientConceptSet.getName()).isEqualTo(dbConceptSet.getName());
-    assertThat(clientConceptSet.getParticipantCount())
-        .isEqualTo(dbConceptSet.getParticipantCount());
     assertThat(clientConceptSet.getDescription()).isEqualTo(dbConceptSet.getDescription());
     assertThat(clientConceptSet.getCreationTime())
         .isEqualTo(dbConceptSet.getCreationTime().getTime());
@@ -93,15 +90,12 @@ public class ConceptSetMapperTest {
     conceptSetRequest.setConceptSet(clientConceptSet);
     conceptSetRequest.setAddedConceptSetConceptIds(
         Arrays.asList(conceptSetConceptId1, conceptSetConceptId2, conceptSetConceptId3));
-    conceptSetMapper.clientToDbModel(
-        conceptSetRequest, 1l, dbConceptSet.getCreator(), conceptBigQueryService);
+    conceptSetMapper.clientToDbModel(conceptSetRequest, 1l, dbConceptSet.getCreator());
     assertThat(clientConceptSet.getId()).isEqualTo(dbConceptSet.getConceptSetId());
     assertThat(Etags.toVersion(clientConceptSet.getEtag())).isEqualTo(dbConceptSet.getVersion());
     assertThat(clientConceptSet.getDomain()).isEqualTo(dbConceptSet.getDomainEnum());
     assertThat(clientConceptSet.getSurvey()).isEqualTo(dbConceptSet.getSurveysEnum());
     assertThat(clientConceptSet.getName()).isEqualTo(dbConceptSet.getName());
-    assertThat(clientConceptSet.getParticipantCount())
-        .isEqualTo(dbConceptSet.getParticipantCount());
     assertThat(clientConceptSet.getDescription()).isEqualTo(dbConceptSet.getDescription());
     assertThat(clientConceptSet.getCreationTime())
         .isEqualTo(dbConceptSet.getCreationTime().getTime());

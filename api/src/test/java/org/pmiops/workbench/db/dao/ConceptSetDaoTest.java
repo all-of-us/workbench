@@ -56,8 +56,7 @@ public class ConceptSetDaoTest {
             ws.getWorkspaceId(),
             creator,
             now,
-            now,
-            200);
+            now);
     dbConceptSet.setConceptSetConceptIds(conceptSetConceptIds);
     this.dbConceptSet = conceptSetDao.save(dbConceptSet);
   }
