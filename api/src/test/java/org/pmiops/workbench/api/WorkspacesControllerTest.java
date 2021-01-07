@@ -20,7 +20,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
 import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
 import static org.pmiops.workbench.config.WorkbenchConfig.createEmptyConfig;
@@ -70,7 +69,6 @@ import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
@@ -257,9 +255,10 @@ public class WorkspacesControllerTest {
           .countValue(256L)
           .prevalence(0.4F)
           .conceptSynonyms(new ArrayList<>());
-  private static final DbConcept CONCEPT_1 = makeConcept(CLIENT_CONCEPT_1);
-  private static final DbConcept CONCEPT_2 = makeConcept(CLIENT_CONCEPT_2);
-  private static final DbConcept CONCEPT_3 = makeConcept(CLIENT_CONCEPT_3);
+  private static final DbConcept CONCEPT_1 =
+      new DbConcept().conceptId(CLIENT_CONCEPT_1.getConceptId());
+  private static final DbConcept CONCEPT_3 =
+      new DbConcept().conceptId(CLIENT_CONCEPT_3.getConceptId());
   private static final String BUCKET_URI =
       String.format("gs://%s/", TestMockFactory.WORKSPACE_BUCKET_NAME);
 
@@ -374,7 +373,6 @@ public class WorkspacesControllerTest {
   @Autowired BigQueryService bigQueryService;
   @SpyBean @Autowired WorkspaceDao workspaceDao;
   @Autowired UserDao userDao;
-  @Autowired ConceptDao conceptDao;
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired CohortDao cohortDao;
   @Autowired CohortReviewDao cohortReviewDao;
@@ -419,10 +417,6 @@ public class WorkspacesControllerTest {
     archivedCdrVersion.setArchivalStatusEnum(ArchivalStatus.ARCHIVED);
     archivedCdrVersion = cdrVersionDao.save(archivedCdrVersion);
     archivedCdrVersionId = Long.toString(archivedCdrVersion.getCdrVersionId());
-
-    conceptDao.save(CONCEPT_1);
-    conceptDao.save(CONCEPT_2);
-    conceptDao.save(CONCEPT_3);
 
     CLOCK.setInstant(NOW.toInstant());
 

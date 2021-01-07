@@ -9,12 +9,83 @@ import {
   DemoChartInfoListResponse,
   Domain,
   DomainCount,
+  DomainInfo,
   DomainInfoResponse,
-  ParticipantDemographics, SurveyCount, SurveysResponse
+  ParticipantDemographics,
+  SurveyCount,
+  SurveyModule,
+  SurveysResponse
 } from 'generated/fetch';
-import {DomainStubVariables, SurveyStubVariables} from 'testing/stubs/concepts-api-stub';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 import {SurveyVersionListResponse} from '../../generated/fetch';
+
+export class SurveyStubVariables {
+  static STUB_SURVEYS: SurveyModule[] = [
+    {
+      conceptId: 1,
+      name: 'The Basics',
+      description: 'Basis description',
+      questionCount: 101,
+      participantCount: 200,
+      orderNumber: 1
+    },
+    {
+      conceptId: 2,
+      name: 'Overall Health',
+      description: 'Overall Health description',
+      questionCount: 102,
+      participantCount: 300,
+      orderNumber: 2
+    },
+    {
+      conceptId: 3,
+      name: 'LifeStyle',
+      description: 'Lifestyle description',
+      questionCount: 103,
+      participantCount: 300,
+      orderNumber: 3
+    }
+  ];
+}
+
+export class DomainStubVariables {
+  static STUB_DOMAINS: DomainInfo[] = [
+    {
+      domain: Domain.CONDITION,
+      name: 'Condition',
+      description: 'The Conditions Stub',
+      standardConceptCount: 1,
+      allConceptCount: 2,
+      participantCount: 30
+    },
+    {
+      domain: Domain.MEASUREMENT,
+      name: 'Measurement',
+      description: 'The Measurements Stub',
+      standardConceptCount: 50,
+      allConceptCount: 65,
+      participantCount: 200
+    },
+  ];
+}
+
+export class DomainCountStubVariables {
+  static STUB_DOMAIN_COUNTS: DomainCount[] = [
+    {
+      domain: Domain.CONDITION,
+      name: 'Condition',
+      conceptCount: 2
+    }, {
+      domain: Domain.MEASUREMENT,
+      name: 'Measurement',
+      conceptCount: 1
+    }, {
+      domain: Domain.DRUG,
+      name: 'Drug',
+      conceptCount: 2
+    }
+  ];
+}
 
 export const cohortStub = {
   name: 'Test Cohort',
