@@ -14,9 +14,6 @@ workspace:
       User ID of user who initially created this workspace.
   disseminate_research_other: |
       Description of user-defined research dissemination option.
-  free_tier_billing_usage: |
-      Free tier billing usage for this workspace, in USD. Free tier usage is
-      counted towards the quota of the workspace creator.
   last_accessed_time: |
       No longer in use. Column should be ignored.
   last_modified_time: |

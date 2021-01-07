@@ -4,4 +4,4 @@ workspace_free_tier_usage:
   workspace_id: |
     ID of the workspace associated with this free tier cost.
   cost: |
-    Free tier usage cost for this workspace.
+    Free tier usage cost for this workspace, in USD.
