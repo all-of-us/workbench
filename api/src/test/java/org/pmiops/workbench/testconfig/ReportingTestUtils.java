@@ -412,6 +412,7 @@ public class ReportingTestUtils {
         .datasetCohorts(new ArrayList<>())
         .institutions(new ArrayList<>())
         .users(new ArrayList<>())
-        .workspaces(new ArrayList<>());
+        .workspaces(new ArrayList<>())
+        .workspaceFreeTierUsage(new ArrayList<>());
   }
 }
