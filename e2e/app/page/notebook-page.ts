@@ -33,7 +33,7 @@ export enum Mode {
 }
 
 export enum KernelStatus {
-  notRunning = 'Kernel is not running',
+  NotRunning = 'Kernel is not running',
   Idle = 'Kernel Idle',
 }
 
@@ -48,10 +48,10 @@ export default class NotebookPage extends AuthenticatedPage {
     try {
       await this.findRunButton(120000);
     } catch (err) {
-      console.log(`Reloading "${this.documentTitle}" because cannot find the Run button`);
+      console.warn(`Reloading "${this.documentTitle}" because cannot find the Run button`);
       await this.page.reload({waitUntil: ['networkidle0', 'load']});
     }
-    await this.waitForKernelIdle(180000); // 3 minutes
+    await this.waitForKernelIdle(300000); // 5 minutes
     return true;
   }
 
@@ -124,12 +124,12 @@ export default class NotebookPage extends AuthenticatedPage {
         frame.waitForSelector(mathJaxMessage, {hidden: true, timeout: timeOut}),
       ]);
     } catch (e) {
-      console.error(`Notebook kernel is: ${await this.kernelStatus()}`);
+      console.error(`Notebook kernel is: ${await this.getKernelStatus()}`);
       throw new Error(`waitForKernelIdle encountered ${e}`);
     }
   }
 
-  async kernelStatus(): Promise<KernelStatus | string> {
+  async getKernelStatus(): Promise<KernelStatus | string> {
     const frame = await this.getIFrame();
     const elemt = await frame.waitForSelector(CssSelector.kernelIcon, {visible: true});
     const value = await getPropValue<string>(elemt, 'title');
