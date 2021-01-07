@@ -5,7 +5,6 @@ import static junit.framework.TestCase.fail;
 import static org.mockito.Mockito.when;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -30,7 +29,6 @@ import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
@@ -159,8 +157,6 @@ public class CohortsControllerTest {
           .prevalence(0.4F)
           .conceptSynonyms(new ArrayList<>());
 
-  private static final DbConcept CONCEPT_1 = makeConcept(CLIENT_CONCEPT_1);
-  private static final DbConcept CONCEPT_2 = makeConcept(CLIENT_CONCEPT_2);
   private static DbUser currentUser;
 
   @Autowired WorkspacesController workspacesController;
@@ -270,7 +266,7 @@ public class CohortsControllerTest {
   }
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     testMockFactory = new TestMockFactory();
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);
     testMockFactory.stubCreateFcWorkspace(fireCloudService);
@@ -551,7 +547,7 @@ public class CohortsControllerTest {
   }
 
   @Test(expected = NotFoundException.class)
-  public void testMaterializeCohortWorkspaceNotFound() throws Exception {
+  public void testMaterializeCohortWorkspaceNotFound() {
     Cohort cohort = createDefaultCohort();
     cohort =
         cohortsController
@@ -572,7 +568,7 @@ public class CohortsControllerTest {
   }
 
   @Test(expected = NotFoundException.class)
-  public void testMaterializeCohortCdrVersionNotFound() throws Exception {
+  public void testMaterializeCohortCdrVersionNotFound() {
     Cohort cohort = createDefaultCohort();
     cohort =
         cohortsController
@@ -586,7 +582,7 @@ public class CohortsControllerTest {
   }
 
   @Test(expected = NotFoundException.class)
-  public void testMaterializeCohortCohortNotFound() throws Exception {
+  public void testMaterializeCohortCohortNotFound() {
     Cohort cohort = createDefaultCohort();
     cohort =
         cohortsController
@@ -599,7 +595,7 @@ public class CohortsControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void testMaterializeCohortNoSpecOrCohortName() throws Exception {
+  public void testMaterializeCohortNoSpecOrCohortName() {
     Cohort cohort = createDefaultCohort();
     cohort =
         cohortsController
@@ -611,7 +607,7 @@ public class CohortsControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void testMaterializeCohortPageSizeTooSmall() throws Exception {
+  public void testMaterializeCohortPageSizeTooSmall() {
     Cohort cohort = createDefaultCohort();
     cohort =
         cohortsController
@@ -625,7 +621,7 @@ public class CohortsControllerTest {
   }
 
   @Test
-  public void testMaterializeCohortPageSizeZero() throws Exception {
+  public void testMaterializeCohortPageSizeZero() {
     Cohort cohort = createDefaultCohort();
     cohort =
         cohortsController
@@ -650,7 +646,7 @@ public class CohortsControllerTest {
   }
 
   @Test
-  public void testMaterializeCohortPageSizeTooLarge() throws Exception {
+  public void testMaterializeCohortPageSizeTooLarge() {
     Cohort cohort = createDefaultCohort();
     cohort =
         cohortsController
@@ -675,7 +671,7 @@ public class CohortsControllerTest {
   }
 
   @Test
-  public void testMaterializeCohortNamedCohort() throws Exception {
+  public void testMaterializeCohortNamedCohort() {
     Cohort cohort = createDefaultCohort();
     cohort =
         cohortsController
@@ -694,9 +690,7 @@ public class CohortsControllerTest {
   }
 
   @Test
-  public void testMaterializeCohortNamedCohortWithConceptSet() throws Exception {
-    conceptDao.save(CONCEPT_1);
-    conceptDao.save(CONCEPT_2);
+  public void testMaterializeCohortNamedCohortWithConceptSet() {
     Cohort cohort = createDefaultCohort();
     cohort =
         cohortsController
@@ -740,9 +734,7 @@ public class CohortsControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void testMaterializeCohortNamedCohortWithConceptSetWrongTable() throws Exception {
-    conceptDao.save(CONCEPT_1);
-    conceptDao.save(CONCEPT_2);
+  public void testMaterializeCohortNamedCohortWithConceptSetWrongTable() {
     Cohort cohort = createDefaultCohort();
     cohort =
         cohortsController
@@ -775,7 +767,7 @@ public class CohortsControllerTest {
   }
 
   @Test(expected = NotFoundException.class)
-  public void testMaterializeCohortNamedCohortWithConceptSetNotFound() throws Exception {
+  public void testMaterializeCohortNamedCohortWithConceptSetNotFound() {
     Cohort cohort = createDefaultCohort();
     cohort =
         cohortsController
@@ -790,7 +782,7 @@ public class CohortsControllerTest {
   }
 
   @Test
-  public void testMaterializeCohortNamedCohortWithReview() throws Exception {
+  public void testMaterializeCohortNamedCohortWithReview() {
     Cohort cohort = createDefaultCohort();
     cohort =
         cohortsController
@@ -817,7 +809,7 @@ public class CohortsControllerTest {
   }
 
   @Test
-  public void testMaterializeCohortWithSpec() throws Exception {
+  public void testMaterializeCohortWithSpec() {
     Cohort cohort = createDefaultCohort();
     cohort =
         cohortsController
@@ -837,7 +829,7 @@ public class CohortsControllerTest {
   }
 
   @Test
-  public void testMaterializeCohortWithEverything() throws Exception {
+  public void testMaterializeCohortWithEverything() {
     Cohort cohort = createDefaultCohort();
     cohort =
         cohortsController
@@ -860,25 +852,5 @@ public class CohortsControllerTest {
                 .materializeCohort(workspace.getNamespace(), WORKSPACE_NAME, request)
                 .getBody())
         .isEqualTo(response);
-  }
-
-  public static DbConcept makeConcept(Concept concept) {
-    DbConcept result = new DbConcept();
-    result.setConceptId(concept.getConceptId());
-    result.setConceptName(concept.getConceptName());
-    result.setStandardConcept(
-        concept.getStandardConcept() == null ? "" : (concept.getStandardConcept() ? "S" : ""));
-    result.setConceptCode(concept.getConceptCode());
-    result.setConceptClassId(concept.getConceptClassId());
-    result.setVocabularyId(concept.getVocabularyId());
-    result.setDomainId(concept.getDomainId());
-    result.setCountValue(concept.getCountValue());
-    result.setSourceCountValue(concept.getCountValue());
-    result.setPrevalence(concept.getPrevalence());
-    result.setSynonymsStr(
-        String.valueOf(concept.getConceptId())
-            + '|'
-            + Joiner.on("|").join(concept.getConceptSynonyms()));
-    return result;
   }
 }
