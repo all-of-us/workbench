@@ -116,8 +116,6 @@ public class WorkbenchConfig {
     // The docker image that we use for our jupyter images
     public String jupyterDockerImage;
     // The docker image that we use for our welder images
-    // TODO(RW-5098): Remove after next release.
-    @Deprecated public String welderDockerImage;
     // Base URL for the Shibboleth API server, e.g.
     // https://profile-dot-broad-shibboleth-prod.appspot.com
     // See RW-4257 for more details on Terra's Shibboleth-specific API.

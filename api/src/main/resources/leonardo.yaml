@@ -2598,13 +2598,6 @@ components:
           type: string
           enum: [GCR, DockerHub]
           description: The container registry from which to pull the latest version of welder.
-        welderDockerImage:
-          type: string
-          description: >
-            The Welder docker image to install. Only takes effect if the tool
-            being installed supports welder.
-
-            May be Dockerhub or GCR. If not set, then a default Welder image will be installed.
         scopes:
           type: array
           items:
@@ -2682,13 +2675,6 @@ components:
           type: string
           enum: [GCR, DockerHub]
           description: The container registry from which to pull the latest version of welder.
-        welderDockerImage:
-          type: string
-          description: >
-            The Welder docker image to install. Only takes effect if the tool
-            being installed supports welder.
-
-            May be Dockerhub or GCR. If not set, then a default Welder image will be installed.
         scopes:
           type: array
           items:
