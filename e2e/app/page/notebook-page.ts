@@ -33,7 +33,7 @@ export enum Mode {
 }
 
 export enum KernelStatus {
-  notRunning = 'Kernel is not running',
+  NotRunning = 'Kernel is not running',
   Idle = 'Kernel Idle',
 }
 
@@ -48,7 +48,7 @@ export default class NotebookPage extends AuthenticatedPage {
     try {
       await this.findRunButton(120000);
     } catch (err) {
-      console.log(`Reloading "${this.documentTitle}" because cannot find the Run button`);
+      console.warn(`Reloading "${this.documentTitle}" because cannot find the Run button`);
       await this.page.reload({waitUntil: ['networkidle0', 'load']});
     }
     await this.waitForKernelIdle(300000); // 5 minutes
