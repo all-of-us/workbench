@@ -375,8 +375,8 @@ public class CohortsControllerTest {
     return criteria;
   }
 
-  private void stubGetWorkspace(String ns, String name, String creator, WorkspaceAccessLevel access)
-      throws Exception {
+  private void stubGetWorkspace(
+      String ns, String name, String creator, WorkspaceAccessLevel access) {
     FirecloudWorkspace fcWorkspace = new FirecloudWorkspace();
     fcWorkspace.setNamespace(ns);
     fcWorkspace.setName(name);
