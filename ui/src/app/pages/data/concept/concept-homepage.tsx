@@ -248,14 +248,15 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
     }
 
     clearSearch() {
+      currentConceptStore.next(null);
+      currentCohortSearchContextStore.next(undefined);
       this.setState({
         currentInputString: '',
         currentSearchString: '',
+        loadingDomains: true,
         inputErrors: [],
         showSearchError: false,
-      });
-      currentConceptStore.next(null);
-      this.setState({loadingDomains: true}, () => this.loadDomainsAndSurveys());
+      }, () => this.loadDomainsAndSurveys());
     }
 
     browseDomain(domain: Domain, surveyName?: string) {
