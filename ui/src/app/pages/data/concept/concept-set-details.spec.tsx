@@ -4,9 +4,8 @@ import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
-import {ConceptsApi, ConceptSet, ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
+import {ConceptSet, ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
-import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
 import {workspaceDataStub, WorkspacesApiStub, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
 
 import {ConceptSetDetails} from 'app/pages/data/concept/concept-set-details';
@@ -18,7 +17,6 @@ describe('ConceptSetDetails', () => {
   beforeEach(() => {
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
-    registerApiClient(ConceptsApi, new ConceptsApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
     conceptSet = ConceptSetsApiStub.stubConceptSets()[0];
     urlParamsStore.next({
