@@ -124,12 +124,12 @@ export default class NotebookPage extends AuthenticatedPage {
         frame.waitForSelector(mathJaxMessage, {hidden: true, timeout: timeOut}),
       ]);
     } catch (e) {
-      console.error(`Notebook kernel is: ${await this.kernelStatus()}`);
+      console.error(`Notebook kernel is: ${await this.getKernelStatus()}`);
       throw new Error(`waitForKernelIdle encountered ${e}`);
     }
   }
 
-  async kernelStatus(): Promise<KernelStatus | string> {
+  async getKernelStatus(): Promise<KernelStatus | string> {
     const frame = await this.getIFrame();
     const elemt = await frame.waitForSelector(CssSelector.kernelIcon, {visible: true});
     const value = await getPropValue<string>(elemt, 'title');
