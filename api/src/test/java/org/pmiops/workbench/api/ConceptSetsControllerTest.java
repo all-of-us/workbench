@@ -363,37 +363,22 @@ public class ConceptSetsControllerTest {
     assertThat(conceptSet.getEtag()).isEqualTo(Etags.fromVersion(1));
     assertThat(conceptSet.getLastModifiedTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(conceptSet.getName()).isEqualTo("concept set 1");
-    assertThat(conceptSet.getParticipantCount()).isEqualTo(0);
-
-    assertThat(
-            conceptSetsController
-                .getConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId())
-                .getBody())
-        .isEqualTo(conceptSet);
-    // Get concept sets will not return the full information, because concepts can have a lot of
-    // information.
-    assertThat(
-            conceptSetsController
-                .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
-                .getBody()
-                .getItems())
-        .contains(conceptSet);
-    assertThat(
-            conceptSetsController
-                .getConceptSetsInWorkspace(workspace2.getNamespace(), WORKSPACE_NAME_2)
-                .getBody()
-                .getItems())
-        .isEmpty();
   }
 
   @Test
-  public void testGetSurveyConceptSet() {
+  public void testGetConceptSet() {
     ConceptSet surveyConceptSet = makeSurveyConceptSet1();
+    surveyConceptSet.setParticipantCount(0);
     assertThat(
             conceptSetsController
                 .getConceptSet(workspace.getNamespace(), WORKSPACE_NAME, surveyConceptSet.getId())
                 .getBody())
         .isEqualTo(surveyConceptSet);
+  }
+
+  @Test
+  public void testGetConceptSetsInWorkspace() {
+    ConceptSet surveyConceptSet = makeSurveyConceptSet1();
     assertThat(
             conceptSetsController
                 .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
@@ -412,30 +397,6 @@ public class ConceptSetsControllerTest {
   public void testGetSurveyConceptSetWrongConceptId() {
     makeSurveyConceptSet1();
     conceptSetsController.getConceptSet(workspace2.getNamespace(), WORKSPACE_NAME_2, 99L);
-  }
-
-  @Test
-  public void testGetConceptSet() {
-    ConceptSet conceptSet = makeConceptSet1();
-    assertThat(
-            conceptSetsController
-                .getConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId())
-                .getBody())
-        .isEqualTo(conceptSet);
-    // Get concept sets will not return the full information, because concepts can have a lot of
-    // information.
-    assertThat(
-            conceptSetsController
-                .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
-                .getBody()
-                .getItems())
-        .contains(conceptSet);
-    assertThat(
-            conceptSetsController
-                .getConceptSetsInWorkspace(workspace2.getNamespace(), WORKSPACE_NAME_2)
-                .getBody()
-                .getItems())
-        .isEmpty();
   }
 
   @Test(expected = NotFoundException.class)
@@ -464,28 +425,7 @@ public class ConceptSetsControllerTest {
     assertThat(updatedConceptSet.getDomain()).isEqualTo(Domain.CONDITION);
     assertThat(updatedConceptSet.getEtag()).isEqualTo(Etags.fromVersion(2));
     assertThat(updatedConceptSet.getLastModifiedTime()).isEqualTo(newInstant.toEpochMilli());
-    assertThat(updatedConceptSet.getParticipantCount()).isEqualTo(0);
     assertThat(conceptSet.getName()).isEqualTo("new name");
-
-    assertThat(
-            conceptSetsController
-                .getConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId())
-                .getBody())
-        .isEqualTo(updatedConceptSet);
-    // Get concept sets will not return the full information, because concepts can have a lot of
-    // information.
-    assertThat(
-            conceptSetsController
-                .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
-                .getBody()
-                .getItems())
-        .contains(updatedConceptSet);
-    assertThat(
-            conceptSetsController
-                .getConceptSetsInWorkspace(workspace2.getNamespace(), WORKSPACE_NAME_2)
-                .getBody()
-                .getItems())
-        .isEmpty();
   }
 
   @Test(expected = ConflictException.class)
@@ -542,7 +482,6 @@ public class ConceptSetsControllerTest {
     assertThat(updated.getCriteriums().get(0).getConceptId())
         .isEqualTo(CLIENT_CRITERIA_1.getConceptId());
     assertThat(updated.getEtag()).isNotEqualTo(conceptSet.getEtag());
-    assertThat(updated.getParticipantCount()).isEqualTo(246);
 
     ConceptSet removed =
         conceptSetsController
@@ -555,7 +494,6 @@ public class ConceptSetsControllerTest {
     assertThat(removed.getCriteriums()).hasSize(1);
     assertThat(removed.getEtag()).isNotEqualTo(conceptSet.getEtag());
     assertThat(removed.getEtag()).isNotEqualTo(updated.getEtag());
-    assertThat(removed.getParticipantCount()).isEqualTo(123);
   }
 
   @Test
@@ -604,7 +542,6 @@ public class ConceptSetsControllerTest {
     assertThat(updated.getCriteriums().get(2).getConceptId())
         .isEqualTo(CLIENT_CRITERIA_3.getConceptId());
     assertThat(updated.getEtag()).isNotEqualTo(conceptSet.getEtag());
-    assertThat(updated.getParticipantCount()).isEqualTo(456);
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION, "condition_occurrence", ImmutableSet.of(dbConceptSetConceptId1)))
@@ -625,7 +562,6 @@ public class ConceptSetsControllerTest {
         .isEqualTo(CLIENT_CRITERIA_1.getConceptId());
     assertThat(removed.getEtag()).isNotEqualTo(conceptSet.getEtag());
     assertThat(removed.getEtag()).isNotEqualTo(updated.getEtag());
-    assertThat(removed.getParticipantCount()).isEqualTo(123);
   }
 
   @Test
@@ -664,7 +600,6 @@ public class ConceptSetsControllerTest {
         .isEqualTo(CLIENT_CRITERIA_4.getConceptId());
     assertThat(conceptSet.getCriteriums().get(2).getConceptId())
         .isEqualTo(CLIENT_CRITERIA_3.getConceptId());
-    assertThat(conceptSet.getParticipantCount()).isEqualTo(456);
   }
 
   @Test(expected = ConflictException.class)
