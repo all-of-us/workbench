@@ -195,8 +195,13 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   @Override
   public void updateRuntime(Runtime runtime) {
-    // TODO: Apply labels on updateRuntime,
-    // https://precisionmedicineinitiative.atlassian.net/browse/RW-5852
+    Map<String, String> runtimeLabels = new HashMap<>();
+    if (runtime.getConfigurationType() != null) {
+      runtimeLabels.put(
+          LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG,
+          LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
+              runtime.getConfigurationType()));
+    }
 
     leonardoRetryHandler.run(
         (context) -> {
@@ -207,9 +212,9 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                   runtime.getRuntimeName(),
                   new LeonardoUpdateRuntimeRequest()
                       .allowStop(true)
-                      .runtimeConfig(
-                          buildRuntimeConfig(
-                              runtime, userProvider.get().getClusterConfigDefault())));
+                      .runtimeConfig(buildRuntimeConfig(runtime, userProvider.get().getClusterConfigDefault()))
+                      .labelsToUpsert(runtimeLabels)
+              );
           return null;
         });
   }
