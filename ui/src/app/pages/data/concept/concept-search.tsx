@@ -164,6 +164,7 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
     componentWillUnmount() {
       localStorage.removeItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS);
       currentConceptStore.next([]);
+      currentConceptSetStore.next(undefined);
       this.subscription.unsubscribe();
     }
 
@@ -181,18 +182,12 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
       const {urlParams: {ns, wsid, csid}} = this.props;
       try {
         const resp = await conceptSetsApi().getConceptSet(ns, wsid, csid);
-        this.setState({conceptSet: resp, editName: resp.name,
-          editDescription: resp.description, loading: false});
-        currentConceptSetStore.next(JSON.parse(JSON.stringify(resp)));
         if (resp.domain === Domain.SURVEY) {
-          const surveyParentList = resp.criteriums.filter((survey) => {
-            return survey.parentCount !== 0;
-          });
-          this.setState({conceptSet: resp});
-          currentConceptStore.next(surveyParentList);
-        } else {
-          currentConceptStore.next(resp.criteriums);
+          resp.criteriums = resp.criteriums.filter((survey) => survey.parentCount !== 0);
         }
+        this.setState({conceptSet: resp, editName: resp.name, editDescription: resp.description, loading: false});
+        currentConceptSetStore.next(JSON.parse(JSON.stringify(resp)));
+        currentConceptStore.next(resp.criteriums);
       } catch (error) {
         console.log(error);
         // TODO: what do we do with resources not found?  Currently we just have an endless spinner
