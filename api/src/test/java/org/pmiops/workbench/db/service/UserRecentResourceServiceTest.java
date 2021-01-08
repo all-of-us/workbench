@@ -1,8 +1,5 @@
 package org.pmiops.workbench.db.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import com.google.common.collect.ImmutableSet;
 import java.time.Clock;
 import java.time.Instant;
@@ -32,6 +29,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import static com.google.common.truth.Truth.assertThat;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -85,6 +84,7 @@ public class UserRecentResourceServiceTest {
     userRecentResourceService.updateCohortEntry(
         workspace.getWorkspaceId(), user.getUserId(), cohort.getCohortId());
     long rowsCount = userRecentResourceDao.count();
+    assertThat(rowsCount).isEqualTo(1);
     assertEquals(rowsCount, 1);
 
     DbCohort newCohort = new DbCohort();

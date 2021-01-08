@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.atLeastOnce;
@@ -525,7 +524,7 @@ public class CohortReviewControllerTest {
           .getBody();
       fail("Should have thrown NotFoundException!");
     } catch (NotFoundException nfe) {
-      assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, nfe.getMessage());
+      assertThat(nfe.getMessage()).isEqualTo("Not Found: No Cohort exists for cohortId: " + cohortId);
     }
   }
 
@@ -873,14 +872,13 @@ public class CohortReviewControllerTest {
               new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1"))
           .getBody();
     } catch (NotFoundException nfe) {
-      assertEquals(
-          "Not Found: Participant Cohort Annotation does not exist for annotationId: "
+      assertThat(nfe.getMessage()).isEqualTo(
+              "Not Found: Participant Cohort Annotation does not exist for annotationId: "
               + badAnnotationId
               + ", cohortReviewId: "
               + cohortReview.getCohortReviewId()
               + ", participantId: "
-              + participantCohortStatus1.getParticipantKey().getParticipantId(),
-          nfe.getMessage());
+              + participantCohortStatus1.getParticipantKey().getParticipantId());
     }
   }
 

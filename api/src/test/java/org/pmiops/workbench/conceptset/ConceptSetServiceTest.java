@@ -1,8 +1,5 @@
 package org.pmiops.workbench.conceptset;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import java.time.Clock;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,6 +26,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import static com.google.common.truth.Truth.assertThat;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -57,9 +56,10 @@ public class ConceptSetServiceTest {
     DbConceptSet fromConceptSet = mockConceptSet();
     DbConceptSet copiedConceptSet =
         conceptSetService.cloneConceptSetAndConceptIds(fromConceptSet, mockDbWorkspace, false);
-    assertNotNull(copiedConceptSet);
-    assertEquals(copiedConceptSet.getConceptSetConceptIds().size(), 5);
-    assertEquals(copiedConceptSet.getWorkspaceId(), mockDbWorkspace.getWorkspaceId());
+    assertThat(copiedConceptSet).isNotNull();
+    assertThat(copiedConceptSet.getConceptSetConceptIds().size()).isEqualTo(5);
+    assertThat(copiedConceptSet.getWorkspaceId()).isEqualTo(mockDbWorkspace.getWorkspaceId());
+    assertThat(copiedConceptSet).isNotNull();
   }
 
   private DbConceptSet mockConceptSet() {
