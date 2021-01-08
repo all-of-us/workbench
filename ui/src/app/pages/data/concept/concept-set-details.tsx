@@ -4,7 +4,6 @@ import * as React from 'react';
 import * as validate from 'validate.js';
 
 import {Button, Clickable, MenuItem} from 'app/components/buttons';
-import {SlidingFabReact} from 'app/components/buttons';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FadeBox} from 'app/components/containers';
 import {CopyModal} from 'app/components/copy-modal';
@@ -33,11 +32,10 @@ import {
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {
-  Concept,
   ConceptSet,
   CopyRequest,
   Domain,
-  ResourceType, UpdateConceptSetRequest,
+  ResourceType,
   WorkspaceAccessLevel
 } from 'generated/fetch';
 
@@ -121,9 +119,6 @@ export interface ConceptSetDetailsState {
   error: boolean;
   errorMessage: string;
   loading: boolean;
-  removingConcepts: boolean;
-  removeSubmitting: boolean;
-  selectedConcepts: Concept[];
 }
 
 export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace())(
@@ -142,9 +137,6 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
         errorMessage: '',
         deleting: false,
         loading: true,
-        removingConcepts: false,
-        removeSubmitting: false,
-        selectedConcepts: []
       };
     }
 
@@ -210,25 +202,6 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
       }
     }
 
-    async onRemoveConcepts() {
-      const {urlParams: {ns, wsid, csid}} = this.props;
-      const {selectedConcepts, conceptSet} = this.state;
-      this.setState({removeSubmitting: true});
-      try {
-        const updateConceptSetReq: UpdateConceptSetRequest = {
-          etag: conceptSet.etag,
-          removedConceptSetConceptIds: selectedConcepts.map(c => ({conceptId: c.conceptId, standard: true}))
-        };
-        const updatedSet = await conceptSetsApi().updateConceptSetConcepts(ns, wsid, csid, updateConceptSetReq);
-        this.setState({conceptSet: updatedSet, selectedConcepts: []});
-      } catch (error) {
-        console.log(error);
-        this.setState({error: true, errorMessage: 'Could not delete concepts.'});
-      } finally {
-        this.setState({removeSubmitting: false, removingConcepts: false});
-      }
-    }
-
     async onDeleteConceptSet() {
       const {urlParams: {ns, wsid, csid}} = this.props;
       try {
@@ -242,10 +215,6 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
       }
     }
 
-    get selectedConceptsCount(): number {
-      return !!this.state.selectedConcepts ? this.state.selectedConcepts.length : 0;
-    }
-
     get conceptSetConceptsCount(): number {
       return !!this.state.conceptSet && this.state.conceptSet.criteriums ? this.state.conceptSet.criteriums.length : 0;
     }
@@ -257,8 +226,7 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
 
     render() {
       const {workspace} = this.props;
-      const {copying, conceptSet, removingConcepts, editing, editDescription, editName, error, errorMessage, editSaving, deleting,
-        removeSubmitting, loading} = this.state;
+      const {copying, conceptSet, editing, editDescription, editName, error, errorMessage, editSaving, deleting, loading} = this.state;
       const errors = validate({editName: editName}, {editName: {
         presence: {allowEmpty: false}
       }});
@@ -338,16 +306,6 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
               <Button style={{width: '6.5rem', alignSelf: 'flex-end', marginBottom: '2rem'}}
                       onClick={() => setSidebarActiveIconStore.next('concept')}>Finish & Review</Button>
             </React.Fragment>}
-            {WorkspacePermissionsUtil.canWrite(workspace.accessLevel) &&
-                this.selectedConceptsCount > 0 &&
-                <SlidingFabReact submitFunction={() => this.setState({removingConcepts: true})}
-                               iconShape='trash' expanded='Remove from set'
-                               tooltip={this.conceptSetConceptsCount === this.selectedConceptsCount}
-                               tooltipContent={
-                                 <div>Concept Sets must include at least one concept</div>}
-                               disable={!WorkspacePermissionsUtil.canWrite(workspace.accessLevel) ||
-                                 this.selectedConceptsCount === 0 ||
-                               this.conceptSetConceptsCount === this.selectedConceptsCount}/>}
           </FlexColumn>}
           {!loading && deleting &&
           <ConfirmDeleteModal closeFunction={() => this.setState({deleting: false})}
@@ -361,18 +319,6 @@ export const ConceptSetDetails = fp.flow(withUrlParams(), withCurrentWorkspace()
                           onClick={() =>
                             this.setState({error: false})}>Close</Button>
               </ModalFooter>
-          </Modal>}
-          {removingConcepts && <Modal loading={removeSubmitting}>
-            <ModalTitle>Are you sure you want to remove {this.selectedConceptsCount}
-            {this.selectedConceptsCount > 1 ? ' concepts' : ' concept'} from this set?</ModalTitle>
-            <ModalFooter>
-                <Button type='secondary' style={{marginRight: '0.5rem'}} disabled={removeSubmitting}
-                        onClick={() => this.setState({removingConcepts: false})}>
-                    Cancel</Button>
-                <Button type='primary' onClick={() => this.onRemoveConcepts()}
-                        disabled={removeSubmitting} data-test-id='confirm-remove-concept'>
-                    Remove concepts</Button>
-            </ModalFooter>
           </Modal>}
           {copying && <CopyModal
             fromWorkspaceNamespace={workspace.namespace}

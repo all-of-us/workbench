@@ -18,7 +18,6 @@ import {triggerEvent} from 'app/utils/analytics';
 import {
   attributesSelectionStore,
   currentCohortSearchContextStore,
-  currentConceptStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
