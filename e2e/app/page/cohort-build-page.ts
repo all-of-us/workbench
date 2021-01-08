@@ -71,8 +71,6 @@ export default class CohortBuildPage extends AuthenticatedPage {
   }
 
   async deleteCohort(): Promise<string[]> {
-    const saveButton = this.getSaveCohortButton();
-    await saveButton.waitUntilEnabled();
     await this.getDeleteButton().then(b => b.click());
     return this.deleteConfirmationDialog();
   }
