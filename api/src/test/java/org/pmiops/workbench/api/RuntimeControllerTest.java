@@ -1023,6 +1023,13 @@ public class RuntimeControllerTest {
         .isEqualTo(dataprocConfig.getMasterMachineType());
     assertThat(actualRuntimeConfig.getMasterDiskSize())
         .isEqualTo(dataprocConfig.getMasterDiskSize());
+
+    assertThat(updateRuntimeRequestCaptor.getValue().getLabelsToUpsert())
+        .isEqualTo(
+            Collections.singletonMap(
+                LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG,
+                LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
+                    RuntimeConfigurationType.USEROVERRIDE)));
   }
 
   @Test

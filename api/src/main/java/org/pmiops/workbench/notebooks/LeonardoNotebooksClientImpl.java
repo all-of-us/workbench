@@ -1,5 +1,6 @@
 package org.pmiops.workbench.notebooks;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -212,14 +213,14 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   private Map<String, String> buildRuntimeConfigurationLabels(
       RuntimeConfigurationType runtimeConfigurationType) {
-    Map<String, String> runtimeLabels = new HashMap<>();
     if (runtimeConfigurationType != null) {
-      runtimeLabels.put(
+      return Collections.singletonMap(
           LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG,
           LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
               runtimeConfigurationType));
+    } else {
+      return new HashMap<>();
     }
-    return runtimeLabels;
   }
 
   @Override
