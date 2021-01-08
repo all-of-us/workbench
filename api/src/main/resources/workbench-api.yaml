@@ -5844,10 +5844,11 @@ definitions:
   EgressEventRequest:
     type: object
     properties:
-      eventsJsonArray:
-        type: string
-        description: 'A JSON string containing an array of JSON-encoded egress events.
-          See the EgressEvent definition for the expected schema of each event.'
+      egressEvents:
+        type: array
+        items:
+          $ref: '#/definitions/EgressEvent'
+    description: 'List of EgressEvent.'
   EgressEvent:
     type: object
     properties:
