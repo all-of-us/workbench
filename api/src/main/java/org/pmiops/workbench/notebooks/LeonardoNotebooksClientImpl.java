@@ -1,5 +1,6 @@
 package org.pmiops.workbench.notebooks;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.Runtime;
+import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
@@ -106,12 +108,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     runtimeLabels.put(LeonardoMapper.RUNTIME_LABEL_AOU, "true");
     runtimeLabels.put(LeonardoMapper.RUNTIME_LABEL_CREATED_BY, userEmail);
 
-    if (runtime.getConfigurationType() != null) {
-      runtimeLabels.put(
-          LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG,
-          LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
-              runtime.getConfigurationType()));
-    }
+    runtimeLabels.putAll(buildRuntimeConfigurationLabels(runtime.getConfigurationType()));
 
     LeonardoCreateRuntimeRequest request =
         new LeonardoCreateRuntimeRequest()
@@ -195,8 +192,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   @Override
   public void updateRuntime(Runtime runtime) {
-    // TODO: Apply labels on updateRuntime,
-    // https://precisionmedicineinitiative.atlassian.net/browse/RW-5852
+    Map<String, String> runtimeLabels =
+        buildRuntimeConfigurationLabels(runtime.getConfigurationType());
 
     leonardoRetryHandler.run(
         (context) -> {
@@ -208,10 +205,22 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                   new LeonardoUpdateRuntimeRequest()
                       .allowStop(true)
                       .runtimeConfig(
-                          buildRuntimeConfig(
-                              runtime, userProvider.get().getClusterConfigDefault())));
+                          buildRuntimeConfig(runtime, userProvider.get().getClusterConfigDefault()))
+                      .labelsToUpsert(runtimeLabels));
           return null;
         });
+  }
+
+  private Map<String, String> buildRuntimeConfigurationLabels(
+      RuntimeConfigurationType runtimeConfigurationType) {
+    if (runtimeConfigurationType != null) {
+      return Collections.singletonMap(
+          LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG,
+          LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
+              runtimeConfigurationType));
+    } else {
+      return new HashMap<>();
+    }
   }
 
   @Override
