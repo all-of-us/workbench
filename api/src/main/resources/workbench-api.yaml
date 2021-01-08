@@ -5850,6 +5850,12 @@ definitions:
           See the EgressEvent definition for the expected schema of each event.'
   EgressEvent:
     type: object
+    required:
+      - environment
+      - time_window_duration
+      - time_window_start
+      - egress_mib
+      - egress_mib_threshold
     properties:
       environment:
         description: The AoU environment in which the high-egress event occurred.
