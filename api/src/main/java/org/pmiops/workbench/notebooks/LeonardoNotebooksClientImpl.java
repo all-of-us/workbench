@@ -212,9 +212,9 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                   runtime.getRuntimeName(),
                   new LeonardoUpdateRuntimeRequest()
                       .allowStop(true)
-                      .runtimeConfig(buildRuntimeConfig(runtime, userProvider.get().getClusterConfigDefault()))
-                      .labelsToUpsert(runtimeLabels)
-              );
+                      .runtimeConfig(
+                          buildRuntimeConfig(runtime, userProvider.get().getClusterConfigDefault()))
+                      .labelsToUpsert(runtimeLabels));
           return null;
         });
   }
