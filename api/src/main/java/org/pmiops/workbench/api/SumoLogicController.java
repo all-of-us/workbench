@@ -56,7 +56,8 @@ public class SumoLogicController implements SumoLogicApiDelegate {
     ObjectMapper mapper = new ObjectMapper();
     EgressEvent[] events;
     try {
-      // Try to deserialize input with default ObjectMapper configuration. If failed to deserialize, log it then
+      // Try to deserialize input with default ObjectMapper configuration. If failed to deserialize,
+      // log it then
       // disable unknown properties restriction and try again.
       // The "eventsJsonArray" field is a JSON-formatted array of EgressEvent JSON objects. Parse
       // this out so we can work with each event as a model object.
@@ -65,7 +66,7 @@ public class SumoLogicController implements SumoLogicApiDelegate {
       log.log(
           Level.WARNING,
           String.format(
-              "Failed to parse SumoLogic egress event JSON: %s. Disable unknown properties restriction and try again...",
+              "Failed to parse SumoLogic egress event JSON: %s. Disabling unknown properties restriction and trying again...",
               request.getEventsJsonArray()),
           e);
       mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
