@@ -5851,11 +5851,8 @@ definitions:
   EgressEvent:
     type: object
     required:
-      - environment
-      - time_window_duration
-      - time_window_start
-      - egress_mib
-      - egress_mib_threshold
+      - project_name
+      - vm_prefix
     properties:
       environment:
         description: The AoU environment in which the high-egress event occurred.

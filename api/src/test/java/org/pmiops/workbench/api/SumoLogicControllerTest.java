@@ -107,4 +107,13 @@ public class SumoLogicControllerTest {
     sumoLogicController.logEgressEvent(API_KEY, request);
     verify(mockEgressEventService, times(2)).handleEvent(any());
   }
+
+  @Test
+  public void testLogsRequestParsingSuccess_ignoreUnknownField() throws Exception {
+    ObjectMapper mapper = new ObjectMapper();
+    String test = "[{\"project_name\":\"test123\", \"random_stuff\":\"foo\"}]";
+    request.setEventsJsonArray(mapper.writeValueAsString(test));
+    sumoLogicController.logEgressEvent(API_KEY, request);
+    verify(mockEgressEventService).handleEvent(any());
+  }
 }
