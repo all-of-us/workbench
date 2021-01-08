@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 import java.io.IOException;
@@ -54,7 +55,7 @@ public class SumoLogicController implements SumoLogicApiDelegate {
     try {
       // The "eventsJsonArray" field is a JSON-formatted array of EgressEvent JSON objects. Parse
       // this out so we can work with each event as a model object.
-      ObjectMapper mapper = new ObjectMapper();
+      ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       EgressEvent[] events = mapper.readValue(request.getEventsJsonArray(), EgressEvent[].class);
       Arrays.stream(events).forEach(egressEventService::handleEvent);
       return ResponseEntity.noContent().build();
