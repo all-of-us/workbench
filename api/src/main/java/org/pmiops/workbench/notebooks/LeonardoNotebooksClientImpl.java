@@ -191,7 +191,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   @Override
   public void updateRuntime(Runtime runtime) {
-    Map<String, String> runtimeLabels = buildRuntimeConfigurationLabels(runtime.getConfigurationType());
+    Map<String, String> runtimeLabels =
+        buildRuntimeConfigurationLabels(runtime.getConfigurationType());
 
     leonardoRetryHandler.run(
         (context) -> {
@@ -209,7 +210,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
         });
   }
 
-  private Map<String, String> buildRuntimeConfigurationLabels(RuntimeConfigurationType runtimeConfigurationType) {
+  private Map<String, String> buildRuntimeConfigurationLabels(
+      RuntimeConfigurationType runtimeConfigurationType) {
     Map<String, String> runtimeLabels = new HashMap<>();
     if (runtimeConfigurationType != null) {
       runtimeLabels.put(
