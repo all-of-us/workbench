@@ -26,6 +26,7 @@ import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.ColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetCohortColumnValueExtractor;
@@ -36,6 +37,7 @@ import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransform
 import org.pmiops.workbench.reporting.insertion.InstitutionColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.WorkspaceFreeTierUsageColumnValueExtractor;
 import org.pmiops.workbench.utils.LogFormatters;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +58,8 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
       UserColumnValueExtractor::values;
   private static final InsertAllRequestPayloadTransformer<ReportingWorkspace>
       workspaceRequestBuilder = WorkspaceColumnValueExtractor::values;
+  private static final InsertAllRequestPayloadTransformer<ReportingWorkspaceFreeTierUsage>
+      workspaceFreeTierUsageRequestBuilder = WorkspaceFreeTierUsageColumnValueExtractor::values;
   private static final InsertAllRequestPayloadTransformer<ReportingDataset> datasetRequestBuilder =
       DatasetColumnValueExtractor::values;
 
@@ -171,6 +175,12 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
         workspaceRequestBuilder.buildBatchedRequests(
             getTableId(WorkspaceColumnValueExtractor.class),
             reportingSnapshot.getWorkspaces(),
+            fixedValues,
+            batchSize));
+    resultBuilder.addAll(
+        workspaceFreeTierUsageRequestBuilder.buildBatchedRequests(
+            getTableId(WorkspaceFreeTierUsageColumnValueExtractor.class),
+            reportingSnapshot.getWorkspaceFreeTierUsage(),
             fixedValues,
             batchSize));
     return resultBuilder.build().stream()

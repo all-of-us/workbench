@@ -8081,6 +8081,10 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ReportingWorkspace"
+      workspaceFreeTierUsage:
+        type: array
+        items:
+          "$ref": "#/definitions/ReportingWorkspaceFreeTierUsage"
   ReportingUploadDetails:
     type: object
     properties:
@@ -8443,6 +8447,25 @@ definitions:
         description: |-
           Prirmary key of the workspace table in Workrbench application database. Along with
           snapshot_timestamp, serves as a pseudo-primary key for this table.
+  ReportingWorkspaceFreeTierUsage:
+    x-aou-note: |-
+      This code was generated using reporting-wizard.rb at 2021-01-05T17:36:27-08:00.
+      Manual modification should be avoided if possible as this is a one-time generation
+      and does not run on every build and updates must be merged manually for now.
+    type: object
+    properties:
+      cost:
+        type: number
+        format: double
+        description: Free tier usage cost for this workspace, in USD.
+      userId:
+        type: integer
+        format: int64
+        description: ID of the user whose free tier quota was billed for this workspace.
+      workspaceId:
+        type: integer
+        format: int64
+        description: ID of the workspace associated with this free tier cost.
   ReportingCohort:
     x-aou-note: |-
       This code was generated using reporting-wizard.rb at 2020-10-09T09:09:12-04:00.
