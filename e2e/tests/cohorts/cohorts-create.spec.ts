@@ -27,6 +27,7 @@ describe('User can create new Cohorts', () => {
    */
   test('Add Cohort of Physical Measurements BMI', async () => {
 
+
     const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
