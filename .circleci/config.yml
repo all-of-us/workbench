@@ -298,7 +298,7 @@ commands:
           name: Running Puppeteer e2e tests
           working_directory: ~/workbench/e2e
           command: |
-            circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings > /tmp/tests-to-run
+            circleci tests glob "tests/**/cohorts-create.spec.ts" | circleci tests split --split-by=timings > /tmp/tests-to-run
             yarn test:ci $(cat /tmp/tests-to-run)
           no_output_timeout: 15m
       - run:
