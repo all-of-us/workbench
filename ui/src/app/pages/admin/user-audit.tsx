@@ -23,9 +23,8 @@ const getNextAuditPath = (subject: string) => {
   return `/admin/user-audit/${subject}`;
 };
 
-// Single-user admin page isn't available yet, so go to the main users list page.
 const getAdminPageUrl = (subject: string) => {
-  return ['/admin/user'];
+  return [`/admin/users/${subject}`];
 };
 
 export const UserAudit = () => {
