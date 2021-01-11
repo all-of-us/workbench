@@ -931,7 +931,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     } catch (BadRequestException bre) {
       assertThat(bre.getMessage())
           .isEqualTo(
-              "Bad Request: attribute NUM can only have 2 operands when using the BETWEEN operator.");
+              "Bad Request: attribute NUM can only have 2 operands when using the BETWEEN operator");
     }
 
     attribute.operands(ImmutableList.of("s", "20"));
