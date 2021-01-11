@@ -22,6 +22,8 @@ import {
 import {environment} from 'environments/environment';
 import {Criteria, Domain} from 'generated/fetch';
 
+export const LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS = 'CURRENT_CRITERIA_SELECTIONS';
+
 const styles = reactStyles({
   arrowIcon: {
     height: '21px',
@@ -161,28 +163,26 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
 
   componentDidMount(): void {
     const {cohortContext: {domain, standard, source, type}} = this.props;
-    let {backMode, mode} = this.state;
-    let hierarchyNode;
     if (this.initTree) {
-      hierarchyNode = {
-        domainId: domain,
-        type: type,
-        isStandard: standard,
-        id: 0,
-      };
-      backMode = 'tree';
-      mode = 'tree';
+      this.setState({
+        backMode: 'tree',
+        hierarchyNode: {
+          domainId: domain,
+          type: type,
+          isStandard: standard,
+          id: 0,
+        } as Criteria,
+        mode: 'tree'
+      });
     }
-    this.setState({backMode, hierarchyNode, mode});
-    if (source === 'cohort') {
-      this.subscription = currentCohortCriteriaStore.subscribe(currentCohortCriteria => {
-        this.setState({selectedCriteriaList: currentCohortCriteria});
-      });
-    } else {
-      this.subscription = currentConceptStore.subscribe(currentConcepts => {
-        const value = fp.map(selected => selected.conceptId + '', currentConcepts);
-        this.setState({selectedCriteriaList: currentConcepts, selectedIds: value});
-      });
+    const currentCriteriaStore = source === 'cohort' ? currentCohortCriteriaStore : currentConceptStore;
+    this.subscription = currentCriteriaStore.subscribe(selectedCriteriaList => this.setState({selectedCriteriaList}));
+    // CB to be implemented with RW-5916
+    if (source !== 'cohort') {
+      const existingCriteria = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS));
+      if (!!existingCriteria && existingCriteria[0].domainId === domain) {
+        currentCriteriaStore.next(existingCriteria);
+      }
     }
   }
 
@@ -239,6 +239,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
   }
 
   addSelection = (selectCriteria)  => {
+    const {source} = this.props.cohortContext;
     // In case of Criteria/Cohort, close existing attribute sidebar before selecting a new value
     if (!this.isConcept && !!attributesSelectionStore.getValue()) {
       this.closeSidebar();
@@ -248,6 +249,10 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
       criteriaList.push(selectCriteria);
     } else {
       criteriaList =  [selectCriteria];
+    }
+    // CB to be implemented with RW-5916
+    if (source !== 'cohort') {
+      localStorage.setItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS, JSON.stringify(criteriaList));
     }
     this.setState({selectedCriteriaList: criteriaList});
     this.isConcept ?  currentConceptStore.next(criteriaList) : currentCohortCriteriaStore.next(criteriaList);

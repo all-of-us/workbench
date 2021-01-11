@@ -18,7 +18,6 @@ import {triggerEvent} from 'app/utils/analytics';
 import {
   attributesSelectionStore,
   currentCohortSearchContextStore,
-  currentConceptStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -302,10 +301,6 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
       if (source === 'conceptSetDetails' && prevProps.concept !== concept && !searching) {
         this.setState({data: concept});
       }
-    }
-
-    componentWillUnmount() {
-      currentConceptStore.next(null);
     }
 
     handleInput = (event: any) => {

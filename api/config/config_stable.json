@@ -13,7 +13,6 @@
     "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_stable",
     "timeoutInSeconds": 60,
     "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.0.14",
-    "welderDockerImage": "broadinstitute/welder-server:7ae1a62",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
     "runtimeImages": {
@@ -100,7 +99,6 @@
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
-    "enableConceptSetSearchV2": true,
     "enableReportingUploadCron": true,
     "enableCustomRuntimes": true
   },

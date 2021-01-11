@@ -3932,10 +3932,6 @@ definitions:
         type: boolean
         default: false
         description: Whether to show the Event Date modifier in cohort builder
-      enableConceptSetSearchV2:
-        type: boolean
-        default: false
-        description: Whether to use new Concept Search.
       enableResearchReviewPrompt:
         type: boolean
         default: false
@@ -5846,6 +5842,9 @@ definitions:
           See the EgressEvent definition for the expected schema of each event.'
   EgressEvent:
     type: object
+    required:
+      - project_name
+      - vm_prefix
     properties:
       environment:
         description: The AoU environment in which the high-egress event occurred.
@@ -8085,6 +8084,10 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ReportingWorkspace"
+      workspaceFreeTierUsage:
+        type: array
+        items:
+          "$ref": "#/definitions/ReportingWorkspaceFreeTierUsage"
   ReportingUploadDetails:
     type: object
     properties:
@@ -8447,6 +8450,30 @@ definitions:
         description: |-
           Prirmary key of the workspace table in Workrbench application database. Along with
           snapshot_timestamp, serves as a pseudo-primary key for this table.
+      workspaceNamespace:
+        type: string
+        description: |-
+          The workspace "namespace", which corresponds to the Google Cloud Project ID associated with
+          the workspace.
+  ReportingWorkspaceFreeTierUsage:
+    x-aou-note: |-
+      This code was generated using reporting-wizard.rb at 2021-01-05T17:36:27-08:00.
+      Manual modification should be avoided if possible as this is a one-time generation
+      and does not run on every build and updates must be merged manually for now.
+    type: object
+    properties:
+      cost:
+        type: number
+        format: double
+        description: Free tier usage cost for this workspace, in USD.
+      userId:
+        type: integer
+        format: int64
+        description: ID of the user whose free tier quota was billed for this workspace.
+      workspaceId:
+        type: integer
+        format: int64
+        description: ID of the workspace associated with this free tier cost.
   ReportingCohort:
     x-aou-note: |-
       This code was generated using reporting-wizard.rb at 2020-10-09T09:09:12-04:00.

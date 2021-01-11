@@ -115,9 +115,6 @@ public class WorkbenchConfig {
     public Integer timeoutInSeconds;
     // The docker image that we use for our jupyter images
     public String jupyterDockerImage;
-    // The docker image that we use for our welder images
-    // TODO(RW-5098): Remove after next release.
-    @Deprecated public String welderDockerImage;
     // Base URL for the Shibboleth API server, e.g.
     // https://profile-dot-broad-shibboleth-prod.appspot.com
     // See RW-4257 for more details on Terra's Shibboleth-specific API.
@@ -242,8 +239,6 @@ public class WorkbenchConfig {
     // Flag to indicate whether to show Update research purpose prompt after an year of workspace
     // creation
     public boolean enableResearchPurposePrompt;
-    // Flag to indicate whether to use new Concept Set Search
-    public boolean enableConceptSetSearchV2;
     // If true, reporting cron job will write data to configured BigQuery reporting dataset.
     public boolean enableReportingUploadCron;
     // Whether users should be able to customize notebook runtime settings.

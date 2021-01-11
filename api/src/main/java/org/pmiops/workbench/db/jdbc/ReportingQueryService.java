@@ -9,6 +9,7 @@ import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 
 /** Expose handy, performant queries that don't require Dao, Entity, or Projection classes. */
 public interface ReportingQueryService {
@@ -27,4 +28,6 @@ public interface ReportingQueryService {
   List<ReportingUser> getUsers();
 
   List<ReportingWorkspace> getWorkspaces();
+
+  List<ReportingWorkspaceFreeTierUsage> getWorkspaceFreeTierUsage();
 }

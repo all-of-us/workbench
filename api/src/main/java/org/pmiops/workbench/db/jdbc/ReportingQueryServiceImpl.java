@@ -16,6 +16,7 @@ import org.pmiops.workbench.model.ReportingDatasetDomainIdValue;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -65,7 +66,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  rp_scientific_approach,\n"
             + "  rp_social_behavioral,\n"
             + "  rp_time_requested,\n"
-            + "  workspace_id\n"
+            + "  workspace_id, \n"
+            + "  workspace_namespace \n"
             + "FROM workspace",
         (rs, unused) ->
             new ReportingWorkspace()
@@ -103,6 +105,22 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .rpScientificApproach(rs.getString("rp_scientific_approach"))
                 .rpSocialBehavioral(rs.getBoolean("rp_social_behavioral"))
                 .rpTimeRequested(offsetDateTimeUtc(rs.getTimestamp("rp_time_requested")))
+                .workspaceId(rs.getLong("workspace_id"))
+                .workspaceNamespace(rs.getString("workspace_namespace")));
+  }
+
+  @Override
+  public List<ReportingWorkspaceFreeTierUsage> getWorkspaceFreeTierUsage() {
+    return jdbcTemplate.query(
+        "SELECT\n"
+            + "  cost,\n"
+            + "  user_id,\n"
+            + "  workspace_id\n"
+            + "FROM workspace_free_tier_usage",
+        (rs, unused) ->
+            new ReportingWorkspaceFreeTierUsage()
+                .cost(rs.getDouble("cost"))
+                .userId(rs.getLong("user_id"))
                 .workspaceId(rs.getLong("workspace_id")));
   }
 
