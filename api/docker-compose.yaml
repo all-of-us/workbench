@@ -26,6 +26,7 @@ x-api-defaults: &api-defaults
     - ~/.gsutil:/.gsutil:cached
     # Plumb local machine timezone through, otherwise we get UTC.
     - /etc/localtime:/etc/localtime:ro
+    - /etc/timezone:/etc/timezone:ro
 
 services:
   scripts:
