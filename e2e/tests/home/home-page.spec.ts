@@ -1,5 +1,5 @@
 import WorkspaceCard from 'app/component/workspace-card';
-import {signIn} from 'utils/test-utils';
+import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 
 describe('Home page ui tests', () => {
 
@@ -8,10 +8,9 @@ describe('Home page ui tests', () => {
   });
 
   test('Check visibility of Workspace cards', async () => {
-    const allCards = await WorkspaceCard.findAllCards(page);
-    for (const card of allCards) {
-      await card.getDateTime();
-    }
+   await WorkspaceCard.getAllCardDetails(page);
+    const workspaceCard = await findOrCreateWorkspace(page);
+    console.log(`oldest workspace card found is: ${await workspaceCard.getWorkspaceName()}`);
   });
 
 });

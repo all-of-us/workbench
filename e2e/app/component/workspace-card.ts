@@ -77,6 +77,19 @@ export default class WorkspaceCard extends CardBase {
     return null; // not found
   }
 
+  static async getAllCardDetails(page: Page, accessLevel: WorkspaceAccessLevel = WorkspaceAccessLevel.Owner): Promise<any[]> {
+    const cards = await WorkspaceCard.findAllCards(page);
+    const arr = [];
+    for (const card of cards) {
+      const level = await card.getWorkspaceAccessLevel();
+      if (accessLevel === level) {
+        const time = await card.getDateTime();
+        const name = await card.getWorkspaceName();
+        arr.push(card, name, time, accessLevel);
+      }
+    }
+    return arr;
+  }
 
   constructor(page: Page) {
     super(page);
@@ -134,26 +147,11 @@ export default class WorkspaceCard extends CardBase {
     return matchWorkspaceArray;
   }
 
-  /**
-   * Finds the oldest Workspace card with OWNER role.
-   * @param level
-   */
-  async getOldestWorkspace(level: WorkspaceAccessLevel = WorkspaceAccessLevel.Owner): Promise<WorkspaceCard> {
-    const workspaceArray = await this.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.Owner);
-    for (const card of allWorkspaceCards) {
-      const cardDateTime = await this.getDateTime();
-      const oldest = creationDate.reduce((c, n) =>
-         Date.parse(n) < Date.parse(c) ? n : c
-      );
-    }
-  }
-
   async getDateTime(): Promise<string> {
     const [element] = await this.cardElement.$x(WorkspaceCardSelector.dateTimeXpath);
     const wholeText = await getPropValue<string>(element, 'innerText');
     // datetime format is "Last Changed: 01/08/21, 05:22 PM"
     const timeText = wholeText.replace('Last Changed: ', '').trim();
-    console.log(timeText);
     return timeText;
   }
 

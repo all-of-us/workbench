@@ -6,7 +6,6 @@ import Textbox from 'app/element/textbox';
 import GoogleLoginPage from 'app/page/google-login';
 import HomePage, {LabelAlias} from 'app/page/home-page';
 import {ElementType, XPathOptions} from 'app/xpath-options';
-import * as fp from 'lodash/fp';
 import {ElementHandle, Page} from 'puppeteer';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 import WorkspaceCard from 'app/component/workspace-card';
@@ -190,7 +189,7 @@ export async function createWorkspace(page: Page, cdrVersionName: string = confi
 }
 
 /**
- * Find a suitable existing workspace, or create one if it does not exist.
+ * Find a suitable existing workspace with the oldest Last Changed time, or create one if workspace does not exist.
  *
  * TODO: this function does a lot of different things.  refactor and split up according to use cases.
  *
@@ -224,11 +223,11 @@ export async function findOrCreateWorkspace(page: Page, opts: {alwaysCreate?: bo
     }
   }
 
-  // workspace name not found, or none was specified
+  // Find all workspaces with OWNER role
+  const existingWorkspaces = await WorkspaceCard.getAllCardDetails(page, WorkspaceAccessLevel.Owner);
 
-  const existingWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.Owner);
+  // Create new workspace if existing workspace is zero or alwayCreate is true
   if (alwaysCreate || existingWorkspaces.length === 0) {
-    // Create new workspace
     const name = workspaceName || makeWorkspaceName();
     await workspacesPage.createWorkspace(name);
     console.log(`Created workspace "${name}"`);
@@ -236,14 +235,14 @@ export async function findOrCreateWorkspace(page: Page, opts: {alwaysCreate?: bo
     return workspaceCard.findCard(name);
   }
 
-  // Returns one random selected Workspace card.
+  // Return one oldest Workspace
+  existingWorkspaces.sort((c1, c2) => Date.parse(c1.time) - Date.parse(c2.time));
+  console.log(existingWorkspaces);
 
-  const res = existingWorkspaces.filter(workspaceCard => )
-
-  const oneWorkspaceCard = fp.shuffle(existingWorkspaces)[0];
-  const workspaceCardName = await oneWorkspaceCard.getWorkspaceName();
+  const oldestWorkspace = existingWorkspaces[0]; // oldest workspace
+  const workspaceCardName = await oldestWorkspace.getWorkspaceName();
   console.log(`Found workspace "${workspaceCardName}"`);
-  return oneWorkspaceCard;
+  return oldestWorkspace;
 }
 
 export async function centerPoint(element: ElementHandle): Promise<[number, number]> {
