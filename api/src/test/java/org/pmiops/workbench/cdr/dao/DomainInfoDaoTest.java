@@ -1,6 +1,6 @@
 package org.pmiops.workbench.cdr.dao;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
@@ -91,33 +91,37 @@ public class DomainInfoDaoTest {
   @Test
   public void findByOrderByDomainId() {
     List<DbDomainInfo> infos = domainInfoDao.findByOrderByDomainId();
-    assertEquals(3, infos.size());
-    assertEquals(domainInfoCondition, infos.get(0));
-    assertEquals(domainInfoObservation, infos.get(1));
-    assertEquals(domainInfoPM, infos.get(2));
+    assertThat(infos.size()).isEqualTo(3);
+    assertThat(domainInfoCondition).isEqualTo(infos.get(0));
+    assertThat(domainInfoObservation).isEqualTo(infos.get(1));
+    assertThat(domainInfoPM).isEqualTo(infos.get(2));
   }
 
   @Test
   public void findStandardConceptCounts() {
     List<DbDomainInfo> infos = domainInfoDao.findConceptCounts("name", ImmutableList.of("S", "C"));
-    assertEquals(2, infos.size());
-    assertEquals(domainInfoCondition.standardConceptCount(1).allConceptCount(1), infos.get(0));
-    assertEquals(domainInfoObservation.standardConceptCount(1).allConceptCount(1), infos.get(1));
+    assertThat(infos.size()).isEqualTo(2);
+    assertThat(domainInfoCondition.standardConceptCount(1).allConceptCount(1))
+        .isEqualTo(infos.get(0));
+    assertThat(domainInfoObservation.standardConceptCount(1).allConceptCount(1))
+        .isEqualTo(infos.get(1));
   }
 
   @Test
   public void findAllMatchConceptCounts() {
     List<DbDomainInfo> infos =
         domainInfoDao.findConceptCounts("name", ImmutableList.of("S", "C", ""));
-    assertEquals(2, infos.size());
-    assertEquals(domainInfoCondition.allConceptCount(1).standardConceptCount(1), infos.get(0));
-    assertEquals(domainInfoObservation.allConceptCount(1).standardConceptCount(1), infos.get(1));
+    assertThat(infos.size()).isEqualTo(2);
+    assertThat(domainInfoCondition.standardConceptCount(1).allConceptCount(1))
+        .isEqualTo(infos.get(0));
+    assertThat(domainInfoObservation.standardConceptCount(1).allConceptCount(1))
+        .isEqualTo(infos.get(1));
   }
 
   @Test
   public void findPhysicalMeasurementConceptCounts() {
     DbDomainInfo info =
         domainInfoDao.findPhysicalMeasurementConceptCounts("name", ImmutableList.of("S", "C", ""));
-    assertEquals(domainInfoPM.allConceptCount(1).standardConceptCount(1), info);
+    assertThat(domainInfoPM.allConceptCount(1).standardConceptCount(1)).isEqualTo(info);
   }
 }

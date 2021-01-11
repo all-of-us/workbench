@@ -1,6 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
@@ -132,7 +132,7 @@ public class ParticipantCohortStatusDaoTest {
             .findByParticipantKey_CohortReviewIdAndParticipantKey_ParticipantId(
                 COHORT_REVIEW_ID, participant1.getParticipantKey().getParticipantId());
     participant1.setBirthDate(actualParticipant.getBirthDate());
-    assertEquals(participant1, actualParticipant);
+    assertThat(actualParticipant).isEqualTo(participant1);
   }
 
   @Test
@@ -166,7 +166,7 @@ public class ParticipantCohortStatusDaoTest {
     final Object[] sqlParams = {key1.getCohortReviewId()};
     final Integer expectedCount = new Integer("2");
 
-    assertEquals(expectedCount, jdbcTemplate.queryForObject(sql, sqlParams, Integer.class));
+    assertThat(jdbcTemplate.queryForObject(sql, sqlParams, Integer.class)).isEqualTo(expectedCount);
   }
 
   @Test
@@ -180,7 +180,7 @@ public class ParticipantCohortStatusDaoTest {
     List<DbParticipantCohortStatus> results =
         participantCohortStatusDao.findAll(COHORT_REVIEW_ID, pageRequest);
 
-    assertEquals(2, results.size());
+    assertThat(results.size()).isEqualTo(2);
   }
 
   @Test
@@ -188,7 +188,7 @@ public class ParticipantCohortStatusDaoTest {
     List<DbParticipantCohortStatus> results =
         participantCohortStatusDao.findByParticipantKey_CohortReviewId(COHORT_REVIEW_ID);
 
-    assertEquals(2, results.size());
+    assertThat(results.size()).isEqualTo(2);
   }
 
   @Test
@@ -201,7 +201,7 @@ public class ParticipantCohortStatusDaoTest {
             .sortColumn(FilterColumns.PARTICIPANTID.toString());
     List<DbParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
-    assertEquals(2, results.size());
+    assertThat(results.size()).isEqualTo(2);
 
     DbParticipantCohortStatus participant1 =
         createExpectedPCS(
@@ -214,8 +214,8 @@ public class ParticipantCohortStatusDaoTest {
             CohortStatus.EXCLUDED);
     participant2.setBirthDate(results.get(1).getBirthDate());
 
-    assertEquals(participant1, results.get(0));
-    assertEquals(participant2, results.get(1));
+    assertThat(results.get(0)).isEqualTo(participant1);
+    assertThat(results.get(1)).isEqualTo(participant2);
   }
 
   @Test
@@ -260,7 +260,7 @@ public class ParticipantCohortStatusDaoTest {
     pageRequest.filters(filters);
     List<DbParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
-    assertEquals(1, results.size());
+    assertThat(results.size()).isEqualTo(1);
 
     DbParticipantCohortStatus expectedPCS =
         createExpectedPCS(
@@ -268,7 +268,7 @@ public class ParticipantCohortStatusDaoTest {
             CohortStatus.INCLUDED);
     expectedPCS.setBirthDate(results.get(0).getBirthDate());
 
-    assertEquals(expectedPCS, results.get(0));
+    assertThat(results.get(0)).isEqualTo(expectedPCS);
   }
 
   @Test
@@ -289,7 +289,7 @@ public class ParticipantCohortStatusDaoTest {
 
     List<DbParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
-    assertEquals(2, results.size());
+    assertThat(results.size()).isEqualTo(2);
 
     DbParticipantCohortStatus expectedPCS1 =
         createExpectedPCS(
@@ -302,8 +302,8 @@ public class ParticipantCohortStatusDaoTest {
             CohortStatus.EXCLUDED);
     expectedPCS2.setBirthDate(results.get(0).getBirthDate());
 
-    assertEquals(expectedPCS1, results.get(0));
-    assertEquals(expectedPCS2, results.get(1));
+    assertThat(results.get(0)).isEqualTo(expectedPCS1);
+    assertThat(results.get(1)).isEqualTo(expectedPCS2);
   }
 
   @Test
@@ -350,7 +350,7 @@ public class ParticipantCohortStatusDaoTest {
     pageRequest.filters(filters);
     List<DbParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
-    assertEquals(2, results.size());
+    assertThat(results.size()).isEqualTo(2);
 
     DbParticipantCohortStatus expectedPCS1 =
         createExpectedPCS(
@@ -363,8 +363,8 @@ public class ParticipantCohortStatusDaoTest {
             CohortStatus.EXCLUDED);
     expectedPCS2.setBirthDate(results.get(0).getBirthDate());
 
-    assertEquals(expectedPCS1, results.get(0));
-    assertEquals(expectedPCS2, results.get(1));
+    assertThat(results.get(0)).isEqualTo(expectedPCS1);
+    assertThat(results.get(1)).isEqualTo(expectedPCS2);
   }
 
   @Test
@@ -377,7 +377,7 @@ public class ParticipantCohortStatusDaoTest {
             .sortColumn(FilterColumns.PARTICIPANTID.toString());
     List<DbParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
-    assertEquals(1, results.size());
+    assertThat(results.size()).isEqualTo(1);
 
     DbParticipantCohortStatus expectedPCS =
         createExpectedPCS(
@@ -385,7 +385,7 @@ public class ParticipantCohortStatusDaoTest {
             CohortStatus.INCLUDED);
     expectedPCS.setBirthDate(results.get(0).getBirthDate());
 
-    assertEquals(expectedPCS, results.get(0));
+    assertThat(results.get(0)).isEqualTo(expectedPCS);
 
     pageRequest =
         new PageRequest()
@@ -395,7 +395,7 @@ public class ParticipantCohortStatusDaoTest {
             .sortColumn(FilterColumns.PARTICIPANTID.toString());
     results = participantCohortStatusDao.findAll(1L, pageRequest);
 
-    assertEquals(1, results.size());
+    assertThat(results.size()).isEqualTo(1);
 
     expectedPCS =
         createExpectedPCS(
@@ -403,7 +403,7 @@ public class ParticipantCohortStatusDaoTest {
             CohortStatus.EXCLUDED);
     expectedPCS.setBirthDate(results.get(0).getBirthDate());
 
-    assertEquals(expectedPCS, results.get(0));
+    assertThat(results.get(0)).isEqualTo(expectedPCS);
   }
 
   @Test
@@ -416,7 +416,7 @@ public class ParticipantCohortStatusDaoTest {
             .sortColumn(FilterColumns.PARTICIPANTID.toString());
     Long results = participantCohortStatusDao.findCount(1L, pageRequest);
 
-    assertEquals(2L, results.longValue());
+    assertThat(results).isEqualTo(2L);
   }
 
   @Test
@@ -429,7 +429,7 @@ public class ParticipantCohortStatusDaoTest {
             .sortColumn(FilterColumns.PARTICIPANTID.toString());
     List<DbParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
-    assertEquals(2, results.size());
+    assertThat(results.size()).isEqualTo(2);
 
     DbParticipantCohortStatus expectedPCS1 =
         createExpectedPCS(
@@ -442,8 +442,8 @@ public class ParticipantCohortStatusDaoTest {
             CohortStatus.EXCLUDED);
     expectedPCS2.setBirthDate(results.get(1).getBirthDate());
 
-    assertEquals(expectedPCS1, results.get(0));
-    assertEquals(expectedPCS2, results.get(1));
+    assertThat(results.get(0)).isEqualTo(expectedPCS1);
+    assertThat(results.get(1)).isEqualTo(expectedPCS2);
 
     pageRequest =
         new PageRequest()
@@ -453,7 +453,7 @@ public class ParticipantCohortStatusDaoTest {
             .sortColumn(FilterColumns.PARTICIPANTID.toString());
     results = participantCohortStatusDao.findAll(1L, pageRequest);
 
-    assertEquals(2, results.size());
+    assertThat(results.size()).isEqualTo(2);
 
     expectedPCS1 =
         createExpectedPCS(
@@ -466,8 +466,8 @@ public class ParticipantCohortStatusDaoTest {
             CohortStatus.INCLUDED);
     expectedPCS2.setBirthDate(results.get(1).getBirthDate());
 
-    assertEquals(expectedPCS1, results.get(0));
-    assertEquals(expectedPCS2, results.get(1));
+    assertThat(results.get(0)).isEqualTo(expectedPCS1);
+    assertThat(results.get(1)).isEqualTo(expectedPCS2);
   }
 
   @Test
@@ -480,7 +480,7 @@ public class ParticipantCohortStatusDaoTest {
             .sortColumn(FilterColumns.STATUS.toString());
     List<DbParticipantCohortStatus> results = participantCohortStatusDao.findAll(1L, pageRequest);
 
-    assertEquals(2, results.size());
+    assertThat(results.size()).isEqualTo(2);
 
     DbParticipantCohortStatus expectedPCS1 =
         createExpectedPCS(
@@ -493,8 +493,8 @@ public class ParticipantCohortStatusDaoTest {
             CohortStatus.INCLUDED);
     expectedPCS2.setBirthDate(results.get(1).getBirthDate());
 
-    assertEquals(expectedPCS1, results.get(0));
-    assertEquals(expectedPCS2, results.get(1));
+    assertThat(results.get(0)).isEqualTo(expectedPCS1);
+    assertThat(results.get(1)).isEqualTo(expectedPCS2);
 
     pageRequest =
         new PageRequest()
@@ -504,7 +504,7 @@ public class ParticipantCohortStatusDaoTest {
             .sortColumn(FilterColumns.STATUS.toString());
     results = participantCohortStatusDao.findAll(1L, pageRequest);
 
-    assertEquals(2, results.size());
+    assertThat(results.size()).isEqualTo(2);
 
     expectedPCS1 =
         createExpectedPCS(
@@ -517,8 +517,7 @@ public class ParticipantCohortStatusDaoTest {
             CohortStatus.EXCLUDED);
     expectedPCS2.setBirthDate(results.get(1).getBirthDate());
 
-    assertEquals(expectedPCS1, results.get(0));
-    assertEquals(expectedPCS2, results.get(1));
+    assertThat(results.get(1)).isEqualTo(expectedPCS2);
   }
 
   @Test
@@ -597,7 +596,7 @@ public class ParticipantCohortStatusDaoTest {
       participantCohortStatusDao.findAll(1L, pageRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException e) {
-      assertEquals(expectedException, e.getMessage());
+      assertThat(e.getMessage()).isEqualTo(expectedException);
     }
   }
 

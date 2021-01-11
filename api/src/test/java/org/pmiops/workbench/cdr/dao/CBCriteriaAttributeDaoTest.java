@@ -1,6 +1,6 @@
 package org.pmiops.workbench.cdr.dao;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 import java.util.List;
 import org.junit.Before;
@@ -37,7 +37,7 @@ public class CBCriteriaAttributeDaoTest {
   public void findCriteriaAttributeByConceptId() {
     List<DbCriteriaAttribute> attributes =
         cbCriteriaAttributeDao.findCriteriaAttributeByConceptId(1L);
-    assertEquals(1, attributes.size());
-    assertEquals(attribute, attributes.get(0));
+    assertThat(attributes.size()).isEqualTo(1);
+    assertThat(attributes.get(0)).isEqualTo(attribute);
   }
 }

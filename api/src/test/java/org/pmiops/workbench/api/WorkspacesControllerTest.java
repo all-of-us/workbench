@@ -2464,9 +2464,11 @@ public class WorkspacesControllerTest {
         workspacesController.getNoteBookList("project", "workspace").getBody().stream()
             .map(FileDetail::getName)
             .collect(Collectors.toList());
-    assertThat(gotNames).isEqualTo(ImmutableList.of(
-            NotebooksService.withNotebookExtension("mockFile"),
-            NotebooksService.withNotebookExtension("two words")));
+    assertThat(gotNames)
+        .isEqualTo(
+            ImmutableList.of(
+                NotebooksService.withNotebookExtension("mockFile"),
+                NotebooksService.withNotebookExtension("two words")));
   }
 
   @Test

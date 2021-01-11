@@ -1,5 +1,7 @@
 package org.pmiops.workbench.conceptset;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import java.time.Clock;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,8 +28,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static com.google.common.truth.Truth.assertThat;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest

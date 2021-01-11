@@ -524,7 +524,8 @@ public class CohortReviewControllerTest {
           .getBody();
       fail("Should have thrown NotFoundException!");
     } catch (NotFoundException nfe) {
-      assertThat(nfe.getMessage()).isEqualTo("Not Found: No Cohort exists for cohortId: " + cohortId);
+      assertThat(nfe.getMessage())
+          .isEqualTo("Not Found: No Cohort exists for cohortId: " + cohortId);
     }
   }
 
@@ -872,13 +873,14 @@ public class CohortReviewControllerTest {
               new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1"))
           .getBody();
     } catch (NotFoundException nfe) {
-      assertThat(nfe.getMessage()).isEqualTo(
+      assertThat(nfe.getMessage())
+          .isEqualTo(
               "Not Found: Participant Cohort Annotation does not exist for annotationId: "
-              + badAnnotationId
-              + ", cohortReviewId: "
-              + cohortReview.getCohortReviewId()
-              + ", participantId: "
-              + participantCohortStatus1.getParticipantKey().getParticipantId());
+                  + badAnnotationId
+                  + ", cohortReviewId: "
+                  + cohortReview.getCohortReviewId()
+                  + ", participantId: "
+                  + participantCohortStatus1.getParticipantKey().getParticipantId());
     }
   }
 

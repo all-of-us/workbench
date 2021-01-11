@@ -1,10 +1,6 @@
 package org.pmiops.workbench.api;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,7 +34,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.model.Cohort;
-import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.WorkspaceResource;
@@ -212,9 +207,9 @@ public class UserMetricsControllerTest {
 
     WorkspaceResourceResponse recentResources =
         userMetricsController.getUserRecentResources().getBody();
-    assertNotNull(recentResources);
-    assertEquals(recentResources.get(0).getNotebook().getPath(), "gs://bucketFile/");
-    assertEquals(recentResources.get(0).getNotebook().getName(), "notebook.ipynb");
+    assertThat(recentResources).isNotNull();
+    assertThat(recentResources.get(0).getNotebook().getPath()).isEqualTo("gs://bucketFile/");
+    assertThat(recentResources.get(0).getNotebook().getName()).isEqualTo("notebook.ipynb");
   }
 
   @Test
@@ -225,10 +220,10 @@ public class UserMetricsControllerTest {
 
     WorkspaceResourceResponse recentResources =
         userMetricsController.getUserRecentResources().getBody();
-    assertNotNull(recentResources);
-    assertEquals(
-        recentResources.get(0).getNotebook().getPath(), "gs://bucketFile/nb.ipynb/intermediate/");
-    assertEquals(recentResources.get(0).getNotebook().getName(), "nb.ipynb");
+    assertThat(recentResources).isNotNull();
+    assertThat(recentResources.get(0).getNotebook().getPath())
+        .isEqualTo("gs://bucketFile/nb.ipynb/intermediate/");
+    assertThat(recentResources.get(0).getNotebook().getName()).isEqualTo("nb.ipynb");
   }
 
   @Test
@@ -239,9 +234,11 @@ public class UserMetricsControllerTest {
 
     WorkspaceResourceResponse recentResources =
         userMetricsController.getUserRecentResources().getBody();
-    assertNotNull(recentResources);
-    assertEquals(recentResources.get(0).getNotebook().getPath(), "gs://bucketFile/note books/");
-    assertEquals(recentResources.get(0).getNotebook().getName(), "My favorite notebook.ipynb");
+    assertThat(recentResources).isNotNull();
+    assertThat(recentResources.get(0).getNotebook().getPath())
+        .isEqualTo("gs://bucketFile/note books/");
+    assertThat(recentResources.get(0).getNotebook().getName())
+        .isEqualTo("My favorite notebook.ipynb");
   }
 
   @Test
@@ -252,8 +249,8 @@ public class UserMetricsControllerTest {
 
     WorkspaceResourceResponse recentResources =
         userMetricsController.getUserRecentResources().getBody();
-    assertNotNull(recentResources);
-    assertEquals(recentResources.size(), 0);
+    assertThat(recentResources).isNotNull();
+    assertThat(recentResources.size()).isEqualTo(0);
   }
 
   @Test
@@ -264,12 +261,10 @@ public class UserMetricsControllerTest {
 
     WorkspaceResourceResponse recentResources =
         userMetricsController.getUserRecentResources().getBody();
-    assertNotNull(recentResources);
-    assertNotNull(recentResources.get(0).getNotebook());
-    assertEquals(
-        recentResources.get(0).getNotebook().getPath(),
-        "gs://bucketFile/notebooks/notebook.ipynb/");
-    assertEquals(recentResources.get(0).getNotebook().getName(), "");
+    assertThat(recentResources.get(0).getNotebook()).isNotNull();
+    assertThat(recentResources.get(0).getNotebook().getPath())
+        .isEqualTo("gs://bucketFile/notebooks/notebook.ipynb/");
+    assertThat(recentResources.get(0).getNotebook().getName()).isEqualTo("");
   }
 
   @Test
@@ -284,24 +279,25 @@ public class UserMetricsControllerTest {
 
     WorkspaceResourceResponse recentResources =
         userMetricsController.getUserRecentResources().getBody();
-    assertNotNull(recentResources);
-    assertEquals(recentResources.size(), 1);
-    assertNotNull(recentResources.get(0).getNotebook());
-    assertEquals(recentResources.get(0).getNotebook().getName(), "notebook.ipynb");
+    assertThat(recentResources).isNotNull();
+    assertThat(recentResources.size()).isEqualTo(1);
+    assertThat(recentResources.get(0).getNotebook()).isNotNull();
+    assertThat(recentResources.get(0).getNotebook().getName()).isEqualTo("notebook.ipynb");
   }
 
   @Test
   public void testGetUserRecentResource() {
     WorkspaceResourceResponse recentResources =
         userMetricsController.getUserRecentResources().getBody();
-    assertNotNull(recentResources);
-    assertEquals(3, recentResources.size());
-    assertNull(recentResources.get(0).getCohort());
-    assertEquals(recentResources.get(0).getNotebook().getPath(), "gs://bucketFile/notebooks/");
+    assertThat(recentResources).isNotNull();
+    assertThat(recentResources.size()).isEqualTo(3);
+    assertThat(recentResources.get(0).getCohort()).isNull();
+    assertThat(recentResources.get(0).getNotebook().getPath())
+        .isEqualTo("gs://bucketFile/notebooks/");
 
-    assertEquals(recentResources.get(0).getNotebook().getName(), "notebook1.ipynb");
-    assertNotNull(recentResources.get(1).getCohort());
-    assertEquals(recentResources.get(1).getCohort().getName(), "Cohort Name");
+    assertThat(recentResources.get(0).getNotebook().getName()).isEqualTo("notebook1.ipynb");
+    assertThat(recentResources.get(1).getCohort()).isNotNull();
+    assertThat(recentResources.get(1).getCohort().getName()).isEqualTo("Cohort Name");
   }
 
   @Test
@@ -311,14 +307,13 @@ public class UserMetricsControllerTest {
         .thenReturn(ImmutableList.of(dbUserRecentResource1, dbUserRecentResource2));
     WorkspaceResourceResponse recentResources =
         userMetricsController.getUserRecentResources().getBody();
-    assertEquals(1, recentResources.size());
+    assertThat(recentResources.size()).isEqualTo(1);
     WorkspaceResource foundResource = recentResources.get(0);
     final Cohort cohort1 = foundResource.getCohort();
     final Cohort cohort2 = cohortMapper.dbModelToClient(dbUserRecentResource2.getCohort());
 
-    assertEquals(cohort1, cohort2);
-
-    assertEquals(foundResource.getWorkspaceId(), (Long) dbUserRecentResource2.getWorkspaceId());
+    assertThat(cohort1).isEqualTo(cohort2);
+    assertThat(foundResource.getWorkspaceId()).isEqualTo(dbUserRecentResource2.getWorkspaceId());
   }
 
   @Test
@@ -327,10 +322,11 @@ public class UserMetricsControllerTest {
     WorkspaceResourceResponse recentResources =
         userMetricsController.getUserRecentResources().getBody();
 
-    assertNotNull(recentResources);
-    assertEquals(1, recentResources.size());
-    assertNull(recentResources.get(0).getCohort());
-    assertEquals(recentResources.get(0).getNotebook().getPath(), "gs://bucketFile/notebooks/");
+    assertThat(recentResources).isNotNull();
+    assertThat(recentResources.size()).isEqualTo(1);
+    assertThat(recentResources.get(0).getCohort()).isNull();
+    assertThat(recentResources.get(0).getNotebook().getPath())
+        .isEqualTo("gs://bucketFile/notebooks/");
   }
 
   @Test
@@ -370,29 +366,32 @@ public class UserMetricsControllerTest {
                 dbWorkspace2.getWorkspaceNamespace(), dbWorkspace2.getFirecloudName(), request)
             .getBody();
 
-    assertNotNull(addedEntry);
-    assertEquals((long) addedEntry.getWorkspaceId(), dbWorkspace2.getWorkspaceId());
-    assertNull(addedEntry.getCohort());
-    assertNotNull(addedEntry.getNotebook());
-    assertEquals(addedEntry.getNotebook().getName(), "notebook.ipynb");
-    assertEquals(addedEntry.getNotebook().getPath(), "gs://newBucket/notebooks/");
+    assertThat(addedEntry).isNotNull();
+    assertThat(addedEntry.getWorkspaceId()).isEqualTo(dbWorkspace2.getWorkspaceId());
+    assertThat(addedEntry.getCohort()).isNull();
+    assertThat(addedEntry.getNotebook()).isNotNull();
+    assertThat(addedEntry.getNotebook().getName()).isEqualTo("notebook.ipynb");
+    assertThat(addedEntry.getNotebook().getPath()).isEqualTo("gs://newBucket/notebooks/");
   }
 
   @Test
   public void testHasValidBlobIdIfNotebookNamePresent_nullNotebookName_passes() {
     dbUserRecentResource1.setNotebookName(null);
-    assertTrue(userMetricsController.hasValidBlobIdIfNotebookNamePresent(dbUserRecentResource1));
+    assertThat(userMetricsController.hasValidBlobIdIfNotebookNamePresent(dbUserRecentResource1))
+        .isTrue();
   }
 
   @Test
   public void testHasValidBlobIdIfNotebookNamePresent_validNotebookName_passes() {
-    assertTrue(userMetricsController.hasValidBlobIdIfNotebookNamePresent(dbUserRecentResource1));
+    assertThat(userMetricsController.hasValidBlobIdIfNotebookNamePresent(dbUserRecentResource1))
+        .isTrue();
   }
 
   @Test
   public void testHasValidBlobIdIfNotebookNamePresent_invalidNotebookName_fails() {
     dbUserRecentResource1.setNotebookName("invalid-notebook@name");
-    assertFalse(userMetricsController.hasValidBlobIdIfNotebookNamePresent(dbUserRecentResource1));
+    assertThat(userMetricsController.hasValidBlobIdIfNotebookNamePresent(dbUserRecentResource1))
+        .isFalse();
   }
 
   @Test
@@ -400,10 +399,9 @@ public class UserMetricsControllerTest {
     WorkspaceResourceResponse recentResources =
         userMetricsController.getUserRecentResources().getBody();
 
-    ConceptSet conceptSet = new ConceptSet();
-    assertNotNull(recentResources);
-    assertEquals(3, recentResources.size());
-    assertNotNull(recentResources.get(2).getConceptSet());
-    assertEquals(recentResources.get(2).getConceptSet().getDomain(), Domain.CONDITION);
+    assertThat(recentResources).isNotNull();
+    assertThat(recentResources.size()).isEqualTo(3);
+    assertThat(recentResources.get(2).getConceptSet()).isNotNull();
+    assertThat(recentResources.get(2).getConceptSet().getDomain()).isEqualTo(Domain.CONDITION);
   }
 }
