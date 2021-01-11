@@ -5842,6 +5842,9 @@ definitions:
           See the EgressEvent definition for the expected schema of each event.'
   EgressEvent:
     type: object
+    required:
+      - project_name
+      - vm_prefix
     properties:
       environment:
         description: The AoU environment in which the high-egress event occurred.

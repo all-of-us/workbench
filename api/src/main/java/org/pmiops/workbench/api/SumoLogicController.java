@@ -1,10 +1,13 @@
 package org.pmiops.workbench.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
@@ -50,22 +53,37 @@ public class SumoLogicController implements SumoLogicApiDelegate {
   @Override
   public ResponseEntity<Void> logEgressEvent(String X_API_KEY, EgressEventRequest request) {
     authorizeRequest(X_API_KEY, request);
-
+    ObjectMapper mapper = new ObjectMapper();
+    EgressEvent[] events;
     try {
+      // Try to deserialize input with default ObjectMapper configuration. If failed to deserialize,
+      // log it then
+      // disable unknown properties restriction and try again.
       // The "eventsJsonArray" field is a JSON-formatted array of EgressEvent JSON objects. Parse
       // this out so we can work with each event as a model object.
-      ObjectMapper mapper = new ObjectMapper();
-      EgressEvent[] events = mapper.readValue(request.getEventsJsonArray(), EgressEvent[].class);
-      Arrays.stream(events).forEach(egressEventService::handleEvent);
-      return ResponseEntity.noContent().build();
-    } catch (IOException e) {
-      log.severe(
+      events = mapper.readValue(request.getEventsJsonArray(), EgressEvent[].class);
+    } catch (JsonProcessingException e) {
+      log.log(
+          Level.WARNING,
           String.format(
-              "Failed to parse SumoLogic egress event JSON: %s", request.getEventsJsonArray()));
-      log.severe(e.getMessage());
-      this.egressEventAuditor.fireFailedToParseEgressEventRequest(request);
-      throw new BadRequestException("Error parsing event details");
+              "Failed to parse SumoLogic egress event JSON: %s. Disabling unknown properties restriction and trying again...",
+              request.getEventsJsonArray()),
+          e);
+      mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      try {
+        events = mapper.readValue(request.getEventsJsonArray(), EgressEvent[].class);
+      } catch (IOException ioException) {
+        log.log(
+            Level.SEVERE,
+            String.format(
+                "Failed to parse SumoLogic egress event JSON: %s", request.getEventsJsonArray()),
+            e);
+        this.egressEventAuditor.fireFailedToParseEgressEventRequest(request);
+        throw new BadRequestException("Error parsing event details");
+      }
     }
+    Arrays.stream(events).forEach(egressEventService::handleEvent);
+    return ResponseEntity.noContent().build();
   }
 
   /**
