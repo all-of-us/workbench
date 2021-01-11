@@ -24,6 +24,8 @@ x-api-defaults: &api-defaults
     - gradle-cache:/.gradle
     - ~/.config:/.config:cached
     - ~/.gsutil:/.gsutil:cached
+    # Plumb local machine timezone through, otherwise we get UTC.
+    - /etc/localtime:/etc/localtime:ro
 
 services:
   scripts:
