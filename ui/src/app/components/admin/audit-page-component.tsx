@@ -6,7 +6,6 @@ import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
 import { useDebounce, useToggle } from 'app/utils';
 import {downloadTextFile} from 'app/utils/audit-utils';
-import {navigate} from 'app/utils/navigation';
 import {AuditAction, AuditLogEntry} from 'generated';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
