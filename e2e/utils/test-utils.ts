@@ -237,6 +237,9 @@ export async function findOrCreateWorkspace(page: Page, opts: {alwaysCreate?: bo
   }
 
   // Returns one random selected Workspace card.
+
+  const res = existingWorkspaces.filter(workspaceCard => )
+
   const oneWorkspaceCard = fp.shuffle(existingWorkspaces)[0];
   const workspaceCardName = await oneWorkspaceCard.getWorkspaceName();
   console.log(`Found workspace "${workspaceCardName}"`);

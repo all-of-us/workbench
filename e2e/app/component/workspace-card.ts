@@ -11,6 +11,7 @@ const WorkspaceCardSelector = {
   cardRootXpath: '//*[child::*[@data-test-id="workspace-card"]]', // finds 'workspace-card' parent container node
   cardNameXpath: '@data-test-id="workspace-card-name"',
   accessLevelXpath: './/*[@data-test-id="workspace-access-level"]',
+  dateTimeXpath: '//*[@data-test-id="workspace-card"]/div[3]'
 }
 
 
@@ -131,6 +132,29 @@ export default class WorkspaceCard extends CardBase {
       }
     }
     return matchWorkspaceArray;
+  }
+
+  /**
+   * Finds the oldest Workspace card with OWNER role.
+   * @param level
+   */
+  async getOldestWorkspace(level: WorkspaceAccessLevel = WorkspaceAccessLevel.Owner): Promise<WorkspaceCard> {
+    const workspaceArray = await this.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.Owner);
+    for (const card of allWorkspaceCards) {
+      const cardDateTime = await this.getDateTime();
+      const oldest = creationDate.reduce((c, n) =>
+         Date.parse(n) < Date.parse(c) ? n : c
+      );
+    }
+  }
+
+  async getDateTime(): Promise<string> {
+    const [element] = await this.cardElement.$x(WorkspaceCardSelector.dateTimeXpath);
+    const wholeText = await getPropValue<string>(element, 'innerText');
+    // datetime format is "Last Changed: 01/08/21, 05:22 PM"
+    const timeText = wholeText.replace('Last Changed: ', '').trim();
+    console.log(timeText);
+    return timeText;
   }
 
   /**
