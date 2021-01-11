@@ -5,13 +5,12 @@ import * as React from 'react';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {ConceptSet, ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
+import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {workspaceDataStub, WorkspacesApiStub, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
+import {ConceptSearch} from './concept-search';
 
-import {ConceptSetDetails} from 'app/pages/data/concept/concept-set-details';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-
-describe('ConceptSetDetails', () => {
+describe('ConceptSearch', () => {
   let conceptSet: ConceptSet;
 
   beforeEach(() => {
@@ -27,42 +26,44 @@ describe('ConceptSetDetails', () => {
   });
 
   it('should render', () => {
-    const wrapper = mount(<ConceptSetDetails/>);
+    const wrapper = mount(<ConceptSearch setConceptSetUpdating={() => {}}
+                                         setShowUnsavedModal={() => {}}
+                                         setUnsavedConceptChanges={() => {}}/>);
     expect(wrapper).toBeTruthy();
   });
 
   it('should display the participant count and domain name', async() => {
-    const wrapper = mount(<ConceptSetDetails/>);
+    const wrapper = mount(<ConceptSearch setConceptSetUpdating={() => {}}
+                                         setShowUnsavedModal={() => {}}
+                                         setUnsavedConceptChanges={() => {}}/>);
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="participant-count"]').text())
-      .toContain(conceptSet.participantCount.toString());
-    expect(wrapper.find('[data-test-id="concept-set-domain"]').text())
-      .toContain(fp.capitalize(conceptSet.domain.toString()));
+    expect(wrapper.find('[data-test-id="participant-count"]').text()).toContain(conceptSet.participantCount.toString());
+    expect(wrapper.find('[data-test-id="concept-set-domain"]').text()).toContain(fp.capitalize(conceptSet.domain.toString()));
   });
 
   it('should allow validLength edits', async() => {
-    const wrapper = mount(<ConceptSetDetails/>);
+    const wrapper = mount(<ConceptSearch setConceptSetUpdating={() => {}}
+                                         setShowUnsavedModal={() => {}}
+                                         setUnsavedConceptChanges={() => {}}/>);
     const newName = 'cool new name';
     const newDesc = 'cool new description';
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="concept-set-title"]').text()).toContain(conceptSet.name);
-    expect(wrapper.find('[data-test-id="concept-set-description"]').text())
-      .toContain(conceptSet.description);
+    expect(wrapper.find('[data-test-id="concept-set-description"]').text()).toContain(conceptSet.description);
     wrapper.find('[data-test-id="edit-concept-set"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="edit-name"]').first()
-      .simulate('change', {target: {value: newName}});
-    wrapper.find('[data-test-id="edit-description"]').first()
-      .simulate('change', {target: {value: newDesc}});
+    wrapper.find('[data-test-id="edit-name"]').first().simulate('change', {target: {value: newName}});
+    wrapper.find('[data-test-id="edit-description"]').first().simulate('change', {target: {value: newDesc}});
     wrapper.find('[data-test-id="save-edit-concept-set"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="concept-set-title"]').text()).toContain(newName);
-    expect(wrapper.find('[data-test-id="concept-set-description"]').text())
-      .toContain(newDesc);
+    expect(wrapper.find('[data-test-id="concept-set-description"]').text()).toContain(newDesc);
   });
 
   it('should disallow empty name edit', async() => {
-    const wrapper = mount(<ConceptSetDetails/>);
+    const wrapper = mount(<ConceptSearch setConceptSetUpdating={() => {}}
+                                         setShowUnsavedModal={() => {}}
+                                         setUnsavedConceptChanges={() => {}}/>);
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="edit-concept-set"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
@@ -73,22 +74,21 @@ describe('ConceptSetDetails', () => {
   });
 
   it('should not edit on cancel', async() => {
-    const wrapper = mount(<ConceptSetDetails/>);
+    const wrapper = mount(<ConceptSearch setConceptSetUpdating={() => {}}
+                                         setShowUnsavedModal={() => {}}
+                                         setUnsavedConceptChanges={() => {}}/>);
     const newName = 'cool new name';
     const newDesc = 'cool new description';
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="concept-set-title"]').text()).toContain(conceptSet.name);
     wrapper.find('[data-test-id="edit-concept-set"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
-    wrapper.find('[data-test-id="edit-name"]').first()
-      .simulate('change', {target: {value: newName}});
-    wrapper.find('[data-test-id="edit-description"]').first()
-      .simulate('change', {target: {value: newDesc}});
+    wrapper.find('[data-test-id="edit-name"]').first().simulate('change', {target: {value: newName}});
+    wrapper.find('[data-test-id="edit-description"]').first().simulate('change', {target: {value: newDesc}});
     wrapper.find('[data-test-id="cancel-edit-concept-set"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="concept-set-title"]').text()).toContain(conceptSet.name);
   });
 
   // TODO RW-2625: test edit and delete set from popup trigger menu
-
 });
