@@ -4,67 +4,65 @@ const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/5
 const isDebugMode = process.argv.includes('--debug');
 
 /**
- * Set up page common properties:
- * - Page view port
- * - Page user-agent
- * - Page navigation timeout
- * - waitFor functions timeout
+ * Enable network interception in new page and block unwanted requests.
  */
 beforeEach(async () => {
   await page.setUserAgent(userAgent);
   await page.setViewport({width: 1280, height: 0});
   page.setDefaultNavigationTimeout(60000); // Puppeteer default timeout is 30 seconds.
   page.setDefaultTimeout(30000);
-});
 
-/**
- * At the end of each test completion, do:
- * - Disable network interception.
- * - Delete broswer cookies.
- * - Reset global page and browser variables.
- */
-afterEach(async () => {
-  await page.deleteCookie(...await page.cookies());
-  await jestPuppeteer.resetPage();
-  await jestPuppeteer.resetBrowser();
-});
+  await page.tracing.start({path: './logs/tracing.json', screenshots: true});
 
-/**
- * Enable network interception in new page and block unwanted requests.
- */
-beforeAll(async () => {
   await page.setRequestInterception(true);
-  page.on('request', (request) => {
-    const requestUrl = url.parse(request.url(), true);
-    const host = requestUrl.hostname;
-    // to improve page load performance, block network requests unrelated to application.
+
+  page.on('request', async(request) => {
+      // console.info(`Request started => ${request.url()}`)
+      await request.continue();
+
+  });
+
+  page.on('response', async response => {
     try {
-      if (host === 'www.google-analytics.com'
-           || host === 'accounts.youtube.com'
-           || host === 'static.zdassets.com'
-           || host === 'play.google.com'
-           || request.url().endsWith('content-security-index-report')) {
-        request.abort();
-      } else {
-        request.continue();
-      }
+      const req = response.request();
+      const reqUrl = req.url();
+
+      // filter out some responses
+      if (reqUrl.indexOf('.png') !== -1
+         || reqUrl.indexOf('.svg') !== -1
+         || reqUrl.indexOf('.woff2') !== -1
+         || reqUrl.indexOf('aousupporthelp') !== -1
+         || reqUrl.indexOf('zdassets') !== -1
+         || reqUrl.indexOf('.js') !== -1)
+        return;
+
+      const text = await response.text();
+      const status = response.status();
+      console.info(`response => ${reqUrl}, ${status}, ${text}`);
     } catch (err) {
-      console.error(err);
+      console.error(`catch errors: ${err}`);
     }
   });
-  if (isDebugMode) {
-    // Emitted when a request failed. Warning: blocked requests from above will be logged as failed requests, safe to ignore these.
-    page.on('requestfailed', request => {
-      console.error(`❌ Failed request => ${request.method()} ${request.url()}`);
-      request.continue();
-    });
-    // Emitted when the page crashed
-    page.on('error', error => console.error(`❌ ${error}`));
-    // Emitted when a script has uncaught exception
-    page.on('pageerror', error => console.error(`❌ ${error}`));
-  }
+
+  // Emitted when the page crashed
+  page.on('error', async(err) => {
+    console.error(`❌ error =>  ${err}`);
+    throw new Error(err.message);
+  });
+
+  // Emitted when a script has uncaught exception
+  page.on('pageerror', async(error) => {
+    console.error(`❌ page error => ${error.message}`)
+  });
+
+  // Emitted when a script within the page uses `console`
+  page.on('console', async(message) => {
+    console[message.type()](`page console => ${message.text()}`)
+  });
+
 });
 
-afterAll(async () => {
+afterEach(async () => {
+  await page.tracing.stop();
   await page.setRequestInterception(false);
 });
