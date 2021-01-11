@@ -237,9 +237,9 @@ export async function findOrCreateWorkspace(page: Page, opts: {alwaysCreate?: bo
 
   // Return one oldest Workspace
   existingWorkspaces.sort((c1, c2) => Date.parse(c1.time) - Date.parse(c2.time));
-  const oldestWorkspace = existingWorkspaces[0]; // oldest workspace
+  const oldestWorkspace: WorkspaceCard = existingWorkspaces[0]; // oldest workspace
   const workspaceCardName = await oldestWorkspace.getWorkspaceName();
-  console.log(`Found workspace "${workspaceCardName}"`);
+  console.log(`Found workspace "${workspaceCardName}". Last changed on ${await oldestWorkspace.getDateTime()}`);
   return oldestWorkspace;
 }
 
