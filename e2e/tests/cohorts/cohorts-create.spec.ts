@@ -9,6 +9,8 @@ import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
+import CohortActionsPage from 'app/page/cohort-actions-page';
+import {Ethnicity} from 'app/page/cohort-search-page';
 
 
 describe('User can create new Cohorts', () => {
@@ -68,7 +70,7 @@ describe('User can create new Cohorts', () => {
     expect(newTotalCountInt).toBeLessThan(group1CountInt);
     console.log('New Total Count: ' + newTotalCountInt);
 
-    // Save new cohort.
+    // Save new cohort - click create cohort button
     const cohortName = await cohortPage.saveCohortAs();
     console.log(`Created Cohort "${cohortName}"`);
 
@@ -101,6 +103,7 @@ describe('User can create new Cohorts', () => {
     // Verify dialog content text
     expect(modalContent).toContain(`Are you sure you want to delete Cohort: ${cohortName}?`);
     console.log(`Deleted Cohort "${cohortName}"`);
+
   });
 
   /**
@@ -108,9 +111,11 @@ describe('User can create new Cohorts', () => {
    * Find an existing workspace.
    * Create new cohort with Condition = EKG.
    * Check Group and Total Count.
-   * Check cohort open okay.
+   * Edit Cohort
    * Duplicate cohort.
-   * Delete cohort.
+   * Delete duplicate cohort via ellipsis menu
+   * Check cohort open okay.
+   * Delete cohort via delete/trash icon on cohort build page
    */
   test('Add Cohort of EKG condition with modifiers', async () => {
 
@@ -174,27 +179,42 @@ describe('User can create new Cohorts', () => {
     expect(totalCountInt).toBe(group1CountInt);
     console.log('Total Count: ' + totalCountInt);
 
-    // Save new cohort.
+    // Save new cohort - click Create Cohort button
     const cohortName = await cohortBuildPage.saveCohortAs();
     await waitForText(page, 'Cohort Saved Successfully');
     console.log(`Created Cohort "${cohortName}"`);
 
-    // Open Workspace, search for created cohort.
+    // Navigate to the data page, find the new cohort.
     await page.goto(workspaceDataUrl);
     await dataPage.waitForLoad();
-
-    // Cohort can be opened from resource card link.
-    let cohortCard = await DataResourceCard.findCard(page, cohortName);
-    await cohortCard.clickResourceName();
-    // Wait for page ready
+    let cohortCard = await DataResourceCard.findCard(page, `${cohortName}`);
+  
+    // Edit cohort using Ellipsis menu
+    await cohortCard.selectSnowmanMenu(Option.Edit, {waitForNav: false});
     await cohortBuildPage.waitForLoad();
     await waitWhileLoading(page);
 
-    await dataPage.openDataPage();
+    // Include Participants Group 1: Add a Condition
+    const group1a = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
+    const ethnicityLookUp = await group1a.includeEthnicity();
+    await ethnicityLookUp.addEthnicity([Ethnicity.HispanicOrLatino]);
+
+    // Open selection list and click Save Criteria button
+   await group1a.viewAndSaveCriteria();
+
+   // select SAVE option from the SAVE COHORT button drop-down menu
+   await cohortBuildPage.saveChanges();
+
+    // Should land on Cohorts Actions page
+    const cohortActionsPage = new CohortActionsPage(page);
+    await cohortActionsPage.waitForLoad();
+
+    // navigate back to the data page and open Cohorts sub tab
+    await dataPage.openCohortsSubtab();
 
     // Duplicate cohort using Ellipsis menu.
     const origCardsCount = (await DataResourceCard.findAllCards(page)).length;
-    cohortCard = await DataResourceCard.findCard(page, cohortName);
+    cohortCard = await DataResourceCard.findCard(page, `${cohortName}`);
     await cohortCard.selectSnowmanMenu(Option.Duplicate, {waitForNav: false});
     await waitWhileLoading(page);
     const newCardsCount = (await DataResourceCard.findAllCards(page)).length;
@@ -202,14 +222,31 @@ describe('User can create new Cohorts', () => {
     expect(newCardsCount).toBe(origCardsCount + 1);
 
     // Delete duplicated cohort.
-    let modalTextContent = await dataPage.deleteResource(`Duplicate of ${cohortName}`, ResourceCard.Cohort);
+    const modalTextContent = await dataPage.deleteResource(`Duplicate of ${cohortName}`, ResourceCard.Cohort);
     expect(modalTextContent).toContain(`Are you sure you want to delete Cohort: Duplicate of ${cohortName}?`);
 
-    // Delete new cohort.
-    modalTextContent = await dataPage.deleteResource(cohortName, ResourceCard.Cohort);
-    expect(modalTextContent).toContain(`Are you sure you want to delete Cohort: ${cohortName}?`);
+    // Verify Delete successful.
+    expect(await DataResourceCard.findCard(page, `Duplicate of ${cohortName}`, 5000)).toBeFalsy();
 
+    // find the original new cohortCard
+    cohortCard = await DataResourceCard.findCard(page, `${cohortName}`);
+    // Cohort can be opened from resource card link.
+     await cohortCard.clickResourceName();
+    // Wait for page ready
+    await cohortBuildPage.waitForLoad();
+    await waitWhileLoading(page);
+
+    // click the delete icon on the cohort build page
+    const modalTextContent1 = await cohortBuildPage.deleteCohort();
+
+    // Verify dialog content text
+    expect(modalTextContent1).toContain(`Are you sure you want to delete Cohort: ${cohortName}?`);
+
+    // navigate to the sub cohort tab
+    await dataPage.openCohortsSubtab();
+
+    // verify that the cohort card does not exist on the subcohort tab
+    expect(await DataResourceCard.findCard(page, `${cohortName}`, 5000)).toBeFalsy();
   });
-
 
 });
