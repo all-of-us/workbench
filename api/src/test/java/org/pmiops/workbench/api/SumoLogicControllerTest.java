@@ -71,6 +71,9 @@ public class SumoLogicControllerTest {
     event.setTimeWindowDuration(Duration.ofSeconds(300).getSeconds());
     event.setTimeWindowStart(Instant.now().toEpochMilli());
 
+    System.out.println("~~~~~~~~~~~");
+    System.out.println(objectMapper.writeValueAsString(Collections.singletonList(event)));
+
     request = new EgressEventRequest();
     request.setEventsJsonArray(objectMapper.writeValueAsString(Collections.singletonList(event)));
 
@@ -110,9 +113,8 @@ public class SumoLogicControllerTest {
 
   @Test
   public void testLogsRequestParsingSuccess_ignoreUnknownField() throws Exception {
-    ObjectMapper mapper = new ObjectMapper();
-    String test = "[{\"project_name\":\"test123\", \"random_stuff\":\"foo\"}]";
-    request.setEventsJsonArray(mapper.writeValueAsString(test));
+    String test = "[{\"project_name\":\"aou-rw-test-c7dec260\", \"random_stuff\":\"foo\"}]";
+    request.setEventsJsonArray(test);
     sumoLogicController.logEgressEvent(API_KEY, request);
     verify(mockEgressEventService).handleEvent(any());
   }
