@@ -330,7 +330,8 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
       try {
         this.setState({data: null, apiError: false, inputErrors: [], loading: true, searching: true, standardOnly: false});
         const {searchContext: {domain, source, selectedSurvey}, workspace: {cdrVersionId}} = this.props;
-        const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(+cdrVersionId, domain, value.trim(), selectedSurvey);
+        const surveyName = selectedSurvey || 'All';
+        const resp = await cohortBuilderApi().findCriteriaByDomainAndSearchTerm(+cdrVersionId, domain, value.trim(), surveyName);
         const data = source !== 'cohort' && this.isSurvey
           ? resp.items.filter(survey => survey.subtype === CriteriaSubType.QUESTION.toString())
           : resp.items;
