@@ -249,11 +249,11 @@ export async function findOrCreateWorkspace(page: Page, opts: {alwaysCreate?: bo
   }
 
   // Return one random Workspace card
-  const randomWorkspaceCard = fp.shuffle(filtered).pop();
-  const workspaceCardName = await randomWorkspaceCard.getWorkspaceName();
-  const lastChangedTime = await randomWorkspaceCard.getLastChangedTime();
-  console.log(`Found workspace "${workspaceCardName}". Last changed on ${lastChangedTime}`);
-  return randomWorkspaceCard;
+  const randomCard = fp.shuffle(filtered).pop();
+  const cardName = await randomCard.getWorkspaceName();
+  const lastChangedTime = await randomCard.getLastChangedTime();
+  console.log(`Found workspace "${cardName}". Last changed on ${lastChangedTime}`);
+  return randomCard;
 }
 
 export async function centerPoint(element: ElementHandle): Promise<[number, number]> {

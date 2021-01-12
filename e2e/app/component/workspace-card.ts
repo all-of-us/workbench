@@ -46,9 +46,8 @@ export default class WorkspaceCard extends CardBase {
     } catch (e) {
       return [];
     }
-    const cardElements = await page.$x(WorkspaceCardSelector.cardRootXpath);
-    // transform to WorkspaceCard object
-    const workspaceCards = cardElements.map(card => new WorkspaceCard(page).asCard(card));
+    const workspaceCards = (await page.$x(WorkspaceCardSelector.cardRootXpath))
+      .map(card => new WorkspaceCard(page).asCard(card));
 
     const filtered = [];
     if (accessLevel !== undefined) {
