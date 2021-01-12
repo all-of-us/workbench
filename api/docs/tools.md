@@ -20,7 +20,7 @@ Some examples of tools we've used
   - `./project.rb list-runtimes`
 
 Advantages of writing tools
-- It can leverage much of the standard code base by being able to compile and call it
+- It provides a quick way to write a script that can leverage much of the standard code base
 - It handles environment setup, including authentication and database connections
 
 Disadvantages
@@ -123,10 +123,15 @@ Common.register_command({
 
 - `common.run_inline` specified which gradle task will be run
 - gradle arguments are passed through -PappArgs=[]
+- GcloudContextV2 is a bit overloaded right now, but its primary purpose is to add the `--project`
+argument parser and validate it. It should be added if you're planning to add `ServiceAccountContext`
 - Wrapping the gradle call with `ServiceAccountContext` like in list-runtime will ensure that the 
 correct `sa-key.json` credentials are set. (The one specified by `--project`)
 - Wrapping the gradle call with `with_cloud_proxy_and_db` will allow the tool to connect to
 the workbench database corresponding to the `--project` flag.
+- Being able to use those two wrappers is one of the best reasons to write a tool. It allows your tool
+  to run against any cloud AoU environment by just switching the `--project` flag. *Does not work on local
+  environment.
 - Things that may change from tool to tool are the argument parsing logic and which context wrapper(s) to use
 
 ### build.gradle
@@ -144,8 +149,11 @@ task manageLeonardoRuntimes(type: JavaExec) {
 ```
 
 - The only parts of this that will change for a new tool are the task name and the class name defined by `main`
+- It is actually  possible to run your Java tool using just gradle and without the project.rb wrapper. I
+prefer this while developing because of the faster cycle time.
+  - It is also the only way to run your Java tool against your local environment.
 
-### tools/src/main/java/org.pmiops.workbench.tools/YourTool.java
+### Java tool
 
 Note: The following code samples were extracted to highlight common patterns in our tools. They're not 
 meant to be compilable examples, but you can look up the file in our code base to see the full source code.
@@ -317,3 +325,7 @@ public class ManageLeonardoRuntimes {
 
 - Sometimes, it's easier to not inject anything at all and just manually create the service that you need.
 This code example demonstrates how to create an API client which is a common use case for the tools.
+- In this case, you can forgo the `CommandLineToolConfig` and construct the runner using `SpringApplicationBuilder`
+- You're not restricted to using only dependency injection or only manually creating instances. Sometimes
+the easiest path forward is to use a combination; import some of the simpler dependencies to 
+  instantiate a more complex service.
