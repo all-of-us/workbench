@@ -230,17 +230,17 @@ export async function findOrCreateWorkspace(page: Page, opts: {alwaysCreate?: bo
   // Filter to include Workspaces older than 30 minutes
   const halfHourMillisec = 1000 * 60 * 30;
   const now = Date.now();
-  const filtered = [];
+  const olderWorkspaceCards = [];
   for (const card of existingCards) {
     const workspaceTime = Date.parse(await card.getLastChangedTime());
     const timeDiff = now - workspaceTime;
     if (timeDiff > halfHourMillisec) {
-      filtered.push(card);
+      olderWorkspaceCards.push(card);
     }
   }
 
   // Create new workspace if existing workspace is zero or alwayCreate is true
-  if (alwaysCreate || filtered.length === 0) {
+  if (alwaysCreate || olderWorkspaceCards.length === 0) {
     const name = workspaceName || makeWorkspaceName();
     await workspacesPage.createWorkspace(name);
     console.log(`Created workspace "${name}"`);
@@ -249,7 +249,7 @@ export async function findOrCreateWorkspace(page: Page, opts: {alwaysCreate?: bo
   }
 
   // Return one random Workspace card
-  const randomCard = fp.shuffle(filtered).pop();
+  const randomCard = fp.shuffle(olderWorkspaceCards).pop();
   const cardName = await randomCard.getWorkspaceName();
   const lastChangedTime = await randomCard.getLastChangedTime();
   console.log(`Found workspace "${cardName}". Last changed on ${lastChangedTime}`);
