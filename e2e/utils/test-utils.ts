@@ -248,7 +248,7 @@ export async function findOrCreateWorkspace(page: Page, opts: {alwaysCreate?: bo
     return workspaceCard.findCard(name);
   }
 
-  // Return one random selected Workspace card
+  // Return one random Workspace card
   const randomWorkspaceCard = fp.shuffle(filtered).pop();
   const workspaceCardName = await randomWorkspaceCard.getWorkspaceName();
   const lastChangedTime = await randomWorkspaceCard.getLastChangedTime();
