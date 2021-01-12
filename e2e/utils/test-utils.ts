@@ -227,11 +227,11 @@ export async function findOrCreateWorkspace(page: Page, opts: {alwaysCreate?: bo
   // Find all workspaces with OWNER role
   const existingCards = await WorkspaceCard.findAllCards(page, WorkspaceAccessLevel.Owner);
 
-  // Filter out Workspaces that are younger than 30 minutes
+  // Filter to include Workspaces older than 30 minutes
   const halfHourMillisec = 1000 * 60 * 30;
+  const now = Date.now();
   const filtered = [];
   for (const card of existingCards) {
-    const now = Date.now();
     const workspaceTime = Date.parse(await card.getLastChangedTime());
     const timeDiff = now - workspaceTime;
     if (timeDiff > halfHourMillisec) {
