@@ -590,7 +590,7 @@ const CostEstimator = ({
 };
 
 const CostInfo = ({runtimeChanged, runtimeConfig, currentUser, workspace, creatorFreeCreditsRemaining}) => {
-  const remainingCredits = !!creatorFreeCreditsRemaining ? formatUsd(creatorFreeCreditsRemaining) : <Spinner size={10}/>;
+  const remainingCredits = creatorFreeCreditsRemaining === null ? <Spinner size={10}/> : formatUsd(creatorFreeCreditsRemaining);
 
   return <FlexRow
     style={
