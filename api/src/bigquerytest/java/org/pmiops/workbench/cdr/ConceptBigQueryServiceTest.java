@@ -82,7 +82,7 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
                     dbConceptSetConceptId2,
                     dbConceptSetConceptId3,
                     dbConceptSetConceptId4)))
-        .isEqualTo(0);
+        .isEqualTo(1);
   }
 
   @Test
@@ -118,11 +118,11 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
 
   @Override
   public List<String> getTableNames() {
-    return ImmutableList.of("condition_occurrence", "cb_criteria");
+    return ImmutableList.of("condition_occurrence", "cb_criteria", "cb_search_all_events");
   }
 
   @Override
   public String getTestDataDirectory() {
-    return MATERIALIZED_DATA;
+    return CB_DATA;
   }
 }
