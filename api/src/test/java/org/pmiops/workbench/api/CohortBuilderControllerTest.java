@@ -1,8 +1,6 @@
 package org.pmiops.workbench.api;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
@@ -129,11 +127,11 @@ public class CohortBuilderControllerTest {
                 .participantCount(1000));
 
     DomainInfo domainInfo = controller.findDomainInfos(1L).getBody().getItems().get(0);
-    assertEquals(domainInfo.getName(), dbDomainInfo.getName());
-    assertEquals(domainInfo.getDescription(), dbDomainInfo.getDescription());
-    assertEquals(domainInfo.getParticipantCount().longValue(), dbDomainInfo.getParticipantCount());
-    assertEquals(domainInfo.getAllConceptCount().longValue(), 0);
-    assertEquals(domainInfo.getStandardConceptCount().longValue(), 0);
+    assertThat(domainInfo.getName()).isEqualTo(dbDomainInfo.getName());
+    assertThat(domainInfo.getDescription()).isEqualTo(dbDomainInfo.getDescription());
+    assertThat(domainInfo.getParticipantCount()).isEqualTo(dbDomainInfo.getParticipantCount());
+    assertThat(domainInfo.getAllConceptCount()).isEqualTo(0);
+    assertThat(domainInfo.getStandardConceptCount()).isEqualTo(0);
   }
 
   @Test
@@ -174,11 +172,11 @@ public class CohortBuilderControllerTest {
                 .participantCount(1000));
 
     SurveyModule surveyModule = controller.findSurveyModules(1L).getBody().getItems().get(0);
-    assertEquals(surveyModule.getName(), dbSurveyModule.getName());
-    assertEquals(surveyModule.getDescription(), dbSurveyModule.getDescription());
-    assertEquals(
-        surveyModule.getParticipantCount().longValue(), dbSurveyModule.getParticipantCount());
-    assertEquals(surveyModule.getQuestionCount().longValue(), 1);
+    assertThat(surveyModule.getName()).isEqualTo(dbSurveyModule.getName());
+    assertThat(surveyModule.getDescription()).isEqualTo(dbSurveyModule.getDescription());
+    assertThat(surveyModule.getParticipantCount().longValue())
+        .isEqualTo(dbSurveyModule.getParticipantCount());
+    assertThat(surveyModule.getQuestionCount().longValue()).isEqualTo(1);
   }
 
   @Test
@@ -204,26 +202,26 @@ public class CohortBuilderControllerTest {
             .build();
     cbCriteriaDao.save(icd9Criteria);
 
-    assertEquals(
-        createResponseCriteria(icd9CriteriaParent),
-        controller
-            .findCriteriaBy(
-                1L, Domain.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false, 0L)
-            .getBody()
-            .getItems()
-            .get(0));
-    assertEquals(
-        createResponseCriteria(icd9Criteria),
-        controller
-            .findCriteriaBy(
-                1L,
-                Domain.CONDITION.toString(),
-                CriteriaType.ICD9CM.toString(),
-                false,
-                icd9CriteriaParent.getId())
-            .getBody()
-            .getItems()
-            .get(0));
+    assertThat(createResponseCriteria(icd9CriteriaParent))
+        .isEqualTo(
+            controller
+                .findCriteriaBy(
+                    1L, Domain.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false, 0L)
+                .getBody()
+                .getItems()
+                .get(0));
+    assertThat(createResponseCriteria(icd9Criteria))
+        .isEqualTo(
+            controller
+                .findCriteriaBy(
+                    1L,
+                    Domain.CONDITION.toString(),
+                    CriteriaType.ICD9CM.toString(),
+                    false,
+                    icd9CriteriaParent.getId())
+                .getBody()
+                .getItems()
+                .get(0));
   }
 
   @Test
@@ -233,8 +231,8 @@ public class CohortBuilderControllerTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // success
-      assertEquals(
-          "Bad Request: Please provide a valid domain. null is not valid.", bre.getMessage());
+      assertThat("Bad Request: Please provide a valid domain. null is not valid.")
+          .isEqualTo(bre.getMessage());
     }
 
     try {
@@ -242,8 +240,8 @@ public class CohortBuilderControllerTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // success
-      assertEquals(
-          "Bad Request: Please provide a valid domain. blah is not valid.", bre.getMessage());
+      assertThat("Bad Request: Please provide a valid domain. blah is not valid.")
+          .isEqualTo(bre.getMessage());
     }
 
     try {
@@ -251,8 +249,8 @@ public class CohortBuilderControllerTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // success
-      assertEquals(
-          "Bad Request: Please provide a valid type. blah is not valid.", bre.getMessage());
+      assertThat("Bad Request: Please provide a valid type. blah is not valid.")
+          .isEqualTo(bre.getMessage());
     }
   }
 
@@ -267,13 +265,14 @@ public class CohortBuilderControllerTest {
             .build();
     cbCriteriaDao.save(demoCriteria);
 
-    assertEquals(
-        createResponseCriteria(demoCriteria),
-        controller
-            .findCriteriaBy(1L, Domain.PERSON.toString(), CriteriaType.AGE.toString(), false, null)
-            .getBody()
-            .getItems()
-            .get(0));
+    assertThat(createResponseCriteria(demoCriteria))
+        .isEqualTo(
+            controller
+                .findCriteriaBy(
+                    1L, Domain.PERSON.toString(), CriteriaType.AGE.toString(), false, null)
+                .getBody()
+                .getItems()
+                .get(0));
   }
 
   @Test
@@ -289,19 +288,19 @@ public class CohortBuilderControllerTest {
             .build();
     cbCriteriaDao.save(criteria);
 
-    assertEquals(
-        createResponseCriteria(criteria),
-        controller
-            .findCriteriaAutoComplete(
-                1L,
-                Domain.MEASUREMENT.toString(),
-                "LP12",
-                CriteriaType.LOINC.toString(),
-                true,
-                null)
-            .getBody()
-            .getItems()
-            .get(0));
+    assertThat(createResponseCriteria(criteria))
+        .isEqualTo(
+            controller
+                .findCriteriaAutoComplete(
+                    1L,
+                    Domain.MEASUREMENT.toString(),
+                    "LP12",
+                    CriteriaType.LOINC.toString(),
+                    true,
+                    null)
+                .getBody()
+                .getItems()
+                .get(0));
   }
 
   @Test
@@ -318,19 +317,19 @@ public class CohortBuilderControllerTest {
             .build();
     cbCriteriaDao.save(criteria);
 
-    assertEquals(
-        createResponseCriteria(criteria),
-        controller
-            .findCriteriaAutoComplete(
-                1L,
-                Domain.MEASUREMENT.toString(),
-                "LP12",
-                CriteriaType.LOINC.toString(),
-                true,
-                null)
-            .getBody()
-            .getItems()
-            .get(0));
+    assertThat(createResponseCriteria(criteria))
+        .isEqualTo(
+            controller
+                .findCriteriaAutoComplete(
+                    1L,
+                    Domain.MEASUREMENT.toString(),
+                    "LP12",
+                    CriteriaType.LOINC.toString(),
+                    true,
+                    null)
+                .getBody()
+                .getItems()
+                .get(0));
   }
 
   @Test
@@ -346,14 +345,19 @@ public class CohortBuilderControllerTest {
             .build();
     cbCriteriaDao.save(criteria);
 
-    assertEquals(
-        createResponseCriteria(criteria),
-        controller
-            .findCriteriaAutoComplete(
-                1L, Domain.CONDITION.toString(), "LP12", CriteriaType.SNOMED.toString(), true, null)
-            .getBody()
-            .getItems()
-            .get(0));
+    assertThat(createResponseCriteria(criteria))
+        .isEqualTo(
+            controller
+                .findCriteriaAutoComplete(
+                    1L,
+                    Domain.CONDITION.toString(),
+                    "LP12",
+                    CriteriaType.SNOMED.toString(),
+                    true,
+                    null)
+                .getBody()
+                .getItems()
+                .get(0));
   }
 
   @Test
@@ -363,8 +367,8 @@ public class CohortBuilderControllerTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // success
-      assertEquals(
-          "Bad Request: Please provide a valid domain. null is not valid.", bre.getMessage());
+      assertThat("Bad Request: Please provide a valid domain. null is not valid.")
+          .isEqualTo(bre.getMessage());
     }
 
     try {
@@ -372,8 +376,8 @@ public class CohortBuilderControllerTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // success
-      assertEquals(
-          "Bad Request: Please provide a valid domain. blah is not valid.", bre.getMessage());
+      assertThat("Bad Request: Please provide a valid domain. blah is not valid.")
+          .isEqualTo(bre.getMessage());
     }
 
     try {
@@ -382,8 +386,8 @@ public class CohortBuilderControllerTest {
       fail("Should have thrown a BadRequestException!");
     } catch (BadRequestException bre) {
       // success
-      assertEquals(
-          "Bad Request: Please provide a valid type. blah is not valid.", bre.getMessage());
+      assertThat("Bad Request: Please provide a valid type. blah is not valid.")
+          .isEqualTo(bre.getMessage());
     }
   }
 
@@ -414,14 +418,14 @@ public class CohortBuilderControllerTest {
             .selectable(true)
             .isStandard(ImmutableList.of("S", "C").contains(dbConcept.getStandardConcept()));
 
-    assertEquals(
-        criteria,
-        controller
-            .findCriteriaByDomainAndSearchTerm(
-                1L, Domain.PHYSICAL_MEASUREMENT.name(), "myTerm", null, null)
-            .getBody()
-            .getItems()
-            .get(0));
+    assertThat(criteria)
+        .isEqualTo(
+            controller
+                .findCriteriaByDomainAndSearchTerm(
+                    1L, Domain.PHYSICAL_MEASUREMENT.name(), "myTerm", null, null)
+                .getBody()
+                .getItems()
+                .get(0));
   }
 
   @Test
@@ -443,13 +447,13 @@ public class CohortBuilderControllerTest {
             .build();
     cbCriteriaDao.save(criteria);
 
-    assertEquals(
-        createResponseCriteria(criteria),
-        controller
-            .findCriteriaByDomainAndSearchTerm(1L, Domain.CONDITION.name(), "001", null, null)
-            .getBody()
-            .getItems()
-            .get(0));
+    assertThat(createResponseCriteria(criteria))
+        .isEqualTo(
+            controller
+                .findCriteriaByDomainAndSearchTerm(1L, Domain.CONDITION.name(), "001", null, null)
+                .getBody()
+                .getItems()
+                .get(0));
   }
 
   @Test
@@ -477,8 +481,8 @@ public class CohortBuilderControllerTest {
             .getBody()
             .getItems();
 
-    assertEquals(1, results.size());
-    assertEquals(createResponseCriteria(criteria), results.get(0));
+    assertThat(1).isEqualTo(results.size());
+    assertThat(createResponseCriteria(criteria)).isEqualTo(results.get(0));
   }
 
   @Test
@@ -505,8 +509,8 @@ public class CohortBuilderControllerTest {
             .findCriteriaByDomainAndSearchTerm(1L, Domain.DRUG.name(), "672535", null, null)
             .getBody()
             .getItems();
-    assertEquals(1, results.size());
-    assertEquals(createResponseCriteria(criteria1), results.get(0));
+    assertThat(1).isEqualTo(results.size());
+    assertThat(createResponseCriteria(criteria1)).isEqualTo(results.get(0));
   }
 
   @Test
@@ -528,13 +532,13 @@ public class CohortBuilderControllerTest {
             .build();
     cbCriteriaDao.save(criteria);
 
-    assertEquals(
-        createResponseCriteria(criteria),
-        controller
-            .findCriteriaByDomainAndSearchTerm(1L, Domain.CONDITION.name(), "LP12", null, null)
-            .getBody()
-            .getItems()
-            .get(0));
+    assertThat(createResponseCriteria(criteria))
+        .isEqualTo(
+            controller
+                .findCriteriaByDomainAndSearchTerm(1L, Domain.CONDITION.name(), "LP12", null, null)
+                .getBody()
+                .getItems()
+                .get(0));
   }
 
   @Test
@@ -556,13 +560,13 @@ public class CohortBuilderControllerTest {
             .build();
     cbCriteriaDao.save(criteria);
 
-    assertEquals(
-        createResponseCriteria(criteria),
-        controller
-            .findCriteriaByDomainAndSearchTerm(1L, Domain.CONDITION.name(), "LP12", null, null)
-            .getBody()
-            .getItems()
-            .get(0));
+    assertThat(createResponseCriteria(criteria))
+        .isEqualTo(
+            controller
+                .findCriteriaByDomainAndSearchTerm(1L, Domain.CONDITION.name(), "LP12", null, null)
+                .getBody()
+                .getItems()
+                .get(0));
   }
 
   @Test
@@ -584,13 +588,13 @@ public class CohortBuilderControllerTest {
             .build();
     cbCriteriaDao.save(criteria);
 
-    assertEquals(
-        createResponseCriteria(criteria),
-        controller
-            .findCriteriaByDomainAndSearchTerm(1L, Domain.CONDITION.name(), "", null, null)
-            .getBody()
-            .getItems()
-            .get(0));
+    assertThat(createResponseCriteria(criteria))
+        .isEqualTo(
+            controller
+                .findCriteriaByDomainAndSearchTerm(1L, Domain.CONDITION.name(), "", null, null)
+                .getBody()
+                .getItems()
+                .get(0));
   }
 
   @Test
@@ -614,13 +618,13 @@ public class CohortBuilderControllerTest {
             .build();
     cbCriteriaDao.save(criteria);
 
-    assertEquals(
-        createResponseCriteria(criteria),
-        controller
-            .findCriteriaByDomainAndSearchTerm(1L, Domain.DRUG.name(), "LP12", null, null)
-            .getBody()
-            .getItems()
-            .get(0));
+    assertThat(createResponseCriteria(criteria))
+        .isEqualTo(
+            controller
+                .findCriteriaByDomainAndSearchTerm(1L, Domain.DRUG.name(), "LP12", null, null)
+                .getBody()
+                .getItems()
+                .get(0));
     jdbcTemplate.execute("drop table cb_criteria_relationship");
   }
 
@@ -640,13 +644,13 @@ public class CohortBuilderControllerTest {
             .addFullText("[CONDITION_rank1]")
             .build();
     cbCriteriaDao.save(criteria);
-    assertEquals(
-        createResponseCriteria(criteria),
-        controller
-            .findStandardCriteriaByDomainAndConceptId(1L, Domain.CONDITION.toString(), 12345L)
-            .getBody()
-            .getItems()
-            .get(0));
+    assertThat(createResponseCriteria(criteria))
+        .isEqualTo(
+            controller
+                .findStandardCriteriaByDomainAndConceptId(1L, Domain.CONDITION.toString(), 12345L)
+                .getBody()
+                .getItems()
+                .get(0));
     jdbcTemplate.execute("drop table cb_criteria_relationship");
   }
 
@@ -679,25 +683,29 @@ public class CohortBuilderControllerTest {
             .build();
     cbCriteriaDao.save(drugBrandCriteria);
 
-    assertEquals(
-        createResponseCriteria(drugATCCriteria),
-        controller.findDrugBrandOrIngredientByValue(1L, "drugN", null).getBody().getItems().get(0));
+    assertThat(createResponseCriteria(drugATCCriteria))
+        .isEqualTo(
+            controller
+                .findDrugBrandOrIngredientByValue(1L, "drugN", null)
+                .getBody()
+                .getItems()
+                .get(0));
 
-    assertEquals(
-        createResponseCriteria(drugBrandCriteria),
-        controller
-            .findDrugBrandOrIngredientByValue(1L, "brandN", null)
-            .getBody()
-            .getItems()
-            .get(0));
+    assertThat(createResponseCriteria(drugBrandCriteria))
+        .isEqualTo(
+            controller
+                .findDrugBrandOrIngredientByValue(1L, "brandN", null)
+                .getBody()
+                .getItems()
+                .get(0));
 
-    assertEquals(
-        createResponseCriteria(drugBrandCriteria),
-        controller
-            .findDrugBrandOrIngredientByValue(1L, "LP6789", null)
-            .getBody()
-            .getItems()
-            .get(0));
+    assertThat(createResponseCriteria(drugBrandCriteria))
+        .isEqualTo(
+            controller
+                .findDrugBrandOrIngredientByValue(1L, "LP6789", null)
+                .getBody()
+                .getItems()
+                .get(0));
   }
 
   @Test
@@ -726,8 +734,8 @@ public class CohortBuilderControllerTest {
             .findCriteriaAttributeByConceptId(1L, criteriaAttributeMin.getConceptId())
             .getBody()
             .getItems();
-    assertTrue(attrs.contains(createResponseCriteriaAttribute(criteriaAttributeMin)));
-    assertTrue(attrs.contains(createResponseCriteriaAttribute(criteriaAttributeMax)));
+    assertThat(attrs.contains(createResponseCriteriaAttribute(criteriaAttributeMin))).isTrue();
+    assertThat(attrs.contains(createResponseCriteriaAttribute(criteriaAttributeMax))).isTrue();
   }
 
   @Test
@@ -769,16 +777,14 @@ public class CohortBuilderControllerTest {
             .addParentId(1)
             .build());
     ParticipantDemographics demos = controller.findParticipantDemographics(1L).getBody();
-    assertEquals(
-        new ConceptIdName().conceptId(1L).conceptName("Male"), demos.getGenderList().get(0));
-    assertEquals(
-        new ConceptIdName().conceptId(2L).conceptName("African American"),
-        demos.getRaceList().get(0));
-    assertEquals(
-        new ConceptIdName().conceptId(3L).conceptName("Not Hispanic or Latino"),
-        demos.getEthnicityList().get(0));
-    assertEquals(
-        new ConceptIdName().conceptId(4L).conceptName("Male"), demos.getSexAtBirthList().get(0));
+    assertThat(new ConceptIdName().conceptId(1L).conceptName("Male"))
+        .isEqualTo(demos.getGenderList().get(0));
+    assertThat(new ConceptIdName().conceptId(2L).conceptName("African American"))
+        .isEqualTo(demos.getRaceList().get(0));
+    assertThat(new ConceptIdName().conceptId(3L).conceptName("Not Hispanic or Latino"))
+        .isEqualTo(demos.getEthnicityList().get(0));
+    assertThat(new ConceptIdName().conceptId(4L).conceptName("Male"))
+        .isEqualTo(demos.getSexAtBirthList().get(0));
   }
 
   @Test
@@ -807,15 +813,15 @@ public class CohortBuilderControllerTest {
         "insert into cb_survey_attribute(id, question_concept_id, answer_concept_id, survey_version_concept_id, item_count) values (6, 715713, 903096, 102, 31)");
     SurveyVersionListResponse response =
         controller.findSurveyVersionByQuestionConceptId(1L, 1333342L, 715713L).getBody();
-    assertEquals(response.getItems().get(0).getSurveyVersionConceptId(), new Long("100"));
-    assertEquals(response.getItems().get(0).getDisplayName(), "May 2020");
-    assertEquals(response.getItems().get(0).getItemCount(), new Long("291"));
-    assertEquals(response.getItems().get(1).getSurveyVersionConceptId(), new Long("101"));
-    assertEquals(response.getItems().get(1).getDisplayName(), "June 2020");
-    assertEquals(response.getItems().get(1).getItemCount(), new Long("148"));
-    assertEquals(response.getItems().get(2).getSurveyVersionConceptId(), new Long("102"));
-    assertEquals(response.getItems().get(2).getDisplayName(), "July 2020");
-    assertEquals(response.getItems().get(2).getItemCount(), new Long("150"));
+    assertThat(response.getItems().get(0).getSurveyVersionConceptId()).isEqualTo(new Long("100"));
+    assertThat(response.getItems().get(0).getDisplayName()).isEqualTo("May 2020");
+    assertThat(response.getItems().get(0).getItemCount()).isEqualTo(new Long("291"));
+    assertThat(response.getItems().get(1).getSurveyVersionConceptId()).isEqualTo(new Long("101"));
+    assertThat(response.getItems().get(1).getDisplayName()).isEqualTo("June 2020");
+    assertThat(response.getItems().get(1).getItemCount()).isEqualTo(new Long("148"));
+    assertThat(response.getItems().get(2).getSurveyVersionConceptId()).isEqualTo(new Long("102"));
+    assertThat(response.getItems().get(2).getDisplayName()).isEqualTo("July 2020");
+    assertThat(response.getItems().get(2).getItemCount()).isEqualTo(new Long("150"));
     jdbcTemplate.execute("drop table cb_survey_version");
     jdbcTemplate.execute("drop table cb_survey_attribute");
   }
@@ -834,36 +840,36 @@ public class CohortBuilderControllerTest {
         new SearchRequest().addIncludesItem(inSearchGroup).addExcludesItem(exSearchGroup);
     // Temporal includes
     inSearchGroup.temporal(true);
-    assertTrue(controller.isApproximate(searchRequest));
+    assertThat(controller.isApproximate(searchRequest)).isTrue();
     // BP includes
     inSearchGroup.temporal(false);
     inSearchParameter.subtype(CriteriaSubType.BP.toString());
-    assertTrue(controller.isApproximate(searchRequest));
+    assertThat(controller.isApproximate(searchRequest)).isTrue();
     // Deceased includes
     inSearchParameter.type(CriteriaType.DECEASED.toString());
-    assertTrue(controller.isApproximate(searchRequest));
+    assertThat(controller.isApproximate(searchRequest)).isTrue();
     // Temporal and BP includes
     inSearchGroup.temporal(true);
     inSearchParameter.subtype(CriteriaSubType.BP.toString());
-    assertTrue(controller.isApproximate(searchRequest));
+    assertThat(controller.isApproximate(searchRequest)).isTrue();
     // No temporal/BP/Decease
     inSearchGroup.temporal(false);
     inSearchParameter.type(CriteriaType.ETHNICITY.toString()).subtype(null);
-    assertFalse(controller.isApproximate(searchRequest));
+    assertThat(controller.isApproximate(searchRequest)).isFalse();
     // Temporal excludes
     exSearchGroup.temporal(true);
-    assertTrue(controller.isApproximate(searchRequest));
+    assertThat(controller.isApproximate(searchRequest)).isTrue();
     // BP excludes
     exSearchGroup.temporal(false);
     exSearchParameter.subtype(CriteriaSubType.BP.toString());
-    assertTrue(controller.isApproximate(searchRequest));
+    assertThat(controller.isApproximate(searchRequest)).isTrue();
     // Deceased excludes
     exSearchParameter.type(CriteriaType.DECEASED.toString());
-    assertTrue(controller.isApproximate(searchRequest));
+    assertThat(controller.isApproximate(searchRequest)).isTrue();
     // Temporal and BP excludes
     exSearchGroup.temporal(true);
     exSearchParameter.subtype(CriteriaSubType.BP.toString());
-    assertTrue(controller.isApproximate(searchRequest));
+    assertThat(controller.isApproximate(searchRequest)).isTrue();
   }
 
   private Criteria createResponseCriteria(DbCriteria dbCriteria) {

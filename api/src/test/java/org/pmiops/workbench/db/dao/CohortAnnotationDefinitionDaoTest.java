@@ -1,6 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,10 +31,10 @@ public class CohortAnnotationDefinitionDaoTest {
 
   @Test
   public void saveNoEnumValues() {
-    assertEquals(
-        cohortAnnotationDefinition,
-        cohortAnnotationDefinitionDao.findOne(
-            cohortAnnotationDefinition.getCohortAnnotationDefinitionId()));
+    assertThat(
+            cohortAnnotationDefinitionDao.findOne(
+                cohortAnnotationDefinition.getCohortAnnotationDefinitionId()))
+        .isEqualTo(cohortAnnotationDefinition);
   }
 
   @Test
@@ -64,25 +64,26 @@ public class CohortAnnotationDefinitionDaoTest {
     DbCohortAnnotationDefinition cad =
         cohortAnnotationDefinitionDao.findOne(
             cohortAnnotationDefinition.getCohortAnnotationDefinitionId());
-    assertEquals(cohortAnnotationDefinition, cad);
-    assertEquals(cohortAnnotationDefinition.getEnumValues(), cad.getEnumValues());
+    assertThat(cohortAnnotationDefinition).isEqualTo(cad);
+    assertThat(cohortAnnotationDefinition.getEnumValues()).isEqualTo(cad.getEnumValues());
   }
 
   @Test
   public void findByCohortIdAndColumnName() {
-    assertEquals(
-        cohortAnnotationDefinition,
-        cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(
-            cohortAnnotationDefinition.getCohortId(), cohortAnnotationDefinition.getColumnName()));
+    assertThat(
+            cohortAnnotationDefinitionDao.findByCohortIdAndColumnName(
+                cohortAnnotationDefinition.getCohortId(),
+                cohortAnnotationDefinition.getColumnName()))
+        .isEqualTo(cohortAnnotationDefinition);
   }
 
   @Test
   public void findByCohortIdOrderByEnumValuesAsc() {
-    assertEquals(
-        cohortAnnotationDefinition,
-        cohortAnnotationDefinitionDao
-            .findByCohortId(cohortAnnotationDefinition.getCohortId())
-            .get(0));
+    assertThat(
+            cohortAnnotationDefinitionDao
+                .findByCohortId(cohortAnnotationDefinition.getCohortId())
+                .get(0))
+        .isEqualTo(cohortAnnotationDefinition);
   }
 
   private DbCohortAnnotationDefinition createCohortAnnotationDefinition() {

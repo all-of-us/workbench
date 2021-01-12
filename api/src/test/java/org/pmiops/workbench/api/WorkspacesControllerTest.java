@@ -2,8 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.fail;
+import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -2465,11 +2464,11 @@ public class WorkspacesControllerTest {
         workspacesController.getNoteBookList("project", "workspace").getBody().stream()
             .map(FileDetail::getName)
             .collect(Collectors.toList());
-    assertEquals(
-        gotNames,
-        ImmutableList.of(
-            NotebooksService.withNotebookExtension("mockFile"),
-            NotebooksService.withNotebookExtension("two words")));
+    assertThat(gotNames)
+        .isEqualTo(
+            ImmutableList.of(
+                NotebooksService.withNotebookExtension("mockFile"),
+                NotebooksService.withNotebookExtension("two words")));
   }
 
   @Test
@@ -2490,7 +2489,7 @@ public class WorkspacesControllerTest {
         workspacesController.getNoteBookList("project", "workspace").getBody().stream()
             .map(FileDetail::getName)
             .collect(Collectors.toList());
-    assertEquals(gotNames, ImmutableList.of(NotebooksService.withNotebookExtension("foo")));
+    assertThat(gotNames).isEqualTo(ImmutableList.of(NotebooksService.withNotebookExtension("foo")));
   }
 
   @Test
