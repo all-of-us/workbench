@@ -27,7 +27,28 @@ public interface ConceptSetMapper {
   @Mapping(target = "survey", source = "surveysEnum")
   @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
   @Mapping(target = "criteriums", ignore = true)
+  @Mapping(target = "participantCount", ignore = true)
   ConceptSet dbModelToClient(DbConceptSet source);
+
+  @Mapping(target = "id", source = "conceptSetId")
+  @Mapping(target = "domain", source = "domainEnum")
+  @Mapping(target = "survey", source = "surveysEnum")
+  @Mapping(target = "etag", source = "version", qualifiedByName = "cdrVersionToEtag")
+  @Mapping(target = "criteriums", ignore = true)
+  @Mapping(target = "participantCount", ignore = true)
+  ConceptSet dbModelToClient(
+      DbConceptSet source, @Context ConceptBigQueryService conceptBigQueryService);
+
+  @AfterMapping
+  default void afterMappingDbModelToClient(
+      DbConceptSet source,
+      @MappingTarget ConceptSet conceptSet,
+      @Context ConceptBigQueryService conceptBigQueryService) {
+    String omopTable = BigQueryTableInfo.getTableName(source.getDomainEnum());
+    conceptSet.setParticipantCount(
+        conceptBigQueryService.getParticipantCountForConcepts(
+            source.getDomainEnum(), omopTable, source.getConceptSetConceptIds()));
+  }
 
   @Mapping(target = "conceptSetId", ignore = true)
   @Mapping(target = "name", ignore = true)
@@ -62,7 +83,6 @@ public interface ConceptSetMapper {
       target = "lastModifiedTime",
       source = "conceptSet.lastModifiedTime",
       qualifiedByName = "toTimestampCurrentIfNull")
-  @Mapping(target = "participantCount", source = "conceptSet.participantCount")
   @Mapping(target = "domain", ignore = true)
   @Mapping(target = "survey", ignore = true)
   @Mapping(target = "creator", ignore = true)
@@ -71,18 +91,14 @@ public interface ConceptSetMapper {
   @Mapping(target = "workspaceId", ignore = true)
   @Mapping(target = "conceptSetConceptIds", ignore = true)
   DbConceptSet clientToDbModel(
-      CreateConceptSetRequest source,
-      @Context Long workspaceId,
-      @Context DbUser creator,
-      @Context ConceptBigQueryService conceptBigQueryService);
+      CreateConceptSetRequest source, @Context Long workspaceId, @Context DbUser creator);
 
   @AfterMapping
   default void afterMappingClientToDbModel(
       CreateConceptSetRequest source,
       @Context Long workspaceId,
       @Context DbUser creator,
-      @MappingTarget DbConceptSet dbConceptSet,
-      @Context ConceptBigQueryService conceptBigQueryService) {
+      @MappingTarget DbConceptSet dbConceptSet) {
     dbConceptSet.setWorkspaceId(workspaceId);
     dbConceptSet.setCreator(creator);
     dbConceptSet
@@ -96,10 +112,6 @@ public interface ConceptSetMapper {
                             .addStandard(c.getStandard())
                             .build())
                 .collect(Collectors.toList()));
-    String omopTable = BigQueryTableInfo.getTableName(source.getConceptSet().getDomain());
-    dbConceptSet.setParticipantCount(
-        conceptBigQueryService.getParticipantCountForConcepts(
-            dbConceptSet.getDomainEnum(), omopTable, dbConceptSet.getConceptSetConceptIds()));
   }
 
   /**
