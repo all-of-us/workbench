@@ -190,7 +190,7 @@ export async function createWorkspace(page: Page, cdrVersionName: string = confi
 }
 
 /**
- * Find a suitable existing workspace which is older than 30 minutes, or create one if workspace does not exist.
+ * Find a suitable existing workspace older than 30 minutes, or create one if workspace does not exist.
  *
  * TODO: this function does a lot of different things.  refactor and split up according to use cases.
  *

@@ -79,9 +79,9 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
   // if the collaborator is already on this workspace, just remove them before continuing.
   async removeCollab(): Promise<void> {  
     const accessLevel = await this.findUserInCollaboratorList(config.collaboratorUsername);
-  if (accessLevel !== null) {
-    await (await (this.openShareModal())).removeUser(config.collaboratorUsername);
-    await waitWhileLoading(page);
+    if (accessLevel !== null) {
+      await (await (this.openShareModal())).removeUser(config.collaboratorUsername);
+      await waitWhileLoading(this.page);
     }
   }
 
