@@ -302,7 +302,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
             ? {marginBottom: '3.5rem'}
             : {height: 'calc(100% - 3.5rem)'}
         }>
-          {domain === Domain.PERSON ? <div style={{flex: 1, overflow: 'auto'}}>
+          {domain === Domain.PERSON ? <div data-test-id='demographics' style={{flex: 1, overflow: 'auto'}}>
               <Demographics
                 criteriaType={type}
                 select={this.addSelection}
