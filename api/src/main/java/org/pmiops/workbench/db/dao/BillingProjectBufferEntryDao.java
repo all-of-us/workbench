@@ -22,7 +22,8 @@ public interface BillingProjectBufferEntryDao
 
   DbBillingProjectBufferEntry findByFireCloudProjectName(String fireCloudProjectName);
 
-  @Query("SELECT COUNT(*) FROM DbBillingProjectBufferEntry WHERE status IN (0, 2) AND access_tier = (:tier)")
+  @Query(
+      "SELECT COUNT(*) FROM DbBillingProjectBufferEntry WHERE status IN (0, 2) AND access_tier = (:tier)")
   Long getCurrentBufferSizeForAccessTier(@Param("tier") String accessTier);
 
   // TODO: decide if we care about potential "tier bias" here; it does not take tiers into account
@@ -32,14 +33,15 @@ public interface BillingProjectBufferEntryDao
   // TODO: decide if we care about potential "tier bias" here; it does not take tiers into account
   List<DbBillingProjectBufferEntry> findTop5ByStatusOrderByLastSyncRequestTimeAsc(short status);
 
-  DbBillingProjectBufferEntry findFirstByStatusAndAccessTierOrderByCreationTimeAsc(short status, String accessTier);
+  DbBillingProjectBufferEntry findFirstByStatusAndAccessTierOrderByCreationTimeAsc(
+      short status, String accessTier);
 
   Long countByStatus(short status);
 
   Long countByStatusAndAccessTier(short status, String accessTier);
 
-  default Map<BufferEntryStatus, Long> getAllTiersCountByStatusMap() {
-    return computeAllTiersProjectCountByStatus().stream()
+  default Map<BufferEntryStatus, Long> getCountByStatusMap() {
+    return computeProjectCountByStatus().stream()
         .collect(
             ImmutableMap.toImmutableMap(
                 StatusToCountResult::getStatusEnum, StatusToCountResult::getNumProjects));
@@ -51,7 +53,7 @@ public interface BillingProjectBufferEntryDao
               + "    from DbBillingProjectBufferEntry \n"
               + "group by status\n"
               + "order by status")
-  List<StatusToCountResult> computeAllTiersProjectCountByStatus();
+  List<StatusToCountResult> computeProjectCountByStatus();
 
   @Query(value = "SELECT GET_LOCK('" + ASSIGNING_LOCK + "', 1)", nativeQuery = true)
   int acquireAssigningLock();

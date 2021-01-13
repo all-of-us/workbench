@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.api.client.http.HttpTransport;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
+import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Rule;
@@ -16,6 +17,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.config.RetryConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.AccessTierConfig;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -24,10 +26,7 @@ import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
-import org.pmiops.workbench.firecloud.api.ServicePerimetersApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
-import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
-import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
@@ -57,7 +56,6 @@ public class FireCloudServiceImplTest {
   @MockBean private NihApi nihApi;
   @MockBean private ProfileApi profileApi;
   @MockBean private StatusApi statusApi;
-  @MockBean private ServicePerimetersApi servicePerimetersApi;
 
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
 
@@ -172,10 +170,14 @@ public class FireCloudServiceImplTest {
   @Test
   public void testCreateAllOfUsBillingProjectInPerimeter() throws Exception {
     final String servicePerimeter = "a-cloud-with-a-fence-around-it";
-    workbenchConfig.firecloud.vpcServicePerimeterName = servicePerimeter;
-    workbenchConfig.featureFlags.enableLazyPerimeterAssignment = false;
+    final String tierName = "registered";
+    final AccessTierConfig tierConfig = new AccessTierConfig();
+    tierConfig.servicePerimeterName = servicePerimeter;
 
-    service.createAllOfUsBillingProject("project-name");
+    workbenchConfig.firecloud.vpcServicePerimeterName = servicePerimeter;
+    workbenchConfig.accessTiers = ImmutableMap.of(tierName, tierConfig);
+
+    service.createAllOfUsBillingProject("project-name", tierName);
 
     ArgumentCaptor<FirecloudCreateRawlsBillingProjectFullRequest> captor =
         ArgumentCaptor.forClass(FirecloudCreateRawlsBillingProjectFullRequest.class);
@@ -192,53 +194,5 @@ public class FireCloudServiceImplTest {
     assertThat(request.getHighSecurityNetwork()).isTrue();
 
     assertThat(request.getServicePerimeter()).isEqualTo(servicePerimeter);
-  }
-
-  @Test
-  public void testCreateAllOfUsBillingProjectWithoutPerimeter() throws Exception {
-    workbenchConfig.featureFlags.enableLazyPerimeterAssignment = true;
-
-    service.createAllOfUsBillingProject("project-name");
-
-    ArgumentCaptor<FirecloudCreateRawlsBillingProjectFullRequest> captor =
-        ArgumentCaptor.forClass(FirecloudCreateRawlsBillingProjectFullRequest.class);
-    verify(billingApi).createBillingProjectFull(captor.capture());
-    FirecloudCreateRawlsBillingProjectFullRequest request = captor.getValue();
-
-    // N.B. FireCloudServiceImpl doesn't add the project prefix; this is done by callers such
-    // as BillingProjectBufferService.
-    assertThat(request.getProjectName()).isEqualTo("project-name");
-    // FireCloudServiceImpl always adds the "billingAccounts/" prefix to the billing account
-    // from config.
-    assertThat(request.getBillingAccount()).isEqualTo("billingAccounts/test-billing-account");
-    assertThat(request.getEnableFlowLogs()).isTrue();
-    assertThat(request.getHighSecurityNetwork()).isTrue();
-
-    assertThat(request.getServicePerimeter()).isNull();
-  }
-
-  @Test
-  public void testAddProjectToServicePerimeter() throws ApiException {
-    final String servicePerimeter = "a-cloud-with-a-fence-around-it";
-    final String projectName = "The Alan Parsons Project";
-
-    when(billingApi.billingProjectStatus(projectName))
-        .thenReturn(
-            new FirecloudBillingProjectStatus()
-                .projectName(projectName)
-                .creationStatus(CreationStatusEnum.READY));
-
-    service.addProjectToServicePerimeter(servicePerimeter, projectName);
-
-    ArgumentCaptor<String> projectNameCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<String> servicePerimeterCaptor = ArgumentCaptor.forClass(String.class);
-    verify(servicePerimetersApi)
-        .addProjectToServicePerimeter(
-            servicePerimeterCaptor.capture(), projectNameCaptor.capture());
-    String invokedPerimeterName = servicePerimeterCaptor.getValue();
-    String invokedProjectName = projectNameCaptor.getValue();
-
-    assertThat(invokedPerimeterName).isEqualTo(servicePerimeter);
-    assertThat(invokedProjectName).isEqualTo(projectName);
   }
 }

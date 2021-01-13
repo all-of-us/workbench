@@ -87,7 +87,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
     final ImmutableMap<BufferEntryStatus, Long> entryStatusToCount =
-        ImmutableMap.copyOf(billingProjectBufferEntryDao.getAllTiersCountByStatusMap());
+        ImmutableMap.copyOf(billingProjectBufferEntryDao.getCountByStatusMap());
 
     return Arrays.stream(BufferEntryStatus.values())
         .map(
@@ -118,7 +118,10 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     final DbBillingProjectBufferEntry creatingBufferEntry = makeCreatingBufferEntry(accessTier);
     fireCloudService.createAllOfUsBillingProject(
         creatingBufferEntry.getFireCloudProjectName(), accessTier);
-    log.info(String.format("Created new project %s for access tier %s", creatingBufferEntry.toString(), accessTier));
+    log.info(
+        String.format(
+            "Created new project %s for access tier %s",
+            creatingBufferEntry.toString(), accessTier));
   }
 
   @NotNull
@@ -276,7 +279,8 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     try {
       entry =
           billingProjectBufferEntryDao.findFirstByStatusAndAccessTierOrderByCreationTimeAsc(
-              DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.AVAILABLE), accessTier);
+              DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.AVAILABLE),
+              accessTier);
 
       if (entry == null) {
         log.log(Level.SEVERE, "Consume Buffer call made while Billing Project Buffer was empty");
@@ -328,13 +332,20 @@ public class BillingProjectBufferService implements GaugeDataCollector {
 
   public BillingProjectBufferStatusByTier getStatusByTier() {
     final BillingProjectBufferStatusByTier response = new BillingProjectBufferStatusByTier();
-    response.addAll(this.workbenchConfigProvider.get().accessTiers.keySet().stream().map(accessTier -> {
-      final long bufferSize =
-          billingProjectBufferEntryDao.countByStatusAndAccessTier(
-              DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.AVAILABLE),
-              accessTier);
-      return new BillingProjectBufferStatusByTierInner().accessTier(accessTier).bufferSize(bufferSize);
-    }).collect(Collectors.toList()));
+    response.addAll(
+        this.workbenchConfigProvider.get().accessTiers.keySet().stream()
+            .map(
+                accessTier -> {
+                  final long bufferSize =
+                      billingProjectBufferEntryDao.countByStatusAndAccessTier(
+                          DbStorageEnums.billingProjectBufferEntryStatusToStorage(
+                              BufferEntryStatus.AVAILABLE),
+                          accessTier);
+                  return new BillingProjectBufferStatusByTierInner()
+                      .accessTier(accessTier)
+                      .bufferSize(bufferSize);
+                })
+            .collect(Collectors.toList()));
     return response;
   }
 }
