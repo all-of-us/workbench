@@ -590,6 +590,8 @@ const CostEstimator = ({
 };
 
 const CostInfo = ({runtimeChanged, runtimeConfig, currentUser, workspace, creatorFreeCreditsRemaining}) => {
+  const remainingCredits = creatorFreeCreditsRemaining === null ? <Spinner size={10}/> : formatUsd(creatorFreeCreditsRemaining);
+
   return <FlexRow
     style={
       runtimeChanged
@@ -605,14 +607,14 @@ const CostInfo = ({runtimeChanged, runtimeConfig, currentUser, workspace, creato
       workspace.billingAccountType === BillingAccountType.FREETIER
       && currentUser === workspace.creator
       && <div style={styles.costsDrawnFrom}>
-        Costs will draw from your remaining {formatUsd(creatorFreeCreditsRemaining)} of free credits.
+        Costs will draw from your remaining {remainingCredits} of free credits.
       </div>
     }
     {
       workspace.billingAccountType === BillingAccountType.FREETIER
       && currentUser !== workspace.creator
       && <div style={styles.costsDrawnFrom}>
-        Costs will draw from workspace creator's remaining {formatUsd(creatorFreeCreditsRemaining)} of free credits.
+        Costs will draw from workspace creator's remaining {remainingCredits} of free credits.
       </div>
     }
     {
@@ -824,7 +826,7 @@ export const RuntimePanel = fp.flow(
   const runtimeChanged = runtimeExists && runtimeDiffs.length > 0;
   const needsDelete = runtimeDiffs.map(diff => diff.differenceType).includes(RuntimeDiffState.NEEDS_DELETE);
 
-  const [creatorFreeCreditsRemaining, setCreatorFreeCreditsRemaining] = useState(0);
+  const [creatorFreeCreditsRemaining, setCreatorFreeCreditsRemaining] = useState(null);
   useEffect(() => {
     const aborter = new AbortController();
     const fetchFreeCredits = async() => {
