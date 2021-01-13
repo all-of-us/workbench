@@ -283,9 +283,6 @@ commands:
       - run:
           command: |
             echo "Environment parameter WORKBENCH_ENV=${WORKBENCH_ENV}"
-      - run:
-          # Needed for env-cmd to function on Circle.
-          command: touch .env
       - restore_cache:
           keys:
             - v5-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
@@ -297,6 +294,9 @@ commands:
             - ~/.cache/yarn
             - e2e/node_modules
           key: v5-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+      - run:
+          # Needed for env-cmd to function on Circle.
+          command: touch e2e/.env
       - run:
           name: Running Puppeteer e2e tests
           working_directory: ~/workbench/e2e
