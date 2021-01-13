@@ -8,7 +8,7 @@ import {ResourceCard} from 'app/text-labels';
 describe('Jupyter notebook tests in Python language', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   /**

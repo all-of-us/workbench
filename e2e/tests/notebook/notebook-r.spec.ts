@@ -9,7 +9,7 @@ jest.setTimeout(20 * 60 * 1000);
 describe('Jupyter notebook tests in R language', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   test('Run code from file', async () => {

@@ -12,7 +12,7 @@ import {waitForNumericalString, waitForText} from 'utils/waits-utils';
 describe('User can create, modify, rename and delete Cohort', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   /**

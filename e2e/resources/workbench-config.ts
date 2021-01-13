@@ -6,7 +6,9 @@ const userCredential = {
   userEmail: process.env.USER_NAME,
   userPassword: process.env.PASSWORD,
   institutionContactEmail: 'aou-dev-registration@broadinstitute.org',
-  userAccessToken: process.env.USER_ACCESS_TOKEN
+  // This is passed via a file to leave open the future option to allow token
+  // refresh during a Puppeteer test run, and also limits logging exposure of the token.
+  userAccessTokenFilename: 'puppeteer-access-token.txt'
 };
 
 const urlPath = {

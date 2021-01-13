@@ -14,7 +14,7 @@ import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 describe('User can create new Cohorts', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   /**

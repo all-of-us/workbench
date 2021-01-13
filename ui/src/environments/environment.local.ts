@@ -18,6 +18,7 @@ export const environment: Environment = {
   zendeskEnv: ZendeskEnv.Sandbox,
   inactivityTimeoutSeconds: 99999999999,
   inactivityWarningBeforeSeconds: 5 * 60,
+  allowTestAccessTokenOverride: true,
   enableCaptcha: true,
   enablePublishedWorkspaces: false,
   enableProfileCapsFeatures: true,

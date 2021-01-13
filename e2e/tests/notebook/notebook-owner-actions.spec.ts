@@ -13,7 +13,7 @@ describe('Workspace owner Jupyter notebook action tests', () => {
   let workspaceName: string;
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
 

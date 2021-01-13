@@ -7,7 +7,7 @@ import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
 describe('Dataset test', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   /**

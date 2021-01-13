@@ -7,7 +7,7 @@ import {config} from 'resources/workbench-config';
 describe('Workspaces Filter Select menu tests', () => {
 
   beforeEach(async () => {
-    await signIn(page, config.collaboratorUsername, config.userPassword);
+    await signInWithAccessToken(page, config.collaboratorUsername, config.userPassword);
   });
 
   /**

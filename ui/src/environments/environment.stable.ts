@@ -16,6 +16,7 @@ export const environment: Environment = {
   trainingUrl: 'https://aoudev.nnlm.gov',
   inactivityTimeoutSeconds: 30 * 60,
   inactivityWarningBeforeSeconds: 5 * 60,
+  allowTestAccessTokenOverride: false,
   enableCaptcha: true,
   enablePublishedWorkspaces: false,
   enableProfileCapsFeatures: true,

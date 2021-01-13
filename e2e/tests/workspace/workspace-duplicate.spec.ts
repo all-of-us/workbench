@@ -8,7 +8,7 @@ import WorkspacesPage from 'app/page/workspaces-page';
 
 describe('Duplicate workspace', () => {
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   /**

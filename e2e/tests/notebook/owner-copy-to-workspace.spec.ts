@@ -85,7 +85,7 @@ let defaultCdrWorkspace: string;
 describe('Workspace owner Jupyter notebook action tests', () => {
 
    beforeEach(async () => {
-      await signIn(page);
+      await signInWithAccessToken(page);
    });
 
    test('Copy notebook to another Workspace when CDR versions match', async () => {

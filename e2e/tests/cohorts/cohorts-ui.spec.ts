@@ -8,7 +8,7 @@ import {TabLabels} from 'app/page/workspace-base';
 describe('Cohorts UI tests', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   /**

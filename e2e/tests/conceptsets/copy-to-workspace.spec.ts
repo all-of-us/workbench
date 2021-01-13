@@ -42,7 +42,7 @@ async function createConceptSet(srcWorkspaceCard: WorkspaceCard) {
 describe('Copy Concept Set to another workspace', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   /**

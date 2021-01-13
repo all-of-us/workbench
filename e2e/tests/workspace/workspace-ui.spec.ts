@@ -8,7 +8,7 @@ import Navigation, {NavLink} from 'app/component/navigation';
 describe('Workspace ui tests', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   test('Workspace cards all have same ui size', async () => {

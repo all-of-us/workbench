@@ -10,7 +10,7 @@ import {createWorkspace, signIn} from 'utils/test-utils';
 describe('Editing and rename Concept Set', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   /**
