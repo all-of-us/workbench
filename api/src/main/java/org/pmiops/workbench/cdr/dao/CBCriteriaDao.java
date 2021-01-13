@@ -198,6 +198,20 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
               + "and c1.conceptId in ( select c.conceptId "
               + "                      from DbCriteria c "
               + "                     where c.domainId = :domain "
+              + "                       and match(c.fullText, concat(:term, '+[', :domain, '_rank1]')) > 0) "
+              + "order by c1.count desc")
+  Page<DbCriteria> findSurveyQuestionCriteriaByDomainAndFullText(
+      @Param("domain") String domain, @Param("term") String term, Pageable page);
+
+  @Query(
+      value =
+          "select c1 "
+              + "from DbCriteria c1 "
+              + "where c1.domainId = :domain "
+              + "and c1.subtype = 'QUESTION' "
+              + "and c1.conceptId in ( select c.conceptId "
+              + "                      from DbCriteria c "
+              + "                     where c.domainId = :domain "
               + "                       and match(c.fullText, concat('+[', :domain, '_rank1]')) > 0 "
               + "                       and match(c.path, :id) > 0) "
               + "order by c1.count desc")

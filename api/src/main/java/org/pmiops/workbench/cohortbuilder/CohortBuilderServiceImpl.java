@@ -149,14 +149,16 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         standardConceptIds.stream().map(l -> l.toString()).collect(Collectors.toList());
     if (!sourceIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
     }
     if (!standardConceptIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
@@ -284,10 +286,17 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     }
 
     if (Domain.fromValue(domain).equals(Domain.SURVEY)) {
-      Long id = cbCriteriaDao.findIdByDomainAndName(domain, surveyName);
-      Page<DbCriteria> dbCriteriaPage =
-          cbCriteriaDao.findSurveyQuestionCriteriaByDomainAndIdAndFullText(
-              domain, id, modifyTermMatch(term), pageRequest);
+      Page<DbCriteria> dbCriteriaPage;
+      if (surveyName.equals("All")) {
+        dbCriteriaPage =
+            cbCriteriaDao.findSurveyQuestionCriteriaByDomainAndFullText(
+                domain, modifyTermMatch(term), pageRequest);
+      } else {
+        Long id = cbCriteriaDao.findIdByDomainAndName(domain, surveyName);
+        dbCriteriaPage =
+            cbCriteriaDao.findSurveyQuestionCriteriaByDomainAndIdAndFullText(
+                domain, id, modifyTermMatch(term), pageRequest);
+      }
       return new CriteriaListWithCountResponse()
           .items(
               dbCriteriaPage.getContent().stream()
