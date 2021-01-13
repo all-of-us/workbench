@@ -163,7 +163,7 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
 
     componentWillUnmount() {
       localStorage.removeItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS);
-      currentConceptStore.next([]);
+      currentConceptStore.next(undefined);
       currentConceptSetStore.next(undefined);
       this.subscription.unsubscribe();
     }
