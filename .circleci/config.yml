@@ -136,7 +136,7 @@ commands:
           name: Deploy API and UI to << parameters.project_name >> App Engine
 
   gcloud-auth-login:
-    description: "Activiate CircleCI service account credential"
+    description: "Activate CircleCI service account credential"
     steps:
       - run:
           working_directory: ~/workbench
@@ -598,6 +598,7 @@ jobs:
                 ;;
             esac
             echo 'export PASSWORD=$PUPPETEER_USER_PASSWORD' >> $BASH_ENV
+            echo 'export GOOGLE_APPLICATION_CREDENTIALS=~/workbench/api/circle-sa-key.json' >> $BASH_ENV
             source $BASH_ENV
       - when:
           condition:
