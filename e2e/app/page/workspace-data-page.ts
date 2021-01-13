@@ -144,7 +144,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
   async verifyWorkspaceNameOnDataPage(workspaceName: string): Promise<void> {
     await this.waitForLoad();
 
-    const workspaceLink = new Link(page, `//a[text()='${workspaceName}']`);
+    const workspaceLink = new Link(this.page, `//a[text()='${workspaceName}']`);
     await workspaceLink.waitForXPath({visible: true});
     expect(await workspaceLink.isVisible()).toBe(true);
   }

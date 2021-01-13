@@ -190,7 +190,7 @@ export async function createWorkspace(page: Page, cdrVersionName: string = confi
 }
 
 /**
- * Find a suitable existing workspace, or create one if it does not exist.
+ * Find a suitable existing workspace older than 30 minutes, or create one if workspace does not exist.
  *
  * TODO: this function does a lot of different things.  refactor and split up according to use cases.
  *
@@ -224,11 +224,23 @@ export async function findOrCreateWorkspace(page: Page, opts: {alwaysCreate?: bo
     }
   }
 
-  // workspace name not found, or none was specified
+  // Find all workspaces with OWNER role
+  const existingCards = await WorkspaceCard.findAllCards(page, WorkspaceAccessLevel.Owner);
 
-  const existingWorkspaces = await workspaceCard.getWorkspaceMatchAccessLevel(WorkspaceAccessLevel.Owner);
-  if (alwaysCreate || existingWorkspaces.length === 0) {
-    // Create new workspace
+  // Filter to include Workspaces older than 30 minutes
+  const halfHourMillisec = 1000 * 60 * 30;
+  const now = Date.now();
+  const olderWorkspaceCards = [];
+  for (const card of existingCards) {
+    const workspaceTime = Date.parse(await card.getLastChangedTime());
+    const timeDiff = now - workspaceTime;
+    if (timeDiff > halfHourMillisec) {
+      olderWorkspaceCards.push(card);
+    }
+  }
+
+  // Create new workspace if existing workspace is zero or alwayCreate is true
+  if (alwaysCreate || olderWorkspaceCards.length === 0) {
     const name = workspaceName || makeWorkspaceName();
     await workspacesPage.createWorkspace(name);
     console.log(`Created workspace "${name}"`);
@@ -236,11 +248,12 @@ export async function findOrCreateWorkspace(page: Page, opts: {alwaysCreate?: bo
     return workspaceCard.findCard(name);
   }
 
-  // Returns one random selected Workspace card.
-  const oneWorkspaceCard = fp.shuffle(existingWorkspaces)[0];
-  const workspaceCardName = await oneWorkspaceCard.getWorkspaceName();
-  console.log(`Found workspace "${workspaceCardName}"`);
-  return oneWorkspaceCard;
+  // Return one random Workspace card
+  const randomCard = fp.shuffle(olderWorkspaceCards).pop();
+  const cardName = await randomCard.getWorkspaceName();
+  const lastChangedTime = await randomCard.getLastChangedTime();
+  console.log(`Found workspace "${cardName}". Last changed on ${lastChangedTime}`);
+  return randomCard;
 }
 
 export async function centerPoint(element: ElementHandle): Promise<[number, number]> {

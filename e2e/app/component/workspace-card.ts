@@ -11,6 +11,7 @@ const WorkspaceCardSelector = {
   cardRootXpath: '//*[child::*[@data-test-id="workspace-card"]]', // finds 'workspace-card' parent container node
   cardNameXpath: '@data-test-id="workspace-card-name"',
   accessLevelXpath: './/*[@data-test-id="workspace-access-level"]',
+  dateTimeXpath: './/*[@data-test-id="workspace-card"]/div[3]'
 }
 
 
@@ -35,20 +36,30 @@ export default class WorkspaceCard extends CardBase {
   }
 
   /**
-   * Find all visible Workspace Cards. Assume at least one Card exists.
+   * Find all visible Workspace Cards.
    * @param {Page} page
    * @throws TimeoutError if fails to find Card.
    */
-  static async findAllCards(page: Page): Promise<WorkspaceCard[]> {
+  static async findAllCards(page: Page, accessLevel?: WorkspaceAccessLevel): Promise<WorkspaceCard[]> {
     try {
       await page.waitForXPath(WorkspaceCardSelector.cardRootXpath, {visible: true, timeout: 1000});
     } catch (e) {
       return [];
     }
-    const cards = await page.$x(WorkspaceCardSelector.cardRootXpath);
-    // transform to WorkspaceCard object
-    const resourceCards = cards.map(card => new WorkspaceCard(page).asCard(card));
-    return resourceCards;
+    const workspaceCards = (await page.$x(WorkspaceCardSelector.cardRootXpath))
+      .map(card => new WorkspaceCard(page).asCard(card));
+
+    const filtered = [];
+    if (accessLevel !== undefined) {
+      for (const card of workspaceCards) {
+        const cardAccessLevel = await card.getWorkspaceAccessLevel();
+        if (cardAccessLevel === accessLevel) {
+          filtered.push(card);
+        }
+      }
+      return filtered;
+    }
+    return workspaceCards;
   }
 
   static async findAnyCard(page: Page): Promise<WorkspaceCard> {
@@ -131,6 +142,13 @@ export default class WorkspaceCard extends CardBase {
       }
     }
     return matchWorkspaceArray;
+  }
+
+  async getLastChangedTime(): Promise<string> {
+    const [element] = await this.cardElement.$x(WorkspaceCardSelector.dateTimeXpath);
+    const wholeText = await getPropValue<string>(element, 'innerText');
+    // datetime format is "Last Changed: 01/08/21, 05:22 PM"
+    return wholeText.replace('Last Changed: ', '').trim();
   }
 
   /**
