@@ -1,6 +1,6 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import WorkspacesPage, {FieldSelector} from 'app/page/workspaces-page';
-import {signIn, performActions} from 'utils/test-utils';
+import {signInWithAccessToken, performActions} from 'utils/test-utils';
 import Button from 'app/element/button';
 import * as testData from 'resources/data/workspace-data';
 import {makeWorkspaceName} from 'utils/str-utils';

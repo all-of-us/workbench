@@ -1,6 +1,6 @@
 import WorkspaceCard from 'app/component/workspace-card';
 import {Page} from 'puppeteer';
-import {createWorkspace, signIn} from 'utils/test-utils';
+import {createWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import {config} from 'resources/workbench-config';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import WorkspaceBase from 'app/page/workspace-base';
