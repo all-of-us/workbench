@@ -40,7 +40,7 @@ public class BillingProjectBufferEntryDaoTest {
 
   @Test
   public void testGetCountByStatusMap() {
-    final Map<BufferEntryStatus, Long> result = billingProjectBufferEntryDao.getCountByStatusMap();
+    final Map<BufferEntryStatus, Long> result = billingProjectBufferEntryDao.getAllTiersCountByStatusMap();
     assertThat(result).hasSize(STATUS_TO_COUNT_INPUT.size());
     assertThat(result.get(BufferEntryStatus.CREATING)).isNull();
     assertThat(result.get(BufferEntryStatus.AVAILABLE)).isEqualTo(2L);

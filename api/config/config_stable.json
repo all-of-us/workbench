@@ -103,8 +103,7 @@
     "enableCohortBuilderV2": true,
     "enableConceptSetSearchV2": true,
     "enableReportingUploadCron": true,
-    "enableCustomRuntimes": true,
-    "enableLazyPerimeterAssignment": false
+    "enableCustomRuntimes": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",

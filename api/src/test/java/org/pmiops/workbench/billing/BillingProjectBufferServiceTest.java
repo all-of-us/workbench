@@ -754,7 +754,7 @@ public class BillingProjectBufferServiceTest {
     DbBillingProjectBufferEntry creatingEntry2 = makeSimpleEntry(BufferEntryStatus.CREATING);
     DbBillingProjectBufferEntry errorEntry1 = makeSimpleEntry(BufferEntryStatus.ERROR);
     final Map<BufferEntryStatus, Long> statusToCount =
-        billingProjectBufferEntryDao.getCountByStatusMap();
+        billingProjectBufferEntryDao.getAllTiersCountByStatusMap();
 
     assertThat(statusToCount.getOrDefault(BufferEntryStatus.ASSIGNING, 0L)).isEqualTo(0);
     assertThat(statusToCount.getOrDefault(BufferEntryStatus.ERROR, 0L)).isEqualTo(1);

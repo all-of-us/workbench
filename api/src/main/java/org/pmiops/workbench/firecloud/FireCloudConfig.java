@@ -13,7 +13,6 @@ import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
-import org.pmiops.workbench.firecloud.api.ServicePerimetersApi;
 import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
@@ -145,13 +144,6 @@ public class FireCloudConfig {
     StatusApi statusApi = new StatusApi();
     statusApi.setApiClient(buildApiClient(workbenchConfig));
     return statusApi;
-  }
-
-  @Bean
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ServicePerimetersApi servicePerimetersApi(
-      @Qualifier(SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
-    return new ServicePerimetersApi(apiClient);
   }
 
   public static ApiClient buildApiClient(WorkbenchConfig workbenchConfig) {

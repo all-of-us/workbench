@@ -1,10 +1,5 @@
 package org.pmiops.workbench.firecloud;
 
-import com.github.rholder.retry.RetryException;
-import com.github.rholder.retry.Retryer;
-import com.github.rholder.retry.RetryerBuilder;
-import com.github.rholder.retry.StopStrategies;
-import com.github.rholder.retry.WaitStrategies;
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.client.http.HttpTransport;
 import com.google.auth.oauth2.OAuth2Credentials;
@@ -13,14 +8,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
@@ -30,19 +20,16 @@ import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
-import org.pmiops.workbench.firecloud.api.ServicePerimetersApi;
 import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
 import org.pmiops.workbench.firecloud.api.StatusApi;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
-import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupRef;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
@@ -72,7 +59,6 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<GroupsApi> groupsApiProvider;
   private final Provider<NihApi> nihApiProvider;
   private final Provider<ProfileApi> profileApiProvider;
-  private final Provider<ServicePerimetersApi> servicePerimetersApiProvider;
   private final Provider<StatusApi> statusApiProvider;
 
   // We call some of the endpoints in these APIs with the user's credentials
@@ -137,8 +123,7 @@ public class FireCloudServiceImpl implements FireCloudService {
           Provider<StaticNotebooksApi> serviceAccountStaticNotebooksApiProvider,
       FirecloudRetryHandler retryHandler,
       IamCredentialsClient iamCredentialsClient,
-      HttpTransport httpTransport,
-      Provider<ServicePerimetersApi> servicePerimetersApiProvider) {
+      HttpTransport httpTransport) {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
@@ -152,7 +137,6 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.serviceAccountStaticNotebooksApiProvider = serviceAccountStaticNotebooksApiProvider;
     this.iamCredentialsClient = iamCredentialsClient;
     this.httpTransport = httpTransport;
-    this.servicePerimetersApiProvider = servicePerimetersApiProvider;
   }
 
   /**
@@ -246,7 +230,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void createAllOfUsBillingProject(String projectName) {
+  public void createAllOfUsBillingProject(String projectName, String accessTier) {
     if (projectName.contains(WORKSPACE_DELIMITER)) {
       throw new IllegalArgumentException(
           String.format(
@@ -260,11 +244,9 @@ public class FireCloudServiceImpl implements FireCloudService {
             .projectName(projectName)
             .highSecurityNetwork(true)
             .enableFlowLogs(true)
-            .privateIpGoogleAccess(true);
-
-    if (!configProvider.get().featureFlags.enableLazyPerimeterAssignment) {
-      request.servicePerimeter(configProvider.get().firecloud.vpcServicePerimeterName);
-    }
+            .privateIpGoogleAccess(true)
+            .servicePerimeter(
+                configProvider.get().accessTiers.get(accessTier).servicePerimeterName);
 
     BillingApi billingApi = billingApiProvider.get();
     retryHandler.run(
@@ -524,80 +506,5 @@ public class FireCloudServiceImpl implements FireCloudService {
             }
           }
         });
-  }
-
-  @Override
-  public void addProjectToServicePerimeter(String servicePerimeterName, String billingProject) {
-    final String utf8 = StandardCharsets.UTF_8.name();
-
-    // yes this actually gets URL decoded twice
-    // TODO: update Rawls, then FC Orch, then AoU.  See Terra JIRA AS-559
-    final String doublyEncodedName;
-    try {
-      doublyEncodedName = URLEncoder.encode(URLEncoder.encode(servicePerimeterName, utf8), utf8);
-    } catch (UnsupportedEncodingException e) {
-      throw new ServerErrorException(e);
-    }
-
-    ServicePerimetersApi perimetersApi = servicePerimetersApiProvider.get();
-    retryHandler.run(
-        (context) -> {
-          perimetersApi.addProjectToServicePerimeter(doublyEncodedName, billingProject);
-          return null;
-        });
-
-    // it takes some time to add the project to the perimeter
-    waitForReadyProject(billingProject);
-  }
-
-  private void waitForReadyProject(String billingProject) throws WorkbenchException {
-    log.info(String.format("Waiting for billing project %s to become READY", billingProject));
-    try {
-      final CreationStatusEnum status =
-          terminalStatusRetryer()
-              .call(() -> getBillingProjectStatus(billingProject))
-              .getCreationStatus();
-
-      if (status == CreationStatusEnum.READY) {
-        log.info(String.format("Billing project %s is READY", billingProject));
-      } else {
-        throw new WorkbenchException(
-            String.format("Billing project %s has %s status", billingProject, status.getValue()));
-      }
-    } catch (RetryException | ExecutionException e) {
-      throw new WorkbenchException(
-          String.format(
-              "Timed out waiting for billing project %s to transition to READY status after %d seconds",
-              billingProject, configProvider.get().firecloud.timeoutInSeconds),
-          e);
-    }
-  }
-
-  // I'd love to use our existing Spring retry system but this does not seem to be possible
-  // as it can only react to Exceptions
-  private Retryer<FirecloudBillingProjectStatus> terminalStatusRetryer() {
-    // TODO config value?
-    final long addToPerimeterPollingIncrementSeconds = 2;
-
-    return RetryerBuilder.<FirecloudBillingProjectStatus>newBuilder()
-        .retryIfResult(
-            status -> {
-              boolean willRetry =
-                  status.getCreationStatus() != CreationStatusEnum.READY
-                      && status.getCreationStatus() != CreationStatusEnum.ERROR;
-              if (willRetry) {
-                log.info(
-                    String.format(
-                        "Waiting for billing project %s terminal status - currently %s, retrying",
-                        status.getProjectName(), status.getCreationStatus().getValue()));
-              }
-              return willRetry;
-            })
-        .withWaitStrategy(
-            WaitStrategies.fixedWait(addToPerimeterPollingIncrementSeconds, TimeUnit.SECONDS))
-        .withStopStrategy(
-            StopStrategies.stopAfterDelay(
-                configProvider.get().firecloud.timeoutInSeconds, TimeUnit.SECONDS))
-        .build();
   }
 }

@@ -27,7 +27,7 @@ public class DbBillingProjectBufferEntry {
   private Timestamp lastStatusChangedTime;
   private Short status;
   private DbUser assignedUser;
-  private Boolean inServicePerimeter;
+  private String accessTier;
 
   public enum BufferEntryStatus {
     // Sent a request to FireCloud to create a BillingProject. Status of BillingProject is TBD
@@ -101,25 +101,13 @@ public class DbBillingProjectBufferEntry {
     this.assignedUser = assignedUser;
   }
 
-  @Column(name = "in_service_perimeter")
-  private Boolean getInServicePerimeter() {
-    return inServicePerimeter;
+  @Column(name = "access_tier")
+  private String getAccessTier() {
+    return accessTier;
   }
 
-  public void setInServicePerimeter(Boolean inServicePerimeter) {
-    this.inServicePerimeter = inServicePerimeter;
-  }
-
-  @Transient
-  public boolean needsPerimeterAssignment() {
-    // if this entry was created before we started tracking this value, then it was created when all
-    // projects
-    // were assigned to the environment's Registered Tier perimeter
-    if (inServicePerimeter == null) {
-      return false;
-    } else {
-      return !inServicePerimeter;
-    }
+  public void setAccessTier(String accessTier) {
+    this.accessTier = accessTier;
   }
 
   @Transient
@@ -172,8 +160,8 @@ public class DbBillingProjectBufferEntry {
         + getStatusEnum()
         + ", assignedUser="
         + Optional.ofNullable(assignedUser).map(u -> Long.toString(u.getUserId())).orElse("n/a")
-        + ", inServicePerimeter="
-        + Optional.ofNullable(inServicePerimeter).map(Object::toString).orElse("n/a")
+        + ", accessTier="
+        + Optional.ofNullable(accessTier).orElse("n/a")
         + '}';
   }
 
