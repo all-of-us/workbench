@@ -8,7 +8,7 @@ import {waitForDocumentTitle} from 'utils/waits-utils';
 describe('Sidebar Navigation', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   test('SideNav menu', async () => {

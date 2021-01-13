@@ -6,9 +6,10 @@ import Textbox from 'app/element/textbox';
 import GoogleLoginPage from 'app/page/google-login';
 import HomePage, {LabelAlias} from 'app/page/home-page';
 import {ElementType, XPathOptions} from 'app/xpath-options';
+import * as fs from 'fs';
 import * as fp from 'lodash/fp';
 import {ElementHandle, Page} from 'puppeteer';
-import {waitForText, waitWhileLoading} from 'utils/waits-utils';
+import {waitForText} from 'utils/waits-utils';
 import WorkspaceCard from 'app/component/workspace-card';
 import {PageUrl, WorkspaceAccessLevel} from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
@@ -29,6 +30,8 @@ export async function signIn(page: Page, userId?: string, passwd?: string): Prom
  * Login in new Incognito page.
  * @param {string} userId
  * @param {string} passwd
+ *
+ * @deprecated use signInWithAccessToken, rm with RW-5580
  */
 export async function signInAs(userId: string, passwd: string, opts: {reset?: boolean} = {}): Promise<Page> {
   const {reset = true} = opts;
@@ -39,7 +42,7 @@ export async function signInAs(userId: string, passwd: string, opts: {reset?: bo
   const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36';
   await newPage.setUserAgent(userAgent);
   await newPage.setDefaultNavigationTimeout(90000);
-  await signIn(newPage, userId, passwd);
+  await signInWithAccessToken(newPage, userId, passwd);
   return newPage;
 }
 
@@ -48,7 +51,8 @@ export async function signOut(page: Page) {
   await page.waitForTimeout(1000);
 }
 
-export async function experimentalTestSignIn(page: Page, token: string): Promise<void> {
+export async function signInWithAccessToken(page: Page, tokenFilename = config.userAccessTokenFilename): Promise<void> {
+  const token = fs.readFileSync(tokenFilename, 'ascii')
   const homePage = new HomePage(page);
   await homePage.gotoUrl(PageUrl.Home.toString());
 

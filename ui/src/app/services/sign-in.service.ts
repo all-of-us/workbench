@@ -36,8 +36,9 @@ export class SignInService {
     serverConfigService: ServerConfigService) {
     this.zone = zone;
 
-    // XXX: if env flag enabled.
-    if (true === true) {
+    // Enable test access token override via global function. Intended to support
+    // Puppeteer testing flows.
+    if (environment.allowTestAccessTokenOverride) {
       window.setTestAccessTokenOverride = (token: string) => {
         if (token) {
           window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
@@ -128,7 +129,6 @@ export class SignInService {
     } else {
       const authResponse = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse(true);
       if (authResponse !== null) {
-        console.log('[REAL AUTH FLOW] currentAccessToken = ' + authResponse.access_token);
         return authResponse.access_token;
       } else {
         return null;

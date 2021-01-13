@@ -42,6 +42,8 @@ export interface EnvironmentBase {
   zendeskEnv: ZendeskEnv;
   inactivityTimeoutSeconds: number;
   inactivityWarningBeforeSeconds: number;
+  // Whether to allow for sign in token overrides; alternate auth scheme for testing purposes.
+  allowTestAccessTokenOverride: boolean;
   // Whether users should be able to see the Published Workspaces
   // tab in the Workspace Library.
   enablePublishedWorkspaces: boolean;

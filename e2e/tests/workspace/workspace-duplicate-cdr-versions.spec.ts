@@ -10,7 +10,7 @@ import WorkspacesPage from 'app/page/workspaces-page';
 
 describe('Duplicate workspace, changing CDR versions', () => {
     beforeEach(async () => {
-        await signIn(page);
+        await signInWithAccessToken(page);
     });
 
     test('OWNER can duplicate workspace to an older CDR Version after consenting to restrictions', async () => {

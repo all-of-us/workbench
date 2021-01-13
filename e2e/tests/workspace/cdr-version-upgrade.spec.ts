@@ -9,7 +9,7 @@ import CdrVersionUpgradeModal from 'app/page/cdr-version-upgrade-modal';
 
 describe('Workspace CDR Version Upgrade modal', () => {
     beforeEach(async () => {
-        await signIn(page);
+        await signInWithAccessToken(page);
     });
 
    test('Clicking Cancel and Upgrade buttons', async () => {

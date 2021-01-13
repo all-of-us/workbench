@@ -8,7 +8,7 @@ import {waitForFn} from 'utils/waits-utils';
 describe('Jupyter notebook download test', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   const testDownloadModal = async (modal: NotebookDownloadModal): Promise<void> => {

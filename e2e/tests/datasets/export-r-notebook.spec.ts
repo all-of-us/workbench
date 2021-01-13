@@ -12,7 +12,7 @@ import {Language, ResourceCard} from 'app/text-labels';
 describe('Create Dataset', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   /**

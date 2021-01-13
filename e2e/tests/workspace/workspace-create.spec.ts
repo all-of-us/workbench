@@ -10,7 +10,7 @@ import {config} from 'resources/workbench-config';
 
 describe('Creating new workspaces', () => {
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   test('Create workspace - NO request for review', async () => {

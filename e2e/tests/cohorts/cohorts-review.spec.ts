@@ -16,7 +16,7 @@ import AnnotationFieldModal, {AnnotationType} from 'app/component/annotation-fie
 describe('Cohort review tests', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   /**

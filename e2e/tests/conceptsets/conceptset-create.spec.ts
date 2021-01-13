@@ -9,7 +9,7 @@ import {ResourceCard} from 'app/text-labels';
 describe('Create Concept Sets from Domains', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   /**

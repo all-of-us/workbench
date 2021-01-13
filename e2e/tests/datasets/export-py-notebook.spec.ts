@@ -10,7 +10,7 @@ import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 describe('Create Dataset', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
    /**

@@ -16,7 +16,7 @@ import WorkspacesPage from 'app/page/workspaces-page';
 describe('Workspace reader Jupyter notebook action tests', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   /**

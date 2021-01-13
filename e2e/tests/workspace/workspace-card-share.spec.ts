@@ -13,7 +13,7 @@ import {waitWhileLoading} from 'utils/waits-utils';
 describe('Share workspace', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   // Assume there is at least one workspace preexist

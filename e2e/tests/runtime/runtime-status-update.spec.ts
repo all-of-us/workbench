@@ -16,7 +16,7 @@ jest.setTimeout(60 * 30 * 1000);
 // Flaky tests. Disable tests now to allow time to address the issue.
 describe.skip('Updating runtime parameters', () => {
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
     const workspaceCard = await createWorkspace(page, config.altCdrVersionName);
     await workspaceCard.clickWorkspaceName();
 

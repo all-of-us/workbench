@@ -6,7 +6,7 @@ import {signIn} from 'utils/test-utils';
 describe('Home page ui tests', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   test('Check visibility of Workspace cards', async () => {

@@ -10,7 +10,7 @@ import DatasetEditPage from 'app/page/dataset-edit-page';
 describe('Dataset test', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   /**

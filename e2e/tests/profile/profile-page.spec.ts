@@ -28,7 +28,7 @@ describe('Profile', () => {
 
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
     await navigation.navMenu(page, NavLink.PROFILE);
     profilePage = new ProfilePage(page);
     await profilePage.waitForLoad();
