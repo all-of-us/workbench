@@ -70,7 +70,6 @@ export default class SidebarContent extends  HelpSidebar {
     return annotationfieldLabel;
     }
 
-
     // get the xpath of the respective annotation field label
     private getFieldNameXpath(fieldName: string): string {
       return `//*[contains(normalize-space(text()), "Annotations")]/following::div[contains(normalize-space(), "${fieldName}")]`;
@@ -105,4 +104,6 @@ export default class SidebarContent extends  HelpSidebar {
           return null;
         }
     }
+
 }
+
