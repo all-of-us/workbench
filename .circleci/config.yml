@@ -283,6 +283,9 @@ commands:
       - run:
           command: |
             echo "Environment parameter WORKBENCH_ENV=${WORKBENCH_ENV}"
+      - run:
+          # Needed for env-cmd to function on Circle.
+          command: touch .env
       - restore_cache:
           keys:
             - v5-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
