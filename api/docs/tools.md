@@ -1,8 +1,8 @@
-# Tools
+# Command Line Tools
 
-## What are "tools"?
+## What are they?
 
-The name is unfortunately generic but this document refers to the command line tools that reside in [workbench-api.yaml](https://github.com/all-of-us/workbench/blob/master/api/tools).
+This document refers to the command line tools that reside in [workbench-api.yaml](https://github.com/all-of-us/workbench/blob/master/api/tools).
 They're usually used to invoke operational or one-off tasks that are more complex than a small bash script but 
 haven't made it into our standard code base yet. The tools are able to compile and use classes from the 
 standard code base so they are relatively quick to write but difficult to maintain. It's not uncommon for a tool to silently break because one of its dependencies in
@@ -25,7 +25,7 @@ Advantages of writing tools
 
 Disadvantages
 - No automated testing
-- No compilation checks
+- No automated compilation checks
 - Still requires recreating many of the Spring Beans to fulfill the dependencies of the services being injected
     - We have many of them covered in `CommandLineToolConfig.java` but importing more complex classes like WorkspaceController 
     will be quite difficult because of the large number of dependencies being pulled in with it.
@@ -121,8 +121,10 @@ Common.register_command({
 })
 ```
 
-- `common.run_inline` specified which gradle task will be run
+- `common.run_inline` specifies which gradle task will be run
 - gradle arguments are passed through -PappArgs=[]
+- ensure_docker will ensure that your command runs within the docker environment. Every command should include
+  this unless there is a specific reason not to.
 - GcloudContextV2 is a bit overloaded right now, but its primary purpose is to add the `--project`
 argument parser and validate it. It should be added if you're planning to add `ServiceAccountContext`
 - Wrapping the gradle call with `ServiceAccountContext` like in list-runtime will ensure that the 
@@ -152,6 +154,10 @@ task manageLeonardoRuntimes(type: JavaExec) {
 - It is actually  possible to run your Java tool using just gradle and without the project.rb wrapper. I
 prefer this while developing because of the faster cycle time.
   - It is also the only way to run your Java tool against your local environment.
+  - ex. `./gradlew setAuthority -PappArgs="['ericsong@fake-research-aou.org','DEVELOPER',false,false]"`
+    is the local equivalent of `./project.rb set-authority --project all-of-us-workbench-test --email ericsong@fake-research-aou.org --authority DEVELOPER`
+  - It may be necessary to run through the [gradle setup](https://github.com/all-of-us/workbench#api-faster-api-startup-for-macos) 
+  for some tasks.
 
 ### Java tool
 
