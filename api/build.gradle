@@ -681,6 +681,16 @@ task exportWorkspaceData(type: JavaExec) {
   }
 }
 
+// See project.rb command: generate-impersonated-user-token
+task generateImpersonatedUserToken(type: JavaExec) {
+  classpath = sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.GenerateImpersonatedUserToken"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
 // See project.rb command: delete-workspaces
 task deleteWorkspaces(type: JavaExec) {
   classpath = sourceSets.__tools__.runtimeClasspath
