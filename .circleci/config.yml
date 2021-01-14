@@ -136,11 +136,29 @@ commands:
           name: Deploy API and UI to << parameters.project_name >> App Engine
 
   gcloud-auth-login:
-    description: "Activiate CircleCI service account credential"
+    description: "Activate CircleCI service account credential"
+    parameters:
+      with_application_default_credentials:
+        description: |
+          Whether to apply these credentials for Application Default Credentials (ADC).
+          This may be necessary to simulate certain local or server-side auth flows.
+          This is applied in addition to the normal behavior of this command, which activates
+          credentials e.g. for gcloud or gsutil commands.
+        type: boolean
+        default: false
     steps:
       - run:
           working_directory: ~/workbench
           command: ci/activate_creds.sh api/circle-sa-key.json
+      - when:
+          condition: << parameters.with_application_default_credentials >>
+          steps:
+            - run:
+                name: Export application default credentials
+                working_directory: ~/workbench
+                command: |
+                  echo 'export GOOGLE_APPLICATION_CREDENTIALS=~/workbench/api/circle-sa-key.json' >> $BASH_ENV
+                  source $BASH_ENV
 
   halt-puppeteer-check:
     description: "Skip ignored changes"
@@ -278,7 +296,9 @@ commands:
   run-puppeteer-test:
     description: "Run puppeteer integration tests"
     steps:
-      - gcloud-auth-login
+      - gcloud-auth-login:
+          # Needed for yarn test, which invokes generate-impersonated-user-token
+          with_application_default_credentials: true
       - browser-tools/install-browser-tools
       - run:
           command: |
@@ -294,6 +314,9 @@ commands:
             - ~/.cache/yarn
             - e2e/node_modules
           key: v5-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
+      - run:
+          # Needed for env-cmd to function on Circle.
+          command: touch ~/workbench/e2e/.env
       - run:
           name: Running Puppeteer e2e tests
           working_directory: ~/workbench/e2e
@@ -583,15 +606,15 @@ jobs:
             case << parameters.env_name >> in
               "staging")
                 echo 'export STAGING_COLLABORATOR=$PUPPETEER_COLLABORATOR_STAGING' >> $BASH_ENV
-                echo 'export USER_NAME=$PUPPETEER_USER_STAGING' >> $BASH_ENV
+                echo 'export USER_NAME=$PUPPETEER_USER_STAGING@staging.fake-research-aou.org' >> $BASH_ENV
                 ;;
               "test")
                 echo 'export TEST_COLLABORATOR=$PUPPETEER_COLLABORATOR_TEST' >> $BASH_ENV
-                echo 'export USER_NAME=$(eval echo "\$PUPPETEER_USER_TEST_${CIRCLE_NODE_INDEX}")' >> $BASH_ENV
+                echo 'export USER_NAME=$(eval echo "\$PUPPETEER_USER_TEST_${CIRCLE_NODE_INDEX}@fake-research-aou.org")' >> $BASH_ENV
                 ;;
               "local")
                 echo 'export DEV_COLLABORATOR=$PUPPETEER_COLLABORATOR_LOCAL' >> $BASH_ENV
-                echo 'export USER_NAME=$(eval echo "\$PUPPETEER_USER_LOCAL_${CIRCLE_NODE_INDEX}")' >> $BASH_ENV
+                echo 'export USER_NAME=$(eval echo "\$PUPPETEER_USER_LOCAL_${CIRCLE_NODE_INDEX}@fake-research-aou.org")' >> $BASH_ENV
                 ;;
             esac
             echo 'export PASSWORD=$PUPPETEER_USER_PASSWORD' >> $BASH_ENV
