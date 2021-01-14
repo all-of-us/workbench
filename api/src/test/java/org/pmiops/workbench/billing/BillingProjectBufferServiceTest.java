@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -431,6 +432,33 @@ public class BillingProjectBufferServiceTest {
                 .findByFireCloudProjectName(capturedProjectNames.get(2))
                 .getStatusEnum())
         .isEqualTo(BufferEntryStatus.AVAILABLE);
+  }
+
+  @Test
+  public void assignBillingProject() {
+    DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
+    entry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
+    entry.setFireCloudProjectName("test-project-name");
+    entry.setCreationTime(getCurrentTimestamp());
+    billingProjectBufferEntryDao.save(entry);
+
+    DbUser user = mock(DbUser.class);
+    doReturn("fake-email@aou.org").when(user).getUsername();
+
+    DbBillingProjectBufferEntry assignedEntry =
+        billingProjectBufferService.assignBillingProject(user, "registered");
+
+    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<String> secondCaptor = ArgumentCaptor.forClass(String.class);
+    verify(mockFireCloudService).addOwnerToBillingProject(captor.capture(), secondCaptor.capture());
+    String invokedEmail = captor.getValue();
+    String invokedProjectName = secondCaptor.getValue();
+
+    assertThat(invokedEmail).isEqualTo("fake-email@aou.org");
+    assertThat(invokedProjectName).isEqualTo("test-project-name");
+
+    assertThat(billingProjectBufferEntryDao.findOne(assignedEntry.getId()).getStatusEnum())
+        .isEqualTo(BufferEntryStatus.ASSIGNED);
   }
 
   @Test
