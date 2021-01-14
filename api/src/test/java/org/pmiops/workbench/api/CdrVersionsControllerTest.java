@@ -18,7 +18,6 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.CdrVersionListResponse;
@@ -109,11 +108,6 @@ public class CdrVersionsControllerTest {
   }
 
   @Test
-  public void testGetCdrVersionsRegistered() {
-    assertResponse(cdrVersionsController.getCdrVersions().getBody(), defaultCdrVersion);
-  }
-
-  @Test
   public void testGetCdrVersions_microarray() {
     user.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     List<CdrVersion> cdrVersions = cdrVersionsController.getCdrVersions().getBody().getItems();
@@ -133,13 +127,6 @@ public class CdrVersionsControllerTest {
                 .get()
                 .getHasMicroarrayData())
         .isTrue();
-  }
-
-  @Test
-  public void testGetCdrVersionsProtected() {
-    user.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
-    assertResponse(
-        cdrVersionsController.getCdrVersions().getBody(), protectedCdrVersion, defaultCdrVersion);
   }
 
   @Test
@@ -178,12 +165,6 @@ public class CdrVersionsControllerTest {
                 .get()
                 .getHasCopeSurveyData())
         .isEqualTo((boolean) true);
-  }
-
-  @Test(expected = ForbiddenException.class)
-  public void testGetCdrVersionsUnregistered() {
-    user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
-    cdrVersionsController.getCdrVersions();
   }
 
   private void assertResponse(CdrVersionListResponse response, DbCdrVersion... versions) {
