@@ -11,6 +11,7 @@ import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 import {getPropValue} from 'utils/element-utils';
 import SidebarContent, {ReviewStatus} from 'app/component/sidebar-content';
 import AnnotationFieldModal, {AnnotationType} from 'app/component/annotation-field-modal';
+import EditDeleteAnnotationsModal from 'app/component/edit-delete-annotations-modal'
 
 
 describe('Cohort review tests', () => {
@@ -23,9 +24,11 @@ describe('Cohort review tests', () => {
    * Test:
    * Find an existing workspace or create a new workspace if none exists.
    * Create a new Cohort from Criteria: Visits -> Out-Patient Visit.
-   * Create a Review Set for 100 participants.
-   * Verify some UI.
-   * Delete Cohort in Cohort Build page.
+   * Create a Review Set for 100 participants via card's ellipsis menu.
+   * Verification: on Cohort review page and the Annotations side bar.
+   * Add/edit/delete annotaions fields.
+   * Rename Cohort review.
+   * Delete cohort review via card's ellipsis menu.
    */
   test('Create Cohort and a Review Set for 100 participants', async () => {
     const reviewSetNumberOfParticipants = 100;
@@ -119,11 +122,60 @@ describe('Cohort review tests', () => {
     // select a review status
     const participantStatus2 = await sidebarContent.selectReviewStatus(ReviewStatus.Included);
 
-   // verify if the same Annotations Name also displays for the next Participant ID.
-    const annotationTextBoxName = await sidebarContent.getAnnotationsName();
+    // verify if the same Annotations Name also displays for the next Participant ID.
+    const annotationTextBoxName = await sidebarContent.getAnnotationsName(newAnnotationName);
     expect(annotationTextBoxName).toEqual(newAnnotationName);
 
+    // click on the annotations EDIT button
+    await sidebarContent.getAnnotationsEdit().then(btn => btn.click());
+
+     // create new annotation name
+     const newAnnotationRename = makeRandomName();
+
+    // the edit-delete annotations modal displays
+    const editDeleteAnnotationsFieldModal = new EditDeleteAnnotationsModal(page); 
+
+    // edit the annotation field name
+    await editDeleteAnnotationsFieldModal.clickRenameAnnotationsName(newAnnotationRename);
+    await waitWhileLoading(page);
+
+    // verify that the Annotation textbox field is displaying the new name
+    const annotationTextBoxName2 = await sidebarContent.getAnnotationsName(newAnnotationRename);
+    expect(annotationTextBoxName2).toEqual(newAnnotationRename);
+
+    await participantDetailPage.goToThePriorParticipant();
+    await participantDetailPage.waitForLoad();
+
+    // verify that the prior participant is displaying the same annotation field name 
+    expect(annotationTextBoxName2).toEqual(newAnnotationRename);
+
+    // verify that the text area is also displaying fr prior participant
+    const annotationsTextArea = await sidebarContent.getAnnotationsTextArea();
+    expect(annotationsTextArea).toBeTruthy();
+
+    // click on the plus-icon next to annotations 
+    await sidebarContent.getAnnotationsButton().then(btn => btn.click());
+
+    // create a a new annotation field by selecting the annotation type option: numeric field 
+    await annotationFieldModal.selectAnnotationType(AnnotationType.NumericField);
+
+    // create new annotation name for the numeric field
+    const newAnnotationName2 = makeRandomName();
+    await annotationFieldModal.createNewAnnotationName(newAnnotationName2);
+
+    const annotationTextBoxName3 = await sidebarContent.getAnnotationsName(newAnnotationName2);
+    expect(annotationTextBoxName3).toEqual(newAnnotationName2);
+
+    // click the annotations edit  button to delete the annotation textbox field
+    await sidebarContent.getAnnotationsEdit().then(btn => btn.click());
+    await editDeleteAnnotationsFieldModal.deleteAnnotationsName();
+    await waitWhileLoading(page);
+
+    // verify that the deletion of the annotation field was successful
+    expect(await sidebarContent.findFieldName(newAnnotationRename)).toBeFalsy();
+
     // navigate to review set page and check if the status column is displaying the review status for both participants
+    await participantDetailPage.clickPenIconHelpSideBar();
     await participantDetailPage.getBackToReviewSetButton().then(btn => btn.click());
     await waitWhileLoading(page);
 
@@ -170,3 +222,4 @@ describe('Cohort review tests', () => {
   });
 
 });
+

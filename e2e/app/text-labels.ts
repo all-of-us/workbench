@@ -37,6 +37,7 @@ export enum LinkText {
    Confirm = 'Confirm',
    Continue = 'Continue',
    Copy = 'Copy',
+   Close = 'Close',
    Create = 'Create',
    CreateAnotherCohort = 'Create another Cohort',
    CreateAnotherConceptSet = 'Create another Concept Set',
@@ -58,6 +59,7 @@ export enum LinkText {
    DeleteWorkspace = 'Delete Workspace',
    DiscardChanges = 'Discard Changes',
    DuplicateWorkspace = 'Duplicate Workspace',
+   Edit = 'Edit',
    ExportAndOpen = 'Export and Open',
    Finish = 'Finish',
    FinishAndReview = 'Finish & Review',
@@ -65,6 +67,7 @@ export enum LinkText {
    GoToCopiedNotebook = 'Go to Copied Notebook',
    KeepEditing = 'Keep Editing',
    Next = 'Next',
+   No = 'No',
    Rename = 'Rename',
    RenameCohort = 'Rename Cohort',
    RenameCohortReview = 'Rename Cohort Review',
@@ -79,6 +82,7 @@ export enum LinkText {
    StayHere = 'Stay Here',
    Submit = 'Submit',
    Update = 'Update',
+   Yes = 'Yes',
 }
 
 // Notebook programming language.
