@@ -42,7 +42,7 @@ export async function signInAs(userId: string, passwd: string, opts: {reset?: bo
   const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36';
   await newPage.setUserAgent(userAgent);
   await newPage.setDefaultNavigationTimeout(90000);
-  await signInWithAccessToken(newPage, userId, passwd);
+  await signIn(newPage, userId, passwd);
   return newPage;
 }
 
