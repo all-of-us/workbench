@@ -47,6 +47,8 @@ export async function signInAs(userId: string, passwd: string, opts: {reset?: bo
 }
 
 export async function signOut(page: Page) {
+  await page.evaluate(`window.setTestAccessTokenOverride(null)`);
+
   await Navigation.navMenu(page, NavLink.SIGN_OUT);
   await page.waitForTimeout(1000);
 }
@@ -56,8 +58,8 @@ export async function signInWithAccessToken(page: Page, tokenFilename = config.u
   const homePage = new HomePage(page);
   await homePage.gotoUrl(PageUrl.Home.toString());
 
-  const cmd = 'window.setTestAccessTokenOverride(\'' + token + '\')';
-  await page.evaluate(cmd);
+  // See sign-in.service.ts.
+  await page.evaluate(`window.setTestAccessTokenOverride('${token}')`);
 
   await homePage.gotoUrl(PageUrl.Home.toString());
   await homePage.waitForLoad();
