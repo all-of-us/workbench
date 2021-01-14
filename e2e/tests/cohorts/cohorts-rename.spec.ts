@@ -5,7 +5,7 @@ import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
-import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
+import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import {waitForNumericalString, waitForText} from 'utils/waits-utils';
 
 

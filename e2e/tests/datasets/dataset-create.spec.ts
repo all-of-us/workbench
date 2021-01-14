@@ -3,7 +3,7 @@ import ClrIconLink from 'app/element/clr-icon-link';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {Option, ResourceCard} from 'app/text-labels';
-import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
+import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 import DatasetEditPage from 'app/page/dataset-edit-page';
 

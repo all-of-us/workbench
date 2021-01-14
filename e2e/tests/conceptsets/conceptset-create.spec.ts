@@ -2,7 +2,7 @@ import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
 import DataResourceCard from 'app/component/data-resource-card';
 import ConceptSetActionsPage from 'app/page/conceptset-actions-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
+import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import {ResourceCard} from 'app/text-labels';
 
