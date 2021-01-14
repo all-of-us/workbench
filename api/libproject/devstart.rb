@@ -1605,6 +1605,7 @@ Common.register_command({
     :description => "Export workspace data to CSV.\n",
     :fn => ->(*args) {export_workspace_data("export-workspace-data", *args)}
 })
+
 def generate_impersonated_user_token(cmd_name, *args)
   common = Common.new
   ensure_docker cmd_name, args
@@ -1655,9 +1656,11 @@ def generate_impersonated_user_token(cmd_name, *args)
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   flags.map! { |f| "'#{f}'" }
 
-  common.run_inline %W{
-      gradle generateImpersonatedUserToken
-     -PappArgs=[#{flags.join(',')}]}
+  ServiceAccountContext.new(project_id).run do
+    common.run_inline %W{
+        gradle generateImpersonatedUserToken
+       -PappArgs=[#{flags.join(',')}]}
+  end
 end
 
 Common.register_command({
