@@ -492,7 +492,7 @@ export const HelpSidebar = fp.flow(
     sidebarContainerStyles(activeIcon, notebookStyles) {
       const sidebarContainerStyle = {
         ...styles.sidebarContainer,
-        width: `calc(${this.sidebarWidth}rem + 70px)`
+        width: '100%'
       };
       if (notebookStyles) {
         if (activeIcon) {
