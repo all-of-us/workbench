@@ -1,5 +1,5 @@
 import WorkspacesPage from 'app/page/workspaces-page';
-import {signInWithAccessToken} from 'utils/test-utils';
+import {signIn} from 'utils/test-utils';
 import WorkspaceCard from 'app/component/workspace-card';
 import ReactSelect from 'app/element/react-select';
 import {config} from 'resources/workbench-config';
@@ -7,7 +7,7 @@ import {config} from 'resources/workbench-config';
 describe('Workspaces Filter Select menu tests', () => {
 
   beforeEach(async () => {
-    await signInWithAccessToken(page, config.collaboratorUsername, config.userPassword);
+    await signIn(page, config.collaboratorUsername, config.userPassword);
   });
 
   /**
