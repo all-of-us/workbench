@@ -4,7 +4,7 @@ import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspacesPage from 'app/page/workspaces-page';
 import {WorkspaceAccessLevel} from 'app/text-labels';
 import {config} from 'resources/workbench-config';
-import {signIn, signInAs, signOut} from 'utils/test-utils';
+import {signInWithAccessToken, signInAs, signOut} from 'utils/test-utils';
 import {makeWorkspaceName} from 'utils/str-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {waitWhileLoading} from 'utils/waits-utils';

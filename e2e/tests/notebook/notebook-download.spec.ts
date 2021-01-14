@@ -1,7 +1,7 @@
 import NotebookDownloadModal from 'app/page/notebook-download-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {makeRandomName} from 'utils/str-utils';
-import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
+import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import {getPropValue} from 'utils/element-utils';
 import {waitForFn} from 'utils/waits-utils';
 

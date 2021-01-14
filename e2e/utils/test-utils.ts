@@ -42,11 +42,13 @@ export async function signInAs(userId: string, passwd: string, opts: {reset?: bo
   const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36';
   await newPage.setUserAgent(userAgent);
   await newPage.setDefaultNavigationTimeout(90000);
-  await signInWithAccessToken(newPage, userId, passwd);
+  await signIn(newPage, userId, passwd);
   return newPage;
 }
 
 export async function signOut(page: Page) {
+  await page.evaluate(`window.setTestAccessTokenOverride(null)`);
+
   await Navigation.navMenu(page, NavLink.SIGN_OUT);
   await page.waitForTimeout(1000);
 }
@@ -56,8 +58,8 @@ export async function signInWithAccessToken(page: Page, tokenFilename = config.u
   const homePage = new HomePage(page);
   await homePage.gotoUrl(PageUrl.Home.toString());
 
-  const cmd = 'window.setTestAccessTokenOverride(\'' + token + '\')';
-  await page.evaluate(cmd);
+  // See sign-in.service.ts.
+  await page.evaluate(`window.setTestAccessTokenOverride('${token}')`);
 
   await homePage.gotoUrl(PageUrl.Home.toString());
   await homePage.waitForLoad();
