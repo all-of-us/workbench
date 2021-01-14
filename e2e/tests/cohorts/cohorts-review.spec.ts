@@ -123,7 +123,7 @@ describe('Cohort review tests', () => {
     const participantStatus2 = await sidebarContent.selectReviewStatus(ReviewStatus.Included);
 
     // verify if the same Annotations Name also displays for the next Participant ID.
-    const annotationTextBoxName = await sidebarContent.getAnnotationsName(`${newAnnotationName}`);
+    const annotationTextBoxName = await sidebarContent.getAnnotationsName(newAnnotationName);
     expect(annotationTextBoxName).toEqual(newAnnotationName);
 
     // click on the annotations EDIT button
@@ -136,18 +136,18 @@ describe('Cohort review tests', () => {
     const editDeleteAnnotationsFieldModal = new EditDeleteAnnotationsModal(page); 
 
     // edit the annotation field name
-    await editDeleteAnnotationsFieldModal.clickRenameAnnotationsName(`${newAnnotationRename}`);
+    await editDeleteAnnotationsFieldModal.clickRenameAnnotationsName(newAnnotationRename);
     await waitWhileLoading(page);
 
     // verify that the Annotation textbox field is displaying the new name
-    const annotationTextBoxName2 = await sidebarContent.getAnnotationsName(`${newAnnotationRename}`);
-    expect(annotationTextBoxName2).toEqual(`${newAnnotationRename}`);
+    const annotationTextBoxName2 = await sidebarContent.getAnnotationsName(newAnnotationRename);
+    expect(annotationTextBoxName2).toEqual(newAnnotationRename);
 
     await participantDetailPage.goToThePriorParticipant();
     await participantDetailPage.waitForLoad();
 
     // verify that the prior participant is displaying the same annotation field name 
-    expect(annotationTextBoxName2).toEqual(`${newAnnotationRename}`);
+    expect(annotationTextBoxName2).toEqual(newAnnotationRename);
 
     // verify that the text area is also displaying fr prior participant
     const annotationsTextArea = await sidebarContent.getAnnotationsTextArea();
@@ -163,8 +163,8 @@ describe('Cohort review tests', () => {
     const newAnnotationName2 = makeRandomName();
     await annotationFieldModal.createNewAnnotationName(newAnnotationName2);
 
-    const annotationTextBoxName3 = await sidebarContent.getAnnotationsName(`${newAnnotationName2}`);
-    expect(annotationTextBoxName3).toEqual(`${newAnnotationName2}`);
+    const annotationTextBoxName3 = await sidebarContent.getAnnotationsName(newAnnotationName2);
+    expect(annotationTextBoxName3).toEqual(newAnnotationName2);
 
     // click the annotations edit  button to delete the annotation textbox field
     await sidebarContent.getAnnotationsEdit().then(btn => btn.click());
@@ -172,7 +172,7 @@ describe('Cohort review tests', () => {
     await waitWhileLoading(page);
 
     // verify that the deletion of the annotation field was successful
-    expect(await sidebarContent.findFieldName(`${newAnnotationRename}`)).toBeFalsy();
+    expect(await sidebarContent.findFieldName(newAnnotationRename)).toBeFalsy();
 
     // navigate to review set page and check if the status column is displaying the review status for both participants
     await participantDetailPage.clickPenIconHelpSideBar();
