@@ -67,12 +67,41 @@ public class BillingProjectBufferEntryDaoTest {
         .isEqualTo(2L);
   }
 
+  @Test
+  public void testGetCurrentBufferSizeForAccessTier_invalidTier() {
+    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier("invalid"))
+        .isEqualTo(0);
+  }
+
+  @Test
+  public void testGetCurrentBufferSizeForAccessTier_defaultTier() {
+    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier("default"))
+        .isEqualTo(STATUS_TO_COUNT_INPUT.get(BufferEntryStatus.AVAILABLE));
+  }
+
+  @Test
+  public void testGetCurrentBufferSizeForAccessTier_multiTier() {
+    // add one available project in an alternate tier
+
+    DbBillingProjectBufferEntry altEntry = new DbBillingProjectBufferEntry();
+    altEntry.setStatusEnum(BufferEntryStatus.AVAILABLE, () -> NOW);
+    altEntry.setAccessTier("other");
+    billingProjectBufferEntryDao.save(altEntry);
+
+    // no change to existing default tier
+    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier("default"))
+        .isEqualTo(STATUS_TO_COUNT_INPUT.get(BufferEntryStatus.AVAILABLE));
+    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier("other"))
+        .isEqualTo(1);
+  }
+
   private void insertEntriesWithCounts(Map<BufferEntryStatus, Long> statusToCount) {
     statusToCount.forEach(
         (status, count) -> {
           for (int i = 0; i < count; ++i) {
             DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
             entry.setStatusEnum(status, () -> NOW);
+            entry.setAccessTier("default");
             entry = billingProjectBufferEntryDao.save(entry);
           }
         });
