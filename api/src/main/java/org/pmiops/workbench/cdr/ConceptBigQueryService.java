@@ -1,5 +1,8 @@
 package org.pmiops.workbench.cdr;
 
+import static org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder.CHILD_LOOKUP_SQL;
+import static org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder.DRUG_CHILD_LOOKUP_SQL;
+
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.cloud.bigquery.TableResult;
@@ -24,7 +27,7 @@ public class ConceptBigQueryService {
   private final BigQueryService bigQueryService;
   private final CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   private static final ImmutableList<Domain> CHILD_LOOKUP_DOMAINS =
-      ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE, Domain.MEASUREMENT);
+      ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE, Domain.MEASUREMENT, Domain.DRUG);
   private static final String SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE =
       "select DISTINCT(question_concept_id) as concept_id \n"
           + "from `${projectId}.${dataSetId}.ds_survey`\n";
@@ -51,29 +54,26 @@ public class ConceptBigQueryService {
         partitionSourceAndStandard.get(false).stream()
             .map(DbConceptSetConceptId::getConceptId)
             .collect(Collectors.toList());
-    StringBuilder innerSql = new StringBuilder("select count(distinct person_id) person_count\n");
-    innerSql.append("from ");
-    innerSql.append(String.format("`${projectId}.${dataSetId}.%s`", omopTable));
-    innerSql.append(" where ");
+    StringBuilder innerSql = new StringBuilder();
     ImmutableMap.Builder<String, QueryParameterValue> paramMap = ImmutableMap.builder();
     if (!standardList.isEmpty()) {
-      innerSql.append(conceptColumns.getStandardConceptColumn().name);
+      innerSql.append("select person_id\n");
+      innerSql.append("from `${projectId}.${dataSetId}.cb_search_all_events`\n");
       generateParentChildLookupSql(
           innerSql, domain, "standardConceptIds", 1, standardList, paramMap);
+      innerSql.append("\n");
       if (!sourceList.isEmpty()) {
-        innerSql.append(" or ");
+        innerSql.append(" union all\n");
       }
     }
     if (!sourceList.isEmpty()) {
-      if (Domain.SURVEY.equals(domain)) {
-        innerSql.append("observation_source_concept_id");
-      } else {
-        innerSql.append(conceptColumns.getSourceConceptColumn().name);
-      }
+      innerSql.append("select person_id\n");
+      innerSql.append("from `${projectId}.${dataSetId}.cb_search_all_events`\n");
       generateParentChildLookupSql(innerSql, domain, "sourceConceptIds", 0, sourceList, paramMap);
     }
+    String finalSql = "select count(distinct person_id) person_count from (\n" + innerSql + ")";
     QueryJobConfiguration jobConfiguration =
-        QueryJobConfiguration.newBuilder(innerSql.toString())
+        QueryJobConfiguration.newBuilder(finalSql.toString())
             .setNamedParameters(paramMap.build())
             .setUseLegacySql(false)
             .build();
@@ -89,68 +89,26 @@ public class ConceptBigQueryService {
       int standardOrSource,
       List<Long> conceptIds,
       ImmutableMap.Builder<String, QueryParameterValue> paramMap) {
+    String standardParam = (standardOrSource == 1 ? "standard" : "source");
+    sqlBuilder.append(
+        String.format("where is_standard = %s and concept_id in ", "@" + standardParam));
+    paramMap.put(
+        conceptIdsParam, QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
+    paramMap.put(standardParam, QueryParameterValue.int64(standardOrSource));
     if (CHILD_LOOKUP_DOMAINS.contains(domain)) {
+      String domainParam = (standardOrSource == 1 ? "standardDomain" : "sourceDomain");
       sqlBuilder.append(
-          " in (select concept_id\n"
-              + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
-              + "join (select cast(id as string) as id\n"
-              + "from `${projectId}.${dataSetId}.cb_criteria`\n"
-              + "where concept_id in unnest(@"
-              + conceptIdsParam
-              + ")\n"
-              + "and domain_id = @"
-              + (standardOrSource == 1 ? "standard" : "source")
-              + "Domain\n"
-              + "and is_standard = @"
-              + (standardOrSource == 1 ? "standard" : "source")
-              + ") a\n"
-              + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id))\n"
-              + "and domain_id = @"
-              + (standardOrSource == 1 ? "standard" : "source")
-              + "Domain\n"
-              + "and is_standard = @"
-              + (standardOrSource == 1 ? "standard" : "source")
-              + ")");
-      paramMap.put(
-          conceptIdsParam, QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
-      paramMap.put(
-          (standardOrSource == 1 ? "standardDomain" : "sourceDomain"),
-          QueryParameterValue.string(domain.toString()));
-      paramMap.put(
-          (standardOrSource == 1 ? "standard" : "source"),
-          QueryParameterValue.int64(standardOrSource));
-    } else if (Domain.DRUG.equals(domain)) {
-      sqlBuilder.append(
-          " in (select distinct ca.descendant_id\n"
-              + "from `${projectId}.${dataSetId}.cb_criteria_ancestor` ca\n"
-              + "join (select distinct c.concept_id\n"
-              + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
-              + "join (select cast(cr.id as string) as id\n"
-              + "from `${projectId}.${dataSetId}.cb_criteria` cr\n"
-              + "where domain_id = @"
-              + (standardOrSource == 1 ? "standard" : "source")
-              + "Domain\n"
-              + "and concept_id in unnest(@"
-              + conceptIdsParam
-              + ")\n"
-              + ") a\n"
-              + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id))\n"
-              + "and domain_id = @"
-              + (standardOrSource == 1 ? "standard" : "source")
-              + "Domain\n"
-              + ") b on (ca.ancestor_id = b.concept_id))");
-      paramMap.put(
-          conceptIdsParam, QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
-      paramMap.put(
-          (standardOrSource == 1 ? "standardDomain" : "sourceDomain"),
-          QueryParameterValue.string(domain.toString()));
-      paramMap.put(
-          (standardOrSource == 1 ? "standard" : "source"),
-          QueryParameterValue.int64(standardOrSource));
+          String.format(
+              Domain.DRUG.equals(domain) ? DRUG_CHILD_LOOKUP_SQL : CHILD_LOOKUP_SQL,
+              "@" + domainParam,
+              "@" + standardParam,
+              "@" + conceptIdsParam,
+              "@" + domainParam,
+              "@" + standardParam));
+
+      paramMap.put(domainParam, QueryParameterValue.string(domain.toString()));
     } else {
-      sqlBuilder.append(" in unnest(@" + conceptIdsParam + ")");
-      paramMap.put(
-          conceptIdsParam, QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
+      sqlBuilder.append(" unnest(@" + conceptIdsParam + ")");
     }
   }
 

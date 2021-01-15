@@ -44,8 +44,6 @@ public final class SearchGroupItemQueryBuilder {
 
   private static final int STANDARD = 1;
   private static final int SOURCE = 0;
-  private static final int GROUP = 1;
-  private static final int NOT_GROUP = 0;
 
   private static final ImmutableMap<AttrName, String> AGE_COLUMN_SQL_MAP =
       ImmutableMap.of(
@@ -72,41 +70,49 @@ public final class SearchGroupItemQueryBuilder {
       "select distinct person_id, entry_date, concept_id\n"
           + "from `${projectId}.${dataSetId}.cb_search_all_events`\n"
           + "where ";
+  private static final String STANDARD_SQL = "is_standard = %s";
+  private static final String CONCEPT_ID_UNNEST_SQL = "concept_id in unnest(%s)";
+  private static final String CONCEPT_ID_IN_SQL = "concept_id in";
   private static final String STANDARD_OR_SOURCE_SQL =
-      "is_standard = %s and concept_id in unnest(%s)\n";
-  private static final String PARENT_STANDARD_OR_SOURCE_SQL =
-      "is_standard = %s and concept_id in (select distinct c.concept_id\n"
+      STANDARD_SQL + AND + CONCEPT_ID_UNNEST_SQL + "\n";
+  public static final String CHILD_LOOKUP_SQL =
+      " (select distinct c.concept_id\n"
           + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
-          + "join (${childLookup}) a\n"
-          + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id) or c.path like concat(a.id, '.%%'))\n"
-          + "where domain_id = %s\n"
-          + "and is_standard = %s\n"
-          + "and is_selectable = 1)\n";
-  private static final String DRUG_SQL =
-      "is_standard = %s and concept_id in (select distinct ca.descendant_id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria_ancestor` ca\n"
-          + "join (select distinct c.concept_id\n"
-          + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
-          + "join (${childLookup}) a\n"
-          + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id))\n"
-          + "where domain_id = %s\n"
-          + "and is_standard = %s\n"
-          + "and is_selectable = 1) b on (ca.ancestor_id = b.concept_id))";
-  private static final String CHILD_LOOKUP =
-      "select cast(cr.id as string) as id\n"
+          + "join (select cast(cr.id as string) as id\n"
           + "from `${projectId}.${dataSetId}.cb_criteria` cr\n"
           + "where domain_id = %s\n"
           + "and is_standard = %s\n"
           + "and concept_id in unnest(%s)\n"
-          + "and is_selectable = 1\n";
+          + "and is_selectable = 1) a\n"
+          + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id) or c.path like concat(a.id, '.%%'))\n"
+          + "where domain_id = %s\n"
+          + "and is_standard = %s\n"
+          + "and is_selectable = 1)";
+  public static final String DRUG_CHILD_LOOKUP_SQL =
+      " (select distinct ca.descendant_id\n"
+          + "from `${projectId}.${dataSetId}.cb_criteria_ancestor` ca\n"
+          + "join (select distinct c.concept_id\n"
+          + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
+          + "join (select cast(cr.id as string) as id\n"
+          + "from `${projectId}.${dataSetId}.cb_criteria` cr\n"
+          + "where domain_id = %s\n"
+          + "and is_standard = %s\n"
+          + "and concept_id in unnest(%s)\n"
+          + "and is_selectable = 1) a\n"
+          + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id))\n"
+          + "where domain_id = %s\n"
+          + "and is_standard = %s\n"
+          + "and is_selectable = 1) b on (ca.ancestor_id = b.concept_id))";
+  private static final String PARENT_STANDARD_OR_SOURCE_SQL =
+      STANDARD_SQL + AND + CONCEPT_ID_IN_SQL + CHILD_LOOKUP_SQL;
+  private static final String DRUG_SQL =
+      STANDARD_SQL + AND + CONCEPT_ID_IN_SQL + DRUG_CHILD_LOOKUP_SQL;
   private static final String VALUE_AS_NUMBER = " value_as_number %s %s";
   private static final String VALUE_AS_NUMBER_IS_NOT_NULL = " and value_as_number is not null";
   private static final String VALUE_AS_CONCEPT_ID = " value_as_concept_id %s unnest(%s)";
   private static final String VALUE_SOURCE_CONCEPT_ID = " value_source_concept_id %s unnest(%s)";
   private static final String SOURCE_CONCEPT_SURVEY_ID =
       " and survey_version_concept_id %s unnest(%s)";
-  private static final String STANDARD_CONCEPT_SQL =
-      "is_standard = %s and concept_id in unnest(%s)";
   private static final String SYSTOLIC_SQL = " and systolic %s %s";
   private static final String DIASTOLIC_SQL = " and diastolic %s %s";
 
@@ -460,7 +466,7 @@ public final class SearchGroupItemQueryBuilder {
                     : conceptIds.toArray(new Long[0]),
                 Long.class));
     StringBuilder sqlBuilder =
-        new StringBuilder(String.format(STANDARD_CONCEPT_SQL, standardParam, conceptIdParam));
+        new StringBuilder(String.format(STANDARD_OR_SOURCE_SQL, standardParam, conceptIdParam));
     if (!nums.isEmpty()) {
       if (!conceptIds.isEmpty()) {
         // attribute.conceptId is unique to blood pressure attributes
@@ -658,17 +664,20 @@ public final class SearchGroupItemQueryBuilder {
         String domainParam =
             QueryParameterUtil.addQueryParameterValue(
                 queryParams, QueryParameterValue.string(domain));
+        String conceptIdsParam =
+            QueryParameterUtil.addQueryParameterValue(
+                queryParams,
+                QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
         // Lookup child nodes
-        String lookupSql =
+        queryParts.add(
             String.format(
                 Domain.DRUG.toString().equals(domain) ? DRUG_SQL : PARENT_STANDARD_OR_SOURCE_SQL,
                 standardOrSourceParam,
                 domainParam,
-                standardOrSourceParam);
-        queryParts.add(
-            lookupSql.replace(
-                "${childLookup}",
-                generateLookupSql(queryParams, conceptIds, domainParam, standardOrSourceParam)));
+                standardOrSourceParam,
+                conceptIdsParam,
+                domainParam,
+                standardOrSourceParam));
       } else {
         // Children only
         String conceptIdsParam =
@@ -679,17 +688,6 @@ public final class SearchGroupItemQueryBuilder {
             String.format(STANDARD_OR_SOURCE_SQL, standardOrSourceParam, conceptIdsParam));
       }
     }
-  }
-
-  private static String generateLookupSql(
-      Map<String, QueryParameterValue> queryParams,
-      List<Long> conceptIds,
-      String domainParam,
-      String standardOrSourceParam) {
-    String conceptIdsParam =
-        QueryParameterUtil.addQueryParameterValue(
-            queryParams, QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
-    return String.format(CHILD_LOOKUP, domainParam, standardOrSourceParam, conceptIdsParam);
   }
 
   /** Helper method to return a modifier. */

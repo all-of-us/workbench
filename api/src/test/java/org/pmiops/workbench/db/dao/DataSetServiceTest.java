@@ -328,17 +328,18 @@ public class DataSetServiceTest {
             domain1, ImmutableList.of(conceptSet1, conceptSet2));
     assertThat(listClauseMaybe.map(String::trim).orElse(""))
         .isEqualTo(
-            "( condition_concept_id in (select concept_id\n"
+            "( condition_concept_id in  (select distinct c.concept_id\n"
                 + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
-                + "join (select cast(id as string)  as id\n"
-                + "from `${projectId}.${dataSetId}.cb_criteria`\n"
-                + "where concept_id in (3, 2, 1, 6, 5, 4)\n"
-                + "and domain_id = 'CONDITION'\n"
-                + "and is_standard = 1) a\n"
-                + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id))\n"
-                + "and domain_id = 'CONDITION'\n"
-                + "and is_standard = 1)\n"
-                + " )");
+                + "join (select cast(cr.id as string) as id\n"
+                + "from `${projectId}.${dataSetId}.cb_criteria` cr\n"
+                + "where domain_id = 'CONDITION'\n"
+                + "and is_standard = 1\n"
+                + "and concept_id in (3, 2, 1, 6, 5, 4)\n"
+                + "and is_selectable = 1) a\n"
+                + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id) or c.path like concat(a.id, '.%'))\n"
+                + "where domain_id = 'CONDITION'\n"
+                + "and is_standard = 1\n"
+                + "and is_selectable = 1))");
   }
 
   @Test
@@ -351,17 +352,18 @@ public class DataSetServiceTest {
             Domain.CONDITION, ImmutableList.of(conceptSet1, conceptSet2));
     assertThat(listClauseMaybe.map(String::trim).orElse(""))
         .isEqualTo(
-            "( condition_concept_id in (select concept_id\n"
+            "( condition_concept_id in  (select distinct c.concept_id\n"
                 + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
-                + "join (select cast(id as string)  as id\n"
-                + "from `${projectId}.${dataSetId}.cb_criteria`\n"
-                + "where concept_id in (3, 2, 1)\n"
-                + "and domain_id = 'CONDITION'\n"
-                + "and is_standard = 1) a\n"
-                + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id))\n"
-                + "and domain_id = 'CONDITION'\n"
-                + "and is_standard = 1)\n"
-                + " )");
+                + "join (select cast(cr.id as string) as id\n"
+                + "from `${projectId}.${dataSetId}.cb_criteria` cr\n"
+                + "where domain_id = 'CONDITION'\n"
+                + "and is_standard = 1\n"
+                + "and concept_id in (3, 2, 1)\n"
+                + "and is_selectable = 1) a\n"
+                + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id) or c.path like concat(a.id, '.%'))\n"
+                + "where domain_id = 'CONDITION'\n"
+                + "and is_standard = 1\n"
+                + "and is_selectable = 1))");
   }
 
   @Test
