@@ -8,6 +8,8 @@ import static org.pmiops.workbench.db.model.DbStorageEnums.organizationTypeFromS
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
 import java.util.List;
+import javax.inject.Provider;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
@@ -22,91 +24,19 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ReportingQueryServiceImpl implements ReportingQueryService {
-
+  private static final long MAX_ROWS_PER_INSERT_ALL_REQUEST = 10_000;
   private final JdbcTemplate jdbcTemplate;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
-  public ReportingQueryServiceImpl(JdbcTemplate jdbcTemplate) {
+  public ReportingQueryServiceImpl(
+      JdbcTemplate jdbcTemplate, Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.jdbcTemplate = jdbcTemplate;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
-  @Override
-  public List<ReportingWorkspace> getWorkspaces() {
-    return jdbcTemplate.query(
-        "SELECT \n"
-            + "  billing_account_type,\n"
-            + "  billing_status,\n"
-            + "  cdr_version_id,\n"
-            + "  creation_time,\n"
-            + "  creator_id,\n"
-            + "  disseminate_research_other,\n"
-            + "  last_accessed_time,\n"
-            + "  last_modified_time,\n"
-            + "  name,\n"
-            + "  needs_rp_review_prompt,\n"
-            + "  published,\n"
-            + "  rp_additional_notes,\n"
-            + "  rp_ancestry,\n"
-            + "  rp_anticipated_findings,\n"
-            + "  rp_approved,\n"
-            + "  rp_commercial_purpose,\n"
-            + "  rp_control_set,\n"
-            + "  rp_disease_focused_research,\n"
-            + "  rp_disease_of_focus,\n"
-            + "  rp_drug_development,\n"
-            + "  rp_educational,\n"
-            + "  rp_ethics,\n"
-            + "  rp_intended_study,\n"
-            + "  rp_methods_development,\n"
-            + "  rp_other_population_details,\n"
-            + "  rp_other_purpose,\n"
-            + "  rp_other_purpose_details,\n"
-            + "  rp_population_health,\n"
-            + "  rp_reason_for_all_of_us,\n"
-            + "  rp_review_requested,\n"
-            + "  rp_scientific_approach,\n"
-            + "  rp_social_behavioral,\n"
-            + "  rp_time_requested,\n"
-            + "  workspace_id, \n"
-            + "  workspace_namespace \n"
-            + "FROM workspace",
-        (rs, unused) ->
-            new ReportingWorkspace()
-                .billingAccountType(
-                    billingAccountTypeFromStorage(rs.getShort("billing_account_type")))
-                .billingStatus(billingStatusFromStorage(rs.getShort("billing_status")))
-                .cdrVersionId(rs.getLong("cdr_version_id"))
-                .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
-                .creatorId(rs.getLong("creator_id"))
-                .disseminateResearchOther(rs.getString("disseminate_research_other"))
-                .lastAccessedTime(offsetDateTimeUtc(rs.getTimestamp("last_accessed_time")))
-                .lastModifiedTime(offsetDateTimeUtc(rs.getTimestamp("last_modified_time")))
-                .name(rs.getString("name"))
-                .needsRpReviewPrompt((int) rs.getShort("needs_rp_review_prompt"))
-                .published(rs.getBoolean("published"))
-                .rpAdditionalNotes(rs.getString("rp_additional_notes"))
-                .rpAncestry(rs.getBoolean("rp_ancestry"))
-                .rpAnticipatedFindings(rs.getString("rp_anticipated_findings"))
-                .rpApproved(rs.getBoolean("rp_approved"))
-                .rpCommercialPurpose(rs.getBoolean("rp_commercial_purpose"))
-                .rpControlSet(rs.getBoolean("rp_control_set"))
-                .rpDiseaseFocusedResearch(rs.getBoolean("rp_disease_focused_research"))
-                .rpDiseaseOfFocus(rs.getString("rp_disease_of_focus"))
-                .rpDrugDevelopment(rs.getBoolean("rp_drug_development"))
-                .rpEducational(rs.getBoolean("rp_educational"))
-                .rpEthics(rs.getBoolean("rp_ethics"))
-                .rpIntendedStudy(rs.getString("rp_intended_study"))
-                .rpMethodsDevelopment(rs.getBoolean("rp_methods_development"))
-                .rpOtherPopulationDetails(rs.getString("rp_other_population_details"))
-                .rpOtherPurpose(rs.getBoolean("rp_other_purpose"))
-                .rpOtherPurposeDetails(rs.getString("rp_other_purpose_details"))
-                .rpPopulationHealth(rs.getBoolean("rp_population_health"))
-                .rpReasonForAllOfUs(rs.getString("rp_reason_for_all_of_us"))
-                .rpReviewRequested(rs.getBoolean("rp_review_requested"))
-                .rpScientificApproach(rs.getString("rp_scientific_approach"))
-                .rpSocialBehavioral(rs.getBoolean("rp_social_behavioral"))
-                .rpTimeRequested(offsetDateTimeUtc(rs.getTimestamp("rp_time_requested")))
-                .workspaceId(rs.getLong("workspace_id"))
-                .workspaceNamespace(rs.getString("workspace_namespace")));
+  public long getQueryBatchSize() {
+    return Math.min(
+            MAX_ROWS_PER_INSERT_ALL_REQUEST, workbenchConfigProvider.get().reporting.maxRowsPerInsert);
   }
 
   @Override
@@ -302,5 +232,88 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                     offsetDateTimeUtc(rs.getTimestamp("two_factor_auth_completion_time")))
                 .userId(rs.getLong("user_id"))
                 .username(rs.getString("username")));
+  }
+
+  @Override
+  public List<ReportingWorkspace> getWorkspaces(long limit, long offset) {
+    return jdbcTemplate.query(
+        String.format(
+            "SELECT \n"
+                + "  billing_account_type,\n"
+                + "  billing_status,\n"
+                + "  cdr_version_id,\n"
+                + "  creation_time,\n"
+                + "  creator_id,\n"
+                + "  disseminate_research_other,\n"
+                + "  last_accessed_time,\n"
+                + "  last_modified_time,\n"
+                + "  name,\n"
+                + "  needs_rp_review_prompt,\n"
+                + "  published,\n"
+                + "  rp_additional_notes,\n"
+                + "  rp_ancestry,\n"
+                + "  rp_anticipated_findings,\n"
+                + "  rp_approved,\n"
+                + "  rp_commercial_purpose,\n"
+                + "  rp_control_set,\n"
+                + "  rp_disease_focused_research,\n"
+                + "  rp_disease_of_focus,\n"
+                + "  rp_drug_development,\n"
+                + "  rp_educational,\n"
+                + "  rp_ethics,\n"
+                + "  rp_intended_study,\n"
+                + "  rp_methods_development,\n"
+                + "  rp_other_population_details,\n"
+                + "  rp_other_purpose,\n"
+                + "  rp_other_purpose_details,\n"
+                + "  rp_population_health,\n"
+                + "  rp_reason_for_all_of_us,\n"
+                + "  rp_review_requested,\n"
+                + "  rp_scientific_approach,\n"
+                + "  rp_social_behavioral,\n"
+                + "  rp_time_requested,\n"
+                + "  workspace_id\n"
+                + "FROM workspace\n"
+                + "ORDER BY workspace_id\n"
+                + "LIMIT %d\n"
+                + "OFFSET %d",
+            limit, offset),
+        (rs, unused) ->
+            new ReportingWorkspace()
+                .billingAccountType(
+                    billingAccountTypeFromStorage(rs.getShort("billing_account_type")))
+                .billingStatus(billingStatusFromStorage(rs.getShort("billing_status")))
+                .cdrVersionId(rs.getLong("cdr_version_id"))
+                .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
+                .creatorId(rs.getLong("creator_id"))
+                .disseminateResearchOther(rs.getString("disseminate_research_other"))
+                .lastAccessedTime(offsetDateTimeUtc(rs.getTimestamp("last_accessed_time")))
+                .lastModifiedTime(offsetDateTimeUtc(rs.getTimestamp("last_modified_time")))
+                .name(rs.getString("name"))
+                .needsRpReviewPrompt((int) rs.getShort("needs_rp_review_prompt"))
+                .published(rs.getBoolean("published"))
+                .rpAdditionalNotes(rs.getString("rp_additional_notes"))
+                .rpAncestry(rs.getBoolean("rp_ancestry"))
+                .rpAnticipatedFindings(rs.getString("rp_anticipated_findings"))
+                .rpApproved(rs.getBoolean("rp_approved"))
+                .rpCommercialPurpose(rs.getBoolean("rp_commercial_purpose"))
+                .rpControlSet(rs.getBoolean("rp_control_set"))
+                .rpDiseaseFocusedResearch(rs.getBoolean("rp_disease_focused_research"))
+                .rpDiseaseOfFocus(rs.getString("rp_disease_of_focus"))
+                .rpDrugDevelopment(rs.getBoolean("rp_drug_development"))
+                .rpEducational(rs.getBoolean("rp_educational"))
+                .rpEthics(rs.getBoolean("rp_ethics"))
+                .rpIntendedStudy(rs.getString("rp_intended_study"))
+                .rpMethodsDevelopment(rs.getBoolean("rp_methods_development"))
+                .rpOtherPopulationDetails(rs.getString("rp_other_population_details"))
+                .rpOtherPurpose(rs.getBoolean("rp_other_purpose"))
+                .rpOtherPurposeDetails(rs.getString("rp_other_purpose_details"))
+                .rpPopulationHealth(rs.getBoolean("rp_population_health"))
+                .rpReasonForAllOfUs(rs.getString("rp_reason_for_all_of_us"))
+                .rpReviewRequested(rs.getBoolean("rp_review_requested"))
+                .rpScientificApproach(rs.getString("rp_scientific_approach"))
+                .rpSocialBehavioral(rs.getBoolean("rp_social_behavioral"))
+                .rpTimeRequested(offsetDateTimeUtc(rs.getTimestamp("rp_time_requested")))
+                .workspaceId(rs.getLong("workspace_id")));
   }
 }
