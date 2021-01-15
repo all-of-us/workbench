@@ -44,8 +44,6 @@ public final class SearchGroupItemQueryBuilder {
 
   private static final int STANDARD = 1;
   private static final int SOURCE = 0;
-  private static final int GROUP = 1;
-  private static final int NOT_GROUP = 0;
 
   private static final ImmutableMap<AttrName, String> AGE_COLUMN_SQL_MAP =
       ImmutableMap.of(
