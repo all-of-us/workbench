@@ -17,8 +17,7 @@ describe('Create Dataset', () => {
     * Create new Dataset, export to notebook in Python language
     * Finally delete Dataset.
     */
-   // disabled temporarily to merge fitbit concept sets, will fix with RW-5932
-  xtest('Export dataset to notebook in Python language', async () => {
+   test('Export dataset to notebook in Python language', async () => {
     const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
@@ -80,8 +79,7 @@ describe('Create Dataset', () => {
    * - Create dataset.
    * - Export dataset to notebook thru snowman menu.
    */
-  // disabled temporarily to merge fitbit concept sets, will fix with RW-5932
-  xtest('Export dataset to notebook thru snowman menu', async () => {
+  test('Export dataset to notebook thru snowman menu', async () => {
     await findOrCreateWorkspace(page).then(card => card.clickWorkspaceName());
 
     // Click Add Datasets button.

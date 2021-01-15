@@ -20,8 +20,7 @@ describe('Create Dataset', () => {
    * Create new Dataset with Cohort, then export to notebook in R language.
    * Delete Cohort, Dataset, and Notebook.
    */
-  // disabled temporarily to merge fitbit concept sets, will fix with RW-5932
-  xtest('Export dataset to notebook in R language', async () => {
+  test('Export dataset to notebook in R language', async () => {
     const workspaceCard = await findOrCreateWorkspace(page);
     const workspaceName = await workspaceCard.clickWorkspaceName();
 
