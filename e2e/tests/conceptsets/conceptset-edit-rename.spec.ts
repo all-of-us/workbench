@@ -21,8 +21,7 @@ describe('Editing and rename Concept Set', () => {
    * - Rename Concept Set.
    * - Delete Concept Set.
    */
-  // disabled temporarily to merge fitbit concept sets, will fix with RW-5932
-  xtest('Workspace OWNER can edit Concept Set', async () => {
+  test('Workspace OWNER can edit Concept Set', async () => {
 
     const workspaceName = await createWorkspace(page).then(card => card.clickWorkspaceName());
 

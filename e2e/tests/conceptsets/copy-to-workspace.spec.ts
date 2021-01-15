@@ -49,8 +49,7 @@ describe('Copy Concept Set to another workspace', () => {
    * Test:
    * - Copy Concept Set from one workspace to another workspace when both have the same CDR Version.
    */
-  // disabled temporarily to merge fitbit concept sets, will fix with RW-5932
-  xtest('Workspace OWNER can copy Concept Set when CDR Versions match', async () => {
+  test('Workspace OWNER can copy Concept Set when CDR Versions match', async () => {
 
     // Create a source and a destination workspace with the same CDR Version.
 
@@ -96,8 +95,7 @@ describe('Copy Concept Set to another workspace', () => {
    * Test:
    * - Fail to Copy Concept Set from one workspace to another workspace when CDR Versions mismatch.
    */
-  // disabled temporarily to merge fitbit concept sets, will fix with RW-5932
-  xtest('Workspace OWNER cannot copy Concept Set when CDR Versions mismatch', async () => {
+  test('Workspace OWNER cannot copy Concept Set when CDR Versions mismatch', async () => {
 
     // Create a source and a destination workspace with differing CDR Versions.
 
