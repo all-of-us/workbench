@@ -59,7 +59,6 @@ public class ConceptBigQueryService {
     if (!standardList.isEmpty()) {
       innerSql.append("select person_id\n");
       innerSql.append("from `${projectId}.${dataSetId}.cb_search_all_events`\n");
-      innerSql.append("where is_standard = 1 and concept_id in ");
       generateParentChildLookupSql(
           innerSql, domain, "standardConceptIds", 1, standardList, paramMap);
       innerSql.append("\n");
@@ -70,7 +69,6 @@ public class ConceptBigQueryService {
     if (!sourceList.isEmpty()) {
       innerSql.append("select person_id\n");
       innerSql.append("from `${projectId}.${dataSetId}.cb_search_all_events`\n");
-      innerSql.append("where is_standard = 0 and concept_id in ");
       generateParentChildLookupSql(innerSql, domain, "sourceConceptIds", 0, sourceList, paramMap);
     }
     String finalSql = "select count(distinct person_id) person_count from (\n" + innerSql + ")";
@@ -91,9 +89,14 @@ public class ConceptBigQueryService {
       int standardOrSource,
       List<Long> conceptIds,
       ImmutableMap.Builder<String, QueryParameterValue> paramMap) {
+    String standardParam = (standardOrSource == 1 ? "standard" : "source");
+    sqlBuilder.append(
+        String.format("where is_standard = %s and concept_id in ", "@" + standardParam));
+    paramMap.put(
+        conceptIdsParam, QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
+    paramMap.put(standardParam, QueryParameterValue.int64(standardOrSource));
     if (CHILD_LOOKUP_DOMAINS.contains(domain)) {
       String domainParam = (standardOrSource == 1 ? "standardDomain" : "sourceDomain");
-      String standardParam = (standardOrSource == 1 ? "standard" : "source");
       sqlBuilder.append(
           String.format(
               Domain.DRUG.equals(domain) ? DRUG_CHILD_LOOKUP_SQL : CHILD_LOOKUP_SQL,
@@ -102,14 +105,10 @@ public class ConceptBigQueryService {
               "@" + conceptIdsParam,
               "@" + domainParam,
               "@" + standardParam));
-      paramMap.put(
-          conceptIdsParam, QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
+
       paramMap.put(domainParam, QueryParameterValue.string(domain.toString()));
-      paramMap.put(standardParam, QueryParameterValue.int64(standardOrSource));
     } else {
-      sqlBuilder.append(" in unnest(@" + conceptIdsParam + ")");
-      paramMap.put(
-          conceptIdsParam, QueryParameterValue.array(conceptIds.toArray(new Long[0]), Long.class));
+      sqlBuilder.append(" unnest(@" + conceptIdsParam + ")");
     }
   }
 
