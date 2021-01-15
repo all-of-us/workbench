@@ -177,7 +177,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  two_factor_auth_bypass_time,\n"
             + "  two_factor_auth_completion_time,\n"
             + "  user_id,\n"
-            + "  username\n"
+            + "  email AS username\n"
             + "FROM user",
         (rs, unused) ->
             new ReportingUser()
