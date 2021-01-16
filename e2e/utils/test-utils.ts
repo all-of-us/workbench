@@ -6,11 +6,12 @@ import Textbox from 'app/element/textbox';
 import GoogleLoginPage from 'app/page/google-login';
 import HomePage, {LabelAlias} from 'app/page/home-page';
 import {ElementType, XPathOptions} from 'app/xpath-options';
+import * as fs from 'fs';
 import * as fp from 'lodash/fp';
 import {ElementHandle, Page} from 'puppeteer';
-import {waitForText, waitWhileLoading} from 'utils/waits-utils';
+import {waitForText} from 'utils/waits-utils';
 import WorkspaceCard from 'app/component/workspace-card';
-import {WorkspaceAccessLevel} from 'app/text-labels';
+import {PageUrl, WorkspaceAccessLevel} from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Navigation, {NavLink} from 'app/component/navigation';
 import {makeWorkspaceName} from './str-utils';
@@ -29,6 +30,8 @@ export async function signIn(page: Page, userId?: string, passwd?: string): Prom
  * Login in new Incognito page.
  * @param {string} userId
  * @param {string} passwd
+ *
+ * @deprecated use signInWithAccessToken, rm with RW-5580
  */
 export async function signInAs(userId: string, passwd: string, opts: {reset?: boolean} = {}): Promise<Page> {
   const {reset = true} = opts;
@@ -44,8 +47,45 @@ export async function signInAs(userId: string, passwd: string, opts: {reset?: bo
 }
 
 export async function signOut(page: Page) {
+  await page.evaluate(`window.setTestAccessTokenOverride(null)`);
+
   await Navigation.navMenu(page, NavLink.SIGN_OUT);
   await page.waitForTimeout(1000);
+}
+
+export async function signInWithAccessToken(page: Page, tokenFilename = config.userAccessTokenFilename): Promise<void> {
+  const token = fs.readFileSync(tokenFilename, 'ascii')
+  const homePage = new HomePage(page);
+  await homePage.gotoUrl(PageUrl.Home.toString());
+
+  // See sign-in.service.ts.
+  await page.evaluate(`window.setTestAccessTokenOverride('${token}')`);
+
+  await homePage.gotoUrl(PageUrl.Home.toString());
+  await homePage.waitForLoad();
+}
+
+/**
+ * <pre>
+ * Wait while the page is loading (spinner is spinning and visible). Waiting stops when spinner stops spinning or when timed out.
+ * It usually indicates the page is ready for user interaction.
+ * </pre>
+ */
+export async function waitWhileLoading(page: Page, timeOut?: number): Promise<void> {
+  const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
+  const spinElementsSelector = '[style*="running spin"], .spinner:empty, [style*="running rotation"]';
+
+  await Promise.race([
+    // To prevent checking on blank page, wait for elements exist in DOM.
+    page.waitForSelector(notBlankPageSelector),
+    page.waitForSelector(spinElementsSelector),
+  ]);
+
+  // Wait for spinners stop and gone.
+  await page.waitForFunction((css) => {
+    const elements = document.querySelectorAll(css);
+    return elements && elements.length === 0;
+  }, {polling: 'mutation', timeout: timeOut}, spinElementsSelector);
 }
 
 

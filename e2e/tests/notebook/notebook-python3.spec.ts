@@ -1,6 +1,6 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {makeRandomName} from 'utils/str-utils';
-import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
+import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import DataResourceCard from 'app/component/data-resource-card';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import {ResourceCard} from 'app/text-labels';
@@ -8,7 +8,7 @@ import {ResourceCard} from 'app/text-labels';
 describe('Jupyter notebook tests in Python language', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   /**

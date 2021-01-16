@@ -3,7 +3,7 @@ import Modal from 'app/component/modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {LinkText, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
-import {createWorkspace, findOrCreateWorkspace, signIn} from 'utils/test-utils';
+import {createWorkspace, findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import {config} from 'resources/workbench-config';
 import WorkspaceCard from 'app/component/workspace-card';
 
@@ -85,7 +85,7 @@ let defaultCdrWorkspace: string;
 describe('Workspace owner Jupyter notebook action tests', () => {
 
    beforeEach(async () => {
-      await signIn(page);
+      await signInWithAccessToken(page);
    });
 
    test('Copy notebook to another Workspace when CDR versions match', async () => {

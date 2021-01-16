@@ -1,4 +1,4 @@
-import {createWorkspace, isValidDate, signIn} from 'utils/test-utils';
+import {createWorkspace, isValidDate, signInWithAccessToken} from 'utils/test-utils';
 import {Option, LinkText, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
@@ -17,7 +17,7 @@ import EditDeleteAnnotationsModal from 'app/component/edit-delete-annotations-mo
 describe('Cohort review tests', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   /**
