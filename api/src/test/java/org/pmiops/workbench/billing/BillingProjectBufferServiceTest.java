@@ -139,7 +139,9 @@ public class BillingProjectBufferServiceTest {
         new DbAccessTier()
             .setShortName(TEST_TIER)
             .setDisplayName(TEST_TIER)
-            .setServicePerimeter(TEST_PERIMETER));
+            .setServicePerimeter(TEST_PERIMETER)
+        .setAuthDomainName("auth-domain")
+        .setAuthDomainGroupEmail("auth-domain-group@terra.bio"));
 
     billingProjectBufferService =
         new BillingProjectBufferService(
@@ -152,11 +154,33 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void canBufferMultipleProjectsPerTask() {
-    workbenchConfig.billing.bufferRefillProjectsPerTask = 2;
+    final int PER_TASK = 2;
+    final int TIER_COUNT = 3;
+
+    workbenchConfig.billing.bufferRefillProjectsPerTask = PER_TASK;
+
+    // TEST_TIER was defined in setUp()
+    // add 2 more tiers
+
+    accessTierDao.save(
+        new DbAccessTier()
+            .setShortName("tier2")
+            .setDisplayName("Tier Two")
+            .setServicePerimeter("perim/2")
+            .setAuthDomainName("auth-domain-2")
+            .setAuthDomainGroupEmail("auth-domain-2-group@terra.bio"));
+
+    accessTierDao.save(
+        new DbAccessTier()
+            .setShortName("tier3")
+            .setDisplayName("Tier Three")
+            .setServicePerimeter("perim/3")
+            .setAuthDomainName("auth-domain-3")
+            .setAuthDomainGroupEmail("auth-domain-3-group@terra.bio"));
 
     billingProjectBufferService.bufferBillingProjects();
 
-    verify(mockFireCloudService, times(2 * 3))
+    verify(mockFireCloudService, times(PER_TASK * TIER_COUNT))
         .createAllOfUsBillingProject(anyString(), anyString());
   }
 
@@ -385,7 +409,8 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService, times(3)).createAllOfUsBillingProject(captor.capture(), anyString());
+    verify(mockFireCloudService, times(3))
+        .createAllOfUsBillingProject(captor.capture(), anyString());
     List<String> capturedProjectNames = captor.getAllValues();
     doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.READY))
         .when(mockFireCloudService)
@@ -422,7 +447,8 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService, times(3)).createAllOfUsBillingProject(captor.capture(), anyString());
+    verify(mockFireCloudService, times(3))
+        .createAllOfUsBillingProject(captor.capture(), anyString());
     List<String> capturedProjectNames = captor.getAllValues();
     doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
         .when(mockFireCloudService)
@@ -605,7 +631,8 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.bufferBillingProjects();
 
     final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService, times(3)).createAllOfUsBillingProject(captor.capture(), anyString());
+    verify(mockFireCloudService, times(3))
+        .createAllOfUsBillingProject(captor.capture(), anyString());
     final List<String> capturedProjectNames = captor.getAllValues();
     doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
         .when(mockFireCloudService)
