@@ -318,7 +318,8 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   }
 
   private long getCurrentBufferSize(DbAccessTier accessTier) {
-    return billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(accessTier.getShortName());
+    return billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(
+        accessTier.getShortName());
   }
 
   // TODO: decide on tier proportion in the billing buffer (e.g. 60% RT, 40% CT).  Use config?

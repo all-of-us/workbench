@@ -223,7 +223,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   // tmp for prototype: add/remove from all Auth Domain Groups
-  private final List<String> authDomainNames = ImmutableList.of("all-of-us-registered-test", "all-of-us-test-prototype-3");
+  private final List<String> authDomainNames =
+      ImmutableList.of("all-of-us-registered-test", "all-of-us-test-prototype-3");
 
   //  private void addToRegisteredTierGroupIdempotent(DbUser user) {
   //    if (!isUserMemberOfRegisteredTierGroup(user)) {
