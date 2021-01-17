@@ -140,8 +140,8 @@ public class BillingProjectBufferServiceTest {
             .setShortName(TEST_TIER)
             .setDisplayName(TEST_TIER)
             .setServicePerimeter(TEST_PERIMETER)
-        .setAuthDomainName("auth-domain")
-        .setAuthDomainGroupEmail("auth-domain-group@terra.bio"));
+            .setAuthDomainName("auth-domain")
+            .setAuthDomainGroupEmail("auth-domain-group@terra.bio"));
 
     billingProjectBufferService =
         new BillingProjectBufferService(
