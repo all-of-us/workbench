@@ -201,7 +201,7 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService).createAllOfUsBillingProject(captor.capture(), any());
+    verify(mockFireCloudService).createAllOfUsBillingProject(captor.capture(), anyString());
 
     String billingProjectName = captor.getValue();
 
@@ -287,7 +287,7 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService).createAllOfUsBillingProject(captor.capture(), any());
+    verify(mockFireCloudService).createAllOfUsBillingProject(captor.capture(), anyString());
     String billingProjectName = captor.getValue();
 
     FirecloudBillingProjectStatus billingProjectStatus = new FirecloudBillingProjectStatus();
@@ -321,7 +321,7 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService).createAllOfUsBillingProject(captor.capture(), any());
+    verify(mockFireCloudService).createAllOfUsBillingProject(captor.capture(), anyString());
     String billingProjectName = captor.getValue();
 
     FirecloudBillingProjectStatus billingProjectStatus = new FirecloudBillingProjectStatus();
@@ -342,7 +342,7 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService).createAllOfUsBillingProject(captor.capture(), any());
+    verify(mockFireCloudService).createAllOfUsBillingProject(captor.capture(), anyString());
     String billingProjectName = captor.getValue();
 
     FirecloudBillingProjectStatus billingProjectStatus =
@@ -363,7 +363,7 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService).createAllOfUsBillingProject(captor.capture(), any());
+    verify(mockFireCloudService).createAllOfUsBillingProject(captor.capture(), anyString());
     String billingProjectName = captor.getValue();
 
     doThrow(NotFoundException.class)
@@ -385,7 +385,7 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService, times(3)).createAllOfUsBillingProject(captor.capture(), any());
+    verify(mockFireCloudService, times(3)).createAllOfUsBillingProject(captor.capture(), anyString());
     List<String> capturedProjectNames = captor.getAllValues();
     doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.READY))
         .when(mockFireCloudService)
@@ -422,7 +422,7 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService, times(3)).createAllOfUsBillingProject(captor.capture(), any());
+    verify(mockFireCloudService, times(3)).createAllOfUsBillingProject(captor.capture(), anyString());
     List<String> capturedProjectNames = captor.getAllValues();
     doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
         .when(mockFireCloudService)
@@ -605,7 +605,7 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.bufferBillingProjects();
 
     final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService, times(3)).createAllOfUsBillingProject(captor.capture(), any());
+    verify(mockFireCloudService, times(3)).createAllOfUsBillingProject(captor.capture(), anyString());
     final List<String> capturedProjectNames = captor.getAllValues();
     doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
         .when(mockFireCloudService)

@@ -315,14 +315,11 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   // FOR PROTOTYPE ONLY
-  private final String PROTO_RT_AUTH_DOMAIN_GROUP = "all-of-us-registered-test";
-  private final String PROTO_TIER2_AUTH_DOMAIN_GROUP = "all-of-us-test-prototype-3";
-
   private List<FirecloudManagedGroupRef> authDomainForPrototype(String workspaceName) {
     final String authDomainName =
         workspaceName.toLowerCase(Locale.US).contains("tier2")
-            ? PROTO_TIER2_AUTH_DOMAIN_GROUP
-            : PROTO_RT_AUTH_DOMAIN_GROUP;
+            ? "all-of-us-test-prototype-3"
+            : "all-of-us-registered-test";
 
     return ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName));
   }

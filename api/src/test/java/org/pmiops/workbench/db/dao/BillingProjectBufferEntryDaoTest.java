@@ -43,7 +43,9 @@ public class BillingProjectBufferEntryDaoTest {
         new DbAccessTier()
             .setShortName(TEST_TIER)
             .setDisplayName("Registered Tier")
-            .setServicePerimeter("the/registered/tier/service/perimeter"));
+            .setServicePerimeter("the/registered/tier/service/perimeter")
+            .setAuthDomainName("auth-domain")
+            .setAuthDomainGroupEmail("auth-domain-group@terra.bio"));
     insertEntriesWithCounts(STATUS_TO_COUNT_INPUT);
   }
 
@@ -78,7 +80,7 @@ public class BillingProjectBufferEntryDaoTest {
 
   @Test
   public void testGetCurrentBufferSizeForAccessTier_invalidTier() {
-    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(TEST_TIER))
+    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier("invalid"))
         .isEqualTo(0);
   }
 
@@ -96,7 +98,9 @@ public class BillingProjectBufferEntryDaoTest {
         new DbAccessTier()
             .setShortName(altTierName)
             .setDisplayName(altTierName)
-            .setServicePerimeter("other perim"));
+            .setServicePerimeter("other perim")
+            .setAuthDomainName("other-auth-domain")
+            .setAuthDomainGroupEmail("other-auth-domain-group@terra.bio"));
 
     DbBillingProjectBufferEntry altEntry = new DbBillingProjectBufferEntry();
     altEntry.setStatusEnum(BufferEntryStatus.AVAILABLE, () -> NOW);
