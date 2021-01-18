@@ -1,4 +1,4 @@
-import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
+import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import {Option} from 'app/text-labels';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import Navigation, {NavLink} from 'app/component/navigation';
@@ -8,7 +8,7 @@ import WorkspacesPage from 'app/page/workspaces-page';
 
 describe('Duplicate workspace', () => {
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   /**

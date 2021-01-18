@@ -1,12 +1,12 @@
 import BaseElement from 'app/element/base-element';
 import HomePage from 'app/page/home-page';
 import WorkspaceCard from 'app/component/workspace-card';
-import {signIn} from 'utils/test-utils';
+import {signInWithAccessToken} from 'utils/test-utils';
 
 describe('Home page ui tests', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   test('Check visibility of Workspace cards', async () => {

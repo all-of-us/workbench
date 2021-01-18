@@ -1,14 +1,14 @@
 import HomePage from 'app/page/home-page';
 import ProfilePage from 'app/page/profile-page';
 import WorkspacesPage from 'app/page/workspaces-page';
-import {signIn, signOut} from 'utils/test-utils';
+import {signInWithAccessToken, signOut} from 'utils/test-utils';
 import Navigation, {NavLink} from 'app/component/navigation';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 
 describe('Sidebar Navigation', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   test('SideNav menu', async () => {

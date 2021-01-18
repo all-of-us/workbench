@@ -1,14 +1,14 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {Option, WorkspaceAccessLevel} from 'app/text-labels';
 import * as testData from 'resources/data/workspace-data';
-import {createWorkspace, findOrCreateWorkspace, performActions, signIn} from 'utils/test-utils';
+import {createWorkspace, findOrCreateWorkspace, performActions, signInWithAccessToken} from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 
 describe('Editing workspace via workspace card snowman menu', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   // Reuse same Workspace for all tests in this file to reduce test playback time.

@@ -73,6 +73,7 @@ export default class ConceptSetPage extends AuthenticatedPage {
    */
   async getEditButton(): Promise<Button> {
     const xpath = '//*[@role="button"]/*[normalize-space()="Edit"]';
+    await this.page.waitForXPath(xpath, {visible: true});
     return new Button(this.page, xpath);
   }
 

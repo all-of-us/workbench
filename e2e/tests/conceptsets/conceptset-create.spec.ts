@@ -2,14 +2,14 @@ import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
 import DataResourceCard from 'app/component/data-resource-card';
 import ConceptSetActionsPage from 'app/page/conceptset-actions-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
+import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
 import {ResourceCard} from 'app/text-labels';
 
 describe('Create Concept Sets from Domains', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   /**
@@ -17,8 +17,7 @@ describe('Create Concept Sets from Domains', () => {
    * - Create new Concept Set from Conditions domain.
    * - Delete Concept Set.
    */
-  // disabled temporarily to merge fitbit concept sets, will fix with RW-5932
-  xtest('Create Concept Set from Conditions domain', async () => {
+  test('Create Concept Set from Conditions domain', async () => {
     const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
@@ -80,8 +79,7 @@ describe('Create Concept Sets from Domains', () => {
    * - Create new Dataset using above two Concept Sets.
    * - Delete Dataset, Concept Set.
    */
-  // disabled temporarily to merge fitbit concept sets, will fix with RW-5932
-  xtest('Create Concept Sets from Drug Exposures and Measurements domains', async () => {
+  test('Create Concept Sets from Drug Exposures and Measurements domains', async () => {
     const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
@@ -127,6 +125,7 @@ describe('Create Concept Sets from Domains', () => {
 
     // Add new Concept in Measurements domain
     const measurementsDomainCard = await ConceptDomainCard.findDomainCard(page, Domain.Measurements);
+    await measurementsDomainCard.getConceptsCount();
     await measurementsDomainCard.clickSelectConceptButton();
 
     // Hardcode Measurements name for search

@@ -5,12 +5,12 @@ import {SaveOption} from 'app/page/conceptset-save-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {ResourceCard} from 'app/text-labels';
 import {makeRandomName, makeString} from 'utils/str-utils';
-import {createWorkspace, signIn} from 'utils/test-utils';
+import {createWorkspace, signInWithAccessToken} from 'utils/test-utils';
 
 describe('Editing and rename Concept Set', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   /**
@@ -21,8 +21,7 @@ describe('Editing and rename Concept Set', () => {
    * - Rename Concept Set.
    * - Delete Concept Set.
    */
-  // disabled temporarily to merge fitbit concept sets, will fix with RW-5932
-  xtest('Workspace OWNER can edit Concept Set', async () => {
+  test('Workspace OWNER can edit Concept Set', async () => {
 
     const workspaceName = await createWorkspace(page).then(card => card.clickWorkspaceName());
 

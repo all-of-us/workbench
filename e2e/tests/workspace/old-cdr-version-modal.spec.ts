@@ -1,4 +1,4 @@
-import {createWorkspace, signIn} from 'utils/test-utils';
+import {createWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import WorkspaceCard from 'app/component/workspace-card';
 import {config} from 'resources/workbench-config';
 import {Option} from 'app/text-labels';
@@ -9,7 +9,7 @@ import WorkspaceEditPage from 'app/page/workspace-edit-page';
 
 describe('OldCdrVersion Modal restrictions', () => {
     beforeEach(async () => {
-        await signIn(page);
+        await signInWithAccessToken(page);
     });
 
     test('User cannot create a workspace with an old CDR Version without consenting to the restrictions', async () => {

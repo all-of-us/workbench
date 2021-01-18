@@ -8,7 +8,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {Option, Language, LinkText, ResourceCard, WorkspaceAccessLevel} from 'app/text-labels';
 import {config} from 'resources/workbench-config';
 import {makeRandomName} from 'utils/str-utils';
-import {createWorkspace, findOrCreateWorkspace, signIn, signInAs, signOut} from 'utils/test-utils';
+import {createWorkspace, findOrCreateWorkspace, signInWithAccessToken, signInAs, signOut} from 'utils/test-utils';
 import {waitWhileLoading} from 'utils/waits-utils';
 import WorkspacesPage from 'app/page/workspaces-page';
 
@@ -16,7 +16,7 @@ import WorkspacesPage from 'app/page/workspaces-page';
 describe('Workspace reader Jupyter notebook action tests', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   /**
