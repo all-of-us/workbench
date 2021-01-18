@@ -18,8 +18,7 @@ describe('Dataset test', () => {
    * - Rename dataset.
    * - Delete dataset.
    */
-  // disabled temporarily to merge fitbit concept sets, will fix with RW-5932
-  xtest('Can create and rename Dataset', async () => {
+  test('Can create and rename Dataset', async () => {
     const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
