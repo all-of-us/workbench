@@ -20,6 +20,7 @@ import {cookiesEnabled, WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
 import {AppRouting} from './app-routing';
+import {CohortPageComponent} from './cohort-search/cohort-page/cohort-page.component';
 import {BugReportComponent} from './components/bug-report';
 import {ConfirmDeleteModalComponent} from './components/confirm-delete-modal';
 import {HelpSidebarComponent} from './components/help-sidebar';
@@ -133,6 +134,7 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     AppRouting,
     BugReportComponent,
     CohortActionsComponent,
+    CohortPageComponent,
     CohortReviewComponent,
     ConceptSetActionsComponent,
     ConceptHomepageComponent,
