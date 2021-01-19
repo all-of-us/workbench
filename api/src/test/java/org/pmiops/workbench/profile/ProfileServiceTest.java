@@ -9,8 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -42,9 +40,7 @@ import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperIm
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.AdminTableUser;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.InstitutionalRole;
-import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.test.FakeClock;
@@ -54,6 +50,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
@@ -98,7 +95,6 @@ public class ProfileServiceTest {
   @MockBean private FreeTierBillingService mockFreeTierBillingService;
   @MockBean private InstitutionDao mockInstitutionDao;
   @MockBean private InstitutionService mockInstitutionService;
-  @MockBean private UserDao mockUserDao;
   @MockBean private UserService mockUserService;
   @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
   @MockBean private VerifiedInstitutionalAffiliationDao mockVerifiedInstitutionalAffiliationDao;
@@ -107,7 +103,9 @@ public class ProfileServiceTest {
   private VerifiedInstitutionalAffiliationMapper mockVerifiedInstitutionalAffiliationMapper;
 
   @Autowired ProfileService profileService;
-  @Autowired UserDao userDao;
+  // Use a SpyBean here, since we need to have a real UserDao available, but also mock out specific
+  // method calls (see e.g. testGetAdminTableUsers* tests).
+  @SpyBean UserDao userDao;
 
   // enables access to the logged in user
   private static DbUser loggedInUser;
@@ -551,9 +549,9 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void testListAllProfiles_noUsers() {
+  public void testGetAdminTableUsers_noUsers() {
     doReturn(ImmutableList.of())
-        .when(mockUserDao)
+        .when(userDao)
         .getAdminTableUsers();
 
     final List<AdminTableUser> profiles = profileService.getAdminTableUsers();
@@ -561,7 +559,7 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void testListAllProfiles_someUsers() {
+  public void testGetAdminTableUsers_someUsers() {
     ProjectionFactory factory = new SpelAwareProxyProjectionFactory();
 
     final UserDao.DbAdminTableUser user1 = factory.createProjection(UserDao.DbAdminTableUser.class);
@@ -583,7 +581,7 @@ public class ProfileServiceTest {
     user3.setInstitutionName("University 3");
 
     doReturn(ImmutableList.of(user1, user2, user3))
-      .when(mockUserDao)
+      .when(userDao)
       .getAdminTableUsers();
 
     final List<AdminTableUser> adminTableUsers = profileService.getAdminTableUsers();
