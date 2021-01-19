@@ -40,7 +40,7 @@ describe('Cohort review tests', () => {
     const cohortName = await cohortCard.getResourceName();
     console.log(`Created Cohort: "${cohortName}"`);
 
-    await cohortCard.selectSnowmanMenu(Option.Review);
+    await cohortCard.selectSnowmanMenu(Option.Review, {waitForNavi: true});
     const modal = new CohortReviewModal(page);
     await modal.fillInNumberOfPartcipants(reviewSetNumberOfParticipants);
     await modal.clickButton(LinkText.CreateSet);

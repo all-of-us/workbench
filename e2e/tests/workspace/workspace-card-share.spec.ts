@@ -62,7 +62,7 @@ describe('Share workspace', () => {
       const workspaceName = await workspaceCard.getWorkspaceName();
 
       // Open the Share modal
-      await workspaceCard.selectSnowmanMenu(Option.Share, {waitForNav: false});
+      await workspaceCard.selectSnowmanMenu(Option.Share, {waitForNavi: false});
 
       const shareModal = new ShareModal(page);
       await shareModal.waitUntilVisible();

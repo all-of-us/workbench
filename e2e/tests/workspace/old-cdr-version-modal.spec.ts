@@ -39,7 +39,7 @@ describe('OldCdrVersion Modal restrictions', () => {
 
         await workspaceCard.asElementHandle().hover();
         // Click on Ellipsis menu "Duplicate" option.
-        await workspaceCard.selectSnowmanMenu(Option.Duplicate);
+        await workspaceCard.selectSnowmanMenu(Option.Duplicate, {waitForNavi: true});
 
         // Fill out Workspace Name should be just enough for successful duplication
         const workspaceEditPage = new WorkspaceEditPage(page);

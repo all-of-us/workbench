@@ -5,16 +5,10 @@ import {waitForNumericalString, waitForText, waitWhileLoading} from 'utils/waits
 import CohortSearchPage from 'app/page/cohort-search-page';
 import CriteriaSearchPage, {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/criteria-search-page';
 import TieredMenu from 'app/component/tiered-menu';
-import {LinkText} from 'app/text-labels';
+import {LinkText, Option} from 'app/text-labels';
 import {snowmanIconXpath} from 'app/component/snowman-menu';
 import Button from 'app/element/button';
 import HelpSidebar from 'app/component/help-sidebar';
-
-enum GroupMenuOption {
-   EditGroupName  = 'Edit group name',
-   SuppressGroupFromTotalCount = 'Suppress group from total count',
-   DeleteGroup = 'Delete group',
-}
 
 export default class CohortParticipantsGroup {
 
@@ -50,9 +44,9 @@ export default class CohortParticipantsGroup {
    * Build Cohort Criteria page: Group snowman menu
    * @param {GroupMenuOption} option
    */
-  async selectGroupSnowmanMenu(option: GroupMenuOption): Promise<void> {
+  async selectGroupSnowmanMenu(option: Option): Promise<void> {
     const menu = new TieredMenu(this.page);
-    return menu.select([option.toString()]);
+    return menu.select(option);
   }
 
   /**
@@ -62,7 +56,7 @@ export default class CohortParticipantsGroup {
    */
   async editGroupName(newGroupName: string): Promise<void> {
     await this.clickSnowmanIcon();
-    await this.selectGroupSnowmanMenu(GroupMenuOption.EditGroupName);
+    await this.selectGroupSnowmanMenu(Option.EditGroupName);
     const modal = new Modal(this.page);
     const textbox = await modal.waitForTextbox('New Name:');
     await textbox.type(newGroupName);
@@ -75,7 +69,7 @@ export default class CohortParticipantsGroup {
    */
   async deleteGroup(): Promise<ElementHandle[]> {
     await this.clickSnowmanIcon();
-    await this.selectGroupSnowmanMenu(GroupMenuOption.DeleteGroup);
+    await this.selectGroupSnowmanMenu(Option.DeleteGroup);
     try {
       await waitForText(this.page, 'This group has been deleted');
     } catch (err) {
@@ -86,33 +80,33 @@ export default class CohortParticipantsGroup {
   }
 
   async includePhysicalMeasurement(criteriaName: PhysicalMeasurementsCriteria, value: number): Promise<string> {
-    await this.clickCriteriaMenuItems(['Physical Measurements']);
+    await this.clickCriteriaMenuItems([Option.PhysicalMeasurements]);
     const searchPage = new CriteriaSearchPage(this.page);
     await searchPage.waitForLoad();
     return searchPage.filterPhysicalMeasurementValue(criteriaName, FilterSign.GreaterThanOrEqualTo, value);
   }
 
   async includeDemographicsDeceased(): Promise<string> {
-    await this.clickCriteriaMenuItems(['Demographics', 'Deceased']);
+    await this.clickCriteriaMenuItems([Option.Demographics, Option.Deceased]);
     return this.getGroupCount();
   }
 
   async includeConditions(): Promise<CriteriaSearchPage> {
-    await this.clickCriteriaMenuItems(['Conditions']);
+    await this.clickCriteriaMenuItems([Option.Conditions]);
     const searchPage = new CriteriaSearchPage(this.page);
     await searchPage.waitForLoad();
     return searchPage;
   }
 
   async includeDrugs(): Promise<CriteriaSearchPage> {
-    await this.clickCriteriaMenuItems(['Drugs']);
+    await this.clickCriteriaMenuItems([Option.Drugs]);
     const searchPage = new CriteriaSearchPage(this.page);
     await searchPage.waitForLoad();
     return searchPage;
   }
 
   async includeEthnicity(): Promise<CohortSearchPage> {
-    await this.clickCriteriaMenuItems(['Demographics', 'Ethnicity']);
+    await this.clickCriteriaMenuItems([Option.Demographics, Option.Ethnicity]);
     const searchPage = new CohortSearchPage(this.page);
     await searchPage.waitForLoad();
     return searchPage;
@@ -123,7 +117,7 @@ export default class CohortParticipantsGroup {
   }
 
   async includeAge(minAge: number, maxAge: number): Promise<string> {
-    await this.clickCriteriaMenuItems(['Demographics', 'Age']);
+    await this.clickCriteriaMenuItems([Option.Demographics, Option.Age]);
     const searchPage = new CohortSearchPage(this.page);
     await searchPage.waitForLoad();
     const results = await searchPage.addAge(minAge, maxAge);
@@ -132,13 +126,13 @@ export default class CohortParticipantsGroup {
   }
 
   async includeVisits(): Promise<CriteriaSearchPage> {
-    await this.clickCriteriaMenuItems(['Visits']);
+    await this.clickCriteriaMenuItems([Option.Visits]);
     const searchPage = new CriteriaSearchPage(this.page);
     await searchPage.waitForLoad();
     return searchPage;
   }
 
-  private async clickCriteriaMenuItems(menuItemLinks: string[]): Promise<void> {
+  private async clickCriteriaMenuItems(menuItemLinks: Option[]): Promise<void> {
     const menu = await this.openTieredMenu();
     await menu.select(menuItemLinks);
   }

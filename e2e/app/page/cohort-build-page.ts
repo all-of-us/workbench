@@ -7,7 +7,7 @@ import {ElementType} from 'app/xpath-options';
 import {makeRandomName} from 'utils/str-utils';
 import {waitForDocumentTitle, waitForNumericalString, waitWhileLoading} from 'utils/waits-utils';
 import {buildXPath} from 'app/xpath-builders';
-import {LinkText} from 'app/text-labels';
+import {LinkText, Option} from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
 import CohortParticipantsGroup from './cohort-participants-group';
 
@@ -42,7 +42,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
     await createCohortButton.waitUntilEnabled();
     await createCohortButton.click(); // Click dropdown trigger to open menu
     const menu =  new TieredMenu(this.page);
-    await menu.select(['Save']);
+    await menu.select(Option.Save);
   }
 
   async saveCohortAs(cohortName?: string, description?: string): Promise<string> {

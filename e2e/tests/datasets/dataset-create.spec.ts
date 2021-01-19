@@ -72,7 +72,7 @@ describe('Dataset test', () => {
 
     // Edit the dataset to include "All Participants".
     const datasetCard = await resourceCard.findCard(datasetName)
-    await datasetCard.selectSnowmanMenu(Option.Edit);
+    await datasetCard.selectSnowmanMenu(Option.Edit, {waitForNavi: true});
     await waitWhileLoading(page);
 
     const datasetEditPage = new DatasetEditPage(page);

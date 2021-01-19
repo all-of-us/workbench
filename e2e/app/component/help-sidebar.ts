@@ -29,7 +29,7 @@ export default class HelpSidebar extends Container {
     await this.waitUntilSectionVisible(SectionSelectors.AttributesForm);
 
     const selectMenu = await SelectMenu.findByName(this.page, {ancestorLevel: 0}, this);
-    await selectMenu.clickMenuItem(filterSign);
+    await selectMenu.selectOption(filterSign);
 
     const numberField = await this.page.waitForXPath(`${this.xpath}//input[@type="number"]`, {visible: true});
     await numberField.type(String(filterValue));
@@ -59,7 +59,7 @@ export default class HelpSidebar extends Container {
     await this.waitUntilSectionVisible(SectionSelectors.ModifiersForm);
 
     const selectMenu = await SelectMenu.findByName(this.page, {name: 'Age At Event', ancestorLevel: 1}, this);
-    await selectMenu.clickMenuItem(filterSign);
+    await selectMenu.selectOption(filterSign);
     const numberField = await this.page.waitForXPath(`${this.xpath}//input[@type="number"]`, {visible: true});
     // Issue with Puppeteer type() function: typing value in this textbox doesn't always trigger change event. workaround is needed.
     // Error: "Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation."

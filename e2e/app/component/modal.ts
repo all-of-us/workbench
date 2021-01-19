@@ -58,7 +58,7 @@ export default class Modal extends Container {
        fp.map(item => item.waitFn()),
        fp.concat([button.click()])
     )([
-      {shouldWait: waitForNav, waitFn: () => this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']})},
+      {shouldWait: waitForNav, waitFn: () => this.page.waitForNavigation({waitUntil: ['load', 'networkidle0']})},
       {shouldWait: waitForClose, waitFn: () => this.waitUntilClose()}
     ]));
   }

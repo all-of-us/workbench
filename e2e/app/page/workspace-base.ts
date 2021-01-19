@@ -128,7 +128,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
       throw new Error(`Failed to find ${resourceType} card "${resourceName}"`);
     }
 
-    await card.selectSnowmanMenu(Option.Delete, {waitForNav: false});
+    await card.selectSnowmanMenu(Option.Delete, {waitForNavi: false});
 
     const modal = new Modal(this.page);
     await modal.waitForLoad();
@@ -184,7 +184,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
         option = Option.Rename;
         break;
     }
-    await card.selectSnowmanMenu(option, {waitForNav: false});
+    await card.selectSnowmanMenu(option, {waitForNavi: false});
 
     const modal = new Modal(this.page);
     await modal.waitForLoad();
@@ -233,7 +233,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param {Option} option
    * @param opts
    */
-  async selectWorkspaceAction(option: Option, opts?: { waitForNav: false }): Promise<void> {
+  async selectWorkspaceAction(option: Option, opts?: { waitForNavi: false }): Promise<void> {
     const iconXpath = './/*[@data-test-id="workspace-menu-button"]';
     await this.page.waitForXPath(iconXpath, {visible: true}).then(icon => icon.click());
     const snowmanMenu = new SnowmanMenu(this.page);
@@ -244,7 +244,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * Delete workspace via Workspace Actions snowman menu "Delete" option.
    */
   async deleteWorkspace(): Promise<string[]> {
-    await this.selectWorkspaceAction(Option.Delete, { waitForNav: false });
+    await this.selectWorkspaceAction(Option.Delete, { waitForNavi: false });
     // Handle Delete Confirmation modal
     return this.dismissDeleteWorkspaceModal();
   }
@@ -283,7 +283,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * Share workspace via Workspace Actions snowman menu "Share" option.
    */
   async shareWorkspace(): Promise<ShareModal> {
-    await this.selectWorkspaceAction(Option.Share, { waitForNav: false });
+    await this.selectWorkspaceAction(Option.Share);
     const modal = new ShareModal(this.page);
     await modal.waitUntilVisible();
     return modal;

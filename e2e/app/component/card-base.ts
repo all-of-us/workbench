@@ -28,8 +28,8 @@ export default abstract class CardBase extends Container {
     return new SnowmanMenu(this.page);
   }
 
-  async selectSnowmanMenu(option: Option, opt: { waitForNav?: boolean } = {}): Promise<void> {
-    return this.getSnowmanMenu().then(menu => menu.select(option, opt));
+  async selectSnowmanMenu(options: Option | Option[], opt: { waitForNavi?: boolean } = {}): Promise<void> {
+    return this.getSnowmanMenu().then(menu => menu.select(options, opt));
   }
 
 

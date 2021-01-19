@@ -190,7 +190,7 @@ describe('User can create new Cohorts', () => {
     let cohortCard = await DataResourceCard.findCard(page, `${cohortName}`);
   
     // Edit cohort using Ellipsis menu
-    await cohortCard.selectSnowmanMenu(Option.Edit, {waitForNav: false});
+    await cohortCard.selectSnowmanMenu(Option.Edit, {waitForNavi: false});
     await cohortBuildPage.waitForLoad();
     await waitWhileLoading(page);
 
@@ -215,7 +215,7 @@ describe('User can create new Cohorts', () => {
     // Duplicate cohort using Ellipsis menu.
     const origCardsCount = (await DataResourceCard.findAllCards(page)).length;
     cohortCard = await DataResourceCard.findCard(page, `${cohortName}`);
-    await cohortCard.selectSnowmanMenu(Option.Duplicate, {waitForNav: false});
+    await cohortCard.selectSnowmanMenu(Option.Duplicate, {waitForNavi: false});
     await waitWhileLoading(page);
     const newCardsCount = (await DataResourceCard.findAllCards(page)).length;
     // cards count increase by 1.

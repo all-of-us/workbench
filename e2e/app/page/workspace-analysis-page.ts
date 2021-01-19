@@ -91,7 +91,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
   async duplicateNotebook(notebookName: string): Promise<string> {
     const resourceCard = new DataResourceCard(this.page);
     const notebookCard = await resourceCard.findCard(notebookName, ResourceCard.Notebook);
-    await notebookCard.selectSnowmanMenu(Option.Duplicate, {waitForNav: false});
+    await notebookCard.selectSnowmanMenu(Option.Duplicate, {waitForNavi: false});
     await waitWhileLoading(this.page);
     return `Duplicate of ${notebookName}`; // name of clone notebook
   }
@@ -106,7 +106,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     // Open Copy modal.s
     const resourceCard = new DataResourceCard(this.page);
     const notebookCard = await resourceCard.findCard(notebookName, ResourceCard.Notebook);
-    await notebookCard.selectSnowmanMenu(Option.CopyToAnotherWorkspace, {waitForNav: false});
+    await notebookCard.selectSnowmanMenu(Option.CopyToAnotherWorkspace, {waitForNavi: false});
     // Fill out modal fields.
     const copyModal = await new CopyModal(this.page);
     await copyModal.waitForLoad();

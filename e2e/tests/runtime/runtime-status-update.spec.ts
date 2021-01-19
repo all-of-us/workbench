@@ -13,7 +13,7 @@ import NotebookPreviewPage from 'app/page/notebook-preview-page';
 // This one is going to take a long time.
 jest.setTimeout(60 * 30 * 1000);
 
-describe('Updating runtime parameters', () => {
+describe.skip('Updating runtime parameters', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
     const workspaceCard = await createWorkspace(page, config.altCdrVersionName);

@@ -51,7 +51,7 @@ export default class NotebookPage extends AuthenticatedPage {
       console.warn(`Reloading "${this.documentTitle}" because cannot find the Run button`);
       await this.page.reload({waitUntil: ['networkidle0', 'load']});
     }
-    await this.waitForKernelIdle(300000); // 5 minutes
+    await this.waitForKernelIdle(600000); // 10 minutes
     return true;
   }
 

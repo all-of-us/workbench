@@ -94,7 +94,7 @@ describe('Create Dataset', () => {
 
     const resourceCard = new DataResourceCard(page);
     const datasetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
-    await datasetCard.selectSnowmanMenu(Option.exportToNotebook, {waitForNav: false});
+    await datasetCard.selectSnowmanMenu(Option.ExportToNotebook, {waitForNavi: false});
 
     const exportModal = new ExportToNotebookModal(page);
     await exportModal.waitForLoad();

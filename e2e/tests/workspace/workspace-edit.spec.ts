@@ -25,7 +25,7 @@ describe('Editing workspace via workspace card snowman menu', () => {
   test('User as OWNER can edit workspace', async () => {
     const workspaceCard = await createWorkspace(page);
     workspaceName = await workspaceCard.getWorkspaceName();
-    await workspaceCard.selectSnowmanMenu(Option.Edit);
+    await workspaceCard.selectSnowmanMenu(Option.Edit, {waitForNavi: true});
 
     const workspaceEditPage = new WorkspaceEditPage(page);
 
@@ -106,11 +106,11 @@ describe('Editing workspace via workspace card snowman menu', () => {
     const workspaceEditPage = new WorkspaceEditPage(page);
 
      // CDR Version Select is readonly. Get selected value.
-     const selectedOption = await workspaceEditPage.selectCdrVersion();
-     const cdrVersionSelect = await workspaceEditPage.getCdrVersionSelect();
-     const selectedValue = await cdrVersionSelect.getOptionValue(selectedOption);
+    const selectedOption = await workspaceEditPage.selectCdrVersion();
+    const cdrVersionSelect = await workspaceEditPage.getCdrVersionSelect();
+    const selectedValue = await cdrVersionSelect.getOptionValue(selectedOption);
 
-     // Change question #2 answer
+    // Change question #2 answer
      await performActions(page, testData.defaultAnswersResearchPurposeSummary);
 
      const updateButton = await workspaceEditPage.getUpdateWorkspaceButton();
