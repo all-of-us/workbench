@@ -550,9 +550,7 @@ public class ProfileServiceTest {
 
   @Test
   public void testGetAdminTableUsers_noUsers() {
-    doReturn(ImmutableList.of())
-        .when(userDao)
-        .getAdminTableUsers();
+    doReturn(ImmutableList.of()).when(userDao).getAdminTableUsers();
 
     final List<AdminTableUser> profiles = profileService.getAdminTableUsers();
     assertThat(profiles).isEmpty();
@@ -580,9 +578,7 @@ public class ProfileServiceTest {
     user3.setDisabled(true);
     user3.setInstitutionName("University 3");
 
-    doReturn(ImmutableList.of(user1, user2, user3))
-      .when(userDao)
-      .getAdminTableUsers();
+    doReturn(ImmutableList.of(user1, user2, user3)).when(userDao).getAdminTableUsers();
 
     final List<AdminTableUser> adminTableUsers = profileService.getAdminTableUsers();
     assertThat(adminTableUsers).hasSize(3);
