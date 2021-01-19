@@ -84,6 +84,12 @@ class NewDataSetModal extends React.Component<Props, State> {
     };
   }
 
+  componentDidMount() {
+    if (this.props.dataSet) {
+      this.setState({name: this.props.dataSet.name});
+    }
+  }
+
   async updateDataSet() {
     const {dataSet, workspaceNamespace, workspaceId} = this.props;
     const {name} = this.state;
@@ -240,6 +246,10 @@ class NewDataSetModal extends React.Component<Props, State> {
         </TooltipTrigger>
         <React.Fragment>  {exportToNotebook && <ExportDataSet
             dataSetRequest={this.getDataSetRequest()}
+            notebookType={(kernelTypeEnum) => this.setState({
+              kernelType: kernelTypeEnum,
+              includeRawMicroarrayData: kernelTypeEnum === KernelTypeEnum.R ? false : this.state.includeRawMicroarrayData
+            })}
             newNotebook={(v) => this.setState({newNotebook: v})}
             updateNotebookName={(v) => this.setState({notebookName: v})}
             workspaceNamespace={this.props.workspaceNamespace} workspaceFirecloudName={this.props.workspaceId}/>}

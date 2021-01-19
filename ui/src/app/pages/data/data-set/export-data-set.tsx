@@ -14,6 +14,7 @@ import * as React from 'react';
 interface Props {
   dataSetRequest: DataSetRequest;
   newNotebook: Function;
+  notebookType?: Function;
   updateNotebookName: Function;
   workspaceNamespace: string;
   workspaceFirecloudName: string;
@@ -108,6 +109,11 @@ export class ExportDataSet extends React.Component<Props, State> {
     this.props.updateNotebookName(notebook);
   }
 
+  onKernelTypeChange(kernelType) {
+    this.setState({kernelType: kernelType});
+    this.props.notebookType(kernelType);
+  }
+
   render() {
     const {
       existingNotebooks,
@@ -166,8 +172,9 @@ export class ExportDataSet extends React.Component<Props, State> {
         .map((kernelTypeEnum, i) =>
               <label key={i} style={{display: 'block'}}>
                 <RadioButton
+                    data-test-id={'kernel-type-' + kernelTypeEnum.toLowerCase()}
                     checked={this.state.kernelType === kernelTypeEnum}
-                    onChange={() => this.setState({kernelType: kernelTypeEnum})}
+                    onChange={() => this.onKernelTypeChange(kernelTypeEnum)}
                 />
                 &nbsp;{kernelTypeEnum}
               </label>
