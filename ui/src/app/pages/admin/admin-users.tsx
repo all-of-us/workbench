@@ -1,9 +1,11 @@
 import {Component} from '@angular/core';
+import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
+import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {AdminUserBypass} from 'app/pages/admin/admin-user-bypass';
 import {authDomainApi, profileApi} from 'app/services/swagger-fetch-clients';
@@ -59,7 +61,7 @@ interface State {
  * other access module bypasses.
  */
 export const AdminUsers = withUserProfile()(class extends React.Component<Props, State> {
-
+  debounceUpdateFilter: Function;
   constructor(props) {
     super(props);
     this.state = {
@@ -68,6 +70,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
       loading: false,
       users: [],
     };
+    this.debounceUpdateFilter = fp.debounce(300, (filterString) => this.setState({filter: filterString}));
   }
 
   async componentDidMount() {
@@ -137,13 +140,20 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
     return new Date(date).toString().split(' ').slice(1, 5).join(' ');
   }
 
-  getAccessModuleString(user: AdminTableUser, key: string) {
+  getAccessModuleString(user: AdminTableUser, key: string): (string|React.ReactElement) {
     const completionTime = user[key + 'CompletionTime'];
     const bypassTime = user[key + 'BypassTime'];
+
     if (completionTime) {
-      return '✔';
+      const completionTimeString = moment(completionTime).format('lll');
+      return <TooltipTrigger content={`Completed at ${completionTimeString}`}>
+        <span>✔</span>
+      </TooltipTrigger>;
     } else if (bypassTime) {
-      return 'B';
+      const bypassTimeString = moment(bypassTime).format('lll');
+      return <TooltipTrigger content={`Bypassed at ${bypassTimeString}`}>
+        <span>B</span>
+      </TooltipTrigger>;
     } else {
       return '';
     }
@@ -156,7 +166,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
         target='_blank'>
         link
       </a>,
-      bypass: <AdminUserBypass user={user}/>,
+      bypass: <AdminUserBypass user={{...user}}/>,
       complianceTraining: this.getAccessModuleString(user, 'complianceTraining'),
       contactEmail: user.contactEmail,
       dataUseAgreement: this.getAccessModuleString(user, 'dataUseAgreement'),
@@ -181,10 +191,6 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
     }));
   }
 
-  filter(query: string) {
-
-  }
-
   render() {
     const {contentLoaded, filter, loading, users} = this.state;
     return <div style={{position: 'relative'}}>
@@ -199,7 +205,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
                style={{marginBottom: '.5em', width: '300px'}}
                type='text'
                placeholder='Search'
-               onChange={fp.debounce(300, e => this.setState({filter: e.target.value}))}
+               onChange={e => this.debounceUpdateFilter(e.target.value)}
         />
         <DataTable value={this.convertProfilesToFields(users)}
                    frozenWidth='200px'

@@ -1250,7 +1250,7 @@ paths:
         200:
           description: A list of users
           schema:
-            "$ref": "#/definitions/UserListResponse"
+            "$ref": "#/definitions/AdminUserListResponse"
         403:
           description: User doesn't have the ACCESS_CONTROL_ADMIN authority
           schema:
@@ -5669,7 +5669,7 @@ definitions:
       accessLevel:
         "$ref": "#/definitions/WorkspaceAccessLevel"
 
-  UserListResponse:
+  AdminUserListResponse:
     type: object
     required:
     - users

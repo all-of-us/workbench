@@ -26,48 +26,57 @@ interface Props {
   user: AdminTableUser;
 }
 
-export class AdminUserBypass extends React.Component<
-    Props,
-    { initialModules: AccessModule[], selectedModules: AccessModule[],
-      open: boolean} > {
+interface State {
+  selectedModules: AccessModule[];
+  open: boolean;
+}
 
+const getUserModuleList = (user: AdminTableUser): Array<AccessModule> => {
+  return [
+    ...(user.betaAccessBypassTime ? [AccessModule.BETAACCESS] : []),
+    ...(user.complianceTrainingBypassTime ? [AccessModule.COMPLIANCETRAINING] : []),
+    ...(user.dataUseAgreementBypassTime ? [AccessModule.DATAUSEAGREEMENT] : []),
+    ...(user.eraCommonsBypassTime ? [AccessModule.ERACOMMONS] : []),
+    ...(user.twoFactorAuthBypassTime ? [AccessModule.TWOFACTORAUTH] : []),
+  ];
+};
+
+export class AdminUserBypass extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     const {user} = props;
-    const initialModules = [
-      ...(user.betaAccessBypassTime ? [AccessModule.BETAACCESS] : []),
-      ...(user.complianceTrainingBypassTime ? [AccessModule.COMPLIANCETRAINING] : []),
-      ...(user.dataUseAgreementBypassTime ? [AccessModule.DATAUSEAGREEMENT] : []),
-      ...(user.eraCommonsBypassTime ? [AccessModule.ERACOMMONS] : []),
-      ...(user.twoFactorAuthBypassTime ? [AccessModule.TWOFACTORAUTH] : []),
-    ];
     this.state = {
       open: false,
-      initialModules: initialModules,
-      selectedModules: initialModules
+      selectedModules: getUserModuleList(user)
     };
   }
 
   cancel() {
-    const {initialModules} = this.state;
-    this.setState({selectedModules: initialModules});
+    this.setState({selectedModules: getUserModuleList(this.props.user)});
   }
 
   save() {
-    const {initialModules, selectedModules} = this.state;
+    const {selectedModules} = this.state;
     const {user} = this.props;
-    const changedModules = fp.xor(initialModules, selectedModules);
+    const changedModules = fp.xor(getUserModuleList(user), selectedModules);
     changedModules.forEach(async module => {
       await profileApi()
         .bypassAccessRequirement(user.userId,
           {isBypassed: selectedModules.includes(module), moduleName: module});
     });
-
-    this.setState({initialModules: selectedModules});
   }
 
   hasEdited(): boolean {
-    return fp.xor(this.state.selectedModules, this.state.initialModules).length !== 0;
+    return fp.xor(this.state.selectedModules, getUserModuleList(this.props.user)).length !== 0;
+  }
+
+  componentDidUpdate(prevProps: Props) {
+  // Reset the "default" set of selected modules if the rendered user changes.
+    if (prevProps.user.userId !== this.props.user.userId) {
+      this.setState({
+        selectedModules: getUserModuleList(this.props.user)
+      });
+    }
   }
 
   render() {
