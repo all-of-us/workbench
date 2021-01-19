@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.springframework.boot.CommandLineRunner;
@@ -44,6 +45,7 @@ public class UpdateCdrVersions {
       Gson gson =
           new GsonBuilder()
               .registerTypeAdapter(Timestamp.class, new TimestampGsonAdapter())
+              .registerTypeAdapter(DbAccessTier.class, new DbAccessTierDeserializer())
               .create();
       List<DbCdrVersion> cdrVersions =
           gson.fromJson(cdrVersionsReader, new TypeToken<List<DbCdrVersion>>() {}.getType());
