@@ -328,7 +328,7 @@ export function mapGroupItem(item: any, temporal: boolean) {
 
 export function mapParameter(sp: any) {
   const {parameterId, name, domainId, type, subtype, group, attributes, conceptId,
-    hasAncestorData, isStandard, code} = sp;
+    hasAncestorData, isStandard} = sp;
   const param = <SearchParameter>{
     parameterId,
     name: stripHtml(name),
