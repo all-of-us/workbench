@@ -987,7 +987,8 @@ public class CohortReviewControllerTest {
                     .page(page)
                     .pageSize(pageSize)
                     .sortOrder(sortOrder))
-            .getBody();
+            .getBody()
+            .getCohortReview();
     verify(userRecentResourceService, atLeastOnce())
         .updateCohortEntry(anyLong(), anyLong(), anyLong());
     assertThat(actualReview).isEqualTo(expectedReview);
@@ -1048,12 +1049,7 @@ public class CohortReviewControllerTest {
         .matchedParticipantCount(actualReview.getMatchedParticipantCount())
         .reviewSize(actualReview.getReviewSize())
         .reviewedCount(actualReview.getReviewedCount())
-        .queryResultSize(2L)
-        .participantCohortStatuses(newParticipantCohortStatusList)
-        .page(page)
-        .pageSize(pageSize)
-        .sortOrder(sortOrder.toString())
-        .sortColumn(sortColumn.name());
+        .participantCohortStatuses(newParticipantCohortStatusList);
   }
 
   private ParticipantCohortStatus dbParticipantCohortStatusToApi(

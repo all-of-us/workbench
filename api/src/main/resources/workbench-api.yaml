@@ -2771,7 +2771,7 @@ paths:
         200:
           description: A collection of participants
           schema:
-            "$ref": "#/definitions/CohortReview"
+            "$ref": "#/definitions/CohortReviewWithCountResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -6580,23 +6580,23 @@ definitions:
       reviewedCount:
         type: integer
         format: int64
-      queryResultSize:
-        type: integer
-        format: int64
       reviewStatus:
         "$ref": "#/definitions/ReviewStatus"
       participantCohortStatuses:
         type: array
         items:
           "$ref": "#/definitions/ParticipantCohortStatus"
-      page:
+  CohortReviewWithCountResponse:
+    required:
+    - queryResultSize
+    - cohortReview
+    properties:
+      queryResultSize:
         type: integer
-      pageSize:
-        type: integer
-      sortOrder:
-        type: string
-      sortColumn:
-        type: string
+        format: int64
+        description: The size of the query results
+      cohortReview:
+        "$ref": "#/definitions/CohortReview"
   PageFilterRequest:
     required:
     - page
