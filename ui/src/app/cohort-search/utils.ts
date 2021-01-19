@@ -248,7 +248,7 @@ export function parseCohortDefinition(json: string) {
       grp.items = grp.items.map(item => {
         item.searchParameters = item.searchParameters.map(sp => {
           const {parameterId, name, domain, type, subtype, group, attributes, conceptId,
-            ancestorData, standard, value} = sp;
+            ancestorData, standard} = sp;
           return {
             parameterId,
             name,
@@ -257,7 +257,7 @@ export function parseCohortDefinition(json: string) {
             subtype,
             group,
             conceptId,
-            code: value || '',
+            code: '',
             attributes,
             hasAttributes: attributes && attributes.length > 0,
             hasAncestorData: ancestorData,
@@ -328,7 +328,7 @@ export function mapGroupItem(item: any, temporal: boolean) {
 
 export function mapParameter(sp: any) {
   const {parameterId, name, domainId, type, subtype, group, attributes, conceptId,
-    hasAncestorData, isStandard, value, code} = sp;
+    hasAncestorData, isStandard, code} = sp;
   const param = <SearchParameter>{
     parameterId,
     name: stripHtml(name),
@@ -344,11 +344,6 @@ export function mapParameter(sp: any) {
   }
   if (domainId === Domain.SURVEY) {
     param.subtype = subtype;
-  }
-  if (value) {
-    param.value = value;
-  } else if (code) {
-    param.value = code;
   }
   return param;
 }

@@ -7460,9 +7460,6 @@ definitions:
       name:
         description: The name of the generating Criterion
         type: string
-      value:
-        description: The Criteria code (or name if querying for Deceased)
-        type: string
       domain:
         description: The omop domain that this criteria belongs to
         type: string
