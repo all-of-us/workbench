@@ -27,8 +27,7 @@ public class DbBillingProjectBufferEntry {
   private Timestamp lastStatusChangedTime;
   private Short status;
   private DbUser assignedUser;
-  // TODO FK to DbAccessTier
-  private String accessTier;
+  private DbAccessTier accessTier;
 
   public enum BufferEntryStatus {
     // Sent a request to FireCloud to create a BillingProject. Status of BillingProject is TBD
@@ -102,12 +101,13 @@ public class DbBillingProjectBufferEntry {
     this.assignedUser = assignedUser;
   }
 
-  @Column(name = "access_tier")
-  private String getAccessTier() {
+  @ManyToOne
+  @JoinColumn(name = "access_tier_2")
+  public DbAccessTier getAccessTier() {
     return accessTier;
   }
 
-  public void setAccessTier(String accessTier) {
+  public void setAccessTier(DbAccessTier accessTier) {
     this.accessTier = accessTier;
   }
 
@@ -162,7 +162,7 @@ public class DbBillingProjectBufferEntry {
         + ", assignedUser="
         + Optional.ofNullable(assignedUser).map(u -> Long.toString(u.getUserId())).orElse("n/a")
         + ", accessTier="
-        + Optional.ofNullable(accessTier).orElse("n/a")
+        + Optional.ofNullable(accessTier).map(t -> t.getShortName()).orElse("n/a")
         + '}';
   }
 

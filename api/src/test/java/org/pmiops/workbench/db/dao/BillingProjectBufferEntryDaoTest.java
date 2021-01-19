@@ -35,17 +35,19 @@ public class BillingProjectBufferEntryDaoTest {
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private BillingProjectBufferEntryDao billingProjectBufferEntryDao;
 
-  private final String TEST_TIER = "registered";
+  private DbAccessTier testTier;
 
   @Before
   public void setup() {
-    accessTierDao.save(
-        new DbAccessTier()
-            .setShortName(TEST_TIER)
-            .setDisplayName("Registered Tier")
-            .setServicePerimeter("the/registered/tier/service/perimeter")
-            .setAuthDomainName("auth-domain")
-            .setAuthDomainGroupEmail("auth-domain-group@terra.bio"));
+    testTier =
+        accessTierDao.save(
+            new DbAccessTier()
+                .setShortName("registered")
+                .setDisplayName("Registered Tier")
+                .setServicePerimeter("the/registered/tier/service/perimeter")
+                .setAuthDomainName("auth-domain")
+                .setAuthDomainGroupEmail("auth-domain-group@terra.bio"));
+
     insertEntriesWithCounts(STATUS_TO_COUNT_INPUT);
   }
 
@@ -80,37 +82,51 @@ public class BillingProjectBufferEntryDaoTest {
 
   @Test
   public void testGetCurrentBufferSizeForAccessTier_invalidTier() {
-    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier("invalid"))
+    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(null)).isEqualTo(0);
+  }
+
+  @Test
+  public void testGetCurrentBufferSizeForAccessTier_noEntriesTier() {
+    DbAccessTier noEntries =
+        accessTierDao.save(
+            new DbAccessTier()
+                .setShortName("another")
+                .setDisplayName("Some Other Tier")
+                .setServicePerimeter("a/service/perimeter")
+                .setAuthDomainName("auth-domain-X")
+                .setAuthDomainGroupEmail("auth-domain-X@terra.bio"));
+
+    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(noEntries))
         .isEqualTo(0);
   }
 
   @Test
   public void testGetCurrentBufferSizeForAccessTier_defaultTier() {
-    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(TEST_TIER))
+    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(testTier))
         .isEqualTo(STATUS_TO_COUNT_INPUT.get(BufferEntryStatus.AVAILABLE));
   }
 
   @Test
   public void testGetCurrentBufferSizeForAccessTier_multiTier() {
     // add one available project in an alternate tier
-    String altTierName = "other";
-    accessTierDao.save(
-        new DbAccessTier()
-            .setShortName(altTierName)
-            .setDisplayName(altTierName)
-            .setServicePerimeter("other perim")
-            .setAuthDomainName("other-auth-domain")
-            .setAuthDomainGroupEmail("other-auth-domain-group@terra.bio"));
+    DbAccessTier altTier =
+        accessTierDao.save(
+            new DbAccessTier()
+                .setShortName("other")
+                .setDisplayName("Another Tier")
+                .setServicePerimeter("other perim")
+                .setAuthDomainName("other-auth-domain")
+                .setAuthDomainGroupEmail("other-auth-domain-group@terra.bio"));
 
     DbBillingProjectBufferEntry altEntry = new DbBillingProjectBufferEntry();
     altEntry.setStatusEnum(BufferEntryStatus.AVAILABLE, () -> NOW);
-    altEntry.setAccessTier(altTierName);
+    altEntry.setAccessTier(altTier);
     billingProjectBufferEntryDao.save(altEntry);
 
     // no change to existing tier
-    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(TEST_TIER))
+    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(testTier))
         .isEqualTo(STATUS_TO_COUNT_INPUT.get(BufferEntryStatus.AVAILABLE));
-    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(altTierName))
+    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(altTier))
         .isEqualTo(1);
   }
 
@@ -120,7 +136,7 @@ public class BillingProjectBufferEntryDaoTest {
           for (int i = 0; i < count; ++i) {
             DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
             entry.setStatusEnum(status, () -> NOW);
-            entry.setAccessTier(TEST_TIER);
+            entry.setAccessTier(testTier);
             entry = billingProjectBufferEntryDao.save(entry);
           }
         });

@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -22,8 +24,7 @@ public class DbCdrVersion {
   private String name;
   @Deprecated // use accessTier
   private Short dataAccessLevel;
-  // TODO FK to DbAccessTier
-  private String accessTier;
+  private DbAccessTier accessTier;
   private short releaseNumber;
   private short archivalStatus;
   private String bigqueryProject;
@@ -84,12 +85,13 @@ public class DbCdrVersion {
     setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
   }
 
-  @Column(name = "access_tier")
-  public String getAccessTier() {
+  @ManyToOne
+  @JoinColumn(name = "access_tier_2")
+  public DbAccessTier getAccessTier() {
     return accessTier;
   }
 
-  public void setAccessTier(String accessTier) {
+  public void setAccessTier(DbAccessTier accessTier) {
     this.accessTier = accessTier;
   }
 

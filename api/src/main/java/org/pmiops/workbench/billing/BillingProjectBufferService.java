@@ -134,7 +134,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     bufferEntry.setFireCloudProjectName(createBillingProjectName());
     bufferEntry.setCreationTime(Timestamp.from(clock.instant()));
     bufferEntry.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
-    bufferEntry.setAccessTier(accessTier.getShortName());
+    bufferEntry.setAccessTier(accessTier);
     return billingProjectBufferEntryDao.save(bufferEntry);
   }
 
@@ -258,7 +258,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
         .collect(Collectors.toList());
   }
 
-  public DbBillingProjectBufferEntry assignBillingProject(DbUser dbUser, String accessTier) {
+  public DbBillingProjectBufferEntry assignBillingProject(DbUser dbUser, DbAccessTier accessTier) {
     DbBillingProjectBufferEntry bufferEntry = consumeBufferEntryForAssignment(accessTier);
     final String billingProject = bufferEntry.getFireCloudProjectName();
 
@@ -271,7 +271,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     return bufferEntry;
   }
 
-  private DbBillingProjectBufferEntry consumeBufferEntryForAssignment(String accessTier) {
+  private DbBillingProjectBufferEntry consumeBufferEntryForAssignment(DbAccessTier accessTier) {
     // Each call to acquire the lock will timeout in 1s if it is currently held
     while (true) {
       if (billingProjectBufferEntryDao.acquireAssigningLock() == 1) {
@@ -318,8 +318,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   }
 
   private long getCurrentBufferSize(DbAccessTier accessTier) {
-    return billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(
-        accessTier.getShortName());
+    return billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(accessTier);
   }
 
   // TODO: decide on tier proportion in the billing buffer (e.g. 60% RT, 40% CT).  Use config?
@@ -345,7 +344,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
                       billingProjectBufferEntryDao.countByStatusAndAccessTier(
                           DbStorageEnums.billingProjectBufferEntryStatusToStorage(
                               BufferEntryStatus.AVAILABLE),
-                          accessTier.getShortName());
+                          accessTier);
                   return new BillingProjectBufferStatusByTierInner()
                       .accessTier(accessTier.getShortName())
                       .bufferSize(bufferSize);

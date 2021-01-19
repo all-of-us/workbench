@@ -113,8 +113,8 @@ public class BillingProjectBufferServiceTest {
   @Autowired private BillingProjectBufferService billingProjectBufferService;
 
   private final long BUFFER_CAPACITY = 5;
-  private final String TEST_TIER = "registered";
-  private final String TEST_PERIMETER = "the/registered/tier/service/perimeter";
+
+  private DbAccessTier testTier;
 
   @Before
   public void setUp() {
@@ -123,6 +123,15 @@ public class BillingProjectBufferServiceTest {
     workbenchConfig.billing.bufferCapacity = (int) BUFFER_CAPACITY;
     workbenchConfig.billing.bufferRefillProjectsPerTask = 1;
     workbenchConfig.firecloud.vpcServicePerimeterName = "we have secured the perimeter";
+
+    testTier =
+        accessTierDao.save(
+            new DbAccessTier()
+                .setShortName("registered")
+                .setDisplayName("Registered Tier")
+                .setServicePerimeter("the/registered/tier/service/perimeter")
+                .setAuthDomainName("auth-domain")
+                .setAuthDomainGroupEmail("auth-domain-group@terra.bio"));
 
     CLOCK.setInstant(NOW);
 
@@ -134,14 +143,6 @@ public class BillingProjectBufferServiceTest {
         .releaseAssigningLock();
 
     mockMonitoringService = spy(mockMonitoringService);
-
-    accessTierDao.save(
-        new DbAccessTier()
-            .setShortName(TEST_TIER)
-            .setDisplayName(TEST_TIER)
-            .setServicePerimeter(TEST_PERIMETER)
-            .setAuthDomainName("auth-domain")
-            .setAuthDomainGroupEmail("auth-domain-group@terra.bio"));
 
     billingProjectBufferService =
         new BillingProjectBufferService(
@@ -197,7 +198,7 @@ public class BillingProjectBufferServiceTest {
     String servicePerimeter = perimeterCaptor.getValue();
 
     assertThat(billingProjectName).startsWith(workbenchConfig.billing.projectNamePrefix);
-    assertThat(servicePerimeter).isEqualTo(TEST_PERIMETER);
+    assertThat(servicePerimeter).isEqualTo(testTier.getServicePerimeter());
     assertThat(
             billingProjectBufferEntryDao
                 .findByFireCloudProjectName(billingProjectName)
@@ -479,7 +480,7 @@ public class BillingProjectBufferServiceTest {
     firstEntry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
     firstEntry.setFireCloudProjectName("test-project-name-1");
     firstEntry.setCreationTime(getCurrentTimestamp());
-    firstEntry.setAccessTier(TEST_TIER);
+    firstEntry.setAccessTier(testTier);
     billingProjectBufferEntryDao.save(firstEntry);
 
     DbUser firstUser = new DbUser();
@@ -490,7 +491,7 @@ public class BillingProjectBufferServiceTest {
     secondEntry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
     secondEntry.setFireCloudProjectName("test-project-name-2");
     secondEntry.setCreationTime(getCurrentTimestamp());
-    secondEntry.setAccessTier(TEST_TIER);
+    secondEntry.setAccessTier(testTier);
     billingProjectBufferEntryDao.save(secondEntry);
 
     DbUser secondUser = new DbUser();
@@ -502,9 +503,9 @@ public class BillingProjectBufferServiceTest {
         .save(any(DbBillingProjectBufferEntry.class));
 
     Callable<DbBillingProjectBufferEntry> t1 =
-        () -> billingProjectBufferService.assignBillingProject(firstUser, TEST_TIER);
+        () -> billingProjectBufferService.assignBillingProject(firstUser, testTier);
     Callable<DbBillingProjectBufferEntry> t2 =
-        () -> billingProjectBufferService.assignBillingProject(secondUser, TEST_TIER);
+        () -> billingProjectBufferService.assignBillingProject(secondUser, testTier);
 
     List<Callable<DbBillingProjectBufferEntry>> callableTasks = new ArrayList<>();
     callableTasks.add(t1);

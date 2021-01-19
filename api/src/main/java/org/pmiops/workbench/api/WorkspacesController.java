@@ -11,7 +11,6 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -21,6 +20,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.accessTiers.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
@@ -100,6 +100,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private static final Level OPERATION_TIME_LOG_LEVEL = Level.FINE;
   private static final String RANDOM_CHARS = "abcdefghijklmnopqrstuvwxyz";
 
+  private final AccessTierService accessTierService;
   private final BillingProjectBufferService billingProjectBufferService;
   private final CdrVersionDao cdrVersionDao;
   private final Clock clock;
@@ -119,6 +120,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   @Autowired
   public WorkspacesController(
+      AccessTierService accessTierService,
       BillingProjectBufferService billingProjectBufferService,
       CdrVersionDao cdrVersionDao,
       Clock clock,
@@ -135,6 +137,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceMapper workspaceMapper,
       WorkspaceResourcesService workspaceResourcesService,
       WorkspaceService workspaceService) {
+    this.accessTierService = accessTierService;
     this.billingProjectBufferService = billingProjectBufferService;
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
@@ -210,13 +213,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     DbUser user = userProvider.get();
 
-    // for prototype
-    final String accessTier =
-        workspace.getName().toLowerCase(Locale.US).contains("tier2") ? "tier2" : "registered";
-
     final DbBillingProjectBufferEntry bufferedBillingProject;
     try {
-      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user, accessTier);
+      bufferedBillingProject =
+          billingProjectBufferService.assignBillingProject(
+              user, accessTierService.getTierForPrototype(workspace.getName()));
     } catch (EmptyBufferException e) {
       throw new TooManyRequestsException();
     }
@@ -440,14 +441,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     DbUser user = userProvider.get();
 
-    // for prototype
-    final String accessTier =
-        toWorkspace.getName().toLowerCase(Locale.US).contains("tier2") ? "tier2" : "registered";
-
     String toWorkspaceName;
     DbBillingProjectBufferEntry bufferedBillingProject;
     try {
-      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user, accessTier);
+      bufferedBillingProject =
+          billingProjectBufferService.assignBillingProject(
+              user, accessTierService.getTierForPrototype(toWorkspace.getName()));
     } catch (EmptyBufferException e) {
       throw new TooManyRequestsException();
     }

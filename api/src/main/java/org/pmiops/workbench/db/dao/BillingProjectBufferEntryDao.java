@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -22,9 +23,16 @@ public interface BillingProjectBufferEntryDao
 
   DbBillingProjectBufferEntry findByFireCloudProjectName(String fireCloudProjectName);
 
-  @Query(
-      "SELECT COUNT(*) FROM DbBillingProjectBufferEntry WHERE status IN (0, 2) AND access_tier = (:tier)")
-  Long getCurrentBufferSizeForAccessTier(@Param("tier") String accessTier);
+  List<DbBillingProjectBufferEntry> findAllByAccessTier(DbAccessTier accessTier);
+
+  default long getCurrentBufferSizeForAccessTier(DbAccessTier accessTier) {
+    return findAllByAccessTier(accessTier).stream()
+        .filter(
+            entry ->
+                entry.getStatusEnum() == BufferEntryStatus.CREATING
+                    || entry.getStatusEnum() == BufferEntryStatus.AVAILABLE)
+        .count();
+  }
 
   // TODO: decide if we care about potential "tier bias" here; it does not take tiers into account
   List<DbBillingProjectBufferEntry> findAllByStatusAndLastStatusChangedTimeLessThan(
@@ -34,11 +42,11 @@ public interface BillingProjectBufferEntryDao
   List<DbBillingProjectBufferEntry> findTop5ByStatusOrderByLastSyncRequestTimeAsc(short status);
 
   DbBillingProjectBufferEntry findFirstByStatusAndAccessTierOrderByCreationTimeAsc(
-      short status, String accessTier);
+      short status, DbAccessTier accessTier);
 
   Long countByStatus(short status);
 
-  Long countByStatusAndAccessTier(short status, String accessTier);
+  Long countByStatusAndAccessTier(short status, DbAccessTier accessTier);
 
   default Map<BufferEntryStatus, Long> getCountByStatusMap() {
     return computeProjectCountByStatus().stream()
