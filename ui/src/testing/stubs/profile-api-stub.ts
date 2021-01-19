@@ -1,6 +1,6 @@
 import {
   AccessBypassRequest,
-  AccessModule, CreateAccountRequest,
+  AccessModule, AdminTableUser, CreateAccountRequest,
   DataAccessLevel,
   InstitutionalRole,
   InvitationVerificationRequest,
@@ -46,6 +46,7 @@ export class ProfileStubVariables {
       institutionalRoleEnum: InstitutionalRole.FELLOW
     }
   };
+  static ADMIN_TABLE_USER_STUB = <AdminTableUser>{...ProfileStubVariables.PROFILE_STUB};
 }
 
 // TODO: Port functionality from ProfileServiceStub as needed.

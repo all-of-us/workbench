@@ -455,7 +455,7 @@ public class ProfileService {
     validateProfileForCorrectness(dummyProfile, profile);
   }
 
-  public List<AdminTableUser> listAllProfiles() {
+  public List<AdminTableUser> getAdminTableUsers() {
     return userDao.getAdminTableUsers().stream()
         .map(dbUser -> profileMapper.adminViewToModel(dbUser))
         .collect(ImmutableList.toImmutableList());

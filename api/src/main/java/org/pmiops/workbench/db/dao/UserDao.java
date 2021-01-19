@@ -74,22 +74,27 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
     Long getUserCount();
   }
 
+  // Note: setter methods are included only where necessary for testing. See ProfileServiceTest.
   interface DbAdminTableUser {
     Long getUserId();
+    void setUserId(Long userId);
 
     String getUsername();
 
     Short getDataAccessLevel();
 
     Boolean getDisabled();
+    void setDisabled(Boolean disabled);
 
     String getGivenName();
 
     String getFamilyName();
 
     String getContactEmail();
+    void setContactEmail(String contactEmail);
 
     String getInstitutionName();
+    void setInstitutionName(String institutionName);
 
     Timestamp getFirstRegistrationCompletionTime();
 
