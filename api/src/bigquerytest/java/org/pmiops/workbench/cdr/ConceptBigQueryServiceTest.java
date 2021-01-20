@@ -7,45 +7,23 @@ import com.google.common.collect.ImmutableSet;
 import java.util.List;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryBaseTest;
-import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.BigQueryTestService;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.model.DbConcept;
-import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.model.Domain;
-import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
-import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({
-  BigQueryTestService.class,
-  TestBigQueryCdrSchemaConfig.class,
-  TestJpaConfig.class,
-  CdrBigQuerySchemaConfigService.class
-})
+@Import({BigQueryTestService.class, ConceptBigQueryService.class})
 public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
 
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
-
-  @Autowired private ConceptDao conceptDao;
-
-  @Autowired private BigQueryService bigQueryService;
-
-  private ConceptBigQueryService conceptBigQueryService;
-
-  private DbConceptSetConceptId dbConceptSetConceptId1;
-  private DbConceptSetConceptId dbConceptSetConceptId2;
-  private DbConceptSetConceptId dbConceptSetConceptId3;
-  private DbConceptSetConceptId dbConceptSetConceptId4;
+  @Autowired private ConceptBigQueryService conceptBigQueryService;
 
   @Before
   public void setUp() {
@@ -53,71 +31,25 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
-
-    dbConceptSetConceptId1 =
-        DbConceptSetConceptId.builder().addConceptId(1L).addStandard(true).build();
-    dbConceptSetConceptId2 =
-        DbConceptSetConceptId.builder().addConceptId(6L).addStandard(true).build();
-    dbConceptSetConceptId3 =
-        DbConceptSetConceptId.builder().addConceptId(13L).addStandard(true).build();
-    dbConceptSetConceptId4 =
-        DbConceptSetConceptId.builder().addConceptId(192819L).addStandard(true).build();
-
-    conceptBigQueryService = new ConceptBigQueryService(bigQueryService);
-
-    conceptDao.deleteAll();
-  }
-
-  @Test
-  public void testGetConceptCountNoConceptsSaved() {
-    assertThat(
-            conceptBigQueryService.getParticipantCountForConcepts(
-                Domain.CONDITION,
-                ImmutableSet.of(
-                    dbConceptSetConceptId1,
-                    dbConceptSetConceptId2,
-                    dbConceptSetConceptId3,
-                    dbConceptSetConceptId4)))
-        .isEqualTo(1);
-  }
-
-  @Test
-  @Ignore("RW-5707")
-  public void testGetConceptCountConceptsSaved() {
-    saveConcept(1L, "S");
-    saveConcept(6L, null);
-    saveConcept(13L, null);
-    saveConcept(192819L, "C");
-
-    assertThat(
-            conceptBigQueryService.getParticipantCountForConcepts(
-                Domain.CONDITION,
-                ImmutableSet.of(
-                    dbConceptSetConceptId1,
-                    dbConceptSetConceptId2,
-                    dbConceptSetConceptId3,
-                    dbConceptSetConceptId4)))
-        .isEqualTo(2);
-  }
-
-  private void saveConcept(long conceptId, String standardConceptValue) {
-    conceptDao.save(
-        new DbConcept()
-            .conceptId(conceptId)
-            .standardConcept(standardConceptValue)
-            .conceptCode("concept" + conceptId)
-            .conceptName("concept " + conceptId)
-            .vocabularyId("V")
-            .domainId("D"));
   }
 
   @Override
   public List<String> getTableNames() {
-    return ImmutableList.of("condition_occurrence", "cb_criteria", "cb_search_all_events");
+    return ImmutableList.of("cb_criteria", "cb_search_all_events");
   }
 
   @Override
   public String getTestDataDirectory() {
     return CB_DATA;
+  }
+
+  @Test
+  public void testGetConceptCountNoConceptsSaved() {
+    DbConceptSetConceptId dbConceptSetConceptId =
+        DbConceptSetConceptId.builder().addConceptId(6L).addStandard(true).build();
+    assertThat(
+            conceptBigQueryService.getParticipantCountForConcepts(
+                Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId)))
+        .isEqualTo(1);
   }
 }
