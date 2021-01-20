@@ -280,7 +280,9 @@ public class WorkbenchConfig {
 
   public static class ReportingConfig {
     public String dataset;
+    // Max rows per batch queried in MySQL, and also the upload batch size for BigQuery. Max
+    // possible is 10000, though around 2500 may be the most Workspace rows we can load into memory
+    // on the smallest App Engine machine.
     public Integer maxRowsPerInsert;
-    public String uploadMethod;
   }
 }
