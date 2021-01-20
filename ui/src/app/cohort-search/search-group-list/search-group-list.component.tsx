@@ -8,6 +8,7 @@ import {SearchGroup} from 'app/cohort-search/search-group/search-group.component
 import {criteriaMenuOptionsStore, searchRequestStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
 import {ClrIcon} from 'app/components/icons';
+import {LOCAL_STORAGE_KEY_COHORT_CONTEXT} from 'app/pages/data/criteria-search';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
@@ -193,13 +194,18 @@ const SearchGroupList = fp.flow(withCurrentWorkspace(), withCdrVersions())(
               domain,
               type: types[0].type,
               standard: types[0].standardFlags[0].standard,
-              order: DOMAIN_TYPES.indexOf(Domain[domain])});
+              order: DOMAIN_TYPES.indexOf(Domain[domain])
+            });
           }
           return acc;
         }, {programTypes: [], domainTypes: []});
         criteriaMenuOptions[cdrVersionId].programTypes.sort((a, b) => a.order - b.order);
         criteriaMenuOptions[cdrVersionId].domainTypes.sort((a, b) => a.order - b.order);
         criteriaMenuOptionsStore.next(criteriaMenuOptions);
+        const existingContext = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT));
+        if (existingContext) {
+          this.props.setSearchContext(existingContext);
+        }
         this.setState({loadingMenuOptions: false});
       });
     }
@@ -238,7 +244,7 @@ const SearchGroupList = fp.flow(withCurrentWorkspace(), withCdrVersions())(
       const itemId = generateId('items');
       const groupId = null;
       const item = initItem(itemId, domain);
-      context = {item, domain, type, standard, role, groupId, itemId};
+      context = {item, domain, type, standard, role, groupId};
       this.props.setSearchContext(context);
     }
 

@@ -22,6 +22,7 @@ import {
 import {environment} from 'environments/environment';
 import {Criteria, Domain} from 'generated/fetch';
 
+export const LOCAL_STORAGE_KEY_COHORT_CONTEXT = 'CURRENT_COHORT_CONTEXT';
 export const LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS = 'CURRENT_CRITERIA_SELECTIONS';
 
 const styles = reactStyles({
@@ -239,7 +240,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
   }
 
   addSelection = (selectCriteria)  => {
-    const {source} = this.props.cohortContext;
+    const {cohortContext, cohortContext: {source}} = this.props;
     // In case of Criteria/Cohort, close existing attribute sidebar before selecting a new value
     if (!this.isConcept && !!attributesSelectionStore.getValue()) {
       this.closeSidebar();
@@ -248,10 +249,13 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
     if (criteriaList && criteriaList.length > 0) {
       criteriaList.push(selectCriteria);
     } else {
-      criteriaList =  [selectCriteria];
+      criteriaList = [selectCriteria];
     }
-    // CB to be implemented with RW-5916
-    if (source !== 'cohort') {
+    // Save selections in local storage in case of error or page refresh
+    if (source === 'cohort') {
+      cohortContext.item.searchParameters = criteriaList;
+      localStorage.setItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT, JSON.stringify(cohortContext));
+    } else {
       localStorage.setItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS, JSON.stringify(criteriaList));
     }
     this.setState({selectedCriteriaList: criteriaList});

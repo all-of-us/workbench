@@ -2,7 +2,7 @@ import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
 import {AttributesPage} from 'app/cohort-search/attributes-page/attributes-page.component';
-import {saveCriteria} from 'app/cohort-search/cohort-search/cohort-search.component';
+import {getItemFromSearchRequest, saveCriteria} from 'app/cohort-search/cohort-search/cohort-search.component';
 import {ModifierPage} from 'app/cohort-search/modifier-page/modifier-page.component';
 import {nameDisplay, typeDisplay} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
@@ -271,20 +271,25 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
     }
 
     checkCriteriaChanges() {
-      const {cohortContext, criteria} = this.props;
+      const {cohortContext: {groupId, item, role}, criteria} = this.props;
       if (criteria.length === 0) {
         this.setState({disableSave: true});
       } else {
-        // We need to check for changes to criteria selections AND the modifiers array
-        const mappedCriteriaString = JSON.stringify({
-          criteria: criteria.map(mapCriteria),
-          modifiers: this.state.modifiers
-        });
-        const mappedParametersString = JSON.stringify({
-          criteria: cohortContext.item.searchParameters.map(mapCriteria),
-          modifiers: cohortContext.item.modifiers
-        });
-        this.setState({disableSave: mappedCriteriaString === mappedParametersString});
+        const requestItem = getItemFromSearchRequest(groupId, item.id, role);
+        if (requestItem) {
+          // We need to check for changes to criteria selections AND the modifiers array
+          const mappedCriteriaString = JSON.stringify({
+            criteria: criteria.map(mapCriteria),
+            modifiers: this.state.modifiers
+          });
+          const mappedParametersString = JSON.stringify({
+            criteria: requestItem.searchParameters.map(mapCriteria),
+            modifiers: requestItem.modifiers
+          });
+          this.setState({disableSave: mappedCriteriaString === mappedParametersString});
+        } else {
+          this.setState({disableSave: false});
+        }
       }
     }
 
