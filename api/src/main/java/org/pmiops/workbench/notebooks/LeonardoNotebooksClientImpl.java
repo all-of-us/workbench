@@ -42,7 +42,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
-  private static final String WORKSPACE_CDR = "WORKSPACE_CDR";
+  private static final String WORKSPACE_CDR_ENV_KEY = "WORKSPACE_CDR";
+  private static final String JUPYTER_DEBUG_LOGGING_ENV_KEY = "JUPYTER_DEBUG_LOGGING";
+
 
   private static final Logger log = Logger.getLogger(LeonardoNotebooksClientImpl.class.getName());
 
@@ -170,11 +172,17 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     // i.e. is NEW or MIGRATED
     if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {
       customEnvironmentVariables.put(
-          WORKSPACE_CDR,
+          WORKSPACE_CDR_ENV_KEY,
           workspace.getCdrVersion().getBigqueryProject()
               + "."
               + workspace.getCdrVersion().getBigqueryDataset());
     }
+
+    // See RW-6079
+    customEnvironmentVariables.put(
+        JUPYTER_DEBUG_LOGGING_ENV_KEY,
+      "true"
+    );
 
     leonardoRetryHandler.run(
         (context) -> {
