@@ -783,36 +783,16 @@ public class CohortReviewControllerTest {
     int pageSize = 25;
     CohortReview expectedReview1 =
         createCohortReview(
-            cohortReview,
-            ImmutableList.of(participantCohortStatus1, participantCohortStatus2),
-            page,
-            pageSize,
-            SortOrder.DESC,
-            FilterColumns.STATUS);
+            cohortReview, ImmutableList.of(participantCohortStatus1, participantCohortStatus2));
     CohortReview expectedReview2 =
         createCohortReview(
-            cohortReview,
-            ImmutableList.of(participantCohortStatus2, participantCohortStatus1),
-            page,
-            pageSize,
-            SortOrder.DESC,
-            FilterColumns.PARTICIPANTID);
+            cohortReview, ImmutableList.of(participantCohortStatus2, participantCohortStatus1));
     CohortReview expectedReview3 =
         createCohortReview(
-            cohortReview,
-            ImmutableList.of(participantCohortStatus1, participantCohortStatus2),
-            page,
-            pageSize,
-            SortOrder.ASC,
-            FilterColumns.STATUS);
+            cohortReview, ImmutableList.of(participantCohortStatus1, participantCohortStatus2));
     CohortReview expectedReview4 =
         createCohortReview(
-            cohortReview,
-            ImmutableList.of(participantCohortStatus1, participantCohortStatus2),
-            page,
-            pageSize,
-            SortOrder.ASC,
-            FilterColumns.PARTICIPANTID);
+            cohortReview, ImmutableList.of(participantCohortStatus1, participantCohortStatus2));
 
     when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.READER))
@@ -1029,12 +1009,7 @@ public class CohortReviewControllerTest {
   }
 
   private CohortReview createCohortReview(
-      DbCohortReview actualReview,
-      List<DbParticipantCohortStatus> participantCohortStatusList,
-      Integer page,
-      Integer pageSize,
-      SortOrder sortOrder,
-      FilterColumns sortColumn) {
+      DbCohortReview actualReview, List<DbParticipantCohortStatus> participantCohortStatusList) {
     List<ParticipantCohortStatus> newParticipantCohortStatusList =
         participantCohortStatusList.stream()
             .map(this::dbParticipantCohortStatusToApi)
