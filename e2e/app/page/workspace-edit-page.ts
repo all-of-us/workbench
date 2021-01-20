@@ -417,6 +417,7 @@ export default class WorkspaceEditPage extends WorkspaceBase {
 
     // confirm create in pop-up modal
     const modal = new Modal(this.page);
+    await modal.waitForLoad();
     const modalTextContent = await modal.getTextContent();
     await modal.clickButton(LinkText.Confirm, {waitForClose: true, waitForNav: true});
     await waitWhileLoading(this.page);

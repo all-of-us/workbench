@@ -64,7 +64,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
     const descriptionTextarea = await modal.waitForTextarea('DESCRIPTION');
     await descriptionTextarea.type(description);
 
-    await modal.clickButton(LinkText.Save, {waitForClose: true});
+    await modal.clickButton(LinkText.Save, {waitForClose: true, timeout: 120000});
     await waitWhileLoading(this.page);
 
     return cohortName;
