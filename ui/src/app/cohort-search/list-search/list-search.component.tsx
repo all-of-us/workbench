@@ -191,14 +191,9 @@ const columns = [
     style: {...styles.columnNameHeader, width: '31%', borderLeft: 0},
   },
   {
-    name: 'Code',
-    tooltip: 'Code from vocabulary',
-    style: columnHeaderStyle,
-  },
-  {
-    name: 'Vocab',
-    tooltip: 'Vocabulary for concept',
-    style: {...columnHeaderStyle, paddingLeft: '0'},
+    name: 'Concept Id',
+    tooltip: 'Unique ID for concept in OMOP',
+    style: {...styles.columnNameHeader, width: '10%', paddingLeft: '0', paddingRight: '0.5rem'},
   },
   {
     name: 'Source/Standard',
@@ -206,9 +201,14 @@ const columns = [
     style: {...styles.columnNameHeader, width: '10%', paddingLeft: '0', paddingRight: '0.5rem'},
   },
   {
-    name: 'Concept Id',
-    tooltip: 'Unique ID for concept in OMOP',
-    style: {...styles.columnNameHeader, width: '10%', paddingLeft: '0', paddingRight: '0.5rem'},
+    name: 'Vocab',
+    tooltip: 'Vocabulary for concept',
+    style: {...columnHeaderStyle, paddingLeft: '0'},
+  },
+  {
+    name: 'Code',
+    tooltip: 'Code from vocabulary',
+    style: columnHeaderStyle,
   },
   {
     name: 'Roll-up Count',
@@ -484,6 +484,9 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
             </div>
           </TooltipTrigger>
         </td>
+        <td style={{...columnBodyStyle, width: '10%', paddingRight: '0.5rem'}}>{row.conceptId}</td>
+        <td style={{...columnBodyStyle, width: '10%', paddingRight: '0.5rem'}}>{row.isStandard ? 'Standard' : 'Source'}</td>
+        <td style={{...columnBodyStyle}}>{!brand && row.type}</td>
         <td style={{...columnBodyStyle, paddingLeft: '0.2rem', paddingRight: '0.5rem'}}>
           <TooltipTrigger disabled={hoverId !== elementId} content={<div>{row.code}</div>}>
             <div data-test-id='code-column-value'
@@ -493,9 +496,6 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
               {row.code}
             </div>
           </TooltipTrigger></td>
-        <td style={{...columnBodyStyle}}>{!brand && row.type}</td>
-        <td style={{...columnBodyStyle, width: '10%', paddingRight: '0.5rem'}}>{row.isStandard ? 'Standard' : 'Source'}</td>
-        <td style={{...columnBodyStyle, width: '10%', paddingRight: '0.5rem'}}>{row.conceptId}</td>
         <td style={{...columnBodyStyle, paddingLeft: '0.2rem'}}>{row.parentCount > -1 && row.parentCount.toLocaleString()}</td>
         <td style={{...columnBodyStyle, paddingLeft: '0.2rem'}}>{row.childCount > -1 && row.childCount.toLocaleString()}</td>
         <td style={{...columnBodyStyle, textAlign: 'center', width: '12%'}}>
