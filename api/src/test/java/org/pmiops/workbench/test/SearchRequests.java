@@ -18,7 +18,6 @@ public class SearchRequests {
   private static final long MALE_CONCEPT_ID = 8507;
   private static final long FEMALE_CONCEPT_ID = 8532;
   private static final long WEIRD_CONCEPT_ID = 2;
-  public static final String ICD9_GROUP_CODE = "001";
 
   private SearchRequests() {}
 
@@ -39,26 +38,22 @@ public class SearchRequests {
     return searchRequest(searchGroupItem);
   }
 
-  public static SearchRequest codesRequest(
-      String groupType, String type, boolean group, String... codes) {
+  public static SearchRequest codesRequest(String groupType, String type, boolean group) {
     SearchGroupItem searchGroupItem = new SearchGroupItem().id("id1").type(groupType);
-    for (String code : codes) {
-      SearchParameter parameter =
-          new SearchParameter()
-              .domain(groupType)
-              .type(type)
-              .group(group)
-              .conceptId(1L)
-              .value(code)
-              .standard(false)
-              .ancestorData(false);
-      searchGroupItem.addSearchParametersItem(parameter);
-    }
+    SearchParameter parameter =
+        new SearchParameter()
+            .domain(groupType)
+            .type(type)
+            .group(group)
+            .conceptId(1L)
+            .standard(false)
+            .ancestorData(false);
+    searchGroupItem.addSearchParametersItem(parameter);
     return searchRequest(searchGroupItem);
   }
 
   public static SearchRequest modifierRequest(
-      String groupType, String type, String code, Modifier... modifiers) {
+      String groupType, String type, Modifier... modifiers) {
     SearchGroupItem searchGroupItem = new SearchGroupItem().id("id1").type(groupType);
     SearchParameter parameter =
         new SearchParameter()
@@ -66,7 +61,6 @@ public class SearchRequests {
             .type(type)
             .group(true)
             .conceptId(1L)
-            .value(code)
             .standard(false)
             .ancestorData(false);
     searchGroupItem.addSearchParametersItem(parameter);
@@ -140,20 +134,17 @@ public class SearchRequests {
   }
 
   public static SearchRequest icd9Codes() {
-    return codesRequest(
-        Domain.CONDITION.toString(), CriteriaType.ICD9CM.toString(), true, ICD9_GROUP_CODE);
+    return codesRequest(Domain.CONDITION.toString(), CriteriaType.ICD9CM.toString(), true);
   }
 
   public static SearchRequest icd9CodesChildren() {
-    return codesRequest(
-        Domain.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false, ICD9_GROUP_CODE);
+    return codesRequest(Domain.CONDITION.toString(), CriteriaType.ICD9CM.toString(), false);
   }
 
   public static SearchRequest icd9CodeWithModifiers() {
     return modifierRequest(
         Domain.CONDITION.toString(),
         CriteriaType.ICD9CM.toString(),
-        ICD9_GROUP_CODE,
         new Modifier()
             .name(ModifierType.AGE_AT_EVENT)
             .operator(Operator.GREATER_THAN_OR_EQUAL_TO)
