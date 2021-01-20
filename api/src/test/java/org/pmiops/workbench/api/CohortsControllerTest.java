@@ -22,6 +22,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.accessTiers.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
@@ -216,6 +217,7 @@ public class CohortsControllerTest {
     WorkspacesController.class,
   })
   @MockBean({
+    AccessTierService.class,
     BillingProjectAuditor.class,
     BillingProjectBufferService.class,
     CdrVersionService.class,

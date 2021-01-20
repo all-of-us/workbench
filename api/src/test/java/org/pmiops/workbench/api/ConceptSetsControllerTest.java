@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.accessTiers.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
@@ -201,6 +202,7 @@ public class ConceptSetsControllerTest {
     WorkspacesController.class,
   })
   @MockBean({
+    AccessTierService.class,
     BigQueryService.class,
     BillingProjectAuditor.class,
     BillingProjectBufferService.class,

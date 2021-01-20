@@ -49,6 +49,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.invocation.InvocationOnMock;
+import org.pmiops.workbench.accessTiers.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
@@ -228,6 +229,7 @@ public class DataSetControllerTest {
     WorkspacesController.class,
   })
   @MockBean({
+    AccessTierService.class,
     BillingProjectAuditor.class,
     CdrBigQuerySchemaConfigService.class,
     CdrVersionService.class,

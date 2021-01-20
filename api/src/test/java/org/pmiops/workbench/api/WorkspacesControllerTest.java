@@ -63,6 +63,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.pmiops.workbench.accessTiers.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
@@ -314,6 +315,7 @@ public class WorkspacesControllerTest {
     WorkspaceServiceImpl.class
   })
   @MockBean({
+    AccessTierService.class,
     BigQueryService.class,
     BillingProjectAuditor.class,
     BillingProjectBufferService.class,
