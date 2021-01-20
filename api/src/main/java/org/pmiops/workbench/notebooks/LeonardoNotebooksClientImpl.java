@@ -45,7 +45,6 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private static final String WORKSPACE_CDR_ENV_KEY = "WORKSPACE_CDR";
   private static final String JUPYTER_DEBUG_LOGGING_ENV_KEY = "JUPYTER_DEBUG_LOGGING";
 
-
   private static final Logger log = Logger.getLogger(LeonardoNotebooksClientImpl.class.getName());
 
   private final Provider<RuntimesApi> runtimesApiProvider;
@@ -179,10 +178,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     }
 
     // See RW-6079
-    customEnvironmentVariables.put(
-        JUPYTER_DEBUG_LOGGING_ENV_KEY,
-      "true"
-    );
+    customEnvironmentVariables.put(JUPYTER_DEBUG_LOGGING_ENV_KEY, "true");
 
     leonardoRetryHandler.run(
         (context) -> {
