@@ -635,7 +635,7 @@ jobs:
                     # If e2e tests are the only files that have changed, run e2e tests against the "test" environment.
                     if [ $E2E_CHANGED_COUNT -gt 0 ] && [ $E2E_CHANGED_COUNT -eq $CHANGED_COUNT ]; then
                         echo 'export WORKBENCH_ENV=test' >> $BASH_ENV
-                        echo 'export USER_NAME=$PUPPETEER_USER_TEST' >> $BASH_ENV
+                        echo 'export USER_NAME=${PUPPETEER_USER_TEST}@fake-research-aou.org' >> $BASH_ENV
                         source $BASH_ENV
                         echo "Reset WORKBENCH_ENV=test"
                     fi

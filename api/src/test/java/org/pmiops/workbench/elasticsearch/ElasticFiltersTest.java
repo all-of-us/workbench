@@ -328,7 +328,6 @@ public class ElasticFiltersTest {
                             new SearchGroupItem()
                                 .addSearchParametersItem(
                                     new SearchParameter()
-                                        .value("001")
                                         .conceptId(771L)
                                         .domain(Domain.CONDITION.toString())
                                         .type(CriteriaType.ICD9CM.toString())
@@ -355,7 +354,6 @@ public class ElasticFiltersTest {
                             new SearchGroupItem()
                                 .addSearchParametersItem(
                                     new SearchParameter()
-                                        .value("001")
                                         .conceptId(771L)
                                         .domain(Domain.CONDITION.toString())
                                         .type(CriteriaType.ICD9CM.toString())
