@@ -8077,10 +8077,6 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ReportingUser"
-      workspaces:
-        type: array
-        items:
-          "$ref": "#/definitions/ReportingWorkspace"
       workspaceFreeTierUsage:
         type: array
         items:

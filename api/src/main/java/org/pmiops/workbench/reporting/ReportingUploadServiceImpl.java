@@ -87,22 +87,46 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     final List<InsertAllRequest> insertAllRequests = getInsertAllRequests(reportingSnapshot);
     final StringBuilder performanceStringBuilder = new StringBuilder();
     for (InsertAllRequest request : insertAllRequests) {
-      stopwatch.start();
-      final InsertAllResponse currentResponse = bigQueryService.insertAll(request);
-      responseMapBuilder.put(request.getTable(), currentResponse);
-      stopwatch.stop();
-      performanceStringBuilder
-          .append(
-              LogFormatters.rate(
-                  String.format("Streaming upload into %s table", request.getTable().getTable()),
-                  stopwatch.elapsed(),
-                  request.getRows().size(),
-                  "rows"))
-          .append("\n");
-      stopwatch.reset();
+      issueInsertAllRequest(stopwatch, responseMapBuilder, performanceStringBuilder, request);
     }
     log.info(performanceStringBuilder.toString());
     checkResponseAndRowCounts(reportingSnapshot, responseMapBuilder.build());
+  }
+
+  /**
+   * It's unfortunately not pragmatic to expose a generic method for all types of rows to upload.
+   * The best we can do is to split things up under the hood.
+   *
+   * <p>TODO(jaycarlton): logging for errors and perf metrics
+   */
+  @Override
+  public void uploadBatch(List<ReportingWorkspace> batch, long captureTimestamp) {
+    final InsertAllRequest insertAllRequest =
+        workspaceRequestBuilder.build(
+            getTableId(WorkspaceColumnValueExtractor.class),
+            batch,
+            getFixedValues(captureTimestamp));
+    bigQueryService.insertAll(insertAllRequest);
+  }
+
+  private void issueInsertAllRequest(
+      Stopwatch stopwatch,
+      ImmutableMultimap.Builder<TableId, InsertAllResponse> responseMapBuilder,
+      StringBuilder performanceStringBuilder,
+      InsertAllRequest request) {
+    stopwatch.start();
+    final InsertAllResponse currentResponse = bigQueryService.insertAll(request);
+    responseMapBuilder.put(request.getTable(), currentResponse);
+    stopwatch.stop();
+    performanceStringBuilder
+        .append(
+            LogFormatters.rate(
+                String.format("Streaming upload into %s table", request.getTable().getTable()),
+                stopwatch.elapsed(),
+                request.getRows().size(),
+                "rows"))
+        .append("\n");
+    stopwatch.reset();
   }
 
   private void checkResponseAndRowCounts(
@@ -122,8 +146,7 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
   }
 
   private List<InsertAllRequest> getInsertAllRequests(ReportingSnapshot reportingSnapshot) {
-    final Map<String, Object> fixedValues =
-        ImmutableMap.of("snapshot_timestamp", reportingSnapshot.getCaptureTimestamp());
+    final Map<String, Object> fixedValues = getFixedValues(reportingSnapshot.getCaptureTimestamp());
     // The maxRowsForInsert parameter is in use by the insert query implementation, but that code is
     // being removed, freeing it to be used here.
     final int batchSize = configProvider.get().reporting.maxRowsPerInsert;
@@ -172,12 +195,6 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
             fixedValues,
             batchSize));
     resultBuilder.addAll(
-        workspaceRequestBuilder.buildBatchedRequests(
-            getTableId(WorkspaceColumnValueExtractor.class),
-            reportingSnapshot.getWorkspaces(),
-            fixedValues,
-            batchSize));
-    resultBuilder.addAll(
         workspaceFreeTierUsageRequestBuilder.buildBatchedRequests(
             getTableId(WorkspaceFreeTierUsageColumnValueExtractor.class),
             reportingSnapshot.getWorkspaceFreeTierUsage(),
@@ -186,6 +203,12 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     return resultBuilder.build().stream()
         .filter(r -> r.getRows().size() > 0)
         .collect(ImmutableList.toImmutableList());
+  }
+
+  private Map<String, Object> getFixedValues(long snapshotTimestamp) {
+    final Map<String, Object> fixedValues =
+        ImmutableMap.of("snapshot_timestamp", snapshotTimestamp);
+    return fixedValues;
   }
 
   private void checkResponse(Multimap<TableId, InsertAllResponse> tableIdToResponses) {

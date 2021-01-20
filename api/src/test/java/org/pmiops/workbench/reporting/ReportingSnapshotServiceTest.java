@@ -27,7 +27,6 @@ import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
-import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
@@ -54,8 +53,8 @@ public class ReportingSnapshotServiceTest {
   @TestConfiguration
   @Import({
     CommonMappers.class,
-    ReportingMapperImpl.class,
     ReportingTestConfig.class,
+    ReportingTestUtils.class,
     ReportingSnapshotServiceImpl.class
   })
   @MockBean({BigQueryService.class})
@@ -74,7 +73,6 @@ public class ReportingSnapshotServiceTest {
     assertThat(snapshot.getDatasets()).isEmpty();
     assertThat(snapshot.getInstitutions()).isEmpty();
     assertThat(snapshot.getUsers()).isEmpty();
-    assertThat(snapshot.getWorkspaces()).isEmpty();
   }
 
   @Test
@@ -102,10 +100,6 @@ public class ReportingSnapshotServiceTest {
     assertThat(snapshot.getUsers()).hasSize(2);
     final ReportingUser user = snapshot.getUsers().get(0);
     userFixture.assertDTOFieldsMatchConstants(user);
-
-    assertThat(snapshot.getWorkspaces()).hasSize(1);
-    final ReportingWorkspace workspace = snapshot.getWorkspaces().get(0);
-    ReportingTestUtils.assertDtoWorkspaceFields(workspace);
 
     ReportingTestUtils.assertDtoWorkspaceFreeTierUsageFields(
         snapshot.getWorkspaceFreeTierUsage().get(0));
