@@ -1498,9 +1498,7 @@ public class WorkspacesControllerTest {
             .addStandard(true)
             .build();
     when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION,
-            "condition_occurrence",
-            ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
+            Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
         .thenReturn(123);
     ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
     conceptSetConceptId1.setConceptId(CONCEPT_1.getConceptId());
@@ -1692,9 +1690,7 @@ public class WorkspacesControllerTest {
             .addStandard(true)
             .build();
     when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION,
-            "condition_occurrence",
-            ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
+            Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
         .thenReturn(123);
 
     ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
@@ -1732,9 +1728,7 @@ public class WorkspacesControllerTest {
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION,
-            "condition_occurrence",
-            ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
+            Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
         .thenReturn(456);
 
     mockBillingProjectBuffer("cloned-ns");

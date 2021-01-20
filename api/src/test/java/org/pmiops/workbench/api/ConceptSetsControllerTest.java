@@ -462,12 +462,10 @@ public class ConceptSetsControllerTest {
             .addStandard(true)
             .build();
     when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION, "condition_occurrence", ImmutableSet.of(dbConceptSetConceptId1)))
+            Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1)))
         .thenReturn(123);
     when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION,
-            "condition_occurrence",
-            ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
+            Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
         .thenReturn(246);
     ConceptSet conceptSet = makeConceptSet1();
     ConceptSet updated =
@@ -517,7 +515,6 @@ public class ConceptSetsControllerTest {
     ConceptSetService.MAX_CONCEPTS_PER_SET = 1000;
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION,
-            "condition_occurrence",
             ImmutableSet.of(
                 dbConceptSetConceptId1, dbConceptSetConceptId2, dbConceptSetConceptId3)))
         .thenReturn(456);
@@ -544,7 +541,7 @@ public class ConceptSetsControllerTest {
     assertThat(updated.getEtag()).isNotEqualTo(conceptSet.getEtag());
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION, "condition_occurrence", ImmutableSet.of(dbConceptSetConceptId1)))
+            Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1)))
         .thenReturn(123);
     ConceptSet removed =
         conceptSetsController
@@ -584,7 +581,6 @@ public class ConceptSetsControllerTest {
             .build();
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION,
-            "condition_occurrence",
             ImmutableSet.of(
                 dbConceptSetConceptId1, dbConceptSetConceptId2, dbConceptSetConceptId3)))
         .thenReturn(456);
