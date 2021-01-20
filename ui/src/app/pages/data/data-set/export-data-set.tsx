@@ -105,7 +105,7 @@ export class ExportDataSet extends React.Component<Props, State> {
   setExistingNotebook(notebook) {
     this.setState({newNotebook: notebook === ''});
     this.setState({notebookName: notebook});
-    this.props.newNotebook(false);
+    this.props.newNotebook(notebook === '');
     this.props.updateNotebookName(notebook);
   }
 
