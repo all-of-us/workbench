@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.model;
 
+import com.google.common.base.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -80,5 +81,27 @@ public class DbAccessTier {
   public DbAccessTier setAuthDomainGroupEmail(String authDomainGroupEmail) {
     this.authDomainGroupEmail = authDomainGroupEmail;
     return this;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    DbAccessTier that = (DbAccessTier) o;
+    return Objects.equal(shortName, that.shortName)
+        && Objects.equal(displayName, that.displayName)
+        && Objects.equal(servicePerimeter, that.servicePerimeter)
+        && Objects.equal(authDomainName, that.authDomainName)
+        && Objects.equal(authDomainGroupEmail, that.authDomainGroupEmail);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(
+        shortName, displayName, servicePerimeter, authDomainName, authDomainGroupEmail);
   }
 }

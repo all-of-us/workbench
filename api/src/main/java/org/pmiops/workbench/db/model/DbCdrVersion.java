@@ -242,6 +242,7 @@ public class DbCdrVersion {
         .append(this.elasticIndexBaseName, that.elasticIndexBaseName)
         .append(this.hasFitbitData, that.hasFitbitData)
         .append(this.hasCopeSurveyData, that.hasCopeSurveyData)
+        .append(this.accessTier, that.accessTier)
         .build();
   }
 }

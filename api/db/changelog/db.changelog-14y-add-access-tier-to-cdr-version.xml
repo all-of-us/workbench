@@ -6,9 +6,23 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="thibault" id="changelog-14y-add-access-tier-to-cdr-version">
     <addColumn tableName="cdr_version">
-      <column name="access_tier_2" type="bigint">
-        <constraints nullable="false" foreignKeyName="fk_cdr_version_tier" references="access_tier(access_tier_id)"/>
-      </column>
+      <column name="access_tier_2" type="bigint"/>
     </addColumn>
+
+    <!-- dummy value to ensure FK is initially satisfied -->
+    <sql>
+      UPDATE cdr_version
+      SET access_tier_2 = 1
+    </sql>
+
+    <addNotNullConstraint tableName="cdr_version" columnName="access_tier_2" columnDataType="bigint"/>
+
+    <addForeignKeyConstraint baseColumnNames="access_tier_2"
+      baseTableName="cdr_version"
+      constraintName="fk_cdr_version_tier"
+      onDelete="CASCADE"
+      referencedColumnNames="access_tier_id"
+      referencedTableName="access_tier"/>
+
   </changeSet>
 </databaseChangeLog>

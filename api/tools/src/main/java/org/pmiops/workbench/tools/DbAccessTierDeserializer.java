@@ -7,11 +7,14 @@ import com.google.gson.JsonParseException;
 import java.lang.reflect.Type;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class DbAccessTierDeserializer implements JsonDeserializer<DbAccessTier> {
 
-  @Autowired private AccessTierDao accessTierDao;
+  private final AccessTierDao accessTierDao;
+
+  public DbAccessTierDeserializer(AccessTierDao accessTierDao) {
+    this.accessTierDao = accessTierDao;
+  }
 
   @Override
   public DbAccessTier deserialize(

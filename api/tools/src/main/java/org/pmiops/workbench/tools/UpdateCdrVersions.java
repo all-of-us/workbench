@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
@@ -33,7 +34,8 @@ public class UpdateCdrVersions {
   private static final Logger logger = Logger.getLogger(UpdateCdrVersions.class.getName());
 
   @Bean
-  public CommandLineRunner run(CdrVersionDao cdrVersionDao, WorkspaceDao workspaceDao)
+  public CommandLineRunner run(
+      AccessTierDao accessTierDao, CdrVersionDao cdrVersionDao, WorkspaceDao workspaceDao)
       throws IOException {
     return (args) -> {
       if (args.length != 2) {
@@ -45,7 +47,7 @@ public class UpdateCdrVersions {
       Gson gson =
           new GsonBuilder()
               .registerTypeAdapter(Timestamp.class, new TimestampGsonAdapter())
-              .registerTypeAdapter(DbAccessTier.class, new DbAccessTierDeserializer())
+              .registerTypeAdapter(DbAccessTier.class, new DbAccessTierDeserializer(accessTierDao))
               .create();
       List<DbCdrVersion> cdrVersions =
           gson.fromJson(cdrVersionsReader, new TypeToken<List<DbCdrVersion>>() {}.getType());
