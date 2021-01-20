@@ -40,8 +40,6 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
 
   @Autowired private BigQueryService bigQueryService;
 
-  @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
-
   private ConceptBigQueryService conceptBigQueryService;
 
   private DbConceptSetConceptId dbConceptSetConceptId1;
@@ -65,8 +63,7 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
     dbConceptSetConceptId4 =
         DbConceptSetConceptId.builder().addConceptId(192819L).addStandard(true).build();
 
-    conceptBigQueryService =
-        new ConceptBigQueryService(bigQueryService, cdrBigQuerySchemaConfigService);
+    conceptBigQueryService = new ConceptBigQueryService(bigQueryService);
 
     conceptDao.deleteAll();
   }
@@ -76,7 +73,6 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
     assertThat(
             conceptBigQueryService.getParticipantCountForConcepts(
                 Domain.CONDITION,
-                "condition_occurrence",
                 ImmutableSet.of(
                     dbConceptSetConceptId1,
                     dbConceptSetConceptId2,
@@ -96,7 +92,6 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
     assertThat(
             conceptBigQueryService.getParticipantCountForConcepts(
                 Domain.CONDITION,
-                "condition_occurrence",
                 ImmutableSet.of(
                     dbConceptSetConceptId1,
                     dbConceptSetConceptId2,
