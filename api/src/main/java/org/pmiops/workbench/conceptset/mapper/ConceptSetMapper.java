@@ -8,7 +8,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
-import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbUser;
@@ -44,10 +43,9 @@ public interface ConceptSetMapper {
       DbConceptSet source,
       @MappingTarget ConceptSet conceptSet,
       @Context ConceptBigQueryService conceptBigQueryService) {
-    String omopTable = BigQueryTableInfo.getTableName(source.getDomainEnum());
     conceptSet.setParticipantCount(
         conceptBigQueryService.getParticipantCountForConcepts(
-            source.getDomainEnum(), omopTable, source.getConceptSetConceptIds()));
+            source.getDomainEnum(), source.getConceptSetConceptIds()));
   }
 
   @Mapping(target = "conceptSetId", ignore = true)

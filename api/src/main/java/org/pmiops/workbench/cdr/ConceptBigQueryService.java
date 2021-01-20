@@ -14,8 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.pmiops.workbench.api.BigQueryService;
-import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
-import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService.ConceptColumns;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.model.Domain;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +23,6 @@ import org.springframework.stereotype.Service;
 public class ConceptBigQueryService {
 
   private final BigQueryService bigQueryService;
-  private final CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   private static final ImmutableList<Domain> CHILD_LOOKUP_DOMAINS =
       ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE, Domain.MEASUREMENT, Domain.DRUG);
   private static final String SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE =
@@ -33,16 +30,12 @@ public class ConceptBigQueryService {
           + "from `${projectId}.${dataSetId}.ds_survey`\n";
 
   @Autowired
-  public ConceptBigQueryService(
-      BigQueryService bigQueryService,
-      CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService) {
+  public ConceptBigQueryService(BigQueryService bigQueryService) {
     this.bigQueryService = bigQueryService;
-    this.cdrBigQuerySchemaConfigService = cdrBigQuerySchemaConfigService;
   }
 
   public int getParticipantCountForConcepts(
-      Domain domain, String omopTable, Set<DbConceptSetConceptId> dbConceptSetConceptIds) {
-    ConceptColumns conceptColumns = cdrBigQuerySchemaConfigService.getConceptColumns(omopTable);
+      Domain domain, Set<DbConceptSetConceptId> dbConceptSetConceptIds) {
     Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
         dbConceptSetConceptIds.stream()
             .collect(Collectors.partitioningBy(DbConceptSetConceptId::getStandard));
@@ -73,7 +66,7 @@ public class ConceptBigQueryService {
     }
     String finalSql = "select count(distinct person_id) person_count from (\n" + innerSql + ")";
     QueryJobConfiguration jobConfiguration =
-        QueryJobConfiguration.newBuilder(finalSql.toString())
+        QueryJobConfiguration.newBuilder(finalSql)
             .setNamedParameters(paramMap.build())
             .setUseLegacySql(false)
             .build();
