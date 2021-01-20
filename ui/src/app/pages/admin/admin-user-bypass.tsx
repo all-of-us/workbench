@@ -3,6 +3,7 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {Toggle} from 'app/components/inputs';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
+import {SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
@@ -23,15 +24,26 @@ const styles = reactStyles({
 });
 
 interface Props {
+  // The user to render the bypass panel for.
   user: AdminTableUser;
+  // Callback prop called when the bypass panel has changed one of the user's module bypass
+  // statuses, requiring a data refresh.
+  onBypassModuleUpdate?: Function;
 }
 
 interface State {
+  // Whether the PopupTrigger is currently open. The PopupTrigger is an uncontrolled component,
+  // so we do not directly control its open state. See popupRef which allows us to call methods
+  // on the PopupTrigger wheere needed (e.g. to close the component after saving).
+  isPopupOpen: boolean;
+  // Whether the dialog is currently saving bypass data to the server, during which time
+  // a spinner should be shown.
+  isSaving: boolean;
+  // The current set of bypassed access modules in the widget.
   selectedModules: AccessModule[];
-  open: boolean;
 }
 
-const getUserModuleList = (user: AdminTableUser): Array<AccessModule> => {
+const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
   return [
     ...(user.betaAccessBypassTime ? [AccessModule.BETAACCESS] : []),
     ...(user.complianceTrainingBypassTime ? [AccessModule.COMPLIANCETRAINING] : []),
@@ -42,53 +54,83 @@ const getUserModuleList = (user: AdminTableUser): Array<AccessModule> => {
 };
 
 export class AdminUserBypass extends React.Component<Props, State> {
+  popupRef: React.RefObject<PopupTrigger>;
   constructor(props: Props) {
     super(props);
     const {user} = props;
     this.state = {
-      open: false,
-      selectedModules: getUserModuleList(user)
+      isPopupOpen: false,
+      isSaving: false,
+      selectedModules: getBypassedModules(user)
     };
+    this.popupRef = React.createRef<PopupTrigger>();
+  }
+
+  private resetState() {
+    this.setState({selectedModules: getBypassedModules(this.props.user)});
+  }
+
+  private closePopup() {
+    if (this.popupRef && this.popupRef.current) {
+      this.popupRef.current.close();
+    }
   }
 
   cancel() {
-    this.setState({selectedModules: getUserModuleList(this.props.user)});
+    this.resetState();
+    this.closePopup();
   }
 
-  save() {
+  async save() {
     const {selectedModules} = this.state;
     const {user} = this.props;
-    const changedModules = fp.xor(getUserModuleList(user), selectedModules);
-    changedModules.forEach(async module => {
-      await profileApi()
-        .bypassAccessRequirement(user.userId,
+    const changedModules = fp.xor(getBypassedModules(user), selectedModules);
+    this.setState({isSaving: true});
+    try {
+      for (const module of changedModules) {
+        await profileApi()
+          .bypassAccessRequirement(user.userId,
           {isBypassed: selectedModules.includes(module), moduleName: module});
-    });
+      }
+      this.setState({isSaving: false});
+      this.resetState();
+      this.closePopup();
+      if (this.props.onBypassModuleUpdate) {
+        this.props.onBypassModuleUpdate();
+      }
+    } catch (e) {
+      // TODO: if we had a toast component, here would be the right place to fire a toast
+      // notification that saving failed and the user should retry. Instead, we'll just keep
+      // the popup open but remove the spinner.
+      this.setState({isSaving: false});
+    }
   }
 
   hasEdited(): boolean {
-    return fp.xor(this.state.selectedModules, getUserModuleList(this.props.user)).length !== 0;
+    return fp.xor(this.state.selectedModules, getBypassedModules(this.props.user)).length !== 0;
   }
 
   componentDidUpdate(prevProps: Props) {
   // Reset the "default" set of selected modules if the rendered user changes.
     if (prevProps.user.userId !== this.props.user.userId) {
-      this.setState({
-        selectedModules: getUserModuleList(this.props.user)
-      });
+      this.resetState();
+    } else if (!fp.isEqual(getBypassedModules(prevProps.user), getBypassedModules(this.props.user))) {
+      console.log('User modules changed');
+      this.resetState();
     }
   }
 
   render() {
-    const {selectedModules, open} = this.state;
+    const {selectedModules, isPopupOpen, isSaving} = this.state;
     const {enableBetaAccess,
       enableComplianceTraining,
       enableEraCommons,
       enableDataUseAgreement} = serverConfigStore.getValue();
     return <PopupTrigger
+        ref={this.popupRef}
         side='bottom'
-        onClose={() => {this.cancel(); this.setState({open: false}); }}
-        onOpen={() => this.setState({open: true})}
+        onClose={() => { this.setState({isPopupOpen: false}); this.resetState(); }}
+        onOpen={() => this.setState({isPopupOpen: true})}
         content={<FlexColumn style={{padding: '1rem'}}>
           {enableBetaAccess && <FlexRow style={{justifyContent: 'space-between'}}>
             <Toggle name='Beta Access'
@@ -135,9 +177,10 @@ export class AdminUserBypass extends React.Component<Props, State> {
                         onClick={() => this.save()}
                         disabled={!this.hasEdited()}/>
           </div>
+          {isSaving && <SpinnerOverlay/>}
         </FlexColumn>}>
       <Button type='secondaryLight' data-test-id='bypass-popup' style={{height: '40px'}}>
-        <ClrIcon shape={open ? 'caret down' : 'caret right'} size={19}
+        <ClrIcon shape={isPopupOpen ? 'caret down' : 'caret right'} size={19}
                  style={{color: colors.accent, marginRight: '1px', cursor: 'pointer'}}/>
         Bypass
       </Button>

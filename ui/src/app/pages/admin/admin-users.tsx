@@ -136,11 +136,11 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
     return a.familyName.localeCompare(b.familyName);
   }
 
-  convertDate(date): string {
-    return new Date(date).toString().split(' ').slice(1, 5).join(' ');
-  }
-
-  getAccessModuleString(user: AdminTableUser, key: string): (string|React.ReactElement) {
+  /**
+   * Returns the appropriate cell contents (icon plus tooltip) for an access module cell
+   * in the table.
+   */
+  accessModuleCellContents(user: AdminTableUser, key: string): (string|React.ReactElement) {
     const completionTime = user[key + 'CompletionTime'];
     const bypassTime = user[key + 'BypassTime'];
 
@@ -159,6 +159,17 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
     }
   }
 
+  /**
+   * Returns a formatted timestamp, or an empty string if the timestamp is zero or null.
+   */
+  formattedTimestampOrEmptyString(timestampSecs: (number|null)): string {
+    if (timestampSecs) {
+      return moment.unix(timestampSecs / 1000).format('lll');
+    } else {
+      return '';
+    }
+  }
+
   convertProfilesToFields(users: AdminTableUser[]) {
     return users.map(user => ({
       audit: <a
@@ -166,14 +177,16 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
         target='_blank'>
         link
       </a>,
-      bypass: <AdminUserBypass user={{...user}}/>,
-      complianceTraining: this.getAccessModuleString(user, 'complianceTraining'),
+      bypass: <AdminUserBypass
+        user={{...user}}
+        onBypassModuleUpdate={() => this.loadProfiles()}/>,
+      complianceTraining: this.accessModuleCellContents(user, 'complianceTraining'),
       contactEmail: user.contactEmail,
-      dataUseAgreement: this.getAccessModuleString(user, 'dataUseAgreement'),
-      eraCommons: this.getAccessModuleString(user, 'eraCommons'),
-      firstRegistrationCompletionTime: moment.unix(user.firstRegistrationCompletionTime / 1000).format('lll'),
+      dataUseAgreement: this.accessModuleCellContents(user, 'dataUseAgreement'),
+      eraCommons: this.accessModuleCellContents(user, 'eraCommons'),
+      firstRegistrationCompletionTime: this.formattedTimestampOrEmptyString(user.firstRegistrationCompletionTime),
       firstRegistrationCompletionTimestamp: user.firstRegistrationCompletionTime,
-      firstSignInTime: moment.unix(user.firstSignInTime / 1000).format('lll'),
+      firstSignInTime: this.formattedTimestampOrEmptyString(user.firstSignInTime),
       firstSignInTimetsamp: user.firstSignInTime,
       institutionName: user.institutionName,
       name: <a
@@ -183,7 +196,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
       </a>,
       nameText: user.familyName + ' ' + user.givenName,
       status: user.disabled ? 'Disabled' : 'Active',
-      twoFactorAuth: this.getAccessModuleString(user, 'twoFactorAuth'),
+      twoFactorAuth: this.accessModuleCellContents(user, 'twoFactorAuth'),
       username: user.username,
       userLockout: <LockoutButton disabled={false}
         profileDisabled={user.disabled}

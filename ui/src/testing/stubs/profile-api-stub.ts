@@ -1,6 +1,8 @@
 import {
   AccessBypassRequest,
-  AccessModule, AdminTableUser, CreateAccountRequest,
+  AccessModule,
+  AdminTableUser,
+  CreateAccountRequest,
   DataAccessLevel,
   InstitutionalRole,
   InvitationVerificationRequest,
