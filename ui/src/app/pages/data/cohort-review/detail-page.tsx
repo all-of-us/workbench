@@ -38,7 +38,7 @@ export const DetailPage = withCurrentWorkspace()(
           pageSize: 25,
           sortOrder: SortOrder.Asc,
           filters: {items: []}
-        }).then(review => cohortReviewStore.next(review));
+        }).then(response => cohortReviewStore.next(response.cohortReview));
       }
       this.subscription = urlParamsStore.distinctUntilChanged(fp.isEqual)
         .filter(params => !!params.pid)

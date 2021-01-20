@@ -45,9 +45,9 @@ export class CohortReview extends React.Component<{}, State> {
       pageSize: 25,
       sortOrder: SortOrder.Asc,
       filters: {items: []}
-    }).then(review => {
-      cohortReviewStore.next(review);
-      const reviewPresent = review.reviewStatus !== ReviewStatus.NONE;
+    }).then(resp => {
+      cohortReviewStore.next(resp.cohortReview);
+      const reviewPresent = resp.cohortReview.reviewStatus !== ReviewStatus.NONE;
       this.setState({reviewPresent});
       if (reviewPresent) {
         navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);

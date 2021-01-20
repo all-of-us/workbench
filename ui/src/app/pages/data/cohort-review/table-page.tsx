@@ -9,7 +9,14 @@ import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import {NumberInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {cohortReviewStore, filterStateStore, getVocabOptions, vocabOptions} from 'app/services/review-state.service';
+import {
+  cohortReviewStore,
+  filterStateStore,
+  getVocabOptions,
+  queryResultSizeStore,
+  reviewPaginationStore,
+  vocabOptions
+} from 'app/services/review-state.service';
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {datatableStyles} from 'app/styles/datatable';
@@ -261,19 +268,26 @@ export const ParticipantsTable = withCurrentWorkspace()(
       const review = cohortReviewStore.getValue();
       if (!review) {
         promises.push(
-          this.getParticipantStatuses().then(rev => {
-            cohortReviewStore.next(rev);
+          this.getParticipantStatuses().then(response => {
+            const {cohortReview, queryResultSize} = response;
+            cohortReviewStore.next(cohortReview);
+            queryResultSizeStore.next(queryResultSize);
             if (!vocabOptions.getValue()) {
-              getVocabOptions(ns, wsid, rev.cohortReviewId);
+              getVocabOptions(ns, wsid, cohortReview.cohortReviewId);
             }
-            this.setState({data: rev.participantCohortStatuses.map(this.mapData), total: rev.queryResultSize});
+            this.setState({data: cohortReview.participantCohortStatuses.map(this.mapData), total: queryResultSize});
           }, (error) => {
             console.error(error);
             this.setState({loading: false, error: true});
           })
         );
       } else {
-        this.setState({data: review.participantCohortStatuses.map(this.mapData), page: review.page, total: review.queryResultSize});
+        const {page} = reviewPaginationStore.getValue();
+        this.setState({
+          data: review.participantCohortStatuses.map(this.mapData),
+          page: page,
+          total: queryResultSizeStore.getValue()
+        });
       }
       promises.push(
         cohortBuilderApi().findParticipantDemographics(+cdrVersionId).then(data => {
@@ -319,9 +333,10 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
 
     getTableData(): void {
-      this.getParticipantStatuses().then(review => {
-        cohortReviewStore.next(review);
-        this.setState({data: review.participantCohortStatuses.map(this.mapData), loading: false, total: review.queryResultSize});
+      this.getParticipantStatuses().then(response => {
+        const {cohortReview, queryResultSize} = response;
+        cohortReviewStore.next(cohortReview);
+        this.setState({data: cohortReview.participantCohortStatuses.map(this.mapData), loading: false, total: queryResultSize});
       }, (error) => {
         console.error(error);
         this.setState({loading: false, error: true});
