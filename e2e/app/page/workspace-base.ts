@@ -258,6 +258,8 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     const contentText = await modal.getTextContent();
     await modal.clickButton(clickButtonText, {waitForClose: true});
     await waitWhileLoading(this.page);
+    const workspaceName = contentText[0].split('Workspace: ')[1].replace('?','');
+    console.log(`Deleted workspace "${workspaceName}"`);
     return contentText;
   }
 

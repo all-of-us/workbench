@@ -35,7 +35,6 @@ export default abstract class BaseMenu extends Container {
       let rootXpath = this.getXpath();
       const len = selections.length;
       for (let i=0; i<len; i++) {
-         console.log(`rootXpath: ${rootXpath}`);
          const menuItemLink = await this.findMenuItemLink(selections[i], rootXpath);
          if (i === (len - 1)) {
             // If it is the last menu item, click on it.
@@ -80,7 +79,6 @@ export default abstract class BaseMenu extends Container {
    // Find and hover over menu item
    protected async findMenuItemLink(menuItemText: string, menuParentXpath: string): Promise<ElementHandle> {
       const menuItemSelector = `${menuParentXpath}${this.getMenuItemXpath(menuItemText)}`;
-      console.log(`menuitem selector: ${menuItemSelector}`);
       const link = await this.page.waitForXPath(menuItemSelector, {visible: true});
       await link.hover();
       await link.focus();
