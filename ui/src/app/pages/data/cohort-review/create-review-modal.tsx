@@ -5,7 +5,7 @@ import {Button} from 'app/components/buttons';
 import {NumberInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {Spinner} from 'app/components/spinners';
-import {cohortReviewStore} from 'app/services/review-state.service';
+import {cohortReviewStore, queryResultSizeStore} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
@@ -86,6 +86,7 @@ export const CreateReviewModal = withCurrentWorkspace()(
       cohortReviewApi().createCohortReview(namespace, id, cohort.id, +cdrVersionId, request)
         .then(response => {
           cohortReviewStore.next(response);
+          queryResultSizeStore.next(parseInt(numberOfParticipants, 10));
           this.setState({creating: false});
           this.props.created(true);
           navigate(['workspaces', namespace, id, 'data', 'cohorts', cohort.id, 'review', 'participants']);

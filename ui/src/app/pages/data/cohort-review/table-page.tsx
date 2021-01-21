@@ -283,10 +283,11 @@ export const ParticipantsTable = withCurrentWorkspace()(
         );
       } else {
         const {page} = reviewPaginationStore.getValue();
+        const total = queryResultSizeStore.getValue();
         this.setState({
           data: review.participantCohortStatuses.map(this.mapData),
           page: page,
-          total: queryResultSizeStore.getValue()
+          total: total
         });
       }
       promises.push(
