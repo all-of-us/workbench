@@ -164,6 +164,7 @@ export async function waitForHidden(page: Page, cssSelector: string): Promise<bo
  * @param {string} cssSelector - The selector for the element on the page
  * @param {string} attribute - The attribute name
  * @param {string} value - The attribute value to match
+ * @param {number} timeout - the timeout in msecs
  */
 export async function waitForAttributeEquality(page: Page,
                                                selector: {xpath?: string, css?: string},

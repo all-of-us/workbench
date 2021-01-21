@@ -1,11 +1,11 @@
-import Container from 'app/container';
-import {LinkText} from 'app/text-labels';
-import Button from 'app/element/button';
-import {Page} from 'puppeteer';
-import {waitForAttributeEquality, waitWhileLoading} from 'utils/waits-utils';
-import PrimereactInputNumber from 'app/element/primereact-input-number';
 import SelectMenu from 'app/component/select-menu';
+import Container from 'app/container';
+import Button from 'app/element/button';
+import PrimereactInputNumber from 'app/element/primereact-input-number';
+import {LinkText} from 'app/text-labels';
+import {Page} from 'puppeteer';
 import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
+import {waitForAttributeEquality, waitWhileLoading} from 'utils/waits-utils';
 
 const defaultXpath = '//*[@id="runtime-panel"]';
 const statusIconXpath = '//*[@data-test-id="runtime-status-icon"]';
@@ -164,7 +164,9 @@ export default class RuntimePanel extends Container {
         {xpath: statusIconXpath},
         'src',
         this.buildStatusIconSrc(startStopIconState),
-        600000
+        // Wait up to 20 minutes before timing out here. We expect runtime changes to be quite
+        // slow, so we want to give a generous amount of time before failing the test.
+        20 * 60 * 1000
     )
   }
 
