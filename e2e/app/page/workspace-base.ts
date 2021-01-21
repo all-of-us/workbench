@@ -285,9 +285,9 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * Share workspace via Workspace Actions snowman menu "Share" option.
    */
   async shareWorkspace(): Promise<ShareModal> {
-    await this.selectWorkspaceAction(Option.Share);
+    await this.selectWorkspaceAction(Option.Share, { waitForNav: false });
     const modal = new ShareModal(this.page);
-    await modal.waitUntilVisible();
+    await modal.waitForLoad();
     return modal;
   }
 }
