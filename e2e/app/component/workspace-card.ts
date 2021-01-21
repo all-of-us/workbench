@@ -29,7 +29,7 @@ export default class WorkspaceCard extends CardBase {
    */
   static async deleteWorkspace(page: Page, workspaceName: string): Promise<string[]> {
     const card = await WorkspaceCard.findCard(page, workspaceName);
-    await card.selectSnowmanMenu(Option.Delete, { waitForNavi: false });
+    await card.selectSnowmanMenu(Option.Delete, { waitForNav: false });
     // Handle Delete Confirmation modal
     return new WorkspaceEditPage(page).dismissDeleteWorkspaceModal();
   }

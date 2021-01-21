@@ -17,8 +17,8 @@ export default abstract class BaseMenu extends Container {
     * @param menuSelections
     * @param opt
     */
-   async select(menuSelections: Option | Option[], opt: { waitForNavi?: boolean } = {}): Promise<void> {
-      const { waitForNavi = false } = opt;
+   async select(menuSelections: Option | Option[], opt: { waitForNav?: boolean } = {}): Promise<void> {
+      const { waitForNav = false } = opt;
 
       let selections = [];
       // Handle case when menuSelections is not array.
@@ -38,7 +38,7 @@ export default abstract class BaseMenu extends Container {
          const menuItemLink = await this.findMenuItemLink(selections[i], rootXpath);
          if (i === (len - 1)) {
             // If it is the last menu item, click on it.
-            if (waitForNavi) {
+            if (waitForNav) {
                await Promise.all([
                   this.page.waitForNavigation({waitUntil: ['load', 'networkidle0']}),
                   menuItemLink.click()

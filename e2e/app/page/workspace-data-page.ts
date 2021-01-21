@@ -66,7 +66,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
   async exportToNotebook(datasetName: string, notebookName: string): Promise<void> {
     const resourceCard = new DataResourceCard(this.page);
     const datasetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
-    await datasetCard.selectSnowmanMenu([Option.ExportToNotebook], {waitForNavi: false});
+    await datasetCard.selectSnowmanMenu([Option.ExportToNotebook], {waitForNav: false});
     console.log(`Exported Dataset "${datasetName}" to notebook "${notebookName}"`);
   }
 

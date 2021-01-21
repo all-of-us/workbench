@@ -19,7 +19,7 @@ describe('Duplicate workspace, changing CDR versions', () => {
 
         await workspaceCard.asElementHandle().hover();
         // Click on Ellipsis menu "Duplicate" option.
-        await workspaceCard.selectSnowmanMenu(Option.Duplicate, {waitForNavi: true});
+        await workspaceCard.selectSnowmanMenu(Option.Duplicate, {waitForNav: true});
 
         // Fill out Workspace Name should be just enough for successful duplication
         const workspaceEditPage = new WorkspaceEditPage(page);
@@ -63,7 +63,7 @@ describe('Duplicate workspace, changing CDR versions', () => {
 
         await workspaceCard.asElementHandle().hover();
         // Click on Ellipsis menu "Duplicate" option.
-        await workspaceCard.selectSnowmanMenu(Option.Duplicate, {waitForNavi: true});
+        await workspaceCard.selectSnowmanMenu(Option.Duplicate, {waitForNav: true});
 
         // Fill out Workspace Name should be just enough for successful duplication
         const workspaceEditPage = new WorkspaceEditPage(page);

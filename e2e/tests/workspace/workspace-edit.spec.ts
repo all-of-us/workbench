@@ -25,7 +25,7 @@ describe('Editing workspace via workspace card snowman menu', () => {
   test('User as OWNER can edit workspace', async () => {
     const workspaceCard = await createWorkspace(page);
     workspaceName = await workspaceCard.getWorkspaceName();
-    await workspaceCard.selectSnowmanMenu(Option.Edit, {waitForNavi: true});
+    await workspaceCard.selectSnowmanMenu(Option.Edit, {waitForNav: true});
 
     const workspaceEditPage = new WorkspaceEditPage(page);
 
