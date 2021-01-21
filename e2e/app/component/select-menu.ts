@@ -20,7 +20,7 @@ export default class SelectMenu extends BaseMenu {
   constructor(page: Page, xpath: string  = defaultMenuXpath) {
     super(page, xpath);
   }
-// select(menuSelections: MenuOption | MenuOption[], opt: { waitForNav?: boolean } = {}): Promise<void>
+
   /**
    * Select an option in a Select element.
    * @param {string} textValue Partial or full string to click in Select.
