@@ -34,7 +34,7 @@ export default class SnowmanMenu extends BaseMenu {
   }
 
   private findOptionLink(option: Option): Link {
-    const selector = `${this.getXpath()}//*[@role='button' and text()='${option}']`;
+    const selector = `${this.getXpath()}${this.getMenuItemXpath(option)}`;
     return new Link(this.page, selector);
   }
 

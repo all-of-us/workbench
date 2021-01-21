@@ -31,7 +31,7 @@ export default class SelectMenu extends BaseMenu {
     const clickText = async () => {
       await this.open(2);
       const link = await this.findMenuItemLink(textValue, this.getXpath());
-      const textContent = await getPropValue<string>(link, 'textContent');
+      const textContent = await getPropValue<string>(await link.asElementHandle(), 'textContent');
       await link.click();
       return textContent;
     };

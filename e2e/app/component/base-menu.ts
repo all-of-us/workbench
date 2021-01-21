@@ -1,8 +1,9 @@
+import {Page} from 'puppeteer';
 import Container from 'app/container';
 import {Option} from 'app/text-labels';
-import {ElementHandle, Page} from 'puppeteer';
 import {waitWhileLoading} from 'utils/waits-utils';
 import {getPropValue} from 'utils/element-utils';
+import Link from 'app/element/link';
 
 export default abstract class BaseMenu extends Container {
 
@@ -77,13 +78,9 @@ export default abstract class BaseMenu extends Container {
    }
 
    // Find and hover over menu item
-   protected async findMenuItemLink(menuItemText: string, menuParentXpath: string): Promise<ElementHandle> {
+   protected async findMenuItemLink(menuItemText: string, menuParentXpath: string): Promise<Link> {
       const menuItemSelector = `${menuParentXpath}${this.getMenuItemXpath(menuItemText)}`;
-      const link = await this.page.waitForXPath(menuItemSelector, {visible: true});
-      await link.hover();
-      await link.focus();
-      await this.page.waitForTimeout(500);
-      return link;
+      return new Link(this.page, menuItemSelector);
    }
 
 }
