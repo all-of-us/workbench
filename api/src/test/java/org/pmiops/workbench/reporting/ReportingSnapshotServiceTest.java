@@ -5,7 +5,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.assertCohortFields;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.assertDatasetFields;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.assertInstitutionFields;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoWorkspace;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoWorkspaceFreeTierUsage;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingCohort;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingDataset;
@@ -78,7 +77,6 @@ public class ReportingSnapshotServiceTest {
   @Test
   public void testGetSnapshot() {
     mockUsers();
-    mockWorkspaces();
     mockWorkspaceFreeTierUsage();
     mockCohorts();
     mockDatasets();
@@ -112,12 +110,6 @@ public class ReportingSnapshotServiceTest {
     final List<ReportingUser> users =
         ImmutableList.of(userFixture.createDto(), userFixture.createDto());
     doReturn(users).when(mockReportingQueryService).getUsers();
-  }
-
-  private void mockWorkspaces() {
-    doReturn(ImmutableList.of(createDtoWorkspace()))
-        .when(mockReportingQueryService)
-        .getWorkspaces();
   }
 
   private void mockWorkspaceFreeTierUsage() {

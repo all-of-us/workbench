@@ -8,13 +8,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Calls the ReportingSnapshotService to obtain the application data from MySQL, Terra (soon),
- * and possibly other sources, then calls the uploadSnapshot() method on the configured ReportingUploadService
- * to upload to various tables in the BigQuery dataset. There is virtually no business logic in this class
- * except for the method for choosing the correct upload implementation.
+ * Calls the ReportingSnapshotService to obtain the application data from MySQL, Terra (soon), and
+ * possibly other sources, then calls the uploadSnapshot() method on the configured
+ * ReportingUploadService to upload to various tables in the BigQuery dataset. There is virtually no
+ * business logic in this class except for the method for choosing the correct upload
+ * implementation.
  *
- * <p> For tables that are extremely large, we obtain them on smaller batches. The current tables are: Workspace.
- * TODO(RW-6145): Support more tables(e.g. User) as we need.
+ * <p>For tables that are extremely large, we obtain them on smaller batches. The current tables
+ * are: Workspace. TODO(RW-6145): Support more tables(e.g. User) as we need.
  */
 @Service
 public class ReportingServiceImpl implements ReportingService {

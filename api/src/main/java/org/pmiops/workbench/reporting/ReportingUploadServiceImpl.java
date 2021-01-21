@@ -2,7 +2,6 @@ package org.pmiops.workbench.reporting;
 
 import static org.pmiops.workbench.reporting.insertion.ColumnValueExtractorUtils.getBigQueryTableName;
 
-import com.google.api.services.directory.model.User;
 import com.google.cloud.bigquery.BigQueryError;
 import com.google.cloud.bigquery.InsertAllRequest;
 import com.google.cloud.bigquery.InsertAllResponse;
@@ -97,20 +96,21 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
   /**
    * Batch uploads {@link ReportingWorkspace}.
    *
-   * TODO(yonghao): checkResponseAndRowCounts for batch.
+   * <p>TODO(yonghao): checkResponseAndRowCounts for batch.
    */
   @Override
   public void uploadBatchWorkspace(List<ReportingWorkspace> batch, long captureTimestamp) {
     final Stopwatch stopwatch = stopwatchProvider.get();
     final ImmutableMultimap.Builder<TableId, InsertAllResponse> responseMapBuilder =
-            ImmutableMultimap.builder();
+        ImmutableMultimap.builder();
     final StringBuilder performanceStringBuilder = new StringBuilder();
     final InsertAllRequest insertAllRequest =
-            workspaceRequestBuilder.build(
-                    getTableId(WorkspaceColumnValueExtractor.class),
-                    batch,
-                    getFixedValues(captureTimestamp));
-    issueInsertAllRequest(stopwatch, responseMapBuilder, performanceStringBuilder, insertAllRequest);
+        workspaceRequestBuilder.build(
+            getTableId(WorkspaceColumnValueExtractor.class),
+            batch,
+            getFixedValues(captureTimestamp));
+    issueInsertAllRequest(
+        stopwatch, responseMapBuilder, performanceStringBuilder, insertAllRequest);
     log.info(performanceStringBuilder.toString());
   }
 

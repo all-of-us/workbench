@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.INSTITUTION__SHORT_NAME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.countPopulatedTables;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createEmptySnapshot;
@@ -17,6 +18,7 @@ import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReporting
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingInstitution;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__CITY;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTION_ID;
+import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
 import com.google.cloud.bigquery.InsertAllRequest;
 import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
@@ -43,11 +45,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.ReportingCohort;
-import org.pmiops.workbench.model.ReportingSnapshot;
-import org.pmiops.workbench.model.ReportingUser;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer;
+import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
@@ -73,6 +73,7 @@ public class ReportingUploadServiceTest {
 
   private ReportingSnapshot reportingSnapshot;
   private ReportingSnapshot snapshotWithNulls;
+  private List<ReportingWorkspace> reportingWorkspaces;
 
   @MockBean private BigQueryService mockBigQueryService;
 
@@ -132,6 +133,24 @@ public class ReportingUploadServiceTest {
                         .givenName(null)
                         .disabled(true)
                         .userId(303L)));
+
+    reportingWorkspaces =
+        ImmutableList.of(
+            new ReportingWorkspace()
+                .workspaceId(201L)
+                .name("Circle K")
+                .creationTime(THEN)
+                .creatorId(101L),
+            new ReportingWorkspace()
+                .workspaceId(202L)
+                .name("Wyld Stallyns")
+                .creationTime(THEN)
+                .creatorId(101L),
+            new ReportingWorkspace()
+                .workspaceId(203L)
+                .name("You-us said what we-us are saying right now.")
+                .creationTime(THEN)
+                .creatorId(202L));
 
     final TableResult mockTableResult = mock(TableResult.class);
     doReturn(99L).when(mockTableResult).getTotalRows();
@@ -269,5 +288,35 @@ public class ReportingUploadServiceTest {
 
     reportingUploadService.uploadSnapshot(largeSnapshot);
     verify(mockBigQueryService, times(13)).insertAll(insertAllRequestCaptor.capture());
+  }
+
+  @Test
+  public void testUploadBatch_workspace() {
+    final InsertAllResponse mockInsertAllResponse = mock(InsertAllResponse.class);
+    doReturn(Collections.emptyMap()).when(mockInsertAllResponse).getInsertErrors();
+    doReturn(mockInsertAllResponse)
+        .when(mockBigQueryService)
+        .insertAll(any(InsertAllRequest.class));
+
+    reportingUploadService.uploadBatchWorkspace(reportingWorkspaces, NOW.toEpochMilli());
+
+    verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
+    InsertAllRequest request = insertAllRequestCaptor.getValue();
+    assertThat(request.getRows().size()).isEqualTo(reportingWorkspaces.size());
+    final Map<String, Object> workspaceColumnValues = request.getRows().get(0).getContent();
+    assertThat(
+            workspaceColumnValues.get(
+                WorkspaceColumnValueExtractor.WORKSPACE_ID.getParameterName()))
+        .isEqualTo(201L);
+    final Optional<OffsetDateTime> creationTime =
+        rowToInsertStringToOffsetTimestamp(
+            (String)
+                workspaceColumnValues.get(
+                    WorkspaceColumnValueExtractor.CREATION_TIME.getParameterName()));
+    assertThat(creationTime).isPresent();
+    assertTimeApprox(creationTime.get(), THEN);
+    assertThat(
+            workspaceColumnValues.get(WorkspaceColumnValueExtractor.CREATOR_ID.getParameterName()))
+        .isEqualTo(101L);
   }
 }
