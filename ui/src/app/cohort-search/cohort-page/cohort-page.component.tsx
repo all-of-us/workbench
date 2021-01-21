@@ -12,6 +12,7 @@ import {FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {LOCAL_STORAGE_KEY_COHORT_CONTEXT} from 'app/pages/data/criteria-search';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
@@ -144,6 +145,10 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
         localStorage.setItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST, JSON.stringify(searchRequest));
       }));
       this.props.setShowWarningModal(this.showWarningModal);
+      const existingContext = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT));
+      if (existingContext) {
+        this.setSearchContext(existingContext);
+      }
     }
 
     componentWillUnmount() {

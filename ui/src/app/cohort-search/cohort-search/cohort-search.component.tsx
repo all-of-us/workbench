@@ -214,6 +214,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
   }
 
   addSelection = (param: any) => {
+    const {cohortContext} = this.props;
     let {selectedIds, selections} = this.state;
     if (selectedIds.includes(param.parameterId)) {
       selections = selections.filter(p => p.parameterId !== param.parameterId);
@@ -222,6 +223,8 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     }
     selections = [...selections, param];
     currentCohortCriteriaStore.next(selections);
+    cohortContext.item.searchParameters = selections;
+    localStorage.setItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT, JSON.stringify(cohortContext));
     this.setState({selections, selectedIds});
     this.growl.show({severity: 'success', detail: 'Criteria Added', closable: false, life: 2000});
     if (!!this.growlTimer) {
