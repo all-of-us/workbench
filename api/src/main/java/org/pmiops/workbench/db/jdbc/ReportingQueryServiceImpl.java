@@ -6,6 +6,7 @@ import static org.pmiops.workbench.db.model.DbStorageEnums.dataAccessLevelFromSt
 import static org.pmiops.workbench.db.model.DbStorageEnums.institutionDUATypeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.organizationTypeFromStorage;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
+import static org.pmiops.workbench.db.model.DbStorageEnums.institutionalRoleFromStorage;
 
 import java.util.List;
 import javax.inject.Provider;
@@ -189,7 +190,14 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  two_factor_auth_completion_time,\n"
             + "  user_id,\n"
             + "  email AS username\n"
-            + "FROM user",
+            + "  via.institution.institution_id AS institution_id,\n"	
+            + "  via.institutional_role_enum,\n"	
+            + "  via.institutional_role_other_text\n"
+            + "  \n"
+            + "FROM user u"
+            + "  LEFT OUTER JOIN FETCH address AS a ON u.userId = a.user.userId\n"	
+            + "  LEFT OUTER JOIN FETCH user_verified_institutional_affiliation AS via on u.userId = via.user.userId"	
+            + "  ORDER BY u.userId",
         (rs, unused) ->
             new ReportingUser()
                 .aboutYou(rs.getString("about_you"))
@@ -231,7 +239,11 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .twoFactorAuthCompletionTime(
                     offsetDateTimeUtc(rs.getTimestamp("two_factor_auth_completion_time")))
                 .userId(rs.getLong("user_id"))
-                .username(rs.getString("username")));
+                .username(rs.getString("username"))
+                .institutionId(rs.getLong("institutionId"))
+                .institutionalRoleEnum(institutionalRoleFromStorage(rs.getShort("institutional_role_enum")))
+                .institutionalRoleOtherText(rs.getString("institutional_role_other_text"))
+                );
   }
 
   @Override
