@@ -457,7 +457,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
       switch (type) {
         case 'number':
           return <NumberInput style={{padding: '0 0.25rem', width: '3rem'}} value={values[field]}
-            onChange={v => this.inputChange(index, field, v)}/>;
+                   min={0} onChange={v => this.inputChange(index, field, v)}/>;
         case 'date':
           return <div style={styles.date}>
             <DatePicker
