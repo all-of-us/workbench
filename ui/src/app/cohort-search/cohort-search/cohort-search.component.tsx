@@ -127,6 +127,7 @@ export function saveCriteria(selections?: Array<Selection>) {
 interface Props {
   cohortContext: any;
   selections?: Array<Selection>;
+  setUnsavedChanges: (unsavedChanges: boolean) => void;
 }
 
 interface State {
@@ -134,6 +135,7 @@ interface State {
   selectedIds: Array<string>;
   selections: Array<Selection>;
   showUnsavedModal: boolean;
+  unsavedChanges: boolean;
 }
 
 export const CohortSearch = withCurrentCohortSearchContext()(class extends React.Component<Props, State> {
@@ -147,6 +149,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
       selectedIds: [],
       selections: [],
       showUnsavedModal: false,
+      unsavedChanges: false,
     };
   }
 
@@ -165,7 +168,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
         this.setState({
           selectedIds: newSelections.map(s => s.parameterId),
           selections: newSelections
-        });
+        }, () => this.setUnsavedChanges());
       }
     });
   }
@@ -173,33 +176,37 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
   componentWillUnmount() {
     this.subscription.unsubscribe();
     currentCohortCriteriaStore.next(undefined);
+    localStorage.removeItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT);
   }
 
   closeSearch() {
     currentCohortSearchContextStore.next(undefined);
-    currentCohortCriteriaStore.next(undefined);
-    localStorage.removeItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT);
     // Delay hiding attributes page until sidebar is closed
     setTimeout(() => attributesSelectionStore.next(undefined), 500);
   }
 
-  checkUnsavedChanges() {
+  setUnsavedChanges() {
     const {cohortContext: {groupId, item, role}} = this.props;
     const {selections} = this.state;
+    let unsavedChanges;
     if (groupId) {
       const requestItem = getItemFromSearchRequest(groupId, item.id, role);
       if (requestItem) {
         const sortAndStringify = (params) => JSON.stringify(params.sort((a, b) => a.id - b.id));
-        const unsavedChanges = sortAndStringify(requestItem.searchParameters) !== sortAndStringify(selections);
-        if (unsavedChanges) {
-          this.setState({showUnsavedModal: true});
-        } else {
-          this.closeSearch();
-        }
+        unsavedChanges = sortAndStringify(requestItem.searchParameters) !== sortAndStringify(selections);
       } else {
-        this.setState({showUnsavedModal: true});
+        unsavedChanges = selections.length > 0;
       }
-    } else if (selections.length > 0) {
+    } else {
+      unsavedChanges = selections.length > 0;
+    }
+    this.setState({unsavedChanges});
+    this.props.setUnsavedChanges(unsavedChanges);
+  }
+
+  checkUnsavedChanges() {
+    const {unsavedChanges} = this.state;
+    if (unsavedChanges) {
       this.setState({showUnsavedModal: true});
     } else {
       this.closeSearch();

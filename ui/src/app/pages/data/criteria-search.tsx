@@ -178,7 +178,6 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
     }
     const currentCriteriaStore = source === 'cohort' ? currentCohortCriteriaStore : currentConceptStore;
     this.subscription = currentCriteriaStore.subscribe(selectedCriteriaList => this.setState({selectedCriteriaList}));
-    // CB to be implemented with RW-5916
     if (source !== 'cohort') {
       const existingCriteria = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS));
       if (!!existingCriteria && existingCriteria[0].domainId === domain) {
