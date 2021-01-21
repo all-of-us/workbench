@@ -80,7 +80,9 @@ export default abstract class BaseMenu extends Container {
    // Find and hover over menu item
    protected async findMenuItemLink(menuItemText: string, menuParentXpath: string): Promise<Link> {
       const menuItemSelector = `${menuParentXpath}${this.getMenuItemXpath(menuItemText)}`;
-      return new Link(this.page, menuItemSelector);
+      const link = new Link(this.page, menuItemSelector);
+      await link.focus();
+      return link;
    }
 
 }
