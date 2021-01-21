@@ -129,7 +129,7 @@ export default class CriteriaSearchPage extends AuthenticatedPage {
 
   async addAgeModifier(filterSign: FilterSign, filterValue: number): Promise<string> {
     const selectMenu = await SelectMenu.findByName(this.page, {name: 'Age At Event', ancestorLevel: 2});
-    await selectMenu.selectOption(filterSign);
+    await selectMenu.select(filterSign);
     const numberField = await this.page.waitForXPath(`${this.containerXpath}//input[@type="number"]`, {visible: true});
     // Issue with Puppeteer type() function: typing value in this textbox doesn't always trigger change event. workaround is needed.
     // Error: "Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation."

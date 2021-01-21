@@ -152,7 +152,7 @@ export default class CreateAccountPage extends BasePage {
   // select Institution Affiliation from a dropdown
   async selectInstitution(selectTextValue: string): Promise<void> {
     const dropdown = await SelectMenu.findByName(this.page, FieldSelector.InstitutionSelect.textOption);
-    return dropdown.selectOption(selectTextValue);
+    return dropdown.select(selectTextValue);
   }
 
   async getInstitutionValue(): Promise<string> {
@@ -163,13 +163,13 @@ export default class CreateAccountPage extends BasePage {
   // select Education Level from a dropdown
   async selectEducationLevel(selectTextValue: string): Promise<void> {
     const dropdown = await SelectMenu.findByName(this.page, FieldSelector.EducationLevelSelect.textOption);
-    return dropdown.selectOption(selectTextValue);
+    return dropdown.select(selectTextValue);
   }
 
   // select Year of Birth from a dropdown
   async selectYearOfBirth(year: string): Promise<void> {
     const dropdown = await SelectMenu.findByName(this.page, FieldSelector.BirthYearSelect.textOption);
-    return dropdown.selectOption(year);
+    return dropdown.select(year);
   }
 
   // Combined steps to make test code cleaner and shorter
@@ -189,7 +189,7 @@ export default class CreateAccountPage extends BasePage {
     await ClrIconLink.findByName(this.page, {containsText: LabelAlias.InstitutionEmail, ancestorLevel: 2, iconShape: 'success-standard'});
 
     const roleSelect = await SelectMenu.findByName(this.page, FieldSelector.DescribeRole.textOption);
-    await roleSelect.selectOption(InstitutionRoleSelectValue.UndergraduteStudent);
+    await roleSelect.select(InstitutionRoleSelectValue.UndergraduteStudent);
   }
 
   // Step 1: Accepting Terms of Use and Privacy statement.

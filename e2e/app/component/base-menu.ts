@@ -18,7 +18,7 @@ export default abstract class BaseMenu extends Container {
     * @param menuSelections
     * @param opt
     */
-   async select(menuSelections: MenuOption | MenuOption[], opt: { waitForNav?: boolean } = {}): Promise<void> {
+   async select(menuSelections: string | MenuOption | MenuOption[], opt: { waitForNav?: boolean } = {}): Promise<void> {
       const { waitForNav = false } = opt;
 
       let selections = [];

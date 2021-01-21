@@ -1,7 +1,7 @@
+import {Page} from 'puppeteer';
 import Container from 'app/container';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType, XPathOptions} from 'app/xpath-options';
-import {Page} from 'puppeteer';
 import {getPropValue} from 'utils/element-utils';
 import BaseMenu from './base-menu';
 
@@ -20,37 +20,15 @@ export default class SelectMenu extends BaseMenu {
   constructor(page: Page, xpath: string  = defaultMenuXpath) {
     super(page, xpath);
   }
-
+// select(menuSelections: MenuOption | MenuOption[], opt: { waitForNav?: boolean } = {}): Promise<void>
   /**
    * Select an option in a Select element.
    * @param {string} textValue Partial or full string to click in Select.
    * @param {number} maxAttempts Default try count is 2.
    */
-  async selectOption(textValue: string, maxAttempts: number = 2): Promise<void> {
-
-    const clickText = async () => {
-      await this.open(2);
-      const link = await this.findMenuItemLink(textValue, this.getXpath());
-      const textContent = await getPropValue<string>(await link.asElementHandle(), 'textContent');
-      await link.click();
-      return textContent;
-    };
-
-    const clickAndCheck = async () => {
-      maxAttempts--;
-      const shouldSelectedValue = await clickText();
-      // compare to displayed text in Select textbox
-      const displayedValue = await this.getSelectedValue();
-      if (shouldSelectedValue === displayedValue) {
-        return shouldSelectedValue; // success
-      }
-      if (maxAttempts <= 0) {
-        return null;
-      }
-      return await this.page.waitForTimeout(2000).then(clickAndCheck); // two seconds pause and retry
-    };
-
-    await clickAndCheck();
+  async select(option: string, opt: { waitForNav?: boolean } = {}): Promise<void> {
+    await this.open();
+    await super.select(option, opt);
   }
 
   /**
