@@ -4,7 +4,7 @@ import DataResourceCard from 'app/component/data-resource-card';
 import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Link from 'app/element/link';
-import {Option, LinkText, ResourceCard} from 'app/text-labels';
+import {MenuOption, LinkText, ResourceCard} from 'app/text-labels';
 import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
@@ -190,7 +190,7 @@ describe('User can create new Cohorts', () => {
     let cohortCard = await DataResourceCard.findCard(page, `${cohortName}`);
   
     // Edit cohort using Ellipsis menu
-    await cohortCard.selectSnowmanMenu(Option.Edit, {waitForNav: false});
+    await cohortCard.selectSnowmanMenu(MenuOption.Edit, {waitForNav: false});
     await cohortBuildPage.waitForLoad();
     await waitWhileLoading(page);
 
@@ -215,7 +215,7 @@ describe('User can create new Cohorts', () => {
     // Duplicate cohort using Ellipsis menu.
     const origCardsCount = (await DataResourceCard.findAllCards(page)).length;
     cohortCard = await DataResourceCard.findCard(page, `${cohortName}`);
-    await cohortCard.selectSnowmanMenu(Option.Duplicate, {waitForNav: false});
+    await cohortCard.selectSnowmanMenu(MenuOption.Duplicate, {waitForNav: false});
     await waitWhileLoading(page);
     const newCardsCount = (await DataResourceCard.findAllCards(page)).length;
     // cards count increase by 1.

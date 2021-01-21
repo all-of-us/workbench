@@ -1,6 +1,6 @@
 import {ElementHandle, Page} from 'puppeteer';
 import * as fp from 'lodash/fp';
-import {Option, WorkspaceAccessLevel} from 'app/text-labels';
+import {MenuOption, WorkspaceAccessLevel} from 'app/text-labels';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {getPropValue} from 'utils/element-utils';
 import CardBase from './card-base';
@@ -29,7 +29,7 @@ export default class WorkspaceCard extends CardBase {
    */
   static async deleteWorkspace(page: Page, workspaceName: string): Promise<string[]> {
     const card = await WorkspaceCard.findCard(page, workspaceName);
-    await card.selectSnowmanMenu(Option.Delete, { waitForNav: false });
+    await card.selectSnowmanMenu(MenuOption.Delete, { waitForNav: false });
     // Handle Delete Confirmation modal
     return new WorkspaceEditPage(page).dismissDeleteWorkspaceModal();
   }
@@ -182,15 +182,15 @@ export default class WorkspaceCard extends CardBase {
     const snowmanMenu = await this.getSnowmanMenu();
     const accessLevel = await this.getWorkspaceAccessLevel();
     if (accessLevel !== WorkspaceAccessLevel.Owner) {
-      expect(await snowmanMenu.isOptionDisabled(Option.Share)).toBe(true);
-      expect(await snowmanMenu.isOptionDisabled(Option.Edit)).toBe(true);
-      expect(await snowmanMenu.isOptionDisabled(Option.Delete)).toBe(true);
-      expect(await snowmanMenu.isOptionDisabled(Option.Duplicate)).toBe(false);
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Share)).toBe(true);
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(true);
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(true);
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(false);
       } else if (accessLevel === WorkspaceAccessLevel.Owner) { 
-      expect(await snowmanMenu.isOptionDisabled(Option.Share)).toBe(false);
-      expect(await snowmanMenu.isOptionDisabled(Option.Edit)).toBe(false);
-      expect(await snowmanMenu.isOptionDisabled(Option.Delete)).toBe(false);
-      expect(await snowmanMenu.isOptionDisabled(Option.Duplicate)).toBe(false);
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Share)).toBe(false);
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(false);
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(false);
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(false);
   }
   }
 }

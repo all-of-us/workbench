@@ -2,7 +2,7 @@ import DataResourceCard from 'app/component/data-resource-card';
 import ExportToNotebookModal from 'app/component/export-to-notebook-modal';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {Option, ResourceCard} from 'app/text-labels';
+import {MenuOption, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
@@ -94,7 +94,7 @@ describe('Create Dataset', () => {
 
     const resourceCard = new DataResourceCard(page);
     const datasetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
-    await datasetCard.selectSnowmanMenu(Option.ExportToNotebook, {waitForNav: false});
+    await datasetCard.selectSnowmanMenu(MenuOption.ExportToNotebook, {waitForNav: false});
 
     const exportModal = new ExportToNotebookModal(page);
     await exportModal.waitForLoad();

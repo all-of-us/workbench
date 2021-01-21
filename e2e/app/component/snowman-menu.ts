@@ -1,5 +1,5 @@
 import {Page} from 'puppeteer';
-import {Option} from 'app/text-labels';
+import {MenuOption} from 'app/text-labels';
 import Link from 'app/element/link';
 import BaseMenu from './base-menu';
 
@@ -22,9 +22,9 @@ export default class SnowmanMenu extends BaseMenu {
 
   /**
    * Determine if an option in snowman menu is disabled.
-   * @param {Option} option Snowman menuitem.
+   * @param {MenuOption} option Snowman menuitem.
    */
-  async isOptionDisabled(option: Option): Promise<boolean> {
+  async isOptionDisabled(option: MenuOption): Promise<boolean> {
     const link = this.findOptionLink(option);
     return link.isCursorNotAllowed();
   }
@@ -33,7 +33,7 @@ export default class SnowmanMenu extends BaseMenu {
     return `//*[@role="button" and normalize-space()="${menuItemText}"]`;
   }
 
-  private findOptionLink(option: Option): Link {
+  private findOptionLink(option: MenuOption): Link {
     const selector = `${this.getXpath()}${this.getMenuItemXpath(option)}`;
     return new Link(this.page, selector);
   }

@@ -1,5 +1,5 @@
 import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
-import {Option} from 'app/text-labels';
+import {MenuOption} from 'app/text-labels';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import Navigation, {NavLink} from 'app/component/navigation';
 import WorkspaceCard from 'app/component/workspace-card';
@@ -23,7 +23,7 @@ describe('Duplicate workspace', () => {
 
       await workspaceCard.asElementHandle().hover();
       // Click on Ellipsis menu "Duplicate" option.
-      await workspaceCard.selectSnowmanMenu(Option.Duplicate, {waitForNav: true});
+      await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, {waitForNav: true});
 
       // Fill out Workspace Name should be just enough for successful duplication
       const workspaceEditPage = new WorkspaceEditPage(page);
@@ -55,7 +55,7 @@ describe('Duplicate workspace', () => {
       await workspaceCard.clickWorkspaceName();
 
       const dataPage = new WorkspaceDataPage(page);
-      await dataPage.selectWorkspaceAction(Option.Duplicate);
+      await dataPage.selectWorkspaceAction(MenuOption.Duplicate);
 
       const workspaceEditPage = new WorkspaceEditPage(page);
 

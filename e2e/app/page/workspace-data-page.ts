@@ -2,7 +2,7 @@ import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
 import Link from 'app/element/link';
 import DataResourceCard from 'app/component/data-resource-card';
 import ClrIconLink from 'app/element/clr-icon-link';
-import {Option, Language, ResourceCard} from 'app/text-labels';
+import {MenuOption, Language, ResourceCard} from 'app/text-labels';
 import {ElementHandle, Page} from 'puppeteer';
 import {makeRandomName} from 'utils/str-utils';
 import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
@@ -66,7 +66,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
   async exportToNotebook(datasetName: string, notebookName: string): Promise<void> {
     const resourceCard = new DataResourceCard(this.page);
     const datasetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
-    await datasetCard.selectSnowmanMenu([Option.ExportToNotebook], {waitForNav: false});
+    await datasetCard.selectSnowmanMenu([MenuOption.ExportToNotebook], {waitForNav: false});
     console.log(`Exported Dataset "${datasetName}" to notebook "${notebookName}"`);
   }
 

@@ -4,7 +4,7 @@ import Link from 'app/element/link';
 import HomePage from 'app/page/home-page';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspacesPage from 'app/page/workspaces-page';
-import {Option, LinkText, WorkspaceAccessLevel} from 'app/text-labels';
+import {MenuOption, LinkText, WorkspaceAccessLevel} from 'app/text-labels';
 import {config} from 'resources/workbench-config';
 import {createWorkspace, findOrCreateWorkspace, signInWithAccessToken, signInAs, signOut} from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
@@ -62,7 +62,7 @@ describe('Share workspace', () => {
       const workspaceName = await workspaceCard.getWorkspaceName();
 
       // Open the Share modal
-      await workspaceCard.selectSnowmanMenu(Option.Share, {waitForNav: false});
+      await workspaceCard.selectSnowmanMenu(MenuOption.Share, {waitForNav: false});
 
       const shareModal = new ShareModal(page);
       await shareModal.waitUntilVisible();

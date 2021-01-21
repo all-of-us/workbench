@@ -13,7 +13,7 @@ export enum WorkspaceAccessLevel {
 }
 
 // Options in dropdown select.
-export enum Option {
+export enum MenuOption {
    Age = 'Age',
    Conditions = 'Conditions',
    CopyToAnotherWorkspace = 'Copy to another Workspace',

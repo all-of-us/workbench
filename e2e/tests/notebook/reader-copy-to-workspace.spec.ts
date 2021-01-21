@@ -5,7 +5,7 @@ import Link from 'app/element/link';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {Option, Language, LinkText, ResourceCard, WorkspaceAccessLevel} from 'app/text-labels';
+import {MenuOption, Language, LinkText, ResourceCard, WorkspaceAccessLevel} from 'app/text-labels';
 import {config} from 'resources/workbench-config';
 import {makeRandomName} from 'utils/str-utils';
 import {createWorkspace, findOrCreateWorkspace, signInWithAccessToken, signInAs, signOut} from 'utils/test-utils';
@@ -84,11 +84,11 @@ describe('Workspace reader Jupyter notebook action tests', () => {
     let notebookCard = await dataResourceCard.findCard(notebookName, ResourceCard.Notebook);
     // open Snowman menu.
     const snowmanMenu = await notebookCard.getSnowmanMenu();
-    expect(await snowmanMenu.isOptionDisabled(Option.Rename)).toBe(true);
-    expect(await snowmanMenu.isOptionDisabled(Option.Duplicate)).toBe(true);
-    expect(await snowmanMenu.isOptionDisabled(Option.Delete)).toBe(true);
+    expect(await snowmanMenu.isOptionDisabled(MenuOption.Rename)).toBe(true);
+    expect(await snowmanMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(true);
+    expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(true);
     // But the Copy to another Workspace action is available for click.
-    expect(await snowmanMenu.isOptionDisabled(Option.CopyToAnotherWorkspace)).toBe(false);
+    expect(await snowmanMenu.isOptionDisabled(MenuOption.CopyToAnotherWorkspace)).toBe(false);
     await notebookCard.clickSnowmanIcon(); // close Snowman menu.
 
     // Copy notebook to another Workspace and give notebook a new name.
@@ -119,10 +119,10 @@ describe('Workspace reader Jupyter notebook action tests', () => {
 
     // Notebook actions Rename, Duplicate, Delete and Copy to another Workspace actions are avaliable to click.
     const copyNotebookCardMenu = await notebookCard.getSnowmanMenu();
-    expect(await copyNotebookCardMenu.isOptionDisabled(Option.Rename)).toBe(false);
-    expect(await copyNotebookCardMenu.isOptionDisabled(Option.Duplicate)).toBe(false);
-    expect(await copyNotebookCardMenu.isOptionDisabled(Option.Delete)).toBe(false);
-    expect(await copyNotebookCardMenu.isOptionDisabled(Option.CopyToAnotherWorkspace)).toBe(false);
+    expect(await copyNotebookCardMenu.isOptionDisabled(MenuOption.Rename)).toBe(false);
+    expect(await copyNotebookCardMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(false);
+    expect(await copyNotebookCardMenu.isOptionDisabled(MenuOption.Delete)).toBe(false);
+    expect(await copyNotebookCardMenu.isOptionDisabled(MenuOption.CopyToAnotherWorkspace)).toBe(false);
     await notebookCard.clickSnowmanIcon(); // close menu
 
     await newAnalysisPage.deleteResource(copiedNotebookName, ResourceCard.Notebook);

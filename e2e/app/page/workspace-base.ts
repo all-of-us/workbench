@@ -4,7 +4,7 @@ import Modal from 'app/component/modal';
 import Link from 'app/element/link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
-import {LinkText, Option, ResourceCard} from 'app/text-labels';
+import {LinkText, MenuOption, ResourceCard} from 'app/text-labels';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
 import {waitForAttributeEquality, waitWhileLoading} from 'utils/waits-utils';
@@ -128,7 +128,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
       throw new Error(`Failed to find ${resourceType} card "${resourceName}"`);
     }
 
-    await card.selectSnowmanMenu(Option.Delete, {waitForNav: false});
+    await card.selectSnowmanMenu(MenuOption.Delete, {waitForNav: false});
 
     const modal = new Modal(this.page);
     await modal.waitForLoad();
@@ -149,7 +149,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
         link = LinkText.DeleteNotebook;
         break;
       case ResourceCard.CohortReview:
-        link = Option.Delete;
+        link = MenuOption.Delete;
         break;
       default:
         throw new Error(`Case ${resourceType} handling is not defined.`);
@@ -175,13 +175,13 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
       throw new Error(`Failed to find ${resourceType} card "${resourceName}"`);
     }
 
-    let option: Option;
+    let option: MenuOption;
     switch (resourceType) {
       case ResourceCard.Dataset:
-        option = Option.RenameDataset;
+        option = MenuOption.RenameDataset;
         break;
       default:
-        option = Option.Rename;
+        option = MenuOption.Rename;
         break;
     }
     await card.selectSnowmanMenu(option, {waitForNav: false});
@@ -230,10 +230,10 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
 
   /**
    * Select Workspace action snowman menu option.
-   * @param {Option} option
+   * @param {MenuOption} option
    * @param opts
    */
-  async selectWorkspaceAction(option: Option, opts?: { waitForNav: false }): Promise<void> {
+  async selectWorkspaceAction(option: MenuOption, opts?: { waitForNav: false }): Promise<void> {
     const iconXpath = './/*[@data-test-id="workspace-menu-button"]';
     await this.page.waitForXPath(iconXpath, {visible: true}).then(icon => icon.click());
     const snowmanMenu = new SnowmanMenu(this.page);
@@ -244,7 +244,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * Delete workspace via Workspace Actions snowman menu "Delete" option.
    */
   async deleteWorkspace(): Promise<string[]> {
-    await this.selectWorkspaceAction(Option.Delete, { waitForNav: false });
+    await this.selectWorkspaceAction(MenuOption.Delete, { waitForNav: false });
     // Handle Delete Confirmation modal
     return this.dismissDeleteWorkspaceModal();
   }
@@ -267,7 +267,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     * Edit workspace via Workspace Actions snowman menu "Edit" option.
     */
   async editWorkspace(): Promise<void> {
-    await this.selectWorkspaceAction(Option.Edit);
+    await this.selectWorkspaceAction(MenuOption.Edit);
   }
 
   async getCdrVersion(): Promise<string> {
@@ -285,7 +285,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * Share workspace via Workspace Actions snowman menu "Share" option.
    */
   async shareWorkspace(): Promise<ShareModal> {
-    await this.selectWorkspaceAction(Option.Share, { waitForNav: false });
+    await this.selectWorkspaceAction(MenuOption.Share, { waitForNav: false });
     const modal = new ShareModal(this.page);
     await modal.waitForLoad();
     return modal;

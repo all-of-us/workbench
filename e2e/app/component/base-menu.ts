@@ -1,6 +1,6 @@
 import {Page} from 'puppeteer';
 import Container from 'app/container';
-import {Option} from 'app/text-labels';
+import {MenuOption} from 'app/text-labels';
 import {waitWhileLoading} from 'utils/waits-utils';
 import {getPropValue} from 'utils/element-utils';
 import Link from 'app/element/link';
@@ -18,7 +18,7 @@ export default abstract class BaseMenu extends Container {
     * @param menuSelections
     * @param opt
     */
-   async select(menuSelections: Option | Option[], opt: { waitForNav?: boolean } = {}): Promise<void> {
+   async select(menuSelections: MenuOption | MenuOption[], opt: { waitForNav?: boolean } = {}): Promise<void> {
       const { waitForNav = false } = opt;
 
       let selections = [];

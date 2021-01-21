@@ -51,7 +51,7 @@ export default class NotebookPage extends AuthenticatedPage {
       console.warn(`Reloading "${this.documentTitle}" because cannot find the Run button`);
       await this.page.reload({waitUntil: ['networkidle0', 'load']});
     }
-    await this.waitForKernelIdle(600000); // 10 minutes
+    await this.waitForKernelIdle(10 * 60 * 1000); // 10 minutes
     return true;
   }
 
@@ -183,7 +183,7 @@ export default class NotebookPage extends AuthenticatedPage {
     const cell = cellIndex === -1 ? await this.findLastCell() : await this.findCell(cellIndex);
     const inputCell = await cell.focus();
 
-    const {code, codeFile, timeOut = 120000, markdownWorkaround = false} = opts;
+    const {code, codeFile, timeOut = 2 * 60 * 1000, markdownWorkaround = false} = opts;
 
     let codeToRun;
     if (code !== undefined) {
