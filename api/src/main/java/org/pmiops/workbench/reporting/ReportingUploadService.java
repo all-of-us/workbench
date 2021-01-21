@@ -12,5 +12,5 @@ import org.pmiops.workbench.model.ReportingWorkspace;
 public interface ReportingUploadService {
   void uploadSnapshot(ReportingSnapshot reportingSnapshot);
 
-  void uploadBatch(List<ReportingWorkspace> batch, long captureTimestamp);
+  void uploadBatchWorkspace(List<ReportingWorkspace> batch, long captureTimestamp);
 }

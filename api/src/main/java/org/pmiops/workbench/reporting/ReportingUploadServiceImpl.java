@@ -2,6 +2,7 @@ package org.pmiops.workbench.reporting;
 
 import static org.pmiops.workbench.reporting.insertion.ColumnValueExtractorUtils.getBigQueryTableName;
 
+import com.google.api.services.directory.model.User;
 import com.google.cloud.bigquery.BigQueryError;
 import com.google.cloud.bigquery.InsertAllRequest;
 import com.google.cloud.bigquery.InsertAllResponse;
@@ -94,19 +95,23 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
   }
 
   /**
-   * It's unfortunately not pragmatic to expose a generic method for all types of rows to upload.
-   * The best we can do is to split things up under the hood.
+   * Batch uploads {@link ReportingWorkspace}.
    *
-   * <p>TODO(jaycarlton): logging for errors and perf metrics
+   * TODO(yonghao): checkResponseAndRowCounts for batch.
    */
   @Override
-  public void uploadBatch(List<ReportingWorkspace> batch, long captureTimestamp) {
+  public void uploadBatchWorkspace(List<ReportingWorkspace> batch, long captureTimestamp) {
+    final Stopwatch stopwatch = stopwatchProvider.get();
+    final ImmutableMultimap.Builder<TableId, InsertAllResponse> responseMapBuilder =
+            ImmutableMultimap.builder();
+    final StringBuilder performanceStringBuilder = new StringBuilder();
     final InsertAllRequest insertAllRequest =
-        workspaceRequestBuilder.build(
-            getTableId(WorkspaceColumnValueExtractor.class),
-            batch,
-            getFixedValues(captureTimestamp));
-    bigQueryService.insertAll(insertAllRequest);
+            workspaceRequestBuilder.build(
+                    getTableId(WorkspaceColumnValueExtractor.class),
+                    batch,
+                    getFixedValues(captureTimestamp));
+    issueInsertAllRequest(stopwatch, responseMapBuilder, performanceStringBuilder, insertAllRequest);
+    log.info(performanceStringBuilder.toString());
   }
 
   private void issueInsertAllRequest(
