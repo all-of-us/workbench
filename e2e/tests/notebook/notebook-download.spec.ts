@@ -1,4 +1,4 @@
-import NotebookDownloadModal from 'app/page/notebook-download-modal';
+import NotebookDownloadModal from 'app/modal/notebook-download-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {makeRandomName} from 'utils/str-utils';
 import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';

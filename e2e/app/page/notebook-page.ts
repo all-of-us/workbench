@@ -5,7 +5,7 @@ import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 import {ResourceCard} from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
 import NotebookCell, {CellType} from './notebook-cell';
-import NotebookDownloadModal from './notebook-download-modal';
+import NotebookDownloadModal from 'app/modal/notebook-download-modal';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
 
 // CSS selectors

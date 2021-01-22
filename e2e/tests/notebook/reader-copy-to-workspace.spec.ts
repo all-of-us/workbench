@@ -1,5 +1,4 @@
 import DataResourceCard from 'app/component/data-resource-card';
-import Modal from 'app/component/modal';
 import WorkspaceCard from 'app/component/workspace-card';
 import Link from 'app/element/link';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
@@ -11,7 +10,7 @@ import {makeRandomName} from 'utils/str-utils';
 import {createWorkspace, findOrCreateWorkspace, signInWithAccessToken, signInAs, signOut} from 'utils/test-utils';
 import {waitWhileLoading} from 'utils/waits-utils';
 import WorkspacesPage from 'app/page/workspaces-page';
-
+import Modal from 'app/modal/modal';
 
 describe('Workspace reader Jupyter notebook action tests', () => {
 
@@ -98,6 +97,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
 
     // Verify Copy Success modal.
     const modal = new Modal(newPage);
+    await modal.waitForLoad();
     await modal.waitForButton(LinkText.GoToCopiedNotebook);
     const textContent = await modal.getTextContent();
     expect(textContent).toContain('Copy to Workspace');

@@ -1,5 +1,4 @@
 import {Page} from 'puppeteer';
-import Modal from 'app/component/modal';
 import {makeRandomName} from 'utils/str-utils';
 import RadioButton from 'app/element/radiobutton';
 import Textbox from 'app/element/textbox';
@@ -7,6 +6,7 @@ import Textarea from 'app/element/textarea';
 import {LinkText} from 'app/text-labels';
 import {getPropValue} from 'utils/element-utils';
 import {waitWhileLoading} from 'utils/waits-utils';
+import Modal from './modal';
 
 const faker = require('faker/locale/en_US');
 
@@ -17,8 +17,17 @@ export enum SaveOption {
 
 export default class ConceptSetSaveModal extends Modal {
 
+  modalTitle: string;
+
   constructor(page: Page) {
     super(page);
+  }
+
+  async isLoaded(): Promise<boolean> {
+    const xpath = '//*[@data-test-id="add-concept-title"]';
+    const title = await this.page.waitForXPath(xpath, {visible: true});
+    this.modalTitle = await getPropValue<string>(title, 'textContent');
+    return true;
   }
 
   /**
@@ -51,7 +60,7 @@ export default class ConceptSetSaveModal extends Modal {
     // Click SAVE button.
     await this.clickButton(LinkText.Save, {waitForClose: true});
     await waitWhileLoading(this.page);
-    
+    console.log(`"${this.modalTitle}" modal: Saved Concept Set "${conceptName}"`);
     return conceptName;
   }
 

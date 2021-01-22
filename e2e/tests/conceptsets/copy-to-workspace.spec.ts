@@ -3,7 +3,7 @@ import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceCard from 'app/component/workspace-card';
 import ConceptSetActionsPage from 'app/page/conceptset-actions-page';
 import ConceptSetPage from 'app/page/conceptset-page';
-import {SaveOption} from 'app/page/conceptset-save-modal';
+import {SaveOption} from 'app/modal/conceptset-save-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {LinkText, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';

@@ -1,7 +1,6 @@
 import RadioButton from 'app/element/radiobutton';
 import Textbox from 'app/element/textbox';
 import {Page} from 'puppeteer';
-import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 import {Language, LinkText} from 'app/text-labels';
 import Modal from './modal';
 
@@ -11,16 +10,9 @@ export default class ExportToNotebookModal extends Modal {
     super(page, xpath);
   }
 
-  async waitForLoad(): Promise<this> {
-    try {
-      await super.waitForLoad();
-      await (this.getNotebookNameInput()).asElementHandle();
-    } catch (e) {
-      await savePageToFile(this.page);
-      await takeScreenshot(this.page);
-      throw new Error(`ExportToNotebookModal waitForLoad() encountered ${e}`);
-    }
-    return this;
+  async isLoaded(): Promise<boolean> {
+    await (this.getNotebookNameInput()).asElementHandle();
+    return true;
   }
 
   getNotebookNameInput(): Textbox {

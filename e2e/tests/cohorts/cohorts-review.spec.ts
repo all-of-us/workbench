@@ -3,15 +3,15 @@ import {MenuOption, LinkText, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import CohortParticipantDetailPage from 'app/page/cohort-participant-detail-page';
-import CohortReviewModal from 'app/page/cohort-review-modal';
+import CohortReviewModal from 'app/modal/cohort-review-modal';
 import CohortReviewPage from 'app/page/cohort-review-page';
 import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 import {getPropValue} from 'utils/element-utils';
 import SidebarContent, {ReviewStatus} from 'app/component/sidebar-content';
-import AnnotationFieldModal, {AnnotationType} from 'app/component/annotation-field-modal';
-import EditDeleteAnnotationsModal from 'app/component/edit-delete-annotations-modal'
+import AnnotationFieldModal, {AnnotationType} from 'app/modal/annotation-field-modal';
+import EditDeleteAnnotationsModal from 'app/modal/edit-delete-annotations-modal'
 
 
 describe('Cohort review tests', () => {
@@ -42,6 +42,7 @@ describe('Cohort review tests', () => {
 
     await cohortCard.selectSnowmanMenu(MenuOption.Review, {waitForNav: true});
     const modal = new CohortReviewModal(page);
+    await modal.waitForLoad();
     await modal.fillInNumberOfPartcipants(reviewSetNumberOfParticipants);
     await modal.clickButton(LinkText.CreateSet);
     console.log(`Created Review Set with ${reviewSetNumberOfParticipants} participants.`);

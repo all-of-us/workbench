@@ -1,6 +1,5 @@
 import {Page} from 'puppeteer';
 import DataResourceCard from 'app/component/data-resource-card';
-import Modal from 'app/component/modal';
 import Link from 'app/element/link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
@@ -10,9 +9,10 @@ import {ElementType} from 'app/xpath-options';
 import {waitForAttributeEquality, waitWhileLoading} from 'utils/waits-utils';
 import SnowmanMenu from 'app/component/snowman-menu';
 import {getPropValue} from 'utils/element-utils';
+import Modal from 'app/modal/modal';
 import AuthenticatedPage from './authenticated-page';
 import BaseElement from 'app/element/base-element';
-import ShareModal from 'app/component/share-modal';
+import ShareModal from 'app/modal/share-modal';
 
 export const UseFreeCredits = 'Use All of Us free credits';
 

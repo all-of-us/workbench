@@ -1,11 +1,10 @@
 import {Page} from 'puppeteer';
-
 import Button from 'app/element/button';
-import Modal from 'app/component/modal';
-import {waitWhileLoading} from 'utils/waits-utils';
 import {ElementType} from 'app/xpath-options';
 import {LinkText} from 'app/text-labels';
 import Checkbox from 'app/element/checkbox';
+import {waitForText} from 'utils/waits-utils';
+import Modal from './modal';
 
 const LabelAlias = {
     WILL_USE_OLD_CDR_VERSION: 'I will use this workspace to complete an existing study or replicate a previous study.',
@@ -33,7 +32,8 @@ export default class OldCdrVersionModal extends Modal {
     async isLoaded(): Promise<boolean> {
       const xpath = '//*[@data-test-id="old-cdr-version-modal"]';
       await this.page.waitForXPath(xpath, {visible: true});
-      await waitWhileLoading(this.page);
+      const modalTitle = 'You have selected an older version of the dataset';
+      await waitForText(this.page, modalTitle, {xpath: this.getXpath()});
       return true;
     }
 
@@ -53,8 +53,6 @@ export default class OldCdrVersionModal extends Modal {
      * if the CDR Version is not the default, consent to the necessary restrictions in the modal which appears
      */
     async consentToOldCdrRestrictions() {
-        await this.isLoaded()
-
         // can't continue yet - user has not yet consented
         const continueButton: Button = await this.getContinueButton();
         expect(await continueButton.isCursorNotAllowed()).toBe(true);

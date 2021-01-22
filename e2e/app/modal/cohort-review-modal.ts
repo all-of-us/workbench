@@ -1,7 +1,7 @@
 import {Page} from 'puppeteer';
-import Modal from 'app/component/modal';
-import {waitForText, waitWhileLoading} from 'utils/waits-utils';
+import {waitForText} from 'utils/waits-utils';
 import InputNumber from 'app/element/input-number';
+import Modal from './modal';
 
 const title = 'Create Review Set';
 
@@ -12,11 +12,7 @@ export default class CohortReviewModal extends Modal {
   }
 
   async isLoaded(): Promise<boolean> {
-    const titleXpath = `${this.getXpath()}/div[normalize-space()="${title}"]`;
-    await Promise.all([
-      waitForText(this.page, titleXpath),
-      waitWhileLoading(this.page),
-    ]);
+    await waitForText(this.page, title, {xpath: this.getXpath()});
     return true;
   }
 

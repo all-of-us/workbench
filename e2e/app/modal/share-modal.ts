@@ -1,14 +1,21 @@
 import {ElementHandle, Page} from 'puppeteer';
 import {LinkText, WorkspaceAccessLevel} from 'app/text-labels';
-import Modal from 'app/component/modal';
 import Textbox from 'app/element/textbox';
 import ClrIcon from 'app/element/clr-icon-link';
+import {waitForText} from 'utils/waits-utils';
+import Modal from './modal';
 
+const modalText = 'share this workspace';
 
 export default class ShareModal extends Modal {
 
   constructor(page: Page, xpath?: string) {
     super(page, xpath);
+  }
+
+  async isLoaded(): Promise<boolean> {
+    await waitForText(this.page, modalText, {xpath: this.getXpath()});
+    return true;
   }
 
   async shareWithUser(username: string, level: WorkspaceAccessLevel): Promise<void> {

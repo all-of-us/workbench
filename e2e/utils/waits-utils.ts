@@ -230,7 +230,7 @@ export async function waitForText(page: Page,
                                   timeout?: number): Promise<boolean> {
   if (selector.css !== undefined) {
     try {
-         // wait for visible then compare texts
+      // wait for visible then compare texts
       await page.waitForSelector(selector.css, {visible: true, timeout});
       const jsHandle = await page.waitForFunction((css, expText) => {
         const element = document.querySelector(css);
@@ -241,7 +241,8 @@ export async function waitForText(page: Page,
       console.error(`Wait for element matching CSS=${selector.css} contains "${textSubstr}" text failed. ${e}`);
       throw e;
     }
-  } else {
+  }
+  if (selector.xpath !== undefined) {
     try {
       await page.waitForXPath(selector.xpath, {visible: true, timeout});
       const jsHandle = await page.waitForFunction((xpath, expText) => {
@@ -254,6 +255,7 @@ export async function waitForText(page: Page,
       throw e;
     }
   }
+  throw new Error('xpath or css is required');
 }
 
 /**

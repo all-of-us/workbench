@@ -1,14 +1,20 @@
-import Modal from 'app/component/modal';
 import Textbox from 'app/element/textbox';
 import {LinkText} from 'app/text-labels';
 import {ElementHandle, Page} from 'puppeteer';
-import {waitWhileLoading} from 'utils/waits-utils';
+import {waitForText, waitWhileLoading} from 'utils/waits-utils';
+import Modal from './modal';
 
+const modalTitle = 'Copy to Workspace';
 
-export default class CopyModal extends Modal {
+export default class CopyToWorkspaceModal extends Modal {
 
   constructor(page: Page, xpath?: string) {
     super(page, xpath);
+  }
+
+  async isLoaded(): Promise<boolean> {
+    await waitForText(this.page, modalTitle, {xpath: this.getXpath()});
+    return true;
   }
 
   async getDestinationTextbox(): Promise<Textbox> {

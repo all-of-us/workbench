@@ -1,7 +1,7 @@
 import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
 import Link from 'app/element/link';
 import ConceptSetActionsPage from 'app/page/conceptset-actions-page';
-import {SaveOption} from 'app/page/conceptset-save-modal';
+import {SaveOption} from 'app/modal/conceptset-save-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {ResourceCard} from 'app/text-labels';
 import {makeRandomName, makeString} from 'utils/str-utils';

@@ -4,7 +4,7 @@ import {config} from 'resources/workbench-config';
 import {MenuOption} from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import {makeWorkspaceName} from 'utils/str-utils';
-import OldCdrVersionModal from 'app/page/old-cdr-version-modal';
+import OldCdrVersionModal from 'app/modal/old-cdr-version-modal';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 
 describe('OldCdrVersion Modal restrictions', () => {

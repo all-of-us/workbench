@@ -42,7 +42,7 @@ export default class Select extends BaseElement {
   async getOptionValue(option: string): Promise<string> {
     // Returns option texts. No matter if option was selected or not.
     const selector = `${this.xpath}/option[@value="${option}"]`;
-    const displayedValue = await this.page.waitForXPath(selector);
+    const displayedValue = await this.page.waitForXPath(selector, {visible: true});
     return getPropValue<string>(displayedValue, 'innerText');
   }
 
@@ -50,7 +50,7 @@ export default class Select extends BaseElement {
    *
    */
   async getSelectedValue(): Promise<string> {
-    const selectedValue = await this.page.waitForXPath(`${this.getXpath()}/label`);
+    const selectedValue = await this.page.waitForXPath(`${this.getXpath()}/label`, {visible: true});
     const baseElement = await BaseElement.asBaseElement(this.page, selectedValue);
     return await baseElement.getTextContent();
   }

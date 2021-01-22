@@ -1,5 +1,5 @@
 import DataResourceCard from 'app/component/data-resource-card';
-import ExportToNotebookModal from 'app/component/export-to-notebook-modal';
+import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {MenuOption, ResourceCard} from 'app/text-labels';

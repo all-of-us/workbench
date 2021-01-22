@@ -1,5 +1,4 @@
 import {Page} from 'puppeteer';
-import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 import {waitForPropertyExists, waitForText, waitWhileLoading} from 'utils/waits-utils';
 import RadioButton from 'app/element/radiobutton';
 import {Language, LinkText} from 'app/text-labels';
@@ -17,16 +16,9 @@ export default class NewNotebookModal extends Modal {
     super(page, xpath);
   }
 
-  async waitForLoad(): Promise<this> {
-    try {
-      await super.waitForLoad();
-      await waitForText(this.page, modalTitle, {xpath: this.getXpath()});
-    } catch (e) {
-      await savePageToFile(this.page);
-      await takeScreenshot(this.page);
-      throw new Error(`NewNotebookModal waitForLoad() encountered ${e}`);
-    }
-    return this;
+  async isLoaded(): Promise<boolean> {
+    await waitForText(this.page, modalTitle, {xpath: this.getXpath()});
+    return true;
   }
 
   /**
