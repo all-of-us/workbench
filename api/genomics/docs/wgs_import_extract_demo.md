@@ -29,6 +29,7 @@ reproducability but note that the source for these files will probably change ov
 1. Create cohort table of sample to extract (argument for --fq_cohort_sample_names in next step)
 	- `bq mk --table wgs_demo_1.cohort sample_id:INTEGER,sample_name:STRING`
 	- `echo '{"sample_id":97461, "sample_name":"NA12878"}' | bq insert wgs_demo_1.cohort`
+	- Alternatively, you can create and upload from a CSV file in a single step with the following command. `bq load --source_format=CSV all-of-us-workbench-test:wgs_demo_6.cohort sample_map_6.txt sample_id:INTEGER,sample_name:STRING` The sample_map file passed into ImportGenomes will work as the CSV.
 	- I used `cohort` as my table name but it can be anything as long as you adjust it in the following steps
 
 2. Create an empty dataset for the next step. I used `wgs_demo_1_temp_tables`
