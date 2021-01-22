@@ -386,6 +386,10 @@ commands:
 #        JOBS
 # -------------------------
 jobs:
+  sleep-2m:
+    steps:
+      - run: sleep 120
+
   api-unit-test:
     parallelism: 4
     executor: workbench-executor
@@ -675,10 +679,13 @@ workflows:
           env_name: "test"
           <<: *filter-master-branch
           requires:
-            - api-deploy-to-test
-            - ui-deploy-to-test
+            - sleep-1m
           post-steps:
             - gcs-load-test-results
+      - sleep-2m:
+          requires:
+            - api-deploy-to-test
+            - ui-deploy-to-test
 
   deploy-staging:
     jobs:
