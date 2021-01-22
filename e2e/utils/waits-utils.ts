@@ -39,7 +39,7 @@ export async function waitForDocumentTitle(page: Page, titleSubstr: string): Pro
     const jsHandle = await page.waitForFunction(t => {
       const actualTitle = document.title;
       return actualTitle.includes(t);
-    }, {timeout: 60000}, titleSubstr);
+    }, {timeout: 10 * 60 * 1000}, titleSubstr);
     return (await jsHandle.jsonValue()) as boolean;
   } catch (e) {
     console.error(`waitForDocumentTitle contains "${titleSubstr}" failed. ${e}`);

@@ -29,7 +29,7 @@ export default abstract class BaseMenu extends Container {
          selections = [...menuSelections];
       }
 
-      // Wait for top-level menu dropdown open and has visible menu items.
+      // Wait for top-level menu dropdown open.
       await this.waitUntilVisible();
 
       // Iterate orderly.
@@ -82,6 +82,7 @@ export default abstract class BaseMenu extends Container {
       const menuItemSelector = `${menuParentXpath}${this.getMenuItemXpath(menuItemText)}`;
       const link = new Link(this.page, menuItemSelector);
       await link.focus();
+      await this.page.waitForTimeout(200);
       return link;
    }
 
