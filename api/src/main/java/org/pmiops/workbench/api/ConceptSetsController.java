@@ -9,7 +9,6 @@ import javax.inject.Provider;
 import org.apache.commons.collections4.CollectionUtils;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -18,7 +17,6 @@ import org.pmiops.workbench.model.ConceptSetListResponse;
 import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.Surveys;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -87,20 +85,6 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
 
     List<ConceptSet> conceptSets =
         conceptSetService.findByWorkspaceId(workspace.getWorkspaceId()).stream()
-            .sorted(Comparator.comparing(ConceptSet::getName))
-            .collect(Collectors.toList());
-    return ResponseEntity.ok(new ConceptSetListResponse().items(conceptSets));
-  }
-
-  @Override
-  public ResponseEntity<ConceptSetListResponse> getSurveyConceptSetsInWorkspace(
-      String workspaceNamespace, String workspaceId, String surveyName) {
-    DbWorkspace workspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    short surveyId = DbStorageEnums.surveysToStorage(Surveys.fromValue(surveyName.toUpperCase()));
-    List<ConceptSet> conceptSets =
-        conceptSetService.findByWorkspaceIdAndSurvey(workspace.getWorkspaceId(), surveyId).stream()
             .sorted(Comparator.comparing(ConceptSet::getName))
             .collect(Collectors.toList());
     return ResponseEntity.ok(new ConceptSetListResponse().items(conceptSets));

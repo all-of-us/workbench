@@ -215,12 +215,6 @@ public class ConceptSetService {
         .collect(Collectors.toList());
   }
 
-  public List<ConceptSet> findByWorkspaceIdAndSurvey(long workspaceId, short surveyId) {
-    return conceptSetDao.findByWorkspaceIdAndSurvey(workspaceId, surveyId).stream()
-        .map(conceptSetMapper::dbModelToClient)
-        .collect(Collectors.toList());
-  }
-
   @Transactional
   public DbConceptSet cloneConceptSetAndConceptIds(
       DbConceptSet dbConceptSet, DbWorkspace targetWorkspace, boolean cdrVersionChanged) {

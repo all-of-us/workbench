@@ -12,8 +12,6 @@ public interface ConceptSetDao extends CrudRepository<DbConceptSet, Long> {
 
   List<DbConceptSet> findByWorkspaceId(long workspaceId);
 
-  List<DbConceptSet> findByWorkspaceIdAndSurvey(long workspaceId, short surveyId);
-
   /** Returns the concept set in the workspace with the specified name, or null if there is none. */
   DbConceptSet findConceptSetByNameAndWorkspaceId(String name, long workspaceId);
 
