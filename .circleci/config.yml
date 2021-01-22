@@ -680,7 +680,7 @@ workflows:
           env_name: "test"
           <<: *filter-master-branch
           requires:
-            - sleep-1m
+            - sleep-2m
           post-steps:
             - gcs-load-test-results
       - sleep-2m:
