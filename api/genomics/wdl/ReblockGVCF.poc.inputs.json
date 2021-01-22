@@ -1,0 +1,6 @@
+{
+    // Pulled from gs://broad-public-datasets/NA12878/NA12878.g.vcf.gz
+    "ReblockGVCF.gvcf": "gs://fc-66b79f35-e7e8-4b0f-b8e8-ab57c9ce98ff/NA12878.g.vcf.gz",
+    // Pulled from gs://broad-public-datasets/NA12878/NA12878.g.vcf.gz.tbi
+    "ReblockGVCF.gvcf_index": "gs://fc-66b79f35-e7e8-4b0f-b8e8-ab57c9ce98ff/NA12878.g.vcf.gz.tbi" 
+}

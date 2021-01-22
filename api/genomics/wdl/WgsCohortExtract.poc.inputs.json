@@ -1,0 +1,20 @@
+{
+    "WgsCohortExtract.SplitIntervals.gatk_override": "gs://all-of-us-workbench-test-genomics/wgs/gatk-package-4.1.8.1-156-g704cd24-SNAPSHOT-local.jar",
+
+    "WgsCohortExtract.fq_cohort_extract_table": "all-of-us-workbench-test.wgs_demo_1.cohort_extract",
+    "WgsCohortExtract.fq_sample_table": "all-of-us-workbench-test.wgs_demo_1.metadata",
+
+    "WgsCohortExtract.gatk_override": "gs://all-of-us-workbench-test-genomics/wgs/gatk-package-4.1.8.1-156-g704cd24-SNAPSHOT-local.jar",
+
+    // I think this can be anything
+    "WgsCohortExtract.output_file_base_name": "wgs_demo_1_extracted",
+
+    // GCP project where extract will run
+    "WgsCohortExtract.query_project": "all-of-us-workbench-test",
+
+    // Pulled from public data repo
+    "WgsCohortExtract.reference": "gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta",
+    "WgsCohortExtract.reference_dict": "gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.dict",
+    "WgsCohortExtract.reference_index": "gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.fai",
+    "WgsCohortExtract.wgs_intervals": "gs://gcp-public-data--broad-references/hg38/v0/wgs_calling_regions.hg38.interval_list"
+}
