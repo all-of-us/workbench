@@ -17,7 +17,9 @@ import {
   attributesSelectionStore,
   currentCohortCriteriaStore,
   currentCohortSearchContextStore,
+  currentCohortStore,
   setSidebarActiveIconStore,
+  urlParamsStore,
 } from 'app/utils/navigation';
 import {CriteriaType, Domain, TemporalMention, TemporalTime} from 'generated/fetch';
 
@@ -223,8 +225,15 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     }
     selections = [...selections, param];
     currentCohortCriteriaStore.next(selections);
+    const {wsid} = urlParamsStore.getValue();
+    const cohort = currentCohortStore.getValue();
     cohortContext.item.searchParameters = selections;
-    localStorage.setItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT, JSON.stringify(cohortContext));
+    const localStorageContext = {
+      workspaceId: wsid,
+      cohortId: !!cohort ? cohort.id : null,
+      cohortContext
+    };
+    localStorage.setItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT, JSON.stringify(localStorageContext));
     this.setState({selections, selectedIds});
     this.growl.show({severity: 'success', detail: 'Criteria Added', closable: false, life: 2000});
     if (!!this.growlTimer) {

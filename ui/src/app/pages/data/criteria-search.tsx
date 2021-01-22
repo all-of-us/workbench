@@ -15,7 +15,7 @@ import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {
   attributesSelectionStore,
-  currentCohortCriteriaStore,
+  currentCohortCriteriaStore, currentCohortStore,
   currentConceptStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
@@ -239,7 +239,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
   }
 
   addSelection = (selectCriteria)  => {
-    const {cohortContext, cohortContext: {source}} = this.props;
+    const {cohortContext, cohortContext: {source}, urlParams} = this.props;
     // In case of Criteria/Cohort, close existing attribute sidebar before selecting a new value
     if (!this.isConcept && !!attributesSelectionStore.getValue()) {
       this.closeSidebar();
@@ -252,8 +252,15 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
     }
     // Save selections in local storage in case of error or page refresh
     if (source === 'cohort') {
+      const {wsid} = urlParams;
+      const cohort = currentCohortStore.getValue();
       cohortContext.item.searchParameters = criteriaList;
-      localStorage.setItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT, JSON.stringify(cohortContext));
+      const localStorageContext = {
+        workspaceId: wsid,
+        cohortId: !!cohort ? cohort.id : null,
+        cohortContext
+      };
+      localStorage.setItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT, JSON.stringify(localStorageContext));
     } else {
       localStorage.setItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS, JSON.stringify(criteriaList));
     }

@@ -86,7 +86,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
       this.state = {
         loading: false,
         overview: false,
-        criteria: {includes: [], excludes: [], dataFilters: []},
+        criteria: {dataFilters: [], includes: [], excludes: []},
         updateCount: 0,
         cohort: undefined,
         cohortError: false,
@@ -101,40 +101,11 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
     }
 
     componentDidMount() {
-      const {workspace: {id, namespace}} = this.props;
-      this.subscription = queryParamsStore.subscribe(params => {
-        const existingSearchRequest = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST));
-        /* If a cohort id is given in the route, we initialize state with it */
-        const {cohortId} = params;
-        if (cohortId) {
-          this.setState({loading: true});
-          cohortsApi().getCohort(namespace, id, cohortId)
-          .then(cohort => {
-            this.setState({cohort, loading: false});
-            currentCohortStore.next(cohort);
-            if (existingSearchRequest) {
-              searchRequestStore.next(existingSearchRequest);
-            } else if (cohort.criteria) {
-              searchRequestStore.next(parseCohortDefinition(cohort.criteria));
-            }
-          })
-          .catch(error => {
-            console.error(error);
-            this.setState({cohortError: true, loading: false});
-          });
-        } else {
-          this.setState(
-            {cohort: {criteria: `{'includes':[],'excludes':[],'dataFilters':[]}`, name: '', type: ''}},
-            () => {
-              if (existingSearchRequest) {
-                searchRequestStore.next(existingSearchRequest);
-              }
-            }
-          );
-        }
-      });
+      const {workspace: {id}} = this.props;
+      this.subscription = queryParamsStore.subscribe(params => this.initCohort(params.cohortId));
       this.subscription.add(searchRequestStore.subscribe(searchRequest => {
-        const cohortChanged = !!this.state.cohort && this.state.cohort.criteria !== JSON.stringify(mapRequest(searchRequest));
+        const {cohort} = this.state;
+        const cohortChanged = !!cohort && cohort.criteria !== JSON.stringify(mapRequest(searchRequest));
         this.props.setCohortChanged(cohortChanged);
         this.setState({
           criteria: searchRequest,
@@ -142,12 +113,19 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
           cohortChanged,
           updateGroupListsCount: this.state.updateGroupListsCount + 1
         });
-        localStorage.setItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST, JSON.stringify(searchRequest));
+        const localStorageCohort = {
+          workspaceId: id,
+          cohortId: !!cohort ? cohort.id : null,
+          searchRequest
+        };
+        localStorage.setItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST, JSON.stringify(localStorageCohort));
       }));
       this.props.setShowWarningModal(this.showWarningModal);
-      const existingContext = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT));
-      if (existingContext) {
-        this.setSearchContext(existingContext);
+    }
+
+    componentDidUpdate(prevProps: Readonly<Props>) {
+      if (prevProps.cohortContext && !this.props.cohortContext) {
+        this.props.setUnsavedSelections(false);
       }
     }
 
@@ -158,6 +136,43 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
       currentCohortSearchContextStore.next(undefined);
       searchRequestStore.next({includes: [], excludes: [], dataFilters: []} as SearchRequest);
       localStorage.removeItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST);
+    }
+
+    initCohort(cid: number) {
+      const {workspace: {id, namespace}} = this.props;
+      const existingCohort = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST));
+      const existingContext = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT));
+      /* If a cohort id is given in the route, we initialize state with it */
+      if (cid) {
+        this.setState({loading: true});
+        cohortsApi().getCohort(namespace, id, cid).then(cohort => {
+          this.setState({cohort, loading: false});
+          currentCohortStore.next(cohort);
+          if (existingCohort && existingCohort.workspaceId === id && existingCohort.cohortId === +cid) {
+            searchRequestStore.next(existingCohort.searchRequest);
+          } else if (cohort.criteria) {
+            searchRequestStore.next(parseCohortDefinition(cohort.criteria));
+          }
+        }).catch(error => {
+          console.error(error);
+          this.setState({cohortError: true, loading: false});
+        });
+      } else {
+        this.setState(
+          {cohort: {criteria: `{'includes':[],'excludes':[],'dataFilters':[]}`, name: '', type: ''}},
+          () => {
+            if (existingCohort && existingCohort.workspaceId === id) {
+              searchRequestStore.next(existingCohort.searchRequest);
+            }
+          }
+        );
+      }
+      if (existingContext) {
+        const {workspaceId, cohortId, cohortContext} = existingContext;
+        if (workspaceId === id && (!cid || +cid === cohortId)) {
+          this.setSearchContext(cohortContext);
+        }
+      }
     }
 
     async showWarningModal() {
