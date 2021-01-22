@@ -35,7 +35,6 @@ public class DbConceptSet {
   private DbUser creator;
   private Timestamp creationTime;
   private Timestamp lastModifiedTime;
-  private int participantCount;
   private Set<DbConceptSetConceptId> dbConceptSetConceptIds = new HashSet<>();
 
   public DbConceptSet() {
@@ -51,8 +50,7 @@ public class DbConceptSet {
       long workspaceId,
       DbUser creator,
       Timestamp creationTime,
-      Timestamp lastModifiedTime,
-      int participantCount) {
+      Timestamp lastModifiedTime) {
     setVersion(version);
     setName(name);
     setDomain(domain);
@@ -62,7 +60,6 @@ public class DbConceptSet {
     setCreator(creator);
     setCreationTime(creationTime);
     setLastModifiedTime(lastModifiedTime);
-    setParticipantCount(participantCount);
   }
 
   public DbConceptSet(DbConceptSet cs) {
@@ -75,7 +72,6 @@ public class DbConceptSet {
     setWorkspaceId(cs.getWorkspaceId());
     setCreationTime(cs.getCreationTime());
     setLastModifiedTime(cs.getLastModifiedTime());
-    setParticipantCount(cs.getParticipantCount());
     setConceptSetConceptIds(new HashSet<>(cs.getConceptSetConceptIds()));
   }
 
@@ -191,15 +187,6 @@ public class DbConceptSet {
     this.lastModifiedTime = lastModifiedTime;
   }
 
-  @Column(name = "participant_count")
-  public int getParticipantCount() {
-    return participantCount;
-  }
-
-  public void setParticipantCount(int participantCount) {
-    this.participantCount = participantCount;
-  }
-
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
       name = "concept_set_concept_id",
@@ -225,7 +212,6 @@ public class DbConceptSet {
     return version == that.version
         && domain == that.domain
         && workspaceId == that.workspaceId
-        && participantCount == that.participantCount
         && Objects.equals(name, that.name)
         && Objects.equals(survey, that.survey)
         && Objects.equals(description, that.description)
@@ -247,7 +233,6 @@ public class DbConceptSet {
         creator,
         creationTime,
         lastModifiedTime,
-        participantCount,
         dbConceptSetConceptIds);
   }
 }

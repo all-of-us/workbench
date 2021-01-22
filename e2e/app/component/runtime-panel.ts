@@ -1,12 +1,11 @@
-import Container from 'app/container';
-import {LinkText} from 'app/text-labels';
-import Button from 'app/element/button';
-import {Page} from 'puppeteer';
-import {waitForAttributeEquality, waitWhileLoading} from 'utils/waits-utils';
-import PrimereactInputNumber from 'app/element/primereact-input-number';
 import SelectMenu from 'app/component/select-menu';
+import Container from 'app/container';
+import Button from 'app/element/button';
+import PrimereactInputNumber from 'app/element/primereact-input-number';
+import {LinkText} from 'app/text-labels';
+import {Page} from 'puppeteer';
 import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
-import BaseElement from 'app/element/base-element';
+import {waitForAttributeEquality, waitWhileLoading} from 'utils/waits-utils';
 
 const defaultXpath = '//*[@id="runtime-panel"]';
 const statusIconXpath = '//*[@data-test-id="runtime-status-icon"]';
@@ -67,7 +66,7 @@ export default class RuntimePanel extends Container {
 
   async pickCpus(cpus: number): Promise<void> {
     const cpusDropdown = await SelectMenu.findByName(this.page, {id: 'runtime-cpu'});
-    return await cpusDropdown.clickMenuItem(cpus.toString());
+    return await cpusDropdown.select(cpus.toString());
   }
 
   async getCpus(): Promise<string> {
@@ -77,7 +76,7 @@ export default class RuntimePanel extends Container {
 
   async pickRamGbs(ramGbs: number): Promise<void> {
     const ramDropdown = await SelectMenu.findByName(this.page, {id: 'runtime-ram'});
-    return await ramDropdown.clickMenuItem(ramGbs.toString());
+    return await ramDropdown.select(ramGbs.toString());
   }
 
   async getRamGbs(): Promise<string> {
@@ -97,7 +96,7 @@ export default class RuntimePanel extends Container {
 
   async pickComputeType(computeType: ComputeType): Promise<void> {
     const computeTypeDropdown = await SelectMenu.findByName(this.page, {id: 'runtime-compute'});
-    return await computeTypeDropdown.clickMenuItem(computeType);
+    return await computeTypeDropdown.select(computeType);
   }
 
   async pickDataprocNumWorkers(numWorkers: number): Promise<void> {
@@ -122,7 +121,7 @@ export default class RuntimePanel extends Container {
 
   async pickWorkerCpus(workerCpus: number): Promise<void> {
     const workerCpusDropdown = await SelectMenu.findByName(this.page, {id: 'worker-cpu'});
-    return await workerCpusDropdown.clickMenuItem(workerCpus.toString());
+    return await workerCpusDropdown.select(workerCpus.toString());
   }
 
   async getWorkerCpus(): Promise<string> {
@@ -132,7 +131,7 @@ export default class RuntimePanel extends Container {
 
   async pickWorkerRamGbs(workerRamGbs: number): Promise<void> {
     const workerRamDropdown = await SelectMenu.findByName(this.page, {id: 'worker-ram'});
-    return await workerRamDropdown.clickMenuItem(workerRamGbs.toString());
+    return await workerRamDropdown.select(workerRamGbs.toString());
   }
 
   async getWorkerRamGbs(): Promise<string> {
@@ -152,7 +151,7 @@ export default class RuntimePanel extends Container {
 
   async pickRuntimePreset(runtimePreset: RuntimePreset): Promise<void> {
     const runtimePresetMenu = await SelectMenu.findByName(this.page, {id: 'runtime-presets-menu'});
-    return await runtimePresetMenu.clickMenuItem(runtimePreset);
+    return await runtimePresetMenu.select(runtimePreset);
   }
 
   buildStatusIconSrc = (startStopIconState: StartStopIconState) => {
@@ -165,13 +164,22 @@ export default class RuntimePanel extends Container {
         {xpath: statusIconXpath},
         'src',
         this.buildStatusIconSrc(startStopIconState),
-        300000
+        // Wait up to 20 minutes before timing out here. We expect runtime changes to be quite
+        // slow, so we want to give a generous amount of time before failing the test.
+        20 * 60 * 1000
     )
   }
 
   async clickStatusIcon(): Promise<void> {
-    const startStopIconElement = BaseElement.asBaseElement(page, await this.page.waitForXPath(statusIconXpath));
-    return await startStopIconElement.click();
+    const icon = await this.page.waitForXPath(statusIconXpath, {visible: true});
+
+    // Oddly, though the element is visible it is sometimes unclickable at this point.
+    // This *may* be because the click target is an image, which may or may not be loaded yet.
+    // Sleeping here is a hacky workaround found after attempting several approaches.
+    await this.page.waitForTimeout(1000);
+
+    await icon.focus();
+    await icon.click();
   }
 
   async waitForLoad(): Promise<this> {

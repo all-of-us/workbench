@@ -43,6 +43,7 @@ interactions visible to you.
 * Run all tests in parallel **in headless Chrome** on deployed AoU "test" environment <div class="text-blue">`yarn test`</div>
 * Run one test on deployed AoU "test" environment <div class="text-blue">`yarn test:debug [TEST_FILE]` </div>
 * Run one test on your local server <div class="text-blue">`yarn test-local [TEST_FILE]` </div>
+* Run tests against a local UI and API server `yarn test-local-devup`
 * Run one test in headless Chrome with node `--inspect-brk` argument. It pauses test playback at breakpoints which is useful for debugging or/and writing new tests <div class="text-blue">`yarn test:debugTest [TEST_FILE]` </div>
   * Navigate to `chrome://inspect` after launching the tests to debug test code
 * If you don't want to use the `.env` file, you can also specify `USER_NAME` and `PASSWORD` as environment variables. <div class="text-blue">`USER_NAME=<YOUR_USERID> PASSWORD=<YOUR_USER_PASSWORD> yarn test-local tests/user/login.spec.ts`</div>
@@ -74,7 +75,7 @@ on the page) and then ensuring that the desired page has loaded.
 
 Example:
 ```   
-await signIn(page);
+await signInWithAccessToken(page);
 await navigation.navMenu(page, NavLink.PROFILE);
 profilePage = new ProfilePage(page);
 await profilePage.waitForLoad();

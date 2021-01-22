@@ -1,6 +1,6 @@
 package org.pmiops.workbench.api;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
@@ -128,7 +128,7 @@ public class CohortAnnotationDefinitionControllerTest {
           NAMESPACE, NAME, 0L, new CohortAnnotationDefinition().columnName("column_name"));
       fail("Should have thrown a NotFoundException!");
     } catch (NotFoundException e) {
-      assertEquals("Not Found: No Cohort exists for cohortId: " + 0L, e.getMessage());
+      assertThat(e.getMessage()).isEqualTo("Not Found: No Cohort exists for cohortId: " + 0L);
     }
   }
 
@@ -151,10 +151,10 @@ public class CohortAnnotationDefinitionControllerTest {
           NAMESPACE, NAME, cohort.getCohortId(), request);
       fail("Should have thrown a ConflictException!");
     } catch (ConflictException e) {
-      assertEquals(
-          "Conflict: Cohort Annotation Definition name exists for: "
-              + dbCohortAnnotationDefinition.getColumnName(),
-          e.getMessage());
+      assertThat(e.getMessage())
+          .isEqualTo(
+              "Conflict: Cohort Annotation Definition name exists for: "
+                  + dbCohortAnnotationDefinition.getColumnName());
     }
   }
 
@@ -182,7 +182,7 @@ public class CohortAnnotationDefinitionControllerTest {
             .annotationType(AnnotationType.STRING)
             .enumValues(new ArrayList<>())
             .etag(Etags.fromVersion(0));
-    assertEquals(expectedResponse, response);
+    assertThat(response).isEqualTo(expectedResponse);
   }
 
   @Test
@@ -210,7 +210,7 @@ public class CohortAnnotationDefinitionControllerTest {
             .annotationType(AnnotationType.ENUM)
             .enumValues(enumValues)
             .etag(Etags.fromVersion(0));
-    assertEquals(expectedResponse, response);
+    assertThat(response).isEqualTo(expectedResponse);
   }
 
   @Test
@@ -228,7 +228,7 @@ public class CohortAnnotationDefinitionControllerTest {
           request);
       fail("Should have thrown a NotFoundException!");
     } catch (NotFoundException e) {
-      assertEquals("Not Found: No Cohort exists for cohortId: " + 99L, e.getMessage());
+      assertThat(e.getMessage()).isEqualTo("Not Found: No Cohort exists for cohortId: " + 99L);
     }
   }
 
@@ -243,9 +243,10 @@ public class CohortAnnotationDefinitionControllerTest {
           NAMESPACE, NAME, cohort.getCohortId(), 99L, request);
       fail("Should have thrown a NotFoundException!");
     } catch (NotFoundException e) {
-      assertEquals(
-          "Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: " + 99L,
-          e.getMessage());
+      assertThat(e.getMessage())
+          .isEqualTo(
+              "Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: "
+                  + 99L);
     }
   }
 
@@ -267,9 +268,9 @@ public class CohortAnnotationDefinitionControllerTest {
           request);
       fail("Should have thrown a ConflictException!");
     } catch (ConflictException e) {
-      assertEquals(
-          "Conflict: Cohort Annotation Definition name exists for: " + EXISTING_COLUMN_NAME,
-          e.getMessage());
+      assertThat(e.getMessage())
+          .isEqualTo(
+              "Conflict: Cohort Annotation Definition name exists for: " + EXISTING_COLUMN_NAME);
     }
   }
 
@@ -305,7 +306,7 @@ public class CohortAnnotationDefinitionControllerTest {
                 request)
             .getBody();
 
-    assertEquals(expectedResponse, responseDefinition);
+    assertThat(responseDefinition).isEqualTo(expectedResponse);
   }
 
   @Test
@@ -317,7 +318,7 @@ public class CohortAnnotationDefinitionControllerTest {
           NAMESPACE, NAME, 99L, dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId());
       fail("Should have thrown a NotFoundException!");
     } catch (NotFoundException e) {
-      assertEquals("Not Found: No Cohort exists for cohortId: " + 99L, e.getMessage());
+      assertThat(e.getMessage()).isEqualTo("Not Found: No Cohort exists for cohortId: " + 99L);
     }
   }
 
@@ -330,9 +331,10 @@ public class CohortAnnotationDefinitionControllerTest {
           NAMESPACE, NAME, cohort.getCohortId(), 99L);
       fail("Should have thrown a NotFoundException!");
     } catch (NotFoundException e) {
-      assertEquals(
-          "Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: " + 99L,
-          e.getMessage());
+      assertThat(e.getMessage())
+          .isEqualTo(
+              "Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: "
+                  + 99L);
     }
   }
 
@@ -349,7 +351,7 @@ public class CohortAnnotationDefinitionControllerTest {
                 dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId())
             .getBody();
 
-    assertEquals(new EmptyResponse(), response);
+    assertThat(response).isEqualTo(new EmptyResponse());
   }
 
   @Test
@@ -361,7 +363,7 @@ public class CohortAnnotationDefinitionControllerTest {
           NAMESPACE, NAME, 99L, dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId());
       fail("Should have thrown a NotFoundException!");
     } catch (NotFoundException e) {
-      assertEquals("Not Found: No Cohort exists for cohortId: " + 99L, e.getMessage());
+      assertThat(e.getMessage()).isEqualTo("Not Found: No Cohort exists for cohortId: " + 99L);
     }
   }
 
@@ -374,9 +376,10 @@ public class CohortAnnotationDefinitionControllerTest {
           NAMESPACE, NAME, cohort.getCohortId(), 99L);
       fail("Should have thrown a NotFoundException!");
     } catch (NotFoundException e) {
-      assertEquals(
-          "Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: " + 99L,
-          e.getMessage());
+      assertThat(e.getMessage())
+          .isEqualTo(
+              "Not Found: No Cohort Annotation Definition exists for annotationDefinitionId: "
+                  + 99L);
     }
   }
 
@@ -403,7 +406,7 @@ public class CohortAnnotationDefinitionControllerTest {
             .enumValues(new ArrayList<>())
             .etag(Etags.fromVersion(0));
 
-    assertEquals(expectedResponse, responseDefinition);
+    assertThat(responseDefinition).isEqualTo(expectedResponse);
   }
 
   @Test
@@ -414,7 +417,7 @@ public class CohortAnnotationDefinitionControllerTest {
       cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(NAMESPACE, NAME, 99L);
       fail("Should have thrown a NotFoundException!");
     } catch (NotFoundException e) {
-      assertEquals("Not Found: No Cohort exists for cohortId: " + 99L, e.getMessage());
+      assertThat(e.getMessage()).isEqualTo("Not Found: No Cohort exists for cohortId: " + 99L);
     }
   }
 
@@ -437,8 +440,8 @@ public class CohortAnnotationDefinitionControllerTest {
             .enumValues(new ArrayList<>())
             .etag(Etags.fromVersion(0));
 
-    assertEquals(1, responseDefinition.getItems().size());
-    assertEquals(expectedResponse, responseDefinition.getItems().get(0));
+    assertThat(responseDefinition.getItems().size()).isEqualTo(1);
+    assertThat(responseDefinition.getItems().get(0)).isEqualTo(expectedResponse);
   }
 
   private void setupWorkspaceServiceMock() {

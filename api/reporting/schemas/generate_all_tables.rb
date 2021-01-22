@@ -1,7 +1,18 @@
 #!/usr/bin/ruby
+#
+# A wrapper script to call reporting-wizard repeatedly on all Workbench MySQL tables. This will send
+# generated files to a specified output directory. Typically, output is sent to a scratch space
+# and then files / snippets are manually copied to the right target location (e.g. Swagger schema
+# files, Java code, or JSON schema files in workbench-terraform-modules).
+#
+# Example invocation:
+#
+# > cd workbench/api/reporting/schemas
+# > ruby generate_all_tables.rb ./input /tmp/reporting-output
+# > cat /tmp/reporting-output/big_query_json/workspace.json
+#
 require 'open3'
 
-# Ugly wrapper script for reporting-wizard.rb. Just use all the files in the csv directory
 input_dir = File.expand_path(ARGV[0])
 describe_csv_dir = File.join(input_dir, 'mysql_describe_csv')
 output_dir = File.expand_path(ARGV[1])

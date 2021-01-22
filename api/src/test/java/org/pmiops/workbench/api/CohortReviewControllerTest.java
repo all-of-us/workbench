@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.atLeastOnce;
@@ -525,7 +524,8 @@ public class CohortReviewControllerTest {
           .getBody();
       fail("Should have thrown NotFoundException!");
     } catch (NotFoundException nfe) {
-      assertEquals("Not Found: No Cohort exists for cohortId: " + cohortId, nfe.getMessage());
+      assertThat(nfe.getMessage())
+          .isEqualTo("Not Found: No Cohort exists for cohortId: " + cohortId);
     }
   }
 
@@ -783,36 +783,16 @@ public class CohortReviewControllerTest {
     int pageSize = 25;
     CohortReview expectedReview1 =
         createCohortReview(
-            cohortReview,
-            ImmutableList.of(participantCohortStatus1, participantCohortStatus2),
-            page,
-            pageSize,
-            SortOrder.DESC,
-            FilterColumns.STATUS);
+            cohortReview, ImmutableList.of(participantCohortStatus1, participantCohortStatus2));
     CohortReview expectedReview2 =
         createCohortReview(
-            cohortReview,
-            ImmutableList.of(participantCohortStatus2, participantCohortStatus1),
-            page,
-            pageSize,
-            SortOrder.DESC,
-            FilterColumns.PARTICIPANTID);
+            cohortReview, ImmutableList.of(participantCohortStatus2, participantCohortStatus1));
     CohortReview expectedReview3 =
         createCohortReview(
-            cohortReview,
-            ImmutableList.of(participantCohortStatus1, participantCohortStatus2),
-            page,
-            pageSize,
-            SortOrder.ASC,
-            FilterColumns.STATUS);
+            cohortReview, ImmutableList.of(participantCohortStatus1, participantCohortStatus2));
     CohortReview expectedReview4 =
         createCohortReview(
-            cohortReview,
-            ImmutableList.of(participantCohortStatus1, participantCohortStatus2),
-            page,
-            pageSize,
-            SortOrder.ASC,
-            FilterColumns.PARTICIPANTID);
+            cohortReview, ImmutableList.of(participantCohortStatus1, participantCohortStatus2));
 
     when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.READER))
@@ -873,14 +853,14 @@ public class CohortReviewControllerTest {
               new ModifyParticipantCohortAnnotationRequest().annotationValueString("test1"))
           .getBody();
     } catch (NotFoundException nfe) {
-      assertEquals(
-          "Not Found: Participant Cohort Annotation does not exist for annotationId: "
-              + badAnnotationId
-              + ", cohortReviewId: "
-              + cohortReview.getCohortReviewId()
-              + ", participantId: "
-              + participantCohortStatus1.getParticipantKey().getParticipantId(),
-          nfe.getMessage());
+      assertThat(nfe.getMessage())
+          .isEqualTo(
+              "Not Found: Participant Cohort Annotation does not exist for annotationId: "
+                  + badAnnotationId
+                  + ", cohortReviewId: "
+                  + cohortReview.getCohortReviewId()
+                  + ", participantId: "
+                  + participantCohortStatus1.getParticipantKey().getParticipantId());
     }
   }
 
@@ -987,7 +967,8 @@ public class CohortReviewControllerTest {
                     .page(page)
                     .pageSize(pageSize)
                     .sortOrder(sortOrder))
-            .getBody();
+            .getBody()
+            .getCohortReview();
     verify(userRecentResourceService, atLeastOnce())
         .updateCohortEntry(anyLong(), anyLong(), anyLong());
     assertThat(actualReview).isEqualTo(expectedReview);
@@ -1028,12 +1009,7 @@ public class CohortReviewControllerTest {
   }
 
   private CohortReview createCohortReview(
-      DbCohortReview actualReview,
-      List<DbParticipantCohortStatus> participantCohortStatusList,
-      Integer page,
-      Integer pageSize,
-      SortOrder sortOrder,
-      FilterColumns sortColumn) {
+      DbCohortReview actualReview, List<DbParticipantCohortStatus> participantCohortStatusList) {
     List<ParticipantCohortStatus> newParticipantCohortStatusList =
         participantCohortStatusList.stream()
             .map(this::dbParticipantCohortStatusToApi)
@@ -1048,12 +1024,7 @@ public class CohortReviewControllerTest {
         .matchedParticipantCount(actualReview.getMatchedParticipantCount())
         .reviewSize(actualReview.getReviewSize())
         .reviewedCount(actualReview.getReviewedCount())
-        .queryResultSize(2L)
-        .participantCohortStatuses(newParticipantCohortStatusList)
-        .page(page)
-        .pageSize(pageSize)
-        .sortOrder(sortOrder.toString())
-        .sortColumn(sortColumn.name());
+        .participantCohortStatuses(newParticipantCohortStatusList);
   }
 
   private ParticipantCohortStatus dbParticipantCohortStatusToApi(

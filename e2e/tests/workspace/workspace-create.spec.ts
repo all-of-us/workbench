@@ -1,7 +1,6 @@
-import Link from 'app/element/link';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import WorkspacesPage, {FieldSelector} from 'app/page/workspaces-page';
-import {signIn, performActions} from 'utils/test-utils';
+import {signInWithAccessToken, performActions} from 'utils/test-utils';
 import Button from 'app/element/button';
 import * as testData from 'resources/data/workspace-data';
 import {makeWorkspaceName} from 'utils/str-utils';
@@ -11,7 +10,7 @@ import {config} from 'resources/workbench-config';
 
 describe('Creating new workspaces', () => {
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   test('Create workspace - NO request for review', async () => {
@@ -27,7 +26,8 @@ describe('Creating new workspaces', () => {
     expect(modalTextContent).toContain('Primary purpose of your project (Question 1)Summary of research purpose (Question 2)Population of interest (Question 5)');
     expect(modalTextContent).toContain('You can also make changes to your answers after you create your workspace.');
 
-    const dataPage = await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
+    const dataPage = new WorkspaceDataPage(page);
+    await dataPage.verifyWorkspaceNameOnDataPage(newWorkspaceName);
 
     // Verify the CDR version displays in the workspace navigation bar
     expect(await dataPage.getCdrVersion()).toBe(config.defaultCdrVersionName);
@@ -78,17 +78,18 @@ describe('Creating new workspaces', () => {
     await finishButton.waitUntilEnabled();
     await workspaceEditPage.clickCreateFinishButton(finishButton);
 
-    await verifyWorkspaceLinkOnDataPage(newWorkspaceName);
+    const dataPage1 = new WorkspaceDataPage(page);
+    await dataPage1.verifyWorkspaceNameOnDataPage(newWorkspaceName);
   });
 
-  // helper function to check visible workspace link on Data page
-  async function verifyWorkspaceLinkOnDataPage(workspaceName: string): Promise<WorkspaceDataPage> {
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.waitForLoad();
+  // // helper function to check visible workspace link on Data page
+  // async function verifyWorkspaceLinkOnDataPage(workspaceName: string): Promise<WorkspaceDataPage> {
+  //   const dataPage = new WorkspaceDataPage(page);
+  //   await dataPage.waitForLoad();
 
-    const workspaceLink = new Link(page, `//a[text()='${workspaceName}']`);
-    await workspaceLink.waitForXPath({visible: true});
-    expect(await workspaceLink.isVisible()).toBe(true);
-    return dataPage;
-  }
+  //   const workspaceLink = new Link(page, `//a[text()='${workspaceName}']`);
+  //   await workspaceLink.waitForXPath({visible: true});
+  //   expect(await workspaceLink.isVisible()).toBe(true);
+  //   return dataPage;
+  // }
 });

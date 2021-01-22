@@ -4,24 +4,19 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
-import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper.ConceptSetContext;
-import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
@@ -49,33 +44,27 @@ public class ConceptSetService {
   private final ConceptDao conceptDao;
   private final ConceptSetDao conceptSetDao;
   private final ConceptBigQueryService conceptBigQueryService;
-  private final ConceptService conceptService;
   private final CohortBuilderService cohortBuilderService;
   private final ConceptSetMapper conceptSetMapper;
   private final Clock clock;
-  private final Provider<WorkbenchConfig> configProvider;
-  private CohortBuilderMapper cohortBuilderMapper;
+  private final CohortBuilderMapper cohortBuilderMapper;
 
   @Autowired
   public ConceptSetService(
       ConceptDao conceptDao,
       ConceptSetDao conceptSetDao,
       ConceptBigQueryService conceptBigQueryService,
-      ConceptService conceptService,
       CohortBuilderService cohortBuilderService,
       CohortBuilderMapper cohortBuilderMapper,
       ConceptSetMapper conceptSetMapper,
-      Clock clock,
-      Provider<WorkbenchConfig> configProvider) {
+      Clock clock) {
     this.conceptDao = conceptDao;
     this.conceptSetDao = conceptSetDao;
     this.conceptBigQueryService = conceptBigQueryService;
-    this.conceptService = conceptService;
     this.cohortBuilderService = cohortBuilderService;
     this.cohortBuilderMapper = cohortBuilderMapper;
     this.conceptSetMapper = conceptSetMapper;
     this.clock = clock;
-    this.configProvider = configProvider;
   }
 
   public ConceptSet copyAndSave(
@@ -110,8 +99,7 @@ public class ConceptSetService {
 
   public ConceptSet createConceptSet(
       CreateConceptSetRequest request, DbUser creator, Long workspaceId) {
-    DbConceptSet dbConceptSet =
-        conceptSetMapper.clientToDbModel(request, workspaceId, creator, conceptBigQueryService);
+    DbConceptSet dbConceptSet = conceptSetMapper.clientToDbModel(request, workspaceId, creator);
     try {
       return toHydratedConcepts(conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSet)));
     } catch (DataIntegrityViolationException e) {
@@ -192,15 +180,6 @@ public class ConceptSetService {
       throw new ConflictException(
           String.format("Exceeded %d concept set limit", MAX_CONCEPTS_PER_SET));
     }
-    if (dbConceptSet.getConceptSetConceptIds().isEmpty()) {
-      dbConceptSet.setParticipantCount(0);
-    } else {
-      dbConceptSet.setParticipantCount(
-          conceptBigQueryService.getParticipantCountForConcepts(
-              dbConceptSet.getDomainEnum(),
-              BigQueryTableInfo.getTableName(dbConceptSet.getDomainEnum()),
-              dbConceptSet.getConceptSetConceptIds()));
-    }
 
     dbConceptSet.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
     try {
@@ -221,7 +200,8 @@ public class ConceptSetService {
                 () ->
                     new NotFoundException(
                         String.format("ConceptSet not found for concept id: %d", conceptSetId)));
-    return toHydratedConcepts(conceptSetMapper.dbModelToClient(dbConceptSet));
+    return toHydratedConcepts(
+        conceptSetMapper.dbModelToClient(dbConceptSet, conceptBigQueryService));
   }
 
   public List<ConceptSet> findAll(List<Long> conceptSetIds) {
@@ -256,12 +236,6 @@ public class ConceptSetService {
 
     DbConceptSet dbConceptSetClone =
         conceptSetMapper.dbModelToDbModel(dbConceptSet, conceptSetContext);
-    if (cdrVersionChanged) {
-      String omopTable = BigQueryTableInfo.getTableName(dbConceptSet.getDomainEnum());
-      dbConceptSetClone.setParticipantCount(
-          conceptBigQueryService.getParticipantCountForConcepts(
-              dbConceptSet.getDomainEnum(), omopTable, dbConceptSet.getConceptSetConceptIds()));
-    }
     return conceptSetDao.save(dbConceptSetClone);
   }
 
@@ -278,27 +252,24 @@ public class ConceptSetService {
         dbConceptSetConceptIds.stream()
             .map(DbConceptSetConceptId::getConceptId)
             .collect(Collectors.toList());
-    if (configProvider.get().featureFlags.enableConceptSetSearchV2) {
-      List<Criteria> criteriaList = new ArrayList<Criteria>();
-      if (!conceptSet.getDomain().equals(Domain.PHYSICAL_MEASUREMENT)) {
-        criteriaList =
-            cohortBuilderService.findCriteriaByDomainIdAndConceptIds(
-                conceptSet.getDomain().toString(), dbConceptSetConceptIds);
-      } else {
-        criteriaList.addAll(
-            StreamSupport.stream(conceptDao.findAll(conceptIds).spliterator(), false)
-                .map(
-                    concept -> {
-                      boolean isStandard = STANDARD_CONCEPTS.contains(concept.getStandardConcept());
-                      return cohortBuilderMapper.dbModelToClient(
-                          concept,
-                          isStandard,
-                          isStandard ? concept.getCountValue() : concept.getSourceCountValue());
-                    })
-                .collect(Collectors.toList()));
-      }
-      return conceptSet.criteriums(criteriaList);
+    List<Criteria> criteriaList;
+    if (!conceptSet.getDomain().equals(Domain.PHYSICAL_MEASUREMENT)) {
+      criteriaList =
+          cohortBuilderService.findCriteriaByDomainIdAndConceptIds(
+              conceptSet.getDomain().toString(), dbConceptSetConceptIds);
+    } else {
+      criteriaList =
+          StreamSupport.stream(conceptDao.findAll(conceptIds).spliterator(), false)
+              .map(
+                  concept -> {
+                    boolean isStandard = STANDARD_CONCEPTS.contains(concept.getStandardConcept());
+                    return cohortBuilderMapper.dbModelToClient(
+                        concept,
+                        isStandard,
+                        isStandard ? concept.getCountValue() : concept.getSourceCountValue());
+                  })
+              .collect(Collectors.toList());
     }
-    return conceptSet.concepts(conceptService.findAll(conceptIds));
+    return conceptSet.criteriums(criteriaList);
   }
 }

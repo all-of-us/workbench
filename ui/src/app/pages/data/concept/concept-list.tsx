@@ -7,6 +7,7 @@ import {FlexRow, FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {ConceptAddModal} from 'app/pages/data/concept/concept-add-modal';
+import {LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS} from 'app/pages/data/criteria-search';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, withCurrentConcept, withCurrentConceptSet, withCurrentWorkspace} from 'app/utils';
@@ -110,6 +111,7 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
 
     removeSelection(conceptToDel) {
       const updatedConceptList = this.props.concept.filter((concept) => concept !== conceptToDel);
+      localStorage.setItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS, JSON.stringify(updatedConceptList));
       currentConceptStore.next(updatedConceptList);
     }
 

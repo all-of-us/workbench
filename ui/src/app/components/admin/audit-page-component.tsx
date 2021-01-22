@@ -1,12 +1,11 @@
 import {AuditActionCardListView} from 'app/components/admin/audit-card-list-view';
 import {Navigate} from 'app/components/app-router';
-import {Button} from 'app/components/buttons';
+import {Button, StyledAnchorTag} from 'app/components/buttons';
 import {NumberInput, TextInputWithLabel} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
 import { useDebounce, useToggle } from 'app/utils';
 import {downloadTextFile} from 'app/utils/audit-utils';
-import {navigate} from 'app/utils/navigation';
 import {AuditAction, AuditLogEntry} from 'generated';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
@@ -108,6 +107,20 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, but
       textAlign: 'center',
       fontWeight: 600
     }}>
+    <TooltipTrigger content={'BigQuery Console page (use pmi-ops.org account)'}>
+      <StyledAnchorTag href={getBigQueryConsoleUrl()}
+                       target='_blank'>
+        BigQuery Console
+      </StyledAnchorTag>
+    </TooltipTrigger>
+    &nbsp;|&nbsp;
+    <TooltipTrigger content={`Admin Page for ${auditSubjectType} ${auditSubject || 'n/a'}`}>
+      <StyledAnchorTag href={auditSubject ? getAdminPageUrl(auditSubject) : undefined}
+                       style={auditSubject ? {} : {cursor: 'not-allowed', color: colors.disabled}}>
+        {auditSubjectType} Admin
+      </StyledAnchorTag>
+    </TooltipTrigger>
+    </div>
     <TooltipTrigger content={'Download actual SQL query for BigQuery Action Audit table. Useful' +
       ' for developers or analysts interested in basing other ad hoc queries off' +
       ' this audit query in the BigQuery console or bq tool.'}>
@@ -117,20 +130,6 @@ const UserInput = ({initialAuditSubject, auditSubjectType, getNextAuditPath, but
         Download SQL
       </Button>
     </TooltipTrigger>
-    <TooltipTrigger content={'BigQuery Console page (use pmi-ops.org account)'}>
-      <Button style={buttonStyle}
-              onClick={() => navigate([getBigQueryConsoleUrl()])}>
-        BigQuery Console
-      </Button>
-    </TooltipTrigger>
-    <TooltipTrigger content={`Admin Page for ${auditSubjectType} ${auditSubject || 'n/a'}`}>
-      <Button style={buttonStyle}
-              disabled={fp.isEmpty(auditSubject)}
-              onClick={() => navigate(getAdminPageUrl(auditSubject))}>
-        {auditSubjectType} Admin
-      </Button>
-    </TooltipTrigger>
-    </div>
   </React.Fragment>;
 };
 

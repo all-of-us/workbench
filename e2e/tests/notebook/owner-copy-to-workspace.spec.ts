@@ -3,12 +3,10 @@ import Modal from 'app/component/modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {LinkText, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
-import {createWorkspace, findOrCreateWorkspace, signIn} from 'utils/test-utils';
+import {createWorkspace, findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import {config} from 'resources/workbench-config';
 import WorkspaceCard from 'app/component/workspace-card';
 
-// Notebook server start may take a long time. Set maximum test running time to 20 minutes.
-jest.setTimeout(20 * 60 * 1000);
 
 /**
  * Test:
@@ -87,13 +85,13 @@ let defaultCdrWorkspace: string;
 describe('Workspace owner Jupyter notebook action tests', () => {
 
    beforeEach(async () => {
-      await signIn(page);
+      await signInWithAccessToken(page);
    });
 
    test('Copy notebook to another Workspace when CDR versions match', async () => {
       defaultCdrWorkspace = await createCustomCdrVersionWorkspace(config.defaultCdrVersionName);
       await copyNotebookTest(defaultCdrWorkspace, config.defaultCdrVersionName);
-   })
+   }, 30 * 60 * 1000)
 
    test('Copy notebook to another Workspace when CDR versions differ', async () => {
       // reuse same source workspace for all tests, but always create new destination workspace.
@@ -101,5 +99,5 @@ describe('Workspace owner Jupyter notebook action tests', () => {
          defaultCdrWorkspace = await createCustomCdrVersionWorkspace(config.defaultCdrVersionName);
       }
       await copyNotebookTest(defaultCdrWorkspace, config.altCdrVersionName);
-   })
+   }, 30 * 60 * 1000)
 });

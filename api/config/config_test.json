@@ -13,7 +13,6 @@
     "vpcServicePerimeterName": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test",
     "timeoutInSeconds": 60,
     "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.0.14",
-    "welderDockerImage": "broadinstitute/welder-server:7ae1a62",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com/dev",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com/dev",
     "runtimeImages": {
@@ -100,12 +99,8 @@
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": true,
-    "enableCohortBuilderV2": true,
-    "enableConceptSetSearchV2": true,
     "enableReportingUploadCron": true,
-    "enableCOPESurvey": true,
-    "enableCustomRuntimes": true,
-    "enableFitbit": true
+    "enableCustomRuntimes": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",
@@ -123,7 +118,6 @@
   },
   "reporting": {
     "dataset": "reporting_test",
-    "maxRowsPerInsert": 800,
-    "uploadMethod": "STREAMING"
+    "maxRowsPerInsert": 2500
   }
 }

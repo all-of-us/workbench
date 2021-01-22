@@ -6,5 +6,5 @@
 .log
 .pdf
 .gitignore
-Test.java
-Test.kt
+.java
+.kt

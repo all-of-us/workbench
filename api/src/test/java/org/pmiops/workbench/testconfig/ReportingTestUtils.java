@@ -1,8 +1,6 @@
 package org.pmiops.workbench.testconfig;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
@@ -11,9 +9,6 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingCohort;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingInstitution;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -29,6 +24,7 @@ import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 
 public class ReportingTestUtils {
 
@@ -71,6 +67,15 @@ public class ReportingTestUtils {
   public static final Timestamp WORKSPACE__RP_TIME_REQUESTED =
       Timestamp.from(Instant.parse("2015-06-07T00:00:00.00Z"));
   public static final Long WORKSPACE__WORKSPACE_ID = 34L;
+  public static final String WORKSPACE__WORKSPACE_NAMESPACE = "aou-rw-12345";
+
+  // This code was generated using reporting-wizard.rb at 2021-01-05T17:36:27-08:00.
+  // Manual modification should be avoided if possible as this is a one-time generation
+  // and does not run on every build and updates must be merged manually for now.
+
+  public static final Double WORKSPACE_FREE_TIER_USAGE__COST = 0.500000;
+  public static final Long WORKSPACE_FREE_TIER_USAGE__USER_ID = 1L;
+  public static final Long WORKSPACE_FREE_TIER_USAGE__WORKSPACE_ID = 2L;
 
   // All constant values, mocking statements, and assertions in this file are generated. The values
   // are chosen so that errors with transposed columns can be caught.
@@ -177,101 +182,12 @@ public class ReportingTestUtils {
     assertThat(workspace.getRpSocialBehavioral()).isEqualTo(WORKSPACE__RP_SOCIAL_BEHAVIORAL);
     assertTimeApprox(workspace.getRpTimeRequested(), WORKSPACE__RP_TIME_REQUESTED);
     assertThat(workspace.getWorkspaceId()).isEqualTo(expectedWorkspaceId);
+    assertThat(workspace.getWorkspaceNamespace()).isEqualTo(WORKSPACE__WORKSPACE_NAMESPACE);
   }
 
   public static void assertDtoWorkspaceFields(ReportingWorkspace workspace) {
     assertDtoWorkspaceFields(
         workspace, WORKSPACE__WORKSPACE_ID, WORKSPACE__CDR_VERSION_ID, WORKSPACE__CREATOR_ID);
-  }
-
-  // TODO: put these override values into the scaffold script
-  public static void assertPrjWorkspaceFields(
-      ProjectedReportingWorkspace workspace,
-      long expectedWorkspaceId,
-      long expectedCdrVersionId,
-      long expectedCreatorId) {
-    assertThat(workspace.getBillingAccountType()).isEqualTo(WORKSPACE__BILLING_ACCOUNT_TYPE);
-    assertThat(workspace.getBillingStatus()).isEqualTo(WORKSPACE__BILLING_STATUS);
-    assertThat(workspace.getCdrVersionId()).isEqualTo(expectedCdrVersionId);
-    assertTimeApprox(workspace.getCreationTime(), WORKSPACE__CREATION_TIME);
-    assertThat(workspace.getCreatorId()).isEqualTo(expectedCreatorId);
-    assertThat(workspace.getDisseminateResearchOther())
-        .isEqualTo(WORKSPACE__DISSEMINATE_RESEARCH_OTHER);
-    assertTimeApprox(workspace.getLastAccessedTime(), WORKSPACE__LAST_ACCESSED_TIME);
-    assertTimeApprox(workspace.getLastModifiedTime(), WORKSPACE__LAST_MODIFIED_TIME);
-    assertThat(workspace.getName()).isEqualTo(WORKSPACE__NAME);
-    assertThat(workspace.getNeedsRpReviewPrompt()).isEqualTo(WORKSPACE__NEEDS_RP_REVIEW_PROMPT);
-    assertThat(workspace.getPublished()).isEqualTo(WORKSPACE__PUBLISHED);
-    assertThat(workspace.getRpAdditionalNotes()).isEqualTo(WORKSPACE__RP_ADDITIONAL_NOTES);
-    assertThat(workspace.getRpAncestry()).isEqualTo(WORKSPACE__RP_ANCESTRY);
-    assertThat(workspace.getRpAnticipatedFindings()).isEqualTo(WORKSPACE__RP_ANTICIPATED_FINDINGS);
-    assertThat(workspace.getRpApproved()).isEqualTo(WORKSPACE__RP_APPROVED);
-    assertThat(workspace.getRpCommercialPurpose()).isEqualTo(WORKSPACE__RP_COMMERCIAL_PURPOSE);
-    assertThat(workspace.getRpControlSet()).isEqualTo(WORKSPACE__RP_CONTROL_SET);
-    assertThat(workspace.getRpDiseaseFocusedResearch())
-        .isEqualTo(WORKSPACE__RP_DISEASE_FOCUSED_RESEARCH);
-    assertThat(workspace.getRpDiseaseOfFocus()).isEqualTo(WORKSPACE__RP_DISEASE_OF_FOCUS);
-    assertThat(workspace.getRpDrugDevelopment()).isEqualTo(WORKSPACE__RP_DRUG_DEVELOPMENT);
-    assertThat(workspace.getRpEducational()).isEqualTo(WORKSPACE__RP_EDUCATIONAL);
-    assertThat(workspace.getRpEthics()).isEqualTo(WORKSPACE__RP_ETHICS);
-    assertThat(workspace.getRpIntendedStudy()).isEqualTo(WORKSPACE__RP_INTENDED_STUDY);
-    assertThat(workspace.getRpMethodsDevelopment()).isEqualTo(WORKSPACE__RP_METHODS_DEVELOPMENT);
-    assertThat(workspace.getRpOtherPopulationDetails())
-        .isEqualTo(WORKSPACE__RP_OTHER_POPULATION_DETAILS);
-    assertThat(workspace.getRpOtherPurpose()).isEqualTo(WORKSPACE__RP_OTHER_PURPOSE);
-    assertThat(workspace.getRpOtherPurposeDetails()).isEqualTo(WORKSPACE__RP_OTHER_PURPOSE_DETAILS);
-    assertThat(workspace.getRpPopulationHealth()).isEqualTo(WORKSPACE__RP_POPULATION_HEALTH);
-    assertThat(workspace.getRpReasonForAllOfUs()).isEqualTo(WORKSPACE__RP_REASON_FOR_ALL_OF_US);
-    assertThat(workspace.getRpReviewRequested()).isEqualTo(WORKSPACE__RP_REVIEW_REQUESTED);
-    assertThat(workspace.getRpScientificApproach()).isEqualTo(WORKSPACE__RP_SCIENTIFIC_APPROACH);
-    assertThat(workspace.getRpSocialBehavioral()).isEqualTo(WORKSPACE__RP_SOCIAL_BEHAVIORAL);
-    assertTimeApprox(workspace.getRpTimeRequested(), WORKSPACE__RP_TIME_REQUESTED);
-    assertThat(workspace.getWorkspaceId()).isEqualTo(expectedWorkspaceId);
-  }
-
-  public static ProjectedReportingWorkspace mockProjectedWorkspace() {
-    final ProjectedReportingWorkspace mockWorkspace = mock(ProjectedReportingWorkspace.class);
-    doReturn(WORKSPACE__BILLING_ACCOUNT_TYPE).when(mockWorkspace).getBillingAccountType();
-    doReturn(WORKSPACE__BILLING_STATUS).when(mockWorkspace).getBillingStatus();
-    doReturn(WORKSPACE__CDR_VERSION_ID).when(mockWorkspace).getCdrVersionId();
-    doReturn(WORKSPACE__CREATION_TIME).when(mockWorkspace).getCreationTime();
-    doReturn(WORKSPACE__CREATOR_ID).when(mockWorkspace).getCreatorId();
-    doReturn(WORKSPACE__DISSEMINATE_RESEARCH_OTHER)
-        .when(mockWorkspace)
-        .getDisseminateResearchOther();
-    doReturn(WORKSPACE__LAST_ACCESSED_TIME).when(mockWorkspace).getLastAccessedTime();
-    doReturn(WORKSPACE__LAST_MODIFIED_TIME).when(mockWorkspace).getLastModifiedTime();
-    doReturn(WORKSPACE__NAME).when(mockWorkspace).getName();
-    doReturn(WORKSPACE__NEEDS_RP_REVIEW_PROMPT).when(mockWorkspace).getNeedsRpReviewPrompt();
-    doReturn(WORKSPACE__PUBLISHED).when(mockWorkspace).getPublished();
-    doReturn(WORKSPACE__RP_ADDITIONAL_NOTES).when(mockWorkspace).getRpAdditionalNotes();
-    doReturn(WORKSPACE__RP_ANCESTRY).when(mockWorkspace).getRpAncestry();
-    doReturn(WORKSPACE__RP_ANTICIPATED_FINDINGS).when(mockWorkspace).getRpAnticipatedFindings();
-    doReturn(WORKSPACE__RP_APPROVED).when(mockWorkspace).getRpApproved();
-    doReturn(WORKSPACE__RP_COMMERCIAL_PURPOSE).when(mockWorkspace).getRpCommercialPurpose();
-    doReturn(WORKSPACE__RP_CONTROL_SET).when(mockWorkspace).getRpControlSet();
-    doReturn(WORKSPACE__RP_DISEASE_FOCUSED_RESEARCH)
-        .when(mockWorkspace)
-        .getRpDiseaseFocusedResearch();
-    doReturn(WORKSPACE__RP_DISEASE_OF_FOCUS).when(mockWorkspace).getRpDiseaseOfFocus();
-    doReturn(WORKSPACE__RP_DRUG_DEVELOPMENT).when(mockWorkspace).getRpDrugDevelopment();
-    doReturn(WORKSPACE__RP_EDUCATIONAL).when(mockWorkspace).getRpEducational();
-    doReturn(WORKSPACE__RP_ETHICS).when(mockWorkspace).getRpEthics();
-    doReturn(WORKSPACE__RP_INTENDED_STUDY).when(mockWorkspace).getRpIntendedStudy();
-    doReturn(WORKSPACE__RP_METHODS_DEVELOPMENT).when(mockWorkspace).getRpMethodsDevelopment();
-    doReturn(WORKSPACE__RP_OTHER_POPULATION_DETAILS)
-        .when(mockWorkspace)
-        .getRpOtherPopulationDetails();
-    doReturn(WORKSPACE__RP_OTHER_PURPOSE).when(mockWorkspace).getRpOtherPurpose();
-    doReturn(WORKSPACE__RP_OTHER_PURPOSE_DETAILS).when(mockWorkspace).getRpOtherPurposeDetails();
-    doReturn(WORKSPACE__RP_POPULATION_HEALTH).when(mockWorkspace).getRpPopulationHealth();
-    doReturn(WORKSPACE__RP_REASON_FOR_ALL_OF_US).when(mockWorkspace).getRpReasonForAllOfUs();
-    doReturn(WORKSPACE__RP_REVIEW_REQUESTED).when(mockWorkspace).getRpReviewRequested();
-    doReturn(WORKSPACE__RP_SCIENTIFIC_APPROACH).when(mockWorkspace).getRpScientificApproach();
-    doReturn(WORKSPACE__RP_SOCIAL_BEHAVIORAL).when(mockWorkspace).getRpSocialBehavioral();
-    doReturn(WORKSPACE__RP_TIME_REQUESTED).when(mockWorkspace).getRpTimeRequested();
-    doReturn(WORKSPACE__WORKSPACE_ID).when(mockWorkspace).getWorkspaceId();
-    return mockWorkspace;
   }
 
   public static ReportingWorkspace createDtoWorkspace() {
@@ -309,7 +225,8 @@ public class ReportingTestUtils {
         .rpScientificApproach(WORKSPACE__RP_SCIENTIFIC_APPROACH)
         .rpSocialBehavioral(WORKSPACE__RP_SOCIAL_BEHAVIORAL)
         .rpTimeRequested(offsetDateTimeUtc(WORKSPACE__RP_TIME_REQUESTED))
-        .workspaceId(WORKSPACE__WORKSPACE_ID);
+        .workspaceId(WORKSPACE__WORKSPACE_ID)
+        .workspaceNamespace(WORKSPACE__WORKSPACE_NAMESPACE);
   }
 
   public static DbWorkspace createDbWorkspace(DbUser creator, DbCdrVersion cdrVersion) {
@@ -347,46 +264,23 @@ public class ReportingTestUtils {
     workspace.setSocialBehavioral(WORKSPACE__RP_SOCIAL_BEHAVIORAL);
     workspace.setTimeRequested(WORKSPACE__RP_TIME_REQUESTED);
     workspace.setWorkspaceId(WORKSPACE__WORKSPACE_ID);
+    workspace.setWorkspaceNamespace(WORKSPACE__WORKSPACE_NAMESPACE);
     return workspace;
   }
 
-  public static ProjectedReportingCohort mockProjectedReportingCohort() {
-    // Projection interface query objects can't be instantiated and must be mocked instead.
-    // This is slightly unfortunate, as the most common issue with projections is a column/type
-    // mismatch
-    // in the query, which only shows up when calling the accessors on the proxy. So live DAO tests
-    // are
-    //  essential as well.
-
-    // This code was generated using reporting-wizard.rb at 2020-09-24T13:40:02-04:00.
-    // Manual modification should be avoided if possible as this is a one-time generation
-    // and does not run on every build and updates must be merged manually for now.
-
-    final ProjectedReportingCohort mockCohort = mock(ProjectedReportingCohort.class);
-    doReturn(COHORT__COHORT_ID).when(mockCohort).getCohortId();
-    doReturn(COHORT__CREATION_TIME).when(mockCohort).getCreationTime();
-    doReturn(COHORT__CREATOR_ID).when(mockCohort).getCreatorId();
-    doReturn(COHORT__CRITERIA).when(mockCohort).getCriteria();
-    doReturn(COHORT__DESCRIPTION).when(mockCohort).getDescription();
-    doReturn(COHORT__LAST_MODIFIED_TIME).when(mockCohort).getLastModifiedTime();
-    doReturn(COHORT__NAME).when(mockCohort).getName();
-    doReturn(COHORT__WORKSPACE_ID).when(mockCohort).getWorkspaceId();
-    return mockCohort;
+  public static void assertDtoWorkspaceFreeTierUsageFields(
+      ReportingWorkspaceFreeTierUsage workspaceFreeTierUsage) {
+    assertThat(workspaceFreeTierUsage.getCost()).isEqualTo(WORKSPACE_FREE_TIER_USAGE__COST);
+    assertThat(workspaceFreeTierUsage.getUserId()).isEqualTo(WORKSPACE_FREE_TIER_USAGE__USER_ID);
+    assertThat(workspaceFreeTierUsage.getWorkspaceId())
+        .isEqualTo(WORKSPACE_FREE_TIER_USAGE__WORKSPACE_ID);
   }
 
-  public static void assertCohortFields(
-      ProjectedReportingCohort cohort,
-      Long expectedCohortId,
-      Long expectedCreatorId,
-      Long expectedWorkspaceId) {
-    assertThat(cohort.getCohortId()).isEqualTo(expectedCohortId);
-    assertTimeApprox(cohort.getCreationTime(), COHORT__CREATION_TIME);
-    assertThat(cohort.getCreatorId()).isEqualTo(expectedCreatorId);
-    assertThat(cohort.getCriteria()).isEqualTo(COHORT__CRITERIA);
-    assertThat(cohort.getDescription()).isEqualTo(COHORT__DESCRIPTION);
-    assertTimeApprox(cohort.getLastModifiedTime(), COHORT__LAST_MODIFIED_TIME);
-    assertThat(cohort.getName()).isEqualTo(COHORT__NAME);
-    assertThat(cohort.getWorkspaceId()).isEqualTo(expectedWorkspaceId);
+  public static ReportingWorkspaceFreeTierUsage createDtoWorkspaceFreeTierUsage() {
+    return new ReportingWorkspaceFreeTierUsage()
+        .cost(WORKSPACE_FREE_TIER_USAGE__COST)
+        .userId(WORKSPACE_FREE_TIER_USAGE__USER_ID)
+        .workspaceId(WORKSPACE_FREE_TIER_USAGE__WORKSPACE_ID);
   }
 
   public static void assertCohortFields(ReportingCohort cohort) {
@@ -444,29 +338,6 @@ public class ReportingTestUtils {
         + oneForNonEmpty(reportingSnapshot.getUsers())
         + oneForNonEmpty(reportingSnapshot.getWorkspaces());
   }
-  // Projection interface query objects can't be instantiated and must be mocked instead.
-  // This is slightly unfortunate, as the most common issue with projections is a column/type
-  // mismatch
-  // in the query, which only shows up when calling the accessors on the proxy. So live DAO tests
-  // are
-  //  essential as well.
-
-  // This code was generated using reporting-wizard.rb at 2020-10-01T12:18:28-04:00.
-  // Manual modification should be avoided if possible as this is a one-time generation
-  // and does not run on every build and updates must be merged manually for now.
-
-  public static ProjectedReportingInstitution mockProjectedReportingInstitution() {
-    final ProjectedReportingInstitution mockInstitution = mock(ProjectedReportingInstitution.class);
-    doReturn(INSTITUTION__DISPLAY_NAME).when(mockInstitution).getDisplayName();
-    doReturn(INSTITUTION__DUA_TYPE_ENUM).when(mockInstitution).getDuaTypeEnum();
-    doReturn(INSTITUTION__INSTITUTION_ID).when(mockInstitution).getInstitutionId();
-    doReturn(INSTITUTION__ORGANIZATION_TYPE_ENUM).when(mockInstitution).getOrganizationTypeEnum();
-    doReturn(INSTITUTION__ORGANIZATION_TYPE_OTHER_TEXT)
-        .when(mockInstitution)
-        .getOrganizationTypeOtherText();
-    doReturn(INSTITUTION__SHORT_NAME).when(mockInstitution).getShortName();
-    return mockInstitution;
-  }
 
   public static ReportingInstitution createReportingInstitution() {
     return new ReportingInstitution()
@@ -487,17 +358,6 @@ public class ReportingTestUtils {
     institution.setOrganizationTypeOtherText(INSTITUTION__ORGANIZATION_TYPE_OTHER_TEXT);
     institution.setShortName(INSTITUTION__SHORT_NAME);
     return institution;
-  }
-
-  public static void assertInstitutionFields(ProjectedReportingInstitution institution) {
-    assertThat(institution.getDisplayName()).isEqualTo(INSTITUTION__DISPLAY_NAME);
-    assertThat(institution.getDuaTypeEnum()).isEqualTo(INSTITUTION__DUA_TYPE_ENUM);
-    assertThat(institution.getInstitutionId()).isEqualTo(INSTITUTION__INSTITUTION_ID);
-    assertThat(institution.getOrganizationTypeEnum())
-        .isEqualTo(INSTITUTION__ORGANIZATION_TYPE_ENUM);
-    assertThat(institution.getOrganizationTypeOtherText())
-        .isEqualTo(INSTITUTION__ORGANIZATION_TYPE_OTHER_TEXT);
-    assertThat(institution.getShortName()).isEqualTo(INSTITUTION__SHORT_NAME);
   }
 
   public static void assertInstitutionFields(ReportingInstitution institution) {
@@ -556,6 +416,7 @@ public class ReportingTestUtils {
         .datasetCohorts(new ArrayList<>())
         .institutions(new ArrayList<>())
         .users(new ArrayList<>())
-        .workspaces(new ArrayList<>());
+        .workspaces(new ArrayList<>())
+        .workspaceFreeTierUsage(new ArrayList<>());
   }
 }

@@ -1,7 +1,6 @@
 import {ElementHandle, Page} from 'puppeteer';
 import * as fp from 'lodash/fp';
-
-import {Option, WorkspaceAccessLevel} from 'app/text-labels';
+import {MenuOption, WorkspaceAccessLevel} from 'app/text-labels';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {getPropValue} from 'utils/element-utils';
 import CardBase from './card-base';
@@ -11,6 +10,7 @@ const WorkspaceCardSelector = {
   cardRootXpath: '//*[child::*[@data-test-id="workspace-card"]]', // finds 'workspace-card' parent container node
   cardNameXpath: '@data-test-id="workspace-card-name"',
   accessLevelXpath: './/*[@data-test-id="workspace-access-level"]',
+  dateTimeXpath: './/*[@data-test-id="workspace-card"]/div[3]'
 }
 
 
@@ -29,26 +29,36 @@ export default class WorkspaceCard extends CardBase {
    */
   static async deleteWorkspace(page: Page, workspaceName: string): Promise<string[]> {
     const card = await WorkspaceCard.findCard(page, workspaceName);
-    await card.selectSnowmanMenu(Option.Delete, { waitForNav: false });
+    await card.selectSnowmanMenu(MenuOption.Delete, { waitForNav: false });
     // Handle Delete Confirmation modal
     return new WorkspaceEditPage(page).dismissDeleteWorkspaceModal();
   }
 
   /**
-   * Find all visible Workspace Cards. Assume at least one Card exists.
+   * Find all visible Workspace Cards.
    * @param {Page} page
    * @throws TimeoutError if fails to find Card.
    */
-  static async findAllCards(page: Page): Promise<WorkspaceCard[]> {
+  static async findAllCards(page: Page, accessLevel?: WorkspaceAccessLevel): Promise<WorkspaceCard[]> {
     try {
       await page.waitForXPath(WorkspaceCardSelector.cardRootXpath, {visible: true, timeout: 1000});
     } catch (e) {
       return [];
     }
-    const cards = await page.$x(WorkspaceCardSelector.cardRootXpath);
-    // transform to WorkspaceCard object
-    const resourceCards = cards.map(card => new WorkspaceCard(page).asCard(card));
-    return resourceCards;
+    const workspaceCards = (await page.$x(WorkspaceCardSelector.cardRootXpath))
+      .map(card => new WorkspaceCard(page).asCard(card));
+
+    const filtered = [];
+    if (accessLevel !== undefined) {
+      for (const card of workspaceCards) {
+        const cardAccessLevel = await card.getWorkspaceAccessLevel();
+        if (cardAccessLevel === accessLevel) {
+          filtered.push(card);
+        }
+      }
+      return filtered;
+    }
+    return workspaceCards;
   }
 
   static async findAnyCard(page: Page): Promise<WorkspaceCard> {
@@ -118,7 +128,7 @@ export default class WorkspaceCard extends CardBase {
    * @param {string} workspaceName
    */
   async getWorkspaceNameLink(workspaceName: string) : Promise<ElementHandle> {
-    return this.page.waitForXPath(this.workspaceNameLinkSelector(workspaceName));
+    return this.page.waitForXPath(this.workspaceNameLinkSelector(workspaceName), {visible: true});
   }
 
   async getWorkspaceMatchAccessLevel(level: WorkspaceAccessLevel = WorkspaceAccessLevel.Owner): Promise<WorkspaceCard[]> {
@@ -131,6 +141,13 @@ export default class WorkspaceCard extends CardBase {
       }
     }
     return matchWorkspaceArray;
+  }
+
+  async getLastChangedTime(): Promise<string> {
+    const [element] = await this.cardElement.$x(WorkspaceCardSelector.dateTimeXpath);
+    const wholeText = await getPropValue<string>(element, 'innerText');
+    // datetime format is "Last Changed: 01/08/21, 05:22 PM"
+    return wholeText.replace('Last Changed: ', '').trim();
   }
 
   /**
@@ -160,4 +177,20 @@ export default class WorkspaceCard extends CardBase {
     return `//*[@role='button'][./*[${WorkspaceCardSelector.cardNameXpath} and normalize-space(text())="${workspaceName}"]]`
   }
 
+  // if the snowman menu options for WRITER & READER are disabled except duplicate option and all options are enabled for OWNER.
+  async verifyWorkspaceCardMenuOptions(): Promise<void>{
+    const snowmanMenu = await this.getSnowmanMenu();
+    const accessLevel = await this.getWorkspaceAccessLevel();
+    if (accessLevel !== WorkspaceAccessLevel.Owner) {
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Share)).toBe(true);
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(true);
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(true);
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(false);
+      } else if (accessLevel === WorkspaceAccessLevel.Owner) { 
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Share)).toBe(false);
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(false);
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(false);
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(false);
+  }
+  }
 }

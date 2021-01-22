@@ -3,10 +3,9 @@ import * as React from 'react';
 
 import {ConceptNavigationBar} from 'app/pages/data/concept/concept-navigation-bar';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {ConceptsApi, ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
+import {ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {currentWorkspaceStore} from 'app/utils/navigation';
-import {ConceptsApiStub} from 'testing/stubs/concepts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 
@@ -18,7 +17,6 @@ describe('ConceptNavigationBar', () => {
 
   beforeEach(() => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
-    registerApiClient(ConceptsApi, new ConceptsApiStub());
     registerApiClient(ConceptSetsApi, new ConceptSetsApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
   });

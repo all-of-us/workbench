@@ -3,7 +3,7 @@ import {Growl} from 'primereact/growl';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
-import {ListSearchV2} from 'app/cohort-search/list-search-v2/list-search-v2.component';
+import {ListSearch} from 'app/cohort-search/list-search/list-search.component';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {CriteriaTree} from 'app/cohort-search/tree/tree.component';
 import {domainToTitle, typeToTitle} from 'app/cohort-search/utils';
@@ -16,10 +16,13 @@ import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {
   attributesSelectionStore,
   currentCohortCriteriaStore,
-  currentConceptStore
+  currentConceptStore,
+  setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {Criteria, Domain} from 'generated/fetch';
+
+export const LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS = 'CURRENT_CRITERIA_SELECTIONS';
 
 const styles = reactStyles({
   arrowIcon: {
@@ -73,7 +76,7 @@ const styles = reactStyles({
     margin: '0 0 0 0.75rem'
   }
 });
-const css = `
+export const growlCSS = `
   .p-growl {
     position: sticky;
   }
@@ -119,8 +122,6 @@ interface Props {
   backFn?: () => void;
   cohortContext: any;
   conceptSearchTerms?: string;
-  selectedSurvey?: string;
-  source: string;
   urlParams: any;
 }
 
@@ -136,8 +137,8 @@ interface State {
   selectedIds: Array<string>;
   treeSearchTerms: string;
   loadingSubtree: boolean;
-
 }
+
 export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(class extends React.Component<Props, State>  {
   growl: any;
   growlTimer: NodeJS.Timer;
@@ -155,35 +156,33 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
       selectedIds: [],
       selections: [],
       selectedCriteriaList: [],
-      treeSearchTerms: props.source !== 'criteria' ? props.conceptSearchTerms : '',
+      treeSearchTerms: props.cohortContext.source !== 'cohort' ? props.conceptSearchTerms : '',
       loadingSubtree: false
     };
   }
 
   componentDidMount(): void {
-    const {cohortContext: {domain, standard, type}, source} = this.props;
-    let {backMode, mode} = this.state;
-    let hierarchyNode;
+    const {cohortContext: {domain, standard, source, type}} = this.props;
     if (this.initTree) {
-      hierarchyNode = {
-        domainId: domain,
-        type: type,
-        isStandard: standard,
-        id: 0,
-      };
-      backMode = 'tree';
-      mode = 'tree';
+      this.setState({
+        backMode: 'tree',
+        hierarchyNode: {
+          domainId: domain,
+          type: type,
+          isStandard: standard,
+          id: 0,
+        } as Criteria,
+        mode: 'tree'
+      });
     }
-    this.setState({backMode, hierarchyNode, mode});
-    if (source === 'criteria') {
-      this.subscription = currentCohortCriteriaStore.subscribe(currentCohortCriteria => {
-        this.setState({selectedCriteriaList: currentCohortCriteria});
-      });
-    } else {
-      this.subscription = currentConceptStore.subscribe(currentConcepts => {
-        const value = fp.map(selected => selected.conceptId + '', currentConcepts);
-        this.setState({selectedCriteriaList: currentConcepts, selectedIds: value});
-      });
+    const currentCriteriaStore = source === 'cohort' ? currentCohortCriteriaStore : currentConceptStore;
+    this.subscription = currentCriteriaStore.subscribe(selectedCriteriaList => this.setState({selectedCriteriaList}));
+    // CB to be implemented with RW-5916
+    if (source !== 'cohort') {
+      const existingCriteria = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS));
+      if (!!existingCriteria && existingCriteria[0].domainId === domain) {
+        currentCriteriaStore.next(existingCriteria);
+      }
     }
   }
 
@@ -192,14 +191,15 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
   }
 
   get initTree() {
-    const {cohortContext: {domain}, source} = this.props;
+    const {cohortContext: {domain, source}} = this.props;
     return domain === Domain.VISIT
-      || (source === 'criteria' && domain === Domain.PHYSICALMEASUREMENT)
-      || (source === 'criteria' && domain === Domain.SURVEY);
+      || (source === 'cohort' && domain === Domain.PHYSICALMEASUREMENT)
+      || (source === 'cohort' && domain === Domain.SURVEY);
   }
 
   get isConcept() {
-    return this.props.source === 'concept' || this.props.source === 'conceptSetDetails';
+    const {cohortContext: {source}} = this.props;
+    return source === 'concept' || source === 'conceptSetDetails';
   }
 
   getGrowlStyle() {
@@ -233,12 +233,26 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
     });
   }
 
+  closeSidebar() {
+    attributesSelectionStore.next(undefined);
+    setSidebarActiveIconStore.next(undefined);
+  }
+
   addSelection = (selectCriteria)  => {
+    const {source} = this.props.cohortContext;
+    // In case of Criteria/Cohort, close existing attribute sidebar before selecting a new value
+    if (!this.isConcept && !!attributesSelectionStore.getValue()) {
+      this.closeSidebar();
+    }
     let criteriaList = this.state.selectedCriteriaList;
     if (criteriaList && criteriaList.length > 0) {
       criteriaList.push(selectCriteria);
     } else {
       criteriaList =  [selectCriteria];
+    }
+    // CB to be implemented with RW-5916
+    if (source !== 'cohort') {
+      localStorage.setItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS, JSON.stringify(criteriaList));
     }
     this.setState({selectedCriteriaList: criteriaList});
     this.isConcept ?  currentConceptStore.next(criteriaList) : currentCohortCriteriaStore.next(criteriaList);
@@ -290,7 +304,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
   }
 
   get domainTitle() {
-    const {cohortContext: {domain, type}, selectedSurvey} = this.props;
+    const {cohortContext: {domain, type, selectedSurvey}} = this.props;
     if (!!selectedSurvey) {
       return selectedSurvey;
     } else {
@@ -299,13 +313,13 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
   }
 
   render() {
-    const {backFn, cohortContext, conceptSearchTerms, selectedSurvey, source} = this.props;
+    const {backFn, cohortContext, cohortContext: {domain, selectedSurvey, source}, conceptSearchTerms} = this.props;
     const {autocompleteSelection, groupSelections, hierarchyNode, loadingSubtree,
       treeSearchTerms, growlVisible} = this.state;
     return <div id='criteria-search-container'>
       {loadingSubtree && <SpinnerOverlay/>}
       <Growl ref={(el) => this.growl = el} style={!growlVisible ? {...styles.growl, display: 'none'} : styles.growl}/>
-      <FlexRowWrap style={{...styles.titleBar, marginTop: source === 'criteria' ? '1rem' : 0}}>
+      <FlexRowWrap style={{...styles.titleBar, marginTop: source === 'cohort' ? '1rem' : 0}}>
         {source !== 'conceptSetDetails' && <React.Fragment>
           <Clickable style={styles.backArrow} onClick={() => backFn()}>
             <img src={arrowIcon} style={styles.arrowIcon} alt='Go back' />
@@ -313,7 +327,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
           <h2 style={styles.titleHeader}>{this.domainTitle}</h2>
         </React.Fragment>}
         <div style={source === 'conceptSetDetails' ? styles.detailExternalLinks : styles.externalLinks}>
-          {cohortContext.domain === Domain.DRUG && <div>
+          {domain === Domain.DRUG && <div>
             <StyledAnchorTag
                 href='https://mor.nlm.nih.gov/RxNav/'
                 target='_blank'
@@ -322,7 +336,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
             </StyledAnchorTag>
             &nbsp;drugs by brand names outside of <AoU/>
           </div>}
-          {cohortContext.domain === Domain.SURVEY && <div>
+          {domain === Domain.SURVEY && <div>
             Find more information about each survey in the&nbsp;
             <StyledAnchorTag
                 href='https://www.researchallofus.org/survey-explorer/'
@@ -343,7 +357,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
         </div>
       </FlexRowWrap>
       <div style={loadingSubtree ? styles.loadingSubTree : {height: '100%', minHeight: '15rem'}}>
-        <style>{css}</style>
+        <style>{growlCSS}</style>
         <Growl ref={(el) => this.growl = el}
                style={!growlVisible ? {...this.getGrowlStyle(), display: 'none'} : this.getGrowlStyle()}/>
         {hierarchyNode && <CriteriaTree
@@ -361,13 +375,11 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
             setSearchTerms={this.setTreeSearchTerms}/>}
          {/*List View (using duplicated version of ListSearch) */}
         {!this.initTree && <div style={this.searchContentStyle('list')}>
-          <ListSearchV2 source={source}
-                        hierarchy={this.showHierarchy}
-                        searchContext={cohortContext}
-                        searchTerms={conceptSearchTerms}
-                        select={this.addSelection}
-                        selectedSurvey={selectedSurvey}
-                        selectedIds={this.getListSearchSelectedIds()}/>
+          <ListSearch hierarchy={this.showHierarchy}
+                      searchContext={cohortContext}
+                      searchTerms={conceptSearchTerms}
+                      select={this.addSelection}
+                      selectedIds={this.getListSearchSelectedIds()}/>
         </div>}
       </div>
      </div>;

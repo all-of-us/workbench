@@ -1,14 +1,17 @@
+import * as moment from 'moment';
+import {RadioButton} from 'primereact/radiobutton';
+import * as React from 'react';
+import {validate, validators} from 'validate.js';
+
 import {DatePicker, NumberInput, Select, ValidationError} from 'app/components/inputs';
-import {cohortReviewStore, filterStateStore, visitsFilterOptions} from 'app/services/review-state.service';
+import {cohortReviewStore, filterStateStore, reviewPaginationStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, summarizeErrors, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-
 import {
-  CohortReview,
   Filter,
   FilterColumns as Columns,
   Operator,
@@ -16,15 +19,9 @@ import {
   ParticipantCohortStatus,
   SortOrder
 } from 'generated/fetch';
-import * as moment from 'moment';
-import {RadioButton} from 'primereact/radiobutton';
-import * as React from 'react';
-import {Observable} from 'rxjs/Observable';
-import {from} from 'rxjs/observable/from';
-import {validate, validators} from 'validate.js';
+
 validators.dateFormat = (value: string) => {
-  return moment(value, 'YYYY-MM-DD', true).isValid()
-    ? null : 'must be in format \'YYYY-MM-DD\'';
+  return moment(value, 'YYYY-MM-DD', true).isValid() ? null : 'must be in format \'YYYY-MM-DD\'';
 };
 
 const css = `
@@ -221,6 +218,7 @@ export const DetailHeader = withCurrentWorkspace()(
 
     update = () => {
       const review = cohortReviewStore.getValue();
+      const pagination = reviewPaginationStore.getValue();
       const participant = this.props.participant;
       const statuses = review.participantCohortStatuses;
       const id = participant && participant.participantId;
@@ -238,12 +236,12 @@ export const DetailHeader = withCurrentWorkspace()(
         return;
       }
 
-      const totalPages = Math.ceil(review.queryResultSize / review.pageSize);
+      const totalPages = Math.ceil(pagination.queryResultSize / pagination.pageSize);
 
       this.setState({
         afterId: statuses[index + 1] && statuses[index + 1]['participantId'],
-        isFirstParticipant: review.page === 0 && index === 0,
-        isLastParticipant: (review.page + 1) === totalPages && (index + 1) === statuses.length,
+        isFirstParticipant: pagination.page === 0 && index === 0,
+        isLastParticipant: (pagination.page + 1) === totalPages && (index + 1) === statuses.length,
         priorId: statuses[index - 1] && statuses[index - 1]['participantId']
       });
     }
@@ -273,33 +271,21 @@ export const DetailHeader = withCurrentWorkspace()(
           ? statuses[statuses.length - 1]
           : statuses[0];
 
-        const adjustPage = (page: number) => left
-          ? page - 1
-          : page + 1;
-
-        cohortReviewStore
-          .take(1)
-          .map(({page, pageSize}) => ({page: adjustPage(page), size: pageSize}))
-          .mergeMap(({page, size}) => this.callAPI(page, size))
-          .subscribe(review => {
-            cohortReviewStore.next(review);
-            const stat = statusGetter(review.participantCohortStatuses);
-            this.navigateById(stat.participantId);
-
-          });
+        const {page, pageSize} = reviewPaginationStore.getValue();
+        const {ns, wsid, cid} = urlParamsStore.getValue();
+        const {cdrVersionId} = currentWorkspaceStore.getValue();
+        const request = {
+          page: left ? page - 1 : page + 1,
+          pageSize: pageSize,
+          sortOrder: SortOrder.Asc,
+          filters: {items: this.getRequestFilters()}
+        } as PageFilterRequest;
+        cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, +cdrVersionId, request).then(response => {
+          cohortReviewStore.next(response.cohortReview);
+          const status = statusGetter(response.cohortReview.participantCohortStatuses);
+          this.navigateById(status.participantId);
+        });
       }
-    }
-
-    callAPI = (page: number, size: number): Observable<CohortReview> => {
-      const {ns, wsid, cid} = urlParamsStore.getValue();
-      const cdrid = +(currentWorkspaceStore.getValue().cdrVersionId);
-      const request = {
-        page: page,
-        pageSize: size,
-        sortOrder: SortOrder.Asc,
-        filters: {items: this.getRequestFilters()}
-      } as PageFilterRequest;
-      return from(cohortReviewApi().getParticipantCohortStatuses(ns, wsid, cid, cdrid, request));
     }
 
     navigateById = (id: number): void => {

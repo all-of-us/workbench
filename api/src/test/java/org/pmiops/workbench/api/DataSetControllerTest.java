@@ -354,11 +354,7 @@ public class DataSetControllerTest {
             .conceptSynonyms(Collections.emptyList()));
 
     ConceptSet conceptSet =
-        new ConceptSet()
-            .id(CONCEPT_SET_ONE_ID)
-            .name(CONCEPT_SET_ONE_NAME)
-            .domain(Domain.CONDITION)
-            .concepts(conceptList);
+        new ConceptSet().id(CONCEPT_SET_ONE_ID).name(CONCEPT_SET_ONE_NAME).domain(Domain.CONDITION);
 
     List<ConceptSetConceptId> conceptSetConceptIds =
         conceptList.stream()
@@ -400,8 +396,7 @@ public class DataSetControllerTest {
         new ConceptSet()
             .id(CONCEPT_SET_SURVEY_ID)
             .name(CONCEPT_SET_SURVEY_NAME)
-            .domain(Domain.OBSERVATION)
-            .concepts(conceptList);
+            .domain(Domain.OBSERVATION);
 
     CreateConceptSetRequest conceptSetRequest1 =
         new CreateConceptSetRequest()
@@ -415,11 +410,7 @@ public class DataSetControllerTest {
     CONCEPT_SET_SURVEY_ID = conceptSurveySet.getId();
 
     ConceptSet conceptSetTwo =
-        new ConceptSet()
-            .id(CONCEPT_SET_TWO_ID)
-            .name(CONCEPT_SET_TWO_NAME)
-            .domain(Domain.DRUG)
-            .concepts(conceptList);
+        new ConceptSet().id(CONCEPT_SET_TWO_ID).name(CONCEPT_SET_TWO_NAME).domain(Domain.DRUG);
 
     CreateConceptSetRequest conceptSetTwoRequest =
         new CreateConceptSetRequest()

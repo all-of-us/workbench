@@ -21,9 +21,9 @@ export default class HomePage extends AuthenticatedPage {
 
   async isLoaded(): Promise<boolean> {
     await waitForDocumentTitle(this.page, PageTitle);
+    await waitWhileLoading(this.page);
     // Look for "See All Workspaces" link.
     await this.getSeeAllWorkspacesLink().then( (element) => element.asElementHandle());
-    await waitWhileLoading(this.page);
     // Look for either a workspace card or the "Create your first workspace" msg.
     await Promise.race([
       this.page.waitForXPath('//*[@data-test-id="workspace-card"]', {visible: true}),

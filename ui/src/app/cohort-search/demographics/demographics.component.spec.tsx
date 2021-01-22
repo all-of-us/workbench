@@ -15,7 +15,7 @@ describe('Demographics', () => {
   });
 
   it('should create', () => {
-    const wrapper = shallow(<Demographics count={1} criteriaType={CriteriaType.GENDER} select={() => {}} selectedIds={[]} selections={[]}/>)
+    const wrapper = shallow(<Demographics criteriaType={CriteriaType.GENDER} select={() => {}} selectedIds={[]} selections={[]}/>)
     expect(wrapper).toBeTruthy();
   });
 });

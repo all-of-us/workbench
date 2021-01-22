@@ -4,16 +4,16 @@ import Link from 'app/element/link';
 import HomePage from 'app/page/home-page';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspacesPage from 'app/page/workspaces-page';
-import {Option, LinkText, WorkspaceAccessLevel} from 'app/text-labels';
+import {MenuOption, LinkText, WorkspaceAccessLevel} from 'app/text-labels';
 import {config} from 'resources/workbench-config';
-import {createWorkspace, findOrCreateWorkspace, signIn, signInAs, signOut} from 'utils/test-utils';
+import {createWorkspace, findOrCreateWorkspace, signInWithAccessToken, signInAs, signOut} from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {waitWhileLoading} from 'utils/waits-utils';
 
 describe('Share workspace', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   // Assume there is at least one workspace preexist
@@ -29,21 +29,15 @@ describe('Share workspace', () => {
 
       const aboutPage = new WorkspaceAboutPage(page);
       await aboutPage.waitForLoad();
-
-      // This test is not hermetic - if the collaborator is already on this
-      // workspace, just remove them before continuing.
-      let accessLevel = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
-      if (accessLevel !== null) {
-        await (await aboutPage.openShareModal()).removeUser(config.collaboratorUsername);
-        await waitWhileLoading(page);
-      }
+       // if the collaborator is already on this workspace, just remove them before continuing.
+       await aboutPage.removeCollab();
 
       let shareModal = await aboutPage.openShareModal();
       await shareModal.shareWithUser(config.collaboratorUsername, WorkspaceAccessLevel.Owner);
       // Collab list is refreshed.
       await waitWhileLoading(page);
 
-      accessLevel = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
+      let accessLevel = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
       expect(accessLevel).toBe(WorkspaceAccessLevel.Owner);
 
       shareModal = await aboutPage.openShareModal();
@@ -68,7 +62,7 @@ describe('Share workspace', () => {
       const workspaceName = await workspaceCard.getWorkspaceName();
 
       // Open the Share modal
-      await workspaceCard.selectSnowmanMenu(Option.Share, {waitForNav: false});
+      await workspaceCard.selectSnowmanMenu(MenuOption.Share, {waitForNav: false});
 
       const shareModal = new ShareModal(page);
       await shareModal.waitUntilVisible();
@@ -92,13 +86,7 @@ describe('Share workspace', () => {
       expect(accessLevel).toBe(WorkspaceAccessLevel.Reader);
 
       // Share, Edit and Delete actions are not available for click.
-      const snowmanMenu = await workspaceCard2.getSnowmanMenu();
-      expect(await snowmanMenu.isOptionDisabled(Option.Share)).toBe(true);
-      expect(await snowmanMenu.isOptionDisabled(Option.Edit)).toBe(true);
-      expect(await snowmanMenu.isOptionDisabled(Option.Delete)).toBe(true);
-
-      // Duplicate action is available for click.
-      expect(await snowmanMenu.isOptionDisabled(Option.Duplicate)).toBe(false);
+      await workspaceCard2.verifyWorkspaceCardMenuOptions();
 
       // Make sure the Search input-field in Share modal is disabled.
       await workspaceCard2.clickWorkspaceName();

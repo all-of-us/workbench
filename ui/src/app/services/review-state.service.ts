@@ -1,7 +1,7 @@
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {CohortReview, CohortStatus, ParticipantCohortStatus} from 'generated/fetch';
+import {CohortReview, CohortStatus, FilterColumns, ParticipantCohortStatus, SortOrder} from 'generated/fetch';
 
 export const initialFilterState = {
   global: {
@@ -95,11 +95,20 @@ export const initialFilterState = {
   vocab: 'standard',
 };
 
+const initialPaginationState = {
+  page: 0,
+  pageSize: 25,
+  sortColumn: FilterColumns.PARTICIPANTID,
+  sortOrder: SortOrder.Asc
+};
+
 export const cohortReviewStore = new BehaviorSubject<CohortReview>(undefined);
 export const visitsFilterOptions = new BehaviorSubject<Array<any>>(null);
 export const filterStateStore = new BehaviorSubject<any>(JSON.parse(JSON.stringify(initialFilterState)));
 export const vocabOptions = new BehaviorSubject<any>(null);
 export const participantStore = new BehaviorSubject<ParticipantCohortStatus>(null);
+export const queryResultSizeStore = new BehaviorSubject<number>(undefined);
+export const reviewPaginationStore = new BehaviorSubject<any>(initialPaginationState);
 
 export function getVocabOptions(workspaceNamespace: string, workspaceId: string, cohortReviewId: number) {
   const vocabFilters = {source: {}, standard: {}};

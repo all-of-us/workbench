@@ -2,7 +2,7 @@ import CopyModal from 'app/component/copy-modal';
 import DataResourceCard from 'app/component/data-resource-card';
 import NewNotebookModal from 'app/component/new-notebook-modal';
 import Link from 'app/element/link';
-import {Option, Language, LinkText, ResourceCard} from 'app/text-labels';
+import {MenuOption, Language, LinkText, ResourceCard} from 'app/text-labels';
 import {Page} from 'puppeteer';
 import {getPropValue} from 'utils/element-utils';
 import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
@@ -42,13 +42,15 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
 
     // Log notebook page heading.
     const pageHeadingCss = '[data-test-id="notebook-redirect"] > h2';
-    const pageHeading = await this.page.waitForSelector(pageHeadingCss, {visible: true});
-    console.log(await getPropValue<string>(pageHeading, 'textContent'));
+    const headingTextElement = await this.page.waitForSelector(pageHeadingCss, {visible: true});
+    const headingText = await getPropValue<string>(headingTextElement, 'textContent');
 
     // Log notebook progress text message
     const progressCss = '[data-test-id="current-progress-card"]';
-    const progressText = await this.page.waitForSelector(progressCss, {visible: true});
-    console.log(await getPropValue<string>(progressText, 'textContent'));
+    const progressTextElement = await this.page.waitForSelector(progressCss, {visible: true});
+    const progressText = await getPropValue<string>(progressTextElement, 'textContent');
+
+    console.log(`${headingText}. ${progressText}`);
 
     // Wait for existances of important messages.
     const warningTexts = 'You are prohibited from taking screenshots or attempting in any way to remove participant-level data from the workbench.';
@@ -89,7 +91,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
   async duplicateNotebook(notebookName: string): Promise<string> {
     const resourceCard = new DataResourceCard(this.page);
     const notebookCard = await resourceCard.findCard(notebookName, ResourceCard.Notebook);
-    await notebookCard.selectSnowmanMenu(Option.Duplicate, {waitForNav: false});
+    await notebookCard.selectSnowmanMenu(MenuOption.Duplicate, {waitForNav: false});
     await waitWhileLoading(this.page);
     return `Duplicate of ${notebookName}`; // name of clone notebook
   }
@@ -104,7 +106,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     // Open Copy modal.s
     const resourceCard = new DataResourceCard(this.page);
     const notebookCard = await resourceCard.findCard(notebookName, ResourceCard.Notebook);
-    await notebookCard.selectSnowmanMenu(Option.CopyToAnotherWorkspace, {waitForNav: false});
+    await notebookCard.selectSnowmanMenu(MenuOption.CopyToAnotherWorkspace, {waitForNav: false});
     // Fill out modal fields.
     const copyModal = await new CopyModal(this.page);
     await copyModal.waitForLoad();

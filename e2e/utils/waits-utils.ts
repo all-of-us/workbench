@@ -39,7 +39,7 @@ export async function waitForDocumentTitle(page: Page, titleSubstr: string): Pro
     const jsHandle = await page.waitForFunction(t => {
       const actualTitle = document.title;
       return actualTitle.includes(t);
-    }, {timeout: 30000}, titleSubstr);
+    }, {timeout: 10 * 60 * 1000}, titleSubstr);
     return (await jsHandle.jsonValue()) as boolean;
   } catch (e) {
     console.error(`waitForDocumentTitle contains "${titleSubstr}" failed. ${e}`);
@@ -164,6 +164,7 @@ export async function waitForHidden(page: Page, cssSelector: string): Promise<bo
  * @param {string} cssSelector - The selector for the element on the page
  * @param {string} attribute - The attribute name
  * @param {string} value - The attribute value to match
+ * @param {number} timeout - the timeout in msecs
  */
 export async function waitForAttributeEquality(page: Page,
                                                selector: {xpath?: string, css?: string},
@@ -261,9 +262,9 @@ export async function waitForText(page: Page,
  * It usually indicates the page is ready for user interaction.
  * </pre>
  */
-export async function waitWhileLoading(page: Page, timeout: number = 90000): Promise<void> {
+export async function waitWhileLoading(page: Page, timeout: number = (2 * 60 * 1000)): Promise<void> {
   const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
-  const spinElementsSelector = '[style*="running spin"], .spinner:empty, svg[style*="running rotation"]:not([aria-hidden="true"])';
+  const spinElementsSelector = '[style*="running spin"], .spinner:empty, [style*="running rotation"]:not([aria-hidden="true"])';
 
   // To prevent checking on blank page, wait for elements exist in DOM.
   await Promise.race([
@@ -276,6 +277,8 @@ export async function waitWhileLoading(page: Page, timeout: number = 90000): Pro
     const elements = document.querySelectorAll(css);
     return elements && elements.length === 0;
   }, {polling: 'mutation', timeout}, spinElementsSelector);
+
+  await page.waitForTimeout(500);
 }
 
 export async function waitUntilEnabled(page: Page, cssSelector: string): Promise<boolean> {

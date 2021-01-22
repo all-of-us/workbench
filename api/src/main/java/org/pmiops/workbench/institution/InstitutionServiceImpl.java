@@ -17,7 +17,6 @@ import org.pmiops.workbench.db.dao.InstitutionEmailAddressDao;
 import org.pmiops.workbench.db.dao.InstitutionEmailDomainDao;
 import org.pmiops.workbench.db.dao.InstitutionUserInstructionsDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingInstitution;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionUserInstructions;
 import org.pmiops.workbench.db.model.DbUser;
@@ -280,11 +279,6 @@ public class InstitutionServiceImpl implements InstitutionService {
         .findFirstByUser(user)
         .map(DbVerifiedInstitutionalAffiliation::getInstitution)
         .map(dbi -> institutionMapper.dbToModel(dbi, this));
-  }
-
-  @Override
-  public List<ProjectedReportingInstitution> getReportingInstitutions() {
-    return institutionDao.getReportingInstitutions();
   }
 
   private Institution toModel(DbInstitution dbInstitution) {

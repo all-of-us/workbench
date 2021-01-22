@@ -90,7 +90,7 @@ function canWrite(resource: WorkspaceResource): boolean {
 }
 
 function canDelete(resource: WorkspaceResource): boolean {
-  return resource.permission === 'OWNER';
+  return resource.permission === 'OWNER' || resource.permission === 'WRITER';
 }
 
 interface NavProps extends PropsWithChildren<any> {

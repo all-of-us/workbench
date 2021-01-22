@@ -50,7 +50,7 @@ def get_config(env)
   return JSON.parse(File.read("../../config/" + ENVIRONMENTS[env][:config_json]))
 end
 
-def get_auth_domain_group(project)
+def get_auth_domain_group_email(project)
   return get_config(project)["firecloud"]["registeredDomainGroup"]
 end
 
@@ -104,6 +104,8 @@ def publish_cdr(cmd_name, args)
   common = Common.new
   env = ENVIRONMENTS[op.opts.project]
   account = env.fetch(:publisher_account)
+  app_sa = "#{ENVIRONMENTS[op.opts.project]}@appspot.gserviceaccount.com"
+
   # TODO(RW-3208): Investigate using a temporary / impersonated SA credential instead of a key.
   key_file = Tempfile.new(["#{account}-key", ".json"], "/tmp")
   ServiceAccountContext.new(
@@ -123,10 +125,6 @@ def publish_cdr(cmd_name, args)
     # bq init --delete_credentials as recommended in the output.
     # TODO(RW-3768): Find a better solution for Google credentials in docker.
 
-    # If you receive a prompt from "bq" for selecting a default project ID, just
-    # hit enter.
-    # TODO(RW-3768): Figure out how to prepopulate this value or disable interactivity.
-
     # Copy through an intermediate project and delete after (include TTL in case later steps fail).
     # See https://docs.google.com/document/d/1EHw5nisXspJjA9yeZput3W4-vSIcuLBU5dPizTnk1i0/edit
     common.run_inline %W{bq mk -f --default_table_expiration 7200 --dataset #{ingest_dataset}}
@@ -140,27 +138,44 @@ def publish_cdr(cmd_name, args)
         #{table_match_filter} #{table_skip_filter}}
 
     # Delete the intermediate dataset.
-    common.run_inline %W{bq rm -rf --dataset #{ingest_dataset}}
+    common.run_inline %W{bq rm -r -f --dataset #{ingest_dataset}}
 
-    auth_domain_group = get_auth_domain_group(op.opts.project)
+    auth_domain_group_email = get_auth_domain_group_email(op.opts.project)
 
     config_file = Tempfile.new("#{op.opts.bq_dataset}-config.json")
     begin
       json = JSON.parse(
         common.capture_stdout %{bq show --format=prettyjson #{dest_dataset}})
       existing_groups = Set[]
+      existing_users = Set[]
       for entry in json["access"]
         if entry.key?("groupByEmail")
           existing_groups.add(entry["groupByEmail"])
         end
+        if entry.key?("userByEmail")
+          existing_users.add(entry["userByEmail"])
+        end
       end
-      if existing_groups.include?(auth_domain_group)
-        common.status "#{auth_domain_group} already in ACL, skipping..."
+
+      if existing_groups.include?(auth_domain_group_email)
+        common.status "#{auth_domain_group_email} already in ACL, skipping..."
       else
-        common.status "Adding #{auth_domain_group} as a READER..."
-        new_entry = { "groupByEmail" => auth_domain_group, "role" => "READER"}
+        common.status "Adding #{auth_domain_group_email} as a READER..."
+        new_entry = { "groupByEmail" => auth_domain_group_email, "role" => "READER"}
         json["access"].push(new_entry)
       end
+
+      # if the app SA's in too many groups, it won't gain READER transitively.
+      # add it directly, to make sure.
+      # See discussion at https://pmi-engteam.slack.com/archives/CHRN2R51N/p1609869521078200?thread_ts=1609796171.063800&cid=CHRN2R51N
+      if existing_users.include?(app_sa)
+        common.status "#{app_sa} already in ACL, skipping..."
+      else
+        common.status "Adding #{app_sa} as a READER..."
+        new_entry = { "userByEmail" => app_sa, "role" => "READER"}
+        json["access"].push(new_entry)
+      end
+
       File.open(config_file.path, "w") do |f|
         f.write(JSON.pretty_generate(json))
       end

@@ -7,7 +7,7 @@ import {ElementType} from 'app/xpath-options';
 import {makeRandomName} from 'utils/str-utils';
 import {waitForDocumentTitle, waitForNumericalString, waitWhileLoading} from 'utils/waits-utils';
 import {buildXPath} from 'app/xpath-builders';
-import {LinkText} from 'app/text-labels';
+import {LinkText, MenuOption} from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
 import CohortParticipantsGroup from './cohort-participants-group';
 
@@ -42,7 +42,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
     await createCohortButton.waitUntilEnabled();
     await createCohortButton.click(); // Click dropdown trigger to open menu
     const menu =  new TieredMenu(this.page);
-    await menu.select(['Save']);
+    await menu.select(MenuOption.Save);
   }
 
   async saveCohortAs(cohortName?: string, description?: string): Promise<string> {
@@ -64,15 +64,13 @@ export default class CohortBuildPage extends AuthenticatedPage {
     const descriptionTextarea = await modal.waitForTextarea('DESCRIPTION');
     await descriptionTextarea.type(description);
 
-    await modal.clickButton(LinkText.Save, {waitForClose: true});
+    await modal.clickButton(LinkText.Save, {waitForClose: true, timeout: 2  * 60 * 1000});
     await waitWhileLoading(this.page);
 
     return cohortName;
   }
 
   async deleteCohort(): Promise<string[]> {
-    const saveButton = this.getSaveCohortButton();
-    await saveButton.waitUntilEnabled();
     await this.getDeleteButton().then(b => b.click());
     return this.deleteConfirmationDialog();
   }

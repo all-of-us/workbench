@@ -45,5 +45,17 @@ export default class CohortReviewPage extends AuthenticatedPage {
     await waitWhileLoading(this.page);
     return textContent;
   }
+    /**
+     * Get the participant ID in specified row
+     * @param {number} rowIndex
+     * @return {string} Participant text that was clicked on.
+     */
+   async getParticipantLinkId(rowIndex: number = 1, colIndex: number = 1): Promise<string> {
+    const dataTable = this.getDataTable();
+    const bodyTable = dataTable.getBodyTable();
+    const cell = await bodyTable.getCell(rowIndex, colIndex);
+    const textContent = await getPropValue<string>(cell, 'textContent');
+    return textContent;
+  }
 
 }

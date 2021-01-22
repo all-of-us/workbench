@@ -1,5 +1,6 @@
 package org.pmiops.workbench.notebooks;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoUserJupyterExtensionConfig;
 import org.pmiops.workbench.model.Runtime;
+import org.pmiops.workbench.model.RuntimeConfigurationType;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
@@ -40,7 +42,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
-  private static final String WORKSPACE_CDR = "WORKSPACE_CDR";
+  private static final String WORKSPACE_CDR_ENV_KEY = "WORKSPACE_CDR";
+  private static final String JUPYTER_DEBUG_LOGGING_ENV_KEY = "JUPYTER_DEBUG_LOGGING";
 
   private static final Logger log = Logger.getLogger(LeonardoNotebooksClientImpl.class.getName());
 
@@ -106,12 +109,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     runtimeLabels.put(LeonardoMapper.RUNTIME_LABEL_AOU, "true");
     runtimeLabels.put(LeonardoMapper.RUNTIME_LABEL_CREATED_BY, userEmail);
 
-    if (runtime.getConfigurationType() != null) {
-      runtimeLabels.put(
-          LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG,
-          LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
-              runtime.getConfigurationType()));
-    }
+    runtimeLabels.putAll(buildRuntimeConfigurationLabels(runtime.getConfigurationType()));
 
     LeonardoCreateRuntimeRequest request =
         new LeonardoCreateRuntimeRequest()
@@ -173,11 +171,14 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     // i.e. is NEW or MIGRATED
     if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {
       customEnvironmentVariables.put(
-          WORKSPACE_CDR,
+          WORKSPACE_CDR_ENV_KEY,
           workspace.getCdrVersion().getBigqueryProject()
               + "."
               + workspace.getCdrVersion().getBigqueryDataset());
     }
+
+    // See RW-6079
+    customEnvironmentVariables.put(JUPYTER_DEBUG_LOGGING_ENV_KEY, "true");
 
     leonardoRetryHandler.run(
         (context) -> {
@@ -195,8 +196,8 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
 
   @Override
   public void updateRuntime(Runtime runtime) {
-    // TODO: Apply labels on updateRuntime,
-    // https://precisionmedicineinitiative.atlassian.net/browse/RW-5852
+    Map<String, String> runtimeLabels =
+        buildRuntimeConfigurationLabels(runtime.getConfigurationType());
 
     leonardoRetryHandler.run(
         (context) -> {
@@ -208,10 +209,22 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                   new LeonardoUpdateRuntimeRequest()
                       .allowStop(true)
                       .runtimeConfig(
-                          buildRuntimeConfig(
-                              runtime, userProvider.get().getClusterConfigDefault())));
+                          buildRuntimeConfig(runtime, userProvider.get().getClusterConfigDefault()))
+                      .labelsToUpsert(runtimeLabels));
           return null;
         });
+  }
+
+  private Map<String, String> buildRuntimeConfigurationLabels(
+      RuntimeConfigurationType runtimeConfigurationType) {
+    if (runtimeConfigurationType != null) {
+      return Collections.singletonMap(
+          LeonardoMapper.RUNTIME_LABEL_AOU_CONFIG,
+          LeonardoMapper.RUNTIME_CONFIGURATION_TYPE_ENUM_TO_STORAGE_MAP.get(
+              runtimeConfigurationType));
+    } else {
+      return new HashMap<>();
+    }
   }
 
   @Override

@@ -2598,13 +2598,6 @@ components:
           type: string
           enum: [GCR, DockerHub]
           description: The container registry from which to pull the latest version of welder.
-        welderDockerImage:
-          type: string
-          description: >
-            The Welder docker image to install. Only takes effect if the tool
-            being installed supports welder.
-
-            May be Dockerhub or GCR. If not set, then a default Welder image will be installed.
         scopes:
           type: array
           items:
@@ -2682,13 +2675,6 @@ components:
           type: string
           enum: [GCR, DockerHub]
           description: The container registry from which to pull the latest version of welder.
-        welderDockerImage:
-          type: string
-          description: >
-            The Welder docker image to install. Only takes effect if the tool
-            being installed supports welder.
-
-            May be Dockerhub or GCR. If not set, then a default Welder image will be installed.
         scopes:
           type: array
           items:
@@ -2783,6 +2769,14 @@ components:
           description: The number of minutes of idle time to elapse before the cluster is
             autopaused. If autopause is set to false, this value is disregarded.
             A value of 0 is equivalent to autopause being turned off.
+        labelsToUpsert:
+          type: object
+          description: Labels to update or add on the runtime. Of type Map[String, String]. You cannot alter default labels or add a label with a null value.
+        labelsToDelete:
+          type: array
+          description: A set of label keys to remove from the runtime labels. Of type Set[String]. You cannot delete a default label.
+          items:
+            type: string
     CreateDiskRequest:
       description: "Creates a new persistent disk"
       type: object

@@ -1,8 +1,6 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -189,15 +187,12 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
-    drugNode1 = drugCriteriaParent();
-    saveCriteriaWithPath("0", drugNode1);
-    drugNode2 = drugCriteriaChild(drugNode1.getId());
-    saveCriteriaWithPath(drugNode1.getPath(), drugNode2);
+    drugNode1 = saveCriteriaWithPath("0", drugCriteriaParent());
+    drugNode2 = saveCriteriaWithPath(drugNode1.getPath(), drugCriteriaChild(drugNode1.getId()));
 
-    criteriaParent = icd9CriteriaParent();
-    saveCriteriaWithPath("0", criteriaParent);
-    criteriaChild = icd9CriteriaChild(criteriaParent.getId());
-    saveCriteriaWithPath(criteriaParent.getPath(), criteriaChild);
+    criteriaParent = saveCriteriaWithPath("0", icd9CriteriaParent());
+    criteriaChild =
+        saveCriteriaWithPath(criteriaParent.getPath(), icd9CriteriaChild(criteriaParent.getId()));
 
     icd9 =
         cbCriteriaDao.save(
@@ -240,106 +235,114 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .build());
 
     temporalParent1 =
-        DbCriteria.builder()
-            .addAncestorData(false)
-            .addCode("001")
-            .addConceptId("0")
-            .addDomainId(Domain.CONDITION.toString())
-            .addType(CriteriaType.ICD10CM.toString())
-            .addGroup(true)
-            .addSelectable(true)
-            .addStandard(false)
-            .addSynonyms("+[CONDITION_rank1]")
-            .build();
-    saveCriteriaWithPath("0", temporalParent1);
+        saveCriteriaWithPath(
+            "0",
+            DbCriteria.builder()
+                .addAncestorData(false)
+                .addCode("001")
+                .addConceptId("0")
+                .addDomainId(Domain.CONDITION.toString())
+                .addType(CriteriaType.ICD10CM.toString())
+                .addGroup(true)
+                .addSelectable(true)
+                .addStandard(false)
+                .addSynonyms("+[CONDITION_rank1]")
+                .build());
     temportalChild1 =
-        DbCriteria.builder()
-            .addParentId(temporalParent1.getId())
-            .addAncestorData(false)
-            .addCode("001.1")
-            .addConceptId("1")
-            .addDomainId(Domain.CONDITION.toString())
-            .addType(CriteriaType.ICD10CM.toString())
-            .addGroup(false)
-            .addSelectable(true)
-            .addStandard(false)
-            .addSynonyms("+[CONDITION_rank1]")
-            .build();
-    saveCriteriaWithPath(temporalParent1.getPath(), temportalChild1);
+        saveCriteriaWithPath(
+            temporalParent1.getPath(),
+            temportalChild1 =
+                DbCriteria.builder()
+                    .addParentId(temporalParent1.getId())
+                    .addAncestorData(false)
+                    .addCode("001.1")
+                    .addConceptId("1")
+                    .addDomainId(Domain.CONDITION.toString())
+                    .addType(CriteriaType.ICD10CM.toString())
+                    .addGroup(false)
+                    .addSelectable(true)
+                    .addStandard(false)
+                    .addSynonyms("+[CONDITION_rank1]")
+                    .build());
 
     procedureParent1 =
-        DbCriteria.builder()
-            .addParentId(99999)
-            .addDomainId(Domain.PROCEDURE.toString())
-            .addType(CriteriaType.SNOMED.toString())
-            .addStandard(true)
-            .addCode("386637004")
-            .addName("Obstetric procedure")
-            .addCount(36673L)
-            .addGroup(true)
-            .addSelectable(true)
-            .addAncestorData(false)
-            .addConceptId("4302541")
-            .addSynonyms("+[PROCEDURE_rank1]")
-            .build();
-    saveCriteriaWithPath("0", procedureParent1);
+        saveCriteriaWithPath(
+            "0",
+            DbCriteria.builder()
+                .addParentId(99999)
+                .addDomainId(Domain.PROCEDURE.toString())
+                .addType(CriteriaType.SNOMED.toString())
+                .addStandard(true)
+                .addCode("386637004")
+                .addName("Obstetric procedure")
+                .addCount(36673L)
+                .addGroup(true)
+                .addSelectable(true)
+                .addAncestorData(false)
+                .addConceptId("4302541")
+                .addSynonyms("+[PROCEDURE_rank1]")
+                .build());
     procedureChild1 =
-        DbCriteria.builder()
-            .addParentId(procedureParent1.getId())
-            .addDomainId(Domain.PROCEDURE.toString())
-            .addType(CriteriaType.SNOMED.toString())
-            .addStandard(true)
-            .addCode("386639001")
-            .addName("Termination of pregnancy")
-            .addCount(50L)
-            .addGroup(false)
-            .addSelectable(true)
-            .addAncestorData(false)
-            .addConceptId("4")
-            .addSynonyms("+[PROCEDURE_rank1]")
-            .build();
-    saveCriteriaWithPath(procedureParent1.getPath(), procedureChild1);
+        saveCriteriaWithPath(
+            procedureParent1.getPath(),
+            DbCriteria.builder()
+                .addParentId(procedureParent1.getId())
+                .addDomainId(Domain.PROCEDURE.toString())
+                .addType(CriteriaType.SNOMED.toString())
+                .addStandard(true)
+                .addCode("386639001")
+                .addName("Termination of pregnancy")
+                .addCount(50L)
+                .addGroup(false)
+                .addSelectable(true)
+                .addAncestorData(false)
+                .addConceptId("4")
+                .addSynonyms("+[PROCEDURE_rank1]")
+                .build());
 
     surveyNode =
-        DbCriteria.builder()
-            .addParentId(0)
-            .addDomainId(Domain.SURVEY.toString())
-            .addType(CriteriaType.PPI.toString())
-            .addSubtype(CriteriaSubType.SURVEY.toString())
-            .addGroup(true)
-            .addSelectable(true)
-            .addStandard(false)
-            .addConceptId("22")
-            .build();
-    saveCriteriaWithPath("0", surveyNode);
+        saveCriteriaWithPath(
+            "0",
+            DbCriteria.builder()
+                .addParentId(0)
+                .addDomainId(Domain.SURVEY.toString())
+                .addType(CriteriaType.PPI.toString())
+                .addSubtype(CriteriaSubType.SURVEY.toString())
+                .addGroup(true)
+                .addSelectable(true)
+                .addStandard(false)
+                .addConceptId("22")
+                .build());
     questionNode =
-        DbCriteria.builder()
-            .addParentId(surveyNode.getId())
-            .addDomainId(Domain.SURVEY.toString())
-            .addType(CriteriaType.PPI.toString())
-            .addSubtype(CriteriaSubType.QUESTION.toString())
-            .addGroup(true)
-            .addSelectable(true)
-            .addStandard(false)
-            .addName("In what country were you born?")
-            .addConceptId("1585899")
-            .addSynonyms("[SURVEY_rank1]")
-            .build();
-    saveCriteriaWithPath(surveyNode.getPath(), questionNode);
+        saveCriteriaWithPath(
+            surveyNode.getPath(),
+            DbCriteria.builder()
+                .addParentId(surveyNode.getId())
+                .addDomainId(Domain.SURVEY.toString())
+                .addType(CriteriaType.PPI.toString())
+                .addSubtype(CriteriaSubType.QUESTION.toString())
+                .addGroup(true)
+                .addSelectable(true)
+                .addStandard(false)
+                .addName("In what country were you born?")
+                .addConceptId("1585899")
+                .addSynonyms("[SURVEY_rank1]")
+                .build());
     answerNode =
-        DbCriteria.builder()
-            .addParentId(questionNode.getId())
-            .addDomainId(Domain.SURVEY.toString())
-            .addType(CriteriaType.PPI.toString())
-            .addSubtype(CriteriaSubType.ANSWER.toString())
-            .addGroup(false)
-            .addSelectable(true)
-            .addStandard(false)
-            .addName("USA")
-            .addConceptId("5")
-            .addSynonyms("[SURVEY_rank1]")
-            .build();
-    saveCriteriaWithPath(questionNode.getPath(), answerNode);
+        saveCriteriaWithPath(
+            questionNode.getPath(),
+            DbCriteria.builder()
+                .addParentId(questionNode.getId())
+                .addDomainId(Domain.SURVEY.toString())
+                .addType(CriteriaType.PPI.toString())
+                .addSubtype(CriteriaSubType.ANSWER.toString())
+                .addGroup(false)
+                .addSelectable(true)
+                .addStandard(false)
+                .addName("USA")
+                .addConceptId("5")
+                .addSynonyms("[SURVEY_rank1]")
+                .build());
 
     dbPerson1 = personDao.save(DbPerson.builder().addAgeAtConsent(55).addAgeAtCdr(56).build());
     dbPerson2 = personDao.save(DbPerson.builder().addAgeAtConsent(22).addAgeAtCdr(22).build());
@@ -607,8 +610,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .type(CriteriaType.DECEASED.toString())
         .group(false)
         .standard(true)
-        .ancestorData(false)
-        .value("Deceased");
+        .ancestorData(false);
   }
 
   private static SearchParameter fitbit() {
@@ -630,6 +632,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .conceptId(22L);
   }
 
+  private static SearchParameter surveyAnswer() {
+    return new SearchParameter()
+        .domain(Domain.SURVEY.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.ANSWER.toString())
+        .ancestorData(false)
+        .standard(false)
+        .group(true)
+        .conceptId(5L);
+  }
+
   private static SearchParameter copeSurveyQuestion() {
     return new SearchParameter()
         .domain(Domain.SURVEY.toString())
@@ -641,6 +654,36 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .conceptId(44L)
         .attributes(
             ImmutableList.of(
+                new Attribute()
+                    .name(AttrName.SURVEY_VERSION_CONCEPT_ID)
+                    .operator(Operator.IN)
+                    .operands(ImmutableList.of("100", "101"))));
+  }
+
+  private static SearchParameter copeSurveyQuestionAnyValue() {
+    return new SearchParameter()
+        .domain(Domain.SURVEY.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.QUESTION.toString())
+        .ancestorData(false)
+        .standard(false)
+        .group(true)
+        .conceptId(44L)
+        .attributes(ImmutableList.of(new Attribute().name(AttrName.ANY)));
+  }
+
+  private static SearchParameter copeSurveyQuestionVersionAndAnyValue() {
+    return new SearchParameter()
+        .domain(Domain.SURVEY.toString())
+        .type(CriteriaType.PPI.toString())
+        .subtype(CriteriaSubType.QUESTION.toString())
+        .ancestorData(false)
+        .standard(false)
+        .group(true)
+        .conceptId(44L)
+        .attributes(
+            ImmutableList.of(
+                new Attribute().name(AttrName.ANY),
                 new Attribute()
                     .name(AttrName.SURVEY_VERSION_CONCEPT_ID)
                     .operator(Operator.IN)
@@ -807,7 +850,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         ImmutableList.of(new StandardFlag().standard(false), new StandardFlag().standard(true));
     List<CriteriaMenuOption> options =
         controller.findCriteriaMenuOptions(cdrVersion.getCdrVersionId()).getBody().getItems();
-    assertEquals(4, options.size());
+
+    assertThat(options.size()).isEqualTo(4);
     CriteriaMenuOption option1 =
         new CriteriaMenuOption()
             .domain(Domain.CONDITION.toString())
@@ -852,22 +896,24 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 new CriteriaMenuSubOption()
                     .type(CriteriaType.PPI.toString())
                     .standardFlags(sourceFlag));
-    assertTrue(options.contains(option1));
-    assertTrue(options.contains(option2));
-    assertTrue(options.contains(option3));
-    assertTrue(options.contains(option4));
+    assertThat(options.contains(option1)).isTrue();
+    assertThat(options.contains(option2)).isTrue();
+    assertThat(options.contains(option3)).isTrue();
+    assertThat(options.contains(option4)).isTrue();
   }
 
   @Test
   public void findDataFilters() {
     List<DataFilter> filters =
         controller.findDataFilters(cdrVersion.getCdrVersionId()).getBody().getItems();
-    assertTrue(
-        filters.contains(
-            new DataFilter().dataFilterId(1L).displayName("displayName1").name("name1")));
-    assertTrue(
-        filters.contains(
-            new DataFilter().dataFilterId(2L).displayName("displayName2").name("name2")));
+    assertThat(
+            filters.contains(
+                new DataFilter().dataFilterId(1L).displayName("displayName1").name("name1")))
+        .isTrue();
+    assertThat(
+            filters.contains(
+                new DataFilter().dataFilterId(2L).displayName("displayName2").name("name2")))
+        .isTrue();
   }
 
   @Test
@@ -882,7 +928,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals("Bad Request: attribute operator null is not valid.", bre.getMessage());
+      assertThat(bre.getMessage()).isEqualTo("Bad Request: attribute operator null is not valid.");
     }
 
     attribute.operator(Operator.BETWEEN);
@@ -890,7 +936,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals("Bad Request: attribute operands are empty.", bre.getMessage());
+      assertThat(bre.getMessage()).isEqualTo("Bad Request: attribute operands are empty.");
     }
 
     attribute.operands(ImmutableList.of("20"));
@@ -898,9 +944,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals(
-          "Bad Request: attribute NUM can only have 2 operands when using the BETWEEN operator",
-          bre.getMessage());
+      assertThat(bre.getMessage())
+          .isEqualTo(
+              "Bad Request: attribute NUM can only have 2 operands when using the BETWEEN operator");
     }
 
     attribute.operands(ImmutableList.of("s", "20"));
@@ -908,7 +954,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals("Bad Request: attribute NUM operands must be numeric.", bre.getMessage());
+      assertThat(bre.getMessage())
+          .isEqualTo("Bad Request: attribute NUM operands must be numeric.");
     }
 
     attribute.operands(ImmutableList.of("10", "20"));
@@ -917,9 +964,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals(
-          "Bad Request: attribute NUM must have one operand when using the EQUAL operator.",
-          bre.getMessage());
+      assertThat(bre.getMessage())
+          .isEqualTo(
+              "Bad Request: attribute NUM must have one operand when using the EQUAL operator.");
     }
   }
 
@@ -933,7 +980,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals("Bad Request: modifier operator null is not valid.", bre.getMessage());
+      assertThat(bre.getMessage()).isEqualTo("Bad Request: modifier operator null is not valid.");
     }
 
     modifier.operator(Operator.BETWEEN);
@@ -941,7 +988,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals("Bad Request: modifier operands are empty.", bre.getMessage());
+      assertThat(bre.getMessage()).isEqualTo("Bad Request: modifier operands are empty.");
     }
 
     modifier.operands(ImmutableList.of("20"));
@@ -949,9 +996,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals(
-          "Bad Request: modifier AGE_AT_EVENT can only have 2 operands when using the BETWEEN operator",
-          bre.getMessage());
+      assertThat(bre.getMessage())
+          .isEqualTo(
+              "Bad Request: modifier AGE_AT_EVENT can only have 2 operands when using the BETWEEN operator");
     }
 
     modifier.operands(ImmutableList.of("s", "20"));
@@ -959,8 +1006,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals(
-          "Bad Request: modifier AGE_AT_EVENT operands must be numeric.", bre.getMessage());
+      assertThat(bre.getMessage())
+          .isEqualTo("Bad Request: modifier AGE_AT_EVENT operands must be numeric.");
     }
 
     modifier.operands(ImmutableList.of("10", "20"));
@@ -969,9 +1016,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals(
-          "Bad Request: modifier AGE_AT_EVENT must have one operand when using the EQUAL operator.",
-          bre.getMessage());
+      assertThat(bre.getMessage())
+          .isEqualTo(
+              "Bad Request: modifier AGE_AT_EVENT must have one operand when using the EQUAL operator.");
     }
 
     modifier.name(ModifierType.EVENT_DATE);
@@ -980,7 +1027,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals("Bad Request: modifier EVENT_DATE must be a valid date.", bre.getMessage());
+      assertThat(bre.getMessage())
+          .isEqualTo("Bad Request: modifier EVENT_DATE must be a valid date.");
     }
   }
 
@@ -1045,8 +1093,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals(
-          "Bad Request: search group item temporal group null is not valid.", bre.getMessage());
+      assertThat(bre.getMessage())
+          .isEqualTo("Bad Request: search group item temporal group null is not valid.");
     }
 
     icd9SGI.temporalGroup(0);
@@ -1054,9 +1102,9 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
       controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals(
-          "Bad Request: Search Group Items must provided for 2 different temporal groups(0 or 1).",
-          bre.getMessage());
+      assertThat(bre.getMessage())
+          .isEqualTo(
+              "Bad Request: Search Group Items must provided for 2 different temporal groups(0 or 1).");
     }
   }
 
@@ -2003,6 +2051,30 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
+  public void countSubjectsCopeSurveyQuestionVersionAndAnyValue() {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            Domain.SURVEY.toString(),
+            ImmutableList.of(copeSurveyQuestionVersionAndAnyValue()),
+            new ArrayList<>());
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    assertParticipants(response, 1);
+  }
+
+  @Test
+  public void countSubjectsCopeSurveyQuestionAnyValue() {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            Domain.SURVEY.toString(),
+            ImmutableList.of(copeSurveyQuestionAnyValue()),
+            new ArrayList<>());
+    ResponseEntity<Long> response =
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest);
+    assertParticipants(response, 1);
+  }
+
+  @Test
   public void countSubjectsCopeSurveyAnswer() {
     // Cope Survey
     SearchRequest searchRequest =
@@ -2046,8 +2118,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .name(AttrName.CAT)
                 .operator(Operator.IN)
                 .operands(ImmutableList.of("7")));
-    SearchParameter ppiValueAsConceptId =
-        survey().subtype(CriteriaSubType.ANSWER.toString()).conceptId(5L).attributes(attributes);
+    SearchParameter ppiValueAsConceptId = surveyAnswer().attributes(attributes);
     SearchRequest searchRequest =
         createSearchRequests(
             ppiValueAsConceptId.getDomain(),
@@ -2067,8 +2138,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 .name(AttrName.NUM)
                 .operator(Operator.EQUAL)
                 .operands(ImmutableList.of("7")));
-    SearchParameter ppiValueAsNumer =
-        survey().subtype(CriteriaSubType.ANSWER.toString()).conceptId(5L).attributes(attributes);
+    SearchParameter ppiValueAsNumer = surveyAnswer().attributes(attributes);
     SearchRequest searchRequest =
         createSearchRequests(
             ppiValueAsNumer.getDomain(), ImmutableList.of(ppiValueAsNumer), new ArrayList<>());
@@ -2092,13 +2162,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 AgeType.AGE.toString(),
                 searchRequest)
             .getBody();
-    assertEquals(2, response.getItems().size());
-    assertEquals(
-        new DemoChartInfo().name("MALE").race("Asian").ageRange("45-64").count(1L),
-        response.getItems().get(0));
-    assertEquals(
-        new DemoChartInfo().name("MALE").race("Caucasian").ageRange("18-44").count(1L),
-        response.getItems().get(1));
+    assertDemographics(response);
   }
 
   @Test
@@ -2117,13 +2181,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 AgeType.AGE_AT_CONSENT.toString(),
                 searchRequest)
             .getBody();
-    assertEquals(2, response.getItems().size());
-    assertEquals(
-        new DemoChartInfo().name("MALE").race("Asian").ageRange("45-64").count(1L),
-        response.getItems().get(0));
-    assertEquals(
-        new DemoChartInfo().name("MALE").race("Caucasian").ageRange("18-44").count(1L),
-        response.getItems().get(1));
+    assertDemographics(response);
   }
 
   @Test
@@ -2141,13 +2199,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
                 AgeType.AGE_AT_CDR.toString(),
                 searchRequest)
             .getBody();
-    assertEquals(2, response.getItems().size());
-    assertEquals(
-        new DemoChartInfo().name("MALE").race("Asian").ageRange("45-64").count(1L),
-        response.getItems().get(0));
-    assertEquals(
-        new DemoChartInfo().name("MALE").race("Caucasian").ageRange("18-44").count(1L),
-        response.getItems().get(1));
+    assertDemographics(response);
   }
 
   @Test
@@ -2209,14 +2261,22 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     assertThat(participantCount).isEqualTo(expectedCount);
   }
 
-  private void saveCriteriaWithPath(String path, DbCriteria criteria) {
+  private DbCriteria saveCriteriaWithPath(String path, DbCriteria criteria) {
     criteria = cbCriteriaDao.save(criteria);
     String pathEnd = String.valueOf(criteria.getId());
     criteria.setPath(path.isEmpty() ? pathEnd : path + "." + pathEnd);
-    criteria = cbCriteriaDao.save(criteria);
+    return cbCriteriaDao.save(criteria);
   }
 
   private void delete(DbCriteria... criteriaList) {
     Arrays.stream(criteriaList).forEach(c -> cbCriteriaDao.delete(c.getId()));
+  }
+
+  private void assertDemographics(DemoChartInfoListResponse response) {
+    assertThat(response.getItems().size()).isEqualTo(2);
+    assertThat(new DemoChartInfo().name("MALE").race("Asian").ageRange("45-64").count(1L))
+        .isEqualTo(response.getItems().get(0));
+    assertThat(new DemoChartInfo().name("MALE").race("Caucasian").ageRange("18-44").count(1L))
+        .isEqualTo(response.getItems().get(1));
   }
 }

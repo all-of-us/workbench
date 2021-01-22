@@ -1,50 +1,29 @@
 import Nouislider from 'nouislider-react';
 import * as React from 'react';
 
-import {ageCountStore} from 'app/cohort-search/search-state.service';
-import {mapParameter, typeToTitle} from 'app/cohort-search/utils';
+import {typeToTitle} from 'app/cohort-search/utils';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
-import {NumberInput} from 'app/components/inputs';
+import {NumberInput, RadioButton} from 'app/components/inputs';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {currentWorkspaceStore, serverConfigStore, setSidebarActiveIconStore} from 'app/utils/navigation';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 import {AttrName, CriteriaType, Domain, Operator} from 'generated/fetch';
 
 const styles = reactStyles({
   ageContainer: {
-    border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
-    borderRadius: '5px',
     margin: '0.5rem 1rem',
     maxHeight: '15rem',
-    padding: '0.5rem 0 1.5rem 1rem'
+    padding: '0.5rem 0 1.5rem 1rem',
+    width: '80%'
   },
   ageInput: {
     fontSize: '13px',
     marginTop: '0.25rem',
     padding: '0 0 0 0.5rem',
-  },
-  ageLabel: {
-    fontSize: '14px',
-    fontWeight: 600,
-    color: colors.primary
-  },
-  calculateBtn: {
-    background: colors.primary,
-    border: 'none',
-    borderRadius: '0.3rem',
-    color: colors.white,
-    cursor: 'pointer',
-    fontSize: '12px',
-    height: '1.5rem',
-    letterSpacing: '0.02rem',
-    lineHeight: '0.75rem',
-    margin: '0.25rem 0.5rem 0.25rem 0',
-    padding: '0rem 0.75rem',
-    textTransform: 'uppercase',
   },
   count: {
     alignItems: 'center',
@@ -65,9 +44,7 @@ const styles = reactStyles({
     backgroundColor: colorWithWhiteness(colors.secondary, 0.8),
     padding: '0.5rem',
     margin: '0 2.5%',
-    position: 'absolute',
-    width: '95%',
-    bottom: '0.5rem',
+    width: '35%',
   },
   option: {
     color: colors.black,
@@ -77,10 +54,6 @@ const styles = reactStyles({
     marginBottom: '0.5rem',
     padding: '0 0.25rem',
     textTransform: 'capitalize',
-  },
-  resultText: {
-    color: colors.primary,
-    fontWeight: 500,
   },
   selectIcon: {
     color: colors.select,
@@ -92,9 +65,10 @@ const styles = reactStyles({
   },
   selectList: {
     alignItems: 'center',
+    display: 'flex',
     marginRight: '1rem',
     maxHeight: '15rem',
-    padding: '0.5rem 0 0 1rem'
+    padding: '0.5rem 0 0 0.25rem'
   },
   slider: {
     flex: 1,
@@ -106,18 +80,14 @@ const styles = reactStyles({
     display: 'flex',
     marginRight: '1rem',
     paddingLeft: '1rem',
-    width: '96%',
   }
 });
 // Template node used for age selections
 const ageNode = {
   hasAncestorData: false,
-  attributes: [],
   code: '',
   domainId: Domain.PERSON,
   group: false,
-  name: 'Age',
-  parameterId: 'age-param',
   isStandard: true,
   type: CriteriaType.AGE,
   value: ''
@@ -142,7 +112,6 @@ function sortByCountThenName(critA, critB) {
 }
 
 interface Props {
-  count: number;
   criteriaType: CriteriaType;
   select: Function;
   selectedIds: Array<string>;
@@ -225,18 +194,6 @@ export class Demographics extends React.Component<Props, State> {
     this.setState({ageTypeNodes}, () => this.calculateAgeFromNodes());
   }
 
-  initAgeRange() {
-    const {count, selections} = this.props;
-    if (selections.length) {
-      const {attributes} = selections[0];
-      const {name, operands} = attributes[0];
-      this.slider.set([+operands[0], +operands[1]]);
-      this.setState({ageType: name, count: count || null, maxAge: operands[1], minAge: operands[0]});
-    } else {
-      this.updateAgeSelection();
-    }
-  }
-
   onMinChange(minAge: string) {
     const {maxAge} = this.state;
     let sliderMin = +minAge;
@@ -270,7 +227,7 @@ export class Demographics extends React.Component<Props, State> {
       maxAge = defaultMaxAge;
     }
     this.slider.set([null, +maxAge]);
-    this.setState({maxAge}, () => this.updateAgeSelection());
+    this.setState({maxAge});
   }
 
   onMinBlur() {
@@ -282,20 +239,16 @@ export class Demographics extends React.Component<Props, State> {
       minAge = defaultMinAge;
     }
     this.slider.set([+minAge, null]);
-    this.setState({minAge}, () => this.updateAgeSelection());
+    this.setState({minAge});
   }
 
   onRadioChange(ageType: AttrName) {
-    this.setState({ageType}, () => {
-      this.updateAgeSelection();
-      this.calculateAgeFromNodes();
-    });
+    this.setState({ageType}, () => this.calculateAgeFromNodes());
   }
 
   onSliderInit(slider: React.ReactNode) {
     this.slider = slider['noUiSlider'];
     if (this.slider) {
-      this.initAgeRange();
       this.centerAgeCount();
     }
   }
@@ -306,11 +259,18 @@ export class Demographics extends React.Component<Props, State> {
     this.setState({maxAge: max, minAge: min}, () => this.calculateAgeFromNodes());
   }
 
-  updateAgeSelection() {
+  get ageParameterId() {
     const {ageType, maxAge, minAge} = this.state;
+    return `${ageType.toString()}-${minAge}-${maxAge}`;
+  }
+
+  addAgeSelection() {
+    const {ageType, maxAge, minAge} = this.state;
+    const ageTypeLabel = ageTypes.find(at => at.type === ageType).label;
     const selectedNode = {
       ...ageNode,
-      name: `Age In Range ${minAge} - ${maxAge}`,
+      parameterId: this.ageParameterId,
+      name: `${ageTypeLabel} In Range ${minAge} - ${maxAge}`,
       attributes: [{
         name: ageType.toString(),
         operator: Operator.BETWEEN,
@@ -358,54 +318,6 @@ export class Demographics extends React.Component<Props, State> {
     this.setState({count});
   }
 
-  async calculateAge(init?: boolean) {
-    const {maxAge, minAge} = this.state;
-    if (!init || this.setTotalAge) {
-      this.setState({calculating: true});
-    }
-    const {cdrVersionId} = currentWorkspaceStore.getValue();
-    const min = init ? defaultMinAge : minAge;
-    const max = init ? defaultMaxAge : maxAge;
-    const parameter = {
-      ...ageNode,
-      name: `Age In Range ${min} - ${max}`,
-      attributes: [{
-        name: AttrName.AGE,
-        operator: Operator.BETWEEN,
-        operands: [min, max]
-      }],
-    };
-    const request = {
-      excludes: [],
-      includes: [{
-        items: [{
-          type: Domain.PERSON.toString(),
-          searchParameters: [mapParameter(parameter)],
-          modifiers: []
-        }],
-        temporal: false
-      }],
-      dataFilters: []
-    };
-    try {
-      const response = await cohortBuilderApi().countParticipants(+cdrVersionId, request);
-      if (init) {
-        const ageCounts = ageCountStore.getValue();
-        ageCounts[cdrVersionId] = response;
-        ageCountStore.next(ageCounts);
-        if (this.setTotalAge) {
-          this.setState({count: response});
-        }
-      } else {
-        this.setState({count: response});
-      }
-      this.setState({calculating: false});
-    } catch (err) {
-      console.error(err);
-      this.setState({calculating: false});
-    }
-  }
-
   calculateAgeFromNodes(minOrMax?: string) {
     const {ageTypeNodes, ageType, maxAge, minAge} = this.state;
     let max = +maxAge;
@@ -422,82 +334,79 @@ export class Demographics extends React.Component<Props, State> {
   }
 
   get showPreview() {
-    const {criteriaType, selections} = this.props;
-    return !serverConfigStore.getValue().enableCohortBuilderV2 &&
-      !this.state.loading &&
-      (selections && selections.length > 0) &&
-      criteriaType !== CriteriaType.AGE;
-  }
-
-  // Checks if form is in its initial state and if a count already exists before setting the total age count
-  get setTotalAge() {
-    const {count, maxAge, minAge} = this.state;
-    return minAge === defaultMinAge && maxAge === defaultMaxAge && !count;
+    const {selections} = this.props;
+    return !this.state.loading && !!selections && selections.length > 0;
   }
 
   render() {
     const {criteriaType, selectedIds} = this.props;
     const {ageType, calculating, count, loading, maxAge, minAge, nodes} = this.state;
     return loading
-      ? <div style={{textAlign: 'center'}}><Spinner style={{marginTop: '3rem'}}/></div>
-      : <React.Fragment>
-        {criteriaType === CriteriaType.AGE
-          // Age slider with number inputs
-          ? <div style={styles.ageContainer}>
-            <div style={styles.ageLabel}>
-              Age Range
+      ? <div style={{textAlign: 'center'}}>
+        <Spinner style={{marginTop: '3rem'}}/>
+      </div>
+      : criteriaType === CriteriaType.AGE
+        // Age slider with number inputs
+        ? <div style={styles.ageContainer}>
+          <div style={styles.sliderContainer}>
+            <div style={{width: '2.5rem'}}>
+              <NumberInput style={styles.ageInput}
+                min={defaultMinAge} max={maxAge}
+                value={minAge}
+                onBlur={() => this.onMinBlur()}
+                onChange={(v) => this.onMinChange(v)}/>
             </div>
-            <div style={styles.sliderContainer}>
-              <div style={{width: '2.5rem'}}>
-                <NumberInput style={styles.ageInput}
-                  min={defaultMinAge} max={maxAge}
-                  value={minAge}
-                  onBlur={() => this.onMinBlur()}
-                  onChange={(v) => this.onMinChange(v)}/>
+            <div style={{...styles.slider, marginBottom: '0.75rem'}}>
+              <div ref={(el) => this.ageWrapper = el} id='count-wrapper'>
+                {calculating
+                  ? <Spinner size={16}/>
+                  : <span style={styles.count} id='age-count'>
+                    {count.toLocaleString()}
+                  </span>
+                }
               </div>
-              <div style={{...styles.slider, marginBottom: '0.75rem'}}>
-                <div ref={(el) => this.ageWrapper = el} id='count-wrapper'>
-                  {calculating
-                    ? <Spinner size={16}/>
-                    : <span style={styles.count} id='age-count'>
-                      {count.toLocaleString()}
-                    </span>
-                  }
-                </div>
-                <Nouislider behaviour='drag'
-                  connect
-                  instanceRef={(slider) => this.onSliderInit(slider)}
-                  onChange={() => this.updateAgeSelection()}
-                  onSlide={(v) => this.onSliderUpdate(v)}
-                  range={{min: +defaultMinAge, max: +defaultMaxAge}}
-                  start={[+defaultMinAge, +defaultMaxAge]}
-                  step={1}/>
-              </div>
-              <div style={{width: '2.5rem'}}>
-                <NumberInput style={styles.ageInput}
-                  min={minAge} max={defaultMaxAge}
-                  value={maxAge}
-                  onBlur={() => this.onMaxBlur()}
-                  onChange={(v) => this.onMaxChange(v)}/>
-              </div>
+              <Nouislider behaviour='drag'
+                connect
+                instanceRef={(slider) => this.onSliderInit(slider)}
+                onSlide={(v) => this.onSliderUpdate(v)}
+                range={{min: +defaultMinAge, max: +defaultMaxAge}}
+                start={[+defaultMinAge, +defaultMaxAge]}
+                step={1}/>
             </div>
-            <div style={{marginLeft: '1rem'}}>
-              {ageTypes.map((ageTypeRadio, a) => <div key={a} style={{display: 'inline-block', marginRight: '0.5rem'}}>
-                <input type='radio' name='ageType'
+            <div style={{width: '2.5rem'}}>
+              <NumberInput style={styles.ageInput}
+                min={minAge} max={defaultMaxAge}
+                value={maxAge}
+                onBlur={() => this.onMaxBlur()}
+                onChange={(v) => this.onMaxChange(v)}/>
+            </div>
+            <Button style={{marginLeft: '1rem'}}
+                    type='primary'
+                    disabled={selectedIds.includes(this.ageParameterId)}
+                    onClick={() => this.addAgeSelection()}>
+              Add Selection
+            </Button>
+          </div>
+          <div style={{marginLeft: '1rem'}}>
+            {ageTypes.map((ageTypeRadio, index) =>
+              <div key={index} style={{display: 'inline-block', marginRight: '0.5rem'}}>
+                <RadioButton name='ageType'
                   style={{marginRight: '0.25rem'}}
                   onChange={() => this.onRadioChange(ageTypeRadio.type)}
                   checked={ageTypeRadio.type === ageType}/>
                 <label>{ageTypeRadio.label}</label>
-              </div>)}
-            </div>
+              </div>)
+            }
           </div>
-          // List of selectable criteria used for Race, Ethnicity, Gender and Sex
-          : <div style={styles.selectList}>
+        </div>
+        // List of selectable criteria used for Race, Ethnicity, Gender and Sex
+        : <React.Fragment>
+          <div style={styles.selectList}>
             <div style={{margin: '0.25rem 0', overflow: 'auto', width: '100%'}}>
-              {nodes.map((opt, o) => <div key={o} style={styles.option} onClick={() => this.selectOption(opt)}>
+              {nodes.map((opt, o) => <div key={o} style={styles.option}>
                 {selectedIds.includes(opt.parameterId)
                   ? <ClrIcon shape='check-circle' size='20' style={{...styles.selectIcon, ...styles.selected}}/>
-                  : <ClrIcon shape='plus-circle'  size='20' style={styles.selectIcon}/>
+                  : <ClrIcon shape='plus-circle'  size='20' style={styles.selectIcon} onClick={() => this.selectOption(opt)}/>
                 }
                 {opt.name}
                 {!!opt.count && <span style={styles.count}>
@@ -505,27 +414,20 @@ export class Demographics extends React.Component<Props, State> {
                 </span>}
               </div>)}
             </div>
-            {serverConfigStore.getValue().enableCohortBuilderV2 && <Button type='primary'
-                    style={{borderRadius: '5px', float: 'right', marginTop: '1rem'}}
-                    disabled={!!selectedIds && selectedIds.length === 0}
-                    onClick={() => setSidebarActiveIconStore.next('criteria')}>
-              Finish & Review
-            </Button>}
           </div>
-        }
-        {this.showPreview && <div style={styles.countPreview}>
-          {count !== null && <div style={{float: 'left', fontSize: '14px'}}>
-            <div style={{color: colors.primary, fontWeight: 500}}>
-              Results
-            </div>
-            <div>
-              Number Participants:
-              <b style={{color: colors.dark}}>
-                &nbsp;{count !== null ? count.toLocaleString() : ' -- '}
-              </b>
-            </div>
+          {this.showPreview && <div style={styles.countPreview}>
+            {count !== null && <div style={{fontSize: '14px'}}>
+              <div style={{color: colors.primary, fontWeight: 500}}>
+                Results
+              </div>
+              <div>
+                Number Participants:
+                <b style={{color: colors.dark}}>
+                  &nbsp;{count.toLocaleString()}
+                </b>
+              </div>
+            </div>}
           </div>}
-        </div>}
-      </React.Fragment>;
+        </React.Fragment>;
   }
 }

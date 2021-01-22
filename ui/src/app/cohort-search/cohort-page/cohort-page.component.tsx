@@ -3,7 +3,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {CohortSearch} from 'app/cohort-search/cohort-search/cohort-search.component';
-import {CBModal} from 'app/cohort-search/modal/modal.component';
 import {ListOverview} from 'app/cohort-search/overview/overview.component';
 import {SearchGroupList} from 'app/cohort-search/search-group-list/search-group-list.component';
 import {idsInUse, searchRequestStore} from 'app/cohort-search/search-state.service';
@@ -24,8 +23,7 @@ import {
 import {
   currentCohortSearchContextStore,
   currentCohortStore,
-  queryParamsStore,
-  serverConfigStore
+  queryParamsStore
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, SearchRequest} from 'generated/fetch';
@@ -158,15 +156,19 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
       setTimeout(() => this.setState({updateCount: this.state.updateCount + 1}));
     }
 
-    setSearchContext(context) {
+    setSearchContext(context: any) {
+      context.source = 'cohort';
       currentCohortSearchContextStore.next(context);
       this.setState({searchContext: context});
     }
 
-    render() {
+    get showCohortSearch() {
       const {cohortContext} = this.props;
-      const {cohort, cohortChanged, cohortError, criteria, loading, modalOpen, overview, searchContext, updateCount, updateGroupListsCount}
-        = this.state;
+      return !!cohortContext && cohortContext.source === 'cohort';
+    }
+
+    render() {
+      const {cohort, cohortChanged, cohortError, criteria, loading, modalOpen, overview, updateCount, updateGroupListsCount} = this.state;
       return <React.Fragment>
         <div style={{minHeight: '28rem', padding: '0.5rem'}}>
           {cohortError
@@ -174,45 +176,8 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
               <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
               Sorry, the cohort could not be loaded. Please try again or contact Support in the left hand navigation.
             </div>
-            : serverConfigStore.getValue().enableCohortBuilderV2
-              /* Cohort Builder V2 UI - behind enableCohortBuilderV2 feature flag */
-              ? <React.Fragment>
-                <FlexRowWrap style={{margin: '1rem 0 2rem', ...(!!cohortContext ? {display: 'none'} : {})}}>
-                  <div style={colStyle('66.66667')}>
-                    <FlexRowWrap style={{margin: '0 -0.5rem'}}>
-                      {!!cohort && !!cohort.name && <div style={{height: '1.5rem', padding: '0 0.5rem', width: '100%'}}>
-                        <h3 style={{marginTop: 0}}>{cohort.name}</h3>
-                      </div>}
-                      <div id='list-include-groups' style={colStyle('50')}>
-                        <SearchGroupList groups={criteria.includes}
-                                         setSearchContext={(c) => this.setSearchContext(c)}
-                                         role='includes'
-                                         updated={updateGroupListsCount}
-                                         updateRequest={() => this.updateRequest()}/>
-                      </div>
-                      <div id='list-exclude-groups' style={colStyle('50')}>
-                        {overview && <SearchGroupList groups={criteria.excludes}
-                                                      setSearchContext={(c) => this.setSearchContext(c)}
-                                                      role='excludes'
-                                                      updated={updateGroupListsCount}
-                                                      updateRequest={() => this.updateRequest()}/>}
-                      </div>
-                    </FlexRowWrap>
-                  </div>
-                  <div style={colStyle('33.33333')}>
-                    {overview && <ListOverview
-                        cohort={cohort}
-                        cohortChanged={cohortChanged}
-                        searchRequest={criteria}
-                        updateCount={updateCount}
-                        updating={() => this.props.setUpdatingCohort(true)}/>}
-                  </div>
-                  {loading && <SpinnerOverlay/>}
-                </FlexRowWrap>
-                {!!cohortContext && <CohortSearch/>}
-              </React.Fragment>
-              /* Current Cohort Builder UI - not behind enableCohortBuilderV2 feature flag */
-              : <FlexRowWrap style={{margin: '0 -0.5rem'}}>
+            : <React.Fragment>
+              <FlexRowWrap style={{margin: '1rem 0 2rem', ...(this.showCohortSearch ? {display: 'none'} : {})}}>
                 <div style={colStyle('66.66667')}>
                   <FlexRowWrap style={{margin: '0 -0.5rem'}}>
                     {!!cohort && !!cohort.name && <div style={{height: '1.5rem', padding: '0 0.5rem', width: '100%'}}>
@@ -243,11 +208,9 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
                       updating={() => this.props.setUpdatingCohort(true)}/>}
                 </div>
                 {loading && <SpinnerOverlay/>}
-                {searchContext && <CBModal
-                    closeSearch={() => this.setSearchContext(undefined)}
-                    searchContext={searchContext}
-                    setSearchContext={(c) => this.setSearchContext(c)}/>}
               </FlexRowWrap>
+              {this.showCohortSearch && <CohortSearch/>}
+            </React.Fragment>
           }
         </div>
         {modalOpen && <Modal>

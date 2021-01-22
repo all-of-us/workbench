@@ -3,7 +3,6 @@ package org.pmiops.workbench.institution;
 import java.util.List;
 import java.util.Optional;
 import org.jetbrains.annotations.Nullable;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingInstitution;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
@@ -119,6 +118,4 @@ public interface InstitutionService {
   Optional<Institution> getFirstMatchingInstitution(final String contactEmail);
 
   Optional<Institution> getByUser(DbUser user);
-
-  List<ProjectedReportingInstitution> getReportingInstitutions();
 }

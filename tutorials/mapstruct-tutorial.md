@@ -2,6 +2,8 @@
 Here's a walkthrough of a typical MapStruct Mapper creation
 exercise, including frequent erros and how to address them.
 
+* This tutorial existed prior to the tutorial format being established *
+
 ## Source and Target Classes
 Consider an `EmployeeModel` class. It's a Plain Old Java Object with a default constructor
 and mutators for all its member variables:

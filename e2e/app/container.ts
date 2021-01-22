@@ -9,7 +9,7 @@ export default class Container {
   constructor(protected readonly page: Page, protected xpath?: string) { }
 
   getXpath(): string {
-    return this.xpath;
+    return (this.xpath === undefined) ? '' : this.xpath;
   }
 
   async waitUntilVisible(): Promise<ElementHandle> {

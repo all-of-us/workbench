@@ -1,6 +1,6 @@
 package org.pmiops.workbench.cohortbuilder.util;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
@@ -57,7 +57,7 @@ public class CriteriaLookupUtilTest {
       lookupUtil.buildCriteriaLookupMap(searchRequest);
       fail("Should have thrown BadRequestException!");
     } catch (BadRequestException bre) {
-      assertEquals("Bad Request: search parameters are empty.", bre.getMessage());
+      assertThat(bre.getMessage()).isEqualTo("Bad Request: search parameters are empty.");
     }
   }
 
@@ -116,9 +116,9 @@ public class CriteriaLookupUtilTest {
             .addIncludesItem(
                 new SearchGroup()
                     .addItemsItem(new SearchGroupItem().addSearchParametersItem(searchParameter)));
-    assertEquals(
-        ImmutableMap.of(searchParameter, new HashSet<>(childConceptIds)),
-        lookupUtil.buildCriteriaLookupMap(searchRequest));
+    assertThat(lookupUtil.buildCriteriaLookupMap(searchRequest))
+        .isEqualTo(ImmutableMap.of(searchParameter, new HashSet<>(childConceptIds)));
+    lookupUtil.buildCriteriaLookupMap(searchRequest);
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
@@ -167,9 +167,8 @@ public class CriteriaLookupUtilTest {
             .addIncludesItem(
                 new SearchGroup()
                     .addItemsItem(new SearchGroupItem().addSearchParametersItem(searchParameter)));
-    assertEquals(
-        ImmutableMap.of(searchParameter, new HashSet<>(childConceptIds)),
-        lookupUtil.buildCriteriaLookupMap(searchRequest));
+    assertThat(lookupUtil.buildCriteriaLookupMap(searchRequest))
+        .isEqualTo(ImmutableMap.of(searchParameter, new HashSet<>(childConceptIds)));
     jdbcTemplate.execute("drop table cb_criteria_ancestor");
   }
 
@@ -226,8 +225,8 @@ public class CriteriaLookupUtilTest {
             .addIncludesItem(
                 new SearchGroup()
                     .addItemsItem(new SearchGroupItem().addSearchParametersItem(searchParameter)));
-    assertEquals(
-        ImmutableMap.of(searchParameter, new HashSet<>(childConceptIds)),
-        lookupUtil.buildCriteriaLookupMap(searchRequest));
+
+    assertThat(lookupUtil.buildCriteriaLookupMap(searchRequest))
+        .isEqualTo(ImmutableMap.of(searchParameter, new HashSet<>(childConceptIds)));
   }
 }

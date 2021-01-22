@@ -2,7 +2,7 @@ const { defaults } = require('jest-config');
 const { TEST_MODE } = process.env;
 
 module.exports = {
-  "verbose": true,
+  "verbose": false,
   "bail": 1,  // Stop running tests after `n` failures
   "preset": "jest-puppeteer",
   "testTimeout": 600000,

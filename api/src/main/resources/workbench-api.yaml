@@ -2207,57 +2207,6 @@ paths:
           description: Successful copy
           schema:
             "$ref": "#/definitions/ConceptSet"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/domainInfo":
-    get:
-      tags:
-      - concepts
-      description: 'Returns information on the domains of data in the workspace''s
-        CDR version along with participant and concept counts'
-      operationId: getDomainInfo
-      parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      - "$ref": "#/parameters/workspaceId"
-      responses:
-        200:
-          description: information on the domains
-          schema:
-            "$ref": "#/definitions/DomainInfoResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/surveyInfo":
-    get:
-      tags:
-      - concepts
-      description: 'Returns survey information in the workspace''s CDR version along
-        with participant and question count'
-      operationId: getSurveyInfo
-      parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      - "$ref": "#/parameters/workspaceId"
-      responses:
-        200:
-          description: information about the surveys
-          schema:
-            "$ref": "#/definitions/SurveysResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/searchSurveys":
-    post:
-      tags:
-      - concepts
-      description: 'Searches for surveys in criteria table by synonyms or survey name'
-      operationId: searchSurveys
-      parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      - "$ref": "#/parameters/workspaceId"
-      - in: body
-        name: request
-        description: survey search request
-        schema:
-          "$ref": "#/definitions/SearchSurveysRequest"
-      responses:
-        200:
-          description: collection of survey questions
-          schema:
-            type: array
-            items:
-              "$ref": "#/definitions/SurveyQuestions"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/generateCode/{kernelType}":
     post:
       tags:
@@ -2770,52 +2719,6 @@ paths:
           description: the requested annotations
           schema:
             "$ref": "#/definitions/CohortAnnotationsResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/searchConcepts":
-    post:
-      tags:
-      - concepts
-      consumes:
-      - application/json
-      description: 'Searches for concepts in concept table by name, and optionally
-        filter on domain, vocabulary IDs, or standard concept status. Uses the CDR
-        version affiliated with the workspace specified in the path.'
-      operationId: searchConcepts
-      parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      - "$ref": "#/parameters/workspaceId"
-      - in: body
-        name: request
-        description: concept search request
-        schema:
-          "$ref": "#/definitions/SearchConceptsRequest"
-      responses:
-        200:
-          description: A collection of concepts
-          schema:
-            "$ref": "#/definitions/ConceptListResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/domainCounts":
-    post:
-      tags:
-      - concepts
-      consumes:
-      - application/json
-      description: 'Searches for concepts in concept table by name, and optionally
-        filter on domain, vocabulary IDs, or standard concept status. Uses the CDR
-        version affiliated with the workspace specified in the path.'
-      operationId: domainCounts
-      parameters:
-      - "$ref": "#/parameters/workspaceNamespace"
-      - "$ref": "#/parameters/workspaceId"
-      - in: body
-        name: request
-        description: domain counts search request
-        schema:
-          "$ref": "#/definitions/DomainCountsRequest"
-      responses:
-        200:
-          description: A collection of concepts
-          schema:
-            "$ref": "#/definitions/DomainCountsListResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortId}/{cdrVersionId}":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -2868,7 +2771,7 @@ paths:
         200:
           description: A collection of participants
           schema:
-            "$ref": "#/definitions/CohortReview"
+            "$ref": "#/definitions/CohortReviewWithCountResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/participants/{participantId}":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -4029,30 +3932,14 @@ definitions:
         type: boolean
         default: false
         description: Whether to show the Event Date modifier in cohort builder
-      enableCohortBuilderV2:
-        type: boolean
-        default: false
-        description: Whether to use the Cohort Builder UI.
-      enableConceptSetSearchV2:
-        type: boolean
-        default: false
-        description: Whether to use new Concept Search.
       enableResearchReviewPrompt:
         type: boolean
         default: false
         description: Whether user should see a prompt if Workspace Research Purpose needs Review
-      enableCOPESurvey:
-        type: boolean
-        default: false
-        description: Whether user should see COPE Survey data
       enableCustomRuntimes:
         type: boolean
         default: false
         description: Whether user should be able to customize notebook runtime settings.
-      enableFitbit:
-        type: boolean
-        default: false
-        description: Whether to display Fitbit Data
       runtimeImages:
         type: array
         items:
@@ -4816,11 +4703,6 @@ definitions:
         format: int32
         description: 'Count of participants in the CDR version for the workspace containing
           this concept set that match the specified concept set'
-      concepts:
-        description: Concepts in the concept set, in conceptName order.
-        type: array
-        items:
-          "$ref": "#/definitions/Concept"
       criteriums:
         description: Criteriums in the concept set, in conceptName order.
         type: array
@@ -5204,46 +5086,6 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/SurveyModule"
-  SearchSurveysRequest:
-    type: object
-    required:
-    - standardConceptFilter
-    properties:
-      query:
-        type: string
-        description: 'A query string that can be used to match a subset of the name
-          (case-insensitively), the entire code value (case-insensitively), or the
-          concept ID. If not specified, all concepts are returned.'
-      standardConceptFilter:
-        description: 'STANDARD_CONCEPTS if only standard concepts should be returned,
-          NON_STANDARD_CONCEPTS if only non-standard concepts should be returned;
-          defaults to ALL_CONCEPTS, meaning both standard and non-standard concepts
-          will be returned.'
-        "$ref": "#/definitions/StandardConceptFilter"
-      surveyName:
-        description: The name of the survey clicked
-        type: string
-      maxResults:
-        type: integer
-        format: int32
-        description: The maximum number of results returned. Defaults to 20.
-      pageNumber:
-        type: integer
-        default: 0
-        description: By default it returns the first page and then its next pages
-          from that on.
-  SurveyQuestions:
-    type: object
-    properties:
-      question:
-        type: string
-      conceptId:
-        type: integer
-        format: int64
-      countValue:
-        description: Count of participants matching this concept in the CDR
-        type: integer
-        format: int64
   CreateAccountRequest:
     type: object
     properties:
@@ -6000,6 +5842,9 @@ definitions:
           See the EgressEvent definition for the expected schema of each event.'
   EgressEvent:
     type: object
+    required:
+      - project_name
+      - vm_prefix
     properties:
       environment:
         description: The AoU environment in which the high-egress event occurred.
@@ -6648,76 +6493,6 @@ definitions:
         description: language concept id
         type: integer
         format: int64
-  SearchConceptsRequest:
-    type: object
-    required:
-    - standardConceptFilter
-    - domain
-    properties:
-      query:
-        type: string
-        description: 'A query string that can be used to match a subset of the name
-          (case-insensitively), the entire code value (case-insensitively), or the
-          concept ID. If not specified, all concepts are returned.'
-      standardConceptFilter:
-        description: 'STANDARD_CONCEPTS if only standard concepts should be returned,
-          NON_STANDARD_CONCEPTS if only non-standard concepts should be returned;
-          defaults to ALL_CONCEPTS, meaning both standard and non-standard concepts
-          will be returned.'
-        "$ref": "#/definitions/StandardConceptFilter"
-      domain:
-        description: 'The domain for the concepts returned (e.g. OBSERVATION, DRUG).
-          Note that this may map to multiple domain ID values in OMOP.'
-        "$ref": "#/definitions/Domain"
-      surveyName:
-        description: The name of the survey clicked
-        type: string
-      maxResults:
-        type: integer
-        format: int32
-        description: The maximum number of results returned. Defaults to 20.
-      pageNumber:
-        type: integer
-        default: 0
-        description: By default it returns the first page and then its next pages
-          from that on.
-  DomainCountsRequest:
-    type: object
-    required:
-    - standardConceptFilter
-    properties:
-      query:
-        type: string
-        description: 'A query string that can be used to match a subset of the name
-          (case-insensitively), the entire code value (case-insensitively), or the
-          concept ID. If not specified, all concepts are returned.'
-      standardConceptFilter:
-        description: 'STANDARD_CONCEPTS if only standard concepts should be returned,
-          NON_STANDARD_CONCEPTS if only non-standard concepts should be returned;
-          defaults to ALL_CONCEPTS, meaning both standard and non-standard concepts
-          will be returned.'
-        "$ref": "#/definitions/StandardConceptFilter"
-      surveyName:
-        description: The name of the survey clicked
-        type: string
-  ConceptListResponse:
-    type: object
-    required:
-    - items
-    properties:
-      items:
-        type: array
-        items:
-          "$ref": "#/definitions/Concept"
-  DomainCountsListResponse:
-    type: object
-    required:
-    - domainCounts
-    properties:
-      domainCounts:
-        type: array
-        items:
-          "$ref": "#/definitions/DomainCount"
   DomainCount:
     type: object
     required:
@@ -6805,23 +6580,23 @@ definitions:
       reviewedCount:
         type: integer
         format: int64
-      queryResultSize:
-        type: integer
-        format: int64
       reviewStatus:
         "$ref": "#/definitions/ReviewStatus"
       participantCohortStatuses:
         type: array
         items:
           "$ref": "#/definitions/ParticipantCohortStatus"
-      page:
+  CohortReviewWithCountResponse:
+    required:
+    - queryResultSize
+    - cohortReview
+    properties:
+      queryResultSize:
         type: integer
-      pageSize:
-        type: integer
-      sortOrder:
-        type: string
-      sortColumn:
-        type: string
+        format: int64
+        description: The size of the query results
+      cohortReview:
+        "$ref": "#/definitions/CohortReview"
   PageFilterRequest:
     required:
     - page
@@ -7685,9 +7460,6 @@ definitions:
       name:
         description: The name of the generating Criterion
         type: string
-      value:
-        description: The Criteria code (or name if querying for Deceased)
-        type: string
       domain:
         description: The omop domain that this criteria belongs to
         type: string
@@ -8309,6 +8081,10 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ReportingWorkspace"
+      workspaceFreeTierUsage:
+        type: array
+        items:
+          "$ref": "#/definitions/ReportingWorkspaceFreeTierUsage"
   ReportingUploadDetails:
     type: object
     properties:
@@ -8671,6 +8447,30 @@ definitions:
         description: |-
           Prirmary key of the workspace table in Workrbench application database. Along with
           snapshot_timestamp, serves as a pseudo-primary key for this table.
+      workspaceNamespace:
+        type: string
+        description: |-
+          The workspace "namespace", which corresponds to the Google Cloud Project ID associated with
+          the workspace.
+  ReportingWorkspaceFreeTierUsage:
+    x-aou-note: |-
+      This code was generated using reporting-wizard.rb at 2021-01-05T17:36:27-08:00.
+      Manual modification should be avoided if possible as this is a one-time generation
+      and does not run on every build and updates must be merged manually for now.
+    type: object
+    properties:
+      cost:
+        type: number
+        format: double
+        description: Free tier usage cost for this workspace, in USD.
+      userId:
+        type: integer
+        format: int64
+        description: ID of the user whose free tier quota was billed for this workspace.
+      workspaceId:
+        type: integer
+        format: int64
+        description: ID of the workspace associated with this free tier cost.
   ReportingCohort:
     x-aou-note: |-
       This code was generated using reporting-wizard.rb at 2020-10-09T09:09:12-04:00.

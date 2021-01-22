@@ -1,13 +1,14 @@
+import {Growl} from 'primereact/growl';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
-import {DemographicsV2} from 'app/cohort-search/demographics/demographics-v2.component';
+import {Demographics} from 'app/cohort-search/demographics/demographics.component';
 import {searchRequestStore} from 'app/cohort-search/search-state.service';
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {generateId, typeToTitle} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
-import {CriteriaSearch} from 'app/pages/data/criteria-search';
+import {CriteriaSearch, growlCSS} from 'app/pages/data/criteria-search';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withCurrentCohortSearchContext} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
@@ -15,10 +16,9 @@ import {
   attributesSelectionStore,
   currentCohortCriteriaStore,
   currentCohortSearchContextStore,
-  serverConfigStore,
   setSidebarActiveIconStore,
 } from 'app/utils/navigation';
-import {Criteria, CriteriaType, Domain, TemporalMention, TemporalTime} from 'generated/fetch';
+import {CriteriaType, Domain, TemporalMention, TemporalTime} from 'generated/fetch';
 
 const styles = reactStyles({
   arrowIcon: {
@@ -42,30 +42,16 @@ const styles = reactStyles({
     position: 'absolute',
     right: '3rem',
   },
-  footer: {
-    marginTop: '0.5rem',
-    padding: '0.45rem 0rem',
-    display: 'flex',
-    justifyContent: 'flex-end',
-  },
-  footerButton: {
-    height: '1.5rem',
-    margin: '0.25rem 0.5rem'
-  },
-  panelLeft: {
-    display: 'none',
-    flex: 1,
-    minWidth: '14rem',
-    overflowY: 'auto',
-    overflowX: 'hidden',
-    width: '100%',
-    height: '100%',
-    padding: '0 0.4rem 0 1rem',
+  growl: {
+    position: 'absolute',
+    right: '0',
+    top: 0
   },
   searchContainer: {
     display: 'flex',
     flexWrap: 'wrap',
     height: '70vh',
+    position: 'relative',
     width: '100%',
   },
   searchContent: {
@@ -136,99 +122,47 @@ interface Props {
 }
 
 interface State {
-  autocompleteSelection: Criteria;
-  backMode: string;
-  count: number;
-  disableFinish: boolean;
-  groupSelections: Array<number>;
-  hierarchyNode: Criteria;
-  loadingSubtree: boolean;
-  mode: string;
+  growlVisible: boolean;
   selectedIds: Array<string>;
   selections: Array<Selection>;
-  treeSearchTerms: string;
 }
 
 export const CohortSearch = withCurrentCohortSearchContext()(class extends React.Component<Props, State> {
+  growl: any;
+  growlTimer: NodeJS.Timer;
   subscription: Subscription;
   constructor(props: Props) {
     super(props);
     this.state = {
-      autocompleteSelection: undefined,
-      backMode: 'list',
-      count: 0,
-      disableFinish: false,
-      groupSelections: [],
-      hierarchyNode: undefined,
-      loadingSubtree: false,
-      mode: 'list',
+      growlVisible: false,
       selectedIds: [],
       selections: [],
-      treeSearchTerms: '',
     };
   }
 
-  componentWillUnmount() {
-    if (serverConfigStore.getValue().enableCohortBuilderV2) {
-      this.subscription.unsubscribe();
-      currentCohortCriteriaStore.next(undefined);
-    }
-  }
-
   componentDidMount(): void {
-    const {cohortContext: {domain, item, standard, type}} = this.props;
+    const {cohortContext: {domain, item, type}} = this.props;
     // JSON stringify and parse prevents changes to selections from being passed to the cohortContext
     const selections = JSON.parse(JSON.stringify(item.searchParameters));
-    const selectedIds = selections.map(s => s.parameterId);
     if (type === CriteriaType.DECEASED) {
       this.selectDeceased();
     } else if (domain === Domain.FITBIT) {
       this.selectFitbit();
-    } else {
-      let {backMode, mode} = this.state;
-      let hierarchyNode;
-      if (this.initTree) {
-        hierarchyNode = {
-          domainId: domain,
-          type: type,
-          isStandard: standard,
-          id: 0,
-        };
-        backMode = 'tree';
-        mode = 'tree';
+    }
+    currentCohortCriteriaStore.next(selections);
+    this.subscription = currentCohortCriteriaStore.subscribe(newSelections => {
+      if (!!newSelections) {
+        this.setState({
+          selectedIds: newSelections.map(s => s.parameterId),
+          selections: newSelections
+        });
       }
-      this.setState({backMode, hierarchyNode, mode, selectedIds, selections});
-    }
-    if (serverConfigStore.getValue().enableCohortBuilderV2) {
-      currentCohortCriteriaStore.next(selections);
-      this.subscription = currentCohortCriteriaStore.subscribe(newSelections => {
-        if (!!newSelections) {
-          this.setState({
-            groupSelections: newSelections.filter(s => s.group).map(s => s.id),
-            selectedIds: newSelections.map(s => s.parameterId),
-            selections: newSelections
-          });
-        }
-      });
-    }
+    });
   }
 
-  setScroll = (id: string) => {
-    const nodeId = `node${id}`;
-    const node = document.getElementById(nodeId);
-    if (node) {
-      setTimeout(() => node.scrollIntoView({behavior: 'smooth', block: 'center'}), 200);
-    }
-    this.setState({loadingSubtree: false});
-  }
-
-  back = () => {
-    if (this.state.mode === 'tree') {
-      this.setState({autocompleteSelection: undefined, backMode: 'list', hierarchyNode: undefined, mode: 'list'});
-    } else {
-      attributesSelectionStore.next(undefined);
-      this.setState({mode: this.state.backMode});
-    }
+  componentWillUnmount() {
+    this.subscription.unsubscribe();
+    currentCohortCriteriaStore.next(undefined);
   }
 
   closeSearch() {
@@ -238,54 +172,23 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     setTimeout(() => attributesSelectionStore.next(undefined), 500);
   }
 
-  get initTree() {
-    const {cohortContext: {domain}} = this.props;
-    return domain === Domain.PHYSICALMEASUREMENT
-      || domain === Domain.SURVEY
-      || domain === Domain.VISIT;
-  }
-
-  searchContentStyle(mode: string) {
-    let style = {
-      display: 'none',
-      flex: 1,
-      minWidth: '14rem',
-      overflowY: 'auto',
-      overflowX: 'hidden',
-      width: '100%',
-      height: '100%',
-    } as React.CSSProperties;
-    if (this.state.mode === mode) {
-      style = {...style, display: 'block', animation: 'fadeEffect 1s'};
-    }
-    return style;
-  }
-
-  modifiersFlag = (disabled: boolean) => {
-    this.setState({disableFinish: disabled});
-  }
-
-  setTreeSearchTerms = (input: string) => {
-    this.setState({treeSearchTerms: input});
-  }
-
-  setAutocompleteSelection = (selection: any) => {
-    this.setState({loadingSubtree: true, autocompleteSelection: selection});
-  }
-
   addSelection = (param: any) => {
-    let {groupSelections, selectedIds, selections} = this.state;
+    let {selectedIds, selections} = this.state;
     if (selectedIds.includes(param.parameterId)) {
       selections = selections.filter(p => p.parameterId !== param.parameterId);
     } else {
       selectedIds = [...selectedIds, param.parameterId];
-      if (param.group) {
-        groupSelections = [...groupSelections, param.id];
-      }
     }
     selections = [...selections, param];
     currentCohortCriteriaStore.next(selections);
-    this.setState({groupSelections, selections, selectedIds});
+    this.setState({selections, selectedIds});
+    this.growl.show({severity: 'success', detail: 'Criteria Added', closable: false, life: 2000});
+    if (!!this.growlTimer) {
+      clearTimeout(this.growlTimer);
+    }
+    // This is to set style display: 'none' on the growl so it doesn't block the nav icons in the sidebar
+    this.growlTimer = setTimeout(() => this.setState({growlVisible: false}), 2500);
+    this.setState({growlVisible: true});
   }
 
   selectDeceased() {
@@ -322,8 +225,10 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
 
   render() {
     const {cohortContext, cohortContext: {domain, type}} = this.props;
-    const {count, selectedIds, selections} = this.state;
+    const {growlVisible, selectedIds, selections} = this.state;
     return !!cohortContext && <FlexRowWrap style={styles.searchContainer}>
+      <style>{growlCSS}</style>
+      <Growl ref={(el) => this.growl = el} style={!growlVisible ? {...styles.growl, display: 'none'} : styles.growl}/>
       <div id='cohort-search-container' style={styles.searchContent}>
         {domain === Domain.PERSON && <div style={styles.titleBar}>
           <Clickable style={styles.backArrow} onClick={() => this.closeSearch()}>
@@ -337,16 +242,14 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
             : {height: 'calc(100% - 3.5rem)'}
         }>
           {domain === Domain.PERSON ? <div style={{flex: 1, overflow: 'auto'}}>
-              <DemographicsV2
-                count={count}
+              <Demographics
                 criteriaType={type}
                 select={this.addSelection}
                 selectedIds={selectedIds}
                 selections={selections}/>
             </div>
             : <CriteriaSearch backFn={() => this.closeSearch()}
-                              cohortContext={cohortContext}
-                              source={'criteria'}/>}
+                              cohortContext={cohortContext}/>}
         </div>
       </div>
       <Button type='primary'

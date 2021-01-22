@@ -2,8 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.fail;
+import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -20,7 +19,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
 import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
 import static org.pmiops.workbench.config.WorkbenchConfig.createEmptyConfig;
@@ -70,7 +68,6 @@ import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
@@ -257,9 +254,10 @@ public class WorkspacesControllerTest {
           .countValue(256L)
           .prevalence(0.4F)
           .conceptSynonyms(new ArrayList<>());
-  private static final DbConcept CONCEPT_1 = makeConcept(CLIENT_CONCEPT_1);
-  private static final DbConcept CONCEPT_2 = makeConcept(CLIENT_CONCEPT_2);
-  private static final DbConcept CONCEPT_3 = makeConcept(CLIENT_CONCEPT_3);
+  private static final DbConcept CONCEPT_1 =
+      new DbConcept().conceptId(CLIENT_CONCEPT_1.getConceptId());
+  private static final DbConcept CONCEPT_3 =
+      new DbConcept().conceptId(CLIENT_CONCEPT_3.getConceptId());
   private static final String BUCKET_URI =
       String.format("gs://%s/", TestMockFactory.WORKSPACE_BUCKET_NAME);
 
@@ -374,7 +372,6 @@ public class WorkspacesControllerTest {
   @Autowired BigQueryService bigQueryService;
   @SpyBean @Autowired WorkspaceDao workspaceDao;
   @Autowired UserDao userDao;
-  @Autowired ConceptDao conceptDao;
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired CohortDao cohortDao;
   @Autowired CohortReviewDao cohortReviewDao;
@@ -419,10 +416,6 @@ public class WorkspacesControllerTest {
     archivedCdrVersion.setArchivalStatusEnum(ArchivalStatus.ARCHIVED);
     archivedCdrVersion = cdrVersionDao.save(archivedCdrVersion);
     archivedCdrVersionId = Long.toString(archivedCdrVersion.getCdrVersionId());
-
-    conceptDao.save(CONCEPT_1);
-    conceptDao.save(CONCEPT_2);
-    conceptDao.save(CONCEPT_3);
 
     CLOCK.setInstant(NOW.toInstant());
 
@@ -1505,9 +1498,7 @@ public class WorkspacesControllerTest {
             .addStandard(true)
             .build();
     when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION,
-            "condition_occurrence",
-            ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
+            Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
         .thenReturn(123);
     ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
     conceptSetConceptId1.setConceptId(CONCEPT_1.getConceptId());
@@ -1595,7 +1586,8 @@ public class WorkspacesControllerTest {
                 cohortsByName.get("c1").getId(),
                 cdrVersion.getCdrVersionId(),
                 new PageFilterRequest())
-            .getBody();
+            .getBody()
+            .getCohortReview();
     assertThat(gotCr1.getReviewSize()).isEqualTo(cr1.getReviewSize());
     assertThat(gotCr1.getParticipantCohortStatuses()).isEqualTo(cr1.getParticipantCohortStatuses());
 
@@ -1629,7 +1621,8 @@ public class WorkspacesControllerTest {
                 cohortsByName.get("c2").getId(),
                 cdrVersion.getCdrVersionId(),
                 new PageFilterRequest())
-            .getBody();
+            .getBody()
+            .getCohortReview();
     assertThat(gotCr2.getReviewSize()).isEqualTo(cr2.getReviewSize());
     assertThat(gotCr2.getParticipantCohortStatuses()).isEqualTo(cr2.getParticipantCohortStatuses());
 
@@ -1699,9 +1692,7 @@ public class WorkspacesControllerTest {
             .addStandard(true)
             .build();
     when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION,
-            "condition_occurrence",
-            ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
+            Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
         .thenReturn(123);
 
     ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
@@ -1739,9 +1730,7 @@ public class WorkspacesControllerTest {
             modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION,
-            "condition_occurrence",
-            ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
+            Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
         .thenReturn(456);
 
     mockBillingProjectBuffer("cloned-ns");
@@ -1903,7 +1892,7 @@ public class WorkspacesControllerTest {
             .getBody();
     assertThat(clonedConceptSet.getName()).isEqualTo(originalConceptSet.getName());
     assertThat(clonedConceptSet.getDomain()).isEqualTo(originalConceptSet.getDomain());
-    assertThat(clonedConceptSet.getConcepts()).isEqualTo(originalConceptSet.getConcepts());
+    assertThat(clonedConceptSet.getCriteriums()).isEqualTo(originalConceptSet.getCriteriums());
     assertThat(clonedConceptSet.getCreator()).isEqualTo(clonedWorkspace.getCreator());
     assertThat(clonedConceptSet.getCreationTime()).isEqualTo(clonedWorkspace.getCreationTime());
     assertThat(clonedConceptSet.getLastModifiedTime())
@@ -2471,11 +2460,11 @@ public class WorkspacesControllerTest {
         workspacesController.getNoteBookList("project", "workspace").getBody().stream()
             .map(FileDetail::getName)
             .collect(Collectors.toList());
-    assertEquals(
-        gotNames,
-        ImmutableList.of(
-            NotebooksService.withNotebookExtension("mockFile"),
-            NotebooksService.withNotebookExtension("two words")));
+    assertThat(gotNames)
+        .isEqualTo(
+            ImmutableList.of(
+                NotebooksService.withNotebookExtension("mockFile"),
+                NotebooksService.withNotebookExtension("two words")));
   }
 
   @Test
@@ -2496,7 +2485,7 @@ public class WorkspacesControllerTest {
         workspacesController.getNoteBookList("project", "workspace").getBody().stream()
             .map(FileDetail::getName)
             .collect(Collectors.toList());
-    assertEquals(gotNames, ImmutableList.of(NotebooksService.withNotebookExtension("foo")));
+    assertThat(gotNames).isEqualTo(ImmutableList.of(NotebooksService.withNotebookExtension("foo")));
   }
 
   @Test

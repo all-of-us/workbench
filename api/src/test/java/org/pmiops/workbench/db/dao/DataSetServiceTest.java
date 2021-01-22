@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -102,7 +101,6 @@ public class DataSetServiceTest {
   @Autowired private DataSetDao dataSetDao;
   @Autowired private DSLinkingDao dsLinkingDao;
   @Autowired private DataSetMapper dataSetMapper;
-  @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @MockBean private BigQueryService mockBigQueryService;
   @MockBean private CohortDao mockCohortDao;
@@ -148,8 +146,7 @@ public class DataSetServiceTest {
             dataSetDao,
             dsLinkingDao,
             dataSetMapper,
-            CLOCK,
-            workbenchConfigProvider);
+            CLOCK);
 
     final DbCohort cohort = buildSimpleCohort();
     when(cohortDao.findCohortByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(cohort);
@@ -329,7 +326,20 @@ public class DataSetServiceTest {
     Optional<String> listClauseMaybe =
         dataSetServiceImpl.buildConceptIdListClause(
             domain1, ImmutableList.of(conceptSet1, conceptSet2));
-    assertThat(listClauseMaybe.map(String::trim).orElse("")).isEqualTo("IN (3, 2, 1, 6, 5, 4)");
+    assertThat(listClauseMaybe.map(String::trim).orElse(""))
+        .isEqualTo(
+            "( condition_concept_id in  (select distinct c.concept_id\n"
+                + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
+                + "join (select cast(cr.id as string) as id\n"
+                + "from `${projectId}.${dataSetId}.cb_criteria` cr\n"
+                + "where domain_id = 'CONDITION'\n"
+                + "and is_standard = 1\n"
+                + "and concept_id in (3, 2, 1, 6, 5, 4)\n"
+                + "and is_selectable = 1) a\n"
+                + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id) or c.path like concat(a.id, '.%'))\n"
+                + "where domain_id = 'CONDITION'\n"
+                + "and is_standard = 1\n"
+                + "and is_selectable = 1))");
   }
 
   @Test
@@ -340,7 +350,20 @@ public class DataSetServiceTest {
     Optional<String> listClauseMaybe =
         dataSetServiceImpl.buildConceptIdListClause(
             Domain.CONDITION, ImmutableList.of(conceptSet1, conceptSet2));
-    assertThat(listClauseMaybe.map(String::trim).orElse("")).isEqualTo("IN (3, 2, 1)");
+    assertThat(listClauseMaybe.map(String::trim).orElse(""))
+        .isEqualTo(
+            "( condition_concept_id in  (select distinct c.concept_id\n"
+                + "from `${projectId}.${dataSetId}.cb_criteria` c\n"
+                + "join (select cast(cr.id as string) as id\n"
+                + "from `${projectId}.${dataSetId}.cb_criteria` cr\n"
+                + "where domain_id = 'CONDITION'\n"
+                + "and is_standard = 1\n"
+                + "and concept_id in (3, 2, 1)\n"
+                + "and is_selectable = 1) a\n"
+                + "on (c.path like concat('%.', a.id, '.%') or c.path like concat('%.', a.id) or c.path like concat(a.id, '.%'))\n"
+                + "where domain_id = 'CONDITION'\n"
+                + "and is_standard = 1\n"
+                + "and is_selectable = 1))");
   }
 
   @Test

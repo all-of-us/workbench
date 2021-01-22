@@ -1,7 +1,7 @@
-import {createWorkspace, signIn} from 'utils/test-utils';
+import {createWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import WorkspaceCard from 'app/component/workspace-card';
 import {config} from 'resources/workbench-config';
-import {Option} from 'app/text-labels';
+import {MenuOption} from 'app/text-labels';
 import OldCdrVersionModal from 'app/page/old-cdr-version-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import Navigation, {NavLink} from 'app/component/navigation';
@@ -10,7 +10,7 @@ import WorkspacesPage from 'app/page/workspaces-page';
 
 describe('Duplicate workspace, changing CDR versions', () => {
     beforeEach(async () => {
-        await signIn(page);
+        await signInWithAccessToken(page);
     });
 
     test('OWNER can duplicate workspace to an older CDR Version after consenting to restrictions', async () => {
@@ -19,7 +19,7 @@ describe('Duplicate workspace, changing CDR versions', () => {
 
         await workspaceCard.asElementHandle().hover();
         // Click on Ellipsis menu "Duplicate" option.
-        await workspaceCard.selectSnowmanMenu(Option.Duplicate);
+        await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, {waitForNav: true});
 
         // Fill out Workspace Name should be just enough for successful duplication
         const workspaceEditPage = new WorkspaceEditPage(page);
@@ -63,7 +63,7 @@ describe('Duplicate workspace, changing CDR versions', () => {
 
         await workspaceCard.asElementHandle().hover();
         // Click on Ellipsis menu "Duplicate" option.
-        await workspaceCard.selectSnowmanMenu(Option.Duplicate);
+        await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, {waitForNav: true});
 
         // Fill out Workspace Name should be just enough for successful duplication
         const workspaceEditPage = new WorkspaceEditPage(page);

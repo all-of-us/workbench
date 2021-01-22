@@ -253,7 +253,7 @@ export default class WorkspaceEditPage extends WorkspaceBase {
 
   async getCdrVersionUpgradeMessage(): Promise<string> {
     const xpath = '//*[@data-test-id="cdr-version-upgrade"]';
-    const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath));
+    const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, {visible: true}));
     return element.getTextContent();
   }
 
@@ -417,6 +417,7 @@ export default class WorkspaceEditPage extends WorkspaceBase {
 
     // confirm create in pop-up modal
     const modal = new Modal(this.page);
+    await modal.waitForLoad();
     const modalTextContent = await modal.getTextContent();
     await modal.clickButton(LinkText.Confirm, {waitForClose: true, waitForNav: true});
     await waitWhileLoading(this.page);

@@ -5,7 +5,7 @@ import RuntimePanel, {
   StartStopIconState
 } from 'app/component/runtime-panel';
 import {config} from 'resources/workbench-config';
-import {createWorkspace, signIn} from 'utils/test-utils';
+import {createWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {makeRandomName} from 'utils/str-utils';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
@@ -15,7 +15,7 @@ jest.setTimeout(60 * 30 * 1000);
 
 describe('Updating runtime parameters', () => {
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
     const workspaceCard = await createWorkspace(page, config.altCdrVersionName);
     await workspaceCard.clickWorkspaceName();
 
@@ -47,17 +47,17 @@ describe('Updating runtime parameters', () => {
     // Run some Python commands to validate the VM configuration
     const cpusOutputText = await notebook.runCodeCell(1, {codeFile: 'resources/python-code/count-cpus.py'});
     // Default CPU count is 4
-    expect(parseInt(cpusOutputText)).toBe(4);
+    expect(parseInt(cpusOutputText, 10)).toBe(4);
     // This gets the amount of memory available to Python in bytes
     const memoryOutputText = await notebook.runCodeCell(2, {codeFile: 'resources/python-code/count-memory.py'});
     // Default memory is 15 gibibytes, we'll check that it is between 14 billion and 16 billion bytes
-    expect(parseInt(memoryOutputText)).toBeGreaterThanOrEqual(14 * 1000 * 1000 * 1000);
-    expect(parseInt(memoryOutputText)).toBeLessThanOrEqual(16 * 1000 * 1000 * 1000);
+    expect(parseInt(memoryOutputText, 10)).toBeGreaterThanOrEqual(14 * 1000 * 1000 * 1000);
+    expect(parseInt(memoryOutputText, 10)).toBeLessThanOrEqual(16 * 1000 * 1000 * 1000);
     // This gets the disk space in bytes
     const diskOutputText = await notebook.runCodeCell(3, {codeFile: 'resources/python-code/count-disk-space.py'});
     // Default disk is 50 gibibytes, we'll check that it is between 45 and 55 billion bytes
-    expect(parseInt(diskOutputText)).toBeGreaterThanOrEqual(45 * 1000 * 1000 * 1000);
-    expect(parseInt(diskOutputText)).toBeLessThanOrEqual(55 * 1000 * 1000 * 1000);
+    expect(parseInt(diskOutputText, 10)).toBeGreaterThanOrEqual(45 * 1000 * 1000 * 1000);
+    expect(parseInt(diskOutputText, 10)).toBeLessThanOrEqual(55 * 1000 * 1000 * 1000);
 
     // Open runtime panel
     await helpSidebar.toggleRuntimePanel();
@@ -129,7 +129,7 @@ describe('Updating runtime parameters', () => {
 
     // Wait until status shows green in side-nav
     await page.waitForTimeout(2000);
-    await helpSidebar.toggleRuntimePanel();;
+    await helpSidebar.toggleRuntimePanel();
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Starting);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Running);
 
@@ -165,16 +165,16 @@ describe('Updating runtime parameters', () => {
 
     // Run notebook to validate runtime settings (cpu, disk, memory)
     const cpusOutputText = await notebook.runCodeCell(2, {codeFile: 'resources/python-code/count-cpus.py'});
-    expect(parseInt(cpusOutputText)).toBe(8);
+    expect(parseInt(cpusOutputText, 10)).toBe(8);
     // This gets the amount of memory available to Python in bytes
     const memoryOutputText = await notebook.runCodeCell(3, {codeFile: 'resources/python-code/count-memory.py'});
-    expect(parseInt(memoryOutputText)).toBeGreaterThanOrEqual(28 * 1000 * 1000 * 1000);
-    expect(parseInt(memoryOutputText)).toBeLessThanOrEqual(32 * 1000 * 1000 * 1000);
+    expect(parseInt(memoryOutputText, 10)).toBeGreaterThanOrEqual(28 * 1000 * 1000 * 1000);
+    expect(parseInt(memoryOutputText, 10)).toBeLessThanOrEqual(32 * 1000 * 1000 * 1000);
     // This gets the disk space in bytes
     const diskOutputText = await notebook.runCodeCell(4, {codeFile: 'resources/python-code/count-disk-space.py'});
     // for whatever reason this always comes out at around 52 billion bytes despite definitely asking for 60
-    expect(parseInt(diskOutputText)).toBeGreaterThanOrEqual(50 * 1000 * 1000 * 1000);
-    expect(parseInt(diskOutputText)).toBeLessThanOrEqual(70 * 1000 * 1000 * 1000);
+    expect(parseInt(diskOutputText, 10)).toBeGreaterThanOrEqual(50 * 1000 * 1000 * 1000);
+    expect(parseInt(diskOutputText, 10)).toBeLessThanOrEqual(70 * 1000 * 1000 * 1000);
 
     // Open runtime panel
     await helpSidebar.toggleRuntimePanel();

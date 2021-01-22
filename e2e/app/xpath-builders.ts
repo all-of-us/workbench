@@ -67,7 +67,7 @@ export function buildXPath(xOpts: XPathOptions, container?: Container): string {
     selector = `${textExpr}//${type}`;
     break;
   case ElementType.Dropdown:
-    selector = `${textExpr}${nodeLevel}//*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown ")]`;
+    selector = `${textExpr}//*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown ")]`;
     break;
   case ElementType.Tab:
     selector = `//*[(@aria-selected | @tabindex) and @role="button" and text()="${name}"]`;

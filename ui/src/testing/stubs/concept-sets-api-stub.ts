@@ -2,25 +2,85 @@ import {CopyRequest, UpdateConceptSetRequest} from 'generated';
 import {
   ConceptSet,
   ConceptSetListResponse,
+  Criteria,
+  CriteriaType,
   Domain,
   Surveys
 } from 'generated/fetch';
 
 import {ConceptSetsApi, CreateConceptSetRequest, EmptyResponse} from 'generated/fetch/api';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
-import {ConceptsApiStub, ConceptStubVariables} from './concepts-api-stub';
+
+export class ConceptStubVariables {
+  static STUB_CONCEPTS: Criteria[] = [
+    {
+      id: 1,
+      parentId: 0,
+      group: true,
+      selectable: true,
+      hasAttributes: false,
+      name: 'Stub Concept 1',
+      domainId: Domain.CONDITION.toString(),
+      type: CriteriaType.SNOMED.toString(),
+      conceptId: 8107,
+      isStandard: true,
+      childCount: 1,
+      parentCount: 0
+    },
+    {
+      id: 2,
+      parentId: 0,
+      group: true,
+      selectable: true,
+      hasAttributes: false,
+      name: 'Stub Concept 2',
+      domainId: Domain.CONDITION.toString(),
+      type: CriteriaType.SNOMED.toString(),
+      conceptId: 8107,
+      isStandard: true,
+      childCount: 2,
+      parentCount: 0
+    },
+    {
+      id: 3,
+      parentId: 0,
+      group: true,
+      selectable: true,
+      hasAttributes: false,
+      name: 'Stub Concept 3',
+      domainId: Domain.MEASUREMENT.toString(),
+      type: CriteriaType.LOINC.toString(),
+      conceptId: 1234,
+      isStandard: true,
+      childCount: 1,
+      parentCount: 0
+    },
+    {
+      id: 4,
+      parentId: 0,
+      group: true,
+      selectable: true,
+      hasAttributes: false,
+      name: 'Stub Concept 4',
+      domainId: Domain.MEASUREMENT.toString(),
+      type: CriteriaType.LOINC.toString(),
+      conceptId: 2345,
+      isStandard: true,
+      childCount: 1,
+      parentCount: 0
+    },
+  ];
+}
 
 export class ConceptSetsApiStub extends ConceptSetsApi {
   public conceptSets: ConceptSet[];
   public surveyConceptSets: ConceptSet[];
   // TODO when this piece is converted
-  public conceptsStub?: ConceptsApiStub;
 
   constructor() {
     super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
 
     this.conceptSets = ConceptSetsApiStub.stubConceptSets();
-    this.conceptsStub = new ConceptsApiStub();
     this.surveyConceptSets  =  ConceptSetsApiStub.stubConceptSets().filter((concepts) => {
       return concepts.domain === Domain.OBSERVATION;
     });
@@ -35,7 +95,7 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
         domain: Domain.CONDITION,
         lastModifiedTime: new Date().getTime() - 8000,
         participantCount: ConceptStubVariables.STUB_CONCEPTS.length,
-        concepts: ConceptStubVariables.STUB_CONCEPTS
+        criteriums: ConceptStubVariables.STUB_CONCEPTS
       },  {
         id: 346,
         name: 'Mock Concept Set Measurement',
@@ -146,21 +206,21 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
       if (!target) {
         throw Error(`concept set ${conceptSetId} not found`);
       }
-      if (!target.concepts) {
-        target.concepts = [];
+      if (!target.criteriums) {
+        target.criteriums = [];
       }
       for (const id of req.removedConceptSetConceptIds || []) {
-        const index = target.concepts.findIndex(c => c.conceptId === id.conceptId);
+        const index = target.criteriums.findIndex(c => c.conceptId === id.conceptId);
         if (index >= 0) {
-          target.concepts = target.concepts.filter(concept => concept.conceptId !== id.conceptId);
+          target.criteriums = target.criteriums.filter(concept => concept.conceptId !== id.conceptId);
         }
       }
       for (const id of req.addedConceptSetConceptIds || []) {
-        const concept = this.conceptsStub.concepts.find(c => c.conceptId === id.conceptId);
+        const concept = ConceptStubVariables.STUB_CONCEPTS.find(c => c.conceptId === id.conceptId);
         if (!concept) {
           throw Error(`concept ${id} not found`);
         }
-        target.concepts.push(concept);
+        target.criteriums.push(concept);
       }
       resolve(target);
     });

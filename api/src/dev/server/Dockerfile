@@ -31,7 +31,7 @@ RUN apt-get update && \
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 
-ENV CLOUD_SDK_VERSION 260.0.0
+ENV CLOUD_SDK_VERSION 321.0.0
 ENV PATH /google-cloud-sdk/bin:$PATH
 
 RUN curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz && \
@@ -74,6 +74,9 @@ RUN gem install --no-document googleauth
 RUN curl -O https://bin.equinox.io/c/htRtQZagtfg/rainforest-cli-stable-linux-amd64.tgz && \
   tar -xvf rainforest-cli-stable-linux-amd64.tgz && rm rainforest-cli-stable-linux-amd64.tgz && \
   mv rainforest /usr/local/bin
+
+# Prevent bq interactively asking us to choose a default project
+RUN touch .bigqueryrc
 
 COPY with-mysql-login.sh /usr/local/bin
 COPY with-uid.sh /usr/local/bin

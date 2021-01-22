@@ -14,6 +14,15 @@ import 'rxjs/Rx';
 
 declare const gapi: any;
 
+// for e2e tests: provide your own oauth token to obviate Google's oauth UI
+// flow, thereby avoiding inevitable challenges as Google identifies Puppeteer
+// as non-human.
+declare global {
+  interface Window { setTestAccessTokenOverride: (token: string) => void; }
+}
+
+const LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN = 'test-access-token-override';
+
 @Injectable()
 export class SignInService {
   // Expose "current user details" as an Observable
@@ -21,10 +30,32 @@ export class SignInService {
   public isSignedIn$ = this.isSignedIn.asObservable();
   // Expose "current user details" as an Observable
   public clientId = environment.clientId;
+  private testAccessTokenOverride: string;
 
   constructor(private zone: NgZone,
     serverConfigService: ServerConfigService) {
     this.zone = zone;
+
+    // Enable test access token override via global function. Intended to support
+    // Puppeteer testing flows.
+    if (environment.allowTestAccessTokenOverride) {
+      window.setTestAccessTokenOverride = (token: string) => {
+        if (token) {
+          window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
+        } else {
+          window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+        }
+      };
+      this.testAccessTokenOverride = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+      if (this.testAccessTokenOverride) {
+        // The client has already configured an access token override. Skip the normal oauth flow.
+        authStore.set({...authStore.get(), authLoaded: true, isSignedIn: true});
+        this.zone.run(() => {
+          this.isSignedIn.next(true);
+        });
+        return;
+      }
+    }
 
     serverConfigService.getConfig().subscribe((config) => {
       this.makeAuth2(config);
@@ -91,7 +122,9 @@ export class SignInService {
   }
 
   public get currentAccessToken() {
-    if (!gapi.auth2) {
+    if (this.testAccessTokenOverride) {
+      return this.testAccessTokenOverride;
+    } else if (!gapi.auth2) {
       return null;
     } else {
       const authResponse = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse(true);

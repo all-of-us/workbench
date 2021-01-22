@@ -59,6 +59,7 @@ import org.pmiops.workbench.model.CohortChartData;
 import org.pmiops.workbench.model.CohortChartDataListResponse;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.CohortReviewListResponse;
+import org.pmiops.workbench.model.CohortReviewWithCountResponse;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.CriteriaType;
@@ -202,13 +203,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     List<ParticipantCohortStatus> paginatedPCS =
         cohortReviewService.findAll(cohortReview.getCohortReviewId(), pageRequest);
 
-    cohortReview
-        .page(pageRequest.getPage())
-        .pageSize(pageRequest.getPageSize())
-        .sortOrder(pageRequest.getSortOrder().toString())
-        .sortColumn(pageRequest.getSortColumn())
-        .participantCohortStatuses(paginatedPCS);
-    return ResponseEntity.ok(cohortReview);
+    return ResponseEntity.ok(cohortReview.participantCohortStatuses(paginatedPCS));
   }
 
   @Override
@@ -376,7 +371,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
    * based on page, pageSize, sortOrder and sortColumn.
    */
   @Override
-  public ResponseEntity<CohortReview> getParticipantCohortStatuses(
+  public ResponseEntity<CohortReviewWithCountResponse> getParticipantCohortStatuses(
       String workspaceNamespace,
       String workspaceId,
       Long cohortId,
@@ -399,20 +394,18 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       cohortReview = initializeCohortReview(cdrVersionId, cohort);
     }
 
-    cohortReview
-        .page(pageRequest.getPage())
-        .pageSize(pageRequest.getPageSize())
-        .sortOrder(pageRequest.getSortOrder().toString())
-        .sortColumn(pageRequest.getSortColumn())
-        .participantCohortStatuses(participantCohortStatuses)
-        .queryResultSize(
-            pageRequest.getFilters().isEmpty()
-                ? cohortReview.getReviewSize()
-                : cohortReviewService.findCount(cohortReview.getCohortReviewId(), pageRequest));
+    cohortReview.participantCohortStatuses(participantCohortStatuses);
 
     userRecentResourceService.updateCohortEntry(
         cohort.getWorkspaceId(), userProvider.get().getUserId(), cohortId);
-    return ResponseEntity.ok(cohortReview);
+    return ResponseEntity.ok(
+        new CohortReviewWithCountResponse()
+            .cohortReview(cohortReview)
+            .queryResultSize(
+                pageRequest.getFilters().isEmpty()
+                    ? cohortReview.getReviewSize()
+                    : cohortReviewService.findCount(
+                        cohortReview.getCohortReviewId(), pageRequest)));
   }
 
   @Override

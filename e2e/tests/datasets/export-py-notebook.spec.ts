@@ -2,23 +2,22 @@ import DataResourceCard from 'app/component/data-resource-card';
 import ExportToNotebookModal from 'app/component/export-to-notebook-modal';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {Option, ResourceCard} from 'app/text-labels';
+import {MenuOption, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
-import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
+import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 
 describe('Create Dataset', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
    /**
     * Create new Dataset, export to notebook in Python language
     * Finally delete Dataset.
     */
-   // disabled temporarily to merge fitbit concept sets, will fix with RW-5932
-  xtest('Export dataset to notebook in Python language', async () => {
+   test('Export dataset to notebook in Python language', async () => {
     const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
@@ -80,8 +79,7 @@ describe('Create Dataset', () => {
    * - Create dataset.
    * - Export dataset to notebook thru snowman menu.
    */
-  // disabled temporarily to merge fitbit concept sets, will fix with RW-5932
-  xtest('Export dataset to notebook thru snowman menu', async () => {
+  test('Export dataset to notebook thru snowman menu', async () => {
     await findOrCreateWorkspace(page).then(card => card.clickWorkspaceName());
 
     // Click Add Datasets button.
@@ -96,7 +94,7 @@ describe('Create Dataset', () => {
 
     const resourceCard = new DataResourceCard(page);
     const datasetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
-    await datasetCard.selectSnowmanMenu(Option.exportToNotebook, {waitForNav: false});
+    await datasetCard.selectSnowmanMenu(MenuOption.ExportToNotebook, {waitForNav: false});
 
     const exportModal = new ExportToNotebookModal(page);
     await exportModal.waitForLoad();

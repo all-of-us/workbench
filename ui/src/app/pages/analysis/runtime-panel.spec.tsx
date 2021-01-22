@@ -838,4 +838,53 @@ describe('RuntimePanel', () => {
     const wrapper = await component();
     expect(wrapper.find('[data-test-id="runtime-status-icon"]').first().prop('src')).toBe(`${iconsDir}/compute-none.svg`);
   });
+
+  it('should prevent runtime creation when disk size is invalid', async() => {
+    runtimeApiStub.runtime = null;
+    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
+    const wrapper = await component();
+    await mustClickButton(wrapper, 'Customize');
+    const getCreateButton = () => wrapper.find({'aria-label': 'Create'}).first();
+
+    await pickMainDiskSize(wrapper, 49);
+    expect(getCreateButton().prop('disabled')).toBeTruthy();
+
+    await pickMainDiskSize(wrapper, 4900);
+    expect(getCreateButton().prop('disabled')).toBeTruthy();
+
+    await pickMainDiskSize(wrapper, 50);
+    await pickComputeType(wrapper, ComputeType.Dataproc);
+    await pickWorkerDiskSize(wrapper, 49);
+    expect(getCreateButton().prop('disabled')).toBeTruthy();
+
+    await pickWorkerDiskSize(wrapper, 4900);
+    expect(getCreateButton().prop('disabled')).toBeTruthy();
+
+    await pickMainDiskSize(wrapper, 50);
+    await pickWorkerDiskSize(wrapper, 50);
+    expect(getCreateButton().prop('disabled')).toBeFalsy();
+  });
+
+  it('should prevent runtime update when disk size is invalid', async() => {
+    const wrapper = await component();
+    const getNextButton = () => wrapper.find({'aria-label': 'Next'}).first();
+
+    await pickMainDiskSize(wrapper, 49);
+    expect(getNextButton().prop('disabled')).toBeTruthy();
+
+    await pickMainDiskSize(wrapper, 4900);
+    expect(getNextButton().prop('disabled')).toBeTruthy();
+
+    await pickMainDiskSize(wrapper, 50);
+    await pickComputeType(wrapper, ComputeType.Dataproc);
+    await pickWorkerDiskSize(wrapper, 49);
+    expect(getNextButton().prop('disabled')).toBeTruthy();
+
+    await pickWorkerDiskSize(wrapper, 4900);
+    expect(getNextButton().prop('disabled')).toBeTruthy();
+
+    await pickMainDiskSize(wrapper, 50);
+    await pickWorkerDiskSize(wrapper, 50);
+    expect(getNextButton().prop('disabled')).toBeFalsy();
+  });
 });

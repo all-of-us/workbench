@@ -103,22 +103,21 @@ export default class GoogleLoginPage {
    * Click Next button to submit login credential.
    */
   async submit(): Promise<void> {
-    try {
-      const submitButton = new Button(this.page, FieldSelector.SubmitButton);
-      await Promise.all([
-        this.page.waitForNavigation({waitUntil: ['networkidle2', 'load'], timeout: 30000}),
-        submitButton.click(),
-      ]);
-      await this.page.waitForSelector('app-signed-in', {timeout: 60000});
-      await submitButton.dispose();
-    } catch (err) {
-      // Two main reasons why error is throw are caused by "Enter Recovery Email" page or login captcha.
-      // At this time, we can only handle "Enter Recover Email" page if it exists.
-      const found = await this.fillOutRecoverEmail();
-      if (!found) {
-        throw err;
-      }
-    }
+    const submitButton = new Button(this.page, FieldSelector.SubmitButton);
+    await Promise.all([
+      this.page.waitForNavigation({waitUntil: ['networkidle0', 'load'], timeout: (2 * 60 * 1000)}), // 2 minutes
+      submitButton.click(),
+    ]);
+    await submitButton.dispose();
+    await this.page.waitForSelector('app-signed-in', {timeout: (1 * 60 * 1000)})
+      .catch(async (err) => {
+        // Two main reasons why error is throw are caused by "Enter Recovery Email" page or login captcha.
+        // At this time, we can only handle "Enter Recover Email" page if it exists.
+        const found = await this.fillOutRecoverEmail();
+        if (!found) {
+          throw err;
+        }
+    });
   }
 
   /**
@@ -126,7 +125,13 @@ export default class GoogleLoginPage {
    */
   async load(): Promise<void> {
     const url = config.uiBaseUrl + config.loginUrlPath;
-    await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded', 'load'], timeout: 180000});
+    const response = await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded', 'load'], timeout: 0});
+    if (response && response.ok()) {
+      return;
+    }
+    // Retry load Login page.
+    console.warn(`Retry loading Login page`);
+    await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded', 'load'], timeout: 60000});
   }
 
   /**

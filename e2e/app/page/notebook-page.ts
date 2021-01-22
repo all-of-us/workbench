@@ -33,7 +33,7 @@ export enum Mode {
 }
 
 export enum KernelStatus {
-  notRunning = 'Kernel is not running',
+  NotRunning = 'Kernel is not running',
   Idle = 'Kernel Idle',
 }
 
@@ -48,10 +48,10 @@ export default class NotebookPage extends AuthenticatedPage {
     try {
       await this.findRunButton(120000);
     } catch (err) {
-      console.log(`Reloading "${this.documentTitle}" because cannot find the Run button`);
+      console.warn(`Reloading "${this.documentTitle}" because cannot find the Run button`);
       await this.page.reload({waitUntil: ['networkidle0', 'load']});
     }
-    await this.waitForKernelIdle(120000);
+    await this.waitForKernelIdle(10 * 60 * 1000); // 10 minutes
     return true;
   }
 
@@ -115,21 +115,18 @@ export default class NotebookPage extends AuthenticatedPage {
   async waitForKernelIdle(timeOut?: number): Promise<void> {
     const idleIconSelector = `${CssSelector.kernelIcon}.kernel_idle_icon`;
     const notifSelector = '#notification_kernel';
-    const mathJaxMessage = '#MathJax_Message'; // py library loading in background
     const frame = await this.getIFrame();
     try {
       await Promise.all([
         frame.waitForSelector(idleIconSelector, {visible: true, timeout: timeOut}),
         frame.waitForSelector(notifSelector, {hidden: true, timeout: timeOut}),
-        frame.waitForSelector(mathJaxMessage, {hidden: true, timeout: timeOut}),
       ]);
     } catch (e) {
-      console.error(`Notebook kernel is: ${await this.kernelStatus()}`);
-      throw new Error(`waitForKernelIdle encountered ${e}`);
+      throw new Error(`Notebook kernel is ${await this.getKernelStatus()}. waitForKernelIdle() encountered ${e}`);
     }
   }
 
-  async kernelStatus(): Promise<KernelStatus | string> {
+  async getKernelStatus(): Promise<KernelStatus | string> {
     const frame = await this.getIFrame();
     const elemt = await frame.waitForSelector(CssSelector.kernelIcon, {visible: true});
     const value = await getPropValue<string>(elemt, 'title');
@@ -186,7 +183,7 @@ export default class NotebookPage extends AuthenticatedPage {
     const cell = cellIndex === -1 ? await this.findLastCell() : await this.findCell(cellIndex);
     const inputCell = await cell.focus();
 
-    const {code, codeFile, timeOut = 120000, markdownWorkaround = false} = opts;
+    const {code, codeFile, timeOut = 2 * 60 * 1000, markdownWorkaround = false} = opts;
 
     let codeToRun;
     if (code !== undefined) {

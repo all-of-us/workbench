@@ -15,7 +15,6 @@ import {
   currentCohortCriteriaStore,
   currentConceptStore,
   currentWorkspaceStore,
-  serverConfigStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {AttrName, Criteria, CriteriaSubType, CriteriaType, Domain, Operator} from 'generated/fetch';
@@ -293,13 +292,9 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   setAttributes(event: Event, node: NodeProp) {
     event.stopPropagation();
-    if (serverConfigStore.getValue().enableCohortBuilderV2) {
-      delete node.children;
-      attributesSelectionStore.next(node);
-      setSidebarActiveIconStore.next('criteria');
-    } else {
-      this.props.setAttributes(node);
-    }
+    delete node.children;
+    attributesSelectionStore.next(node);
+    setSidebarActiveIconStore.next('criteria');
   }
 
   get isCOPESurvey() {
@@ -315,7 +310,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   getSelectedValues() {
     const {node: {domainId, path}, source} = this.props;
-    return source === 'criteria'
+    return source === 'cohort'
       ? currentCohortCriteriaStore.getValue().some(crit =>
         crit.parameterId === this.paramId()
           || (![Domain.PHYSICALMEASUREMENT.toString(), Domain.VISIT.toString()].includes(domainId)
@@ -327,20 +322,15 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   selectIconDisabled() {
     const {selectedIds, source} = this.props;
-    return source !== 'criteria' && selectedIds && selectedIds.length >= 1000;
+    return source !== 'cohort' && selectedIds && selectedIds.length >= 1000;
   }
 
   render() {
-    const {autocompleteSelection, groupSelections, node,
-      node: {code, count, domainId, id, group, hasAttributes, name, parentId, selectable},
-      source, scrollToMatch, searchTerms, select, selectedIds,
-      setAttributes} = this.props;
+    const {autocompleteSelection, groupSelections, node, node: {code, count, domainId, id, group, hasAttributes, name, selectable},
+      source, scrollToMatch, searchTerms, select, selectedIds, setAttributes} = this.props;
     const {children, error, expanded, hover, loading, searchMatch} = this.state;
     const nodeChildren = domainId === Domain.PHYSICALMEASUREMENT.toString() ? node.children : children;
-    const selected = serverConfigStore.getValue().enableCohortBuilderV2
-      ? this.getSelectedValues()
-      : selectedIds.includes(this.paramId()) ||
-        groupSelections.includes(parentId);
+    const selected = this.getSelectedValues();
     const displayName = domainId === Domain.PHYSICALMEASUREMENT.toString() && !!searchTerms
       ? highlightSearchTerm(searchTerms, name, colors.success)
       : name;
@@ -358,8 +348,8 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
         <div style={hover ? {...styles.treeNodeContent, background: colors.light} : styles.treeNodeContent}
           onMouseEnter={() => this.setState({hover: true})}
           onMouseLeave={() => this.setState({hover: false})}>
-          {(selectable && (source === 'criteria' || node.subtype !== 'ANSWER')) && <button style={styles.iconButton}>
-            {hasAttributes && source === 'criteria'
+          {(selectable && (source === 'cohort' || node.subtype !== 'ANSWER')) && <button style={styles.iconButton}>
+            {hasAttributes && source === 'cohort'
               ? <ClrIcon style={{color: colors.accent}}
                   shape='slider' dir='right' size='20'
                   onClick={(e) => this.setAttributes(e, node)}/>

@@ -1,6 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 import java.sql.Timestamp;
 import java.util.Calendar;
@@ -43,7 +43,7 @@ public class CohortReviewDaoTest {
 
   @Test
   public void save() {
-    assertEquals(cohortReview, cohortReviewDao.findOne(cohortReview.getCohortReviewId()));
+    assertThat(cohortReviewDao.findOne(cohortReview.getCohortReviewId())).isEqualTo(cohortReview);
   }
 
   @Test
@@ -51,27 +51,27 @@ public class CohortReviewDaoTest {
     cohortReview = cohortReviewDao.findOne(cohortReview.getCohortReviewId());
     cohortReview.setReviewedCount(3);
     cohortReviewDao.saveAndFlush(cohortReview);
-    assertEquals(cohortReview, cohortReviewDao.findOne(cohortReview.getCohortReviewId()));
+    assertThat(cohortReviewDao.findOne(cohortReview.getCohortReviewId())).isEqualTo(cohortReview);
   }
 
   @Test
   public void findCohortReviewByCohortIdAndCdrVersionId() {
-    assertEquals(
-        cohortReview,
-        cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(
-            cohortReview.getCohortId(), cohortReview.getCdrVersionId()));
+    assertThat(
+            cohortReviewDao.findCohortReviewByCohortIdAndCdrVersionId(
+                cohortReview.getCohortId(), cohortReview.getCdrVersionId()))
+        .isEqualTo(cohortReview);
   }
 
   @Test
   public void findByFirecloudNameAndActiveStatus() {
-    assertEquals(
-        cohortReview,
-        cohortReviewDao
-            .findByFirecloudNameAndActiveStatus(
-                "namespace",
-                "firecloudName",
-                DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE))
-            .get(0));
+    assertThat(
+            cohortReviewDao
+                .findByFirecloudNameAndActiveStatus(
+                    "namespace",
+                    "firecloudName",
+                    DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE))
+                .get(0))
+        .isEqualTo(cohortReview);
   }
 
   private DbCohortReview createCohortReview() {

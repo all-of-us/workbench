@@ -38,7 +38,6 @@ import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
@@ -113,7 +112,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private NotebooksService notebooksService;
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
   @Autowired private Provider<DbUser> userProvider;
-  @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   @Qualifier(DatasetConfig.DATASET_PREFIX_CODE)
@@ -215,8 +213,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             dataSetDao,
             dsLinkingDao,
             dataSetMapper,
-            CLOCK,
-            workbenchConfigProvider);
+            CLOCK);
     controller =
         spy(
             new DataSetController(
@@ -338,7 +335,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     DbConceptSet dbConceptSet = new DbConceptSet();
     dbConceptSet.setDomain(DbStorageEnums.domainToStorage(domain));
     DbConceptSetConceptId dbConceptSetConceptId =
-        DbConceptSetConceptId.builder().addConceptId(1L).addStandard(true).build();
+        DbConceptSetConceptId.builder().addConceptId(1L).addStandard(false).build();
     dbConceptSet.setConceptSetConceptIds(
         new HashSet<>(Collections.singletonList(dbConceptSetConceptId)));
     dbConceptSet.setWorkspaceId(workspaceId);

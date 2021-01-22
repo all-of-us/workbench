@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -360,9 +359,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             .matchedParticipantCount(reviewWithoutEHRData.getMatchedParticipantCount())
             .reviewedCount(reviewWithoutEHRData.getReviewedCount())
             .etag(Etags.fromVersion(reviewWithoutEHRData.getVersion()));
-    assertEquals(
-        expectedReview,
-        controller.getCohortReviewsInWorkspace(NAMESPACE, NAME).getBody().getItems().get(0));
+    assertThat(controller.getCohortReviewsInWorkspace(NAMESPACE, NAME).getBody().getItems().get(0))
+        .isEqualTo(expectedReview);
   }
 
   @Test
@@ -661,13 +659,15 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             .getCohortChartData(
                 NAMESPACE, NAME, reviewWithoutEHRData.getCohortReviewId(), Domain.LAB.name(), 10)
             .getBody();
-    assertEquals(3, response.getItems().size());
-    assertEquals(
-        new CohortChartData().name("name10").conceptId(10L).count(1L), response.getItems().get(0));
-    assertEquals(
-        new CohortChartData().name("name3").conceptId(3L).count(1L), response.getItems().get(1));
-    assertEquals(
-        new CohortChartData().name("name9").conceptId(9L).count(1L), response.getItems().get(2));
+    assertThat(response.getItems().size()).isEqualTo(3);
+    assertThat(response.getItems().get(0))
+        .isEqualTo(new CohortChartData().name("name10").conceptId(10L).count(1L));
+    assertThat(response.getItems().get(0))
+        .isEqualTo(new CohortChartData().name("name10").conceptId(10L).count(1L));
+    assertThat(response.getItems().get(1))
+        .isEqualTo(new CohortChartData().name("name3").conceptId(3L).count(1L));
+    assertThat(response.getItems().get(2))
+        .isEqualTo(new CohortChartData().name("name9").conceptId(9L).count(1L));
   }
 
   @Test
@@ -677,13 +677,13 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             .getCohortChartData(
                 NAMESPACE, NAME, reviewWithEHRData.getCohortReviewId(), Domain.LAB.name(), 10)
             .getBody();
-    assertEquals(3, response.getItems().size());
-    assertEquals(
-        new CohortChartData().name("name10").conceptId(10L).count(1L), response.getItems().get(0));
-    assertEquals(
-        new CohortChartData().name("name3").conceptId(3L).count(1L), response.getItems().get(1));
-    assertEquals(
-        new CohortChartData().name("name9").conceptId(9L).count(1L), response.getItems().get(2));
+    assertThat(response.getItems().size()).isEqualTo(3);
+    assertThat(response.getItems().get(0))
+        .isEqualTo(new CohortChartData().name("name10").conceptId(10L).count(1L));
+    assertThat(response.getItems().get(1))
+        .isEqualTo(new CohortChartData().name("name3").conceptId(3L).count(1L));
+    assertThat(response.getItems().get(2))
+        .isEqualTo(new CohortChartData().name("name9").conceptId(9L).count(1L));
   }
 
   @Test
@@ -693,9 +693,9 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
             .getCohortChartData(
                 NAMESPACE, NAME, reviewWithoutEHRData.getCohortReviewId(), Domain.DRUG.name(), 10)
             .getBody();
-    assertEquals(1, response.getItems().size());
-    assertEquals(
-        new CohortChartData().name("name11").conceptId(1L).count(1L), response.getItems().get(0));
+    assertThat(response.getItems().size()).isEqualTo(1);
+    assertThat(response.getItems().get(0))
+        .isEqualTo(new CohortChartData().name("name11").conceptId(1L).count(1L));
   }
 
   @Test
@@ -709,11 +709,11 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 Domain.CONDITION.name(),
                 10)
             .getBody();
-    assertEquals(2, response.getItems().size());
-    assertEquals(
-        new CohortChartData().name("name1").conceptId(1L).count(1L), response.getItems().get(0));
-    assertEquals(
-        new CohortChartData().name("name7").conceptId(7L).count(1L), response.getItems().get(1));
+    assertThat(response.getItems().size()).isEqualTo(2);
+    assertThat(response.getItems().get(0))
+        .isEqualTo(new CohortChartData().name("name1").conceptId(1L).count(1L));
+    assertThat(response.getItems().get(1))
+        .isEqualTo(new CohortChartData().name("name7").conceptId(7L).count(1L));
   }
 
   @Test
@@ -727,13 +727,14 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                 Domain.PROCEDURE.name(),
                 10)
             .getBody();
-    assertEquals(3, response.getItems().size());
-    assertEquals(
-        new CohortChartData().name("name2").conceptId(2L).count(1L), response.getItems().get(0));
-    assertEquals(
-        new CohortChartData().name("name4").conceptId(4L).count(1L), response.getItems().get(1));
-    assertEquals(
-        new CohortChartData().name("name8").conceptId(8L).count(1L), response.getItems().get(2));
+
+    assertThat(response.getItems().size()).isEqualTo(3);
+    assertThat(response.getItems().get(0))
+        .isEqualTo(new CohortChartData().name("name2").conceptId(2L).count(1L));
+    assertThat(response.getItems().get(1))
+        .isEqualTo(new CohortChartData().name("name4").conceptId(4L).count(1L));
+    assertThat(response.getItems().get(2))
+        .isEqualTo(new CohortChartData().name("name8").conceptId(8L).count(1L));
   }
 
   @Test
@@ -742,16 +743,13 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
         controller
             .getVocabularies(NAMESPACE, NAME, reviewWithoutEHRData.getCohortReviewId())
             .getBody();
-    assertEquals(20, response.getItems().size());
-    assertEquals(
-        new Vocabulary().type("Source").domain("ALL_EVENTS").vocabulary("CPT4"),
-        response.getItems().get(0));
-    assertEquals(
-        new Vocabulary().type("Source").domain("ALL_EVENTS").vocabulary("ICD10CM"),
-        response.getItems().get(1));
-    assertEquals(
-        new Vocabulary().type("Source").domain("ALL_EVENTS").vocabulary("ICD9CM"),
-        response.getItems().get(2));
+    assertThat(response.getItems().size()).isEqualTo(20);
+    assertThat(response.getItems().get(0))
+        .isEqualTo(new Vocabulary().type("Source").domain("ALL_EVENTS").vocabulary("CPT4"));
+    assertThat(response.getItems().get(1))
+        .isEqualTo(new Vocabulary().type("Source").domain("ALL_EVENTS").vocabulary("ICD10CM"));
+    assertThat(response.getItems().get(2))
+        .isEqualTo(new Vocabulary().type("Source").domain("ALL_EVENTS").vocabulary("ICD9CM"));
   }
 
   private void saveParticipantCohortStatus(Long participantId, Long reviewId) {

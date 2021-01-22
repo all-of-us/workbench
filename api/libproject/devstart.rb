@@ -44,7 +44,8 @@ ENVIRONMENTS = {
     :config_json => "config_local.json",
     :cdr_versions_json => "cdr_versions_local.json",
     :featured_workspaces_json => "featured_workspaces_local.json",
-    :gae_vars => make_gae_vars
+    :gae_vars => make_gae_vars,
+    :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-workbench-test" => {
     :env_name => "test",
@@ -53,7 +54,8 @@ ENVIRONMENTS = {
     :config_json => "config_test.json",
     :cdr_versions_json => "cdr_versions_test.json",
     :featured_workspaces_json => "featured_workspaces_test.json",
-    :gae_vars => make_gae_vars(0, 10, 'F4')
+    :gae_vars => make_gae_vars(0, 10, 'F4'),
+    :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-rw-staging" => {
     :env_name => "staging",
@@ -62,7 +64,8 @@ ENVIRONMENTS = {
     :config_json => "config_staging.json",
     :cdr_versions_json => "cdr_versions_staging.json",
     :featured_workspaces_json => "featured_workspaces_staging.json",
-    :gae_vars => make_gae_vars
+    :gae_vars => make_gae_vars,
+    :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-rw-perf" => {
     :env_name => "perf",
@@ -71,7 +74,8 @@ ENVIRONMENTS = {
     :config_json => "config_perf.json",
     :cdr_versions_json => "cdr_versions_perf.json",
     :featured_workspaces_json => "featured_workspaces_perf.json",
-    :gae_vars => make_gae_vars(20, 20)
+    :gae_vars => make_gae_vars(20, 20),
+    :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-rw-stable" => {
     :env_name => "stable",
@@ -80,7 +84,8 @@ ENVIRONMENTS = {
     :config_json => "config_stable.json",
     :cdr_versions_json => "cdr_versions_stable.json",
     :featured_workspaces_json => "featured_workspaces_stable.json",
-    :gae_vars => make_gae_vars
+    :gae_vars => make_gae_vars,
+    :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-rw-preprod" => {
     :env_name => "preprod",
@@ -89,7 +94,8 @@ ENVIRONMENTS = {
     :config_json => "config_preprod.json",
     :cdr_versions_json => "cdr_versions_preprod.json",
     :featured_workspaces_json => "featured_workspaces_preprod.json",
-    :gae_vars => make_gae_vars
+    :gae_vars => make_gae_vars,
+    :source_cdr_project => "aou-res-curation-output-prod"
   },
   "all-of-us-rw-prod" => {
     :env_name => "prod",
@@ -98,7 +104,8 @@ ENVIRONMENTS = {
     :config_json => "config_prod.json",
     :cdr_versions_json => "cdr_versions_prod.json",
     :featured_workspaces_json => "featured_workspaces_prod.json",
-    :gae_vars => make_gae_vars(8, 64, 'F4')
+    :gae_vars => make_gae_vars(8, 64, 'F4'),
+    :source_cdr_project => "aou-res-curation-output-prod"
   }
 }
 
@@ -766,8 +773,60 @@ Common.register_command({
   :fn => ->() { run_local_rw_migrations() }
 })
 
+def circle_build_cdr_indices(cmd_name, args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.data_browser = false
+  op.opts.branch = "main"
+  op.add_option(
+    "--branch [--branch]",
+    ->(opts, v) { opts.branch = v},
+    "Branch. Optional - Default is master."
+  )
+  op.add_option(
+    "--project [--project]",
+    ->(opts, v) { opts.project = v},
+    "Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_option(
+    "--cdr-version [cdr-version]",
+    ->(opts, v) { opts.cdr_version = v},
+    "CDR version. Required."
+  )
+  op.add_option(
+    "--cdr-date [cdr-date]",
+    ->(opts, v) { opts.cdr_date = v},
+    "CDR date is Required. Please use the date from the source CDR. <YYYY-mm-dd>"
+  )
+  op.add_option(
+    "--data-browser [data-browser]",
+    ->(opts, v) { opts.data_browser = v},
+    "Generate for data browser. Optional - Default is false"
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.bq_dataset and opts.cdr_version and opts.cdr_date }
+  op.parse.validate
+
+  env = ENVIRONMENTS[op.opts.project]
+
+  common = Common.new
+  content_type = "Content-Type: application/json"
+  accept = "Accept: application/json"
+  circle_token = "Circle-Token: "
+  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_build_cdr_indices\": true, \"cdr_source_project\": \"#{env.fetch(:source_cdr_project)}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"cdr_sql_bucket\": \"all-of-us-workbench-private-cloudsql\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"cdr_date\": \"#{op.opts.cdr_date}\", \"data_browser\": #{op.opts.data_browser} }}"
+  common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/cdr-indices/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
+end
+
+Common.register_command({
+  :invocation => "circle-build-cdr-indices",
+  :description => "Build the CDR indices using CircleCi",
+  :fn => ->(*args) { circle_build_cdr_indices("circle-build-cdr-indices", args) }
+})
+
 def make_bq_denormalized_tables(cmd_name, *args)
-  ensure_docker_sync()
   op = WbOptionsParser.new(cmd_name, args)
   date = Time.new
   date = date.year.to_s + "-" + date.month.to_s + "-" + date.day.to_s
@@ -803,7 +862,9 @@ def make_bq_denormalized_tables(cmd_name, *args)
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.data_browser} #{op.opts.dry_run}}
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_date} #{op.opts.data_browser} #{op.opts.dry_run}}
+  end
 end
 
 Common.register_command({
@@ -1031,7 +1092,6 @@ Generates the criteria table in big query. Used by cohort builder. Must be run o
 })
 
 def generate_private_cdr_counts(cmd_name, *args)
-  ensure_docker_sync()
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
     "--bq-project [bq-project]",
@@ -1044,9 +1104,9 @@ def generate_private_cdr_counts(cmd_name, *args)
     "BQ dataset. Required."
   )
   op.add_option(
-    "--workbench-project [workbench-project]",
-    ->(opts, v) { opts.workbench_project = v},
-    "Workbench Project. Required."
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "Project. Required."
   )
   op.add_option(
     "--cdr-version [cdr-version]",
@@ -1058,19 +1118,24 @@ def generate_private_cdr_counts(cmd_name, *args)
     ->(opts, v) { opts.bucket = v},
     "GCS bucket. Required."
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.workbench_project and opts.cdr_version and opts.bucket }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.project and opts.cdr_version and opts.bucket }
   op.parse.validate
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate()
 
-  ServiceAccountContext.new(op.opts.workbench_project).run do
+  with_cloud_proxy_and_db(gcc) do
     common = Common.new
-    common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.workbench_project} #{op.opts.cdr_version} #{op.opts.bucket}}
+    Dir.chdir('db-cdr') do
+      common.run_inline %W{./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.project} #{op.opts.cdr_version} #{op.opts.bucket}}
+    end
   end
 end
 
 Common.register_command({
   :invocation => "generate-private-cdr-counts",
-  :description => "generate-private-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --workbench-project <PROJECT> \
- --cdr-version=<''|YYYYMMDD> --bucket <BUCKET>
+  :description => "generate-private-cdr-counts --bq-project <PROJECT> --bq-dataset <DATASET> --project <PROJECT> \
+ --cdr-version=<VERSION> --bucket <BUCKET>
 Generates databases in bigquery with data from a de-identified cdr that will be imported to mysql/cloudsql to be used by workbench.",
   :fn => ->(*args) { generate_private_cdr_counts("generate-private-cdr-counts", *args) }
 })
@@ -1539,6 +1604,69 @@ Common.register_command({
     :invocation => "export-workspace-data",
     :description => "Export workspace data to CSV.\n",
     :fn => ->(*args) {export_workspace_data("export-workspace-data", *args)}
+})
+
+def generate_impersonated_user_token(cmd_name, *args)
+  common = Common.new
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_typed_option(
+      "--output-token-filename [output-token-filename]",
+      String,
+      ->(opts, v) { opts.output_token_filename = v},
+      "Path to an output file for the generated token")
+  op.add_typed_option(
+      "--impersonated-username [impersonated-username]",
+      String,
+      ->(opts, v) { opts.impersonated_username = v},
+      "AoU researcher email to impersonate, e.g. calbach@fake-research-aou.org")
+  op.add_validator ->(opts) { raise ArgumentError unless (opts.output_token_filename and opts.impersonated_username)}
+  op.parse.validate
+
+  project_id = nil
+  ENVIRONMENTS.each_key do |project|
+    if project == "local"
+      next
+    end
+
+    config = get_config(project)
+    if op.opts.impersonated_username.end_with?("@" + config["googleDirectoryService"]["gSuiteDomain"])
+      project_id = project
+      break
+    end
+  end
+  if project_id.nil?
+    common.error "invalid domain for given user #{op.opts.impersonated_username} - target must be an AoU research domain email"
+    raise ArgumentError
+  end
+
+  if ["all-of-us-rw-prod", "all-of-us-rw-preprod"].include? project_id
+    get_user_confirmation(
+      "Using impersonation in a production environment is highly discouraged, " +
+      "and should only be considered in a break-glass scenario. Check with the " +
+      "Workbench team that all other options have been exhausted before " +
+      "continuing. Continue?")
+  end
+
+  flags = ([
+      ["--output-token-filename", op.opts.output_token_filename],
+      ["--impersonated-username", op.opts.impersonated_username],
+      ["--project-id", project_id]
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  flags.map! { |f| "'#{f}'" }
+
+  ServiceAccountContext.new(project_id).run do
+    common.run_inline %W{
+        gradle generateImpersonatedUserToken
+       -PappArgs=[#{flags.join(',')}]}
+  end
+end
+
+Common.register_command({
+    :invocation => "generate-impersonated-user-token",
+    :description => "Generate an imperonsated oauth token for a target researcher",
+    :fn => ->(*args) {generate_impersonated_user_token("generate-impersonated-user-token", *args)}
 })
 
 def load_institutions(cmd_name, *args)

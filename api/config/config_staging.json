@@ -13,7 +13,6 @@
     "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_staging",
     "timeoutInSeconds": 60,
     "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.0.14",
-    "welderDockerImage": "broadinstitute/welder-server:7ae1a62",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
     "runtimeImages": {
@@ -100,12 +99,8 @@
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
-    "enableCohortBuilderV2": true,
-    "enableConceptSetSearchV2": true,
     "enableReportingUploadCron": true,
-    "enableCOPESurvey": true,
-    "enableCustomRuntimes": false,
-    "enableFitbit": true
+    "enableCustomRuntimes": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",
@@ -123,7 +118,6 @@
   },
   "reporting": {
     "dataset": "reporting_staging",
-    "maxRowsPerInsert": 800,
-    "uploadMethod": "STREAMING"
+    "maxRowsPerInsert": 2500
   }
 }

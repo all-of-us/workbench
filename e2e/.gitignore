@@ -5,6 +5,8 @@ node_modules/
 tsc-out/
 out/
 
+puppeteer-access-token.txt
+
 # logs
 screenshot/
 logs/

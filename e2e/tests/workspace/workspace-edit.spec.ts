@@ -1,14 +1,14 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {Option, WorkspaceAccessLevel} from 'app/text-labels';
+import {MenuOption, WorkspaceAccessLevel} from 'app/text-labels';
 import * as testData from 'resources/data/workspace-data';
-import {createWorkspace, findOrCreateWorkspace, performActions, signIn} from 'utils/test-utils';
+import {createWorkspace, findOrCreateWorkspace, performActions, signInWithAccessToken} from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 
 describe('Editing workspace via workspace card snowman menu', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   // Reuse same Workspace for all tests in this file to reduce test playback time.
@@ -25,7 +25,7 @@ describe('Editing workspace via workspace card snowman menu', () => {
   test('User as OWNER can edit workspace', async () => {
     const workspaceCard = await createWorkspace(page);
     workspaceName = await workspaceCard.getWorkspaceName();
-    await workspaceCard.selectSnowmanMenu(Option.Edit);
+    await workspaceCard.selectSnowmanMenu(MenuOption.Edit, {waitForNav: true});
 
     const workspaceEditPage = new WorkspaceEditPage(page);
 
@@ -106,11 +106,11 @@ describe('Editing workspace via workspace card snowman menu', () => {
     const workspaceEditPage = new WorkspaceEditPage(page);
 
      // CDR Version Select is readonly. Get selected value.
-     const selectedOption = await workspaceEditPage.selectCdrVersion();
-     const cdrVersionSelect = await workspaceEditPage.getCdrVersionSelect();
-     const selectedValue = await cdrVersionSelect.getOptionValue(selectedOption);
+    const selectedOption = await workspaceEditPage.selectCdrVersion();
+    const cdrVersionSelect = await workspaceEditPage.getCdrVersionSelect();
+    const selectedValue = await cdrVersionSelect.getOptionValue(selectedOption);
 
-     // Change question #2 answer
+    // Change question #2 answer
      await performActions(page, testData.defaultAnswersResearchPurposeSummary);
 
      const updateButton = await workspaceEditPage.getUpdateWorkspaceButton();

@@ -173,5 +173,10 @@
     "name": "workspace_id",
     "type": "INT64",
     "description": "Primary key of the workspace table in Workrbench application database. Along with\nsnapshot_timestamp, serves as a pseudo-primary key for this table."
+  },
+  {
+    "name": "workspace_namespace",
+    "type": "STRING",
+    "description": "The workspace \"namespace\", which corresponds to the Google Cloud Project ID associated with the workspace."
   }
 ]

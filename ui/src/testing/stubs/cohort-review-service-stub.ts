@@ -1,7 +1,7 @@
 import {
   CohortChartDataListResponse,
   CohortReview,
-  CohortReviewApi, CohortReviewListResponse,
+  CohortReviewApi, CohortReviewListResponse, CohortReviewWithCountResponse,
   CohortStatus,
   Domain,
   EmptyResponse,
@@ -100,8 +100,8 @@ export class CohortReviewServiceStub extends CohortReviewApi {
     super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
   }
 
-  getParticipantCohortStatuses(): Promise<CohortReview> {
-    return new Promise<CohortReview>(resolve => resolve(cohortReviewStubs[0]));
+  getParticipantCohortStatuses(): Promise<CohortReviewWithCountResponse> {
+    return new Promise<CohortReviewWithCountResponse>(resolve => resolve({cohortReview: cohortReviewStubs[0], queryResultSize: 0}));
   }
 
   getParticipantData(): Promise<ParticipantDataListResponse> {

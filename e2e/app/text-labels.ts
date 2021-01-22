@@ -13,16 +13,28 @@ export enum WorkspaceAccessLevel {
 }
 
 // Options in dropdown select.
-export enum Option {
+export enum MenuOption {
+   Age = 'Age',
+   Conditions = 'Conditions',
    CopyToAnotherWorkspace = 'Copy to another Workspace',
+   Deceased = 'Deceased',
    Delete = 'Delete',
+   DeleteGroup = 'Delete group',
+   Demographics = 'Demographics',
+   Drugs = 'Drugs',
    Duplicate  = 'Duplicate',
    Edit = 'Edit',
+   EditGroupName  = 'Edit group name',
+   Ethnicity  = 'Ethnicity',
+   ExportToNotebook = 'Export to Notebook',
+   PhysicalMeasurements = 'Physical Measurements',
    Rename = 'Rename',
    RenameDataset = 'Rename Dataset',
    Review = 'Review',
+   Save = 'Save',
    Share = 'Share',
-   exportToNotebook = 'Export to Notebook',
+   SuppressGroupFromTotalCount = 'Suppress group from total count',
+   Visits = 'Visits',
 }
 
 // Button or link text labels.
@@ -37,6 +49,7 @@ export enum LinkText {
    Confirm = 'Confirm',
    Continue = 'Continue',
    Copy = 'Copy',
+   Close = 'Close',
    Create = 'Create',
    CreateAnotherCohort = 'Create another Cohort',
    CreateAnotherConceptSet = 'Create another Concept Set',
@@ -58,6 +71,7 @@ export enum LinkText {
    DeleteWorkspace = 'Delete Workspace',
    DiscardChanges = 'Discard Changes',
    DuplicateWorkspace = 'Duplicate Workspace',
+   Edit = 'Edit',
    ExportAndOpen = 'Export and Open',
    Finish = 'Finish',
    FinishAndReview = 'Finish & Review',
@@ -65,6 +79,7 @@ export enum LinkText {
    GoToCopiedNotebook = 'Go to Copied Notebook',
    KeepEditing = 'Keep Editing',
    Next = 'Next',
+   No = 'No',
    Rename = 'Rename',
    RenameCohort = 'Rename Cohort',
    RenameCohortReview = 'Rename Cohort Review',
@@ -79,6 +94,7 @@ export enum LinkText {
    StayHere = 'Stay Here',
    Submit = 'Submit',
    Update = 'Update',
+   Yes = 'Yes',
 }
 
 // Notebook programming language.

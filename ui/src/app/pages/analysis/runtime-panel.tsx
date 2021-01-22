@@ -11,6 +11,7 @@ import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {
   DEFAULT,
   reactStyles,
+  summarizeErrors,
   switchCase,
   withCdrVersions,
   withCurrentWorkspace,
@@ -52,6 +53,7 @@ import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 import * as React from 'react';
+import {validate} from 'validate.js';
 
 const {useState, useEffect, Fragment} = React;
 
@@ -273,9 +275,6 @@ const DiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskSize, idPre
       value={selectedDiskSize || diskSize}
       inputStyle={styles.inputNumber}
       onChange={({value}) => onChange(value)}
-      step={10}
-      min={50 /* Runtime API has a minimum 50GB requirement. */}
-      max={4000 /* (4TB) Prevent accidental excessively large disks, should cover foreseeable use cases. */}
     />
   </Fragment>;
 };
@@ -591,6 +590,8 @@ const CostEstimator = ({
 };
 
 const CostInfo = ({runtimeChanged, runtimeConfig, currentUser, workspace, creatorFreeCreditsRemaining}) => {
+  const remainingCredits = creatorFreeCreditsRemaining === null ? <Spinner size={10}/> : formatUsd(creatorFreeCreditsRemaining);
+
   return <FlexRow
     style={
       runtimeChanged
@@ -606,14 +607,14 @@ const CostInfo = ({runtimeChanged, runtimeConfig, currentUser, workspace, creato
       workspace.billingAccountType === BillingAccountType.FREETIER
       && currentUser === workspace.creator
       && <div style={styles.costsDrawnFrom}>
-        Costs will draw from your remaining {formatUsd(creatorFreeCreditsRemaining)} of free credits.
+        Costs will draw from your remaining {remainingCredits} of free credits.
       </div>
     }
     {
       workspace.billingAccountType === BillingAccountType.FREETIER
       && currentUser !== workspace.creator
       && <div style={styles.costsDrawnFrom}>
-        Costs will draw from workspace creator's remaining {formatUsd(creatorFreeCreditsRemaining)} of free credits.
+        Costs will draw from workspace creator's remaining {remainingCredits} of free credits.
       </div>
     }
     {
@@ -825,7 +826,7 @@ export const RuntimePanel = fp.flow(
   const runtimeChanged = runtimeExists && runtimeDiffs.length > 0;
   const needsDelete = runtimeDiffs.map(diff => diff.differenceType).includes(RuntimeDiffState.NEEDS_DELETE);
 
-  const [creatorFreeCreditsRemaining, setCreatorFreeCreditsRemaining] = useState(0);
+  const [creatorFreeCreditsRemaining, setCreatorFreeCreditsRemaining] = useState(null);
   useEffect(() => {
     const aborter = new AbortController();
     const fetchFreeCredits = async() => {
@@ -868,9 +869,47 @@ export const RuntimePanel = fp.flow(
 
     return runtimeRequest;
   };
+
+  const diskSizeValidatorWithMessage = (message) => {
+    return {
+      numericality: {
+        greaterThanOrEqualTo: 50,
+        lessThanOrEqualTo: 4000,
+        message: message
+      }
+    };
+  };
+
+  // 50 GB is the minimum GCP limit for disk size, 4000 GB is our arbitrary limit for not making a
+  // disk that is way too big and expensive ($.22 an hour)
+  const validators = {
+    selectedDiskSize: diskSizeValidatorWithMessage('^Disk size must be between 50 and 4000 GB')
+  };
+  // We don't clear dataproc config when we change compute type so we can't combine this with the
+  // above or else we can end up with phantom validation fails
+  const dataprocValidators = {
+    masterDiskSize: diskSizeValidatorWithMessage('^Master disk size must be between 50 and 4000 GB'),
+    workerDiskSize: diskSizeValidatorWithMessage('^Worker disk size must be between 50 and 4000 GB')
+  };
+  const errors = validate({selectedDiskSize}, validators);
+  const {masterDiskSize = null, workerDiskSize = null} = selectedDataprocConfig || {};
+  const dataprocErrors = selectedCompute === ComputeType.Dataproc
+      ? validate({masterDiskSize, workerDiskSize}, dataprocValidators)
+      : undefined;
+  const runtimeCanBeCreated = !errors && !dataprocErrors;
   // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
   // where we get 'status' from
-  const runtimeCanBeUpdated = runtimeChanged && [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus);
+  const runtimeCanBeUpdated = runtimeChanged
+      && [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)
+      && !errors
+      && !dataprocErrors;
+
+  const getErrorsTooltipContent = () => {
+    const errorDivs = [];
+    errorDivs.push(summarizeErrors(errors));
+    errorDivs.push(summarizeErrors(dataprocErrors));
+    return errorDivs;
+  };
 
   const renderUpdateButton = () => {
     return <Button
@@ -887,6 +926,7 @@ export const RuntimePanel = fp.flow(
   const renderCreateButton = () => {
     return <Button
       aria-label='Create'
+      disabled={!runtimeCanBeCreated}
       onClick={() => {
         setRequestedRuntime(createRuntimeRequest(newRuntimeConfig));
         onClose();
@@ -967,7 +1007,9 @@ export const RuntimePanel = fp.flow(
             <DiskSizeSelector
                 idPrefix='runtime'
                 selectedDiskSize={selectedDiskSize}
-                onChange={(value) => setSelectedDiskSize(value)}
+                onChange={(value) => {
+                  setSelectedDiskSize(value);
+                }}
                 disabled={disableControls}
                 diskSize={diskSize}/>
          </div>
@@ -994,6 +1036,11 @@ export const RuntimePanel = fp.flow(
             <div>You've made changes that require recreating your environment to take effect.</div>
          </WarningMessage>
        }
+       {(errors || dataprocErrors) &&
+         <WarningMessage>
+           {getErrorsTooltipContent()}
+         </WarningMessage>
+       }
        <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
          <Link
            style={{...styles.deleteLink, ...(
@@ -1003,7 +1050,7 @@ export const RuntimePanel = fp.flow(
            aria-label='Delete Environment'
            disabled={disableControls || !runtimeExists}
            onClick={() => setPanelContent(PanelContent.Delete)}>Delete Environment</Link>
-         {!runtimeExists ? renderCreateButton() : renderNextButton()}
+           {!runtimeExists ? renderCreateButton() : renderNextButton()}
        </FlexRow>
      </Fragment>],
       [PanelContent.Confirm, () => <ConfirmUpdatePanel initialRuntimeConfig={initialRuntimeConfig}

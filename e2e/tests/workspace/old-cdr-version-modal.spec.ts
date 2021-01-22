@@ -1,7 +1,7 @@
-import {createWorkspace, signIn} from 'utils/test-utils';
+import {createWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import WorkspaceCard from 'app/component/workspace-card';
 import {config} from 'resources/workbench-config';
-import {Option} from 'app/text-labels';
+import {MenuOption} from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
 import {makeWorkspaceName} from 'utils/str-utils';
 import OldCdrVersionModal from 'app/page/old-cdr-version-modal';
@@ -9,7 +9,7 @@ import WorkspaceEditPage from 'app/page/workspace-edit-page';
 
 describe('OldCdrVersion Modal restrictions', () => {
     beforeEach(async () => {
-        await signIn(page);
+        await signInWithAccessToken(page);
     });
 
     test('User cannot create a workspace with an old CDR Version without consenting to the restrictions', async () => {
@@ -39,7 +39,7 @@ describe('OldCdrVersion Modal restrictions', () => {
 
         await workspaceCard.asElementHandle().hover();
         // Click on Ellipsis menu "Duplicate" option.
-        await workspaceCard.selectSnowmanMenu(Option.Duplicate);
+        await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, {waitForNav: true});
 
         // Fill out Workspace Name should be just enough for successful duplication
         const workspaceEditPage = new WorkspaceEditPage(page);

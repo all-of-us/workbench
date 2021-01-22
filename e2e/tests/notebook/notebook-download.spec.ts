@@ -1,14 +1,14 @@
 import NotebookDownloadModal from 'app/page/notebook-download-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {makeRandomName} from 'utils/str-utils';
-import {findOrCreateWorkspace, signIn} from 'utils/test-utils';
+import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import {getPropValue} from 'utils/element-utils';
 import {waitForFn} from 'utils/waits-utils';
 
 describe('Jupyter notebook download test', () => {
 
   beforeEach(async () => {
-    await signIn(page);
+    await signInWithAccessToken(page);
   });
 
   const testDownloadModal = async (modal: NotebookDownloadModal): Promise<void> => {
@@ -68,6 +68,6 @@ describe('Jupyter notebook download test', () => {
     // As of 9/25/20 I was unable to find a clear mechanism for accessing this.
 
     await notebook.deleteNotebook(notebookName);
-  }, 20 * 60 * 1000);
+  }, 30 * 60 * 1000);
 
 })

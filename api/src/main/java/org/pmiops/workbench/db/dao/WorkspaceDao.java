@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import org.pmiops.workbench.db.dao.projection.ProjectedReportingWorkspace;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -86,44 +85,4 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
 
     Long getWorkspaceCount();
   }
-
-  @Query(
-      "SELECT\n"
-          + "  w.billingAccountType,\n"
-          + "  w.billingStatus,\n"
-          + "  w.cdrVersion.cdrVersionId AS cdrVersionId,\n"
-          + "  w.creationTime,\n"
-          + "  w.creator.userId AS creatorId,\n"
-          + "  w.disseminateResearchOther,\n"
-          + "  w.lastAccessedTime,\n"
-          + "  w.lastModifiedTime,\n"
-          + "  w.name,\n"
-          + "  w.needsResearchPurposeReviewPrompt AS needsRpReviewPrompt,\n"
-          + "  w.published,\n"
-          + "  w.additionalNotes AS rpAdditionalNotes,\n"
-          + "  w.ancestry AS rpAncestry,\n"
-          + "  w.anticipatedFindings AS rpAnticipatedFindings,\n"
-          + "  w.approved AS rpApproved,\n"
-          + "  w.commercialPurpose AS rpCommercialPurpose,\n"
-          + "  w.controlSet AS rpControlSet,\n"
-          + "  w.diseaseFocusedResearch AS rpDiseaseFocusedResearch,\n"
-          + "  w.diseaseOfFocus AS rpDiseaseOfFocus,\n"
-          + "  w.drugDevelopment AS rpDrugDevelopment,\n"
-          + "  w.educational AS rpEducational,\n"
-          + "  w.ethics AS rpEthics,\n"
-          + "  w.intendedStudy AS rpIntendedStudy,\n"
-          + "  w.methodsDevelopment AS rpMethodsDevelopment,\n"
-          + "  w.otherPopulationDetails AS rpOtherPopulationDetails,\n"
-          + "  w.otherPurpose AS rpOtherPurpose,\n"
-          + "  w.otherPurposeDetails AS rpOtherPurposeDetails,\n"
-          + "  w.populationHealth AS rpPopulationHealth,\n"
-          + "  w.reasonForAllOfUs AS rpReasonForAllOfUs,\n"
-          + "  w.reviewRequested AS rpReviewRequested,\n"
-          + "  w.scientificApproach AS rpScientificApproach,\n"
-          + "  w.socialBehavioral AS rpSocialBehavioral,\n"
-          + "  w.timeRequested AS rpTimeRequested,\n"
-          + "  w.workspaceId\n"
-          + "FROM DbWorkspace w\n"
-          + "WHERE w.activeStatus = 0")
-  List<ProjectedReportingWorkspace> getReportingWorkspaces();
 }

@@ -1,14 +1,13 @@
 import {AlertDanger} from 'app/components/alert';
-import {Button, TabButton} from 'app/components/buttons';
-import {SmallHeader, styles as headerStyles} from 'app/components/headers';
-import {CheckBox, RadioButton, Select, TextArea, TextInput} from 'app/components/inputs';
+import {Button} from 'app/components/buttons';
+import {styles as headerStyles} from 'app/components/headers';
+import {CheckBox, RadioButton, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
-import {SpinnerOverlay} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 
-import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {summarizeErrors} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
@@ -29,6 +28,7 @@ import * as React from 'react';
 import {validate} from 'validate.js';
 import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
 import GenomicsDataTypeEnum = DataSetExportRequest.GenomicsDataTypeEnum;
+import {ExportDataSet} from './export-data-set';
 
 interface Props {
   closeFunction: Function;
@@ -62,16 +62,6 @@ interface State {
   genomicsAnalysisTool: GenomicsAnalysisToolEnum;
 }
 
-const styles = {
-  codePreviewSelector: {
-    display: 'flex',
-    marginTop: '1rem'
-  },
-  codePreviewSelectorTab: {
-    width: '2.6rem'
-  }
-};
-
 class NewDataSetModal extends React.Component<Props, State> {
   constructor(props) {
     super(props);
@@ -95,24 +85,8 @@ class NewDataSetModal extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.generateQuery();
-    this.loadNotebooks();
-  }
-
-  private async loadNotebooks() {
-    try {
-      const {workspaceNamespace, workspaceId} = this.props;
-      if (this.props.dataSet) {
-        this.setState({name: this.props.dataSet.name});
-      }
-      this.setState({notebooksLoading: true});
-      const existingNotebooks =
-        await workspacesApi().getNoteBookList(workspaceNamespace, workspaceId);
-      this.setState({existingNotebooks});
-    } catch (error) {
-      console.error(error);
-    } finally {
-      this.setState({notebooksLoading: false});
+    if (this.props.dataSet) {
+      this.setState({name: this.props.dataSet.name});
     }
   }
 
@@ -208,8 +182,7 @@ class NewDataSetModal extends React.Component<Props, State> {
     this.saveDataSet();
   }
 
-  async generateQuery() {
-    const {workspaceNamespace, workspaceId} = this.props;
+  getDataSetRequest() {
     const dataSetRequest: DataSetRequest = {
       name: 'dataSet',
       conceptSetIds: this.props.selectedConceptSetIds,
@@ -218,23 +191,8 @@ class NewDataSetModal extends React.Component<Props, State> {
       includesAllParticipants: this.props.includesAllParticipants,
       prePackagedConceptSet: this.props.prePackagedConceptSet
     };
-    dataSetApi().generateCode(
-      workspaceNamespace,
-      workspaceId,
-      KernelTypeEnum.Python.toString(),
-      dataSetRequest).then(pythonCode => {
-        this.setState(({queries}) => ({
-          queries: queries.set(KernelTypeEnum.Python, pythonCode.code)}));
-      });
-    dataSetApi().generateCode(
-      workspaceNamespace,
-      workspaceId,
-      KernelTypeEnum.R.toString(),
-      dataSetRequest).then(rCode => {
-        this.setState(({queries}) => ({queries: queries.set(KernelTypeEnum.R, rCode.code)}));
-      });
+    return dataSetRequest;
   }
-
   render() {
     const {
       conflictDataSetName,
@@ -244,18 +202,8 @@ class NewDataSetModal extends React.Component<Props, State> {
       name,
       newNotebook,
       notebookName,
-      notebooksLoading,
       existingNotebooks,
-      previewedKernelType,
-      queries,
-      seePreview
     } = this.state;
-
-    const selectOptions = [{label: '(Create a new notebook)', value: ''}]
-      .concat(existingNotebooks.map(notebook => ({
-        value: notebook.name.slice(0, -6),
-        label: notebook.name.slice(0, -6)
-      })));
 
     const errors = validate({name, notebookName}, {
       name: {
@@ -296,65 +244,15 @@ class NewDataSetModal extends React.Component<Props, State> {
               color: colors.primary}}>Export to notebook</div>
           </div>
         </TooltipTrigger>
-        {exportToNotebook && <React.Fragment>
-          {notebooksLoading && <SpinnerOverlay />}
-          <Button style={{marginTop: '1rem'}} data-test-id='code-preview-button'
-                  onClick={() => {
-                    if (!seePreview) {
-                      AnalyticsTracker.DatasetBuilder.SeeCodePreview();
-                    }
-                    this.setState({seePreview: !seePreview});
-                  }}>
-            {seePreview ? 'Hide Preview' : 'See Code Preview'}
-          </Button>
-          {seePreview && <React.Fragment>
-            {Array.from(queries.values())
-              .filter(query => query !== undefined).length === 0 && <SpinnerOverlay />}
-            <div style={styles.codePreviewSelector}>
-              {Object.keys(KernelTypeEnum)
-                .map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])
-                .map((kernelTypeEnum, i) =>
-                  <TabButton onClick={() => this.setState({previewedKernelType: kernelTypeEnum})}
-                             key={i}
-                             active={previewedKernelType === kernelTypeEnum}
-                             style={styles.codePreviewSelectorTab}
-                             disabled={queries.get(kernelTypeEnum) === undefined}>
-                    {kernelTypeEnum}
-                  </TabButton>)}
-            </div>
-            <TextArea disabled={true} onChange={() => {}}
-                      data-test-id='code-text-box'
-                      value={queries.get(previewedKernelType)} />
-          </React.Fragment>}
-          <div style={{marginTop: '1rem'}}>
-            <Select value={this.state.notebookName}
-                    options={selectOptions}
-                    onChange={v => this.setState({notebookName: v, newNotebook: v === ''})}/>
-          </div>
-          {newNotebook && <React.Fragment>
-            <SmallHeader style={{fontSize: 14, marginTop: '1rem'}}>Notebook Name</SmallHeader>
-            <TextInput onChange={(v) => this.setState({notebookName: v})}
-                       value={notebookName} data-test-id='notebook-name-input'/>
-            <div style={headerStyles.formLabel}>
-              Programming Language:
-            </div>
-            {Object.keys(KernelTypeEnum).map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])
-              .map((kernelTypeEnum, i) =>
-                <label key={i} style={{display: 'block'}}>
-                  <RadioButton
-                    data-test-id={'kernel-type-' + kernelTypeEnum.toLowerCase()}
-                    checked={this.state.kernelType === kernelTypeEnum}
-                    onChange={() => {
-                      this.setState({
-                        kernelType: kernelTypeEnum,
-                        includeRawMicroarrayData: kernelTypeEnum === KernelTypeEnum.R ? false : this.state.includeRawMicroarrayData
-                      });
-                    }}
-                  />
-                  &nbsp;{kernelTypeEnum}
-                </label>
-              )}
-          </React.Fragment>}
+        <React.Fragment>  {exportToNotebook && <ExportDataSet
+            dataSetRequest={this.getDataSetRequest()}
+            notebookType={(kernelTypeEnum) => this.setState({
+              kernelType: kernelTypeEnum,
+              includeRawMicroarrayData: kernelTypeEnum === KernelTypeEnum.R ? false : this.state.includeRawMicroarrayData
+            })}
+            newNotebook={(v) => this.setState({newNotebook: v})}
+            updateNotebookName={(v) => this.setState({notebookName: v})}
+            workspaceNamespace={this.props.workspaceNamespace} workspaceFirecloudName={this.props.workspaceId}/>}
           {this.props.displayMicroarrayOptions && this.state.kernelType === KernelTypeEnum.Python &&
           <div style={{border: '1px solid grey', padding: '.5rem', paddingTop: 0, marginTop: '.5rem'}}>
             <TextColumn>
@@ -391,7 +289,7 @@ class NewDataSetModal extends React.Component<Props, State> {
               })}
             </div>}
           </div> }
-        </React.Fragment>}
+        </React.Fragment>
       </ModalBody>
       <ModalFooter>
         <Button type='secondary'

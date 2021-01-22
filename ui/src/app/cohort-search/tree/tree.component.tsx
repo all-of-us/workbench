@@ -10,7 +10,7 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentConcept, withCurrentWorkspace} from 'app/utils';
 import {getCdrVersion} from 'app/utils/cdr-versions';
-import {currentCohortCriteriaStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
+import {currentCohortCriteriaStore, currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   CdrVersionListResponse,
@@ -37,23 +37,30 @@ const styles = reactStyles({
     fontWeight: 'bold',
     padding: '0.5rem',
   },
+  arrowIcon: {
+    height: '0.7rem',
+    marginTop: '-0.2rem',
+    width: '0.7rem',
+    marginRight: '0.5rem'
+  },
   returnLink: {
-    background: 'transparent',
+    backgroundColor: colorWithWhiteness(colors.accent, 0.87),
     border: 0,
     color: colors.accent,
     cursor: 'pointer',
     float: 'left',
-    fontSize: '12px',
-    height: '1.5rem',
-    margin: '0.25rem 0',
+    fontSize: '14px',
+    height: '2rem',
     padding: '0 0.5rem',
+    marginRight: '0.7rem',
+    fontWeight: 600
   },
   searchBarContainer: {
-    width: '95%',
+    width: '80%',
     marginTop: '-1px',
     display: 'flex',
     padding: '0.4rem 0',
-    backgroundColor: colors.white,
+    backgroundColor: 'transparent',
     zIndex: 1,
   },
   treeHeader: {
@@ -199,7 +206,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
   }
 
   get criteriaLookupNeeded() {
-    return this.props.source === 'criteria'
+    return this.props.source === 'cohort'
       &&  ![Domain.PHYSICALMEASUREMENT.toString(), Domain.VISIT.toString()].includes(this.props.node.domainId)
       &&  currentCohortCriteriaStore.getValue().some(crit => !crit.id);
   }
@@ -263,12 +270,12 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
 
   get showHeader() {
     const {node: {domainId}, source} = this.props;
-    return !(source === 'criteria' && domainId === Domain.SURVEY.toString())
+    return !(source === 'cohort' && domainId === Domain.SURVEY.toString())
       && domainId !== Domain.PHYSICALMEASUREMENT.toString()
       && domainId !== Domain.VISIT.toString();
   }
 
-  // Hides the tree node for COPE survey if enableCOPESurvey config flag is set to false
+  // Hides the tree node for COPE survey if config hasCopeSurveyData is set to false
   showNode(node: Criteria) {
     const {workspace, cdrVersionListResponse} = this.props;
     return node.subtype === CriteriaSubType.SURVEY.toString() && node.name.includes('COPE')
@@ -278,7 +285,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
 
   selectIconDisabled() {
     const {selectedIds, source} = this.props;
-    return source !== 'criteria' && selectedIds && selectedIds.length >= 1000;
+    return source !== 'cohort' && selectedIds && selectedIds.length >= 1000;
   }
 
   render() {
@@ -295,9 +302,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
         more.
       </div>}
       {node.domainId !== Domain.VISIT.toString() &&
-        <div style={serverConfigStore.getValue().enableCohortBuilderV2
-          ? {...styles.searchBarContainer, backgroundColor: 'transparent', width: '80%'}
-          : styles.searchBarContainer}>
+        <div style={styles.searchBarContainer}>
           <SearchBar node={node}
                      searchTerms={searchTerms}
                      selectOption={selectOption}
@@ -305,12 +310,14 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
                      setInput={(v) => setSearchTerms(v)}/>
         </div>
       }
-      {!loading && <div style={{paddingTop: this.showHeader ? '0.5rem' : 0, width: '99%'}}>
+      {!loading && <div style={{paddingTop: this.showHeader ? '1.5rem' : 0, width: '99%'}}>
         {this.showHeader && <div style={{...styles.treeHeader, border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`}}>
           {!!ingredients && <div style={styles.ingredients}>
             Ingredients in this brand: {ingredients.join(', ')}
           </div>}
-          <button style={styles.returnLink} onClick={() => back()}>Return to list</button>
+          <button style={styles.returnLink} onClick={() => back()}>
+            <img src='/assets/icons/arrow-left-regular.svg' style={styles.arrowIcon} alt='Go back' />
+            RETURN TO LIST</button>
         </div>}
         {error && <div style={styles.error}>
           <ClrIcon style={{color: colors.white}} className='is-solid' shape='exclamation-triangle'/>

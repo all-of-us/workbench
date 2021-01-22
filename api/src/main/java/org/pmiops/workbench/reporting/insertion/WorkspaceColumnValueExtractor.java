@@ -47,7 +47,8 @@ public enum WorkspaceColumnValueExtractor implements ColumnValueExtractor<Report
   RP_SCIENTIFIC_APPROACH("rp_scientific_approach", ReportingWorkspace::getRpScientificApproach),
   RP_SOCIAL_BEHAVIORAL("rp_social_behavioral", ReportingWorkspace::getRpSocialBehavioral),
   RP_TIME_REQUESTED("rp_time_requested", w -> toInsertRowString(w.getRpTimeRequested())),
-  WORKSPACE_ID("workspace_id", ReportingWorkspace::getWorkspaceId);
+  WORKSPACE_ID("workspace_id", ReportingWorkspace::getWorkspaceId),
+  WORKSPACE_NAMESPACE("workspace_namespace", ReportingWorkspace::getWorkspaceNamespace);
 
   private static final String TABLE_NAME = "workspace";
   private final String parameterName;

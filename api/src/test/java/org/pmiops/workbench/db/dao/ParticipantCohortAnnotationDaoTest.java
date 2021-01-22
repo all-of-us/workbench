@@ -1,6 +1,6 @@
 package org.pmiops.workbench.db.dao;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 import java.util.List;
 import org.junit.Before;
@@ -83,24 +83,24 @@ public class ParticipantCohortAnnotationDaoTest {
 
   @Test
   public void save() {
-    assertEquals(pca, participantCohortAnnotationDao.findOne(pca.getAnnotationId()));
+    assertThat(participantCohortAnnotationDao.findOne(pca.getAnnotationId())).isEqualTo(pca);
   }
 
   @Test
   public void findByCohortReviewIdAndCohortAnnotationDefinitionIdAndParticipantId() {
-    assertEquals(
-        pca,
-        participantCohortAnnotationDao
-            .findByCohortReviewIdAndCohortAnnotationDefinitionIdAndParticipantId(
-                cohortReviewId, pca.getCohortAnnotationDefinitionId(), participantId));
+    assertThat(
+            participantCohortAnnotationDao
+                .findByCohortReviewIdAndCohortAnnotationDefinitionIdAndParticipantId(
+                    cohortReviewId, pca.getCohortAnnotationDefinitionId(), participantId))
+        .isEqualTo(pca);
   }
 
   @Test
   public void findByAnnotationIdAndCohortReviewIdAndParticipantId() {
-    assertEquals(
-        pca,
-        participantCohortAnnotationDao.findByAnnotationIdAndCohortReviewIdAndParticipantId(
-            pca.getAnnotationId(), cohortReviewId, participantId));
+    assertThat(
+            participantCohortAnnotationDao.findByAnnotationIdAndCohortReviewIdAndParticipantId(
+                pca.getAnnotationId(), cohortReviewId, participantId))
+        .isEqualTo(pca);
   }
 
   @Test
@@ -108,15 +108,16 @@ public class ParticipantCohortAnnotationDaoTest {
     List<DbParticipantCohortAnnotation> annotations =
         participantCohortAnnotationDao.findByCohortReviewIdAndParticipantId(
             cohortReviewId, participantId);
-    assertEquals(2, annotations.size());
-    assertEquals(pca, annotations.get(0));
-    assertEquals(pca1, annotations.get(1));
-    assertEquals(
-        pca1.getCohortAnnotationEnumValue().getCohortAnnotationDefinition().getEnumValues(),
-        annotations
-            .get(1)
-            .getCohortAnnotationEnumValue()
-            .getCohortAnnotationDefinition()
-            .getEnumValues());
+    assertThat(annotations.size()).isEqualTo(2);
+    assertThat(annotations.get(0)).isEqualTo(pca);
+    assertThat(annotations.get(1)).isEqualTo(pca1);
+    assertThat(
+            annotations
+                .get(1)
+                .getCohortAnnotationEnumValue()
+                .getCohortAnnotationDefinition()
+                .getEnumValues())
+        .isEqualTo(
+            pca1.getCohortAnnotationEnumValue().getCohortAnnotationDefinition().getEnumValues());
   }
 }

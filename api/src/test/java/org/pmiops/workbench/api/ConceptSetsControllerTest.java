@@ -3,7 +3,6 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.api.ConceptsControllerTest.makeConcept;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.common.collect.ImmutableMap;
@@ -11,7 +10,6 @@ import com.google.common.collect.ImmutableSet;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -26,11 +24,12 @@ import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.model.DbConcept;
+import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
+import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
-import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
-import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
+import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortCloningService;
@@ -38,7 +37,6 @@ import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.compliance.ComplianceService;
-import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -59,10 +57,10 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageService;
 import org.pmiops.workbench.google.DirectoryService;
-import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
+import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -100,76 +98,65 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class ConceptSetsControllerTest {
 
-  private static final Concept CLIENT_CONCEPT_1 =
-      new Concept()
+  private static final Criteria CLIENT_CRITERIA_1 =
+      new Criteria()
           .conceptId(123L)
-          .conceptName("a concept")
-          .standardConcept(true)
-          .conceptCode("conceptA")
-          .conceptClassId("classId")
-          .vocabularyId("V1")
-          .domainId("Condition")
-          .countValue(123L)
-          .prevalence(0.2F)
-          .conceptSynonyms(new ArrayList<>());
+          .name("a concept")
+          .isStandard(true)
+          .code("conceptA")
+          .type("V1")
+          .domainId(Domain.CONDITION.toString())
+          .childCount(123L)
+          .parentCount(123L);
 
-  private static final Concept CLIENT_CONCEPT_2 =
-      new Concept()
+  private static final Criteria CLIENT_CRITERIA_2 =
+      new Criteria()
           .conceptId(456L)
-          .standardConcept(false)
-          .conceptName("b concept")
-          .conceptCode("conceptB")
-          .conceptClassId("classId2")
-          .vocabularyId("V2")
-          .domainId("Measurement")
-          .countValue(456L)
-          .prevalence(0.3F)
-          .conceptSynonyms(new ArrayList<>());
+          .isStandard(true)
+          .name("b concept")
+          .code("conceptB")
+          .type("V2")
+          .domainId(Domain.MEASUREMENT.toString())
+          .childCount(456L)
+          .parentCount(456L);
 
-  private static final Concept CLIENT_CONCEPT_3 =
-      new Concept()
+  private static final Criteria CLIENT_CRITERIA_3 =
+      new Criteria()
           .conceptId(789L)
-          .standardConcept(false)
-          .conceptName("multi word concept")
-          .conceptCode("conceptC")
-          .conceptClassId("classId3")
-          .vocabularyId("V3")
-          .domainId("Condition")
-          .countValue(789L)
-          .prevalence(0.4F)
-          .conceptSynonyms(new ArrayList<>());
+          .isStandard(true)
+          .name("multi word concept")
+          .code("conceptC")
+          .type("V3")
+          .domainId(Domain.CONDITION.toString())
+          .childCount(789L)
+          .parentCount(789L);
 
-  private static final Concept CLIENT_CONCEPT_4 =
-      new Concept()
+  private static final Criteria CLIENT_CRITERIA_4 =
+      new Criteria()
           .conceptId(7890L)
-          .standardConcept(false)
-          .conceptName("conceptD test concept")
-          .standardConcept(true)
-          .conceptCode("conceptE")
-          .conceptClassId("classId5")
-          .vocabularyId("V5")
-          .domainId("Condition")
-          .countValue(7890L)
-          .prevalence(0.9F)
-          .conceptSynonyms(new ArrayList<>());
+          .isStandard(true)
+          .name("conceptD test concept")
+          .code("conceptE")
+          .type("V5")
+          .domainId(Domain.CONDITION.toString())
+          .childCount(7890L)
+          .parentCount(7890L);
 
-  private static final Concept CLIENT_SURVEY_CONCEPT_1 =
-      new Concept()
+  private static final Criteria CLIENT_SURVEY_CONCEPT_1 =
+      new Criteria()
           .conceptId(987L)
-          .conceptName("a concept")
-          .standardConcept(true)
-          .conceptCode("conceptA")
-          .conceptClassId("classId")
-          .vocabularyId("V1")
+          .name("a concept")
+          .isStandard(true)
+          .code("conceptA")
+          .type("V1")
           .domainId("Observation")
-          .countValue(123L)
-          .prevalence(0.2F)
-          .conceptSynonyms(new ArrayList<>());
+          .childCount(123L)
+          .parentCount(123L);
 
-  private static final DbConcept CONCEPT_1 = makeConcept(CLIENT_CONCEPT_1);
-  private static final DbConcept CONCEPT_2 = makeConcept(CLIENT_CONCEPT_2);
-  private static final DbConcept CONCEPT_3 = makeConcept(CLIENT_CONCEPT_3);
-  private static final DbConcept CONCEPT_4 = makeConcept(CLIENT_CONCEPT_4);
+  private static final DbCriteria DB_CRITERIA_1 = makeDbCriteria(CLIENT_CRITERIA_1);
+  private static final DbCriteria DB_CRITERIA_2 = makeDbCriteria(CLIENT_CRITERIA_2);
+  private static final DbCriteria DB_CRITERIA_3 = makeDbCriteria(CLIENT_CRITERIA_3);
+  private static final DbCriteria DB_CRITERIA_4 = makeDbCriteria(CLIENT_CRITERIA_4);
 
   private static final String USER_EMAIL = "bob@gmail.com";
   private static final String WORKSPACE_NAMESPACE = "ns";
@@ -185,7 +172,7 @@ public class ConceptSetsControllerTest {
 
   @Autowired CdrVersionDao cdrVersionDao;
 
-  @Autowired ConceptDao conceptDao;
+  @Autowired CBCriteriaDao cbCriteriaDao;
 
   @Autowired UserDao userDao;
 
@@ -200,7 +187,8 @@ public class ConceptSetsControllerTest {
   @TestConfiguration
   @Import({
     CommonMappers.class,
-    ConceptService.class,
+    CohortBuilderMapperImpl.class,
+    CohortBuilderServiceImpl.class,
     ConceptSetMapperImpl.class,
     ConceptSetService.class,
     ConceptSetsController.class,
@@ -213,17 +201,17 @@ public class ConceptSetsControllerTest {
     WorkspacesController.class,
   })
   @MockBean({
+    BigQueryService.class,
     BillingProjectAuditor.class,
     BillingProjectBufferService.class,
     CloudStorageService.class,
-    CohortBuilderMapper.class,
-    CohortBuilderService.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
     CohortMapperImpl.class,
     CohortReviewMapperImpl.class,
     CohortReviewServiceImpl.class,
     CohortService.class,
+    CohortQueryBuilder.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
     DataSetMapperImpl.class,
@@ -351,8 +339,9 @@ public class ConceptSetsControllerTest {
 
   @Test
   public void testCreateConceptSet() {
+    saveConcepts();
     ConceptSetConceptId conceptSetConceptId = new ConceptSetConceptId();
-    conceptSetConceptId.setConceptId(CLIENT_CONCEPT_1.getConceptId());
+    conceptSetConceptId.setConceptId(CLIENT_CRITERIA_1.getConceptId());
     conceptSetConceptId.setStandard(true);
     ConceptSet conceptSet = new ConceptSet();
     conceptSet.setDescription("desc 1");
@@ -367,44 +356,29 @@ public class ConceptSetsControllerTest {
                     .conceptSet(conceptSet)
                     .addAddedConceptSetConceptIdsItem(conceptSetConceptId))
             .getBody();
-    assertThat(conceptSet.getConcepts()).isNotNull();
+    assertThat(conceptSet.getCriteriums()).isNotNull();
     assertThat(conceptSet.getCreationTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(conceptSet.getDescription()).isEqualTo("desc 1");
     assertThat(conceptSet.getDomain()).isEqualTo(Domain.CONDITION);
     assertThat(conceptSet.getEtag()).isEqualTo(Etags.fromVersion(1));
     assertThat(conceptSet.getLastModifiedTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(conceptSet.getName()).isEqualTo("concept set 1");
-    assertThat(conceptSet.getParticipantCount()).isEqualTo(0);
-
-    assertThat(
-            conceptSetsController
-                .getConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId())
-                .getBody())
-        .isEqualTo(conceptSet);
-    // Get concept sets will not return the full information, because concepts can have a lot of
-    // information.
-    assertThat(
-            conceptSetsController
-                .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
-                .getBody()
-                .getItems())
-        .contains(conceptSet);
-    assertThat(
-            conceptSetsController
-                .getConceptSetsInWorkspace(workspace2.getNamespace(), WORKSPACE_NAME_2)
-                .getBody()
-                .getItems())
-        .isEmpty();
   }
 
   @Test
-  public void testGetSurveyConceptSet() {
+  public void testGetConceptSet() {
     ConceptSet surveyConceptSet = makeSurveyConceptSet1();
+    surveyConceptSet.setParticipantCount(0);
     assertThat(
             conceptSetsController
                 .getConceptSet(workspace.getNamespace(), WORKSPACE_NAME, surveyConceptSet.getId())
                 .getBody())
         .isEqualTo(surveyConceptSet);
+  }
+
+  @Test
+  public void testGetConceptSetsInWorkspace() {
+    ConceptSet surveyConceptSet = makeSurveyConceptSet1();
     assertThat(
             conceptSetsController
                 .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
@@ -425,30 +399,6 @@ public class ConceptSetsControllerTest {
     conceptSetsController.getConceptSet(workspace2.getNamespace(), WORKSPACE_NAME_2, 99L);
   }
 
-  @Test
-  public void testGetConceptSet() {
-    ConceptSet conceptSet = makeConceptSet1();
-    assertThat(
-            conceptSetsController
-                .getConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId())
-                .getBody())
-        .isEqualTo(conceptSet);
-    // Get concept sets will not return the full information, because concepts can have a lot of
-    // information.
-    assertThat(
-            conceptSetsController
-                .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
-                .getBody()
-                .getItems())
-        .contains(conceptSet);
-    assertThat(
-            conceptSetsController
-                .getConceptSetsInWorkspace(workspace2.getNamespace(), WORKSPACE_NAME_2)
-                .getBody()
-                .getItems())
-        .isEmpty();
-  }
-
   @Test(expected = NotFoundException.class)
   public void testGetConceptSetWrongConceptSetId() {
     makeConceptSet1();
@@ -457,7 +407,7 @@ public class ConceptSetsControllerTest {
 
   @Test
   public void testUpdateConceptSet() {
-    conceptDao.save(CONCEPT_1);
+    cbCriteriaDao.save(DB_CRITERIA_1);
     ConceptSet conceptSet = makeConceptSet1();
     conceptSet.setDescription("new description");
     conceptSet.setName("new name");
@@ -469,34 +419,13 @@ public class ConceptSetsControllerTest {
                 workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId(), conceptSet)
             .getBody();
     assertThat(updatedConceptSet.getCreator()).isEqualTo(USER_EMAIL);
-    assertThat(updatedConceptSet.getConcepts()).isNotNull();
+    assertThat(updatedConceptSet.getCriteriums()).isNotNull();
     assertThat(updatedConceptSet.getCreationTime()).isEqualTo(NOW.toEpochMilli());
     assertThat(updatedConceptSet.getDescription()).isEqualTo("new description");
     assertThat(updatedConceptSet.getDomain()).isEqualTo(Domain.CONDITION);
     assertThat(updatedConceptSet.getEtag()).isEqualTo(Etags.fromVersion(2));
     assertThat(updatedConceptSet.getLastModifiedTime()).isEqualTo(newInstant.toEpochMilli());
-    assertThat(updatedConceptSet.getParticipantCount()).isEqualTo(0);
     assertThat(conceptSet.getName()).isEqualTo("new name");
-
-    assertThat(
-            conceptSetsController
-                .getConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId())
-                .getBody())
-        .isEqualTo(updatedConceptSet);
-    // Get concept sets will not return the full information, because concepts can have a lot of
-    // information.
-    assertThat(
-            conceptSetsController
-                .getConceptSetsInWorkspace(workspace.getNamespace(), WORKSPACE_NAME)
-                .getBody()
-                .getItems())
-        .contains(updatedConceptSet);
-    assertThat(
-            conceptSetsController
-                .getConceptSetsInWorkspace(workspace2.getNamespace(), WORKSPACE_NAME_2)
-                .getBody()
-                .getItems())
-        .isEmpty();
   }
 
   @Test(expected = ConflictException.class)
@@ -524,21 +453,19 @@ public class ConceptSetsControllerTest {
     saveConcepts();
     DbConceptSetConceptId dbConceptSetConceptId1 =
         DbConceptSetConceptId.builder()
-            .addConceptId(CLIENT_CONCEPT_1.getConceptId())
+            .addConceptId(CLIENT_CRITERIA_1.getConceptId())
             .addStandard(true)
             .build();
     DbConceptSetConceptId dbConceptSetConceptId2 =
         DbConceptSetConceptId.builder()
-            .addConceptId(CLIENT_CONCEPT_3.getConceptId())
+            .addConceptId(CLIENT_CRITERIA_3.getConceptId())
             .addStandard(true)
             .build();
     when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION, "condition_occurrence", ImmutableSet.of(dbConceptSetConceptId1)))
+            Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1)))
         .thenReturn(123);
     when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION,
-            "condition_occurrence",
-            ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
+            Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
         .thenReturn(246);
     ConceptSet conceptSet = makeConceptSet1();
     ConceptSet updated =
@@ -547,11 +474,12 @@ public class ConceptSetsControllerTest {
                 workspace.getNamespace(),
                 WORKSPACE_NAME,
                 conceptSet.getId(),
-                addConceptsRequest(conceptSet.getEtag(), CLIENT_CONCEPT_3.getConceptId()))
+                addConceptsRequest(conceptSet.getEtag(), CLIENT_CRITERIA_3.getConceptId()))
             .getBody();
-    assertThat(updated.getConcepts()).contains(CLIENT_CONCEPT_3);
+    assertThat(updated.getCriteriums()).hasSize(2);
+    assertThat(updated.getCriteriums().get(0).getConceptId())
+        .isEqualTo(CLIENT_CRITERIA_1.getConceptId());
     assertThat(updated.getEtag()).isNotEqualTo(conceptSet.getEtag());
-    assertThat(updated.getParticipantCount()).isEqualTo(246);
 
     ConceptSet removed =
         conceptSetsController
@@ -559,12 +487,11 @@ public class ConceptSetsControllerTest {
                 workspace.getNamespace(),
                 WORKSPACE_NAME,
                 conceptSet.getId(),
-                removeConceptsRequest(updated.getEtag(), CLIENT_CONCEPT_3.getConceptId()))
+                removeConceptsRequest(updated.getEtag(), CLIENT_CRITERIA_3.getConceptId()))
             .getBody();
-    assertThat(removed.getConcepts().size()).isEqualTo(1);
+    assertThat(removed.getCriteriums()).hasSize(1);
     assertThat(removed.getEtag()).isNotEqualTo(conceptSet.getEtag());
     assertThat(removed.getEtag()).isNotEqualTo(updated.getEtag());
-    assertThat(removed.getParticipantCount()).isEqualTo(123);
   }
 
   @Test
@@ -572,23 +499,22 @@ public class ConceptSetsControllerTest {
     saveConcepts();
     DbConceptSetConceptId dbConceptSetConceptId1 =
         DbConceptSetConceptId.builder()
-            .addConceptId(CLIENT_CONCEPT_1.getConceptId())
+            .addConceptId(CLIENT_CRITERIA_1.getConceptId())
             .addStandard(true)
             .build();
     DbConceptSetConceptId dbConceptSetConceptId2 =
         DbConceptSetConceptId.builder()
-            .addConceptId(CLIENT_CONCEPT_3.getConceptId())
+            .addConceptId(CLIENT_CRITERIA_3.getConceptId())
             .addStandard(true)
             .build();
     DbConceptSetConceptId dbConceptSetConceptId3 =
         DbConceptSetConceptId.builder()
-            .addConceptId(CLIENT_CONCEPT_4.getConceptId())
+            .addConceptId(CLIENT_CRITERIA_4.getConceptId())
             .addStandard(true)
             .build();
     ConceptSetService.MAX_CONCEPTS_PER_SET = 1000;
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION,
-            "condition_occurrence",
             ImmutableSet.of(
                 dbConceptSetConceptId1, dbConceptSetConceptId2, dbConceptSetConceptId3)))
         .thenReturn(456);
@@ -601,17 +527,21 @@ public class ConceptSetsControllerTest {
                 conceptSet.getId(),
                 addConceptsRequest(
                     conceptSet.getEtag(),
-                    CLIENT_CONCEPT_1.getConceptId(),
-                    CLIENT_CONCEPT_3.getConceptId(),
-                    CLIENT_CONCEPT_4.getConceptId()))
+                    CLIENT_CRITERIA_1.getConceptId(),
+                    CLIENT_CRITERIA_3.getConceptId(),
+                    CLIENT_CRITERIA_4.getConceptId()))
             .getBody();
-    assertThat(updated.getConcepts())
-        .containsExactly(CLIENT_CONCEPT_1, CLIENT_CONCEPT_4, CLIENT_CONCEPT_3);
+    assertThat(updated.getCriteriums()).hasSize(3);
+    assertThat(updated.getCriteriums().get(0).getConceptId())
+        .isEqualTo(CLIENT_CRITERIA_1.getConceptId());
+    assertThat(updated.getCriteriums().get(1).getConceptId())
+        .isEqualTo(CLIENT_CRITERIA_4.getConceptId());
+    assertThat(updated.getCriteriums().get(2).getConceptId())
+        .isEqualTo(CLIENT_CRITERIA_3.getConceptId());
     assertThat(updated.getEtag()).isNotEqualTo(conceptSet.getEtag());
-    assertThat(updated.getParticipantCount()).isEqualTo(456);
 
     when(conceptBigQueryService.getParticipantCountForConcepts(
-            Domain.CONDITION, "condition_occurrence", ImmutableSet.of(dbConceptSetConceptId1)))
+            Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1)))
         .thenReturn(123);
     ConceptSet removed =
         conceptSetsController
@@ -621,13 +551,14 @@ public class ConceptSetsControllerTest {
                 conceptSet.getId(),
                 removeConceptsRequest(
                     updated.getEtag(),
-                    CLIENT_CONCEPT_3.getConceptId(),
-                    CLIENT_CONCEPT_4.getConceptId()))
+                    CLIENT_CRITERIA_3.getConceptId(),
+                    CLIENT_CRITERIA_4.getConceptId()))
             .getBody();
-    assertThat(removed.getConcepts()).containsExactly(CLIENT_CONCEPT_1);
+    assertThat(removed.getCriteriums()).hasSize(1);
+    assertThat(removed.getCriteriums().get(0).getConceptId())
+        .isEqualTo(CLIENT_CRITERIA_1.getConceptId());
     assertThat(removed.getEtag()).isNotEqualTo(conceptSet.getEtag());
     assertThat(removed.getEtag()).isNotEqualTo(updated.getEtag());
-    assertThat(removed.getParticipantCount()).isEqualTo(123);
   }
 
   @Test
@@ -635,33 +566,36 @@ public class ConceptSetsControllerTest {
     saveConcepts();
     DbConceptSetConceptId dbConceptSetConceptId1 =
         DbConceptSetConceptId.builder()
-            .addConceptId(CLIENT_CONCEPT_1.getConceptId())
+            .addConceptId(CLIENT_CRITERIA_1.getConceptId())
             .addStandard(true)
             .build();
     DbConceptSetConceptId dbConceptSetConceptId2 =
         DbConceptSetConceptId.builder()
-            .addConceptId(CLIENT_CONCEPT_3.getConceptId())
+            .addConceptId(CLIENT_CRITERIA_3.getConceptId())
             .addStandard(true)
             .build();
     DbConceptSetConceptId dbConceptSetConceptId3 =
         DbConceptSetConceptId.builder()
-            .addConceptId(CLIENT_CONCEPT_4.getConceptId())
+            .addConceptId(CLIENT_CRITERIA_4.getConceptId())
             .addStandard(true)
             .build();
     when(conceptBigQueryService.getParticipantCountForConcepts(
             Domain.CONDITION,
-            "condition_occurrence",
             ImmutableSet.of(
                 dbConceptSetConceptId1, dbConceptSetConceptId2, dbConceptSetConceptId3)))
         .thenReturn(456);
     ConceptSet conceptSet =
         makeConceptSet1(
-            CLIENT_CONCEPT_1.getConceptId(),
-            CLIENT_CONCEPT_3.getConceptId(),
-            CLIENT_CONCEPT_4.getConceptId());
-    assertThat(conceptSet.getConcepts())
-        .containsExactly(CLIENT_CONCEPT_1, CLIENT_CONCEPT_4, CLIENT_CONCEPT_3);
-    assertThat(conceptSet.getParticipantCount()).isEqualTo(456);
+            CLIENT_CRITERIA_1.getConceptId(),
+            CLIENT_CRITERIA_3.getConceptId(),
+            CLIENT_CRITERIA_4.getConceptId());
+    assertThat(conceptSet.getCriteriums()).hasSize(3);
+    assertThat(conceptSet.getCriteriums().get(0).getConceptId())
+        .isEqualTo(CLIENT_CRITERIA_1.getConceptId());
+    assertThat(conceptSet.getCriteriums().get(1).getConceptId())
+        .isEqualTo(CLIENT_CRITERIA_4.getConceptId());
+    assertThat(conceptSet.getCriteriums().get(2).getConceptId())
+        .isEqualTo(CLIENT_CRITERIA_3.getConceptId());
   }
 
   @Test(expected = ConflictException.class)
@@ -676,9 +610,9 @@ public class ConceptSetsControllerTest {
             conceptSet.getId(),
             addConceptsRequest(
                 conceptSet.getEtag(),
-                CLIENT_CONCEPT_1.getConceptId(),
-                CLIENT_CONCEPT_3.getConceptId(),
-                CLIENT_CONCEPT_4.getConceptId()))
+                CLIENT_CRITERIA_1.getConceptId(),
+                CLIENT_CRITERIA_3.getConceptId(),
+                CLIENT_CRITERIA_4.getConceptId()))
         .getBody();
   }
 
@@ -690,7 +624,7 @@ public class ConceptSetsControllerTest {
         workspace.getNamespace(),
         WORKSPACE_NAME,
         conceptSet.getId(),
-        addConceptsRequest(Etags.fromVersion(2), CLIENT_CONCEPT_1.getConceptId()));
+        addConceptsRequest(Etags.fromVersion(2), CLIENT_CRITERIA_1.getConceptId()));
   }
 
   @Test
@@ -707,9 +641,9 @@ public class ConceptSetsControllerTest {
                 conceptSet1.getId(),
                 addConceptsRequest(
                     conceptSet1.getEtag(),
-                    CLIENT_CONCEPT_1.getConceptId(),
-                    CLIENT_CONCEPT_3.getConceptId(),
-                    CLIENT_CONCEPT_4.getConceptId()))
+                    CLIENT_CRITERIA_1.getConceptId(),
+                    CLIENT_CRITERIA_3.getConceptId(),
+                    CLIENT_CRITERIA_4.getConceptId()))
             .getBody();
     ConceptSet updatedConceptSet2 =
         conceptSetsController
@@ -717,11 +651,18 @@ public class ConceptSetsControllerTest {
                 workspace.getNamespace(),
                 WORKSPACE_NAME,
                 conceptSet2.getId(),
-                addConceptsRequest(conceptSet2.getEtag(), CLIENT_CONCEPT_2.getConceptId()))
+                addConceptsRequest(conceptSet2.getEtag(), CLIENT_CRITERIA_2.getConceptId()))
             .getBody();
-    assertThat(updatedConceptSet.getConcepts())
-        .containsExactly(CLIENT_CONCEPT_1, CLIENT_CONCEPT_3, CLIENT_CONCEPT_4);
-    assertThat(updatedConceptSet2.getConcepts()).containsExactly(CLIENT_CONCEPT_2);
+    assertThat(updatedConceptSet.getCriteriums()).hasSize(3);
+    assertThat(updatedConceptSet.getCriteriums().get(0).getConceptId())
+        .isEqualTo(CLIENT_CRITERIA_1.getConceptId());
+    assertThat(updatedConceptSet.getCriteriums().get(1).getConceptId())
+        .isEqualTo(CLIENT_CRITERIA_4.getConceptId());
+    assertThat(updatedConceptSet.getCriteriums().get(2).getConceptId())
+        .isEqualTo(CLIENT_CRITERIA_3.getConceptId());
+    assertThat(updatedConceptSet2.getCriteriums()).hasSize(1);
+    assertThat(updatedConceptSet2.getCriteriums().get(0).getConceptId())
+        .isEqualTo(CLIENT_CRITERIA_2.getConceptId());
 
     conceptSetsController.deleteConceptSet(
         workspace.getNamespace(), WORKSPACE_NAME, conceptSet1.getId());
@@ -736,7 +677,9 @@ public class ConceptSetsControllerTest {
         conceptSetsController
             .getConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSet2.getId())
             .getBody();
-    assertThat(conceptSet2.getConcepts()).containsExactly(CLIENT_CONCEPT_2);
+    assertThat(conceptSet2.getCriteriums()).hasSize(1);
+    assertThat(conceptSet2.getCriteriums().get(0).getConceptId())
+        .isEqualTo(CLIENT_CRITERIA_2.getConceptId());
   }
 
   private UpdateConceptSetRequest addConceptsRequest(String etag, Long... conceptIds) {
@@ -818,7 +761,7 @@ public class ConceptSetsControllerTest {
             .conceptSet(conceptSet)
             .addAddedConceptSetConceptIdsItem(
                 new ConceptSetConceptId()
-                    .conceptId(CLIENT_CONCEPT_1.getConceptId())
+                    .conceptId(CLIENT_CRITERIA_1.getConceptId())
                     .standard(true));
     if (addedIds.length > 0) {
       request = request.addedConceptSetConceptIds(conceptSetConceptIdList);
@@ -830,7 +773,7 @@ public class ConceptSetsControllerTest {
 
   private ConceptSet makeConceptSet2() {
     ConceptSetConceptId conceptSetConceptId = new ConceptSetConceptId();
-    conceptSetConceptId.setConceptId(CLIENT_CONCEPT_2.getConceptId());
+    conceptSetConceptId.setConceptId(CLIENT_CRITERIA_2.getConceptId());
     conceptSetConceptId.setStandard(true);
     ConceptSet conceptSet = new ConceptSet();
     conceptSet.setDescription("desc 2");
@@ -869,9 +812,23 @@ public class ConceptSetsControllerTest {
   }
 
   private void saveConcepts() {
-    conceptDao.save(CONCEPT_1);
-    conceptDao.save(CONCEPT_2);
-    conceptDao.save(CONCEPT_3);
-    conceptDao.save(CONCEPT_4);
+    cbCriteriaDao.save(DB_CRITERIA_1);
+    cbCriteriaDao.save(DB_CRITERIA_2);
+    cbCriteriaDao.save(DB_CRITERIA_3);
+    cbCriteriaDao.save(DB_CRITERIA_4);
+  }
+
+  private static DbCriteria makeDbCriteria(Criteria criteria) {
+    return DbCriteria.builder()
+        .addConceptId(criteria.getConceptId().toString())
+        .addParentCount(criteria.getParentCount())
+        .addChildCount(criteria.getChildCount())
+        .addType(criteria.getType())
+        .addDomainId(criteria.getDomainId())
+        .addCode(criteria.getCode())
+        .addStandard(criteria.getIsStandard())
+        .addName(criteria.getName())
+        .addFullText("+[" + criteria.getDomainId() + "_rank1]")
+        .build();
   }
 }

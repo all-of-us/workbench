@@ -284,10 +284,17 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     }
 
     if (Domain.fromValue(domain).equals(Domain.SURVEY)) {
-      Long id = cbCriteriaDao.findIdByDomainAndName(domain, surveyName);
-      Page<DbCriteria> dbCriteriaPage =
-          cbCriteriaDao.findSurveyQuestionCriteriaByDomainAndIdAndFullText(
-              domain, id, modifyTermMatch(term), pageRequest);
+      Page<DbCriteria> dbCriteriaPage;
+      if (surveyName.equals("All")) {
+        dbCriteriaPage =
+            cbCriteriaDao.findSurveyQuestionCriteriaByDomainAndFullText(
+                domain, modifyTermMatch(term), pageRequest);
+      } else {
+        Long id = cbCriteriaDao.findIdByDomainAndName(domain, surveyName);
+        dbCriteriaPage =
+            cbCriteriaDao.findSurveyQuestionCriteriaByDomainAndIdAndFullText(
+                domain, id, modifyTermMatch(term), pageRequest);
+      }
       return new CriteriaListWithCountResponse()
           .items(
               dbCriteriaPage.getContent().stream()
