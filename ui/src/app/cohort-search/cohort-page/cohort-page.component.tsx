@@ -161,16 +161,20 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
         this.setState(
           {cohort: {criteria: `{'includes':[],'excludes':[],'dataFilters':[]}`, name: '', type: ''}},
           () => {
-            if (existingCohort && existingCohort.workspaceId === id) {
+            if (existingCohort && existingCohort.workspaceId === id && !existingCohort.cohortId) {
               searchRequestStore.next(existingCohort.searchRequest);
+            } else {
+              localStorage.removeItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST);
             }
           }
         );
       }
       if (existingContext) {
         const {workspaceId, cohortId, cohortContext} = existingContext;
-        if (workspaceId === id && (!cid || +cid === cohortId)) {
+        if (workspaceId === id && ((!cid && !cohortId) || +cid === cohortId)) {
           this.setSearchContext(cohortContext);
+        } else {
+          localStorage.removeItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT);
         }
       }
     }

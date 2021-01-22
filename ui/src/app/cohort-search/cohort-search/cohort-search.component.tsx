@@ -190,17 +190,13 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
   setUnsavedChanges() {
     const {cohortContext: {groupId, item, role}} = this.props;
     const {selections} = this.state;
-    let unsavedChanges;
+    let unsavedChanges = selections.length > 0;
     if (groupId) {
       const requestItem = getItemFromSearchRequest(groupId, item.id, role);
       if (requestItem) {
         const sortAndStringify = (params) => JSON.stringify(params.sort((a, b) => a.id - b.id));
         unsavedChanges = sortAndStringify(requestItem.searchParameters) !== sortAndStringify(selections);
-      } else {
-        unsavedChanges = selections.length > 0;
       }
-    } else {
-      unsavedChanges = selections.length > 0;
     }
     this.setState({unsavedChanges});
     this.props.setUnsavedChanges(unsavedChanges);
