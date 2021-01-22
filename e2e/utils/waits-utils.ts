@@ -261,7 +261,7 @@ export async function waitForText(page: Page,
  * It usually indicates the page is ready for user interaction.
  * </pre>
  */
-export async function waitWhileLoading(page: Page, timeout: number = 150000): Promise<void> {
+export async function waitWhileLoading(page: Page, timeout: number = (2 * 60 * 1000)): Promise<void> {
   const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
   const spinElementsSelector = '[style*="running spin"], .spinner:empty, [style*="running rotation"]:not([aria-hidden="true"])';
 
