@@ -18,7 +18,7 @@ export default class DatasetSaveModal extends Modal {
    }
 
    async isLoaded(): Promise<boolean> {
-      await this.page.waitForXPath(modalTitleXpath, {visible: true});
+      await this.page.waitForXPath(`${this.getXpath()}${modalTitleXpath}`, {visible: true});
       return true;
    }
 
