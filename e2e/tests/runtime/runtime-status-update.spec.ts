@@ -129,7 +129,7 @@ describe('Updating runtime parameters', () => {
 
     // Wait until status shows green in side-nav
     await page.waitForTimeout(2000);
-    await helpSidebar.toggleRuntimePanel();;
+    await helpSidebar.toggleRuntimePanel();
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Starting);
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Running);
 

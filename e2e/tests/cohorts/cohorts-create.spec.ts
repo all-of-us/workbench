@@ -4,7 +4,7 @@ import DataResourceCard from 'app/component/data-resource-card';
 import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Link from 'app/element/link';
-import {Option, LinkText, ResourceCard} from 'app/text-labels';
+import {MenuOption, LinkText, ResourceCard} from 'app/text-labels';
 import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
@@ -190,7 +190,7 @@ describe('User can create new Cohorts', () => {
     let cohortCard = await DataResourceCard.findCard(page, `${cohortName}`);
   
     // Edit cohort using Ellipsis menu
-    await cohortCard.selectSnowmanMenu(Option.Edit, {waitForNav: false});
+    await cohortCard.selectSnowmanMenu(MenuOption.Edit, {waitForNav: false});
     await cohortBuildPage.waitForLoad();
     await waitWhileLoading(page);
 
@@ -211,22 +211,21 @@ describe('User can create new Cohorts', () => {
 
     // navigate back to the data page and open Cohorts sub tab
     await dataPage.openCohortsSubtab();
+    await waitWhileLoading(page);
 
     // Duplicate cohort using Ellipsis menu.
-    const origCardsCount = (await DataResourceCard.findAllCards(page)).length;
     cohortCard = await DataResourceCard.findCard(page, `${cohortName}`);
-    await cohortCard.selectSnowmanMenu(Option.Duplicate, {waitForNav: false});
+    await cohortCard.selectSnowmanMenu(MenuOption.Duplicate, {waitForNav: false});
     await waitWhileLoading(page);
-    const newCardsCount = (await DataResourceCard.findAllCards(page)).length;
-    // cards count increase by 1.
-    expect(newCardsCount).toBe(origCardsCount + 1);
 
+    const duplCohortName = `Duplicate of ${cohortName}`;
+    console.log(`Duplicated Cohort "${cohortName}": "${duplCohortName}"`)
     // Delete duplicated cohort.
-    const modalTextContent = await dataPage.deleteResource(`Duplicate of ${cohortName}`, ResourceCard.Cohort);
-    expect(modalTextContent).toContain(`Are you sure you want to delete Cohort: Duplicate of ${cohortName}?`);
+    const modalTextContent = await dataPage.deleteResource(duplCohortName, ResourceCard.Cohort);
+    expect(modalTextContent).toContain(`Are you sure you want to delete Cohort: ${duplCohortName}?`);
 
     // Verify Delete successful.
-    expect(await DataResourceCard.findCard(page, `Duplicate of ${cohortName}`, 5000)).toBeFalsy();
+    expect(await DataResourceCard.findCard(page, duplCohortName, 5000)).toBeFalsy();
 
     // find the original new cohortCard
     cohortCard = await DataResourceCard.findCard(page, `${cohortName}`);

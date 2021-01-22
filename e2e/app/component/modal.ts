@@ -11,7 +11,7 @@ import * as fp from 'lodash/fp';
 import {waitWhileLoading} from 'utils/waits-utils';
 
 const Selector = {
-  defaultDialog: '//*[@role="dialog"]',
+  defaultDialog: '//*[@id="popup-root"]//*[@role="dialog" and contains(@class, "after-open")]',
 }
 
 export default class Modal extends Container {
@@ -49,8 +49,9 @@ export default class Modal extends Container {
    * @param {string} buttonLabel The button text label.
    * @param waitOptions Wait for navigation or/and modal close after click button.
    */
-  async clickButton(buttonLabel: LinkText, waitOptions: {waitForNav?: boolean, waitForClose?: boolean} = {}): Promise<void> {
-    const { waitForNav = false, waitForClose = false } = waitOptions;
+  async clickButton(buttonLabel: LinkText,
+                    waitOptions: {waitForNav?: boolean, waitForClose?: boolean, timeout?: number} = {}): Promise<void> {
+    const { waitForNav = false, waitForClose = false, timeout } = waitOptions;
     const button = await this.waitForButton(buttonLabel);
     await button.waitUntilEnabled();
     await Promise.all( fp.flow(
@@ -58,8 +59,8 @@ export default class Modal extends Container {
        fp.map(item => item.waitFn()),
        fp.concat([button.click()])
     )([
-      {shouldWait: waitForNav, waitFn: () => this.page.waitForNavigation({waitUntil: ['domcontentloaded', 'networkidle0']})},
-      {shouldWait: waitForClose, waitFn: () => this.waitUntilClose()}
+      {shouldWait: waitForNav, waitFn: () => this.page.waitForNavigation({waitUntil: ['load', 'networkidle0']})},
+      {shouldWait: waitForClose, waitFn: () => this.waitUntilClose(timeout)}
     ]));
   }
 
@@ -79,8 +80,8 @@ export default class Modal extends Container {
     return Checkbox.findByName(this.page, {name: checkboxName}, this);
   }
 
-  async waitUntilClose(): Promise<void> {
-    await this.page.waitForXPath(this.xpath, {hidden: true, timeout: 60000});
+  async waitUntilClose(timeout: number = 60000): Promise<void> {
+    await this.page.waitForXPath(this.xpath, {hidden: true, timeout});
   }
 
   /**

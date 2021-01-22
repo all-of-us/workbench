@@ -3,7 +3,7 @@ import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 import SnowmanMenu from 'app/component/snowman-menu';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
-import {Option} from 'app/text-labels';
+import {MenuOption} from 'app/text-labels';
 import Button from 'app/element/button';
 import Textbox from 'app/element/textbox';
 import {getPropValue} from 'utils/element-utils';
@@ -28,7 +28,7 @@ export default class ConceptSetPage extends AuthenticatedPage {
   }
 
   async openCopyToWorkspaceModal(conceptSetName: string): Promise<CopyModal> {
-    await this.getSnowmanMenu(conceptSetName).then(menu => menu.select(Option.CopyToAnotherWorkspace, {waitForNav: false}));
+    await this.getSnowmanMenu(conceptSetName).then(menu => menu.select(MenuOption.CopyToAnotherWorkspace, {waitForNav: false}));
     const modal = new CopyModal(this.page);
     await modal.waitForLoad();
     return modal;

@@ -2,7 +2,7 @@ import CopyModal from 'app/component/copy-modal';
 import DataResourceCard from 'app/component/data-resource-card';
 import NewNotebookModal from 'app/component/new-notebook-modal';
 import Link from 'app/element/link';
-import {Option, Language, LinkText, ResourceCard} from 'app/text-labels';
+import {MenuOption, Language, LinkText, ResourceCard} from 'app/text-labels';
 import {Page} from 'puppeteer';
 import {getPropValue} from 'utils/element-utils';
 import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
@@ -91,7 +91,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
   async duplicateNotebook(notebookName: string): Promise<string> {
     const resourceCard = new DataResourceCard(this.page);
     const notebookCard = await resourceCard.findCard(notebookName, ResourceCard.Notebook);
-    await notebookCard.selectSnowmanMenu(Option.Duplicate, {waitForNav: false});
+    await notebookCard.selectSnowmanMenu(MenuOption.Duplicate, {waitForNav: false});
     await waitWhileLoading(this.page);
     return `Duplicate of ${notebookName}`; // name of clone notebook
   }
@@ -106,7 +106,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     // Open Copy modal.s
     const resourceCard = new DataResourceCard(this.page);
     const notebookCard = await resourceCard.findCard(notebookName, ResourceCard.Notebook);
-    await notebookCard.selectSnowmanMenu(Option.CopyToAnotherWorkspace, {waitForNav: false});
+    await notebookCard.selectSnowmanMenu(MenuOption.CopyToAnotherWorkspace, {waitForNav: false});
     // Fill out modal fields.
     const copyModal = await new CopyModal(this.page);
     await copyModal.waitForLoad();

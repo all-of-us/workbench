@@ -1,5 +1,5 @@
 import {createWorkspace, isValidDate, signInWithAccessToken} from 'utils/test-utils';
-import {Option, LinkText, ResourceCard} from 'app/text-labels';
+import {MenuOption, LinkText, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import CohortParticipantDetailPage from 'app/page/cohort-participant-detail-page';
@@ -40,7 +40,7 @@ describe('Cohort review tests', () => {
     const cohortName = await cohortCard.getResourceName();
     console.log(`Created Cohort: "${cohortName}"`);
 
-    await cohortCard.selectSnowmanMenu(Option.Review);
+    await cohortCard.selectSnowmanMenu(MenuOption.Review, {waitForNav: true});
     const modal = new CohortReviewModal(page);
     await modal.fillInNumberOfPartcipants(reviewSetNumberOfParticipants);
     await modal.clickButton(LinkText.CreateSet);

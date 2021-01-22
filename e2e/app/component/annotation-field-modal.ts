@@ -65,7 +65,7 @@ export default class AnnotationFieldModal extends Modal {
   // create a Review-Wide Annotation Field name
   async createNewAnnotationName(newName?: string): Promise<void> {
     await this.beginCreateNewAnnotationName(newName);
-    await this.clickButton(LinkText.Create);
+    await this.clickButton(LinkText.Create, {waitForClose: true});
     await waitWhileLoading(this.page);
     console.log(`created annotation field: "${newName}"`);
   }
