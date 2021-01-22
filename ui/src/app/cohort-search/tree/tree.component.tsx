@@ -37,16 +37,23 @@ const styles = reactStyles({
     fontWeight: 'bold',
     padding: '0.5rem',
   },
+  arrowIcon: {
+    height: '0.7rem',
+    marginTop: '-0.2rem',
+    width: '0.7rem',
+    marginRight: '0.5rem'
+  },
   returnLink: {
-    background: 'transparent',
+    backgroundColor: colorWithWhiteness(colors.accent, 0.87),
     border: 0,
     color: colors.accent,
     cursor: 'pointer',
     float: 'left',
-    fontSize: '12px',
-    height: '1.5rem',
-    margin: '0.25rem 0',
+    fontSize: '14px',
+    height: '2rem',
     padding: '0 0.5rem',
+    marginRight: '0.7rem',
+    fontWeight: 600
   },
   searchBarContainer: {
     width: '80%',
@@ -303,12 +310,14 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
                      setInput={(v) => setSearchTerms(v)}/>
         </div>
       }
-      {!loading && <div style={{paddingTop: this.showHeader ? '0.5rem' : 0, width: '99%'}}>
+      {!loading && <div style={{paddingTop: this.showHeader ? '1.5rem' : 0, width: '99%'}}>
         {this.showHeader && <div style={{...styles.treeHeader, border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`}}>
           {!!ingredients && <div style={styles.ingredients}>
             Ingredients in this brand: {ingredients.join(', ')}
           </div>}
-          <button style={styles.returnLink} onClick={() => back()}>Return to list</button>
+          <button style={styles.returnLink} onClick={() => back()}>
+            <img src='/assets/icons/arrow-left-regular.svg' style={styles.arrowIcon} alt='Go back' />
+            RETURN TO LIST</button>
         </div>}
         {error && <div style={styles.error}>
           <ClrIcon style={{color: colors.white}} className='is-solid' shape='exclamation-triangle'/>
