@@ -128,7 +128,11 @@ public class DataSetController implements DataSetApiDelegate {
       throw new BadRequestException("Missing name");
     } else if (dataSetRequest.getConceptSetIds() == null
         || (dataSetRequest.getConceptSetIds().isEmpty()
-            && dataSetRequest.getPrePackagedConceptSet().equals(PrePackagedConceptSetEnum.NONE))) {
+            && (dataSetRequest.getPrePackagedConceptSet().size() == 1
+                && dataSetRequest
+                    .getPrePackagedConceptSet()
+                    .get(0)
+                    .equals(PrePackagedConceptSetEnum.NONE)))) {
       throw new BadRequestException("Missing concept set ids");
     } else if ((dataSetRequest.getCohortIds() == null || dataSetRequest.getCohortIds().isEmpty())
         && !includesAllParticipants) {
