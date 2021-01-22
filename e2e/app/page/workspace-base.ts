@@ -224,7 +224,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
 
     await modal.clickButton(buttonLink, {waitForClose: true});
     await waitWhileLoading(this.page);
-    console.log(`Renamed resource ${resourceType} "${resourceName}" to "${newResourceName}"`);
+    console.log(`Renamed ${resourceType} "${resourceName}" to "${newResourceName}"`);
     return modalTextContents;
   }
 

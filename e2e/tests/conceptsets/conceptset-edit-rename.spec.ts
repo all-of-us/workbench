@@ -51,7 +51,6 @@ describe('Editing and rename Concept Set', () => {
 
     // Save new Concept Set.
     const conceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
-    console.log(`Created Concept Set: "${conceptSetName}"`);
 
     // Add another Concept in Procedures domain.
     const conceptSetActionsPage = new ConceptSetActionsPage(page);

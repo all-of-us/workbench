@@ -31,7 +31,7 @@ async function createConceptSet(srcWorkspaceCard: WorkspaceCard) {
   await conceptSearchPage.viewAndSaveConceptSet();
 
   const conceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
-  console.log(`Created Concept Set: "${conceptSetName}"`);
+
   // Click on link to open Concept Set page.
   const conceptSetActionPage = new ConceptSetActionsPage(page);
   await conceptSetActionPage.openConceptSet(conceptSetName);
@@ -85,7 +85,7 @@ describe('Copy Concept Set to another workspace', () => {
     const exists = await resourceCard.cardExists(conceptSetCopyName, ResourceCard.ConceptSet);
     expect(exists).toBe(true);
 
-    console.log(`Copied Concept Set: "${conceptSetName} from workspace: "${srcWorkspace}" to Concept Set: "${conceptSetCopyName}" in another workspace: "${destWorkspace}"`)
+    console.log(`Copied Concept Set "${conceptSetName} from workspace "${srcWorkspace}" to Concept Set "${conceptSetCopyName}" in another workspace "${destWorkspace}"`)
 
     // Delete Concept Set in destWorkspace.
     await dataPage.deleteResource(conceptSetCopyName, ResourceCard.ConceptSet);

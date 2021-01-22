@@ -32,7 +32,7 @@ export default class ShareModal extends Modal {
     await ownerOpt.click();
 
     await this.clickButton(LinkText.Save, {waitForClose: true});
-    console.log(`Shared workspace to user ${username} with role ${level}`);
+    console.log(`Shared workspace to ${username} with role ${level}`);
   }
 
   async removeUser(username: string): Promise<void> {

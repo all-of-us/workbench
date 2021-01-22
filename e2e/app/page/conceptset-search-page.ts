@@ -29,6 +29,7 @@ export default class ConceptSetSearchPage extends AuthenticatedPage{
 
   async saveConceptSet(saveOption?: SaveOption, existingConceptSetName?: string): Promise<string> {
     const modal = new ConceptSetSaveModal(this.page);
+    await modal.waitForLoad();
     return modal.fillOutSaveModal(saveOption, existingConceptSetName);
   }
 
