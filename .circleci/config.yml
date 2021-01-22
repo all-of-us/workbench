@@ -387,6 +387,7 @@ commands:
 # -------------------------
 jobs:
   sleep-2m:
+    executor: workbench-executor
     steps:
       - run: sleep 120
 
