@@ -188,18 +188,18 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  professional_url,\n"
             + "  two_factor_auth_bypass_time,\n"
             + "  two_factor_auth_completion_time,\n"
-            + "  user_id,\n"
-            + "  email AS username\n"
-            + "  via.institution.institution_id AS institution_id,\n"	
+            + "  u.user_id,\n"
+            + "  email AS username,\n"
+            + "  via.institution_id AS institution_id,\n"	
             + "  via.institutional_role_enum,\n"	
             + "  via.institutional_role_other_text\n"
-            + "  \n"
+            + "  \n" 
             + "FROM user u"
-            + "  LEFT OUTER JOIN FETCH address AS a ON u.userId = a.user.userId\n"	
-            + "  LEFT OUTER JOIN FETCH user_verified_institutional_affiliation AS via on u.userId = via.user.userId"	
-            + "  ORDER BY u.userId",
+            + "  LEFT OUTER JOIN address AS a ON u.user_id = a.user_id\n"	
+            + "  LEFT OUTER JOIN user_verified_institutional_affiliation AS via on u.user_id = via.user_id"	
+            + "  ORDER BY u.user_id",
         (rs, unused) ->
-            new ReportingUser()
+            new ReportingUser() 
                 .aboutYou(rs.getString("about_you"))
                 .areaOfResearch(rs.getString("area_of_research"))
                 .complianceTrainingBypassTime(
@@ -240,7 +240,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                     offsetDateTimeUtc(rs.getTimestamp("two_factor_auth_completion_time")))
                 .userId(rs.getLong("user_id"))
                 .username(rs.getString("username"))
-                .institutionId(rs.getLong("institutionId"))
+                .institutionId(rs.getLong("institution_id"))
                 .institutionalRoleEnum(institutionalRoleFromStorage(rs.getShort("institutional_role_enum")))
                 .institutionalRoleOtherText(rs.getString("institutional_role_other_text"))
                 );
