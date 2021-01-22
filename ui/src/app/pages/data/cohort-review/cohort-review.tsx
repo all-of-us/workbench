@@ -5,7 +5,7 @@ import {Button} from 'app/components/buttons';
 import {Modal, ModalFooter, ModalTitle} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {CreateReviewModal} from 'app/pages/data/cohort-review/create-review-modal';
-import {cohortReviewStore, visitsFilterOptions} from 'app/services/review-state.service';
+import {cohortReviewStore, queryResultSizeStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, ReactWrapperBase} from 'app/utils';
@@ -45,9 +45,11 @@ export class CohortReview extends React.Component<{}, State> {
       pageSize: 25,
       sortOrder: SortOrder.Asc,
       filters: {items: []}
-    }).then(review => {
-      cohortReviewStore.next(review);
-      const reviewPresent = review.reviewStatus !== ReviewStatus.NONE;
+    }).then(resp => {
+      const {cohortReview, queryResultSize} = resp;
+      cohortReviewStore.next(cohortReview);
+      queryResultSizeStore.next(queryResultSize);
+      const reviewPresent = cohortReview.reviewStatus !== ReviewStatus.NONE;
       this.setState({reviewPresent});
       if (reviewPresent) {
         navigate(['workspaces', ns, wsid, 'data', 'cohorts', cid, 'review', 'participants']);

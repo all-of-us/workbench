@@ -1586,7 +1586,8 @@ public class WorkspacesControllerTest {
                 cohortsByName.get("c1").getId(),
                 cdrVersion.getCdrVersionId(),
                 new PageFilterRequest())
-            .getBody();
+            .getBody()
+            .getCohortReview();
     assertThat(gotCr1.getReviewSize()).isEqualTo(cr1.getReviewSize());
     assertThat(gotCr1.getParticipantCohortStatuses()).isEqualTo(cr1.getParticipantCohortStatuses());
 
@@ -1620,7 +1621,8 @@ public class WorkspacesControllerTest {
                 cohortsByName.get("c2").getId(),
                 cdrVersion.getCdrVersionId(),
                 new PageFilterRequest())
-            .getBody();
+            .getBody()
+            .getCohortReview();
     assertThat(gotCr2.getReviewSize()).isEqualTo(cr2.getReviewSize());
     assertThat(gotCr2.getParticipantCohortStatuses()).isEqualTo(cr2.getParticipantCohortStatuses());
 
