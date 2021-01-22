@@ -9,10 +9,17 @@ import Textbox from 'app/element/textbox';
 import {Language, LinkText} from 'app/text-labels';
 import Modal from './modal';
 
+const modalTitleXpath = '//*[contains(normalize-space(),"Save Dataset") or contains(normalize-space(),"Update Dataset")]';
+
 export default class DatasetSaveModal extends Modal {
 
-   constructor(page: Page) {
-      super(page);
+   constructor(page: Page, xpath?: string) {
+      super(page, xpath);
+   }
+
+   async isLoaded(): Promise<boolean> {
+      await this.page.waitForXPath(modalTitleXpath, {visible: true});
+      return true;
    }
 
    /**
