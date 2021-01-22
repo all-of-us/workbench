@@ -1,3 +1,5 @@
+# Source - https://github.com/broadinstitute/gatk/blob/ah_var_store/scripts/variantstore/wdl/extract/ngs_cohort_extract.py
+
 # -*- coding: utf-8 -*-
 import sys
 import uuid

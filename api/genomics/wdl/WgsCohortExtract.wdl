@@ -1,5 +1,7 @@
 version 1.0
 
+# source - https://github.com/broadinstitute/gatk/blob/ah_var_store/scripts/variantstore/wdl/ngs_cohort_extract.wdl
+
 workflow WgsCohortExtract {
    input {
 
