@@ -460,8 +460,12 @@ public class BillingProjectBufferServiceTest {
                   billingProjectBufferEntryDao.findByFireCloudProjectName(projectName);
               Duration timeSinceCreation =
                   Duration.between(entry.getCreationTime().toInstant(), CLOCK.instant());
-              log.fine(String.format("%s is %s mins old (%s project)", projectName, timeSinceCreation.toMinutes(),
-                  successProjectNames.contains(projectName) ? "SUCCESS" : "ERROR"));
+              log.fine(
+                  String.format(
+                      "%s is %s mins old (%s project)",
+                      projectName,
+                      timeSinceCreation.toMinutes(),
+                      successProjectNames.contains(projectName) ? "SUCCESS" : "ERROR"));
               CreationStatusEnum status = null;
               if (timeSinceCreation.toMinutes() < 15) {
                 status = CreationStatusEnum.CREATING;
@@ -541,8 +545,8 @@ public class BillingProjectBufferServiceTest {
     }
 
     assertThat(workbenchRecoveryTime).isNotNull();
-    long workbenchRecoveryMinutes = Duration.between(terraRecoveryTime, workbenchRecoveryTime)
-        .toMinutes();
+    long workbenchRecoveryMinutes =
+        Duration.between(terraRecoveryTime, workbenchRecoveryTime).toMinutes();
     log.info(String.format("Workbench recovered in %s minutes", workbenchRecoveryMinutes));
     assertThat(workbenchRecoveryMinutes).isLessThan(30l);
   }
