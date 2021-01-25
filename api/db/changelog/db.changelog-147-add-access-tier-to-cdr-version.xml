@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="thibault" id="changelog-147-add-access-tier-to-cdr-version">
+    <addColumn tableName="cdr_version">
+      <column name="access_tier" type="bigint"/>
+    </addColumn>
+
+    <addForeignKeyConstraint baseColumnNames="access_tier"
+      baseTableName="cdr_version"
+      constraintName="fk_cdr_version_tier"
+      onDelete="CASCADE"
+      referencedColumnNames="access_tier_id"
+      referencedTableName="access_tier"/>
+
+  </changeSet>
+</databaseChangeLog>

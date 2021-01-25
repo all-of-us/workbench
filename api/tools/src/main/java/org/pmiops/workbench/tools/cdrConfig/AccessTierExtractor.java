@@ -1,0 +1,13 @@
+package org.pmiops.workbench.tools.cdrConfig;
+
+import java.util.List;
+import org.pmiops.workbench.db.model.DbAccessTier;
+
+// expected format:
+// { "accessTiers": [ {DbAccessTier}, ...], "cdrVersions": [ {DbCdrVersion}, ...] }
+
+// however we need to parse them separately because we use an adapter to resolve the accessTier
+// field in the DbCdrVersion but we need to NOT use it here
+class AccessTierExtractor {
+  public List<DbAccessTier> accessTiers;
+}

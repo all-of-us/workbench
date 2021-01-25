@@ -1,4 +1,4 @@
-package org.pmiops.workbench.tools;
+package org.pmiops.workbench.tools.cdrConfig;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;

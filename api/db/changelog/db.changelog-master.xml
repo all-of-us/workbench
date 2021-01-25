@@ -156,6 +156,7 @@
     file="changelog/db.changelog-144-remove-concept-set-concept-id-primarykeyconstraint.xml"/>
   <include file="changelog/db.changelog-145-remove-participant-count.xml"/>
   <include file="changelog/db.changelog-146-access-tier-table.xml"/>
+  <include file="changelog/db.changelog-147-add-access-tier-to-cdr-version.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
