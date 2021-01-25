@@ -28,7 +28,14 @@ public interface BillingProjectBufferEntryDao
   List<DbBillingProjectBufferEntry> findAllByStatusAndLastStatusChangedTimeLessThan(
       short status, Timestamp timestamp);
 
-  List<DbBillingProjectBufferEntry> findTop5ByStatusOrderByLastSyncRequestTimeAsc(short status);
+  @Query(
+      value =
+          "SELECT * FROM billing_project_buffer_entry "
+              + "  WHERE status = 0 "
+              + "  ORDER BY last_sync_request_time ASC "
+              + "  LIMIT ?1",
+      nativeQuery = true)
+  List<DbBillingProjectBufferEntry> getCreatingEntriesToSync(int limit);
 
   DbBillingProjectBufferEntry findFirstByStatusOrderByCreationTimeAsc(short status);
 

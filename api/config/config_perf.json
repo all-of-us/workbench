@@ -27,6 +27,7 @@
     "retryCount": 4,
     "bufferCapacity": 300,
     "bufferRefillProjectsPerTask": 5,
+    "bufferStatusChecksPerTask": 10,
     "defaultFreeCreditsDollarLimit": 300.0,
     "freeTierCostAlertThresholds": [
       0.5,

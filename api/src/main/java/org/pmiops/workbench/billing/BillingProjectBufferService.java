@@ -121,20 +121,24 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     final DbBillingProjectBufferEntry bufferEntry = new DbBillingProjectBufferEntry();
     bufferEntry.setFireCloudProjectName(createBillingProjectName());
     bufferEntry.setCreationTime(Timestamp.from(clock.instant()));
+
+    bufferEntry.setLastSyncRequestTime(Timestamp.from(clock.instant()));
     bufferEntry.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
     return billingProjectBufferEntryDao.save(bufferEntry);
   }
 
   public void syncBillingProjectStatus() {
     List<DbBillingProjectBufferEntry> creatingEntriesToSync =
-        billingProjectBufferEntryDao.findTop5ByStatusOrderByLastSyncRequestTimeAsc(
-            DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.CREATING));
+        billingProjectBufferEntryDao.getCreatingEntriesToSync(
+            workbenchConfigProvider.get().billing.bufferStatusChecksPerTask);
     if (creatingEntriesToSync.isEmpty()) {
+      log.info("No entries to sync!");
       return;
     }
 
     int successfulSyncCount = 0;
     for (DbBillingProjectBufferEntry bufferEntry : creatingEntriesToSync) {
+      log.info("Syncing buffer entry");
       //noinspection UnusedAssignment
       bufferEntry = syncBufferEntry(bufferEntry);
       successfulSyncCount += 1;

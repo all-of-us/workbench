@@ -13,21 +13,25 @@ import static org.mockito.Mockito.verify;
 
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
@@ -58,6 +62,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
@@ -70,6 +75,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 public class BillingProjectBufferServiceTest {
+  private static final Logger log =
+      Logger.getLogger(BillingProjectBufferServiceTest.class.getName());
 
   private static final Instant NOW = Instant.now();
   private static final Instant BEFORE_CREATING_TIMEOUT_ELAPSES =
@@ -104,7 +111,8 @@ public class BillingProjectBufferServiceTest {
   @Autowired private Clock clock;
   @Autowired private UserDao userDao;
   @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
-  @Autowired private BillingProjectBufferEntryDao billingProjectBufferEntryDao;
+  // Put a spy on the buffer entry DAO since we might want to intercept some calls.
+  @Autowired @SpyBean private BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   @Autowired private FireCloudService mockFireCloudService;
   @Autowired private MonitoringService mockMonitoringService;
 
@@ -426,6 +434,91 @@ public class BillingProjectBufferServiceTest {
   }
 
   @Test
+  public void testOutageRecoveryTimePeriod() {
+    workbenchConfig.billing.bufferCapacity = (int) 300;
+    workbenchConfig.billing.bufferRefillProjectsPerTask = 5;
+
+    Set<String> successProjectNames = new HashSet<>();
+    doAnswer(
+            invocation -> {
+              String projectName = invocation.getArgument(0);
+              DbBillingProjectBufferEntry entry =
+                  billingProjectBufferEntryDao.findByFireCloudProjectName(projectName);
+              Duration timeSinceCreation =
+                  Duration.between(entry.getCreationTime().toInstant(), CLOCK.instant());
+
+              CreationStatusEnum status = null;
+              if (timeSinceCreation.toMinutes() < 15) {
+                status = CreationStatusEnum.CREATING;
+              } else if (successProjectNames.contains(projectName)) {
+                status = CreationStatusEnum.READY;
+              } else {
+                status = CreationStatusEnum.ERROR;
+              }
+              return new FirecloudBillingProjectStatus()
+                  .creationStatus(status)
+                  .projectName(projectName);
+            })
+        .when(mockFireCloudService)
+        .getBillingProjectStatus(anyString());
+
+    Instant startingTime = CLOCK.instant();
+    Runnable tick =
+        () -> {
+          CLOCK.setInstant(CLOCK.instant().plus(Duration.ofMinutes(1)));
+          billingProjectBufferService.bufferBillingProjects();
+          billingProjectBufferService.syncBillingProjectStatus();
+        };
+
+    // Outage simulation: create a bunch of projects which will error-out after 15 minutes.
+    while (billingProjectBufferEntryDao.count() < 300) {
+      tick.run();
+      if (Duration.between(startingTime, CLOCK.instant()).toHours() > 3) {
+        // Bail out if it takes too long
+        break;
+      }
+    }
+
+    assertThat(billingProjectBufferEntryDao.getCountByStatusMap().get(BufferEntryStatus.AVAILABLE))
+        .isEqualTo(null);
+    assertThat(billingProjectBufferEntryDao.getCountByStatusMap().get(BufferEntryStatus.ERROR))
+        .isGreaterThan(0L);
+
+    // Recovery: start creating projects which will be READY after 15 minutes.
+    doAnswer(
+            invocation -> {
+              DbBillingProjectBufferEntry entry = invocation.getArgument(0);
+              successProjectNames.add(entry.getFireCloudProjectName());
+              return invocation.callRealMethod();
+            })
+        .when(billingProjectBufferEntryDao)
+        .save((DbBillingProjectBufferEntry) any());
+
+    Instant terraRecoveryTime = CLOCK.instant();
+    Instant workbenchRecoveryTime = null;
+    while (true) {
+      tick.run();
+
+      Long availableCount =
+          billingProjectBufferEntryDao.getCountByStatusMap().get(BufferEntryStatus.AVAILABLE);
+      if (availableCount != null && availableCount >= 1) {
+        workbenchRecoveryTime = CLOCK.instant();
+        break;
+      }
+      if (Duration.between(startingTime, CLOCK.instant()).toHours() > 4) {
+        log.info("Took too long, bailing out");
+        break;
+      }
+    }
+
+    log.info(
+        String.format(
+            "Workbench recovered after %s minutes",
+            Duration.between(terraRecoveryTime, workbenchRecoveryTime).toMinutes()));
+    assertThat(workbenchRecoveryTime).isNotNull();
+  }
+
+  @Test
   public void assignBillingProject() {
     DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
     entry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
@@ -502,6 +595,7 @@ public class BillingProjectBufferServiceTest {
     entry.setFireCloudProjectName("foo");
     entry.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
     entry.setCreationTime(getCurrentTimestamp());
+    entry.setLastSyncRequestTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(entry);
 
     doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
@@ -521,6 +615,7 @@ public class BillingProjectBufferServiceTest {
     entry.setFireCloudProjectName("foo");
     entry.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
     entry.setCreationTime(getCurrentTimestamp());
+    entry.setLastSyncRequestTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(entry);
 
     doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
@@ -541,6 +636,7 @@ public class BillingProjectBufferServiceTest {
     entry.setFireCloudProjectName("foo");
     entry.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
     entry.setCreationTime(getCurrentTimestamp());
+    entry.setLastSyncRequestTime(getCurrentTimestamp());
     billingProjectBufferEntryDao.save(entry);
 
     doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
