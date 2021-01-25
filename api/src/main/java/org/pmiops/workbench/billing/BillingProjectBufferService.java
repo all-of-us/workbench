@@ -69,7 +69,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   }
 
   private Timestamp getCurrentTimestamp() {
-    return new Timestamp(clock.instant().toEpochMilli());
+    return Timestamp.from(clock.instant());
   }
 
   /** Makes a configurable number of project creation attempts. */
@@ -121,15 +121,22 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     final DbBillingProjectBufferEntry bufferEntry = new DbBillingProjectBufferEntry();
     bufferEntry.setFireCloudProjectName(createBillingProjectName());
     bufferEntry.setCreationTime(Timestamp.from(clock.instant()));
+    // Note: we set the lastSyncRequestTime column to the current timestamp as an optimization.
+    // If we leave this column as NULL, the sync process will prioritize this entry for immediate
+    // synchronization with Terra. Instead, we populate this column with the current timestamp
+    // since we know with high confidence that the initial status is CREATING. See RW-6192 for
+    // more context.
+    bufferEntry.setLastSyncRequestTime(Timestamp.from(clock.instant()));
     bufferEntry.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
     return billingProjectBufferEntryDao.save(bufferEntry);
   }
 
   public void syncBillingProjectStatus() {
     List<DbBillingProjectBufferEntry> creatingEntriesToSync =
-        billingProjectBufferEntryDao.findTop5ByStatusOrderByLastSyncRequestTimeAsc(
-            DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.CREATING));
+        billingProjectBufferEntryDao.getCreatingEntriesToSync(
+            workbenchConfigProvider.get().billing.bufferStatusChecksPerTask);
     if (creatingEntriesToSync.isEmpty()) {
+      log.info("No entries to sync!");
       return;
     }
 
