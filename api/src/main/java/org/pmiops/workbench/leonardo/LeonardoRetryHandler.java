@@ -4,6 +4,7 @@ import java.net.SocketTimeoutException;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.utils.ResponseCodeRetryPolicy;
 import org.pmiops.workbench.utils.RetryHandler;
@@ -36,12 +37,20 @@ public class LeonardoRetryHandler extends RetryHandler<ApiException> {
     @Override
     protected void logNoRetry(Throwable t, int responseCode) {
       if (t instanceof ApiException) {
-        logger.log(
-            getLogLevel(responseCode),
-            String.format(
-                "Exception calling Leonardo API with response: %s",
-                ((ApiException) t).getResponseBody()),
-            t);
+        if (responseCode == 404) {
+          logger.log(
+              getLogLevel(responseCode),
+              String.format(
+                  "Exception calling Leonardo API with response: %s. This is likely because a runtime has not yet been created and is being polled for. Surpressing stack trace.",
+                  responseCode));
+        } else {
+          logger.log(
+              getLogLevel(responseCode),
+              String.format(
+                  "Exception calling Leonardo API with response: %s",
+                  ((ApiException) t).getResponseBody()),
+              t);
+        }
       } else {
         super.logNoRetry(t, responseCode);
       }
