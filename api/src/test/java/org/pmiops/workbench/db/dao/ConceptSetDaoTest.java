@@ -78,15 +78,6 @@ public class ConceptSetDaoTest {
   }
 
   @Test
-  public void findByWorkspaceIdAndSurvey() {
-    assertThat(
-            conceptSetDao
-                .findByWorkspaceIdAndSurvey(dbConceptSet.getWorkspaceId(), dbConceptSet.getSurvey())
-                .get(0))
-        .isEqualTo(dbConceptSet);
-  }
-
-  @Test
   public void findConceptSetByNameAndWorkspaceId() {
     assertThat(
             conceptSetDao.findConceptSetByNameAndWorkspaceId(

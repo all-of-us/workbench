@@ -148,16 +148,6 @@ export class ConceptSetsApiStub extends ConceptSetsApi {
     });
   }
 
-  public getSurveyConceptSetsInWorkspace(
-    workspaceNamespace: string, workspaceId: string, surveyName: string):
-  Promise<ConceptSetListResponse> {
-    return new Promise<ConceptSetListResponse>(resolve => {
-      resolve({items: this.surveyConceptSets.filter((survey) => {
-        return survey.survey.toString() === surveyName;
-      })});
-    });
-  }
-
   public getConceptSet(workspaceNamespace: string, workspaceId: string, conceptSetId: number):
   Promise<ConceptSet> {
     return new Promise<ConceptSet>(resolve => {
