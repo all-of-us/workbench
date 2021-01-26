@@ -195,6 +195,10 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
       const requestItem = getItemFromSearchRequest(groupId, item.id, role);
       if (requestItem) {
         const sortAndStringify = (params) => JSON.stringify(params.sort((a, b) => a.id - b.id));
+        if (this.criteriaIdsLookedUp(requestItem.searchParameters)) {
+          // If a lookup has been done, we delete the ids before comparing search parameters and selections
+          selections.forEach(selection => delete selection.id);
+        }
         unsavedChanges = sortAndStringify(requestItem.searchParameters) !== sortAndStringify(selections);
       }
     }
@@ -209,6 +213,12 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     } else {
       this.closeSearch();
     }
+  }
+
+  // Checks if a lookup has been done to add the criteria ids to the selections
+  criteriaIdsLookedUp(searchParameters: Array<Selection>) {
+    const {selections} = this.state;
+    return selections.length && searchParameters.length && selections.some(sel => !!sel.id) && searchParameters.some(sel => !sel.id);
   }
 
   addSelection = (param: any) => {
