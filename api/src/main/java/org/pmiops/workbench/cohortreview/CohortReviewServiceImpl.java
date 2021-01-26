@@ -167,8 +167,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
 
   @Override
   public CohortReview findCohortReview(Long cohortReviewId) {
-    DbCohortReview cohortReview = findDbCohortReview(cohortReviewId);
-    return cohortReviewMapper.dbModelToClient(cohortReview);
+    return cohortReviewMapper.dbModelToClient(findDbCohortReview(cohortReviewId));
   }
 
   @Override
