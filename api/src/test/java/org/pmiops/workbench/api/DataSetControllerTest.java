@@ -61,6 +61,7 @@ import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
+import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortAnnotationMapper;
 import org.pmiops.workbench.cohortreview.mapper.ParticipantCohortStatusMapper;
@@ -228,6 +229,7 @@ public class DataSetControllerTest {
     WorkspacesController.class,
   })
   @MockBean({
+    BigQueryService.class,
     BillingProjectAuditor.class,
     CdrBigQuerySchemaConfigService.class,
     CdrVersionService.class,
@@ -236,12 +238,14 @@ public class DataSetControllerTest {
     CohortBuilderService.class,
     CohortCloningService.class,
     CohortMaterializationService.class,
+    CohortQueryBuilder.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
     DirectoryService.class,
     FreeTierBillingService.class,
     ParticipantCohortAnnotationMapper.class,
     ParticipantCohortStatusMapper.class,
+    ReviewQueryBuilder.class,
     UserRecentResourceService.class,
     UserServiceAuditor.class,
     WorkspaceAuditor.class,
