@@ -1,8 +1,8 @@
-import {Component, Input,} from '@angular/core';
+import {Component, Input, } from '@angular/core';
 
 import {Button} from 'app/components/buttons';
 
-import {Modal, ModalBody, ModalFooter, ModalTitle,} from 'app/components/modals';
+import {Modal, ModalBody, ModalFooter, ModalTitle, } from 'app/components/modals';
 
 import {ReactWrapperBase} from 'app/utils';
 import {toDisplay} from 'app/utils/resources';
@@ -19,7 +19,7 @@ export interface ConfirmDeleteModalProps {
 
 export interface ConfirmDeleteModalState {
   loading: boolean;
-  deleteDisabled: boolean,
+  deleteDisabled: boolean;
 }
 
 export class ConfirmDeleteModal
@@ -45,8 +45,6 @@ export class ConfirmDeleteModal
   }
 
   render() {
-    console.log(this.state.loading);
-
     return <Modal loading={this.state.loading}>
       <ModalTitle style={{lineHeight: '28px'}}>
         Warning -- All work in this workspace will be lost.
@@ -60,8 +58,7 @@ export class ConfirmDeleteModal
           and cohort definitions. This includes items created or used by other users with access to the workspace.
           If you still wish to delete this workspace and all items within it, type DELETE below to confirm.
         </div>
-        <TextInput onChange={this.validateDeleteText} onBlur={() => {
-        }}/>
+        <TextInput style={{marginTop: '0.5rem'}} onChange={this.validateDeleteText} onBlur=''/>
       </ModalBody>
       <ModalFooter style={{paddingTop: '1rem'}}>
         <Button
