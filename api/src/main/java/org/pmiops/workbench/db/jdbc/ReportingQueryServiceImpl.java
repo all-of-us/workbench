@@ -254,8 +254,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .zipCode(rs.getString("zip_code"))
                 .institutionId(rs.getLong("institution_id"))
                 .institutionalRoleEnum(institutionalRoleFromStorage(rs.getShort("institutional_role_enum")))
-                .institutionalRoleOtherText(rs.getString("institutional_role_other_text"))
-                );
+                .institutionalRoleOtherText(rs.getString("institutional_role_other_text")));
   }
 
   @Override
