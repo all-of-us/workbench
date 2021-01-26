@@ -1,0 +1,87 @@
+{
+  "accessTiers": [
+    {
+      "accessTierId": 1,
+      "shortName": "registered",
+      "displayName": "Registered Tier",
+      "servicePerimeter": "xxxx",
+      "authDomainName": "yyyy",
+      "authDomainGroupEmail": "zzzz"
+    }
+  ],
+  "cdrVersions": [
+    {
+      "cdrVersionId": 1,
+      "name": "[Removed] Synthetic Dataset v1 (Legacy)",
+      "dataAccessLevel": 1,
+      "archivalStatus": 1,
+      "bigqueryProject": "",
+      "bigqueryDataset": "",
+      "creationTime": "2018-06-06 00:00:00Z",
+      "releaseNumber": 1,
+      "numParticipants": 0,
+      "cdrDbName": "synth_r_2020q1_1"
+    },
+    {
+      "cdrVersionId": 2,
+      "name": "[Removed] All of Us Dataset v1 (Legacy)",
+      "dataAccessLevel": 1,
+      "archivalStatus": 1,
+      "bigqueryProject": "",
+      "bigqueryDataset": "",
+      "creationTime": "2018-11-16 00:00:00Z",
+      "releaseNumber": 1,
+      "numParticipants": 0,
+      "cdrDbName": "r_2019q1_4"
+    },
+    {
+      "cdrVersionId": 3,
+      "name": "[Removed] All of Us Dataset v2 (Legacy)",
+      "dataAccessLevel": 1,
+      "archivalStatus": 1,
+      "bigqueryProject": "",
+      "bigqueryDataset": "",
+      "creationTime": "2019-05-10 00:00:00Z",
+      "releaseNumber": 2,
+      "numParticipants": 0,
+      "cdrDbName": "r_2019q2_2"
+    },
+    {
+      "cdrVersionId": 4,
+      "name": "[Removed] All of Us Dataset v2",
+      "dataAccessLevel": 1,
+      "archivalStatus": 1,
+      "bigqueryProject": "",
+      "bigqueryDataset": "",
+      "creationTime": "2019-05-10 00:00:00Z",
+      "releaseNumber": 2,
+      "numParticipants": 0,
+      "cdrDbName": "r_2019q2_2"
+    },
+    {
+      "cdrVersionId": 5,
+      "name": "All of Us Dataset v3",
+      "dataAccessLevel": 1,
+      "bigqueryProject": "fc-aou-cdr-prod",
+      "bigqueryDataset": "R2019Q4R3",
+      "creationTime": "2019-10-04 00:00:00Z",
+      "releaseNumber": 3,
+      "numParticipants": 224143,
+      "cdrDbName": "r_2019q4_10"
+    },
+    {
+      "cdrVersionId": 6,
+      "isDefault": true,
+      "name": "All of Us Dataset v4",
+      "dataAccessLevel": 1,
+      "bigqueryProject": "fc-aou-cdr-prod",
+      "bigqueryDataset": "R2020Q4R2",
+      "creationTime": "2020-10-20 00:00:00Z",
+      "releaseNumber": 4,
+      "numParticipants": 315297,
+      "cdrDbName": "r_2020q4_2",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true
+    }
+  ]
+}

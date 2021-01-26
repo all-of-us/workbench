@@ -1,0 +1,93 @@
+{
+  "accessTiers": [
+    {
+      "accessTierId": 1,
+      "shortName": "registered",
+      "displayName": "Registered Tier",
+      "servicePerimeter": "xxxx",
+      "authDomainName": "yyyy",
+      "authDomainGroupEmail": "zzzz"
+    }
+  ],
+  "cdrVersions": [
+    {
+      "cdrVersionId": 1,
+      "name": "[Removed] Synthetic Dataset v1 (Legacy)",
+      "dataAccessLevel": 1,
+      "archivalStatus": 1,
+      "bigqueryProject": "",
+      "bigqueryDataset": "",
+      "creationTime": "2018-06-06 00:00:00Z",
+      "releaseNumber": 1,
+      "numParticipants": 0,
+      "cdrDbName": "synth_r_2020q1_3",
+      "elasticIndexBaseName": "synth_r_2019q1_1"
+    },
+    {
+      "cdrVersionId": 2,
+      "name": "[Removed] Synthetic Dataset v2 (Legacy)",
+      "dataAccessLevel": 1,
+      "archivalStatus": 1,
+      "bigqueryProject": "",
+      "bigqueryDataset": "",
+      "creationTime": "2018-06-06 00:00:00Z",
+      "releaseNumber": 1,
+      "numParticipants": 0,
+      "cdrDbName": "synth_r_2020q1_3",
+      "elasticIndexBaseName": "synth_r_2019q1_1"
+    },
+    {
+      "cdrVersionId": 3,
+      "name": "[Removed] Synthetic Dataset v1",
+      "dataAccessLevel": 1,
+      "archivalStatus": 1,
+      "bigqueryProject": "",
+      "bigqueryDataset": "",
+      "creationTime": "2018-06-06 00:00:00Z",
+      "releaseNumber": 1,
+      "numParticipants": 0,
+      "cdrDbName": "synth_r_2020q1_3",
+      "elasticIndexBaseName": "synth_r_2019q1_1"
+    },
+    {
+      "cdrVersionId": 4,
+      "name": "[Removed] Synthetic Dataset v2",
+      "dataAccessLevel": 1,
+      "archivalStatus": 1,
+      "bigqueryProject": "",
+      "bigqueryDataset": "",
+      "creationTime": "2018-06-06 00:00:00Z",
+      "releaseNumber": 1,
+      "numParticipants": 0,
+      "cdrDbName": "synth_r_2020q1_3",
+      "elasticIndexBaseName": "synth_r_2019q1_1"
+    },
+    {
+      "cdrVersionId": 5,
+      "name": "Synthetic Dataset v3",
+      "dataAccessLevel": 1,
+      "bigqueryProject": "fc-aou-cdr-synth-stable",
+      "bigqueryDataset": "SR2019q4r3",
+      "creationTime": "2019-09-30 00:00:00Z",
+      "releaseNumber": 3,
+      "numParticipants": 234525,
+      "cdrDbName": "synth_r_2019q4_10",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true
+    },
+    {
+      "cdrVersionId": 6,
+      "isDefault": true,
+      "name": "Synthetic Dataset v4",
+      "dataAccessLevel": 1,
+      "bigqueryProject": "fc-aou-cdr-synth-stable",
+      "bigqueryDataset": "SR2019q4r3",
+      "creationTime": "2019-09-30 00:00:00Z",
+      "releaseNumber": 4,
+      "numParticipants": 234525,
+      "cdrDbName": "synth_r_2019q4_10",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true
+    }
+  ]
+}
