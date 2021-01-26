@@ -12,6 +12,7 @@ import {FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {LOCAL_STORAGE_KEY_COHORT_CONTEXT} from 'app/pages/data/criteria-search';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {
@@ -27,6 +28,8 @@ import {
 } from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort, SearchRequest} from 'generated/fetch';
+
+const LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST = 'CURRENT_COHORT_SEARCH_REQUEST';
 
 const styles = reactStyles({
   cohortError: {
@@ -52,6 +55,7 @@ function colStyle(percentage: string) {
 interface Props {
   cohortContext: any;
   setCohortChanged: (cohortChanged: boolean) => void;
+  setUnsavedSelections: (unsavedSelections: boolean) => void;
   setUpdatingCohort: (updatingCohort: boolean) => void;
   setShowWarningModal: (showWarningModal: () => Promise<boolean>) => void;
   workspace: WorkspaceData;
@@ -82,7 +86,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
       this.state = {
         loading: false,
         overview: false,
-        criteria: {includes: [], excludes: [], dataFilters: []},
+        criteria: {dataFilters: [], includes: [], excludes: []},
         updateCount: 0,
         cohort: undefined,
         cohortError: false,
@@ -97,31 +101,11 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
     }
 
     componentDidMount() {
-      const {workspace: {id, namespace}} = this.props;
-      this.subscription = queryParamsStore.subscribe(params => {
-        /* If a cohort id is given in the route, we initialize state with it */
-        const {cohortId} = params;
-        if (cohortId) {
-          this.setState({loading: true});
-          cohortsApi().getCohort(namespace, id, cohortId)
-          .then(cohort => {
-            this.setState({cohort, loading: false});
-            currentCohortStore.next(cohort);
-            if (cohort.criteria) {
-              searchRequestStore.next(parseCohortDefinition(cohort.criteria));
-            }
-          })
-          .catch(error => {
-            console.error(error);
-            this.setState({cohortError: true, loading: false});
-          });
-        } else {
-          this.setState({cohort: {criteria: `{'includes':[],'excludes':[],'dataFilters':[]}`, name: '', type: ''}});
-        }
-      });
-
+      const {workspace: {id}} = this.props;
+      this.subscription = queryParamsStore.subscribe(params => this.initCohort(params.cohortId));
       this.subscription.add(searchRequestStore.subscribe(searchRequest => {
-        const cohortChanged = !!this.state.cohort && this.state.cohort.criteria !== JSON.stringify(mapRequest(searchRequest));
+        const {cohort} = this.state;
+        const cohortChanged = !!cohort && cohort.criteria !== JSON.stringify(mapRequest(searchRequest));
         this.props.setCohortChanged(cohortChanged);
         this.setState({
           criteria: searchRequest,
@@ -129,8 +113,20 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
           cohortChanged,
           updateGroupListsCount: this.state.updateGroupListsCount + 1
         });
+        const localStorageCohort = {
+          workspaceId: id,
+          cohortId: !!cohort ? cohort.id : null,
+          searchRequest
+        };
+        localStorage.setItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST, JSON.stringify(localStorageCohort));
       }));
       this.props.setShowWarningModal(this.showWarningModal);
+    }
+
+    componentDidUpdate(prevProps: Readonly<Props>) {
+      if (prevProps.cohortContext && !this.props.cohortContext) {
+        this.props.setUnsavedSelections(false);
+      }
     }
 
     componentWillUnmount() {
@@ -139,6 +135,48 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
       currentCohortStore.next(undefined);
       currentCohortSearchContextStore.next(undefined);
       searchRequestStore.next({includes: [], excludes: [], dataFilters: []} as SearchRequest);
+      localStorage.removeItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST);
+    }
+
+    initCohort(cid: number) {
+      const {workspace: {id, namespace}} = this.props;
+      const existingCohort = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST));
+      const existingContext = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT));
+      /* If a cohort id is given in the route, we initialize state with it */
+      if (cid) {
+        this.setState({loading: true});
+        cohortsApi().getCohort(namespace, id, cid).then(cohort => {
+          this.setState({cohort, loading: false});
+          currentCohortStore.next(cohort);
+          if (existingCohort && existingCohort.workspaceId === id && existingCohort.cohortId === +cid) {
+            searchRequestStore.next(existingCohort.searchRequest);
+          } else if (cohort.criteria) {
+            searchRequestStore.next(parseCohortDefinition(cohort.criteria));
+          }
+        }).catch(error => {
+          console.error(error);
+          this.setState({cohortError: true, loading: false});
+        });
+      } else {
+        this.setState(
+          {cohort: {criteria: `{'includes':[],'excludes':[],'dataFilters':[]}`, name: '', type: ''}},
+          () => {
+            if (existingCohort && existingCohort.workspaceId === id && !existingCohort.cohortId) {
+              searchRequestStore.next(existingCohort.searchRequest);
+            } else {
+              localStorage.removeItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST);
+            }
+          }
+        );
+      }
+      if (existingContext) {
+        const {workspaceId, cohortId, cohortContext} = existingContext;
+        if (workspaceId === id && ((!cid && !cohortId) || +cid === cohortId)) {
+          this.setSearchContext(cohortContext);
+        } else {
+          localStorage.removeItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT);
+        }
+      }
     }
 
     async showWarningModal() {
@@ -209,7 +247,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
                 </div>
                 {loading && <SpinnerOverlay/>}
               </FlexRowWrap>
-              {this.showCohortSearch && <CohortSearch/>}
+              {this.showCohortSearch && <CohortSearch setUnsavedChanges={(unsaved) => this.props.setUnsavedSelections(unsaved)}/>}
             </React.Fragment>
           }
         </div>
@@ -217,7 +255,8 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
           <ModalTitle>Warning! </ModalTitle>
           <ModalBody>
             Your cohort has not been saved. If you’d like to save your cohort criteria, please click CANCEL
-            and {cohort && cohort.id ? 'use Save or Save As' : 'click CREATE COHORT'} to save your criteria.
+            and {this.showCohortSearch ? 'save your changes in the right sidebar.' :
+            cohort && cohort.id ? 'use Save or Save As' : 'click CREATE COHORT'} to save your criteria.
           </ModalBody>
           <ModalFooter>
             <Button type='link' onClick={() => this.getModalResponse(false)}>Cancel</Button>
@@ -237,17 +276,23 @@ export class CohortPageComponent extends ReactWrapperBase {
   // The functions and variables here are a temporary workaround to keep the unsaved changes warning until we can move this route to the
   // new React router (RW-5256)
   cohortChanged: boolean;
+  unsavedSelections: boolean;
   updatingCohort: boolean;
   showWarningModal: () => Promise<boolean>;
   constructor() {
-    super(CohortPage, ['setCohortChanged', 'setUpdatingCohort', 'setShowWarningModal']);
+    super(CohortPage, ['setCohortChanged', 'setUnsavedSelections', 'setUpdatingCohort', 'setShowWarningModal']);
     this.setCohortChanged = this.setCohortChanged.bind(this);
+    this.setUnsavedSelections = this.setUnsavedSelections.bind(this);
     this.setUpdatingCohort = this.setUpdatingCohort.bind(this);
     this.setShowWarningModal = this.setShowWarningModal.bind(this);
   }
 
   setCohortChanged(cohortChanged: boolean): void {
     this.cohortChanged = cohortChanged;
+  }
+
+  setUnsavedSelections(unsavedSelections: boolean): void {
+    this.unsavedSelections = unsavedSelections;
   }
 
   setUpdatingCohort(updatingCohort: boolean): void {
@@ -259,6 +304,6 @@ export class CohortPageComponent extends ReactWrapperBase {
   }
 
   canDeactivate(): Promise<boolean> | boolean {
-    return !this.cohortChanged || this.updatingCohort || this.showWarningModal();
+    return !(this.cohortChanged || this.unsavedSelections) || this.updatingCohort || this.showWarningModal();
   }
 }
