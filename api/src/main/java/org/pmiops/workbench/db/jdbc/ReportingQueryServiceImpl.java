@@ -4,9 +4,9 @@ import static org.pmiops.workbench.db.model.DbStorageEnums.billingAccountTypeFro
 import static org.pmiops.workbench.db.model.DbStorageEnums.billingStatusFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.dataAccessLevelFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.institutionDUATypeFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.institutionalRoleFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.organizationTypeFromStorage;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
-import static org.pmiops.workbench.db.model.DbStorageEnums.institutionalRoleFromStorage;
 
 import java.util.List;
 import javax.inject.Provider;
@@ -190,22 +190,22 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             + "  u.two_factor_auth_completion_time,\n"
             + "  u.user_id,\n"
             + "  u.email AS username,\n"
-            + "  a.city,\n"	
-            + "  a.country,\n"	
-            + "  a.state,\n"	
-            + "  a.street_address_1,\n"	
-            + "  a.street_address_2,\n"	
+            + "  a.city,\n"
+            + "  a.country,\n"
+            + "  a.state,\n"
+            + "  a.street_address_1,\n"
+            + "  a.street_address_2,\n"
             + "  a.zip_code,\n"
-            + "  via.institution_id AS institution_id,\n"	
-            + "  via.institutional_role_enum,\n"	
+            + "  via.institution_id AS institution_id,\n"
+            + "  via.institutional_role_enum,\n"
             + "  via.institutional_role_other_text\n"
-            + "  \n" 
+            + "  \n"
             + "FROM user u"
-            + "  LEFT OUTER JOIN address AS a ON u.user_id = a.user_id\n"	
-            + "  LEFT OUTER JOIN user_verified_institutional_affiliation AS via on u.user_id = via.user_id"	
+            + "  LEFT OUTER JOIN address AS a ON u.user_id = a.user_id\n"
+            + "  LEFT OUTER JOIN user_verified_institutional_affiliation AS via on u.user_id = via.user_id"
             + "  ORDER BY u.user_id",
         (rs, unused) ->
-            new ReportingUser() 
+            new ReportingUser()
                 .aboutYou(rs.getString("about_you"))
                 .areaOfResearch(rs.getString("area_of_research"))
                 .complianceTrainingBypassTime(
@@ -253,7 +253,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .streetAddress2(rs.getString("street_address_2"))
                 .zipCode(rs.getString("zip_code"))
                 .institutionId(rs.getLong("institution_id"))
-                .institutionalRoleEnum(institutionalRoleFromStorage(rs.getShort("institutional_role_enum")))
+                .institutionalRoleEnum(
+                    institutionalRoleFromStorage(rs.getShort("institutional_role_enum")))
                 .institutionalRoleOtherText(rs.getString("institutional_role_other_text")));
   }
 
