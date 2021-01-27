@@ -2487,10 +2487,6 @@ def get_auth_domain(project)
   return get_fc_config(project)["registeredDomainName"]
 end
 
-def get_auth_domain_group(project)
-  return get_fc_config(project)["registeredDomainGroup"]
-end
-
 def get_firecloud_base_url(project)
   return get_fc_config(project)["baseUrl"]
 end

@@ -3662,12 +3662,14 @@ definitions:
     required:
     - cdrVersionId
     - name
-    - dataAccessLevel
+    - accessTier
     - creationTime
     properties:
       cdrVersionId:
         type: string
       name:
+        type: string
+      accessTier:
         type: string
       dataAccessLevel:
         "$ref": "#/definitions/DataAccessLevel"
