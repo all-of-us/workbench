@@ -21,7 +21,8 @@
       "releaseNumber": 1,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_3",
-      "elasticIndexBaseName": "synth_r_2019q1_1"
+      "elasticIndexBaseName": "synth_r_2019q1_1",
+      "accessTier": 1
     },
     {
       "cdrVersionId": 2,
@@ -34,7 +35,8 @@
       "releaseNumber": 1,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_3",
-      "elasticIndexBaseName": "synth_r_2019q1_1"
+      "elasticIndexBaseName": "synth_r_2019q1_1",
+      "accessTier": 1
     },
     {
       "cdrVersionId": 3,
@@ -47,7 +49,8 @@
       "releaseNumber": 1,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_3",
-      "elasticIndexBaseName": "synth_r_2019q1_1"
+      "elasticIndexBaseName": "synth_r_2019q1_1",
+      "accessTier": 1
     },
     {
       "cdrVersionId": 4,
@@ -60,7 +63,8 @@
       "releaseNumber": 1,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_3",
-      "elasticIndexBaseName": "synth_r_2019q1_1"
+      "elasticIndexBaseName": "synth_r_2019q1_1",
+      "accessTier": 1
     },
     {
       "cdrVersionId": 5,
@@ -73,7 +77,8 @@
       "numParticipants": 234525,
       "cdrDbName": "synth_r_2019q4_10",
       "hasFitbitData": true,
-      "hasCopeSurveyData": true
+      "hasCopeSurveyData": true,
+      "accessTier": 1
     },
     {
       "cdrVersionId": 6,
@@ -87,7 +92,8 @@
       "numParticipants": 234525,
       "cdrDbName": "synth_r_2019q4_10",
       "hasFitbitData": true,
-      "hasCopeSurveyData": true
+      "hasCopeSurveyData": true,
+      "accessTier": 1
     }
   ]
 }

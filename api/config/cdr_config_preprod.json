@@ -19,7 +19,8 @@
       "creationTime": "2019-10-21 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 224143,
-      "cdrDbName": "r_2019q4_10"
+      "cdrDbName": "r_2019q4_10",
+      "accessTier": 1
     },
     {
       "cdrVersionId": 2,
@@ -30,7 +31,8 @@
       "creationTime": "2020-04-16 00:00:00Z",
       "releaseNumber": 4,
       "numParticipants": 224001,
-      "cdrDbName": "r_2019q4_10"
+      "cdrDbName": "r_2019q4_10",
+      "accessTier": 1
     },
     {
       "cdrVersionId": 3,
@@ -43,7 +45,8 @@
       "numParticipants": 234525,
       "cdrDbName": "synth_r_2019q4_10",
       "hasFitbitData": true,
-      "hasCopeSurveyData": true
+      "hasCopeSurveyData": true,
+      "accessTier": 1
     },
     {
       "cdrVersionId": 4,
@@ -57,7 +60,8 @@
       "numParticipants": 315297,
       "cdrDbName": "r_2020q4_2",
       "hasFitbitData": true,
-      "hasCopeSurveyData": true
+      "hasCopeSurveyData": true,
+      "accessTier": 1
     }
   ]
 }
