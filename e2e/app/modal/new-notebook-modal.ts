@@ -37,7 +37,7 @@ export default class NewNotebookModal extends Modal {
   }
 
   async name(): Promise<Textbox> {
-    return Textbox.findByName(this.page, {name: 'Name:'});
+    return Textbox.findByName(this.page, {name: 'Name:'}, this);
   }
 
   getPythonRadioButton(): RadioButton {
@@ -51,7 +51,7 @@ export default class NewNotebookModal extends Modal {
   }
 
   async createNotebookButton(): Promise<Button> {
-    return Button.findByName(this.page, {name: LinkText.CreateNotebook});
+    return Button.findByName(this.page, {name: LinkText.CreateNotebook}, this);
   }
 
   /**

@@ -7,11 +7,12 @@ import {config} from 'resources/workbench-config';
 import {createWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {makeRandomName} from 'utils/str-utils';
-import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import {LinkText} from 'app/text-labels';
 
-// This one is going to take a long time.
+// This one is going to take a long time
 jest.setTimeout(60 * 30 * 1000);
+// Retry one more when fails
+jest.retryTimes(1);
 
 describe('Updating runtime compute type', () => {
 
@@ -28,7 +29,6 @@ describe('Updating runtime compute type', () => {
     // Click “customize“ , from the default “create panel”
     const runtimePanel = new RuntimePanel(page);
     await runtimePanel.open();
-
     await runtimePanel.clickButton(LinkText.Customize);
 
     // Use the preset selector to pick “Hail genomics analysis“
@@ -55,22 +55,9 @@ describe('Updating runtime compute type', () => {
     await runtimePanel.pickCpus(8);
     await runtimePanel.pickRamGbs(30);
     await runtimePanel.pickDiskGbs(60);
-    await runtimePanel.clickButton(LinkText.Next);
-    await runtimePanel.clickButton(LinkText.Update);
-    await runtimePanel.waitUntilClose();
 
-    // Automatically opens the Preview page
-    const notebookPreviewPage = new NotebookPreviewPage(page);
-    await notebookPreviewPage.waitForLoad();
-
-    // Wait new runtime running
-    await page.waitForTimeout(2000);
-    await runtimePanel.open();
-    // runtime status transition from Stopping to None to Running
-    await runtimePanel.waitForStartStopIconState(StartStopIconState.Stopping);
-    await runtimePanel.waitForStartStopIconState(StartStopIconState.None);
-    await runtimePanel.waitForStartStopIconState(StartStopIconState.Starting);
-    await runtimePanel.waitForStartStopIconState(StartStopIconState.Running);
+    // Apply changes and wait for new runtime running
+    const notebookPreviewPage = await runtimePanel.applyChanges();
 
     // Go back to the notebook
     await notebookPreviewPage.openEditMode(notebookName);
@@ -91,13 +78,11 @@ describe('Updating runtime compute type', () => {
 
     // Delete runtime
     await runtimePanel.open();
+    // Confirm runtime status is Running before delete
     await runtimePanel.waitForStartStopIconState(StartStopIconState.Running);
 
-    // Click ''delete environment”
-    await runtimePanel.clickButton(LinkText.DeleteEnvironment);
-    await runtimePanel.clickButton(LinkText.Delete);
-
-    await notebookPreviewPage.waitForLoad();
+    // Delete environment
+    await notebook.deleteRuntime();
 
     // Verify GCE custom settings are still shown
     await runtimePanel.open();

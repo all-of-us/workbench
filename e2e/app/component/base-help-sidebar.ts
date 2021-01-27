@@ -9,12 +9,16 @@ const enum Selectors {
    rootXpath = '//*[@id="help-sidebar"]',
    // "margin-right: 0px;" is used to deterimine visibility
    contentXpath = '//*[@data-test-id="sidebar-content" and contains(normalize-space(@style), "margin-right: 0px;")]',
+   deleteXpath = '//*[@role="button"][./*[@alt="Close"]]',
 }
 
 export default abstract class BaseHelpSidebar extends Container {
 
+   deleteIconXpath: string;
+
    protected constructor(page: Page, xpath: string = `${Selectors.rootXpath}${Selectors.contentXpath}`) {
       super(page, xpath);
+      this.deleteIconXpath = `${Selectors.rootXpath}${Selectors.contentXpath}${Selectors.deleteXpath}`;
    }
 
    abstract open(): Promise<void>
@@ -67,12 +71,26 @@ export default abstract class BaseHelpSidebar extends Container {
     */
    async close(): Promise<void> {
       const sidePanelTitle = await this.getTitle();
-      const xpath = `${Selectors.rootXpath}${Selectors.contentXpath}//*[@role="button"][./*[@alt="Close"]]`;
-      const closeButton = new Button(this.page, xpath);
+      const closeButton = new Button(this.page, this.deleteIconXpath);
       await closeButton.waitUntilEnabled();
       await closeButton.click();
       await this.waitUntilClose();
+      await this.page.waitForXPath(this.deleteIconXpath, {hidden: true});
       await this.page.waitForTimeout(1000);
       console.log(`Closed "${sidePanelTitle}" sidebar panel`);
    }
+
+   async isVisible(): Promise<boolean> {
+      if (! await super.isVisible()) return false;
+      try  {
+         await Promise.all([
+            this.page.waitForXPath(this.getXpath(), {visible: true, timeout: 1000}),
+            this.page.waitForXPath(this.deleteIconXpath, {visible: true, timeout: 1000}),
+         ]);
+         return true;
+      } catch (err) {
+         return false;
+      }
+   }
+
 }

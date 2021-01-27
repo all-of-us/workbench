@@ -27,6 +27,8 @@ export default class HelpSidebar extends BaseHelpSidebar {
     if (isOpen) return;
     await this.clickIcon(SideBarLink.HelpTips);
     await this.waitUntilVisible();
+    // Wait for visible texts
+    await this.page.waitForXPath(`${this.getXpath()}//h3`, {visible: true});
     console.log(`Opened "${await this.getTitle()}" Help Tips sidebar`);
   }
 

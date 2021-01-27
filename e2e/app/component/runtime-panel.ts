@@ -1,9 +1,9 @@
 import {Page} from 'puppeteer';
 import SelectMenu from 'app/component/select-menu';
 import PrimereactInputNumber from 'app/element/primereact-input-number';
-import {waitForAttributeEquality} from 'utils/waits-utils';
 import {LinkText, SideBarLink} from 'app/text-labels';
-import Button from '../element/button';
+import Button from 'app/element/button';
+import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import BaseHelpSidebar from './base-help-sidebar';
 
 const defaultXpath = '//*[@id="runtime-panel"]';
@@ -67,7 +67,6 @@ export default class RuntimePanel extends BaseHelpSidebar {
 
   async pickComputeType(computeType: ComputeType): Promise<void> {
     const computeTypeDropdown = await SelectMenu.findByName(this.page, {id: 'runtime-compute'}, this);
-    console.log(`computeTypeDropdown: ${computeTypeDropdown.getXpath()}`);
     return await computeTypeDropdown.select(computeType);
   }
 
@@ -136,29 +135,44 @@ export default class RuntimePanel extends BaseHelpSidebar {
    * @param startStopIconState
    * @param timeout
    */
-  async waitForStartStopIconState(startStopIconState: StartStopIconState, timeout: number = (10 * 60 * 1000)): Promise<boolean> {
-    const xpath = `${this.getXpath()}${statusIconXpath}`;
-    return waitForAttributeEquality(
-        this.page,
-        {xpath},
-        'src',
-        this.buildStatusIconSrc(startStopIconState),
-       timeout
-    )
+  async waitForStartStopIconState(startStopIconState: StartStopIconState, timeout: number = (20 * 60 * 1000)): Promise<void> {
+    const xpath = `${this.getXpath()}${statusIconXpath}[@src="${this.buildStatusIconSrc(startStopIconState)}"]`;
+    await this.page.waitForXPath(xpath, {visible: true, timeout});
   }
 
-  async clickStatusIcon(): Promise<void> {
-    const icon = new Button(this.page, `${this.getXpath()}${statusIconXpath}`);
+  async clickPauseRuntimeIcon(): Promise<void> {
+    const xpath = `${this.getXpath()}${statusIconXpath}[@src="${this.buildStatusIconSrc(StartStopIconState.Running)}"]`;
+    const icon = new Button(this.page, xpath);
+    await icon.click();
+  }
+
+  async clickResumeRuntimeIcon(): Promise<void> {
+    const xpath = `${this.getXpath()}${statusIconXpath}[@src="${this.buildStatusIconSrc(StartStopIconState.Stopped)}"]`;
+    const icon = new Button(this.page, xpath);
     await icon.click();
   }
 
   async open(): Promise<void> {
     const isOpen = await this.isVisible();
-    if (isOpen) return;
+    if (isOpen) {
+      return;
+    }
     await this.clickIcon(SideBarLink.ComputeConfiguration);
     await this.waitUntilVisible();
-    // Wait for visible texts
+    await this.page.waitForTimeout(1000);
+    // Wait for visible text
     await this.page.waitForXPath(`${this.getXpath()}//h3`, {visible: true});
+    // Wait for visible button
+    await this.page.waitForXPath(`${this.getXpath()}//*[@role="button" and @aria-label]`, {visible: true});
+
+    const panel = await this.page.waitForXPath(this.getXpath(), {visible: true});
+    const box1 = await panel.boxModel();
+    await this.page.waitForTimeout(1000);
+    const box2 = await panel.boxModel();
+    await this.page.waitForTimeout(1000);
+    const box3 = await panel.boxModel();
+    console.log(`box1 width:${box1.width} height:${box1.height}. box2 width:${box2.width} height:${box2.height}. box3 width:${box3.width} height:${box3.height}`);
+
     console.log(`Opened "${await this.getTitle()}" runtime sidebar`);
   }
 
@@ -166,13 +180,15 @@ export default class RuntimePanel extends BaseHelpSidebar {
    * Create runtime and wait until running.
    */
   async createRuntime(): Promise<void> {
+    console.log(`Creating runtime`);
     await this.open();
     await this.waitForStartStopIconState(StartStopIconState.None);
     await this.clickButton(LinkText.Create);
+    await this.page.waitForTimeout(1000);
     // Runtime panel automatically close after click Create button.
     // Reopen panel in order to check icon status.
     await this.open();
-    await this.waitForStartStopIconState(StartStopIconState.Starting, 30 * 1000);
+    await this.waitForStartStopIconState(StartStopIconState.Starting, 60 * 1000);
     await this.waitForStartStopIconState(StartStopIconState.Running);
     await this.close();
     console.log('Runtime is running');
@@ -182,12 +198,17 @@ export default class RuntimePanel extends BaseHelpSidebar {
    * Delete runtime.
    */
   async deleteRuntime(): Promise<void> {
+    console.log(`Deleting runtime`);
     await this.open();
     await this.clickButton(LinkText.DeleteEnvironment);
     await this.clickButton(LinkText.Delete);
-    await this.waitForStartStopIconState(StartStopIconState.Stopping, 30 * 1000);
+    await this.page.waitForTimeout(1000);
+    // Runtime panel automatically close after click Create button.
+    // Reopen panel in order to check icon status.
+    await this.open();
+    await this.waitForStartStopIconState(StartStopIconState.Stopping, 60 * 1000);
     await this.waitForStartStopIconState(StartStopIconState.None);
-    // the runtime panel is automatically closed when delete successfully
+    await this.close();
     console.log('Runtime is deleted');
   }
 
@@ -195,12 +216,47 @@ export default class RuntimePanel extends BaseHelpSidebar {
    * Pause runtime.
    */
   async pauseRuntime(): Promise<void> {
+    console.log(`Pausing runtime`);
     await this.open();
     await this.waitForStartStopIconState(StartStopIconState.Running, 30 * 1000);
-    await this.clickStatusIcon();
+    await this.clickPauseRuntimeIcon();
     await this.waitForStartStopIconState(StartStopIconState.Stopping);
     await this.waitForStartStopIconState(StartStopIconState.Stopped);
     await this.close();
-    console.log(`runtime is paused`);
+    console.log(`Runtime is paused`);
   }
+
+  /**
+   * Resume runtime.
+   */
+  async resumeRuntime(): Promise<void> {
+    console.log(`Resuming runtime`);
+    await this.open();
+    await this.clickResumeRuntimeIcon();
+    await this.waitForStartStopIconState(StartStopIconState.Stopped);
+    await this.waitForStartStopIconState(StartStopIconState.Starting);
+    await this.waitForStartStopIconState(StartStopIconState.Running);
+    await this.close();
+    console.log(`Runtime is resumed`);
+  }
+
+  async applyChanges(): Promise<NotebookPreviewPage> {
+    await this.clickButton(LinkText.Next);
+    await this.clickButton(LinkText.Update);
+    await this.waitUntilClose();
+
+    // Automatically opens the Preview page
+    const notebookPreviewPage = new NotebookPreviewPage(this.page);
+    await notebookPreviewPage.waitForLoad();
+
+    // Wait for new runtime running. The runtime status transition from Stopping to None to Running
+    await this.open();
+    await this.waitForStartStopIconState(StartStopIconState.Stopping);
+    await this.waitForStartStopIconState(StartStopIconState.None);
+    await this.waitForStartStopIconState(StartStopIconState.Starting);
+    await this.waitForStartStopIconState(StartStopIconState.Running);
+
+    return notebookPreviewPage;
+  }
+
 }

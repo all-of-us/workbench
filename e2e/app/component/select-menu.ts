@@ -70,7 +70,6 @@ export default class SelectMenu extends BaseMenu {
 
   private async toggle(): Promise<void> {
     const selector = this.xpath + '/*[@class="p-dropdown-trigger"]';
-    console.log(`select-menu toggle: ${selector}`)
     const dropdownTrigger = await this.page.waitForXPath(selector, { visible: true });
     await dropdownTrigger.hover();
     await dropdownTrigger.click();

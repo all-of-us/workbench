@@ -52,6 +52,7 @@ export default abstract class BaseMenu extends Container {
       }
 
       // Wait for menu close and disappear.
+      await this.page.waitForTimeout(1000);
       await waitWhileLoading(this.page);
    }
 

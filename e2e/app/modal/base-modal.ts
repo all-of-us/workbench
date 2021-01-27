@@ -25,8 +25,8 @@ export default abstract class BaseModal extends Container {
 
    async waitForLoad(): Promise<this> {
       await this.waitUntilVisible();
-      await waitWhileLoading(this.page);
       await this.isLoaded();
+      await waitWhileLoading(this.page);
       return this;
    }
 
@@ -50,16 +50,23 @@ export default abstract class BaseModal extends Container {
    async clickButton(buttonLabel: LinkText,
                      waitOptions: { waitForNav?: boolean, waitForClose?: boolean, timeout?: number } = {}): Promise<void> {
       const {waitForNav = false, waitForClose = false, timeout} = waitOptions;
+
       const button = await this.waitForButton(buttonLabel);
       await button.waitUntilEnabled();
-      await Promise.all(fp.flow(
-         fp.filter<{ shouldWait: boolean, waitFn: () => Promise<void> }>('shouldWait'),
-         fp.map(item => item.waitFn()),
-         fp.concat([button.click()])
-      )([
-         {shouldWait: waitForNav, waitFn: () => this.page.waitForNavigation({waitUntil: ['load', 'networkidle0']})},
-         {shouldWait: waitForClose, waitFn: () => this.waitUntilClose(timeout)}
-      ]));
+      await button.focus();
+
+      if (waitForNav) {
+         await Promise.all([
+            this.page.waitForNavigation({waitUntil: ['load', 'networkidle0']}),
+            button.click(),
+         ]);
+      } else {
+         await button.click();
+      }
+
+      if (waitForClose) {
+         await this.waitUntilClose(timeout);
+      }
    }
 
    async waitForButton(buttonLabel: LinkText): Promise<Button> {

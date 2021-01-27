@@ -182,8 +182,8 @@ export async function waitForAttributeEquality(page: Page,
       }, {timeout: timeout || 30000}, selector.css, attribute, value);
       return (await jsHandle.jsonValue()) as boolean;
     } catch (e) {
-      console.error(`Failed to find element matching CSS=${selector.css} attribute=${attribute} value=${value}. ${e}`);
-      throw e;
+      console.error(`Find element matching CSS=${selector.css} attribute=${attribute} value=${value}. ${e}`);
+      throw new Error(e);
     }
   }
   if (selector.xpath !== undefined) {
@@ -194,8 +194,8 @@ export async function waitForAttributeEquality(page: Page,
       }, {timeout: timeout || 30000}, selector.xpath, attribute, value);
       return (await jsHandle.jsonValue()) as boolean;
     } catch (e) {
-      console.error(`Failed to find element matching Xpath=${selector.xpath} attribute=${attribute} value=${value}. ${e}`);
-      throw e;
+      console.error(`Find element matching Xpath=${selector.xpath} attribute=${attribute} value=${value}. ${e}`);
+      throw new Error(e);
     }
   }
   throw new Error('Required selector: {xpath or css} is missing');
