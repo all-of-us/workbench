@@ -8,8 +8,8 @@ import {TextColumn} from 'app/components/text-column';
 import {AouTitle} from 'app/components/text-wrappers';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {
-  OptionalDropDownSection,
-  OptionalSection
+  DropDownSection,
+  Section,
 } from 'app/pages/login/account-creation/common';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, toggleIncludes} from 'app/utils';
@@ -138,33 +138,33 @@ export class DemographicSurvey extends React.Component<Props, State> {
       </TextColumn>
 
       {/*Race section*/}
-      <OptionalSection header='Race'>
+      <Section header='Race'>
         <SelectAllText/>
         <FlexColumn style={styles.checkboxAreaContainer}>
           {AccountCreationOptions.race.map((race) => {
             return this.createOptionCheckbox('race', race);
           })}
         </FlexColumn>
-      </OptionalSection>
+      </Section>
 
       {/*Ethnicity section*/}
-      <OptionalDropDownSection data-test-id='dropdown-ethnicity'
+      <DropDownSection data-test-id='dropdown-ethnicity'
                        header='Ethnicity'
                        options={AccountCreationOptions.ethnicity}
                        value={!!demographicSurvey ? demographicSurvey.ethnicity : null}
                        onChange={(e) => this.updateDemographicAttribute('ethnicity', e)}/>
 
       {/*Gender Identity section*/}
-      <OptionalSection header='Gender Identity'>
+      <Section header='Gender Identity'>
         <SelectAllText/>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
           {AccountCreationOptions.genderIdentity.map((genderIdentity) => {
             return this.createOptionCheckbox('genderIdentityList', genderIdentity);
           })}
         </FlexColumn>
-      </OptionalSection>
+      </Section>
 
-      <OptionalSection header='Do you identify as lesbian, gay, bisexual, transgender, queer (LGBTQ),
+      <Section header='Do you identify as lesbian, gay, bisexual, transgender, queer (LGBTQ),
 or another sexual and/or gender minority?'>
         <FlexColumn>
           <FlexRow style={{alignItems: 'baseline'}}>
@@ -187,26 +187,26 @@ or another sexual and/or gender minority?'>
                             containerStyle={{width: '26rem', marginTop: '0.5rem'}} inputStyle={{width: '26rem'}}
                             onChange={(value) => this.updateDemographicAttribute('lgbtqIdentity', value)}
                             disabled={!!demographicSurvey ? !demographicSurvey.identifiesAsLgbtq : true}/>
-      </OptionalSection>
+      </Section>
 
       {/*Sex at birth section*/}
-      <OptionalSection header='Sex at birth'>
+      <Section header='Sex at birth'>
         <SelectAllText/>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
           {AccountCreationOptions.sexAtBirth.map((sexAtBirth) => {
             return this.createOptionCheckbox('sexAtBirth', sexAtBirth);
           })}
         </FlexColumn>
-      </OptionalSection>
+      </Section>
 
       {/*Year of birth section*/}
-      <OptionalDropDownSection header='Year of Birth'
+      <DropDownSection header='Year of Birth'
                        options={AccountCreationOptions.Years}
                        value={!!demographicSurvey ? demographicSurvey.yearOfBirth : null}
                        onChange={(e) => this.updateDemographicAttribute('yearOfBirth', e)}
       />
       {/*Disability section*/}
-      <OptionalSection header='Do you have a physical or cognitive disability?'>
+      <Section header='Do you have a physical or cognitive disability?'>
         <FlexColumn>
           <FlexRow style={{alignItems: 'baseline'}}>
             <RadioButton id='radio-disability-yes' onChange={
@@ -222,9 +222,9 @@ or another sexual and/or gender minority?'>
             <label htmlFor='radio-disability-no' style={{color: colors.primary}}>No</label>
           </FlexRow>
         </FlexColumn>
-      </OptionalSection>
+      </Section>
       {/*Education section*/}
-      <OptionalDropDownSection header='Highest Level of Education Completed'
+      <DropDownSection header='Highest Level of Education Completed'
                        options={AccountCreationOptions.levelOfEducation}
                        value={!!demographicSurvey ? demographicSurvey.education : null}
                        onChange={(e) => this.updateDemographicAttribute('education', e)}/>

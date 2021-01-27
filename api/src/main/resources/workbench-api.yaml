@@ -3654,11 +3654,13 @@ definitions:
     - COLLEGE_GRADUATE
     - MASTER
     - DOCTORATE
+    - PREFER_NO_ANSWER
   Disability:
     type: string
     enum:
     - true
     - false
+    - PREFER_NO_ANSWER
   FeaturedWorkspaceCategory:
     type: string
     enum:

@@ -134,7 +134,8 @@ export const AccountCreationOptions = {
       'Technical school (1 to 3 years), or current undergraduate student', value: Education.UNDERGRADUATE},
     {label: 'College graduate (4 years or more) or current post-graduate trainee', value: Education.COLLEGEGRADUATE},
     {label: 'Master’s degree', value: Education.MASTER},
-    {label: 'Doctorate', value: Education.DOCTORATE}
+    {label: 'Doctorate', value: Education.DOCTORATE},
+    {label: 'Prefer not to answer', value: Education.PREFERNOANSWER}
   ],
   Years: []
 };
