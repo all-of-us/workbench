@@ -233,6 +233,10 @@ public class ProfileControllerTest extends BaseControllerTest {
             .state(STATE)
             .country(COUNTRY)
             .zipCode(ZIP_CODE));
+    DemographicSurvey demographicSurvey = new DemographicSurvey();
+    demographicSurvey.setDisability(null);
+    demographicSurvey.setEducation(PREFER_NO_ANSWER);
+    profile.setDemographicSurvey(demographicSurvey);
 
     // TODO: this needs to be set in createAccountAndDbUserWithAffiliation() instead of here.  Why?
     // profile.setEmailVerificationStatus(EmailVerificationStatus.SUBSCRIBED);
@@ -425,6 +429,15 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testCreateAccount_success() {
+    createAccountAndDbUserWithAffiliation();
+    verify(mockProfileAuditor).fireCreateAction(any(Profile.class));
+    final DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
+    assertThat(dbUser).isNotNull();
+    assertThat(dbUser.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.UNREGISTERED);
+  }
+
+  @Test
+  public void testCreateAccountWithSurvery_success() {
     createAccountAndDbUserWithAffiliation();
     verify(mockProfileAuditor).fireCreateAction(any(Profile.class));
     final DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);

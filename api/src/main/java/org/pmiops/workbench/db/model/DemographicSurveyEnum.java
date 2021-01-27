@@ -66,12 +66,14 @@ public class DemographicSurveyEnum {
           .put(Education.UNDERGRADUATE, (short) 4)
           .put(Education.MASTER, (short) 5)
           .put(Education.DOCTORATE, (short) 6)
+          .put(Education.PREFE_NOT_ANSWER, (short) 7)
           .build();
 
   private static final BiMap<Disability, Short> CLIENT_TO_STORAGE_DISABILITY =
       ImmutableBiMap.<Disability, Short>builder()
           .put(Disability.TRUE, (short) 1)
           .put(Disability.FALSE, (short) 2)
+          .put(Disability.PREFE_NOT_ANSWER, (short) 3)
           .build();
 
   public static Race raceFromStorage(Short race) {
@@ -130,7 +132,7 @@ public class DemographicSurveyEnum {
     if (disability != null) {
       return disability ? (short) 1 : (short) 2;
     } else {
-      return null;
+      return (short) 3;
     }
   }
 
@@ -142,7 +144,13 @@ public class DemographicSurveyEnum {
   // can't be named disabilityFromStorage because it would have the same args as the other one.
   public static Boolean boolyDisabilityFromStorage(Short disability) {
     if (disability != null) {
-      return disability == 1;
+      if (disability == 1) {
+        return true;
+      } else if (disability == 0) {
+        return false;
+      } else {
+        return null;
+      }
     } else {
       return null;
     }
