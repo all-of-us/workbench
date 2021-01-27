@@ -1,13 +1,9 @@
-import RuntimePanel, {
-  ComputeType,
-  RuntimePreset,
-  StartStopIconState
-} from 'app/component/runtime-panel';
-import {config} from 'resources/workbench-config';
-import {createWorkspace, signInWithAccessToken} from 'utils/test-utils';
+import RuntimePanel, {ComputeType, RuntimePreset, StartStopIconState} from 'app/component/runtime-panel';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
+import {LinkText, ResourceCard} from 'app/text-labels';
+import {config} from 'resources/workbench-config';
 import {makeRandomName} from 'utils/str-utils';
-import {LinkText} from 'app/text-labels';
+import {createWorkspace, signInWithAccessToken} from 'utils/test-utils';
 
 // This one is going to take a long time
 jest.setTimeout(60 * 30 * 1000);
@@ -36,6 +32,7 @@ describe('Updating runtime compute type', () => {
 
     // Create runtime
     await runtimePanel.createRuntime();
+    await page.waitForTimeout(2000);
 
     // Open a notebook
     const dataPage = new WorkspaceDataPage(page);
@@ -89,6 +86,10 @@ describe('Updating runtime compute type', () => {
     expect(await runtimePanel.getCpus()).toBe('8');
     expect(await runtimePanel.getRamGbs()).toBe('30');
     expect(await runtimePanel.getDiskGbs()).toBe(60);
+
+    // Delete notebook
+    const workspaceAnalysisPage = await notebookPreviewPage.goAnalysisPage();
+    await workspaceAnalysisPage.deleteResource(notebookName, ResourceCard.Notebook);
   });
 
 });

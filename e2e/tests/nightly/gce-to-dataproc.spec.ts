@@ -3,6 +3,7 @@ import {config} from 'resources/workbench-config';
 import {createWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {makeRandomName} from 'utils/str-utils';
+import {ResourceCard} from 'app/text-labels';
 
 // This one is going to take a long time
 jest.setTimeout(60 * 30 * 1000);
@@ -25,6 +26,7 @@ describe('Updating runtime compute type', () => {
 
     // Create runtime
     await runtimePanel.createRuntime();
+    await page.waitForTimeout(2000);
 
     // Open a Python notebook
     const dataPage = new WorkspaceDataPage(page);
@@ -86,6 +88,10 @@ describe('Updating runtime compute type', () => {
     expect(parseInt(await runtimePanel.getWorkerCpus(), 10)).toBe(numCpus);
     expect(parseInt(await runtimePanel.getWorkerRamGbs(), 10)).toBe(ramGbs);
     expect(await runtimePanel.getWorkerDisk()).toBe(workerDisk);
+
+    // Delete notebook
+    const workspaceAnalysisPage = await notebookPreviewPage.goAnalysisPage();
+    await workspaceAnalysisPage.deleteResource(notebookName, ResourceCard.Notebook);
   });
 
 });
