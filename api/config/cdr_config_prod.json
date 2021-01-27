@@ -4,9 +4,9 @@
       "accessTierId": 1,
       "shortName": "registered",
       "displayName": "Registered Tier",
-      "servicePerimeter": "xxxx",
-      "authDomainName": "yyyy",
-      "authDomainGroupEmail": "zzzz"
+      "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_prod",
+      "authDomainName": "all-of-us-registered-prod",
+      "authDomainGroupEmail": "all-of-us-registered-prod@firecloud.org"
     }
   ],
   "cdrVersions": [
