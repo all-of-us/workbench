@@ -323,7 +323,7 @@ commands:
           command: |
             circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings > /tmp/tests-to-run
             yarn test:ci $(cat /tmp/tests-to-run)
-          no_output_timeout: 30m
+          no_output_timeout: 25m
       - run:
           name: Create circleci_parameters.json
           working_directory: ~/workbench/e2e
