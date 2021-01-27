@@ -233,7 +233,7 @@ export default class RuntimePanel extends BaseHelpSidebar {
 
   async applyChanges(): Promise<NotebookPreviewPage> {
     await this.clickButton(LinkText.Next);
-    await this.clickButton(LinkText.Update);
+    await this.clickButton(LinkText.ApplyRecreate);
     await this.waitUntilClose();
 
     // Automatically opens the Preview page

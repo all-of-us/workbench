@@ -42,6 +42,7 @@ export enum LinkText {
    AddSelection = 'Add Selection',
    AddThis = 'ADD THIS',
    ApplyModifiers = 'APPLY MODIFIERS',
+   ApplyRecreate = 'APPLY & RECREATE',
    BackToCohort = 'Back to cohort',
    BackToReviewSet = 'Back to review set',
    Calculate = 'Calculate',
@@ -93,7 +94,7 @@ export enum LinkText {
    SeeCodePreview = 'See Code Preview',
    StayHere = 'Stay Here',
    Submit = 'Submit',
-   Update = 'APPLY & RECREATE',
+   Update = 'Update',
    Yes = 'Yes',
 }
 

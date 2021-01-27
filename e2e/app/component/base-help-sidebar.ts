@@ -9,7 +9,7 @@ const enum Selectors {
    rootXpath = '//*[@id="help-sidebar"]',
    // "margin-right: 0px;" is used to deterimine visibility
    contentXpath = '//*[@data-test-id="sidebar-content" and contains(normalize-space(@style), "margin-right: 0px;")]',
-   deleteXpath = '//*[@role="button"][./*[@alt="Close"]]',
+   closeIconXpath = '//*[@role="button"][./*[@alt="Close"]]',
 }
 
 export default abstract class BaseHelpSidebar extends Container {
@@ -18,7 +18,7 @@ export default abstract class BaseHelpSidebar extends Container {
 
    protected constructor(page: Page, xpath: string = `${Selectors.rootXpath}${Selectors.contentXpath}`) {
       super(page, xpath);
-      this.deleteIconXpath = `${Selectors.rootXpath}${Selectors.contentXpath}${Selectors.deleteXpath}`;
+      this.deleteIconXpath = `${Selectors.rootXpath}${Selectors.contentXpath}${Selectors.closeIconXpath}`;
    }
 
    abstract open(): Promise<void>
