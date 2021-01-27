@@ -150,6 +150,12 @@ public class UpdateCdrConfig {
           }
 
           long accessTierId = accessTierMap.get(v.getCdrVersionId());
+
+          if (accessTierId == 0) {
+            throw new IllegalArgumentException(
+                String.format("CDR version %d is missing an Access Tier", id));
+          }
+
           if (!accessTierIds.contains(accessTierId)) {
             throw new IllegalArgumentException(
                 String.format(

@@ -13,3 +13,5 @@ CDR Version Multiple Defaults: multi_default_cdr.json
 CDR Version Archived Default: archived_default_cdr.json
 
 CDR Version / Access Tier Mismatch: cdr_tier_mismatch.json
+
+CDR Version has no Access Tier: cdr_no_tier.json
