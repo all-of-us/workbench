@@ -2,7 +2,7 @@ import {Page} from 'puppeteer';
 import {PageUrl} from 'app/text-labels';
 import BasePage from 'app/page/base-page';
 import {getPropValue} from 'utils/element-utils';
-import HelpSidebar from 'app/component/help-sidebar';
+import HelpTipsSidebar from 'app/component/help-tips-sidebar';
 
 const signedInIndicator = 'app-signed-in';
 
@@ -60,7 +60,7 @@ export default abstract class AuthenticatedPage extends BasePage {
   }
 
   async closeHelpSidebarIfOpen(): Promise<void> {
-    const sidebar = new HelpSidebar(this.page);
+    const sidebar = new HelpTipsSidebar(this.page);
     const isOpen = await sidebar.isVisible();
     if (isOpen) {
       await sidebar.close();

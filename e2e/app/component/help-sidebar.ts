@@ -1,12 +1,13 @@
 import {ElementHandle, Page} from 'puppeteer';
+
 import SelectMenu from 'app/component/select-menu';
+import Container from 'app/container';
 import Button from 'app/element/button';
 import {FilterSign} from 'app/page/criteria-search-page';
-import {LinkText, SideBarLink} from 'app/text-labels';
+import {LinkText} from 'app/text-labels';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
 import {waitForNumericalString, waitWhileLoading} from 'utils/waits-utils';
-import BaseHelpSidebar from './base-help-sidebar';
 
 const defaultXpath = '//*[@id="help-sidebar"]';
 enum SectionSelectors {
@@ -14,22 +15,14 @@ enum SectionSelectors {
   ModifiersForm = '//*[@id="modifiers-form"]',
   SelectionList = '//*[@id="selection-list"]',
 }
+export enum HelpSidebarTab {
+  ComputeConfiguration = '//*[@data-test-id="help-sidebar-icon-runtime"]'
+}
 
-export default class HelpSidebar extends BaseHelpSidebar {
+export default class HelpSidebar extends Container {
 
   constructor(page: Page, xpath: string = defaultXpath) {
-    super(page);
-    super.setXpath(`${super.getXpath()}${xpath}`);
-  }
-
-  async open(): Promise<void> {
-    const isOpen = await this.isVisible();
-    if (isOpen) return;
-    await this.clickIcon(SideBarLink.HelpTips);
-    await this.waitUntilVisible();
-    // Wait for visible texts
-    await this.page.waitForXPath(`${this.getXpath()}//h3`, {visible: true});
-    console.log(`Opened "${await this.getTitle()}" Help Tips sidebar`);
+    super(page, xpath);
   }
 
   async getPhysicalMeasurementParticipantResult(filterSign: FilterSign, filterValue: number): Promise<string> {
