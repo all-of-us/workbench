@@ -164,15 +164,6 @@ export default class RuntimePanel extends BaseHelpSidebar {
     await this.page.waitForXPath(`${this.getXpath()}//h3`, {visible: true});
     // Wait for visible button
     await this.page.waitForXPath(`${this.getXpath()}//*[@role="button" and @aria-label]`, {visible: true});
-
-    const panel = await this.page.waitForXPath(this.getXpath(), {visible: true});
-    const box1 = await panel.boxModel();
-    await this.page.waitForTimeout(1000);
-    const box2 = await panel.boxModel();
-    await this.page.waitForTimeout(1000);
-    const box3 = await panel.boxModel();
-    console.log(`box1 width:${box1.width} height:${box1.height}. box2 width:${box2.width} height:${box2.height}. box3 width:${box3.width} height:${box3.height}`);
-
     console.log(`Opened "${await this.getTitle()}" runtime sidebar`);
   }
 
