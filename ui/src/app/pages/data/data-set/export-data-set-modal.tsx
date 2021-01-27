@@ -114,7 +114,9 @@ class ExportDataSetModal extends React.Component<
     return <Modal loading={loading}>
       <ModalTitle>Export {dataSet.name} to Notebook</ModalTitle>
       <ModalBody>
-        <ExportDataSet dataSetRequest={this.datasetRequest} newNotebook={(newNotebookName) => this.setState({newNotebook: newNotebookName})}
+        <ExportDataSet dataSetRequest={this.datasetRequest}
+                       notebookType={(kernelTypeEnum) => this.setState({kernelType: kernelTypeEnum})}
+                       newNotebook={(newNotebookName) => this.setState({newNotebook: newNotebookName})}
                        updateNotebookName={(name) => this.setState({notebookName: name})}
                        workspaceNamespace={this.props.workspaceNamespace} workspaceFirecloudName={this.props.workspaceFirecloudName}/>
       </ModalBody>
