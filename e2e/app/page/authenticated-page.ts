@@ -2,6 +2,7 @@ import {Page} from 'puppeteer';
 import {PageUrl} from 'app/text-labels';
 import BasePage from 'app/page/base-page';
 import {getPropValue} from 'utils/element-utils';
+import HelpSidebar from '../component/help-sidebar';
 
 const signedInIndicator = 'app-signed-in';
 
@@ -12,7 +13,7 @@ const signedInIndicator = 'app-signed-in';
  */
 export default abstract class AuthenticatedPage extends BasePage {
 
-  constructor(page: Page) {
+  protected constructor(page: Page) {
     super(page);
   }
 
@@ -36,6 +37,8 @@ export default abstract class AuthenticatedPage extends BasePage {
       console.warn('Retry failed isLoaded() function');
       this.isLoaded();
     });
+    await this.isLoaded();
+    await this.closeHelpSidebarIfOpen();
     return this;
   }
 
@@ -57,5 +60,12 @@ export default abstract class AuthenticatedPage extends BasePage {
     return getPropValue<string>(username, 'innerText');
   }
 
+  async closeHelpSidebarIfOpen(): Promise<void> {
+    const sidebar = new HelpSidebar(this.page);
+    const isOpen = await sidebar.isVisible();
+    if (isOpen) {
+      await sidebar.close();
+    }
+  }
 
 }

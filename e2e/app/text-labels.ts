@@ -93,7 +93,7 @@ export enum LinkText {
    SeeCodePreview = 'See Code Preview',
    StayHere = 'Stay Here',
    Submit = 'Submit',
-   Update = 'Update',
+   Update = 'APPLY & RECREATE',
    Yes = 'Yes',
 }
 
@@ -110,4 +110,11 @@ export enum ResourceCard {
    Notebook = 'Notebook',
    Dataset = 'Dataset',
    CohortReview = 'Cohort Review',
+}
+
+export enum SideBarLink {
+   ComputeConfiguration,
+   DataDictionary,
+   HelpTips,
+   WorkspaceMenu,
 }
