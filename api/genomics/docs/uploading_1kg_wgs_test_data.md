@@ -24,18 +24,9 @@ were copied into `gs://all-of-us-workbench-test-genomics/1kg_gvcfs/`
 - Right now, the sample_names in the `metadata` table match the sample_names in the VCFs
 - However, we need the sample_names to match participant_ids in AoU
 
+- ```bq query --max_rows=1000000 --format=csv --nouse_legacy_sql 'SELECT person_id FROM `all-of-us-workbench-test.synth_r_2019q4_9.cb_person`;' | sed -e 1d > ehr_sample_names.txt```
+- ```bq query --format=csv --nouse_legacy_sql 'SELECT sample_name FROM `all-of-us-workbench-test.wgs_demo.metadata`' | sed -e 1d > vcf_sample_names.txt```
+- ```paste -d "," <(shuf -n $(cat vcf_sample_names.txt | wc -l) ehr_sample_names.txt) vcf_sample_names.txt > old_new_sample_names_map.csv```
+- ```cat old_new_sample_names_map.csv | awk -F',' '{print "UPDATE `all-of-us-workbench-test.wgs_demo_7.metadata` set sample_name=\""$1"\" where sample_name=\""$2"\";"}'```
+- Run update queries in BQ console or bq CLI
 
-- Create (new_sample_name, old_sample_name) list file
-  - `echo "1184442,HG00420" >> old_new_sample_names_map.txt` 
-  - `echo "2473159,HG00423" >> old_new_sample_names_map.txt` 
-  - `echo "3436708,HG00418" >> old_new_sample_names_map.txt` 
-- Create update queries
-  - `cat sample_map_6.txt | awk -F',' '{print "UPDATE `all-of-us-workbench-test.wgs_demo_7.metadata` set sample_name=\""$1"\" where sample_name=\""$2"\";"}'`
-- Run update queries in BQ console or wherever
-
-
-Extract should now work as is if you follow the demo but running this command to generate the new sample_map will be helpful.
-
-`bq query --format=csv --nouse_legacy_sql 'SELECT sample_id,sample_name FROM `all-of-us-workbench-test.wgs_demo_7.metadata`' | sed -e 1d > sample_map_7.txt`
-
-this sample_map file can feed into the `bq load` command in the demo doc.
