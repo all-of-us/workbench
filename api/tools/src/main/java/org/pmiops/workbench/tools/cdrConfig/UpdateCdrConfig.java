@@ -320,7 +320,7 @@ public class UpdateCdrConfig {
       if (!dryRun) {
         // Note: this will fail if the database still has references to the Access Tier being
         // deleted.
-        cdrVersionDao.delete(accessTier.getAccessTierId());
+        accessTierDao.delete(accessTier.getAccessTierId());
       }
     }
   }
