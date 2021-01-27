@@ -152,18 +152,17 @@ export default class BaseElement extends Container {
    * @param textValue The text string.
    * @param options The typing options.
    */
-  async type(textValue: string, options: { delay?: number } = {}): Promise<this> {
-    const { delay = 10 } = options;
+  async type(textValue: string, options?: { delay: number }): Promise<this> {
 
-    const clearAndType = async (txt: string): Promise<string> => {
+    const clearAndType = async (txt: string, opts?: { delay: number }): Promise<string> => {
       await this.clear();
-      await this.asElementHandle().then((handle: ElementHandle) => handle.type(txt, {delay}));
+      await this.asElementHandle().then((handle: ElementHandle) => handle.type(txt, opts));
       return this.getProperty<string>('value');
     }
 
-    let maxRetries = 2;
+    let maxRetries = 1;
     const typeAndCheck = async () => {
-      const actualValue = (await clearAndType(textValue));
+      const actualValue = (await clearAndType(textValue, options));
       if (actualValue === textValue) {
         return; // success
       }
@@ -202,7 +201,6 @@ export default class BaseElement extends Container {
   async clear(options: ClickOptions = { clickCount: 3 }): Promise<void> {
     const elemt = await this.asElementHandle();
     await elemt.focus();
-    await elemt.hover();
     await elemt.click(options);
     await this.page.keyboard.press('Backspace');
   }

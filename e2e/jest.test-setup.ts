@@ -12,7 +12,7 @@ const isDebugMode = process.argv.includes('--debug');
  */
 beforeEach(async () => {
   await page.setUserAgent(userAgent);
-  await page.setViewport({width: 1300, height: 0});
+  await page.setViewport({width: 1280, height: 0});
   page.setDefaultNavigationTimeout(60000); // Puppeteer default timeout is 30 seconds.
   page.setDefaultTimeout(30000);
 });
