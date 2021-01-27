@@ -610,11 +610,11 @@ jobs:
                 ;;
               "test")
                 echo 'export TEST_COLLABORATOR=$PUPPETEER_COLLABORATOR_TEST' >> $BASH_ENV
-                echo 'export USER_NAME=$(eval echo "\$PUPPETEER_USER_TEST_${CIRCLE_NODE_INDEX}@fake-research-aou.org")' >> $BASH_ENV
+                echo 'export USER_NAME=$(eval echo "\$PUPPETEER_USER_TEST@fake-research-aou.org")' >> $BASH_ENV
                 ;;
               "local")
                 echo 'export DEV_COLLABORATOR=$PUPPETEER_COLLABORATOR_LOCAL' >> $BASH_ENV
-                echo 'export USER_NAME=$(eval echo "\$PUPPETEER_USER_LOCAL_${CIRCLE_NODE_INDEX}@fake-research-aou.org")' >> $BASH_ENV
+                echo 'export USER_NAME=$(eval echo "\$PUPPETEER_USER_LOCAL@fake-research-aou.org")' >> $BASH_ENV
                 ;;
             esac
             echo 'export PASSWORD=$PUPPETEER_USER_PASSWORD' >> $BASH_ENV
