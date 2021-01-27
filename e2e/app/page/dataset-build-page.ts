@@ -6,10 +6,10 @@ import ClrIconLink from 'app/element/clr-icon-link';
 import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 import {buildXPath} from 'app/xpath-builders';
 import {ElementType} from 'app/xpath-options';
+import DatasetSaveModal from 'app/modal/dataset-save-modal';
 import AuthenticatedPage from './authenticated-page';
 import CohortBuildPage from './cohort-build-page';
 import ConceptSetSearchPage from './conceptset-search-page';
-import DatasetSaveModal from './dataset-save-modal';
 
 const pageTitle = 'Dataset Page';
 

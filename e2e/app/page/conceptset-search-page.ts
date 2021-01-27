@@ -7,7 +7,7 @@ import Button from 'app/element/button';
 import {LinkText} from 'app/text-labels';
 import {getPropValue, waitUntilChanged} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
-import ConceptSetSaveModal, {SaveOption} from './conceptset-save-modal';
+import ConceptSetSaveModal, {SaveOption} from 'app/modal/conceptset-save-modal';
 
 const PageTitle = 'Search Concepts';
 
@@ -29,6 +29,7 @@ export default class ConceptSetSearchPage extends AuthenticatedPage{
 
   async saveConceptSet(saveOption?: SaveOption, existingConceptSetName?: string): Promise<string> {
     const modal = new ConceptSetSaveModal(this.page);
+    await modal.waitForLoad();
     return modal.fillOutSaveModal(saveOption, existingConceptSetName);
   }
 

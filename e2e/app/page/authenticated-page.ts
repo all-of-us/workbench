@@ -17,7 +17,7 @@ export default abstract class AuthenticatedPage extends BasePage {
   }
 
   protected async isSignedIn(): Promise<boolean> {
-    return this.page.waitForSelector(signedInIndicator, {timeout: 30000})
+    return this.page.waitForSelector(signedInIndicator, {timeout: 5 * 60 * 1000})
       .then( (elemt) => elemt.asElement() !== null);
   }
 
@@ -32,7 +32,10 @@ export default abstract class AuthenticatedPage extends BasePage {
    */
   async waitForLoad(): Promise<this> {
     await this.isSignedIn();
-    await this.isLoaded();
+    await this.isLoaded().catch(() => {
+      console.warn('Retry failed isLoaded() function');
+      this.isLoaded();
+    });
     return this;
   }
 

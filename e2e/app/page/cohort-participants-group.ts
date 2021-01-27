@@ -1,6 +1,5 @@
 import {ElementHandle, Page} from 'puppeteer';
 import {FieldSelector} from 'app/page/cohort-build-page';
-import Modal from 'app/component/modal';
 import {waitForNumericalString, waitForText, waitWhileLoading} from 'utils/waits-utils';
 import CohortSearchPage from 'app/page/cohort-search-page';
 import CriteriaSearchPage, {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/criteria-search-page';
@@ -9,6 +8,7 @@ import {LinkText, MenuOption} from 'app/text-labels';
 import {snowmanIconXpath} from 'app/component/snowman-menu';
 import Button from 'app/element/button';
 import HelpSidebar from 'app/component/help-sidebar';
+import Modal from 'app/modal/modal';
 
 export default class CohortParticipantsGroup {
 

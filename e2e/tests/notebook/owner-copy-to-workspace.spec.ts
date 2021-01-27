@@ -1,11 +1,11 @@
 import DataResourceCard from 'app/component/data-resource-card';
-import Modal from 'app/component/modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {LinkText, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {createWorkspace, findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import {config} from 'resources/workbench-config';
 import WorkspaceCard from 'app/component/workspace-card';
+import Modal from 'app/modal/modal';
 
 
 /**
@@ -44,6 +44,7 @@ async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName:
 
    // Verify Copy Success modal.
    const modal = new Modal(page);
+   await modal.waitForLoad();
    await modal.waitForButton(LinkText.GoToCopiedNotebook);
    const textContent = await modal.getTextContent();
    const successMsg = `Successfully copied ${sourceNotebookName}  to ${destWorkspace} . Do you want to view the copied Notebook?`;

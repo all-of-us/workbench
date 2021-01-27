@@ -117,7 +117,6 @@ describe('Create Concept Sets from Domains', () => {
 
     // Save
     const conceptSet1 = await conceptSearchPage.saveConceptSet();
-    console.log(`Created Concept Set "${conceptSet1}"`);
 
     // Start: Create new Concept Set 2
     const conceptActionPage = new ConceptSetActionsPage(page);
@@ -140,7 +139,6 @@ describe('Create Concept Sets from Domains', () => {
 
     // Save
     const conceptSet2 = await conceptSearchPage.saveConceptSet();
-    console.log(`Created Concept Set "${conceptSet2}"`);
 
     // Create new Dataset with two new Concept Sets
     await conceptActionPage.clickCreateDatasetButton();
