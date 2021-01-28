@@ -25,30 +25,32 @@ beforeEach(async () => {
   page.on('request', (request) => {
     try {
       request.continue();
+      // tslint:disable-next-line:no-empty
     } catch (e) {
-      console.log('');
     }
   })
 
   page.on('console', async(message) => {
-    console[message.type()](`page console => ${message.text()}`)
+    console.log(`console => ${message.type()} ${message.text()}`);
   });
 
   // Emitted when the page crashed
-  page.on('error', err => {
-    console.error(`❌ ${err}`);
+  page.on('error', error => {
+    console.error(`❌ ${error.toString()}`);
   });
 
   // Emitted when a script has uncaught exception
   page.on('pageerror', error => {
-    console.error(`❌ ${error.message}`)
+    console.error(`❌ ${error.toString()}`);
   });
 
   // Emitted when a request failed. Warning: blocked requests from above will be logged as failed requests, safe to ignore these.
   page.on('requestfailed', request => {
     const response = request.response();
-    const status = (response !== null ? response.status() : '');
-    console.error(`❌ ${status} ${request.method()} ${request.url()}`);
+    if (response !== null && !response.ok) {
+      const status = response.status();
+      console.error(`❌ ${status} ${request.method()} ${request.url()}  \n ${response.text()}`);
+    }
   });
 
   page.on('response', async(response) => {
@@ -69,8 +71,8 @@ beforeEach(async () => {
 
       }
 
+      // tslint:disable-next-line:no-empty
     } catch (err) {
-      console.log('');
     }
   });
   

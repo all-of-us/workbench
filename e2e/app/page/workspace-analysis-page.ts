@@ -72,8 +72,8 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
       this.page.waitForXPath(redirectingTextsXpath, {visible: true}),
     ]);
 
-    // Waiting up to 20 minutes
-    await waitWhileLoading(this.page, (20 * 60 * 1000));
+    // Waiting up to 30 minutes
+    await waitWhileLoading(this.page, (30 * 60 * 1000));
 
     const notebook = new NotebookPage(this.page, notebookName);
     await notebook.waitForLoad();

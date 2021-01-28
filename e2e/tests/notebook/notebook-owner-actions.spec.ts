@@ -5,7 +5,6 @@ import {LinkText, ResourceCard} from 'app/text-labels';
 import {makeRandomName, makeWorkspaceName} from 'utils/str-utils';
 import {signInWithAccessToken} from 'utils/test-utils';
 
-
 describe('Workspace owner Jupyter notebook action tests', () => {
 
   // In order to reduce test playback time, reuse same Workspace for all tests in this file.

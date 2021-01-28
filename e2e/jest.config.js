@@ -5,7 +5,7 @@ module.exports = {
   "verbose": false,
   "bail": 1,  // Stop running tests after `n` failures
   "preset": "jest-puppeteer",
-  "testTimeout": 600000,
+  "testTimeout": 1200000,
   "testRunner": "jest-circus/runner",
   "testEnvironment": "<rootDir>/puppeteer-custom-environment.ts",
   "setupFilesAfterEnv": [
