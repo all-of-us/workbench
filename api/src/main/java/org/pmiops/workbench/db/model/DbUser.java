@@ -80,7 +80,6 @@ public class DbUser {
   private boolean disabled;
   private Short emailVerificationStatus;
   private Set<DbPageVisit> pageVisits = new HashSet<>();
-  private String clusterConfigDefault;
 
   private String aboutYou;
   private String areaOfResearch;
@@ -371,31 +370,6 @@ public class DbUser {
 
   public void setIdVerificationIsValid(Boolean value) {
     idVerificationIsValid = value;
-  }
-
-  @Column(name = "cluster_config_default")
-  public String getClusterConfigDefaultRaw() {
-    return clusterConfigDefault;
-  }
-
-  public void setClusterConfigDefaultRaw(String value) {
-    clusterConfigDefault = value;
-  }
-
-  @Transient
-  public ClusterConfig getClusterConfigDefault() {
-    if (clusterConfigDefault == null) {
-      return null;
-    }
-    return new Gson().fromJson(clusterConfigDefault, ClusterConfig.class);
-  }
-
-  public void setClusterConfigDefault(ClusterConfig value) {
-    String rawValue = null;
-    if (value != null) {
-      rawValue = new Gson().toJson(value);
-    }
-    setClusterConfigDefaultRaw(rawValue);
   }
 
   @Column(name = "demographic_survey_completion_time")

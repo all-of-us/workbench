@@ -196,7 +196,7 @@ export class LeoRuntimeInitializer {
     }
 
     let runtime: Runtime;
-    if (serverConfigStore.getValue().enableCustomRuntimes && this.targetRuntime) {
+    if (this.targetRuntime) {
       runtime = this.targetRuntime;
     } else if (this.currentRuntime) {
       runtime = applyPresetOverride(this.currentRuntime);

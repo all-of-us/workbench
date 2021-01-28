@@ -182,10 +182,6 @@ public class RuntimeController implements RuntimeApiDelegate {
               leonardoNotebooksClient.getRuntime(
                   workspaceNamespace, userProvider.get().getRuntimeName())));
     } catch (NotFoundException e) {
-      if (!workbenchConfigProvider.get().featureFlags.enableCustomRuntimes) {
-        throw e;
-      }
-
       return ResponseEntity.ok(getOverrideFromListRuntimes(workspaceNamespace));
     }
   }
@@ -249,14 +245,12 @@ public class RuntimeController implements RuntimeApiDelegate {
       runtime = new Runtime();
     }
 
-    if (workbenchConfigProvider.get().featureFlags.enableCustomRuntimes) {
-      if (runtime.getGceConfig() == null && runtime.getDataprocConfig() == null) {
-        throw new BadRequestException("Either a GceConfig or DataprocConfig must be provided");
-      }
+    if (runtime.getGceConfig() == null && runtime.getDataprocConfig() == null) {
+      throw new BadRequestException("Either a GceConfig or DataprocConfig must be provided");
+    }
 
-      if (runtime.getGceConfig() != null && runtime.getDataprocConfig() != null) {
-        throw new BadRequestException("Only one of GceConfig or DataprocConfig must be provided");
-      }
+    if (runtime.getGceConfig() != null && runtime.getDataprocConfig() != null) {
+      throw new BadRequestException("Only one of GceConfig or DataprocConfig must be provided");
     }
 
     String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
@@ -390,28 +384,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     return ResponseEntity.ok(new RuntimeLocalizeResponse().runtimeLocalDirectory(targetDir));
   }
 
-  @Override
-  @AuthorityRequired({Authority.DEVELOPER})
-  public ResponseEntity<EmptyResponse> updateClusterConfig(UpdateClusterConfigRequest body) {
-    DbUser user = userService.getByUsernameOrThrow(body.getUserEmail());
-    String oldOverride = user.getClusterConfigDefaultRaw();
-
-    final ClusterConfig override = body.getClusterConfig() != null ? new ClusterConfig() : null;
-    if (override != null) {
-      override.masterDiskSize = body.getClusterConfig().getMasterDiskSize();
-      override.machineType = body.getClusterConfig().getMachineType();
-    }
-    userService.updateUserWithRetries(
-        (u) -> {
-          u.setClusterConfigDefault(override);
-          return u;
-        },
-        user,
-        Agent.asAdmin(userProvider.get()));
-    userService.logAdminUserAction(
-        user.getUserId(), "cluster config override", oldOverride, new Gson().toJson(override));
-    return ResponseEntity.ok(new EmptyResponse());
-  }
+  // TODO eric - remove updateClusterConfig
 
   private String jsonToDataUri(JSONObject json) {
     return DATA_URI_PREFIX + Base64.getUrlEncoder().encodeToString(json.toString().getBytes());

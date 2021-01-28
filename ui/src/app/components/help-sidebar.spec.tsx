@@ -66,8 +66,7 @@ describe('HelpSidebar', () => {
     currentWorkspaceStore.next(workspaceDataStub);
     cohortReviewStore.next(cohortReviewStubs[0]);
     serverConfigStore.next({
-      ...defaultServerConfig,
-      enableCustomRuntimes: true
+      ...defaultServerConfig
     });
     runtimeStore.set({workspaceNamespace: workspaceDataStub.namespace, runtime: runtimeStub.runtime});
 

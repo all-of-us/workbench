@@ -12,7 +12,6 @@ import {FlexColumn} from 'app/components/flex';
 import {InfoIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
-import {ResetRuntimeButton} from 'app/pages/analysis/reset-runtime-button';
 import {ResearchPurpose} from 'app/pages/workspace/research-purpose';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -269,9 +268,6 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
                   <Spinner style={{height: 16, width: 16}}/>
                 }</div>
               </div>}
-          {!!this.workspaceRuntimeBillingProjectId() &&
-           !serverConfigStore.getValue().enableCustomRuntimes &&
-            <ResetRuntimeButton workspaceNamespace={this.workspaceRuntimeBillingProjectId()}/>}
         </div>
       </div>
       {sharing && <WorkspaceShare workspace={workspace}
