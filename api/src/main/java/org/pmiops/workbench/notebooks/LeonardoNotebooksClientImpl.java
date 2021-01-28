@@ -4,15 +4,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbUser.ClusterConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.exceptions.ExceptionUtils;
@@ -22,7 +19,6 @@ import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.api.ServiceInfoApi;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest.WelderRegistryEnum;
-import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoUpdateRuntimeRequest;
@@ -84,9 +80,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   }
 
   private LeonardoCreateRuntimeRequest buildCreateRuntimeRequest(
-      String userEmail,
-      Runtime runtime,
-      Map<String, String> customEnvironmentVariables) {
+      String userEmail, Runtime runtime, Map<String, String> customEnvironmentVariables) {
     WorkbenchConfig config = workbenchConfigProvider.get();
     String assetsBaseUrl = config.server.apiBaseUrl + "/static";
 
@@ -161,10 +155,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
           runtimesApi.createRuntime(
               runtime.getGoogleProject(),
               runtime.getRuntimeName(),
-              buildCreateRuntimeRequest(
-                  user.getUsername(),
-                  runtime,
-                  customEnvironmentVariables));
+              buildCreateRuntimeRequest(user.getUsername(), runtime, customEnvironmentVariables));
           return null;
         });
   }
@@ -183,8 +174,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
                   runtime.getRuntimeName(),
                   new LeonardoUpdateRuntimeRequest()
                       .allowStop(true)
-                      .runtimeConfig(
-                          buildRuntimeConfig(runtime))
+                      .runtimeConfig(buildRuntimeConfig(runtime))
                       .labelsToUpsert(runtimeLabels));
           return null;
         });
