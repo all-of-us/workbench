@@ -38,7 +38,6 @@ import {
   currentCohortSearchContextStore,
   currentConceptStore,
   NavStore,
-  serverConfigStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {withRuntimeStore} from 'app/utils/runtime-utils';
