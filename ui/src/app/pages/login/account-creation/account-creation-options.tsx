@@ -104,8 +104,8 @@ export const AccountCreationOptions = {
     {label: `Asian`, value: Race.ASIAN},
     {label: `Native Hawaiian or Other Pacific Islander`, value: Race.NHOPI},
     {label: `White`, value: Race.WHITE},
+    {label: `None of these describe me`, value: Race.NONE},
     {label: `Prefer not to answer`, value: Race.PREFERNOANSWER},
-    {label: `None of these describe me`, value: Race.NONE}
   ],
   ethnicity: [
     {label: `Hispanic or Latino`, value: Ethnicity.HISPANIC},

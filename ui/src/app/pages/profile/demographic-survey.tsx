@@ -15,10 +15,11 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, toggleIncludes} from 'app/utils';
 
 import {environment} from 'environments/environment';
-import {Profile} from 'generated/fetch';
+import {Profile, Race, GenderIdentity, SexAtBirth } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
+// import { GenderIdentity, SexAtBirth } from 'generated';
 import * as validate from 'validate.js';
 
 const styles = reactStyles({
@@ -62,6 +63,8 @@ interface State {
   profile: Profile;
 }
 
+const isChecked = (demographicSurvey, optionKey, value) => demographicSurvey && demographicSurvey[optionKey] && demographicSurvey[optionKey].includes(value)
+const isCheckedx = (optionKey, value) => fp.flow(fp.get([optionKey]), fp.includes(value))
 export class DemographicSurvey extends React.Component<Props, State> {
   private captchaRef = React.createRef<ReCAPTCHA>();
   constructor(props: any) {
@@ -74,15 +77,16 @@ export class DemographicSurvey extends React.Component<Props, State> {
     };
   }
 
-  createOptionCheckbox(optionKey: string, optionObject: any) {
-    const {profile: {demographicSurvey}} = this.props;
+  createOptionCheckbox(optionKey: string, optionObject: any, preferNoAnswer: any) {
+    const {profile: {demographicSurvey}} = this.state;
     const initialValue = demographicSurvey && demographicSurvey[optionKey] && demographicSurvey[optionKey].includes(optionObject.value);
-
+  
     return <CheckBox label={optionObject.label} data-test-id={'checkbox-' + optionObject.value.toString()}
                      style={styles.checkbox} key={optionObject.value.toString()}
                      checked={initialValue}
+                     manageOwnState={false}
                      wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
-                     onChange={(value) => this.updateList(optionKey, optionObject.value)}
+                     onChange={(value) => this.updateList(optionKey, optionObject.value, preferNoAnswer)}
     />;
   }
 
@@ -90,9 +94,12 @@ export class DemographicSurvey extends React.Component<Props, State> {
     this.setState({captchaToken: token, captcha: true});
   }
 
-  updateList(key, value) {
+  updateList(key, value, preferNoAnswer) {
     // Toggle Includes removes the element if it already exists and adds if not
-    const attributeList = toggleIncludes(value, this.props.profile.demographicSurvey[key] || []);
+    const attributeList = fp.flow(
+      toggleIncludes(value),
+      fp.remove(v => v === preferNoAnswer)
+    )(this.state.profile.demographicSurvey[key] || []);
     this.updateDemographicAttribute(key, attributeList);
   }
 
@@ -114,9 +121,12 @@ export class DemographicSurvey extends React.Component<Props, State> {
   }
 
   render() {
-    const {profile: {demographicSurvey}, captcha, captchaToken, loading} = this.state;
+    const {profile: {demographicSurvey = {}}, captcha, captchaToken, loading} = this.state;
 
     const errors = this.validateDemographicSurvey(demographicSurvey);
+    const pntaRace = fp.find({value: Race.PREFERNOANSWER}, AccountCreationOptions.race)
+    const pntaGenderIdentity = fp.find({value: GenderIdentity.PREFERNOANSWER}, AccountCreationOptions.genderIdentity)
+    const pntaSexAtBirth = fp.find({value: SexAtBirth.PREFERNOANSWER}, AccountCreationOptions.sexAtBirth)
 
     return <div style={{marginTop: '1rem', paddingLeft: '1rem', width: '32rem'}}>
       <TextColumn>
@@ -141,9 +151,18 @@ export class DemographicSurvey extends React.Component<Props, State> {
       <Section header='Race'>
         <SelectAllText/>
         <FlexColumn style={styles.checkboxAreaContainer}>
-          {AccountCreationOptions.race.map((race) => {
-            return this.createOptionCheckbox('race', race);
-          })}
+          {fp.flow(
+            fp.remove({value: Race.PREFERNOANSWER}),
+            fp.map((race) => this.createOptionCheckbox('race', race, Race.PREFERNOANSWER))
+          )(AccountCreationOptions.race)
+          }
+          <CheckBox label={pntaRace.label} data-test-id={'checkbox-' + pntaRace.value.toString()}
+                     style={styles.checkbox} key={pntaRace.value.toString()}  
+                     checked={isChecked(demographicSurvey, 'race', pntaRace.value)}
+                     wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
+                     manageOwnState={false}
+                     onChange={(value) => this.setState(fp.set(['profile', 'demographicSurvey', 'race'], value ? [pntaRace.value] : []))}
+          />
         </FlexColumn>
       </Section>
 
@@ -158,9 +177,18 @@ export class DemographicSurvey extends React.Component<Props, State> {
       <Section header='Gender Identity'>
         <SelectAllText/>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
-          {AccountCreationOptions.genderIdentity.map((genderIdentity) => {
-            return this.createOptionCheckbox('genderIdentityList', genderIdentity);
-          })}
+          {fp.flow(
+            fp.remove({value: GenderIdentity.PREFERNOANSWER}),
+            fp.map((race) => this.createOptionCheckbox('genderIdentityList', race, GenderIdentity.PREFERNOANSWER))
+          )(AccountCreationOptions.genderIdentity)
+          }
+          <CheckBox label={pntaGenderIdentity.label} data-test-id={'checkbox-' + pntaGenderIdentity.value.toString()}
+                     style={styles.checkbox} key={pntaGenderIdentity.value.toString()}  
+                     checked={isChecked(demographicSurvey, 'genderIdentityList', pntaGenderIdentity.value)}
+                     wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
+                     manageOwnState={false}
+                     onChange={(value) => this.setState(fp.set(['profile', 'demographicSurvey', 'genderIdentityList'], value ? [pntaGenderIdentity.value] : []))}
+          />
         </FlexColumn>
       </Section>
 
@@ -180,6 +208,12 @@ or another sexual and/or gender minority?'>
                          style={{marginRight: '0.5rem'}}/>
             <label htmlFor='radio-lgbtq-no' style={{color: colors.primary}}>No</label>
           </FlexRow>
+          <FlexRow style={{alignItems: 'baseline'}}>
+            <RadioButton data-test-id='radio-lgbtq-pnta' id='radio-lgbtq-pnta' onChange={(e) => this.updateDemographicAttribute('identifiesAsLgbtq', null)}
+                         checked={!!demographicSurvey ? demographicSurvey.identifiesAsLgbtq === null : false}
+                         style={{marginRight: '0.5rem'}}/>
+            <label htmlFor='radio-lgbtq-pnta' style={{color: colors.primary}}>Prefer not to answer</label>
+          </FlexRow>
         </FlexColumn>
         <label></label>
         <TextInputWithLabel labelText='If yes, please tell us about your LGBTQ+ identity'
@@ -193,9 +227,19 @@ or another sexual and/or gender minority?'>
       <Section header='Sex at birth'>
         <SelectAllText/>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
-          {AccountCreationOptions.sexAtBirth.map((sexAtBirth) => {
-            return this.createOptionCheckbox('sexAtBirth', sexAtBirth);
-          })}
+          {fp.flow(
+            fp.remove({value: SexAtBirth.PREFERNOANSWER}),
+            fp.map((race) => this.createOptionCheckbox('sexAtBirth', race, SexAtBirth.PREFERNOANSWER))
+          )(AccountCreationOptions.sexAtBirth)
+          }          
+          <CheckBox label={pntaSexAtBirth.label} data-test-id={'checkbox-' + pntaSexAtBirth.value.toString()}
+                     style={styles.checkbox} key={pntaSexAtBirth.value.toString()}  
+                     checked={isChecked(demographicSurvey, 'sexAtBirth', pntaSexAtBirth.value)}
+                     wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
+                     manageOwnState={false}
+                     onChange={(value) => this.setState(fp.set(['profile', 'demographicSurvey', 'sexAtBirth'], value ? [pntaSexAtBirth.value] : []))}
+          />
+
         </FlexColumn>
       </Section>
 
@@ -220,6 +264,12 @@ or another sexual and/or gender minority?'>
                          checked={!!demographicSurvey ? demographicSurvey.disability === false : false}
                          style={{marginRight: '0.5rem'}}/>
             <label htmlFor='radio-disability-no' style={{color: colors.primary}}>No</label>
+          </FlexRow>
+          <FlexRow style={{alignItems: 'baseline'}}>
+            <RadioButton id='radio-disability-pnta' onChange={(e) => this.updateDemographicAttribute('disability', null)}
+                         checked={!!demographicSurvey ? demographicSurvey.disability === null : false}
+                         style={{marginRight: '0.5rem'}}/>
+            <label htmlFor='radio-disability-pnta' style={{color: colors.primary}}>Prefer not to answer</label>
           </FlexRow>
         </FlexColumn>
       </Section>
@@ -279,7 +329,7 @@ or another sexual and/or gender minority?'>
                       }
                       this.setState({loading: false});
                     }
-                  }}
+                  }} 
                   data-test-id={'submit-button'}
           >
             Submit
