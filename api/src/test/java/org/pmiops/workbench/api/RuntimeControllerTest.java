@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -906,11 +905,13 @@ public class RuntimeControllerTest {
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
 
     BadRequestException e =
-            assertThrows(
-                    BadRequestException.class,
-                    () -> runtimeController.createRuntime(BILLING_PROJECT_ID, null));
+        assertThrows(
+            BadRequestException.class,
+            () -> runtimeController.createRuntime(BILLING_PROJECT_ID, null));
 
-    assertThat(e).hasMessageThat().contains("Either a GceConfig or DataprocConfig must be provided");
+    assertThat(e)
+        .hasMessageThat()
+        .contains("Either a GceConfig or DataprocConfig must be provided");
   }
 
   @Test
@@ -920,11 +921,13 @@ public class RuntimeControllerTest {
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
 
     BadRequestException e =
-            assertThrows(
-                    BadRequestException.class,
-                    () -> runtimeController.createRuntime(BILLING_PROJECT_ID, new Runtime()));
+        assertThrows(
+            BadRequestException.class,
+            () -> runtimeController.createRuntime(BILLING_PROJECT_ID, new Runtime()));
 
-    assertThat(e).hasMessageThat().contains("Either a GceConfig or DataprocConfig must be provided");
+    assertThat(e)
+        .hasMessageThat()
+        .contains("Either a GceConfig or DataprocConfig must be provided");
   }
 
   @Test
