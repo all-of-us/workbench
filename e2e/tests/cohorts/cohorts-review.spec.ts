@@ -71,7 +71,7 @@ describe('Cohort review tests', () => {
     isValidDate(cellValue);
 
     // Check table row link navigation works. Click ParticipantId link in the second row.
-    const dataTablepid1 = await cohortReviewPage.clickParticipantLink(2);
+    const participantId = await cohortReviewPage.clickParticipantLink(2);
     
     // Not checking anything in Participant Detail page.
     const participantDetailPage = new CohortParticipantDetailPage(page);
@@ -82,7 +82,7 @@ describe('Cohort review tests', () => {
     await annotationsSidebar.open();
 
     const reviewParticipantid1 = await annotationsSidebar.getParticipantID();
-    expect(dataTablepid1).toEqual(reviewParticipantid1);
+    expect(participantId).toEqual(reviewParticipantid1);
     
     // select review status from dropdown option
     const participantStatus1 = await annotationsSidebar.selectReviewStatus(ReviewStatus.Excluded);
