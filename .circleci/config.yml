@@ -323,7 +323,7 @@ commands:
           command: |
             circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings > /tmp/tests-to-run
             yarn test:ci $(cat /tmp/tests-to-run)
-          no_output_timeout: 25m
+          no_output_timeout: 30m
       - run:
           name: Create circleci_parameters.json
           working_directory: ~/workbench/e2e
@@ -573,6 +573,7 @@ jobs:
 
   # Run Puppeteer UI tests on deployed "local", "test" or "staging" environment.
   puppeteer-test:
+    resource_class: medium+
     executor: puppeteer-executor
     parameters:
       env_name:
@@ -666,7 +667,7 @@ workflows:
       - puppeteer-test:
           <<: *filter-pr-branch
           env_name: "local"
-          parallel_num: 2
+          parallel_num: 3
           optional_steps:
             - halt-puppeteer-check
       # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully

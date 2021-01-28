@@ -1,9 +1,9 @@
+import Container from 'app/container';
+import Button from 'app/element/button';
+import {LinkText, SideBarLink} from 'app/text-labels';
 import * as fp from 'lodash/fp';
 import {Page} from 'puppeteer';
-import Container from 'app/container';
-import {LinkText, SideBarLink} from 'app/text-labels';
 import {getPropValue} from 'utils/element-utils';
-import Button from 'app/element/button';
 
 const enum Selectors {
    rootXpath = '//*[@id="help-sidebar"]',
@@ -43,6 +43,9 @@ export default abstract class BaseHelpSidebar extends Container {
             break;
          case SideBarLink.WorkspaceMenu:
             xpath = `${Selectors.rootXpath}//*[@data-test-id="workspace-menu-button"]`;
+            break;
+         case SideBarLink.EditAnnotations:
+            xpath = `${Selectors.rootXpath}//*[@data-test-id="help-sidebar-icon-annotations"]`;
             break;
       }
       await this.page.waitForXPath(xpath, {visible: true}).then(link => link.click());
