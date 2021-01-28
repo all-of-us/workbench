@@ -5,7 +5,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.assertCohortFields;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.assertDatasetFields;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.assertInstitutionFields;
-import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoWorkspace;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDtoWorkspaceFreeTierUsage;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingCohort;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingDataset;
@@ -27,7 +26,6 @@ import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingInstitution;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
-import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
@@ -54,8 +52,8 @@ public class ReportingSnapshotServiceTest {
   @TestConfiguration
   @Import({
     CommonMappers.class,
-    ReportingMapperImpl.class,
     ReportingTestConfig.class,
+    ReportingTestUtils.class,
     ReportingSnapshotServiceImpl.class
   })
   @MockBean({BigQueryService.class})
@@ -74,13 +72,11 @@ public class ReportingSnapshotServiceTest {
     assertThat(snapshot.getDatasets()).isEmpty();
     assertThat(snapshot.getInstitutions()).isEmpty();
     assertThat(snapshot.getUsers()).isEmpty();
-    assertThat(snapshot.getWorkspaces()).isEmpty();
   }
 
   @Test
   public void testGetSnapshot() {
     mockUsers();
-    mockWorkspaces();
     mockWorkspaceFreeTierUsage();
     mockCohorts();
     mockDatasets();
@@ -103,10 +99,6 @@ public class ReportingSnapshotServiceTest {
     final ReportingUser user = snapshot.getUsers().get(0);
     userFixture.assertDTOFieldsMatchConstants(user);
 
-    assertThat(snapshot.getWorkspaces()).hasSize(1);
-    final ReportingWorkspace workspace = snapshot.getWorkspaces().get(0);
-    ReportingTestUtils.assertDtoWorkspaceFields(workspace);
-
     ReportingTestUtils.assertDtoWorkspaceFreeTierUsageFields(
         snapshot.getWorkspaceFreeTierUsage().get(0));
 
@@ -118,12 +110,6 @@ public class ReportingSnapshotServiceTest {
     final List<ReportingUser> users =
         ImmutableList.of(userFixture.createDto(), userFixture.createDto());
     doReturn(users).when(mockReportingQueryService).getUsers();
-  }
-
-  private void mockWorkspaces() {
-    doReturn(ImmutableList.of(createDtoWorkspace()))
-        .when(mockReportingQueryService)
-        .getWorkspaces();
   }
 
   private void mockWorkspaceFreeTierUsage() {

@@ -25,7 +25,6 @@ import org.pmiops.workbench.reporting.insertion.DatasetConceptSetColumnValueExtr
 import org.pmiops.workbench.reporting.insertion.DatasetDomainColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.InstitutionColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
-import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceFreeTierUsageColumnValueExtractor;
 import org.pmiops.workbench.utils.FieldValues;
 import org.pmiops.workbench.utils.LogFormatters;
@@ -62,10 +61,6 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
                 ImmutableList.of(
                     getUploadResult(
                         snapshot, UserColumnValueExtractor.class, ReportingSnapshot::getUsers),
-                    getUploadResult(
-                        snapshot,
-                        WorkspaceColumnValueExtractor.class,
-                        ReportingSnapshot::getWorkspaces),
                     getUploadResult(
                         snapshot,
                         WorkspaceFreeTierUsageColumnValueExtractor.class,
