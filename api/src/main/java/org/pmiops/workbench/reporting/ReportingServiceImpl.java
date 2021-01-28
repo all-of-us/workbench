@@ -48,5 +48,7 @@ public class ReportingServiceImpl implements ReportingService {
     reportingQueryService
         .getWorkspacesStream()
         .forEach(b -> reportingUploadService.uploadBatchWorkspace(b, captureTimestamp));
+
+    // sss
   }
 }
