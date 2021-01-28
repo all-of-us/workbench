@@ -507,8 +507,6 @@ tasks.compileJava {
     options.compilerArgs << '-Xlint:unchecked'
 }
 
-testResultsDirName = "$buildDir/test-results/test"
-
 task integrationTest(type: Test) {
     group = LifecycleBasePlugin.VERIFICATION_GROUP
     description = 'Run integration test suite.'

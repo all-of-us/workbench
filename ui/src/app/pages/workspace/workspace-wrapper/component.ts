@@ -207,6 +207,8 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
 
   delete(workspace: Workspace): void {
     this.deleting = true;
+
+
     workspacesApi().deleteWorkspace(
       workspace.namespace, workspace.id).then(() => {
         navigate(['/workspaces']);
