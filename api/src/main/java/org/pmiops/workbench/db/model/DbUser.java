@@ -35,22 +35,6 @@ public class DbUser {
 
   private static final String RUNTIME_NAME_PREFIX = "all-of-us-";
 
-  /**
-   * TODO(RW-5406): Remove cluster config overrides.
-   *
-   * <p>This is a Gson compatible class for encoding a JSON blob which is stored in MySQL. This
-   * represents cluster configuration overrides we support on a per-user basis for their notebook
-   * cluster. Corresponds to Leonardo's MachineConfig model. All fields are optional.
-   *
-   * <p>Any changes to this class should produce backwards-compatible JSON.
-   */
-  public static class ClusterConfig {
-    // Master persistent disk size in GB.
-    public Integer masterDiskSize;
-    // GCE machine type, e.g. n1-standard-2.
-    public String machineType;
-  }
-
   private long userId;
   private int version;
   // A nonce which can be used during the account creation flow to verify

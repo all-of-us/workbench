@@ -380,8 +380,6 @@ public class RuntimeController implements RuntimeApiDelegate {
     return ResponseEntity.ok(new RuntimeLocalizeResponse().runtimeLocalDirectory(targetDir));
   }
 
-  // TODO eric - remove updateClusterConfig
-
   private String jsonToDataUri(JSONObject json) {
     return DATA_URI_PREFIX + Base64.getUrlEncoder().encodeToString(json.toString().getBytes());
   }
