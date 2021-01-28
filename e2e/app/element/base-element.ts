@@ -142,8 +142,26 @@ export default class BaseElement extends Container {
 
   async click(options?: ClickOptions): Promise<void> {
     return this.asElementHandle()
-      .then(elemt => {
-        return elemt.click(options);
+      .then(async element => {
+        console.log('start checking boundingBox');
+        // Wait for the x & y to stop changin within specified time.
+        const startTime = Date.now();
+        let prevX;
+        let prevY;
+        while ((Date.now() - startTime) < (30 * 1000)) {
+          const box = await element.boundingBox();
+          const x = box.x + (box.width/2);
+          const y = box.y + (box.height/2);
+          if (prevX === x || prevY === y) {
+            break;
+          }
+          prevX = x;
+          prevY = y;
+          console.log(`x=${x}, y=${y}`);
+          await this.page.waitForTimeout(100);
+        }
+
+        return element.click(options);
       });
   }
 
