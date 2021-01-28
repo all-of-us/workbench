@@ -2,10 +2,12 @@ import * as fs from 'fs';
 import {ElementHandle, Frame, Page} from 'puppeteer';
 import {getPropValue} from 'utils/element-utils';
 import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
-import {ResourceCard} from 'app/text-labels';
+import {LinkText, ResourceCard} from 'app/text-labels';
+import RuntimePanel, {StartStopIconState} from 'app/component/runtime-panel';
 import AuthenticatedPage from './authenticated-page';
 import NotebookCell, {CellType} from './notebook-cell';
 import NotebookDownloadModal from 'app/modal/notebook-download-modal';
+import NotebookPreviewPage from './notebook-preview-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
 
 // CSS selectors
@@ -233,6 +235,28 @@ export default class NotebookPage extends AuthenticatedPage {
   async deleteNotebook(notebookName: string): Promise<void> {
     const analysisPage = await this.goAnalysisPage();
     await analysisPage.deleteResource(notebookName, ResourceCard.Notebook);
+  }
+
+  /**
+   * Delete runtime
+   */
+  async deleteRuntime(): Promise<void> {
+    // Open runtime panel
+    const runtimePanel = new RuntimePanel(this.page);
+    await runtimePanel.open();
+
+    // Click 'delete environment' then Delete buttons.
+    await runtimePanel.clickButton(LinkText.DeleteEnvironment);
+    await runtimePanel.clickButton(LinkText.Delete);
+
+    const notebookPreviewPage = new NotebookPreviewPage(this.page);
+    await notebookPreviewPage.waitForLoad();
+
+    // Wait until runtime status indicats None.
+    await runtimePanel.open();
+    await runtimePanel.waitForStartStopIconState(StartStopIconState.Stopping);
+    await runtimePanel.waitForStartStopIconState(StartStopIconState.None);
+    await runtimePanel.close();
   }
 
   private async getIFrame(): Promise<Frame> {
