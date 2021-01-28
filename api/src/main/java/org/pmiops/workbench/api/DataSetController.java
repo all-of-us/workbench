@@ -63,6 +63,7 @@ import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -126,19 +127,14 @@ public class DataSetController implements DataSetApiDelegate {
         Optional.ofNullable(dataSetRequest.getIncludesAllParticipants()).orElse(false);
     if (Strings.isNullOrEmpty(dataSetRequest.getName())) {
       throw new BadRequestException("Missing name");
-    } else if (dataSetRequest.getConceptSetIds() == null
-        || (dataSetRequest.getConceptSetIds().isEmpty()
-            && (dataSetRequest.getPrePackagedConceptSet().size() == 1
-                && dataSetRequest
-                    .getPrePackagedConceptSet()
-                    .get(0)
-                    .equals(PrePackagedConceptSetEnum.NONE)))) {
+    } else if (CollectionUtils.isEmpty(dataSetRequest.getConceptSetIds())
+        && dataSetRequest
+            .getPrePackagedConceptSet()
+            .containsAll(ImmutableList.of(PrePackagedConceptSetEnum.NONE))) {
       throw new BadRequestException("Missing concept set ids");
-    } else if ((dataSetRequest.getCohortIds() == null || dataSetRequest.getCohortIds().isEmpty())
-        && !includesAllParticipants) {
+    } else if (CollectionUtils.isEmpty(dataSetRequest.getCohortIds()) && !includesAllParticipants) {
       throw new BadRequestException("Missing cohort ids");
-    } else if (dataSetRequest.getDomainValuePairs() == null
-        || dataSetRequest.getDomainValuePairs().isEmpty()) {
+    } else if (CollectionUtils.isEmpty(dataSetRequest.getDomainValuePairs())) {
       throw new BadRequestException("Missing values");
     }
   }
