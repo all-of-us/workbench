@@ -905,8 +905,12 @@ public class RuntimeControllerTest {
         .thenThrow(new NotFoundException());
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
 
-    runtimeController.createRuntime(BILLING_PROJECT_ID, null);
-    verify(userRuntimesApi).createRuntime(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), any());
+    BadRequestException e =
+            assertThrows(
+                    BadRequestException.class,
+                    () -> runtimeController.createRuntime(BILLING_PROJECT_ID, null));
+
+    assertThat(e).hasMessageThat().contains("Either a GceConfig or DataprocConfig must be provided");
   }
 
   @Test
@@ -915,19 +919,12 @@ public class RuntimeControllerTest {
         .thenThrow(new NotFoundException());
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
 
-    runtimeController.createRuntime(BILLING_PROJECT_ID, new Runtime());
-    verify(userRuntimesApi)
-        .createRuntime(
-            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+    BadRequestException e =
+            assertThrows(
+                    BadRequestException.class,
+                    () -> runtimeController.createRuntime(BILLING_PROJECT_ID, new Runtime()));
 
-    Runtime capturedRuntimeConfig = new Runtime();
-    leonardoMapper.mapRuntimeConfig(
-        capturedRuntimeConfig, createRuntimeRequestCaptor.getValue().getRuntimeConfig());
-    assertThat(capturedRuntimeConfig.getGceConfig())
-        .isEqualTo(
-            new GceConfig()
-                .machineType(config.firecloud.notebookRuntimeDefaultMachineType)
-                .diskSize(config.firecloud.notebookRuntimeDefaultDiskSizeGb));
+    assertThat(e).hasMessageThat().contains("Either a GceConfig or DataprocConfig must be provided");
   }
 
   @Test
