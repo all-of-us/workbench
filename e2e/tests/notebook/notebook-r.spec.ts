@@ -3,9 +3,6 @@ import {Language} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
 
-// Notebook server start may take a long time. Set maximum test running time to 20 minutes.
-jest.setTimeout(20 * 60 * 1000);
-
 describe('Jupyter notebook tests in R language', () => {
 
   beforeEach(async () => {

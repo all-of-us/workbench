@@ -46,6 +46,7 @@ export default class CohortParticipantsGroup {
    */
   async selectGroupSnowmanMenu(option: MenuOption): Promise<void> {
     const menu = new TieredMenu(this.page);
+    await menu.waitUntilVisible();
     return menu.select(option);
   }
 
@@ -140,7 +141,9 @@ export default class CohortParticipantsGroup {
   private async openTieredMenu(): Promise<TieredMenu> {
     const addCriteriaButton = await this.page.waitForXPath(this.getAddCriteriaButtonXpath(), {visible: true});
     await addCriteriaButton.click(); // Click dropdown trigger to open menu
-    return new TieredMenu(this.page);
+    const tieredMenu = new TieredMenu(this.page);
+    await tieredMenu.waitUntilVisible();
+    return tieredMenu;
   }
 
   async getGroupCriteriasList(): Promise<ElementHandle[]> {
