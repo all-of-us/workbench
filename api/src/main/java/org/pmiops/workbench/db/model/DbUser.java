@@ -66,7 +66,6 @@ public class DbUser {
 
   private String aboutYou;
   private String areaOfResearch;
-  private Integer clusterCreateRetries;
   private Integer billingProjectRetries;
   private Integer moodleId;
 
@@ -408,15 +407,6 @@ public class DbUser {
 
   public void setAreaOfResearch(String areaOfResearch) {
     this.areaOfResearch = areaOfResearch;
-  }
-
-  @Column(name = "cluster_create_retries")
-  public Integer getClusterCreateRetries() {
-    return clusterCreateRetries;
-  }
-
-  public void setClusterCreateRetries(Integer clusterCreateRetries) {
-    this.clusterCreateRetries = clusterCreateRetries;
   }
 
   @Column(name = "billing_project_retries")
