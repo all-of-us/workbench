@@ -1,4 +1,3 @@
-const url = require('url');
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
 
 const isDebugMode = process.argv.includes('--debug');
@@ -13,6 +12,7 @@ const isDebugMode = process.argv.includes('--debug');
 beforeEach(async () => {
 
   await jestPuppeteer.resetPage();
+  await jestPuppeteer.resetBrowser();
 
   await page.setUserAgent(userAgent);
   await page.setViewport({width: 1300, height: 0});
