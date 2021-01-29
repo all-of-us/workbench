@@ -53,12 +53,14 @@ beforeEach(async () => {
   });
 
   // Emitted when a request failed. Warning: blocked requests from above will be logged as failed requests, safe to ignore these.
-  page.on('requestfailed', request => {
+  page.on('requestfailed', async request => {
     try {
       const response = request.response();
       if (response !== null) {
         const status = response.status();
-        console.error(`❌ ${status} ${request.method()} ${request.url()}  \n ${request.failure().errorText} \n ${response.text()}`);
+        const responseText = await response.text();
+        const failureError = request.failure().errorText;
+        console.error(`❌ ${status} ${request.method()} ${request.url()}  \n ${failureError} \n ${responseText}`);
       }
       // tslint:disable-next-line:no-empty
     } catch (err) {
