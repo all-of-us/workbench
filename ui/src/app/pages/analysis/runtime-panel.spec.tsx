@@ -37,7 +37,7 @@ describe('RuntimePanel', () => {
 
   beforeEach(() => {
     cdrVersionStore.next(cdrVersionListResponse);
-    serverConfigStore.next({...defaultServerConfig, enableCustomRuntimes: true});
+    serverConfigStore.next({...defaultServerConfig});
 
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);

@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import com.google.common.collect.ImmutableList;
-import com.google.gson.Gson;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Clock;
@@ -16,7 +15,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.json.JSONObject;
-import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -25,7 +23,6 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbUser.ClusterConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -42,7 +39,6 @@ import org.pmiops.workbench.model.Runtime;
 import org.pmiops.workbench.model.RuntimeLocalizeRequest;
 import org.pmiops.workbench.model.RuntimeLocalizeResponse;
 import org.pmiops.workbench.model.RuntimeStatus;
-import org.pmiops.workbench.model.UpdateClusterConfigRequest;
 import org.pmiops.workbench.model.UpdateRuntimeRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
@@ -182,10 +178,6 @@ public class RuntimeController implements RuntimeApiDelegate {
               leonardoNotebooksClient.getRuntime(
                   workspaceNamespace, userProvider.get().getRuntimeName())));
     } catch (NotFoundException e) {
-      if (!workbenchConfigProvider.get().featureFlags.enableCustomRuntimes) {
-        throw e;
-      }
-
       return ResponseEntity.ok(getOverrideFromListRuntimes(workspaceNamespace));
     }
   }
@@ -249,14 +241,12 @@ public class RuntimeController implements RuntimeApiDelegate {
       runtime = new Runtime();
     }
 
-    if (workbenchConfigProvider.get().featureFlags.enableCustomRuntimes) {
-      if (runtime.getGceConfig() == null && runtime.getDataprocConfig() == null) {
-        throw new BadRequestException("Either a GceConfig or DataprocConfig must be provided");
-      }
+    if (runtime.getGceConfig() == null && runtime.getDataprocConfig() == null) {
+      throw new BadRequestException("Either a GceConfig or DataprocConfig must be provided");
+    }
 
-      if (runtime.getGceConfig() != null && runtime.getDataprocConfig() != null) {
-        throw new BadRequestException("Only one of GceConfig or DataprocConfig must be provided");
-      }
+    if (runtime.getGceConfig() != null && runtime.getDataprocConfig() != null) {
+      throw new BadRequestException("Only one of GceConfig or DataprocConfig must be provided");
     }
 
     String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
@@ -388,29 +378,6 @@ public class RuntimeController implements RuntimeApiDelegate {
 
     // This is the Jupyer-server-root-relative path, the style used by the Jupyter REST API.
     return ResponseEntity.ok(new RuntimeLocalizeResponse().runtimeLocalDirectory(targetDir));
-  }
-
-  @Override
-  @AuthorityRequired({Authority.DEVELOPER})
-  public ResponseEntity<EmptyResponse> updateClusterConfig(UpdateClusterConfigRequest body) {
-    DbUser user = userService.getByUsernameOrThrow(body.getUserEmail());
-    String oldOverride = user.getClusterConfigDefaultRaw();
-
-    final ClusterConfig override = body.getClusterConfig() != null ? new ClusterConfig() : null;
-    if (override != null) {
-      override.masterDiskSize = body.getClusterConfig().getMasterDiskSize();
-      override.machineType = body.getClusterConfig().getMachineType();
-    }
-    userService.updateUserWithRetries(
-        (u) -> {
-          u.setClusterConfigDefault(override);
-          return u;
-        },
-        user,
-        Agent.asAdmin(userProvider.get()));
-    userService.logAdminUserAction(
-        user.getUserId(), "cluster config override", oldOverride, new Gson().toJson(override));
-    return ResponseEntity.ok(new EmptyResponse());
   }
 
   private String jsonToDataUri(JSONObject json) {

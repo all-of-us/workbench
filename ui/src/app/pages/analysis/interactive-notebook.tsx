@@ -13,7 +13,7 @@ import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
+import {navigate, userProfileStore} from 'app/utils/navigation';
 import {withRuntimeStore} from 'app/utils/runtime-utils';
 import {maybeInitializeRuntime} from 'app/utils/runtime-utils';
 import {RuntimeStore} from 'app/utils/stores';
@@ -255,7 +255,6 @@ export const InteractiveNotebook = fp.flow(
     }
 
     private renderNotebookText() {
-      const {enableCustomRuntimes} = serverConfigStore.getValue();
       const {status = RuntimeStatus.Unknown} = this.props.runtimeStore.runtime || {};
       switch (status) {
         case RuntimeStatus.Starting:
@@ -267,10 +266,6 @@ export const InteractiveNotebook = fp.flow(
         case RuntimeStatus.Deleted:
           return 'Preparing your Jupyter environment. This may take up to 5 minutes.';
         case RuntimeStatus.Error:
-          if (!enableCustomRuntimes) {
-            return 'Error creating your jupyter environment. Please try clicking' +
-                   ' the reset notebook server on Workspace About Page.';
-          }
           return 'Error creating your analysis environment. Please delete or ' +
                  'recreate via the compute configuration panel in the sidebar.';
         default:
