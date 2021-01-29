@@ -109,6 +109,14 @@ export class DemographicSurvey extends React.Component<Props, State> {
 
   validateDemographicSurvey(demographicSurvey) {
     const validationCheck = {
+      race: { presence: { allowEmpty: false } },
+      ethniticy: { presence: false  },
+      genderIdentityList: { presence: { allowEmpty: false } },
+      identifiesAsLgbtq: { presence: { allowEmpty: false } },
+      sexAtBirth: { presence: { allowEmpty: false } },
+      yearOfBirth: { presence: { allowEmpty: false } },
+      disability: { presence: { allowEmpty: false } },
+      education: { presence: { allowEmpty: false } },
       lgbtqIdentity: {
         length: {
           maximum: 255,

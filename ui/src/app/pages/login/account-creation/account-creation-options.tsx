@@ -141,6 +141,6 @@ export const AccountCreationOptions = {
 };
 
 const year = (new Date()).getFullYear();
-const years = Array.from(new Array(100), ( val, index) => year - index);
+const years = Array.from(new Array(100), (val, index) => ({label: year - index, value: year - index}));
 
-AccountCreationOptions.Years = years.map((yearOpt) => ({label: yearOpt, value: yearOpt}));
+AccountCreationOptions.Years = [{label: 'Prefer not to answer', value: null}, ...years]
