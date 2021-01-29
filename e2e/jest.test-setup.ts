@@ -11,83 +11,60 @@ const isDebugMode = process.argv.includes('--debug');
  * - waitFor functions timeout
  */
 beforeEach(async () => {
-
-  await jestPuppeteer.resetPage();
-
   await page.setUserAgent(userAgent);
-  await page.setViewport({width: 1300, height: 0});
-
+  await page.setViewport({width: 1280, height: 0});
   page.setDefaultNavigationTimeout(60000); // Puppeteer default timeout is 30 seconds.
   page.setDefaultTimeout(30000);
-
-  await page.setRequestInterception(true);
-
-  page.on('request', (request) => {
-    try {
-      request.continue();
-      // tslint:disable-next-line:no-empty
-    } catch (e) {
-    }
-  });
-
-  page.on('console', async(message) => {
-    if (message != null) {
-      const msg = message.type().toUpperCase();
-      // Don't log "log", "info" or "debug"
-      if (msg.includes('ERROR') || msg.includes('WARNING')) {
-        console.error(`${message.type()}: ${message.text()}`);
-      }
-    }
-  });
-
-  // Emitted when the page crashed
-  page.on('error', error => {
-    console.error(`❌ ${error}`);
-  });
-
-  // Emitted when a script has uncaught exception
-  page.on('pageerror', error => {
-    if (error != null) {
-      console.error(`❌ ${error}`);
-    }
-  });
-
-  // Emitted when a request failed. Warning: blocked requests from above will be logged as failed requests, safe to ignore these.
-  page.on('requestfailed', request => {
-    const response = request.response();
-    if (response !== null) {
-      const status = response.status();
-      console.error(`❌ ${status} ${request.method()} ${request.url()}  \n ${request.failure().errorText} \n ${response.text()}`);
-    }
-  });
-
-  page.on('response', async(response) => {
-    try {
-      const request = response.request();
-      const requestUrl = request.url();
-
-      // Long only responses from AoU-app requests
-      if (requestUrl.includes('api-dot-all-of-us')) {
-        const failure = request.failure();
-        if (failure !== null) {
-          console.info(`${status} ${request.method()} ${requestUrl} \n ${failure}`);
-        }
-        /*
-        // Do not remove.
-        if (failure === null) {
-          const text = await response.text();
-          const status = response.status();
-          console.info(`${status} ${request.method()} ${requestUrl} \n ${text}`);
-        }
-        */
-      }
-      // tslint:disable-next-line:no-empty
-    } catch (err) {
-    }
-  });
-  
 });
 
+/**
+ * At the end of each test completion, do:
+ * - Disable network interception.
+ * - Delete broswer cookies.
+ * - Reset global page and browser variables.
+ */
 afterEach(async () => {
+  await page.deleteCookie(...await page.cookies());
+  await jestPuppeteer.resetPage();
+  await jestPuppeteer.resetBrowser();
+});
+
+/**
+ * Enable network interception in new page and block unwanted requests.
+ */
+beforeAll(async () => {
+  await page.setRequestInterception(true);
+  page.on('request', (request) => {
+    const requestUrl = url.parse(request.url(), true);
+    const host = requestUrl.hostname;
+    // to improve page load performance, block network requests unrelated to application.
+    try {
+      if (host === 'www.google-analytics.com'
+           || host === 'accounts.youtube.com'
+           || host === 'static.zdassets.com'
+           || host === 'play.google.com'
+           || request.url().endsWith('content-security-index-report')) {
+        request.abort();
+      } else {
+        request.continue();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  });
+  if (isDebugMode) {
+    // Emitted when a request failed. Warning: blocked requests from above will be logged as failed requests, safe to ignore these.
+    page.on('requestfailed', request => {
+      console.error(`❌ Failed request => ${request.method()} ${request.url()}`);
+      request.continue();
+    });
+    // Emitted when the page crashed
+    page.on('error', error => console.error(`❌ ${error}`));
+    // Emitted when a script has uncaught exception
+    page.on('pageerror', error => console.error(`❌ ${error}`));
+  }
+});
+
+afterAll(async () => {
   await page.setRequestInterception(false);
 });
