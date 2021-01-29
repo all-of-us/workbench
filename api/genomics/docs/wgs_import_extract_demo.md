@@ -15,7 +15,7 @@ reproducability but note that the source for these files will probably change ov
 2. Create an empty dataset to contain the genome data. I used `wgs_demo_1`.
    
 3. Run ImportGenomes
-	- WDL - api/genomics/wdl/ImportGenomes.wdl
+	- WDL - https://github.com/broadinstitute/gatk/blob/75f0bd80a45ed46e171ba2125fcb6a6b825c1b74/scripts/variantstore/wdl/ImportGenomes.wdl
 	- Inputs - api/genomics/wdl/ImportGenomes.poc.inputs.json
 	- This will create three tables: metadata, pet_?, and vet_? within the dataset
 

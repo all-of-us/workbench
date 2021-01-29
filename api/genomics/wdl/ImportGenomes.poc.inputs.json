@@ -8,7 +8,7 @@
     "ImportGenomes.gatk_override": "gs://all-of-us-workbench-test-genomics/wgs/gatk-package-4.1.8.1-153-g9c3b338-SNAPSHOT-local.jar",
     
     // Output from Reblock step
-    "ImportGenomes.input_vcfs": "${[\"gs://fc-66b79f35-e7e8-4b0f-b8e8-ab57c9ce98ff/eaa0ddda-d6d4-468f-9faf-7e30782cab40/ReblockGVCF/fcd16bd6-7412-4df4-9d89-e72a6a552739/call-Reblock/NA12878.reblocked.g.vcf.gz\"]}",
+    "ImportGenomes.input_vcfs_list": "gs://fc-66b79f35-e7e8-4b0f-b8e8-ab57c9ce98ff/1kg_reblocked_gvcfs_list.txt",
     
     // Pulled from public data repo where we retrieved the input dataset
     "ImportGenomes.interval_list": "gs://gcp-public-data--broad-references/hg38/v0/wgs_calling_regions.hg38.interval_list",
