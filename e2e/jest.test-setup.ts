@@ -1,7 +1,5 @@
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
 
-const isDebugMode = process.argv.includes('--debug');
-
 /**
  * Set up page common properties:
  * - Page view port
