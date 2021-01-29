@@ -148,6 +148,7 @@ export default class BaseElement extends Container {
         const startTime = Date.now();
         let prevX;
         let prevY;
+        let i = 0;
         while ((Date.now() - startTime) < (30 * 1000)) {
           const box = await element.boundingBox();
           const x = box.x + (box.width/2);
@@ -155,12 +156,15 @@ export default class BaseElement extends Container {
           if (prevX === x || prevY === y) {
             break;
           } else {
-            console.warn(`prevx=${prevX} x=${x}  prevY=${prevY} y=${y}`);
+            if (i > 0) {
+              console.warn(`prevx=${prevX} x=${x}  prevY=${prevY} y=${y}`);
+            }
           }
           prevX = x;
           prevY = y;
           console.log(`x=${x}, y=${y}`);
           await this.page.waitForTimeout(100);
+          i++;
         }
         console.log('finished checking boundingBox');
         return element.click(options);
