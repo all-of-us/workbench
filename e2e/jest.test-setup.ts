@@ -33,20 +33,20 @@ beforeEach(async () => {
       const msg = message.type().toUpperCase();
       // Don't log "log", "info" or "debug"
       if (msg.includes('ERROR') || msg.includes('WARNING')) {
-        console.debug(`${message.type()}: ${message.text()}`);
+        console.debug(`❗ ${message.type()}: ${message.text()}`);
       }
     }
   });
 
   // Emitted when the page crashed
   page.on('error', error => {
-    console.debug(`❌ ${error}`);
+    console.debug(`❗ ${error}`);
   });
 
   // Emitted when a script has uncaught exception
   page.on('pageerror', error => {
     if (error != null) {
-      console.debug(`❌ ${error}`);
+      console.debug(`❗ ${error}`);
     }
   });
 
@@ -58,7 +58,7 @@ beforeEach(async () => {
         const status = response.status();
         const responseText = await response.text();
         const failureError = request.failure().errorText;
-        console.debug(`❌ ${status} ${request.method()} ${request.url()}  \n ${failureError} \n ${responseText}`);
+        console.debug(`❗ ${status} ${request.method()} ${request.url()}  \n ${failureError} \n ${responseText}`);
       }
       // tslint:disable-next-line:no-empty
     } catch (err) {
@@ -76,9 +76,9 @@ beforeEach(async () => {
         const method = request.method().trim();
         if (method !== 'OPTIONS') {
           if (failure !== null) {
-            console.debug(`${response.status()} ${method} ${requestUrl} \n ${failure.errorText}`);
+            console.debug(`❗ ${response.status()} ${method} ${requestUrl} \n ${failure.errorText}`);
           } else {
-            console.debug(`${response.status()} ${request.method()} ${requestUrl}`);
+            console.debug(`❗ ${response.status()} ${request.method()} ${requestUrl}`);
           }
         }
       }
