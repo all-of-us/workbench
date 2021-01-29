@@ -35,20 +35,20 @@ beforeEach(async () => {
       const msg = message.type().toUpperCase();
       // Don't log "log", "info" or "debug"
       if (msg.includes('ERROR') || msg.includes('WARNING')) {
-        console.error(`${message.type()}: ${message.text()}`);
+        console.debug(`${message.type()}: ${message.text()}`);
       }
     }
   });
 
   // Emitted when the page crashed
   page.on('error', error => {
-    console.error(`❌ ${error}`);
+    console.debug(`❌ ${error}`);
   });
 
   // Emitted when a script has uncaught exception
   page.on('pageerror', error => {
     if (error != null) {
-      console.error(`❌ ${error}`);
+      console.debug(`❌ ${error}`);
     }
   });
 
@@ -60,7 +60,7 @@ beforeEach(async () => {
         const status = response.status();
         const responseText = await response.text();
         const failureError = request.failure().errorText;
-        console.error(`❌ ${status} ${request.method()} ${request.url()}  \n ${failureError} \n ${responseText}`);
+        console.debug(`❌ ${status} ${request.method()} ${request.url()}  \n ${failureError} \n ${responseText}`);
       }
       // tslint:disable-next-line:no-empty
     } catch (err) {
@@ -76,16 +76,12 @@ beforeEach(async () => {
       if (requestUrl.includes('api-dot-all-of-us')) {
         const failure = request.failure();
         if (failure !== null) {
-          console.info(`${status} ${request.method()} ${requestUrl} \n ${failure}`);
+          console.debug(`${status} ${request.method()} ${requestUrl} \n ${failure}`);
         }
-        /*
-        // Do not remove.
         if (failure === null) {
-          const text = await response.text();
           const status = response.status();
-          console.info(`${status} ${request.method()} ${requestUrl} \n ${text}`);
+          console.debug(`${status} ${request.method()} ${requestUrl}`);
         }
-        */
       }
       // tslint:disable-next-line:no-empty
     } catch (err) {
