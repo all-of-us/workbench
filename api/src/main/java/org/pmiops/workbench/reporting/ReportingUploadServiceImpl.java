@@ -27,6 +27,7 @@ import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
+import org.pmiops.workbench.reporting.ReportingServiceImpl.BatchSupportedTableEnum;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.ColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetCohortColumnValueExtractor;
@@ -98,13 +99,12 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     checkResponseAndRowCounts(reportingSnapshot, responseMapBuilder.build());
   }
 
-  /**
-   * Batch uploads {@link ReportingWorkspace}.
-   *
-   * <p>TODO(RW-6175): checkResponseAndRowCounts for batch.
-   */
+  /** Batch uploads {@link ReportingWorkspace}. */
   @Override
-  public void uploadBatchWorkspace(List<ReportingWorkspace> batch, long captureTimestamp) {
+  public void uploadBatchWorkspace(
+      List<ReportingWorkspace> batch,
+      long captureTimestamp,
+      Map<BatchSupportedTableEnum, Integer> batchUploadedCount) {
     final Stopwatch stopwatch = stopwatchProvider.get();
     final ImmutableMultimap.Builder<TableId, InsertAllResponse> responseMapBuilder =
         ImmutableMultimap.builder();
@@ -117,6 +117,11 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     issueInsertAllRequest(
         stopwatch, responseMapBuilder, performanceStringBuilder, insertAllRequest);
     log.info(performanceStringBuilder.toString());
+    // Check response and abort the process if any error happens. In this case, verify_snopshot
+    // won't have the 'successful' record, hence we know that is a "bad" dataset.
+    checkResponse(responseMapBuilder.build());
+    int previousCount = batchUploadedCount.getOrDefault(BatchSupportedTableEnum.WORKSPACE, 0);
+    batchUploadedCount.put(BatchSupportedTableEnum.WORKSPACE, previousCount + batch.size());
   }
 
   /** Issues one {@link BigQueryService#insertAll(InsertAllRequest)}, then logs the performance. */

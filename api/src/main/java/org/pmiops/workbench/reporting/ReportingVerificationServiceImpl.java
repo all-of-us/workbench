@@ -7,6 +7,7 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,9 +15,11 @@ import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUploadDetails;
 import org.pmiops.workbench.model.ReportingUploadResult;
+import org.pmiops.workbench.reporting.ReportingServiceImpl.BatchSupportedTableEnum;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.ColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetCohortColumnValueExtractor;
@@ -38,14 +41,18 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private Provider<Stopwatch> stopwatchProvider;
+  private final ReportingQueryService reportingQueryService;
 
   public ReportingVerificationServiceImpl(
       BigQueryService bigQueryService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      Provider<Stopwatch> stopwatchProvider) {
+      Provider<Stopwatch> stopwatchProvider,
+      ReportingQueryService reportingQueryService) {
     this.bigQueryService = bigQueryService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.stopwatchProvider = stopwatchProvider;
+    this.stopwatchProvider = stopwatchProvider;
+    this.reportingQueryService = reportingQueryService;
   }
 
   @Override
@@ -102,27 +109,56 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
     sb.append("Table\tUploaded\tExpected\tDifference(%)\n");
     Level detailsLogLevel = Level.INFO;
     for (final ReportingUploadResult result : uploadDetails.getUploads()) {
-      final long delta = result.getDestinationRowCount() - result.getSourceRowCount();
-      final String relativeDelta;
-      if (result.getSourceRowCount() == 0) {
-        relativeDelta = "";
-      } else {
-        relativeDelta = String.format(" (%.3f%%)", 100.0 * delta / result.getSourceRowCount());
-      }
-      sb.append(
-          String.format(
-              "%s\t%d\t%d\t%d%s\n",
-              result.getTableName(),
-              result.getSourceRowCount(),
-              result.getDestinationRowCount(),
-              delta,
-              relativeDelta));
-      if (!result.getDestinationRowCount().equals(result.getSourceRowCount())) {
+      if (!verifyCount(
+          result.getTableName(), result.getSourceRowCount(), result.getDestinationRowCount(), sb)) {
         detailsLogLevel = Level.WARNING;
       }
     }
     logger.log(detailsLogLevel, sb.toString());
     return uploadDetails;
+  }
+
+  @Override
+  public void verifyBatchesAndLog(
+      Map<BatchSupportedTableEnum, Integer> tableNameAndCount, long captureSnapshotTime) {
+    final StringBuilder sb =
+        new StringBuilder(String.format("Verifying batches %d:\n", captureSnapshotTime));
+    Level detailsLogLevel = Level.INFO;
+
+    for (Map.Entry<BatchSupportedTableEnum, Integer> entry : tableNameAndCount.entrySet()) {
+      sb.append("Table\tUploaded\tExpected\tDifference(%)\n");
+      switch (entry.getKey()) {
+        case WORKSPACE:
+          int sourceCount = reportingQueryService.getWorkspacesCount();
+          if (!verifyCount(
+              entry.getKey().name().toLowerCase(),
+              (long) sourceCount,
+              (long) entry.getValue(),
+              sb)) {
+            detailsLogLevel = Level.WARNING;
+          }
+          break;
+        default:
+          break;
+      }
+    }
+    logger.log(detailsLogLevel, sb.toString());
+  }
+
+  /** Verifies source count equals to destination count. Returns {@code true} of match. */
+  private static boolean verifyCount(
+      String tableName, Long sourceCount, Long destinationCount, StringBuilder sb) {
+    final long delta = destinationCount - sourceCount;
+    final String relativeDelta;
+    if (sourceCount == 0) {
+      relativeDelta = "";
+    } else {
+      relativeDelta = String.format(" (%.3f%%)", 100.0 * delta / sourceCount);
+    }
+    sb.append(
+        String.format(
+            "%s\t%d\t%d\t%d%s\n", tableName, sourceCount, destinationCount, delta, relativeDelta));
+    return destinationCount.equals(sourceCount);
   }
 
   public String getDataset() {

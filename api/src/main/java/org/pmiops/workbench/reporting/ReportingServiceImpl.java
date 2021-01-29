@@ -1,5 +1,7 @@
 package org.pmiops.workbench.reporting;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
@@ -22,16 +24,19 @@ public class ReportingServiceImpl implements ReportingService {
   private final ReportingQueryService reportingQueryService;
   private final ReportingUploadService reportingUploadService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final ReportingVerificationService reportingVerificationService;
 
   public ReportingServiceImpl(
       ReportingQueryService reportingQueryService,
       ReportingUploadService reportingUploadService,
       ReportingSnapshotService reportingSnapshotService,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      ReportingVerificationService reportingVerificationService) {
     this.reportingQueryService = reportingQueryService;
     this.reportingUploadService = reportingUploadService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.reportingSnapshotService = reportingSnapshotService;
+    this.reportingVerificationService = reportingVerificationService;
   }
 
   /** Loads data from data source (MySql only for now), then uploads them. */
@@ -44,9 +49,20 @@ public class ReportingServiceImpl implements ReportingService {
     reportingUploadService.uploadSnapshot(snapshot);
 
     // Second: Obtain data on smaller batches for larger data.
-    // TODO(RW-6175): Verily batch count
+    Map<BatchSupportedTableEnum, Integer> batchUploadedCount = new HashMap<>();
     reportingQueryService
         .getWorkspacesStream()
-        .forEach(b -> reportingUploadService.uploadBatchWorkspace(b, captureTimestamp));
+        .forEach(
+            b ->
+                reportingUploadService.uploadBatchWorkspace(
+                    b, captureTimestamp, batchUploadedCount));
+
+    // Third: Verify the count.
+    reportingVerificationService.verifyBatchesAndLog(batchUploadedCount, captureTimestamp);
+  }
+
+  /** Tables that support batch upload. */
+  public enum BatchSupportedTableEnum {
+    WORKSPACE,
   }
 }

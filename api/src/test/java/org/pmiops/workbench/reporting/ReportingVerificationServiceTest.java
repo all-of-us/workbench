@@ -45,6 +45,10 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ReportingCohort;
@@ -64,14 +68,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Test all implementations of ReportingUploadService to save on setup code. If this becomes too
- * complex (e.g. by having multiple public methods on each service), then we could share the setup
- * code and have separate tests.
- */
 @RunWith(SpringRunner.class)
-public class ReportingUploadServiceTest {
+public class ReportingVerificationServiceTest {
 
   private static final Instant NOW = Instant.parse("2000-01-01T00:00:00.00Z");
   private static final Instant THEN_INSTANT = Instant.parse("1989-02-17T00:00:00.00Z");
@@ -80,6 +80,20 @@ public class ReportingUploadServiceTest {
   private ReportingSnapshot reportingSnapshot;
   private ReportingSnapshot snapshotWithNulls;
   private List<ReportingWorkspace> reportingWorkspaces;
+  private UserDao userDao;
+  private WorkspaceDao workspaceDao;
+  private CdrVersionDao cdrVersionDao;
+
+
+  @Transactional
+  public DbCdrVersion createWorkspace(int count) {
+    DbCdrVersion cdrVersion1 = new DbCdrVersion();
+    cdrVersion1.setName("foo");
+    cdrVersion1 = cdrVersionDao.save(cdrVersion1);
+    assertThat(cdrVersionDao.count()).isEqualTo(1);
+    return cdrVersion1;
+  }
+  private  workspaceDao;
 
   @MockBean private BigQueryService mockBigQueryService;
 
@@ -90,8 +104,7 @@ public class ReportingUploadServiceTest {
   @Captor private ArgumentCaptor<InsertAllRequest> insertAllRequestCaptor;
 
   @TestConfiguration
-  @Import({ReportingUploadServiceImpl.class, ReportingTestConfig.class})
-  @MockBean({ReportingVerificationService.class})
+  @Import({ReportingVerificationServiceImpl.class, ReportingTestConfig.class})
   public static class config {
     @Bean
     public Clock getClock() {

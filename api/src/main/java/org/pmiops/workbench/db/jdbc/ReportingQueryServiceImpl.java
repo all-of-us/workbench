@@ -340,4 +340,9 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .rpTimeRequested(offsetDateTimeUtc(rs.getTimestamp("rp_time_requested")))
                 .workspaceId(rs.getLong("workspace_id")));
   }
+
+  @Override
+  public int getWorkspacesCount() {
+    return jdbcTemplate.queryForObject("SELECT count(*) FROM workspace", Integer.class);
+  }
 }

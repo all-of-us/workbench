@@ -38,6 +38,8 @@ public interface ReportingQueryService {
 
   List<ReportingWorkspace> getWorkspaces(long limit, long offset);
 
+  int getWorkspacesCount();
+
   default Stream<List<ReportingWorkspace>> getWorkspacesStream() {
     return getStream(this::getWorkspaces);
   }
