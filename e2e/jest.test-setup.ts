@@ -28,25 +28,24 @@ beforeEach(async () => {
     }
   });
 
-  page.on('console', async(message) => {
+  page.on('console', message => {
     if (message != null) {
-      const msg = message.type().toUpperCase();
       // Don't log "log", "info" or "debug"
-      if (msg.includes('ERROR') || msg.includes('WARNING')) {
-        console.debug(`❗ ${message.type()}: ${message.text()}`);
+      if (['ERROR', 'WARNING'].includes(message.type().toUpperCase())) {
+        console.debug(`❗ Console Message: ${message.type()}: ${message.text()}`);
       }
     }
   });
 
   // Emitted when the page crashed
   page.on('error', error => {
-    console.debug(`❗ ${error}`);
+    console.debug(`❗ Page Crashed: ${error}`);
   });
 
   // Emitted when a script has uncaught exception
   page.on('pageerror', error => {
     if (error != null) {
-      console.debug(`❗ ${error}`);
+      console.debug(`❗ Page Error: ${error}`);
     }
   });
 
@@ -58,7 +57,7 @@ beforeEach(async () => {
         const status = response.status();
         const responseText = await response.text();
         const failureError = request.failure().errorText;
-        console.debug(`❗ ${status} ${request.method()} ${request.url()}  \n ${failureError} \n ${responseText}`);
+        console.debug(`❗ Failed Request: ${status} ${request.method()} ${request.url()}  \n ${failureError} \n ${responseText}`);
       }
       // tslint:disable-next-line:no-empty
     } catch (err) {
@@ -76,9 +75,10 @@ beforeEach(async () => {
         const method = request.method().trim();
         if (method !== 'OPTIONS') {
           if (failure !== null) {
-            console.debug(`❗ ${response.status()} ${method} ${requestUrl} \n ${failure.errorText}`);
+            // This log sometimes duplicate log from requestfailed.
+            console.debug(`❗ Failed Request: ${response.status()} ${method} ${requestUrl} \n ${failure.errorText}`);
           } else {
-            console.debug(`❗ ${response.status()} ${request.method()} ${requestUrl}`);
+            console.debug(`❗ Request: ${response.status()} ${method} ${requestUrl}`);
           }
         }
       }
