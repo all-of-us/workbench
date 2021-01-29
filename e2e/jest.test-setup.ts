@@ -75,12 +75,13 @@ beforeEach(async () => {
       // Long only responses from AoU-app requests
       if (requestUrl.includes('api-dot-all-of-us')) {
         const failure = request.failure();
-        if (failure !== null) {
-          console.debug(`${status} ${request.method()} ${requestUrl} \n ${failure}`);
-        }
-        if (failure === null) {
-          const status = response.status();
-          console.debug(`${status} ${request.method()} ${requestUrl}`);
+        const method = request.method().trim();
+        if (method !== 'OPTIONS') {
+          if (failure !== null) {
+            console.debug(`${response.status()} ${method} ${requestUrl} \n ${failure.errorText}`);
+          } else {
+            console.debug(`${response.status()} ${request.method()} ${requestUrl}`);
+          }
         }
       }
       // tslint:disable-next-line:no-empty
