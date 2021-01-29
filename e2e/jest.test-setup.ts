@@ -28,36 +28,36 @@ beforeEach(async () => {
       // tslint:disable-next-line:no-empty
     } catch (e) {
     }
-  })
+  });
 
   page.on('console', async(message) => {
     if (message != null) {
       const msg = message.type().toUpperCase();
       // Don't log "log", "info" or "debug"
-      if (msg.includes('ERROR') && msg.includes('WARNING')) {
-        console.log(`${message.type()}: ${message.text()}`);
+      if (msg.includes('ERROR') || msg.includes('WARNING')) {
+        console.error(`${message.type()}: ${message.text()}`);
       }
     }
   });
 
   // Emitted when the page crashed
   page.on('error', error => {
-    console.error(`❌ ${error.toString()}`);
+    console.error(`❌ ${error}`);
   });
 
   // Emitted when a script has uncaught exception
   page.on('pageerror', error => {
     if (error != null) {
-      console.error(`❌ ${error.toString()}`);
+      console.error(`❌ ${error}`);
     }
   });
 
   // Emitted when a request failed. Warning: blocked requests from above will be logged as failed requests, safe to ignore these.
   page.on('requestfailed', request => {
     const response = request.response();
-    if (response !== null && !response.ok) {
+    if (response !== null) {
       const status = response.status();
-      console.error(`❌ ${status} ${request.method()} ${request.url()}  \n ${response.text()}`);
+      console.error(`❌ ${status} ${request.method()} ${request.url()}  \n ${request.failure().errorText} \n ${response.text()}`);
     }
   });
 

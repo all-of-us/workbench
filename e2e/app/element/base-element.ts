@@ -143,7 +143,7 @@ export default class BaseElement extends Container {
   async click(options?: ClickOptions): Promise<void> {
     return this.asElementHandle()
       .then(async element => {
-        // Wait for the x & y to stop changin within specified time.
+        // Wait for x,y to stop changing within specified time.
         const startTime = Date.now();
         let prevX;
         let prevY;
