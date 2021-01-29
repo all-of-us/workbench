@@ -35,10 +35,7 @@ export default abstract class AuthenticatedPage extends BasePage {
   async waitForLoad(): Promise<this> {
     try {
       await this.isSignedIn();
-      await this.isLoaded().catch(() => {
-        console.warn('Retry failed isLoaded() function');
-        this.isLoaded();
-      });
+      await this.isLoaded();
     } catch (err) {
       await savePageToFile(this.page);
       await takeScreenshot(this.page);

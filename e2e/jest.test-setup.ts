@@ -31,7 +31,13 @@ beforeEach(async () => {
   })
 
   page.on('console', async(message) => {
-    console.log(`console => ${message.type()} ${message.text()}`);
+    if (message != null) {
+      const msg = message.type().toUpperCase();
+      // Don't log "log", "info" or "debug"
+      if (msg.includes('ERROR') && msg.includes('WARNING')) {
+        console.log(`${message.type()}: ${message.text()}`);
+      }
+    }
   });
 
   // Emitted when the page crashed
@@ -41,7 +47,9 @@ beforeEach(async () => {
 
   // Emitted when a script has uncaught exception
   page.on('pageerror', error => {
-    console.error(`❌ ${error.toString()}`);
+    if (error != null) {
+      console.error(`❌ ${error.toString()}`);
+    }
   });
 
   // Emitted when a request failed. Warning: blocked requests from above will be logged as failed requests, safe to ignore these.
@@ -58,19 +66,21 @@ beforeEach(async () => {
       const request = response.request();
       const requestUrl = request.url();
 
-      // filter out some responses
+      // Long only responses from AoU-app requests
       if (requestUrl.includes('api-dot-all-of-us')) {
         const failure = request.failure();
+        if (failure !== null) {
+          console.info(`${status} ${request.method()} ${requestUrl} \n ${failure}`);
+        }
+        /*
+        // Do not remove.
         if (failure === null) {
           const text = await response.text();
           const status = response.status();
           console.info(`${status} ${request.method()} ${requestUrl} \n ${text}`);
-        } else {
-          console.info(`${status} ${request.method()} ${requestUrl} \n ${failure}`);
         }
-
+        */
       }
-
       // tslint:disable-next-line:no-empty
     } catch (err) {
     }
