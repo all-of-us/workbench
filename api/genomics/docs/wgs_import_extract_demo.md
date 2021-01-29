@@ -28,8 +28,8 @@ reproducability but note that the source for these files will probably change ov
 
 1. Create cohort table of sample to extract (argument for --fq_cohort_sample_names in next step)
     - The following commands will use the entire metadata table as the cohort but you can create a subset by removing entries from sample_map.txt
-    - ```bq query --format=csv --nouse_legacy_sql 'SELECT sample_id,sample_name FROM `all-of-us-workbench-test.wgs_demo.metadata`' | sed -e 1d > sample_map.txt```
-    - `bq load --max_rows=1000000 --source_format=CSV all-of-us-workbench-test:wgs_demo.cohort sample_map.txt sample_id:INTEGER,sample_name:STRING`
+    - ```bq query --max_rows=1000000 --format=csv --nouse_legacy_sql 'SELECT sample_id,sample_name FROM `all-of-us-workbench-test.wgs_demo.metadata`' | sed -e 1d > sample_map.txt```
+    - `bq load --source_format=CSV all-of-us-workbench-test:wgs_demo.cohort sample_map.txt sample_id:INTEGER,sample_name:STRING`
 	- I used `cohort` as my table name but it can be anything as long as you adjust it in the following steps
 
 2. Create an empty dataset for the next step. I used `wgs_demo_1_temp_tables`
