@@ -53,7 +53,7 @@ public class DbAccessTier {
     return this;
   }
 
-  @Column(name = "service_perimeter", nullable = false, unique = true)
+  @Column(name = "service_perimeter", nullable = false)
   public String getServicePerimeter() {
     return servicePerimeter;
   }
@@ -63,7 +63,7 @@ public class DbAccessTier {
     return this;
   }
 
-  @Column(name = "auth_domain_name", nullable = false, unique = true)
+  @Column(name = "auth_domain_name", nullable = false)
   public String getAuthDomainName() {
     return authDomainName;
   }
@@ -73,7 +73,7 @@ public class DbAccessTier {
     return this;
   }
 
-  @Column(name = "auth_domain_group_email", nullable = false, unique = true)
+  @Column(name = "auth_domain_group_email", nullable = false)
   public String getAuthDomainGroupEmail() {
     return authDomainGroupEmail;
   }
