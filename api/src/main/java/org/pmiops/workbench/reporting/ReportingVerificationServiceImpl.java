@@ -56,7 +56,55 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
   }
 
   @Override
-  public ReportingUploadDetails getUploadDetails(ReportingSnapshot snapshot) {
+  public ReportingUploadDetails verifyAndLog(ReportingSnapshot reportingSnapshot) {
+    // check each table. Note that for streaming inputs, not all rows may be immediately available.
+    final ReportingUploadDetails uploadDetails = getUploadDetails(reportingSnapshot);
+    final StringBuilder sb =
+        new StringBuilder(
+            String.format("Verifying Snapshot %d:\n", reportingSnapshot.getCaptureTimestamp()));
+    sb.append("Table\tUploaded\tExpected\tDifference(%)\n");
+    Level detailsLogLevel = Level.INFO;
+    for (final ReportingUploadResult result : uploadDetails.getUploads()) {
+      if (!verifyCount(
+          result.getTableName(), result.getSourceRowCount(), result.getDestinationRowCount(), sb)) {
+        detailsLogLevel = Level.WARNING;
+      }
+    }
+    logger.log(detailsLogLevel, sb.toString());
+    return uploadDetails;
+  }
+
+  @Override
+  public boolean verifyBatchesAndLog(
+      Map<BatchSupportedTableEnum, Integer> tableNameAndCount, long captureSnapshotTime) {
+    final StringBuilder sb =
+        new StringBuilder(String.format("Verifying batches %d:\n", captureSnapshotTime));
+    Level detailsLogLevel = Level.INFO;
+
+    for (Map.Entry<BatchSupportedTableEnum, Integer> entry : tableNameAndCount.entrySet()) {
+      sb.append("Table\tUploaded\tExpected\tDifference(%)\n");
+      switch (entry.getKey()) {
+        case WORKSPACE:
+          int sourceCount = reportingQueryService.getWorkspacesCount();
+          System.out.println("!!!!!!!!!");
+          System.out.println(sourceCount);
+          if (!verifyCount(
+              entry.getKey().name().toLowerCase(),
+              (long) sourceCount,
+              (long) entry.getValue(),
+              sb)) {
+            detailsLogLevel = Level.WARNING;
+          }
+          break;
+        default:
+          break;
+      }
+    }
+    logger.log(detailsLogLevel, sb.toString());
+    return detailsLogLevel.equals(Level.INFO);
+  }
+
+  private ReportingUploadDetails getUploadDetails(ReportingSnapshot snapshot) {
     final Stopwatch verifyStopwatch = stopwatchProvider.get();
     verifyStopwatch.start();
     final ReportingUploadDetails result =
@@ -97,52 +145,6 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
     verifyStopwatch.stop();
     logger.info(LogFormatters.duration("Verification queries", verifyStopwatch.elapsed()));
     return result;
-  }
-
-  @Override
-  public ReportingUploadDetails verifyAndLog(ReportingSnapshot reportingSnapshot) {
-    // check each table. Note that for streaming inputs, not all rows may be immediately available.
-    final ReportingUploadDetails uploadDetails = getUploadDetails(reportingSnapshot);
-    final StringBuilder sb =
-        new StringBuilder(
-            String.format("Verifying Snapshot %d:\n", reportingSnapshot.getCaptureTimestamp()));
-    sb.append("Table\tUploaded\tExpected\tDifference(%)\n");
-    Level detailsLogLevel = Level.INFO;
-    for (final ReportingUploadResult result : uploadDetails.getUploads()) {
-      if (!verifyCount(
-          result.getTableName(), result.getSourceRowCount(), result.getDestinationRowCount(), sb)) {
-        detailsLogLevel = Level.WARNING;
-      }
-    }
-    logger.log(detailsLogLevel, sb.toString());
-    return uploadDetails;
-  }
-
-  @Override
-  public void verifyBatchesAndLog(
-      Map<BatchSupportedTableEnum, Integer> tableNameAndCount, long captureSnapshotTime) {
-    final StringBuilder sb =
-        new StringBuilder(String.format("Verifying batches %d:\n", captureSnapshotTime));
-    Level detailsLogLevel = Level.INFO;
-
-    for (Map.Entry<BatchSupportedTableEnum, Integer> entry : tableNameAndCount.entrySet()) {
-      sb.append("Table\tUploaded\tExpected\tDifference(%)\n");
-      switch (entry.getKey()) {
-        case WORKSPACE:
-          int sourceCount = reportingQueryService.getWorkspacesCount();
-          if (!verifyCount(
-              entry.getKey().name().toLowerCase(),
-              (long) sourceCount,
-              (long) entry.getValue(),
-              sb)) {
-            detailsLogLevel = Level.WARNING;
-          }
-          break;
-        default:
-          break;
-      }
-    }
-    logger.log(detailsLogLevel, sb.toString());
   }
 
   /** Verifies source count equals to destination count. Returns {@code true} of match. */
