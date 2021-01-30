@@ -1,4 +1,4 @@
-package org.pmiops.workbench.tools.cdrConfig;
+package org.pmiops.workbench.tools.cdrconfig;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;

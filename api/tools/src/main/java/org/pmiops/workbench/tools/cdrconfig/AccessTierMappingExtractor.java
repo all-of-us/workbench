@@ -1,4 +1,4 @@
-package org.pmiops.workbench.tools.cdrConfig;
+package org.pmiops.workbench.tools.cdrconfig;
 
 import java.util.List;
 
