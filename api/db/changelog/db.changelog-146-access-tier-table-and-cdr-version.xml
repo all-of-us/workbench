@@ -6,7 +6,7 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="thibault" id="changelog-146-access-tier-table-and-cdr-version">
     <createTable tableName="access_tier">
-      <column name="access_tier_id" type="bigint" autoIncrement="true">
+      <column name="access_tier_id" type="bigint">
         <constraints primaryKey="true" nullable="false"/>
       </column>
       <column name="short_name" type="VARCHAR(40)">

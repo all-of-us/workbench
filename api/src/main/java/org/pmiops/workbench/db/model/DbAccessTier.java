@@ -3,8 +3,6 @@ package org.pmiops.workbench.db.model;
 import com.google.common.base.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -22,7 +20,6 @@ public class DbAccessTier {
   public DbAccessTier() {}
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "access_tier_id")
   public long getAccessTierId() {
     return accessTierId;
