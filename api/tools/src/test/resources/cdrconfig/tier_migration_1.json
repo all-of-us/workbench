@@ -24,7 +24,7 @@
       "elasticIndexBaseName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "accessTier": 1
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 2,
@@ -41,7 +41,7 @@
       "elasticIndexBaseName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "accessTier": 1
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 3,
@@ -57,7 +57,7 @@
       "elasticIndexBaseName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "accessTier": 1
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 4,
@@ -74,7 +74,7 @@
       "elasticIndexBaseName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "accessTier": 1
+      "accessTier": "registered"
     }
   ]
 }

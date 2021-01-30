@@ -22,7 +22,7 @@
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_3",
       "elasticIndexBaseName": "synth_r_2019q1_1",
-      "accessTier": 1
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 2,
@@ -36,7 +36,7 @@
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_3",
       "elasticIndexBaseName": "synth_r_2019q1_1",
-      "accessTier": 1
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 3,
@@ -51,7 +51,7 @@
       "cdrDbName": "synth_r_2019q4_10",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "accessTier": 1
+      "accessTier": "registered"
     }
   ]
 }

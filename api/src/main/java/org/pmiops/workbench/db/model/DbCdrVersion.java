@@ -18,7 +18,6 @@ import org.pmiops.workbench.model.DataAccessLevel;
 @Entity
 @Table(name = "cdr_version")
 public class DbCdrVersion {
-
   private long cdrVersionId;
   private boolean isDefault;
   private String name;

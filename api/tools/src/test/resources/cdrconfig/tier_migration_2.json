@@ -32,7 +32,7 @@
       "elasticIndexBaseName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "accessTier": 1
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 2,
@@ -49,7 +49,7 @@
       "elasticIndexBaseName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "accessTier": 1
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 3,
@@ -65,7 +65,7 @@
       "elasticIndexBaseName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "accessTier": 1
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 4,
@@ -82,7 +82,7 @@
       "elasticIndexBaseName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "accessTier": 1
+      "accessTier": "registered"
     },{
       "cdrVersionId": 5,
       "isDefault": false,
@@ -97,7 +97,7 @@
       "elasticIndexBaseName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "accessTier": 2
+      "accessTier": "test"
     },
     {
       "cdrVersionId": 6,
@@ -114,7 +114,7 @@
       "elasticIndexBaseName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "accessTier": 2
+      "accessTier": "test"
     }
   ]
 }

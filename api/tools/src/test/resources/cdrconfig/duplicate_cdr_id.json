@@ -22,7 +22,7 @@
       "numParticipants": 0,
       "cdrDbName": "cdr",
       "elasticIndexBaseName": "cdr",
-      "accessTier": 1
+      "accessTier": "registered"
     },
     {
       "cdrVersionId": 1,
@@ -36,7 +36,7 @@
       "numParticipants": 0,
       "cdrDbName": "cdr",
       "elasticIndexBaseName": "cdr",
-      "accessTier": 1
+      "accessTier": "registered"
     }
   ]
 }
