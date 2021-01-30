@@ -20,7 +20,7 @@ x-api-defaults: &api-defaults
   env_file:
     - db/vars.env
   volumes:
-    - src-sync:/w:nocopy
+    - ..:/w
     - gradle-cache:/.gradle
     - ~/.config:/.config:cached
     - ~/.gsutil:/.gsutil:cached
@@ -89,5 +89,4 @@ volumes:
   esdata:
   gradle-cache:
   src-sync:
-    external: true
 
