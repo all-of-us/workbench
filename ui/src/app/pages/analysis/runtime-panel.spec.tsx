@@ -20,7 +20,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {defaultGceConfig, defaultDataprocConfig, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
-import {BillingStatus} from "generated/fetch";
+import {BillingStatus} from 'generated/fetch';
 
 describe('RuntimePanel', () => {
   let props: Props;
@@ -898,7 +898,9 @@ describe('RuntimePanel', () => {
         cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
       }});
 
-    const billingInactiveMessage = wrapper.find({'data-test-id': 'billing-inactive'});
-    expect(billingInactiveMessage.text()).toContain('disabled');
+    const disabledPanel = wrapper.find({'data-test-id': 'runtime-disabled-panel'});
+    expect(disabledPanel.exists()).toBeTruthy();
+    const createPanel = wrapper.find({'data-test-id': 'runtime-create-panel'});
+    expect(createPanel.exists()).toBeFalsy();
   });
 });

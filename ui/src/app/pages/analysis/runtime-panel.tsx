@@ -270,13 +270,14 @@ const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPr
 
 const DisabledPanel = () => {
   return <WarningMessage
+        data-test-id='runtime-disabled-panel'
         iconSize={16}
-        iconStyle={{alignSelf: 'flex-start', flex: '0 0 auto'}}
+        iconPosition={'top'}
     >
       {
         <TextColumn>
           <div style={{fontWeight: 600}}>Cloud services are disabled for this workspace.</div>
-          <div data-test-id='billing-inactive' style={{marginTop: '0.5rem'}}>
+          <div style={{marginTop: '0.5rem'}}>
             You cannot run or edit notebooks in this workspace because billed services are disabled
             for the workspace creator's <AoU/> Researcher account.
           </div>
@@ -651,7 +652,7 @@ const CreatePanel = ({creatorFreeCreditsRemaining, profile, setPanelContent, wor
   const displayName = runtimeConfig.computeType === ComputeType.Dataproc ?
     runtimePresets.hailAnalysis.displayName : runtimePresets.generalAnalysis.displayName;
 
-  return <div style={styles.controlSection}>
+  return <div data-test-id='runtime-create-panel' style={styles.controlSection}>
     <FlexRow style={styles.costPredictorWrapper}>
       <StartStopRuntimeButton workspaceNamespace={workspace.namespace}/>
       <CostInfo runtimeChanged={false}
