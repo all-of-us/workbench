@@ -120,7 +120,7 @@ def publish_cdr(cmd_name, args)
   common = Common.new
   env = ENVIRONMENTS[op.opts.project]
   account = env.fetch(:publisher_account)
-  app_sa = "#{ENVIRONMENTS[op.opts.project]}@appspot.gserviceaccount.com"
+  app_sa = "#{op.opts.project}@appspot.gserviceaccount.com"
   tier = env.fetch(:accessTiers)[op.opts.tier]
 
   # TODO(RW-3208): Investigate using a temporary / impersonated SA credential instead of a key.
