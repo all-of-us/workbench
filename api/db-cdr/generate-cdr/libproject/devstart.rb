@@ -8,51 +8,60 @@ require "tempfile"
 ENVIRONMENTS = {
   "all-of-us-workbench-test" => {
     :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
-    :source_cdr_project => "all-of-us-ehr-dev",
-    :ingest_cdr_project => "fc-aou-vpc-ingest-test",
-    :dest_cdr_project => "fc-aou-cdr-synth-test",
-    :config_json => "config_test.json"
+    :accessTiers => {
+      "registered" => {
+        :source_cdr_project => "all-of-us-ehr-dev",
+        :ingest_cdr_project => "fc-aou-vpc-ingest-test",
+        :dest_cdr_project => "fc-aou-cdr-synth-test",
+        :auth_domain_group_email => "GROUP_all-of-us-registered-test@dev.test.firecloud.org",
+      },
+    }
   },
   "all-of-us-rw-staging" => {
     :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
-    :source_cdr_project => "all-of-us-ehr-dev",
-    :ingest_cdr_project => "fc-aou-vpc-ingest-staging",
-    :dest_cdr_project => "fc-aou-cdr-synth-staging",
-    :config_json => "config_staging.json"
+    :accessTiers => {
+      "registered" => {
+        :source_cdr_project => "all-of-us-ehr-dev",
+        :ingest_cdr_project => "fc-aou-vpc-ingest-staging",
+        :dest_cdr_project => "fc-aou-cdr-synth-staging",
+        :auth_domain_group_email => "GROUP_all-of-us-registered-staging@firecloud.org",
+      },
+    }
   },
   "all-of-us-rw-stable" => {
     :publisher_account => "deploy@all-of-us-rw-stable.iam.gserviceaccount.com",
-    :source_cdr_project => "all-of-us-ehr-dev",
-    :ingest_cdr_project => "fc-aou-vpc-ingest-stable",
-    :dest_cdr_project => "fc-aou-cdr-synth-stable",
-    :config_json => "config_stable.json"
+    :accessTiers => {
+      "registered" => {
+        :source_cdr_project => "all-of-us-ehr-dev",
+        :ingest_cdr_project => "fc-aou-vpc-ingest-stable",
+        :dest_cdr_project => "fc-aou-cdr-synth-stable",
+        :auth_domain_group_email => "GROUP_all-of-us-registered-stable@firecloud.org",
+      },
+    }
   },
   "all-of-us-rw-preprod" => {
     :publisher_account => "deploy@all-of-us-rw-preprod.iam.gserviceaccount.com",
-    :source_cdr_project => "aou-res-curation-output-prod",
-    :ingest_cdr_project => "fc-aou-vpc-ingest-preprod",
-    :dest_cdr_project => "fc-aou-cdr-preprod",
-    :config_json => "config_preprod.json"
+    :accessTiers => {
+      "registered" => {
+        :source_cdr_project => "aou-res-curation-output-prod",
+        :ingest_cdr_project => "fc-aou-vpc-ingest-preprod",
+        :dest_cdr_project => "fc-aou-cdr-preprod",
+        :auth_domain_group_email => "all-of-us-registered-preprod@firecloud.org",
+      },
+    }
   },
   "all-of-us-rw-prod" => {
     :publisher_account => "deploy@all-of-us-rw-prod.iam.gserviceaccount.com",
-    :source_cdr_project => "aou-res-curation-output-prod",
-    :ingest_cdr_project => "fc-aou-vpc-ingest-prod",
-    :dest_cdr_project => "fc-aou-cdr-prod",
-    :config_json => "config_prod.json"
+    :accessTiers => {
+      "registered" => {
+        :source_cdr_project => "aou-res-curation-output-prod",
+        :ingest_cdr_project => "fc-aou-vpc-ingest-prod",
+        :dest_cdr_project => "fc-aou-cdr-prod",
+        :auth_domain_group_email => "all-of-us-registered-prod@firecloud.org",
+      },
+    }
   }
 }
-
-def get_config(env)
-  unless ENVIRONMENTS.fetch(env, {}).has_key?(:config_json)
-    raise ArgumentError.new("env '#{env}' lacks a valid configuration")
-  end
-  return JSON.parse(File.read("../../config/" + ENVIRONMENTS[env][:config_json]))
-end
-
-def get_auth_domain_group_email(project)
-  return get_config(project)["firecloud"]["registeredDomainGroup"]
-end
 
 def ensure_docker(cmd_name, args=nil)
   args = (args or [])
@@ -77,6 +86,13 @@ def publish_cdr(cmd_name, args)
     "The Google Cloud project associated with this workbench environment, " +
     "e.g. all-of-us-rw-staging. Required."
   )
+  op.opts.tier = "registered"
+  op.add_option(
+     "--tier [tier]",
+     ->(opts, v) { opts.tier = v},
+     "The access tier associated with this CDR, " +
+     "e.g. registered. Default is registered."
+   )
   op.add_option(
     "--table-prefixes [prefix1,prefix2,...]",
     ->(opts, v) { opts.table_prefixes = v},
@@ -86,8 +102,9 @@ def publish_cdr(cmd_name, args)
     "was an issue with the publish. In general, CDRs should be treated as " +
     "immutable after the initial publish."
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_dataset and opts.project }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_dataset and opts.project and opts.tier }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
+  op.add_validator ->(opts) { raise ArgumentError.new("unsupported tier: #{opts.tier}") unless ENVIRONMENTS[opts.project][:accessTiers].key? opts.tier }
   op.parse.validate
 
   # This is a grep filter. It matches all tables, by default.
@@ -104,7 +121,8 @@ def publish_cdr(cmd_name, args)
   common = Common.new
   env = ENVIRONMENTS[op.opts.project]
   account = env.fetch(:publisher_account)
-  app_sa = "#{ENVIRONMENTS[op.opts.project]}@appspot.gserviceaccount.com"
+  app_sa = "#{op.opts.project}@appspot.gserviceaccount.com"
+  tier = env.fetch(:accessTiers)[op.opts.tier]
 
   # TODO(RW-3208): Investigate using a temporary / impersonated SA credential instead of a key.
   key_file = Tempfile.new(["#{account}-key", ".json"], "/tmp")
@@ -115,9 +133,9 @@ def publish_cdr(cmd_name, args)
     # session, or else we would revert the active account after running.
     common.run_inline %W{gcloud auth activate-service-account -q --key-file #{key_file.path}}
 
-    source_dataset = "#{env.fetch(:source_cdr_project)}:#{op.opts.bq_dataset}"
-    ingest_dataset = "#{env.fetch(:ingest_cdr_project)}:#{op.opts.bq_dataset}"
-    dest_dataset = "#{env.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
+    source_dataset = "#{tier.fetch(:source_cdr_project)}:#{op.opts.bq_dataset}"
+    ingest_dataset = "#{tier.fetch(:ingest_cdr_project)}:#{op.opts.bq_dataset}"
+    dest_dataset = "#{tier.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
     common.status "Copying from '#{source_dataset}' -> '#{ingest_dataset}' -> '#{dest_dataset}' as #{account}"
 
     # If you receive an error from "bq" like "Invalid JWT Signature", you may
@@ -129,18 +147,18 @@ def publish_cdr(cmd_name, args)
     # See https://docs.google.com/document/d/1EHw5nisXspJjA9yeZput3W4-vSIcuLBU5dPizTnk1i0/edit
     common.run_inline %W{bq mk -f --default_table_expiration 7200 --dataset #{ingest_dataset}}
     common.run_inline %W{./copy-bq-dataset.sh
-        #{source_dataset} #{ingest_dataset} #{env.fetch(:source_cdr_project)}
+        #{source_dataset} #{ingest_dataset} #{tier.fetch(:source_cdr_project)}
         #{table_match_filter} #{table_skip_filter}}
 
     common.run_inline %W{bq mk -f --dataset #{dest_dataset}}
     common.run_inline %W{./copy-bq-dataset.sh
-        #{ingest_dataset} #{dest_dataset} #{env.fetch(:ingest_cdr_project)}
+        #{ingest_dataset} #{dest_dataset} #{tier.fetch(:ingest_cdr_project)}
         #{table_match_filter} #{table_skip_filter}}
 
     # Delete the intermediate dataset.
     common.run_inline %W{bq rm -r -f --dataset #{ingest_dataset}}
 
-    auth_domain_group_email = get_auth_domain_group_email(op.opts.project)
+    auth_domain_group_email = tier.fetch(:auth_domain_group_email)
 
     config_file = Tempfile.new("#{op.opts.bq_dataset}-config.json")
     begin
