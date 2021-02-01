@@ -330,6 +330,7 @@ public final class DbStorageEnums {
           .put(Education.COLLEGE_GRADUATE, (short) 3)
           .put(Education.MASTER, (short) 4)
           .put(Education.DOCTORATE, (short) 5)
+          .put(Education.PREFER_NO_ANSWER, (short) 7)
           .build();
 
   public static Education educationFromStorage(Short education) {
