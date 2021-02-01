@@ -139,6 +139,7 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     bigQueryService.insertAll(insertAllRequest);
     // No need to check response, either it success, we get the record, or it fails, no record
     // presents.
+    log.info(String.format("Verify snapshot at %d", captureTimestamp));
   }
 
   /** Issues one {@link BigQueryService#insertAll(InsertAllRequest)}, then logs the performance. */
