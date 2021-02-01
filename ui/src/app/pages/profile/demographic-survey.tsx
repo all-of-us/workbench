@@ -15,11 +15,10 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, toggleIncludes} from 'app/utils';
 
 import {environment} from 'environments/environment';
-import {Profile, Race, GenderIdentity, SexAtBirth } from 'generated/fetch';
+import {Profile, Race, GenderIdentity, SexAtBirth, Disability } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
-// import { GenderIdentity, SexAtBirth } from 'generated';
 import * as validate from 'validate.js';
 
 const styles = reactStyles({
@@ -108,14 +107,15 @@ export class DemographicSurvey extends React.Component<Props, State> {
   }
 
   validateDemographicSurvey(demographicSurvey) {
+    validate.validators.nullBoolean = v => (v === true || v === false || v === null) ? undefined : 'value must be selected'
     const validationCheck = {
       race: { presence: { allowEmpty: false } },
       ethniticy: { presence: false  },
       genderIdentityList: { presence: { allowEmpty: false } },
-      identifiesAsLgbtq: { presence: { allowEmpty: false } },
+      identifiesAsLgbtq: { nullBoolean: {} },
       sexAtBirth: { presence: { allowEmpty: false } },
       yearOfBirth: { presence: { allowEmpty: false } },
-      disability: { presence: { allowEmpty: false } },
+      disability: { nullBoolean: {} },
       education: { presence: { allowEmpty: false } },
       lgbtqIdentity: {
         length: {
@@ -263,13 +263,13 @@ or another sexual and/or gender minority?'>
           <FlexRow style={{alignItems: 'baseline'}}>
             <RadioButton id='radio-disability-yes' onChange={
               (e) => this.updateDemographicAttribute('disability', true)}
-                         checked={!!demographicSurvey ? demographicSurvey.disability === true : false}
+                         checked={!!demographicSurvey ? demographicSurvey.disability === Disability.True : false}
                          style={{marginRight: '0.5rem'}}/>
             <label htmlFor='radio-disability-yes' style={{paddingRight: '3rem', color: colors.primary}}>Yes</label>
           </FlexRow>
           <FlexRow style={{alignItems: 'baseline'}}>
             <RadioButton id='radio-disability-no' onChange={(e) => this.updateDemographicAttribute('disability', false)}
-                         checked={!!demographicSurvey ? demographicSurvey.disability === false : false}
+                         checked={!!demographicSurvey ? demographicSurvey.disability === Disability.False : false}
                          style={{marginRight: '0.5rem'}}/>
             <label htmlFor='radio-disability-no' style={{color: colors.primary}}>No</label>
           </FlexRow>
