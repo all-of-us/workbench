@@ -3,7 +3,7 @@ import {ClrIcon} from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import * as React from 'react';
 
-export const WarningMessage = ({children}) => {
+export const WarningMessage = ({iconSize = 30, iconStyle = {}, children}) => {
   return <FlexRow
     style={{
       alignItems: 'center',
@@ -12,13 +12,13 @@ export const WarningMessage = ({children}) => {
       borderRadius: '5px',
       color: colors.dark,
       marginTop: '.5rem',
-      padding: '.5rem 0px'
+      padding: '.5rem 0px',
     }}
   >
     <ClrIcon
-      style={{color: colors.warning, marginLeft: '.5rem'}}
+      style={{color: colors.warning, marginLeft: '.5rem', ...iconStyle}}
       shape={'warning-standard'}
-      size={30}
+      size={iconSize}
       class={'is-solid'}
     />
     <div style={{paddingLeft: '0.5rem', paddingRight: '0.5rem'}}>

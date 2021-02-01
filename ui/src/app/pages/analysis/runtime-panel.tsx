@@ -54,6 +54,7 @@ import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 import * as React from 'react';
 import {validate} from 'validate.js';
+import {AoU} from "../../components/text-wrappers";
 
 const {useState, useEffect, Fragment} = React;
 
@@ -161,6 +162,7 @@ enum PanelContent {
   Create = 'Create',
   Customize = 'Customize',
   Delete = 'Delete',
+  Disabled = 'Disabled',
   Confirm = 'Confirm'
 }
 
@@ -262,6 +264,23 @@ const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPr
         value={memory}
         />
   </Fragment>;
+};
+
+const DisabledPanel = () => {
+    return <WarningMessage
+        iconSize={16}
+        iconStyle={{alignSelf: 'flex-start', flex: '0 0 auto'}}
+    >
+      {
+        <TextColumn>
+          <div style={{fontWeight: 600}}>Cloud services are disabled for this workspace.</div>
+          <div style={{marginTop: '0.5rem'}}>
+            You cannot run or edit notebooks in this workspace because billed services are disabled
+            for the workspace creator's <AoU/> Researcher account.
+          </div>
+        </TextColumn>
+      }
+    </WarningMessage>
 };
 
 const DiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskSize, idPrefix}) => {
@@ -770,20 +789,37 @@ export const RuntimePanel = fp.flow(
   const initialMasterMachine = findMachineByName(machineName) || defaultMachineType;
   const initialCompute = dataprocConfig ? ComputeType.Dataproc : ComputeType.Standard;
 
+  const [creatorFreeCreditsRemaining, setCreatorFreeCreditsRemaining] = useState(null);
+  useEffect(() => {
+    const aborter = new AbortController();
+    const fetchFreeCredits = async() => {
+      const {freeCreditsRemaining} = await workspacesApi().getWorkspaceCreatorFreeCreditsRemaining(namespace, id, {signal: aborter.signal});
+      setCreatorFreeCreditsRemaining(freeCreditsRemaining);
+    };
+
+    fetchFreeCredits();
+
+    return function cleanup() {
+      aborter.abort();
+    };
+  }, []);
+
+
   // We may encounter a race condition where an existing current runtime has not loaded by the time this panel renders.
   // It's unclear how often that would actually happen.
   const initialPanelContent = fp.cond([
+    [([c, , ]) => c <= 0, () => PanelContent.Disabled],
     // currentRuntime being undefined means the first `getRuntime` has still not completed.
     // If there's a pendingRuntime, this means there's already a create/update
     // in progress, even if the runtime store doesn't actively reflect this yet.
     // Show the customize panel in this event.
-    [([r, ]) => r === undefined || !!pendingRuntime, () => PanelContent.Customize],
-    [([r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
-    [([r, ]) => r.status === RuntimeStatus.Deleted &&
+    [([c, r, ]) => r === undefined || !!pendingRuntime, () => PanelContent.Customize],
+    [([c, r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
+    [([c, r, ]) => r.status === RuntimeStatus.Deleted &&
       ([RuntimeConfigurationType.GeneralAnalysis, RuntimeConfigurationType.HailGenomicAnalysis].includes(r.configurationType)),
       () => PanelContent.Create],
     [() => true, () => PanelContent.Customize]
-  ])([currentRuntime, status]);
+  ])([creatorFreeCreditsRemaining, currentRuntime, status]);
   const [panelContent, setPanelContent] = useState<PanelContent>(initialPanelContent);
 
   const [selectedMachine, setSelectedMachine] = useState(initialMasterMachine);
@@ -825,21 +861,6 @@ export const RuntimePanel = fp.flow(
   const runtimeDiffs = getRuntimeConfigDiffs(initialRuntimeConfig, newRuntimeConfig);
   const runtimeChanged = runtimeExists && runtimeDiffs.length > 0;
   const needsDelete = runtimeDiffs.map(diff => diff.differenceType).includes(RuntimeDiffState.NEEDS_DELETE);
-
-  const [creatorFreeCreditsRemaining, setCreatorFreeCreditsRemaining] = useState(null);
-  useEffect(() => {
-    const aborter = new AbortController();
-    const fetchFreeCredits = async() => {
-      const {freeCreditsRemaining} = await workspacesApi().getWorkspaceCreatorFreeCreditsRemaining(namespace, id, {signal: aborter.signal});
-      setCreatorFreeCreditsRemaining(freeCreditsRemaining);
-    };
-
-    fetchFreeCredits();
-
-    return function cleanup() {
-      aborter.abort();
-    };
-  }, []);
 
   if (currentRuntime === undefined) {
     return <Spinner style={{width: '100%', marginTop: '5rem'}}/>;
@@ -1059,6 +1080,7 @@ export const RuntimePanel = fp.flow(
                                                          setPanelContent(PanelContent.Customize);
                                                        }}
                                                        updateButton={renderUpdateButton()}
-      />])}
+      />],
+    [PanelContent.Disabled, () => <DisabledPanel/>])}
   </div>;
 });
