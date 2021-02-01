@@ -43,7 +43,8 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {AoU} from 'app/components/text-wrappers';
 import {
-  BillingAccountType, BillingStatus,
+  BillingAccountType,
+  BillingStatus,
   CdrVersionListResponse,
   DataprocConfig,
   Runtime,
@@ -798,9 +799,9 @@ export const RuntimePanel = fp.flow(
     // If there's a pendingRuntime, this means there's already a create/update
     // in progress, even if the runtime store doesn't actively reflect this yet.
     // Show the customize panel in this event.
-    [([b, r, ]) => r === undefined || !!pendingRuntime, () => PanelContent.Customize],
-    [([b, r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
-    [([b, r, ]) => r.status === RuntimeStatus.Deleted &&
+    [([, r, ]) => r === undefined || !!pendingRuntime, () => PanelContent.Customize],
+    [([, r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
+    [([, r, ]) => r.status === RuntimeStatus.Deleted &&
       ([RuntimeConfigurationType.GeneralAnalysis, RuntimeConfigurationType.HailGenomicAnalysis].includes(r.configurationType)),
       () => PanelContent.Create],
     [() => true, () => PanelContent.Customize]
