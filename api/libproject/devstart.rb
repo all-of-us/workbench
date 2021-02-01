@@ -1963,6 +1963,58 @@ Common.register_command({
   :fn => ->(*args) { set_authority_local("set-authority-local", *args) }
 })
 
+def create_terra_bp_workspace(cmd_name, *args)
+  ensure_docker cmd_name, args
+
+  common = Common.new
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = true
+  op.add_option(
+      "--billing-account [billing-account]",
+      ->(opts, v) { opts.billing_account = v},
+      "Billing account to link the billing project to")
+  op.add_option(
+      "--billing-project-name [billing-project-name]",
+      ->(opts, v) { opts.billing_project_name = v},
+      "Billing project that the workspace will be created in")
+  op.add_option(
+      "--workspace-name [workspace-name]",
+      ->(opts, v) { opts.workspace_name = v},
+      "Terra workspace name")
+  op.add_validator ->(opts) {
+    unless (opts.billing_account or opts.billing_project_name or opts.workspace_name)
+      common.error "all arguments must be provided"
+      raise ArgumentError
+    end
+  }
+
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+
+  fc_config = get_fc_config(op.opts.project)
+
+  flags = ([
+      ["--fc-base-url", fc_config["baseUrl"]],
+      ["--billing-account", op.opts.billing_account],
+      ["--billing-project-name", op.opts.billing_project_name],
+      ["--workspace-name", op.opts.workspace_name],
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  flags.map! { |f| "'#{f}'" }
+
+  ServiceAccountContext.new(gcc.project).run do
+    common.run_inline %W{
+       gradle createTerraBillingProjectWorkspace
+       -PappArgs=[#{flags.join(',')}]}
+  end
+end
+
+Common.register_command({
+  :invocation => "create-terra-bp-workspace",
+  :description => "Create operational Terra billing project and workspace. This will NOT show up as an AoU workspace.",
+  :fn => ->(*args) { create_terra_bp_workspace("create-terra-bp-workspace", *args) }
+})
+
 def delete_runtimes(cmd_name, *args)
   ensure_docker cmd_name, args
 
