@@ -62,7 +62,11 @@ public class StorageEnumsTest {
       throws InvocationTargetException, IllegalAccessException {
     final Method enumToStorageMethod = enumClassToStorageMethod.get(enumClass);
     final Object returnValue = enumToStorageMethod.invoke(INDICATES_STATIC_METHOD, enumValue);
-    assertThat(returnValue instanceof Short).isTrue();
+
+    String invokedMethodDesc = String.format("%s(%s)", enumToStorageMethod.getName(), enumValue);
+
+    assertThat(returnValue).named(invokedMethodDesc).isNotNull();
+    assertThat(returnValue).named(invokedMethodDesc).isInstanceOf(Short.class);
     return (Short) returnValue;
   }
 
