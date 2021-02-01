@@ -36,4 +36,6 @@ were copied into `gs://all-of-us-workbench-test-genomics/1kg_gvcfs/`
 - The scatter count was increased to 1000 to let the extraction finish in a reasonable time frame (~3 hours). 
 - The extraction time per shard varies a lot right now. Probably due to some more complex genomic intervals containing many more variants than less complex regions.
 - Some of the shards were also failing until I turned down the parameter for max local records in memory from 10 million to 5 million.
-- // TODO eric - script to migrate VCF files en masse
+- Moving extract shards into GCS bucket
+  - `gsutil -m ls gs://fc-66b79f35-e7e8-4b0f-b8e8-ab57c9ce98ff/9b6bceb0-096e-400b-9b3e-825a36e74334/NgsCohortExtract/8f81c231-918b-43e0-b833-563bdeb833a0/call-ExtractTask/shard-*/1kg_wgs_*.vcf.gz > 1kg_extract_shards.txt`
+  - `cat 1kg_extract_shards.txt | awk '{print "gsutil mv "$0" gs://all-of-us-workbench-test-genomics/1kg_wgs/extract/"}' | parallel --jobs 8`
