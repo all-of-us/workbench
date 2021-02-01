@@ -63,7 +63,6 @@ interface State {
 }
 
 const isChecked = (demographicSurvey, optionKey, value) => demographicSurvey && demographicSurvey[optionKey] && demographicSurvey[optionKey].includes(value)
-const isCheckedx = (optionKey, value) => fp.flow(fp.get([optionKey]), fp.includes(value))
 export class DemographicSurvey extends React.Component<Props, State> {
   private captchaRef = React.createRef<ReCAPTCHA>();
   constructor(props: any) {
@@ -76,7 +75,19 @@ export class DemographicSurvey extends React.Component<Props, State> {
     };
   }
 
-  createOptionCheckbox(optionKey: string, optionObject: any, preferNoAnswer: any) {
+  createNoAnswerCheckbox ({value, label}, optionKey: string) {
+    const {profile: {demographicSurvey}} = this.state;
+
+    return <CheckBox label={label} data-test-id={'checkbox-' + value.toString()}
+                     style={styles.checkbox} key={value.toString()}  
+                     checked={isChecked(demographicSurvey, optionKey, value)}
+                     wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
+                     manageOwnState={false}
+                     onChange={nextValue => this.setState(fp.set(['profile', 'demographicSurvey', optionKey], nextValue ? [value] : []))}
+    />
+  }
+
+  createOptionCheckbox(optionKey: string, optionObject: any, preferNoAnswerValue: any) {
     const {profile: {demographicSurvey}} = this.state;
     const initialValue = demographicSurvey && demographicSurvey[optionKey] && demographicSurvey[optionKey].includes(optionObject.value);
   
@@ -85,7 +96,7 @@ export class DemographicSurvey extends React.Component<Props, State> {
                      checked={initialValue}
                      manageOwnState={false}
                      wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
-                     onChange={(value) => this.updateList(optionKey, optionObject.value, preferNoAnswer)}
+                     onChange={(value) => this.updateList(optionKey, optionObject.value, preferNoAnswerValue)}
     />;
   }
 
@@ -93,11 +104,11 @@ export class DemographicSurvey extends React.Component<Props, State> {
     this.setState({captchaToken: token, captcha: true});
   }
 
-  updateList(key, value, preferNoAnswer) {
+  updateList(key, value, preferNoAnswerValue) {
     // Toggle Includes removes the element if it already exists and adds if not
     const attributeList = fp.flow(
       toggleIncludes(value),
-      fp.remove(v => v === preferNoAnswer)
+      fp.remove(v => v === preferNoAnswerValue)
     )(this.state.profile.demographicSurvey[key] || []);
     this.updateDemographicAttribute(key, attributeList);
   }
@@ -161,16 +172,10 @@ export class DemographicSurvey extends React.Component<Props, State> {
         <FlexColumn style={styles.checkboxAreaContainer}>
           {fp.flow(
             fp.remove({value: Race.PREFERNOANSWER}),
-            fp.map((race) => this.createOptionCheckbox('race', race, Race.PREFERNOANSWER))
+            fp.map((race) => this.createOptionCheckbox('race', race, Race.PREFERNOANSWER)),
+            v => [...v, this.createNoAnswerCheckbox(pntaRace, 'race' )]
           )(AccountCreationOptions.race)
           }
-          <CheckBox label={pntaRace.label} data-test-id={'checkbox-' + pntaRace.value.toString()}
-                     style={styles.checkbox} key={pntaRace.value.toString()}  
-                     checked={isChecked(demographicSurvey, 'race', pntaRace.value)}
-                     wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
-                     manageOwnState={false}
-                     onChange={(value) => this.setState(fp.set(['profile', 'demographicSurvey', 'race'], value ? [pntaRace.value] : []))}
-          />
         </FlexColumn>
       </Section>
 
@@ -187,16 +192,10 @@ export class DemographicSurvey extends React.Component<Props, State> {
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
           {fp.flow(
             fp.remove({value: GenderIdentity.PREFERNOANSWER}),
-            fp.map((race) => this.createOptionCheckbox('genderIdentityList', race, GenderIdentity.PREFERNOANSWER))
+            fp.map((race) => this.createOptionCheckbox('genderIdentityList', race, GenderIdentity.PREFERNOANSWER)),
+            v => [...v, this.createNoAnswerCheckbox(pntaGenderIdentity, 'genderIdentityList' )]
           )(AccountCreationOptions.genderIdentity)
           }
-          <CheckBox label={pntaGenderIdentity.label} data-test-id={'checkbox-' + pntaGenderIdentity.value.toString()}
-                     style={styles.checkbox} key={pntaGenderIdentity.value.toString()}  
-                     checked={isChecked(demographicSurvey, 'genderIdentityList', pntaGenderIdentity.value)}
-                     wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
-                     manageOwnState={false}
-                     onChange={(value) => this.setState(fp.set(['profile', 'demographicSurvey', 'genderIdentityList'], value ? [pntaGenderIdentity.value] : []))}
-          />
         </FlexColumn>
       </Section>
 
@@ -237,17 +236,10 @@ or another sexual and/or gender minority?'>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
           {fp.flow(
             fp.remove({value: SexAtBirth.PREFERNOANSWER}),
-            fp.map((race) => this.createOptionCheckbox('sexAtBirth', race, SexAtBirth.PREFERNOANSWER))
+            fp.map((race) => this.createOptionCheckbox('sexAtBirth', race, SexAtBirth.PREFERNOANSWER)),
+            v => [...v, this.createNoAnswerCheckbox(pntaSexAtBirth, 'sexAtBirth' )]
           )(AccountCreationOptions.sexAtBirth)
           }          
-          <CheckBox label={pntaSexAtBirth.label} data-test-id={'checkbox-' + pntaSexAtBirth.value.toString()}
-                     style={styles.checkbox} key={pntaSexAtBirth.value.toString()}  
-                     checked={isChecked(demographicSurvey, 'sexAtBirth', pntaSexAtBirth.value)}
-                     wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
-                     manageOwnState={false}
-                     onChange={(value) => this.setState(fp.set(['profile', 'demographicSurvey', 'sexAtBirth'], value ? [pntaSexAtBirth.value] : []))}
-          />
-
         </FlexColumn>
       </Section>
 
