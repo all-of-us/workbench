@@ -974,12 +974,8 @@ export const RuntimePanel = fp.flow(
       Your cloud environment is unique to this workspace and not shared with other users.
     </div>
 
-    {/*
-      Normally we'd do this as part of panelContent, but 1) initialPanelContent only sets panelContent once
-      and 2) you can't set PanelContent in the body of render() or else it'll cause an infinite loop in render()
-    */}
     {switchCase(panelContent,
-          [PanelContent.Create, () =>
+      [PanelContent.Create, () =>
             <Fragment>
               <CreatePanel
                   creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
@@ -992,15 +988,15 @@ export const RuntimePanel = fp.flow(
                 {renderCreateButton()}
               </FlexRow>
             </Fragment>
-          ],
-          [PanelContent.Delete, () => <ConfirmDelete
+      ],
+      [PanelContent.Delete, () => <ConfirmDelete
             onConfirm={async() => {
               await setRuntimeStatus(RuntimeStatusRequest.Delete);
               onClose();
             }}
             onCancel={() => setPanelContent(PanelContent.Customize)}
           />],
-          [PanelContent.Customize, () => <Fragment>
+      [PanelContent.Customize, () => <Fragment>
             <div style={styles.controlSection}>
               <FlexRow style={styles.costPredictorWrapper}>
                 <StartStopRuntimeButton workspaceNamespace={workspace.namespace}/>
@@ -1078,7 +1074,7 @@ export const RuntimePanel = fp.flow(
                {!runtimeExists ? renderCreateButton() : renderNextButton()}
            </FlexRow>
          </Fragment>],
-          [PanelContent.Confirm, () => <ConfirmUpdatePanel initialRuntimeConfig={initialRuntimeConfig}
+      [PanelContent.Confirm, () => <ConfirmUpdatePanel initialRuntimeConfig={initialRuntimeConfig}
                                                            newRuntimeConfig={newRuntimeConfig}
                                                            onCancel={() => {
                                                              setPanelContent(PanelContent.Customize);
