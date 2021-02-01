@@ -19,31 +19,47 @@ ENVIRONMENTS = {
   },
   "all-of-us-rw-staging" => {
     :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
-    :source_cdr_project => "all-of-us-ehr-dev",
-    :ingest_cdr_project => "fc-aou-vpc-ingest-staging",
-    :dest_cdr_project => "fc-aou-cdr-synth-staging",
-    :config_json => "config_staging.json"
+    :accessTiers => {
+      "registered" => {
+        :source_cdr_project => "all-of-us-ehr-dev",
+        :ingest_cdr_project => "fc-aou-vpc-ingest-staging",
+        :dest_cdr_project => "fc-aou-cdr-synth-staging",
+        :auth_domain_group_email => "GROUP_all-of-us-registered-staging@firecloud.org",
+      },
+    }
   },
   "all-of-us-rw-stable" => {
     :publisher_account => "deploy@all-of-us-rw-stable.iam.gserviceaccount.com",
-    :source_cdr_project => "all-of-us-ehr-dev",
-    :ingest_cdr_project => "fc-aou-vpc-ingest-stable",
-    :dest_cdr_project => "fc-aou-cdr-synth-stable",
-    :config_json => "config_stable.json"
+    :accessTiers => {
+      "registered" => {
+        :source_cdr_project => "all-of-us-ehr-dev",
+        :ingest_cdr_project => "fc-aou-vpc-ingest-stable",
+        :dest_cdr_project => "fc-aou-cdr-synth-stable",
+        :auth_domain_group_email => "GROUP_all-of-us-registered-stable@firecloud.org",
+      },
+    }
   },
   "all-of-us-rw-preprod" => {
     :publisher_account => "deploy@all-of-us-rw-preprod.iam.gserviceaccount.com",
-    :source_cdr_project => "aou-res-curation-output-prod",
-    :ingest_cdr_project => "fc-aou-vpc-ingest-preprod",
-    :dest_cdr_project => "fc-aou-cdr-preprod",
-    :config_json => "config_preprod.json"
+    :accessTiers => {
+      "registered" => {
+        :source_cdr_project => "aou-res-curation-output-prod",
+        :ingest_cdr_project => "fc-aou-vpc-ingest-preprod",
+        :dest_cdr_project => "fc-aou-cdr-preprod",
+        :auth_domain_group_email => "all-of-us-registered-preprod@firecloud.org",
+      },
+    }
   },
   "all-of-us-rw-prod" => {
     :publisher_account => "deploy@all-of-us-rw-prod.iam.gserviceaccount.com",
-    :source_cdr_project => "aou-res-curation-output-prod",
-    :ingest_cdr_project => "fc-aou-vpc-ingest-prod",
-    :dest_cdr_project => "fc-aou-cdr-prod",
-    :config_json => "config_prod.json"
+    :accessTiers => {
+      "registered" => {
+        :source_cdr_project => "aou-res-curation-output-prod",
+        :ingest_cdr_project => "fc-aou-vpc-ingest-prod",
+        :dest_cdr_project => "fc-aou-cdr-prod",
+        :auth_domain_group_email => "all-of-us-registered-prod@firecloud.org",
+      },
+    }
   }
 }
 
