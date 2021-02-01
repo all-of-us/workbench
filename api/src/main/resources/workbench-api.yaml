@@ -2941,35 +2941,35 @@ paths:
           format: int64
           required: true
           description: specifies which annotation
-        put:
-          tags:
-            - cohortReview
-          consumes:
-            - application/json
-          description: This endpoint will modify a ParticipantCohortAnnotation.
-          operationId: updateParticipantCohortAnnotation
-          parameters:
-            - in: body
-              name: request
-              required: true
-              description: ParticipantCohortAnnotation modification request body
-              schema:
-                "$ref": "#/definitions/ModifyParticipantCohortAnnotationRequest"
-          responses:
-            200:
-              description: A ParticipantCohortAnnotation.
-              schema:
-                "$ref": "#/definitions/ParticipantCohortAnnotation"
-        delete:
-          tags:
-            - cohortReview
-          description: Deletes the ParticipantCohortAnnotation with the specified ID
-          operationId: deleteParticipantCohortAnnotation
-          responses:
-            202:
-              description: ParticipantCohortAnnotation deletion request accepted
-              schema:
-                "$ref": "#/definitions/EmptyResponse"
+      put:
+        tags:
+          - cohortReview
+        consumes:
+          - application/json
+        description: This endpoint will modify a ParticipantCohortAnnotation.
+        operationId: updateParticipantCohortAnnotation
+        parameters:
+          - in: body
+            name: request
+            required: true
+            description: ParticipantCohortAnnotation modification request body
+            schema:
+              "$ref": "#/definitions/ModifyParticipantCohortAnnotationRequest"
+        responses:
+          200:
+            description: A ParticipantCohortAnnotation.
+            schema:
+              "$ref": "#/definitions/ParticipantCohortAnnotation"
+      delete:
+        tags:
+          - cohortReview
+        description: Deletes the ParticipantCohortAnnotation with the specified ID
+        operationId: deleteParticipantCohortAnnotation
+        responses:
+          202:
+            description: ParticipantCohortAnnotation deletion request accepted
+            schema:
+              "$ref": "#/definitions/EmptyResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/review/{cohortReviewId}/vocabularies":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -8059,10 +8059,6 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ReportingUser"
-      verifiedSnapshot:
-        type: array
-        items:
-          "$ref": "#/definitions/ReportingVerifiedSnapshot"
       workspaces:
         type: array
         items:
@@ -8102,16 +8098,6 @@ definitions:
         description: Number of rows present in query
         type: integer
         format: int64
-  ReportingVerifiedSnapshot:
-    x-aou-note: |-
-      This code was generated using reporting-wizard.rb at 2021-01-31T20:07:42-05:00.
-      Manual modification should be avoided if possible as this is a one-time generation
-      and does not run on every build and updates must be merged manually for now.
-    type: object
-    properties:
-      tableName:
-        description: BigQuery table name
-        type: string
   ReportingUser:
     x-aou-note: |-
       This code was generated using reporting-wizard.rb at 2020-09-30T16:18:29-04:00.
