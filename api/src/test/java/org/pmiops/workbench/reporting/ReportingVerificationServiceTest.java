@@ -114,8 +114,11 @@ public class ReportingVerificationServiceTest {
   @Test
   public void testVerifyBatch_verified() throws Exception {
     createWorkspaces(ACTUAL_COUNT);
-    assertThat(reportingVerificationService.verifyBatchesAndLog(BATCH_UPLOADED_TABLES, 1111111L))
+    assertThat(
+            reportingVerificationService.verifyBatchesAndLog(
+                BATCH_UPLOADED_TABLES, NOW.toEpochMilli()))
         .isTrue();
+    // 2 entities in database, and we uploaded 2.
     String expectedLogPart = "workspace\t2\t2\t0 (0.000%)";
     assertThat(getTestCapturedLog().contains(expectedLogPart)).isTrue();
   }
@@ -123,8 +126,11 @@ public class ReportingVerificationServiceTest {
   @Test
   public void testVerifyBatch_fail() throws Exception {
     createWorkspaces(ACTUAL_COUNT * 2);
-    assertThat(reportingVerificationService.verifyBatchesAndLog(BATCH_UPLOADED_TABLES, 1111111L))
+    assertThat(
+            reportingVerificationService.verifyBatchesAndLog(
+                BATCH_UPLOADED_TABLES, NOW.toEpochMilli()))
         .isFalse();
+    // 4 entities in database, and we uploaded 2.
     String expectedLogPart = "workspace\t4\t2\t-2 (-50.000%)";
     assertThat(getTestCapturedLog().contains(expectedLogPart)).isTrue();
   }

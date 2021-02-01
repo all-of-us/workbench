@@ -81,22 +81,16 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
     Level detailsLogLevel = Level.INFO;
     boolean verified = true;
 
-    for (String tableName : batchTables) {
-      sb.append("Table\tUploaded\tExpected\tDifference(%)\n");
-      switch (tableName) {
-        case WorkspaceColumnValueExtractor.TABLE_NAME:
-          int sourceCount = reportingQueryService.getWorkspacesCount();
-          if (!verifyCount(
-              tableName,
-              (long) sourceCount,
-              getActualRowCount(tableName, captureSnapshotTime),
-              sb)) {
-            detailsLogLevel = Level.WARNING;
-            verified = false;
-          }
-          break;
-        default:
-          break;
+    sb.append("Table\tUploaded\tExpected\tDifference(%)\n");
+    if (batchTables.contains(WorkspaceColumnValueExtractor.TABLE_NAME)) {
+      int sourceCount = reportingQueryService.getWorkspacesCount();
+      if (!verifyCount(
+          WorkspaceColumnValueExtractor.TABLE_NAME,
+          (long) sourceCount,
+          getActualRowCount(WorkspaceColumnValueExtractor.TABLE_NAME, captureSnapshotTime),
+          sb)) {
+        detailsLogLevel = Level.WARNING;
+        verified = false;
       }
     }
     logger.log(detailsLogLevel, sb.toString());
