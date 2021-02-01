@@ -41,6 +41,7 @@ import {
 } from 'app/utils/runtime-utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
+import {AoU} from 'app/components/text-wrappers';
 import {
   BillingAccountType,
   CdrVersionListResponse,
@@ -54,7 +55,6 @@ import {Dropdown} from 'primereact/dropdown';
 import {InputNumber} from 'primereact/inputnumber';
 import * as React from 'react';
 import {validate} from 'validate.js';
-import {AoU} from "../../components/text-wrappers";
 
 const {useState, useEffect, Fragment} = React;
 
@@ -267,7 +267,7 @@ const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPr
 };
 
 const DisabledPanel = () => {
-    return <WarningMessage
+  return <WarningMessage
         iconSize={16}
         iconStyle={{alignSelf: 'flex-start', flex: '0 0 auto'}}
     >
@@ -280,7 +280,7 @@ const DisabledPanel = () => {
           </div>
         </TextColumn>
       }
-    </WarningMessage>
+    </WarningMessage>;
 };
 
 const DiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskSize, idPrefix}) => {
