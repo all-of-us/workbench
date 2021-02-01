@@ -86,11 +86,12 @@ def publish_cdr(cmd_name, args)
     "The Google Cloud project associated with this workbench environment, " +
     "e.g. all-of-us-rw-staging. Required."
   )
+  op.opts.tier = "registered"
   op.add_option(
      "--tier [tier]",
      ->(opts, v) { opts.tier = v},
      "The access tier associated with this CDR, " +
-     "e.g. registered. Required."
+     "e.g. registered. Default is registered."
    )
   op.add_option(
     "--table-prefixes [prefix1,prefix2,...]",
