@@ -59,10 +59,10 @@ export default abstract class BaseModal extends Container {
       if (waitForNav) {
          await Promise.all([
             this.page.waitForNavigation({waitUntil: ['load', 'networkidle0']}),
-            button.click(),
+            button.click({delay: 10}),
          ]);
       } else {
-         await button.click();
+         await button.click({delay: 10});
       }
 
       if (waitForClose) {

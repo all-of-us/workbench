@@ -143,25 +143,30 @@ export default class BaseElement extends Container {
   async click(options?: ClickOptions): Promise<void> {
     return this.asElementHandle()
       .then(async element => {
-        // Wait for x,y to stop changing within specified time.
+        // Experienment: click workaround
+        // Wait for x,y to stop changing within specified time
         const startTime = Date.now();
-        let prevX;
-        let prevY;
+        let previousX;
+        let previousY;
         let i = 0;
         while ((Date.now() - startTime) < (30 * 1000)) {
-          const box = await element.boundingBox();
-          const x = box.x + (box.width/2);
-          const y = box.y + (box.height/2);
-          if (prevX === x || prevY === y) {
-            break;
+          const viewport = await element.isIntersectingViewport();
+          if (viewport) {
+            const box = await element.boundingBox();
+            const x = box.x + (box.width / 2);
+            const y = box.y + (box.height / 2);
+            if (i > 0) {
+              console.warn(`Detected changing boundingBox: i=${i} prevX=${previousX} x=${x} prevY=${previousY} y=${y}`);
+            }
+            if (previousX === x || previousY === y) {
+              break;
+            }
+            previousX = x;
+            previousY = y;
+            i++;
           }
-          if (i > 0) {
-            console.warn(`Detected changing boundingBox. prevX=${prevX} x=${x}  prevY=${prevY} y=${y}`);
-          }
-          prevX = x;
-          prevY = y;
-          await this.page.waitForTimeout(100);
-          i++;
+          await element.hover();
+          await this.page.waitForTimeout(200);
         }
         return element.click(options);
       });
