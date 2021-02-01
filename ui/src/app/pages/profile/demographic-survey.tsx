@@ -255,13 +255,13 @@ or another sexual and/or gender minority?'>
           <FlexRow style={{alignItems: 'baseline'}}>
             <RadioButton id='radio-disability-yes' onChange={
               (e) => this.updateDemographicAttribute('disability', true)}
-                         checked={!!demographicSurvey ? demographicSurvey.disability === Disability.True : false}
+                         checked={!!demographicSurvey ? demographicSurvey.disability === true : false}
                          style={{marginRight: '0.5rem'}}/>
             <label htmlFor='radio-disability-yes' style={{paddingRight: '3rem', color: colors.primary}}>Yes</label>
           </FlexRow>
           <FlexRow style={{alignItems: 'baseline'}}>
             <RadioButton id='radio-disability-no' onChange={(e) => this.updateDemographicAttribute('disability', false)}
-                         checked={!!demographicSurvey ? demographicSurvey.disability === Disability.False : false}
+                         checked={!!demographicSurvey ? demographicSurvey.disability === false : false}
                          style={{marginRight: '0.5rem'}}/>
             <label htmlFor='radio-disability-no' style={{color: colors.primary}}>No</label>
           </FlexRow>

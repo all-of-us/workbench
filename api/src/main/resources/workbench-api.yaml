@@ -3660,7 +3660,6 @@ definitions:
     enum:
     - true
     - false
-    - PREFER_NO_ANSWER
   FeaturedWorkspaceCategory:
     type: string
     enum:

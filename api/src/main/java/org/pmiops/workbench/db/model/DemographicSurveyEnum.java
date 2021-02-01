@@ -73,7 +73,6 @@ public class DemographicSurveyEnum {
       ImmutableBiMap.<Disability, Short>builder()
           .put(Disability.TRUE, (short) 1)
           .put(Disability.FALSE, (short) 2)
-          .put(Disability.PREFER_NO_ANSWER, (short) 3)
           .build();
 
   public static Race raceFromStorage(Short race) {
