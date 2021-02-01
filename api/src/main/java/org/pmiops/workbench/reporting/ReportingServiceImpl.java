@@ -1,11 +1,13 @@
 package org.pmiops.workbench.reporting;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
+import java.util.List;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.model.ReportingSnapshot;
+import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,10 @@ public class ReportingServiceImpl implements ReportingService {
   private final ReportingUploadService reportingUploadService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final ReportingVerificationService reportingVerificationService;
+
+  @VisibleForTesting
+  static final List<String> BATCH_UPLOADED_TABLES =
+      ImmutableList.of(WorkspaceColumnValueExtractor.TABLE_NAME);
 
   public ReportingServiceImpl(
       ReportingQueryService reportingQueryService,
@@ -49,20 +55,11 @@ public class ReportingServiceImpl implements ReportingService {
     reportingUploadService.uploadSnapshot(snapshot);
 
     // Second: Obtain data on smaller batches for larger data.
-    Map<BatchSupportedTableEnum, Integer> batchUploadedCount = new HashMap<>();
     reportingQueryService
         .getWorkspacesStream()
-        .forEach(
-            b ->
-                reportingUploadService.uploadBatchWorkspace(
-                    b, captureTimestamp, batchUploadedCount));
+        .forEach(b -> reportingUploadService.uploadBatchWorkspace(b, captureTimestamp));
 
     // Third: Verify the count.
-    reportingVerificationService.verifyBatchesAndLog(batchUploadedCount, captureTimestamp);
-  }
-
-  /** Tables that support batch upload. */
-  public enum BatchSupportedTableEnum {
-    WORKSPACE,
+    reportingVerificationService.verifyBatchesAndLog(BATCH_UPLOADED_TABLES, captureTimestamp);
   }
 }

@@ -6,8 +6,8 @@ FROM
 WHERE
         u.snapshot_timestamp = (
         SELECT
-            MAX(u2.snapshot_timestamp)
+            MAX(vs2.snapshot_timestamp)
         FROM
-            reporting_test.user u2)
+            reporting_test.verified_snapshot vs2)
 ORDER BY
     u.username;

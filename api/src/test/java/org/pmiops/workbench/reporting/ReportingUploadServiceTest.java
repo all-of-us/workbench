@@ -34,7 +34,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -51,7 +50,6 @@ import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
-import org.pmiops.workbench.reporting.ReportingServiceImpl.BatchSupportedTableEnum;
 import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.test.FakeClock;
@@ -299,15 +297,13 @@ public class ReportingUploadServiceTest {
   @Test
   public void testUploadBatch_workspace() {
     final InsertAllResponse mockInsertAllResponse = mock(InsertAllResponse.class);
-    Map<BatchSupportedTableEnum, Integer> countMap = new HashMap<>();
-    countMap.put(BatchSupportedTableEnum.WORKSPACE, 5);
 
     doReturn(Collections.emptyMap()).when(mockInsertAllResponse).getInsertErrors();
     doReturn(mockInsertAllResponse)
         .when(mockBigQueryService)
         .insertAll(any(InsertAllRequest.class));
 
-    reportingUploadService.uploadBatchWorkspace(reportingWorkspaces, NOW.toEpochMilli(), countMap);
+    reportingUploadService.uploadBatchWorkspace(reportingWorkspaces, NOW.toEpochMilli());
 
     verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
     InsertAllRequest request = insertAllRequestCaptor.getValue();
@@ -327,6 +323,5 @@ public class ReportingUploadServiceTest {
     assertThat(
             workspaceColumnValues.get(WorkspaceColumnValueExtractor.CREATOR_ID.getParameterName()))
         .isEqualTo(101L);
-    assertThat(countMap.get(BatchSupportedTableEnum.WORKSPACE)).isEqualTo(5 + 1);
   }
 }

@@ -7,7 +7,6 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,7 +18,6 @@ import org.pmiops.workbench.db.jdbc.ReportingQueryService;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUploadDetails;
 import org.pmiops.workbench.model.ReportingUploadResult;
-import org.pmiops.workbench.reporting.ReportingServiceImpl.BatchSupportedTableEnum;
 import org.pmiops.workbench.reporting.insertion.CohortColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.ColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.DatasetCohortColumnValueExtractor;
@@ -28,6 +26,7 @@ import org.pmiops.workbench.reporting.insertion.DatasetConceptSetColumnValueExtr
 import org.pmiops.workbench.reporting.insertion.DatasetDomainColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.InstitutionColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
+import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceFreeTierUsageColumnValueExtractor;
 import org.pmiops.workbench.utils.FieldValues;
 import org.pmiops.workbench.utils.LogFormatters;
@@ -40,7 +39,7 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
 
   private final BigQueryService bigQueryService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private Provider<Stopwatch> stopwatchProvider;
+  private final Provider<Stopwatch> stopwatchProvider;
   private final ReportingQueryService reportingQueryService;
 
   public ReportingVerificationServiceImpl(
@@ -51,12 +50,11 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
     this.bigQueryService = bigQueryService;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.stopwatchProvider = stopwatchProvider;
-    this.stopwatchProvider = stopwatchProvider;
     this.reportingQueryService = reportingQueryService;
   }
 
   @Override
-  public ReportingUploadDetails verifyAndLog(ReportingSnapshot reportingSnapshot) {
+  public boolean verifyAndLog(ReportingSnapshot reportingSnapshot) {
     // check each table. Note that for streaming inputs, not all rows may be immediately available.
     final ReportingUploadDetails uploadDetails = getUploadDetails(reportingSnapshot);
     final StringBuilder sb =
@@ -64,36 +62,37 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
             String.format("Verifying Snapshot %d:\n", reportingSnapshot.getCaptureTimestamp()));
     sb.append("Table\tUploaded\tExpected\tDifference(%)\n");
     Level detailsLogLevel = Level.INFO;
+    boolean verified = true;
     for (final ReportingUploadResult result : uploadDetails.getUploads()) {
       if (!verifyCount(
           result.getTableName(), result.getSourceRowCount(), result.getDestinationRowCount(), sb)) {
         detailsLogLevel = Level.WARNING;
+        verified = false;
       }
     }
     logger.log(detailsLogLevel, sb.toString());
-    return uploadDetails;
+    return verified;
   }
 
   @Override
-  public boolean verifyBatchesAndLog(
-      Map<BatchSupportedTableEnum, Integer> tableNameAndCount, long captureSnapshotTime) {
+  public boolean verifyBatchesAndLog(List<String> batchTables, long captureSnapshotTime) {
     final StringBuilder sb =
         new StringBuilder(String.format("Verifying batches %d:\n", captureSnapshotTime));
     Level detailsLogLevel = Level.INFO;
+    boolean verified = true;
 
-    for (Map.Entry<BatchSupportedTableEnum, Integer> entry : tableNameAndCount.entrySet()) {
+    for (String tableName : batchTables) {
       sb.append("Table\tUploaded\tExpected\tDifference(%)\n");
-      switch (entry.getKey()) {
-        case WORKSPACE:
+      switch (tableName) {
+        case WorkspaceColumnValueExtractor.TABLE_NAME:
           int sourceCount = reportingQueryService.getWorkspacesCount();
-          System.out.println("!!!!!!!!!");
-          System.out.println(sourceCount);
           if (!verifyCount(
-              entry.getKey().name().toLowerCase(),
+              tableName,
               (long) sourceCount,
-              (long) entry.getValue(),
+              getActualRowCount(tableName, captureSnapshotTime),
               sb)) {
             detailsLogLevel = Level.WARNING;
+            verified = false;
           }
           break;
         default:
@@ -101,7 +100,7 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
       }
     }
     logger.log(detailsLogLevel, sb.toString());
-    return detailsLogLevel.equals(Level.INFO);
+    return verified;
   }
 
   private ReportingUploadDetails getUploadDetails(ReportingSnapshot snapshot) {

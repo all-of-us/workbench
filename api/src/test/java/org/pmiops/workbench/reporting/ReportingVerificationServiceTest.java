@@ -1,18 +1,26 @@
 package org.pmiops.workbench.reporting;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.pmiops.workbench.reporting.ReportingServiceImpl.BatchSupportedTableEnum.WORKSPACE;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.pmiops.workbench.reporting.ReportingServiceImpl.BATCH_UPLOADED_TABLES;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createDbWorkspace;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.cloud.bigquery.Field;
+import com.google.cloud.bigquery.FieldList;
+import com.google.cloud.bigquery.FieldValueList;
+import com.google.cloud.bigquery.LegacySQLTypeName;
+import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.cloud.bigquery.TableResult;
+import com.google.common.collect.ImmutableList;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.Clock;
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 import java.util.logging.StreamHandler;
@@ -24,14 +32,14 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.jdbc.ReportingQueryService;
+import org.pmiops.workbench.db.jdbc.ReportingQueryServiceImpl;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.ReportingUser;
-import org.pmiops.workbench.reporting.ReportingServiceImpl.BatchSupportedTableEnum;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
+import org.pmiops.workbench.utils.FieldValues;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -47,12 +55,17 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ReportingVerificationServiceTest {
-
   private static final Instant NOW = Instant.parse("2000-01-01T00:00:00.00Z");
   private static final Instant THEN_INSTANT = Instant.parse("1989-02-17T00:00:00.00Z");
-  private static final OffsetDateTime THEN = OffsetDateTime.ofInstant(THEN_INSTANT, ZoneOffset.UTC);
 
-  private static Logger log =
+  private static final Long ACTUAL_COUNT = (long) 2;
+  private static final List<FieldValueList> ACTUAL_COUNT_QUERY_RESULT =
+      ImmutableList.of(
+          FieldValues.buildFieldValueList(
+              FieldList.of(Field.of("actual_count", LegacySQLTypeName.INTEGER)),
+              Arrays.asList(new Object[] {Long.toString(ACTUAL_COUNT)})));
+
+  private static final Logger LOGGER =
       Logger.getLogger(
           ReportingVerificationServiceImpl.class
               .getName()); // matches the logger in the affected class
@@ -65,14 +78,17 @@ public class ReportingVerificationServiceTest {
 
   @Autowired private ReportingVerificationService reportingVerificationService;
   @Autowired private EntityManager entityManager;
-  @MockBean private BigQueryService mockBigQueryService;
-  @Autowired private ReportingQueryService reportingQueryService;
   @Autowired private CdrVersionDao cCdrVersionDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private UserDao userDao;
+  @MockBean private BigQueryService mockBigQueryService;
 
   @TestConfiguration
-  @Import({ReportingVerificationServiceImpl.class, ReportingTestConfig.class})
+  @Import({
+    ReportingVerificationServiceImpl.class,
+    ReportingTestConfig.class,
+    ReportingQueryServiceImpl.class
+  })
   public static class config {
     @Bean
     public Clock getClock() {
@@ -82,34 +98,38 @@ public class ReportingVerificationServiceTest {
 
   @Before
   public void setup() {
-    logCapturingStream = new ByteArrayOutputStream();
-    Handler[] handlers = log.getParent().getHandlers();
-    customLogHandler = new StreamHandler(logCapturingStream, handlers[0].getFormatter());
-    log.addHandler(customLogHandler);
-  }
+    final TableResult mockTableResult = mock(TableResult.class);
+    doReturn(ACTUAL_COUNT_QUERY_RESULT).when(mockTableResult).getValues();
 
-  public String getTestCapturedLog() throws IOException {
-    customLogHandler.flush();
-    return logCapturingStream.toString();
+    doReturn(mockTableResult)
+        .when(mockBigQueryService)
+        .executeQuery(any(QueryJobConfiguration.class));
+
+    logCapturingStream = new ByteArrayOutputStream();
+    Handler[] handlers = LOGGER.getParent().getHandlers();
+    customLogHandler = new StreamHandler(logCapturingStream, handlers[0].getFormatter());
+    LOGGER.addHandler(customLogHandler);
   }
 
   @Test
   public void testVerifyBatch_verified() throws Exception {
-    createWorkspaces(2);
-    Map<BatchSupportedTableEnum, Integer> map = ImmutableMap.of(WORKSPACE, 2);
-    assertThat(reportingVerificationService.verifyBatchesAndLog(map, 1111111L)).isTrue();
-    System.out.println("~~~~~~~");
-    System.out.println(getTestCapturedLog());
+    createWorkspaces(ACTUAL_COUNT);
+    assertThat(reportingVerificationService.verifyBatchesAndLog(BATCH_UPLOADED_TABLES, 1111111L))
+        .isTrue();
+    String expectedLogPart = "workspace\t2\t2\t0 (0.000%)";
+    assertThat(getTestCapturedLog().contains(expectedLogPart)).isTrue();
   }
 
   @Test
-  public void testVerifyBatch_fail() {
-    createWorkspaces(3);
-    Map<BatchSupportedTableEnum, Integer> map = ImmutableMap.of(WORKSPACE, 2);
-    assertThat(reportingVerificationService.verifyBatchesAndLog(map, 1111111L)).isFalse();
+  public void testVerifyBatch_fail() throws Exception {
+    createWorkspaces(ACTUAL_COUNT * 2);
+    assertThat(reportingVerificationService.verifyBatchesAndLog(BATCH_UPLOADED_TABLES, 1111111L))
+        .isFalse();
+    String expectedLogPart = "workspace\t4\t2\t-2 (-50.000%)";
+    assertThat(getTestCapturedLog().contains(expectedLogPart)).isTrue();
   }
 
-  private void createWorkspaces(int count) {
+  private void createWorkspaces(long count) {
     DbUser user = userFixture.createEntity();
     userDao.save(user);
     DbCdrVersion cdrVersion = new DbCdrVersion();
@@ -117,9 +137,14 @@ public class ReportingVerificationServiceTest {
     cCdrVersionDao.save(cdrVersion);
 
     for (int i = 0; i < count; ++i) {
-      System.out.println("11111111111111111");
       workspaceDao.save(createDbWorkspace(user, cdrVersion));
     }
     entityManager.flush();
+  }
+
+  /** Gets the captured log. */
+  private static String getTestCapturedLog() throws IOException {
+    customLogHandler.flush();
+    return logCapturingStream.toString();
   }
 }
