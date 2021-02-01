@@ -10,7 +10,7 @@ import org.pmiops.workbench.model.ReportingWorkspace;
  * insertion path.
  */
 public interface ReportingUploadService {
-  void uploadSnapshot(ReportingSnapshot reportingSnapshot);
+  boolean uploadSnapshot(ReportingSnapshot reportingSnapshot);
 
   void uploadBatchWorkspace(List<ReportingWorkspace> batch, long captureTimestamp);
 

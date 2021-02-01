@@ -1,9 +1,11 @@
 package org.pmiops.workbench.reporting;
 
 import static org.pmiops.workbench.reporting.insertion.ColumnValueExtractorUtils.getBigQueryTableName;
+import static org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer.generateInsertId;
 
 import com.google.cloud.bigquery.BigQueryError;
 import com.google.cloud.bigquery.InsertAllRequest;
+import com.google.cloud.bigquery.InsertAllRequest.RowToInsert;
 import com.google.cloud.bigquery.InsertAllResponse;
 import com.google.cloud.bigquery.TableId;
 import com.google.common.base.Stopwatch;
@@ -62,8 +64,13 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
       workspaceFreeTierUsageRequestBuilder = WorkspaceFreeTierUsageColumnValueExtractor::values;
   private static final InsertAllRequestPayloadTransformer<ReportingDataset> datasetRequestBuilder =
       DatasetColumnValueExtractor::values;
-  private static final InsertAllRequestVerifiedSnapshot<ReportingVerifiedSnapshot> verifiedSnapshotRequestBuilder =
-      VerifiedSnapshotValueExtractor::values;
+
+  /**
+   * The verified–snapshot BigQuery name. It has no row other than the default snapshot_timestamp,
+   * no need to create(also not compilable with the current model) ReportingSnapShot model with a
+   * ColumnValueExtractor.
+   */
+  private static final String VERIFIED_SNAPSHOT_TABLE_NAME = "verified_snapshot";
 
   private final BigQueryService bigQueryService;
   private final ReportingVerificationService reportingVerificationService;
@@ -83,11 +90,12 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
 
   /**
    * @deprecated Retrieve data using stream approach then upload as batch.
-   *     <p>Uploads {@link ReportingSnapshot} to bigquery and log&verify the performance.
+   *     <p>Uploads {@link ReportingSnapshot} to bigquery and log&verify the performance. Returns
+   *     {@code true} if upload success and snapshot count is verified.
    */
   @Deprecated
   @Override
-  public void uploadSnapshot(ReportingSnapshot reportingSnapshot) {
+  public boolean uploadSnapshot(ReportingSnapshot reportingSnapshot) {
     final Stopwatch stopwatch = stopwatchProvider.get();
     final ImmutableMultimap.Builder<TableId, InsertAllResponse> responseMapBuilder =
         ImmutableMultimap.builder();
@@ -97,7 +105,7 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
       issueInsertAllRequest(stopwatch, responseMapBuilder, performanceStringBuilder, request);
     }
     log.info(performanceStringBuilder.toString());
-    checkResponseAndRowCounts(reportingSnapshot, responseMapBuilder.build());
+    return checkResponseAndRowCounts(reportingSnapshot, responseMapBuilder.build());
   }
 
   /** Batch uploads {@link ReportingWorkspace}. */
@@ -115,14 +123,22 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     issueInsertAllRequest(
         stopwatch, responseMapBuilder, performanceStringBuilder, insertAllRequest);
     log.info(performanceStringBuilder.toString());
-    // Check response and abort the process if any error happens. In this case, verify_snopshot
+    // Check response and abort the process if any error happens. In this case, verify_snapshot
     // won't have the 'successful' record, hence we know that is a "bad" dataset.
     checkResponse(responseMapBuilder.build());
   }
 
+  /** Uploads a record into verified_snapshot BigQuery table. */
   @Override
   public void uploadVerifiedSnapshot(long captureTimestamp) {
-    bigQueryService.insertAll(request)
+    final InsertAllRequest insertAllRequest =
+        InsertAllRequest.newBuilder(getTableId(VERIFIED_SNAPSHOT_TABLE_NAME))
+            .setIgnoreUnknownValues(false)
+            .addRow(RowToInsert.of(generateInsertId(), getFixedValues(captureTimestamp)))
+            .build();
+    bigQueryService.insertAll(insertAllRequest);
+    // No need to check response, either it success, we get the record, or it fails, no record
+    // presents.
   }
 
   /** Issues one {@link BigQueryService#insertAll(InsertAllRequest)}, then logs the performance. */
@@ -146,12 +162,12 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     stopwatch.reset();
   }
 
-  private void checkResponseAndRowCounts(
+  private boolean checkResponseAndRowCounts(
       ReportingSnapshot reportingSnapshot,
       ImmutableMultimap<TableId, InsertAllResponse> responseMap) {
     checkResponse(responseMap);
 
-    reportingVerificationService.verifyAndLog(reportingSnapshot);
+    return reportingVerificationService.verifyAndLog(reportingSnapshot);
   }
 
   private <E extends Enum<E> & ColumnValueExtractor<?>> TableId getTableId(
@@ -160,6 +176,13 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     final String dataset = configProvider.get().reporting.dataset;
 
     return TableId.of(projectId, dataset, getBigQueryTableName(columnValueExtractorClass));
+  }
+
+  private <E extends Enum<E> & ColumnValueExtractor<?>> TableId getTableId(String tableName) {
+    final String projectId = configProvider.get().server.projectId;
+    final String dataset = configProvider.get().reporting.dataset;
+
+    return TableId.of(projectId, dataset, tableName);
   }
 
   private List<InsertAllRequest> getInsertAllRequests(ReportingSnapshot reportingSnapshot) {

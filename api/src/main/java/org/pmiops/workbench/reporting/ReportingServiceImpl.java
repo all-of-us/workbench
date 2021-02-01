@@ -3,6 +3,7 @@ package org.pmiops.workbench.reporting;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
+import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.jdbc.ReportingQueryService;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class ReportingServiceImpl implements ReportingService {
+  private static final Logger logger = Logger.getLogger(ReportingServiceImpl.class.getName());
 
   private final ReportingSnapshotService reportingSnapshotService;
   private final ReportingQueryService reportingQueryService;
@@ -52,7 +54,7 @@ public class ReportingServiceImpl implements ReportingService {
     // First: Obtain the snapshot data.
     final ReportingSnapshot snapshot = reportingSnapshotService.takeSnapshot();
     final long captureTimestamp = snapshot.getCaptureTimestamp();
-    reportingUploadService.uploadSnapshot(snapshot);
+    boolean snapshotUploadSuccess = reportingUploadService.uploadSnapshot(snapshot);
 
     // Second: Obtain data on smaller batches for larger data.
     reportingQueryService
@@ -60,6 +62,17 @@ public class ReportingServiceImpl implements ReportingService {
         .forEach(b -> reportingUploadService.uploadBatchWorkspace(b, captureTimestamp));
 
     // Third: Verify the count.
-    reportingVerificationService.verifyBatchesAndLog(BATCH_UPLOADED_TABLES, captureTimestamp);
+    boolean batchUploadSucceed =
+        reportingVerificationService.verifyBatchesAndLog(BATCH_UPLOADED_TABLES, captureTimestamp);
+
+    // Finally: Mark this snapshot valid by inserting one record into verified_snapshot table.
+    if (snapshotUploadSuccess && batchUploadSucceed) {
+      reportingUploadService.uploadVerifiedSnapshot(captureTimestamp);
+    } else {
+      logger.warning(
+          String.format(
+              "Failed to verified upload result, snapshotUploadSuccess: %s, batchUploadSucceed :%s",
+              snapshotUploadSuccess, batchUploadSucceed));
+    }
   }
 }
