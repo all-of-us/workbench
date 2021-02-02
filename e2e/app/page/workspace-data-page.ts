@@ -94,7 +94,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     const searchPage = await group1.includeVisits();
     await searchPage.addVisits([Visits.OutpatientVisit]);
     // Open selection list and click Save Criteria button
-    await group1.viewAndSaveCriteria();
+    await searchPage.reviewAndSaveCriteria();
     await waitWhileLoading(this.page);
     await cohortBuildPage.getTotalCount();
     const name = (cohortName === undefined) ? makeRandomName() : cohortName;

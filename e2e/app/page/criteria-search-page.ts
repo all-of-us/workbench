@@ -1,5 +1,5 @@
 import {Page} from 'puppeteer';
-import HelpSidebar from 'app/component/help-sidebar';
+import ReviewCriteriaSidebar from 'app/component/review-criteria-sidebar';
 import SelectMenu from 'app/component/select-menu';
 import Table from 'app/component/table';
 import Button from 'app/element/button';
@@ -96,17 +96,11 @@ export default class CriteriaSearchPage extends AuthenticatedPage {
     // Delay to make sure correct sidebar content is showing
     await this.page.waitForTimeout(1000);
 
-    const helpSidebar = new HelpSidebar(this.page);
-    const participantResult = await helpSidebar.getPhysicalMeasurementParticipantResult(filterSign, filterValue);
+    const reviewCriteriaSidebar = new ReviewCriteriaSidebar(this.page);
+    await reviewCriteriaSidebar.waitUntilVisible();
+    const participantResult = await reviewCriteriaSidebar.getPhysicalMeasurementParticipantResult(filterSign, filterValue);
     // return participants count for comparing
     return participantResult;
-  }
-
-  /**
-   * Click FINISH button.
-   */
-  async clickFinishButton(): Promise<void> {
-    return Button.findByName(this.page, {normalizeSpace: LinkText.FinishAndReview}).then(button => button.click());
   }
 
   async waitForParticipantResult(): Promise<string> {
@@ -187,6 +181,21 @@ export default class CriteriaSearchPage extends AuthenticatedPage {
     await elemt.click();
 
     return { name: nameValue, code: codeValue, vocabulary: vocabValue, rollUpCount: rollUpCountValue };
+  }
+
+  // Click Finish and Review button in sidebar
+  async clickFinishAndReviewButton(): Promise<void> {
+    const finishAndReviewButton = await Button.findByName(this.page, {name: LinkText.FinishAndReview});
+    await finishAndReviewButton.waitUntilEnabled();
+    await finishAndReviewButton.click();
+  }
+
+  // Save Criteria
+  async reviewAndSaveCriteria(): Promise<void> {
+    await this.clickFinishAndReviewButton();
+    const reviewCriteriaSidebar = new ReviewCriteriaSidebar(this.page);
+    await reviewCriteriaSidebar.waitUntilVisible();
+    await reviewCriteriaSidebar.clickSaveCriteriaButton();
   }
 
 }
