@@ -8,7 +8,7 @@ require "tempfile"
 ENVIRONMENTS = {
   "all-of-us-workbench-test" => {
     :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
-    :source_cdr_project => "all-of-us-ehr-dev",
+    :source_cdr_project => "all-of-us-workbench-test",
     :ingest_cdr_project => "fc-aou-vpc-ingest-test",
     :dest_cdr_project => "fc-aou-cdr-synth-test",
     :config_json => "config_test.json"
@@ -104,7 +104,7 @@ def publish_cdr(cmd_name, args)
   common = Common.new
   env = ENVIRONMENTS[op.opts.project]
   account = env.fetch(:publisher_account)
-  app_sa = "#{ENVIRONMENTS[op.opts.project]}@appspot.gserviceaccount.com"
+  app_sa = "#{op.opts.project}@appspot.gserviceaccount.com"
 
   # TODO(RW-3208): Investigate using a temporary / impersonated SA credential instead of a key.
   key_file = Tempfile.new(["#{account}-key", ".json"], "/tmp")
@@ -157,28 +157,38 @@ def publish_cdr(cmd_name, args)
         end
       end
 
-      if existing_groups.include?(auth_domain_group_email)
-        common.status "#{auth_domain_group_email} already in ACL, skipping..."
-      else
-        common.status "Adding #{auth_domain_group_email} as a READER..."
-        new_entry = { "groupByEmail" => auth_domain_group_email, "role" => "READER"}
-        json["access"].push(new_entry)
-      end
+#      if existing_groups.include?(auth_domain_group_email)
+#        common.status "#{auth_domain_group_email} already in ACL, skipping..."
+#      else
+#        common.status "Adding #{auth_domain_group_email} as a READER..."
+#        new_entry = { "groupByEmail" => auth_domain_group_email, "role" => "READER"}
+#        json["access"].push(new_entry)
+#      end
+
+      bq_reader = "PROXY_100800045120777231830@dev.test.firecloud.org"
+      common.status "Adding #{bq_reader} as a READER..."
+      new_entry = { "groupByEmail" => bq_reader, "role" => "READER"}
+      json["access"].push(new_entry)
 
       # if the app SA's in too many groups, it won't gain READER transitively.
       # add it directly, to make sure.
       # See discussion at https://pmi-engteam.slack.com/archives/CHRN2R51N/p1609869521078200?thread_ts=1609796171.063800&cid=CHRN2R51N
-      if existing_users.include?(app_sa)
-        common.status "#{app_sa} already in ACL, skipping..."
-      else
-        common.status "Adding #{app_sa} as a READER..."
-        new_entry = { "userByEmail" => app_sa, "role" => "READER"}
-        json["access"].push(new_entry)
-      end
+#      if existing_users.include?(app_sa)
+#        common.status "#{app_sa} already in ACL, skipping..."
+      #else
+     #   common.status "Adding #{app_sa} as a READER..."
+     #   new_entry = { "groupByEmail" => app_sa, "role" => "READER"}
+     #   json["access"].push(new_entry)
+     # end
 
       File.open(config_file.path, "w") do |f|
         f.write(JSON.pretty_generate(json))
       end
+
+      File.open("update_attempt.json", "w") do |f|
+        f.write(JSON.pretty_generate(json))
+      end
+
       common.run_inline %{bq update --source #{config_file.path} #{dest_dataset}}
     ensure
       config_file.unlink
