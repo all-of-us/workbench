@@ -5,7 +5,7 @@ import * as fp from 'lodash/fp';
 
 import {Button, Link} from 'app/components/buttons';
 import {Spinner} from 'app/components/spinners';
-import {WarningMessage} from 'app/components/warning-message';
+import {WarningMessage} from 'app/components/messages';
 import {ConfirmDelete, RuntimePanel, Props} from 'app/pages/analysis/runtime-panel';
 import {registerApiClient, runtimeApi} from 'app/services/swagger-fetch-clients';
 import {findMachineByName, ComputeType} from 'app/utils/machines';

@@ -4,7 +4,7 @@ import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
-import {WarningMessage} from 'app/components/warning-message';
+import {WarningMessage} from 'app/components/messages';
 
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
@@ -1083,6 +1083,6 @@ export const RuntimePanel = fp.flow(
                                                            }}
                                                            updateButton={renderUpdateButton()}
           />],
-          [PanelContent.Disabled, () => <DisabledPanel/>])}
+      [PanelContent.Disabled, () => <DisabledPanel/>])}
   </div>;
 });
