@@ -27,10 +27,8 @@ import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SexAtBirth;
-import org.pmiops.workbench.model.SexualOrientation;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.Surveys;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
 /**
@@ -509,23 +507,6 @@ public final class DbStorageEnums {
     return CLIENT_TO_STORAGE_SURVEY.get(survey);
   }
 
-  // WorkspaceAccessLevel
-  private static final BiMap<WorkspaceAccessLevel, Short> CLIENT_TO_STORAGE_WORKSPACE_ACCESS =
-      ImmutableBiMap.<WorkspaceAccessLevel, Short>builder()
-          .put(WorkspaceAccessLevel.NO_ACCESS, (short) 0)
-          .put(WorkspaceAccessLevel.READER, (short) 1)
-          .put(WorkspaceAccessLevel.WRITER, (short) 2)
-          .put(WorkspaceAccessLevel.OWNER, (short) 3)
-          .build();
-
-  public static WorkspaceAccessLevel workspaceAccessLevelFromStorage(Short level) {
-    return CLIENT_TO_STORAGE_WORKSPACE_ACCESS.inverse().get(level);
-  }
-
-  public static Short workspaceAccessLevelToStorage(WorkspaceAccessLevel level) {
-    return CLIENT_TO_STORAGE_WORKSPACE_ACCESS.get(level);
-  }
-
   // WorkspaceActiveStatus
   private static final BiMap<WorkspaceActiveStatus, Short>
       CLIENT_TO_STORAGE_WORKSPACE_ACTIVE_STATUS =
@@ -552,16 +533,6 @@ public final class DbStorageEnums {
           .put(Race.WHITE, (short) 5)
           .put(Race.PREFER_NO_ANSWER, (short) 6)
           .put(Race.NONE, (short) 7)
-          .build();
-
-  private static final BiMap<SexualOrientation, Short> CLIENT_TO_STORAGE_SEXUAL_ORIENTATION =
-      ImmutableBiMap.<SexualOrientation, Short>builder()
-          .put(SexualOrientation.LESBIAN, (short) 1)
-          .put(SexualOrientation.GAY, (short) 2)
-          .put(SexualOrientation.STRAIGHT, (short) 3)
-          .put(SexualOrientation.BISEXUAL, (short) 4)
-          .put(SexualOrientation.PREFER_NO_ANSWER, (short) 5)
-          .put(SexualOrientation.NONE_OF_THESE_DESCRIBE_ME, (short) 6)
           .build();
 
   private static final BiMap<SexAtBirth, Short> CLIENT_TO_STORAGE_SEX_AT_BIRTH =
@@ -612,14 +583,6 @@ public final class DbStorageEnums {
 
   public static Short raceToStorage(Race race) {
     return CLIENT_TO_STORAGE_RACE.get(race);
-  }
-
-  public static SexualOrientation sexualOrientationFromStorage(Short sexualOrientation) {
-    return CLIENT_TO_STORAGE_SEXUAL_ORIENTATION.inverse().get(sexualOrientation);
-  }
-
-  public static Short sexualOrientationToStorage(SexualOrientation sexualOrientation) {
-    return CLIENT_TO_STORAGE_SEXUAL_ORIENTATION.get(sexualOrientation);
   }
 
   public static SexAtBirth sexAtBirthFromStorage(Short sexAtBirth) {
