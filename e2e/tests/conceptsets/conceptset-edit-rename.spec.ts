@@ -47,7 +47,7 @@ describe('Editing and rename Concept Set', () => {
     expect(Number.isNaN(parseInt(row1.rollUpCount.replace(/,/g, ''), 10))).toBe(false);
     expect(Number.isNaN(parseInt(row2.rollUpCount.replace(/,/g, ''), 10))).toBe(false);
 
-    await conceptSearchPage.viewAndSaveConceptSet();
+    await conceptSearchPage.reviewAndSaveConceptSet();
 
     // Save new Concept Set.
     const conceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);

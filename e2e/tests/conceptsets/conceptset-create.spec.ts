@@ -53,7 +53,7 @@ describe('Create Concept Sets from Domains', () => {
 
     await conceptSetPage.reviewAndSaveConceptSet();
     
-    // Save
+    // Save modal window
     const conceptSetName = await conceptSetPage.saveConceptSet();
 
     // Verify Concept Set created successfully.

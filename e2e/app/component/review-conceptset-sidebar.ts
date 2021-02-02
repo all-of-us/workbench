@@ -21,7 +21,6 @@ export default class ReviewConceptSetSidebar extends BaseHelpSidebar {
 
   async clickSaveConceptSetButton(): Promise<void> {
     await this.clickButton(LinkText.SaveConceptSet);
-    await this.waitUntilClose();
   }
 
 }
