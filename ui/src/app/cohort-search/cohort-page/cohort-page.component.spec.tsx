@@ -27,6 +27,7 @@ describe('CohortPage', () => {
 
   it('should render one search group for each includes/excludes item', async() => {
     const mockGetCohort = jest.spyOn(cohortsApi(), 'getCohort');
+    const {id, namespace} = workspaceDataStub;
     const wrapper = mount(<CohortPage setCohortChanged={() => {}} setShowWarningModal={() => {}} setUpdatingCohort={() => {}}/>);
     await waitOneTickAndUpdate(wrapper);
     expect(mockGetCohort).toHaveBeenCalledTimes(0);
@@ -36,15 +37,18 @@ describe('CohortPage', () => {
     // Call cohort with 2 includes groups
     queryParamsStore.next({cohortId: 1});
     await waitOneTickAndUpdate(wrapper);
-    expect(mockGetCohort).toHaveBeenCalledTimes(1);
+    expect(mockGetCohort).toHaveBeenCalledWith(namespace, id, 1);
     expect(wrapper.find('[data-test-id="includes-search-group"]').length).toBe(2);
     expect(wrapper.find('[data-test-id="excludes-search-group"]').length).toBe(0);
 
     // Call cohort with 2 includes groups and one excludes group
     queryParamsStore.next({cohortId: 2});
     await waitOneTickAndUpdate(wrapper);
-    expect(mockGetCohort).toHaveBeenCalledTimes(2);
+    expect(mockGetCohort).toHaveBeenCalledWith(namespace, id, 2);
     expect(wrapper.find('[data-test-id="includes-search-group"]').length).toBe(2);
     expect(wrapper.find('[data-test-id="excludes-search-group"]').length).toBe(1);
+    console.log(wrapper.state());
+    console.log(wrapper.state('criteria'));
+    console.log(wrapper.state('value'));
   });
 });

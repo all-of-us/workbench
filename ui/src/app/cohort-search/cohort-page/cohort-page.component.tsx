@@ -102,7 +102,11 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
 
     componentDidMount() {
       const {workspace: {id}} = this.props;
-      this.subscription = queryParamsStore.subscribe(params => this.initCohort(params.cohortId));
+      console.log(id);
+      this.subscription = queryParamsStore.subscribe(params => {
+        console.log(params);
+        this.initCohort(params.cohortId);
+      });
       this.subscription.add(searchRequestStore.subscribe(searchRequest => {
         const {cohort} = this.state;
         const cohortChanged = !!cohort && cohort.criteria !== JSON.stringify(mapRequest(searchRequest));
