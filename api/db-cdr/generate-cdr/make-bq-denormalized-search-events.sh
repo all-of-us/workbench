@@ -29,15 +29,15 @@ test=$(bq show "$BQ_PROJECT:$BQ_DATASET")
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
 
-bq --project=$BQ_PROJECT rm -f $BQ_DATASET.cb_search_all_events
-bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/cb_search_all_events.json --time_partitioning_type=DAY --clustering_fields concept_id $BQ_DATASET.cb_search_all_events
+bq --project_id=$BQ_PROJECT rm -f $BQ_DATASET.cb_search_all_events
+bq --quiet --project_id=$BQ_PROJECT mk --schema=$schema_path/cb_search_all_events.json --time_partitioning_type=DAY --clustering_fields concept_id $BQ_DATASET.cb_search_all_events
 
 
 ############################################################
 # create cb_survey_version and populate it
 ############################################################
 echo "cb_survey_version - creating table"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\`
 (
       survey_version_concept_id     INT64
@@ -47,7 +47,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 )"
 
 echo "cb_survey_version - adding data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\`
 (
       survey_version_concept_id
@@ -66,7 +66,7 @@ VALUES
 # insert source condition data into cb_search_all_events
 ############################################################
 echo "Inserting source conditions data into cb_search_all_events"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
     (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id)
 SELECT p.person_id,
@@ -89,7 +89,7 @@ where co.condition_source_concept_id is not null
 # insert standard condition data into cb_search_all_events
 ##############################################################
 echo "Inserting standard conditions data into cb_search_all_events"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
     (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id)
 SELECT p.person_id,
@@ -112,7 +112,7 @@ WHERE co.condition_concept_id is not null
 #   insert source procedure data into cb_search_all_events
 ############################################################
 echo "Inserting source procedures data into cb_search_all_events"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
     (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id)
 SELECT p.person_id,
@@ -135,7 +135,7 @@ WHERE po.procedure_source_concept_id is not null
 #   insert standard procedure data into cb_search_all_events
 ##############################################################
 echo "Inserting standard procedures data into cb_search_all_events"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
     (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id)
 SELECT p.person_id,
@@ -158,7 +158,7 @@ WHERE po.procedure_concept_id is not null
 # insert source measurement data into cb_search_all_events
 ##############################################################
 echo "Inserting source measurement data into cb_search_all_events"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
     (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id,
     visit_occurrence_id, value_as_number, value_as_concept_id, systolic, diastolic)
@@ -186,7 +186,7 @@ WHERE m.measurement_source_concept_id is not null
 # update source diastolic pressure data into cb_search_all_events
 #####################################################################
 echo "Updating diastolic pressure data into cb_search_all_events"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` sad
 SET sad.diastolic = meas.diastolic
 FROM
@@ -207,7 +207,7 @@ WHERE meas.person_id = sad.person_id
 #   update source systolic pressure data into cb_search_all_events
 #####################################################################
 echo "Updating systolic pressure data into cb_search_all_events"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` sad
 SET sad.systolic = meas.systolic
 FROM
@@ -228,7 +228,7 @@ WHERE meas.person_id = sad.person_id
 #   insert standard measurement data into cb_search_all_events
 ################################################################
 echo "Inserting measurement data into cb_search_all_events"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
     (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id,
     visit_occurrence_id, value_as_number, value_as_concept_id, systolic, diastolic)
@@ -256,7 +256,7 @@ WHERE m.measurement_concept_id is not null
 #   update standard diastolic pressure data into cb_search_all_events
 #######################################################################
 echo "Updating diastolic pressure data into cb_search_all_events"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` sad
 SET sad.diastolic = meas.diastolic
 FROM
@@ -278,7 +278,7 @@ WHERE meas.person_id = sad.person_id
 #   update standard systolic pressure data into cb_search_all_events
 #######################################################################
 echo "Updating systolic pressure data into cb_search_all_events"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\` sad
 SET sad.systolic = meas.systolic
 FROM
@@ -300,7 +300,7 @@ WHERE meas.person_id = sad.person_id
 # Observation - Source Data
 ##############################################################
 echo "cb_search_all_events - inserting observation source data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
     (
           person_id
@@ -344,7 +344,7 @@ WHERE a.observation_source_concept_id is not null
 #   insert standard observation data into cb_search_all_events
 ################################################################
 echo "Inserting observation data into cb_search_all_events"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
     (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id,
     visit_occurrence_id, value_as_number, value_as_concept_id, value_source_concept_id)
@@ -371,7 +371,7 @@ WHERE o.observation_concept_id is not null
 #   insert source drug data into cb_search_all_events
 #######################################################
 echo "Inserting drug data into cb_search_all_events"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
     (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id)
 SELECT p.person_id,
@@ -394,7 +394,7 @@ WHERE d.drug_source_concept_id is not null
 #   insert standard drug data into cb_search_all_events
 #########################################################
 echo "Inserting drug data into cb_search_all_events"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
     (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id)
 SELECT p.person_id,
@@ -417,7 +417,7 @@ WHERE d.drug_concept_id is not null
 #   insert standard visit data into cb_search_all_events
 ##########################################################
 echo "Inserting visit data into cb_search_all_events"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_all_events\`
     (person_id, entry_date, entry_datetime, is_standard, concept_id, domain, age_at_event, visit_concept_id, visit_occurrence_id)
 SELECT p.person_id,

@@ -38,14 +38,14 @@ test=$(bq show "$BQ_PROJECT:$BQ_DATASET")
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
 
-bq --project=$BQ_PROJECT rm -f $BQ_DATASET.cb_search_person
-bq --quiet --project=$BQ_PROJECT mk --schema=$schema_path/cb_search_person.json --time_partitioning_type=DAY --clustering_fields person_id $BQ_DATASET.cb_search_person
+bq --project_id=$BQ_PROJECT rm -f $BQ_DATASET.cb_search_person
+bq --quiet --project_id=$BQ_PROJECT mk --schema=$schema_path/cb_search_person.json --time_partitioning_type=DAY --clustering_fields person_id $BQ_DATASET.cb_search_person
 
 ################################################
 # insert person data into cb_search_person
 ################################################
 echo "Inserting person data into cb_search_person"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`
     (
           person_id
@@ -111,7 +111,7 @@ LEFT JOIN
 # To get date_of_consent, we first try to find a consent date, if none, we fall back to Street Address: PII State
 # If that does not exist, we fall back to the MINIMUM date of The Basics Survey
 echo "adding age data to cb_search_person"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\` x
 SET x.age_at_consent = y.age_at_consent,
     x.age_at_cdr = y.age_at_cdr
@@ -163,7 +163,7 @@ WHERE x.person_id = y.person_id"
 # set has physical measurement data flag
 ################################################
 echo "set has physical measurement data flag in cb_search_person"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\` x
 SET x.has_physical_measurement_data = y.has_data
 FROM
@@ -190,7 +190,7 @@ WHERE x.person_id = y.person_id"
 # set has ppi survey data flag
 ################################################
 echo "set has ppi survey data flag in cb_search_person"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\` x
 SET x.has_ppi_survey_data = y.has_data
 FROM
@@ -221,7 +221,7 @@ WHERE x.person_id = y.person_id"
 # set has EHR data flag
 ################################################
 echo "set has EHR data flag in cb_search_person"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\` x
 SET x.has_ehr_data = y.has_data
 FROM
