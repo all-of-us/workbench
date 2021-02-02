@@ -67,7 +67,7 @@ describe('Editing and rename Concept Set', () => {
     const row = await criteriaSearch.resultsTableSelectRow();
     expect(row.name).toBe(procedureName);
 
-    await conceptSearchPage.viewAndSaveConceptSet();
+    await conceptSearchPage.reviewAndSaveConceptSet();
 
     // Save to Existing Set: Only one Concept set and it is the new Concept Set created earlier in same workspace.
     const existingConceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.ChooseExistingSet);

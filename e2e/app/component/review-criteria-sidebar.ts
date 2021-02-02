@@ -7,20 +7,16 @@ import {ElementType} from 'app/xpath-options';
 import {waitForNumericalString} from 'utils/waits-utils';
 import BaseHelpSidebar from './base-help-sidebar';
 
-const defaultXpath = '//*[@id="help-sidebar"]';
 enum SectionSelectors {
   AttributesForm = '//*[@id="attributes-form"]',
   ModifiersForm = '//*[@id="modifiers-form"]',
   SelectionList = '//*[@id="selection-list"]',
 }
-export enum HelpSidebarTab {
-  ComputeConfiguration = '//*[@data-test-id="help-sidebar-icon-runtime"]'
-}
 
 export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
 
-  constructor(page: Page, xpath: string = defaultXpath) {
-    super(page, xpath);
+  constructor(page: Page) {
+    super(page);
   }
 
   // Not implemented because it's not triggered to open by sidebar tab.
