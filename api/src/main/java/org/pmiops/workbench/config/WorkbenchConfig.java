@@ -111,7 +111,9 @@ public class WorkbenchConfig {
     public Integer notebookRuntimeIdleMaxAgeDays;
     public String notebookRuntimeDefaultMachineType;
     public Integer notebookRuntimeDefaultDiskSizeGb;
+    @Deprecated // soon to be replaced by access_tier.auth_domain_name in the DB
     public String registeredDomainName;
+    @Deprecated // soon to be replaced by access_tier.auth_domain_group_email in the DB
     public String registeredDomainGroup;
     public String leoBaseUrl;
     // This value specifies the information we hand to Terra as our AppId header.
@@ -119,6 +121,7 @@ public class WorkbenchConfig {
     public String xAppIdValue;
     // The name of the VPC service perimeter to create our Terra GCP projects inside,
     // if enabled.
+    @Deprecated // soon to be replaced by access_tier.service_perimeter in the DB
     public String vpcServicePerimeterName;
     // The length of our API HTTP client timeouts to firecloud
     public Integer timeoutInSeconds;
