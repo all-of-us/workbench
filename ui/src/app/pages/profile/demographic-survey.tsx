@@ -78,7 +78,7 @@ export class DemographicSurvey extends React.Component<Props, State> {
   createNoAnswerCheckbox ({value, label}, optionKey: string) {
     const {profile: {demographicSurvey}} = this.state;
 
-    return <CheckBox label={label} data-test-id={'checkbox-' + value.toString()}
+    return <CheckBox label={label} data-test-id={`checkbox-${optionKey}-${value}`}
                      style={styles.checkbox} key={value.toString()}  
                      checked={isChecked(demographicSurvey, optionKey, value)}
                      wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
@@ -244,7 +244,8 @@ or another sexual and/or gender minority?'>
       </Section>
 
       {/*Year of birth section*/}
-      <DropDownSection header='Year of Birth'
+      <DropDownSection data-test-id='year-of-birth'
+                       header='Year of Birth'
                        options={AccountCreationOptions.Years}
                        value={!!demographicSurvey ? demographicSurvey.yearOfBirth : null}
                        onChange={(e) => this.updateDemographicAttribute('yearOfBirth', e)}
@@ -274,7 +275,8 @@ or another sexual and/or gender minority?'>
         </FlexColumn>
       </Section>
       {/*Education section*/}
-      <DropDownSection header='Highest Level of Education Completed'
+      <DropDownSection data-test-id='highest-education-level'
+                       header='Highest Level of Education Completed'
                        options={AccountCreationOptions.levelOfEducation}
                        value={!!demographicSurvey ? demographicSurvey.education : null}
                        onChange={(e) => this.updateDemographicAttribute('education', e)}/>
