@@ -1,9 +1,8 @@
-import HelpSidebar from 'app/component/help-sidebar';
+import ReviewCriteriaSidebar from 'app/component/review-criteria-sidebar';
 import {FilterSign} from 'app/page/criteria-search-page';
 import DataResourceCard from 'app/component/data-resource-card';
-import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
-import {MenuOption, LinkText, ResourceCard} from 'app/text-labels';
+import {MenuOption, ResourceCard} from 'app/text-labels';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
@@ -68,12 +67,10 @@ describe('Cohorts', () => {
     await addIcon.click();
 
     // Click Finish & Review button to open selection list and add modifier
-    const finishAndReviewButton = await Button.findByName(page, {name: LinkText.FinishAndReview});
-    await finishAndReviewButton.waitUntilEnabled();
-    await finishAndReviewButton.click();
+    await searchPage.clickFinishAndReviewButton();
 
     // Add Condition Modifiers: Age At Event >= 50
-    const helpSidebar = new HelpSidebar(page);
+    const helpSidebar = new ReviewCriteriaSidebar(page);
     await helpSidebar.addAgeModifier(FilterSign.GreaterThanOrEqualTo, 50);
 
     // Click SAVE CRITERIA button. Sidebar closes.
@@ -112,7 +109,7 @@ describe('Cohorts', () => {
     await ethnicityLookUp.addEthnicity([Ethnicity.HispanicOrLatino]);
 
     // Open selection list and click Save Criteria button
-   await group1a.viewAndSaveCriteria();
+   await ethnicityLookUp.reviewAndSaveCriteria();
 
    // select SAVE option from the SAVE COHORT button drop-down menu
    await cohortBuildPage.saveChanges();

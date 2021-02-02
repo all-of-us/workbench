@@ -6,8 +6,6 @@ import CriteriaSearchPage, {FilterSign, PhysicalMeasurementsCriteria} from 'app/
 import TieredMenu from 'app/component/tiered-menu';
 import {LinkText, MenuOption} from 'app/text-labels';
 import {snowmanIconXpath} from 'app/component/snowman-menu';
-import Button from 'app/element/button';
-import HelpSidebar from 'app/component/help-sidebar';
 import Modal from 'app/modal/modal';
 
 export default class CohortParticipantsGroup {
@@ -149,16 +147,6 @@ export default class CohortParticipantsGroup {
   async getGroupCriteriasList(): Promise<ElementHandle[]> {
     const selector = `${this.rootXpath}//*[@data-test-id="item-list"]`;
     return this.page.$x(selector);
-  }
-
-  async viewAndSaveCriteria(): Promise<void> {
-    const finishAndReviewButton = await Button.findByName(this.page, {name: LinkText.FinishAndReview});
-    await finishAndReviewButton.waitUntilEnabled();
-    await finishAndReviewButton.click();
-
-    // Click Save Criteria button in sidebar
-    const helpSidebar = new HelpSidebar(this.page);
-    await helpSidebar.clickSaveCriteriaButton();
   }
 
 }
