@@ -15,6 +15,11 @@ jest.retryTimes(1);
 let defaultCdrWorkspace: string;
 
 /**
+ * This test suite takes a long time to run. Two tests create 3 new workspaces and 2 notebook runtime.
+ * Test suite runs nightly shortens CI job runtime and reduces number of new workspaces and notebooks.
+ */
+
+/**
  * Test:
  * - Create new Workspace as the copy-to destination Workspace.
  * - Create new Workspace as copy-from Workspace and create new notebook in this Workspace.
