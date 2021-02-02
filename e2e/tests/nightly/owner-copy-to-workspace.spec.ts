@@ -7,7 +7,7 @@ import {config} from 'resources/workbench-config';
 import WorkspaceCard from 'app/component/workspace-card';
 import Modal from 'app/modal/modal';
 
-// Retry one more when fails
+// re-run one more time if test has failed
 jest.retryTimes(1);
 
 // Reuse same source workspace for all tests in this file, in order to reduce test playback time.
@@ -27,7 +27,7 @@ let defaultCdrWorkspace: string;
  * @param {string} sourceWorkspaceName: Source workspace name
  * @param {string} to create new destination workspace with CDR Version
  */
-describe('Workspace owner Jupyter notebook action tests', () => {
+describe('Workspace owner copy notebook tests', () => {
 
    beforeEach(async () => {
       await signInWithAccessToken(page);
