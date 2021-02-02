@@ -35,13 +35,10 @@ import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.jdbc.ReportingQueryServiceImpl;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
-import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
 import org.pmiops.workbench.utils.FieldValues;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -56,7 +53,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ReportingVerificationServiceTest {
   private static final Instant NOW = Instant.parse("2000-01-01T00:00:00.00Z");
-  private static final Instant THEN_INSTANT = Instant.parse("1989-02-17T00:00:00.00Z");
 
   private static final Long ACTUAL_COUNT = (long) 2;
   private static final List<FieldValueList> ACTUAL_COUNT_QUERY_RESULT =
@@ -72,13 +68,9 @@ public class ReportingVerificationServiceTest {
   private static OutputStream logCapturingStream;
   private static StreamHandler customLogHandler;
 
-  @Autowired
-  @Qualifier("REPORTING_USER_TEST_FIXTURE")
-  ReportingTestFixture<DbUser, ReportingUser> userFixture;
-
   @Autowired private ReportingVerificationService reportingVerificationService;
   @Autowired private EntityManager entityManager;
-  @Autowired private CdrVersionDao cCdrVersionDao;
+  @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private UserDao userDao;
   @MockBean private BigQueryService mockBigQueryService;
@@ -136,11 +128,11 @@ public class ReportingVerificationServiceTest {
   }
 
   private void createWorkspaces(long count) {
-    DbUser user = userFixture.createEntity();
+    DbUser user = new DbUser();
     userDao.save(user);
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setName("foo");
-    cCdrVersionDao.save(cdrVersion);
+    cdrVersionDao.save(cdrVersion);
 
     for (int i = 0; i < count; ++i) {
       workspaceDao.save(createDbWorkspace(user, cdrVersion));

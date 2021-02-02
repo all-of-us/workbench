@@ -131,14 +131,14 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
   /** Uploads a record into verified_snapshot BigQuery table. */
   @Override
   public void uploadVerifiedSnapshot(long captureTimestamp) {
+    final TableId tableId = getTableId(VERIFIED_SNAPSHOT_TABLE_NAME);
     final InsertAllRequest insertAllRequest =
-        InsertAllRequest.newBuilder(getTableId(VERIFIED_SNAPSHOT_TABLE_NAME))
+        InsertAllRequest.newBuilder(tableId)
             .setIgnoreUnknownValues(false)
             .addRow(RowToInsert.of(generateInsertId(), getFixedValues(captureTimestamp)))
             .build();
-    bigQueryService.insertAll(insertAllRequest);
-    // No need to check response, either it success, we get the record, or it fails, no record
-    // presents.
+    InsertAllResponse response = bigQueryService.insertAll(insertAllRequest);
+    checkResponse(ImmutableMultimap.of(tableId, response));
     log.info(String.format("Verify snapshot at %d", captureTimestamp));
   }
 

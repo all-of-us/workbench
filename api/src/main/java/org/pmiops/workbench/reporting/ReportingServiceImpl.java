@@ -62,17 +62,17 @@ public class ReportingServiceImpl implements ReportingService {
         .forEach(b -> reportingUploadService.uploadBatchWorkspace(b, captureTimestamp));
 
     // Third: Verify the count.
-    boolean batchUploadSucceed =
+    boolean batchUploadSuccess =
         reportingVerificationService.verifyBatchesAndLog(BATCH_UPLOADED_TABLES, captureTimestamp);
 
     // Finally: Mark this snapshot valid by inserting one record into verified_snapshot table.
-    if (snapshotUploadSuccess && batchUploadSucceed) {
+    if (snapshotUploadSuccess && batchUploadSuccess) {
       reportingUploadService.uploadVerifiedSnapshot(captureTimestamp);
     } else {
       logger.warning(
           String.format(
-              "Failed to verified upload result, snapshotUploadSuccess: %s, batchUploadSucceed :%s",
-              snapshotUploadSuccess, batchUploadSucceed));
+              "Failed to verified upload result, snapshotUploadSuccess: %s, batchUploadSuccess :%s",
+              snapshotUploadSuccess, batchUploadSuccess));
     }
   }
 }
