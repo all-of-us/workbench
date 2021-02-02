@@ -3,14 +3,14 @@ package org.pmiops.workbench.profile;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
-import org.pmiops.workbench.db.model.DemographicSurveyEnum;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(
     config = MapStructConfig.class,
-    uses = {CommonMappers.class, DemographicSurveyEnum.class})
+    uses = {CommonMappers.class, DbStorageEnums.class})
 public interface DemographicSurveyMapper {
   @Mapping(target = "disability", source = "disabilityEnum")
   @Mapping(target = "education", source = "educationEnum")

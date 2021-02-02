@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.junit.Test;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.Domain;
@@ -22,20 +21,8 @@ import org.pmiops.workbench.model.Domain;
 public class StorageEnumsTest {
   private final Object INDICATES_STATIC_METHOD = null;
 
-  // files with the DbStorageEnums pattern as of 1 Feb 2021:
-  // DbStorageEnums, DemographicSurveyEnum
-
-  final List<Field> allFields =
-      Stream.concat(
-              Arrays.stream(DbStorageEnums.class.getDeclaredFields()),
-              Arrays.stream(DemographicSurveyEnum.class.getDeclaredFields()))
-          .collect(Collectors.toList());
-
-  final List<Method> allMethods =
-      Stream.concat(
-              Arrays.stream(DbStorageEnums.class.getDeclaredMethods()),
-              Arrays.stream(DemographicSurveyEnum.class.getDeclaredMethods()))
-          .collect(Collectors.toList());
+  final List<Field> allFields = Arrays.asList(DbStorageEnums.class.getDeclaredFields());
+  final List<Method> allMethods = Arrays.asList(DbStorageEnums.class.getDeclaredMethods());
 
   @Test
   public void test_duplicateFieldNames() {
@@ -78,20 +65,20 @@ public class StorageEnumsTest {
   @Test
   public void test_disability() {
     for (Disability disabilityValue : Disability.values()) {
-      Short shortValue = DemographicSurveyEnum.disabilityToStorage(disabilityValue);
+      Short shortValue = DbStorageEnums.disabilityToStorage(disabilityValue);
       assertWithMessage("unmapped enum value (Disability -> Short): " + disabilityValue)
           .that(shortValue)
           .isNotNull();
-      Boolean boolValue = DemographicSurveyEnum.boolyDisabilityFromStorage(shortValue);
+      Boolean boolValue = DbStorageEnums.boolyDisabilityFromStorage(shortValue);
       assertWithMessage("unmapped enum value (Short -> Boolean): " + disabilityValue)
           .that(boolValue)
           .isNotNull();
-      Short shortValue2 = DemographicSurveyEnum.disabilityToStorage(boolValue);
+      Short shortValue2 = DbStorageEnums.disabilityToStorage(boolValue);
       assertWithMessage("unmapped enum value (Boolean -> Short): " + disabilityValue)
           .that(shortValue2)
           .isNotNull();
       assertThat(shortValue2).isEqualTo(shortValue);
-      Disability roundTrip = DemographicSurveyEnum.disabilityFromStorage(shortValue);
+      Disability roundTrip = DbStorageEnums.disabilityFromStorage(shortValue);
       assertWithMessage("unmapped enum value (Short -> Disability): " + disabilityValue)
           .that(roundTrip)
           .isNotNull();

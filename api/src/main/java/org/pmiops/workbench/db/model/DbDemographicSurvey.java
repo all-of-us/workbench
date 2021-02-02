@@ -40,23 +40,23 @@ public class DbDemographicSurvey {
   public DbDemographicSurvey() {}
 
   public DbDemographicSurvey(org.pmiops.workbench.model.DemographicSurvey demographicSurvey) {
-    this.disability = DemographicSurveyEnum.disabilityToStorage(demographicSurvey.getDisability());
-    this.education = DemographicSurveyEnum.educationToStorage(demographicSurvey.getEducation());
-    this.ethnicity = DemographicSurveyEnum.ethnicityToStorage(demographicSurvey.getEthnicity());
+    this.disability = DbStorageEnums.disabilityToStorage(demographicSurvey.getDisability());
+    this.education = DbStorageEnums.educationToStorage(demographicSurvey.getEducation());
+    this.ethnicity = DbStorageEnums.ethnicityToStorage(demographicSurvey.getEthnicity());
     this.identifiesAsLgbtq = demographicSurvey.getIdentifiesAsLgbtq();
     this.lgbtqIdentity = demographicSurvey.getLgbtqIdentity();
     this.race =
         demographicSurvey.getRace().stream()
-            .map(DemographicSurveyEnum::raceToStorage)
+            .map(DbStorageEnums::raceToStorage)
             .collect(Collectors.toList());
     this.sexAtBirth =
         demographicSurvey.getSexAtBirth().stream()
-            .map(DemographicSurveyEnum::sexAtBirthToStorage)
+            .map(DbStorageEnums::sexAtBirthToStorage)
             .collect(Collectors.toList());
     this.year_of_birth = demographicSurvey.getYearOfBirth().intValue();
     this.genderIdentityList =
         demographicSurvey.getGenderIdentityList().stream()
-            .map(DemographicSurveyEnum::genderIdentityToStorage)
+            .map(DbStorageEnums::genderIdentityToStorage)
             .collect(Collectors.toList());
   }
 
@@ -71,11 +71,11 @@ public class DbDemographicSurvey {
 
   @Transient
   public Disability getDisabilityEnum() {
-    return DemographicSurveyEnum.disabilityFromStorage(disability);
+    return DbStorageEnums.disabilityFromStorage(disability);
   }
 
   public void setDisabilityEnum(Disability disability) {
-    this.disability = DemographicSurveyEnum.disabilityToStorage(disability);
+    this.disability = DbStorageEnums.disabilityToStorage(disability);
   }
 
   @Column(name = "education")
@@ -90,11 +90,11 @@ public class DbDemographicSurvey {
   @Transient
   public Education getEducationEnum() {
     if (education == null) return null;
-    return DemographicSurveyEnum.educationFromStorage(education);
+    return DbStorageEnums.educationFromStorage(education);
   }
 
   public void setEducationEnum(Education education) {
-    this.education = DemographicSurveyEnum.educationToStorage(education);
+    this.education = DbStorageEnums.educationToStorage(education);
   }
 
   @Column(name = "ethnicity")
@@ -109,11 +109,11 @@ public class DbDemographicSurvey {
   @Transient
   public Ethnicity getEthnicityEnum() {
     if (ethnicity == null) return null;
-    return DemographicSurveyEnum.ethnicityFromStorage(ethnicity);
+    return DbStorageEnums.ethnicityFromStorage(ethnicity);
   }
 
   public void setEthnicityEnum(Ethnicity ethnicity) {
-    this.ethnicity = DemographicSurveyEnum.ethnicityToStorage(ethnicity);
+    this.ethnicity = DbStorageEnums.ethnicityToStorage(ethnicity);
   }
 
   @Id
@@ -171,14 +171,11 @@ public class DbDemographicSurvey {
   @Transient
   public List<Race> getRaceEnum() {
     if (race == null) return null;
-    return this.race.stream()
-        .map(DemographicSurveyEnum::raceFromStorage)
-        .collect(Collectors.toList());
+    return this.race.stream().map(DbStorageEnums::raceFromStorage).collect(Collectors.toList());
   }
 
   public void setRaceEnum(List<Race> raceList) {
-    this.race =
-        raceList.stream().map(DemographicSurveyEnum::raceToStorage).collect(Collectors.toList());
+    this.race = raceList.stream().map(DbStorageEnums::raceToStorage).collect(Collectors.toList());
   }
 
   @ElementCollection(fetch = FetchType.LAZY)
@@ -198,14 +195,14 @@ public class DbDemographicSurvey {
   public List<GenderIdentity> getGenderIdentityEnumList() {
     if (genderIdentityList == null) return new ArrayList<GenderIdentity>();
     return this.genderIdentityList.stream()
-        .map(DemographicSurveyEnum::genderIdentityFromStorage)
+        .map(DbStorageEnums::genderIdentityFromStorage)
         .collect(Collectors.toList());
   }
 
   public void setGenderIdentityEnumList(List<GenderIdentity> genderList) {
     this.genderIdentityList =
         genderList.stream()
-            .map(DemographicSurveyEnum::genderIdentityToStorage)
+            .map(DbStorageEnums::genderIdentityToStorage)
             .collect(Collectors.toList());
   }
 
@@ -226,14 +223,14 @@ public class DbDemographicSurvey {
   public List<SexAtBirth> getSexAtBirthEnum() {
     if (sexAtBirth == null) return null;
     return this.sexAtBirth.stream()
-        .map(DemographicSurveyEnum::sexAtBirthFromStorage)
+        .map(DbStorageEnums::sexAtBirthFromStorage)
         .collect(Collectors.toList());
   }
 
   public void setSexAtBirthEnum(List<SexAtBirth> sexAtBirthList) {
     this.sexAtBirth =
         sexAtBirthList.stream()
-            .map(DemographicSurveyEnum::sexAtBirthToStorage)
+            .map(DbStorageEnums::sexAtBirthToStorage)
             .collect(Collectors.toList());
   }
 
