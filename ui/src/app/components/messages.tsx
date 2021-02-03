@@ -8,13 +8,13 @@ const MessageWithIcon = ({iconAltText, messageType, iconSize = 30, iconPosition 
     warning: 'warning-standard',
     error: 'warning-standard',
     success: 'success-standard',
-  }
+  };
 
   const color = {
     warning: colors.warning,
     error: colors.danger,
     success: colors.success
-  }
+  };
 
   const position = {
     top: {alignSelf: 'flex-start'},
@@ -54,20 +54,20 @@ const MessageWithIcon = ({iconAltText, messageType, iconSize = 30, iconPosition 
 
 export const WarningMessage = ({iconSize = 30, iconPosition = 'center', children}) => {
   return <MessageWithIcon
-      messageType={"warning"}
+      messageType={'warning'}
       iconSize={iconSize}
       iconPosition={iconPosition}
   >
     {children}
-  </MessageWithIcon>
+  </MessageWithIcon>;
 };
 
 export const ErrorMessage = ({iconSize = 30, iconPosition = 'center', children}) => {
   return <MessageWithIcon
-      messageType={"error"}
+      messageType={'error'}
       iconSize={iconSize}
       iconPosition={iconPosition}
     >
     {children}
-  </MessageWithIcon>
-}
+  </MessageWithIcon>;
+};

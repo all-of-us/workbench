@@ -1,10 +1,10 @@
 import {Button, Clickable, Link} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
+import {ErrorMessage, WarningMessage} from 'app/components/messages';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
-import {ErrorMessage, WarningMessage} from 'app/components/messages';
 
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
@@ -909,10 +909,10 @@ export const RuntimePanel = fp.flow(
         lessThan: runningCost,
         message: message
       }
-    }
-  }
+    };
+  };
 
-  const runningCost = machineRunningCost({
+  const currentRunningCost = machineRunningCost({
     computeType: selectedCompute,
     masterMachine: selectedMachine,
     masterDiskSize: diskSize,
@@ -937,17 +937,17 @@ export const RuntimePanel = fp.flow(
   // We have a different set of thresholds for workspaces on user billing accounts. 64 TB is the GCE limit on persistent disk.
   const paidTierErrorValidators = {
     selectedDiskSize: diskSizeValidatorWithMessage(64000, '^Disk size must be between 50 and 64,000 GB')
-  }
+  };
   const paidTierErrorDataprocValidators = {
     masterDiskSize: diskSizeValidatorWithMessage(64000, '^Master disk size must be between 50 and 4000 GB'),
     workerDiskSize: diskSizeValidatorWithMessage(64000, '^Worker disk size must be between 50 and 4000 GB')
-  }
+  };
   const paidTierWarningValidators = {
     runningCost: runningCostValidatorWithMessage(150, '^Your environment is very expensive. Are you sure you wish to proceed?')
-  }
+  };
 
   const {masterDiskSize = null, workerDiskSize = null} = selectedDataprocConfig || {};
-  const freeTierErrors = validate({selectedDiskSize, runningCost}, freeTierErrorValidators);
+  const freeTierErrors = validate({selectedDiskSize, currentRunningCost}, freeTierErrorValidators);
   const freeTierDataprocErrors = selectedCompute === ComputeType.Dataproc
       ? validate({masterDiskSize, workerDiskSize}, freeTierErrorDataprocValidators)
       : undefined;
@@ -955,7 +955,7 @@ export const RuntimePanel = fp.flow(
   const paidTierDataprocErrors = selectedCompute === ComputeType.Dataproc
       ? validate({masterDiskSize, workerDiskSize}, paidTierErrorDataprocValidators)
       : undefined;
-  const paidTierWarnings = validate({runningCost}, paidTierWarningValidators);
+  const paidTierWarnings = validate({currentRunningCost}, paidTierWarningValidators);
 
   const runtimeCanBeCreated = workspace.billingAccountType === BillingAccountType.FREETIER
     ? !freeTierErrors && !freeTierDataprocErrors
@@ -987,7 +987,7 @@ export const RuntimePanel = fp.flow(
       warningDivs.push(summarizeErrors(paidTierWarnings));
     }
     return warningDivs;
-  }
+  };
 
   const renderUpdateButton = () => {
     return <Button
