@@ -47,8 +47,5 @@ describe('CohortPage', () => {
     expect(mockGetCohort).toHaveBeenCalledWith(namespace, id, 2);
     expect(wrapper.find('[data-test-id="includes-search-group"]').length).toBe(2);
     expect(wrapper.find('[data-test-id="excludes-search-group"]').length).toBe(1);
-    console.log(wrapper.state());
-    console.log(wrapper.state('criteria'));
-    console.log(wrapper.state('value'));
   });
 });

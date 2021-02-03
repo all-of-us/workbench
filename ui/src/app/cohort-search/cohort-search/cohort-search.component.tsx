@@ -166,6 +166,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     }
     currentCohortCriteriaStore.next(selections);
     this.subscription = currentCohortCriteriaStore.subscribe(newSelections => {
+      console.log(newSelections);
       if (!!newSelections) {
         this.setState({
           selectedIds: newSelections.map(s => s.parameterId),
@@ -292,7 +293,9 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
       <Growl ref={(el) => this.growl = el} style={!growlVisible ? {...styles.growl, display: 'none'} : styles.growl}/>
       <div id='cohort-search-container' style={styles.searchContent}>
         {domain === Domain.PERSON && <div style={styles.titleBar}>
-          <Clickable style={styles.backArrow} onClick={() => this.checkUnsavedChanges()}>
+          <Clickable data-test-id='cohort-search-back-arrow'
+                     style={styles.backArrow}
+                     onClick={() => this.checkUnsavedChanges()}>
             <img src={arrowIcon} style={styles.arrowIcon} alt='Go back' />
           </Clickable>
           <h2 style={styles.titleHeader}>{typeToTitle(type)}</h2>
@@ -321,7 +324,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
       </Button>
       {showUnsavedModal && <Modal>
         <ModalTitle>Warning! </ModalTitle>
-        <ModalBody>
+        <ModalBody data-test-id='cohort-search-unsaved-message'>
           Your cohort has not been saved. If you’d like to save your cohort criteria, please click CANCEL
           and save your changes in the right sidebar.
         </ModalBody>
