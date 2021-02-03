@@ -118,4 +118,5 @@ export enum SideBarLink {
    DataDictionary,
    HelpTips,
    WorkspaceMenu,
+   EditAnnotations,
 }

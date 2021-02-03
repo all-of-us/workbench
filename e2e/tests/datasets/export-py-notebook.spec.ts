@@ -5,7 +5,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {MenuOption, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
-import {waitForText, waitWhileLoading} from 'utils/waits-utils';
+import {waitWhileLoading} from 'utils/waits-utils';
 
 describe('Create Dataset', () => {
 
@@ -43,9 +43,6 @@ describe('Create Dataset', () => {
     await notebookPreviewPage.waitForLoad();
     const currentPageUrl = page.url();
     expect(currentPageUrl).toContain(`notebooks/preview/${newNotebookName}.ipynb`);
-
-    const previewTextVisible = await waitForText(page, 'Preview (Read-Only)', {xpath: '//*[text()="Preview (Read-Only)"]'});
-    expect(previewTextVisible).toBe(true);
 
     const code = await notebookPreviewPage.getFormattedCode();
     expect(code).toContain('import pandas');

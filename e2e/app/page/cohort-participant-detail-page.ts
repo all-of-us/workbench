@@ -4,6 +4,7 @@ import Button from 'app/element/button';
 import {LinkText} from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
 import {getPropValue} from 'utils/element-utils';
+import CohortReviewPage from './cohort-review-page';
 
 const PageTitle = 'Participant Detail';
 
@@ -38,16 +39,12 @@ export default class CohortParticipantDetailPage extends AuthenticatedPage {
   }
   
   // get the back to review set button
-  async getBackToReviewSetButton(): Promise<Button> {
-    return Button.findByName(this.page, {name: LinkText.BackToReviewSet});
-  }
- 
-   // click on the pen icon located on the side bar
-   async clickPenIconHelpSideBar(): Promise<void> {
-    const clickPenIcon = await this.page.waitForXPath(`//*[@data-test-id="help-sidebar-icon-annotations"]`, {visible: true});
-    await clickPenIcon.click();
-    await this.page.waitForXPath('//*[@data-test-id="sidebar-content"]', {visible: true});
-    await waitWhileLoading(this.page);
+  async getBackToReviewSetButton(): Promise<CohortReviewPage> {
+    const button = await Button.findByName(this.page, {name: LinkText.BackToReviewSet});
+    await button.click();
+    const cohortReviewPage = new CohortReviewPage(this.page);
+    await cohortReviewPage.waitForLoad();
+    return cohortReviewPage;
   }
 
   // click on pi-angle-right button to go to next participant

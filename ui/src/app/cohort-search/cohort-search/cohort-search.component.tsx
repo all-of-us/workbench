@@ -194,8 +194,14 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     if (groupId) {
       const requestItem = getItemFromSearchRequest(groupId, item.id, role);
       if (requestItem) {
+        // Use clone to compare to prevent passing changes back to actual selections
+        const selectionsClone = JSON.parse(JSON.stringify(selections));
         const sortAndStringify = (params) => JSON.stringify(params.sort((a, b) => a.id - b.id));
-        unsavedChanges = sortAndStringify(requestItem.searchParameters) !== sortAndStringify(selections);
+        if (this.criteriaIdsLookedUp(requestItem.searchParameters)) {
+          // If a lookup has been done, we delete the ids before comparing search parameters and selections
+          selectionsClone.forEach(selection => delete selection.id);
+        }
+        unsavedChanges = sortAndStringify(requestItem.searchParameters) !== sortAndStringify(selectionsClone);
       }
     }
     this.setState({unsavedChanges});
@@ -209,6 +215,12 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     } else {
       this.closeSearch();
     }
+  }
+
+  // Checks if a lookup has been done to add the criteria ids to the selections
+  criteriaIdsLookedUp(searchParameters: Array<Selection>) {
+    const {selections} = this.state;
+    return selections.length && searchParameters.length && selections.some(sel => !!sel.id) && searchParameters.some(sel => !sel.id);
   }
 
   addSelection = (param: any) => {

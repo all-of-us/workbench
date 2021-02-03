@@ -41,8 +41,10 @@ import {
 } from 'app/utils/runtime-utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
+import {AoU} from 'app/components/text-wrappers';
 import {
   BillingAccountType,
+  BillingStatus,
   CdrVersionListResponse,
   DataprocConfig,
   Runtime,
@@ -161,9 +163,11 @@ enum PanelContent {
   Create = 'Create',
   Customize = 'Customize',
   Delete = 'Delete',
+  Disabled = 'Disabled',
   Confirm = 'Confirm'
 }
 
+// this is only used in the test.
 export interface Props {
   workspace: WorkspaceData;
   cdrVersionListResponse?: CdrVersionListResponse;
@@ -262,6 +266,24 @@ const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPr
         value={memory}
         />
   </Fragment>;
+};
+
+const DisabledPanel = () => {
+  return <WarningMessage
+        data-test-id='runtime-disabled-panel'
+        iconSize={16}
+        iconPosition={'top'}
+    >
+      {
+        <TextColumn>
+          <div style={{fontWeight: 600}}>Cloud services are disabled for this workspace.</div>
+          <div style={{marginTop: '0.5rem'}}>
+            You cannot run or edit notebooks in this workspace because billed services are disabled
+            for the workspace creator's <AoU/> Researcher account.
+          </div>
+        </TextColumn>
+      }
+    </WarningMessage>;
 };
 
 const DiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskSize, idPrefix}) => {
@@ -630,7 +652,7 @@ const CreatePanel = ({creatorFreeCreditsRemaining, profile, setPanelContent, wor
   const displayName = runtimeConfig.computeType === ComputeType.Dataproc ?
     runtimePresets.hailAnalysis.displayName : runtimePresets.generalAnalysis.displayName;
 
-  return <div style={styles.controlSection}>
+  return <div data-test-id='runtime-create-panel' style={styles.controlSection}>
     <FlexRow style={styles.costPredictorWrapper}>
       <StartStopRuntimeButton workspaceNamespace={workspace.namespace}/>
       <CostInfo runtimeChanged={false}
@@ -773,17 +795,18 @@ export const RuntimePanel = fp.flow(
   // We may encounter a race condition where an existing current runtime has not loaded by the time this panel renders.
   // It's unclear how often that would actually happen.
   const initialPanelContent = fp.cond([
+    [([b, , ]) => b === BillingStatus.INACTIVE, () => PanelContent.Disabled],
     // currentRuntime being undefined means the first `getRuntime` has still not completed.
     // If there's a pendingRuntime, this means there's already a create/update
     // in progress, even if the runtime store doesn't actively reflect this yet.
     // Show the customize panel in this event.
-    [([r, ]) => r === undefined || !!pendingRuntime, () => PanelContent.Customize],
-    [([r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
-    [([r, ]) => r.status === RuntimeStatus.Deleted &&
+    [([, r, ]) => r === undefined || !!pendingRuntime, () => PanelContent.Customize],
+    [([, r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
+    [([, r, ]) => r.status === RuntimeStatus.Deleted &&
       ([RuntimeConfigurationType.GeneralAnalysis, RuntimeConfigurationType.HailGenomicAnalysis].includes(r.configurationType)),
       () => PanelContent.Create],
     [() => true, () => PanelContent.Customize]
-  ])([currentRuntime, status]);
+  ])([workspace.billingStatus, currentRuntime, status]);
   const [panelContent, setPanelContent] = useState<PanelContent>(initialPanelContent);
 
   const [selectedMachine, setSelectedMachine] = useState(initialMasterMachine);
@@ -955,110 +978,111 @@ export const RuntimePanel = fp.flow(
 
     {switchCase(panelContent,
       [PanelContent.Create, () =>
-        <Fragment>
-          <CreatePanel
-              creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
-              profile={profile}
-              setPanelContent={(value) => setPanelContent(value)}
-              workspace={workspace}
-              runtimeConfig={newRuntimeConfig}
-          />
-          <FlexRow style={{justifyContent: 'flex-end', marginTop: '1rem'}}>
-            {renderCreateButton()}
-          </FlexRow>
-        </Fragment>
+            <Fragment>
+              <CreatePanel
+                  creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
+                  profile={profile}
+                  setPanelContent={(value) => setPanelContent(value)}
+                  workspace={workspace}
+                  runtimeConfig={newRuntimeConfig}
+              />
+              <FlexRow style={{justifyContent: 'flex-end', marginTop: '1rem'}}>
+                {renderCreateButton()}
+              </FlexRow>
+            </Fragment>
       ],
       [PanelContent.Delete, () => <ConfirmDelete
-        onConfirm={async() => {
-          await setRuntimeStatus(RuntimeStatusRequest.Delete);
-          onClose();
-        }}
-        onCancel={() => setPanelContent(PanelContent.Customize)}
-      />],
+            onConfirm={async() => {
+              await setRuntimeStatus(RuntimeStatusRequest.Delete);
+              onClose();
+            }}
+            onCancel={() => setPanelContent(PanelContent.Customize)}
+          />],
       [PanelContent.Customize, () => <Fragment>
-        <div style={styles.controlSection}>
-          <FlexRow style={styles.costPredictorWrapper}>
-            <StartStopRuntimeButton workspaceNamespace={workspace.namespace}/>
-            <CostInfo runtimeChanged={runtimeChanged}
-              runtimeConfig={newRuntimeConfig}
-              currentUser={profile.username}
-              workspace={workspace}
-              creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
-              />
-          </FlexRow>
-          <PresetSelector
-            hasMicroarrayData={hasMicroarrayData}
-            disabled={disableControls}
-            setSelectedDiskSize={(disk) => setSelectedDiskSize(disk)}
-            setSelectedMachine={(machine) => setSelectedMachine(machine)}
-            setSelectedCompute={(compute) => setSelectedCompute(compute)}
-            setSelectedDataprocConfig={(dataproc) => setSelectedDataprocConfig(dataproc)}
-          />
-          {/* Runtime customization: change detailed machine configuration options. */}
-          <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
-          <div style={styles.formGrid}>
-            <MachineSelector
-              idPrefix='runtime'
-              disabled={disableControls}
-              selectedMachine={selectedMachine}
-              onChange={(value) => setSelectedMachine(value)}
-              validMachineTypes={validMainMachineTypes}
-              machineType={machineName}/>
-            <DiskSizeSelector
-                idPrefix='runtime'
-                selectedDiskSize={selectedDiskSize}
-                onChange={(value) => {
-                  setSelectedDiskSize(value);
-                }}
+            <div style={styles.controlSection}>
+              <FlexRow style={styles.costPredictorWrapper}>
+                <StartStopRuntimeButton workspaceNamespace={workspace.namespace}/>
+                <CostInfo runtimeChanged={runtimeChanged}
+                  runtimeConfig={newRuntimeConfig}
+                  currentUser={profile.username}
+                  workspace={workspace}
+                  creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
+                  />
+              </FlexRow>
+              <PresetSelector
+                hasMicroarrayData={hasMicroarrayData}
                 disabled={disableControls}
-                diskSize={diskSize}/>
-         </div>
-         <FlexColumn style={{marginTop: '1rem'}}>
-           <label htmlFor='runtime-compute'>Compute type</label>
-           <Dropdown id='runtime-compute'
-                     disabled={!hasMicroarrayData || disableControls}
-                     style={{width: '10rem'}}
-                     options={[ComputeType.Standard, ComputeType.Dataproc]}
-                     value={selectedCompute || ComputeType.Standard}
-                     onChange={({value}) => {setSelectedCompute(value); }}
-                     />
-           {
-             selectedCompute === ComputeType.Dataproc &&
-             <DataProcConfigSelector
-               disabled={disableControls}
-               onChange={config => setSelectedDataprocConfig(config)}
-               dataprocConfig={selectedDataprocConfig} />
+                setSelectedDiskSize={(disk) => setSelectedDiskSize(disk)}
+                setSelectedMachine={(machine) => setSelectedMachine(machine)}
+                setSelectedCompute={(compute) => setSelectedCompute(compute)}
+                setSelectedDataprocConfig={(dataproc) => setSelectedDataprocConfig(dataproc)}
+              />
+              {/* Runtime customization: change detailed machine configuration options. */}
+              <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
+              <div style={styles.formGrid}>
+                <MachineSelector
+                  idPrefix='runtime'
+                  disabled={disableControls}
+                  selectedMachine={selectedMachine}
+                  onChange={(value) => setSelectedMachine(value)}
+                  validMachineTypes={validMainMachineTypes}
+                  machineType={machineName}/>
+                <DiskSizeSelector
+                    idPrefix='runtime'
+                    selectedDiskSize={selectedDiskSize}
+                    onChange={(value) => {
+                      setSelectedDiskSize(value);
+                    }}
+                    disabled={disableControls}
+                    diskSize={diskSize}/>
+             </div>
+             <FlexColumn style={{marginTop: '1rem'}}>
+               <label htmlFor='runtime-compute'>Compute type</label>
+               <Dropdown id='runtime-compute'
+                         disabled={!hasMicroarrayData || disableControls}
+                         style={{width: '10rem'}}
+                         options={[ComputeType.Standard, ComputeType.Dataproc]}
+                         value={selectedCompute || ComputeType.Standard}
+                         onChange={({value}) => {setSelectedCompute(value); }}
+                         />
+               {
+                 selectedCompute === ComputeType.Dataproc &&
+                 <DataProcConfigSelector
+                   disabled={disableControls}
+                   onChange={config => setSelectedDataprocConfig(config)}
+                   dataprocConfig={selectedDataprocConfig} />
+               }
+             </FlexColumn>
+           </div>
+           {runtimeExists && runtimeChanged &&
+             <WarningMessage>
+                <div>You've made changes that require recreating your environment to take effect.</div>
+             </WarningMessage>
            }
-         </FlexColumn>
-       </div>
-       {runtimeExists && runtimeChanged &&
-         <WarningMessage>
-            <div>You've made changes that require recreating your environment to take effect.</div>
-         </WarningMessage>
-       }
-       {(errors || dataprocErrors) &&
-         <WarningMessage>
-           {getErrorsTooltipContent()}
-         </WarningMessage>
-       }
-       <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
-         <Link
-           style={{...styles.deleteLink, ...(
-             (disableControls || !runtimeExists) ?
-             {color: colorWithWhiteness(colors.dark, .4)} : {}
-           )}}
-           aria-label='Delete Environment'
-           disabled={disableControls || !runtimeExists}
-           onClick={() => setPanelContent(PanelContent.Delete)}>Delete Environment</Link>
-           {!runtimeExists ? renderCreateButton() : renderNextButton()}
-       </FlexRow>
-     </Fragment>],
+           {(errors || dataprocErrors) &&
+             <WarningMessage>
+               {getErrorsTooltipContent()}
+             </WarningMessage>
+           }
+           <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
+             <Link
+               style={{...styles.deleteLink, ...(
+                 (disableControls || !runtimeExists) ?
+                 {color: colorWithWhiteness(colors.dark, .4)} : {}
+               )}}
+               aria-label='Delete Environment'
+               disabled={disableControls || !runtimeExists}
+               onClick={() => setPanelContent(PanelContent.Delete)}>Delete Environment</Link>
+               {!runtimeExists ? renderCreateButton() : renderNextButton()}
+           </FlexRow>
+         </Fragment>],
       [PanelContent.Confirm, () => <ConfirmUpdatePanel initialRuntimeConfig={initialRuntimeConfig}
-                                                       newRuntimeConfig={newRuntimeConfig}
-                                                       onCancel={() => {
-                                                         setPanelContent(PanelContent.Customize);
-                                                       }}
-                                                       updateButton={renderUpdateButton()}
-      />])}
+                                                           newRuntimeConfig={newRuntimeConfig}
+                                                           onCancel={() => {
+                                                             setPanelContent(PanelContent.Customize);
+                                                           }}
+                                                           updateButton={renderUpdateButton()}
+          />],
+          [PanelContent.Disabled, () => <DisabledPanel/>])}
   </div>;
 });

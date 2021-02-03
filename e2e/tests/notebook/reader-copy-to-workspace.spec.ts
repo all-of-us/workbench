@@ -12,6 +12,9 @@ import {waitWhileLoading} from 'utils/waits-utils';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Modal from 'app/modal/modal';
 
+// Retry one more when fails
+jest.retryTimes(1);
+
 describe('Workspace reader Jupyter notebook action tests', () => {
 
   beforeEach(async () => {
