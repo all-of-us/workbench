@@ -211,6 +211,12 @@ public class ReportingQueryServiceTest {
     assertThat(totalBatches).isEqualTo(0);
   }
 
+  @Test
+  public void testWorkspaceCount() {
+    createWorkspaces(5);
+    assertThat(reportingQueryService.getWorkspacesCount()).isEqualTo(5);
+  }
+
   private void createWorkspaces(int count) {
     final DbUser user = createDbUser();
     final DbCdrVersion cdrVersion = createCdrVersion();

@@ -297,6 +297,7 @@ public class ReportingUploadServiceTest {
   @Test
   public void testUploadBatch_workspace() {
     final InsertAllResponse mockInsertAllResponse = mock(InsertAllResponse.class);
+
     doReturn(Collections.emptyMap()).when(mockInsertAllResponse).getInsertErrors();
     doReturn(mockInsertAllResponse)
         .when(mockBigQueryService)
