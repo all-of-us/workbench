@@ -121,7 +121,7 @@ export const machineRunningCost = ({
   masterMachine,
   numberOfWorkers = 0,
   numberOfPreemptibleWorkers = 0,
-  workerDiskSize,
+  workerDiskSize = 0,
   workerMachine
 }) => {
   const dataprocPrice = computeType === ComputeType.Dataproc
