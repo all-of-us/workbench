@@ -23,7 +23,7 @@ import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-st
 import {BillingStatus} from 'generated/fetch';
 
 describe('RuntimePanel', () => {
-  let props: Props;p
+  let props: Props;
   let runtimeApiStub: RuntimeApiStub;
   let workspacesApiStub: WorkspacesApiStub;
   let onClose: () => void;
