@@ -166,7 +166,6 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     }
     currentCohortCriteriaStore.next(selections);
     this.subscription = currentCohortCriteriaStore.subscribe(newSelections => {
-      console.log(newSelections);
       if (!!newSelections) {
         this.setState({
           selectedIds: newSelections.map(s => s.parameterId),
