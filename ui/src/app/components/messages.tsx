@@ -3,7 +3,7 @@ import {ClrIcon} from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import * as React from 'react';
 
-const MessageWithIcon = ({iconAltText, messageType, iconSize = 30, iconPosition = 'center', children}) => {
+const MessageWithIcon = ({messageType, iconSize = 30, iconPosition = 'center', children}) => {
   const icon = {
     warning: 'warning-standard',
     error: 'warning-standard',
@@ -44,7 +44,6 @@ const MessageWithIcon = ({iconAltText, messageType, iconSize = 30, iconPosition 
         shape={icon[messageType]}
         size={iconSize}
         class={'is-solid'}
-        alt={iconAltText}
     />
     <div style={{paddingLeft: '0.5rem', paddingRight: '0.5rem'}}>
       {children}
