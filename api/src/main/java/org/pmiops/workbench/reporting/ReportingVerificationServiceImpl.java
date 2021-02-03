@@ -7,6 +7,7 @@ import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -75,7 +76,7 @@ public class ReportingVerificationServiceImpl implements ReportingVerificationSe
   }
 
   @Override
-  public boolean verifyBatchesAndLog(List<String> batchTables, long captureSnapshotTime) {
+  public boolean verifyBatchesAndLog(Set<String> batchTables, long captureSnapshotTime) {
     final StringBuilder sb =
         new StringBuilder(String.format("Verifying batches %d:\n", captureSnapshotTime));
     Level detailsLogLevel = Level.INFO;
