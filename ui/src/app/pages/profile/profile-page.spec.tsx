@@ -101,6 +101,23 @@ describe('ProfilePageComponent', () => {
 
     getDemographicSurveyButton(wrapper).simulate('click');
     await waitOneTickAndUpdate(wrapper);
+
+    wrapper.find('[data-test-id="checkbox-race-PREFER_NO_ANSWER"]').at(1).simulate('change', {target: {checked: true}})
+    wrapper.find('[data-test-id="checkbox-genderIdentityList-PREFER_NO_ANSWER"]').at(1).simulate('change', {target: {checked: true}})
+    wrapper.find('[data-test-id="checkbox-sexAtBirth-PREFER_NO_ANSWER"]').at(1).simulate('change', {target: {checked: true}})
+  
+    wrapper.find('[data-test-id="radio-lgbtq-pnta"]').first().simulate('click');
+    wrapper.find('[id="radio-disability-pnta"]').first().simulate('click');
+  
+    wrapper.find('[data-test-id="dropdown-ethnicity"]').first().simulate('click');
+    wrapper.find('[data-test-id="dropdown-ethnicity"] [aria-label=" Prefer not to answer"]').first().simulate('click')
+  
+    wrapper.find('[data-test-id="year-of-birth"]').first().simulate('click');
+    wrapper.find('[aria-label="Prefer not to answer"]').first().simulate('click')
+  
+    wrapper.find('[data-test-id="highest-education-level"]').first().simulate('click');
+    wrapper.find('[data-test-id="highest-education-level"] [aria-label="Prefer not to answer"]').first().simulate('click');
+
     getSubmitButton(wrapper).simulate('click');
     // We need to await one tick to allow async processing of the error response to resolve.
     await waitOneTickAndUpdate(wrapper);

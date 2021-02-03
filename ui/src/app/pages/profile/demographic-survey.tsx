@@ -172,7 +172,7 @@ export class DemographicSurvey extends React.Component<Props, State> {
         <FlexColumn style={styles.checkboxAreaContainer}>
           {fp.flow(
             fp.remove({value: Race.PREFERNOANSWER}),
-            fp.map((race) => this.createOptionCheckbox('race', race, Race.PREFERNOANSWER)),
+            fp.map(item => this.createOptionCheckbox('race', item, Race.PREFERNOANSWER)),
             v => [...v, this.createNoAnswerCheckbox(pntaRace, 'race' )]
           )(AccountCreationOptions.race)
           }
@@ -192,7 +192,7 @@ export class DemographicSurvey extends React.Component<Props, State> {
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
           {fp.flow(
             fp.remove({value: GenderIdentity.PREFERNOANSWER}),
-            fp.map((race) => this.createOptionCheckbox('genderIdentityList', race, GenderIdentity.PREFERNOANSWER)),
+            fp.map(item => this.createOptionCheckbox('genderIdentityList', item, GenderIdentity.PREFERNOANSWER)),
             v => [...v, this.createNoAnswerCheckbox(pntaGenderIdentity, 'genderIdentityList' )]
           )(AccountCreationOptions.genderIdentity)
           }
@@ -236,7 +236,7 @@ or another sexual and/or gender minority?'>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
           {fp.flow(
             fp.remove({value: SexAtBirth.PREFERNOANSWER}),
-            fp.map((race) => this.createOptionCheckbox('sexAtBirth', race, SexAtBirth.PREFERNOANSWER)),
+            fp.map(item => this.createOptionCheckbox('sexAtBirth', item, SexAtBirth.PREFERNOANSWER)),
             v => [...v, this.createNoAnswerCheckbox(pntaSexAtBirth, 'sexAtBirth' )]
           )(AccountCreationOptions.sexAtBirth)
           }          
