@@ -1,8 +1,8 @@
 package org.pmiops.workbench.reporting;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
-import java.util.List;
+import com.google.common.collect.ImmutableSet;
+import java.util.Set;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -31,8 +31,8 @@ public class ReportingServiceImpl implements ReportingService {
   private final ReportingVerificationService reportingVerificationService;
 
   @VisibleForTesting
-  static final List<String> BATCH_UPLOADED_TABLES =
-      ImmutableList.of(WorkspaceColumnValueExtractor.TABLE_NAME);
+  static final Set<String> BATCH_UPLOADED_TABLES =
+      ImmutableSet.of(WorkspaceColumnValueExtractor.TABLE_NAME);
 
   public ReportingServiceImpl(
       ReportingQueryService reportingQueryService,
