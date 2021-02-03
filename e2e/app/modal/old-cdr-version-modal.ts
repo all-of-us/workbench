@@ -68,5 +68,6 @@ export default class OldCdrVersionModal extends Modal {
         // can continue now
         await continueButton.waitUntilEnabled();
         await continueButton.click();
+        await this.waitUntilClose();
     }
 }

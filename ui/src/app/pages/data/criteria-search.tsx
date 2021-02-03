@@ -277,9 +277,11 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
   }
 
   getListSearchSelectedIds() {
+    const {cohortContext: {source}} = this.props;
     const {selectedCriteriaList} = this.state;
-    const value = fp.map(selected => ('param' + selected.conceptId + selected.code + selected.isStandard), selectedCriteriaList);
-    return value;
+    return source === 'cohort' ?
+      fp.map(selected => selected.parameterId , selectedCriteriaList) :
+      fp.map(selected => ('param' + selected.conceptId + selected.code + selected.isStandard), selectedCriteriaList);
   }
 
   setScroll = (id: string) => {

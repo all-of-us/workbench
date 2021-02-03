@@ -7,6 +7,17 @@ import {config} from 'resources/workbench-config';
 import WorkspaceCard from 'app/component/workspace-card';
 import Modal from 'app/modal/modal';
 
+// re-run one more time if test has failed
+jest.retryTimes(1);
+
+// Reuse same source workspace for all tests in this file, in order to reduce test playback time.
+// Workspace to be created in first test. If create failed in first test, next test will try create it.
+let defaultCdrWorkspace: string;
+
+/**
+ * This test suite takes a long time to run. Two tests create 3 new workspaces and 2 notebook runtime.
+ * Test suite runs nightly shortens CI job runtime and reduces number of new workspaces and notebooks.
+ */
 
 /**
  * Test:
@@ -21,6 +32,27 @@ import Modal from 'app/modal/modal';
  * @param {string} sourceWorkspaceName: Source workspace name
  * @param {string} to create new destination workspace with CDR Version
  */
+describe('Workspace owner copy notebook tests', () => {
+
+   beforeEach(async () => {
+      await signInWithAccessToken(page);
+   });
+
+   test('Copy notebook to another Workspace when CDR versions match', async () => {
+      defaultCdrWorkspace = await createCustomCdrVersionWorkspace(config.defaultCdrVersionName);
+      await copyNotebookTest(defaultCdrWorkspace, config.defaultCdrVersionName);
+   }, 30 * 60 * 1000)
+
+   test('Copy notebook to another Workspace when CDR versions differ', async () => {
+      // reuse same source workspace for all tests, but always create new destination workspace.
+      if (defaultCdrWorkspace === undefined) {
+         defaultCdrWorkspace = await createCustomCdrVersionWorkspace(config.defaultCdrVersionName);
+      }
+      await copyNotebookTest(defaultCdrWorkspace, config.altCdrVersionName);
+   }, 30 * 60 * 1000)
+});
+
+
 async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName: string) {
 
    const destWorkspace = await createWorkspace(page, destCdrVersionName).then(card => card.getWorkspaceName());
@@ -78,27 +110,3 @@ async function createCustomCdrVersionWorkspace(cdrVersion: string): Promise<stri
    const workspace = await createWorkspace(page, cdrVersion);
    return workspace.getWorkspaceName();
 }
-
-// Reuse same source workspace for all tests in this file, in order to reduce test playback time.
-// Workspace to be created in first test. If create failed in first test, next test will try create it.
-let defaultCdrWorkspace: string;
-
-describe('Workspace owner Jupyter notebook action tests', () => {
-
-   beforeEach(async () => {
-      await signInWithAccessToken(page);
-   });
-
-   test('Copy notebook to another Workspace when CDR versions match', async () => {
-      defaultCdrWorkspace = await createCustomCdrVersionWorkspace(config.defaultCdrVersionName);
-      await copyNotebookTest(defaultCdrWorkspace, config.defaultCdrVersionName);
-   }, 30 * 60 * 1000)
-
-   test('Copy notebook to another Workspace when CDR versions differ', async () => {
-      // reuse same source workspace for all tests, but always create new destination workspace.
-      if (defaultCdrWorkspace === undefined) {
-         defaultCdrWorkspace = await createCustomCdrVersionWorkspace(config.defaultCdrVersionName);
-      }
-      await copyNotebookTest(defaultCdrWorkspace, config.altCdrVersionName);
-   }, 30 * 60 * 1000)
-});

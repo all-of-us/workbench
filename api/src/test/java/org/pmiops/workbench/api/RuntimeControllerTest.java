@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -241,7 +240,6 @@ public class RuntimeControllerTest {
     config.firecloud.notebookRuntimeDefaultMachineType = "n1-standard-4";
     config.firecloud.notebookRuntimeDefaultDiskSizeGb = 50;
     config.access.enableComplianceTraining = true;
-    config.featureFlags.enableCustomRuntimes = true;
 
     user = new DbUser();
     user.setUsername(LOGGED_IN_USER_EMAIL);
@@ -801,7 +799,6 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
-    config.featureFlags.enableCustomRuntimes = true;
 
     assertThrows(
         BadRequestException.class,
@@ -813,7 +810,6 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
-    config.featureFlags.enableCustomRuntimes = true;
 
     assertThrows(
         BadRequestException.class,
@@ -830,7 +826,6 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
-    config.featureFlags.enableCustomRuntimes = true;
 
     runtimeController.createRuntime(
         BILLING_PROJECT_ID,
@@ -876,7 +871,6 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
-    config.featureFlags.enableCustomRuntimes = true;
 
     runtimeController.createRuntime(
         BILLING_PROJECT_ID,
@@ -906,37 +900,34 @@ public class RuntimeControllerTest {
 
   @Test
   public void testCreateRuntime_nullRuntime() throws ApiException {
-    config.featureFlags.enableCustomRuntimes = false;
-
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
 
-    runtimeController.createRuntime(BILLING_PROJECT_ID, null);
-    verify(userRuntimesApi).createRuntime(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), any());
+    BadRequestException e =
+        assertThrows(
+            BadRequestException.class,
+            () -> runtimeController.createRuntime(BILLING_PROJECT_ID, null));
+
+    assertThat(e)
+        .hasMessageThat()
+        .contains("Either a GceConfig or DataprocConfig must be provided");
   }
 
   @Test
   public void testCreateRuntime_emptyRuntime() throws ApiException {
-    config.featureFlags.enableCustomRuntimes = false;
-
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
     stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
 
-    runtimeController.createRuntime(BILLING_PROJECT_ID, new Runtime());
-    verify(userRuntimesApi)
-        .createRuntime(
-            eq(BILLING_PROJECT_ID), eq(getRuntimeName()), createRuntimeRequestCaptor.capture());
+    BadRequestException e =
+        assertThrows(
+            BadRequestException.class,
+            () -> runtimeController.createRuntime(BILLING_PROJECT_ID, new Runtime()));
 
-    Runtime capturedRuntimeConfig = new Runtime();
-    leonardoMapper.mapRuntimeConfig(
-        capturedRuntimeConfig, createRuntimeRequestCaptor.getValue().getRuntimeConfig());
-    assertThat(capturedRuntimeConfig.getGceConfig())
-        .isEqualTo(
-            new GceConfig()
-                .machineType(config.firecloud.notebookRuntimeDefaultMachineType)
-                .diskSize(config.firecloud.notebookRuntimeDefaultDiskSizeGb));
+    assertThat(e)
+        .hasMessageThat()
+        .contains("Either a GceConfig or DataprocConfig must be provided");
   }
 
   @Test

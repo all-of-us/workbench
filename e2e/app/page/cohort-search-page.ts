@@ -1,5 +1,5 @@
 import {Page} from 'puppeteer';
-import HelpSidebar from 'app/component/help-sidebar';
+import ReviewCriteriaSidebar from 'app/component/review-criteria-sidebar';
 import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Textbox from 'app/element/textbox';
@@ -58,19 +58,22 @@ export default class CohortSearchPage extends AuthenticatedPage {
 
     // Get count from slider badge
     const count = await waitForNumericalString(this.page, `${this.containerXpath}//*[@id="age-count"]`);
-
     // Click ADD SELECTION to add selected age range
     await Button.findByName(this.page, {name: LinkText.AddSelection}).then(button => button.click());
+    await this.reviewAndSaveCriteria();
+    return count;
+  }
 
+  async reviewAndSaveCriteria(): Promise<void> {
     // Click FINISH & REVIEW button. Sidebar should open.
     const finishAndReviewButton = await Button.findByName(this.page, {name: LinkText.FinishAndReview});
     await finishAndReviewButton.waitUntilEnabled();
     await finishAndReviewButton.click();
 
     // Click SAVE CRITERIA button. Sidebar closes.
-    const helpSidebar = await new HelpSidebar(this.page);
-    await helpSidebar.clickSaveCriteriaButton();
-    return count;
+    const reviewCriteriaSidebar = await new ReviewCriteriaSidebar(this.page);
+    await reviewCriteriaSidebar.waitUntilVisible();
+    await reviewCriteriaSidebar.clickSaveCriteriaButton();
   }
 
   // Experimental

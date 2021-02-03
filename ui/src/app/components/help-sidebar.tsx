@@ -38,7 +38,6 @@ import {
   currentCohortSearchContextStore,
   currentConceptStore,
   NavStore,
-  serverConfigStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {withRuntimeStore} from 'app/utils/runtime-utils';
@@ -308,7 +307,6 @@ const helpIconName = (helpContentKey: string) => {
 
 const icons = (
   helpContentKey: string,
-  enableCustomRuntimes: boolean,
   workspaceAccessLevel: WorkspaceAccessLevel
 ) => {
   const keys = [
@@ -318,7 +316,7 @@ const icons = (
     'dataDictionary',
     'annotations'
   ];
-  if (enableCustomRuntimes && WorkspacePermissionsUtil.canWrite(workspaceAccessLevel)) {
+  if (WorkspacePermissionsUtil.canWrite(workspaceAccessLevel)) {
     keys.push('runtime');
   }
   return keys.map(k => ({...iconConfigs[k], id: k}));
@@ -679,7 +677,7 @@ export const HelpSidebar = fp.flow(
       return <div id='help-sidebar'>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
           {!(criteria || concept)  && this.renderWorkspaceMenu()}
-          {icons(helpContentKey, serverConfigStore.getValue().enableCustomRuntimes, workspace.accessLevel).map((icon, i) =>
+          {icons(helpContentKey, workspace.accessLevel).map((icon, i) =>
           this.showIcon(icon) && <div key={i} style={{display: 'table'}}>
                 <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
                   <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}

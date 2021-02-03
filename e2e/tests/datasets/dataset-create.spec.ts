@@ -45,7 +45,7 @@ describe('Dataset test', () => {
     await addIcon.click();
 
     // Open selection list and click Save Criteria button
-    await group1.viewAndSaveCriteria();
+    await searchPage.reviewAndSaveCriteria();
     await cohortBuildPage.getTotalCount();
 
     // Save new cohort.

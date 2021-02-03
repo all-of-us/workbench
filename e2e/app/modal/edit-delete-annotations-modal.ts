@@ -21,8 +21,8 @@ export default class EditDeleteAnnotationsModal extends Modal {
     * @param {string} newName New name.
     */
   
-  // rename annotations field  name
-  async clickRenameAnnotationsName(newName?: string): Promise<void> {
+  // rename annotations and close modal window
+  async renameAnnotation(newName?: string): Promise<void> {
      await this.clickButton(LinkText.Rename);
       
      const selector = `${this.getXpath()}//*[contains(text(), "Edit")]/following::div[3]/input`;
@@ -33,6 +33,7 @@ export default class EditDeleteAnnotationsModal extends Modal {
      await baseElement.type(newName);
      await this.clickButton(LinkText.Rename);
      await this.clickButton(LinkText.Close);
+     await this.waitUntilClose();
   }
 
   async deleteAnnotationsName(): Promise<void>{

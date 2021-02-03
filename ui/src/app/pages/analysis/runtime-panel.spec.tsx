@@ -20,6 +20,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {defaultGceConfig, defaultDataprocConfig, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
+import {BillingStatus} from 'generated/fetch';
 
 describe('RuntimePanel', () => {
   let props: Props;
@@ -29,15 +30,16 @@ describe('RuntimePanel', () => {
 
   const iconsDir = '/assets/icons';
 
-  const component = async() => {
-    const c = mount(<RuntimePanel {...props}/>);
+  const component = async(propOverrides?: object) => {
+    const allProps = {...props, ...propOverrides}
+    const c = mount(<RuntimePanel {...allProps}/>);
     await waitOneTickAndUpdate(c);
     return c;
   };
 
   beforeEach(() => {
     cdrVersionStore.next(cdrVersionListResponse);
-    serverConfigStore.next({...defaultServerConfig, enableCustomRuntimes: true});
+    serverConfigStore.next({...defaultServerConfig});
 
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);
@@ -886,5 +888,19 @@ describe('RuntimePanel', () => {
     await pickMainDiskSize(wrapper, 50);
     await pickWorkerDiskSize(wrapper, 50);
     expect(getNextButton().prop('disabled')).toBeFalsy();
+  });
+
+  it('should render disabled panel when creator billing disabled', async () => {
+    const wrapper = await component({workspace: {
+        ...workspaceStubs[0],
+        accessLevel: WorkspaceAccessLevel.WRITER,
+        billingStatus: BillingStatus.INACTIVE,
+        cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
+      }});
+
+    const disabledPanel = wrapper.find({'data-test-id': 'runtime-disabled-panel'});
+    expect(disabledPanel.exists()).toBeTruthy();
+    const createPanel = wrapper.find({'data-test-id': 'runtime-create-panel'});
+    expect(createPanel.exists()).toBeFalsy();
   });
 });

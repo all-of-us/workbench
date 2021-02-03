@@ -1,0 +1,73 @@
+{
+  "accessTiers": [
+    {
+      "accessTierId": 1,
+      "shortName": "registered",
+      "displayName": "Registered Tier",
+      "servicePerimeter": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test",
+      "authDomainName": "all-of-us-registered-test",
+      "authDomainGroupEmail": "GROUP_all-of-us-registered-test@dev.test.firecloud.org"
+    }
+  ],
+  "cdrVersions": [
+    {
+      "cdrVersionId": 1,
+      "name": "[Removed] Synthetic Dataset v1",
+      "dataAccessLevel": 1,
+      "archivalStatus": 1,
+      "bigqueryProject": "",
+      "bigqueryDataset": "",
+      "creationTime": "2018-06-06 00:00:00Z",
+      "releaseNumber": 1,
+      "numParticipants": 0,
+      "cdrDbName": "synth_r_2020q1_3",
+      "elasticIndexBaseName": "synth_r_2020q1_1",
+      "accessTier": "registered"
+    },
+    {
+      "cdrVersionId": 2,
+      "name": "[Removed] Synthetic Dataset v2",
+      "dataAccessLevel": 1,
+      "archivalStatus": 1,
+      "bigqueryProject": "",
+      "bigqueryDataset": "",
+      "creationTime": "2018-06-06 00:00:00Z",
+      "releaseNumber": 2,
+      "numParticipants": 0,
+      "cdrDbName": "synth_r_2020q1_3",
+      "elasticIndexBaseName": "synth_r_2019q1_1",
+      "accessTier": "registered"
+    },
+    {
+      "cdrVersionId": 3,
+      "isDefault": true,
+      "name": "Synthetic Dataset v3",
+      "dataAccessLevel": 1,
+      "bigqueryProject": "fc-aou-cdr-synth-test",
+      "bigqueryDataset": "SR2019q4r3",
+      "creationTime": "2019-09-30 00:00:00Z",
+      "releaseNumber": 3,
+      "numParticipants": 234525,
+      "cdrDbName": "synth_r_2019q4_10",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true,
+      "accessTier": "registered"
+    },
+    {
+      "cdrVersionId": 4,
+      "isDefault": false,
+      "name": "Synthetic Dataset v3 with Microarray",
+      "dataAccessLevel": 1,
+      "bigqueryProject": "fc-aou-cdr-synth-test",
+      "bigqueryDataset": "SR2019q4r3",
+      "microarrayBigqueryDataset": "microarray_data",
+      "creationTime": "2020-08-26 00:09:51Z",
+      "releaseNumber": 3,
+      "numParticipants": 234525,
+      "cdrDbName": "synth_r_2019q4_10",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true,
+      "accessTier": "registered"
+    }
+  ]
+}

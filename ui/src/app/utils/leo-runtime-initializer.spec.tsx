@@ -44,7 +44,7 @@ describe('RuntimeInitializer', () => {
     mockDeleteRuntime = jest.spyOn(runtimeApi(), 'deleteRuntime');
     mockStartRuntime = jest.spyOn(leoRuntimesApi(), 'startRuntime');
 
-    serverConfigStore.next({gsuiteDomain: 'researchallofus.org', enableCustomRuntimes: false});
+    serverConfigStore.next({gsuiteDomain: 'researchallofus.org'});
   });
 
   afterEach(() => {
@@ -165,7 +165,7 @@ describe('RuntimeInitializer', () => {
   });
 
   it('should lazily create user\'s most runtime if a valid one exists', async() => {
-    serverConfigStore.next({gsuiteDomain: 'researchallofus.org', enableCustomRuntimes: true});
+    serverConfigStore.next({gsuiteDomain: 'researchallofus.org'});
     mockGetRuntime.mockImplementation(namespace => {
       return {
         ...defaultRuntime(),
@@ -191,7 +191,7 @@ describe('RuntimeInitializer', () => {
   });
 
   it('should use preset values during lazy runtime creation if a preset was selected', async() => {
-    serverConfigStore.next({gsuiteDomain: 'researchallofus.org', enableCustomRuntimes: true});
+    serverConfigStore.next({gsuiteDomain: 'researchallofus.org'});
     mockGetRuntime.mockImplementation(namespace => {
       return {
         ...defaultRuntime(),

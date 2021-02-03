@@ -28,7 +28,7 @@ async function createConceptSet(srcWorkspaceCard: WorkspaceCard) {
   await criteriaSearch.resultsTableSelectRow(1, 1);
   await criteriaSearch.resultsTableSelectRow(2, 1);
 
-  await conceptSearchPage.viewAndSaveConceptSet();
+  await conceptSearchPage.reviewAndSaveConceptSet();
 
   const conceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
 

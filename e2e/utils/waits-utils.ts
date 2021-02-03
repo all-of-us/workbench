@@ -236,7 +236,8 @@ export async function waitForText(page: Page,
       await page.waitForSelector(selector.css, {visible: true, timeout});
       const jsHandle = await page.waitForFunction((css, expText) => {
         const element = document.querySelector(css);
-        return element && element.textContent.includes(expText);
+        const regExp = new RegExp(expText);
+        return element != null && regExp.test(element.textContent);
       }, {timeout}, selector.css, textSubstr);
       return (await jsHandle.jsonValue()) as boolean;
     } catch (e) {
@@ -249,7 +250,8 @@ export async function waitForText(page: Page,
       await page.waitForXPath(selector.xpath, {visible: true, timeout});
       const jsHandle = await page.waitForFunction((xpath, expText) => {
         const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-        return element && element.textContent.includes(expText);
+        const regExp = new RegExp(expText);
+        return element != null && regExp.test(element.textContent);
       }, {timeout}, selector.xpath, textSubstr);
       return (await jsHandle.jsonValue()) as boolean;
     } catch (e) {

@@ -47,7 +47,7 @@ describe('Editing and rename Concept Set', () => {
     expect(Number.isNaN(parseInt(row1.rollUpCount.replace(/,/g, ''), 10))).toBe(false);
     expect(Number.isNaN(parseInt(row2.rollUpCount.replace(/,/g, ''), 10))).toBe(false);
 
-    await conceptSearchPage.viewAndSaveConceptSet();
+    await conceptSearchPage.reviewAndSaveConceptSet();
 
     // Save new Concept Set.
     const conceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
@@ -67,7 +67,7 @@ describe('Editing and rename Concept Set', () => {
     const row = await criteriaSearch.resultsTableSelectRow();
     expect(row.name).toBe(procedureName);
 
-    await conceptSearchPage.viewAndSaveConceptSet();
+    await conceptSearchPage.reviewAndSaveConceptSet();
 
     // Save to Existing Set: Only one Concept set and it is the new Concept Set created earlier in same workspace.
     const existingConceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.ChooseExistingSet);

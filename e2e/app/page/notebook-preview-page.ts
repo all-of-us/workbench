@@ -21,7 +21,8 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
     await waitWhileLoading(this.page);
     await Promise.all([
       this.page.waitForXPath(Selector.editButton, {visible: true}),
-      this.page.waitForXPath(Selector.playgroundButton, {visible: true})
+      this.page.waitForXPath(Selector.playgroundButton, {visible: true}),
+      this.page.waitForXPath('//*[text()="Preview (Read-Only)"]', {visible: true}),
     ]);
     return true;
   }
