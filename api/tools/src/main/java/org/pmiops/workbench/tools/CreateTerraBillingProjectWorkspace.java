@@ -105,23 +105,28 @@ public class CreateTerraBillingProjectWorkspace {
 //              .billingAccount(opts.getOptionValue(billingAccountOpt.getLongOpt()))
 //              .projectName(opts.getOptionValue(billingProjectNameOpt.getLongOpt()));
 //              .highSecurityNetwork(true)
- //             .enableFlowLogs(true)
-  //            .privateIpGoogleAccess(true);
+//              .enableFlowLogs(true)
+//              .privateIpGoogleAccess(true);
 
-      String billingAccount = opts.getOptionValue(billingProjectNameOpt.getLongOpt());
+      String billingAccount = opts.getOptionValue(billingAccountOpt.getLongOpt());
       String billingProjectName = opts.getOptionValue(billingProjectNameOpt.getLongOpt());
       String workspaceName = opts.getOptionValue(workspaceNameOpt.getLongOpt());
 
       FirecloudCreateRawlsBillingProjectFullRequest billingProjectRequest =
               new FirecloudCreateRawlsBillingProjectFullRequest()
-                      .billingAccount("billingAccounts/" + opts.getOptionValue(billingAccountOpt.getLongOpt()))
-                      .projectName(opts.getOptionValue(billingProjectNameOpt.getLongOpt()))
-                      .highSecurityNetwork(true)
-                      .enableFlowLogs(true)
-                      .privateIpGoogleAccess(true);
+                      .billingAccount("billingAccounts/" + billingAccount)
+                      .projectName(opts.getOptionValue(billingProjectNameOpt.getLongOpt()));
+                      //.highSecurityNetwork(true)
+                      //.enableFlowLogs(true)
+                      //.privateIpGoogleAccess(true);
 
       log.info("Creating billing project");
-      apiFactory.billingApi().createBillingProjectFull(billingProjectRequest);
+      try {
+        apiFactory.billingApi().createBillingProjectFull(billingProjectRequest);
+      } catch (ApiException e) {
+        log.info(e.getResponseBody());
+        e.printStackTrace();
+      }
 
       FirecloudBillingProjectStatus.CreationStatusEnum status = apiFactory.billingApi().billingProjectStatus(billingProjectRequest.getProjectName()).getCreationStatus();
       while (status != FirecloudBillingProjectStatus.CreationStatusEnum.READY) {
@@ -151,13 +156,34 @@ public class CreateTerraBillingProjectWorkspace {
       FirecloudWorkspace workspace = apiFactory.workspacesApi().createWorkspace(workspaceIngest);
 
       FirecloudWorkspaceACLUpdate aclUpdate = new FirecloudWorkspaceACLUpdate()
-              .email("eric.song@pmi-ops.org")
+              .email("all-of-us-workbench-test@appspot.gserviceaccount.com")
+              .accessLevel(WorkspaceAccessLevel.OWNER.toString())
+              .canCompute(true)
+              .canShare(true);
+
+      FirecloudWorkspaceACLUpdate aclUpdate2 = new FirecloudWorkspaceACLUpdate()
+              .email("songe@broadinstitute.org")
+              .accessLevel(WorkspaceAccessLevel.OWNER.toString())
+              .canCompute(true)
+              .canShare(true);
+
+      FirecloudWorkspaceACLUpdate aclUpdate3 = new FirecloudWorkspaceACLUpdate()
+              .email(apiFactory.profileApi().getProxyGroup("all-of-us-workbench-test@appspot.gserviceaccount.com"))
               .accessLevel(WorkspaceAccessLevel.OWNER.toString())
               .canCompute(true)
               .canShare(true);
 
       log.info("Updating Workspace ACL");
-      apiFactory.workspacesApi().updateWorkspaceACL(workspace.getNamespace(), workspace.getName(), false, Collections.singletonList(aclUpdate));
+      apiFactory.workspacesApi().updateWorkspaceACL(workspace.getNamespace(), workspace.getName(), false, Arrays.asList(aclUpdate, aclUpdate2, aclUpdate3));
+
+      FirecloudWorkspaceACL acl = apiFactory.workspacesApi().getWorkspaceAcl(workspace.getNamespace(), workspace.getName());
+      for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : acl.getAcl().entrySet()) {
+        log.info("ACLs");
+        log.info(entry.getKey());
+        log.info(entry.getValue().toString());
+      }
+
+      log.info(workspace.getBucketName());
     };
   }
 

@@ -6,8 +6,7 @@ import java.util.Arrays;
 
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.firecloud.ApiClient;
-import org.pmiops.workbench.firecloud.api.BillingApi;
-import org.pmiops.workbench.firecloud.api.WorkspacesApi;
+import org.pmiops.workbench.firecloud.api.*;
 
 public class ServiceAccountAPIClientFactory {
 
@@ -43,6 +42,24 @@ public class ServiceAccountAPIClientFactory {
 
   public BillingApi billingApi() throws IOException {
     BillingApi api = new BillingApi();
+    api.setApiClient(newApiClient(apiUrl));
+    return api;
+  }
+
+  public SubmissionsApi submissionsApi() throws IOException {
+    SubmissionsApi api = new SubmissionsApi();
+    api.setApiClient(newApiClient(apiUrl));
+    return api;
+  }
+
+  public MethodconfigsApi methodconfigsApi() throws IOException {
+    MethodconfigsApi api = new MethodconfigsApi();
+    api.setApiClient(newApiClient(apiUrl));
+    return api;
+  }
+
+  public ProfileApi profileApi() throws IOException {
+    ProfileApi api = new ProfileApi();
     api.setApiClient(newApiClient(apiUrl));
     return api;
   }
