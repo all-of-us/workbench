@@ -20,7 +20,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {defaultGceConfig, defaultDataprocConfig, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
-import {BillingStatus} from 'generated/fetch';
+import {BillingAccountType, BillingStatus} from 'generated/fetch';
 
 describe('RuntimePanel', () => {
   let props: Props;
@@ -53,7 +53,8 @@ describe('RuntimePanel', () => {
       workspace: {
         ...workspaceStubs[0],
         accessLevel: WorkspaceAccessLevel.WRITER,
-        cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
+        cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
+        billingAccountType: BillingAccountType.FREETIER,
       },
       cdrVersionListResponse,
       onClose
@@ -888,6 +889,52 @@ describe('RuntimePanel', () => {
     await pickMainDiskSize(wrapper, 50);
     await pickWorkerDiskSize(wrapper, 50);
     expect(getNextButton().prop('disabled')).toBeFalsy();
+  });
+
+  it('should prevent runtime creation when running cost is too high for free tier', async() => {
+    runtimeApiStub.runtime = null;
+    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
+    const wrapper = await component();
+    await mustClickButton(wrapper, 'Customize');
+    const getCreateButton = () => wrapper.find({'aria-label': 'Create'}).first();
+
+    await pickComputeType(wrapper, ComputeType.Dataproc);
+
+    // This should make the cost about $50/hr.
+    await pickNumWorkers(wrapper, 200);
+    expect(getCreateButton().prop('disabled')).toBeTruthy();
+
+    await pickNumWorkers(wrapper, 2);
+    expect(getCreateButton().prop('disabled')).toBeFalsy();
+  });
+
+  it('should prevent runtime creation when running cost is too high for paid tier', async() => {
+    runtimeApiStub.runtime = null;
+    act(() => { runtimeStore.set({runtime: null, workspaceNamespace: workspaceStubs[0].namespace}) });
+    const wrapper = await component({workspace: {
+        ...workspaceStubs[0],
+        accessLevel: WorkspaceAccessLevel.WRITER,
+        billingAccountType: BillingAccountType.USERPROVIDED,
+        cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
+      }});
+
+    await mustClickButton(wrapper, 'Customize');
+    const getCreateButton = () => wrapper.find({'aria-label': 'Create'}).first();
+
+    await pickComputeType(wrapper, ComputeType.Dataproc);
+
+    // This should make the cost about $140/hr.
+    await pickNumWorkers(wrapper, 600);
+    expect(getCreateButton().prop('disabled')).toBeFalsy();
+
+    // This should make the cost around $160/hr.
+    await pickNumWorkers(wrapper, 700);
+    expect(getCreateButton().prop('disabled')).toBeFalsy();
+    expect(wrapper.find('[data-test-id="runtime-warning-messages"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-id="runtime-error-messages"]').exists()).toBeFalsy();
+
+    await pickNumWorkers(wrapper, 2);
+    expect(getCreateButton().prop('disabled')).toBeFalsy();
   });
 
   it('should render disabled panel when creator billing disabled', async () => {

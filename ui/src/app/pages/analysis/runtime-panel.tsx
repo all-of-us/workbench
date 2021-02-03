@@ -926,7 +926,7 @@ export const RuntimePanel = fp.flow(
   // disk that is way too big and expensive on free tier ($.22 an hour)
   const freeTierErrorValidators = {
     selectedDiskSize: diskSizeValidatorWithMessage(4000, '^Disk size must be between 50 and 4000 GB'),
-    runningCost: runningCostValidatorWithMessage(25, '^Your environment is too expensive. To proceed using free credits, reduce your running costs below $25/hr.')
+    currentRunningCost: runningCostValidatorWithMessage(25, '^Your environment is too expensive. To proceed using free credits, reduce your running costs below $25/hr.')
   };
   // We don't clear dataproc config when we change compute type so we can't combine this with the
   // above or else we can end up with phantom validation fails
@@ -943,7 +943,7 @@ export const RuntimePanel = fp.flow(
     workerDiskSize: diskSizeValidatorWithMessage(64000, '^Worker disk size must be between 50 and 4000 GB')
   };
   const paidTierWarningValidators = {
-    runningCost: runningCostValidatorWithMessage(150, '^Your environment is very expensive. Are you sure you wish to proceed?')
+    currentRunningCost: runningCostValidatorWithMessage(150, '^Your environment is very expensive. Are you sure you wish to proceed?')
   };
 
   const {masterDiskSize = null, workerDiskSize = null} = selectedDataprocConfig || {};
@@ -1120,12 +1120,12 @@ export const RuntimePanel = fp.flow(
              ) || (
                workspace.billingAccountType === BillingAccountType.USERPROVIDED && (paidTierErrors || paidTierDataprocErrors)
              )) &&
-             <ErrorMessage>
+             <ErrorMessage data-test-id={'runtime-error-messages'}>
                {getErrorMessageContent()}
              </ErrorMessage>
            }
            {paidTierWarnings &&
-            <WarningMessage>
+            <WarningMessage data-test-id={'runtime-warning-messages'}>
               {getWarningMessageContent()}
             </WarningMessage>
            }
