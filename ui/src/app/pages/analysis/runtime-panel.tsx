@@ -964,8 +964,11 @@ export const RuntimePanel = fp.flow(
   // where we get 'status' from
   const runtimeCanBeUpdated = runtimeChanged
       && [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)
-      && !freeTierErrors
-      && !freeTierDataprocErrors;
+      && (
+          workspace.billingAccountType === BillingAccountType.FREETIER
+            ? !freeTierErrors && !freeTierDataprocErrors
+            : !paidTierErrors && !paidTierDataprocErrors
+      );
 
   const getErrorMessageContent = () => {
     const errorDivs = [];
