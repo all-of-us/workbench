@@ -53,8 +53,8 @@ describe('RuntimePanel', () => {
       workspace: {
         ...workspaceStubs[0],
         accessLevel: WorkspaceAccessLevel.WRITER,
-        cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
         billingAccountType: BillingAccountType.FREETIER,
+        cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
       },
       cdrVersionListResponse,
       onClose
