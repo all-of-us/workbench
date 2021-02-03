@@ -635,6 +635,7 @@ paths:
       - in: body
         name: runtime
         description: notebooks runtime definition
+        required: true
         schema:
           "$ref": "#/definitions/Runtime"
       responses:
@@ -3899,10 +3900,6 @@ definitions:
         type: boolean
         default: false
         description: Whether user should see a prompt if Workspace Research Purpose needs Review
-      enableCustomRuntimes:
-        type: boolean
-        default: false
-        description: Whether user should be able to customize notebook runtime settings.
       runtimeImages:
         type: array
         items:
@@ -5368,13 +5365,7 @@ definitions:
       - UserOverride
       - GeneralAnalysis
       - HailGenomicAnalysis
-      # Deprecated.
-      # TODO(calbach): Remove after next release.
-      - DefaultGce
-      - DefaultDataproc
   Runtime:
-    # TODO: Add required properties after enableCustomRuntimes feature fully released
-    # We need to allow null/empty Runtimes while we support enableCustomRuntimes=false
     properties:
       googleProject:
         type: string

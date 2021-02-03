@@ -253,8 +253,6 @@ public class WorkbenchConfig {
     public boolean enableResearchPurposePrompt;
     // If true, reporting cron job will write data to configured BigQuery reporting dataset.
     public boolean enableReportingUploadCron;
-    // Whether users should be able to customize notebook runtime settings.
-    public boolean enableCustomRuntimes;
   }
 
   public static class ActionAuditConfig {
