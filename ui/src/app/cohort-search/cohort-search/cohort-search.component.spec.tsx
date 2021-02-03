@@ -1,10 +1,11 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {currentCohortCriteriaStore, currentCohortSearchContextStore} from 'app/utils/navigation';
+import {currentCohortCriteriaStore, currentCohortSearchContextStore, currentWorkspaceStore} from 'app/utils/navigation';
 import {Domain} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CriteriaStubVariables} from 'testing/stubs/cohort-builder-service-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {CohortSearch} from './cohort-search.component';
 
 const searchContextStubs = [
@@ -23,6 +24,9 @@ const searchContextStubs = [
 ];
 
 describe('CohortSearch', () => {
+  beforeEach(() => {
+    currentWorkspaceStore.next(workspaceDataStub);
+  });
   it('should render', () => {
     currentCohortSearchContextStore.next(searchContextStubs[0]);
     const wrapper = mount(<CohortSearch setUnsavedChanges={() => {}}/>);
