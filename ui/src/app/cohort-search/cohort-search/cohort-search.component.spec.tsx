@@ -1,10 +1,11 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentCohortCriteriaStore, currentCohortSearchContextStore, currentWorkspaceStore} from 'app/utils/navigation';
-import {Domain} from 'generated/fetch';
+import {CohortBuilderApi, CriteriaType, Domain} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {CriteriaStubVariables} from 'testing/stubs/cohort-builder-service-stub';
+import {CohortBuilderServiceStub, CriteriaStubVariables} from 'testing/stubs/cohort-builder-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
 import {CohortSearch} from './cohort-search.component';
 
@@ -19,13 +20,15 @@ const searchContextStubs = [
     domain: Domain.PERSON,
     item: {
       searchParameters: []
-    }
+    },
+    type: CriteriaType.ETHNICITY
   }
 ];
 
 describe('CohortSearch', () => {
   beforeEach(() => {
     currentWorkspaceStore.next(workspaceDataStub);
+    registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
   });
   it('should render', () => {
     currentCohortSearchContextStore.next(searchContextStubs[0]);
@@ -55,6 +58,6 @@ describe('CohortSearch', () => {
     currentCohortCriteriaStore.next([selection]);
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="cohort-search-back-arrow"]').simulate('click');
-    expect(wrapper.find('[data-test-id="cohort-search-unsaved-message"]').length).toBe(1);
+    expect(wrapper.find('[data-test-id="cohort-search-unsaved-message"]').length).toBeGreaterThan(0);
   });
 });
