@@ -41,6 +41,7 @@ export enum MenuOption {
 export enum LinkText {
    AddSelection = 'Add Selection',
    AddThis = 'ADD THIS',
+   AllSurveys = 'All Surveys',
    ApplyModifiers = 'APPLY MODIFIERS',
    ApplyRecreate = 'APPLY & RECREATE',
    BackToCohort = 'Back to cohort',
@@ -70,6 +71,7 @@ export enum LinkText {
    DeleteEnvironment = 'Delete Environment',
    DeleteNotebook = 'Delete Notebook',
    DeleteWorkspace = 'Delete Workspace',
+   Demographics = 'Demographics',
    DiscardChanges = 'Discard Changes',
    DuplicateWorkspace = 'Duplicate Workspace',
    Edit = 'Edit',

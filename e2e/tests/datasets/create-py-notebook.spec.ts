@@ -1,13 +1,12 @@
 import DataResourceCard from 'app/component/data-resource-card';
-import ExportToNotebookModal from 'app/modal/export-to-notebook-modal';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {MenuOption, ResourceCard} from 'app/text-labels';
+import {LinkText, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
-import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
+import {createWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import {waitWhileLoading} from 'utils/waits-utils';
 
-describe('Create Dataset', () => {
+describe('Create dataset and export to notebook at same time', () => {
 
   beforeEach(async () => {
     await signInWithAccessToken(page);
@@ -17,8 +16,8 @@ describe('Create Dataset', () => {
     * Create new Dataset, export to notebook in Python language
     * Finally delete Dataset.
     */
-   test('Export dataset to notebook in Python language', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page);
+   test('Jupyter Notebook for Python programming language can be created', async () => {
+    const workspaceCard = await createWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
     // Click Add Datasets button.
@@ -26,7 +25,7 @@ describe('Create Dataset', () => {
     const datasetBuildPage = await dataPage.clickAddDatasetButton();
 
     await datasetBuildPage.selectCohorts(['All Participants']);
-    await datasetBuildPage.selectConceptSets(['Demographics']);
+    await datasetBuildPage.selectConceptSets([LinkText.Demographics]);
 
     // Preview table exists and has one or more table rows.
     const previewTable = await datasetBuildPage.getPreviewTable();
@@ -67,53 +66,11 @@ describe('Create Dataset', () => {
 
     // Delete Dataset.
     await dataPage.openDatasetsSubtab();
-
     await dataPage.deleteResource(newDatasetName, ResourceCard.Dataset);
+
+    // Delete workspace
+    await dataPage.deleteWorkspace();
   });
 
-  /**
-   * Test:
-   * - Create dataset.
-   * - Export dataset to notebook thru snowman menu.
-   */
-  test('Export dataset to notebook thru snowman menu', async () => {
-    await findOrCreateWorkspace(page).then(card => card.clickWorkspaceName());
-
-    // Click Add Datasets button.
-    const dataPage = new WorkspaceDataPage(page);
-    const datasetBuildPage = await dataPage.clickAddDatasetButton();
-
-    await datasetBuildPage.selectCohorts(['All Participants']);
-    await datasetBuildPage.selectConceptSets(['Demographics']);
-    const saveModal = await datasetBuildPage.clickSaveAndAnalyzeButton();
-    const datasetName = await saveModal.saveDataset({exportToNotebook: false});
-    await waitWhileLoading(page);
-
-    const resourceCard = new DataResourceCard(page);
-    const datasetCard = await resourceCard.findCard(datasetName, ResourceCard.Dataset);
-    await datasetCard.selectSnowmanMenu(MenuOption.ExportToNotebook, {waitForNav: false});
-
-    const exportModal = new ExportToNotebookModal(page);
-    await exportModal.waitForLoad();
-
-    const notebookName = makeRandomName('test-notebook');
-    await exportModal.fillInModal(notebookName);
-
-    // Verify notebook created successfully. Not going to start the Jupyter notebook.
-    const notebookPreviewPage = new NotebookPreviewPage(page);
-    await notebookPreviewPage.waitForLoad();
-    const currentPageUrl = page.url();
-    expect(currentPageUrl).toContain(`notebooks/preview/${notebookName}.ipynb`);
-
-    // Navigate to Workpace Notebooks page.
-    const analysisPage = await notebookPreviewPage.goAnalysisPage();
-
-    // Delete notebook
-    await analysisPage.deleteResource(notebookName, ResourceCard.Notebook);
-
-    // Delete Dataset
-    await analysisPage.openDatasetsSubtab();
-    await analysisPage.deleteResource(datasetName, ResourceCard.Dataset);
-  });
 
 });

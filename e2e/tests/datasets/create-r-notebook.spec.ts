@@ -7,9 +7,9 @@ import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import {Ethnicity} from 'app/page/cohort-search-page';
-import {Language, ResourceCard} from 'app/text-labels';
+import {Language, LinkText, ResourceCard} from 'app/text-labels';
 
-describe('Create Dataset', () => {
+describe('Create dataset and export to notebook at same time', () => {
 
   beforeEach(async () => {
     await signInWithAccessToken(page);
@@ -20,7 +20,7 @@ describe('Create Dataset', () => {
    * Create new Dataset with Cohort, then export to notebook in R language.
    * Delete Cohort, Dataset, and Notebook.
    */
-  test('Export dataset to notebook in R language', async () => {
+  test('Jupyter Notebook for R programming language can be created', async () => {
     const workspaceCard = await findOrCreateWorkspace(page);
     const workspaceName = await workspaceCard.clickWorkspaceName();
 
@@ -52,7 +52,7 @@ describe('Create Dataset', () => {
     await cohortActionsPage.clickCreateDatasetButton();
 
     await datasetBuildPage.selectCohorts([newCohortName]);
-    await datasetBuildPage.selectConceptSets(['Demographics']);
+    await datasetBuildPage.selectConceptSets([LinkText.Demographics]);
     const saveModal = await datasetBuildPage.clickSaveAndAnalyzeButton();
     const newNotebookName = makeRandomName();
     const newDatasetName = await saveModal.saveDataset({
