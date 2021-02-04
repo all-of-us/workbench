@@ -904,7 +904,7 @@ export const RuntimePanel = fp.flow(
       standard: `^Disk size must be between 50 and ${maxDiskSize} GB`,
       master: `^Master disk size must be between 50 and ${maxDiskSize} GB`,
       worker: `^Worker disk size must be between 50 and ${maxDiskSize} GB`
-    }
+    };
 
     return {
       numericality: {
@@ -918,10 +918,10 @@ export const RuntimePanel = fp.flow(
   const runningCostValidatorWithMessage = () => {
     const maxRunningCost = workspace.billingAccountType === BillingAccountType.FREETIER
       ? 25
-      : 150
+      : 150;
     const message = workspace.billingAccountType === BillingAccountType.FREETIER
       ? '^Your runtime is too expensive. To proceed using free credits, reduce your running costs below $25/hr.'
-      : '^Your runtime is very expensive. Are you sure you wish to proceed?'
+      : '^Your runtime is very expensive. Are you sure you wish to proceed?';
     return {
       numericality: {
         lessThan: maxRunningCost,
@@ -962,18 +962,23 @@ export const RuntimePanel = fp.flow(
 
   const getErrorMessageContent = () => {
     const errorDivs = [];
-    standardDiskErrors && errorDivs.push(summarizeErrors(standardDiskErrors));
-    dataprocErrors && errorDivs.push(summarizeErrors(dataprocErrors));
-    if (workspace.billingAccountType === BillingAccountType.FREETIER) {
-      runningCostErrors && errorDivs.push(summarizeErrors(runningCostErrors));
+    // Sorry this is phrased this way. Would normally do standardDiskErrors && errorDivs.push but lint hates fun
+    if (standardDiskErrors) {
+      errorDivs.push(summarizeErrors(standardDiskErrors));
+    }
+    if (dataprocErrors) {
+      errorDivs.push(summarizeErrors(dataprocErrors));
+    }
+    if (workspace.billingAccountType === BillingAccountType.FREETIER && runningCostErrors) {
+      errorDivs.push(summarizeErrors(runningCostErrors));
     }
     return errorDivs;
   };
 
   const getWarningMessageContent = () => {
     const warningDivs = [];
-    if (workspace.billingAccountType === BillingAccountType.USERPROVIDED) {
-      runningCostErrors && warningDivs.push(summarizeErrors(runningCostErrors));
+    if (workspace.billingAccountType === BillingAccountType.USERPROVIDED && runningCostErrors) {
+      warningDivs.push(summarizeErrors(runningCostErrors));
     }
     return warningDivs;
   };
