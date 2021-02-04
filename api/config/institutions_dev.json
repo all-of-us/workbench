@@ -16,4 +16,11 @@
 	"organizationTypeEnum": "INDUSTRY",
 	"emailAddresses": [],
 	"emailDomains": ["verily.com", "google.com"]
+}, {
+	"shortName": "Legacy",
+	"displayName": "Legacy Research Accounts",
+	"organizationTypeEnum": "OTHER",
+	"organizationTypeOtherText": "Legacy dev accounts with backfilled contact emails",
+	"emailAddresses": [],
+	"emailDomains": ["fake-research-aou.org"]
 }]

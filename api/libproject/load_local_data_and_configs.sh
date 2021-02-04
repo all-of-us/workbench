@@ -14,3 +14,5 @@
 ./gradlew --daemon loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json
 ./gradlew --daemon loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json
 ./gradlew --daemon loadDataDictionary -PappArgs=false
+
+./gradlew --daemon loadInstitutions -PappArgs="['--import-filename=config/institutions_dev.json']"
