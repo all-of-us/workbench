@@ -15,4 +15,4 @@
 ./gradlew --daemon loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json
 ./gradlew --daemon loadDataDictionary -PappArgs=false
 
-./gradlew --daemon loadInstitutions -PappArgs="['--import-filename=config/institutions_dev.json']"
+./gradlew --daemon loadInstitutions -PappArgs="['--import-filename=config/institutions_local.json']"
