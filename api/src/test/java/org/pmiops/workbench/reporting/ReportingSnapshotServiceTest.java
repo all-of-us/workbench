@@ -65,7 +65,6 @@ public class ReportingSnapshotServiceTest {
     assertThat(snapshot.getCohorts()).isEmpty();
     assertThat(snapshot.getDatasets()).isEmpty();
     assertThat(snapshot.getInstitutions()).isEmpty();
-    assertThat(snapshot.getUsers()).isEmpty();
   }
 
   @Test

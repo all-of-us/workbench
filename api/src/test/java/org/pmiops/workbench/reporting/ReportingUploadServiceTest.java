@@ -10,14 +10,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.COHORT__NAME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.INSTITUTION__SHORT_NAME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.countPopulatedTables;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createEmptySnapshot;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingCohort;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingDataset;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingInstitution;
-import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__CITY;
-import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTION_ID;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
 import com.google.cloud.bigquery.InsertAllRequest;
@@ -103,13 +102,21 @@ public class ReportingUploadServiceTest {
     reportingSnapshot =
         createEmptySnapshot()
             .captureTimestamp(NOW.toEpochMilli())
-            .cohorts(ImmutableList.of(createReportingCohort()))
+            .cohorts(
+                ImmutableList.of(
+                    createReportingCohort(), createReportingCohort(), createReportingCohort()))
             .datasets(ImmutableList.of(createReportingDataset()))
             .institutions(ImmutableList.of(createReportingInstitution()));
 
     snapshotWithNulls =
         createEmptySnapshot()
             .captureTimestamp(NOW.toEpochMilli())
+            .cohorts(
+                ImmutableList.of(
+                    createReportingCohort().criteria(null),
+                    createReportingCohort().criteria(null),
+                    createReportingCohort().criteria(null)))
+            .datasets(ImmutableList.of(createReportingDataset().description(null)))
             .institutions(ImmutableList.of(createReportingInstitution().displayName(null)));
 
     reportingWorkspaces =
@@ -155,7 +162,8 @@ public class ReportingUploadServiceTest {
         .insertAll(any(InsertAllRequest.class));
     reportingUploadService.uploadSnapshot(reportingSnapshot);
 
-    verify(mockBigQueryService, times(5)).insertAll(insertAllRequestCaptor.capture());
+    // Two for cohort because it is split into 2, one for institution, one for dataset.
+    verify(mockBigQueryService, times(4)).insertAll(insertAllRequestCaptor.capture());
     final List<InsertAllRequest> requests = insertAllRequestCaptor.getAllValues();
 
     // assume we need at least one split collection
@@ -163,16 +171,15 @@ public class ReportingUploadServiceTest {
 
     final Multimap<String, InsertAllRequest> tableIdToInsertAllRequest =
         Multimaps.index(requests, r -> r.getTable().getTable());
-    final Collection<InsertAllRequest> userRequests = tableIdToInsertAllRequest.get("user");
-    assertThat(userRequests).isNotEmpty();
+    final Collection<InsertAllRequest> cohortRequests = tableIdToInsertAllRequest.get("cohort");
+    assertThat(cohortRequests).isNotEmpty();
 
-    final List<RowToInsert> userRows = userRequests.stream().findFirst().get().getRows();
-    assertThat(userRows).hasSize(2); // batch size
-    assertThat(userRows.get(0).getId())
+    final List<RowToInsert> cohortRows = cohortRequests.stream().findFirst().get().getRows();
+    assertThat(cohortRows).hasSize(2); // batch size
+    assertThat(cohortRows.get(0).getId())
         .hasLength(InsertAllRequestPayloadTransformer.INSERT_ID_LENGTH);
-    final Map<String, Object> userColumnToValue = userRows.get(0).getContent();
-    assertThat((String) userColumnToValue.get("city")).isEqualTo(USER__CITY);
-    assertThat((long) userColumnToValue.get("institution_id")).isEqualTo(USER__INSTITUTION_ID);
+    final Map<String, Object> cohortColumnToValue = cohortRows.get(0).getContent();
+    assertThat((String) cohortColumnToValue.get("name")).isEqualTo(COHORT__NAME);
 
     final Optional<InsertAllRequest> institutionRequest =
         tableIdToInsertAllRequest.get("institution").stream().findFirst();
@@ -193,7 +200,8 @@ public class ReportingUploadServiceTest {
         .insertAll(any(InsertAllRequest.class));
     reportingUploadService.uploadSnapshot(snapshotWithNulls);
 
-    verify(mockBigQueryService, times(3)).insertAll(insertAllRequestCaptor.capture());
+    // Two for cohort because it is split into 2, one for institution, one for dataset.
+    verify(mockBigQueryService, times(4)).insertAll(insertAllRequestCaptor.capture());
     final List<InsertAllRequest> requests = insertAllRequestCaptor.getAllValues();
 
     // assume we need at least one split collection
@@ -201,17 +209,15 @@ public class ReportingUploadServiceTest {
 
     final Multimap<String, InsertAllRequest> tableIdToInsertAllRequest =
         Multimaps.index(requests, r -> r.getTable().getTable());
+    final Collection<InsertAllRequest> cohortRequests = tableIdToInsertAllRequest.get("cohort");
+    assertThat(cohortRequests).isNotEmpty();
 
-    final Collection<InsertAllRequest> userRequests = tableIdToInsertAllRequest.get("user");
-    assertThat(userRequests).isNotEmpty();
-
-    final List<RowToInsert> userRows = userRequests.stream().findFirst().get().getRows();
-    assertThat(userRows).hasSize(2); // batch size
-    assertThat(userRows.get(0).getId())
+    final List<RowToInsert> cohortRows = cohortRequests.stream().findFirst().get().getRows();
+    assertThat(cohortRows).hasSize(2); // batch size
+    assertThat(cohortRows.get(0).getId())
         .hasLength(InsertAllRequestPayloadTransformer.INSERT_ID_LENGTH);
-    final Map<String, Object> userColumnToValue = userRows.get(0).getContent();
-    assertThat((String) userColumnToValue.get("city")).isEqualTo(USER__CITY);
-    assertThat((long) userColumnToValue.get("institution_id")).isEqualTo(USER__INSTITUTION_ID);
+    final Map<String, Object> cohortColumnToValue = cohortRows.get(0).getContent();
+    assertThat((String) cohortColumnToValue.get("name")).isEqualTo(COHORT__NAME);
 
     final Optional<InsertAllRequest> institutionRequest =
         tableIdToInsertAllRequest.get("institution").stream().findFirst();
