@@ -64,7 +64,7 @@ public class ReportingServiceImpl implements ReportingService {
         .forEach(b -> reportingUploadService.uploadBatchWorkspace(b, captureTimestamp));
     reportingQueryService
         .getUserStream()
-        .forEach(b -> reportingUploadService.uploadBatchWorkspace(b, captureTimestamp));
+        .forEach(b -> reportingUploadService.uploadBatchUser(b, captureTimestamp));
 
     // Third: Verify the count.
     boolean batchUploadSuccess =

@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
@@ -237,6 +238,15 @@ public class ReportingQueryServiceTest {
     assertThat(batch3).hasSize(1);
 
     assertThat(iterator.hasNext()).isFalse();
+  }
+
+  @Test
+  public void testUserStream_twoAndAHalfBatches() {
+    createUsers(5);
+
+    final List<List<ReportingUser>> stream =
+        reportingQueryService.getUserStream().collect(Collectors.toList());
+    assertThat(stream.size()).isEqualTo(3);
   }
 
   @Test

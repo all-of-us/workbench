@@ -44,8 +44,8 @@ public interface ReportingQueryService {
 
   List<ReportingUser> getUsers(long limit, long offset);
 
-  default Stream<List<ReportingWorkspace>> getUserStream() {
-    return getStream(this::getWorkspaces);
+  default Stream<List<ReportingUser>> getUserStream() {
+    return getStream(this::getUsers);
   }
 
   int getUserCount();
