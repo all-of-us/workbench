@@ -3,7 +3,12 @@ import {ClrIcon} from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import * as React from 'react';
 
-const MessageWithIcon = ({messageType, iconSize = 30, iconPosition = 'center', children}) => {
+const MessageWithIcon = ({
+  messageType = 'warning' || 'error' || 'success',
+  iconSize = 30,
+  iconPosition = 'top' || 'center' || 'bottom',
+  children
+}) => {
   const icon = {
     warning: 'warning-standard',
     error: 'warning-standard',

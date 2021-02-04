@@ -893,20 +893,38 @@ export const RuntimePanel = fp.flow(
     return runtimeRequest;
   };
 
-  const diskSizeValidatorWithMessage = (maxDiskSize, message) => {
+  // 50 GB is the minimum GCP limit for disk size, 4000 GB is our arbitrary limit for not making a
+  // disk that is way too big and expensive on free tier ($.22 an hour). 64 TB is the GCE limit on
+  // persistent disk.
+  const diskSizeValidatorWithMessage = (diskType = 'standard' || 'master' || 'worker') => {
+    const maxDiskSize = workspace.billingAccountType === BillingAccountType.FREETIER
+        ? 4000
+        : 64000;
+    const message = {
+      standard: `^Disk size must be between 50 and ${maxDiskSize} GB`,
+      master: `^Master disk size must be between 50 and ${maxDiskSize} GB`,
+      worker: `^Worker disk size must be between 50 and ${maxDiskSize} GB`
+    }
+
     return {
       numericality: {
         greaterThanOrEqualTo: 50,
         lessThanOrEqualTo: maxDiskSize,
-        message: message
+        message: message[diskType]
       }
     };
   };
 
-  const runningCostValidatorWithMessage = (runningCost, message) => {
+  const runningCostValidatorWithMessage = () => {
+    const maxRunningCost = workspace.billingAccountType === BillingAccountType.FREETIER
+      ? 25
+      : 150
+    const message = workspace.billingAccountType === BillingAccountType.FREETIER
+      ? '^Your runtime is too expensive. To proceed using free credits, reduce your running costs below $25/hr.'
+      : '^Your runtime is very expensive. Are you sure you wish to proceed?'
     return {
       numericality: {
-        lessThan: runningCost,
+        lessThan: maxRunningCost,
         message: message
       }
     };
@@ -922,75 +940,52 @@ export const RuntimePanel = fp.flow(
     workerMachine: selectedDataprocConfig && findMachineByName(selectedDataprocConfig.workerMachineType)
   });
 
-  // 50 GB is the minimum GCP limit for disk size, 4000 GB is our arbitrary limit for not making a
-  // disk that is way too big and expensive on free tier ($.22 an hour)
-  const freeTierErrorValidators = {
-    selectedDiskSize: diskSizeValidatorWithMessage(4000, '^Disk size must be between 50 and 4000 GB'),
-    currentRunningCost: runningCostValidatorWithMessage(25, '^Your environment is too expensive. To proceed using free credits, reduce your running costs below $25/hr.')
+  const standardDiskValidator = {
+    selectedDiskSize: diskSizeValidatorWithMessage('standard')
+  };
+  const runningCostValidator = {
+    currentRunningCost: runningCostValidatorWithMessage()
   };
   // We don't clear dataproc config when we change compute type so we can't combine this with the
   // above or else we can end up with phantom validation fails
-  const freeTierErrorDataprocValidators = {
-    masterDiskSize: diskSizeValidatorWithMessage(4000, '^Master disk size must be between 50 and 4000 GB'),
-    workerDiskSize: diskSizeValidatorWithMessage(4000, '^Worker disk size must be between 50 and 4000 GB')
-  };
-  // We have a different set of thresholds for workspaces on user billing accounts. 64 TB is the GCE limit on persistent disk.
-  const paidTierErrorValidators = {
-    selectedDiskSize: diskSizeValidatorWithMessage(64000, '^Disk size must be between 50 and 64,000 GB')
-  };
-  const paidTierErrorDataprocValidators = {
-    masterDiskSize: diskSizeValidatorWithMessage(64000, '^Master disk size must be between 50 and 4000 GB'),
-    workerDiskSize: diskSizeValidatorWithMessage(64000, '^Worker disk size must be between 50 and 4000 GB')
-  };
-  const paidTierWarningValidators = {
-    currentRunningCost: runningCostValidatorWithMessage(150, '^Your environment is very expensive. Are you sure you wish to proceed?')
+  const dataprocValidators = {
+    masterDiskSize: diskSizeValidatorWithMessage('master'),
+    workerDiskSize: diskSizeValidatorWithMessage('worker')
   };
 
   const {masterDiskSize = null, workerDiskSize = null} = selectedDataprocConfig || {};
-  const freeTierErrors = validate({selectedDiskSize, currentRunningCost}, freeTierErrorValidators);
-  const freeTierDataprocErrors = selectedCompute === ComputeType.Dataproc
-      ? validate({masterDiskSize, workerDiskSize}, freeTierErrorDataprocValidators)
+  const standardDiskErrors = validate({selectedDiskSize}, standardDiskValidator);
+  const runningCostErrors = validate({currentRunningCost}, runningCostValidator);
+  const dataprocErrors = selectedCompute === ComputeType.Dataproc
+      ? validate({masterDiskSize, workerDiskSize}, dataprocValidators)
       : undefined;
-  const paidTierErrors = validate({selectedDiskSize}, paidTierErrorValidators);
-  const paidTierDataprocErrors = selectedCompute === ComputeType.Dataproc
-      ? validate({masterDiskSize, workerDiskSize}, paidTierErrorDataprocValidators)
-      : undefined;
-  const paidTierWarnings = validate({currentRunningCost}, paidTierWarningValidators);
-
-  const runtimeCanBeCreated = workspace.billingAccountType === BillingAccountType.FREETIER
-    ? !freeTierErrors && !freeTierDataprocErrors
-    : !paidTierErrors && !paidTierDataprocErrors;
-  // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
-  // where we get 'status' from
-  const runtimeCanBeUpdated = runtimeChanged
-      && [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)
-      && (
-          workspace.billingAccountType === BillingAccountType.FREETIER
-            ? !freeTierErrors && !freeTierDataprocErrors
-            : !paidTierErrors && !paidTierDataprocErrors
-      );
 
   const getErrorMessageContent = () => {
     const errorDivs = [];
+    standardDiskErrors && errorDivs.push(summarizeErrors(standardDiskErrors));
+    dataprocErrors && errorDivs.push(summarizeErrors(dataprocErrors));
     if (workspace.billingAccountType === BillingAccountType.FREETIER) {
-      errorDivs.push(summarizeErrors(freeTierErrors));
-      errorDivs.push(summarizeErrors(freeTierDataprocErrors));
-    } else {
-      errorDivs.push(summarizeErrors(paidTierErrors));
-      errorDivs.push(summarizeErrors(paidTierDataprocErrors));
+      runningCostErrors && errorDivs.push(summarizeErrors(runningCostErrors));
     }
     return errorDivs;
   };
 
   const getWarningMessageContent = () => {
     const warningDivs = [];
-    // TODO: switch this conditional to check for FREETIER for consistency if we ever have
-    // non blocking validation warnings for free tier
     if (workspace.billingAccountType === BillingAccountType.USERPROVIDED) {
-      warningDivs.push(summarizeErrors(paidTierWarnings));
+      runningCostErrors && warningDivs.push(summarizeErrors(runningCostErrors));
     }
     return warningDivs;
   };
+
+  const runtimeCanBeCreated = workspace.billingAccountType === BillingAccountType.FREETIER
+    ? !standardDiskErrors && !runningCostErrors && !dataprocErrors
+    : !standardDiskErrors && !dataprocErrors;
+  // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
+  // where we get 'status' from
+  const runtimeCanBeUpdated = runtimeChanged
+      && [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)
+      && runtimeCanBeCreated;
 
   const renderUpdateButton = () => {
     return <Button
@@ -1117,18 +1112,13 @@ export const RuntimePanel = fp.flow(
                 <div>You've made changes that require recreating your environment to take effect.</div>
              </WarningMessage>
            }
-           {
-             ((
-               workspace.billingAccountType === BillingAccountType.FREETIER && (freeTierErrors || freeTierDataprocErrors)
-             ) || (
-               workspace.billingAccountType === BillingAccountType.USERPROVIDED && (paidTierErrors || paidTierDataprocErrors)
-             )) &&
-             <ErrorMessage data-test-id={'runtime-error-messages'}>
+           {getErrorMessageContent().length > 0 &&
+             <ErrorMessage iconSize={16} iconPosition={'top'} data-test-id={'runtime-error-messages'}>
                {getErrorMessageContent()}
              </ErrorMessage>
            }
-           {paidTierWarnings &&
-            <WarningMessage data-test-id={'runtime-warning-messages'}>
+           {getWarningMessageContent().length > 0 &&
+            <WarningMessage iconSize={16} iconPosition={'top'} data-test-id={'runtime-warning-messages'}>
               {getWarningMessageContent()}
             </WarningMessage>
            }

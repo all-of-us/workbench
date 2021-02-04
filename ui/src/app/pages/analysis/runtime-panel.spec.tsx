@@ -929,6 +929,7 @@ describe('RuntimePanel', () => {
 
     // This should make the cost around $160/hr.
     await pickNumWorkers(wrapper, 700);
+    // We don't want to disable for user provided billing. Just put a warning.
     expect(getCreateButton().prop('disabled')).toBeFalsy();
     expect(wrapper.find('[data-test-id="runtime-warning-messages"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-id="runtime-error-messages"]').exists()).toBeFalsy();
