@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
+
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -22,24 +24,23 @@ public interface BillingProjectBufferEntryDao
 
   DbBillingProjectBufferEntry findByFireCloudProjectName(String fireCloudProjectName);
 
-  @Query("SELECT COUNT(*) FROM DbBillingProjectBufferEntry WHERE status IN (0, 2)")
-  Long getCurrentBufferSize();
+  @Query(
+      "SELECT COUNT(*) FROM DbBillingProjectBufferEntry WHERE status IN (0, 2) AND access_tier = (:tier)")
+  Long getCurrentBufferSizeForAccessTier(@Param("tier") DbAccessTier accessTier);
 
+  // TODO: decide if we care about potential "tier bias" here; it does not take tiers into account
   List<DbBillingProjectBufferEntry> findAllByStatusAndLastStatusChangedTimeLessThan(
       short status, Timestamp timestamp);
 
-  @Query(
-      value =
-          "SELECT * FROM billing_project_buffer_entry "
-              + "  WHERE status = 0 "
-              + "  ORDER BY last_sync_request_time ASC "
-              + "  LIMIT ?1",
-      nativeQuery = true)
-  List<DbBillingProjectBufferEntry> getCreatingEntriesToSync(int limit);
+  // TODO: decide if we care about potential "tier bias" here; it does not take tiers into account
+  List<DbBillingProjectBufferEntry> findTop5ByStatusOrderByLastSyncRequestTimeAsc(short status);
 
-  DbBillingProjectBufferEntry findFirstByStatusOrderByCreationTimeAsc(short status);
+  DbBillingProjectBufferEntry findFirstByStatusAndAccessTierOrderByCreationTimeAsc(
+      short status, DbAccessTier accessTier);
 
   Long countByStatus(short status);
+
+  Long countByStatusAndAccessTier(short status, DbAccessTier accessTier);
 
   default Map<BufferEntryStatus, Long> getCountByStatusMap() {
     return computeProjectCountByStatus().stream()

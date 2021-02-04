@@ -4143,6 +4143,8 @@ definitions:
         "$ref": "#/definitions/BillingAccountType"
       googleBucketName:
         type: string
+      accessTierShortName:
+        type: string
       dataAccessLevel:
         "$ref": "#/definitions/DataAccessLevel"
       researchPurpose:

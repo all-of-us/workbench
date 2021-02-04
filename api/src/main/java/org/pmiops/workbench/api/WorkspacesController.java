@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -31,11 +32,8 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
-import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
-import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.*;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.db.model.DbWorkspace.FirecloudWorkspaceId;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -208,18 +206,17 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     validateWorkspaceApiModel(workspace);
 
     DbUser user = userProvider.get();
-    String workspaceNamespace;
-    DbBillingProjectBufferEntry bufferedBillingProject;
+    final DbBillingProjectBufferEntry bufferedBillingProject;
     try {
-      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user, workspace);
     } catch (EmptyBufferException e) {
       throw new TooManyRequestsException();
     }
-    workspaceNamespace = bufferedBillingProject.getFireCloudProjectName();
+    final String billingProject = bufferedBillingProject.getFireCloudProjectName();
 
     // Note: please keep any initialization logic here in sync with CloneWorkspace().
     FirecloudWorkspaceId workspaceId =
-        generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());
+        generateFirecloudWorkspaceId(billingProject, workspace.getName());
     FirecloudWorkspace fcWorkspace = attemptFirecloudWorkspaceCreation(workspaceId);
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
@@ -438,7 +435,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     String toWorkspaceName;
     DbBillingProjectBufferEntry bufferedBillingProject;
     try {
-      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user, toWorkspace);
     } catch (EmptyBufferException e) {
       throw new TooManyRequestsException();
     }
