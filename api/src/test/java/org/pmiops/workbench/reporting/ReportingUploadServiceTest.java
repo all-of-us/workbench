@@ -51,6 +51,7 @@ import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer;
+import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
@@ -104,39 +105,12 @@ public class ReportingUploadServiceTest {
             .captureTimestamp(NOW.toEpochMilli())
             .cohorts(ImmutableList.of(createReportingCohort()))
             .datasets(ImmutableList.of(createReportingDataset()))
-            .institutions(ImmutableList.of(createReportingInstitution()))
-            .users(
-                ImmutableList.of(
-                    userFixture.createDto(),
-                    new ReportingUser()
-                        .username("ted@aou.biz")
-                        .givenName("Ted")
-                        .disabled(true)
-                        .userId(202L),
-                    new ReportingUser()
-                        .username("socrates@aou.biz")
-                        .givenName("So-Crates")
-                        .disabled(false)
-                        .userId(303L),
-                    userFixture.createDto()));
+            .institutions(ImmutableList.of(createReportingInstitution()));
 
     snapshotWithNulls =
         createEmptySnapshot()
             .captureTimestamp(NOW.toEpochMilli())
-            .institutions(ImmutableList.of(createReportingInstitution().displayName(null)))
-            .users(
-                ImmutableList.of(
-                    userFixture.createDto(),
-                    new ReportingUser()
-                        .username("america@usa.gov")
-                        .givenName(null)
-                        .disabled(false)
-                        .userId(202L),
-                    new ReportingUser()
-                        .username(null)
-                        .givenName(null)
-                        .disabled(true)
-                        .userId(303L)));
+            .institutions(ImmutableList.of(createReportingInstitution().displayName(null)));
 
     reportingWorkspaces =
         ImmutableList.of(
@@ -323,5 +297,32 @@ public class ReportingUploadServiceTest {
     assertThat(
             workspaceColumnValues.get(WorkspaceColumnValueExtractor.CREATOR_ID.getParameterName()))
         .isEqualTo(101L);
+  }
+
+  @Test
+  public void testUploadBatch_user() {
+    List<ReportingUser> reportingUsers =
+        ImmutableList.of(
+            userFixture.createDto(),
+            new ReportingUser().username("ted@aou.biz").disabled(true).userId(202L),
+            new ReportingUser().username("socrates@aou.biz").disabled(false).userId(303L),
+            userFixture.createDto());
+    final InsertAllResponse mockInsertAllResponse = mock(InsertAllResponse.class);
+
+    doReturn(Collections.emptyMap()).when(mockInsertAllResponse).getInsertErrors();
+    doReturn(mockInsertAllResponse)
+        .when(mockBigQueryService)
+        .insertAll(any(InsertAllRequest.class));
+
+    reportingUploadService.uploadBatchUser(reportingUsers, NOW.toEpochMilli());
+
+    verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
+    InsertAllRequest request = insertAllRequestCaptor.getValue();
+    assertThat(request.getRows().size()).isEqualTo(reportingUsers.size());
+    final Map<String, Object> userColumnValues = request.getRows().get(0).getContent();
+    assertThat(userColumnValues.get(UserColumnValueExtractor.USER_ID.getParameterName()))
+        .isEqualTo(reportingUsers.get(0).getUserId());
+    assertThat(userColumnValues.get(UserColumnValueExtractor.USERNAME.getParameterName()))
+        .isEqualTo(reportingUsers.get(0).getUsername());
   }
 }

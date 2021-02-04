@@ -32,8 +32,6 @@ public interface ReportingQueryService {
 
   List<ReportingInstitution> getInstitutions();
 
-  List<ReportingUser> getUsers();
-
   List<ReportingWorkspaceFreeTierUsage> getWorkspaceFreeTierUsage();
 
   List<ReportingWorkspace> getWorkspaces(long limit, long offset);
@@ -43,6 +41,14 @@ public interface ReportingQueryService {
   default Stream<List<ReportingWorkspace>> getWorkspacesStream() {
     return getStream(this::getWorkspaces);
   }
+
+  List<ReportingUser> getUsers(long limit, long offset);
+
+  default Stream<List<ReportingWorkspace>> getUserStream() {
+    return getStream(this::getWorkspaces);
+  }
+
+  int getUserCount();
 
   default <T> List<T> getBatchByIndex(BiFunction<Long, Long, List<T>> getter, long batchIndex) {
     final long offset = getQueryBatchSize() * batchIndex;
@@ -97,6 +103,10 @@ public interface ReportingQueryService {
 
   default Iterator<List<ReportingWorkspace>> getWorkspaceBatchIterator() {
     return getBatchIterator(this::getWorkspaces);
+  }
+
+  default Iterator<List<ReportingUser>> getUserBatchIterator() {
+    return getBatchIterator(this::getUsers);
   }
 
   /** Use the maximum batch to get in single batch */
