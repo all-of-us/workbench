@@ -556,7 +556,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    DbWorkspace workspace = loadDbWorkspace(workspaceNamespace, workspaceId);
+    DbWorkspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     return ResponseEntity.ok(
         new WorkspaceBillingUsageResponse()
             .cost(freeTierBillingService.getWorkspaceFreeTierBillingUsage(workspace)));
@@ -614,7 +614,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
   public ResponseEntity<EmptyResponse> reviewWorkspace(
       String ns, String id, ResearchPurposeReviewRequest review) {
-    DbWorkspace workspace = loadDbWorkspace(ns, id);
+    DbWorkspace workspace = workspaceService.getRequired(ns, id);
     userService.logAdminWorkspaceAction(
         workspace.getWorkspaceId(),
         "research purpose approval",
@@ -912,7 +912,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<RecentWorkspaceResponse> updateRecentWorkspaces(
       String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace = loadDbWorkspace(workspaceNamespace, workspaceId);
+    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     DbUserRecentWorkspace userRecentWorkspace =
         workspaceService.updateRecentWorkspaces(dbWorkspace);
     final WorkspaceAccessLevel workspaceAccessLevel;
@@ -977,16 +977,5 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return ResponseEntity.ok(
         new WorkspaceCreatorFreeCreditsRemainingResponse()
             .freeCreditsRemaining(freeCreditsRemaining));
-  }
-
-  private DbWorkspace loadDbWorkspace(String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace = workspaceService.get(workspaceNamespace, workspaceId);
-    if (dbWorkspace == null) {
-      throw new NotFoundException(
-          String.format(
-              "Could not find workspace. workspaceNamespace: %s, workspaceId: %s",
-              workspaceNamespace, workspaceId));
-    }
-    return dbWorkspace;
   }
 }
