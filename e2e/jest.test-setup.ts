@@ -43,13 +43,13 @@ beforeEach(async () => {
         // response body can only be accessed for non-redirect responses.
         if (request.url().includes('api-dot-all-of-us')){
           responseBody = await response.buffer();
+          if (responseBody !== undefined) {
+            responseBody = JSON.stringify(responseBody.toString());
+          }
+          const method = request.method();
+          console.debug(`❗Request finished: ${status} ${method} ${request.url()}  \n ${responseBody}`);
         }
       }
-      if (responseBody !== undefined) {
-        responseBody = JSON.stringify(responseBody);
-      }
-      const method = request.method();
-      console.debug(`❗Request finished: ${status} ${method} ${request.url()}  \n ${responseBody}`);
       await request.continue();
       // tslint:disable-next-line:no-empty
     } catch (e) {
