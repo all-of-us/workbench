@@ -43,10 +43,10 @@ beforeEach(async () => {
         if (request.url().includes('api-dot-all-of-us')){
           responseBody = await response.buffer();
           if (responseBody !== undefined) {
-            responseBody = JSON.stringify(responseBody.toString());
+            responseBody = JSON.stringify(JSON.parse(responseBody.toString()), null, 2);
           }
           const method = request.method();
-          console.debug(`❗Request finished: ${status} ${method} ${request.url()}  \n ${responseBody}`);
+          console.debug(`❗Request finished: ${status} ${method} ${request.url()}  \n ${responseBody}`, {depth: null, colors: true});
         }
       }
       await request.continue();
@@ -83,7 +83,7 @@ beforeEach(async () => {
       console.debug(`❗Page error: ${error}`);
     }
   })
-  
+
 });
 
 afterEach(async () => {
