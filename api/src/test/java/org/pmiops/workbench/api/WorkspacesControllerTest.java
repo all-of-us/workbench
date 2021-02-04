@@ -3102,6 +3102,12 @@ public class WorkspacesControllerTest {
   }
 
   @Test
+  public void updateRecentWorkspaces_nullWorkspace() {
+    assertThrows(
+        NotFoundException.class, () -> workspacesController.updateRecentWorkspaces("foo", "bar"));
+  }
+
+  @Test
   public void cloneNotebook_validateActiveBilling() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 

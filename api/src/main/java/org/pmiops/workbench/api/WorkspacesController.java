@@ -914,8 +914,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<RecentWorkspaceResponse> updateRecentWorkspaces(
       String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = workspaceService.get(workspaceNamespace, workspaceId);
-    if(dbWorkspace == null) {
-      throw new NotFoundException(String.format("Could not find workspace. workspaceNamespace: %s, workspaceId: %s", workspaceNamespace, workspaceId));
+    if (dbWorkspace == null) {
+      throw new NotFoundException(
+          String.format(
+              "Could not find workspace. workspaceNamespace: %s, workspaceId: %s",
+              workspaceNamespace, workspaceId));
     }
     DbUserRecentWorkspace userRecentWorkspace =
         workspaceService.updateRecentWorkspaces(dbWorkspace);
