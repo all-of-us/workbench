@@ -91,20 +91,11 @@ function redirectToTwoFactorSetup(): void {
 
 function redirectToNiH(): void {
   AnalyticsTracker.Registration.ERACommons();
-  const url = "https://stsstg.nih.gov/auth/oauth/v2/authorize" + '/login?return-url=' +
+  const url = serverConfigStore.getValue().shibbolethUiBaseUrl + '/login?return-url=' +
       encodeURIComponent(
-        window.location.origin.toString() + '/ras?token=<token>');
+        window.location.origin.toString() + '/nih-callback?token=<token>');
   window.open(url, '_blank');
 }
-
-function redirectToRas(): void {
-  AnalyticsTracker.Registration.ERACommons();
-  const url = "https://stsstg.nih.gov/auth/oauth/v2/authorize" + '/login?return-url=' +
-      encodeURIComponent(
-        window.location.origin.toString() + '/ras?token=<token>');
-  window.open(url, '_blank');
-}
-
 
 async function redirectToTraining() {
   AnalyticsTracker.Registration.EthicsTraining();
@@ -149,7 +140,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     key: 'eraCommons',
     completionPropsKey: 'eraCommonsLinked',
     loadingPropsKey: 'eraCommonsLoading',
-    title: 'Connect Your RAS Account',
+    title: 'Connect Your eRA Commons Account',
     description: 'Connect your Researcher Workbench account to your eRA Commons account. There is no exchange of personal data in this step.',
     buttonText: 'Connect',
     completedText: 'Linked',
