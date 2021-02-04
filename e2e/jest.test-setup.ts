@@ -20,7 +20,6 @@ beforeEach(async () => {
 
   await page.setRequestInterception(true);
 
-  // Note: A request could be still
   page.on('request', (request) => {
     try {
       if (request.url().includes('api-dot-all-of-us')) {
@@ -84,30 +83,7 @@ beforeEach(async () => {
       console.debug(`❗Page error: ${error}`);
     }
   })
-  /*
-  .on('response', async(response) => {
-    try {
-      const request = response.request();
-      const requestUrl = request.url();
-
-      // Long only responses from AoU-app requests
-      if (requestUrl.includes('api-dot-all-of-us')) {
-        const failure = request.failure();
-        const method = request.method().trim();
-        if (method !== 'OPTIONS') {
-          if (failure !== null) {
-            // This log sometimes duplicate log from requestfailed.
-            console.debug(`❗ Failed Request: ${response.status()} ${method} ${requestUrl} \n ${failure.errorText}`);
-          } else {
-            console.debug(`❗ Request: ${response.status()} ${method} ${requestUrl}`);
-          }
-        }
-      }
-      // tslint:disable-next-line:no-empty
-    } catch (err) {
-    }
-  });
-  */
+  
 });
 
 afterEach(async () => {
