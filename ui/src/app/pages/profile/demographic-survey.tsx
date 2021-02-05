@@ -15,7 +15,7 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, toggleIncludes} from 'app/utils';
 
 import {environment} from 'environments/environment';
-import {Profile, Race, GenderIdentity, SexAtBirth, Disability } from 'generated/fetch';
+import {GenderIdentity, Profile, Race, SexAtBirth } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
@@ -62,7 +62,8 @@ interface State {
   profile: Profile;
 }
 
-const isChecked = (demographicSurvey, optionKey, value) => demographicSurvey && demographicSurvey[optionKey] && demographicSurvey[optionKey].includes(value)
+const isChecked = (demographicSurvey, optionKey, value) =>
+  demographicSurvey && demographicSurvey[optionKey] && demographicSurvey[optionKey].includes(value);
 export class DemographicSurvey extends React.Component<Props, State> {
   private captchaRef = React.createRef<ReCAPTCHA>();
   constructor(props: any) {
@@ -75,22 +76,22 @@ export class DemographicSurvey extends React.Component<Props, State> {
     };
   }
 
-  createNoAnswerCheckbox ({value, label}, optionKey: string) {
+  createNoAnswerCheckbox({value, label}, optionKey: string) {
     const {profile: {demographicSurvey}} = this.state;
 
     return <CheckBox label={label} data-test-id={`checkbox-${optionKey}-${value}`}
-                     style={styles.checkbox} key={value.toString()}  
+                     style={styles.checkbox} key={value.toString()}
                      checked={isChecked(demographicSurvey, optionKey, value)}
                      wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
                      manageOwnState={false}
                      onChange={nextValue => this.setState(fp.set(['profile', 'demographicSurvey', optionKey], nextValue ? [value] : []))}
-    />
+    />;
   }
 
   createOptionCheckbox(optionKey: string, optionObject: any, preferNoAnswerValue: any) {
     const {profile: {demographicSurvey}} = this.state;
     const initialValue = demographicSurvey && demographicSurvey[optionKey] && demographicSurvey[optionKey].includes(optionObject.value);
-  
+
     return <CheckBox label={optionObject.label} data-test-id={'checkbox-' + optionObject.value.toString()}
                      style={styles.checkbox} key={optionObject.value.toString()}
                      checked={initialValue}
@@ -118,7 +119,7 @@ export class DemographicSurvey extends React.Component<Props, State> {
   }
 
   validateDemographicSurvey(demographicSurvey) {
-    validate.validators.nullBoolean = v => (v === true || v === false || v === null) ? undefined : 'value must be selected'
+    validate.validators.nullBoolean = v => (v === true || v === false || v === null) ? undefined : 'value must be selected';
     const validationCheck = {
       race: { presence: { allowEmpty: false } },
       ethniticy: { presence: false  },
@@ -143,9 +144,9 @@ export class DemographicSurvey extends React.Component<Props, State> {
     const {profile: {demographicSurvey = {}}, captcha, captchaToken, loading} = this.state;
 
     const errors = this.validateDemographicSurvey(demographicSurvey);
-    const pntaRace = fp.find({value: Race.PREFERNOANSWER}, AccountCreationOptions.race)
-    const pntaGenderIdentity = fp.find({value: GenderIdentity.PREFERNOANSWER}, AccountCreationOptions.genderIdentity)
-    const pntaSexAtBirth = fp.find({value: SexAtBirth.PREFERNOANSWER}, AccountCreationOptions.sexAtBirth)
+    const pntaRace = fp.find({value: Race.PREFERNOANSWER}, AccountCreationOptions.race);
+    const pntaGenderIdentity = fp.find({value: GenderIdentity.PREFERNOANSWER}, AccountCreationOptions.genderIdentity);
+    const pntaSexAtBirth = fp.find({value: SexAtBirth.PREFERNOANSWER}, AccountCreationOptions.sexAtBirth);
 
     return <div style={{marginTop: '1rem', paddingLeft: '1rem', width: '32rem'}}>
       <TextColumn>
@@ -239,7 +240,7 @@ or another sexual and/or gender minority?'>
             fp.map(item => this.createOptionCheckbox('sexAtBirth', item, SexAtBirth.PREFERNOANSWER)),
             v => [...v, this.createNoAnswerCheckbox(pntaSexAtBirth, 'sexAtBirth' )]
           )(AccountCreationOptions.sexAtBirth)
-          }          
+          }
         </FlexColumn>
       </Section>
 
@@ -331,7 +332,7 @@ or another sexual and/or gender minority?'>
                       }
                       this.setState({loading: false});
                     }
-                  }} 
+                  }}
                   data-test-id={'submit-button'}
           >
             Submit
