@@ -82,7 +82,7 @@ export class DemographicSurvey extends React.Component<Props, State> {
 
     return <CheckBox label={label}
                      data-test-id={`checkbox-${optionKey}-${value}`}
-                     style={styles.checkbox} 
+                     style={styles.checkbox}
                      key={value.toString()}
                      checked={isChecked(demographicSurvey, optionKey, value)}
                      wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
@@ -96,7 +96,7 @@ export class DemographicSurvey extends React.Component<Props, State> {
     const {profile: {demographicSurvey}} = this.state;
     const initialValue = demographicSurvey && demographicSurvey[optionKey] && demographicSurvey[optionKey].includes(optionObject.value);
 
-    return <CheckBox label={optionObject.label} 
+    return <CheckBox label={optionObject.label}
                      data-test-id={'checkbox-' + optionObject.value.toString()}
                      style={styles.checkbox} key={optionObject.value.toString()}
                      checked={initialValue}
