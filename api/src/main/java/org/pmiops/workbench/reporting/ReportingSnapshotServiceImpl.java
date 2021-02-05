@@ -42,8 +42,6 @@ public class ReportingSnapshotServiceImpl implements ReportingSnapshotService {
             .datasetConceptSets(reportingQueryService.getDatasetConceptSets())
             .datasetDomainIdValues(reportingQueryService.getDatasetDomainIdValues())
             .institutions(reportingQueryService.getInstitutions())
-            .users(reportingQueryService.getUsers())
-            .workspaces(reportingQueryService.getWorkspaces())
             .workspaceFreeTierUsage(reportingQueryService.getWorkspaceFreeTierUsage());
     stopwatch.stop();
     log.info(LogFormatters.duration("Application DB Queries", stopwatch.elapsed()));

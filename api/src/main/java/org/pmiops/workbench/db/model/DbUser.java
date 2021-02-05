@@ -1,7 +1,6 @@
 package org.pmiops.workbench.db.model;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.gson.Gson;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.HashSet;
@@ -36,22 +35,6 @@ public class DbUser {
 
   private static final String RUNTIME_NAME_PREFIX = "all-of-us-";
 
-  /**
-   * TODO(RW-5406): Remove cluster config overrides.
-   *
-   * <p>This is a Gson compatible class for encoding a JSON blob which is stored in MySQL. This
-   * represents cluster configuration overrides we support on a per-user basis for their notebook
-   * cluster. Corresponds to Leonardo's MachineConfig model. All fields are optional.
-   *
-   * <p>Any changes to this class should produce backwards-compatible JSON.
-   */
-  public static class ClusterConfig {
-    // Master persistent disk size in GB.
-    public Integer masterDiskSize;
-    // GCE machine type, e.g. n1-standard-2.
-    public String machineType;
-  }
-
   private long userId;
   private int version;
   // A nonce which can be used during the account creation flow to verify
@@ -80,11 +63,9 @@ public class DbUser {
   private boolean disabled;
   private Short emailVerificationStatus;
   private Set<DbPageVisit> pageVisits = new HashSet<>();
-  private String clusterConfigDefault;
 
   private String aboutYou;
   private String areaOfResearch;
-  private Integer clusterCreateRetries;
   private Integer billingProjectRetries;
   private Integer moodleId;
 
@@ -373,31 +354,6 @@ public class DbUser {
     idVerificationIsValid = value;
   }
 
-  @Column(name = "cluster_config_default")
-  public String getClusterConfigDefaultRaw() {
-    return clusterConfigDefault;
-  }
-
-  public void setClusterConfigDefaultRaw(String value) {
-    clusterConfigDefault = value;
-  }
-
-  @Transient
-  public ClusterConfig getClusterConfigDefault() {
-    if (clusterConfigDefault == null) {
-      return null;
-    }
-    return new Gson().fromJson(clusterConfigDefault, ClusterConfig.class);
-  }
-
-  public void setClusterConfigDefault(ClusterConfig value) {
-    String rawValue = null;
-    if (value != null) {
-      rawValue = new Gson().toJson(value);
-    }
-    setClusterConfigDefaultRaw(rawValue);
-  }
-
   @Column(name = "demographic_survey_completion_time")
   public Timestamp getDemographicSurveyCompletionTime() {
     return demographicSurveyCompletionTime;
@@ -451,15 +407,6 @@ public class DbUser {
 
   public void setAreaOfResearch(String areaOfResearch) {
     this.areaOfResearch = areaOfResearch;
-  }
-
-  @Column(name = "cluster_create_retries")
-  public Integer getClusterCreateRetries() {
-    return clusterCreateRetries;
-  }
-
-  public void setClusterCreateRetries(Integer clusterCreateRetries) {
-    this.clusterCreateRetries = clusterCreateRetries;
   }
 
   @Column(name = "billing_project_retries")

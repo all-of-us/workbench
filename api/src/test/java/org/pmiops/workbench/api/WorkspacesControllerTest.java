@@ -3021,7 +3021,7 @@ public class WorkspacesControllerTest {
   public void testGetBillingUsage() {
     Double cost = 150.50;
     Workspace ws = createWorkspace();
-
+    ws = workspacesController.createWorkspace(ws).getBody();
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.OWNER);
     when(mockFreeTierBillingService.getWorkspaceFreeTierBillingUsage(any())).thenReturn(cost);
 
@@ -3099,6 +3099,12 @@ public class WorkspacesControllerTest {
     assertThat(recentWorkspace.getWorkspace().getNamespace())
         .isEqualTo(dbWorkspace.getWorkspaceNamespace());
     assertThat(recentWorkspace.getWorkspace().getName()).isEqualTo(dbWorkspace.getName());
+  }
+
+  @Test
+  public void updateRecentWorkspaces_nullWorkspace() {
+    assertThrows(
+        NotFoundException.class, () -> workspacesController.updateRecentWorkspaces("foo", "bar"));
   }
 
   @Test

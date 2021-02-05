@@ -2,6 +2,8 @@ import {Page} from 'puppeteer';
 import {PageUrl} from 'app/text-labels';
 import BasePage from 'app/page/base-page';
 import {getPropValue} from 'utils/element-utils';
+import HelpTipsSidebar from 'app/component/help-tips-sidebar';
+import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 
 const signedInIndicator = 'app-signed-in';
 
@@ -12,12 +14,12 @@ const signedInIndicator = 'app-signed-in';
  */
 export default abstract class AuthenticatedPage extends BasePage {
 
-  constructor(page: Page) {
+  protected constructor(page: Page) {
     super(page);
   }
 
   protected async isSignedIn(): Promise<boolean> {
-    return this.page.waitForSelector(signedInIndicator, {timeout: 30000})
+    return this.page.waitForSelector(signedInIndicator, {timeout: 5 * 60 * 1000})
       .then( (elemt) => elemt.asElement() !== null);
   }
 
@@ -31,8 +33,15 @@ export default abstract class AuthenticatedPage extends BasePage {
    * Wait until current page is loaded and without spinners spinning.
    */
   async waitForLoad(): Promise<this> {
-    await this.isSignedIn();
-    await this.isLoaded();
+    try {
+      await this.isSignedIn();
+      await this.isLoaded();
+    } catch (err) {
+      await savePageToFile(this.page);
+      await takeScreenshot(this.page);
+      throw (err);
+    }
+    await this.closeHelpSidebarIfOpen();
     return this;
   }
 
@@ -54,5 +63,12 @@ export default abstract class AuthenticatedPage extends BasePage {
     return getPropValue<string>(username, 'innerText');
   }
 
+  async closeHelpSidebarIfOpen(): Promise<void> {
+    const sidebar = new HelpTipsSidebar(this.page);
+    const isOpen = await sidebar.isVisible();
+    if (isOpen) {
+      await sidebar.close();
+    }
+  }
 
 }

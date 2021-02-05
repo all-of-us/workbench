@@ -4,7 +4,7 @@ import {LinkText, WorkspaceAccessLevel} from 'app/text-labels';
 import {getPropValue} from 'utils/element-utils';
 import WorkspaceBase from './workspace-base';
 import Button from 'app/element/button';
-import ShareModal from 'app/component/share-modal';
+import ShareModal from 'app/modal/share-modal';
 import {config} from 'resources/workbench-config';
 // import WorkspaceCard from 'app/component/workspace-card';
 

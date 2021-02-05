@@ -4,21 +4,22 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableList;
 import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
+import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortreview.CohortAnnotationDefinitionService;
 import org.pmiops.workbench.cohortreview.CohortAnnotationDefinitionServiceImpl;
 import org.pmiops.workbench.cohortreview.CohortReviewService;
 import org.pmiops.workbench.cohortreview.CohortReviewServiceImpl;
+import org.pmiops.workbench.cohortreview.ReviewQueryBuilder;
 import org.pmiops.workbench.cohortreview.mapper.CohortAnnotationDefinitionMapper;
 import org.pmiops.workbench.cohortreview.mapper.CohortAnnotationDefinitionMapperImpl;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
@@ -40,6 +41,7 @@ import org.pmiops.workbench.model.CohortAnnotationDefinition;
 import org.pmiops.workbench.model.CohortAnnotationDefinitionListResponse;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,24 +57,29 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class CohortAnnotationDefinitionControllerTest {
 
-  private static String NAMESPACE = "aou-test";
-  private static String NAME = "test";
-  private static String EXISTING_COLUMN_NAME = "testing";
-  private static String NEW_COLUMN_NAME = "new_column";
+  private static final String NAMESPACE = "aou-test";
+  private static final String NAME = "test";
+  private static final String EXISTING_COLUMN_NAME = "testing";
+  private static final String NEW_COLUMN_NAME = "new_column";
   private DbCohort cohort;
   private DbCohortAnnotationDefinition dbCohortAnnotationDefinition;
   @Autowired private CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
   @Autowired private CohortDao cohortDao;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private CohortAnnotationDefinitionMapper cohortAnnotationDefinitionMapper;
-  @Mock private CohortReviewDao cohortReviewDao;
-  @Mock private ParticipantCohortStatusDao participantCohortStatusDao;
-  @Mock private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
-  @Mock private WorkspaceService workspaceService;
+  @Mock private BigQueryService bigQueryService;
   @Mock private CohortBuilderService cohortBuilderService;
-  @Mock private ParticipantCohortAnnotationMapper participantCohortAnnotationMapper;
-  @Mock private ParticipantCohortStatusMapper participantCohortStatusMapper;
+  @Mock private CohortReviewDao cohortReviewDao;
   @Mock private CohortReviewMapper cohortReviewMapper;
+  @Mock private CohortQueryBuilder cohortQueryBuilder;
+  @Mock private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
+  @Mock private ParticipantCohortAnnotationMapper participantCohortAnnotationMapper;
+  @Mock private ParticipantCohortStatusDao participantCohortStatusDao;
+  @Mock private ParticipantCohortStatusMapper participantCohortStatusMapper;
+  @Mock private ReviewQueryBuilder reviewQueryBuilder;
+  @Mock private WorkspaceService workspaceService;
+  private static final Instant NOW = Instant.now();
+  private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
 
   @TestConfiguration
@@ -84,15 +91,19 @@ public class CohortAnnotationDefinitionControllerTest {
   public void setUp() {
     CohortReviewService cohortReviewService =
         new CohortReviewServiceImpl(
-            cohortBuilderService,
-            cohortReviewDao,
-            cohortDao,
-            participantCohortStatusDao,
-            participantCohortAnnotationDao,
+            bigQueryService,
             cohortAnnotationDefinitionDao,
+            cohortBuilderService,
+            cohortDao,
+            cohortReviewDao,
+            cohortReviewMapper,
+            cohortQueryBuilder,
+            participantCohortAnnotationDao,
             participantCohortAnnotationMapper,
+            participantCohortStatusDao,
             participantCohortStatusMapper,
-            cohortReviewMapper);
+            reviewQueryBuilder,
+            CLOCK);
     CohortAnnotationDefinitionService cohortAnnotationDefinitionService =
         new CohortAnnotationDefinitionServiceImpl(
             cohortAnnotationDefinitionDao, cohortAnnotationDefinitionMapper);
@@ -115,7 +126,6 @@ public class CohortAnnotationDefinitionControllerTest {
             .annotationTypeEnum(AnnotationType.STRING)
             .columnName(EXISTING_COLUMN_NAME)
             .version(0);
-    SortedSet enumValues = new TreeSet();
     cohortAnnotationDefinitionDao.save(dbCohortAnnotationDefinition);
   }
 
@@ -189,13 +199,12 @@ public class CohortAnnotationDefinitionControllerTest {
   public void createCohortAnnotationDefinitionEnumValues() {
     setupWorkspaceServiceMock();
 
-    List<String> enumValues = Arrays.asList("value");
     CohortAnnotationDefinition request =
         new CohortAnnotationDefinition()
             .cohortId(cohort.getCohortId())
             .columnName(NEW_COLUMN_NAME)
             .annotationType(AnnotationType.ENUM)
-            .enumValues(enumValues)
+            .enumValues(ImmutableList.of("value"))
             .etag(Etags.fromVersion(0));
 
     CohortAnnotationDefinition response =
@@ -208,7 +217,7 @@ public class CohortAnnotationDefinitionControllerTest {
             .cohortId(cohort.getCohortId())
             .columnName(NEW_COLUMN_NAME)
             .annotationType(AnnotationType.ENUM)
-            .enumValues(enumValues)
+            .enumValues(ImmutableList.of("value"))
             .etag(Etags.fromVersion(0));
     assertThat(response).isEqualTo(expectedResponse);
   }

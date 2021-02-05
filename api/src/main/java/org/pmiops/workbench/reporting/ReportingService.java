@@ -6,5 +6,5 @@ package org.pmiops.workbench.reporting;
  * daily) uploads, and aggregate and time-series metrics are computed in BigQuery.
  */
 public interface ReportingService {
-  void takeAndUploadSnapshot();
+  void collectRecordsAndUpload();
 }

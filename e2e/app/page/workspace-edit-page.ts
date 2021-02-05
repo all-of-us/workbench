@@ -1,4 +1,3 @@
-import Modal from 'app/component/modal';
 import Button from 'app/element/button';
 import Checkbox from 'app/element/checkbox';
 import Select from 'app/element/select';
@@ -9,6 +8,7 @@ import {ElementHandle, Page} from 'puppeteer';
 import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 import {buildXPath} from 'app/xpath-builders';
 import {LinkText} from 'app/text-labels';
+import NewWorkspaceModal from 'app/modal/new-workspace-modal';
 import WorkspaceBase, {UseFreeCredits} from './workspace-base';
 import {config} from 'resources/workbench-config';
 import BaseElement from 'app/element/base-element';
@@ -416,7 +416,7 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     await button.click();
 
     // confirm create in pop-up modal
-    const modal = new Modal(this.page);
+    const modal = new NewWorkspaceModal(this.page);
     await modal.waitForLoad();
     const modalTextContent = await modal.getTextContent();
     await modal.clickButton(LinkText.Confirm, {waitForClose: true, waitForNav: true});

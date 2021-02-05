@@ -222,10 +222,10 @@ class NewDataSetModal extends React.Component<Props, State> {
       <ModalBody>
         <div>
           {conflictDataSetName &&
-          <AlertDanger>DataSet with same name exist</AlertDanger>
+          <AlertDanger>A Dataset with the same name exists</AlertDanger>
           }
           {missingDataSetInfo &&
-          <AlertDanger> Data state cannot save as some information is missing</AlertDanger>
+          <AlertDanger>Cannot save the Dataset because some information is missing</AlertDanger>
           }
           <TextInput type='text' autoFocus placeholder='Dataset Name'
                      value={name} data-test-id='data-set-name-input'

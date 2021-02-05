@@ -30,6 +30,7 @@ export default class Button extends BaseElement {
    */
   async waitUntilEnabled(xpathSelector?: string): Promise<void> {
     const selector = xpathSelector || this.getXpath();
+    await this.page.waitForXPath(selector, {visible: true});
     await this.page.waitForFunction(xpath => {
       const elemt = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
       const style = window.getComputedStyle(elemt as Element);

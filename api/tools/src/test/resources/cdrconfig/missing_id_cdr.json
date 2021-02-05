@@ -1,0 +1,27 @@
+{
+  "accessTiers": [
+    {
+      "accessTierId": 1,
+      "shortName": "registered",
+      "displayName": "Registered Tier",
+      "servicePerimeter": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test",
+      "authDomainName": "all-of-us-registered-test",
+      "authDomainGroupEmail": "GROUP_all-of-us-registered-test@dev.test.firecloud.org"
+    }
+  ],
+  "cdrVersions": [
+    {
+      "name": "[Removed] Synthetic Dataset v1",
+      "dataAccessLevel": 1,
+      "archivalStatus": 1,
+      "bigqueryProject": "",
+      "bigqueryDataset": "",
+      "creationTime": "2018-06-06 00:00:00Z",
+      "releaseNumber": 1,
+      "numParticipants": 0,
+      "cdrDbName": "cdr",
+      "elasticIndexBaseName": "cdr",
+      "accessTier": "registered"
+    }
+  ]
+}

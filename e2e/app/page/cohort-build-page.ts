@@ -1,5 +1,4 @@
 import {Page} from 'puppeteer';
-import Modal from 'app/component/modal';
 import TieredMenu from 'app/component/tiered-menu';
 import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
@@ -8,6 +7,7 @@ import {makeRandomName} from 'utils/str-utils';
 import {waitForDocumentTitle, waitForNumericalString, waitWhileLoading} from 'utils/waits-utils';
 import {buildXPath} from 'app/xpath-builders';
 import {LinkText, MenuOption} from 'app/text-labels';
+import Modal from 'app/modal/modal';
 import AuthenticatedPage from './authenticated-page';
 import CohortParticipantsGroup from './cohort-participants-group';
 
@@ -58,6 +58,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
     }
 
     const modal = new Modal(this.page);
+    await modal.waitForLoad();
     const nameTextbox = await modal.waitForTextbox('COHORT NAME');
     await nameTextbox.type(cohortName);
 
@@ -81,6 +82,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
    */
   async deleteConfirmationDialog(): Promise<string[]> {
     const modal = new Modal(this.page);
+    await modal.waitForLoad();
     const contentText = await modal.getTextContent();
     await modal.clickButton(LinkText.DeleteCohort, {waitForClose: true});
     await waitWhileLoading(this.page);
@@ -93,6 +95,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
    */
   async discardChangesConfirmationDialog(): Promise<string[]> {
     const modal = new Modal(this.page);
+    await modal.waitForLoad();
     const contentText = await modal.getTextContent();
     await modal.clickButton(LinkText.DiscardChanges, {waitForNav: true, waitForClose: true});
     await waitWhileLoading(this.page);

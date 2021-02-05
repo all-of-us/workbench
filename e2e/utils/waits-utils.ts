@@ -182,21 +182,23 @@ export async function waitForAttributeEquality(page: Page,
       }, {timeout: timeout || 30000}, selector.css, attribute, value);
       return (await jsHandle.jsonValue()) as boolean;
     } catch (e) {
-      console.error(`Wait for element matching CSS="${selector.css}" attribute:${attribute} value:${value} failed. ${e}`);
-      throw e;
+      console.error(`Find element matching CSS=${selector.css} attribute=${attribute} value=${value}. ${e}`);
+      throw new Error(e);
     }
-  } else {
+  }
+  if (selector.xpath !== undefined) {
     try {
       const jsHandle = await page.waitForFunction((xpath, attributeName, attributeValue) => {
         const element: any = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
         return element && element.attributes[attributeName] && element.attributes[attributeName].value === attributeValue;
-      }, timeout ? {timeout} : {}, selector.xpath, attribute, value);
+      }, {timeout: timeout || 30000}, selector.xpath, attribute, value);
       return (await jsHandle.jsonValue()) as boolean;
     } catch (e) {
-      console.error(`Wait for element matching Xpath=${selector.xpath} attribute:${attribute} value:${value} failed. ${e}`);
-      throw e;
+      console.error(`Find element matching Xpath=${selector.xpath} attribute=${attribute} value=${value}. ${e}`);
+      throw new Error(e);
     }
   }
+  throw new Error('Required selector: {xpath or css} is missing');
 }
 
 /**
@@ -230,23 +232,26 @@ export async function waitForText(page: Page,
                                   timeout?: number): Promise<boolean> {
   if (selector.css !== undefined) {
     try {
-         // wait for visible then compare texts
+      // wait for visible then compare texts
       await page.waitForSelector(selector.css, {visible: true, timeout});
       const jsHandle = await page.waitForFunction((css, expText) => {
         const element = document.querySelector(css);
-        return element && element.textContent.includes(expText);
+        const regExp = new RegExp(expText);
+        return element != null && regExp.test(element.textContent);
       }, {timeout}, selector.css, textSubstr);
       return (await jsHandle.jsonValue()) as boolean;
     } catch (e) {
       console.error(`Wait for element matching CSS=${selector.css} contains "${textSubstr}" text failed. ${e}`);
       throw e;
     }
-  } else {
+  }
+  if (selector.xpath !== undefined) {
     try {
       await page.waitForXPath(selector.xpath, {visible: true, timeout});
       const jsHandle = await page.waitForFunction((xpath, expText) => {
         const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-        return element && element.textContent.includes(expText);
+        const regExp = new RegExp(expText);
+        return element != null && regExp.test(element.textContent);
       }, {timeout}, selector.xpath, textSubstr);
       return (await jsHandle.jsonValue()) as boolean;
     } catch (e) {
@@ -254,6 +259,7 @@ export async function waitForText(page: Page,
       throw e;
     }
   }
+  throw new Error('xpath or css is required');
 }
 
 /**
@@ -262,9 +268,11 @@ export async function waitForText(page: Page,
  * It usually indicates the page is ready for user interaction.
  * </pre>
  */
-export async function waitWhileLoading(page: Page, timeout: number = (2 * 60 * 1000)): Promise<void> {
+export async function waitWhileLoading(page: Page, timeout: number = (2 * 60 * 1000), opts: {waitForRuntime?: boolean} = {}): Promise<void> {
+  const {waitForRuntime = false}  = opts;
+
   const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
-  const spinElementsSelector = '[style*="running spin"], .spinner:empty, [style*="running rotation"]:not([aria-hidden="true"])';
+  const spinElementsSelector = `[style*="running spin"], .spinner:empty, [style*="running rotation"]${waitForRuntime ? ':not([aria-hidden="true"])' : ''}`;
 
   // To prevent checking on blank page, wait for elements exist in DOM.
   await Promise.race([

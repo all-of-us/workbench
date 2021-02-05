@@ -8,7 +8,7 @@ import Button from 'app/element/button';
 import Textbox from 'app/element/textbox';
 import {getPropValue} from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
-import CopyModal from 'app/component/copy-modal';
+import CopyToWorkspaceModal from 'app/modal/copy-to-workspace-modal';
 
 
 const PageTitle = 'Concept Set';
@@ -27,9 +27,9 @@ export default class ConceptSetPage extends AuthenticatedPage {
     return true;
   }
 
-  async openCopyToWorkspaceModal(conceptSetName: string): Promise<CopyModal> {
+  async openCopyToWorkspaceModal(conceptSetName: string): Promise<CopyToWorkspaceModal> {
     await this.getSnowmanMenu(conceptSetName).then(menu => menu.select(MenuOption.CopyToAnotherWorkspace, {waitForNav: false}));
-    const modal = new CopyModal(this.page);
+    const modal = new CopyToWorkspaceModal(this.page);
     await modal.waitForLoad();
     return modal;
   }

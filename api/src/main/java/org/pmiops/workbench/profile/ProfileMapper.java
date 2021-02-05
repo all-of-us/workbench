@@ -36,15 +36,6 @@ public interface ProfileMapper {
   @Mapping(target = "authoritiesEnum", ignore = true) // derived property
   @Mapping(target = "billingProjectRetries", ignore = true) // I don't think we actually use this
   @Mapping(
-      target = "clusterConfigDefault",
-      ignore = true) // used only by ClusterController / LeonardoNotebooksClient
-  @Mapping(
-      target = "clusterConfigDefaultRaw",
-      ignore = true) // used only by ClusterController / LeonardoNotebooksClient
-  @Mapping(
-      target = "clusterCreateRetries",
-      ignore = true) // used only by ClusterController / LeonardoNotebooksClient
-  @Mapping(
       target = "complianceTrainingExpirationTime",
       ignore = true) // handled by UserService.syncComplianceTraining[V1|V2]
   @Mapping(target = "creationTime", ignore = true) // handled by ProfileController.createProfile

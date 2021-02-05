@@ -1,6 +1,6 @@
 import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {ResourceCard} from 'app/text-labels';
+import {LinkText, ResourceCard} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
 import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
 
@@ -27,7 +27,7 @@ describe('Dataset test', () => {
     const datasetPage = await dataPage.clickAddDatasetButton();
 
     await datasetPage.selectCohorts(['All Participants']);
-    await datasetPage.selectConceptSets(['Demographics', 'All Surveys']);
+    await datasetPage.selectConceptSets([LinkText.Demographics, LinkText.AllSurveys]);
     const saveModal = await datasetPage.clickSaveAndAnalyzeButton();
     const datasetName = await saveModal.saveDataset();
 

@@ -43,7 +43,11 @@ interactions visible to you.
 * Run all tests in parallel **in headless Chrome** on deployed AoU "test" environment <div class="text-blue">`yarn test`</div>
 * Run one test on deployed AoU "test" environment <div class="text-blue">`yarn test:debug [TEST_FILE]` </div>
 * Run one test on your local server <div class="text-blue">`yarn test-local [TEST_FILE]` </div>
-* Run tests against a local UI and API server `yarn test-local-devup`
+* Run tests against a local UI and API server (RW-6132 will eliminate this distinction):
+  * Stop your local API server
+  * `e2e$ yarn impersonate-test-user`
+  * Restart your local API server: `api$ ./project.rb run-api`
+  * `e2e$ yarn test-local-devup`
 * Run one test in headless Chrome with node `--inspect-brk` argument. It pauses test playback at breakpoints which is useful for debugging or/and writing new tests <div class="text-blue">`yarn test:debugTest [TEST_FILE]` </div>
   * Navigate to `chrome://inspect` after launching the tests to debug test code
 * If you don't want to use the `.env` file, you can also specify `USER_NAME` and `PASSWORD` as environment variables. <div class="text-blue">`USER_NAME=<YOUR_USERID> PASSWORD=<YOUR_USER_PASSWORD> yarn test-local tests/user/login.spec.ts`</div>

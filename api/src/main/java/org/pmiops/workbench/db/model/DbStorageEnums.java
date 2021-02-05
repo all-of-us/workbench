@@ -15,17 +15,12 @@ import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DuaType;
-import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.model.Ethnicity;
-import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
-import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ReviewStatus;
-import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.Surveys;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -321,26 +316,6 @@ public final class DbStorageEnums {
     return DOMAIN_ID_MAP.inverse().get(domainId);
   }
 
-  // Education
-  private static final BiMap<Education, Short> CLIENT_TO_STORAGE_EDUCATION =
-      ImmutableBiMap.<Education, Short>builder()
-          .put(Education.NO_EDUCATION, (short) 0)
-          .put(Education.GRADES_1_12, (short) 1)
-          .put(Education.UNDERGRADUATE, (short) 2)
-          .put(Education.COLLEGE_GRADUATE, (short) 3)
-          .put(Education.MASTER, (short) 4)
-          .put(Education.DOCTORATE, (short) 5)
-          .put(Education.PREFER_NO_ANSWER, (short) 7)
-          .build();
-
-  public static Education educationFromStorage(Short education) {
-    return CLIENT_TO_STORAGE_EDUCATION.inverse().get(education);
-  }
-
-  public static Short educationToStorage(Education education) {
-    return CLIENT_TO_STORAGE_EDUCATION.get(education);
-  }
-
   // EmailVerificationStatus
   private static final BiMap<EmailVerificationStatus, Short>
       CLIENT_TO_STORAGE_EMAIL_VERIFICATION_STATUS =
@@ -358,41 +333,6 @@ public final class DbStorageEnums {
   public static Short emailVerificationStatusToStorage(
       EmailVerificationStatus emailVerificationStatus) {
     return CLIENT_TO_STORAGE_EMAIL_VERIFICATION_STATUS.get(emailVerificationStatus);
-  }
-
-  // Ethnicity
-  private static final BiMap<Ethnicity, Short> CLIENT_TO_STORAGE_ETHNICITY =
-      ImmutableBiMap.<Ethnicity, Short>builder()
-          .put(Ethnicity.HISPANIC, (short) 0)
-          .put(Ethnicity.NOT_HISPANIC, (short) 1)
-          .put(Ethnicity.PREFER_NO_ANSWER, (short) 2)
-          .build();
-
-  public static Ethnicity ethnicityFromStorage(Short ethnicity) {
-    return CLIENT_TO_STORAGE_ETHNICITY.inverse().get(ethnicity);
-  }
-
-  public static Short ethnicityToStorage(Ethnicity ethnicity) {
-    return CLIENT_TO_STORAGE_ETHNICITY.get(ethnicity);
-  }
-
-  // GenderIdentity
-  private static final BiMap<GenderIdentity, Short> CLIENT_TO_STORAGE_GENDER_IDENTITY =
-      ImmutableBiMap.<GenderIdentity, Short>builder()
-          .put(GenderIdentity.MAN, (short) 0)
-          .put(GenderIdentity.WOMAN, (short) 1)
-          .put(GenderIdentity.NON_BINARY, (short) 2)
-          .put(GenderIdentity.TRANSGENDER, (short) 3)
-          .put(GenderIdentity.NONE_DESCRIBE_ME, (short) 4)
-          .put(GenderIdentity.PREFER_NO_ANSWER, (short) 5)
-          .build();
-
-  public static GenderIdentity genderIdentityFromStorage(Short genderIdentity) {
-    return CLIENT_TO_STORAGE_GENDER_IDENTITY.inverse().get(genderIdentity);
-  }
-
-  public static Short genderIdentityToStorage(GenderIdentity genderIdentity) {
-    return CLIENT_TO_STORAGE_GENDER_IDENTITY.get(genderIdentity);
   }
 
   // InstitutionalRole
@@ -477,26 +417,6 @@ public final class DbStorageEnums {
     return CLIENT_TO_STORAGE_PRE_PACKAGED_CONCEPTSET.get(conceptSet);
   }
 
-  // Race
-  private static final BiMap<Race, Short> CLIENT_TO_STORAGE_RACE =
-      ImmutableBiMap.<Race, Short>builder()
-          .put(Race.AIAN, (short) 0)
-          .put(Race.ASIAN, (short) 1)
-          .put(Race.AA, (short) 2)
-          .put(Race.NHOPI, (short) 3)
-          .put(Race.WHITE, (short) 4)
-          .put(Race.NONE, (short) 5)
-          .put(Race.PREFER_NO_ANSWER, (short) 6)
-          .build();
-
-  public static final Race raceFromStorage(Short race) {
-    return CLIENT_TO_STORAGE_RACE.inverse().get(race);
-  }
-
-  public static final Short raceToStorage(Race race) {
-    return CLIENT_TO_STORAGE_RACE.get(race);
-  }
-
   // ResearchOutcome
   private static final BiMap<ResearchOutcomeEnum, Short> CLIENT_TO_STORAGE_RESEARCH_OUTCOME =
       ImmutableBiMap.<ResearchOutcomeEnum, Short>builder()
@@ -529,24 +449,6 @@ public final class DbStorageEnums {
 
   public static Short reviewStatusToStorage(ReviewStatus reviewStatus) {
     return CLIENT_TO_STORAGE_REVIEW_STATUS.get(reviewStatus);
-  }
-
-  // SexAtBirth
-  private static final BiMap<SexAtBirth, Short> CLIENT_TO_STORAGE_SEX_AT_BIRTH =
-      ImmutableBiMap.<SexAtBirth, Short>builder()
-          .put(SexAtBirth.MALE, (short) 0)
-          .put(SexAtBirth.FEMALE, (short) 1)
-          .put(SexAtBirth.INTERSEX, (short) 2)
-          .put(SexAtBirth.NONE_OF_THESE_DESCRIBE_ME, (short) 3)
-          .put(SexAtBirth.PREFER_NO_ANSWER, (short) 4)
-          .build();
-
-  public static final SexAtBirth sexAtBirthFromStorage(Short sexAtBirth) {
-    return CLIENT_TO_STORAGE_SEX_AT_BIRTH.inverse().get(sexAtBirth);
-  }
-
-  public static final Short sexAtBirthToStorage(SexAtBirth sexAtBirth) {
-    return CLIENT_TO_STORAGE_SEX_AT_BIRTH.get(sexAtBirth);
   }
 
   // SpecificPopulation

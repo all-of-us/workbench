@@ -2,7 +2,7 @@ import {createWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import WorkspaceCard from 'app/component/workspace-card';
 import {config} from 'resources/workbench-config';
 import {MenuOption} from 'app/text-labels';
-import OldCdrVersionModal from 'app/page/old-cdr-version-modal';
+import OldCdrVersionModal from 'app/modal/old-cdr-version-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import Navigation, {NavLink} from 'app/component/navigation';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';

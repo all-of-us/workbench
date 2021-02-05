@@ -1,7 +1,7 @@
 import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
 import Link from 'app/element/link';
 import ConceptSetActionsPage from 'app/page/conceptset-actions-page';
-import {SaveOption} from 'app/page/conceptset-save-modal';
+import {SaveOption} from 'app/modal/conceptset-save-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {ResourceCard} from 'app/text-labels';
 import {makeRandomName, makeString} from 'utils/str-utils';
@@ -47,11 +47,10 @@ describe('Editing and rename Concept Set', () => {
     expect(Number.isNaN(parseInt(row1.rollUpCount.replace(/,/g, ''), 10))).toBe(false);
     expect(Number.isNaN(parseInt(row2.rollUpCount.replace(/,/g, ''), 10))).toBe(false);
 
-    await conceptSearchPage.viewAndSaveConceptSet();
+    await conceptSearchPage.reviewAndSaveConceptSet();
 
     // Save new Concept Set.
     const conceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
-    console.log(`Created Concept Set: "${conceptSetName}"`);
 
     // Add another Concept in Procedures domain.
     const conceptSetActionsPage = new ConceptSetActionsPage(page);
@@ -68,7 +67,7 @@ describe('Editing and rename Concept Set', () => {
     const row = await criteriaSearch.resultsTableSelectRow();
     expect(row.name).toBe(procedureName);
 
-    await conceptSearchPage.viewAndSaveConceptSet();
+    await conceptSearchPage.reviewAndSaveConceptSet();
 
     // Save to Existing Set: Only one Concept set and it is the new Concept Set created earlier in same workspace.
     const existingConceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.ChooseExistingSet);

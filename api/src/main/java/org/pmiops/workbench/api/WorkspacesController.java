@@ -556,11 +556,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
+    DbWorkspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     return ResponseEntity.ok(
         new WorkspaceBillingUsageResponse()
-            .cost(
-                freeTierBillingService.getWorkspaceFreeTierBillingUsage(
-                    workspaceService.get(workspaceNamespace, workspaceId))));
+            .cost(freeTierBillingService.getWorkspaceFreeTierBillingUsage(workspace)));
   }
 
   @Override
@@ -615,7 +614,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
   public ResponseEntity<EmptyResponse> reviewWorkspace(
       String ns, String id, ResearchPurposeReviewRequest review) {
-    DbWorkspace workspace = workspaceService.get(ns, id);
+    DbWorkspace workspace = workspaceService.getRequired(ns, id);
     userService.logAdminWorkspaceAction(
         workspace.getWorkspaceId(),
         "research purpose approval",
@@ -913,7 +912,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<RecentWorkspaceResponse> updateRecentWorkspaces(
       String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace = workspaceService.get(workspaceNamespace, workspaceId);
+    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     DbUserRecentWorkspace userRecentWorkspace =
         workspaceService.updateRecentWorkspaces(dbWorkspace);
     final WorkspaceAccessLevel workspaceAccessLevel;

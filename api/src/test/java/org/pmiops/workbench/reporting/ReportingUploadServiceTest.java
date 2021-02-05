@@ -10,14 +10,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.rowToInsertStringToOffsetTimestamp;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.COHORT__NAME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.INSTITUTION__SHORT_NAME;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.countPopulatedTables;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createEmptySnapshot;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingCohort;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingDataset;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.createReportingInstitution;
-import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__CITY;
-import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTION_ID;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 
 import com.google.cloud.bigquery.InsertAllRequest;
@@ -46,10 +45,12 @@ import org.mockito.Captor;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
 import org.pmiops.workbench.reporting.insertion.InsertAllRequestPayloadTransformer;
+import org.pmiops.workbench.reporting.insertion.UserColumnValueExtractor;
 import org.pmiops.workbench.reporting.insertion.WorkspaceColumnValueExtractor;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
@@ -76,14 +77,14 @@ public class ReportingUploadServiceTest {
 
   private ReportingSnapshot reportingSnapshot;
   private ReportingSnapshot snapshotWithNulls;
+  private List<ReportingWorkspace> reportingWorkspaces;
 
   @MockBean private BigQueryService mockBigQueryService;
 
-  @Autowired private ReportingUploadService reportingUploadServiceStreamingImpl;
+  @Autowired private ReportingUploadService reportingUploadService;
 
   @Autowired private ReportingTestFixture<DbUser, ReportingUser> userFixture;
 
-  @Captor private ArgumentCaptor<QueryJobConfiguration> queryJobConfigurationCaptor;
   @Captor private ArgumentCaptor<InsertAllRequest> insertAllRequestCaptor;
 
   @TestConfiguration
@@ -101,71 +102,40 @@ public class ReportingUploadServiceTest {
     reportingSnapshot =
         createEmptySnapshot()
             .captureTimestamp(NOW.toEpochMilli())
-            .cohorts(ImmutableList.of(createReportingCohort()))
+            .cohorts(
+                ImmutableList.of(
+                    createReportingCohort(), createReportingCohort(), createReportingCohort()))
             .datasets(ImmutableList.of(createReportingDataset()))
-            .institutions(ImmutableList.of(createReportingInstitution()))
-            .users(
-                ImmutableList.of(
-                    userFixture.createDto(),
-                    new ReportingUser()
-                        .username("ted@aou.biz")
-                        .givenName("Ted")
-                        .disabled(true)
-                        .userId(202L),
-                    new ReportingUser()
-                        .username("socrates@aou.biz")
-                        .givenName("So-Crates")
-                        .disabled(false)
-                        .userId(303L),
-                    userFixture.createDto()))
-            .workspaces(
-                ImmutableList.of(
-                    new ReportingWorkspace()
-                        .workspaceId(201L)
-                        .name("Circle K")
-                        .creationTime(THEN)
-                        .creatorId(101L),
-                    new ReportingWorkspace()
-                        .workspaceId(202L)
-                        .name("Wyld Stallyns")
-                        .creationTime(THEN)
-                        .creatorId(101L),
-                    new ReportingWorkspace()
-                        .workspaceId(203L)
-                        .name("You-us said what we-us are saying right now.")
-                        .creationTime(THEN)
-                        .creatorId(202L)));
+            .institutions(ImmutableList.of(createReportingInstitution()));
 
     snapshotWithNulls =
         createEmptySnapshot()
             .captureTimestamp(NOW.toEpochMilli())
-            .institutions(ImmutableList.of(createReportingInstitution().displayName(null)))
-            .users(
+            .cohorts(
                 ImmutableList.of(
-                    userFixture.createDto(),
-                    new ReportingUser()
-                        .username("america@usa.gov")
-                        .givenName(null)
-                        .disabled(false)
-                        .userId(202L),
-                    new ReportingUser().username(null).givenName(null).disabled(true).userId(303L)))
-            .workspaces(
-                ImmutableList.of(
-                    new ReportingWorkspace()
-                        .workspaceId(201L)
-                        .name(null)
-                        .creationTime(THEN)
-                        .creatorId(101L),
-                    new ReportingWorkspace()
-                        .workspaceId(202L)
-                        .name("Work Work Work")
-                        .creationTime(THEN)
-                        .creatorId(101L),
-                    new ReportingWorkspace()
-                        .workspaceId(203L)
-                        .name(null)
-                        .creationTime(THEN)
-                        .creatorId(202L)));
+                    createReportingCohort().criteria(null),
+                    createReportingCohort().criteria(null),
+                    createReportingCohort().criteria(null)))
+            .datasets(ImmutableList.of(createReportingDataset().description(null)))
+            .institutions(ImmutableList.of(createReportingInstitution().displayName(null)));
+
+    reportingWorkspaces =
+        ImmutableList.of(
+            new ReportingWorkspace()
+                .workspaceId(201L)
+                .name("Circle K")
+                .creationTime(THEN)
+                .creatorId(101L),
+            new ReportingWorkspace()
+                .workspaceId(202L)
+                .name("Wyld Stallyns")
+                .creationTime(THEN)
+                .creatorId(101L),
+            new ReportingWorkspace()
+                .workspaceId(203L)
+                .name("You-us said what we-us are saying right now.")
+                .creationTime(THEN)
+                .creatorId(202L));
 
     final TableResult mockTableResult = mock(TableResult.class);
     doReturn(99L).when(mockTableResult).getTotalRows();
@@ -190,9 +160,10 @@ public class ReportingUploadServiceTest {
     doReturn(mockInsertAllResponse)
         .when(mockBigQueryService)
         .insertAll(any(InsertAllRequest.class));
-    reportingUploadServiceStreamingImpl.uploadSnapshot(reportingSnapshot);
+    reportingUploadService.uploadSnapshot(reportingSnapshot);
 
-    verify(mockBigQueryService, times(7)).insertAll(insertAllRequestCaptor.capture());
+    // Two for cohort because it is split into 2, one for institution, one for dataset.
+    verify(mockBigQueryService, times(4)).insertAll(insertAllRequestCaptor.capture());
     final List<InsertAllRequest> requests = insertAllRequestCaptor.getAllValues();
 
     // assume we need at least one split collection
@@ -200,38 +171,15 @@ public class ReportingUploadServiceTest {
 
     final Multimap<String, InsertAllRequest> tableIdToInsertAllRequest =
         Multimaps.index(requests, r -> r.getTable().getTable());
-    final Collection<InsertAllRequest> userRequests = tableIdToInsertAllRequest.get("user");
-    assertThat(userRequests).isNotEmpty();
+    final Collection<InsertAllRequest> cohortRequests = tableIdToInsertAllRequest.get("cohort");
+    assertThat(cohortRequests).isNotEmpty();
 
-    final List<RowToInsert> userRows = userRequests.stream().findFirst().get().getRows();
-    assertThat(userRows).hasSize(2); // batch size
-    assertThat(userRows.get(0).getId())
+    final List<RowToInsert> cohortRows = cohortRequests.stream().findFirst().get().getRows();
+    assertThat(cohortRows).hasSize(2); // batch size
+    assertThat(cohortRows.get(0).getId())
         .hasLength(InsertAllRequestPayloadTransformer.INSERT_ID_LENGTH);
-    final Map<String, Object> userColumnToValue = userRows.get(0).getContent();
-    assertThat((String) userColumnToValue.get("city")).isEqualTo(USER__CITY);
-    assertThat((long) userColumnToValue.get("institution_id")).isEqualTo(USER__INSTITUTION_ID);
-
-    final Optional<InsertAllRequest> workspaceRequest =
-        tableIdToInsertAllRequest.get("workspace").stream().findFirst();
-    assertThat(workspaceRequest).isPresent();
-    assertThat(workspaceRequest.get().getRows()).hasSize(2);
-
-    final Map<String, Object> workspaceColumnValues =
-        workspaceRequest.get().getRows().get(0).getContent();
-    assertThat(
-            workspaceColumnValues.get(
-                WorkspaceColumnValueExtractor.WORKSPACE_ID.getParameterName()))
-        .isEqualTo(201L);
-    final Optional<OffsetDateTime> creationTime =
-        rowToInsertStringToOffsetTimestamp(
-            (String)
-                workspaceColumnValues.get(
-                    WorkspaceColumnValueExtractor.CREATION_TIME.getParameterName()));
-    assertThat(creationTime).isPresent();
-    assertTimeApprox(creationTime.get(), THEN);
-    assertThat(
-            workspaceColumnValues.get(WorkspaceColumnValueExtractor.CREATOR_ID.getParameterName()))
-        .isEqualTo(101L);
+    final Map<String, Object> cohortColumnToValue = cohortRows.get(0).getContent();
+    assertThat((String) cohortColumnToValue.get("name")).isEqualTo(COHORT__NAME);
 
     final Optional<InsertAllRequest> institutionRequest =
         tableIdToInsertAllRequest.get("institution").stream().findFirst();
@@ -250,9 +198,10 @@ public class ReportingUploadServiceTest {
     doReturn(mockInsertAllResponse)
         .when(mockBigQueryService)
         .insertAll(any(InsertAllRequest.class));
-    reportingUploadServiceStreamingImpl.uploadSnapshot(snapshotWithNulls);
+    reportingUploadService.uploadSnapshot(snapshotWithNulls);
 
-    verify(mockBigQueryService, times(5)).insertAll(insertAllRequestCaptor.capture());
+    // Two for cohort because it is split into 2, one for institution, one for dataset.
+    verify(mockBigQueryService, times(4)).insertAll(insertAllRequestCaptor.capture());
     final List<InsertAllRequest> requests = insertAllRequestCaptor.getAllValues();
 
     // assume we need at least one split collection
@@ -260,39 +209,15 @@ public class ReportingUploadServiceTest {
 
     final Multimap<String, InsertAllRequest> tableIdToInsertAllRequest =
         Multimaps.index(requests, r -> r.getTable().getTable());
+    final Collection<InsertAllRequest> cohortRequests = tableIdToInsertAllRequest.get("cohort");
+    assertThat(cohortRequests).isNotEmpty();
 
-    final Collection<InsertAllRequest> userRequests = tableIdToInsertAllRequest.get("user");
-    assertThat(userRequests).isNotEmpty();
-
-    final List<RowToInsert> userRows = userRequests.stream().findFirst().get().getRows();
-    assertThat(userRows).hasSize(2); // batch size
-    assertThat(userRows.get(0).getId())
+    final List<RowToInsert> cohortRows = cohortRequests.stream().findFirst().get().getRows();
+    assertThat(cohortRows).hasSize(2); // batch size
+    assertThat(cohortRows.get(0).getId())
         .hasLength(InsertAllRequestPayloadTransformer.INSERT_ID_LENGTH);
-    final Map<String, Object> userColumnToValue = userRows.get(0).getContent();
-    assertThat((String) userColumnToValue.get("city")).isEqualTo(USER__CITY);
-    assertThat((long) userColumnToValue.get("institution_id")).isEqualTo(USER__INSTITUTION_ID);
-
-    final Optional<InsertAllRequest> workspaceRequest =
-        tableIdToInsertAllRequest.get("workspace").stream().findFirst();
-    assertThat(workspaceRequest).isPresent();
-    assertThat(workspaceRequest.get().getRows()).hasSize(2);
-
-    final Map<String, Object> workspaceColumnValues =
-        workspaceRequest.get().getRows().get(0).getContent();
-    assertThat(
-            workspaceColumnValues.get(
-                WorkspaceColumnValueExtractor.WORKSPACE_ID.getParameterName()))
-        .isEqualTo(201L);
-    final Optional<OffsetDateTime> creationTime =
-        rowToInsertStringToOffsetTimestamp(
-            (String)
-                workspaceColumnValues.get(
-                    WorkspaceColumnValueExtractor.CREATION_TIME.getParameterName()));
-    assertThat(creationTime).isPresent();
-    assertTimeApprox(creationTime.get(), THEN);
-    assertThat(
-            workspaceColumnValues.get(WorkspaceColumnValueExtractor.CREATOR_ID.getParameterName()))
-        .isEqualTo(101L);
+    final Map<String, Object> cohortColumnToValue = cohortRows.get(0).getContent();
+    assertThat((String) cohortColumnToValue.get("name")).isEqualTo(COHORT__NAME);
 
     final Optional<InsertAllRequest> institutionRequest =
         tableIdToInsertAllRequest.get("institution").stream().findFirst();
@@ -305,18 +230,18 @@ public class ReportingUploadServiceTest {
 
   @Test
   public void testUploadSnapshot_streaming_empty() {
-    reportingUploadServiceStreamingImpl.uploadSnapshot(ReportingTestUtils.EMPTY_SNAPSHOT);
+    reportingUploadService.uploadSnapshot(ReportingTestUtils.EMPTY_SNAPSHOT);
     verify(mockBigQueryService, never()).insertAll(any());
   }
 
   @Test
   public void testUploadSnapshot_nullEnum() {
-    final ReportingWorkspace workspace = new ReportingWorkspace();
-    workspace.setWorkspaceId(101L);
-    workspace.setBillingStatus(null);
+    final ReportingCohort cohort = new ReportingCohort();
+    cohort.setWorkspaceId(101L);
+    cohort.setCreatorId(null);
     final ReportingSnapshot snapshot =
-        createEmptySnapshot().captureTimestamp(0L).workspaces(ImmutableList.of(workspace));
-    reportingUploadServiceStreamingImpl.uploadSnapshot(snapshot);
+        createEmptySnapshot().captureTimestamp(0L).cohorts(ImmutableList.of(cohort));
+    reportingUploadService.uploadSnapshot(snapshot);
     verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
 
     final InsertAllRequest insertAllRequest = insertAllRequestCaptor.getValue();
@@ -342,17 +267,68 @@ public class ReportingUploadServiceTest {
                                 .disabled(false)
                                 .userId((long) id))
                     .collect(ImmutableList.toImmutableList()))
-            .workspaces(
-                ImmutableList.of(
-                    new ReportingWorkspace()
-                        .workspaceId(303L)
-                        .name("Circle K")
-                        .creationTime(THEN)
-                        .creatorId(101L)))
             .cohorts(ImmutableList.of(ReportingTestUtils.createReportingCohort()))
             .institutions(ImmutableList.of(ReportingTestUtils.createReportingInstitution()));
 
-    reportingUploadServiceStreamingImpl.uploadSnapshot(largeSnapshot);
-    verify(mockBigQueryService, times(14)).insertAll(insertAllRequestCaptor.capture());
+    reportingUploadService.uploadSnapshot(largeSnapshot);
+    verify(mockBigQueryService, times(13)).insertAll(insertAllRequestCaptor.capture());
+  }
+
+  @Test
+  public void testUploadBatch_workspace() {
+    final InsertAllResponse mockInsertAllResponse = mock(InsertAllResponse.class);
+
+    doReturn(Collections.emptyMap()).when(mockInsertAllResponse).getInsertErrors();
+    doReturn(mockInsertAllResponse)
+        .when(mockBigQueryService)
+        .insertAll(any(InsertAllRequest.class));
+
+    reportingUploadService.uploadBatchWorkspace(reportingWorkspaces, NOW.toEpochMilli());
+
+    verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
+    InsertAllRequest request = insertAllRequestCaptor.getValue();
+    assertThat(request.getRows().size()).isEqualTo(reportingWorkspaces.size());
+    final Map<String, Object> workspaceColumnValues = request.getRows().get(0).getContent();
+    assertThat(
+            workspaceColumnValues.get(
+                WorkspaceColumnValueExtractor.WORKSPACE_ID.getParameterName()))
+        .isEqualTo(201L);
+    final Optional<OffsetDateTime> creationTime =
+        rowToInsertStringToOffsetTimestamp(
+            (String)
+                workspaceColumnValues.get(
+                    WorkspaceColumnValueExtractor.CREATION_TIME.getParameterName()));
+    assertThat(creationTime).isPresent();
+    assertTimeApprox(creationTime.get(), THEN);
+    assertThat(
+            workspaceColumnValues.get(WorkspaceColumnValueExtractor.CREATOR_ID.getParameterName()))
+        .isEqualTo(101L);
+  }
+
+  @Test
+  public void testUploadBatch_user() {
+    List<ReportingUser> reportingUsers =
+        ImmutableList.of(
+            userFixture.createDto(),
+            new ReportingUser().username("ted@aou.biz").disabled(true).userId(202L),
+            new ReportingUser().username("socrates@aou.biz").disabled(false).userId(303L),
+            userFixture.createDto());
+    final InsertAllResponse mockInsertAllResponse = mock(InsertAllResponse.class);
+
+    doReturn(Collections.emptyMap()).when(mockInsertAllResponse).getInsertErrors();
+    doReturn(mockInsertAllResponse)
+        .when(mockBigQueryService)
+        .insertAll(any(InsertAllRequest.class));
+
+    reportingUploadService.uploadBatchUser(reportingUsers, NOW.toEpochMilli());
+
+    verify(mockBigQueryService).insertAll(insertAllRequestCaptor.capture());
+    InsertAllRequest request = insertAllRequestCaptor.getValue();
+    assertThat(request.getRows().size()).isEqualTo(reportingUsers.size());
+    final Map<String, Object> userColumnValues = request.getRows().get(0).getContent();
+    assertThat(userColumnValues.get(UserColumnValueExtractor.USER_ID.getParameterName()))
+        .isEqualTo(reportingUsers.get(0).getUserId());
+    assertThat(userColumnValues.get(UserColumnValueExtractor.USERNAME.getParameterName()))
+        .isEqualTo(reportingUsers.get(0).getUsername());
   }
 }
