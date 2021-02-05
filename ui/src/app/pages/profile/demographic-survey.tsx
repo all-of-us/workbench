@@ -76,11 +76,14 @@ export class DemographicSurvey extends React.Component<Props, State> {
     };
   }
 
+  // Clicking this checkbox will remove other answers within the 'checkbox group'
   createNoAnswerCheckbox({value, label}, optionKey: string) {
     const {profile: {demographicSurvey}} = this.state;
 
-    return <CheckBox label={label} data-test-id={`checkbox-${optionKey}-${value}`}
-                     style={styles.checkbox} key={value.toString()}
+    return <CheckBox label={label}
+                     data-test-id={`checkbox-${optionKey}-${value}`}
+                     style={styles.checkbox} 
+                     key={value.toString()}
                      checked={isChecked(demographicSurvey, optionKey, value)}
                      wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
                      manageOwnState={false}
@@ -88,11 +91,13 @@ export class DemographicSurvey extends React.Component<Props, State> {
     />;
   }
 
+  // Clicking one of these options will remove the prefer not to answer selection, if selected
   createOptionCheckbox(optionKey: string, optionObject: any, preferNoAnswerValue: any) {
     const {profile: {demographicSurvey}} = this.state;
     const initialValue = demographicSurvey && demographicSurvey[optionKey] && demographicSurvey[optionKey].includes(optionObject.value);
 
-    return <CheckBox label={optionObject.label} data-test-id={'checkbox-' + optionObject.value.toString()}
+    return <CheckBox label={optionObject.label} 
+                     data-test-id={'checkbox-' + optionObject.value.toString()}
                      style={styles.checkbox} key={optionObject.value.toString()}
                      checked={initialValue}
                      manageOwnState={false}
@@ -103,6 +108,14 @@ export class DemographicSurvey extends React.Component<Props, State> {
 
   captureCaptchaResponse(token) {
     this.setState({captchaToken: token, captcha: true});
+  }
+
+  checkboxArea(optionKey, pntaOption, allOptions) {
+    return fp.flow(
+      fp.remove({value: pntaOption}), // Remove the PNTA checkbox from the list, return list w/o PNTA
+      fp.map(item => this.createOptionCheckbox(optionKey, item, pntaOption)), // Create checkboxes sans PNTA
+      v => [...v, this.createNoAnswerCheckbox(fp.find({value: pntaOption}, allOptions), optionKey )] // Append PNTA checkbox to list
+    )(allOptions);
   }
 
   updateList(key, value, preferNoAnswerValue) {
@@ -121,8 +134,8 @@ export class DemographicSurvey extends React.Component<Props, State> {
   validateDemographicSurvey(demographicSurvey) {
     validate.validators.nullBoolean = v => (v === true || v === false || v === null) ? undefined : 'value must be selected';
     const validationCheck = {
-      race: { presence: { allowEmpty: false } },
-      ethniticy: { presence: false  },
+      race: { presence: { allowEmpty: false},  },
+      ethnicity: { presence: { allowEmpty: false } },
       genderIdentityList: { presence: { allowEmpty: false } },
       identifiesAsLgbtq: { nullBoolean: {} },
       sexAtBirth: { presence: { allowEmpty: false } },
@@ -144,9 +157,6 @@ export class DemographicSurvey extends React.Component<Props, State> {
     const {profile: {demographicSurvey = {}}, captcha, captchaToken, loading} = this.state;
 
     const errors = this.validateDemographicSurvey(demographicSurvey);
-    const pntaRace = fp.find({value: Race.PREFERNOANSWER}, AccountCreationOptions.race);
-    const pntaGenderIdentity = fp.find({value: GenderIdentity.PREFERNOANSWER}, AccountCreationOptions.genderIdentity);
-    const pntaSexAtBirth = fp.find({value: SexAtBirth.PREFERNOANSWER}, AccountCreationOptions.sexAtBirth);
 
     return <div style={{marginTop: '1rem', paddingLeft: '1rem', width: '32rem'}}>
       <TextColumn>
@@ -171,12 +181,7 @@ export class DemographicSurvey extends React.Component<Props, State> {
       <Section header='Race'>
         <SelectAllText/>
         <FlexColumn style={styles.checkboxAreaContainer}>
-          {fp.flow(
-            fp.remove({value: Race.PREFERNOANSWER}),
-            fp.map(item => this.createOptionCheckbox('race', item, Race.PREFERNOANSWER)),
-            v => [...v, this.createNoAnswerCheckbox(pntaRace, 'race' )]
-          )(AccountCreationOptions.race)
-          }
+          { this.checkboxArea('race', Race.PREFERNOANSWER, AccountCreationOptions.race) }
         </FlexColumn>
       </Section>
 
@@ -191,12 +196,7 @@ export class DemographicSurvey extends React.Component<Props, State> {
       <Section header='Gender Identity'>
         <SelectAllText/>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
-          {fp.flow(
-            fp.remove({value: GenderIdentity.PREFERNOANSWER}),
-            fp.map(item => this.createOptionCheckbox('genderIdentityList', item, GenderIdentity.PREFERNOANSWER)),
-            v => [...v, this.createNoAnswerCheckbox(pntaGenderIdentity, 'genderIdentityList' )]
-          )(AccountCreationOptions.genderIdentity)
-          }
+          { this.checkboxArea('genderIdentityList', GenderIdentity.PREFERNOANSWER, AccountCreationOptions.genderIdentity) }
         </FlexColumn>
       </Section>
 
@@ -235,12 +235,7 @@ or another sexual and/or gender minority?'>
       <Section header='Sex at birth'>
         <SelectAllText/>
         <FlexColumn style={{...styles.checkboxAreaContainer, height: '5rem'}}>
-          {fp.flow(
-            fp.remove({value: SexAtBirth.PREFERNOANSWER}),
-            fp.map(item => this.createOptionCheckbox('sexAtBirth', item, SexAtBirth.PREFERNOANSWER)),
-            v => [...v, this.createNoAnswerCheckbox(pntaSexAtBirth, 'sexAtBirth' )]
-          )(AccountCreationOptions.sexAtBirth)
-          }
+          { this.checkboxArea('sexAtBirth', SexAtBirth.PREFERNOANSWER, AccountCreationOptions.sexAtBirth) }
         </FlexColumn>
       </Section>
 
@@ -302,6 +297,7 @@ or another sexual and/or gender minority?'>
           <div>Please review the following: </div>
           <ul>
             {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
+            <li>You may select "Prefer not to answer" for each unfilled item to continue</li>
           </ul>
         </React.Fragment>}>
           <Button type='primary'
