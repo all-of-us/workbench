@@ -569,6 +569,7 @@ public final class DbStorageEnums {
           .put(Education.UNDERGRADUATE, (short) 4)
           .put(Education.MASTER, (short) 5)
           .put(Education.DOCTORATE, (short) 6)
+          .put(Education.PREFER_NO_ANSWER, (short) 7)
           .build();
 
   private static final BiMap<Disability, Short> CLIENT_TO_STORAGE_DISABILITY =
