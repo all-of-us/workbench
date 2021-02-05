@@ -3634,6 +3634,7 @@ definitions:
     - COLLEGE_GRADUATE
     - MASTER
     - DOCTORATE
+    - PREFER_NO_ANSWER
   Disability:
     type: string
     enum:
