@@ -159,51 +159,55 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   @Override
-  public List<ReportingUser> getUsers() {
+  public List<ReportingUser> getUsers(long limit, long offset) {
     return jdbcTemplate.query(
-        "SELECT \n"
-            + "  u.about_you,\n"
-            + "  u.area_of_research,\n"
-            + "  u.compliance_training_bypass_time,\n"
-            + "  u.compliance_training_completion_time,\n"
-            + "  u.compliance_training_expiration_time,\n"
-            + "  u.contact_email,\n"
-            + "  u.creation_time,\n"
-            + "  u.current_position,\n"
-            + "  u.data_access_level,\n"
-            + "  u.data_use_agreement_bypass_time,\n"
-            + "  u.data_use_agreement_completion_time,\n"
-            + "  u.data_use_agreement_signed_version,\n"
-            + "  u.demographic_survey_completion_time,\n"
-            + "  u.disabled,\n"
-            + "  u.era_commons_bypass_time,\n"
-            + "  u.era_commons_completion_time,\n"
-            + "  u.family_name,\n"
-            + "  u.first_registration_completion_time,\n"
-            + "  u.first_sign_in_time,\n"
-            + "  u.free_tier_credits_limit_days_override,\n"
-            + "  u.free_tier_credits_limit_dollars_override,\n"
-            + "  u.given_name,\n"
-            + "  u.last_modified_time,\n"
-            + "  u.professional_url,\n"
-            + "  u.two_factor_auth_bypass_time,\n"
-            + "  u.two_factor_auth_completion_time,\n"
-            + "  u.user_id,\n"
-            + "  u.email AS username,\n"
-            + "  a.city,\n"
-            + "  a.country,\n"
-            + "  a.state,\n"
-            + "  a.street_address_1,\n"
-            + "  a.street_address_2,\n"
-            + "  a.zip_code,\n"
-            + "  via.institution_id AS institution_id,\n"
-            + "  via.institutional_role_enum,\n"
-            + "  via.institutional_role_other_text\n"
-            + "  \n"
-            + "FROM user u"
-            + "  LEFT OUTER JOIN address AS a ON u.user_id = a.user_id\n"
-            + "  LEFT OUTER JOIN user_verified_institutional_affiliation AS via on u.user_id = via.user_id"
-            + "  ORDER BY u.user_id",
+        String.format(
+            "SELECT \n"
+                + "  u.about_you,\n"
+                + "  u.area_of_research,\n"
+                + "  u.compliance_training_bypass_time,\n"
+                + "  u.compliance_training_completion_time,\n"
+                + "  u.compliance_training_expiration_time,\n"
+                + "  u.contact_email,\n"
+                + "  u.creation_time,\n"
+                + "  u.current_position,\n"
+                + "  u.data_access_level,\n"
+                + "  u.data_use_agreement_bypass_time,\n"
+                + "  u.data_use_agreement_completion_time,\n"
+                + "  u.data_use_agreement_signed_version,\n"
+                + "  u.demographic_survey_completion_time,\n"
+                + "  u.disabled,\n"
+                + "  u.era_commons_bypass_time,\n"
+                + "  u.era_commons_completion_time,\n"
+                + "  u.family_name,\n"
+                + "  u.first_registration_completion_time,\n"
+                + "  u.first_sign_in_time,\n"
+                + "  u.free_tier_credits_limit_days_override,\n"
+                + "  u.free_tier_credits_limit_dollars_override,\n"
+                + "  u.given_name,\n"
+                + "  u.last_modified_time,\n"
+                + "  u.professional_url,\n"
+                + "  u.two_factor_auth_bypass_time,\n"
+                + "  u.two_factor_auth_completion_time,\n"
+                + "  u.user_id,\n"
+                + "  u.email AS username,\n"
+                + "  a.city,\n"
+                + "  a.country,\n"
+                + "  a.state,\n"
+                + "  a.street_address_1,\n"
+                + "  a.street_address_2,\n"
+                + "  a.zip_code,\n"
+                + "  via.institution_id AS institution_id,\n"
+                + "  via.institutional_role_enum,\n"
+                + "  via.institutional_role_other_text\n"
+                + "  \n"
+                + "FROM user u"
+                + "  LEFT OUTER JOIN address AS a ON u.user_id = a.user_id\n"
+                + "  LEFT OUTER JOIN user_verified_institutional_affiliation AS via on u.user_id = via.user_id"
+                + "  ORDER BY u.user_id"
+                + "  LIMIT %d\n"
+                + "  OFFSET %d",
+            limit, offset),
         (rs, unused) ->
             new ReportingUser()
                 .aboutYou(rs.getString("about_you"))
@@ -344,5 +348,10 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   @Override
   public int getWorkspacesCount() {
     return jdbcTemplate.queryForObject("SELECT count(*) FROM workspace", Integer.class);
+  }
+
+  @Override
+  public int getUserCount() {
+    return jdbcTemplate.queryForObject("SELECT count(*) FROM user", Integer.class);
   }
 }

@@ -105,36 +105,41 @@ public class ReportingVerificationServiceTest {
 
   @Test
   public void testVerifyBatch_verified() throws Exception {
-    createWorkspaces(ACTUAL_COUNT);
+    createWorkspacesAndUsers(ACTUAL_COUNT);
     assertThat(
             reportingVerificationService.verifyBatchesAndLog(
                 BATCH_UPLOADED_TABLES, NOW.toEpochMilli()))
         .isTrue();
     // 2 entities in database, and we uploaded 2.
-    String expectedLogPart = "workspace\t2\t2\t0 (0.000%)";
-    assertThat(getTestCapturedLog().contains(expectedLogPart)).isTrue();
+    String expectedWorkspaceLogPart = "workspace\t2\t2\t0 (0.000%)";
+    assertThat(getTestCapturedLog().contains(expectedWorkspaceLogPart)).isTrue();
+    String expectedUserLogPart = "user\t2\t2\t0 (0.000%)";
+    assertThat(getTestCapturedLog().contains(expectedUserLogPart)).isTrue();
   }
 
   @Test
   public void testVerifyBatch_fail() throws Exception {
-    createWorkspaces(ACTUAL_COUNT * 2);
+    createWorkspacesAndUsers(ACTUAL_COUNT * 2);
     assertThat(
             reportingVerificationService.verifyBatchesAndLog(
                 BATCH_UPLOADED_TABLES, NOW.toEpochMilli()))
         .isFalse();
     // 4 entities in database, and we uploaded 2.
-    String expectedLogPart = "workspace\t4\t2\t-2 (-50.000%)";
-    assertThat(getTestCapturedLog().contains(expectedLogPart)).isTrue();
+    String expectedWorkspaceLogPart = "workspace\t4\t2\t-2 (-50.000%)";
+    assertThat(getTestCapturedLog().contains(expectedWorkspaceLogPart)).isTrue();
+    String expectedUserLogPart = "user\t4\t2\t-2 (-50.000%)";
+    assertThat(getTestCapturedLog().contains(expectedUserLogPart)).isTrue();
   }
 
-  private void createWorkspaces(long count) {
-    DbUser user = new DbUser();
-    userDao.save(user);
+  /** This creates equal amount of users and workspaces. */
+  private void createWorkspacesAndUsers(long count) {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setName("foo");
     cdrVersionDao.save(cdrVersion);
 
     for (int i = 0; i < count; ++i) {
+      DbUser user = new DbUser();
+      userDao.save(user);
       workspaceDao.save(createDbWorkspace(user, cdrVersion));
     }
     entityManager.flush();

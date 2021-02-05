@@ -128,6 +128,24 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
     checkResponse(responseMapBuilder.build());
   }
 
+  /** Batch uploads {@link ReportingUser}. */
+  @Override
+  public void uploadBatchUser(List<ReportingUser> batch, long captureTimestamp) {
+    final Stopwatch stopwatch = stopwatchProvider.get();
+    final ImmutableMultimap.Builder<TableId, InsertAllResponse> responseMapBuilder =
+        ImmutableMultimap.builder();
+    final StringBuilder performanceStringBuilder = new StringBuilder();
+    final InsertAllRequest insertAllRequest =
+        userRequestBuilder.build(
+            getTableId(UserColumnValueExtractor.class), batch, getFixedValues(captureTimestamp));
+    issueInsertAllRequest(
+        stopwatch, responseMapBuilder, performanceStringBuilder, insertAllRequest);
+    log.info(performanceStringBuilder.toString());
+    // Check response and abort the process if any error happens. In this case, verify_snapshot
+    // won't have the 'successful' record, hence we know that is a "bad" dataset.
+    checkResponse(responseMapBuilder.build());
+  }
+
   /** Uploads a record into verified_snapshot BigQuery table. */
   @Override
   public void uploadVerifiedSnapshot(long captureTimestamp) {

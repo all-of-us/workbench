@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
@@ -130,8 +131,9 @@ public class ReportingQueryServiceTest {
 
   @Transactional
   public DbUser createDbUser() {
+    int currentSize = userDao.findUsers().size();
     final DbUser user1 = userDao.save(userFixture.createEntity());
-    assertThat(userDao.count()).isEqualTo(1);
+    assertThat(userDao.count()).isEqualTo(currentSize + 1);
     return user1;
   }
 
@@ -217,11 +219,54 @@ public class ReportingQueryServiceTest {
     assertThat(reportingQueryService.getWorkspacesCount()).isEqualTo(5);
   }
 
+  @Test
+  public void testUserIterator_twoAndAHalfBatches() {
+    createUsers(5);
+
+    final Iterator<List<ReportingUser>> iterator = reportingQueryService.getUserBatchIterator();
+    assertThat(iterator.hasNext()).isTrue();
+
+    final List<ReportingUser> batch1 = iterator.next();
+    assertThat(batch1).hasSize(BATCH_SIZE);
+
+    assertThat(iterator.hasNext()).isTrue();
+    final List<ReportingUser> batch2 = iterator.next();
+    assertThat(batch2).hasSize(BATCH_SIZE);
+
+    assertThat(iterator.hasNext()).isTrue();
+    final List<ReportingUser> batch3 = iterator.next();
+    assertThat(batch3).hasSize(1);
+
+    assertThat(iterator.hasNext()).isFalse();
+  }
+
+  @Test
+  public void testUserStream_twoAndAHalfBatches() {
+    createUsers(5);
+
+    final List<List<ReportingUser>> stream =
+        reportingQueryService.getUserStream().collect(Collectors.toList());
+    assertThat(stream.size()).isEqualTo(3);
+  }
+
+  @Test
+  public void testUserCount() {
+    createUsers(3);
+    assertThat(reportingQueryService.getUserCount()).isEqualTo(3);
+  }
+
   private void createWorkspaces(int count) {
     final DbUser user = createDbUser();
     final DbCdrVersion cdrVersion = createCdrVersion();
     for (int i = 0; i < count; ++i) {
       createDbWorkspace(user, cdrVersion);
+    }
+    entityManager.flush();
+  }
+
+  private void createUsers(int count) {
+    for (int i = 0; i < count; ++i) {
+      createDbUser();
     }
     entityManager.flush();
   }
