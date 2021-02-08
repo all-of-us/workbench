@@ -730,7 +730,7 @@ const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, u
       </FlexRow>
     </div>
 
-    <WarningMessage>
+    <WarningMessage iconSize={30} iconPosition={'center'}>
       <TextColumn>
         {needsDelete ? <React.Fragment>
           <div>
@@ -1110,7 +1110,7 @@ export const RuntimePanel = fp.flow(
              </FlexColumn>
            </div>
            {runtimeExists && runtimeChanged &&
-             <WarningMessage>
+             <WarningMessage iconSize={30} iconPosition={'center'}>
                 <div>You've made changes that require recreating your environment to take effect.</div>
              </WarningMessage>
            }
