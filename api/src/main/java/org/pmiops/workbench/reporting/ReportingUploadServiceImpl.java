@@ -246,12 +246,6 @@ public class ReportingUploadServiceImpl implements ReportingUploadService {
             fixedValues,
             batchSize));
     resultBuilder.addAll(
-        userRequestBuilder.buildBatchedRequests(
-            getTableId(UserColumnValueExtractor.class),
-            reportingSnapshot.getUsers(),
-            fixedValues,
-            batchSize));
-    resultBuilder.addAll(
         workspaceFreeTierUsageRequestBuilder.buildBatchedRequests(
             getTableId(WorkspaceFreeTierUsageColumnValueExtractor.class),
             reportingSnapshot.getWorkspaceFreeTierUsage(),
