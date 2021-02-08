@@ -215,7 +215,7 @@ export default class CreateAccountPage extends BasePage {
   async fillOutDemographicSurvey(): Promise<void> {
     await waitForText(this.page, 'Optional Demographics Survey');
     // Find and check on all checkboxes with same label: Prefer not to answer
-    const targetXpath = '//*[normalize-space(text())="Prefer not to answer"]/ancestor::node()[1]/input[@type="checkbox"]';
+    const targetXpath = '//*[normalize-space(text())="Prefer not to answer"]/ancestor::node()[1]/input[@type="checkbox" or @type="radio"]';
     await this.page.waitForXPath(targetXpath, { visible: true });
     const checkboxes = await this.page.$x(targetXpath);
     for (const ck of checkboxes) {
