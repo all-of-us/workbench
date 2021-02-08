@@ -3,8 +3,8 @@ import {Button} from 'app/components/buttons';
 
 import * as React from 'react';
 
-const ProfileErrorModal = ({title, message, onDismiss}) => {
-  return <Modal data-test-id='update-profile-error'>
+export const ProfileErrorModal = ({title, message, onDismiss}) => {
+  return <Modal data-test-id='profile-error-modal'>
     <ModalTitle>{title}</ModalTitle>
     <ModalBody>
         <div>An error occurred while saving profile. The following message was
@@ -19,7 +19,7 @@ const ProfileErrorModal = ({title, message, onDismiss}) => {
         </div>
     </ModalBody>
     <ModalFooter>
-        <Button onClick={onDismiss} type='primary'>Close</Button> 
+        <Button onClick={onDismiss} type='primary'>Close</Button>
     </ModalFooter>
   </Modal>
 }

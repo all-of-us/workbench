@@ -99,6 +99,8 @@ describe('ProfilePageComponent', () => {
 
     const wrapper = component();
 
+    getDemographicSurveyButton(wrapper).simulate('click');
+    await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('[data-test-id="checkbox-race-PREFER_NO_ANSWER"]').at(1).simulate('change', {target: {checked: true}})
     wrapper.find('[data-test-id="checkbox-genderIdentityList-PREFER_NO_ANSWER"]').at(1).simulate('change', {target: {checked: true}})
@@ -120,9 +122,9 @@ describe('ProfilePageComponent', () => {
     // We need to await one tick to allow async processing of the error response to resolve.
     await waitOneTickAndUpdate(wrapper);
 
-    const errorModal = wrapper.find('Modal[data-test-id="update-profile-error"]');
+    const errorModal = wrapper.find('Modal[data-test-id="profile-error-modal"]');
     // Ensure the error modal contains explanatory intro text.
-    expect(errorModal.getDOMNode().textContent).toContain('An error occurred while updating your profile');
+    expect(errorModal.getDOMNode().textContent).toContain('An error occurred while saving profile');
     // Ensure the error modal contains the server-side error message.
     expect(errorModal.getDOMNode().textContent).toContain('Could not create account: invalid institutional affiliation');
   });

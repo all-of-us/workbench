@@ -694,9 +694,9 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                 showStepCount={false}
             />
         </Modal>}
-        {saveProfileErrorResponse && 
-          <ProfileErrorModal 
-            title='Error creating account'
+        {saveProfileErrorResponse &&
+          <ProfileErrorModal
+            title='Error updating account'
             message={saveProfileErrorResponse.message}
             onDismiss={() => this.setState({saveProfileErrorResponse: null})}/>
         // <Modal data-test-id='update-profile-error'>
