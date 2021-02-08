@@ -260,10 +260,7 @@ public class ReportingUploadServiceTest {
             .captureTimestamp(NOW.toEpochMilli())
             .datasetCohorts(
                 IntStream.range(0, 21)
-                    .mapToObj(
-                        id ->
-                            new ReportingDatasetCohort()
-                                .cohortId((long) id))
+                    .mapToObj(id -> new ReportingDatasetCohort().cohortId((long) id))
                     .collect(ImmutableList.toImmutableList()))
             .cohorts(ImmutableList.of(ReportingTestUtils.createReportingCohort()))
             .institutions(ImmutableList.of(ReportingTestUtils.createReportingInstitution()));
