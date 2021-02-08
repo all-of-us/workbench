@@ -1,10 +1,10 @@
 import {Button, Clickable, Link} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
+import {ErrorMessage, WarningMessage} from 'app/components/messages';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
-import {WarningMessage} from 'app/components/warning-message';
 
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
@@ -730,7 +730,7 @@ const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, u
       </FlexRow>
     </div>
 
-    <WarningMessage>
+    <WarningMessage iconSize={30} iconPosition={'center'}>
       <TextColumn>
         {needsDelete ? <React.Fragment>
           <div>
@@ -893,46 +893,101 @@ export const RuntimePanel = fp.flow(
     return runtimeRequest;
   };
 
-  const diskSizeValidatorWithMessage = (message) => {
+  // 50 GB is the minimum GCP limit for disk size, 4000 GB is our arbitrary limit for not making a
+  // disk that is way too big and expensive on free tier ($.22 an hour). 64 TB is the GCE limit on
+  // persistent disk.
+  const diskSizeValidatorWithMessage = (diskType = 'standard' || 'master' || 'worker') => {
+    const maxDiskSize = workspace.billingAccountType === BillingAccountType.FREETIER
+        ? 4000
+        : 64000;
+    const message = {
+      standard: `^Disk size must be between 50 and ${maxDiskSize} GB`,
+      master: `^Master disk size must be between 50 and ${maxDiskSize} GB`,
+      worker: `^Worker disk size must be between 50 and ${maxDiskSize} GB`
+    };
+
     return {
       numericality: {
         greaterThanOrEqualTo: 50,
-        lessThanOrEqualTo: 4000,
+        lessThanOrEqualTo: maxDiskSize,
+        message: message[diskType]
+      }
+    };
+  };
+
+  const runningCostValidatorWithMessage = () => {
+    const maxRunningCost = workspace.billingAccountType === BillingAccountType.FREETIER
+      ? 25
+      : 150;
+    const message = workspace.billingAccountType === BillingAccountType.FREETIER
+      ? '^Your runtime is too expensive. To proceed using free credits, reduce your running costs below $25/hr.'
+      : '^Your runtime is very expensive. Are you sure you wish to proceed?';
+    return {
+      numericality: {
+        lessThan: maxRunningCost,
         message: message
       }
     };
   };
 
-  // 50 GB is the minimum GCP limit for disk size, 4000 GB is our arbitrary limit for not making a
-  // disk that is way too big and expensive ($.22 an hour)
-  const validators = {
-    selectedDiskSize: diskSizeValidatorWithMessage('^Disk size must be between 50 and 4000 GB')
+  const currentRunningCost = machineRunningCost({
+    computeType: selectedCompute,
+    masterMachine: selectedMachine,
+    masterDiskSize: diskSize,
+    numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,
+    numberOfPreemptibleWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfPreemptibleWorkers,
+    workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize,
+    workerMachine: selectedDataprocConfig && findMachineByName(selectedDataprocConfig.workerMachineType)
+  });
+
+  const standardDiskValidator = {
+    selectedDiskSize: diskSizeValidatorWithMessage('standard')
+  };
+  const runningCostValidator = {
+    currentRunningCost: runningCostValidatorWithMessage()
   };
   // We don't clear dataproc config when we change compute type so we can't combine this with the
   // above or else we can end up with phantom validation fails
   const dataprocValidators = {
-    masterDiskSize: diskSizeValidatorWithMessage('^Master disk size must be between 50 and 4000 GB'),
-    workerDiskSize: diskSizeValidatorWithMessage('^Worker disk size must be between 50 and 4000 GB')
+    masterDiskSize: diskSizeValidatorWithMessage('master'),
+    workerDiskSize: diskSizeValidatorWithMessage('worker')
   };
-  const errors = validate({selectedDiskSize}, validators);
+
   const {masterDiskSize = null, workerDiskSize = null} = selectedDataprocConfig || {};
+  const standardDiskErrors = validate({selectedDiskSize}, standardDiskValidator);
+  const runningCostErrors = validate({currentRunningCost}, runningCostValidator);
   const dataprocErrors = selectedCompute === ComputeType.Dataproc
       ? validate({masterDiskSize, workerDiskSize}, dataprocValidators)
       : undefined;
-  const runtimeCanBeCreated = !errors && !dataprocErrors;
+
+  const getErrorMessageContent = () => {
+    const errorDivs = [];
+    if (standardDiskErrors) {
+      errorDivs.push(summarizeErrors(standardDiskErrors));
+    }
+    if (dataprocErrors) {
+      errorDivs.push(summarizeErrors(dataprocErrors));
+    }
+    if (workspace.billingAccountType === BillingAccountType.FREETIER && runningCostErrors) {
+      errorDivs.push(summarizeErrors(runningCostErrors));
+    }
+    return errorDivs;
+  };
+
+  const getWarningMessageContent = () => {
+    const warningDivs = [];
+    if (workspace.billingAccountType === BillingAccountType.USERPROVIDED && runningCostErrors) {
+      warningDivs.push(summarizeErrors(runningCostErrors));
+    }
+    return warningDivs;
+  };
+
+  const runtimeCanBeCreated = !(getErrorMessageContent().length > 0);
   // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
   // where we get 'status' from
   const runtimeCanBeUpdated = runtimeChanged
       && [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)
-      && !errors
-      && !dataprocErrors;
-
-  const getErrorsTooltipContent = () => {
-    const errorDivs = [];
-    errorDivs.push(summarizeErrors(errors));
-    errorDivs.push(summarizeErrors(dataprocErrors));
-    return errorDivs;
-  };
+      && runtimeCanBeCreated;
 
   const renderUpdateButton = () => {
     return <Button
@@ -1055,14 +1110,19 @@ export const RuntimePanel = fp.flow(
              </FlexColumn>
            </div>
            {runtimeExists && runtimeChanged &&
-             <WarningMessage>
+             <WarningMessage iconSize={30} iconPosition={'center'}>
                 <div>You've made changes that require recreating your environment to take effect.</div>
              </WarningMessage>
            }
-           {(errors || dataprocErrors) &&
-             <WarningMessage>
-               {getErrorsTooltipContent()}
-             </WarningMessage>
+           {getErrorMessageContent().length > 0 &&
+             <ErrorMessage iconSize={16} iconPosition={'top'} data-test-id={'runtime-error-messages'}>
+               {getErrorMessageContent()}
+             </ErrorMessage>
+           }
+           {getWarningMessageContent().length > 0 &&
+            <WarningMessage iconSize={16} iconPosition={'top'} data-test-id={'runtime-warning-messages'}>
+              {getWarningMessageContent()}
+            </WarningMessage>
            }
            <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
              <Link
@@ -1083,6 +1143,6 @@ export const RuntimePanel = fp.flow(
                                                            }}
                                                            updateButton={renderUpdateButton()}
           />],
-          [PanelContent.Disabled, () => <DisabledPanel/>])}
+      [PanelContent.Disabled, () => <DisabledPanel/>])}
   </div>;
 });
