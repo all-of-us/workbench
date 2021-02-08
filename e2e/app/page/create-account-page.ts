@@ -45,6 +45,7 @@ export const LabelAlias = {
   EducationLevel: 'Highest Level of Education Completed', // Highest Level of Education Completed
   YearOfBirth: 'Year of Birth',
   InstitutionEmail: 'Your institutional email address',
+  Ethnicity: 'Ethnicity'
 };
 
 export const FieldSelector = {
@@ -56,6 +57,11 @@ export const FieldSelector = {
   EducationLevelSelect: {
     textOption: {
       type: ElementType.Dropdown, name: LabelAlias.EducationLevel, ancestorLevel: 2
+    }
+  },
+  EthnicitySelect: {
+    textOption: {
+      type: ElementType.Dropdown, name: LabelAlias.Ethnicity, ancestorLevel: 2
     }
   },
   BirthYearSelect: {
@@ -172,6 +178,12 @@ export default class CreateAccountPage extends BasePage {
     return dropdown.select(year);
   }
 
+  // select Ethnicity from a dropdown
+  async selectEthnicity(option: string): Promise<void> {
+    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.EthnicitySelect.textOption);
+    return dropdown.select(option);
+  }
+
   // Combined steps to make test code cleaner and shorter
 
   // Step 2: Fill out institution affiliation details
@@ -221,6 +233,7 @@ export default class CreateAccountPage extends BasePage {
     for (const ck of checkboxes) {
       await ck.click();
     }
+    await this.selectEthnicity('Prefer not to answer');
     await this.selectYearOfBirth('1955');
     await this.selectEducationLevel(EducationLevelValue.Doctorate);
   }
