@@ -99,8 +99,6 @@ describe('ProfilePageComponent', () => {
 
     const wrapper = component();
 
-    getDemographicSurveyButton(wrapper).simulate('click');
-    await waitOneTickAndUpdate(wrapper);
 
     wrapper.find('[data-test-id="checkbox-race-PREFER_NO_ANSWER"]').at(1).simulate('change', {target: {checked: true}})
     wrapper.find('[data-test-id="checkbox-genderIdentityList-PREFER_NO_ANSWER"]').at(1).simulate('change', {target: {checked: true}})

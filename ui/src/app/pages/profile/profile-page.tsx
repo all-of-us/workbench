@@ -5,6 +5,7 @@ import * as validate from 'validate.js';
 
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
+import {ProfileErrorModal} from 'app/components/profile-error-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {TextAreaWithLengthValidationMessage, TextInput, ValidationError} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
@@ -693,26 +694,30 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                 showStepCount={false}
             />
         </Modal>}
-        {saveProfileErrorResponse &&
-        <Modal data-test-id='update-profile-error'>
-            <ModalTitle>Error creating account</ModalTitle>
-            <ModalBody>
-                <div>An error occurred while updating your profile. The following message was
-                    returned:
-                </div>
-                <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
-                    "{saveProfileErrorResponse.message}"
-                </div>
-                <div>
-                    Please try again or contact <a
-                    href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
-                </div>
-            </ModalBody>
-            <ModalFooter>
-                <Button onClick={() => this.setState({saveProfileErrorResponse: null})}
-                        type='primary'>Close</Button>
-            </ModalFooter>
-        </Modal>
+        {saveProfileErrorResponse && 
+          <ProfileErrorModal 
+            title='Error creating account'
+            message={saveProfileErrorResponse.message}
+            onDismiss={() => this.setState({saveProfileErrorResponse: null})}/>
+        // <Modal data-test-id='update-profile-error'>
+        //     <ModalTitle>Error creating account</ModalTitle>
+        //     <ModalBody>
+        //         <div>An error occurred while updating your profile. The following message was
+        //             returned:
+        //         </div>
+        //         <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
+        //             "{saveProfileErrorResponse.message}"
+        //         </div>
+        //         <div>
+        //             Please try again or contact <a
+        //             href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
+        //         </div>
+        //     </ModalBody>
+        //     <ModalFooter>
+        //         <Button onClick={() => this.setState({saveProfileErrorResponse: null})}
+        //                 type='primary'>Close</Button>
+        //     </ModalFooter>
+        // </Modal>
         }
       </div>
     </FadeBox>;
