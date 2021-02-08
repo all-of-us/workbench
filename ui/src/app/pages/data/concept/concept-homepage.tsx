@@ -81,7 +81,7 @@ const DomainCard: React.FunctionComponent<{conceptDomainInfo: DomainInfo, browse
            data-test-id='domain-box-name'>{conceptDomainInfo.name}</Clickable>
       <div style={styles.conceptText}>
         {updating ? <Spinner size={42}/> : <React.Fragment>
-          <span style={{fontSize: 30}}>{conceptCount.toLocaleString()}</span> concepts in this domain. <p/>
+          <span style={{fontSize: 30}}>{conceptCount.toLocaleString()}</span> concepts in this domain.
         </React.Fragment>}
         <div><b>{conceptDomainInfo.participantCount.toLocaleString()}</b> participants in domain.</div>
       </div>

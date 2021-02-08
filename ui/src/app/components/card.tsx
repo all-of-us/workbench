@@ -25,6 +25,7 @@ export const styles = reactStyles({
   },
   domainCard: {
     ...baseStyles.card,
+    justifyContent: 'space-between',
     minWidth: '300px', maxWidth: '300px',
     minHeight: '223px', maxHeight: '223px',
   },
