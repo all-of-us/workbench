@@ -962,7 +962,6 @@ export const RuntimePanel = fp.flow(
 
   const getErrorMessageContent = () => {
     const errorDivs = [];
-    // Sorry this is phrased this way. Would normally do standardDiskErrors && errorDivs.push but lint hates fun
     if (standardDiskErrors) {
       errorDivs.push(summarizeErrors(standardDiskErrors));
     }
