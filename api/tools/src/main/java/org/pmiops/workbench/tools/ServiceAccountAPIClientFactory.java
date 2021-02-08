@@ -1,12 +1,20 @@
 package org.pmiops.workbench.tools;
 
+import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
+import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
 import java.util.Arrays;
 
+import com.google.auth.oauth2.OAuth2Credentials;
+import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
+import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.firecloud.ApiClient;
+import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.api.*;
+
+import static org.pmiops.workbench.firecloud.FireCloudServiceImpl.FIRECLOUD_API_OAUTH_SCOPES;
 
 public class ServiceAccountAPIClientFactory {
 
@@ -23,7 +31,26 @@ public class ServiceAccountAPIClientFactory {
     this.apiUrl = apiUrl;
   }
 
-  private ApiClient newApiClient(String apiUrl) throws IOException {
+  public ApiClient newFirecloudAdminApiClient(String apiUrl) throws IOException {
+    final OAuth2Credentials delegatedCreds =
+            new DelegatedUserCredentials(
+                    "all-of-us-workbench-test@appspot.gserviceaccount.com",
+                    "firecloud-admin@all-of-us-workbench-test.iam.gserviceaccount.com",
+                    FIRECLOUD_API_OAUTH_SCOPES,
+                    IamCredentialsClient.create(),
+                    new ApacheHttpTransport());
+    delegatedCreds.refresh();
+
+//    ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
+    ApiClient apiClient = new ApiClient();
+    apiClient.setBasePath(apiUrl);
+    apiClient.setAccessToken(delegatedCreds.getAccessToken().getTokenValue());
+
+    return apiClient;
+  }
+
+
+  private ApiClient newServiceAccountApiClient(String apiUrl) throws IOException {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(apiUrl);
 //    GoogleCredentials credentials =
@@ -32,6 +59,10 @@ public class ServiceAccountAPIClientFactory {
 
     apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(Arrays.asList(FC_SCOPES)));
     return apiClient;
+  }
+
+  private ApiClient newApiClient(String apiUrl) throws IOException {
+    return newFirecloudAdminApiClient(apiUrl);
   }
 
   public WorkspacesApi workspacesApi() throws IOException {
