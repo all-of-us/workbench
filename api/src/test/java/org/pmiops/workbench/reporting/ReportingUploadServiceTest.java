@@ -46,6 +46,7 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.ReportingCohort;
+import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingSnapshot;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
@@ -257,15 +258,12 @@ public class ReportingUploadServiceTest {
     final ReportingSnapshot largeSnapshot =
         createEmptySnapshot()
             .captureTimestamp(NOW.toEpochMilli())
-            .users(
+            .datasetCohorts(
                 IntStream.range(0, 21)
                     .mapToObj(
                         id ->
-                            new ReportingUser()
-                                .username("bill@aou.biz")
-                                .givenName("Bill")
-                                .disabled(false)
-                                .userId((long) id))
+                            new ReportingDatasetCohort()
+                                .cohortId((long) id))
                     .collect(ImmutableList.toImmutableList()))
             .cohorts(ImmutableList.of(ReportingTestUtils.createReportingCohort()))
             .institutions(ImmutableList.of(ReportingTestUtils.createReportingInstitution()));
