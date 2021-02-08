@@ -4,9 +4,14 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import * as React from 'react';
 
 const MessageWithIcon = ({
-  messageType = 'warning' || 'error' || 'success',
+  messageType,
   iconSize = 30,
-  iconPosition = 'top' || 'center' || 'bottom',
+  iconPosition,
+  children
+}: {
+  messageType: 'warning' | 'error' | 'success',
+  iconSize: number,
+  iconPosition: 'top' | 'center' | 'bottom',
   children
 }) => {
   const icon = {
@@ -56,7 +61,15 @@ const MessageWithIcon = ({
   </FlexRow>;
 };
 
-export const WarningMessage = ({iconSize = 30, iconPosition = 'center', children}) => {
+export const WarningMessage = ({
+  iconSize = 30,
+  iconPosition = 'center',
+  children
+}: {
+  iconSize: number,
+  iconPosition: 'top' | 'center' | 'bottom',
+  children
+}) => {
   return <MessageWithIcon
       messageType={'warning'}
       iconSize={iconSize}
@@ -66,7 +79,15 @@ export const WarningMessage = ({iconSize = 30, iconPosition = 'center', children
   </MessageWithIcon>;
 };
 
-export const ErrorMessage = ({iconSize = 30, iconPosition = 'center', children}) => {
+export const ErrorMessage = ({
+  iconSize = 30,
+  iconPosition = 'center',
+  children
+}: {
+  iconSize: number,
+  iconPosition: 'top' | 'center' | 'bottom',
+  children
+}) => {
   return <MessageWithIcon
       messageType={'error'}
       iconSize={iconSize}

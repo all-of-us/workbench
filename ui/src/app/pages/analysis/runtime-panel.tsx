@@ -983,9 +983,7 @@ export const RuntimePanel = fp.flow(
     return warningDivs;
   };
 
-  const runtimeCanBeCreated = workspace.billingAccountType === BillingAccountType.FREETIER
-    ? !standardDiskErrors && !runningCostErrors && !dataprocErrors
-    : !standardDiskErrors && !dataprocErrors;
+  const runtimeCanBeCreated = !(getErrorMessageContent().length > 0);
   // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
   // where we get 'status' from
   const runtimeCanBeUpdated = runtimeChanged
