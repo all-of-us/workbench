@@ -158,6 +158,7 @@
   <include file="changelog/db.changelog-146-access-tier-table-and-cdr-version.xml"/>
   <include file="changelog/db.changelog-147-remove-cluster-create-retries.xml"/>
   <include file="changelog/db.changelog-148-remove-cluster-config.xml"/>
+  <include file="changelog/db.changelog-149-demographic-survey-add-disability-prefer-no-answer.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
