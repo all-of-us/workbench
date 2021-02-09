@@ -11,8 +11,11 @@ export const testEnvironmentBase: EnvironmentBase = {
   leoApiUrl: 'https://leonardo.dsde-dev.broadinstitute.org',
   publicUiUrl: 'https://aou-db-test.appspot.com',
   gaId: 'UA-112406425-1',
+  // note: these are shifted by 1 from other environments due to an extra
+  // custom GA dimension "Test" which has the #1 spot in Test
   gaUserAgentDimension: 'dimension2',
   gaLoggedInDimension: 'dimension3',
+  gaUserInstitutionCategoryDimension: 'dimension4',
   trainingUrl: 'https://aoudev.nnlm.gov',
   zendeskEnv: ZendeskEnv.Sandbox,
   shouldShowDisplayTag: true,
