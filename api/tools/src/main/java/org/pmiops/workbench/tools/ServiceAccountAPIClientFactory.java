@@ -2,12 +2,18 @@ package org.pmiops.workbench.tools;
 
 import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
+import com.google.api.gax.rpc.ApiException;
 import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
+import com.google.cloud.iam.credentials.v1.ServiceAccountName;
+import com.google.protobuf.Duration;
+import io.grpc.StatusRuntimeException;
 import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.firecloud.ApiClient;
@@ -32,23 +38,33 @@ public class ServiceAccountAPIClientFactory {
   }
 
   public ApiClient newFirecloudAdminApiClient(String apiUrl) throws IOException {
-    final OAuth2Credentials delegatedCreds =
-            new DelegatedUserCredentials(
-                    "all-of-us-workbench-test@appspot.gserviceaccount.com",
-                    "firecloud-admin@all-of-us-workbench-test.iam.gserviceaccount.com",
-                    FIRECLOUD_API_OAUTH_SCOPES,
-                    IamCredentialsClient.create(),
-                    new ApacheHttpTransport());
-    delegatedCreds.refresh();
+//    final OAuth2Credentials delegatedCreds =
+//            new DelegatedUserCredentials(
+//                    "all-of-us-workbench-test@appspot.gserviceaccount.com",
+//                    "firecloud-admin@all-of-us-workbench-test.iam.gserviceaccount.com",
+//                    FIRECLOUD_API_OAUTH_SCOPES,
+//                    IamCredentialsClient.create(),
+//                    new ApacheHttpTransport());
+//    delegatedCreds.refresh();
+
+    IamCredentialsClient iamCredentialsClient = IamCredentialsClient.create();
+    List<String> delegates = Arrays.asList("projects/-/serviceAccounts/all-of-us-workbench-test@appspot.gserviceaccount.com");
+    Duration lifetime = Duration.newBuilder().setSeconds(60*60).build();
+
+    String accessToken = iamCredentialsClient.generateAccessToken(
+            "projects/-/serviceAccounts/wgs-cohort-extraction@all-of-us-workbench-test.iam.gserviceaccount.com",
+            delegates,
+            Arrays.asList(FC_SCOPES),
+            lifetime
+    ).getAccessToken();
 
 //    ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(apiUrl);
-    apiClient.setAccessToken(delegatedCreds.getAccessToken().getTokenValue());
+    apiClient.setAccessToken(accessToken);
 
     return apiClient;
   }
-
 
   private ApiClient newServiceAccountApiClient(String apiUrl) throws IOException {
     ApiClient apiClient = new ApiClient();
