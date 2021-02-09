@@ -73,6 +73,9 @@ const styles = reactStyles({
   bold: {
     fontWeight: 700,
   },
+  semiBold: {
+    fontWeight: 600,
+  },
   controlSection: {
     backgroundColor: String(addOpacity(colors.white, .75)),
     borderRadius: '3px',
@@ -226,7 +229,7 @@ const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPr
   const {cpu, memory} = selectedMachine || initialMachineType;
 
   return <Fragment>
-      <label htmlFor={`${idPrefix}-cpu`}>CPUs</label>
+      <label style={styles.semiBold} htmlFor={`${idPrefix}-cpu`}>CPUs</label>
       <Dropdown id={`${idPrefix}-cpu`}
         options={fp.flow(
           // Show all CPU options.
@@ -245,7 +248,7 @@ const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPr
         }
         disabled={disabled}
         value={cpu}/>
-      <label htmlFor={`${idPrefix}-ram`}>RAM (GB)</label>
+      <label style={styles.semiBold} htmlFor={`${idPrefix}-ram`}>RAM (GB)</label>
       <Dropdown id={`${idPrefix}-ram`}
         options={fp.flow(
           // Show valid memory options as constrained by the currently selected CPU.
@@ -288,7 +291,7 @@ const DisabledPanel = () => {
 
 const DiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskSize, idPrefix}) => {
   return <Fragment>
-    <label htmlFor={`${idPrefix}-disk`}>Disk (GB)</label>
+    <label style={styles.semiBold} htmlFor={`${idPrefix}-disk`}>Disk (GB)</label>
     <InputNumber id={`${idPrefix}-disk`}
       showButtons
       disabled={disabled}
@@ -335,7 +338,7 @@ const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
   return <fieldset style={{marginTop: '0.75rem'}}>
     <legend style={styles.workerConfigLabel}>Worker Config</legend>
     <div style={styles.formGrid}>
-      <label htmlFor='num-workers'>Workers</label>
+      <label style={styles.semiBold} htmlFor='num-workers'>Workers</label>
       <InputNumber id='num-workers'
         showButtons
         disabled={disabled}
@@ -345,7 +348,7 @@ const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
         inputStyle={styles.inputNumber}
         onChange={({value}) => setSelectedNumWorkers(value)}
         min={2}/>
-      <label htmlFor='num-preemptible'>Preemptible</label>
+      <label style={styles.semiBold} htmlFor='num-preemptible'>Preemptible</label>
       <InputNumber id='num-preemptible'
         showButtons
         disabled={disabled}
@@ -1073,7 +1076,7 @@ export const RuntimePanel = fp.flow(
                 setSelectedDataprocConfig={(dataproc) => setSelectedDataprocConfig(dataproc)}
               />
               {/* Runtime customization: change detailed machine configuration options. */}
-              <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
+              <h3 style={{...styles.sectionHeader, ...styles.bold}}>Cloud compute profile</h3>
               <div style={styles.formGrid}>
                 <MachineSelector
                   idPrefix='runtime'
@@ -1092,7 +1095,7 @@ export const RuntimePanel = fp.flow(
                     diskSize={diskSize}/>
              </div>
              <FlexColumn style={{marginTop: '1rem'}}>
-               <label htmlFor='runtime-compute'>Compute type</label>
+               <label style={styles.semiBold} htmlFor='runtime-compute'>Compute type</label>
                <Dropdown id='runtime-compute'
                          disabled={!hasMicroarrayData || disableControls}
                          style={{width: '10rem'}}
