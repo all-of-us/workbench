@@ -12,7 +12,7 @@ export const environment: Environment = {
   gaId: 'UA-112406425-3',
   gaUserAgentDimension: 'dimension1',
   gaLoggedInDimension: 'dimension2',
-  gaUserInstitutionCategoryDimension: 'dimension3',   // TODO create
+  gaUserInstitutionCategoryDimension: 'dimension3',
   zendeskEnv: ZendeskEnv.Sandbox,
   trainingUrl: 'https://aoudev.nnlm.gov',
   inactivityTimeoutSeconds: 30 * 60,
