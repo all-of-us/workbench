@@ -204,20 +204,25 @@ export class DemographicSurvey extends React.Component<Props, State> {
 or another sexual and/or gender minority?'>
         <FlexColumn>
           <FlexRow style={{alignItems: 'baseline'}}>
-            <RadioButton data-test-id='radio-lgbtq-yes' id='radio-lgbtq-yes' onChange={
-              (e) => this.updateDemographicAttribute('identifiesAsLgbtq', true)}
+            <RadioButton data-test-id='radio-lgbtq-yes'
+                         id='radio-lgbtq-yes'
+                         onChange={(e) => this.updateDemographicAttribute('identifiesAsLgbtq', true)}
                          checked={!!demographicSurvey ? demographicSurvey.identifiesAsLgbtq === true : false}
                          style={{marginRight: '0.5rem'}}/>
             <label htmlFor='radio-lgbtq-yes' style={{paddingRight: '3rem', color: colors.primary}}>Yes</label>
           </FlexRow>
           <FlexRow style={{alignItems: 'baseline'}}>
-            <RadioButton data-test-id='radio-lgbtq-no' id='radio-lgbtq-no' onChange={(e) => this.updateDemographicAttribute('identifiesAsLgbtq', false)}
+            <RadioButton data-test-id='radio-lgbtq-no'
+                         id='radio-lgbtq-no'
+                         onChange={(e) => this.updateDemographicAttribute('identifiesAsLgbtq', false)}
                          checked={!!demographicSurvey ? demographicSurvey.identifiesAsLgbtq === false : false}
                          style={{marginRight: '0.5rem'}}/>
             <label htmlFor='radio-lgbtq-no' style={{color: colors.primary}}>No</label>
           </FlexRow>
           <FlexRow style={{alignItems: 'baseline'}}>
-            <RadioButton data-test-id='radio-lgbtq-pnta' id='radio-lgbtq-pnta' onChange={(e) => this.updateDemographicAttribute('identifiesAsLgbtq', null)}
+            <RadioButton data-test-id='radio-lgbtq-pnta'
+                         id='radio-lgbtq-pnta'
+                         onChange={(e) => this.updateDemographicAttribute('identifiesAsLgbtq', null)}
                          checked={!!demographicSurvey ? demographicSurvey.identifiesAsLgbtq === null : false}
                          style={{marginRight: '0.5rem'}}/>
             <label htmlFor='radio-lgbtq-pnta' style={{color: colors.primary}}>Prefer not to answer</label>
@@ -250,20 +255,22 @@ or another sexual and/or gender minority?'>
       <Section header='Do you have a physical or cognitive disability?'>
         <FlexColumn>
           <FlexRow style={{alignItems: 'baseline'}}>
-            <RadioButton id='radio-disability-yes' onChange={
-              (e) => this.updateDemographicAttribute('disability', true)}
+            <RadioButton id='radio-disability-yes'
+                         onChange={(e) => this.updateDemographicAttribute('disability', e)}
                          checked={!!demographicSurvey ? demographicSurvey.disability === Disability.True : false}
                          style={{marginRight: '0.5rem'}}/>
             <label htmlFor='radio-disability-yes' style={{paddingRight: '3rem', color: colors.primary}}>Yes</label>
           </FlexRow>
           <FlexRow style={{alignItems: 'baseline'}}>
-            <RadioButton id='radio-disability-no' onChange={(e) => this.updateDemographicAttribute('disability', false)}
+            <RadioButton id='radio-disability-no'
+                         onChange={(e) => this.updateDemographicAttribute('disability', e)}
                          checked={!!demographicSurvey ? demographicSurvey.disability === Disability.False : false}
                          style={{marginRight: '0.5rem'}}/>
             <label htmlFor='radio-disability-no' style={{color: colors.primary}}>No</label>
           </FlexRow>
           <FlexRow style={{alignItems: 'baseline'}}>
-            <RadioButton id='radio-disability-pnta' onChange={(e) => this.updateDemographicAttribute('disability', null)}
+            <RadioButton id='radio-disability-pnta'
+                         onChange={(e) => this.updateDemographicAttribute('disability', e)}
                          checked={!!demographicSurvey ? demographicSurvey.disability === Disability.PREFERNOANSWER : false}
                          style={{marginRight: '0.5rem'}}/>
             <label htmlFor='radio-disability-pnta' style={{color: colors.primary}}>Prefer not to answer</label>
