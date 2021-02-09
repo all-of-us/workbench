@@ -38,6 +38,7 @@ describe('User registration tests:', () => {
     await createAccountPage.fillOutDemographicSurvey();
 
     const submitButton = await createAccountPage.getSubmitButton();
+    await submitButton.waitUntilEnabled();
     await submitButton.click();
 
     // Verify New account created successfully.
