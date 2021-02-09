@@ -3638,8 +3638,9 @@ definitions:
   Disability:
     type: string
     enum:
-    - true
-    - false
+    - TRUE
+    - FALSE
+    - PREFER_NO_ANSWER
   FeaturedWorkspaceCategory:
     type: string
     enum:
