@@ -5,7 +5,7 @@ version: 2.1
 # -------------------------
 # https://circleci.com/orbs/registry/
 orbs:
-  browser-tools: circleci/browser-tools@1.0.1
+  browser-tools: circleci/browser-tools@1.1.1
 
 # -------------------------
 #   PIPELINE PARAMETERS
