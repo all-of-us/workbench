@@ -19,7 +19,7 @@ export const styles = {
     fontWeight: 800,
     fontSize: '1rem',
   },
-  semiBold: {
+  label: {
     fontWeight: 600
   },
   h4: {
@@ -50,7 +50,7 @@ export const styles = {
 export const BolderHeader = withStyle(styles.h1)('h1');
 export const BoldHeader = withStyle(styles.h2)('h2');
 export const Header = withStyle(styles.h3)('h3');
-export const SemiBoldHeader = withStyle({...styles.h3, ...styles.semiBold})('h3');
+export const SemiBoldHeader = withStyle({...styles.h3, ...styles.label})('h3');
 export const SmallHeader = withStyle(styles.h4)('h4');
 export const ListPageHeader = withStyle(styles.listPageHeader)('h3');
 export const PageHeader = withStyle(styles.pageHeader)('h2');
