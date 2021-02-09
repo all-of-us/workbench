@@ -25,7 +25,7 @@ beforeEach(async () => {
       if (request.url().includes('api-dot-all-of-us')) {
         const method = request.method();
         if (method !== 'OPTIONS') {
-          console.debug(`❗Request issued: ${request.url()}`);
+          console.debug(`❗Request issued: ${method} ${request.url()}`);
         }
       }
       request.continue();
@@ -67,20 +67,40 @@ beforeEach(async () => {
     } catch (err) {
     }
   })
-  .on('console', (message) => {
-    if (message != null) {
-      // Don't log "log", "info" or "debug"
-      if (['ERROR', 'WARNING'].includes(message.type().toUpperCase())) {
-        console.debug(`❗Page console: ${message.type()}: ${message.text()}`);
-      }
+  .on('console', async (message) => {
+    const args = await Promise.all(
+      message.args().map(async (arg) =>
+        await arg.executionContext().evaluate( (txt) => {
+          if (txt instanceof Error) {
+            return JSON.stringify(txt.stack);
+          }
+          return txt.toString();
+        }, arg))
+    );
+
+    const msgText = message.text();
+    const text = args.filter(msg => msg !== 'undefined').join(' ');
+    if (msgText && !message.args().length) {
+      return;
+    }
+
+    const type = message.type();
+    // Don't log "log", "info" or "debug"
+    switch (type) {
+      case 'error':
+      case 'warning':
+        console.debug(`❗Page console: ${message.type()}: ${JSON.stringify(text, null, 2)}`);
+        break;
     }
   })
   .on('error', (error) => {
     console.debug(`❗Page error: ${error}`);
   })
   .on('pageerror', (error) => {
-    if (error != null) {
+    try {
       console.debug(`❗Page error: ${error}`);
+      // tslint:disable-next-line:no-empty
+    } catch (err) {
     }
   })
 
