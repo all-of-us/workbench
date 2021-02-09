@@ -3638,8 +3638,9 @@ definitions:
   Disability:
     type: string
     enum:
-    - true
-    - false
+    - TRUE
+    - FALSE
+    - PREFER_NO_ANSWER
   FeaturedWorkspaceCategory:
     type: string
     enum:
@@ -5304,8 +5305,7 @@ definitions:
       education:
         "$ref": "#/definitions/Education"
       disability:
-        type: boolean
-        default: null
+        "$ref": "#/definitions/Disability"
   Address:
     type: object
     properties:

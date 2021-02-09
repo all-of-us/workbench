@@ -576,6 +576,7 @@ public final class DbStorageEnums {
       ImmutableBiMap.<Disability, Short>builder()
           .put(Disability.TRUE, (short) 1)
           .put(Disability.FALSE, (short) 2)
+          .put(Disability.PREFER_NO_ANSWER, (short) 3)
           .build();
 
   public static Race raceFromStorage(Short race) {
@@ -622,25 +623,7 @@ public final class DbStorageEnums {
     return CLIENT_TO_STORAGE_DISABILITY.get(disability);
   }
 
-  public static Short disabilityToStorage(Boolean disability) {
-    if (disability != null) {
-      return disability ? (short) 1 : (short) 2;
-    } else {
-      return null;
-    }
-  }
-
   public static Disability disabilityFromStorage(Short disability) {
     return CLIENT_TO_STORAGE_DISABILITY.inverse().get(disability);
-  }
-
-  // named such for MapStruct, which will automatically pick up on a function with this signature.
-  // can't be named disabilityFromStorage because it would have the same args as the other one.
-  public static Boolean boolyDisabilityFromStorage(Short disability) {
-    if (disability != null) {
-      return disability == 1;
-    } else {
-      return null;
-    }
   }
 }
