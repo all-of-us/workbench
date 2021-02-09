@@ -42,7 +42,6 @@ public class ConfigController implements ConfigApiDelegate {
             .enableV3DataUserCodeOfConduct(config.featureFlags.enableV3DataUserCodeOfConduct)
             .enableEventDateModifier(config.featureFlags.enableEventDateModifier)
             .enableResearchReviewPrompt(config.featureFlags.enableResearchPurposePrompt)
-            .enableCustomRuntimes(config.featureFlags.enableCustomRuntimes)
             .runtimeImages(
                 Stream.concat(
                         config.firecloud.runtimeImages.dataproc.stream()

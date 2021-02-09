@@ -1,6 +1,6 @@
-import CopyModal from 'app/component/copy-modal';
+import CopyToWorkspaceModal from 'app/modal/copy-to-workspace-modal';
 import DataResourceCard from 'app/component/data-resource-card';
-import NewNotebookModal from 'app/component/new-notebook-modal';
+import NewNotebookModal from 'app/modal/new-notebook-modal';
 import Link from 'app/element/link';
 import {MenuOption, Language, LinkText, ResourceCard} from 'app/text-labels';
 import {Page} from 'puppeteer';
@@ -72,8 +72,8 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
       this.page.waitForXPath(redirectingTextsXpath, {visible: true}),
     ]);
 
-    // Waiting up to 20 minutes
-    await waitWhileLoading(this.page, (20 * 60 * 1000));
+    // Waiting up to 30 minutes
+    await waitWhileLoading(this.page, (30 * 60 * 1000));
 
     const notebook = new NotebookPage(this.page, notebookName);
     await notebook.waitForLoad();
@@ -108,7 +108,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     const notebookCard = await resourceCard.findCard(notebookName, ResourceCard.Notebook);
     await notebookCard.selectSnowmanMenu(MenuOption.CopyToAnotherWorkspace, {waitForNav: false});
     // Fill out modal fields.
-    const copyModal = await new CopyModal(this.page);
+    const copyModal = await new CopyToWorkspaceModal(this.page);
     await copyModal.waitForLoad();
     await copyModal.copyToAnotherWorkspace(destinationWorkspace, destinationNotebookName);
   }

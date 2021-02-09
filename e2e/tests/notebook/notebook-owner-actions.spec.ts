@@ -1,10 +1,9 @@
 import DataResourceCard from 'app/component/data-resource-card';
-import NewNotebookModal from 'app/component/new-notebook-modal';
+import NewNotebookModal from 'app/modal/new-notebook-modal';
 import WorkspacesPage from 'app/page/workspaces-page';
 import {LinkText, ResourceCard} from 'app/text-labels';
 import {makeRandomName, makeWorkspaceName} from 'utils/str-utils';
 import {signInWithAccessToken} from 'utils/test-utils';
-
 
 describe('Workspace owner Jupyter notebook action tests', () => {
 

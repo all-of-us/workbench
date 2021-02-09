@@ -1,14 +1,12 @@
 import {ElementHandle, Page} from 'puppeteer';
 import {FieldSelector} from 'app/page/cohort-build-page';
-import Modal from 'app/component/modal';
 import {waitForNumericalString, waitForText, waitWhileLoading} from 'utils/waits-utils';
 import CohortSearchPage from 'app/page/cohort-search-page';
 import CriteriaSearchPage, {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/criteria-search-page';
 import TieredMenu from 'app/component/tiered-menu';
 import {LinkText, MenuOption} from 'app/text-labels';
 import {snowmanIconXpath} from 'app/component/snowman-menu';
-import Button from 'app/element/button';
-import HelpSidebar from 'app/component/help-sidebar';
+import Modal from 'app/modal/modal';
 
 export default class CohortParticipantsGroup {
 
@@ -46,6 +44,7 @@ export default class CohortParticipantsGroup {
    */
   async selectGroupSnowmanMenu(option: MenuOption): Promise<void> {
     const menu = new TieredMenu(this.page);
+    await menu.waitUntilVisible();
     return menu.select(option);
   }
 
@@ -140,22 +139,14 @@ export default class CohortParticipantsGroup {
   private async openTieredMenu(): Promise<TieredMenu> {
     const addCriteriaButton = await this.page.waitForXPath(this.getAddCriteriaButtonXpath(), {visible: true});
     await addCriteriaButton.click(); // Click dropdown trigger to open menu
-    return new TieredMenu(this.page);
+    const tieredMenu = new TieredMenu(this.page);
+    await tieredMenu.waitUntilVisible();
+    return tieredMenu;
   }
 
   async getGroupCriteriasList(): Promise<ElementHandle[]> {
     const selector = `${this.rootXpath}//*[@data-test-id="item-list"]`;
     return this.page.$x(selector);
-  }
-
-  async viewAndSaveCriteria(): Promise<void> {
-    const finishAndReviewButton = await Button.findByName(this.page, {name: LinkText.FinishAndReview});
-    await finishAndReviewButton.waitUntilEnabled();
-    await finishAndReviewButton.click();
-
-    // Click Save Criteria button in sidebar
-    const helpSidebar = new HelpSidebar(this.page);
-    await helpSidebar.clickSaveCriteriaButton();
   }
 
 }

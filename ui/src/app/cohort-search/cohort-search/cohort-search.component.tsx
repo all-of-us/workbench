@@ -8,7 +8,8 @@ import {Selection} from 'app/cohort-search/selection-list/selection-list.compone
 import {generateId, typeToTitle} from 'app/cohort-search/utils';
 import {Button, Clickable} from 'app/components/buttons';
 import {FlexRowWrap} from 'app/components/flex';
-import {CriteriaSearch, growlCSS} from 'app/pages/data/criteria-search';
+import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {CriteriaSearch, growlCSS, LOCAL_STORAGE_KEY_COHORT_CONTEXT} from 'app/pages/data/criteria-search';
 import colors, {addOpacity} from 'app/styles/colors';
 import {reactStyles, withCurrentCohortSearchContext} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
@@ -16,7 +17,9 @@ import {
   attributesSelectionStore,
   currentCohortCriteriaStore,
   currentCohortSearchContextStore,
+  currentCohortStore,
   setSidebarActiveIconStore,
+  urlParamsStore,
 } from 'app/utils/navigation';
 import {CriteriaType, Domain, TemporalMention, TemporalTime} from 'generated/fetch';
 
@@ -91,6 +94,13 @@ function initGroup(role: string, item: any) {
   };
 }
 
+
+export function getItemFromSearchRequest(groupId: string, itemId: string, role: string) {
+  const searchRequest = searchRequestStore.getValue();
+  const groupIndex = searchRequest[role].findIndex(grp => grp.id === groupId);
+  return groupIndex > -1 ? searchRequest[role][groupIndex].items.find(it => it.id === itemId) : null;
+}
+
 export function saveCriteria(selections?: Array<Selection>) {
   const {domain, groupId, item, role, type} = currentCohortSearchContextStore.getValue();
   if (domain === Domain.PERSON) {
@@ -119,12 +129,15 @@ export function saveCriteria(selections?: Array<Selection>) {
 interface Props {
   cohortContext: any;
   selections?: Array<Selection>;
+  setUnsavedChanges: (unsavedChanges: boolean) => void;
 }
 
 interface State {
   growlVisible: boolean;
   selectedIds: Array<string>;
   selections: Array<Selection>;
+  showUnsavedModal: boolean;
+  unsavedChanges: boolean;
 }
 
 export const CohortSearch = withCurrentCohortSearchContext()(class extends React.Component<Props, State> {
@@ -137,6 +150,8 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
       growlVisible: false,
       selectedIds: [],
       selections: [],
+      showUnsavedModal: false,
+      unsavedChanges: false,
     };
   }
 
@@ -155,7 +170,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
         this.setState({
           selectedIds: newSelections.map(s => s.parameterId),
           selections: newSelections
-        });
+        }, () => this.setUnsavedChanges());
       }
     });
   }
@@ -163,16 +178,53 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
   componentWillUnmount() {
     this.subscription.unsubscribe();
     currentCohortCriteriaStore.next(undefined);
+    localStorage.removeItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT);
   }
 
   closeSearch() {
     currentCohortSearchContextStore.next(undefined);
-    currentCohortCriteriaStore.next(undefined);
     // Delay hiding attributes page until sidebar is closed
     setTimeout(() => attributesSelectionStore.next(undefined), 500);
   }
 
+  setUnsavedChanges() {
+    const {cohortContext: {groupId, item, role}} = this.props;
+    const {selections} = this.state;
+    let unsavedChanges = selections.length > 0;
+    if (groupId) {
+      const requestItem = getItemFromSearchRequest(groupId, item.id, role);
+      if (requestItem) {
+        // Use clone to compare to prevent passing changes back to actual selections
+        const selectionsClone = JSON.parse(JSON.stringify(selections));
+        const sortAndStringify = (params) => JSON.stringify(params.sort((a, b) => a.id - b.id));
+        if (this.criteriaIdsLookedUp(requestItem.searchParameters)) {
+          // If a lookup has been done, we delete the ids before comparing search parameters and selections
+          selectionsClone.forEach(selection => delete selection.id);
+        }
+        unsavedChanges = sortAndStringify(requestItem.searchParameters) !== sortAndStringify(selectionsClone);
+      }
+    }
+    this.setState({unsavedChanges});
+    this.props.setUnsavedChanges(unsavedChanges);
+  }
+
+  checkUnsavedChanges() {
+    const {unsavedChanges} = this.state;
+    if (unsavedChanges) {
+      this.setState({showUnsavedModal: true});
+    } else {
+      this.closeSearch();
+    }
+  }
+
+  // Checks if a lookup has been done to add the criteria ids to the selections
+  criteriaIdsLookedUp(searchParameters: Array<Selection>) {
+    const {selections} = this.state;
+    return selections.length && searchParameters.length && selections.some(sel => !!sel.id) && searchParameters.some(sel => !sel.id);
+  }
+
   addSelection = (param: any) => {
+    const {cohortContext} = this.props;
     let {selectedIds, selections} = this.state;
     if (selectedIds.includes(param.parameterId)) {
       selections = selections.filter(p => p.parameterId !== param.parameterId);
@@ -181,6 +233,15 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     }
     selections = [...selections, param];
     currentCohortCriteriaStore.next(selections);
+    const {wsid} = urlParamsStore.getValue();
+    const cohort = currentCohortStore.getValue();
+    cohortContext.item.searchParameters = selections;
+    const localStorageContext = {
+      workspaceId: wsid,
+      cohortId: !!cohort ? cohort.id : null,
+      cohortContext
+    };
+    localStorage.setItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT, JSON.stringify(localStorageContext));
     this.setState({selections, selectedIds});
     this.growl.show({severity: 'success', detail: 'Criteria Added', closable: false, life: 2000});
     if (!!this.growlTimer) {
@@ -225,13 +286,13 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
 
   render() {
     const {cohortContext, cohortContext: {domain, type}} = this.props;
-    const {growlVisible, selectedIds, selections} = this.state;
+    const {growlVisible, selectedIds, selections, showUnsavedModal} = this.state;
     return !!cohortContext && <FlexRowWrap style={styles.searchContainer}>
       <style>{growlCSS}</style>
       <Growl ref={(el) => this.growl = el} style={!growlVisible ? {...styles.growl, display: 'none'} : styles.growl}/>
       <div id='cohort-search-container' style={styles.searchContent}>
         {domain === Domain.PERSON && <div style={styles.titleBar}>
-          <Clickable style={styles.backArrow} onClick={() => this.closeSearch()}>
+          <Clickable style={styles.backArrow} onClick={() => this.checkUnsavedChanges()}>
             <img src={arrowIcon} style={styles.arrowIcon} alt='Go back' />
           </Clickable>
           <h2 style={styles.titleHeader}>{typeToTitle(type)}</h2>
@@ -248,7 +309,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
                 selectedIds={selectedIds}
                 selections={selections}/>
             </div>
-            : <CriteriaSearch backFn={() => this.closeSearch()}
+            : <CriteriaSearch backFn={() => this.checkUnsavedChanges()}
                               cohortContext={cohortContext}/>}
         </div>
       </div>
@@ -258,6 +319,17 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
               onClick={() => setSidebarActiveIconStore.next('criteria')}>
         Finish & Review
       </Button>
+      {showUnsavedModal && <Modal>
+        <ModalTitle>Warning! </ModalTitle>
+        <ModalBody>
+          Your cohort has not been saved. If you’d like to save your cohort criteria, please click CANCEL
+          and save your changes in the right sidebar.
+        </ModalBody>
+        <ModalFooter>
+          <Button type='link' onClick={() => this.setState({showUnsavedModal: false})}>Cancel</Button>
+          <Button type='primary' onClick={() => this.closeSearch()}>Discard Changes</Button>
+        </ModalFooter>
+      </Modal>}
     </FlexRowWrap>;
   }
 });

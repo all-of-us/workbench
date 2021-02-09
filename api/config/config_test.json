@@ -27,6 +27,7 @@
     "retryCount": 2,
     "bufferCapacity": 300,
     "bufferRefillProjectsPerTask": 1,
+    "bufferStatusChecksPerTask": 10,
     "defaultFreeCreditsDollarLimit": 300.0,
     "freeTierCostAlertThresholds": [
       0.5,
@@ -99,8 +100,7 @@
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": true,
-    "enableReportingUploadCron": true,
-    "enableCustomRuntimes": true
+    "enableReportingUploadCron": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-test",

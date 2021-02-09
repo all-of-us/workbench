@@ -394,7 +394,7 @@ export const SearchGroup = withCurrentWorkspace()(
       const itemId = generateId('items');
       const item = initItem(itemId, domain, temporalGroup);
       const groupId = group.id;
-      const context = {item, domain, type, standard, role, groupId, itemId, temporalGroup};
+      const context = {item, domain, type, standard, role, groupId, temporalGroup};
       setSearchContext(context);
     }
 

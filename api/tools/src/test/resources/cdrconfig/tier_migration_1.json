@@ -1,0 +1,80 @@
+{
+  "accessTiers": [
+    {
+      "accessTierId": 1,
+      "shortName": "registered",
+      "displayName": "Registered Tier",
+      "servicePerimeter": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test",
+      "authDomainName": "all-of-us-registered-test",
+      "authDomainGroupEmail": "GROUP_all-of-us-registered-test@dev.test.firecloud.org"
+    }
+  ],
+  "cdrVersions": [
+    {
+      "cdrVersionId": 1,
+      "isDefault": true,
+      "name": "Migration Test Dataset 1",
+      "dataAccessLevel": 1,
+      "bigqueryProject": "fc-aou-cdr-synth-test",
+      "bigqueryDataset": "SR2019q4r3",
+      "creationTime": "2019-09-30 00:00:00Z",
+      "releaseNumber": 3,
+      "numParticipants": 234525,
+      "cdrDbName": "cdr",
+      "elasticIndexBaseName": "cdr",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true,
+      "accessTier": "registered"
+    },
+    {
+      "cdrVersionId": 2,
+      "isDefault": false,
+      "name": "Migration Test Dataset 2",
+      "dataAccessLevel": 1,
+      "bigqueryProject": "fc-aou-cdr-synth-test",
+      "bigqueryDataset": "SR2019q4r3",
+      "microarrayBigqueryDataset": "microarray_data",
+      "creationTime": "2020-08-26 00:09:51Z",
+      "releaseNumber": 3,
+      "numParticipants": 234525,
+      "cdrDbName": "cdr",
+      "elasticIndexBaseName": "cdr",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true,
+      "accessTier": "registered"
+    },
+    {
+      "cdrVersionId": 3,
+      "isDefault": false,
+      "name": "Migration Test Dataset 3",
+      "dataAccessLevel": 1,
+      "bigqueryProject": "fc-aou-cdr-synth-test",
+      "bigqueryDataset": "SR2019q4r3",
+      "creationTime": "2019-09-30 00:00:00Z",
+      "releaseNumber": 3,
+      "numParticipants": 234525,
+      "cdrDbName": "cdr",
+      "elasticIndexBaseName": "cdr",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true,
+      "accessTier": "registered"
+    },
+    {
+      "cdrVersionId": 4,
+      "isDefault": false,
+      "name": "Migration Test Dataset 4",
+      "dataAccessLevel": 1,
+      "bigqueryProject": "fc-aou-cdr-synth-test",
+      "bigqueryDataset": "SR2019q4r3",
+      "microarrayBigqueryDataset": "microarray_data",
+      "creationTime": "2020-08-26 00:09:51Z",
+      "releaseNumber": 3,
+      "numParticipants": 234525,
+      "cdrDbName": "cdr",
+      "elasticIndexBaseName": "cdr",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true,
+      "accessTier": "registered"
+    }
+  ]
+}

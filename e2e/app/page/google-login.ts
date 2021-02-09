@@ -109,7 +109,7 @@ export default class GoogleLoginPage {
       submitButton.click(),
     ]);
     await submitButton.dispose();
-    await this.page.waitForSelector('app-signed-in', {timeout: (1 * 60 * 1000)})
+    await this.page.waitForSelector('app-signed-in', {timeout: (2 * 60 * 1000)})
       .catch(async (err) => {
         // Two main reasons why error is throw are caused by "Enter Recovery Email" page or login captcha.
         // At this time, we can only handle "Enter Recover Email" page if it exists.
@@ -125,13 +125,13 @@ export default class GoogleLoginPage {
    */
   async load(): Promise<void> {
     const url = config.uiBaseUrl + config.loginUrlPath;
-    const response = await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded', 'load'], timeout: 0});
+    const response = await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded', 'load'], timeout: 2 * 60 * 1000});
     if (response && response.ok()) {
       return;
     }
     // Retry load Login page.
     console.warn(`Retry loading Login page`);
-    await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded', 'load'], timeout: 60000});
+    await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded', 'load'], timeout: 30 * 1000});
   }
 
   /**

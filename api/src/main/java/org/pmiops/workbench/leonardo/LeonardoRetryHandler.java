@@ -36,12 +36,21 @@ public class LeonardoRetryHandler extends RetryHandler<ApiException> {
     @Override
     protected void logNoRetry(Throwable t, int responseCode) {
       if (t instanceof ApiException) {
-        logger.log(
-            getLogLevel(responseCode),
-            String.format(
-                "Exception calling Leonardo API with response: %s",
-                ((ApiException) t).getResponseBody()),
-            t);
+        if (responseCode == 404) {
+          logger.log(
+              getLogLevel(responseCode),
+              String.format(
+                  "Exception calling Leonardo API with response: %s. This is likely because a runtime "
+                      + "has not yet been created and is being polled for. Suppressing stack trace.",
+                  responseCode));
+        } else {
+          logger.log(
+              getLogLevel(responseCode),
+              String.format(
+                  "Exception calling Leonardo API with response: %s",
+                  ((ApiException) t).getResponseBody()),
+              t);
+        }
       } else {
         super.logNoRetry(t, responseCode);
       }

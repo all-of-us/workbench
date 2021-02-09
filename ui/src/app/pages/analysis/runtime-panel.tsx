@@ -1,10 +1,10 @@
 import {Button, Clickable, Link} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
+import {ErrorMessage, WarningMessage} from 'app/components/messages';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
-import {WarningMessage} from 'app/components/warning-message';
 
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
@@ -41,8 +41,10 @@ import {
 } from 'app/utils/runtime-utils';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
+import {AoU} from 'app/components/text-wrappers';
 import {
   BillingAccountType,
+  BillingStatus,
   CdrVersionListResponse,
   DataprocConfig,
   Runtime,
@@ -161,9 +163,11 @@ enum PanelContent {
   Create = 'Create',
   Customize = 'Customize',
   Delete = 'Delete',
+  Disabled = 'Disabled',
   Confirm = 'Confirm'
 }
 
+// this is only used in the test.
 export interface Props {
   workspace: WorkspaceData;
   cdrVersionListResponse?: CdrVersionListResponse;
@@ -262,6 +266,24 @@ const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPr
         value={memory}
         />
   </Fragment>;
+};
+
+const DisabledPanel = () => {
+  return <WarningMessage
+        data-test-id='runtime-disabled-panel'
+        iconSize={16}
+        iconPosition={'top'}
+    >
+      {
+        <TextColumn>
+          <div style={{fontWeight: 600}}>Cloud services are disabled for this workspace.</div>
+          <div style={{marginTop: '0.5rem'}}>
+            You cannot run or edit notebooks in this workspace because billed services are disabled
+            for the workspace creator's <AoU/> Researcher account.
+          </div>
+        </TextColumn>
+      }
+    </WarningMessage>;
 };
 
 const DiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskSize, idPrefix}) => {
@@ -630,7 +652,7 @@ const CreatePanel = ({creatorFreeCreditsRemaining, profile, setPanelContent, wor
   const displayName = runtimeConfig.computeType === ComputeType.Dataproc ?
     runtimePresets.hailAnalysis.displayName : runtimePresets.generalAnalysis.displayName;
 
-  return <div style={styles.controlSection}>
+  return <div data-test-id='runtime-create-panel' style={styles.controlSection}>
     <FlexRow style={styles.costPredictorWrapper}>
       <StartStopRuntimeButton workspaceNamespace={workspace.namespace}/>
       <CostInfo runtimeChanged={false}
@@ -708,7 +730,7 @@ const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, u
       </FlexRow>
     </div>
 
-    <WarningMessage>
+    <WarningMessage iconSize={30} iconPosition={'center'}>
       <TextColumn>
         {needsDelete ? <React.Fragment>
           <div>
@@ -773,17 +795,18 @@ export const RuntimePanel = fp.flow(
   // We may encounter a race condition where an existing current runtime has not loaded by the time this panel renders.
   // It's unclear how often that would actually happen.
   const initialPanelContent = fp.cond([
+    [([b, , ]) => b === BillingStatus.INACTIVE, () => PanelContent.Disabled],
     // currentRuntime being undefined means the first `getRuntime` has still not completed.
     // If there's a pendingRuntime, this means there's already a create/update
     // in progress, even if the runtime store doesn't actively reflect this yet.
     // Show the customize panel in this event.
-    [([r, ]) => r === undefined || !!pendingRuntime, () => PanelContent.Customize],
-    [([r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
-    [([r, ]) => r.status === RuntimeStatus.Deleted &&
+    [([, r, ]) => r === undefined || !!pendingRuntime, () => PanelContent.Customize],
+    [([, r, s]) => r === null || s === RuntimeStatus.Unknown, () => PanelContent.Create],
+    [([, r, ]) => r.status === RuntimeStatus.Deleted &&
       ([RuntimeConfigurationType.GeneralAnalysis, RuntimeConfigurationType.HailGenomicAnalysis].includes(r.configurationType)),
       () => PanelContent.Create],
     [() => true, () => PanelContent.Customize]
-  ])([currentRuntime, status]);
+  ])([workspace.billingStatus, currentRuntime, status]);
   const [panelContent, setPanelContent] = useState<PanelContent>(initialPanelContent);
 
   const [selectedMachine, setSelectedMachine] = useState(initialMasterMachine);
@@ -870,46 +893,101 @@ export const RuntimePanel = fp.flow(
     return runtimeRequest;
   };
 
-  const diskSizeValidatorWithMessage = (message) => {
+  // 50 GB is the minimum GCP limit for disk size, 4000 GB is our arbitrary limit for not making a
+  // disk that is way too big and expensive on free tier ($.22 an hour). 64 TB is the GCE limit on
+  // persistent disk.
+  const diskSizeValidatorWithMessage = (diskType = 'standard' || 'master' || 'worker') => {
+    const maxDiskSize = workspace.billingAccountType === BillingAccountType.FREETIER
+        ? 4000
+        : 64000;
+    const message = {
+      standard: `^Disk size must be between 50 and ${maxDiskSize} GB`,
+      master: `^Master disk size must be between 50 and ${maxDiskSize} GB`,
+      worker: `^Worker disk size must be between 50 and ${maxDiskSize} GB`
+    };
+
     return {
       numericality: {
         greaterThanOrEqualTo: 50,
-        lessThanOrEqualTo: 4000,
+        lessThanOrEqualTo: maxDiskSize,
+        message: message[diskType]
+      }
+    };
+  };
+
+  const runningCostValidatorWithMessage = () => {
+    const maxRunningCost = workspace.billingAccountType === BillingAccountType.FREETIER
+      ? 25
+      : 150;
+    const message = workspace.billingAccountType === BillingAccountType.FREETIER
+      ? '^Your runtime is too expensive. To proceed using free credits, reduce your running costs below $25/hr.'
+      : '^Your runtime is very expensive. Are you sure you wish to proceed?';
+    return {
+      numericality: {
+        lessThan: maxRunningCost,
         message: message
       }
     };
   };
 
-  // 50 GB is the minimum GCP limit for disk size, 4000 GB is our arbitrary limit for not making a
-  // disk that is way too big and expensive ($.22 an hour)
-  const validators = {
-    selectedDiskSize: diskSizeValidatorWithMessage('^Disk size must be between 50 and 4000 GB')
+  const currentRunningCost = machineRunningCost({
+    computeType: selectedCompute,
+    masterMachine: selectedMachine,
+    masterDiskSize: diskSize,
+    numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,
+    numberOfPreemptibleWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfPreemptibleWorkers,
+    workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize,
+    workerMachine: selectedDataprocConfig && findMachineByName(selectedDataprocConfig.workerMachineType)
+  });
+
+  const standardDiskValidator = {
+    selectedDiskSize: diskSizeValidatorWithMessage('standard')
+  };
+  const runningCostValidator = {
+    currentRunningCost: runningCostValidatorWithMessage()
   };
   // We don't clear dataproc config when we change compute type so we can't combine this with the
   // above or else we can end up with phantom validation fails
   const dataprocValidators = {
-    masterDiskSize: diskSizeValidatorWithMessage('^Master disk size must be between 50 and 4000 GB'),
-    workerDiskSize: diskSizeValidatorWithMessage('^Worker disk size must be between 50 and 4000 GB')
+    masterDiskSize: diskSizeValidatorWithMessage('master'),
+    workerDiskSize: diskSizeValidatorWithMessage('worker')
   };
-  const errors = validate({selectedDiskSize}, validators);
+
   const {masterDiskSize = null, workerDiskSize = null} = selectedDataprocConfig || {};
+  const standardDiskErrors = validate({selectedDiskSize}, standardDiskValidator);
+  const runningCostErrors = validate({currentRunningCost}, runningCostValidator);
   const dataprocErrors = selectedCompute === ComputeType.Dataproc
       ? validate({masterDiskSize, workerDiskSize}, dataprocValidators)
       : undefined;
-  const runtimeCanBeCreated = !errors && !dataprocErrors;
+
+  const getErrorMessageContent = () => {
+    const errorDivs = [];
+    if (standardDiskErrors) {
+      errorDivs.push(summarizeErrors(standardDiskErrors));
+    }
+    if (dataprocErrors) {
+      errorDivs.push(summarizeErrors(dataprocErrors));
+    }
+    if (workspace.billingAccountType === BillingAccountType.FREETIER && runningCostErrors) {
+      errorDivs.push(summarizeErrors(runningCostErrors));
+    }
+    return errorDivs;
+  };
+
+  const getWarningMessageContent = () => {
+    const warningDivs = [];
+    if (workspace.billingAccountType === BillingAccountType.USERPROVIDED && runningCostErrors) {
+      warningDivs.push(summarizeErrors(runningCostErrors));
+    }
+    return warningDivs;
+  };
+
+  const runtimeCanBeCreated = !(getErrorMessageContent().length > 0);
   // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
   // where we get 'status' from
   const runtimeCanBeUpdated = runtimeChanged
       && [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)
-      && !errors
-      && !dataprocErrors;
-
-  const getErrorsTooltipContent = () => {
-    const errorDivs = [];
-    errorDivs.push(summarizeErrors(errors));
-    errorDivs.push(summarizeErrors(dataprocErrors));
-    return errorDivs;
-  };
+      && runtimeCanBeCreated;
 
   const renderUpdateButton = () => {
     return <Button
@@ -955,110 +1033,116 @@ export const RuntimePanel = fp.flow(
 
     {switchCase(panelContent,
       [PanelContent.Create, () =>
-        <Fragment>
-          <CreatePanel
-              creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
-              profile={profile}
-              setPanelContent={(value) => setPanelContent(value)}
-              workspace={workspace}
-              runtimeConfig={newRuntimeConfig}
-          />
-          <FlexRow style={{justifyContent: 'flex-end', marginTop: '1rem'}}>
-            {renderCreateButton()}
-          </FlexRow>
-        </Fragment>
+            <Fragment>
+              <CreatePanel
+                  creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
+                  profile={profile}
+                  setPanelContent={(value) => setPanelContent(value)}
+                  workspace={workspace}
+                  runtimeConfig={newRuntimeConfig}
+              />
+              <FlexRow style={{justifyContent: 'flex-end', marginTop: '1rem'}}>
+                {renderCreateButton()}
+              </FlexRow>
+            </Fragment>
       ],
       [PanelContent.Delete, () => <ConfirmDelete
-        onConfirm={async() => {
-          await setRuntimeStatus(RuntimeStatusRequest.Delete);
-          onClose();
-        }}
-        onCancel={() => setPanelContent(PanelContent.Customize)}
-      />],
+            onConfirm={async() => {
+              await setRuntimeStatus(RuntimeStatusRequest.Delete);
+              onClose();
+            }}
+            onCancel={() => setPanelContent(PanelContent.Customize)}
+          />],
       [PanelContent.Customize, () => <Fragment>
-        <div style={styles.controlSection}>
-          <FlexRow style={styles.costPredictorWrapper}>
-            <StartStopRuntimeButton workspaceNamespace={workspace.namespace}/>
-            <CostInfo runtimeChanged={runtimeChanged}
-              runtimeConfig={newRuntimeConfig}
-              currentUser={profile.username}
-              workspace={workspace}
-              creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
-              />
-          </FlexRow>
-          <PresetSelector
-            hasMicroarrayData={hasMicroarrayData}
-            disabled={disableControls}
-            setSelectedDiskSize={(disk) => setSelectedDiskSize(disk)}
-            setSelectedMachine={(machine) => setSelectedMachine(machine)}
-            setSelectedCompute={(compute) => setSelectedCompute(compute)}
-            setSelectedDataprocConfig={(dataproc) => setSelectedDataprocConfig(dataproc)}
-          />
-          {/* Runtime customization: change detailed machine configuration options. */}
-          <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
-          <div style={styles.formGrid}>
-            <MachineSelector
-              idPrefix='runtime'
-              disabled={disableControls}
-              selectedMachine={selectedMachine}
-              onChange={(value) => setSelectedMachine(value)}
-              validMachineTypes={validMainMachineTypes}
-              machineType={machineName}/>
-            <DiskSizeSelector
-                idPrefix='runtime'
-                selectedDiskSize={selectedDiskSize}
-                onChange={(value) => {
-                  setSelectedDiskSize(value);
-                }}
+            <div style={styles.controlSection}>
+              <FlexRow style={styles.costPredictorWrapper}>
+                <StartStopRuntimeButton workspaceNamespace={workspace.namespace}/>
+                <CostInfo runtimeChanged={runtimeChanged}
+                  runtimeConfig={newRuntimeConfig}
+                  currentUser={profile.username}
+                  workspace={workspace}
+                  creatorFreeCreditsRemaining={creatorFreeCreditsRemaining}
+                  />
+              </FlexRow>
+              <PresetSelector
+                hasMicroarrayData={hasMicroarrayData}
                 disabled={disableControls}
-                diskSize={diskSize}/>
-         </div>
-         <FlexColumn style={{marginTop: '1rem'}}>
-           <label htmlFor='runtime-compute'>Compute type</label>
-           <Dropdown id='runtime-compute'
-                     disabled={!hasMicroarrayData || disableControls}
-                     style={{width: '10rem'}}
-                     options={[ComputeType.Standard, ComputeType.Dataproc]}
-                     value={selectedCompute || ComputeType.Standard}
-                     onChange={({value}) => {setSelectedCompute(value); }}
-                     />
-           {
-             selectedCompute === ComputeType.Dataproc &&
-             <DataProcConfigSelector
-               disabled={disableControls}
-               onChange={config => setSelectedDataprocConfig(config)}
-               dataprocConfig={selectedDataprocConfig} />
+                setSelectedDiskSize={(disk) => setSelectedDiskSize(disk)}
+                setSelectedMachine={(machine) => setSelectedMachine(machine)}
+                setSelectedCompute={(compute) => setSelectedCompute(compute)}
+                setSelectedDataprocConfig={(dataproc) => setSelectedDataprocConfig(dataproc)}
+              />
+              {/* Runtime customization: change detailed machine configuration options. */}
+              <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
+              <div style={styles.formGrid}>
+                <MachineSelector
+                  idPrefix='runtime'
+                  disabled={disableControls}
+                  selectedMachine={selectedMachine}
+                  onChange={(value) => setSelectedMachine(value)}
+                  validMachineTypes={validMainMachineTypes}
+                  machineType={machineName}/>
+                <DiskSizeSelector
+                    idPrefix='runtime'
+                    selectedDiskSize={selectedDiskSize}
+                    onChange={(value) => {
+                      setSelectedDiskSize(value);
+                    }}
+                    disabled={disableControls}
+                    diskSize={diskSize}/>
+             </div>
+             <FlexColumn style={{marginTop: '1rem'}}>
+               <label htmlFor='runtime-compute'>Compute type</label>
+               <Dropdown id='runtime-compute'
+                         disabled={!hasMicroarrayData || disableControls}
+                         style={{width: '10rem'}}
+                         options={[ComputeType.Standard, ComputeType.Dataproc]}
+                         value={selectedCompute || ComputeType.Standard}
+                         onChange={({value}) => {setSelectedCompute(value); }}
+                         />
+               {
+                 selectedCompute === ComputeType.Dataproc &&
+                 <DataProcConfigSelector
+                   disabled={disableControls}
+                   onChange={config => setSelectedDataprocConfig(config)}
+                   dataprocConfig={selectedDataprocConfig} />
+               }
+             </FlexColumn>
+           </div>
+           {runtimeExists && runtimeChanged &&
+             <WarningMessage iconSize={30} iconPosition={'center'}>
+                <div>You've made changes that require recreating your environment to take effect.</div>
+             </WarningMessage>
            }
-         </FlexColumn>
-       </div>
-       {runtimeExists && runtimeChanged &&
-         <WarningMessage>
-            <div>You've made changes that require recreating your environment to take effect.</div>
-         </WarningMessage>
-       }
-       {(errors || dataprocErrors) &&
-         <WarningMessage>
-           {getErrorsTooltipContent()}
-         </WarningMessage>
-       }
-       <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
-         <Link
-           style={{...styles.deleteLink, ...(
-             (disableControls || !runtimeExists) ?
-             {color: colorWithWhiteness(colors.dark, .4)} : {}
-           )}}
-           aria-label='Delete Environment'
-           disabled={disableControls || !runtimeExists}
-           onClick={() => setPanelContent(PanelContent.Delete)}>Delete Environment</Link>
-           {!runtimeExists ? renderCreateButton() : renderNextButton()}
-       </FlexRow>
-     </Fragment>],
+           {getErrorMessageContent().length > 0 &&
+             <ErrorMessage iconSize={16} iconPosition={'top'} data-test-id={'runtime-error-messages'}>
+               {getErrorMessageContent()}
+             </ErrorMessage>
+           }
+           {getWarningMessageContent().length > 0 &&
+            <WarningMessage iconSize={16} iconPosition={'top'} data-test-id={'runtime-warning-messages'}>
+              {getWarningMessageContent()}
+            </WarningMessage>
+           }
+           <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
+             <Link
+               style={{...styles.deleteLink, ...(
+                 (disableControls || !runtimeExists) ?
+                 {color: colorWithWhiteness(colors.dark, .4)} : {}
+               )}}
+               aria-label='Delete Environment'
+               disabled={disableControls || !runtimeExists}
+               onClick={() => setPanelContent(PanelContent.Delete)}>Delete Environment</Link>
+               {!runtimeExists ? renderCreateButton() : renderNextButton()}
+           </FlexRow>
+         </Fragment>],
       [PanelContent.Confirm, () => <ConfirmUpdatePanel initialRuntimeConfig={initialRuntimeConfig}
-                                                       newRuntimeConfig={newRuntimeConfig}
-                                                       onCancel={() => {
-                                                         setPanelContent(PanelContent.Customize);
-                                                       }}
-                                                       updateButton={renderUpdateButton()}
-      />])}
+                                                           newRuntimeConfig={newRuntimeConfig}
+                                                           onCancel={() => {
+                                                             setPanelContent(PanelContent.Customize);
+                                                           }}
+                                                           updateButton={renderUpdateButton()}
+          />],
+      [PanelContent.Disabled, () => <DisabledPanel/>])}
   </div>;
 });

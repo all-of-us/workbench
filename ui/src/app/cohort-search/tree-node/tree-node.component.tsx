@@ -236,8 +236,8 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
 
   paramId(crit?: Criteria) {
     const node = crit || this.props.node;
-    const {code, conceptId, domainId, id} = node;
-    return `param${!!conceptId && domainId !== Domain.SURVEY.toString() ? (conceptId + code) : id}`;
+    const {code, conceptId, domainId, id, isStandard} = node;
+    return `param${!!conceptId && domainId !== Domain.SURVEY.toString() ? (conceptId + code + isStandard) : id}`;
   }
 
   get isPMCat() {
@@ -308,7 +308,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
     return domainId !== Domain.SURVEY.toString() && !!code && code !== name;
   }
 
-  getSelectedValues() {
+  get nodeIsSelected() {
     const {node: {domainId, path}, source} = this.props;
     return source === 'cohort'
       ? currentCohortCriteriaStore.getValue().some(crit =>
@@ -330,7 +330,6 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
       source, scrollToMatch, searchTerms, select, selectedIds, setAttributes} = this.props;
     const {children, error, expanded, hover, loading, searchMatch} = this.state;
     const nodeChildren = domainId === Domain.PHYSICALMEASUREMENT.toString() ? node.children : children;
-    const selected = this.getSelectedValues();
     const displayName = domainId === Domain.PHYSICALMEASUREMENT.toString() && !!searchTerms
       ? highlightSearchTerm(searchTerms, name, colors.success)
       : name;
@@ -353,7 +352,7 @@ export class TreeNode extends React.Component<TreeNodeProps, TreeNodeState> {
               ? <ClrIcon style={{color: colors.accent}}
                   shape='slider' dir='right' size='20'
                   onClick={(e) => this.setAttributes(e, node)}/>
-              : selected
+              : this.nodeIsSelected
                 ? <ClrIcon style={{...styles.selectIcon, ...styles.disableIcon}}
                     shape='check-circle' size='20'/>
                 : <ClrIcon style={selectIconStyle}

@@ -2,12 +2,12 @@ import {Page} from 'puppeteer';
 import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
 import Textbox from 'app/element/textbox';
 import DataTable from 'app/component/data-table';
-import HelpSidebar from 'app/component/help-sidebar';
 import Button from 'app/element/button';
 import {LinkText} from 'app/text-labels';
 import {getPropValue, waitUntilChanged} from 'utils/element-utils';
+import ReviewConceptSetSidebar from 'app/component/review-conceptset-sidebar';
 import AuthenticatedPage from './authenticated-page';
-import ConceptSetSaveModal, {SaveOption} from './conceptset-save-modal';
+import ConceptSetSaveModal, {SaveOption} from 'app/modal/conceptset-save-modal';
 
 const PageTitle = 'Search Concepts';
 
@@ -29,6 +29,7 @@ export default class ConceptSetSearchPage extends AuthenticatedPage{
 
   async saveConceptSet(saveOption?: SaveOption, existingConceptSetName?: string): Promise<string> {
     const modal = new ConceptSetSaveModal(this.page);
+    await modal.waitForLoad();
     return modal.fillOutSaveModal(saveOption, existingConceptSetName);
   }
 
@@ -108,14 +109,15 @@ export default class ConceptSetSearchPage extends AuthenticatedPage{
     return new Textbox(this.page, '//input[@data-test-id="concept-search-input"]');
   }
 
-  async viewAndSaveConceptSet(): Promise<void> {
+  async reviewAndSaveConceptSet(): Promise<void> {
     const finishAndReviewButton = await Button.findByName(this.page, {name: LinkText.FinishAndReview});
     await finishAndReviewButton.waitUntilEnabled();
     await finishAndReviewButton.click();
 
     // Click Save Concept Set button in sidebar
-    const helpSidebar = new HelpSidebar(this.page);
-    await helpSidebar.clickSaveConceptSetButton();
+    const reviewConceptSetSidebar = new ReviewConceptSetSidebar(this.page);
+    await reviewConceptSetSidebar.waitUntilVisible();
+    await reviewConceptSetSidebar.clickSaveConceptSetButton();
   }
 
 }

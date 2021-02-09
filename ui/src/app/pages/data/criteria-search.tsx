@@ -15,13 +15,14 @@ import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {
   attributesSelectionStore,
-  currentCohortCriteriaStore,
+  currentCohortCriteriaStore, currentCohortStore,
   currentConceptStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {Criteria, Domain} from 'generated/fetch';
 
+export const LOCAL_STORAGE_KEY_COHORT_CONTEXT = 'CURRENT_COHORT_CONTEXT';
 export const LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS = 'CURRENT_CRITERIA_SELECTIONS';
 
 const styles = reactStyles({
@@ -177,7 +178,6 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
     }
     const currentCriteriaStore = source === 'cohort' ? currentCohortCriteriaStore : currentConceptStore;
     this.subscription = currentCriteriaStore.subscribe(selectedCriteriaList => this.setState({selectedCriteriaList}));
-    // CB to be implemented with RW-5916
     if (source !== 'cohort') {
       const existingCriteria = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS));
       if (!!existingCriteria && existingCriteria[0].domainId === domain) {
@@ -239,7 +239,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
   }
 
   addSelection = (selectCriteria)  => {
-    const {source} = this.props.cohortContext;
+    const {cohortContext, cohortContext: {source}, urlParams} = this.props;
     // In case of Criteria/Cohort, close existing attribute sidebar before selecting a new value
     if (!this.isConcept && !!attributesSelectionStore.getValue()) {
       this.closeSidebar();
@@ -248,10 +248,20 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
     if (criteriaList && criteriaList.length > 0) {
       criteriaList.push(selectCriteria);
     } else {
-      criteriaList =  [selectCriteria];
+      criteriaList = [selectCriteria];
     }
-    // CB to be implemented with RW-5916
-    if (source !== 'cohort') {
+    // Save selections in local storage in case of error or page refresh
+    if (source === 'cohort') {
+      const {wsid} = urlParams;
+      const cohort = currentCohortStore.getValue();
+      cohortContext.item.searchParameters = criteriaList;
+      const localStorageContext = {
+        workspaceId: wsid,
+        cohortId: !!cohort ? cohort.id : null,
+        cohortContext
+      };
+      localStorage.setItem(LOCAL_STORAGE_KEY_COHORT_CONTEXT, JSON.stringify(localStorageContext));
+    } else {
       localStorage.setItem(LOCAL_STORAGE_KEY_CRITERIA_SELECTIONS, JSON.stringify(criteriaList));
     }
     this.setState({selectedCriteriaList: criteriaList});
@@ -267,9 +277,11 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
   }
 
   getListSearchSelectedIds() {
+    const {cohortContext: {source}} = this.props;
     const {selectedCriteriaList} = this.state;
-    const value = fp.map(selected => ('param' + selected.conceptId + selected.code + selected.isStandard), selectedCriteriaList);
-    return value;
+    return source === 'cohort' ?
+      fp.map(selected => selected.parameterId , selectedCriteriaList) :
+      fp.map(selected => ('param' + selected.conceptId + selected.code + selected.isStandard), selectedCriteriaList);
   }
 
   setScroll = (id: string) => {

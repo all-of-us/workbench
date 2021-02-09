@@ -260,10 +260,10 @@ export const SearchGroupItem = withCurrentWorkspace()(
       // items of type 'DECEASED` cannot be edited
       if (item.searchParameters[0].type !== CriteriaType.DECEASED.toString()) {
         const _item = JSON.parse(JSON.stringify(item));
-        const {id, searchParameters} = _item;
+        const {searchParameters} = _item;
         const domain = _item.type;
         const {type, standard} = getTypeAndStandard(searchParameters, domain);
-        const context = {item: _item, domain, type, role, groupId, itemId: id, standard, count: item.count};
+        const context = {item: _item, domain, type, role, groupId, standard, count: item.count};
         setSearchContext(context);
       }
     }

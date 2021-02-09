@@ -1,4 +1,4 @@
-import ShareModal from 'app/component/share-modal';
+import ShareModal from 'app/modal/share-modal';
 import WorkspaceCard from 'app/component/workspace-card';
 import Link from 'app/element/link';
 import HomePage from 'app/page/home-page';

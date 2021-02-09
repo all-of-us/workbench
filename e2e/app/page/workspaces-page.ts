@@ -11,7 +11,7 @@ import WorkspaceDataPage from './workspace-data-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
 import {config} from 'resources/workbench-config';
 import {UseFreeCredits} from './workspace-base';
-import OldCdrVersionModal from './old-cdr-version-modal';
+import OldCdrVersionModal from 'app/modal/old-cdr-version-modal';
 import AuthenticatedPage from './authenticated-page';
 
 const faker = require('faker/locale/en_US');
@@ -93,6 +93,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
     // if the CDR Version is not the default, consent to the necessary restrictions
     if (cdrVersionName !== config.defaultCdrVersionName) {
       const modal = new OldCdrVersionModal(this.page);
+      await modal.waitForLoad();
       await modal.consentToOldCdrRestrictions();
     }
 

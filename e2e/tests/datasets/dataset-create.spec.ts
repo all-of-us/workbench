@@ -2,7 +2,7 @@ import DataResourceCard from 'app/component/data-resource-card';
 import ClrIconLink from 'app/element/clr-icon-link';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {MenuOption, ResourceCard} from 'app/text-labels';
+import {LinkText, MenuOption, ResourceCard} from 'app/text-labels';
 import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import {waitForText, waitWhileLoading} from 'utils/waits-utils';
 import DatasetEditPage from 'app/page/dataset-edit-page';
@@ -22,7 +22,7 @@ describe('Dataset test', () => {
    * - Edit dataset. Save dataset without Export to Notebook.
    * - Delete Dataset.
    */
-  test('Can create Dataset with user-defined Cohorts', async () => {
+  test('Create Dataset from user-defined Cohorts', async () => {
     const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
@@ -45,7 +45,7 @@ describe('Dataset test', () => {
     await addIcon.click();
 
     // Open selection list and click Save Criteria button
-    await group1.viewAndSaveCriteria();
+    await searchPage.reviewAndSaveCriteria();
     await cohortBuildPage.getTotalCount();
 
     // Save new cohort.
@@ -59,7 +59,7 @@ describe('Dataset test', () => {
     const datasetPage = await dataPage.clickAddDatasetButton();
 
     await datasetPage.selectCohorts([cohortName]);
-    await datasetPage.selectConceptSets(['Demographics']);
+    await datasetPage.selectConceptSets([LinkText.Demographics]);
     const saveModal = await datasetPage.clickSaveAndAnalyzeButton();
     let datasetName = await saveModal.saveDataset({exportToNotebook: false});
 
@@ -79,7 +79,7 @@ describe('Dataset test', () => {
     await datasetEditPage.waitForLoad();
     await datasetEditPage.selectCohorts(['All Participants']);
     await datasetEditPage.clickAnalyzeButton();
-    
+
     // Save Dataset in a new name.
     await saveModal.waitForLoad();
     datasetName = await saveModal.saveDataset({exportToNotebook: false}, true);

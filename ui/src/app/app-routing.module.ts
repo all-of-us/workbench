@@ -8,6 +8,7 @@ import {SignInGuard} from './guards/sign-in-guard.service';
 
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
+import {CohortPageComponent} from './cohort-search/cohort-page/cohort-page.component';
 import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
@@ -212,7 +213,18 @@ const routes: Routes = [
                           },
                           {
                             path: 'build',
-                            loadChildren: './cohort-search/cohort-search.module#CohortSearchModule',
+                            children: [
+                              {
+                                path: '',
+                                component: CohortPageComponent,
+                                canDeactivate: [CanDeactivateGuard],
+                                data: {
+                                  title: 'Build Cohort Criteria',
+                                  breadcrumb: BreadcrumbType.CohortAdd,
+                                  helpContentKey: 'cohortBuilder'
+                                }
+                              },
+                            ]
                           },
                           {
                             path: ':cid/review',

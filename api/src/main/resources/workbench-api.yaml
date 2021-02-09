@@ -635,6 +635,7 @@ paths:
       - in: body
         name: runtime
         description: notebooks runtime definition
+        required: true
         schema:
           "$ref": "#/definitions/Runtime"
       responses:
@@ -1335,27 +1336,6 @@ paths:
           description: success
           schema:
             "$ref": "#/definitions/CloudStorageTraffic"
-  "/v1/admin/clusters/updateConfig":
-    post:
-      summary: Sets default cluster creation request parameters for a user.
-      description: 'Clusters are created with a default machine configuration. Setting
-        this override changes that configuration for subsequent cluster creations.
-        This change only takes effect after a new cluster creation, e.g. due to standard
-        cluster expiration (~2w) or via manual reset. Requires DEVELOPER authority.'
-      operationId: updateClusterConfig
-      tags:
-      - runtime
-      parameters:
-      - in: body
-        name: body
-        description: Cluster config update request.
-        schema:
-          "$ref": "#/definitions/UpdateClusterConfigRequest"
-      responses:
-        200:
-          description: success
-          schema:
-            "$ref": "#/definitions/EmptyResponse"
   "/v1/admin/sumo/egressEvent":
     post:
       tags:
@@ -3654,6 +3634,7 @@ definitions:
     - COLLEGE_GRADUATE
     - MASTER
     - DOCTORATE
+    - PREFER_NO_ANSWER
   Disability:
     type: string
     enum:
@@ -3683,12 +3664,14 @@ definitions:
     required:
     - cdrVersionId
     - name
-    - dataAccessLevel
+    - accessTier
     - creationTime
     properties:
       cdrVersionId:
         type: string
       name:
+        type: string
+      accessTier:
         type: string
       dataAccessLevel:
         "$ref": "#/definitions/DataAccessLevel"
@@ -3918,10 +3901,6 @@ definitions:
         type: boolean
         default: false
         description: Whether user should see a prompt if Workspace Research Purpose needs Review
-      enableCustomRuntimes:
-        type: boolean
-        default: false
-        description: Whether user should be able to customize notebook runtime settings.
       runtimeImages:
         type: array
         items:
@@ -4441,27 +4420,6 @@ definitions:
       approved:
         type: boolean
         default: false
-  ClusterConfig:
-    properties:
-      masterDiskSize:
-        description: Master persistent disk size in GB.
-        type: integer
-        format: int32
-      machineType:
-        description: GCE machine type, e.g. n1-standard-2.
-        type: string
-  UpdateClusterConfigRequest:
-    description: 'Request to update the default cluster configuration for a given
-      user. Fields of the config may be omitted, in which case a default will be used.
-      Set clusterConfig to null to clear it.'
-    type: object
-    required:
-    - userEmail
-    properties:
-      userEmail:
-        type: string
-      clusterConfig:
-        "$ref": "#/definitions/ClusterConfig"
   AccessModule:
     type: string
     enum:
@@ -5408,13 +5366,7 @@ definitions:
       - UserOverride
       - GeneralAnalysis
       - HailGenomicAnalysis
-      # Deprecated.
-      # TODO(calbach): Remove after next release.
-      - DefaultGce
-      - DefaultDataproc
   Runtime:
-    # TODO: Add required properties after enableCustomRuntimes feature fully released
-    # We need to allow null/empty Runtimes while we support enableCustomRuntimes=false
     properties:
       googleProject:
         type: string
@@ -8055,14 +8007,6 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/ReportingInstitution"
-      users:
-        type: array
-        items:
-          "$ref": "#/definitions/ReportingUser"
-      workspaces:
-        type: array
-        items:
-          "$ref": "#/definitions/ReportingWorkspace"
       workspaceFreeTierUsage:
         type: array
         items:

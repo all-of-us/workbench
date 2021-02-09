@@ -71,6 +71,15 @@ public class WorkbenchConfig {
     // of project creation to a number less than 1 per second. In practice, a reasonable aggressive
     // value for this parameter would be 5-10 project refills per minute.
     public Integer bufferRefillProjectsPerTask;
+    // The number of projects whose status should be checked per cron task execution. This controls
+    // the maximum rate of API calls to Terra's getBillingProjectStatus endpoint. This value has
+    // little impact during normal operation, when the number of CREATING projects which need to be
+    // synced is quite small, but can impact system behavior during outages and after recovery.
+    //
+    // A higher number ensures that projects are kept in sync more quickly, at the cost of greater
+    // load on Terra's endpoints. Historically this number was hard-coded to 5, but a larger value
+    // (between 10-20) significantly speeds the Workbench's recovery from an outage.
+    public Integer bufferStatusChecksPerTask;
     // The environment-driven prefix to apply to GCP projects created in the buffer. Example:
     // "aou-rw-perf-" causes the buffer to create projects named like "aou-rw-perf-8aec175b".
     public String projectNamePrefix;
@@ -102,7 +111,9 @@ public class WorkbenchConfig {
     public Integer notebookRuntimeIdleMaxAgeDays;
     public String notebookRuntimeDefaultMachineType;
     public Integer notebookRuntimeDefaultDiskSizeGb;
+    @Deprecated // soon to be replaced by access_tier.auth_domain_name in the DB
     public String registeredDomainName;
+    @Deprecated // soon to be replaced by access_tier.auth_domain_group_email in the DB
     public String registeredDomainGroup;
     public String leoBaseUrl;
     // This value specifies the information we hand to Terra as our AppId header.
@@ -110,6 +121,7 @@ public class WorkbenchConfig {
     public String xAppIdValue;
     // The name of the VPC service perimeter to create our Terra GCP projects inside,
     // if enabled.
+    @Deprecated // soon to be replaced by access_tier.service_perimeter in the DB
     public String vpcServicePerimeterName;
     // The length of our API HTTP client timeouts to firecloud
     public Integer timeoutInSeconds;
@@ -241,8 +253,6 @@ public class WorkbenchConfig {
     public boolean enableResearchPurposePrompt;
     // If true, reporting cron job will write data to configured BigQuery reporting dataset.
     public boolean enableReportingUploadCron;
-    // Whether users should be able to customize notebook runtime settings.
-    public boolean enableCustomRuntimes;
   }
 
   public static class ActionAuditConfig {

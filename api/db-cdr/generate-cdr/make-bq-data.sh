@@ -10,7 +10,7 @@ export OUTPUT_PROJECT=$3 # output project
 export OUTPUT_DATASET=$4 # output dataset
 
 # Check that bq_dataset exists and exit if not
-datasets=$(bq --project=$BQ_PROJECT ls --max_results=1000)
+datasets=$(bq --project_id=$BQ_PROJECT ls --max_results=1000)
 if [ -z "$datasets" ]
 then
   echo "$BQ_PROJECT.$BQ_DATASET does not exist. Please specify a valid project and dataset."
@@ -25,17 +25,17 @@ else
 fi
 
 # Make dataset for cdr cloudsql tables
-datasets=$(bq --project=$OUTPUT_PROJECT ls --max_results=1000)
+datasets=$(bq --project_id=$OUTPUT_PROJECT ls --max_results=1000)
 re=\\b$OUTPUT_DATASET\\b
 if [[ $datasets =~ $re ]]; then
   echo "$OUTPUT_DATASET exists"
 else
   echo "Creating $OUTPUT_DATASET"
-  bq --project=$OUTPUT_PROJECT mk $OUTPUT_DATASET
+  bq --project_id=$OUTPUT_PROJECT mk $OUTPUT_DATASET
 fi
 
 #Check if tables to be copied over exists in bq project dataset
-tables=$(bq --project=$BQ_PROJECT --dataset=$BQ_DATASET ls --max_results=1000)
+tables=$(bq --project_id=$BQ_PROJECT --dataset=$BQ_DATASET ls --max_results=1000)
 cb_cri_table_check=\\bcb_criteria\\b
 cb_cri_attr_table_check=\\bcb_criteria_attribute\\b
 cb_cri_rel_table_check=\\bcb_criteria_relationship\\b
@@ -47,8 +47,8 @@ create_tables=(cb_survey_attribute cb_survey_version concept cb_criteria cb_crit
 
 for t in "${create_tables[@]}"
 do
-    bq --project=$OUTPUT_PROJECT rm -f $OUTPUT_DATASET.$t
-    bq --quiet --project=$OUTPUT_PROJECT mk --schema=$schema_path/$t.json $OUTPUT_DATASET.$t
+    bq --project_id=$OUTPUT_PROJECT rm -f $OUTPUT_DATASET.$t
+    bq --quiet --project_id=$OUTPUT_PROJECT mk --schema=$schema_path/$t.json $OUTPUT_DATASET.$t
 done
 
 # Populate cb_survey_attribute
@@ -56,7 +56,7 @@ done
 # cb_survey_attribute #
 #######################
 echo "Inserting cb_survey_attribute"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_survey_attribute\`
 (id,question_concept_id,answer_concept_id,survey_version_concept_id,item_count)
 SELECT id,question_concept_id,answer_concept_id,survey_version_concept_id,item_count
@@ -67,7 +67,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`"
 # cb_survey_version #
 #####################
 echo "Inserting cb_survey_version"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_survey_version\`
 (survey_version_concept_id,survey_concept_id,display_name,display_order)
 SELECT survey_version_concept_id,survey_concept_id,display_name,display_order
@@ -78,7 +78,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\`"
 # domain_info #
 ###############
 echo "Inserting domain_info"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\`
 (concept_id,domain,domain_id,domain_enum,name,description,all_concept_count,standard_concept_count,participant_count)
 VALUES
@@ -94,7 +94,7 @@ VALUES
 # survey_module #
 #################
 echo "Inserting survey_module"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.survey_module\`
 (concept_id,name,description,question_count,participant_count,order_number)
 VALUES
@@ -108,7 +108,7 @@ VALUES
 
 # Populate cb_person table
 echo "Inserting cb_person"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_person\`
 (person_id, dob, age_at_consent, age_at_cdr, is_deceased)
 SELECT person_id, dob, age_at_consent, age_at_cdr, is_deceased
@@ -116,7 +116,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`"
 
 # Populate cb_data_filter table
 echo "Inserting cb_data_filter"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_data_filter\`
 (data_filter_id, display_name, name)
 VALUES
@@ -125,7 +125,7 @@ VALUES
 
 # Populate ds_linking table
 echo "Inserting ds_linking"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.ds_linking\`
 (ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN)
 SELECT ROW_NUMBER() OVER() ID, DENORMALIZED_NAME, OMOP_SQL, JOIN_VALUE, DOMAIN
@@ -137,7 +137,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.ds_linking\`"
 ###############
 if [[ $tables =~ $cb_cri_table_check ]]; then
     echo "Inserting cb_criteria"
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\`
      (id, parent_id, domain_id, type, subtype, is_standard, code, name, value, is_group, is_selectable, est_count, concept_id, has_attribute, has_hierarchy, has_ancestor_data, path, synonyms, rollup_count, item_count, full_text, display_synonyms)
     SELECT id, parent_id, domain_id, type, subtype, is_standard, code, name, value, is_group, is_selectable, est_count, concept_id, has_attribute, has_hierarchy, has_ancestor_data, path, synonyms, rollup_count, item_count, full_text, display_synonyms
@@ -149,7 +149,7 @@ fi
 #########################
 if [[ $tables =~ $cb_cri_attr_table_check ]]; then
     echo "Inserting cb_criteria_attribute"
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria_attribute\`
      (id, concept_id, value_as_concept_id, concept_name, type, est_count)
     SELECT id, concept_id, value_as_concept_id, concept_name, type, est_count
@@ -161,7 +161,7 @@ fi
 ############################
 if [[ $tables =~ $cb_cri_rel_table_check ]]; then
     echo "Inserting cb_criteria_relationship"
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria_relationship\`
      (concept_id_1, concept_id_2)
     SELECT concept_id_1, concept_id_2
@@ -173,7 +173,7 @@ fi
 ############################
 if [[ $tables =~ $cb_cri_anc_table_check ]]; then
     echo "Inserting cb_criteria_ancestor"
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria_ancestor\`
      (ancestor_id, descendant_id)
     SELECT ancestor_id, descendant_id
@@ -184,7 +184,7 @@ fi
 # domain #
 ##########
 echo "Inserting domain"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain\`
  (domain_id, domain_name, domain_concept_id)
 SELECT domain_id, domain_name, domain_concept_id
@@ -194,7 +194,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.domain\` d"
 # vocabulary #
 ##############
 echo "Inserting vocabulary"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.vocabulary\`
  (vocabulary_id, vocabulary_name, vocabulary_reference, vocabulary_version, vocabulary_concept_id)
 SELECT vocabulary_id, vocabulary_name, vocabulary_reference, vocabulary_version, vocabulary_concept_id
@@ -207,7 +207,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.vocabulary\`"
 # and dates need to be formatted for mysql
 # Insert the base data into it formatting dates.
 echo "Inserting concept table data ... "
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\`
 (concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept,
 concept_code, count_value, prevalence, source_count_value, synonyms)
@@ -220,10 +220,10 @@ group by c.concept_id,c.concept_name,c.domain_id,c.vocabulary_id,c.concept_class
 
 # Update counts and prevalence in concept
 q="select count(*) from \`$BQ_PROJECT.$BQ_DATASET.person\`"
-person_count=$(bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql "$q" |  tr -dc '0-9')
+person_count=$(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql "$q" |  tr -dc '0-9')
 
 # Update counts in concept for gender
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "Update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
 set c.source_count_value = r.source_count_value,
 c.count_value = r.count_value
@@ -235,7 +235,7 @@ group by GENDER_CONCEPT_ID) as r
 where r.concept_id = c.concept_id"
 
 # Update counts in concept for race
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "Update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
 set c.source_count_value = r.source_count_value,
 c.count_value = r.count_value
@@ -247,7 +247,7 @@ group by RACE_CONCEPT_ID) as r
 where r.concept_id = c.concept_id"
 
 # Update counts in concept for ethnicity
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "Update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
 set c.source_count_value = r.source_count_value,
 c.count_value = r.count_value
@@ -259,7 +259,7 @@ group by ETHNICITY_CONCEPT_ID) as r
 where r.concept_id = c.concept_id"
 
 # Update counts in concept for visit domain
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "Update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
 set c.source_count_value = (c.source_count_value + r.source_count_value),
 c.count_value = (c.count_value + r.count_value)
@@ -279,7 +279,7 @@ group by vo1.visit_source_concept_id) as r
 where r.concept_id = c.concept_id"
 
 # Update counts in concept for condition domain
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "Update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
 set c.source_count_value = (c.source_count_value + r.source_count_value),
 c.count_value = (c.count_value + r.count_value)
@@ -301,7 +301,7 @@ group by co1.condition_source_concept_id) as r
 where r.concept_id = c.concept_id"
 
 # Update counts in concept for procedure domain
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "Update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
 set c.source_count_value = (c.source_count_value + r.source_count_value),
 c.count_value = (c.count_value + r.count_value)
@@ -321,7 +321,7 @@ group by po1.procedure_source_CONCEPT_ID) as r
 where r.concept_id = c.concept_id"
 
 # Update counts in concept for drug domain
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "Update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
 set c.source_count_value = (c.source_count_value + r.source_count_value),
 c.count_value = (c.count_value + r.count_value)
@@ -340,7 +340,7 @@ group by de1.drug_source_CONCEPT_ID) as r
 where r.concept_id = c.concept_id"
 
 # Update counts in concept for observation domain
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "Update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
 set c.source_count_value = (c.source_count_value + r.source_count_value),
 c.count_value = (c.count_value + r.count_value)
@@ -360,7 +360,7 @@ group by co1.observation_source_CONCEPT_ID) as r
 where r.concept_id = c.concept_id"
 
 # Update counts in concept for measurement domain
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "Update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
 set c.source_count_value = (c.source_count_value + r.source_count_value),
 c.count_value = (c.count_value + r.count_value)
@@ -381,7 +381,7 @@ group by co1.measurement_source_concept_id) as r
 where r.concept_id = c.concept_id"
 
 # Set participant counts for Condition domain
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
 set c.count_value = r.count from
 (select count(distinct person_id) as count
@@ -390,7 +390,7 @@ join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on co.condition_concept_id = c.concep
 where c.concept_id = 19"
 
 # Set participant counts for Measurement domain
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
 set c.count_value = r.count from
 (select count(distinct person_id) as count
@@ -399,7 +399,7 @@ join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on m.measurement_concept_id = c.conce
 where c.concept_id = 21"
 
 # Set participant counts for Procedure domain
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c
 set c.count_value = r.count from
 (select count(distinct person_id) as count
@@ -408,7 +408,7 @@ join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on po.procedure_concept_id = c.concep
 where c.concept_id = 10"
 
 # Set participant counts for Drug domain
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
 set c.count_value = r.count from
 (select count(distinct person_id) as count
@@ -417,7 +417,7 @@ join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on de.drug_concept_id = c.concept_id)
 where c.concept_id = 13"
 
 # Set participant counts for Observation domain
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\` c
 set c.count_value = r.count from
 (select count(distinct person_id) as count
@@ -426,7 +426,7 @@ join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on o.observation_concept_id = c.conce
 where c.concept_id = 27"
 
 #Concept prevalence (based on count value and not on source count value)
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "Update  \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\`
 set prevalence =
 case when count_value > 0 then round(count_value/$person_count, 2)
@@ -439,7 +439,7 @@ where count_value > 0 or source_count_value > 0"
 ##########################################
 
 # Set all_concept_count and standard_concept_count on domain_info
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
 set d.all_concept_count = c.all_concept_count
 from (select domain_id, sum(all_concept_count) as all_concept_count
@@ -451,7 +451,7 @@ from (select domain_id, sum(all_concept_count) as all_concept_count
       group by domain_id) c
 where d.domain_enum = c.domain_id"
 
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
 set d.standard_concept_count = c.standard_concept_count
 from (select c.domain_id as domain_id, COUNT(DISTINCT c.concept_id) as standard_concept_count
@@ -462,7 +462,7 @@ group by c.domain_id) c
 where d.domain_enum = c.domain_id"
 
 # Set all_concept_count on domain_info for Physical Measurements
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
 set d.all_concept_count = c.all_concept_count, d.standard_concept_count = c.standard_concept_count from
 (SELECT count(distinct concept_id) as all_concept_count, SUM(CASE WHEN standard_concept IN ('S', 'C') THEN 1 ELSE 0 END) as standard_concept_count
@@ -474,7 +474,7 @@ AND concept_class_id = 'Clinical Observation') c
 where d.domain = 10"
 
 # Set participant counts for Condition domain
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
 set d.participant_count = r.count from
 (select count(distinct person_id) as count
@@ -482,7 +482,7 @@ from \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` co) as r
 where d.concept_id = 19"
 
 # Set participant counts for Measurement domain
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
 set d.participant_count = r.count from
 (select count(distinct person_id) as count
@@ -490,7 +490,7 @@ from \`$BQ_PROJECT.$BQ_DATASET.measurement\` m) as r
 where d.concept_id = 21"
 
 # Set participant counts for Procedure domain
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
 set d.participant_count = r.count from
 (select count(distinct person_id) as count
@@ -498,7 +498,7 @@ from \`$BQ_PROJECT.$BQ_DATASET.procedure_occurrence\` po) as r
 where d.concept_id = 10"
 
 # Set participant counts for Drug domain
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
 set d.participant_count = r.count from
 (select count(distinct person_id) as count
@@ -506,7 +506,7 @@ from \`$BQ_PROJECT.$BQ_DATASET.drug_exposure\` de) as r
 where d.concept_id = 13"
 
 # Set participant counts for Observation domain
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
 set d.participant_count = r.count from
 (select count(distinct person_id) as count
@@ -514,7 +514,7 @@ from \`$BQ_PROJECT.$BQ_DATASET.observation\` o) as r
 where d.concept_id = 27"
 
 # Set participant counts for Physical Measurements domain
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
 set d.participant_count = r.count from
 (SELECT COUNT(DISTINCT person_id) as count
@@ -532,7 +532,7 @@ where d.domain = 10"
 ##########################################
 
 # Set the survey participant count on the concept
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c1
 set c1.count_value=count_val from
 (select count(distinct ob.person_id) as count_val,cr.concept_id_2 as survey_concept_id from \`${BQ_PROJECT}.${BQ_DATASET}.observation\` ob
@@ -543,7 +543,7 @@ group by cr.concept_id_2)
 where c1.concept_id=survey_concept_id"
 
 # Set the participant count on the survey_module row
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_module\` x
 SET x.participant_count = y.est_count
 FROM
@@ -556,7 +556,7 @@ FROM
 WHERE x.concept_id = y.concept_id"
 
 # Set the question participant counts
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.concept\` c1
 set c1.count_value=count_val from
 (select count(distinct ob.person_id) as count_val,cr.concept_id_2 as survey_concept_id,cr.concept_id_1 as question_id
@@ -568,7 +568,7 @@ group by survey_concept_id,cr.concept_id_1)
 where c1.concept_id=question_id"
 
 # Set the question count on the survey_module row
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`${OUTPUT_PROJECT}.${OUTPUT_DATASET}.survey_module\` x
 SET x.question_count = y.num_questions
 FROM
@@ -592,7 +592,7 @@ WHERE x.concept_id = y.ancestor_concept_id"
 # concept_synonym #
 ########################
 echo "Inserting concept_synonym"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept_synonym\`
  (id, concept_id, concept_synonym_name)
 SELECT 0, c.concept_id, c.concept_synonym_name

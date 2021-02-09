@@ -1,6 +1,5 @@
 {
-    // Pulled from gs://broad-public-datasets/NA12878/NA12878.g.vcf.gz
-    "ReblockGVCF.gvcf": "gs://fc-66b79f35-e7e8-4b0f-b8e8-ab57c9ce98ff/NA12878.g.vcf.gz",
-    // Pulled from gs://broad-public-datasets/NA12878/NA12878.g.vcf.gz.tbi
-    "ReblockGVCF.gvcf_index": "gs://fc-66b79f35-e7e8-4b0f-b8e8-ab57c9ce98ff/NA12878.g.vcf.gz.tbi" 
+    //List of gcs paths. Providing as a file instead of array input since a few hundred can get unwieldy
+    "ReblockGVCF.gvcfs_list": "gs://fc-66b79f35-e7e8-4b0f-b8e8-ab57c9ce98ff/gvcfs_list.txt",
+    "ReblockGVCF.output_gcs_bucket": "gs://fc-66b79f35-e7e8-4b0f-b8e8-ab57c9ce98ff/reblock_out/"
 }

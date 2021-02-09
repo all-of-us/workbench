@@ -41,7 +41,9 @@ export enum MenuOption {
 export enum LinkText {
    AddSelection = 'Add Selection',
    AddThis = 'ADD THIS',
+   AllSurveys = 'All Surveys',
    ApplyModifiers = 'APPLY MODIFIERS',
+   ApplyRecreate = 'APPLY & RECREATE',
    BackToCohort = 'Back to cohort',
    BackToReviewSet = 'Back to review set',
    Calculate = 'Calculate',
@@ -69,6 +71,7 @@ export enum LinkText {
    DeleteEnvironment = 'Delete Environment',
    DeleteNotebook = 'Delete Notebook',
    DeleteWorkspace = 'Delete Workspace',
+   Demographics = 'Demographics',
    DiscardChanges = 'Discard Changes',
    DuplicateWorkspace = 'Duplicate Workspace',
    Edit = 'Edit',
@@ -110,4 +113,12 @@ export enum ResourceCard {
    Notebook = 'Notebook',
    Dataset = 'Dataset',
    CohortReview = 'Cohort Review',
+}
+
+export enum SideBarLink {
+   ComputeConfiguration,
+   DataDictionary,
+   HelpTips,
+   WorkspaceMenu,
+   EditAnnotations,
 }
