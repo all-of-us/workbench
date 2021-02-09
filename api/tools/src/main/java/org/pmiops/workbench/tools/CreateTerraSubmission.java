@@ -87,12 +87,12 @@ public class CreateTerraSubmission {
               .canShare(true);
 
       FirecloudWorkspaceACLUpdate aclUpdate3 = new FirecloudWorkspaceACLUpdate()
-              .email("PROXY_100757400075040755992@dev.test.firecloud.org")
+              .email("wgs-cohort-extraction@all-of-us-workbench-test.iam.gserviceaccount.com")
               .accessLevel(WorkspaceAccessLevel.OWNER.toString())
               .canCompute(true)
               .canShare(true);
 
-      List<FirecloudWorkspaceACLUpdate> acls = Arrays.asList(aclUpdate, aclUpdate2, aclUpdate3);
+      List<FirecloudWorkspaceACLUpdate> acls = Arrays.asList(aclUpdate2, aclUpdate3);
       apiFactory.workspacesApi().updateWorkspaceACL(workspaceNamespace, workspaceName, true, acls);
 
       FirecloudWorkspaceACL acl = apiFactory.workspacesApi().getWorkspaceAcl(workspaceNamespace, workspaceName);
