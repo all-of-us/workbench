@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.model;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import com.google.api.client.util.Sets;
 import java.lang.reflect.Field;
