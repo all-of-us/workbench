@@ -1,7 +1,6 @@
 package org.pmiops.workbench.db.model;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
 
 import com.google.api.client.util.Sets;
 import java.lang.reflect.Field;
@@ -15,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.Test;
-import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.Domain;
 
 public class StorageEnumsTest {
@@ -57,32 +55,6 @@ public class StorageEnumsTest {
       String storageValue = DbStorageEnums.domainToDomainId(domainValue);
       assertWithMessage("unmapped enum value: " + domainValue).that(storageValue).isNotNull();
       assertThat(DbStorageEnums.domainIdToDomain(storageValue)).isEqualTo(domainValue);
-    }
-  }
-
-  // special-case test for Disability Short/Boolean methods
-
-  @Test
-  public void test_disability() {
-    for (Disability disabilityValue : Disability.values()) {
-      Short shortValue = DbStorageEnums.disabilityToStorage(disabilityValue);
-      assertWithMessage("unmapped enum value (Disability -> Short): " + disabilityValue)
-          .that(shortValue)
-          .isNotNull();
-      Boolean boolValue = DbStorageEnums.boolyDisabilityFromStorage(shortValue);
-      assertWithMessage("unmapped enum value (Short -> Boolean): " + disabilityValue)
-          .that(boolValue)
-          .isNotNull();
-      Short shortValue2 = DbStorageEnums.disabilityToStorage(boolValue);
-      assertWithMessage("unmapped enum value (Boolean -> Short): " + disabilityValue)
-          .that(shortValue2)
-          .isNotNull();
-      assertThat(shortValue2).isEqualTo(shortValue);
-      Disability roundTrip = DbStorageEnums.disabilityFromStorage(shortValue);
-      assertWithMessage("unmapped enum value (Short -> Disability): " + disabilityValue)
-          .that(roundTrip)
-          .isNotNull();
-      assertThat(roundTrip).isEqualTo(disabilityValue);
     }
   }
 

@@ -5304,8 +5304,7 @@ definitions:
       education:
         "$ref": "#/definitions/Education"
       disability:
-        type: boolean
-        default: null
+        "$ref": "#/definitions/Disability"
   Address:
     type: object
     properties:
