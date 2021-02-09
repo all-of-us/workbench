@@ -12,18 +12,23 @@ import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
+import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DuaType;
+import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.Ethnicity;
+import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
+import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ReviewStatus;
+import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.Surveys;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
 /**
@@ -502,23 +507,6 @@ public final class DbStorageEnums {
     return CLIENT_TO_STORAGE_SURVEY.get(survey);
   }
 
-  // WorkspaceAccessLevel
-  private static final BiMap<WorkspaceAccessLevel, Short> CLIENT_TO_STORAGE_WORKSPACE_ACCESS =
-      ImmutableBiMap.<WorkspaceAccessLevel, Short>builder()
-          .put(WorkspaceAccessLevel.NO_ACCESS, (short) 0)
-          .put(WorkspaceAccessLevel.READER, (short) 1)
-          .put(WorkspaceAccessLevel.WRITER, (short) 2)
-          .put(WorkspaceAccessLevel.OWNER, (short) 3)
-          .build();
-
-  public static WorkspaceAccessLevel workspaceAccessLevelFromStorage(Short level) {
-    return CLIENT_TO_STORAGE_WORKSPACE_ACCESS.inverse().get(level);
-  }
-
-  public static Short workspaceAccessLevelToStorage(WorkspaceAccessLevel level) {
-    return CLIENT_TO_STORAGE_WORKSPACE_ACCESS.get(level);
-  }
-
   // WorkspaceActiveStatus
   private static final BiMap<WorkspaceActiveStatus, Short>
       CLIENT_TO_STORAGE_WORKSPACE_ACTIVE_STATUS =
@@ -536,6 +524,123 @@ public final class DbStorageEnums {
     return CLIENT_TO_STORAGE_WORKSPACE_ACTIVE_STATUS.get(s);
   }
 
-  /** Utility class. */
-  private DbStorageEnums() {}
+  private static final BiMap<Race, Short> CLIENT_TO_STORAGE_RACE =
+      ImmutableBiMap.<Race, Short>builder()
+          .put(Race.AA, (short) 1)
+          .put(Race.AIAN, (short) 2)
+          .put(Race.ASIAN, (short) 3)
+          .put(Race.NHOPI, (short) 4)
+          .put(Race.WHITE, (short) 5)
+          .put(Race.PREFER_NO_ANSWER, (short) 6)
+          .put(Race.NONE, (short) 7)
+          .build();
+
+  private static final BiMap<SexAtBirth, Short> CLIENT_TO_STORAGE_SEX_AT_BIRTH =
+      ImmutableBiMap.<SexAtBirth, Short>builder()
+          .put(SexAtBirth.FEMALE, (short) 1)
+          .put(SexAtBirth.MALE, (short) 2)
+          .put(SexAtBirth.INTERSEX, (short) 3)
+          .put(SexAtBirth.PREFER_NO_ANSWER, (short) 4)
+          .put(SexAtBirth.NONE_OF_THESE_DESCRIBE_ME, (short) 5)
+          .build();
+
+  private static final BiMap<Ethnicity, Short> CLIENT_TO_STORAGE_ETHNICITY =
+      ImmutableBiMap.<Ethnicity, Short>builder()
+          .put(Ethnicity.HISPANIC, (short) 1)
+          .put(Ethnicity.NOT_HISPANIC, (short) 2)
+          .put(Ethnicity.PREFER_NO_ANSWER, (short) 3)
+          .build();
+
+  private static final BiMap<GenderIdentity, Short> CLIENT_TO_STORAGE_GENDER_IDENTITY =
+      ImmutableBiMap.<GenderIdentity, Short>builder()
+          .put(GenderIdentity.MAN, (short) 1)
+          .put(GenderIdentity.WOMAN, (short) 2)
+          .put(GenderIdentity.NON_BINARY, (short) 3)
+          .put(GenderIdentity.TRANSGENDER, (short) 4)
+          .put(GenderIdentity.NONE_DESCRIBE_ME, (short) 5)
+          .put(GenderIdentity.PREFER_NO_ANSWER, (short) 6)
+          .build();
+
+  private static final BiMap<Education, Short> CLIENT_TO_STORAGE_EDUCATION =
+      ImmutableBiMap.<Education, Short>builder()
+          .put(Education.NO_EDUCATION, (short) 1)
+          .put(Education.GRADES_1_12, (short) 2)
+          .put(Education.COLLEGE_GRADUATE, (short) 3)
+          .put(Education.UNDERGRADUATE, (short) 4)
+          .put(Education.MASTER, (short) 5)
+          .put(Education.DOCTORATE, (short) 6)
+          .put(Education.PREFER_NO_ANSWER, (short) 7)
+          .build();
+
+  private static final BiMap<Disability, Short> CLIENT_TO_STORAGE_DISABILITY =
+      ImmutableBiMap.<Disability, Short>builder()
+          .put(Disability.TRUE, (short) 1)
+          .put(Disability.FALSE, (short) 2)
+          .build();
+
+  public static Race raceFromStorage(Short race) {
+    return CLIENT_TO_STORAGE_RACE.inverse().get(race);
+  }
+
+  public static Short raceToStorage(Race race) {
+    return CLIENT_TO_STORAGE_RACE.get(race);
+  }
+
+  public static SexAtBirth sexAtBirthFromStorage(Short sexAtBirth) {
+    return CLIENT_TO_STORAGE_SEX_AT_BIRTH.inverse().get(sexAtBirth);
+  }
+
+  public static Short sexAtBirthToStorage(SexAtBirth sexAtBirth) {
+    return CLIENT_TO_STORAGE_SEX_AT_BIRTH.get(sexAtBirth);
+  }
+
+  public static Ethnicity ethnicityFromStorage(Short ethnicity) {
+    return CLIENT_TO_STORAGE_ETHNICITY.inverse().get(ethnicity);
+  }
+
+  public static Short ethnicityToStorage(Ethnicity ethnicity) {
+    return CLIENT_TO_STORAGE_ETHNICITY.get(ethnicity);
+  }
+
+  public static Short genderIdentityToStorage(GenderIdentity genderIdentity) {
+    return CLIENT_TO_STORAGE_GENDER_IDENTITY.get(genderIdentity);
+  }
+
+  public static GenderIdentity genderIdentityFromStorage(Short genderIdentity) {
+    return CLIENT_TO_STORAGE_GENDER_IDENTITY.inverse().get(genderIdentity);
+  }
+
+  public static Short educationToStorage(Education education) {
+    return CLIENT_TO_STORAGE_EDUCATION.get(education);
+  }
+
+  public static Education educationFromStorage(Short education) {
+    return CLIENT_TO_STORAGE_EDUCATION.inverse().get(education);
+  }
+
+  public static Short disabilityToStorage(Disability disability) {
+    return CLIENT_TO_STORAGE_DISABILITY.get(disability);
+  }
+
+  public static Short disabilityToStorage(Boolean disability) {
+    if (disability != null) {
+      return disability ? (short) 1 : (short) 2;
+    } else {
+      return null;
+    }
+  }
+
+  public static Disability disabilityFromStorage(Short disability) {
+    return CLIENT_TO_STORAGE_DISABILITY.inverse().get(disability);
+  }
+
+  // named such for MapStruct, which will automatically pick up on a function with this signature.
+  // can't be named disabilityFromStorage because it would have the same args as the other one.
+  public static Boolean boolyDisabilityFromStorage(Short disability) {
+    if (disability != null) {
+      return disability == 1;
+    } else {
+      return null;
+    }
+  }
 }
