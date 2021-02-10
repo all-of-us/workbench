@@ -108,6 +108,27 @@ export const CriteriaStubVariables: Criteria[] = [
     domainId: Domain.CONDITION.toString(),
     hasAttributes: false,
     path: '0',
+  },
+  {
+    childCount: 44652,
+    code: '',
+    conceptId: 38003563,
+    count: 44652,
+    domainId: 'PERSON',
+    group: false,
+    hasAncestorData: false,
+    hasAttributes: false,
+    hasHierarchy: false,
+    id: 333112,
+    isStandard: true,
+    name: 'Ethnicity - Hispanic or Latino',
+    parentCount: 0,
+    parentId: 0,
+    path: '',
+    selectable: true,
+    subtype: '',
+    type: 'ETHNICITY',
+    value: '',
   }
 ];
 

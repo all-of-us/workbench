@@ -233,10 +233,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
     const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
     if (selectedSurveyChild && selectedSurveyChild.length > 0) {
       cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, selectedSurveyChild[0].id)
-          .then(surveyResponse => {
-            console.log(surveyResponse.items);
-            this.setState({children: surveyResponse.items});
-          });
+        .then(surveyResponse => this.setState({children: surveyResponse.items}));
     } else {
       this.setState({children: resp.items});
       if (domainId === Domain.SURVEY.toString()) {
