@@ -5,7 +5,7 @@ import * as validate from 'validate.js';
 
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
-import {ProfileErrorModal} from 'app/components/profile-error-modal';
+import {withProfileErrorModal, WithProfileErrorModalProps, withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {TextAreaWithLengthValidationMessage, TextInput, ValidationError} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
@@ -30,9 +30,10 @@ import {
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {serverConfigStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
-import {ErrorResponse, InstitutionalRole, Profile} from 'generated/fetch';
+import {InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
+
 
 const styles = reactStyles({
   h1: {
@@ -137,7 +138,7 @@ enum RegistrationStepStatus {
   UNCOMPLETE
 }
 
-interface ProfilePageProps {
+interface ProfilePageProps extends WithProfileErrorModalProps {
   profileState: {
     profile: Profile;
     reload: () => {};
@@ -147,12 +148,15 @@ interface ProfilePageProps {
 interface ProfilePageState {
   currentProfile: Profile;
   institutions: Array<PublicInstitutionDetails>;
-  saveProfileErrorResponse: ErrorResponse;
   showDemographicSurveyModal: boolean;
   updating: boolean;
 }
 
-export const ProfilePage = withUserProfile()(class extends React.Component<
+export const ProfilePage = fp.flow(
+  withUserProfile(),
+  withProfileErrorModal({title: 'Error updating account'}),
+  withErrorModal()
+  )(class extends React.Component<
     ProfilePageProps,
     ProfilePageState
 > {
@@ -164,7 +168,6 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
     this.state = {
       currentProfile: this.initializeProfile(),
       institutions: [],
-      saveProfileErrorResponse: null,
       showDemographicSurveyModal: false,
       updating: false
     };
@@ -263,7 +266,7 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
     } catch (error) {
       reportError(error);
       const errorResponse = await convertAPIError(error);
-      this.setState({saveProfileErrorResponse: errorResponse});
+      this.props.showProfileErrorModal(errorResponse.message)
       console.error(error);
       return Promise.reject();
     } finally {
@@ -360,8 +363,9 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
   }
 
   render() {
+    console.log('props:', this.props)
     const {profileState: {profile}} = this.props;
-    const {currentProfile, saveProfileErrorResponse, updating, showDemographicSurveyModal} = this.state;
+    const {currentProfile, updating, showDemographicSurveyModal} = this.state;
     const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement} =
       serverConfigStore.getValue();
     const {
@@ -694,31 +698,6 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                 showStepCount={false}
             />
         </Modal>}
-        {saveProfileErrorResponse &&
-          <ProfileErrorModal
-            title='Error updating account'
-            message={saveProfileErrorResponse.message}
-            onDismiss={() => this.setState({saveProfileErrorResponse: null})}/>
-        // <Modal data-test-id='update-profile-error'>
-        //     <ModalTitle>Error creating account</ModalTitle>
-        //     <ModalBody>
-        //         <div>An error occurred while updating your profile. The following message was
-        //             returned:
-        //         </div>
-        //         <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
-        //             "{saveProfileErrorResponse.message}"
-        //         </div>
-        //         <div>
-        //             Please try again or contact <a
-        //             href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
-        //         </div>
-        //     </ModalBody>
-        //     <ModalFooter>
-        //         <Button onClick={() => this.setState({saveProfileErrorResponse: null})}
-        //                 type='primary'>Close</Button>
-        //     </ModalFooter>
-        // </Modal>
-        }
       </div>
     </FadeBox>;
   }

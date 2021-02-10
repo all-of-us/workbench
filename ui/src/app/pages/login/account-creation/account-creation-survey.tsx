@@ -1,8 +1,6 @@
 import * as React from 'react';
 
-import {Button} from 'app/components/buttons';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
-import {ProfileErrorModal} from 'app/components/profile-error-modal';
+import {withErrorModal, withProfileErrorModal, WithProfileErrorModalProps} from 'app/components/with-error-modal';
 import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 
@@ -13,7 +11,7 @@ import {ErrorResponse, Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 
 
-export interface AccountCreationSurveyProps {
+export interface AccountCreationSurveyProps extends WithProfileErrorModalProps{
   invitationKey: string;
   termsOfServiceVersion?: number;
   profile: Profile;
@@ -26,7 +24,10 @@ export interface AccountCreationState {
   createAccountErrorResponse?: ErrorResponse;
 }
 
-export class AccountCreationSurvey extends React.Component<AccountCreationSurveyProps, AccountCreationState> {
+export const AccountCreationSurvey = fp.flow(
+  withProfileErrorModal({title: 'Error creating account x'}),
+  withErrorModal()
+)(class extends React.Component<AccountCreationSurveyProps, AccountCreationState> {
   constructor(props: any) {
     super(props);
     this.state = {
@@ -55,6 +56,8 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
   }
 
   render() {
+    const {showProfileErrorModal} = this.props
+
     return <React.Fragment>
       <DemographicSurvey
           profile={fp.set('demographicSurvey', fp.mapValues(() => undefined, this.props.profile.demographicSurvey), this.props.profile)}
@@ -67,28 +70,8 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
           enablePrevious={true}
           showStepCount={true}
       />
-      {this.state.createAccountErrorResponse &&
-        <ProfileErrorModal
-          title='Error creating account'
-          message={this.state.createAccountErrorResponse.message}
-          onDismiss={() => this.setState({createAccountErrorResponse: null})}/>
-      //   <Modal data-test-id='create-account-error'>
-      //   <ModalTitle>Error creating account</ModalTitle>
-      //   <ModalBody>
-      //     <div>An error occurred while creating your account. The following message was returned:</div>
-      //     <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
-      //       "{this.state.createAccountErrorResponse.message}"
-      //     </div>
-      //     <div>
-      //       Please try again or contact <a href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
-      //     </div>
-      //   </ModalBody>
-      //   <ModalFooter>
-      //     <Button onClick = {() => this.setState({createAccountErrorResponse: null})}
-      //             type='primary'>Close</Button>
-      //   </ModalFooter>
-      // </Modal>
+      {this.state.createAccountErrorResponse && showProfileErrorModal(this.state.createAccountErrorResponse.message)
       }
     </React.Fragment>;
   }
-}
+})
