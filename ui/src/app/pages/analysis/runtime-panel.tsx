@@ -73,6 +73,13 @@ const styles = reactStyles({
   bold: {
     fontWeight: 700,
   },
+  label: {
+    fontWeight: 600,
+    marginRight: '.5rem'
+  },
+  labelAndInput: {
+    alignItems: 'center',
+  },
   controlSection: {
     backgroundColor: String(addOpacity(colors.white, .75)),
     borderRadius: '3px',
@@ -85,7 +92,7 @@ const styles = reactStyles({
   },
   formGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(6, 1fr)',
+    gridTemplateColumns: 'repeat(3, 1fr)',
     gridGap: '1rem',
     alignItems: 'center'
   },
@@ -221,31 +228,43 @@ export const ConfirmDelete = ({onCancel, onConfirm}) => {
   </Fragment>;
 };
 
-const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPrefix, validMachineTypes}) => {
+const MachineSelector = ({
+  onChange,
+  selectedMachine,
+  machineType,
+  disabled,
+  idPrefix,
+  validMachineTypes,
+  cpuLabelStyles = {},
+  ramLabelStyles = {}}
+) => {
   const initialMachineType = findMachineByName(machineType) || defaultMachineType;
   const {cpu, memory} = selectedMachine || initialMachineType;
 
   return <Fragment>
-      <label htmlFor={`${idPrefix}-cpu`}>CPUs</label>
+    <FlexRow style={styles.labelAndInput}>
+      <label style={{...styles.label, ...cpuLabelStyles}} htmlFor={`${idPrefix}-cpu`}>CPUs</label>
       <Dropdown id={`${idPrefix}-cpu`}
-        options={fp.flow(
-          // Show all CPU options.
-          fp.map('cpu'),
-          // In the event that was remove a machine type from our set of valid
-          // configs, we want to continue to allow rendering of the value here.
-          // Union also makes the CPU values unique.
-          fp.union([cpu]),
-          fp.sortBy(fp.identity)
-        )(validMachineTypes)}
-        onChange={
-          ({value}) => fp.flow(
-            fp.sortBy('memory'),
-            fp.find({cpu: value}),
-            onChange)(validMachineTypes)
-        }
-        disabled={disabled}
-        value={cpu}/>
-      <label htmlFor={`${idPrefix}-ram`}>RAM (GB)</label>
+                options={fp.flow(
+                    // Show all CPU options.
+                  fp.map('cpu'),
+                    // In the event that was remove a machine type from our set of valid
+                    // configs, we want to continue to allow rendering of the value here.
+                    // Union also makes the CPU values unique.
+                  fp.union([cpu]),
+                  fp.sortBy(fp.identity)
+                )(validMachineTypes)}
+                onChange={
+                  ({value}) => fp.flow(
+                    fp.sortBy('memory'),
+                    fp.find({cpu: value}),
+                    onChange)(validMachineTypes)
+                }
+                disabled={disabled}
+                value={cpu}/>
+    </FlexRow>
+    <FlexRow style={styles.labelAndInput}>
+      <label style={{...styles.label, ...ramLabelStyles}} htmlFor={`${idPrefix}-ram`}>RAM (GB)</label>
       <Dropdown id={`${idPrefix}-ram`}
         options={fp.flow(
           // Show valid memory options as constrained by the currently selected CPU.
@@ -265,6 +284,7 @@ const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPr
         disabled={disabled}
         value={memory}
         />
+    </FlexRow>
   </Fragment>;
 };
 
@@ -287,18 +307,18 @@ const DisabledPanel = () => {
 };
 
 const DiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskSize, idPrefix}) => {
-  return <Fragment>
-    <label htmlFor={`${idPrefix}-disk`}>Disk (GB)</label>
-    <InputNumber id={`${idPrefix}-disk`}
-      showButtons
-      disabled={disabled}
-      decrementButtonClassName='p-button-secondary'
-      incrementButtonClassName='p-button-secondary'
-      value={selectedDiskSize || diskSize}
-      inputStyle={styles.inputNumber}
-      onChange={({value}) => onChange(value)}
-    />
-  </Fragment>;
+  return <FlexRow  style={styles.labelAndInput}>
+      <label style={styles.label} htmlFor={`${idPrefix}-disk`}>Disk (GB)</label>
+      <InputNumber id={`${idPrefix}-disk`}
+                   showButtons
+                   disabled={disabled}
+                   decrementButtonClassName='p-button-secondary'
+                   incrementButtonClassName='p-button-secondary'
+                   value={selectedDiskSize || diskSize}
+                   inputStyle={styles.inputNumber}
+                   onChange={({value}) => onChange(value)}
+      />
+    </FlexRow>;
 };
 
 const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
@@ -333,42 +353,50 @@ const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
   }, [selectedNumWorkers, selectedPreemtible, selectedWorkerMachine, selectedDiskSize]);
 
   return <fieldset style={{marginTop: '0.75rem'}}>
-    <legend style={styles.workerConfigLabel}>Worker Config</legend>
+    <legend style={styles.workerConfigLabel}>Worker Configuration</legend>
     <div style={styles.formGrid}>
-      <label htmlFor='num-workers'>Workers</label>
-      <InputNumber id='num-workers'
-        showButtons
-        disabled={disabled}
-        decrementButtonClassName='p-button-secondary'
-        incrementButtonClassName='p-button-secondary'
-        value={selectedNumWorkers}
-        inputStyle={styles.inputNumber}
-        onChange={({value}) => setSelectedNumWorkers(value)}
-        min={2}/>
-      <label htmlFor='num-preemptible'>Preemptible</label>
-      <InputNumber id='num-preemptible'
-        showButtons
-        disabled={disabled}
-        decrementButtonClassName='p-button-secondary'
-        incrementButtonClassName='p-button-secondary'
-        value={selectedPreemtible}
-        inputStyle={styles.inputNumber}
-        onChange={({value}) => setSelectedPreemptible(value)}
-        min={0}/>
-      <div style={{gridColumnEnd: 'span 2'}}/>
+      <FlexRow style={styles.labelAndInput}>
+        <label style={styles.label} htmlFor='num-workers'>Workers</label>
+        <InputNumber id='num-workers'
+          showButtons
+          disabled={disabled}
+          decrementButtonClassName='p-button-secondary'
+          incrementButtonClassName='p-button-secondary'
+          value={selectedNumWorkers}
+          inputStyle={styles.inputNumber}
+          onChange={({value}) => setSelectedNumWorkers(value)}
+          min={2}/>
+      </FlexRow>
+      <FlexRow style={styles.labelAndInput}>
+        <label style={styles.label} htmlFor='num-preemptible'>Preemptible</label>
+        <InputNumber id='num-preemptible'
+          showButtons
+          disabled={disabled}
+          decrementButtonClassName='p-button-secondary'
+          incrementButtonClassName='p-button-secondary'
+          value={selectedPreemtible}
+          inputStyle={styles.inputNumber}
+          onChange={({value}) => setSelectedPreemptible(value)}
+          min={0}/>
+      </FlexRow>
+      <div style={{gridColumnEnd: 'span 1'}}/>
       <MachineSelector
         machineType={workerMachineType}
         onChange={setSelectedWorkerMachine}
         selectedMachine={selectedWorkerMachine}
         disabled={disabled}
         validMachineTypes={validLeoDataprocWorkerMachineTypes}
-        idPrefix='worker'/>
+        idPrefix='worker'
+        cpuLabelStyles={{minWidth: '2.5rem'}} // width of 'Workers' label above
+        ramLabelStyles={{minWidth: '3.75rem'}} // width of 'Preemptible' label above
+      />
       <DiskSizeSelector
         diskSize={workerDiskSize}
         onChange={setSelectedDiskSize}
         selectedDiskSize={selectedDiskSize}
         disabled={disabled}
-        idPrefix='worker'/>
+        idPrefix='worker'
+      />
     </div>
   </fieldset>;
 };
@@ -1073,7 +1101,7 @@ export const RuntimePanel = fp.flow(
                 setSelectedDataprocConfig={(dataproc) => setSelectedDataprocConfig(dataproc)}
               />
               {/* Runtime customization: change detailed machine configuration options. */}
-              <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
+              <h3 style={{...styles.sectionHeader, ...styles.bold}}>Cloud compute profile</h3>
               <div style={styles.formGrid}>
                 <MachineSelector
                   idPrefix='runtime'
@@ -1092,7 +1120,7 @@ export const RuntimePanel = fp.flow(
                     diskSize={diskSize}/>
              </div>
              <FlexColumn style={{marginTop: '1rem'}}>
-               <label htmlFor='runtime-compute'>Compute type</label>
+               <label style={styles.label} htmlFor='runtime-compute'>Compute type</label>
                <Dropdown id='runtime-compute'
                          disabled={!hasMicroarrayData || disableControls}
                          style={{width: '10rem'}}
