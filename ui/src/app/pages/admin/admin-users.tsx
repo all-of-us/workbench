@@ -187,7 +187,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
       firstRegistrationCompletionTime: this.formattedTimestampOrEmptyString(user.firstRegistrationCompletionTime),
       firstRegistrationCompletionTimestamp: user.firstRegistrationCompletionTime,
       firstSignInTime: this.formattedTimestampOrEmptyString(user.firstSignInTime),
-      firstSignInTimetsamp: user.firstSignInTime,
+      firstSignInTimestamp: user.firstSignInTime,
       institutionName: user.institutionName,
       name: <a
         href={`/admin/users/${usernameWithoutDomain(user.username)}`}
