@@ -256,21 +256,21 @@ or another sexual and/or gender minority?'>
         <FlexColumn>
           <FlexRow style={{alignItems: 'baseline'}}>
             <RadioButton id='radio-disability-yes'
-                         onChange={(e) => this.updateDemographicAttribute('disability', e)}
+                         onChange={(e) => this.updateDemographicAttribute('disability', Disability.True)}
                          checked={!!demographicSurvey ? demographicSurvey.disability === Disability.True : false}
                          style={{marginRight: '0.5rem'}}/>
             <label htmlFor='radio-disability-yes' style={{paddingRight: '3rem', color: colors.primary}}>Yes</label>
           </FlexRow>
           <FlexRow style={{alignItems: 'baseline'}}>
             <RadioButton id='radio-disability-no'
-                         onChange={(e) => this.updateDemographicAttribute('disability', e)}
+                         onChange={(e) => this.updateDemographicAttribute('disability', Disability.False)}
                          checked={!!demographicSurvey ? demographicSurvey.disability === Disability.False : false}
                          style={{marginRight: '0.5rem'}}/>
             <label htmlFor='radio-disability-no' style={{color: colors.primary}}>No</label>
           </FlexRow>
           <FlexRow style={{alignItems: 'baseline'}}>
             <RadioButton id='radio-disability-pnta'
-                         onChange={(e) => this.updateDemographicAttribute('disability', e)}
+                         onChange={(e) => this.updateDemographicAttribute('disability', Disability.PREFERNOANSWER)}
                          checked={!!demographicSurvey ? demographicSurvey.disability === Disability.PREFERNOANSWER : false}
                          style={{marginRight: '0.5rem'}}/>
             <label htmlFor='radio-disability-pnta' style={{color: colors.primary}}>Prefer not to answer</label>

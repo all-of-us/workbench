@@ -122,7 +122,7 @@ describe('ProfilePageComponent', () => {
     // We need to await one tick to allow async processing of the error response to resolve.
     await waitOneTickAndUpdate(wrapper);
 
-    const errorModal = wrapper.find('Modal[data-test-id="profile-error-modal"]');
+    const errorModal = wrapper.find('Modal[role="alertdialog"]');
     // Ensure the error modal contains explanatory intro text.
     expect(errorModal.getDOMNode().textContent).toContain('An error occurred while saving profile');
     // Ensure the error modal contains the server-side error message.

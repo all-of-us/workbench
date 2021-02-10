@@ -1,17 +1,17 @@
 import * as React from 'react';
 
-import {withErrorModal, withProfileErrorModal, WithProfileErrorModalProps} from 'app/components/with-error-modal';
+import {withProfileErrorModal, WithProfileErrorModalProps} from 'app/components/with-error-modal';
 import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {environment} from 'environments/environment';
-import {ErrorResponse, Profile} from 'generated/fetch';
+import {Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 
 
-export interface AccountCreationSurveyProps extends WithProfileErrorModalProps{
+export interface AccountCreationSurveyProps extends WithProfileErrorModalProps {
   invitationKey: string;
   termsOfServiceVersion?: number;
   profile: Profile;
@@ -21,13 +21,10 @@ export interface AccountCreationSurveyProps extends WithProfileErrorModalProps{
 
 export interface AccountCreationState {
   captcha: boolean;
-  createAccountErrorResponse?: ErrorResponse;
 }
 
-export const AccountCreationSurvey = fp.flow(
-  withProfileErrorModal({title: 'Error creating account x'}),
-  withErrorModal()
-)(class extends React.Component<AccountCreationSurveyProps, AccountCreationState> {
+export const AccountCreationSurvey = withProfileErrorModal({title: 'Error creating account'})
+(class extends React.Component<AccountCreationSurveyProps, AccountCreationState> {
   constructor(props: any) {
     super(props);
     this.state = {
@@ -51,13 +48,11 @@ export const AccountCreationSurvey = fp.flow(
     } catch (error) {
       reportError(error);
       const errorResponse = await convertAPIError(error);
-      this.setState({createAccountErrorResponse: errorResponse});
+      this.props.showProfileErrorModal(errorResponse.message)
     }
   }
 
   render() {
-    const {showProfileErrorModal} = this.props
-
     return <React.Fragment>
       <DemographicSurvey
           profile={fp.set('demographicSurvey', fp.mapValues(() => undefined, this.props.profile.demographicSurvey), this.props.profile)}
@@ -70,8 +65,6 @@ export const AccountCreationSurvey = fp.flow(
           enablePrevious={true}
           showStepCount={true}
       />
-      {this.state.createAccountErrorResponse && showProfileErrorModal(this.state.createAccountErrorResponse.message)
-      }
     </React.Fragment>;
   }
 })

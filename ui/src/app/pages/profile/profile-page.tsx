@@ -5,11 +5,11 @@ import * as validate from 'validate.js';
 
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
-import {withProfileErrorModal, WithProfileErrorModalProps, withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
+import {withProfileErrorModal, WithProfileErrorModalProps} from 'app/components/with-error-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {TextAreaWithLengthValidationMessage, TextInput, ValidationError} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {Modal} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
@@ -154,8 +154,7 @@ interface ProfilePageState {
 
 export const ProfilePage = fp.flow(
   withUserProfile(),
-  withProfileErrorModal({title: 'Error updating account'}),
-  withErrorModal()
+  withProfileErrorModal({title: 'Error updating account'})
   )(class extends React.Component<
     ProfilePageProps,
     ProfilePageState
@@ -363,7 +362,6 @@ export const ProfilePage = fp.flow(
   }
 
   render() {
-    console.log('props:', this.props)
     const {profileState: {profile}} = this.props;
     const {currentProfile, updating, showDemographicSurveyModal} = this.state;
     const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement} =

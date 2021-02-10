@@ -37,7 +37,8 @@ export const withErrorModal = () => {
 
       render() {
         return <React.Fragment>
-          {this.state.show && <TextModal title={this.state.title}
+          {this.state.show && <TextModal role='alertdialog'
+                                         title={this.state.title}
                                          body={this.state.body}
                                          closeFunction={() => this.setState({show: false})}/>
           }
@@ -49,11 +50,11 @@ export const withErrorModal = () => {
   };
 };
 
-export interface WithProfileErrorModalProps extends WithErrorModalProps {
+export interface WithProfileErrorModalProps {
   showProfileErrorModal?: (message: string) => void;
 }
 
-export const withProfileErrorModal = ({title = ''}) => {
+export const withProfileErrorWrapper = ({title = ''}) => {
   const body = ({message}) => (<React.Fragment>
     <div>An error occurred while saving profile. The following message was
         returned:
@@ -75,3 +76,5 @@ export const withProfileErrorModal = ({title = ''}) => {
     return ProileErrorWrapper
   }
 }
+
+export const withProfileErrorModal = ({title = '' }) => fp.flow(withProfileErrorWrapper({title}), withErrorModal())
