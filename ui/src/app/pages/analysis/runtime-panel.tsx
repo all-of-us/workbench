@@ -228,13 +228,13 @@ export const ConfirmDelete = ({onCancel, onConfirm}) => {
   </Fragment>;
 };
 
-const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPrefix, validMachineTypes}) => {
+const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPrefix, validMachineTypes, cpuLabelStyles = {}, ramLabelStyles = {}}) => {
   const initialMachineType = findMachineByName(machineType) || defaultMachineType;
   const {cpu, memory} = selectedMachine || initialMachineType;
 
   return <Fragment>
     <FlexRow style={styles.labelAndInput}>
-      <label style={styles.label} htmlFor={`${idPrefix}-cpu`}>CPUs</label>
+      <label style={{...styles.label, ...cpuLabelStyles}} htmlFor={`${idPrefix}-cpu`}>CPUs</label>
       <Dropdown id={`${idPrefix}-cpu`}
                 options={fp.flow(
                     // Show all CPU options.
@@ -255,7 +255,7 @@ const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPr
                 value={cpu}/>
     </FlexRow>
     <FlexRow style={styles.labelAndInput}>
-      <label style={styles.label} htmlFor={`${idPrefix}-ram`}>RAM (GB)</label>
+      <label style={{...styles.label, ...ramLabelStyles}} htmlFor={`${idPrefix}-ram`}>RAM (GB)</label>
       <Dropdown id={`${idPrefix}-ram`}
         options={fp.flow(
           // Show valid memory options as constrained by the currently selected CPU.
@@ -377,13 +377,17 @@ const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
         selectedMachine={selectedWorkerMachine}
         disabled={disabled}
         validMachineTypes={validLeoDataprocWorkerMachineTypes}
-        idPrefix='worker'/>
+        idPrefix='worker'
+        cpuLabelStyles={{minWidth: '2.5rem'}} // width of 'Workers' label above
+        ramLabelStyles={{minWidth: '3.75rem'}} // width of 'Preemptible' label above
+      />
       <DiskSizeSelector
         diskSize={workerDiskSize}
         onChange={setSelectedDiskSize}
         selectedDiskSize={selectedDiskSize}
         disabled={disabled}
-        idPrefix='worker'/>
+        idPrefix='worker'
+      />
     </div>
   </fieldset>;
 };
