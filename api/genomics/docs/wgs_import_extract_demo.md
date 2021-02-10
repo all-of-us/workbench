@@ -18,6 +18,9 @@ reproducability but note that the source for these files will probably change ov
 	- WDL - https://github.com/broadinstitute/gatk/blob/75f0bd80a45ed46e171ba2125fcb6a6b825c1b74/scripts/variantstore/wdl/ImportGenomes.wdl
 	- Inputs - api/genomics/wdl/ImportGenomes.poc.inputs.json
 	- This will create three tables: metadata, pet_?, and vet_? within the dataset
+4. Publish dataset into VPC-SC
+	- ```./project.rb publish-cdr --project all-of-us-workbench-test --bq-dataset wgs_demo_5 --exclude-sa-acl --exclude-auth-domain-acl --additional-reader-group PROXY_118217329794842274136@dev.test.firecloud.org --source-cdr-project-override all-of-us-workbench-test```
+	- Change the argument for `--additional-reader-group` to match the Proxy group for the extraction SA in the current environment
 
 ### Creating Filter
 1. Run NgsFilterExtract
