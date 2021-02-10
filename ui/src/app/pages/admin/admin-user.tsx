@@ -42,7 +42,7 @@ import {Dropdown} from 'primereact/dropdown';
 import * as validate from 'validate.js';
 
 const styles = reactStyles({
-  label: {
+  semiBold: {
     fontWeight: 600
   },
   backgroundColorDark: {
@@ -63,7 +63,7 @@ const CREDIT_LIMIT_DEFAULT_STEP = 50;
 
 const DropdownWithLabel = ({label, options, initialValue, onChange, disabled= false, dataTestId, dropdownStyle = {}}) => {
   return <FlexColumn data-test-id={dataTestId} style={{marginTop: '1rem'}}>
-    <label style={styles.label}>{label}</label>
+    <label style={styles.semiBold}>{label}</label>
     <Dropdown
         style={{
           minWidth: '70px',
