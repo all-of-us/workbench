@@ -8,7 +8,7 @@ require "tempfile"
 ENVIRONMENTS = {
   "all-of-us-workbench-test" => {
     :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
-    :source_cdr_project => "all-of-us-workbench-test",
+    :source_cdr_project => "all-of-us-ehr-dev",
     :ingest_cdr_project => "fc-aou-vpc-ingest-test",
     :dest_cdr_project => "fc-aou-cdr-synth-test",
     :config_json => "config_test.json"
@@ -103,6 +103,10 @@ def publish_cdr(cmd_name, args)
       "--additional-reader-group [reader_email]",
       ->(opts, v) { opts.additional_reader_group = v},
       "Additional Google group to include in the reader ACL.")
+  op.add_option(
+    "--source-cdr-project-override [source-cdr-project]",
+    ->(opts, v) { opts.source_cdr_project_override = v},
+    "Override for the source cdr project where the source dataset is.")
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_dataset and opts.project }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
   op.parse.validate
@@ -132,7 +136,8 @@ def publish_cdr(cmd_name, args)
     # session, or else we would revert the active account after running.
     common.run_inline %W{gcloud auth activate-service-account -q --key-file #{key_file.path}}
 
-    source_dataset = "#{env.fetch(:source_cdr_project)}:#{op.opts.bq_dataset}"
+    source_cdr_project = op.opts.source_cdr_project_override || env.fetch(:source_cdr_project)
+    source_dataset = "#{source_cdr_project}:#{op.opts.bq_dataset}"
     ingest_dataset = "#{env.fetch(:ingest_cdr_project)}:#{op.opts.bq_dataset}"
     dest_dataset = "#{env.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
     common.status "Copying from '#{source_dataset}' -> '#{ingest_dataset}' -> '#{dest_dataset}' as #{account}"
@@ -146,7 +151,7 @@ def publish_cdr(cmd_name, args)
     # See https://docs.google.com/document/d/1EHw5nisXspJjA9yeZput3W4-vSIcuLBU5dPizTnk1i0/edit
     common.run_inline %W{bq mk -f --default_table_expiration 7200 --dataset #{ingest_dataset}}
     common.run_inline %W{./copy-bq-dataset.sh
-        #{source_dataset} #{ingest_dataset} #{env.fetch(:source_cdr_project)}
+        #{source_dataset} #{ingest_dataset} #{source_cdr_project}
         #{table_match_filter} #{table_skip_filter}}
 
     common.run_inline %W{bq mk -f --dataset #{dest_dataset}}
