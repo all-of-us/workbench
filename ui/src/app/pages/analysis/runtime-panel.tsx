@@ -228,7 +228,16 @@ export const ConfirmDelete = ({onCancel, onConfirm}) => {
   </Fragment>;
 };
 
-const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPrefix, validMachineTypes, cpuLabelStyles = {}, ramLabelStyles = {}}) => {
+const MachineSelector = ({
+  onChange,
+  selectedMachine,
+  machineType,
+  disabled,
+  idPrefix,
+  validMachineTypes,
+  cpuLabelStyles = {},
+  ramLabelStyles = {}}
+) => {
   const initialMachineType = findMachineByName(machineType) || defaultMachineType;
   const {cpu, memory} = selectedMachine || initialMachineType;
 
@@ -238,18 +247,18 @@ const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPr
       <Dropdown id={`${idPrefix}-cpu`}
                 options={fp.flow(
                     // Show all CPU options.
-                    fp.map('cpu'),
+                  fp.map('cpu'),
                     // In the event that was remove a machine type from our set of valid
                     // configs, we want to continue to allow rendering of the value here.
                     // Union also makes the CPU values unique.
-                    fp.union([cpu]),
-                    fp.sortBy(fp.identity)
+                  fp.union([cpu]),
+                  fp.sortBy(fp.identity)
                 )(validMachineTypes)}
                 onChange={
                   ({value}) => fp.flow(
-                      fp.sortBy('memory'),
-                      fp.find({cpu: value}),
-                      onChange)(validMachineTypes)
+                    fp.sortBy('memory'),
+                    fp.find({cpu: value}),
+                    onChange)(validMachineTypes)
                 }
                 disabled={disabled}
                 value={cpu}/>
