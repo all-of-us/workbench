@@ -8,7 +8,7 @@ require "tempfile"
 ENVIRONMENTS = {
   "all-of-us-workbench-test" => {
     :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
-    :source_cdr_project => "all-of-us-workbench-test",
+    :source_cdr_project => "all-of-us-ehr-dev",
     :ingest_cdr_project => "fc-aou-vpc-ingest-test",
     :dest_cdr_project => "fc-aou-cdr-synth-test",
     :config_json => "config_test.json"
@@ -65,6 +65,9 @@ def publish_cdr(cmd_name, args)
   ensure_docker cmd_name, args
 
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.exclude_sa_acl = false
+  op.opts.exclude_auth_domain_acl = false
+
   op.add_option(
     "--bq-dataset [dataset]",
     ->(opts, v) { opts.bq_dataset = v},
@@ -86,6 +89,24 @@ def publish_cdr(cmd_name, args)
     "was an issue with the publish. In general, CDRs should be treated as " +
     "immutable after the initial publish."
   )
+  op.add_typed_option(
+      "--exclude-sa-acl",
+      TrueClass,
+      ->(opts, v) { opts.exclude_sa_acl = v},
+      "When true, does not include the default service account in the ACL. Defaults to false which includes the ACL.")
+  op.add_typed_option(
+      "--exclude-auth-domain-acl",
+      TrueClass,
+      ->(opts, v) { opts.exclude_auth_domain_acl = v},
+      "When true, does not include the auth domain in the ACL. Defaults to false which includes the ACL.")
+  op.add_option(
+      "--additional-reader-group [reader_email]",
+      ->(opts, v) { opts.additional_reader_group = v},
+      "Additional Google group to include in the reader ACL.")
+  op.add_option(
+    "--source-cdr-project-override [source-cdr-project]",
+    ->(opts, v) { opts.source_cdr_project_override = v},
+    "Override for the source cdr project where the source dataset is.")
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_dataset and opts.project }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
   op.parse.validate
@@ -115,7 +136,8 @@ def publish_cdr(cmd_name, args)
     # session, or else we would revert the active account after running.
     common.run_inline %W{gcloud auth activate-service-account -q --key-file #{key_file.path}}
 
-    source_dataset = "#{env.fetch(:source_cdr_project)}:#{op.opts.bq_dataset}"
+    source_cdr_project = op.opts.source_cdr_project_override || env.fetch(:source_cdr_project)
+    source_dataset = "#{source_cdr_project}:#{op.opts.bq_dataset}"
     ingest_dataset = "#{env.fetch(:ingest_cdr_project)}:#{op.opts.bq_dataset}"
     dest_dataset = "#{env.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
     common.status "Copying from '#{source_dataset}' -> '#{ingest_dataset}' -> '#{dest_dataset}' as #{account}"
@@ -129,7 +151,7 @@ def publish_cdr(cmd_name, args)
     # See https://docs.google.com/document/d/1EHw5nisXspJjA9yeZput3W4-vSIcuLBU5dPizTnk1i0/edit
     common.run_inline %W{bq mk -f --default_table_expiration 7200 --dataset #{ingest_dataset}}
     common.run_inline %W{./copy-bq-dataset.sh
-        #{source_dataset} #{ingest_dataset} #{env.fetch(:source_cdr_project)}
+        #{source_dataset} #{ingest_dataset} #{source_cdr_project}
         #{table_match_filter} #{table_skip_filter}}
 
     common.run_inline %W{bq mk -f --dataset #{dest_dataset}}
@@ -157,35 +179,46 @@ def publish_cdr(cmd_name, args)
         end
       end
 
-#      if existing_groups.include?(auth_domain_group_email)
-#        common.status "#{auth_domain_group_email} already in ACL, skipping..."
-#      else
-#        common.status "Adding #{auth_domain_group_email} as a READER..."
-#        new_entry = { "groupByEmail" => auth_domain_group_email, "role" => "READER"}
-#        json["access"].push(new_entry)
-#      end
-
-      bq_reader = "PROXY_100800045120777231830@dev.test.firecloud.org"
-      common.status "Adding #{bq_reader} as a READER..."
-      new_entry = { "groupByEmail" => bq_reader, "role" => "READER"}
-      json["access"].push(new_entry)
+      unless op.opts.exclude_auth_domain_acl
+        if existing_groups.include?(auth_domain_group_email)
+          common.status "#{auth_domain_group_email} already in ACL, skipping..."
+        else
+          common.status "Adding #{auth_domain_group_email} as a READER..."
+          new_entry = { "groupByEmail" => auth_domain_group_email, "role" => "READER"}
+          json["access"].push(new_entry)
+        end
+      end
 
       # if the app SA's in too many groups, it won't gain READER transitively.
       # add it directly, to make sure.
       # See discussion at https://pmi-engteam.slack.com/archives/CHRN2R51N/p1609869521078200?thread_ts=1609796171.063800&cid=CHRN2R51N
-#      if existing_users.include?(app_sa)
-#        common.status "#{app_sa} already in ACL, skipping..."
-      #else
-     #   common.status "Adding #{app_sa} as a READER..."
-     #   new_entry = { "groupByEmail" => app_sa, "role" => "READER"}
-     #   json["access"].push(new_entry)
-     # end
+      unless op.opts.exclude_sa_acl
+        if existing_users.include?(app_sa)
+          common.status "#{app_sa} already in ACL, skipping..."
+        else
+          common.status "Adding #{app_sa} as a READER..."
+          new_entry = { "userByEmail" => app_sa, "role" => "READER"}
+          json["access"].push(new_entry)
+        end
+      end
+
+      if op.opts.additional_reader_group
+        new_group = op.opts.additional_reader_group
+
+        if existing_users.include?(new_group)
+          common.status "#{new_group} already in ACL, skipping..."
+        else
+          common.status "Adding #{new_group} as a READER..."
+          new_entry = { "groupByEmail" => new_group, "role" => "READER"}
+          json["access"].push(new_entry)
+        end
+      end
 
       File.open(config_file.path, "w") do |f|
         f.write(JSON.pretty_generate(json))
       end
 
-      File.open("update_attempt.json", "w") do |f|
+      File.open("update_acl.json", "w") do |f|
         f.write(JSON.pretty_generate(json))
       end
 
