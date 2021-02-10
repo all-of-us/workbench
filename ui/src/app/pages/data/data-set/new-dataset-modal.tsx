@@ -133,7 +133,7 @@ class NewDataSetModal extends React.Component<Props, State> {
         };
         await dataSetApi().updateDataSet(workspaceNamespace, workspaceId, dataSet.id, updateReq);
       } else {
-        await dataSetApi().createDataSet(workspaceNamespace, workspaceId, request);
+        await dataSetApi().createDataSet(workspaceNamespace, workspaceId, null);
       }
       if (this.state.exportToNotebook) {
         await dataSetApi().exportToNotebook(
@@ -154,6 +154,7 @@ class NewDataSetModal extends React.Component<Props, State> {
         window.history.back();
       }
     } catch (e) {
+      console.error(e);
       if (e.status === 409) {
         this.setState({conflictDataSetName: true, loading: false});
       } else if (e.status === 400) {
