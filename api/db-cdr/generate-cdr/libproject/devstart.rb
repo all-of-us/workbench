@@ -65,6 +65,9 @@ def publish_cdr(cmd_name, args)
   ensure_docker cmd_name, args
 
   op = WbOptionsParser.new(cmd_name, args)
+  op.opts.exclude_sa_acl = false
+  op.opts.exclude_auth_domain_acl = false
+
   op.add_option(
     "--bq-dataset [dataset]",
     ->(opts, v) { opts.bq_dataset = v},
@@ -86,6 +89,20 @@ def publish_cdr(cmd_name, args)
     "was an issue with the publish. In general, CDRs should be treated as " +
     "immutable after the initial publish."
   )
+  op.add_typed_option(
+      "--exclude-sa-acl",
+      TrueClass,
+      ->(opts, v) { opts.exclude_sa_acl = v},
+      "When true, does not include the default service account in the ACL. Defaults to false which includes the ACL.")
+  op.add_typed_option(
+      "--exclude-auth-domain-acl",
+      TrueClass,
+      ->(opts, v) { opts.exclude_auth_domain_acl = v},
+      "When true, does not include the auth domain in the ACL. Defaults to false which includes the ACL.")
+  op.add_option(
+      "--additional-reader-group [reader_email]",
+      ->(opts, v) { opts.additional_reader_group = v},
+      "Additional Google group to include in the reader ACL.")
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_dataset and opts.project }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
   op.parse.validate
@@ -157,31 +174,46 @@ def publish_cdr(cmd_name, args)
         end
       end
 
-#      if existing_groups.include?(auth_domain_group_email)
-#        common.status "#{auth_domain_group_email} already in ACL, skipping..."
-#      else
-#        common.status "Adding #{auth_domain_group_email} as a READER..."
-#        new_entry = { "groupByEmail" => auth_domain_group_email, "role" => "READER"}
-#        json["access"].push(new_entry)
-#      end
-
-      bq_reader = "PROXY_118217329794842274136@dev.test.firecloud.org"
-      common.status "Adding #{bq_reader} as a READER..."
-      new_entry = { "groupByEmail" => bq_reader, "role" => "READER"}
-      json["access"].push(new_entry)
+      unless op.opts.exclude_auth_domain_acl
+        if existing_groups.include?(auth_domain_group_email)
+          common.status "#{auth_domain_group_email} already in ACL, skipping..."
+        else
+          common.status "Adding #{auth_domain_group_email} as a READER..."
+          new_entry = { "groupByEmail" => auth_domain_group_email, "role" => "READER"}
+          json["access"].push(new_entry)
+        end
+      end
 
       # if the app SA's in too many groups, it won't gain READER transitively.
       # add it directly, to make sure.
       # See discussion at https://pmi-engteam.slack.com/archives/CHRN2R51N/p1609869521078200?thread_ts=1609796171.063800&cid=CHRN2R51N
-#      if existing_users.include?(app_sa)
-#        common.status "#{app_sa} already in ACL, skipping..."
-      #else
-     #   common.status "Adding #{app_sa} as a READER..."
-     #   new_entry = { "groupByEmail" => app_sa, "role" => "READER"}
-     #   json["access"].push(new_entry)
-     # end
+      unless op.opts.exclude_sa_acl
+        if existing_users.include?(app_sa)
+          common.status "#{app_sa} already in ACL, skipping..."
+        else
+          common.status "Adding #{app_sa} as a READER..."
+          new_entry = { "userByEmail" => app_sa, "role" => "READER"}
+          json["access"].push(new_entry)
+        end
+      end
+
+      if op.opts.additional_reader_group
+        new_group = op.opts.additional_reader_group
+
+        if existing_users.include?(new_group)
+          common.status "#{new_group} already in ACL, skipping..."
+        else
+          common.status "Adding #{new_group} as a READER..."
+          new_entry = { "groupByEmail" => new_group, "role" => "READER"}
+          json["access"].push(new_entry)
+        end
+      end
 
       File.open(config_file.path, "w") do |f|
+        f.write(JSON.pretty_generate(json))
+      end
+
+      File.open("update_acl.json", "w") do |f|
         f.write(JSON.pretty_generate(json))
       end
 
