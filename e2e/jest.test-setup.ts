@@ -68,29 +68,33 @@ beforeEach(async () => {
     }
   })
   .on('console', async (message) => {
-    const args = await Promise.all(
-      message.args().map(async (arg) =>
-        await arg.executionContext().evaluate( (txt) => {
-          if (txt instanceof Error) {
-            return JSON.stringify(txt.stack);
-          }
-          return txt.toString();
-        }, arg))
-    ).catch();
+    try {
+      const args = await Promise.all(
+        message.args().map(async (arg) =>
+          await arg.executionContext().evaluate((txt) => {
+            if (txt instanceof Error) {
+              return JSON.stringify(txt.stack);
+            }
+            return txt.toString();
+          }, arg))
+      )
 
-    const msgText = message.text();
-    const text = args.filter(msg => msg !== 'undefined').join(' ');
-    if (msgText && !message.args().length) {
-      return;
-    }
+      const msgText = message.text();
+      const text = args.filter(msg => msg !== 'undefined').join(' ');
+      if (msgText && !message.args().length) {
+        return;
+      }
 
-    const type = message.type();
-    // Don't log "log", "info" or "debug"
-    switch (type) {
-      case 'error':
-      case 'warning':
-        console.debug(`❗Page console: ${message.type()}: ${JSON.stringify(text, null, 2)}`);
-        break;
+      const type = message.type();
+      // Don't log "log", "info" or "debug"
+      switch (type) {
+        case 'error':
+        case 'warning':
+          console.debug(`❗Page console: ${message.type()}: ${JSON.stringify(text, null, 2)}`);
+          break;
+      }
+      // tslint:disable-next-line:no-empty
+    } catch (err) {
     }
   })
   .on('error', (error) => {
