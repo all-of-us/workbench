@@ -76,7 +76,7 @@ beforeEach(async () => {
           }
           return txt.toString();
         }, arg))
-    );
+    ).catch();
 
     const msgText = message.text();
     const text = args.filter(msg => msg !== 'undefined').join(' ');
