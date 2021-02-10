@@ -69,7 +69,7 @@ public class CreateTerraSubmission {
       ServiceAccountAPIClientFactory apiFactory =
               new ServiceAccountAPIClientFactory(opts.getOptionValue(fcBaseUrlOpt.getLongOpt()));
 
-      log.info(apiFactory.profileApi().getProxyGroup("all-of-us-workbench-test@appspot.gserviceaccount.com"));
+      log.info(apiFactory.profileApi().getProxyGroup("wgs-cohort-extraction@all-of-us-workbench-test.iam.gserviceaccount.com"));
 
       String workspaceNamespace = opts.getOptionValue(workspaceNamespaceOpt.getLongOpt());
       String workspaceName = opts.getOptionValue(workspaceNameOpt.getLongOpt());

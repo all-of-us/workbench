@@ -165,7 +165,7 @@ def publish_cdr(cmd_name, args)
 #        json["access"].push(new_entry)
 #      end
 
-      bq_reader = "PROXY_100800045120777231830@dev.test.firecloud.org"
+      bq_reader = "PROXY_118217329794842274136@dev.test.firecloud.org"
       common.status "Adding #{bq_reader} as a READER..."
       new_entry = { "groupByEmail" => bq_reader, "role" => "READER"}
       json["access"].push(new_entry)
@@ -182,10 +182,6 @@ def publish_cdr(cmd_name, args)
      # end
 
       File.open(config_file.path, "w") do |f|
-        f.write(JSON.pretty_generate(json))
-      end
-
-      File.open("update_attempt.json", "w") do |f|
         f.write(JSON.pretty_generate(json))
       end
 
