@@ -344,7 +344,7 @@ const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
   }, [selectedNumWorkers, selectedPreemtible, selectedWorkerMachine, selectedDiskSize]);
 
   return <fieldset style={{marginTop: '0.75rem'}}>
-    <legend style={styles.workerConfigLabel}>Worker Config</legend>
+    <legend style={styles.workerConfigLabel}>Worker Configuration</legend>
     <div style={styles.formGrid}>
       <FlexRow style={styles.labelAndInput}>
         <label style={styles.label} htmlFor='num-workers'>Workers</label>
