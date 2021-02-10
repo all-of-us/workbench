@@ -43,7 +43,7 @@ test=$(bq show "$BQ_PROJECT:$BQ_DATASET")
 # CREATE TABLES
 ################################################
 echo "CREATE TABLES - cb_criteria"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 (
     id                  INT64,
@@ -72,7 +72,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 
 # table that holds the ingredient --> coded drugs mapping
 echo "CREATE TABLES - cb_criteria_ancestor"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_ancestor\`
 (
     ancestor_id INT64,
@@ -81,7 +81,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 
 # table that holds categorical results and min/max information about individual labs
 echo "CREATE TABLES - cb_criteria_attribute"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
 (
     id                    INT64,
@@ -94,7 +94,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 
 # table that holds which survey versions each question and answer are apart of
 echo "CREATE TABLES - cb_survey_attribute"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`
 (
       id                    INT64
@@ -107,7 +107,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 # table that holds the drug brands to ingredients relationship mapping
 # also holds source concept --> standard concept mapping information
 echo "CREATE TABLES - cb_criteria_relationship"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_relationship\`
 (
     concept_id_1 INT64,
@@ -116,7 +116,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 
 # staging table to make it easier to add data into prep_concept_ancestor
 echo "CREATE TABLES - prep_ancestor_staging"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
 (
     ancestor_concept_id     INT64,
@@ -147,7 +147,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 
 # table that holds ancestor information for parent counts
 echo "CREATE TABLES - prep_concept_ancestor"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
 (
     ancestor_concept_id     INT64,
@@ -157,7 +157,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 
 # holds atc and rxnorm concept relationships for drugs
 echo "CREATE TABLES - prep_atc_rel_in_data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
 (
     p_concept_id    INT64,
@@ -172,7 +172,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 
 # holds LOINC concept relationship data for measurements
 echo "CREATE TABLES - prep_loinc_rel_in_data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\`
 (
     p_concept_id    INT64,
@@ -187,7 +187,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 
 # holds standard snomed concept relationship data for conditions
 echo "CREATE TABLES - prep_snomed_rel_cm_in_data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_in_data\`
 (
     p_concept_id    INT64,
@@ -202,7 +202,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 
 # holds source snomed concept relationship data for conditions
 echo "CREATE TABLES - prep_snomed_rel_cm_src_in_data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\`
 (
     p_concept_id    INT64,
@@ -217,7 +217,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 
 # holds standard snomed concept relationship data for measurements
 echo "CREATE TABLES - prep_snomed_rel_meas_in_data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_meas_in_data\`
 (
     p_concept_id    INT64,
@@ -232,7 +232,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 
 # holds standard snomed concept relationship data for procedures
 echo "CREATE TABLES - prep_snomed_rel_pcs_in_data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_in_data\`
 (
     p_concept_id    INT64,
@@ -247,7 +247,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 
 # holds source snomed concept relationship data for procedures
 echo "CREATE TABLES - prep_snomed_rel_pcs_src_in_data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_src_in_data\`
 (
     p_concept_id    INT64,
@@ -265,7 +265,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 # ICD9 - SOURCE
 ################################################
 echo "ICD9 - SOURCE - add data (do not insert zero count children)"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -355,7 +355,7 @@ WHERE a.type in ('ICD9CM', 'ICD9Proc')
 ORDER BY 1"
 
 echo "ICD9 - SOURCE - generate parent rollup counts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.rollup_count = y.cnt
     ,x.est_count = y.cnt
@@ -391,7 +391,7 @@ FROM
 WHERE x.id = y.id"
 
 echo "ICD9 - SOURCE - delete parents that have no count"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "DELETE
 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 WHERE type in ('ICD9CM', 'ICD9Proc')
@@ -404,7 +404,7 @@ WHERE type in ('ICD9CM', 'ICD9Proc')
 # ICD10CM / ICD10PCS - SOURCE
 ################################################
 echo "ICD10CM - SOURCE - insert data (do not insert zero count children)"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -494,7 +494,7 @@ WHERE a.type = 'ICD10CM'
 ORDER BY 1"
 
 echo "ICD10PCS - SOURCE - insert data (do not insert zero count children)"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -584,7 +584,7 @@ ORDER BY 1"
 
 # Join Count: 8
 echo "ICD10CM / ICD10PCS - SOURCE - add items into staging table for use in next query"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
     (
           ancestor_concept_id
@@ -622,7 +622,7 @@ FROM
 
 # Count: 8 - If count above is changed, the number of JOINS below must be updated
 echo "ICD10CM / ICD10PCS - SOURCE - add items into ancestor table"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
     (
           ancestor_concept_id
@@ -678,7 +678,7 @@ WHERE type in ('ICD10CM','ICD10PCS')
     and is_standard = 0"
 
 echo "ICD10CM - SOURCE - generate parent rollup counts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt
@@ -711,7 +711,7 @@ WHERE x.concept_id = y.concept_id
     and x.is_group = 1"
 
 echo "ICD10PCS - SOURCE - generate parent rollup counts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt
@@ -744,7 +744,7 @@ WHERE x.concept_id = y.concept_id
     and x.is_group = 1"
 
 echo "ICD10CM / ICD10PCS - SOURCE - delete zero count parents"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "DELETE
 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 WHERE type IN ('ICD10CM', 'ICD10PCS')
@@ -757,7 +757,7 @@ WHERE type IN ('ICD10CM', 'ICD10PCS')
 # CPT4 - SOURCE
 ################################################
 echo "CPT4 - SOURCE - insert data (do not insert zero count children)"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -845,7 +845,7 @@ WHERE a.type = 'CPT4'
 ORDER BY 1"
 
 echo "CPT4 - SOURCE - generate parent counts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt
@@ -881,7 +881,7 @@ FROM
 WHERE x.id = y.id"
 
 echo "CPT4 - SOURCE - delete zero count parents"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "DELETE
 FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 WHERE type = 'CPT4'
@@ -902,7 +902,7 @@ WHERE type = 'CPT4'
 # PPI PHYSICAL MEASUREMENTS (PM)
 ################################################
 echo "PM - insert data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -944,7 +944,7 @@ WHERE domain_id = 'PHYSICAL_MEASUREMENT'
 ORDER BY 1"
 
 echo "PM - counts for Heart Rate, Height, Weight, BMI, Waist Circumference, Hip Circumference"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
@@ -962,7 +962,7 @@ WHERE x.domain_id = 'PHYSICAL_MEASUREMENT'
     and x.concept_id = y.concept_id"
 
 echo "PM - counts for heart rhythm, pregnancy, wheelchair use"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
@@ -983,7 +983,7 @@ WHERE x.domain_id = 'PHYSICAL_MEASUREMENT'
 
 #----- BLOOD PRESSURE -----
 echo "PM - blood pressure - hypotensive"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET item_count =
         (
@@ -1008,7 +1008,7 @@ WHERE domain_id = 'PHYSICAL_MEASUREMENT'
     and name LIKE 'Hypotensive%'"
 
 echo "PM - blood pressure - normal"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET item_count =
         (
@@ -1033,7 +1033,7 @@ WHERE domain_id = 'PHYSICAL_MEASUREMENT'
     and name LIKE 'Normal%'"
 
 echo "PM - blood pressure - pre-hypertensive"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET item_count =
         (
@@ -1058,7 +1058,7 @@ WHERE domain_id = 'PHYSICAL_MEASUREMENT'
     and name LIKE 'Pre-Hypertensive%'"
 
 echo "PM - blood pressure  - hypertensive"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET item_count =
         (
@@ -1083,7 +1083,7 @@ WHERE domain_id = 'PHYSICAL_MEASUREMENT'
     and name LIKE 'Hypertensive%'"
 
 echo "PM - blood pressure  - detail"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET item_count =
         (
@@ -1109,7 +1109,7 @@ WHERE domain_id = 'PHYSICAL_MEASUREMENT'
 # PPI SURVEYS
 ################################################
 echo "PPI SURVEYS - insert data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -1166,7 +1166,7 @@ WHERE a.domain_id = 'SURVEY'
 ORDER BY 1"
 
 echo "PPI SURVEYS - insert extra answers (Skip, Prefer Not To Answer, Dont Know)"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -1233,7 +1233,7 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` e on
 # the concept_id of the answer, is the concept_id for the question
 # we do this because there are a few answers that are attached to a topic and we want to get those as well
 echo "PPI SURVEYS - add items to ancestor table"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
     (
           ancestor_concept_id
@@ -1249,7 +1249,7 @@ WHERE a.domain_id = 'SURVEY'
     and a.subtype = 'ANSWER'"
 
 echo "PPI SURVEYS - generate answer counts for all questions EXCEPT where question concept_id = 1585747"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
@@ -1277,7 +1277,7 @@ WHERE x.domain_id = 'SURVEY'
     and x.value = y.value"
 
 echo "PPI SURVEYS - generate answer counts for question concept_id = 1585747"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
@@ -1306,7 +1306,7 @@ WHERE x.domain_id = 'SURVEY'
     and x.value = y.value"
 
 echo "PPI SURVEYS - generate question counts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.rollup_count = y.cnt
     , x.item_count = y.cnt
@@ -1334,7 +1334,7 @@ WHERE x.domain_id = 'SURVEY'
     and x.concept_id = y.concept_id"
 
 echo "PPI SURVEYS - generate survey counts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt
@@ -1360,11 +1360,70 @@ FROM
 WHERE x.domain_id = 'SURVEY'
     and x.concept_id = y.ancestor_concept_id"
 
+
+################################################
+# PHYSICAL MEASUREMENTS - CONCEPT SET
+################################################
+echo "PHYSICAL MEASUREMENTS - CONCEPT SET"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , concept_id
+        , code
+        , name
+        , rollup_count
+        , item_count
+        , est_count
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+        , path
+    )
+SELECT
+      ROW_NUMBER() OVER (ORDER BY concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
+    , -1
+    , 'PHYSICAL_MEASUREMENT_CSS'
+    , 0
+    , vocabulary_id as type
+    , concept_id
+    , concept_code as code
+    , concept_name as name
+    , 0 as rollup_count
+    , b.cnt as item_count
+    , b.cnt as est_count
+    , 0
+    , 1
+    , 0
+    , 0
+    , CAST(ROW_NUMBER() OVER (ORDER BY concept_name) +
+      (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as STRING)
+FROM
+    (
+        SELECT *
+        FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
+        WHERE vocabulary_id = 'PPI'
+        and concept_class_id = 'Clinical Observation'
+        and domain_id = 'Measurement'
+    ) a
+JOIN
+    (   --- get the count of distinct patients coded with each concept
+        SELECT measurement_source_concept_id , COUNT(DISTINCT person_id) cnt
+        FROM \`$BQ_PROJECT.$BQ_DATASET.measurement\`
+        GROUP BY 1
+    ) b on a.concept_id = b.measurement_source_concept_id"
+
+
 ################################################
 # FITBIT DATA
 ################################################
 echo "FITBIT DATA"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -1394,7 +1453,7 @@ SELECT
 # DEMOGRAPHICS
 ################################################
 echo "DEMOGRAPHICS - Age"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -1421,7 +1480,7 @@ SELECT
     , 0"
 
 echo "DEMOGRAPHICS - Deceased"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -1455,7 +1514,7 @@ SELECT
 FROM \`$BQ_PROJECT.$BQ_DATASET.death\`"
 
 echo "DEMOGRAPHICS - Gender Identity"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -1497,7 +1556,7 @@ FROM
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.gender_concept_id = b.concept_id"
 
 echo "DEMOGRAPHICS - Sex at Birth"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -1539,7 +1598,7 @@ FROM
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.sex_at_birth_concept_id = b.concept_id"
 
 echo "DEMOGRAPHICS - Race"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -1585,7 +1644,7 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.race_concept_id = b.concept
 WHERE b.concept_id is not null"
 
 echo "DEMOGRAPHICS - Ethnicity"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -1632,7 +1691,7 @@ WHERE b.concept_id is not null"
 # VISIT_OCCURRENCE (VISITS/ENCOUNTERS)
 ################################################
 echo "VISIT_OCCURRENCE - add items with counts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -1680,7 +1739,7 @@ FROM
 # CONDITION_OCCURRENCE - SNOMED - SOURCE
 ################################################
 echo "CONDITION_OCCURRENCE - SNOMED - SOURCE - create prep_snomed_rel_cm_src"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src\` AS
 SELECT DISTINCT c1.concept_id AS p_concept_id
     , c1.concept_code AS p_concept_code
@@ -1706,7 +1765,7 @@ WHERE cr.concept_id_1 = c1.concept_id
     AND cr.relationship_id = 'Subsumes'"
 
 echo "CONDITION_OCCURRENCE - SNOMED - SOURCE - temp table adding level 0"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\`
     (
           p_concept_id
@@ -1735,7 +1794,7 @@ WHERE concept_id in
 for i in {1..7};
 do
     echo "CONDITION_OCCURRENCE - SNOMED - SOURCE - temp table adding level $i"
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_src_in_data\`
         (
               p_concept_id
@@ -1763,7 +1822,7 @@ do
 done
 
 echo "CONDITION_OCCURRENCE - SNOMED - SOURCE - adding root"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -1798,7 +1857,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
 WHERE concept_id = 441840"
 
 echo "CONDITION_OCCURRENCE - SNOMED - SOURCE - adding level 0"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -1856,7 +1915,7 @@ WHERE p.domain_id = 'CONDITION'
 for i in {1..18};
 do
     echo "CONDITION_OCCURRENCE - SNOMED - SOURCE - adding level $i"
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
         (
               id
@@ -1913,7 +1972,7 @@ done
 
 # Count: 18 - If loop count above is changed, the number of JOINS below must be updated
 echo "CONDITION_OCCURRENCE - SNOMED - SOURCE - add items into staging table for use in next query"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
     (
           ancestor_concept_id
@@ -1980,7 +2039,7 @@ FROM (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_
 
 # Count: 18 - If loop count above is changed, the number of JOINS below must be updated
 echo "CONDITION_OCCURRENCE - SNOMED - SOURCE - add items into ancestor table"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
     (
           ancestor_concept_id
@@ -2114,7 +2173,7 @@ WHERE domain_id = 'CONDITION'
     and is_standard = 0"
 
 echo "CONDITION_OCCURRENCE - SNOMED - SOURCE - item counts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
@@ -2132,7 +2191,7 @@ WHERE x.concept_id = y.concept_id
     and x.is_selectable = 1"
 
 echo "CONDITION_OCCURRENCE - SNOMED - SOURCE - parent counts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt
@@ -2171,7 +2230,7 @@ WHERE x.concept_id = y.concept_id
 # CONDITION_OCCURRENCE - SNOMED - STANDARD
 ###############################################
 echo "CONDITION_OCCURRENCE - SNOMED - STANDARD - create prep_snomed_rel_cm"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm\` AS
 SELECT DISTINCT c1.concept_id AS p_concept_id
     , c1.concept_code AS p_concept_code
@@ -2199,7 +2258,7 @@ WHERE cr.concept_id_1 = c1.concept_id
     AND cr.relationship_id = 'Subsumes'"
 
 echo "CONDITION_OCCURRENCE - SNOMED - STANDARD - temp table adding level 0"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_in_data\`
     (
           p_concept_id
@@ -2229,7 +2288,7 @@ WHERE concept_id in
 for i in {1..6};
 do
     echo "CONDITION_OCCURRENCE - SNOMED - STANDARD - temp table adding level $i"
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_cm_in_data\`
         (
               p_concept_id
@@ -2256,7 +2315,7 @@ do
 done
 
 echo "CONDITION_OCCURRENCE - SNOMED - STANDARD - adding root"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -2291,7 +2350,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
 WHERE concept_id = 441840"
 
 echo "CONDITION_OCCURRENCE - SNOMED - STANDARD - adding level 0"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -2349,7 +2408,7 @@ WHERE p.domain_id = 'CONDITION'
 for i in {1..18};
 do
     echo "CONDITION_OCCURRENCE - SNOMED - STANDARD - adding level $i"
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
         (
               id
@@ -2406,7 +2465,7 @@ done
 
 # Join Count: 18 - If loop count above is changed, the number of JOINS below must be updated
 echo "CONDITION_OCCURRENCE - SNOMED - STANDARD - add items into staging table for use in next query"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
     (
           ancestor_concept_id
@@ -2473,7 +2532,7 @@ FROM (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_
 
 # Count: 18 - If loop count above is changed, the number of JOINS below must be updated
 echo "CONDITION_OCCURRENCE - SNOMED - STANDARD - add items into ancestor table"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
     (
           ancestor_concept_id
@@ -2607,7 +2666,7 @@ WHERE domain_id = 'CONDITION'
     and is_standard = 1"
 
 echo "CONDITION_OCCURRENCE - SNOMED - STANDARD - item counts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
@@ -2625,7 +2684,7 @@ WHERE x.concept_id = y.concept_id
     and x.is_selectable = 1"
 
 echo "CONDITION_OCCURRENCE - SNOMED - STANDARD - parent counts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt
@@ -2664,7 +2723,7 @@ WHERE x.concept_id = y.concept_id
 # MEASUREMENT - Clinical - STANDARD LOINC
 ################################################
 echo "MEASUREMENT - Clinical - STANDARD LOINC - add root"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -2698,7 +2757,7 @@ SELECT (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 as id
     , CAST((SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS STRING)"
 
 echo "MEASUREMENT - Clinical - STANDARD LOINC - add parents"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -2741,7 +2800,7 @@ FROM
 
 # this will add all clinical items that have been categorized and added into prep_clinical_terms_nc
 echo "MEASUREMENT - Clinical - STANDARD LOINC - add children"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -2813,7 +2872,7 @@ FROM
 # MEASUREMENT - Labs - STANDARD LOINC
 ################################################
 echo "MEASUREMENT - Labs - STANDARD LOINC - create prep_loinc_rel"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel\` AS
 SELECT DISTINCT c1.concept_id AS p_concept_id
     , c1.concept_code AS p_concept_code
@@ -2837,7 +2896,7 @@ WHERE cr.concept_id_1 = c1.concept_id
     AND c2.concept_class_id IN ('LOINC Hierarchy', 'LOINC Component', 'Lab Test')"
 
 echo "MEASUREMENT - Labs - STANDARD LOINC - temp table adding level 0"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\`
     (
           p_concept_id
@@ -2865,7 +2924,7 @@ WHERE concept_id in
 for i in {1..5};
 do
     echo "MEASUREMENT - Labs - STANDARD LOINC - load temp table adding level $i"
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_loinc_rel_in_data\`
         (
               p_concept_id
@@ -2890,7 +2949,7 @@ do
 done
 
 echo "MEASUREMENT - Labs - STANDARD LOINC - add root"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -2925,7 +2984,7 @@ SELECT (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 as id
 
 # add items directly under the root item in the above query
 echo "MEASUREMENT - Labs - STANDARD LOINC - add level 0"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -2985,7 +3044,7 @@ WHERE p.type = 'LOINC'
 for i in {1..13};
 do
     echo "MEASUREMENT - Labs - STANDARD LOINC - add level $i"
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
         (
               id
@@ -3043,7 +3102,7 @@ do
 done
 
 echo "MEASUREMENT - Labs - STANDARD LOINC - add parent for un-categorized labs"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -3082,7 +3141,7 @@ WHERE type = 'LOINC'
     and parent_id = 0"
 
 echo "MEASUREMENT - Labs - STANDARD LOINC - add uncategorized labs"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -3144,7 +3203,7 @@ FROM
 
 # Join Count: 13 - If loop count above is changed, the number of JOINS below must be updated
 echo "MEASUREMENT - Labs - STANDARD LOINC - add items into staging table for use in next query"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
     (
           ancestor_concept_id
@@ -3197,7 +3256,7 @@ FROM
 
 # Count: 13 - If loop count above is changed, the number of JOINS below must be updated
 echo "MEASUREMENT - Labs - STANDARD LOINC - add items into ancestor table"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
     (
           ancestor_concept_id
@@ -3283,7 +3342,7 @@ WHERE type = 'LOINC'
     and is_standard = 1"
 
 echo "MEASUREMENT - Labs - STANDARD LOINC - item counts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
@@ -3301,7 +3360,7 @@ WHERE x.concept_id = y.concept_id
     and x.is_selectable = 1"
 
 echo "MEASUREMENT - Labs - STANDARD LOINC - generate parent counts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt
@@ -3337,7 +3396,7 @@ WHERE x.concept_id = y.concept_id
     and x.is_group = 1"
 
 echo "MEASUREMENT - Labs - STANDARD LOINC - generate count for Uncategorized parent"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt
@@ -3368,7 +3427,7 @@ WHERE x.type = 'LOINC'
 # MEASUREMENT - SNOMED - STANDARD
 ################################################
 echo "MEASUREMENT - SNOMED - STANDARD - create table prep_snomed_rel_meas"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_meas\` AS
 SELECT DISTINCT c1.concept_id AS p_concept_id
     , c1.concept_code AS p_concept_code
@@ -3396,7 +3455,7 @@ WHERE cr.concept_id_1 = c1.concept_id
     AND cr.relationship_id = 'Subsumes'"
 
 echo "MEASUREMENT - SNOMED - STANDARD - temp table level 0"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_meas_in_data\`
     (
           p_concept_id
@@ -3425,7 +3484,7 @@ WHERE concept_id in
 for i in {1..4};
 do
     echo "MEASUREMENT - SNOMED - STANDARD - temp table level $i"
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_meas_in_data\`
         (
               p_concept_id
@@ -3452,7 +3511,7 @@ do
 done
 
 echo "MEASUREMENT - SNOMED - STANDARD - add roots"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -3508,7 +3567,7 @@ FROM
     ) x"
 
 echo "MEASUREMENT - SNOMED - STANDARD - adding level 0"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -3566,7 +3625,7 @@ WHERE p.domain_id = 'MEASUREMENT'
 for i in {1..9};
 do
     echo "MEASUREMENT - SNOMED - STANDARD - adding level $i"
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
             (
                   id
@@ -3623,7 +3682,7 @@ done
 
 # Join Count: 9 - If loop count above is changed, the number of JOINS below must be updated
 echo "MEASUREMENT - SNOMED - STANDARD - add items into staging table for use in next query"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
     (
           ancestor_concept_id
@@ -3663,7 +3722,7 @@ FROM (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_
 
 # Count: 9 - If loop count above is changed, the number of JOINS below must be updated
 echo "MEASUREMENT - SNOMED - STANDARD - add items into ancestor table"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
     (
           ancestor_concept_id
@@ -3734,7 +3793,7 @@ WHERE domain_id = 'MEASUREMENT'
     and is_standard = 1"
 
 echo "MEASUREMENT - SNOMED - STANDARD - item counts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
@@ -3752,7 +3811,7 @@ WHERE x.concept_id = y.concept_id
     and x.is_selectable = 1"
 
 echo "MEASUREMENT - SNOMED - STANDARD - parent counts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt
@@ -3793,7 +3852,7 @@ WHERE x.concept_id = y.concept_id
 # ATC4 - ATC5 --> RXNORM/RXNORM Extension ingredient
 # ATC4 - ATC5 --> RXNORM/RXNORM Extension precise ingedient --> RXNORM ingredient
 echo "DRUG_EXPOSURE - RXNORM - temp table - ATC4 to ATC5 to RXNORM"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
     (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
 SELECT distinct e.p_concept_id, e.p_concept_code, e.p_concept_name, e.p_DOMAIN_ID,
@@ -3856,7 +3915,7 @@ left join
     ) e on d.atc_5 = e.atc_5"
 
 echo "DRUGS - temp table - ATC3 to ATC4"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
     (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
 select c1.CONCEPT_ID as p_concept_id, c1.CONCEPT_CODE as p_concept_code, c1.CONCEPT_NAME as p_concept_name,
@@ -3879,7 +3938,7 @@ where RELATIONSHIP_ID = 'Subsumes'
         )"
 
 echo "DRUGS - temp table - ATC2 TO ATC3"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
     (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
 select c1.CONCEPT_ID as p_concept_id, c1.CONCEPT_CODE as p_concept_code, c1.CONCEPT_NAME as p_concept_name,
@@ -3902,7 +3961,7 @@ where RELATIONSHIP_ID = 'Subsumes'
         )"
 
 echo "DRUGS - temp table - ATC1 TO ATC2"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.prep_atc_rel_in_data\`
     (p_concept_id, p_concept_code, p_concept_name, p_domain_id, concept_id, concept_code, concept_name, domain_id)
 select c1.CONCEPT_ID as p_concept_id, c1.CONCEPT_CODE as p_concept_code, c1.CONCEPT_NAME as p_concept_name,
@@ -3925,7 +3984,7 @@ where RELATIONSHIP_ID = 'Subsumes'
         )"
 
 echo "DRUGS - add roots"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (id,parent_id,domain_id,is_standard,type,concept_id,code,name,is_group,is_selectable,has_attribute,has_hierarchy,has_ancestor_data,path)
 select row_number() over (order by concept_code) + (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS ID,
@@ -3938,7 +3997,7 @@ where VOCABULARY_ID = 'ATC'
     and STANDARD_CONCEPT = 'C'"
 
 echo "DRUGS - add root for unmapped ingredients"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (id,parent_id,domain_id,is_standard,type,name,is_group,is_selectable,has_attribute,has_hierarchy,has_ancestor_data,path)
 select (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS ID,
@@ -3946,7 +4005,7 @@ select (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS ID,
     CAST( (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 as STRING ) as path"
 
 echo "DRUGS - level 2"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (id,parent_id,domain_id,is_standard,type,concept_id,code,name,is_group,is_selectable,has_attribute,has_hierarchy,has_ancestor_data,path)
 select row_number() over (order by p.id, c.concept_code)+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`),
@@ -3967,7 +4026,7 @@ where p.domain_id = 'DRUG'
         )"
 
 echo "DRUGS - level 3"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (id,parent_id,domain_id,is_standard,type,concept_id,code,name,is_group,is_selectable,has_attribute,has_hierarchy,has_ancestor_data,path)
 select row_number() over (order by p.id, c.concept_code)+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`),
@@ -3988,7 +4047,7 @@ where p.domain_id = 'DRUG'
         )"
 
 echo "DRUGS - level 4"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (id,parent_id,domain_id,is_standard,type,concept_id,code,name,is_group,is_selectable,has_attribute,has_hierarchy,has_ancestor_data,path)
 select row_number() over (order by p.id, c.concept_code)+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`),
@@ -4009,7 +4068,7 @@ where p.domain_id = 'DRUG'
         )"
 
 echo "DRUGS - level 5 - ingredients"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (id,parent_id,domain_id,is_standard,type,concept_id,code,name,is_group,is_selectable,has_attribute,has_hierarchy,has_ancestor_data,path)
 select row_number() over (order by p.id, UPPER(c.concept_name))+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`),
@@ -4030,7 +4089,7 @@ where p.domain_id = 'DRUG'
         )"
 
 echo "DRUGS - add parents for unmapped ingredients"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (id,parent_id,domain_id,is_standard,type,code,name,is_group,is_selectable,has_attribute,has_hierarchy,has_ancestor_data,path)
 select ROW_NUMBER() OVER(ORDER BY upper(name)) + (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS ID,
@@ -4066,7 +4125,7 @@ from
     ) x"
 
 echo "DRUGS - add unmapped ingredients"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "insert into \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (id,parent_id,domain_id,is_standard,type,concept_id,code,name,is_group,is_selectable,has_attribute,has_hierarchy,has_ancestor_data,path)
 select row_number() over (order by z.id, upper(x.concept_name))+(select max(id) from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`),
@@ -4109,7 +4168,7 @@ join
     ) z on UPPER(SUBSTR(x.concept_name, 1, 1)) = z.name"
 
 echo "DRUGS - generate child counts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 set x.rollup_count = 0
     , x.item_count = y.cnt
@@ -4133,7 +4192,7 @@ where x.concept_id = y.concept_id
     and x.type = 'RXNORM'"
 
 echo "DRUG_EXPOSURE - ATC/RXNORM - add brand names"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (id,parent_id,domain_id,is_standard,type,concept_id,code,name,is_group,is_selectable,has_attribute,has_hierarchy)
 SELECT ROW_NUMBER() OVER(ORDER BY upper(concept_name)) + (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS ID,
@@ -4159,7 +4218,7 @@ FROM
     ) x"
 
 echo "DRUG_EXPOSURE - ATC/RXNORM - add data into prep_concept_ancestor table"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
     (
           ancestor_concept_id
@@ -4176,7 +4235,7 @@ LEFT JOIN (SELECT id, parent_id, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_cr
 LEFT JOIN (SELECT id, parent_id, concept_id FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` WHERE domain_id = 'DRUG' and type in ('ATC','RXNORM')) e on d.id = e.parent_id"
 
 echo "DRUG_EXPOSURE - ATC/RXNORM - generate parent counts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.rollup_count = y.cnt
     , x.item_count = 0
@@ -4226,7 +4285,7 @@ WHERE x.concept_id = y.concept_id
 # PROCEDURE_OCCURRENCE - SNOMED - SOURCE
 ################################################
 echo "PROCEDURE_OCCURRENCE - SNOMED - SOURCE - create prep_snomed_rel_pcs_src"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_src\` AS
 SELECT DISTINCT c1.concept_id AS p_concept_id
     , c1.concept_code AS p_concept_code
@@ -4252,7 +4311,7 @@ WHERE cr.concept_id_1 = c1.concept_id
     AND cr.relationship_id = 'Subsumes'"
 
 echo "PROCEDURE_OCCURRENCE - SNOMED - SOURCE - temp table adding level 0"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_src_in_data\`
     (
           p_concept_id
@@ -4281,7 +4340,7 @@ WHERE concept_id in
 for i in {1..9};
 do
     echo "PROCEDURE_OCCURRENCE - SNOMED - SOURCE - temp table adding level $i"
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_src_in_data\`
         (
               p_concept_id
@@ -4308,7 +4367,7 @@ do
 done
 
 echo "PROCEDURE_OCCURRENCE - SNOMED - SOURCE - adding root"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -4343,7 +4402,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
 WHERE concept_id = 4322976"
 
 echo "PROCEDURE_OCCURRENCE - SNOMED - SOURCE - adding level 0"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -4401,7 +4460,7 @@ WHERE p.domain_id = 'PROCEDURE'
 for i in {1..13};
 do
     echo "PROCEDURE_OCCURRENCE - SNOMED - SOURCE - adding level $i"
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
         (
               id
@@ -4458,7 +4517,7 @@ done
 
 # Count: 13 - If loop count above is changed, the number of JOINS below must be updated
 echo "PROCEDURE_OCCURRENCE - SNOMED - SOURCE - add items into staging table for use in next query"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
     (
           ancestor_concept_id
@@ -4511,7 +4570,7 @@ FROM (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_
 # Count: 13 - If loop count above is changed, the number of JOINS below must be updated
 # the last UNION statement is to add the item to itself
 echo "PROCEDURE_OCCURRENCE - SNOMED - SOURCE - adding items into ancestor table"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
     (
           ancestor_concept_id
@@ -4609,7 +4668,7 @@ WHERE domain_id = 'PROCEDURE'
     and is_standard = 0"
 
 echo "PROCEDURE_OCCURRENCE - SNOMED - SOURCE - item counts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
@@ -4627,7 +4686,7 @@ WHERE x.concept_id = y.concept_id
     and x.is_selectable = 1"
 
 echo "PROCEDURE_OCCURRENCE - SNOMED - SOURCE - parent counts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt
@@ -4666,7 +4725,7 @@ WHERE x.concept_id = y.concept_id
 # PROCEDURE_OCCURRENCE - SNOMED - STANDARD
 ###############################################
 echo "PROCEDURE_OCCURRENCE - SNOMED - STANDARD - create prep_snomed_rel_pcs"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs\` AS
 SELECT DISTINCT c1.concept_id AS p_concept_id
     , c1.concept_code AS p_concept_code
@@ -4694,7 +4753,7 @@ WHERE cr.concept_id_1 = c1.concept_id
     AND cr.relationship_id = 'Subsumes'"
 
 echo "PROCEDURE_OCCURRENCE - SNOMED - STANDARD - temp table adding level 0"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_in_data\`
     (
           p_concept_id
@@ -4724,7 +4783,7 @@ WHERE concept_id in
 for i in {1..6};
 do
     echo "PROCEDURE_OCCURRENCE - SNOMED - STANDARD - temp table adding level $i"
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_snomed_rel_pcs_in_data\`
         (
               p_concept_id
@@ -4752,7 +4811,7 @@ do
 done
 
 echo "PROCEDURE_OCCURRENCE - SNOMED - STANDARD - adding root"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -4787,7 +4846,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
 WHERE concept_id = 4322976"
 
 echo "PROCEDURE_OCCURRENCE - SNOMED - STANDARD - adding level 0"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -4845,7 +4904,7 @@ WHERE p.domain_id = 'PROCEDURE'
 for i in {1..16};
 do
     echo "PROCEDURE_OCCURRENCE - SNOMED - STANDARD - adding level $i"
-    bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
         (
               id
@@ -4902,7 +4961,7 @@ done
 
 # Join Count: 16 - If loop count above is changed, the number of JOINS below must be updated
 echo "PROCEDURE_OCCURRENCE - SNOMED - STANDARD - add items into staging table for use in next query"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_ancestor_staging\`
     (
           ancestor_concept_id
@@ -4964,7 +5023,7 @@ FROM (SELECT id, parent_id, domain_id, type, is_standard, concept_id FROM \`$BQ_
 # Join Count: 16 - If loop count above is changed, the number of JOINS below must be updated
 # the last UNION statement is to add the item to itself
 echo "PROCEDURE_OCCURRENCE - SNOMED - STANDARD - add items into ancestor table"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.prep_concept_ancestor\`
     (
           ancestor_concept_id
@@ -5083,7 +5142,7 @@ WHERE domain_id = 'PROCEDURE'
     and is_standard = 1"
 
 echo "PROCEDURE_OCCURRENCE - SNOMED - STANDARD - generate item counts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.item_count = y.cnt
     , x.est_count = y.cnt
@@ -5101,7 +5160,7 @@ WHERE x.concept_id = y.concept_id
     and x.is_selectable = 1"
 
 echo "PROCEDURE_OCCURRENCE - SNOMED - STANDARD - parent counts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.rollup_count = y.cnt
     , x.est_count = y.cnt
@@ -5139,7 +5198,7 @@ WHERE x.concept_id = y.concept_id
 ################################################
 # OBSERVATION
 ################################################
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (
           id
@@ -5199,7 +5258,7 @@ FROM
 # CB_CRITERIA_ANCESTOR
 ################################################
 echo "CB_CRITERIA_ANCESTOR - Drugs - add ingredients to drugs mapping"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_ancestor\`
     (
           ancestor_id
@@ -5228,7 +5287,7 @@ and descendant_concept_id in
 # ADD IN OTHER CODES NOT ALREADY CAPTURED
 ################################################
 echo "CONDITION_OCCURRENCE - add other source concepts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (id,parent_id,domain_id,is_standard,type,concept_id,code,name,rollup_count,item_count,est_count,is_group,is_selectable,has_attribute,has_hierarchy,path)
 SELECT ROW_NUMBER() OVER (order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as id,
@@ -5256,7 +5315,7 @@ FROM
     ) x"
 
 echo "CONDITION_OCCURRENCE - add other standard concepts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (id,parent_id,domain_id,is_standard,type,concept_id,code,name,rollup_count,item_count,est_count,is_group,is_selectable,has_attribute,has_hierarchy,path)
 SELECT ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as ID,
@@ -5281,7 +5340,7 @@ FROM
     ) x"
 
 echo "PROCEDURE_OCCURRENCE - add other source concepts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (id,parent_id,domain_id,is_standard,type,concept_id,code,name,rollup_count,item_count,est_count,is_group,is_selectable,has_attribute,has_hierarchy,path)
 SELECT ROW_NUMBER() OVER (order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as id,
@@ -5309,7 +5368,7 @@ FROM
     ) x"
 
 echo "PROCEDURE_OCCURRENCE - add other standard concepts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (id,parent_id,domain_id,is_standard,type,concept_id,code,name,rollup_count,item_count,est_count,is_group,is_selectable,has_attribute,has_hierarchy,path)
 SELECT ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as ID,
@@ -5334,7 +5393,7 @@ FROM
     ) x"
 
 echo "MEASUREMENT - add other standard concepts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (id,parent_id,domain_id,is_standard,type,concept_id,code,name,rollup_count,item_count,est_count,is_group,is_selectable,has_attribute,has_hierarchy,path)
 SELECT ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as ID,
@@ -5360,7 +5419,7 @@ FROM
     ) x"
 
 echo "DRUG_EXPOSURE - add other standard concepts"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
     (id,parent_id,domain_id,is_standard,type,concept_id,code,name,rollup_count,item_count,est_count,is_group,is_selectable,has_attribute,has_hierarchy,path)
 SELECT ROW_NUMBER() OVER(order by vocabulary_id,concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as ID,
@@ -5393,7 +5452,7 @@ FROM
 ################################################
 # we hard code the min/max for these PPI questions because we can't get the information programmatically
 echo "CB_CRITERIA_ATTRIBUTE - PPI SURVEY - add values for certain questions"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
     (
           id
@@ -5469,7 +5528,7 @@ VALUES
 # this will add the min/max values for all numeric measurement concepts
 # this code will filter out any labs WHERE all results = 0
 echo "CB_CRITERIA_ATTRIBUTE - Measurements - add numeric results"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
     (
           id
@@ -5529,7 +5588,7 @@ FROM
 
 # this will add all categorical values for all measurement concepts where value_as_concept_id is valid
 echo "CB_CRITERIA_ATTRIBUTE - Measurements - add categorical results"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_attribute\`
     (
           id
@@ -5571,7 +5630,7 @@ FROM
 
 # set has_attribute=1 for any measurement criteria that has data in cb_criteria_attribute
 echo "CB_CRITERIA - update has_attribute"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET has_attribute = 1
 WHERE domain_id = 'MEASUREMENT'
@@ -5587,7 +5646,7 @@ WHERE domain_id = 'MEASUREMENT'
 # CB_SURVEY_ATTRIBUTE
 ################################################
 echo "CB_SURVEY_ATTRIBUTE - adding data for questions"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`
     (
           id
@@ -5622,7 +5681,7 @@ FROM
     )"
 
 echo "CB_SURVEY_ATTRIBUTE - adding data for answers"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_survey_attribute\`
 SELECT
         ROW_NUMBER() OVER (ORDER BY question_concept_id, answer_concept_id) +
@@ -5654,7 +5713,7 @@ FROM
 
 # set has_attribute=1 for any criteria that has data in cb_survey_attribute
 echo "CB_SURVEY - update has_attribute"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET has_attribute = 1
 WHERE domain_id = 'SURVEY'
@@ -5670,7 +5729,7 @@ WHERE domain_id = 'SURVEY'
 # CB_CRITERIA_RELATIONSHIP
 ################################################
 echo "CB_CRITERIA_RELATIONSHIP - Drugs - add drug/ingredient relationships"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_relationship\`
     (
           concept_id_1
@@ -5691,7 +5750,7 @@ WHERE b.concept_class_id = 'Ingredient'
         )"
 
 echo "CB_CRITERIA_RELATIONSHIP - Source Concept -> Standard Concept Mapping"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria_relationship\`
     (
           concept_id_1
@@ -5717,31 +5776,31 @@ WHERE b.standard_concept = 'S'
 # DATA CLEAN UP
 ################################################
 echo "CLEAN UP - set rollup_count = -1 WHERE the count is NULL"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET rollup_count = -1
 WHERE rollup_count is null"
 
 echo "CLEAN UP - set item_count = -1 WHERE the count is NULL"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET item_count = -1
 WHERE item_count is null"
 
 echo "CLEAN UP - set est_count = -1 WHERE the count is NULL"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET est_count = -1
 WHERE est_count is null"
 
 echo "CLEAN UP - set has_ancestor_data = 0 for all items WHERE it is currently NULL"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET has_ancestor_data = 0
 WHERE has_ancestor_data is null"
 
 echo "CLEAN UP - remove all double quotes FROM criteria names"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
 SET name = REGEXP_REPLACE(name, r'[\"]', '')
 WHERE REGEXP_CONTAINS(name, r'[\"]')"
@@ -5751,7 +5810,7 @@ WHERE REGEXP_CONTAINS(name, r'[\"]')"
 # FULL_TEXT and SYNONYMS
 ###############################################
 echo "FULL_TEXT and SYNONYMS - adding data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET   x.full_text = y.full_text
     , x.synonyms = y.full_text
@@ -5781,7 +5840,7 @@ WHERE x.id = y.id"
 
 # add [rank1] for all items. this is to deal with the poly-hierarchical issue in many trees
 echo "FULL_TEXT - add [rank1]"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET x.full_text = CONCAT(x.full_text, '|', y.rnk)
    ,x.synonyms = CONCAT(x.full_text, '|', y.rnk)
