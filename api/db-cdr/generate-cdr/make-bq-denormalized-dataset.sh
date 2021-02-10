@@ -30,7 +30,7 @@ test=$(bq show "$BQ_PROJECT:$BQ_DATASET")
 # CREATE TABLES
 ################################################
 echo "CREATE TABLE - ds_condition_occurrence"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_condition_occurrence\`
 (
     PERSON_ID                       INT64,
@@ -56,7 +56,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 )"
 
 echo "CREATE TABLE - ds_drug_exposure"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_drug_exposure\`
 (
     PERSON_ID                       INT64,
@@ -89,7 +89,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 )"
 
 echo "CREATE TABLE - ds_measurement"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_measurement\`
 (
     PERSON_ID                       INT64,
@@ -121,7 +121,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 )"
 
 echo "CREATE TABLE - ds_observation"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_observation\`
 (
     PERSON_ID                       INT64,
@@ -155,7 +155,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 )"
 
 echo "CREATE TABLE - ds_person"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_person\`
 (
     PERSON_ID               INT64,
@@ -171,7 +171,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 )"
 
 echo "CREATE TABLE - ds_procedure_occurrence"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_procedure_occurrence\`
 (
     PERSON_ID                       INT64,
@@ -196,7 +196,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 )"
 
 echo "CREATE TABLE - ds_survey"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_survey\`
 (
     person_id           INT64,
@@ -211,7 +211,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 )"
 
 echo "CREATE TABLE - ds_visit_occurrence"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_visit_occurrence\`
 (
     PERSON_ID                       INT64,
@@ -237,7 +237,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 )"
 
 echo "CREATE TABLE - ds_activity_summary"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_activity_summary\`
 (
     DATE                            DATE,
@@ -256,7 +256,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 )"
 
 echo "CREATE TABLE - ds_heart_rate_minute_level"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_heart_rate_minute_level\`
 (
     DATETIME                        DATETIME,
@@ -265,7 +265,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 )"
 
 echo "CREATE TABLE - ds_heart_rate_summary"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_heart_rate_summary\`
 (
     PERSON_ID                       INT64,
@@ -278,7 +278,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 )"
 
 echo "CREATE TABLE - ds_steps_intradayy"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_steps_intraday\`
 (
     DATETIME                        DATETIME,
@@ -290,7 +290,7 @@ bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
 # INSERT DATA
 ################################################
 echo "ds_condition_occurrence - inserting data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_condition_occurrence\`
     (PERSON_ID, CONDITION_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY,
     CONDITION_START_DATETIME, CONDITION_END_DATETIME, CONDITION_TYPE_CONCEPT_ID, CONDITION_TYPE_CONCEPT_NAME,
@@ -312,7 +312,7 @@ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on a.CONDITION_SOURCE_CONCEPT_I
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.CONDITION_STATUS_CONCEPT_ID = c5.CONCEPT_ID"
 
 echo "ds_drug_exposure - inserting data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_drug_exposure\`
     (PERSON_ID, DRUG_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY, DRUG_EXPOSURE_START_DATETIME,
     DRUG_EXPOSURE_END_DATETIME, VERBATIM_END_DATE, DRUG_TYPE_CONCEPT_ID, DRUG_TYPE_CONCEPT_NAME, STOP_REASON, REFILLS, QUANTITY,
@@ -335,7 +335,7 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on v.VISIT_CONCEPT_ID = c4.CONC
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.DRUG_SOURCE_CONCEPT_ID = c5.CONCEPT_ID"
 
 echo "ds_measurement - inserting data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_measurement\`
     (PERSON_ID, MEASUREMENT_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY,
     MEASUREMENT_DATETIME, MEASUREMENT_TYPE_CONCEPT_ID, MEASUREMENT_TYPE_CONCEPT_NAME, OPERATOR_CONCEPT_ID,
@@ -363,7 +363,7 @@ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c6 on v.visit_concept_id = c6.conc
 left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c7 on a.measurement_source_concept_id = c7.concept_id"
 
 echo "ds_observation - inserting data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_observation\`
     (PERSON_ID, OBSERVATION_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY,
     OBSERVATION_DATETIME, OBSERVATION_TYPE_CONCEPT_ID, OBSERVATION_TYPE_CONCEPT_NAME, VALUE_AS_NUMBER, VALUE_AS_STRING,
@@ -391,7 +391,7 @@ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c6 on v.visit_concept_id = c6.conc
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c7 on a.OBSERVATION_SOURCE_CONCEPT_ID = c7.CONCEPT_ID"
 
 echo "ds_person - inserting data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_person\`
     (PERSON_ID, GENDER_CONCEPT_ID, GENDER, DATE_OF_BIRTH, RACE_CONCEPT_ID, RACE, ETHNICITY_CONCEPT_ID, ETHNICITY, SEX_AT_BIRTH_CONCEPT_ID, SEX_AT_BIRTH)
 SELECT
@@ -404,7 +404,7 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c3 on a.ethnicity_concept_id = c3.
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on a.sex_at_birth_concept_id = c4.CONCEPT_ID"
 
 echo "ds_procedure_occurrence - inserting data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_procedure_occurrence\`
     (PERSON_ID, PROCEDURE_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY,
     PROCEDURE_DATETIME, PROCEDURE_TYPE_CONCEPT_ID, PROCEDURE_TYPE_CONCEPT_NAME, MODIFIER_CONCEPT_ID, MODIFIER_CONCEPT_NAME,
@@ -426,7 +426,7 @@ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on v.visit_concept_id = c4.conc
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.PROCEDURE_SOURCE_CONCEPT_ID = c5.CONCEPT_ID"
 
 echo "ds_survey - inserting data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_survey\`
    (person_id, survey_datetime, survey, question_concept_id, question, answer_concept_id, answer, survey_version_concept_id, survey_version_name)
 SELECT  a.person_id,
@@ -458,7 +458,7 @@ LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.observation_ext\` f on a.observation_id = f.
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\` g on f.survey_version_concept_id = g.survey_version_concept_id"
 
 echo "ds_visit_occurrence - inserting data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_visit_occurrence\`
     (PERSON_ID, VISIT_CONCEPT_ID, STANDARD_CONCEPT_NAME, STANDARD_CONCEPT_CODE, STANDARD_VOCABULARY, VISIT_START_DATETIME,
     VISIT_END_DATETIME, VISIT_TYPE_CONCEPT_ID, VISIT_TYPE_CONCEPT_NAME, VISIT_SOURCE_VALUE, VISIT_SOURCE_CONCEPT_ID,
@@ -479,7 +479,7 @@ left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c4 on a.ADMITTING_SOURCE_CONCEPT_I
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c5 on a.DISCHARGE_TO_CONCEPT_ID = c5.CONCEPT_ID"
 
 echo "ds_activity_summary - inserting data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_activity_summary\`
     (date, activity_calories, calories_bmr, calories_out, elevation, fairly_active_minutes, floors,
     lightly_active_minutes, marginal_calories, sedentary_minutes, steps, very_active_minutes, person_id)
@@ -490,7 +490,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.activity_summary\`)
 where rank = 1"
 
 echo "ds_heart_rate_minute_level - inserting data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_heart_rate_minute_level\`
     (datetime, person_id, heart_rate_value)
 SELECT datetime, person_id, heart_rate_value
@@ -499,7 +499,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_minute_level\`)
 where rank = 1"
 
 echo "ds_heart_rate_summary - inserting data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_heart_rate_summary\`
     (person_id, date, zone_name, min_heart_rate, max_heart_rate, minute_in_zone, calorie_count)
 SELECT person_id, date, zone_name, min_heart_rate, max_heart_rate, minute_in_zone, calorie_count
@@ -508,7 +508,7 @@ FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_summary\`)
 where rank = 1"
 
 echo "ds_steps_intraday - inserting data"
-bq --quiet --project=$BQ_PROJECT query --nouse_legacy_sql \
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.ds_steps_intraday\`
     (datetime, steps, person_id)
 SELECT datetime, steps, person_id

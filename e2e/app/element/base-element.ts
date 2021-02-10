@@ -146,8 +146,8 @@ export default class BaseElement extends Container {
         // Experienment: click workaround
         // Wait for x,y to stop changing within specified time
         const startTime = Date.now();
-        let previousX;
-        let previousY;
+        let previousX: number;
+        let previousY: number;
         let i = 0;
         while ((Date.now() - startTime) < (30 * 1000)) {
           const viewport = await element.isIntersectingViewport();
@@ -155,11 +155,15 @@ export default class BaseElement extends Container {
             const box = await element.boundingBox();
             const x = box.x + (box.width / 2);
             const y = box.y + (box.height / 2);
+            if (previousX !== undefined && previousY !== undefined) {
+              // tslint:disable:triple-equals
+              if (parseFloat(previousX.toFixed(7)) == parseFloat(x.toFixed(7))
+                && parseFloat(previousY.toFixed(7)) == parseFloat(y.toFixed(7))) {
+                break;
+              }
+            }
             if (i > 0) {
               console.warn(`Detected changing boundingBox: i=${i} prevX=${previousX} x=${x} prevY=${previousY} y=${y}`);
-            }
-            if (previousX === x || previousY === y) {
-              break;
             }
             previousX = x;
             previousY = y;

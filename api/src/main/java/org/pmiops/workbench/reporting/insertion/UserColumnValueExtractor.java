@@ -1,6 +1,5 @@
 package org.pmiops.workbench.reporting.insertion;
 
-import static com.google.cloud.bigquery.QueryParameterValue.*;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.enumToString;
 import static org.pmiops.workbench.cohortbuilder.util.QueryParameterValues.toInsertRowString;
 
@@ -77,7 +76,7 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
 
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
   // as enums can't be abstract or extend abstract classes.
-  private static final String TABLE_NAME = "user";
+  public static final String TABLE_NAME = "user";
   private final String parameterName;
   private final Function<ReportingUser, Object> objectValueFunction;
 

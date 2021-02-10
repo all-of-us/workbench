@@ -1,10 +1,10 @@
 import {Button, Clickable, Link} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
+import {ErrorMessage, WarningMessage} from 'app/components/messages';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
-import {WarningMessage} from 'app/components/warning-message';
 
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity, colorWithWhiteness} from 'app/styles/colors';
@@ -73,6 +73,13 @@ const styles = reactStyles({
   bold: {
     fontWeight: 700,
   },
+  label: {
+    fontWeight: 600,
+    marginRight: '.5rem'
+  },
+  labelAndInput: {
+    alignItems: 'center',
+  },
   controlSection: {
     backgroundColor: String(addOpacity(colors.white, .75)),
     borderRadius: '3px',
@@ -85,7 +92,7 @@ const styles = reactStyles({
   },
   formGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(6, 1fr)',
+    gridTemplateColumns: 'repeat(3, 1fr)',
     gridGap: '1rem',
     alignItems: 'center'
   },
@@ -221,31 +228,43 @@ export const ConfirmDelete = ({onCancel, onConfirm}) => {
   </Fragment>;
 };
 
-const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPrefix, validMachineTypes}) => {
+const MachineSelector = ({
+  onChange,
+  selectedMachine,
+  machineType,
+  disabled,
+  idPrefix,
+  validMachineTypes,
+  cpuLabelStyles = {},
+  ramLabelStyles = {}}
+) => {
   const initialMachineType = findMachineByName(machineType) || defaultMachineType;
   const {cpu, memory} = selectedMachine || initialMachineType;
 
   return <Fragment>
-      <label htmlFor={`${idPrefix}-cpu`}>CPUs</label>
+    <FlexRow style={styles.labelAndInput}>
+      <label style={{...styles.label, ...cpuLabelStyles}} htmlFor={`${idPrefix}-cpu`}>CPUs</label>
       <Dropdown id={`${idPrefix}-cpu`}
-        options={fp.flow(
-          // Show all CPU options.
-          fp.map('cpu'),
-          // In the event that was remove a machine type from our set of valid
-          // configs, we want to continue to allow rendering of the value here.
-          // Union also makes the CPU values unique.
-          fp.union([cpu]),
-          fp.sortBy(fp.identity)
-        )(validMachineTypes)}
-        onChange={
-          ({value}) => fp.flow(
-            fp.sortBy('memory'),
-            fp.find({cpu: value}),
-            onChange)(validMachineTypes)
-        }
-        disabled={disabled}
-        value={cpu}/>
-      <label htmlFor={`${idPrefix}-ram`}>RAM (GB)</label>
+                options={fp.flow(
+                    // Show all CPU options.
+                  fp.map('cpu'),
+                    // In the event that was remove a machine type from our set of valid
+                    // configs, we want to continue to allow rendering of the value here.
+                    // Union also makes the CPU values unique.
+                  fp.union([cpu]),
+                  fp.sortBy(fp.identity)
+                )(validMachineTypes)}
+                onChange={
+                  ({value}) => fp.flow(
+                    fp.sortBy('memory'),
+                    fp.find({cpu: value}),
+                    onChange)(validMachineTypes)
+                }
+                disabled={disabled}
+                value={cpu}/>
+    </FlexRow>
+    <FlexRow style={styles.labelAndInput}>
+      <label style={{...styles.label, ...ramLabelStyles}} htmlFor={`${idPrefix}-ram`}>RAM (GB)</label>
       <Dropdown id={`${idPrefix}-ram`}
         options={fp.flow(
           // Show valid memory options as constrained by the currently selected CPU.
@@ -265,6 +284,7 @@ const MachineSelector = ({onChange, selectedMachine, machineType, disabled, idPr
         disabled={disabled}
         value={memory}
         />
+    </FlexRow>
   </Fragment>;
 };
 
@@ -287,18 +307,18 @@ const DisabledPanel = () => {
 };
 
 const DiskSizeSelector = ({onChange, disabled, selectedDiskSize, diskSize, idPrefix}) => {
-  return <Fragment>
-    <label htmlFor={`${idPrefix}-disk`}>Disk (GB)</label>
-    <InputNumber id={`${idPrefix}-disk`}
-      showButtons
-      disabled={disabled}
-      decrementButtonClassName='p-button-secondary'
-      incrementButtonClassName='p-button-secondary'
-      value={selectedDiskSize || diskSize}
-      inputStyle={styles.inputNumber}
-      onChange={({value}) => onChange(value)}
-    />
-  </Fragment>;
+  return <FlexRow  style={styles.labelAndInput}>
+      <label style={styles.label} htmlFor={`${idPrefix}-disk`}>Disk (GB)</label>
+      <InputNumber id={`${idPrefix}-disk`}
+                   showButtons
+                   disabled={disabled}
+                   decrementButtonClassName='p-button-secondary'
+                   incrementButtonClassName='p-button-secondary'
+                   value={selectedDiskSize || diskSize}
+                   inputStyle={styles.inputNumber}
+                   onChange={({value}) => onChange(value)}
+      />
+    </FlexRow>;
 };
 
 const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
@@ -333,42 +353,50 @@ const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
   }, [selectedNumWorkers, selectedPreemtible, selectedWorkerMachine, selectedDiskSize]);
 
   return <fieldset style={{marginTop: '0.75rem'}}>
-    <legend style={styles.workerConfigLabel}>Worker Config</legend>
+    <legend style={styles.workerConfigLabel}>Worker Configuration</legend>
     <div style={styles.formGrid}>
-      <label htmlFor='num-workers'>Workers</label>
-      <InputNumber id='num-workers'
-        showButtons
-        disabled={disabled}
-        decrementButtonClassName='p-button-secondary'
-        incrementButtonClassName='p-button-secondary'
-        value={selectedNumWorkers}
-        inputStyle={styles.inputNumber}
-        onChange={({value}) => setSelectedNumWorkers(value)}
-        min={2}/>
-      <label htmlFor='num-preemptible'>Preemptible</label>
-      <InputNumber id='num-preemptible'
-        showButtons
-        disabled={disabled}
-        decrementButtonClassName='p-button-secondary'
-        incrementButtonClassName='p-button-secondary'
-        value={selectedPreemtible}
-        inputStyle={styles.inputNumber}
-        onChange={({value}) => setSelectedPreemptible(value)}
-        min={0}/>
-      <div style={{gridColumnEnd: 'span 2'}}/>
+      <FlexRow style={styles.labelAndInput}>
+        <label style={styles.label} htmlFor='num-workers'>Workers</label>
+        <InputNumber id='num-workers'
+          showButtons
+          disabled={disabled}
+          decrementButtonClassName='p-button-secondary'
+          incrementButtonClassName='p-button-secondary'
+          value={selectedNumWorkers}
+          inputStyle={styles.inputNumber}
+          onChange={({value}) => setSelectedNumWorkers(value)}
+          min={2}/>
+      </FlexRow>
+      <FlexRow style={styles.labelAndInput}>
+        <label style={styles.label} htmlFor='num-preemptible'>Preemptible</label>
+        <InputNumber id='num-preemptible'
+          showButtons
+          disabled={disabled}
+          decrementButtonClassName='p-button-secondary'
+          incrementButtonClassName='p-button-secondary'
+          value={selectedPreemtible}
+          inputStyle={styles.inputNumber}
+          onChange={({value}) => setSelectedPreemptible(value)}
+          min={0}/>
+      </FlexRow>
+      <div style={{gridColumnEnd: 'span 1'}}/>
       <MachineSelector
         machineType={workerMachineType}
         onChange={setSelectedWorkerMachine}
         selectedMachine={selectedWorkerMachine}
         disabled={disabled}
         validMachineTypes={validLeoDataprocWorkerMachineTypes}
-        idPrefix='worker'/>
+        idPrefix='worker'
+        cpuLabelStyles={{minWidth: '2.5rem'}} // width of 'Workers' label above
+        ramLabelStyles={{minWidth: '3.75rem'}} // width of 'Preemptible' label above
+      />
       <DiskSizeSelector
         diskSize={workerDiskSize}
         onChange={setSelectedDiskSize}
         selectedDiskSize={selectedDiskSize}
         disabled={disabled}
-        idPrefix='worker'/>
+        idPrefix='worker'
+      />
     </div>
   </fieldset>;
 };
@@ -730,7 +758,7 @@ const ConfirmUpdatePanel = ({initialRuntimeConfig, newRuntimeConfig, onCancel, u
       </FlexRow>
     </div>
 
-    <WarningMessage>
+    <WarningMessage iconSize={30} iconPosition={'center'}>
       <TextColumn>
         {needsDelete ? <React.Fragment>
           <div>
@@ -893,46 +921,101 @@ export const RuntimePanel = fp.flow(
     return runtimeRequest;
   };
 
-  const diskSizeValidatorWithMessage = (message) => {
+  // 50 GB is the minimum GCP limit for disk size, 4000 GB is our arbitrary limit for not making a
+  // disk that is way too big and expensive on free tier ($.22 an hour). 64 TB is the GCE limit on
+  // persistent disk.
+  const diskSizeValidatorWithMessage = (diskType = 'standard' || 'master' || 'worker') => {
+    const maxDiskSize = workspace.billingAccountType === BillingAccountType.FREETIER
+        ? 4000
+        : 64000;
+    const message = {
+      standard: `^Disk size must be between 50 and ${maxDiskSize} GB`,
+      master: `^Master disk size must be between 50 and ${maxDiskSize} GB`,
+      worker: `^Worker disk size must be between 50 and ${maxDiskSize} GB`
+    };
+
     return {
       numericality: {
         greaterThanOrEqualTo: 50,
-        lessThanOrEqualTo: 4000,
+        lessThanOrEqualTo: maxDiskSize,
+        message: message[diskType]
+      }
+    };
+  };
+
+  const runningCostValidatorWithMessage = () => {
+    const maxRunningCost = workspace.billingAccountType === BillingAccountType.FREETIER
+      ? 25
+      : 150;
+    const message = workspace.billingAccountType === BillingAccountType.FREETIER
+      ? '^Your runtime is too expensive. To proceed using free credits, reduce your running costs below $25/hr.'
+      : '^Your runtime is very expensive. Are you sure you wish to proceed?';
+    return {
+      numericality: {
+        lessThan: maxRunningCost,
         message: message
       }
     };
   };
 
-  // 50 GB is the minimum GCP limit for disk size, 4000 GB is our arbitrary limit for not making a
-  // disk that is way too big and expensive ($.22 an hour)
-  const validators = {
-    selectedDiskSize: diskSizeValidatorWithMessage('^Disk size must be between 50 and 4000 GB')
+  const currentRunningCost = machineRunningCost({
+    computeType: selectedCompute,
+    masterMachine: selectedMachine,
+    masterDiskSize: diskSize,
+    numberOfWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfWorkers,
+    numberOfPreemptibleWorkers: selectedDataprocConfig && selectedDataprocConfig.numberOfPreemptibleWorkers,
+    workerDiskSize: selectedDataprocConfig && selectedDataprocConfig.workerDiskSize,
+    workerMachine: selectedDataprocConfig && findMachineByName(selectedDataprocConfig.workerMachineType)
+  });
+
+  const standardDiskValidator = {
+    selectedDiskSize: diskSizeValidatorWithMessage('standard')
+  };
+  const runningCostValidator = {
+    currentRunningCost: runningCostValidatorWithMessage()
   };
   // We don't clear dataproc config when we change compute type so we can't combine this with the
   // above or else we can end up with phantom validation fails
   const dataprocValidators = {
-    masterDiskSize: diskSizeValidatorWithMessage('^Master disk size must be between 50 and 4000 GB'),
-    workerDiskSize: diskSizeValidatorWithMessage('^Worker disk size must be between 50 and 4000 GB')
+    masterDiskSize: diskSizeValidatorWithMessage('master'),
+    workerDiskSize: diskSizeValidatorWithMessage('worker')
   };
-  const errors = validate({selectedDiskSize}, validators);
+
   const {masterDiskSize = null, workerDiskSize = null} = selectedDataprocConfig || {};
+  const standardDiskErrors = validate({selectedDiskSize}, standardDiskValidator);
+  const runningCostErrors = validate({currentRunningCost}, runningCostValidator);
   const dataprocErrors = selectedCompute === ComputeType.Dataproc
       ? validate({masterDiskSize, workerDiskSize}, dataprocValidators)
       : undefined;
-  const runtimeCanBeCreated = !errors && !dataprocErrors;
+
+  const getErrorMessageContent = () => {
+    const errorDivs = [];
+    if (standardDiskErrors) {
+      errorDivs.push(summarizeErrors(standardDiskErrors));
+    }
+    if (dataprocErrors) {
+      errorDivs.push(summarizeErrors(dataprocErrors));
+    }
+    if (workspace.billingAccountType === BillingAccountType.FREETIER && runningCostErrors) {
+      errorDivs.push(summarizeErrors(runningCostErrors));
+    }
+    return errorDivs;
+  };
+
+  const getWarningMessageContent = () => {
+    const warningDivs = [];
+    if (workspace.billingAccountType === BillingAccountType.USERPROVIDED && runningCostErrors) {
+      warningDivs.push(summarizeErrors(runningCostErrors));
+    }
+    return warningDivs;
+  };
+
+  const runtimeCanBeCreated = !(getErrorMessageContent().length > 0);
   // Casting to RuntimeStatus here because it can't easily be done at the destructuring level
   // where we get 'status' from
   const runtimeCanBeUpdated = runtimeChanged
       && [RuntimeStatus.Running, RuntimeStatus.Stopped].includes(status as RuntimeStatus)
-      && !errors
-      && !dataprocErrors;
-
-  const getErrorsTooltipContent = () => {
-    const errorDivs = [];
-    errorDivs.push(summarizeErrors(errors));
-    errorDivs.push(summarizeErrors(dataprocErrors));
-    return errorDivs;
-  };
+      && runtimeCanBeCreated;
 
   const renderUpdateButton = () => {
     return <Button
@@ -1018,7 +1101,7 @@ export const RuntimePanel = fp.flow(
                 setSelectedDataprocConfig={(dataproc) => setSelectedDataprocConfig(dataproc)}
               />
               {/* Runtime customization: change detailed machine configuration options. */}
-              <h3 style={styles.sectionHeader}>Cloud compute profile</h3>
+              <h3 style={{...styles.sectionHeader, ...styles.bold}}>Cloud compute profile</h3>
               <div style={styles.formGrid}>
                 <MachineSelector
                   idPrefix='runtime'
@@ -1037,7 +1120,7 @@ export const RuntimePanel = fp.flow(
                     diskSize={diskSize}/>
              </div>
              <FlexColumn style={{marginTop: '1rem'}}>
-               <label htmlFor='runtime-compute'>Compute type</label>
+               <label style={styles.label} htmlFor='runtime-compute'>Compute type</label>
                <Dropdown id='runtime-compute'
                          disabled={!hasMicroarrayData || disableControls}
                          style={{width: '10rem'}}
@@ -1055,14 +1138,19 @@ export const RuntimePanel = fp.flow(
              </FlexColumn>
            </div>
            {runtimeExists && runtimeChanged &&
-             <WarningMessage>
+             <WarningMessage iconSize={30} iconPosition={'center'}>
                 <div>You've made changes that require recreating your environment to take effect.</div>
              </WarningMessage>
            }
-           {(errors || dataprocErrors) &&
-             <WarningMessage>
-               {getErrorsTooltipContent()}
-             </WarningMessage>
+           {getErrorMessageContent().length > 0 &&
+             <ErrorMessage iconSize={16} iconPosition={'top'} data-test-id={'runtime-error-messages'}>
+               {getErrorMessageContent()}
+             </ErrorMessage>
+           }
+           {getWarningMessageContent().length > 0 &&
+            <WarningMessage iconSize={16} iconPosition={'top'} data-test-id={'runtime-warning-messages'}>
+              {getWarningMessageContent()}
+            </WarningMessage>
            }
            <FlexRow style={{justifyContent: 'space-between', marginTop: '.75rem'}}>
              <Link
@@ -1083,6 +1171,6 @@ export const RuntimePanel = fp.flow(
                                                            }}
                                                            updateButton={renderUpdateButton()}
           />],
-          [PanelContent.Disabled, () => <DisabledPanel/>])}
+      [PanelContent.Disabled, () => <DisabledPanel/>])}
   </div>;
 });

@@ -104,8 +104,8 @@ export const AccountCreationOptions = {
     {label: `Asian`, value: Race.ASIAN},
     {label: `Native Hawaiian or Other Pacific Islander`, value: Race.NHOPI},
     {label: `White`, value: Race.WHITE},
+    {label: `None of these describe me`, value: Race.NONE},
     {label: `Prefer not to answer`, value: Race.PREFERNOANSWER},
-    {label: `None of these describe me`, value: Race.NONE}
   ],
   ethnicity: [
     {label: `Hispanic or Latino`, value: Ethnicity.HISPANIC},
@@ -134,12 +134,13 @@ export const AccountCreationOptions = {
       'Technical school (1 to 3 years), or current undergraduate student', value: Education.UNDERGRADUATE},
     {label: 'College graduate (4 years or more) or current post-graduate trainee', value: Education.COLLEGEGRADUATE},
     {label: 'Master’s degree', value: Education.MASTER},
-    {label: 'Doctorate', value: Education.DOCTORATE}
+    {label: 'Doctorate', value: Education.DOCTORATE},
+    {label: 'Prefer not to answer', value: Education.PREFERNOANSWER}
   ],
   Years: []
 };
 
 const year = (new Date()).getFullYear();
-const years = Array.from(new Array(100), ( val, index) => year - index);
+const years = Array.from(new Array(100), (val, index) => ({label: year - index, value: year - index}));
 
-AccountCreationOptions.Years = years.map((yearOpt) => ({label: yearOpt, value: yearOpt}));
+AccountCreationOptions.Years = [{label: 'Prefer not to answer', value: 0}, ...years];

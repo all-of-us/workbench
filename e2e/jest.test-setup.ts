@@ -22,71 +22,68 @@ beforeEach(async () => {
 
   page.on('request', (request) => {
     try {
+      if (request.url().includes('api-dot-all-of-us')) {
+        const method = request.method();
+        if (method !== 'OPTIONS') {
+          console.debug(`❗Request issued: ${request.url()}`);
+        }
+      }
       request.continue();
       // tslint:disable-next-line:no-empty
     } catch (e) {
     }
-  });
-
-  page.on('console', message => {
-    if (message != null) {
-      // Don't log "log", "info" or "debug"
-      if (['ERROR', 'WARNING'].includes(message.type().toUpperCase())) {
-        console.debug(`❗ Console Message: ${message.type()}: ${message.text()}`);
+  })
+  .on('requestfinished', async (request) => {
+    try {
+      const response = await request.response();
+      const status = request.response().status();
+      let responseBody;
+      if (request.redirectChain().length === 0) {
+        // response body can only be accessed for non-redirect responses.
+        if (request.url().includes('api-dot-all-of-us')){
+          responseBody = await response.buffer();
+          if (responseBody !== undefined) {
+            responseBody = JSON.stringify(JSON.parse(responseBody.toString()), null, 2);
+          }
+          const method = request.method();
+          console.debug(`❗Request finished: ${status} ${method} ${request.url()}  \n ${responseBody}`, {depth: null, colors: true});
+        }
       }
+      await request.continue();
+      // tslint:disable-next-line:no-empty
+    } catch (e) {
     }
-  });
-
-  // Emitted when the page crashed
-  page.on('error', error => {
-    console.debug(`❗ Page Crashed: ${error}`);
-  });
-
-  // Emitted when a script has uncaught exception
-  page.on('pageerror', error => {
-    if (error != null) {
-      console.debug(`❗ Page Error: ${error}`);
-    }
-  });
-
-  // Emitted when a request failed. Warning: blocked requests from above will be logged as failed requests, safe to ignore these.
-  page.on('requestfailed', async request => {
+  })
+  .on('requestfailed', async (request) => {
     try {
       const response = request.response();
       if (response !== null) {
         const status = response.status();
         const responseText = await response.text();
         const failureError = request.failure().errorText;
-        console.debug(`❗ Failed Request: ${status} ${request.method()} ${request.url()}  \n ${failureError} \n ${responseText}`);
+        console.debug(`❗Request failed: ${status} ${request.method()} ${request.url()}  \n ${failureError} \n ${responseText}`);
       }
       // tslint:disable-next-line:no-empty
     } catch (err) {
     }
-  });
-
-  page.on('response', async(response) => {
-    try {
-      const request = response.request();
-      const requestUrl = request.url();
-
-      // Long only responses from AoU-app requests
-      if (requestUrl.includes('api-dot-all-of-us')) {
-        const failure = request.failure();
-        const method = request.method().trim();
-        if (method !== 'OPTIONS') {
-          if (failure !== null) {
-            // This log sometimes duplicate log from requestfailed.
-            console.debug(`❗ Failed Request: ${response.status()} ${method} ${requestUrl} \n ${failure.errorText}`);
-          } else {
-            console.debug(`❗ Request: ${response.status()} ${method} ${requestUrl}`);
-          }
-        }
+  })
+  .on('console', (message) => {
+    if (message != null) {
+      // Don't log "log", "info" or "debug"
+      if (['ERROR', 'WARNING'].includes(message.type().toUpperCase())) {
+        console.debug(`❗Page console: ${message.type()}: ${message.text()}`);
       }
-      // tslint:disable-next-line:no-empty
-    } catch (err) {
     }
-  });
-  
+  })
+  .on('error', (error) => {
+    console.debug(`❗Page error: ${error}`);
+  })
+  .on('pageerror', (error) => {
+    if (error != null) {
+      console.debug(`❗Page error: ${error}`);
+    }
+  })
+
 });
 
 afterEach(async () => {

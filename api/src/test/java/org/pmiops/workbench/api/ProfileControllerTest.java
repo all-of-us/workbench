@@ -70,6 +70,7 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DemographicSurvey;
+import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.Education;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -1024,7 +1025,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     demographicSurvey.addSexAtBirthItem(SexAtBirth.FEMALE);
     demographicSurvey.setYearOfBirth(new BigDecimal(2000));
     demographicSurvey.setEducation(Education.NO_EDUCATION);
-    demographicSurvey.setDisability(false);
+    demographicSurvey.setDisability(Disability.FALSE);
 
     profile.setDemographicSurvey(demographicSurvey);
 
