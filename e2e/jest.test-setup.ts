@@ -78,19 +78,18 @@ beforeEach(async () => {
             return txt.toString();
           }, arg))
       )
-
       const msgText = message.text();
       const text = args.filter(msg => msg !== 'undefined').join(' ');
       if (msgText && !message.args().length) {
         return;
       }
-
       const type = message.type();
-      // Don't log "log", "info" or "debug"
+      // Don't log "log", "info"
       switch (type) {
         case 'error':
         case 'warning':
-          console.debug(`❗Page console: ${message.type()}: ${JSON.stringify(text, null, 2)}`);
+        case 'debug':
+          console.debug(`❗Page console ${message.type()}: ${JSON.stringify(text, null, 2)}`);
           break;
       }
       // tslint:disable-next-line:no-empty
