@@ -60,6 +60,7 @@ interface State {
   seePreview: boolean;
   includeRawMicroarrayData: boolean;
   genomicsAnalysisTool: GenomicsAnalysisToolEnum;
+  saveOrExportError: boolean;
 }
 
 class NewDataSetModal extends React.Component<Props, State> {
@@ -80,7 +81,8 @@ class NewDataSetModal extends React.Component<Props, State> {
       queries: new Map([[KernelTypeEnum.Python, undefined], [KernelTypeEnum.R, undefined]]),
       seePreview: false,
       includeRawMicroarrayData: false,
-      genomicsAnalysisTool: GenomicsAnalysisToolEnum.NONE
+      genomicsAnalysisTool: GenomicsAnalysisToolEnum.NONE,
+      saveOrExportError: false
     };
   }
 
@@ -110,7 +112,7 @@ class NewDataSetModal extends React.Component<Props, State> {
     if (!this.state.name) {
       return;
     }
-    this.setState({conflictDataSetName: false, missingDataSetInfo: false, loading: true});
+    this.setState({conflictDataSetName: false, missingDataSetInfo: false, loading: true, saveOrExportError: false});
     const {name} = this.state;
     const request: DataSetRequest = {
       name: name,
@@ -156,6 +158,8 @@ class NewDataSetModal extends React.Component<Props, State> {
         this.setState({conflictDataSetName: true, loading: false});
       } else if (e.status === 400) {
         this.setState({missingDataSetInfo: true, loading: false});
+      } else {
+        this.setState({saveOrExportError: true, loading: false});
       }
     }
   }
@@ -203,6 +207,7 @@ class NewDataSetModal extends React.Component<Props, State> {
       newNotebook,
       notebookName,
       existingNotebooks,
+      saveOrExportError
     } = this.state;
 
     const errors = validate({name, notebookName}, {
@@ -217,16 +222,18 @@ class NewDataSetModal extends React.Component<Props, State> {
         }
       }
     });
+    const isApiError = conflictDataSetName || missingDataSetInfo || saveOrExportError;
     return <Modal loading={loading}>
       <ModalTitle>{this.props.dataSet ? 'Update' : 'Save'} Dataset</ModalTitle>
       <ModalBody>
         <div>
-          {conflictDataSetName &&
-          <AlertDanger>A Dataset with the same name exists</AlertDanger>
-          }
-          {missingDataSetInfo &&
-          <AlertDanger>Cannot save the Dataset because some information is missing</AlertDanger>
-          }
+          {isApiError && <AlertDanger style={{marginBottom: '0.25rem', padding: '0 0.25rem'}}>
+            {conflictDataSetName && <span>A Dataset with the same name exists</span>}
+            {missingDataSetInfo && <span>Cannot save the Dataset because some information is missing</span>}
+            {saveOrExportError && <span>
+              The request cannot be completed. Please try again or contact Support in the left hand navigation
+            </span>}
+          </AlertDanger>}
           <TextInput type='text' autoFocus placeholder='Dataset Name'
                      value={name} data-test-id='data-set-name-input'
                      onChange={v => this.setState({
