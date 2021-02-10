@@ -109,12 +109,12 @@ def publish_cdr(cmd_name, args)
       "--exclude-sa-acl",
       TrueClass,
       ->(opts, v) { opts.exclude_sa_acl = v},
-      "When true, does not include the default service account in the ACL. Defaults to false which includes the ACL.")
+      "When true, does not include the default service account in the ACL. Defaults to false which includes the SA.")
   op.add_typed_option(
       "--exclude-auth-domain-acl",
       TrueClass,
       ->(opts, v) { opts.exclude_auth_domain_acl = v},
-      "When true, does not include the auth domain in the ACL. Defaults to false which includes the ACL.")
+      "When true, does not include the auth domain in the ACL. Defaults to false which includes the auth domain.")
   op.add_option(
       "--additional-reader-group [reader_email]",
       ->(opts, v) { opts.additional_reader_group = v},
@@ -235,7 +235,6 @@ def publish_cdr(cmd_name, args)
       File.open(config_file.path, "w") do |f|
         f.write(JSON.pretty_generate(json))
       end
-
       common.run_inline %{bq update --source #{config_file.path} #{dest_dataset}}
     ensure
       config_file.unlink
