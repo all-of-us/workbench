@@ -1,12 +1,12 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 import {AdminUserBypass} from './admin-user-bypass';
-import {Profile} from 'generated/fetch';
+import {AdminTableUser} from 'generated/fetch';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {serverConfigStore} from 'app/utils/navigation';
 
 describe('AdminUserBypassSpec', () => {
-  let props: {profile: Profile};
+  let props: {user: AdminTableUser};
 
   const component = () => {
     return mount(<AdminUserBypass {...props}/>);
@@ -21,7 +21,7 @@ describe('AdminUserBypassSpec', () => {
       enableEraCommons: true,
     });
     props = {
-      profile: ProfileStubVariables.PROFILE_STUB
+      user: ProfileStubVariables.ADMIN_TABLE_USER_STUB
     };
   });
 
