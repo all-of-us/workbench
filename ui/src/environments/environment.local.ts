@@ -15,6 +15,7 @@ export const environment: Environment = {
   gaId: 'UA-112406425-5',
   gaUserAgentDimension: 'dimension1',
   gaLoggedInDimension: 'dimension2',
+  gaUserInstitutionCategoryDimension: 'dimension3',
   zendeskEnv: ZendeskEnv.Sandbox,
   inactivityTimeoutSeconds: 99999999999,
   inactivityWarningBeforeSeconds: 5 * 60,

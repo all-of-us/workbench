@@ -179,7 +179,7 @@ export default class RuntimePanel extends BaseHelpSidebar {
     // Runtime panel automatically close after click Create button.
     // Reopen panel in order to check icon status.
     await this.open();
-    await this.waitForStartStopIconState(StartStopIconState.Starting, 60 * 1000);
+    await this.waitForStartStopIconState(StartStopIconState.Starting, 10 * 60 * 1000);
     await this.waitForStartStopIconState(StartStopIconState.Running);
     await this.close();
     console.log('Runtime is running');

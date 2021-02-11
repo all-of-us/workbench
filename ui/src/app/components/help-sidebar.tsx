@@ -86,7 +86,7 @@ const styles = reactStyles({
     height: '100%',
     overflow: 'auto',
     background: colorWithWhiteness(colors.primary, .87),
-    transition: 'margin-right 0.5s ease-out, width 0.5s ease-out',
+    transition: 'margin-right 0.5s ease-out',
     boxShadow: `-10px 0px 10px -8px ${colorWithWhiteness(colors.dark, .5)}`,
   },
   sidebarOpen: {

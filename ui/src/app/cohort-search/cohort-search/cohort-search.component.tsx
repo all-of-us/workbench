@@ -194,8 +194,14 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     if (groupId) {
       const requestItem = getItemFromSearchRequest(groupId, item.id, role);
       if (requestItem) {
+        // Use clone to compare to prevent passing changes back to actual selections
+        const selectionsClone = JSON.parse(JSON.stringify(selections));
         const sortAndStringify = (params) => JSON.stringify(params.sort((a, b) => a.id - b.id));
-        unsavedChanges = sortAndStringify(requestItem.searchParameters) !== sortAndStringify(selections);
+        if (this.criteriaIdsLookedUp(requestItem.searchParameters)) {
+          // If a lookup has been done, we delete the ids before comparing search parameters and selections
+          selectionsClone.forEach(selection => delete selection.id);
+        }
+        unsavedChanges = sortAndStringify(requestItem.searchParameters) !== sortAndStringify(selectionsClone);
       }
     }
     this.setState({unsavedChanges});
@@ -209,6 +215,12 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
     } else {
       this.closeSearch();
     }
+  }
+
+  // Checks if a lookup has been done to add the criteria ids to the selections
+  criteriaIdsLookedUp(searchParameters: Array<Selection>) {
+    const {selections} = this.state;
+    return selections.length && searchParameters.length && selections.some(sel => !!sel.id) && searchParameters.some(sel => !sel.id);
   }
 
   addSelection = (param: any) => {
@@ -280,7 +292,9 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
       <Growl ref={(el) => this.growl = el} style={!growlVisible ? {...styles.growl, display: 'none'} : styles.growl}/>
       <div id='cohort-search-container' style={styles.searchContent}>
         {domain === Domain.PERSON && <div style={styles.titleBar}>
-          <Clickable style={styles.backArrow} onClick={() => this.checkUnsavedChanges()}>
+          <Clickable data-test-id='cohort-search-back-arrow'
+                     style={styles.backArrow}
+                     onClick={() => this.checkUnsavedChanges()}>
             <img src={arrowIcon} style={styles.arrowIcon} alt='Go back' />
           </Clickable>
           <h2 style={styles.titleHeader}>{typeToTitle(type)}</h2>
@@ -290,7 +304,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
             ? {marginBottom: '3.5rem'}
             : {height: 'calc(100% - 3.5rem)'}
         }>
-          {domain === Domain.PERSON ? <div style={{flex: 1, overflow: 'auto'}}>
+          {domain === Domain.PERSON ? <div data-test-id='demographics' style={{flex: 1, overflow: 'auto'}}>
               <Demographics
                 criteriaType={type}
                 select={this.addSelection}
@@ -309,7 +323,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
       </Button>
       {showUnsavedModal && <Modal>
         <ModalTitle>Warning! </ModalTitle>
-        <ModalBody>
+        <ModalBody data-test-id='cohort-search-unsaved-message'>
           Your cohort has not been saved. If you’d like to save your cohort criteria, please click CANCEL
           and save your changes in the right sidebar.
         </ModalBody>

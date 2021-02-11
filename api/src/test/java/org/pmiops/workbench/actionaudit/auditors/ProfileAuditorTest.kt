@@ -16,6 +16,7 @@ import org.pmiops.workbench.actionaudit.TargetType
 import org.pmiops.workbench.db.model.DbUser
 import org.pmiops.workbench.model.DataAccessLevel
 import org.pmiops.workbench.model.DemographicSurvey
+import org.pmiops.workbench.model.Disability
 import org.pmiops.workbench.model.Education
 import org.pmiops.workbench.model.Ethnicity
 import org.pmiops.workbench.model.InstitutionalRole
@@ -75,7 +76,7 @@ class ProfileAuditorTest {
                 .apply { institutionalRoleEnum = InstitutionalRole.ADMIN }
 
         val demographicSurvey1 = DemographicSurvey()
-                .apply { disability = false }
+                .apply { disability = Disability.FALSE }
                 .apply { ethnicity = Ethnicity.NOT_HISPANIC }
                 .apply { yearOfBirth = BigDecimal.valueOf(1999) }
                 .apply { race = listOf(Race.PREFER_NO_ANSWER) }

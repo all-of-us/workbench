@@ -1,7 +1,4 @@
-const url = require('url');
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
-
-const isDebugMode = process.argv.includes('--debug');
 
 /**
  * Set up page common properties:
@@ -11,60 +8,84 @@ const isDebugMode = process.argv.includes('--debug');
  * - waitFor functions timeout
  */
 beforeEach(async () => {
-  await page.setUserAgent(userAgent);
-  await page.setViewport({width: 1280, height: 0});
-  page.setDefaultNavigationTimeout(60000); // Puppeteer default timeout is 30 seconds.
-  page.setDefaultTimeout(30000);
-});
 
-/**
- * At the end of each test completion, do:
- * - Disable network interception.
- * - Delete broswer cookies.
- * - Reset global page and browser variables.
- */
-afterEach(async () => {
-  await page.deleteCookie(...await page.cookies());
   await jestPuppeteer.resetPage();
   await jestPuppeteer.resetBrowser();
-});
 
-/**
- * Enable network interception in new page and block unwanted requests.
- */
-beforeAll(async () => {
+  await page.setUserAgent(userAgent);
+  await page.setViewport({width: 1300, height: 0});
+
+  page.setDefaultNavigationTimeout(60000); // Puppeteer default timeout is 30 seconds.
+  page.setDefaultTimeout(30000);
+
   await page.setRequestInterception(true);
+
   page.on('request', (request) => {
-    const requestUrl = url.parse(request.url(), true);
-    const host = requestUrl.hostname;
-    // to improve page load performance, block network requests unrelated to application.
     try {
-      if (host === 'www.google-analytics.com'
-           || host === 'accounts.youtube.com'
-           || host === 'static.zdassets.com'
-           || host === 'play.google.com'
-           || request.url().endsWith('content-security-index-report')) {
-        request.abort();
-      } else {
-        request.continue();
+      if (request.url().includes('api-dot-all-of-us')) {
+        const method = request.method();
+        if (method !== 'OPTIONS') {
+          console.debug(`❗Request issued: ${request.url()}`);
+        }
       }
-    } catch (err) {
-      console.error(err);
-    }
-  });
-  if (isDebugMode) {
-    // Emitted when a request failed. Warning: blocked requests from above will be logged as failed requests, safe to ignore these.
-    page.on('requestfailed', request => {
-      console.error(`❌ Failed request => ${request.method()} ${request.url()}`);
       request.continue();
-    });
-    // Emitted when the page crashed
-    page.on('error', error => console.error(`❌ ${error}`));
-    // Emitted when a script has uncaught exception
-    page.on('pageerror', error => console.error(`❌ ${error}`));
-  }
+      // tslint:disable-next-line:no-empty
+    } catch (e) {
+    }
+  })
+  .on('requestfinished', async (request) => {
+    try {
+      const response = await request.response();
+      const status = request.response().status();
+      let responseBody;
+      if (request.redirectChain().length === 0) {
+        // response body can only be accessed for non-redirect responses.
+        if (request.url().includes('api-dot-all-of-us')){
+          responseBody = await response.buffer();
+          if (responseBody !== undefined) {
+            responseBody = JSON.stringify(JSON.parse(responseBody.toString()), null, 2);
+          }
+          const method = request.method();
+          console.debug(`❗Request finished: ${status} ${method} ${request.url()}  \n ${responseBody}`, {depth: null, colors: true});
+        }
+      }
+      await request.continue();
+      // tslint:disable-next-line:no-empty
+    } catch (e) {
+    }
+  })
+  .on('requestfailed', async (request) => {
+    try {
+      const response = request.response();
+      if (response !== null) {
+        const status = response.status();
+        const responseText = await response.text();
+        const failureError = request.failure().errorText;
+        console.debug(`❗Request failed: ${status} ${request.method()} ${request.url()}  \n ${failureError} \n ${responseText}`);
+      }
+      // tslint:disable-next-line:no-empty
+    } catch (err) {
+    }
+  })
+  .on('console', (message) => {
+    if (message != null) {
+      // Don't log "log", "info" or "debug"
+      if (['ERROR', 'WARNING'].includes(message.type().toUpperCase())) {
+        console.debug(`❗Page console: ${message.type()}: ${message.text()}`);
+      }
+    }
+  })
+  .on('error', (error) => {
+    console.debug(`❗Page error: ${error}`);
+  })
+  .on('pageerror', (error) => {
+    if (error != null) {
+      console.debug(`❗Page error: ${error}`);
+    }
+  })
+
 });
 
-afterAll(async () => {
+afterEach(async () => {
   await page.setRequestInterception(false);
 });

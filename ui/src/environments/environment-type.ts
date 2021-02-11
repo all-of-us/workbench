@@ -23,12 +23,19 @@ export interface EnvironmentBase {
   gaId: string;
   // The Google Analytics custom dimension ID for sending User Agent
   // info, allowing us to filter out Pingdom, Appscan, etc
-  // This value should look like 'dimension1' or similar.
+  // This value should look like 'dimension1' or similar,
+  // matching the value in GA -> Admin -> Custom Dimensions.
   gaUserAgentDimension: string;
   // The Google Analytics custom dimension ID for sending logged-in state,
   // allowing us to distinguish between unauthenticated and logged-in sessions.
-  // This value should look like 'dimension2' or similar.
+  // This value should look like 'dimension2' or similar,
+  // matching the value in GA -> Admin -> Custom Dimensions.
   gaLoggedInDimension: string;
+  // The Google Analytics custom dimension ID for distinguishing between researchers and operational users,
+  // by checking the name of the user's institution.
+  // This value should look like 'dimension3' or similar,
+  // matching the value in GA -> Admin -> Custom Dimensions.
+  gaUserInstitutionCategoryDimension: string;
   // API endpoint to use for Leonardo (notebook proxy) API calls.
   // Example value: 'https://notebooks.firecloud.org'
   leoApiUrl: string;

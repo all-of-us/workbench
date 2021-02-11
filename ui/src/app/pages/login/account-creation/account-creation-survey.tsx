@@ -9,6 +9,7 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {environment} from 'environments/environment';
 import {ErrorResponse, Profile} from 'generated/fetch';
+import * as fp from 'lodash/fp';
 
 
 export interface AccountCreationSurveyProps {
@@ -55,7 +56,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
   render() {
     return <React.Fragment>
       <DemographicSurvey
-          profile={this.props.profile}
+          profile={fp.set('demographicSurvey', fp.mapValues(() => undefined, this.props.profile.demographicSurvey), this.props.profile)}
           onSubmit={(profile, captchaToken) => {
             AnalyticsTracker.Registration.DemographicSurvey();
             return this.createAccount(profile, captchaToken);

@@ -2,9 +2,11 @@ package org.pmiops.workbench.profile;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.model.AdminTableUser;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -33,11 +35,10 @@ public interface ProfileMapper {
       Double freeTierUsage,
       Double freeTierDollarQuota);
 
+  AdminTableUser adminViewToModel(UserDao.DbAdminTableUser dbUser);
+
   @Mapping(target = "authoritiesEnum", ignore = true) // derived property
   @Mapping(target = "billingProjectRetries", ignore = true) // I don't think we actually use this
-  @Mapping(
-      target = "clusterCreateRetries",
-      ignore = true) // used only by ClusterController / LeonardoNotebooksClient
   @Mapping(
       target = "complianceTrainingExpirationTime",
       ignore = true) // handled by UserService.syncComplianceTraining[V1|V2]

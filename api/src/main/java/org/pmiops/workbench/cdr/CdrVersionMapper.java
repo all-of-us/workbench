@@ -15,6 +15,7 @@ public interface CdrVersionMapper {
   @Mapping(source = "microarrayBigqueryDataset", target = "hasMicroarrayData")
   @Mapping(source = "dataAccessLevelEnum", target = "dataAccessLevel")
   @Mapping(source = "archivalStatusEnum", target = "archivalStatus")
+  @Mapping(source = "accessTier.shortName", target = "accessTier")
   CdrVersion dbModelToClient(DbCdrVersion db);
 
   default boolean isNonEmpty(String s) {

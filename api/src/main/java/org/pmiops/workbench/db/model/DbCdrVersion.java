@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -16,11 +18,12 @@ import org.pmiops.workbench.model.DataAccessLevel;
 @Entity
 @Table(name = "cdr_version")
 public class DbCdrVersion {
-
   private long cdrVersionId;
   private boolean isDefault;
   private String name;
+  @Deprecated // soon to be replaced by accessTier
   private Short dataAccessLevel;
+  private DbAccessTier accessTier;
   private short releaseNumber;
   private short archivalStatus;
   private String bigqueryProject;
@@ -62,6 +65,7 @@ public class DbCdrVersion {
     this.name = name;
   }
 
+  @Deprecated // soon to be replaced by accessTier
   @Column(name = "data_access_level")
   public Short getDataAccessLevel() {
     return dataAccessLevel;
@@ -78,6 +82,16 @@ public class DbCdrVersion {
 
   public void setDataAccessLevelEnum(DataAccessLevel dataAccessLevel) {
     setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
+  }
+
+  @ManyToOne
+  @JoinColumn(name = "access_tier")
+  public DbAccessTier getAccessTier() {
+    return accessTier;
+  }
+
+  public void setAccessTier(DbAccessTier accessTier) {
+    this.accessTier = accessTier;
   }
 
   @Column(name = "archival_status")
@@ -227,6 +241,7 @@ public class DbCdrVersion {
         .append(this.elasticIndexBaseName, that.elasticIndexBaseName)
         .append(this.hasFitbitData, that.hasFitbitData)
         .append(this.hasCopeSurveyData, that.hasCopeSurveyData)
+        .append(this.accessTier, that.accessTier)
         .build();
   }
 }

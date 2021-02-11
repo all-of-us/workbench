@@ -1,7 +1,7 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {Language} from 'app/text-labels';
 import {makeRandomName} from 'utils/str-utils';
-import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
+import {createWorkspace, signInWithAccessToken} from 'utils/test-utils';
 
 describe('Jupyter notebook tests in R language', () => {
 
@@ -10,7 +10,7 @@ describe('Jupyter notebook tests in R language', () => {
   });
 
   test('Run code from file', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page);
+    const workspaceCard = await createWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
     const notebookName = makeRandomName('r-notebook');

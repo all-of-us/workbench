@@ -17,7 +17,6 @@ require "ostruct"
 require "tempfile"
 
 TEST_PROJECT = "all-of-us-workbench-test"
-GSUITE_ADMIN_KEY_PATH = "src/main/webapp/WEB-INF/gsuite-admin-sa.json"
 INSTANCE_NAME = "workbenchmaindb"
 FAILOVER_INSTANCE_NAME = "workbenchbackupdb"
 SERVICES = %W{servicemanagement.googleapis.com storage-component.googleapis.com iam.googleapis.com
@@ -42,7 +41,7 @@ ENVIRONMENTS = {
     :api_endpoint_host => "localhost:8081",
     :cdr_sql_instance => "workbench",
     :config_json => "config_local.json",
-    :cdr_versions_json => "cdr_versions_local.json",
+    :cdr_config_json => "cdr_config_local.json",
     :featured_workspaces_json => "featured_workspaces_local.json",
     :gae_vars => make_gae_vars,
     :source_cdr_project => "all-of-us-ehr-dev"
@@ -52,7 +51,7 @@ ENVIRONMENTS = {
     :api_endpoint_host => "api-dot-#{TEST_PROJECT}.appspot.com",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_test.json",
-    :cdr_versions_json => "cdr_versions_test.json",
+    :cdr_config_json => "cdr_config_test.json",
     :featured_workspaces_json => "featured_workspaces_test.json",
     :gae_vars => make_gae_vars(3, 10, 'F4'),
     :source_cdr_project => "all-of-us-ehr-dev"
@@ -62,7 +61,7 @@ ENVIRONMENTS = {
     :api_endpoint_host => "api-dot-all-of-us-rw-staging.appspot.com",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_staging.json",
-    :cdr_versions_json => "cdr_versions_staging.json",
+    :cdr_config_json => "cdr_config_staging.json",
     :featured_workspaces_json => "featured_workspaces_staging.json",
     :gae_vars => make_gae_vars,
     :source_cdr_project => "all-of-us-ehr-dev"
@@ -72,7 +71,7 @@ ENVIRONMENTS = {
     :api_endpoint_host => "api-dot-all-of-us-rw-perf.appspot.com",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_perf.json",
-    :cdr_versions_json => "cdr_versions_perf.json",
+    :cdr_config_json => "cdr_config_perf.json",
     :featured_workspaces_json => "featured_workspaces_perf.json",
     :gae_vars => make_gae_vars(20, 20),
     :source_cdr_project => "all-of-us-ehr-dev"
@@ -82,7 +81,7 @@ ENVIRONMENTS = {
     :api_endpoint_host => "api-dot-all-of-us-rw-stable.appspot.com",
     :cdr_sql_instance => "#{TEST_PROJECT}:us-central1:workbenchmaindb",
     :config_json => "config_stable.json",
-    :cdr_versions_json => "cdr_versions_stable.json",
+    :cdr_config_json => "cdr_config_stable.json",
     :featured_workspaces_json => "featured_workspaces_stable.json",
     :gae_vars => make_gae_vars,
     :source_cdr_project => "all-of-us-ehr-dev"
@@ -92,7 +91,7 @@ ENVIRONMENTS = {
     :api_endpoint_host => "api.preprod-workbench.researchallofus.org",
     :cdr_sql_instance => "all-of-us-rw-preprod:us-central1:workbenchmaindb",
     :config_json => "config_preprod.json",
-    :cdr_versions_json => "cdr_versions_preprod.json",
+    :cdr_config_json => "cdr_config_preprod.json",
     :featured_workspaces_json => "featured_workspaces_preprod.json",
     :gae_vars => make_gae_vars,
     :source_cdr_project => "aou-res-curation-output-prod"
@@ -102,7 +101,7 @@ ENVIRONMENTS = {
     :api_endpoint_host => "api.workbench.researchallofus.org",
     :cdr_sql_instance => "all-of-us-rw-prod:us-central1:workbenchmaindb",
     :config_json => "config_prod.json",
-    :cdr_versions_json => "cdr_versions_prod.json",
+    :cdr_config_json => "cdr_config_prod.json",
     :featured_workspaces_json => "featured_workspaces_prod.json",
     :gae_vars => make_gae_vars(8, 64, 'F4'),
     :source_cdr_project => "aou-res-curation-output-prod"
@@ -302,7 +301,7 @@ def run_local_migrations()
   common.run_inline %W{gradle :loadConfig -Pconfig_key=main -Pconfig_file=config/config_local.json}
   common.run_inline %W{gradle :loadConfig -Pconfig_key=cdrBigQuerySchema -Pconfig_file=config/cdm/cdm_5_2.json}
   common.run_inline %W{gradle :loadConfig -Pconfig_key=featuredWorkspaces -Pconfig_file=config/featured_workspaces_local.json}
-  common.run_inline %W{gradle :updateCdrVersions -PappArgs=['config/cdr_versions_local.json',false]}
+  common.run_inline %W{gradle :updateCdrConfig -PappArgs=['config/cdr_config_local.json',false]}
 end
 
 Common.register_command({
@@ -357,17 +356,9 @@ Common.register_command({
   :fn => ->() { run_local_api_tests() }
 })
 
-def get_gsuite_admin_key(project)
-  unless File.exist? GSUITE_ADMIN_KEY_PATH
-    common = Common.new
-    common.run_inline("gsutil cp gs://#{project}-credentials/gsuite-admin-sa.json #{GSUITE_ADMIN_KEY_PATH}")
-  end
-end
-
 def run_api()
   common = Common.new
   ServiceAccountContext.new(TEST_PROJECT).run do
-    get_gsuite_admin_key(TEST_PROJECT)
     common.status "Starting API. This can take a while. Thoughts on reducing development cycle time"
     common.status "are here:"
     common.status "  https://github.com/all-of-us/workbench/blob/master/api/doc/2017/dev-cycle.md"
@@ -441,7 +432,6 @@ def run_integration_tests(cmd_name, *args)
   ensure_docker cmd_name, args
   common = Common.new
   ServiceAccountContext.new(TEST_PROJECT).run do
-    get_gsuite_admin_key(TEST_PROJECT)
     common.run_inline %W{gradle integrationTest} + args
   end
 end
@@ -2160,7 +2150,7 @@ def load_es_index(cmd_name, *args)
     "--cdr-version [VERSION]",
     ->(opts, v) { opts.cdr_version = v},
     "CDR version, e.g. 'synth_r_2019q1_2', used to name the index. Value " +
-    "should eventually match elasticIndexBaseName in the cdr_versions_*.json " +
+    "should eventually match elasticIndexBaseName in the cdr_config_*.json " +
     "configurations. Defaults to 'cdr' for local runs")
 
   # TODO(RW-2213): Generalize this subsampling approach for all local development work.
@@ -2195,7 +2185,7 @@ def load_es_index(cmd_name, *args)
   create_flags = (([
     ['--query-project-id', 'all-of-us-ehr-dev'],
     ['--es-base-url', base_url],
-    # Matches cdr_versions_local.json
+    # Matches cdr_config_local.json
     ['--cdr-version', op.opts.cdr_version],
     ['--cdr-big-query-dataset', 'all-of-us-ehr-dev.synthetic_cdr20180606'],
     ['--scratch-big-query-dataset', 'all-of-us-ehr-dev.workbench_elastic'],
@@ -2218,7 +2208,7 @@ Common.register_command({
   :fn => ->(*args) { load_es_index("load-es-index", *args) }
 })
 
-def update_cdr_version_options(cmd_name, args)
+def update_cdr_config_options(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = false
   op.add_option(
@@ -2228,52 +2218,52 @@ def update_cdr_version_options(cmd_name, args)
   return op
 end
 
-def update_cdr_versions_for_project(versions_file, dry_run)
+def update_cdr_config_for_project(cdr_config_file, dry_run)
   common = Common.new
   common.run_inline %W{
-    gradle updateCdrVersions
-   -PappArgs=['#{versions_file}',#{dry_run}]}
+    gradle updateCdrConfig
+   -PappArgs=['#{cdr_config_file}',#{dry_run}]}
 end
 
-def update_cdr_versions(cmd_name, *args)
+def update_cdr_config(cmd_name, *args)
   ensure_docker cmd_name, args
-  op = update_cdr_version_options(cmd_name, args)
+  op = update_cdr_config_options(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
 
   with_cloud_proxy_and_db(gcc) do
-    versions_file = must_get_env_value(gcc.project, :cdr_versions_json)
-    update_cdr_versions_for_project("/w/api/config/#{versions_file}", op.opts.dry_run)
+    cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
+    update_cdr_config_for_project("/w/api/config/#{cdr_config_file}", op.opts.dry_run)
   end
 end
 
 Common.register_command({
-  :invocation => "update-cdr-versions",
-  :description => "Update CDR versions in a cloud environment",
-  :fn => ->(*args) { update_cdr_versions("update-cdr-versions", *args)}
+  :invocation => "update-cdr-config",
+  :description => "Update CDR config (tiers and versions) in a cloud environment",
+  :fn => ->(*args) { update_cdr_config("update-cdr-config", *args)}
 })
 
-def update_cdr_versions_local(cmd_name, *args)
+def update_cdr_config_local(cmd_name, *args)
   ensure_docker_sync()
   setup_local_environment
-  op = update_cdr_version_options(cmd_name, args)
+  op = update_cdr_config_options(cmd_name, args)
   op.parse.validate
-  versions_file = 'config/cdr_versions_local.json'
-  app_args = ["-PappArgs=['/w/api/" + versions_file + "',false]"]
+  cdr_config_file = 'config/cdr_config_local.json'
+  app_args = ["-PappArgs=['/w/api/" + cdr_config_file + "',false]"]
   common = Common.new
-  common.run_inline %W{docker-compose run --rm api-scripts ./gradlew updateCdrVersions} + app_args
+  common.run_inline %W{docker-compose run --rm api-scripts ./gradlew updateCdrConfig} + app_args
 end
 
 Common.register_command({
-  :invocation => "update-cdr-versions-local",
-  :description => "Update CDR versions in the local environment",
-  :fn => ->(*args) { update_cdr_versions_local("update-cdr-versions-local", *args)}
+  :invocation => "update-cdr-config-local",
+  :description => "Update CDR config (tiers and versions) in the local environment",
+  :fn => ->(*args) { update_cdr_config_local("update-cdr-config-local", *args)}
 })
 
 def update_review_demographics(cmd_name, *args)
   ensure_docker cmd_name, args
-  op = update_cdr_version_options(cmd_name, args)
+  op = update_cdr_config_options(cmd_name, args)
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
@@ -2394,7 +2384,7 @@ Common.register_command({
   :fn => ->(*args) { connect_to_cloud_db_binlog("connect-to-cloud-db-binlog", *args) }
 })
 
-def deploy_app(cmd_name, args, with_cron, with_gsuite_admin, with_queue)
+def deploy_app(cmd_name, args, with_cron, with_queue)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = false
@@ -2434,11 +2424,6 @@ def deploy_app(cmd_name, args, with_cron, with_gsuite_admin, with_queue)
 
   # Clear out generated files, which may be out of date; they will be regenerated by appengineStage.
   common.run_inline %W{rm -rf src/generated}
-  if with_gsuite_admin
-    common.run_inline %W{rm -f #{GSUITE_ADMIN_KEY_PATH}}
-    # TODO: generate new key here
-    get_gsuite_admin_key(gcc.project)
-  end
   Dir.chdir("snippets-menu") do
     common.run_inline(%W{./build.rb build-snippets-menu})
   end
@@ -2464,7 +2449,7 @@ def deploy_api(cmd_name, args)
   ensure_docker cmd_name, args
   common = Common.new
   common.status "Deploying api..."
-  deploy_app(cmd_name, args, true, true, true)
+  deploy_app(cmd_name, args, true, true)
 end
 
 Common.register_command({
@@ -2538,10 +2523,6 @@ end
 
 def get_auth_domain(project)
   return get_fc_config(project)["registeredDomainName"]
-end
-
-def get_auth_domain_group(project)
-  return get_fc_config(project)["registeredDomainGroup"]
 end
 
 def get_firecloud_base_url(project)
@@ -2648,8 +2629,8 @@ def deploy(cmd_name, args)
   with_cloud_proxy_and_db(gcc, op.opts.account, op.opts.key_file) do |ctx|
     migrate_database(op.opts.dry_run)
     load_config(ctx.project, op.opts.dry_run)
-    versions_file = must_get_env_value(gcc.project, :cdr_versions_json)
-    update_cdr_versions_for_project("config/#{versions_file}", op.opts.dry_run)
+    cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
+    update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
 
     common.run_inline %W{gradle loadDataDictionary -PappArgs=#{op.opts.dry_run ? true : false}}
 
@@ -2786,19 +2767,6 @@ def setup_project_data(gcc, cdr_db_name)
   # Don't delete the credentials created here; they will be stored in GCS and reused during
   # deployment, etc.
   with_cloud_proxy_and_db(gcc) do
-    common.status "Copying GSuite service account key to GCS..."
-    gsuite_admin_creds_file = Tempfile.new("gsuite-admin-sa.json").path
-    common.run_inline %W{gcloud iam service-accounts keys create #{gsuite_admin_creds_file}
-        --iam-account=gsuite-admin@#{gcc.project}.iam.gserviceaccount.com --project=#{gcc.project}}
-    common.run_inline %W{gsutil cp #{gsuite_admin_creds_file} gs://#{gcc.project}-credentials/gsuite-admin-sa.json}
-
-    common.status "Copying FireCloud service account key to GCS..."
-    firecloud_admin_creds_file = Tempfile.new("firecloud-admin-sa.json").path
-    common.run_inline %W{gcloud iam service-accounts keys create #{firecloud_admin_creds_file}
-        --iam-account=firecloud-admin@#{gcc.project}.iam.gserviceaccount.com --project=#{gcc.project}}
-    common.run_inline %W{gsutil cp #{firecloud_admin_creds_file} gs://#{gcc.project}-credentials/firecloud-admin-sa.json}
-
-
     common.status "Setting up databases and users..."
     create_or_update_workbench_db
 

@@ -76,6 +76,10 @@ public class ExceptionUtils {
         || code == HttpServletResponse.SC_BAD_GATEWAY;
   }
 
+  public static boolean isInternalServerError(int code) {
+    return code == HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+  }
+
   private static RuntimeException codeToException(int code) {
 
     if (code == HttpStatus.NOT_FOUND.value()) {

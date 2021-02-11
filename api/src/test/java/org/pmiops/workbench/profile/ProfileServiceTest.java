@@ -9,11 +9,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -41,10 +38,9 @@ import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapperImpl;
 import org.pmiops.workbench.model.Address;
+import org.pmiops.workbench.model.AdminTableUser;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.InstitutionalRole;
-import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.test.FakeClock;
@@ -54,9 +50,12 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.data.projection.ProjectionFactory;
+import org.springframework.data.projection.SpelAwareProxyProjectionFactory;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -104,7 +103,9 @@ public class ProfileServiceTest {
   private VerifiedInstitutionalAffiliationMapper mockVerifiedInstitutionalAffiliationMapper;
 
   @Autowired ProfileService profileService;
-  @Autowired UserDao userDao;
+  // Use a SpyBean here, since we need to have a real UserDao available, but also mock out specific
+  // method calls (see e.g. testGetAdminTableUsers* tests).
+  @SpyBean UserDao userDao;
 
   // enables access to the logged in user
   private static DbUser loggedInUser;
@@ -548,112 +549,44 @@ public class ProfileServiceTest {
   }
 
   @Test
-  public void testListAllProfiles_noUsers() {
-    final List<Profile> profiles = profileService.listAllProfiles();
+  public void testGetAdminTableUsers_noUsers() {
+    doReturn(ImmutableList.of()).when(userDao).getAdminTableUsers();
+
+    final List<AdminTableUser> profiles = profileService.getAdminTableUsers();
     assertThat(profiles).isEmpty();
   }
 
   @Test
-  public void testListAllProfiles_someUsers() {
-    final DbUser user1 = new DbUser();
+  public void testGetAdminTableUsers_someUsers() {
+    ProjectionFactory factory = new SpelAwareProxyProjectionFactory();
+
+    final UserDao.DbAdminTableUser user1 = factory.createProjection(UserDao.DbAdminTableUser.class);
     user1.setUserId(101L);
-    user1.setUsername("jay@aou.biz");
+    user1.setContactEmail("jay@aou.biz");
     user1.setDisabled(false);
-    user1.setAboutYou("Just a test user");
+    user1.setInstitutionName("University 1");
 
-    final DbUser user2 = new DbUser();
+    final UserDao.DbAdminTableUser user2 = factory.createProjection(UserDao.DbAdminTableUser.class);
     user2.setUserId(102l);
-    user2.setUsername("fred@aou.biz");
+    user2.setContactEmail("fred@aou.biz");
     user2.setDisabled(true);
-    user2.setAboutYou("a disabled user account");
+    user2.setInstitutionName("University 2");
 
-    final DbUser user3 = new DbUser();
+    final UserDao.DbAdminTableUser user3 = factory.createProjection(UserDao.DbAdminTableUser.class);
     user3.setUserId(103l);
-    user3.setUsername("betty@aou.biz");
+    user3.setContactEmail("betty@aou.biz");
     user3.setDisabled(true);
-    user3.setAboutYou("where to begin...");
+    user3.setInstitutionName("University 3");
 
-    doReturn(ImmutableSet.of(user1, user2, user3))
-        .when(mockUserService)
-        .findAllUsersWithAuthoritiesAndPageVisits();
+    doReturn(ImmutableList.of(user1, user2, user3)).when(userDao).getAdminTableUsers();
 
-    doReturn(
-            ImmutableMap.of(
-                user1.getUserId(), 1.75,
-                user2.getUserId(), 67.53,
-                user3.getUserId(), 0.00))
-        .when(mockFreeTierBillingService)
-        .getUserIdToTotalCost();
+    final List<AdminTableUser> adminTableUsers = profileService.getAdminTableUsers();
+    assertThat(adminTableUsers).hasSize(3);
 
-    doReturn(100.00).when(mockFreeTierBillingService).getUserFreeTierDollarLimit(user1);
-    doReturn(200.00).when(mockFreeTierBillingService).getUserFreeTierDollarLimit(user2);
-    doReturn(50.00).when(mockFreeTierBillingService).getUserFreeTierDollarLimit(user3);
-
-    final DbUserTermsOfService dbTos1 = new DbUserTermsOfService();
-    dbTos1.setUserTermsOfServiceId(1L);
-    dbTos1.setUserId(user1.getUserId());
-    dbTos1.setTosVersion(1);
-    dbTos1.setAgreementTime(Timestamp.from(CLOCK.instant()));
-
-    final DbUserTermsOfService dbTos2 = new DbUserTermsOfService();
-    dbTos2.setUserTermsOfServiceId(2L);
-    dbTos2.setUserId(user2.getUserId());
-    dbTos2.setTosVersion(2);
-    dbTos2.setAgreementTime(Timestamp.from(CLOCK.instant().plusSeconds(3600L)));
-
-    // Test the case where a given user has more than one TOS record.
-    final DbUserTermsOfService dbTos3 = new DbUserTermsOfService();
-    dbTos3.setUserTermsOfServiceId(3L);
-    dbTos3.setUserId(user2.getUserId());
-    dbTos3.setTosVersion(2);
-    final Timestamp tos3time = Timestamp.from(CLOCK.instant().plus(Duration.ofDays(30)));
-    dbTos3.setAgreementTime(tos3time);
-
-    doReturn(ImmutableList.of(dbTos1, dbTos2, dbTos3)).when(mockUserTermsOfServiceDao).findAll();
-
-    final DbInstitution dbInstitution1 = new DbInstitution();
-    dbInstitution1.setShortName("caltech");
-    dbInstitution1.setDisplayName("California Institute of Technology");
-    dbInstitution1.setOrganizationTypeEnum(OrganizationType.ACADEMIC_RESEARCH_INSTITUTION);
-    dbInstitution1.setDuaTypeEnum(DuaType.MASTER);
-    dbInstitution1.setInstitutionId(1L);
-
-    final DbVerifiedInstitutionalAffiliation dbAffiliation1 =
-        new DbVerifiedInstitutionalAffiliation();
-    dbAffiliation1.setVerifiedInstitutionalAffiliationId(1L);
-    dbAffiliation1.setUser(user1);
-    dbAffiliation1.setInstitution(dbInstitution1);
-    doReturn(ImmutableList.of(dbAffiliation1))
-        .when(mockVerifiedInstitutionalAffiliationDao)
-        .findAll();
-
-    // The VerifiedInstitutionalAffiliationMapper is already injected as a mock for purposes of
-    // other test cases
-    // so I have to mock this method (even though the generated code would do what I want). The way
-    // the Application
-    // Context works here, I can't easily use the mock in some methods and the real class in others.
-    final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation1 =
-        new VerifiedInstitutionalAffiliation()
-            .institutionShortName(dbInstitution1.getShortName())
-            .institutionDisplayName(dbInstitution1.getDisplayName())
-            .institutionalRoleOtherText(dbInstitution1.getOrganizationTypeOtherText());
-    doReturn(verifiedInstitutionalAffiliation1)
-        .when(mockVerifiedInstitutionalAffiliationMapper)
-        .dbToModel(dbAffiliation1);
-
-    final List<Profile> profiles = profileService.listAllProfiles();
-    assertThat(profiles).hasSize(3);
-
-    assertThat(profiles.get(0).getVerifiedInstitutionalAffiliation().getInstitutionDisplayName())
-        .isEqualTo(dbInstitution1.getDisplayName());
-
-    assertThat(profiles.get(1).getUserId()).isEqualTo(user2.getUserId());
-    assertThat(profiles.get(1).getFreeTierDollarQuota()).isWithin(0.02).of(200.00);
-    assertThat((double) profiles.get(1).getLatestTermsOfServiceTime())
-        .isWithin(500.0)
-        .of(tos3time.getTime());
-
-    assertThat(profiles.get(2).getVerifiedInstitutionalAffiliation()).isNull();
-    assertThat(profiles.get(2).getFreeTierUsage()).isWithin(0.02).of(0.00);
+    assertThat(adminTableUsers.get(0).getInstitutionName()).isEqualTo("University 1");
+    assertThat(adminTableUsers.get(0).getContactEmail()).isEqualTo("jay@aou.biz");
+    assertThat(adminTableUsers.get(0).getDisabled()).isEqualTo(false);
+    assertThat(adminTableUsers.get(1).getUserId()).isEqualTo(user2.getUserId());
+    assertThat(adminTableUsers.get(2).getUserId()).isEqualTo(user3.getUserId());
   }
 }

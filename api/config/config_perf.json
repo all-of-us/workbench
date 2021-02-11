@@ -104,8 +104,7 @@
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
-    "enableReportingUploadCron": false,
-    "enableCustomRuntimes": true
+    "enableReportingUploadCron": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",

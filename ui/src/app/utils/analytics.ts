@@ -1,4 +1,5 @@
 import {environment} from 'environments/environment';
+import {VerifiedInstitutionalAffiliation} from 'generated/fetch';
 
 declare let gtag: Function;
 
@@ -158,9 +159,39 @@ enum UserAuthState {
  * @param signedIn
  */
 export function setLoggedInState(loggedIn: boolean) {
-  gtag('set', {
+  gtagSet({
     [environment.gaLoggedInDimension]: loggedIn ? UserAuthState.LOGGED_IN : UserAuthState.LOGGED_OUT
   });
+}
+
+enum InstitutionCategoryState {
+  RESEARCHER = 'Researcher',
+  OPERATIONS = 'Operations',
+  NO_INSTITUTION = 'No Institution',
+  UNKNOWN = 'Unknown',
+}
+
+// matches backend InstitutionServiceImpl
+// TODO: avoid reliance on the name of the ops institution
+const OPERATIONAL_USER_INSTITUTION_SHORT_NAME = 'AouOps';
+
+/**
+ * Sets the Analytics custom dimension indicating what category of institution the user belongs to:
+ * RESEARCHER, OPERATIONS, or NONE. This allows us to create Analytics segments split by category.
+ * @param affiliation the verified institutional affiliation
+ */
+export function setInstitutionCategoryState(affiliation: VerifiedInstitutionalAffiliation) {
+  if (affiliation) {
+    const category = (OPERATIONAL_USER_INSTITUTION_SHORT_NAME === affiliation.institutionShortName) ?
+        InstitutionCategoryState.OPERATIONS : InstitutionCategoryState.RESEARCHER;
+    gtagSet({
+      [environment.gaUserInstitutionCategoryDimension]: category
+    });
+  } else {
+    gtagSet({
+      [environment.gaUserInstitutionCategoryDimension]: InstitutionCategoryState.NO_INSTITUTION
+    });
+  }
 }
 
 /**
@@ -170,9 +201,17 @@ export function setLoggedInState(loggedIn: boolean) {
  */
 export function initializeAnalytics() {
   gtag('js', new Date());
-  gtag('set', {
+  gtagSet({
     [environment.gaUserAgentDimension]: window.navigator.userAgent.slice(0, 100),
-    [environment.gaLoggedInDimension]: UserAuthState.LOGGED_OUT
+    [environment.gaLoggedInDimension]: UserAuthState.LOGGED_OUT,
+    [environment.gaUserInstitutionCategoryDimension]: InstitutionCategoryState.UNKNOWN,
   });
   gtag('config', environment.gaId);
+}
+
+// invokes the 'set' command in gtag.js which mutates global state.
+// All gtag event triggers after this call will be affected.
+// see https://developers.google.com/gtagjs/reference/api
+function gtagSet(setParam: object) {
+  gtag('set', setParam);
 }

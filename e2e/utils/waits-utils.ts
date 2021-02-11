@@ -268,9 +268,11 @@ export async function waitForText(page: Page,
  * It usually indicates the page is ready for user interaction.
  * </pre>
  */
-export async function waitWhileLoading(page: Page, timeout: number = (2 * 60 * 1000)): Promise<void> {
+export async function waitWhileLoading(page: Page, timeout: number = (2 * 60 * 1000), opts: {waitForRuntime?: boolean} = {}): Promise<void> {
+  const {waitForRuntime = false}  = opts;
+
   const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
-  const spinElementsSelector = '[style*="running spin"], .spinner:empty, [style*="running rotation"]';
+  const spinElementsSelector = `[style*="running spin"], .spinner:empty, [style*="running rotation"]${waitForRuntime ? ':not([aria-hidden="true"])' : ''}`;
 
   // To prevent checking on blank page, wait for elements exist in DOM.
   await Promise.race([

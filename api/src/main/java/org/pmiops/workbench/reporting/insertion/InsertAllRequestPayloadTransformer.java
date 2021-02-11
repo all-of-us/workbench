@@ -41,9 +41,10 @@ public interface InsertAllRequestPayloadTransformer<MODEL_T>
         .map(batch -> build(tableId, batch, fixedValues))
         .collect(ImmutableList.toImmutableList());
   }
-  /*
-   * Construct an InsertAllRequest from all of the provided models, one row per model. The fixedValues
-   * argument is to allow a value (like snapshot_timestamp) to span all rows in its column.
+  /**
+   * Construct an InsertAllRequest from all of the provided models, one row per model. The
+   * fixedValues argument is to allow a value (like snapshot_timestamp) to span all rows in its
+   * column.
    */
   default InsertAllRequest build(
       TableId tableId, List<MODEL_T> models, Map<String, Object> fixedValues) {
@@ -82,7 +83,7 @@ public interface InsertAllRequestPayloadTransformer<MODEL_T>
   /*
    * As an aid for best-effort deduplication, we can specify a unique 16-character key for each row.
    */
-  default String generateInsertId() {
+  static String generateInsertId() {
     return RandomUtils.generateRandomChars(INSERT_ID_CHARS, INSERT_ID_LENGTH);
   }
 }
