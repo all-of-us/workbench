@@ -86,7 +86,7 @@
     {
       "cdrVersionId": 5,
       "isDefault": false,
-      "name": "CT Synthetic Dataset",
+      "name": "CDR for Controlled Tier - DO NOT USE",
       "dataAccessLevel": 1,
       "bigqueryProject": "fc-aou-cdr-synth-test",
       "bigqueryDataset": "SR2019q4r3",
