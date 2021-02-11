@@ -34,7 +34,7 @@ export class TextModal extends React.Component<TextModalProps> {
   }
 
   render() {
-    const {closeFunction, title, body, buttonText, role = 'dialog'} = this.props
+    const {closeFunction, title, body, buttonText, role = 'dialog'} = this.props;
     return (
       <React.Fragment>
         <Modal onRequestClose={closeFunction} role={role}>

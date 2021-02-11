@@ -5,7 +5,6 @@ import * as validate from 'validate.js';
 
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
-import {withProfileErrorModal, WithProfileErrorModalProps} from 'app/components/with-error-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {TextAreaWithLengthValidationMessage, TextInput, ValidationError} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
@@ -13,6 +12,7 @@ import {Modal} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
+import {withProfileErrorModal, WithProfileErrorModalProps} from 'app/components/with-error-modal';
 import {getRegistrationTasksMap} from 'app/pages/homepage/registration-dashboard';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
@@ -159,9 +159,9 @@ export const ProfilePage = fp.flow(
     ProfilePageProps,
     ProfilePageState
 > {
-  static displayName = 'ProfilePage';
+    static displayName = 'ProfilePage';
 
-  constructor(props) {
+    constructor(props) {
     super(props);
 
     this.state = {
@@ -172,7 +172,7 @@ export const ProfilePage = fp.flow(
     };
   }
 
-  async componentDidMount() {
+    async componentDidMount() {
     try {
       const details = await institutionApi().getPublicInstitutionDetails();
       this.setState({
@@ -183,12 +183,12 @@ export const ProfilePage = fp.flow(
     }
   }
 
-  navigateToTraining(): void {
+    navigateToTraining(): void {
     window.location.assign(
       environment.trainingUrl + '/static/data-researcher.html?saml=on');
   }
 
-  initializeProfile() {
+    initializeProfile() {
     if (!this.props.profileState.profile) {
       return this.createInitialProfile();
     }
@@ -204,14 +204,14 @@ export const ProfilePage = fp.flow(
     return this.props.profileState.profile;
   }
 
-  createInitialProfile(): Profile {
+    createInitialProfile(): Profile {
     return {
       ...this.props.profileState.profile,
       demographicSurvey: {}
     };
   }
 
-  componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps) {
     const {profileState: {profile}} = this.props;
 
     if (!fp.isEqual(prevProps.profileState.profile, profile)) {
@@ -219,7 +219,7 @@ export const ProfilePage = fp.flow(
     }
   }
 
-  getRoleOptions(): Array<{label: string, value: InstitutionalRole}> {
+    getRoleOptions(): Array<{label: string, value: InstitutionalRole}> {
     const {institutions, currentProfile} = this.state;
     if (currentProfile) {
       const selectedOrgType = institutions.find(
@@ -239,7 +239,7 @@ export const ProfilePage = fp.flow(
     }
   }
 
-  saveProfileErrorMessage(errors) {
+    saveProfileErrorMessage(errors) {
     return <React.Fragment>
       <div>You must correct errors before saving: </div>
       <BulletAlignedUnorderedList>
@@ -248,7 +248,7 @@ export const ProfilePage = fp.flow(
     </React.Fragment>;
   }
 
-  async saveProfile(profile: Profile): Promise<Profile> {
+    async saveProfile(profile: Profile): Promise<Profile> {
     const {profileState: {reload}} = this.props;
 
     // updating is only used to control spinner display. If the demographic survey modal
@@ -265,7 +265,7 @@ export const ProfilePage = fp.flow(
     } catch (error) {
       reportError(error);
       const errorResponse = await convertAPIError(error);
-      this.props.showProfileErrorModal(errorResponse.message)
+      this.props.showProfileErrorModal(errorResponse.message);
       console.error(error);
       return Promise.reject();
     } finally {
@@ -273,19 +273,19 @@ export const ProfilePage = fp.flow(
     }
   }
 
-  getRegistrationStatus(completionTime: number, bypassTime: number) {
+    getRegistrationStatus(completionTime: number, bypassTime: number) {
     return completionTime !== null && completionTime !== undefined ? RegistrationStepStatus.COMPLETED :
       bypassTime !== null && completionTime !== undefined ? RegistrationStepStatus.BYPASSED : RegistrationStepStatus.UNCOMPLETE;
   }
 
-  private bypassedText(bypassTime) {
+    private bypassedText(bypassTime) {
     return <React.Fragment>
       <div>Bypassed on:</div>
       <div>{displayDateWithoutHours(bypassTime)}</div>
     </React.Fragment>;
   }
 
-  private getTwoFactorAuthCardText(profile) {
+    private getTwoFactorAuthCardText(profile) {
     switch (this.getRegistrationStatus(profile.twoFactorAuthCompletionTime, profile.twoFactorAuthBypassTime)) {
       case RegistrationStepStatus.COMPLETED:
         return <React.Fragment>
@@ -299,7 +299,7 @@ export const ProfilePage = fp.flow(
     }
   }
 
-  private getEraCommonsCardText(profile) {
+    private getEraCommonsCardText(profile) {
     switch (this.getRegistrationStatus(profile.eraCommonsCompletionTime, profile.eraCommonsBypassTime)) {
       case RegistrationStepStatus.COMPLETED:
         return <div>
@@ -324,7 +324,7 @@ export const ProfilePage = fp.flow(
     }
   }
 
-  private getComplianceTrainingText(profile) {
+    private getComplianceTrainingText(profile) {
     switch (this.getRegistrationStatus(profile.complianceTrainingCompletionTime, profile.complianceTrainingBypassTime)) {
       case RegistrationStepStatus.COMPLETED:
         return <React.Fragment>
@@ -338,7 +338,7 @@ export const ProfilePage = fp.flow(
     }
   }
 
-  private getDataUseAgreementText(profile) {
+    private getDataUseAgreementText(profile) {
     const universalText = <a onClick={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}>
       View code of conduct
     </a>;
@@ -361,7 +361,7 @@ export const ProfilePage = fp.flow(
     }
   }
 
-  render() {
+    render() {
     const {profileState: {profile}} = this.props;
     const {currentProfile, updating, showDemographicSurveyModal} = this.state;
     const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement} =
@@ -699,7 +699,7 @@ export const ProfilePage = fp.flow(
       </div>
     </FadeBox>;
   }
-});
+  });
 
 @Component({
   template: '<div #root></div>'

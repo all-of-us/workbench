@@ -1,7 +1,6 @@
 import {TextModal} from 'app/components/text-modal';
-import * as React from 'react';
 import * as fp from 'lodash/fp';
-import { AnnotationsElliottWaveControlPointOptions } from 'highcharts';
+import * as React from 'react';
 
 interface State {
   show: boolean;
@@ -69,12 +68,12 @@ export const withProfileErrorWrapper = ({title = ''}) => {
     </React.Fragment>);
 
   return WrappedComponent => {
-      const ProileErrorWrapper = ({showErrorModal, ...props}) => {
-      return <WrappedComponent showProfileErrorModal={(message) => showErrorModal(title, body({message}))} {...props}/>
-    }
+    const ProileErrorWrapper = ({showErrorModal, ...props}) => {
+        return <WrappedComponent showProfileErrorModal={(message) => showErrorModal(title, body({message}))} {...props}/>;
+      };
 
-    return ProileErrorWrapper
-  }
-}
+    return ProileErrorWrapper;
+  };
+};
 
-export const withProfileErrorModal = ({title = '' }) => fp.flow(withProfileErrorWrapper({title}), withErrorModal())
+export const withProfileErrorModal = ({title = '' }) => fp.flow(withProfileErrorWrapper({title}), withErrorModal());

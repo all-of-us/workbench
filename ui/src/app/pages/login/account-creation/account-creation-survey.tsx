@@ -48,7 +48,7 @@ export const AccountCreationSurvey = withProfileErrorModal({title: 'Error creati
     } catch (error) {
       reportError(error);
       const errorResponse = await convertAPIError(error);
-      this.props.showProfileErrorModal(errorResponse.message)
+      this.props.showProfileErrorModal(errorResponse.message);
     }
   }
 
@@ -67,4 +67,4 @@ export const AccountCreationSurvey = withProfileErrorModal({title: 'Error creati
       />
     </React.Fragment>;
   }
-})
+});
