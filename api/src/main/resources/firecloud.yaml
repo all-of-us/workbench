@@ -753,6 +753,32 @@ paths:
           - openid
           - email
           - profile
+  /api/proxyGroup/{email}:
+    get:
+      tags:
+        - Profile
+      summary: Returns the proxy group email for the current user
+      operationId: getProxyGroup
+      parameters:
+        - name: email
+          in: path
+          description: User email whose proxy group to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: user proxy group
+          schema:
+            type: string
+        404:
+          description: user not found
+        500:
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/ErrorReport'
 
 ##########################################################################################
 ## PARAMETERS

@@ -1953,7 +1953,7 @@ Common.register_command({
   :fn => ->(*args) { set_authority_local("set-authority-local", *args) }
 })
 
-def create_extract_bp_workspace(cmd_name, *args)
+def create_extraction_bp_workspace(cmd_name, *args)
   ensure_docker cmd_name, args
 
   common = Common.new
@@ -2002,7 +2002,7 @@ end
 Common.register_command({
   :invocation => "create-extraction-bp-workspace",
   :description => "Create Terra billing project and workspace impersonating the Extraction SA. This will NOT show up as an AoU workspace.",
-  :fn => ->(*args) { create_terra_bp_workspace("create-extraction-bp-workspace", *args) }
+  :fn => ->(*args) { create_extraction_bp_workspace("create-extraction-bp-workspace", *args) }
 })
 
 def delete_runtimes(cmd_name, *args)
