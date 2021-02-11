@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
 
 /**
@@ -25,7 +26,9 @@ beforeEach(async () => {
       if (request.url().includes('api-dot-all-of-us')) {
         const method = request.method();
         if (method !== 'OPTIONS') {
-          console.debug(`❗Request issued: ${method} ${request.url()}`);
+          const data = request.postData();
+          const dataString = (data === undefined) ? '' : JSON.stringify(data, null, 2);
+          console.debug(`❗Request issued: ${method} ${request.url()} \n ${dataString}`);
         }
       }
       request.continue();
@@ -35,18 +38,24 @@ beforeEach(async () => {
   })
   .on('requestfinished', async (request) => {
     try {
-      const response = await request.response();
-      const status = request.response().status();
-      let responseBody;
+      // response body can only be accessed for non-redirect responses.
       if (request.redirectChain().length === 0) {
-        // response body can only be accessed for non-redirect responses.
-        if (request.url().includes('api-dot-all-of-us')){
-          responseBody = await response.buffer();
-          if (responseBody !== undefined) {
-            responseBody = JSON.stringify(JSON.parse(responseBody.toString()), null, 2);
+        const response = await request.response();
+        if (response != null) {
+          if (request.url().includes('api-dot-all-of-us')) {
+            const status = response.status();
+            const failure = request.failure();
+            if (failure != null) {
+              const errorText = failure.errorText;
+              const text = await response.text();
+              console.debug(`❗Request failed: ${status} ${request.method()} ${request.url()}  \n ${errorText} \n ${text}`);
+            } else {
+              const buffer = await response.buffer();
+              const truncatedResponse = _.truncate(JSON.stringify(JSON.parse(buffer.toString()), null, 2), {length: 2000});
+              const method = request.method();
+              console.debug(`❗Request finished: ${status} ${method} ${request.url()}  \n ${truncatedResponse}`);
+            }
           }
-          const method = request.method();
-          console.debug(`❗Request finished: ${status} ${method} ${request.url()}  \n ${responseBody}`, {depth: null, colors: true});
         }
       }
       await request.continue();
@@ -54,42 +63,26 @@ beforeEach(async () => {
     } catch (e) {
     }
   })
-  .on('requestfailed', async (request) => {
-    try {
-      const response = request.response();
-      if (response !== null) {
-        const status = response.status();
-        const responseText = await response.text();
-        const failureError = request.failure().errorText;
-        console.debug(`❗Request failed: ${status} ${request.method()} ${request.url()}  \n ${failureError} \n ${responseText}`);
-      }
-      // tslint:disable-next-line:no-empty
-    } catch (err) {
-    }
-  })
   .on('console', async (message) => {
+    if (!message.args().length) {
+      return;
+    }
     try {
-      const args = await Promise.all(
+      const texts = await Promise.all(
         message.args().map(async (arg) =>
           await arg.executionContext().evaluate((txt) => {
             if (txt instanceof Error) {
-              return JSON.stringify(txt.stack);
+              return txt.stack;
             }
             return txt.toString();
           }, arg))
       )
-      const msgText = message.text();
-      const text = args.filter(msg => msg !== 'undefined').join(' ');
-      if (msgText && !message.args().length) {
-        return;
-      }
       const type = message.type();
-      // Don't log "log", "info"
+      // Don't log "log", "info", "debug"
       switch (type) {
         case 'error':
         case 'warning':
-        case 'debug':
-          console.debug(`❗Page console ${message.type()}: ${JSON.stringify(text, null, 2)}`);
+          console.debug(`❗Page console ${message.type()}: ${texts}`);
           break;
       }
       // tslint:disable-next-line:no-empty
