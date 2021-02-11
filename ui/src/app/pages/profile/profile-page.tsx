@@ -176,8 +176,8 @@ export const ProfilePage = fp.flow(
       try {
         const details = await institutionApi().getPublicInstitutionDetails();
         this.setState({
-        institutions: details.institutions
-      });
+          institutions: details.institutions
+        });
       } catch (e) {
         reportError(e);
       }
@@ -194,12 +194,12 @@ export const ProfilePage = fp.flow(
       }
       if (!this.props.profileState.profile.address) {
         this.props.profileState.profile.address = {
-        streetAddress1: '',
-        city: '',
-        state: '',
-        zipCode: '',
-        country: ''
-      };
+          streetAddress1: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          country: ''
+        };
       }
       return this.props.profileState.profile;
     }
@@ -223,19 +223,19 @@ export const ProfilePage = fp.flow(
       const {institutions, currentProfile} = this.state;
       if (currentProfile) {
         const selectedOrgType = institutions.find(
-        inst => inst.shortName === currentProfile.verifiedInstitutionalAffiliation.institutionShortName);
+          inst => inst.shortName === currentProfile.verifiedInstitutionalAffiliation.institutionShortName);
         if (selectedOrgType) {
-        const sel = selectedOrgType.organizationTypeEnum;
+          const sel = selectedOrgType.organizationTypeEnum;
 
-        const availableRoles: Array<InstitutionalRole> =
+          const availableRoles: Array<InstitutionalRole> =
            AccountCreationOptions.institutionalRolesByOrganizationType
                .find(obj => obj.type === sel)
                .roles;
 
-        return AccountCreationOptions.institutionalRoleOptions.filter(option =>
+          return AccountCreationOptions.institutionalRoleOptions.filter(option =>
            availableRoles.includes(option.value)
        );
-      }
+        }
       }
     }
 
@@ -392,30 +392,31 @@ export const ProfilePage = fp.flow(
         city,
         state,
         country
-      }, validators, {
+        }, 
+          validators, {
         prettify: v => ({
           givenName: 'First Name',
           familyName: 'Last Name',
           areaOfResearch: 'Current Research'
-        }[v] || validate.prettify(v))
-      })
+          }[v] || validate.prettify(v))
+        })
       };
       const errors = fp.isEmpty(errorMessages) ? undefined : errorMessages;
 
       const makeProfileInput = ({title, valueKey, isLong = false, ...props}) => {
         let errorText = profile && errors && errors[valueKey];
         if (valueKey && Array.isArray(valueKey) && valueKey.length > 1) {
-        errorText = profile && errors && errors[valueKey[1]];
-      }
+          errorText = profile && errors && errors[valueKey[1]];
+        }
         const inputProps = {
-        value: fp.get(valueKey, currentProfile) || '',
-        onChange: v => this.setState(fp.set(['currentProfile', ...valueKey], v)),
-        invalid: !!errorText,
-        style: props.style,
-        maxCharacters: props.maxCharacters,
-        tooLongWarningCharacters: props.tooLongWarningCharacters,
-        ...props
-      };
+          value: fp.get(valueKey, currentProfile) || '',
+          onChange: v => this.setState(fp.set(['currentProfile', ...valueKey], v)),
+          invalid: !!errorText,
+          style: props.style,
+          maxCharacters: props.maxCharacters,
+          tooLongWarningCharacters: props.tooLongWarningCharacters,
+          ...props
+        };
         const id = props.id || valueKey;
 
         return <div style={{marginBottom: 40}}>
