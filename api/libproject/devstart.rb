@@ -1962,11 +1962,11 @@ def create_extract_bp_workspace(cmd_name, *args)
   op.add_option(
       "--billing-project-name [billing-project-name]",
       ->(opts, v) { opts.billing_project_name = v},
-      "Billing project that the workspace will be created in")
+      "Name of Billing project to create")
   op.add_option(
       "--workspace-name [workspace-name]",
       ->(opts, v) { opts.workspace_name = v},
-      "Terra workspace name")
+      "Name of Terra workspace name to create")
   op.add_option(
     "--owners [EMAIL,...]",
     ->(opts, v) { opts.owners = v},
@@ -1985,7 +1985,6 @@ def create_extract_bp_workspace(cmd_name, *args)
   fc_config = get_fc_config(op.opts.project)
 
   flags = ([
-      ["--fc-base-url", fc_config["baseUrl"]],
       ["--billing-account", get_billing_config(op.opts.project)["accountId"]],
       ["--billing-project-name", op.opts.billing_project_name],
       ["--workspace-name", op.opts.workspace_name],

@@ -28,14 +28,6 @@ import java.util.stream.Collectors;
 @Configuration
 public class CreateExtractionBillingProjectWorkspace {
 
-  private static Option fcBaseUrlOpt =
-      Option.builder()
-          .longOpt("fc-base-url")
-          .desc("Firecloud API base URL")
-          .required()
-          .hasArg()
-          .build();
-
   private static Option billingAccountOpt =
       Option.builder()
           .longOpt("billing-account")
@@ -66,7 +58,6 @@ public class CreateExtractionBillingProjectWorkspace {
 
   private static Options options =
       new Options()
-          .addOption(fcBaseUrlOpt)
           .addOption(billingAccountOpt)
           .addOption(billingProjectNameOpt)
           .addOption(workspaceNameOpt)
