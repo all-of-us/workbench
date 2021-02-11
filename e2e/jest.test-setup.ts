@@ -1,4 +1,3 @@
-const util = require('util')
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
 
 /**
@@ -15,7 +14,7 @@ beforeEach(async () => {
     return url.startsWith('https://api-dot-all-of-us-workbench-test.appspot.com/v1');
   }
 
-  // Whether reponse should be written to the test log.
+  // Whether to write request response to test log.
   const skipResponse = (url: string): boolean => {
     return url.endsWith('/readonly');
   }
@@ -60,7 +59,7 @@ beforeEach(async () => {
             } else {
               const bufferString = (await response.buffer()).toString();
               const jsonString = JSON.stringify(JSON.parse(bufferString), null, 2);
-              if (skipResponse) {
+              if (skipResponse(request.url())) {
                 console.debug(`❗Request finished: ${status} ${method} ${request.url()}\n`);
               } else {
                 console.debug(`❗Request finished: ${status} ${method} ${request.url()}\n${jsonString}`);
