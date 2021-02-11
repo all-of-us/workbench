@@ -36,28 +36,30 @@ export class SignInService {
     serverConfigService: ServerConfigService) {
     this.zone = zone;
 
-    // Enable test access token override via global function. Intended to support
-    // Puppeteer testing flows.
-    if (environment.allowTestAccessTokenOverride) {
-      window.setTestAccessTokenOverride = (token: string) => {
-        if (token) {
-          window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
-        } else {
-          window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
-        }
-      };
-      this.testAccessTokenOverride = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
-      if (this.testAccessTokenOverride) {
-        // The client has already configured an access token override. Skip the normal oauth flow.
-        authStore.set({...authStore.get(), authLoaded: true, isSignedIn: true});
-        this.zone.run(() => {
-          this.isSignedIn.next(true);
-        });
-        return;
-      }
-    }
-
     serverConfigService.getConfig().subscribe((config) => {
+      // Enable test access token override via global function. Intended to support
+      // Puppeteer testing flows. This is handled in the server config callback
+      // for signin timing consistency. Normally we cannot sign in until we've
+      // loaded the oauth client ID from the config service.
+      if (environment.allowTestAccessTokenOverride) {
+        window.setTestAccessTokenOverride = (token: string) => {
+          if (token) {
+            window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
+          } else {
+            window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+          }
+        };
+        this.testAccessTokenOverride = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+        if (this.testAccessTokenOverride) {
+          // The client has already configured an access token override. Skip the normal oauth flow.
+          authStore.set({...authStore.get(), authLoaded: true, isSignedIn: true});
+          this.zone.run(() => {
+            this.isSignedIn.next(true);
+          });
+          return;
+        }
+      }
+
       this.makeAuth2(config);
     });
   }
