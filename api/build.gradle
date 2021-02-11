@@ -779,7 +779,7 @@ task loadDataDictionary(type: JavaExec) {
 }
 
 
-// See project.rb command: create-terra-bp-workspace
+// See project.rb command: create-extraction-bp-workspace
 task createExtractionBillingProjectWorkspace(type: JavaExec) {
   classpath sourceSets.__tools__.runtimeClasspath
   main = "org.pmiops.workbench.tools.CreateExtractionBillingProjectWorkspace"
