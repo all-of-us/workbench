@@ -149,14 +149,16 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         standardConceptIds.stream().map(l -> l.toString()).collect(Collectors.toList());
     if (!sourceIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
     }
     if (!standardConceptIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
@@ -267,7 +269,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
                   .collect(Collectors.toList()))
           .totalCount(dbCriteriaPage.getTotalElements());
     }
-    if (Domain.fromValue(domain).equals(Domain.PHYSICAL_MEASUREMENT)) {
+    if (Domain.fromValue(domain).equals(Domain.PHYSICAL_MEASUREMENT_CSS)) {
       Page<DbConcept> dbConcepts = conceptDao.findPMConcepts(modifyTermMatch(term), pageRequest);
       List<Criteria> criteriaList =
           dbConcepts.getContent().stream()

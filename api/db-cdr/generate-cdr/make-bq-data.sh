@@ -465,12 +465,10 @@ where d.domain_enum = c.domain_id"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "update \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d
 set d.all_concept_count = c.all_concept_count, d.standard_concept_count = c.standard_concept_count from
-(SELECT count(distinct concept_id) as all_concept_count, SUM(CASE WHEN standard_concept IN ('S', 'C') THEN 1 ELSE 0 END) as standard_concept_count
-FROM \`$OUTPUT_PROJECT.$OUTPUT_DATASET.concept\`
-WHERE vocabulary_id = 'PPI'
-AND domain_id = 'Measurement'
-AND (count_value > 0 or source_count_value > 0)
-AND concept_class_id = 'Clinical Observation') c
+(SELECT count(distinct concept_id) as all_concept_count, 0 as standard_concept_count
+FROM \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\`
+WHERE type = 'PPI'
+AND domain_id = 'PHYSICAL_MEASUREMENT_CSS') c
 where d.domain = 10"
 
 # Set participant counts for Condition domain

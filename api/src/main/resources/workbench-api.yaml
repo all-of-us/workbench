@@ -3568,6 +3568,7 @@ definitions:
     - SURVEY
     - PERSON
     - PHYSICAL_MEASUREMENT
+    - PHYSICAL_MEASUREMENT_CSS
     - ALL_EVENTS
     - LAB
     - VITAL
