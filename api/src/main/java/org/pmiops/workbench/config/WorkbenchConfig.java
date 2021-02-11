@@ -148,6 +148,7 @@ public class WorkbenchConfig {
     // A list of GCP service accounts (not affiliated with researchers) that can be used to
     // make API calls.
     public ArrayList<String> serviceAccountApiUsers;
+    public String extractionServiceAccount;
   }
 
   public static class CdrConfig {

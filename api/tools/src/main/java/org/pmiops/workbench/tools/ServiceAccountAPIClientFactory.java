@@ -5,109 +5,31 @@ import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.api.gax.rpc.ApiException;
 import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
-import com.google.cloud.iam.credentials.v1.ServiceAccountName;
 import com.google.protobuf.Duration;
-import io.grpc.StatusRuntimeException;
-import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.firecloud.ApiClient;
-import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.api.*;
 
-import static org.pmiops.workbench.firecloud.FireCloudServiceImpl.FIRECLOUD_API_OAUTH_SCOPES;
-
-public class ServiceAccountAPIClientFactory {
-
-  final String apiUrl;
-
-  private static final String[] FC_SCOPES =
-      new String[] {
-        "https://www.googleapis.com/auth/userinfo.profile",
-        "https://www.googleapis.com/auth/userinfo.email",
-        "https://www.googleapis.com/auth/cloud-billing"
-      };
+public class ServiceAccountAPIClientFactory extends ApiClientFactory {
 
   public ServiceAccountAPIClientFactory(String apiUrl) {
-    this.apiUrl = apiUrl;
-  }
-
-  public ApiClient newFirecloudAdminApiClient(String apiUrl) throws IOException {
-//    final OAuth2Credentials delegatedCreds =
-//            new DelegatedUserCredentials(
-//                    "all-of-us-workbench-test@appspot.gserviceaccount.com",
-//                    "firecloud-admin@all-of-us-workbench-test.iam.gserviceaccount.com",
-//                    FIRECLOUD_API_OAUTH_SCOPES,
-//                    IamCredentialsClient.create(),
-//                    new ApacheHttpTransport());
-//    delegatedCreds.refresh();
-
-    IamCredentialsClient iamCredentialsClient = IamCredentialsClient.create();
-    List<String> delegates = Arrays.asList("projects/-/serviceAccounts/all-of-us-workbench-test@appspot.gserviceaccount.com");
-    Duration lifetime = Duration.newBuilder().setSeconds(60*60).build();
-
-    String accessToken = iamCredentialsClient.generateAccessToken(
-            "projects/-/serviceAccounts/wgs-cohort-extraction@all-of-us-workbench-test.iam.gserviceaccount.com",
-            delegates,
-            Arrays.asList(FC_SCOPES),
-            lifetime
-    ).getAccessToken();
-
-//    ApiClient apiClient = FireCloudConfig.buildApiClient(configProvider.get());
-    ApiClient apiClient = new ApiClient();
-    apiClient.setBasePath(apiUrl);
-    apiClient.setAccessToken(accessToken);
-
-    return apiClient;
-  }
-
-  private ApiClient newServiceAccountApiClient(String apiUrl) throws IOException {
-    ApiClient apiClient = new ApiClient();
-    apiClient.setBasePath(apiUrl);
-//    GoogleCredentials credentials =
-//        GoogleCredentials.getApplicationDefault().createScoped(Arrays.asList(FC_SCOPES));
-//    credentials.refresh();
-
-    apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(Arrays.asList(FC_SCOPES)));
-    return apiClient;
+    try {
+      this.apiClient = newApiClient(apiUrl);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   private ApiClient newApiClient(String apiUrl) throws IOException {
-    return newFirecloudAdminApiClient(apiUrl);
+    ApiClient apiClient = new ApiClient();
+    apiClient.setBasePath(apiUrl);
+    apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(Arrays.asList(this.FC_SCOPES)));
+    return apiClient;
   }
 
-  public WorkspacesApi workspacesApi() throws IOException {
-    WorkspacesApi api = new WorkspacesApi();
-    api.setApiClient(newApiClient(apiUrl));
-    return api;
-  }
-
-  public BillingApi billingApi() throws IOException {
-    BillingApi api = new BillingApi();
-    api.setApiClient(newApiClient(apiUrl));
-    return api;
-  }
-
-  public SubmissionsApi submissionsApi() throws IOException {
-    SubmissionsApi api = new SubmissionsApi();
-    api.setApiClient(newApiClient(apiUrl));
-    return api;
-  }
-
-  public MethodconfigsApi methodconfigsApi() throws IOException {
-    MethodconfigsApi api = new MethodconfigsApi();
-    api.setApiClient(newApiClient(apiUrl));
-    return api;
-  }
-
-  public ProfileApi profileApi() throws IOException {
-    ProfileApi api = new ProfileApi();
-    api.setApiClient(newApiClient(apiUrl));
-    return api;
-  }
 }

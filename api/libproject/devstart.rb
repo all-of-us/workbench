@@ -1970,10 +1970,6 @@ def create_terra_bp_workspace(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.dry_run = true
   op.add_option(
-      "--billing-account [billing-account]",
-      ->(opts, v) { opts.billing_account = v},
-      "Billing account to link the billing project to")
-  op.add_option(
       "--billing-project-name [billing-project-name]",
       ->(opts, v) { opts.billing_project_name = v},
       "Billing project that the workspace will be created in")
@@ -1981,6 +1977,10 @@ def create_terra_bp_workspace(cmd_name, *args)
       "--workspace-name [workspace-name]",
       ->(opts, v) { opts.workspace_name = v},
       "Terra workspace name")
+  op.add_option(
+    "--owners [EMAIL,...]",
+    ->(opts, v) { opts.owners = v},
+    "Comma-separated list of Terra user accounts to add to workspace ACL.")
   op.add_validator ->(opts) {
     unless (opts.billing_account or opts.billing_project_name or opts.workspace_name)
       common.error "all arguments must be provided"
@@ -1996,9 +1996,10 @@ def create_terra_bp_workspace(cmd_name, *args)
 
   flags = ([
       ["--fc-base-url", fc_config["baseUrl"]],
-      ["--billing-account", op.opts.billing_account],
+      ["--billing-account", get_billing_config(op.opts.project)["accountId"]],
       ["--billing-project-name", op.opts.billing_project_name],
       ["--workspace-name", op.opts.workspace_name],
+      ["--owners", op.opts.owners],
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   flags.map! { |f| "'#{f}'" }
 

@@ -44,7 +44,8 @@
   "auth": {
     "serviceAccountApiUsers": [
       "all-of-us-rw-perf@appspot.gserviceaccount.com"
-    ]
+    ],
+    "extractionServiceAccount": ""
   },
   "cdr": {
     "debugQueries": true
