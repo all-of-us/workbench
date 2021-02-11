@@ -14,7 +14,7 @@ beforeEach(async () => {
     return url.startsWith('https://api-dot-all-of-us-workbench-test.appspot.com/v1');
   }
 
-  // Whether to write request response to test log.
+  // Don't log response for targetted requests. Because some requests response could be too long, clutter up test log.
   const skipResponse = (url: string): boolean => {
     return url.endsWith('/readonly');
   }
