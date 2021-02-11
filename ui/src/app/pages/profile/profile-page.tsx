@@ -384,22 +384,22 @@ export const ProfilePage = fp.flow(
       const errorMessages = {
         ...urlError,
         ...validate({
-        givenName,
-        familyName, areaOfResearch,
-        streetAddress1,
-        streetAddress2,
-        zipCode,
-        city,
-        state,
-        country
-        }, 
+          givenName,
+          familyName, areaOfResearch,
+          streetAddress1,
+          streetAddress2,
+          zipCode,
+          city,
+          state,
+          country
+        },
           validators, {
-        prettify: v => ({
+            prettify: v => ({
           givenName: 'First Name',
           familyName: 'Last Name',
           areaOfResearch: 'Current Research'
-          }[v] || validate.prettify(v))
-        })
+        }[v] || validate.prettify(v))
+          })
       };
       const errors = fp.isEmpty(errorMessages) ? undefined : errorMessages;
 
