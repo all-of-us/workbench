@@ -753,32 +753,32 @@ paths:
           - openid
           - email
           - profile
+
   /api/proxyGroup/{email}:
     get:
       tags:
-        - Profile
-      summary: Returns the proxy group email for the current user
+        - Groups
       operationId: getProxyGroup
+      summary: Returns the proxy group email for the current user
       parameters:
-        - name: email
-          in: path
+        - in: path
           description: User email whose proxy group to retrieve
+          name: email
           required: true
-          schema:
-            type: string
+          type: string
       responses:
         200:
           description: user proxy group
           schema:
             type: string
         404:
-          description: user not found
+          description: Group not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
         500:
-          description: Internal Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/definitions/ErrorReport'
+          description: FireCloud Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
 
 ##########################################################################################
 ## PARAMETERS
