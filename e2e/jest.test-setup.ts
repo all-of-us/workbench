@@ -52,18 +52,23 @@ beforeEach(async () => {
           if (isAoUApi(request.url())) {
             const status = response.status();
             const failure = request.failure();
-            if (failure != null) {
+            const responseText = (await response.buffer()).toString();
+            let responseTextJson = JSON.stringify(JSON.parse(responseText), null, 2);
+            if (failure != null || !response.ok()) {
               const errorText = JSON.stringify(JSON.parse(failure.errorText), null, 2);
-              const text = JSON.stringify(JSON.parse(await response.text()), null, 2);
-              console.debug(`❗Request failed: ${status} ${method} ${request.url()}\n${errorText}\n${text}`);
+              const errorTextJson = JSON.stringify(JSON.parse(await response.text()), null, 2);
+              console.debug(`❗Request failed: ${status} ${method} ${request.url()}\n${errorText}\n${errorTextJson}\n${responseTextJson}`);
+              return;
+            }
+            if (skipResponse(request.url())) {
+              console.debug(`❗Request finished: ${status} ${method} ${request.url()}\n`);
             } else {
-              const bufferString = (await response.buffer()).toString();
-              const jsonString = JSON.stringify(JSON.parse(bufferString), null, 2);
-              if (skipResponse(request.url())) {
-                console.debug(`❗Request finished: ${status} ${method} ${request.url()}\n`);
-              } else {
-                console.debug(`❗Request finished: ${status} ${method} ${request.url()}\n${jsonString}`);
+              if (request.url().endsWith('/v1/workspaces')) {
+                // Additional log processer: truncate response json because could be too many workspaces.
+                const jsonBody = JSON.parse(responseText);
+                responseTextJson = JSON.stringify(jsonBody.items.slice(0, 3), null, 2);
               }
+              console.debug(`❗Request finished: ${status} ${method} ${request.url()}\n${responseTextJson}`);
             }
           }
         }
