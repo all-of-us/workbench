@@ -22,10 +22,6 @@
     <property name="cdr.datasource.password" value="${CDR_DB_PASSWORD}"/>
   </system-properties>
 
-  <resource-files>
-    <include path="WEB-INF/gsuite-admin-sa.json"></include>
-  </resource-files>
-
   <static-error-handlers>
     <handler file="server_unavailable.html" />
   </static-error-handlers>
