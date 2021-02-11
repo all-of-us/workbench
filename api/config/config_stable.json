@@ -39,10 +39,10 @@
     ]
   },
   "auth": {
+    "extractionServiceAccount": "wgs-cohort-extraction@all-of-us-rw-stable.iam.gserviceaccount.com",
     "serviceAccountApiUsers": [
       "all-of-us-rw-stable@appspot.gserviceaccount.com"
-    ],
-    "extractionServiceAccount": "wgs-cohort-extraction@all-of-us-rw-stable.iam.gserviceaccount.com"
+    ]
   },
   "cdr": {
     "debugQueries": true
