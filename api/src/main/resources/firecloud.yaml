@@ -757,7 +757,7 @@ paths:
   /api/proxyGroup/{email}:
     get:
       tags:
-        - Groups
+        - Profile
       operationId: getProxyGroup
       summary: Returns the proxy group email for the current user
       parameters:
