@@ -223,7 +223,7 @@ def publish_cdr(cmd_name, args)
       if op.opts.additional_reader_group
         new_group = op.opts.additional_reader_group
 
-        if existing_users.include?(new_group)
+        if existing_groups.include?(new_group)
           common.status "#{new_group} already in ACL, skipping..."
         else
           common.status "Adding #{new_group} as a READER..."
