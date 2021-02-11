@@ -789,16 +789,6 @@ task createTerraBillingProjectWorkspace(type: JavaExec) {
   }
 }
 
-// See project.rb command: create-terra-submission
-task createTerraSubmission(type: JavaExec) {
-  classpath sourceSets.__tools__.runtimeClasspath
-  main = "org.pmiops.workbench.tools.CreateTerraSubmission"
-  systemProperties = commandLineSpringProperties
-  if (project.hasProperty("appArgs")) {
-    args Eval.me(appArgs)
-  }
-}
-
 // See project.rb command: load-institutions
 task loadInstitutions(type: JavaExec) {
   classpath = sourceSets.__tools__.runtimeClasspath

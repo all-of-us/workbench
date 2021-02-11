@@ -2016,53 +2016,6 @@ Common.register_command({
   :fn => ->(*args) { create_terra_bp_workspace("create-terra-bp-workspace", *args) }
 })
 
-def create_terra_submission(cmd_name, *args)
-  ensure_docker cmd_name, args
-
-  common = Common.new
-  op = WbOptionsParser.new(cmd_name, args)
-  op.opts.dry_run = true
-  op.add_option(
-      "--workspace-namespace [workspace-namespace]",
-      ->(opts, v) { opts.workspace_namespace = v},
-      "help")
-  op.add_option(
-      "--workspace-name [workspace-name]",
-      ->(opts, v) { opts.workspace_name = v},
-      "Terra workspace name")
-  op.add_validator ->(opts) {
-    unless (opts.workspace_namespace or opts.workspace_name)
-      common.error "all arguments must be provided"
-      raise ArgumentError
-    end
-  }
-
-  gcc = GcloudContextV2.new(op)
-  op.parse.validate
-  gcc.validate
-
-  fc_config = get_fc_config(op.opts.project)
-
-  flags = ([
-      ["--fc-base-url", fc_config["baseUrl"]],
-      ["--workspace-namespace", op.opts.workspace_namespace],
-      ["--workspace-name", op.opts.workspace_name],
-  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
-  flags.map! { |f| "'#{f}'" }
-
-  ServiceAccountContext.new(gcc.project).run do
-    common.run_inline %W{
-       gradle createTerraSubmission
-       -PappArgs=[#{flags.join(',')}]}
-  end
-end
-
-Common.register_command({
-  :invocation => "create-terra-submission",
-  :description => "Create Terra submission.",
-  :fn => ->(*args) { create_terra_submission("create-terra-submission", *args) }
-})
-
 def delete_runtimes(cmd_name, *args)
   ensure_docker cmd_name, args
 
