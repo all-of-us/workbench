@@ -42,7 +42,7 @@
     "serviceAccountApiUsers": [
       "all-of-us-workbench-test@appspot.gserviceaccount.com"
     ],
-    "extractionServiceAccount": ""
+    "extractionServiceAccount": "wgs-cohort-extraction@all-of-us-workbench-test.iam.gserviceaccount.com",
   },
   "cdr": {
     "debugQueries": false

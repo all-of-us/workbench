@@ -1,8 +1,5 @@
 package org.pmiops.workbench.tools;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
@@ -16,9 +13,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -26,11 +20,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * Backfill script to adjust users with improper billing project access. Dry run mode can be used to
- * audit for inconsistent access. Specifically this aims to revoke access for users who were
- * incompletely removed as OWNERs per RW-5013, though this situation can theoretically arise in the
- * event of a normal partial sharing failure (sharing and setting of the billing project role cannot
- * be done transactionally).
+ * Sets up workspace for Extraction service account
+ * 1. Creates Terra BP
+ * 2. Create Terra Workspace
+ * 3. Share Workspace with given users
  */
 @Configuration
 public class CreateTerraBillingProjectWorkspace {

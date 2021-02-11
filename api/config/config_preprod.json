@@ -42,7 +42,7 @@
     "serviceAccountApiUsers": [
       "all-of-us-rw-preprod@appspot.gserviceaccount.com"
     ],
-    "extractionServiceAccount": ""
+    "extractionServiceAccount": "wgs-cohort-extraction@all-of-us-rw-preprod.iam.gserviceaccount.com"
   },
   "cdr": {
     "debugQueries": false
