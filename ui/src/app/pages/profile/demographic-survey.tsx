@@ -163,7 +163,7 @@ export class DemographicSurvey extends React.Component<Props, State> {
         <div style={{fontSize: 28, fontWeight: 400, marginBottom: '.8rem'}}>Demographics Survey</div>
         {this.props.showStepCount &&
           <div style={{fontSize: 16, marginBottom: '.5rem'}}>
-            Please complete Step '3 of 3'
+            Please complete Step 3 of 3
           </div>
         }
         <div style={{
