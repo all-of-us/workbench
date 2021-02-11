@@ -1982,8 +1982,6 @@ def create_extraction_bp_workspace(cmd_name, *args)
   op.parse.validate
   gcc.validate
 
-  fc_config = get_fc_config(op.opts.project)
-
   flags = ([
       ["--billing-account", get_billing_config(op.opts.project)["accountId"]],
       ["--billing-project-name", op.opts.billing_project_name],
