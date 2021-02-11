@@ -395,10 +395,10 @@ export const ProfilePage = fp.flow(
         },
           validators, {
             prettify: v => ({
-          givenName: 'First Name',
-          familyName: 'Last Name',
-          areaOfResearch: 'Current Research'
-        }[v] || validate.prettify(v))
+              givenName: 'First Name',
+              familyName: 'Last Name',
+              areaOfResearch: 'Current Research'
+            }[v] || validate.prettify(v))
           })
       };
       const errors = fp.isEmpty(errorMessages) ? undefined : errorMessages;
