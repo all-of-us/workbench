@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  * 3. Share Workspace with given users
  */
 @Configuration
-public class CreateTerraBillingProjectWorkspace {
+public class CreateExtractionBillingProjectWorkspace {
 
   private static Option fcBaseUrlOpt =
       Option.builder()
@@ -73,7 +73,7 @@ public class CreateTerraBillingProjectWorkspace {
           .addOption(ownersOpt);
 
   private static final Logger log =
-      Logger.getLogger(CreateTerraBillingProjectWorkspace.class.getName());
+      Logger.getLogger(CreateExtractionBillingProjectWorkspace.class.getName());
 
 
   @Bean
@@ -139,6 +139,6 @@ public class CreateTerraBillingProjectWorkspace {
   }
 
   public static void main(String[] args) {
-    CommandLineToolConfig.runCommandLine(CreateTerraBillingProjectWorkspace.class, args);
+    CommandLineToolConfig.runCommandLine(CreateExtractionBillingProjectWorkspace.class, args);
   }
 }

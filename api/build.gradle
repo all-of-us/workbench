@@ -780,9 +780,9 @@ task loadDataDictionary(type: JavaExec) {
 
 
 // See project.rb command: create-terra-bp-workspace
-task createTerraBillingProjectWorkspace(type: JavaExec) {
+task createExtractionBillingProjectWorkspace(type: JavaExec) {
   classpath sourceSets.__tools__.runtimeClasspath
-  main = "org.pmiops.workbench.tools.CreateTerraBillingProjectWorkspace"
+  main = "org.pmiops.workbench.tools.CreateExtractionBillingProjectWorkspace"
   systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)
