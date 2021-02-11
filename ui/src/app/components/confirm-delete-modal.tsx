@@ -62,7 +62,9 @@ export class ConfirmDeleteModal
             and cohort definitions. This includes items created or used by other users with access to the workspace.
             If you still wish to delete this workspace and all items within it, type DELETE below to confirm.
           </div>
-          <TextInput placeholder="type DELETE to confirm" style={{marginTop: '0.5rem'}} onChange={this.validateDeleteText} onBlur=''/>
+          <TextInput placeholder='type DELETE to confirm'
+                     style={{marginTop: '0.5rem'}}
+                     onChange={this.validateDeleteText} onBlur=''/>
         </ModalBody>
         <ModalFooter style={{paddingTop: '1rem'}}>
           <Button
