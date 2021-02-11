@@ -26,18 +26,6 @@ public abstract class ApiClientFactory {
     return api;
   }
 
-  public SubmissionsApi submissionsApi() throws IOException {
-    SubmissionsApi api = new SubmissionsApi();
-    api.setApiClient(apiClient);
-    return api;
-  }
-
-  public MethodconfigsApi methodconfigsApi() throws IOException {
-    MethodconfigsApi api = new MethodconfigsApi();
-    api.setApiClient(apiClient);
-    return api;
-  }
-
   public ProfileApi profileApi() throws IOException {
     ProfileApi api = new ProfileApi();
     api.setApiClient(apiClient);
