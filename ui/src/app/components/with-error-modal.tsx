@@ -69,8 +69,8 @@ export const withProfileErrorWrapper = ({title = ''}) => {
 
   return WrappedComponent => {
     const ProileErrorWrapper = ({showErrorModal, ...props}) => {
-        return <WrappedComponent showProfileErrorModal={(message) => showErrorModal(title, body({message}))} {...props}/>;
-      };
+      return <WrappedComponent showProfileErrorModal={(message) => showErrorModal(title, body({message}))} {...props}/>;
+    };
 
     return ProileErrorWrapper;
   };

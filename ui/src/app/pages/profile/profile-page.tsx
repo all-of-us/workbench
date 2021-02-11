@@ -162,69 +162,69 @@ export const ProfilePage = fp.flow(
     static displayName = 'ProfilePage';
 
     constructor(props) {
-    super(props);
+      super(props);
 
-    this.state = {
-      currentProfile: this.initializeProfile(),
-      institutions: [],
-      showDemographicSurveyModal: false,
-      updating: false
-    };
-  }
+      this.state = {
+        currentProfile: this.initializeProfile(),
+        institutions: [],
+        showDemographicSurveyModal: false,
+        updating: false
+      };
+    }
 
     async componentDidMount() {
-    try {
-      const details = await institutionApi().getPublicInstitutionDetails();
-      this.setState({
+      try {
+        const details = await institutionApi().getPublicInstitutionDetails();
+        this.setState({
         institutions: details.institutions
       });
-    } catch (e) {
-      reportError(e);
+      } catch (e) {
+        reportError(e);
+      }
     }
-  }
 
     navigateToTraining(): void {
-    window.location.assign(
-      environment.trainingUrl + '/static/data-researcher.html?saml=on');
-  }
+      window.location.assign(
+        environment.trainingUrl + '/static/data-researcher.html?saml=on');
+    }
 
     initializeProfile() {
-    if (!this.props.profileState.profile) {
-      return this.createInitialProfile();
-    }
-    if (!this.props.profileState.profile.address) {
-      this.props.profileState.profile.address = {
+      if (!this.props.profileState.profile) {
+        return this.createInitialProfile();
+      }
+      if (!this.props.profileState.profile.address) {
+        this.props.profileState.profile.address = {
         streetAddress1: '',
         city: '',
         state: '',
         zipCode: '',
         country: ''
       };
+      }
+      return this.props.profileState.profile;
     }
-    return this.props.profileState.profile;
-  }
 
     createInitialProfile(): Profile {
-    return {
-      ...this.props.profileState.profile,
-      demographicSurvey: {}
-    };
-  }
+      return {
+        ...this.props.profileState.profile,
+        demographicSurvey: {}
+      };
+    }
 
     componentDidUpdate(prevProps) {
-    const {profileState: {profile}} = this.props;
+      const {profileState: {profile}} = this.props;
 
-    if (!fp.isEqual(prevProps.profileState.profile, profile)) {
-      this.setState({currentProfile: profile}); // for when profile loads after component load
+      if (!fp.isEqual(prevProps.profileState.profile, profile)) {
+        this.setState({currentProfile: profile}); // for when profile loads after component load
+      }
     }
-  }
 
     getRoleOptions(): Array<{label: string, value: InstitutionalRole}> {
-    const {institutions, currentProfile} = this.state;
-    if (currentProfile) {
-      const selectedOrgType = institutions.find(
+      const {institutions, currentProfile} = this.state;
+      if (currentProfile) {
+        const selectedOrgType = institutions.find(
         inst => inst.shortName === currentProfile.verifiedInstitutionalAffiliation.institutionShortName);
-      if (selectedOrgType) {
+        if (selectedOrgType) {
         const sel = selectedOrgType.organizationTypeEnum;
 
         const availableRoles: Array<InstitutionalRole> =
@@ -236,73 +236,73 @@ export const ProfilePage = fp.flow(
            availableRoles.includes(option.value)
        );
       }
+      }
     }
-  }
 
     saveProfileErrorMessage(errors) {
-    return <React.Fragment>
+      return <React.Fragment>
       <div>You must correct errors before saving: </div>
       <BulletAlignedUnorderedList>
       {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
       </BulletAlignedUnorderedList>
     </React.Fragment>;
-  }
+    }
 
     async saveProfile(profile: Profile): Promise<Profile> {
-    const {profileState: {reload}} = this.props;
+      const {profileState: {reload}} = this.props;
 
     // updating is only used to control spinner display. If the demographic survey modal
     // is open (and, by extension, it is causing this save), a spinner is being displayed over
     // that modal, so no need to show one here.
-    if (!this.state.showDemographicSurveyModal) {
-      this.setState({updating: true});
-    }
+      if (!this.state.showDemographicSurveyModal) {
+        this.setState({updating: true});
+      }
 
-    try {
-      await profileApi().updateProfile(profile);
-      await reload();
-      return profile;
-    } catch (error) {
-      reportError(error);
-      const errorResponse = await convertAPIError(error);
-      this.props.showProfileErrorModal(errorResponse.message);
-      console.error(error);
-      return Promise.reject();
-    } finally {
-      this.setState({updating: false});
+      try {
+        await profileApi().updateProfile(profile);
+        await reload();
+        return profile;
+      } catch (error) {
+        reportError(error);
+        const errorResponse = await convertAPIError(error);
+        this.props.showProfileErrorModal(errorResponse.message);
+        console.error(error);
+        return Promise.reject();
+      } finally {
+        this.setState({updating: false});
+      }
     }
-  }
 
     getRegistrationStatus(completionTime: number, bypassTime: number) {
-    return completionTime !== null && completionTime !== undefined ? RegistrationStepStatus.COMPLETED :
+      return completionTime !== null && completionTime !== undefined ? RegistrationStepStatus.COMPLETED :
       bypassTime !== null && completionTime !== undefined ? RegistrationStepStatus.BYPASSED : RegistrationStepStatus.UNCOMPLETE;
-  }
+    }
 
     private bypassedText(bypassTime) {
-    return <React.Fragment>
+      return <React.Fragment>
       <div>Bypassed on:</div>
       <div>{displayDateWithoutHours(bypassTime)}</div>
     </React.Fragment>;
-  }
+    }
 
     private getTwoFactorAuthCardText(profile) {
-    switch (this.getRegistrationStatus(profile.twoFactorAuthCompletionTime, profile.twoFactorAuthBypassTime)) {
-      case RegistrationStepStatus.COMPLETED:
-        return <React.Fragment>
+      switch (this.getRegistrationStatus(profile.twoFactorAuthCompletionTime, profile.twoFactorAuthBypassTime)) {
+        case RegistrationStepStatus.COMPLETED:
+          return <React.Fragment>
           <div>Completed on:</div>
           <div>{displayDateWithoutHours(profile.twoFactorAuthCompletionTime)}</div>
         </React.Fragment>;
-      case RegistrationStepStatus.BYPASSED:
-        return this.bypassedText(profile.twoFactorAuthBypassTime);
-      default:
-        return;
+        case RegistrationStepStatus.BYPASSED:
+          return this.bypassedText(profile.twoFactorAuthBypassTime);
+        default:
+          return;
+      }
     }
-  }
 
     private getEraCommonsCardText(profile) {
-    switch (this.getRegistrationStatus(profile.eraCommonsCompletionTime, profile.eraCommonsBypassTime)) {
-      case RegistrationStepStatus.COMPLETED:
-        return <div>
+      switch (this.getRegistrationStatus(profile.eraCommonsCompletionTime, profile.eraCommonsBypassTime)) {
+        case RegistrationStepStatus.COMPLETED:
+          return <div>
           {profile.eraCommonsLinkedNihUsername != null && <React.Fragment>
               <div> Username:</div>
               <div> {profile.eraCommonsLinkedNihUsername} </div>
@@ -317,56 +317,56 @@ export const ProfilePage = fp.flow(
               </div>
           </React.Fragment>}
         </div>;
-      case RegistrationStepStatus.BYPASSED:
-        return this.bypassedText(profile.twoFactorAuthBypassTime);
-      default:
-        return;
+        case RegistrationStepStatus.BYPASSED:
+          return this.bypassedText(profile.twoFactorAuthBypassTime);
+        default:
+          return;
+      }
     }
-  }
 
     private getComplianceTrainingText(profile) {
-    switch (this.getRegistrationStatus(profile.complianceTrainingCompletionTime, profile.complianceTrainingBypassTime)) {
-      case RegistrationStepStatus.COMPLETED:
-        return <React.Fragment>
+      switch (this.getRegistrationStatus(profile.complianceTrainingCompletionTime, profile.complianceTrainingBypassTime)) {
+        case RegistrationStepStatus.COMPLETED:
+          return <React.Fragment>
           <div>Training Completed</div>
           <div>{displayDateWithoutHours(profile.complianceTrainingCompletionTime)}</div>
         </React.Fragment>;
-      case RegistrationStepStatus.BYPASSED:
-        return this.bypassedText(profile.complianceTrainingBypassTime);
-      default:
-        return;
+        case RegistrationStepStatus.BYPASSED:
+          return this.bypassedText(profile.complianceTrainingBypassTime);
+        default:
+          return;
+      }
     }
-  }
 
     private getDataUseAgreementText(profile) {
-    const universalText = <a onClick={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}>
+      const universalText = <a onClick={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}>
       View code of conduct
     </a>;
-    switch (this.getRegistrationStatus(profile.dataUseAgreementCompletionTime, profile.dataUseAgreementBypassTime)) {
-      case RegistrationStepStatus.COMPLETED:
-        return <React.Fragment>
+      switch (this.getRegistrationStatus(profile.dataUseAgreementCompletionTime, profile.dataUseAgreementBypassTime)) {
+        case RegistrationStepStatus.COMPLETED:
+          return <React.Fragment>
           <div>Signed On:</div>
           <div>
             {displayDateWithoutHours(profile.dataUseAgreementCompletionTime)}
           </div>
           {universalText}
         </React.Fragment>;
-      case RegistrationStepStatus.BYPASSED:
-        return <React.Fragment>
+        case RegistrationStepStatus.BYPASSED:
+          return <React.Fragment>
           {this.bypassedText(profile.dataUseAgreementBypassTime)}
           {universalText}
         </React.Fragment>;
-      case RegistrationStepStatus.UNCOMPLETE:
-        return universalText;
+        case RegistrationStepStatus.UNCOMPLETE:
+          return universalText;
+      }
     }
-  }
 
     render() {
-    const {profileState: {profile}} = this.props;
-    const {currentProfile, updating, showDemographicSurveyModal} = this.state;
-    const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement} =
+      const {profileState: {profile}} = this.props;
+      const {currentProfile, updating, showDemographicSurveyModal} = this.state;
+      const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement} =
       serverConfigStore.getValue();
-    const {
+      const {
       givenName, familyName, areaOfResearch, professionalUrl,
         address: {
         streetAddress1,
@@ -378,12 +378,12 @@ export const ProfilePage = fp.flow(
         }
     } = currentProfile;
 
-    const urlError = professionalUrl
+      const urlError = professionalUrl
       ? validate({website: professionalUrl}, {website: {url: {message: '^Professional URL %{value} is not a valid URL'}}})
       : undefined;
-    const errorMessages = {
-      ...urlError,
-      ...validate({
+      const errorMessages = {
+        ...urlError,
+        ...validate({
         givenName,
         familyName, areaOfResearch,
         streetAddress1,
@@ -399,15 +399,15 @@ export const ProfilePage = fp.flow(
           areaOfResearch: 'Current Research'
         }[v] || validate.prettify(v))
       })
-    };
-    const errors = fp.isEmpty(errorMessages) ? undefined : errorMessages;
+      };
+      const errors = fp.isEmpty(errorMessages) ? undefined : errorMessages;
 
-    const makeProfileInput = ({title, valueKey, isLong = false, ...props}) => {
-      let errorText = profile && errors && errors[valueKey];
-      if (valueKey && Array.isArray(valueKey) && valueKey.length > 1) {
+      const makeProfileInput = ({title, valueKey, isLong = false, ...props}) => {
+        let errorText = profile && errors && errors[valueKey];
+        if (valueKey && Array.isArray(valueKey) && valueKey.length > 1) {
         errorText = profile && errors && errors[valueKey[1]];
       }
-      const inputProps = {
+        const inputProps = {
         value: fp.get(valueKey, currentProfile) || '',
         onChange: v => this.setState(fp.set(['currentProfile', ...valueKey], v)),
         invalid: !!errorText,
@@ -416,9 +416,9 @@ export const ProfilePage = fp.flow(
         tooLongWarningCharacters: props.tooLongWarningCharacters,
         ...props
       };
-      const id = props.id || valueKey;
+        const id = props.id || valueKey;
 
-      return <div style={{marginBottom: 40}}>
+        return <div style={{marginBottom: 40}}>
         <div style={styles.inputLabel}>{title}</div>
         {isLong ? <TextAreaWithLengthValidationMessage
             id={id} data-test-id={id}
@@ -436,10 +436,10 @@ export const ProfilePage = fp.flow(
           /></TooltipTrigger>}
         <ValidationError>{errorText}</ValidationError>
       </div>;
-    };
+      };
 
 
-    return <FadeBox style={styles.fadebox}>
+      return <FadeBox style={styles.fadebox}>
       <div style={{width: '95%'}}>
         {(!profile || updating) && <SpinnerOverlay/>}
         <div style={{...styles.h1, marginBottom: '0.7rem'}}>Profile</div>
@@ -698,7 +698,7 @@ export const ProfilePage = fp.flow(
         </Modal>}
       </div>
     </FadeBox>;
-  }
+    }
   });
 
 @Component({
