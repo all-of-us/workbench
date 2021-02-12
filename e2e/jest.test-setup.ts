@@ -8,17 +8,6 @@ const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/5
  * - waitFor functions timeout
  */
 beforeEach(async () => {
-
-  // URL string begins with "https://api-dot-all-of-us-workbench-test.appspot.com/v1"
-  const isAoUApi = (url: string): boolean => {
-    return url.startsWith('https://api-dot-all-of-us-workbench-test.appspot.com/v1');
-  }
-
-  // Don't log response for targetted requests. Because some requests response could be too long, clutter up test log.
-  const skipResponse = (url: string): boolean => {
-    return url.endsWith('/readonly');
-  }
-
   await jestPuppeteer.resetPage();
   await jestPuppeteer.resetBrowser();
   await page.setUserAgent(userAgent);
@@ -27,9 +16,20 @@ beforeEach(async () => {
   page.setDefaultTimeout(30000);
 
   await page.setRequestInterception(true);
+
+  // Log responses from Workbench API.
+  const isWorkbenchApi = (url: string): boolean => {
+    return url.startsWith('api-dot-all-of-us-workbench-test.appspot.com/v1');
+  }
+
+  // Don't log response. Some requests response could be long, clutter up test log.
+  const ignoreWorkbenchApi = (url: string): boolean => {
+    return url.endsWith('/readonly');
+  }
+
   page.on('request', (request) => {
     try {
-      if (isAoUApi(request.url())) {
+      if (isWorkbenchApi(request.url())) {
         const method = request.method();
         if (method !== 'OPTIONS') {
           const data = request.postData();
@@ -49,7 +49,7 @@ beforeEach(async () => {
         const method = request.method();
         const response = await request.response();
         if (response != null) {
-          if (isAoUApi(request.url())) {
+          if (isWorkbenchApi(request.url())) {
             const status = response.status();
             const failure = request.failure();
             const responseText = (await response.buffer()).toString();
@@ -58,17 +58,17 @@ beforeEach(async () => {
               const errorText = JSON.stringify(JSON.parse(failure.errorText), null, 2);
               const errorTextJson = JSON.stringify(JSON.parse(await response.text()), null, 2);
               console.debug(`❗Request failed: ${status} ${method} ${request.url()}\n${errorText}\n${errorTextJson}\n${responseTextJson}`);
-              return;
-            }
-            if (skipResponse(request.url())) {
-              console.debug(`❗Request finished: ${status} ${method} ${request.url()}\n`);
             } else {
-              if (request.url().endsWith('/v1/workspaces')) {
-                // Additional log processer: truncate response json because could be too many workspaces.
-                const jsonBody = JSON.parse(responseText);
-                responseTextJson = JSON.stringify(jsonBody.items.slice(0, 3), null, 2);
+              if (ignoreWorkbenchApi(request.url())) {
+                console.debug(`❗Request finished: ${status} ${method} ${request.url()}\n`);
+              } else {
+                if (request.url().endsWith('/v1/workspaces')) {
+                  // Truncate response json. Too many workspaces clutter up log.
+                  const jsonBody = JSON.parse(responseText);
+                  responseTextJson = JSON.stringify(jsonBody.items.slice(0, 3), null, 2);
+                }
+                console.debug(`❗Request finished: ${status} ${method} ${request.url()}\n${responseTextJson}`);
               }
-              console.debug(`❗Request finished: ${status} ${method} ${request.url()}\n${responseTextJson}`);
             }
           }
         }
