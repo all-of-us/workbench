@@ -233,7 +233,8 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     bufferEntry = billingProjectBufferEntryDao.save(bufferEntry);
   }
 
-  private List<DbBillingProjectBufferEntry> findEntriesWithExpiredGracePeriod(
+  @VisibleForTesting
+  List<DbBillingProjectBufferEntry> findEntriesWithExpiredGracePeriod(
       Instant now, BufferEntryStatus bufferEntryStatus) {
     final Optional<Duration> gracePeriod =
         Optional.ofNullable(STATUS_TO_GRACE_PERIOD.get(bufferEntryStatus));
