@@ -1953,7 +1953,7 @@ Common.register_command({
   :fn => ->(*args) { set_authority_local("set-authority-local", *args) }
 })
 
-def create_extraction_bp_workspace(cmd_name, *args)
+def create_wgs_cohort_extraction_bp_workspace(cmd_name, *args)
   ensure_docker cmd_name, args
 
   common = Common.new
@@ -1992,15 +1992,15 @@ def create_extraction_bp_workspace(cmd_name, *args)
 
   ServiceAccountContext.new(gcc.project).run do
     common.run_inline %W{
-       gradle createExtractionBillingProjectWorkspace
+       gradle createWgsCohortExtractionBillingProjectWorkspace
        -PappArgs=[#{flags.join(',')}]}
   end
 end
 
 Common.register_command({
-  :invocation => "create-extraction-bp-workspace",
-  :description => "Create Terra billing project and workspace impersonating the Extraction SA. This will NOT show up as an AoU workspace.",
-  :fn => ->(*args) { create_extraction_bp_workspace("create-extraction-bp-workspace", *args) }
+  :invocation => "create-wgs-cohort-extraction-bp-workspace",
+  :description => "Create Terra billing project and workspace impersonating the Genomics Cohort Extraction SA. This will NOT show up as an AoU workspace.",
+  :fn => ->(*args) { create_wgs_cohort_extraction_bp_workspace("create-wgs-cohort-extraction-bp-workspace", *args) }
 })
 
 def delete_runtimes(cmd_name, *args)

@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Configuration;
  * Share Workspace with given users
  */
 @Configuration
-public class CreateExtractionBillingProjectWorkspace {
+public class CreateWgsCohortExtractionBillingProjectWorkspace {
 
   private static Option billingAccountOpt =
       Option.builder().longOpt("billing-account").required().hasArg().build();
@@ -44,7 +44,7 @@ public class CreateExtractionBillingProjectWorkspace {
           .addOption(ownersOpt);
 
   private static final Logger log =
-      Logger.getLogger(CreateExtractionBillingProjectWorkspace.class.getName());
+      Logger.getLogger(CreateWgsCohortExtractionBillingProjectWorkspace.class.getName());
 
   @Bean
   ImpersonatedServiceAccountApiClientFactory apiClientFactory(WorkbenchConfig config) {
@@ -128,6 +128,6 @@ public class CreateExtractionBillingProjectWorkspace {
   }
 
   public static void main(String[] args) {
-    CommandLineToolConfig.runCommandLine(CreateExtractionBillingProjectWorkspace.class, args);
+    CommandLineToolConfig.runCommandLine(CreateWgsCohortExtractionBillingProjectWorkspace.class, args);
   }
 }
