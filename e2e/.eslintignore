@@ -1,6 +1,2 @@
 node_modules
 tsc-out
-logs
-*.json
-*.py
-*.R
