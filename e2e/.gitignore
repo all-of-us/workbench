@@ -8,7 +8,6 @@ out/
 puppeteer-access-token.txt
 
 # logs
-screenshot/
 logs/
 *.log
 npm-debug.log*
@@ -19,3 +18,5 @@ yarn-error.log*
 
 .idea
 .DS_Store
+
+.eslintcache
