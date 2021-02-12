@@ -168,7 +168,7 @@ public class FireCloudServiceImplTest {
   @Test
   public void testCreateAllOfUsBillingProject() throws Exception {
     final String servicePerimeter = "a-cloud-with-a-fence-around-it";
-    
+
     service.createAllOfUsBillingProject("project-name", servicePerimeter);
 
     ArgumentCaptor<FirecloudCreateRawlsBillingProjectFullRequest> captor =

@@ -16,8 +16,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.jetbrains.annotations.NotNull;
 
-import ch.qos.logback.classic.db.DBAppender;
-
 @Entity
 @Table(name = "billing_project_buffer_entry")
 public class DbBillingProjectBufferEntry {

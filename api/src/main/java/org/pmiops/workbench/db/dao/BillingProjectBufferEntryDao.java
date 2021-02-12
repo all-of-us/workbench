@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
-
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
@@ -33,7 +32,14 @@ public interface BillingProjectBufferEntryDao
       short status, Timestamp timestamp);
 
   // TODO: decide if we care about potential "tier bias" here; it does not take tiers into account
-  List<DbBillingProjectBufferEntry> findTop5ByStatusOrderByLastSyncRequestTimeAsc(short status);
+  @Query(
+      value =
+          "SELECT * FROM billing_project_buffer_entry "
+              + "  WHERE status = 0 " // BufferEntryStatus.CREATING
+              + "  ORDER BY last_sync_request_time ASC "
+              + "  LIMIT ?1",
+      nativeQuery = true)
+  List<DbBillingProjectBufferEntry> getCreatingEntriesToSync(int limit);
 
   DbBillingProjectBufferEntry findFirstByStatusAndAccessTierOrderByCreationTimeAsc(
       short status, DbAccessTier accessTier);

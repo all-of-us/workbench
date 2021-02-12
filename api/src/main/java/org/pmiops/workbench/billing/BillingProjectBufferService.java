@@ -4,6 +4,20 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.hash.Hashing;
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -27,16 +41,6 @@ import org.pmiops.workbench.utils.Comparables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.inject.Provider;
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
 @Service
 public class BillingProjectBufferService implements GaugeDataCollector {
 
@@ -50,28 +54,28 @@ public class BillingProjectBufferService implements GaugeDataCollector {
           BufferEntryStatus.CREATING, CREATING_TIMEOUT,
           BufferEntryStatus.ASSIGNING, ASSIGNING_TIMEOUT);
 
-  private final BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   private final AccessTierDao accessTierDao;
+  private final BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   private final Clock clock;
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public BillingProjectBufferService(
+      AccessTierDao accessTierDao,
       BillingProjectBufferEntryDao billingProjectBufferEntryDao,
       Clock clock,
       FireCloudService fireCloudService,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
-      AccessTierDao accessTierDao) {
-    this.billingProjectBufferEntryDao = billingProjectBufferEntryDao;
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.accessTierDao = accessTierDao;
+    this.billingProjectBufferEntryDao = billingProjectBufferEntryDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   private Timestamp getCurrentTimestamp() {
-    return new Timestamp(clock.instant().toEpochMilli());
+    return Timestamp.from(clock.instant());
   }
 
   /** Makes a configurable number of project creation attempts. */
@@ -111,8 +115,10 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     if (getUnfilledBufferSpace(accessTier) <= 0) {
       log.fine(
           String.format(
-              "Billing buffer for tier %s is at capacity: size = %d, capacity = %d",
-              accessTier, getCurrentBufferSize(accessTier), getBufferMaxCapacity(accessTier.getShortName())));
+              "Billing buffer for tier '%s' is at capacity: size = %d, capacity = %d",
+              accessTier.getDisplayName(),
+              getCurrentBufferSize(accessTier),
+              getBufferMaxCapacity(accessTier.getShortName())));
       return;
     }
 
@@ -121,8 +127,8 @@ public class BillingProjectBufferService implements GaugeDataCollector {
         creatingBufferEntry.getFireCloudProjectName(), accessTier.getServicePerimeter());
     log.info(
         String.format(
-            "Created new project %s for access tier %s",
-            creatingBufferEntry.toString(), accessTier));
+            "Created new project %s for access tier '%s'",
+            creatingBufferEntry.getFireCloudProjectName(), accessTier.getDisplayName()));
   }
 
   @NotNull
@@ -130,6 +136,12 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     final DbBillingProjectBufferEntry bufferEntry = new DbBillingProjectBufferEntry();
     bufferEntry.setFireCloudProjectName(createBillingProjectName());
     bufferEntry.setCreationTime(Timestamp.from(clock.instant()));
+    // Note: we set the lastSyncRequestTime column to the current timestamp as an optimization.
+    // If we leave this column as NULL, the sync process will prioritize this entry for immediate
+    // synchronization with Terra. Instead, we populate this column with the current timestamp
+    // since we know with high confidence that the initial status is CREATING. See RW-6192 for
+    // more context.
+    bufferEntry.setLastSyncRequestTime(Timestamp.from(clock.instant()));
     bufferEntry.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
     bufferEntry.setAccessTier(accessTier);
     return billingProjectBufferEntryDao.save(bufferEntry);
@@ -137,8 +149,8 @@ public class BillingProjectBufferService implements GaugeDataCollector {
 
   public void syncBillingProjectStatus() {
     List<DbBillingProjectBufferEntry> creatingEntriesToSync =
-        billingProjectBufferEntryDao.findTop5ByStatusOrderByLastSyncRequestTimeAsc(
-            DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.CREATING));
+        billingProjectBufferEntryDao.getCreatingEntriesToSync(
+            workbenchConfigProvider.get().billing.bufferStatusChecksPerTask);
     if (creatingEntriesToSync.isEmpty()) {
       return;
     }
@@ -256,11 +268,12 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   }
 
   public DbBillingProjectBufferEntry assignBillingProject(DbUser dbUser, Workspace workspace) {
-    DbAccessTier dbAccessTier = accessTierDao.findOneByShortName(workspace.getAccessTierShortName());
+    DbAccessTier dbAccessTier =
+        accessTierDao.findOneByShortName(workspace.getAccessTierShortName());
     DbBillingProjectBufferEntry bufferEntry = consumeBufferEntryForAssignment(dbAccessTier);
-    final String billingProject = bufferEntry.getFireCloudProjectName();
 
-    fireCloudService.addOwnerToBillingProject(dbUser.getUsername(), billingProject);
+    fireCloudService.addOwnerToBillingProject(
+        dbUser.getUsername(), bufferEntry.getFireCloudProjectName());
     bufferEntry.setStatusEnum(BufferEntryStatus.ASSIGNED, this::getCurrentTimestamp);
     bufferEntry.setAssignedUser(dbUser);
 
@@ -329,24 +342,4 @@ public class BillingProjectBufferService implements GaugeDataCollector {
             DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.AVAILABLE));
     return new BillingProjectBufferStatus().bufferSize(bufferSize);
   }
-
-//  public BillingProjectBufferStatusByTier getStatusByTier() {
-//    final BillingProjectBufferStatusByTier response = new BillingProjectBufferStatusByTier();
-//
-//    response.addAll(
-//        accessTiers.stream()
-//            .map(
-//                accessTier -> {
-//                  final long bufferSize =
-//                      billingProjectBufferEntryDao.countByStatusAndAccessTier(
-//                          DbStorageEnums.billingProjectBufferEntryStatusToStorage(
-//                              BufferEntryStatus.AVAILABLE),
-//                          accessTier);
-//                  return new BillingProjectBufferStatusByTierInner()
-//                      .accessTier(accessTier)
-//                      .bufferSize(bufferSize);
-//                })
-//            .collect(Collectors.toList()));
-//    return response;
-//  }
 }

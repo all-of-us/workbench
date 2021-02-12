@@ -33,7 +33,8 @@ public class BillingProjectBufferEntryDaoTest {
           BufferEntryStatus.ERROR, 1L,
           BufferEntryStatus.CREATING, 4L);
 
-  private static DbAccessTier accessTier = new DbAccessTier()
+  private static DbAccessTier accessTier =
+      new DbAccessTier()
           .setShortName("michael")
           .setAuthDomainGroupEmail("michael@test.org")
           .setAuthDomainName("test.org")
@@ -82,25 +83,27 @@ public class BillingProjectBufferEntryDaoTest {
   public void testGetCurrentBufferSizeForAccessTier_invalidTier() {
     DbAccessTier entry = new DbAccessTier();
 
-    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(entry))
-            .isEqualTo(0);
+    assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(entry)).isEqualTo(0);
   }
 
   @Test
   public void testGetCurrentBufferSizeForAccessTier_defaultTier() {
     assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(accessTier))
-            .isEqualTo(STATUS_TO_COUNT_INPUT.get(BufferEntryStatus.AVAILABLE) + STATUS_TO_COUNT_INPUT.get(BufferEntryStatus.CREATING));
+        .isEqualTo(
+            STATUS_TO_COUNT_INPUT.get(BufferEntryStatus.AVAILABLE)
+                + STATUS_TO_COUNT_INPUT.get(BufferEntryStatus.CREATING));
   }
 
   @Test
   public void testGetCurrentBufferSizeForAccessTier_multiTier() {
     // add one available project in an alternate tier
-    DbAccessTier anotherAccessTier = new DbAccessTier()
-      .setShortName("pete")
-      .setAuthDomainGroupEmail("pete@test.org")
-      .setAuthDomainName("anothertest.org")
-      .setDisplayName("Another Fancy Display Name")
-      .setServicePerimeter("another-serviceperimeter");
+    DbAccessTier anotherAccessTier =
+        new DbAccessTier()
+            .setShortName("pete")
+            .setAuthDomainGroupEmail("pete@test.org")
+            .setAuthDomainName("anothertest.org")
+            .setDisplayName("Another Fancy Display Name")
+            .setServicePerimeter("another-serviceperimeter");
 
     anotherAccessTier = accessTierDao.save(anotherAccessTier);
 
@@ -112,11 +115,13 @@ public class BillingProjectBufferEntryDaoTest {
 
     // no change to existing default tier
     assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(accessTier))
-            .isEqualTo(STATUS_TO_COUNT_INPUT.get(BufferEntryStatus.AVAILABLE) + STATUS_TO_COUNT_INPUT.get(BufferEntryStatus.CREATING));
+        .isEqualTo(
+            STATUS_TO_COUNT_INPUT.get(BufferEntryStatus.AVAILABLE)
+                + STATUS_TO_COUNT_INPUT.get(BufferEntryStatus.CREATING));
 
     // Why is the buffer size 1? - There is an available entry in the correct tier
     assertThat(billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(anotherAccessTier))
-            .isEqualTo(1);
+        .isEqualTo(1);
   }
 
   private void insertEntriesWithCounts(Map<BufferEntryStatus, Long> statusToCount) {
