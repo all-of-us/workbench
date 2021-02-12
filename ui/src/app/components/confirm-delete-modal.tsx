@@ -51,11 +51,12 @@ export class ConfirmDeleteModal
       return <Modal loading={this.state.loading}>
         <ModalTitle style={{lineHeight: '28px'}}>
           Warning — All work in this workspace will be lost.
-          Are you sure you want to
-          delete {toDisplay(this.props.resourceType)}
-          : {this.props.resourceName}?
         </ModalTitle>
         <ModalBody style={{marginTop: '0.2rem', lineHeight: '28.px'}}>
+          <div>
+            Are you sure you want to delete {toDisplay(this.props.resourceType)} : {this.props.resourceName}?
+          </div>
+          <br />
           <div>
             Deleting this workspace will immediately, permanently delete any items inside the workspace, such as
             notebooks
