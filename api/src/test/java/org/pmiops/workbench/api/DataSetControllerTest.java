@@ -297,7 +297,7 @@ public class DataSetControllerTest {
     DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
     entry.setFireCloudProjectName(UUID.randomUUID().toString());
 
-    doReturn(entry).when(mockBillingProjectBufferService).assignBillingProject(any());
+    doReturn(entry).when(mockBillingProjectBufferService).assignBillingProject(any(), any());
     TestMockFactory.stubCreateFcWorkspace(fireCloudService);
 
     Gson gson = new Gson();

@@ -46,8 +46,6 @@ public interface BillingProjectBufferEntryDao
 
   Long countByStatus(short status);
 
-  Long countByStatusAndAccessTier(short status, DbAccessTier accessTier);
-
   default Map<BufferEntryStatus, Long> getCountByStatusMap() {
     return computeProjectCountByStatus().stream()
         .collect(
