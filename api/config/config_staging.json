@@ -1,6 +1,7 @@
 {
   "firecloud": {
     "baseUrl": "https:\/\/api.firecloud.org",
+    "samBaseUrl": "https:\/\/sam.dsde-prod.broadinstitute.org",
     "notebookRuntimeMaxAgeDays": 7,
     "notebookRuntimeIdleMaxAgeDays": 3,
     "notebookRuntimeDefaultMachineType": "n1-highmem-4",

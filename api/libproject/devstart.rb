@@ -1983,6 +1983,7 @@ def create_wgs_cohort_extraction_bp_workspace(cmd_name, *args)
   gcc.validate
 
   flags = ([
+      ["--config-json", get_config_file(op.opts.project)],
       ["--billing-account", get_billing_config(op.opts.project)["accountId"]],
       ["--billing-project-name", op.opts.billing_project_name],
       ["--workspace-name", op.opts.workspace_name],
@@ -2493,9 +2494,13 @@ def migrate_database(dry_run = false)
   end
 end
 
-def get_config(project)
+def get_config_file(project)
   config_json = must_get_env_value(project, :config_json)
-  return JSON.parse(File.read("config/#{config_json}"))
+  return "config/#{config_json}"
+end
+
+def get_config(project)
+  return JSON.parse(File.read(get_config_file(project)))
 end
 
 def get_fc_config(project)

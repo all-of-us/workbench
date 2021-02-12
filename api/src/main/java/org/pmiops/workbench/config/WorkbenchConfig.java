@@ -11,7 +11,7 @@ public class WorkbenchConfig {
 
   public FireCloudConfig firecloud;
   public AuthConfig auth;
-  public WgsCohortExtractConfig wgsCohortExtractConfig;
+  public WgsCohortExtractionConfig wgsCohortExtraction;
   public CdrConfig cdr;
   public GoogleCloudStorageServiceConfig googleCloudStorageService;
   public GoogleDirectoryServiceConfig googleDirectoryService;
@@ -35,7 +35,7 @@ public class WorkbenchConfig {
     config.access = new AccessConfig();
     config.admin = new AdminConfig();
     config.auth = new AuthConfig();
-    config.wgsCohortExtractConfig = new WgsCohortExtractConfig();
+    config.wgsCohortExtraction = new WgsCohortExtractionConfig();
     config.auth.serviceAccountApiUsers = new ArrayList<>();
     config.cdr = new CdrConfig();
     config.elasticsearch = new ElasticsearchConfig();
@@ -109,6 +109,7 @@ public class WorkbenchConfig {
   public static class FireCloudConfig {
     public boolean debugEndpoints;
     public String baseUrl;
+    public String samBaseUrl;
     public Integer notebookRuntimeMaxAgeDays;
     public Integer notebookRuntimeIdleMaxAgeDays;
     public String notebookRuntimeDefaultMachineType;
@@ -155,7 +156,7 @@ public class WorkbenchConfig {
     public ArrayList<String> serviceAccountApiUsers;
   }
 
-  public static class WgsCohortExtractConfig {
+  public static class WgsCohortExtractionConfig {
     public String serviceAccount;
   }
 

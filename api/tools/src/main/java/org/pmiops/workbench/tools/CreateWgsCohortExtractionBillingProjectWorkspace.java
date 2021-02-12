@@ -1,11 +1,24 @@
 package org.pmiops.workbench.tools;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
@@ -18,6 +31,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 /**
  * Sets up workspace for Extraction service account 1. Creates Terra BP 2. Create Terra Workspace 3.
@@ -25,6 +39,9 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class CreateWgsCohortExtractionBillingProjectWorkspace {
+
+  private static Option configJsonOpt =
+          Option.builder().longOpt("config-json").required().hasArg().build();
 
   private static Option billingAccountOpt =
       Option.builder().longOpt("billing-account").required().hasArg().build();
@@ -39,6 +56,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
 
   private static Options options =
       new Options()
+          .addOption(configJsonOpt)
           .addOption(billingAccountOpt)
           .addOption(billingProjectNameOpt)
           .addOption(workspaceNameOpt)
@@ -47,23 +65,56 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
   private static final Logger log =
       Logger.getLogger(CreateWgsCohortExtractionBillingProjectWorkspace.class.getName());
 
-  @Bean
-  ImpersonatedServiceAccountApiClientFactory apiClientFactory(WorkbenchConfig config) throws IOException {
-    // TODO : replace string with `config.auth.extractionServiceAccount` once that value is in the
-    // test db
-    return new ImpersonatedServiceAccountApiClientFactory(
-        "wgs-cohort-extraction@all-of-us-workbench-test.iam.gserviceaccount.com", config);
+  WorkbenchConfig workbenchConfig(String configJsonFilepath) throws IOException {
+    ObjectMapper jackson = new ObjectMapper();
+    String rawJson =
+            new String(Files.readAllBytes(Paths.get(configJsonFilepath)), Charset.defaultCharset());
+
+    String strippedJson = rawJson.replaceAll("\\s*//.*", "");
+    JsonNode newJson = jackson.readTree(strippedJson);
+
+    return (new Gson()).fromJson(newJson.toString(), WorkbenchConfig.class);
+  }
+
+  ImpersonatedServiceAccountApiClientFactory wgsCohortExtractionServiceAccountApiClientFactory(WorkbenchConfig config) throws IOException {
+    return new ImpersonatedServiceAccountApiClientFactory(config.wgsCohortExtraction.serviceAccount, config.firecloud.baseUrl);
+  }
+
+  private String getExtractionPetSa(String workspaceNamespace, WorkbenchConfig workbenchConfig) throws IOException, InterruptedException {
+    String accessToken =  ImpersonatedServiceAccountApiClientFactory.getAccessToken(workbenchConfig.wgsCohortExtraction.serviceAccount);
+    log.info("Extraction SA Access Token: " + accessToken);
+
+    Request request = new Request.Builder()
+            .url(workbenchConfig.firecloud.samBaseUrl + "/api/google/v1/user/petServiceAccount/" + workspaceNamespace)
+            .addHeader("Authorization", "Bearer " + accessToken)
+            .build();
+
+    final OkHttpClient client = new OkHttpClient();
+    Response response = client.newCall(request).execute();
+
+    // The first call seems to always fail for some reason. Just retry a few times
+    int retries = 0;
+    while (!response.isSuccessful() && retries < 3) {
+      response = client.newCall(request).execute();
+      retries++;
+      Thread.sleep(5000);
+    }
+
+    return response.body().string();
   }
 
   @Bean
-  public CommandLineRunner run(ImpersonatedServiceAccountApiClientFactory apiClientFactory) {
+  public CommandLineRunner run() {
     return (args) -> {
       CommandLine opts = new DefaultParser().parse(options, args);
 
-      BillingApi billingApi = apiClientFactory.billingApi();
+      String configJsonFilepath = opts.getOptionValue(configJsonOpt.getLongOpt());
       String billingAccount = opts.getOptionValue(billingAccountOpt.getLongOpt());
       String billingProjectName = opts.getOptionValue(billingProjectNameOpt.getLongOpt());
       String workspaceName = opts.getOptionValue(workspaceNameOpt.getLongOpt());
+
+      WorkbenchConfig workbenchConfig = workbenchConfig(configJsonFilepath);
+      ApiClientFactory apiClientFactory = wgsCohortExtractionServiceAccountApiClientFactory(workbenchConfig);
 
       FirecloudCreateRawlsBillingProjectFullRequest billingProjectRequest =
           new FirecloudCreateRawlsBillingProjectFullRequest()
@@ -71,6 +122,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
               .projectName(opts.getOptionValue(billingProjectNameOpt.getLongOpt()));
 
       log.info("Creating billing project");
+      BillingApi billingApi = apiClientFactory.billingApi();
       billingApi.createBillingProjectFull(billingProjectRequest);
 
       while (billingApi
@@ -116,15 +168,8 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
 
       log.info("Workspace created by " + workspace.getCreatedBy());
       String proxyGroup = apiClientFactory.profileApi().getProxyGroup(workspace.getCreatedBy());
-      Matcher m = Pattern.compile("PROXY_(\\d+)@.*").matcher(proxyGroup);
-      m.matches();
-      String proxyGroupId = m.group(1);
-      log.info(workspace.getNamespace());
-      String petSaAccount =
-          "pet-" + proxyGroupId + "@" + billingProjectName + ".iam.gserviceaccount.com";
-
       log.info("Proxy group is " + proxyGroup);
-      log.info("Pet SA account is " + petSaAccount);
+      log.info("Pet SA account is " + getExtractionPetSa(workspace.getNamespace(), workbenchConfig));
     };
   }
 

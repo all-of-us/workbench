@@ -4,35 +4,36 @@ import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.protobuf.Duration;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
-import org.pmiops.workbench.config.WorkbenchConfig;
+import java.util.Collections;
 import org.pmiops.workbench.firecloud.ApiClient;
 
 public class ImpersonatedServiceAccountApiClientFactory extends ApiClientFactory {
 
   public ImpersonatedServiceAccountApiClientFactory(
-      String targetServiceAccount, WorkbenchConfig config) throws IOException {
-    super(newApiClient(targetServiceAccount, config));
+      String targetServiceAccount, String fcBaseUrl) throws IOException {
+    super(newApiClient(targetServiceAccount, fcBaseUrl));
   }
 
-  private static ApiClient newApiClient(String targetServiceAccount, WorkbenchConfig config)
-      throws IOException {
+  public static String getAccessToken(String targetServiceAccount) throws IOException {
     IamCredentialsClient iamCredentialsClient = IamCredentialsClient.create();
-    List<String> delegates =
-        Arrays.asList("projects/-/serviceAccounts/" + config.auth.serviceAccountApiUsers.get(0));
 
     String accessToken =
-        iamCredentialsClient
-            .generateAccessToken(
-                "projects/-/serviceAccounts/" + targetServiceAccount,
-                delegates,
-                Arrays.asList(FC_SCOPES),
-                Duration.newBuilder().setSeconds(60 * 60).build())
-            .getAccessToken();
+            iamCredentialsClient
+                    .generateAccessToken(
+                            "projects/-/serviceAccounts/" + targetServiceAccount,
+                            Collections.EMPTY_LIST,
+                            Arrays.asList(FC_SCOPES),
+                            Duration.newBuilder().setSeconds(60 * 60).build())
+                    .getAccessToken();
 
+    return accessToken;
+  }
+
+  private static ApiClient newApiClient(String targetServiceAccount, String fcBaseUrl)
+      throws IOException {
     ApiClient apiClient = new ApiClient();
-    apiClient.setBasePath(config.firecloud.baseUrl);
-    apiClient.setAccessToken(accessToken);
+    apiClient.setBasePath(fcBaseUrl);
+    apiClient.setAccessToken(getAccessToken(targetServiceAccount));
 
     return apiClient;
   }
