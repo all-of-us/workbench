@@ -14,7 +14,6 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
@@ -160,7 +159,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
       List<FirecloudWorkspaceACLUpdate> acls =
           Stream.concat(
                   Arrays.stream(opts.getOptionValue(ownersOpt.getLongOpt()).split(",")),
-                  Arrays.stream(new String[]{workspace.getCreatedBy()}))
+                  Arrays.stream(new String[] {workspace.getCreatedBy()}))
               .map(
                   email ->
                       new FirecloudWorkspaceACLUpdate()
