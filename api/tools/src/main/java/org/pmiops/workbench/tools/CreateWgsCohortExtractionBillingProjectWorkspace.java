@@ -37,9 +37,6 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
   private static Option configJsonOpt =
       Option.builder().longOpt("config-json").required().hasArg().build();
 
-  private static Option billingAccountOpt =
-      Option.builder().longOpt("billing-account").required().hasArg().build();
-
   private static Option billingProjectNameOpt =
       Option.builder().longOpt("billing-project-name").required().hasArg().build();
 
@@ -51,7 +48,6 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
   private static Options options =
       new Options()
           .addOption(configJsonOpt)
-          .addOption(billingAccountOpt)
           .addOption(billingProjectNameOpt)
           .addOption(workspaceNameOpt)
           .addOption(ownersOpt);
@@ -112,7 +108,6 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
       CommandLine opts = new DefaultParser().parse(options, args);
 
       String configJsonFilepath = opts.getOptionValue(configJsonOpt.getLongOpt());
-      String billingAccount = opts.getOptionValue(billingAccountOpt.getLongOpt());
       String billingProjectName = opts.getOptionValue(billingProjectNameOpt.getLongOpt());
       String workspaceName = opts.getOptionValue(workspaceNameOpt.getLongOpt());
 
@@ -122,7 +117,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
 
       FirecloudCreateRawlsBillingProjectFullRequest billingProjectRequest =
           new FirecloudCreateRawlsBillingProjectFullRequest()
-              .billingAccount("billingAccounts/" + billingAccount)
+              .billingAccount("billingAccounts/" + workbenchConfig.billing.accountId)
               .projectName(opts.getOptionValue(billingProjectNameOpt.getLongOpt()));
 
       log.info("Creating billing project");
