@@ -15,6 +15,12 @@ ENVIRONMENTS = {
         :dest_cdr_project => "fc-aou-cdr-synth-test",
         :auth_domain_group_email => "GROUP_all-of-us-registered-test@dev.test.firecloud.org",
       },
+      "controlled_test" => {
+        :source_cdr_project => "all-of-us-ehr-dev",
+        :ingest_cdr_project => "fc-aou-cdr-ingest-test-2",
+        :dest_cdr_project => "fc-aou-cdr-synth-test-2",
+        :auth_domain_group_email => "all-of-us-test-prototype-3@dev.test.firecloud.org",
+      }
     }
   },
   "all-of-us-rw-staging" => {
