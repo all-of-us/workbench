@@ -9,8 +9,8 @@ import org.pmiops.workbench.firecloud.ApiClient;
 
 public class ImpersonatedServiceAccountApiClientFactory extends ApiClientFactory {
 
-  public ImpersonatedServiceAccountApiClientFactory(
-      String targetServiceAccount, String fcBaseUrl) throws IOException {
+  public ImpersonatedServiceAccountApiClientFactory(String targetServiceAccount, String fcBaseUrl)
+      throws IOException {
     super(newApiClient(targetServiceAccount, fcBaseUrl));
   }
 
@@ -18,13 +18,13 @@ public class ImpersonatedServiceAccountApiClientFactory extends ApiClientFactory
     IamCredentialsClient iamCredentialsClient = IamCredentialsClient.create();
 
     String accessToken =
-            iamCredentialsClient
-                    .generateAccessToken(
-                            "projects/-/serviceAccounts/" + targetServiceAccount,
-                            Collections.EMPTY_LIST,
-                            Arrays.asList(FC_SCOPES),
-                            Duration.newBuilder().setSeconds(60 * 60).build())
-                    .getAccessToken();
+        iamCredentialsClient
+            .generateAccessToken(
+                "projects/-/serviceAccounts/" + targetServiceAccount,
+                Collections.EMPTY_LIST,
+                Arrays.asList(FC_SCOPES),
+                Duration.newBuilder().setSeconds(60 * 60).build())
+            .getAccessToken();
 
     return accessToken;
   }

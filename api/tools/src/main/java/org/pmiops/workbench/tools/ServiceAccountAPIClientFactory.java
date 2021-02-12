@@ -14,8 +14,7 @@ public class ServiceAccountAPIClientFactory extends ApiClientFactory {
   private static ApiClient newApiClient(String apiUrl) throws IOException {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(apiUrl);
-    apiClient.setAccessToken(
-        ServiceAccounts.getScopedServiceAccessToken(Arrays.asList(FC_SCOPES)));
+    apiClient.setAccessToken(ServiceAccounts.getScopedServiceAccessToken(Arrays.asList(FC_SCOPES)));
     return apiClient;
   }
 }
