@@ -1,5 +1,6 @@
 package org.pmiops.workbench.tools;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -47,7 +48,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
       Logger.getLogger(CreateWgsCohortExtractionBillingProjectWorkspace.class.getName());
 
   @Bean
-  ImpersonatedServiceAccountApiClientFactory apiClientFactory(WorkbenchConfig config) {
+  ImpersonatedServiceAccountApiClientFactory apiClientFactory(WorkbenchConfig config) throws IOException {
     // TODO : replace string with `config.auth.extractionServiceAccount` once that value is in the
     // test db
     return new ImpersonatedServiceAccountApiClientFactory(

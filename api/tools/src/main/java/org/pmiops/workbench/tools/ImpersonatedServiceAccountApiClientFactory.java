@@ -11,15 +11,11 @@ import org.pmiops.workbench.firecloud.ApiClient;
 public class ImpersonatedServiceAccountApiClientFactory extends ApiClientFactory {
 
   public ImpersonatedServiceAccountApiClientFactory(
-      String targetServiceAccount, WorkbenchConfig config) {
-    try {
-      this.apiClient = newApiClient(targetServiceAccount, config);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+      String targetServiceAccount, WorkbenchConfig config) throws IOException {
+    super(newApiClient(targetServiceAccount, config));
   }
 
-  public ApiClient newApiClient(String targetServiceAccount, WorkbenchConfig config)
+  private static ApiClient newApiClient(String targetServiceAccount, WorkbenchConfig config)
       throws IOException {
     IamCredentialsClient iamCredentialsClient = IamCredentialsClient.create();
     List<String> delegates =

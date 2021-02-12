@@ -121,7 +121,7 @@ public class ExportWorkspaceData {
   }
 
   @Bean
-  ServiceAccountAPIClientFactory serviceAccountAPIClientFactory(WorkbenchConfig config) {
+  ServiceAccountAPIClientFactory serviceAccountAPIClientFactory(WorkbenchConfig config) throws IOException {
     return new ServiceAccountAPIClientFactory(config.firecloud.baseUrl);
   }
 

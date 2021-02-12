@@ -4,23 +4,18 @@ import java.io.IOException;
 import java.util.Arrays;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.firecloud.ApiClient;
-import org.pmiops.workbench.firecloud.api.*;
 
 public class ServiceAccountAPIClientFactory extends ApiClientFactory {
 
-  public ServiceAccountAPIClientFactory(String apiUrl) {
-    try {
-      this.apiClient = newApiClient(apiUrl);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+  public ServiceAccountAPIClientFactory(String apiUrl) throws IOException {
+    super(newApiClient(apiUrl));
   }
 
-  private ApiClient newApiClient(String apiUrl) throws IOException {
+  private static ApiClient newApiClient(String apiUrl) throws IOException {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(apiUrl);
     apiClient.setAccessToken(
-        ServiceAccounts.getScopedServiceAccessToken(Arrays.asList(this.FC_SCOPES)));
+        ServiceAccounts.getScopedServiceAccessToken(Arrays.asList(FC_SCOPES)));
     return apiClient;
   }
 }

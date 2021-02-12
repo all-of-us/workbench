@@ -2,11 +2,18 @@ package org.pmiops.workbench.tools;
 
 import java.io.IOException;
 import org.pmiops.workbench.firecloud.ApiClient;
-import org.pmiops.workbench.firecloud.api.*;
+import org.pmiops.workbench.firecloud.api.BillingApi;
+import org.pmiops.workbench.firecloud.api.ProfileApi;
+import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 
 public abstract class ApiClientFactory {
 
   protected ApiClient apiClient;
+
+  protected ApiClientFactory(ApiClient apiClient) {
+    this.apiClient = apiClient;
+  }
+
   protected static final String[] FC_SCOPES =
       new String[] {
         "https://www.googleapis.com/auth/userinfo.profile",
