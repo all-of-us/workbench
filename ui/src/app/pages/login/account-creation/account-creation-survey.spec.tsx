@@ -2,7 +2,6 @@ import {mount, ReactWrapper} from 'enzyme';
 import * as React from "react";
 
 import {serverConfigStore} from 'app/utils/navigation';
-// import {WithProfileErrorModalProps} from 'app/components/with-error-modal';
 import {ProfileApi} from 'generated/fetch';
 import {createEmptyProfile} from 'app/pages/login/sign-in';
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
@@ -72,9 +71,5 @@ it('should handle error when creating an account', async() => {
   // We need to await one tick to allow async processing of the error response to resolve.
   await waitOneTickAndUpdate(wrapper);
 
-  const errorModal = wrapper.find('Modal[role="alertdialog"]');
-  // Ensure the error modal contains explanatory intro text.
-  expect(errorModal.getDOMNode().textContent).toContain('An error occurred while saving profile');
-  // Ensure the error modal contains the server-side error message.
-  expect(errorModal.getDOMNode().textContent).toContain('Could not create account: invalid institutional affiliation');
+  expect(wrapper.find('Modal[role="alertdialog"]').length).toEqual(1);
 });

@@ -41,8 +41,7 @@ export const withErrorModal = () => {
                                          body={this.state.body}
                                          closeFunction={() => this.setState({show: false})}/>
           }
-          <WrappedComponent showErrorModal={(title, body) => this.show(title, body)}
-                            {...this.props} />
+          <WrappedComponent showErrorModal={this.show.bind(this)} {...this.props}/>
         </React.Fragment>;
       }
     };
@@ -55,7 +54,7 @@ export interface WithProfileErrorModalProps {
 
 export const withProfileErrorWrapper = ({title = ''}) => {
   const body = ({message}) => (<React.Fragment>
-    <div>An error occurred while saving profile. The following message was
+    <div>An error occurred while saving your profile. The following message was
         returned:
     </div>
     <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
