@@ -40,6 +40,11 @@ public enum BigQueryDataSetTableInfo {
       " measurement_source_concept_id in "
           + String.format(
               CHILD_LOOKUP_SQL, "'MEASUREMENT'", 0, "@sourceConceptIds", "'MEASUREMENT'", 0)),
+  PHYSICAL_MEASUREMENT_CSS(
+      Domain.PHYSICAL_MEASUREMENT_CSS,
+      "ds_measurement",
+      " measurement_concept_id in unnest(@standardConceptIds)",
+      " measurement_source_concept_id in unnest(@sourceConceptIds)"),
   SURVEY(Domain.SURVEY, "ds_survey", null, " question_concept_id in unnest(@sourceConceptIds)"),
   PERSON(Domain.PERSON, "ds_person", null, null),
   OBSERVATION(

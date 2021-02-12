@@ -260,7 +260,10 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     Map<String, QueryParameterValue> mergedQueryParameterValues = new HashMap<>();
 
     final List<String> domainValues =
-        bigQueryService.getTableFieldsFromDomain(domain).stream()
+        bigQueryService
+            .getTableFieldsFromDomain(
+                Domain.PHYSICAL_MEASUREMENT_CSS.equals(domain) ? Domain.MEASUREMENT : domain)
+            .stream()
             .map(field -> field.getName().toLowerCase())
             .collect(Collectors.toList());
 
@@ -288,7 +291,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                   .filter(
                       cs ->
                           cs.getDomainEnum().equals(domain)
-                              || (cs.getDomainEnum().equals(Domain.PHYSICAL_MEASUREMENT)
+                              || (cs.getDomainEnum().equals(Domain.PHYSICAL_MEASUREMENT_CSS)
                                   && domain.equals(Domain.MEASUREMENT)))
                   .flatMap(cs -> cs.getConceptSetConceptIds().stream())
                   .collect(Collectors.toList());
@@ -1000,7 +1003,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             .collect(Collectors.toList()));
 
     final String domainName = domainMaybe.get().toString();
-    final String domainFirstCharacterCapitalized = capitalizeFirstCharacterOnly(domainName);
+    final String domainFirstCharacterCapitalized =
+        capitalizeFirstCharacterOnly(
+            Domain.PHYSICAL_MEASUREMENT_CSS.toString().equals(domainName)
+                ? Domain.MEASUREMENT.toString()
+                : domainName);
 
     final List<DbDSLinking> valuesLinkingTableResult =
         dsLinkingDao.findByDomainAndDenormalizedNameIn(

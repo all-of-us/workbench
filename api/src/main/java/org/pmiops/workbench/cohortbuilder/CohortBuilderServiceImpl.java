@@ -472,8 +472,15 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   private String modifyTermMatch(String term) {
     if (MYSQL_FULL_TEXT_CHARS.stream().anyMatch(term::contains)) {
       return Arrays.stream(term.split("\\s+"))
-          .map(s -> (!s.startsWith("+") && !s.startsWith("-")) ? "+" + s : s)
-          .collect(Collectors.joining());
+          .map(
+              s -> {
+                if (s.startsWith("(")
+                    || (!s.startsWith("+") && !s.startsWith("-") && !s.endsWith(")"))) {
+                  return "+" + s;
+                }
+                return s;
+              })
+          .collect(Collectors.joining(" "));
     }
 
     String[] keywords = term.split("\\W+");
