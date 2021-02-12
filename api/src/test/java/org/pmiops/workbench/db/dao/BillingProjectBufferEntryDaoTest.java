@@ -149,7 +149,8 @@ public class BillingProjectBufferEntryDaoTest {
     // confirm that the query retrieves the 3 CREATING entries with the oldest
     // last_sync_request_time time:
     // TEST_TIME.plusSeconds(10), TEST_TIME.plusSeconds(40), and TEST_TIME.plusSeconds(50)
-    List<Timestamp> expectedTimestamps = Lists.newArrayList(
+    List<Timestamp> expectedTimestamps =
+        Lists.newArrayList(
             Timestamp.from(TEST_TIME.plusSeconds(10)),
             Timestamp.from(TEST_TIME.plusSeconds(40)),
             Timestamp.from(TEST_TIME.plusSeconds(50)));
