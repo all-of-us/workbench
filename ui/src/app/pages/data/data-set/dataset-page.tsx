@@ -13,11 +13,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {CircleWithText} from 'app/icons/circleWithText';
 import {NewDataSetModal} from 'app/pages/data/data-set/new-dataset-modal';
-import {
-  cohortsApi,
-  conceptSetsApi,
-  dataSetApi
-} from 'app/services/swagger-fetch-clients';
+import {cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatDomain,
@@ -32,10 +28,7 @@ import {
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getCdrVersion} from 'app/utils/cdr-versions';
-import {
-  currentWorkspaceStore,
-  navigateAndPreventDefaultIfNoKeysPressed
-} from 'app/utils/navigation';
+import {currentWorkspaceStore, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -312,7 +305,7 @@ export class ValueListItem extends React.Component<
 
     dataSetApi().getDataDictionaryEntry(
       parseInt(currentWorkspaceStore.getValue().cdrVersionId, 10),
-      domain.toString(),
+      domain === Domain.PHYSICALMEASUREMENTCSS ? Domain.MEASUREMENT.toString() : domain.toString(),
       domainValue.value).then(dataDictionaryEntry => {
         this.setState({dataDictionaryEntry});
       }).catch(e => {
