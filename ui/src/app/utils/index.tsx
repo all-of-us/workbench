@@ -453,7 +453,8 @@ export function formatWorkspaceResourceDisplayDate(time: string): string {
 }
 
 export function formatDomainString(domainString: string): string {
-  return fp.capitalize(domainString === 'PHYSICALMEASUREMENTCSS' ? Domain.PHYSICALMEASUREMENT.toString() : domainString);
+  return fp.capitalize(domainString === Domain.PHYSICALMEASUREMENTCSS.toString()
+    ? Domain.PHYSICALMEASUREMENT.toString() : domainString);
 }
 
 export function formatDomain(domain: FetchDomain): string {

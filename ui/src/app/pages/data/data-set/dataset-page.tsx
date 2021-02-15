@@ -1181,8 +1181,9 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
               <FlexColumn>
                 <FlexRow style={{paddingTop: '0.5rem'}}>
                   {fp.toPairs(previewList).map((value) => {
-                    // Strip underscores so we get the correct enum value below
-                    const domain: string = value[0].replace(/_/g, '');
+                    const domain: string = value[0];
+                    // Strip underscores so we get the correct enum value
+                    const domainEnumValue = Domain[domain.replace(/_/g, '')];
                     const previewRow: DataSetPreviewInfo = value[1];
                     return <TooltipTrigger key={domain}
                                            content={
@@ -1194,8 +1195,8 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                            side='top'>
                       <Clickable
                                  disabled={previewRow.isLoading}
-                                 onClick={() => this.setState({selectedPreviewDomain: Domain[domain]})}
-                                 style={stylesFunction.selectDomainForPreviewButton(selectedPreviewDomain === Domain[domain])}>
+                                 onClick={() => this.setState({selectedPreviewDomain: domainEnumValue})}
+                                 style={stylesFunction.selectDomainForPreviewButton(selectedPreviewDomain === domainEnumValue)}>
                         <FlexRow style={{alignItems: 'center', overflow: 'auto', wordBreak: 'break-all'}}>
                           {formatDomainString(domain)}
                           {previewRow.isLoading &&
