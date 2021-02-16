@@ -11,10 +11,4 @@ Test.java
 .tsx
 .git
 yarn.lock
-config.yml
-pr-halt-e2e.sh
-e2e-test-users.sh
-pr-skip-ci.sh
-e2e-job-ignore-patterns.txt
-e2e-update-env.sh
 LICENSE.txt

@@ -89,7 +89,6 @@ executors:
   puppeteer-executor:
     docker:
       - image: << pipeline.parameters.workbench-image >>
-    resource_class: medium+
     working_directory: ~/workbench
     environment:
       CI: true
@@ -205,7 +204,7 @@ commands:
           background: true
       - run:
           name: Wait for local API server to start
-          command: dockerize -wait http://localhost:8081/v1/status -timeout 4m
+          command: dockerize -wait tcp://localhost:8081/v1/status -timeout 4m
 
   launch-local-ui:
     description: "Launch local UI server"
@@ -565,14 +564,14 @@ jobs:
       - steps: << parameters.optional_steps >>
       - run:
           name: "Update environment variables for e2e test"
-          command: bash .circleci/e2e-test-users.sh << parameters.env_name >>
+          command: bash .circleci/export-e2e-test-user-vars.sh << parameters.env_name >>
       - when:
           condition:
             equal: [ "local", << parameters.env_name >> ]
           steps:
             - run:
                 name: Change WORKBENCH_ENV to "test" if needed
-                command: bash .circleci/e2e-update-env.sh
+                command: bash .circleci/choose-e2e-env.sh
             # Local UI server is started but unused if WORKBENCH_ENV reset to "test" value in above step
             - launch-local-ui
             - run-puppeteer-test
