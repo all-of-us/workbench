@@ -32,6 +32,7 @@ public interface BillingProjectBufferEntryDao
   List<DbBillingProjectBufferEntry> findAllByStatusAndLastStatusChangedTimeLessThan(
       short status, Timestamp timestamp);
 
+  // a friendlier method name than the above JPA magic name
   default List<DbBillingProjectBufferEntry> findOlderThanByStatus(
       Instant inst, BufferEntryStatus status) {
     return findAllByStatusAndLastStatusChangedTimeLessThan(
@@ -51,6 +52,7 @@ public interface BillingProjectBufferEntryDao
   DbBillingProjectBufferEntry findFirstByStatusAndAccessTierOrderByCreationTimeAsc(
       short status, DbAccessTier accessTier);
 
+  // a friendlier method name than the above JPA magic name
   default DbBillingProjectBufferEntry findOldestForStatus(
       BufferEntryStatus status, DbAccessTier accessTier) {
     return findFirstByStatusAndAccessTierOrderByCreationTimeAsc(

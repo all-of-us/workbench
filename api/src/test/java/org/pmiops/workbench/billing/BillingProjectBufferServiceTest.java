@@ -270,7 +270,7 @@ public class BillingProjectBufferServiceTest {
   }
 
   @Test
-  public void fillREGISTERED_TIER_BUFFER_CAPACITY() {
+  public void fillBuffer_capacity() {
     // fill up buffer
     for (int i = 0; i < REGISTERED_TIER_BUFFER_CAPACITY; i++) {
       billingProjectBufferService.bufferBillingProjects();
