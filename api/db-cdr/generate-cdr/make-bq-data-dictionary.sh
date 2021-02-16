@@ -9,11 +9,12 @@ export BQ_PROJECT=$1  # project
 export BQ_DATASET=$2  # dataset
 export DRY_RUN=$3     # dry run
 
+archiveList=$(gsutil ls gs://all-of-us-workbench-private-cloudsql/$BQ_DATASET/data_dictionary/archive/*.csv) > /dev/null || true;
+dataDictionaryList=$(gsutil ls gs://all-of-us-workbench-private-cloudsql/$BQ_DATASET/data_dictionary/*.csv) > /dev/null || true;
+
 if [ "$DRY_RUN" == true ]
 then
   echo "Check if data dictionary file exists"
-  archiveList=$(gsutil ls gs://all-of-us-workbench-private-cloudsql/$BQ_DATASET/data_dictionary/archive/*.csv) > /dev/null || true;
-  dataDictionaryList=$(gsutil ls gs://all-of-us-workbench-private-cloudsql/$BQ_DATASET/data_dictionary/*.csv) > /dev/null || true;
   if [ -z "$dataDictionaryList" ] && [ -z "$archiveList" ]
   then
     echo "Error: Data Dictionary file is missing!"
@@ -24,8 +25,6 @@ fi
 
 # Throw error if there is no data_dictionary file for CDR release
 echo "Check if data dictionary file exists"
-archiveList=$(gsutil ls gs://all-of-us-workbench-private-cloudsql/$BQ_DATASET/data_dictionary/archive/*.csv) > /dev/null || true;
-dataDictionaryList=$(gsutil ls gs://all-of-us-workbench-private-cloudsql/$BQ_DATASET/data_dictionary/*.csv) > /dev/null || true;
 if [ -z "$dataDictionaryList" ] && [ -z "$archiveList" ]
 then
   echo "Error: Data Dictionary file is missing!"
