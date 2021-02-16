@@ -6,7 +6,7 @@ set -xv
 if [[ ${CIRCLE_PULL_REQUEST} ]]; then
   echo "CIRCLE_PULL_REQUEST: ${CIRCLE_PULL_REQUEST}"
   regexp="[[:digit:]]\+$"
-  PR_NUMBER=`echo $CIRCLE_PULL_REQUEST | grep -o $regexp`
+  PR_NUMBER=$(echo $CIRCLE_PULL_REQUEST | grep -o $regexp)
   echo "PR_NUMBER: ${PR_NUMBER}"
 else
   exit 0
