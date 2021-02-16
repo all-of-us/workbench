@@ -5,7 +5,7 @@ version: 2.1
 # -------------------------
 # https://circleci.com/orbs/registry/
 orbs:
-  browser-tools: circleci/browser-tools@1.0.1
+  browser-tools: circleci/browser-tools@1.1.1
 
 # -------------------------
 #   PIPELINE PARAMETERS
@@ -20,6 +20,9 @@ parameters:
   db-image:
     type: string
     default: "circleci/mysql:5.7"
+  e2e-cache-key:
+    type: string
+    default: v1-e2e-yarn-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
 
 # -------------------------
 #   ANCHORS
@@ -35,12 +38,6 @@ anchors:
     MYSQL_ROOT_PASSWORD: ubuntu
     MYSQL_USER: ubuntu
     MYSQL_PASSWORD: ubuntu
-
-  env-puppeteer: &env-puppeteer
-    CI: true
-    NODE_ENV: development
-    WORKBENCH_ENV: test
-    TEST_MODE: integration
 
   # Job runs for master branch only
   filter-master-branch: &filter-master-branch
@@ -95,9 +92,13 @@ executors:
   puppeteer-executor:
     docker:
       - image: << pipeline.parameters.workbench-image >>
+    resource_class: medium+
     working_directory: ~/workbench
     environment:
-      <<: *env-puppeteer
+      CI: true
+      NODE_ENV: development
+      WORKBENCH_ENV: test
+      TEST_MODE: integration
 
 # -------------------------
 #   COMMANDS
@@ -155,37 +156,13 @@ commands:
           steps:
             - run:
                 name: Export application default credentials
-                working_directory: ~/workbench
                 command: |
                   echo 'export GOOGLE_APPLICATION_CREDENTIALS=~/workbench/api/circle-sa-key.json' >> $BASH_ENV
                   source $BASH_ENV
-
-  halt-puppeteer-check:
-    description: "Skip ignored changes"
-    steps:
-      - run:
-          name: "Skip ignored changes"
-          command: |
-            if ! git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep -qvFf .circleci/e2e-job-ignore-patterns.txt ; then
-              echo "Workbench application code are not changed."
-              circleci-agent step halt
-            fi
-      - store-commit-message
-      - run:
-          name: "Halt if commit message contains 'skip e2e'"
-          command: |
-            echo "Git commit message: $COMMIT_MESSAGE"
-            # Double comma is "Parameter Expansion". It converts string to lowercase letters
-            if [[ "${COMMIT_MESSAGE,,}" == *"skip e2e"* ]]; then
-              echo "Halting e2e test."
-              circleci-agent step halt
-            fi
-      - run:
-          name: "Halt if branch is not a pull request"
-          command: bash .circleci/pr-skip-ci.sh
+                working_directory: ~/workbench
 
   halt-test-check:
-    description: "Halt job and succeed early if no code changes detected in << parameters.dir_names >> directories on non-master branch"
+    description: "Exiting job because code in the following paths have not changed: << parameters.dir_names >> directories"
     parameters:
       dir_names:
         type: string
@@ -205,12 +182,12 @@ commands:
                   fi
                 done
                 if [[ $changed = false ]]; then
-                  echo "Code in '<< parameters.dir_names >>' directories are not changed"
+                  echo "Code in '<< parameters.dir_names >>' directories are not changed. Exiting job."
                   circleci-agent step halt
                 fi
               fi
             fi
-          name: Halt if code in '<< parameters.dir_names >>' directories are not changed
+          name: "Halt job if code in '<< parameters.dir_names >>' directories are not changed"
 
   launch-local-api:
     description: "Launch local API server"
@@ -259,8 +236,9 @@ commands:
                 # Start local UI server that connects to "test" api server
                 command: yarn dev-up
                 background: true
+      - run: sleep 30 # sleep for 30 seconds
       - run:
-          name: Watch the port for 4m for local UI server start up
+          name: "Watch the port for 4m for local UI server start up"
           command: dockerize -wait tcp://localhost:4200 -timeout 4m
 
   run-api-test:
@@ -293,27 +271,14 @@ commands:
           destination: JunitTestResult
           when: always
 
-  run-puppeteer-test:
-    description: "Run puppeteer integration tests"
+  run-e2e-test:
+    description: "Run puppeteer end-to-end integration test"
     steps:
+      - run:
+          command: echo "Environment parameter WORKBENCH_ENV=${WORKBENCH_ENV}"
       - gcloud-auth-login:
           # Needed for yarn test, which invokes generate-impersonated-user-token
           with_application_default_credentials: true
-      - browser-tools/install-browser-tools
-      - run:
-          command: |
-            echo "Environment parameter WORKBENCH_ENV=${WORKBENCH_ENV}"
-      - restore_cache:
-          keys:
-            - v5-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
-      - run:
-          working_directory: ~/workbench/e2e
-          command: yarn install --frozen-lockfile --non-interactive
-      - save_cache:
-          paths:
-            - ~/.cache/yarn
-            - e2e/node_modules
-          key: v5-e2e-cache-{{ .Branch }}-{{ checksum "~/workbench/e2e/yarn.lock" }}
       - run:
           # Needed for env-cmd to function on Circle.
           command: touch ~/workbench/e2e/.env
@@ -323,7 +288,7 @@ commands:
           command: |
             circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings > /tmp/tests-to-run
             yarn test:ci $(cat /tmp/tests-to-run)
-          no_output_timeout: 25m
+          no_output_timeout: 30m
       - run:
           name: Create circleci_parameters.json
           working_directory: ~/workbench/e2e
@@ -357,8 +322,7 @@ commands:
     description: "workbench/ui: yarn install, save and restore cache"
     steps:
       - restore_cache:
-          keys:
-            - v5-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
+          key: v5-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
       - run:
           working_directory: ~/workbench/ui
           command: yarn install --verbose --frozen-lockfile --non-interactive
@@ -381,6 +345,16 @@ commands:
             STORAGE_BUCKET=gs://circleci-puppeteer-test-results
             gsutil cp ${NEW_JSON} ${STORAGE_BUCKET}
           when: always
+
+  halt-e2e-check:
+    description: "Stop running Puppeteer end-to-end test if conditions are met"
+    steps:
+      - run:
+          name: "Check commit message and find changed file names that do not match ignore patterns"
+          command: bash .circleci/pr-halt-e2e.sh
+      - halt-test-check:
+          # Stop running Puppeteer end-to-end test if code are not changed in "api", "ui" and "e2e" directories
+          dir_names: "api ui e2e"
 
 # -------------------------
 #        JOBS
@@ -576,15 +550,10 @@ jobs:
     executor: puppeteer-executor
     parameters:
       env_name:
-        description: The target environment for run Puppeteer tests. Must be one of "test", "staging", "local".
+        description: The target environment for run Puppeteer end-to-end test. Must be one of "test", "staging", "local".
         default: "test"
         type: enum
         enum: ["test", "staging", "local"]
-      test_mode:
-        description: Switching between "nightly-integration" and normal "integration" test mode.
-        default: "integration"
-        type: enum
-        enum: ["integration", "nightly-integration"]
       parallel_num:
         type: integer
         default: 1
@@ -593,54 +562,54 @@ jobs:
         default: []
     environment:
       WORKBENCH_ENV: << parameters.env_name >>
-      TEST_MODE: << parameters.test_mode >>
     parallelism: << parameters.parallel_num >>
     steps:
-      - checkout-code
+      - attach_workspace:
+          at: .
       - steps: << parameters.optional_steps >>
-      - halt-test-check:
-          dir_names: "api ui e2e"
       - run:
-          name: Update test user environment variables
-          command: |
-            case << parameters.env_name >> in
-              "staging")
-                echo 'export STAGING_COLLABORATOR=$PUPPETEER_COLLABORATOR_STAGING' >> $BASH_ENV
-                echo 'export USER_NAME=$PUPPETEER_USER_STAGING@staging.fake-research-aou.org' >> $BASH_ENV
-                ;;
-              "test")
-                echo 'export TEST_COLLABORATOR=$PUPPETEER_COLLABORATOR_TEST' >> $BASH_ENV
-                echo 'export USER_NAME=$PUPPETEER_USER_TEST@fake-research-aou.org' >> $BASH_ENV
-                ;;
-              "local")
-                echo 'export DEV_COLLABORATOR=$PUPPETEER_COLLABORATOR_LOCAL' >> $BASH_ENV
-                echo 'export USER_NAME=$PUPPETEER_USER_LOCAL@fake-research-aou.org' >> $BASH_ENV
-                ;;
-            esac
-            echo 'export PASSWORD=$PUPPETEER_USER_PASSWORD' >> $BASH_ENV
-            source $BASH_ENV
+          name: "Update environment variables for e2e test"
+          command: bash .circleci/e2e-test-users.sh << parameters.env_name >>
       - when:
           condition:
             equal: [ "local", << parameters.env_name >> ]
           steps:
-            # Local UI server is not used if WORKBENCH_ENV reset to "test" value in next step
-            - launch-local-ui
             - run:
-                name: See if WORKBENCH_ENV environment variable should override from "local" to "test".
-                command: |
-                  if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ]; then
-                    # Count total number of files changed.
-                    CHANGED_COUNT=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | wc -l | xargs)
-                    E2E_CHANGED_COUNT=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) -- e2e | wc -l | xargs)
-                    # If e2e tests are the only files that have changed, run e2e tests against the "test" environment.
-                    if [ $E2E_CHANGED_COUNT -gt 0 ] && [ $E2E_CHANGED_COUNT -eq $CHANGED_COUNT ]; then
-                        echo 'export WORKBENCH_ENV=test' >> $BASH_ENV
-                        echo 'export USER_NAME=${PUPPETEER_USER_TEST}@fake-research-aou.org' >> $BASH_ENV
-                        source $BASH_ENV
-                        echo "Reset WORKBENCH_ENV=test"
-                    fi
-                  fi
-      - run-puppeteer-test
+                name: Change WORKBENCH_ENV to "test" if needed
+                command: bash .circleci/e2e-update-env.sh
+            # Local UI server is started but unused if WORKBENCH_ENV reset to "test" value in above step
+            - launch-local-ui
+            - run-e2e-test
+
+  e2e-env-setup:
+    executor: puppeteer-executor
+    parameters:
+      test_mode:
+        description: Switching between "nightly-integration" and normal "integration" test mode
+        default: "integration"
+        type: enum
+        enum: [ "integration", "nightly-integration" ]
+    environment:
+      TEST_MODE: << parameters.test_mode >>
+    steps:
+      - checkout-code
+      - store-commit-message
+      - browser-tools/install-browser-tools
+      - restore_cache:
+          keys:
+            - << pipeline.parameters.e2e-cache-key >>
+      - run:
+          working_directory: ~/workbench/e2e
+          command: yarn install --frozen-lockfile --non-interactive
+      - save_cache:
+          paths:
+            - ~/workbench/e2e/.cache/yarn
+            - ~/workbench/e2e/node_modules
+          key: << pipeline.parameters.e2e-cache-key >>
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
 
 
 workflows:
@@ -663,18 +632,22 @@ workflows:
           requires:
             - ui-unit-test
       # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only
+      - e2e-env-setup
       - puppeteer-test:
           <<: *filter-pr-branch
           env_name: "local"
-          parallel_num: 2
+          parallel_num: 4
           optional_steps:
-            - halt-puppeteer-check
+            - halt-e2e-check
+          requires:
+            - e2e-env-setup
       # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
       - puppeteer-test:
           parallel_num: 4
           env_name: "test"
           <<: *filter-master-branch
           requires:
+            - e2e-env-setup
             - api-deploy-to-test
             - ui-deploy-to-test
           post-steps:
@@ -712,13 +685,15 @@ workflows:
             - api-deps-check
             - api-integration-test
             - ui-unit-test
-      # Not ready until delete workspace script is working
+      # Not ready
+      # - e2e-env-setup
       # - puppeteer-test:
           # <<: *filter-release-tags
           # parallel_num: 4
           # env_name: "staging"
           # requires:
             # - deploy-to-staging
+            # - e2e-env-setup
 
   nightly-tests:
     triggers:
@@ -731,10 +706,13 @@ workflows:
                 - master
     jobs:
       - api-bigquery-test
+      - e2e-env-setup:
+          test_mode: "nightly-integration"
       - puppeteer-test:
           parallel_num: 1
-          test_mode: "nightly-integration"
           env_name: "test"
+          requires:
+            - e2e-env-setup
 
 experimental:
   notify:
