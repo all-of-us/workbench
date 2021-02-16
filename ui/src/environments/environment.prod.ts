@@ -20,7 +20,6 @@ export const environment: Environment = {
   allowTestAccessTokenOverride: false,
   enableCaptcha: true,
   enablePublishedWorkspaces: false,
-  enableProfileCapsFeatures: true,
   enableNewConceptTabs: false,
   enableFooter: true
 };
