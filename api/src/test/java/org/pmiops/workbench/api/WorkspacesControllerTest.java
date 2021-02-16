@@ -208,9 +208,6 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class WorkspacesControllerTest {
-
-  // TODO
-
   private static final Timestamp NOW = Timestamp.from(Instant.now());
   private static final long NOW_TIME = NOW.getTime();
   private static final FakeClock CLOCK = new FakeClock(NOW.toInstant(), ZoneId.systemDefault());

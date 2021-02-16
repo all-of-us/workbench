@@ -266,8 +266,13 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   }
 
   public DbBillingProjectBufferEntry assignBillingProject(DbUser dbUser, Workspace workspace) {
-    DbAccessTier dbAccessTier =
-        accessTierDao.findOneByShortName(workspace.getAccessTierShortName());
+    final String tierName = workspace.getAccessTierShortName();
+    DbAccessTier dbAccessTier = accessTierDao.findOneByShortName(tierName);
+    if (dbAccessTier == null) {
+      throw new NotFoundException(
+          String.format("Could not find Access Tier '%s' in database", tierName));
+    }
+
     DbBillingProjectBufferEntry bufferEntry = consumeBufferEntryForAssignment(dbAccessTier);
 
     fireCloudService.addOwnerToBillingProject(

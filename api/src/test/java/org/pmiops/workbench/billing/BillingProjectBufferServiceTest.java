@@ -39,6 +39,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
+import org.assertj.core.util.Maps;
+import org.javers.common.collections.Sets;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -183,12 +185,12 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
-    ArgumentCaptor<String> tierCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<String> perimeterCaptor = ArgumentCaptor.forClass(String.class);
     verify(mockFireCloudService)
-        .createAllOfUsBillingProject(projectCaptor.capture(), tierCaptor.capture());
+        .createAllOfUsBillingProject(projectCaptor.capture(), perimeterCaptor.capture());
 
     String billingProjectName = projectCaptor.getValue();
-    String servicePerimeter = tierCaptor.getValue();
+    String servicePerimeter = perimeterCaptor.getValue();
     assertThat(billingProjectName).startsWith(workbenchConfig.billing.projectNamePrefix);
     assertThat(servicePerimeter).isEqualTo(REGISTERED_TIER_SERVICE_PERIMETER);
     assertThat(
@@ -196,6 +198,47 @@ public class BillingProjectBufferServiceTest {
                 .findByFireCloudProjectName(billingProjectName)
                 .getStatusEnum())
         .isEqualTo(BufferEntryStatus.CREATING);
+  }
+
+  @Test
+  public void fillBufferMultiTier() {
+    final String controlledTierName = "controlled";
+    final String controlledTierServicePerimeter = "controlled/perimeter";
+    DbAccessTier controlledTier =
+        new DbAccessTier()
+            .setAccessTierId(1)
+            .setShortName(controlledTierName)
+            .setDisplayName("Registered Tier")
+            .setAuthDomainGroupEmail("joel@example.com")
+            .setAuthDomainName("aou-reg-users")
+            .setServicePerimeter(controlledTierServicePerimeter);
+    controlledTier = accessTierDao.save(controlledTier);
+
+    final Map<String, Integer> tierMap =
+        Maps.newHashMap(REGISTERED_TIER_NAME, REGISTERED_TIER_BUFFER_CAPACITY);
+    tierMap.put(controlledTierName, 3);
+    workbenchConfig.billing.bufferCapacity = tierMap;
+
+    billingProjectBufferService.bufferBillingProjects();
+
+    Set<String> servicePerimeters =
+        Sets.asSet(REGISTERED_TIER_SERVICE_PERIMETER, controlledTierServicePerimeter);
+
+    for (int i = 0; i < servicePerimeters.size(); i++) {
+      ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
+      ArgumentCaptor<String> perimeterCaptor = ArgumentCaptor.forClass(String.class);
+      verify(mockFireCloudService)
+          .createAllOfUsBillingProject(projectCaptor.capture(), perimeterCaptor.capture());
+
+      String billingProjectName = projectCaptor.getValue();
+      assertThat(billingProjectName).startsWith(workbenchConfig.billing.projectNamePrefix);
+      assertThat(perimeterCaptor.getValue()).isIn(servicePerimeters);
+      assertThat(
+              billingProjectBufferEntryDao
+                  .findByFireCloudProjectName(billingProjectName)
+                  .getStatusEnum())
+          .isEqualTo(BufferEntryStatus.CREATING);
+    }
   }
 
   @Test
@@ -616,6 +659,58 @@ public class BillingProjectBufferServiceTest {
 
     assertThat(billingProjectBufferEntryDao.findOne(assignedEntry.getId()).getStatusEnum())
         .isEqualTo(BufferEntryStatus.ASSIGNED);
+  }
+
+  @Test
+  public void assignBillingProjectMultiTier() {
+    final String controlledTierName = "controlled";
+    final String controlledTierServicePerimeter = "controlled/perimeter";
+    DbAccessTier controlledTier =
+        new DbAccessTier()
+            .setAccessTierId(1)
+            .setShortName(controlledTierName)
+            .setDisplayName("Registered Tier")
+            .setAuthDomainGroupEmail("joel@example.com")
+            .setAuthDomainName("aou-reg-users")
+            .setServicePerimeter(controlledTierServicePerimeter);
+    controlledTier = accessTierDao.save(controlledTier);
+
+    DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
+    entry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
+    entry.setFireCloudProjectName("test-project-name");
+    entry.setCreationTime(getCurrentTimestamp());
+    entry.setAccessTier(controlledTier);
+    billingProjectBufferEntryDao.save(entry);
+
+    DbUser user = mock(DbUser.class);
+    doReturn("fake-email@aou.org").when(user).getUsername();
+
+    Workspace toCreate = new Workspace().accessTierShortName(controlledTierName);
+
+    DbBillingProjectBufferEntry assignedEntry =
+        billingProjectBufferService.assignBillingProject(user, toCreate);
+
+    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<String> secondCaptor = ArgumentCaptor.forClass(String.class);
+    verify(mockFireCloudService).addOwnerToBillingProject(captor.capture(), secondCaptor.capture());
+    String invokedEmail = captor.getValue();
+    String invokedProjectName = secondCaptor.getValue();
+
+    assertThat(invokedEmail).isEqualTo("fake-email@aou.org");
+    assertThat(invokedProjectName).isEqualTo("test-project-name");
+
+    assertThat(billingProjectBufferEntryDao.findOne(assignedEntry.getId()).getStatusEnum())
+        .isEqualTo(BufferEntryStatus.ASSIGNED);
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void assignBillingProjectInvalidTier() {
+    DbUser user = mock(DbUser.class);
+    doReturn("fake-email@aou.org").when(user).getUsername();
+
+    Workspace toCreate = new Workspace().accessTierShortName("missing");
+
+    billingProjectBufferService.assignBillingProject(user, toCreate);
   }
 
   @Test
