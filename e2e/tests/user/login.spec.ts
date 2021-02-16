@@ -3,6 +3,7 @@ import GoogleLoginPage, {FieldSelector} from 'app/page/google-login';
 import {config} from 'resources/workbench-config';
 import {waitForText} from 'utils/waits-utils';
 
+
 describe('Login tests:', () => {
 
   test('Cookie banner visible on login page', async () => {
