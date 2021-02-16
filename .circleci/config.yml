@@ -349,7 +349,7 @@ commands:
           command: bash .circleci/skip-e2e-pr-checks.sh
       - halt-test-check:
           # Stop running Puppeteer end-to-end test if code are not changed in "api", "ui" and "e2e" directories
-          dir_names: "api ui e2e"
+          dir_names: "api ui e2e .circleci"
 
 # -------------------------
 #        JOBS
