@@ -55,3 +55,4 @@ client/py/.pydevproject
 **/gradlew.bat
 **/.gradle
 **/*.orig
+**/.vscode
