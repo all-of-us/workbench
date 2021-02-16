@@ -43,7 +43,7 @@
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_10",
+      "cdrDbName": "synth_r_2019q4_11",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
@@ -58,7 +58,7 @@
       "creationTime": "2020-10-20 00:00:00Z",
       "releaseNumber": 5,
       "numParticipants": 315297,
-      "cdrDbName": "r_2020q4_2",
+      "cdrDbName": "r_2020q4_3",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
