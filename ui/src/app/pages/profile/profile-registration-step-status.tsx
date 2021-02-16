@@ -11,10 +11,10 @@ const styles = reactStyles({
   container: {
     backgroundColor: colors.white,
     color: colors.primary,
-    // height: '225px',
-    // width: '220px',
+    height: '225px',
+    width: '220px',
     borderRadius: 8,
-    // marginBottom: '10px',
+    marginBottom: '10px',
     padding: 14,
     border: `1px solid ${colorWithWhiteness(colors.dark, 0.7)}`
   },
