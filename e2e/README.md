@@ -1,7 +1,7 @@
 # All-of-Us Test Automation with Puppeteer in Chrome or Chromium
 Puppeteer `e2e` end-to-end integration tests.  These tests are run in CircleCI
 for every PR and merge to master ([example](https://app.circleci.com/pipelines/github/all-of-us/workbench/4074/workflows/ca636d7c-8c11-463e-bfdc-39ea63b6df52/jobs/100294)).
-# test
+
 * See [Puppeteer API](https://github.com/puppeteer/puppeteer/blob/v5.0.0/docs/api.md). Puppeteer supports the latest [maintenance LTS](https://github.com/nodejs/Release#release-schedule) version of Node.
 * Use [jest-puppeteer](https://github.com/smooth-code/jest-puppeteer) preset to configure `jest` to run Pupppeteer tests.
   Puppeteer `browser`, `context` and `page` variables are global variables exposed by jest-puppeteer preset.
