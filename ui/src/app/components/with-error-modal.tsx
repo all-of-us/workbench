@@ -1,4 +1,5 @@
 import {TextModal} from 'app/components/text-modal';
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 interface State {
@@ -35,14 +36,43 @@ export const withErrorModal = () => {
 
       render() {
         return <React.Fragment>
-          {this.state.show && <TextModal title={this.state.title}
+          {this.state.show && <TextModal role='alertdialog'
+                                         title={this.state.title}
                                          body={this.state.body}
                                          closeFunction={() => this.setState({show: false})}/>
           }
-          <WrappedComponent showErrorModal={(tile, body) => this.show(tile, body)}
-                            {...this.props} />
+          <WrappedComponent showErrorModal={this.show.bind(this)} {...this.props}/>
         </React.Fragment>;
       }
     };
   };
 };
+
+export interface WithProfileErrorModalProps {
+  showProfileErrorModal?: (message: string) => void;
+}
+
+export const withProfileErrorWrapper = ({title = ''}) => {
+  const body = ({message}) => (<React.Fragment>
+    <div>An error occurred while saving your profile. The following message was
+        returned:
+    </div>
+    <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
+        "{message}"
+    </div>
+    <div>
+        Please try again or contact <a
+        href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
+    </div>
+    </React.Fragment>);
+
+  return WrappedComponent => {
+    const ProileErrorWrapper = ({showErrorModal, ...props}) => {
+      return <WrappedComponent showProfileErrorModal={(message) => showErrorModal(title, body({message}))} {...props}/>;
+    };
+
+    return ProileErrorWrapper;
+  };
+};
+
+export const withProfileErrorModal = ({title = '' }) => fp.flow(withProfileErrorWrapper({title}), withErrorModal());
