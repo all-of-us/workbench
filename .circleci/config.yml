@@ -268,7 +268,7 @@ commands:
           destination: JunitTestResult
           when: always
 
-  run-e2e-test:
+  run-puppeteer-test:
     description: "Run puppeteer end-to-end integration test"
     steps:
       - run:
@@ -343,7 +343,7 @@ commands:
             gsutil cp ${NEW_JSON} ${STORAGE_BUCKET}
           when: always
 
-  halt-e2e-check:
+  halt-puppeteer-check:
     description: "Stop running Puppeteer end-to-end test if conditions are met"
     steps:
       - run:
@@ -576,9 +576,9 @@ jobs:
                 command: bash .circleci/e2e-update-env.sh
             # Local UI server is started but unused if WORKBENCH_ENV reset to "test" value in above step
             - launch-local-ui
-            - run-e2e-test
+            - run-puppeteer-test
 
-  e2e-env-setup:
+  puppeteer-env-setup:
     executor: puppeteer-executor
     parameters:
       test_mode:
@@ -629,22 +629,22 @@ workflows:
           requires:
             - ui-unit-test
       # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only
-      - e2e-env-setup
+      - puppeteer-env-setup
       - puppeteer-test:
           <<: *filter-pr-branch
           env_name: "local"
           parallel_num: 4
           optional_steps:
-            - halt-e2e-check
+            - halt-puppeteer-check
           requires:
-            - e2e-env-setup
+            - puppeteer-env-setup
       # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
       - puppeteer-test:
           parallel_num: 4
           env_name: "test"
           <<: *filter-master-branch
           requires:
-            - e2e-env-setup
+            - puppeteer-env-setup
             - api-deploy-to-test
             - ui-deploy-to-test
           post-steps:
@@ -683,14 +683,14 @@ workflows:
             - api-integration-test
             - ui-unit-test
       # Not ready
-      # - e2e-env-setup
+      # - puppeteer-env-setup
       # - puppeteer-test:
           # <<: *filter-release-tags
           # parallel_num: 4
           # env_name: "staging"
           # requires:
             # - deploy-to-staging
-            # - e2e-env-setup
+            # - puppeteer-env-setup
 
   nightly-tests:
     triggers:
@@ -703,13 +703,13 @@ workflows:
                 - master
     jobs:
       - api-bigquery-test
-      - e2e-env-setup:
+      - puppeteer-env-setup:
           test_mode: "nightly-integration"
       - puppeteer-test:
           parallel_num: 1
           env_name: "test"
           requires:
-            - e2e-env-setup
+            - puppeteer-env-setup
 
 experimental:
   notify:
