@@ -5,6 +5,7 @@ import {signInWithAccessToken, signOut} from 'utils/test-utils';
 import Navigation, {NavLink} from 'app/component/navigation';
 import {waitForDocumentTitle} from 'utils/waits-utils';
 
+
 describe('Sidebar Navigation', () => {
 
   beforeEach(async () => {
