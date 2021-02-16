@@ -7,8 +7,8 @@
 .pdf
 .gitignore
 Test.java
-.kt
-.tsx
+Test.kt
+.spec.tsx
 .git
 yarn.lock
 LICENSE.txt
