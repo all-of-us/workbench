@@ -46,17 +46,7 @@ public interface CloudStorageService {
 
   String getCredentialsBucketString(String objectPath);
 
-  JSONObject getJiraCredentials();
-
   JSONObject getElasticCredentials();
-
-  ServiceAccountCredentials getGSuiteAdminCredentials() throws IOException;
-
-  ServiceAccountCredentials getFireCloudAdminCredentials() throws IOException;
-
-  ServiceAccountCredentials getCloudResourceManagerAdminCredentials() throws IOException;
-
-  ServiceAccountCredentials getDefaultServiceAccountCredentials() throws IOException;
 
   ServiceAccountCredentials getGarbageCollectionServiceAccountCredentials(
       String garbageCollectionEmail) throws IOException;
