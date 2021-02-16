@@ -1052,6 +1052,40 @@ Must be run once when a new cdr is released",
   :fn => ->(*args) { make_bq_dataset_linking("make-bq-dataset-linking", *args) }
 })
 
+def make_bq_data_dictionary(cmd_name, *args)
+  ensure_docker_sync()
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = false
+  op.add_option(
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_option(
+    "--dry-run [dry-run]",
+    ->(opts, v) { opts.dry_run = v},
+    "Is this dry run. Default is false"
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
+  op.parse.validate
+
+  common = Common.new
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-data-dictionary.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.dry_run}}
+end
+
+Common.register_command({
+  :invocation => "make_bq_data_dictionary",
+  :description => "make_bq_data_dictionary --bq-project <PROJECT> --bq-dataset <DATASET>
+Generates big query data dictionary tables. Used by Data Set Builder to show values details.
+Must be run once when a new cdr is released",
+  :fn => ->(*args) { make_bq_data_dictionary("make-bq-data-dictionary", *args) }
+})
+
 def generate_cb_criteria_tables(cmd_name, *args)
   ensure_docker_sync()
   op = WbOptionsParser.new(cmd_name, args)
