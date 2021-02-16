@@ -20,6 +20,7 @@ import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -64,6 +65,7 @@ public class WorkspaceMapperTest {
   private static final ImmutableSet<ResearchOutcomeEnum> RESEARCH_OUTCOMES =
       ImmutableSet.of(ResearchOutcomeEnum.DECREASE_ILLNESS_BURDEN);
   private static final String DISSEMINATE_FINDINGS_OTHER = "Everywhere except MIT.";
+  private static final String ACCESS_TIER_SHORT_NAME = "registered";
 
   private DbWorkspace sourceDbWorkspace;
   private FirecloudWorkspace sourceFirecloudWorkspace;
@@ -104,8 +106,11 @@ public class WorkspaceMapperTest {
     creatorUser.setDataAccessLevelEnum(DATA_ACCESS_LEVEL);
     creatorUser.setUserId(CREATOR_USER_ID);
 
+    final DbAccessTier accessTier = new DbAccessTier().setShortName(ACCESS_TIER_SHORT_NAME);
+
     final DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(CDR_VERSION_ID);
+    cdrVersion.setAccessTier(accessTier);
 
     sourceDbWorkspace = new DbWorkspace();
     sourceDbWorkspace.setWorkspaceId(WORKSPACE_DB_ID);
@@ -168,6 +173,7 @@ public class WorkspaceMapperTest {
     assertThat(ws.getGoogleBucketName()).isEqualTo(FIRECLOUD_BUCKET_NAME);
     assertThat(ws.getDataAccessLevel()).isEqualTo(DATA_ACCESS_LEVEL);
     assertThat(ws.getBillingAccountName()).isEqualTo(BILLING_ACCOUNT_NAME);
+    assertThat(ws.getAccessTierShortName()).isEqualTo(ACCESS_TIER_SHORT_NAME);
 
     final ResearchPurpose rp = ws.getResearchPurpose();
     assertResearchPurposeMatches(rp);

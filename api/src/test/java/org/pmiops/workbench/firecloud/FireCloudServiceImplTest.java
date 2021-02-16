@@ -41,8 +41,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class FireCloudServiceImplTest {
 
-  // TODO
-
   private static final String EMAIL_ADDRESS = "abc@fake-research-aou.org";
 
   @Autowired private FireCloudService service;
@@ -170,6 +168,8 @@ public class FireCloudServiceImplTest {
   @Test
   public void testCreateAllOfUsBillingProject() throws Exception {
     final String servicePerimeter = "a-cloud-with-a-fence-around-it";
+    // confirm that this value is no longer how we choose perimeters
+    workbenchConfig.firecloud.vpcServicePerimeterName = "something else";
 
     service.createAllOfUsBillingProject("project-name", servicePerimeter);
 

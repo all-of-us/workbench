@@ -240,15 +240,12 @@ public class BillingProjectBufferService implements GaugeDataCollector {
         Optional.ofNullable(STATUS_TO_GRACE_PERIOD.get(bufferEntryStatus));
 
     return gracePeriod
-        .map(p -> findEntriesWithExpiredGracePeriod(now, bufferEntryStatus, p))
+        .map(
+            p ->
+                billingProjectBufferEntryDao.findAllByStatusAndLastStatusChangedTimeLessThan(
+                    DbStorageEnums.billingProjectBufferEntryStatusToStorage(bufferEntryStatus),
+                    Timestamp.from(now.minus(p))))
         .orElse(Collections.emptyList());
-  }
-
-  private List<DbBillingProjectBufferEntry> findEntriesWithExpiredGracePeriod(
-      Instant now, BufferEntryStatus bufferEntryStatus, Duration gracePeriod) {
-    return billingProjectBufferEntryDao.findAllByStatusAndLastStatusChangedTimeLessThan(
-        DbStorageEnums.billingProjectBufferEntryStatusToStorage(bufferEntryStatus),
-        Timestamp.from(now.minus(gracePeriod)));
   }
 
   private List<DbBillingProjectBufferEntry> findExpiredCreatingEntries(Instant now) {

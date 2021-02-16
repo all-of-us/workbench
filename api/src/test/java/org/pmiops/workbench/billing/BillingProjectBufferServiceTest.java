@@ -11,10 +11,12 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.google.common.collect.Lists;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.Period;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -848,14 +850,74 @@ public class BillingProjectBufferServiceTest {
     assertThat(statusToCount).hasSize(2);
   }
 
-  private DbBillingProjectBufferEntry makeSimpleEntry(BufferEntryStatus bufferEntryStatus) {
-    DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
-    entry.setStatusEnum(bufferEntryStatus, () -> Timestamp.from(CLOCK.instant()));
+  @Test
+  public void testFindEntriesWithExpiredGracePeriod() {
+
+    // populate a variety of entries, including 2 which are older than the Creating grace period
+    // and 3 which have passed the Assigning grace period
+
+    Instant baseTime = NOW.minus(Period.ofDays(1));
+    Instant testTime = baseTime.plus(Duration.ofMinutes(100));
+
+    // past grace period of 60 minutes ago
+    makeEntry(BufferEntryStatus.CREATING, testTime.minus(Duration.ofMinutes(90)));
+    makeEntry(BufferEntryStatus.CREATING, testTime.minus(Duration.ofMinutes(70)));
+
+    // within grace period
+    makeEntry(BufferEntryStatus.CREATING, testTime.minus(Duration.ofMinutes(40)));
+
+    // past grace period of 10 minutes ago
+    makeEntry(BufferEntryStatus.ASSIGNING, testTime.minus(Duration.ofMinutes(35)));
+    makeEntry(BufferEntryStatus.ASSIGNING, testTime.minus(Duration.ofMinutes(25)));
+    makeEntry(BufferEntryStatus.ASSIGNING, testTime.minus(Duration.ofMinutes(15)));
+
+    // within grace period
+    makeEntry(BufferEntryStatus.ASSIGNING, testTime.minus(Duration.ofMinutes(5)));
+
+    // other irrelevant entries
+    makeEntry(BufferEntryStatus.ERROR, baseTime);
+    makeEntry(BufferEntryStatus.GARBAGE_COLLECTED, baseTime.plus(Duration.ofMinutes(20)));
+    makeEntry(BufferEntryStatus.AVAILABLE, baseTime.plus(Duration.ofMinutes(99)));
+
+    List<Timestamp> expectedExpiredCreating =
+        Lists.newArrayList(
+            Timestamp.from(testTime.minus(Duration.ofMinutes(90))),
+            Timestamp.from(testTime.minus(Duration.ofMinutes(70))));
+
+    List<Timestamp> observedExpiredCreating =
+        billingProjectBufferService
+            .findEntriesWithExpiredGracePeriod(testTime, BufferEntryStatus.CREATING).stream()
+            .map(DbBillingProjectBufferEntry::getLastSyncRequestTime)
+            .collect(Collectors.toList());
+
+    assertThat(observedExpiredCreating).containsExactlyElementsIn(expectedExpiredCreating);
+
+    List<Timestamp> expectedExpiredAssigning =
+        Lists.newArrayList(
+            Timestamp.from(testTime.minus(Duration.ofMinutes(35))),
+            Timestamp.from(testTime.minus(Duration.ofMinutes(25))),
+            Timestamp.from(testTime.minus(Duration.ofMinutes(15))));
+
+    List<Timestamp> observedExpiredAssigning =
+        billingProjectBufferService
+            .findEntriesWithExpiredGracePeriod(testTime, BufferEntryStatus.ASSIGNING).stream()
+            .map(DbBillingProjectBufferEntry::getLastSyncRequestTime)
+            .collect(Collectors.toList());
+
+    assertThat(observedExpiredAssigning).containsExactlyElementsIn(expectedExpiredAssigning);
+  }
+
+  private DbBillingProjectBufferEntry makeEntry(BufferEntryStatus status, Instant lastUpdatedTime) {
+    final DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
+    // entry.setAccessTier(accessTier);
+    entry.setStatusEnum(status, () -> Timestamp.from(lastUpdatedTime));
+    entry.setLastSyncRequestTime(Timestamp.from(lastUpdatedTime));
     return billingProjectBufferEntryDao.save(entry);
   }
 
-  // TODO
-  //  test findEntriesWithExpiredGracePeriod
+  private DbBillingProjectBufferEntry makeSimpleEntry(BufferEntryStatus bufferEntryStatus) {
+    return makeEntry(bufferEntryStatus, CLOCK.instant());
+  }
 
   private Timestamp getCurrentTimestamp() {
     return new Timestamp(NOW.toEpochMilli());
