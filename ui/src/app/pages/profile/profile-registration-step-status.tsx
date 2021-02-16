@@ -5,7 +5,6 @@ import {FlexColumn} from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import {environment} from 'environments/environment';
 
 const styles = reactStyles({
   container: {
