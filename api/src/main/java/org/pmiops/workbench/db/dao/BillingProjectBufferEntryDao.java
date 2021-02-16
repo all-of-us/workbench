@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import org.pmiops.workbench.db.model.DbAccessTier;
@@ -31,6 +32,12 @@ public interface BillingProjectBufferEntryDao
   List<DbBillingProjectBufferEntry> findAllByStatusAndLastStatusChangedTimeLessThan(
       short status, Timestamp timestamp);
 
+  default List<DbBillingProjectBufferEntry> findOlderThanByStatus(
+      Instant inst, BufferEntryStatus status) {
+    return findAllByStatusAndLastStatusChangedTimeLessThan(
+        DbStorageEnums.billingProjectBufferEntryStatusToStorage(status), Timestamp.from(inst));
+  }
+
   // TODO: decide if we care about potential "tier bias" here; it does not take tiers into account
   @Query(
       value =
@@ -43,6 +50,12 @@ public interface BillingProjectBufferEntryDao
 
   DbBillingProjectBufferEntry findFirstByStatusAndAccessTierOrderByCreationTimeAsc(
       short status, DbAccessTier accessTier);
+
+  default DbBillingProjectBufferEntry findOldestForStatus(
+      BufferEntryStatus status, DbAccessTier accessTier) {
+    return findFirstByStatusAndAccessTierOrderByCreationTimeAsc(
+        DbStorageEnums.billingProjectBufferEntryStatusToStorage(status), accessTier);
+  }
 
   Long countByStatus(short status);
 

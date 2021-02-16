@@ -78,7 +78,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     return Timestamp.from(clock.instant());
   }
 
-  /** Makes a configurable number of project creation attempts. */
+  /** Makes a configurable number of project creation attempts per access tier. */
   public void bufferBillingProjects() {
     WorkbenchConfig config = this.workbenchConfigProvider.get();
 
@@ -152,6 +152,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
         billingProjectBufferEntryDao.getCreatingEntriesToSync(
             workbenchConfigProvider.get().billing.bufferStatusChecksPerTask);
     if (creatingEntriesToSync.isEmpty()) {
+      log.info("No entries to sync!");
       return;
     }
 
@@ -242,9 +243,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     return gracePeriod
         .map(
             p ->
-                billingProjectBufferEntryDao.findAllByStatusAndLastStatusChangedTimeLessThan(
-                    DbStorageEnums.billingProjectBufferEntryStatusToStorage(bufferEntryStatus),
-                    Timestamp.from(now.minus(p))))
+                billingProjectBufferEntryDao.findOlderThanByStatus(now.minus(p), bufferEntryStatus))
         .orElse(Collections.emptyList());
   }
 
@@ -296,10 +295,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     DbBillingProjectBufferEntry entry;
     try {
       entry =
-          billingProjectBufferEntryDao.findFirstByStatusAndAccessTierOrderByCreationTimeAsc(
-              DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.AVAILABLE),
-              accessTier);
-
+          billingProjectBufferEntryDao.findOldestForStatus(BufferEntryStatus.AVAILABLE, accessTier);
       if (entry == null) {
         log.log(Level.SEVERE, "Consume Buffer call made while Billing Project Buffer was empty");
         throw new EmptyBufferException();
@@ -335,8 +331,8 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     return billingProjectBufferEntryDao.getCurrentBufferSizeForAccessTier(accessTier);
   }
 
-  private int getBufferMaxCapacity(String accessTier) {
-    return workbenchConfigProvider.get().billing.bufferCapacity.get(accessTier);
+  private int getBufferMaxCapacity(String accessTierShortName) {
+    return workbenchConfigProvider.get().billing.bufferCapacity.get(accessTierShortName);
   }
 
   public BillingProjectBufferStatus getStatus() {

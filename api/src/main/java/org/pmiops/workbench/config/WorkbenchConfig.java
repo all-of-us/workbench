@@ -61,9 +61,9 @@ public class WorkbenchConfig {
   public static class BillingConfig {
     // This config variable seems to be unused.
     public Integer retryCount;
-    // The total capacity of the GCP project buffer. The buffering system will not attempt to create
-    // any new projects when the total number of in-progress & ready projects is at or above this
-    // level.
+    // The total capacity of the GCP project buffer, per access tier. The buffering system will not
+    // attempt to create any new projects in a tier when the total number of in-progress & ready
+    // projects is at or above this level.
     public Map<String, Integer> bufferCapacity;
     // The number of times to attempt project creation per cron task execution. This effectively
     // controls the max rate of project refill. If the cron task is configured to run once per

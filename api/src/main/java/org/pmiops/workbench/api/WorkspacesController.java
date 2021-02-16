@@ -434,14 +434,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     DbUser user = userProvider.get();
 
-    String toWorkspaceName;
-    DbBillingProjectBufferEntry bufferedBillingProject;
+    final DbBillingProjectBufferEntry bufferedBillingProject;
     try {
       bufferedBillingProject = billingProjectBufferService.assignBillingProject(user, toWorkspace);
     } catch (EmptyBufferException e) {
       throw new TooManyRequestsException();
     }
-    toWorkspaceName = bufferedBillingProject.getFireCloudProjectName();
+    final String toWorkspaceProject = bufferedBillingProject.getFireCloudProjectName();
 
     DbWorkspace fromWorkspace =
         workspaceService.getRequiredWithCohorts(fromWorkspaceNamespace, fromWorkspaceId);
@@ -451,7 +450,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
 
     FirecloudWorkspaceId toFcWorkspaceId =
-        generateFirecloudWorkspaceId(toWorkspaceName, toWorkspace.getName());
+        generateFirecloudWorkspaceId(toWorkspaceProject, toWorkspace.getName());
     FirecloudWorkspace toFcWorkspace =
         fireCloudService.cloneWorkspace(
             fromWorkspaceNamespace,
