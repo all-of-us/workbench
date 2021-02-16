@@ -235,6 +235,7 @@ commands:
                 background: true
       - run: sleep 30 # sleep for 30 seconds
       - run:
+          # TODO: UI server is still compiling when tcp connection is successful
           name: "Watch the port for 4m for local UI server start up"
           command: dockerize -wait tcp://localhost:4200 -timeout 4m
 
