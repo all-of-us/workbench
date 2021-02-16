@@ -192,7 +192,7 @@ commands:
       - run:
           # Watch the port for 2m for MySQL start up
           name: Await MySQL startup
-          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
+          command: dockerize -wait http://127.0.0.1:3306 -timeout 2m
       - run:
           name: Run Local Migrations
           working_directory: ~/workbench/api
@@ -205,7 +205,7 @@ commands:
           background: true
       - run:
           name: Wait for local API server to start
-          command: dockerize -wait tcp://localhost:8081/v1/status -timeout 4m
+          command: dockerize -wait http://localhost:8081/v1/status -timeout 4m
 
   launch-local-ui:
     description: "Launch local UI server"
@@ -234,7 +234,6 @@ commands:
                 background: true
       - run: sleep 30 # sleep for 30 seconds
       - run:
-          # TODO: UI server is still compiling when tcp connection is successful
           name: "Watch the port for 4m for local UI server start up"
           command: dockerize -wait http://localhost:4200 -timeout 4m
 
