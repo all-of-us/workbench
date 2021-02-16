@@ -221,7 +221,6 @@ commands:
             - run:
                 name: Launch local UI server
                 working_directory: ~/workbench/ui
-                # Start local UI server that connects to local api server
                 command: yarn dev-up --configuration=local
                 background: true
       - unless:
