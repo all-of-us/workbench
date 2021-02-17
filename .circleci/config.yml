@@ -341,7 +341,7 @@ commands:
           path: ~/workbench/e2e/logs
           destination: logs
       - store_test_results:
-          path: ~/workbench/e2e
+          path: ~/workbench/e2e/logs
 
 
   store-commit-message:
