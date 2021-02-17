@@ -1,4 +1,5 @@
 import * as fp from 'lodash/fp';
+import {Response} from "puppeteer";
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
 
 /**
@@ -15,61 +16,70 @@ beforeEach(async () => {
   await page.setViewport({width: 1300, height: 0});
   page.setDefaultNavigationTimeout(60000); // Puppeteer default timeout is 30 seconds.
   page.setDefaultTimeout(30000);
-
   await page.setRequestInterception(true);
-
-  // Log responses from Workbench API.
-  const isWorkbenchApi = (url: string): boolean => {
-    return url.startsWith('api-dot-all-of-us-workbench-test.appspot.com/v1');
-  }
 
   const stringifyData = (data) => {
     JSON.stringify(JSON.parse(data), null, 2);
   }
 
-  const isWorkbenchApiRequest = (request): Request | null => {
+  const isWorkbenchApi = (request): Request | null => {
     return request && request.url().startsWith('api-dot-all-of-us-workbench-test.appspot.com/v1') ? request : null;
   }
 
-  const notOptionsRequest = (request) => {
+  const notOptionsRequest = (request): Request | null => {
     return request && request.method() !== 'OPTIONS' ? request : null;
   }
 
-  const getPostData = (request) => {
-    return request && request.postData() ? request.postData() : '';
+  const isWorkbenchRequest = fp.flow(isWorkbenchApi, notOptionsRequest);
+
+  const getRequestPostData = (request): string | undefined => {
+    return request && request.postData() ? request.postData() : undefined;
   }
 
-  const isApiRequest = fp.flow(isWorkbenchApiRequest, notOptionsRequest);
+  const getRequestData = fp.flow(getRequestPostData, stringifyData);
 
-  const getRequestResponse = async (request) => {
-    request && request.redirectChain().length === 0 ? await request.response() : null;
+  const getResponse = async (request): Promise<Response | null> => {
+    // Response body can only be accessed for non-redirect requests
+    return request && request.redirectChain().length === 0 ? await request.response() : null;
   }
 
-  const getApiResponse = fp.flow(isApiRequest, getRequestResponse);
-  
+  const getRequestResponse = fp.flow(isWorkbenchRequest, await getResponse)
+
+  const isFailedRequest = (request): boolean => {
+    return request.failure() || !request.response().ok();
+  }
 
   // Don't log response. Some requests response could be long, clutter up test log.
-  const ignoreWorkbenchApi = (url: string): boolean => {
-    return url.endsWith('/readonly');
+  const notLogResponse = (request): boolean => {
+    return request && request.url().endsWith('/readonly') ? request : null;
   }
 
   page.on('request', (request) => {
     try {
-      if (isWorkbenchApi(request.url())) {
-        const method = request.method();
-        if (method !== 'OPTIONS') {
-          const data = request.postData();
-          const dataString = (data === undefined) ? '' : JSON.stringify(JSON.parse(data), null, 2);
-          console.debug(`❗Request issued: ${method} ${request.url()}\n${dataString}`);
-        }
+      if (isWorkbenchRequest(request)) {
+        console.debug(`❗Request issued: ${request.method()} ${request.url()}\n${getRequestData(request)}`);
       }
       request.continue();
       // tslint:disable-next-line:no-empty
     } catch (e) {
     }
-  })
-  .on('requestfinished', async (request) => {
+  });
+
+  page.on('requestfinished', async (request) => {
     try {
+
+      const response = await getRequestResponse(request);
+      if (isFailedRequest(request)) {
+
+      } else {
+
+      }
+
+      const status = response.status();
+      const failure = request.failure();
+      const responseText = stringifyData((await response.buffer()).toString());
+
+
       // response body can only be accessed for non-redirect responses.
       if (request.redirectChain().length === 0) {
         const method = request.method();
@@ -85,7 +95,7 @@ beforeEach(async () => {
               const errorTextJson = JSON.stringify(JSON.parse(await response.text()), null, 2);
               console.debug(`❗Request failed: ${status} ${method} ${request.url()}\n${errorText}\n${errorTextJson}\n${responseTextJson}`);
             } else {
-              if (ignoreWorkbenchApi(request.url())) {
+              if (notLogResponse(request.url())) {
                 console.debug(`❗Request finished: ${status} ${method} ${request.url()}\n`);
               } else {
                 if (request.url().endsWith('/v1/workspaces')) {
@@ -103,8 +113,9 @@ beforeEach(async () => {
       // tslint:disable-next-line:no-empty
     } catch (e) {
     }
-  })
-  .on('console', async (message) => {
+  });
+
+  page.on('console', async (message) => {
     if (!message.args().length) {
       return;
     }
@@ -129,11 +140,13 @@ beforeEach(async () => {
       // tslint:disable-next-line:no-empty
     } catch (err) {
     }
-  })
-  .on('error', (error) => {
+  });
+
+  page.on('error', (error) => {
     console.debug(`❗Page error: ${error}`);
-  })
-  .on('pageerror', (error) => {
+  });
+
+  page.on('pageerror', (error) => {
     try {
       console.debug(`❗Page error: ${error}`);
       // tslint:disable-next-line:no-empty
