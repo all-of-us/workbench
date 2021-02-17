@@ -338,11 +338,11 @@ commands:
               > ./logs/circleci_parameters.json
           when: always
       - store_artifacts:
-          path: e2e/logs
-          destination: logs
-          when: always
-      - store_test_results:
           path: ~/workbench/e2e/logs
+          destination: logs
+      - store_test_results:
+          path: ~/workbench/e2e
+
 
   store-commit-message:
     description: "Export Git commit message to environment variable"
