@@ -10,5 +10,4 @@ Test.java
 Test.kt
 .spec.tsx
 .git
-yarn.lock
 LICENSE.txt
