@@ -3,7 +3,6 @@ package org.pmiops.workbench.api;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
-import com.google.common.collect.ImmutableList;
 import java.util.List;
 import javax.inject.Provider;
 import org.junit.Before;
@@ -14,11 +13,9 @@ import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
-import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
@@ -60,14 +57,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class CohortBuilderControllerTest {
 
   private CohortBuilderController controller;
-  private CohortBuilderService cohortBuilderService;
   @Mock private BigQueryService bigQueryService;
   @Mock private CloudStorageService cloudStorageService;
   @Mock private CohortQueryBuilder cohortQueryBuilder;
   @Mock private CdrVersionService cdrVersionService;
   @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
-  @Autowired private ConceptDao conceptDao;
   @Autowired private CBDataFilterDao cbDataFilterDao;
   @Autowired private DomainInfoDao domainInfoDao;
   @Autowired private PersonDao personDao;
@@ -85,13 +80,12 @@ public class CohortBuilderControllerTest {
     ElasticSearchService elasticSearchService =
         new ElasticSearchService(cbCriteriaDao, cloudStorageService, configProvider);
 
-    cohortBuilderService =
+    CohortBuilderService cohortBuilderService =
         new CohortBuilderServiceImpl(
             bigQueryService,
             cohortQueryBuilder,
             cbCriteriaAttributeDao,
             cbCriteriaDao,
-            conceptDao,
             cbDataFilterDao,
             domainInfoDao,
             personDao,
@@ -174,9 +168,8 @@ public class CohortBuilderControllerTest {
     SurveyModule surveyModule = controller.findSurveyModules(1L).getBody().getItems().get(0);
     assertThat(surveyModule.getName()).isEqualTo(dbSurveyModule.getName());
     assertThat(surveyModule.getDescription()).isEqualTo(dbSurveyModule.getDescription());
-    assertThat(surveyModule.getParticipantCount().longValue())
-        .isEqualTo(dbSurveyModule.getParticipantCount());
-    assertThat(surveyModule.getQuestionCount().longValue()).isEqualTo(1);
+    assertThat(surveyModule.getParticipantCount()).isEqualTo(dbSurveyModule.getParticipantCount());
+    assertThat(surveyModule.getQuestionCount()).isEqualTo(1);
   }
 
   @Test
@@ -393,36 +386,28 @@ public class CohortBuilderControllerTest {
 
   @Test
   public void findCriteriaByDomainAndSearchTermPhysicalMeasurement() {
-    DbConcept dbConcept =
-        conceptDao.save(
-            new DbConcept()
-                .conceptId(123L)
-                .conceptName("chol blah")
-                .conceptCode("myTerm")
-                .standardConcept("")
-                .sourceCountValue(10L)
-                .vocabularyId("PPI")
-                .conceptClassId("Clinical Observation")
-                .count(10L)
-                .domainId("Measurement"));
+    DbCriteria dbCriteria =
+        DbCriteria.builder()
+            .addCode("12345")
+            .addCount(10L)
+            .addConceptId("123")
+            .addDomainId(Domain.PHYSICAL_MEASUREMENT_CSS.toString())
+            .addGroup(Boolean.FALSE)
+            .addSelectable(Boolean.TRUE)
+            .addName("chol blah")
+            .addParentId(0)
+            .addType(CriteriaType.PPI.toString())
+            .addAttribute(Boolean.FALSE)
+            .addStandard(false)
+            .addFullText("[PHYSICAL_MEASUREMENT_CSS_rank1]")
+            .build();
+    cbCriteriaDao.save(dbCriteria);
 
-    Criteria criteria =
-        new Criteria()
-            .code(dbConcept.getConceptCode())
-            .conceptId(dbConcept.getConceptId())
-            .childCount(dbConcept.getSourceCountValue())
-            .parentCount(0L)
-            .domainId(dbConcept.getDomainId())
-            .name(dbConcept.getConceptName())
-            .type(dbConcept.getVocabularyId())
-            .selectable(true)
-            .isStandard(ImmutableList.of("S", "C").contains(dbConcept.getStandardConcept()));
-
-    assertThat(criteria)
+    assertThat(cohortBuilderMapper.dbModelToClient(dbCriteria))
         .isEqualTo(
             controller
                 .findCriteriaByDomainAndSearchTerm(
-                    1L, Domain.PHYSICAL_MEASUREMENT.name(), "myTerm", null, null)
+                    1L, Domain.PHYSICAL_MEASUREMENT_CSS.toString(), "12345", null, null)
                 .getBody()
                 .getItems()
                 .get(0));
@@ -876,7 +861,7 @@ public class CohortBuilderControllerTest {
     return new Criteria()
         .code(dbCriteria.getCode())
         .conceptId(dbCriteria.getConceptId() == null ? null : new Long(dbCriteria.getConceptId()))
-        .count(new Long(dbCriteria.getCount()))
+        .count(dbCriteria.getCount())
         .parentCount(dbCriteria.getParentCount())
         .childCount(dbCriteria.getChildCount())
         .domainId(dbCriteria.getDomainId())
