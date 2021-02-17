@@ -283,7 +283,7 @@ commands:
           command: |
             circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings > /tmp/tests-to-run
             yarn test:ci $(cat /tmp/tests-to-run)
-          no_output_timeout: 30m
+          no_output_timeout: 25m
       - run:
           name: Create circleci_parameters.json
           working_directory: ~/workbench/e2e
@@ -300,9 +300,9 @@ commands:
       - store_artifacts:
           path: e2e/logs
           destination: logs
-      - store_test_results:
-          path: ~/workbench/e2e
           when: always
+      - store_test_results:
+          path: ~/workbench/e2e/logs
 
   store-commit-message:
     description: "Export Git commit message to environment variable"
