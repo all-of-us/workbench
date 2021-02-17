@@ -1953,6 +1953,57 @@ Common.register_command({
   :fn => ->(*args) { set_authority_local("set-authority-local", *args) }
 })
 
+def create_wgs_cohort_extraction_bp_workspace(cmd_name, *args)
+  ensure_docker cmd_name, args
+
+  common = Common.new
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = true
+  op.add_option(
+      "--billing-project-name [billing-project-name]",
+      ->(opts, v) { opts.billing_project_name = v},
+      "Name of Billing project to create")
+  op.add_option(
+      "--workspace-name [workspace-name]",
+      ->(opts, v) { opts.workspace_name = v},
+      "Name of Terra workspace name to create")
+  op.add_option(
+    "--owners [EMAIL,...]",
+    ->(opts, v) { opts.owners = v},
+    "Comma-separated list of Terra user accounts to add to workspace ACL.")
+  op.add_validator ->(opts) {
+    unless (opts.billing_account or opts.billing_project_name or opts.workspace_name)
+      common.error "all arguments must be provided"
+      raise ArgumentError
+    end
+  }
+
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+
+  flags = ([
+      ["--config-json", get_config_file(op.opts.project)],
+      ["--billing-account", get_billing_config(op.opts.project)["accountId"]],
+      ["--billing-project-name", op.opts.billing_project_name],
+      ["--workspace-name", op.opts.workspace_name],
+      ["--owners", op.opts.owners],
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  flags.map! { |f| "'#{f}'" }
+
+  ServiceAccountContext.new(gcc.project).run do
+    common.run_inline %W{
+       gradle createWgsCohortExtractionBillingProjectWorkspace
+       -PappArgs=[#{flags.join(',')}]}
+  end
+end
+
+Common.register_command({
+  :invocation => "create-wgs-cohort-extraction-bp-workspace",
+  :description => "Create Terra billing project and workspace impersonating the Genomics Cohort Extraction SA. This will NOT show up as an AoU workspace.",
+  :fn => ->(*args) { create_wgs_cohort_extraction_bp_workspace("create-wgs-cohort-extraction-bp-workspace", *args) }
+})
+
 def delete_runtimes(cmd_name, *args)
   ensure_docker cmd_name, args
 
@@ -2443,9 +2494,13 @@ def migrate_database(dry_run = false)
   end
 end
 
-def get_config(project)
+def get_config_file(project)
   config_json = must_get_env_value(project, :config_json)
-  return JSON.parse(File.read("config/#{config_json}"))
+  return "config/#{config_json}"
+end
+
+def get_config(project)
+  return JSON.parse(File.read(get_config_file(project)))
 end
 
 def get_fc_config(project)

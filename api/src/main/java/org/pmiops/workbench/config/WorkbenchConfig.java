@@ -11,6 +11,7 @@ public class WorkbenchConfig {
 
   public FireCloudConfig firecloud;
   public AuthConfig auth;
+  public WgsCohortExtractionConfig wgsCohortExtraction;
   public CdrConfig cdr;
   public GoogleCloudStorageServiceConfig googleCloudStorageService;
   public GoogleDirectoryServiceConfig googleDirectoryService;
@@ -34,6 +35,7 @@ public class WorkbenchConfig {
     config.access = new AccessConfig();
     config.admin = new AdminConfig();
     config.auth = new AuthConfig();
+    config.wgsCohortExtraction = new WgsCohortExtractionConfig();
     config.auth.serviceAccountApiUsers = new ArrayList<>();
     config.cdr = new CdrConfig();
     config.elasticsearch = new ElasticsearchConfig();
@@ -107,6 +109,7 @@ public class WorkbenchConfig {
   public static class FireCloudConfig {
     public boolean debugEndpoints;
     public String baseUrl;
+    public String samBaseUrl;
     public Integer notebookRuntimeMaxAgeDays;
     public Integer notebookRuntimeIdleMaxAgeDays;
     public String notebookRuntimeDefaultMachineType;
@@ -151,6 +154,10 @@ public class WorkbenchConfig {
     // A list of GCP service accounts (not affiliated with researchers) that can be used to
     // make API calls.
     public ArrayList<String> serviceAccountApiUsers;
+  }
+
+  public static class WgsCohortExtractionConfig {
+    public String serviceAccount;
   }
 
   public static class CdrConfig {

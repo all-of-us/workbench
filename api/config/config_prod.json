@@ -1,6 +1,7 @@
 {
   "firecloud": {
     "baseUrl": "https:\/\/api.firecloud.org",
+    "samBaseUrl": "https:\/\/sam.dsde-prod.broadinstitute.org",
     "notebookRuntimeMaxAgeDays": 14,
     "notebookRuntimeIdleMaxAgeDays": 7,
     "notebookRuntimeDefaultMachineType": "n1-highmem-4",
@@ -42,6 +43,9 @@
     "serviceAccountApiUsers": [
       "all-of-us-rw-prod@appspot.gserviceaccount.com"
     ]
+  },
+  "wgsCohortExtraction": {
+    "serviceAccount": "wgs-cohort-extraction@all-of-us-rw-prod.iam.gserviceaccount.com"
   },
   "cdr": {
     "debugQueries": false
