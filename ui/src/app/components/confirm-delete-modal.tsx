@@ -54,18 +54,20 @@ export class ConfirmDeleteModal
         </ModalTitle>
         <ModalBody style={{marginTop: '0.2rem', lineHeight: '28.px'}}>
           <div>
-            Are you sure you want to delete {toDisplay(this.props.resourceType)} : {this.props.resourceName}?
+            <div>
+              Are you sure you want to delete {toDisplay(this.props.resourceType)} : {this.props.resourceName}?
+            </div>
+            <br />
+            <div>
+              Deleting this workspace will immediately, permanently delete any items inside the workspace, such as
+              notebooks
+              and cohort definitions. This includes items created or used by other users with access to the workspace.
+              If you still wish to delete this workspace and all items within it, type DELETE below to confirm.
+            </div>
+            <TextInput placeholder='type DELETE to confirm'
+                       style={{marginTop: '0.5rem'}}
+                       onChange={this.validateDeleteText} onBlur=''/>
           </div>
-          <br />
-          <div>
-            Deleting this workspace will immediately, permanently delete any items inside the workspace, such as
-            notebooks
-            and cohort definitions. This includes items created or used by other users with access to the workspace.
-            If you still wish to delete this workspace and all items within it, type DELETE below to confirm.
-          </div>
-          <TextInput placeholder='type DELETE to confirm'
-                     style={{marginTop: '0.5rem'}}
-                     onChange={this.validateDeleteText} onBlur=''/>
         </ModalBody>
         <ModalFooter style={{paddingTop: '1rem'}}>
           <Button
