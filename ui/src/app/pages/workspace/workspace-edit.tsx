@@ -397,8 +397,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         // This is the only field which is not automatically handled/differentiated
         // on the API level.
         workspace.name = 'Duplicate of ' + workspace.name;
-        // if the original workspace was reviewed, it's unlikely that we need a re-review
-        workspace.researchPurpose.reviewRequested = false;
+        // unselect to prevent unneeded re-review
+        workspace.researchPurpose.reviewRequested = undefined;
       }
 
       // We preselect the default CDR version when a new workspace is being
@@ -1004,6 +1004,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
       // defined below in the OverlayPanel declaration
       let freeTierBalancePanel: OverlayPanel;
+
+      console.log(reviewRequested);
 
       const errors = this.validate();
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
