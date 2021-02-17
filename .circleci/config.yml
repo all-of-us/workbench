@@ -574,7 +574,7 @@ jobs:
                 command: bash .circleci/choose-e2e-env.sh
             # Local UI server is started but unused if WORKBENCH_ENV reset to "test" value in above step
             - launch-local-ui
-            - run-puppeteer-test
+      - run-puppeteer-test
 
   puppeteer-env-setup:
     executor: puppeteer-executor
