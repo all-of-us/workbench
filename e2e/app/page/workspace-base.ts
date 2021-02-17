@@ -255,12 +255,11 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    */
   async dismissDeleteWorkspaceModal(clickButtonText: LinkText = LinkText.DeleteWorkspace): Promise<string[]> {
     const modal = new Modal(this.page);
-    const contentText = await modal.getTextContent();
+    const textBox = await modal.waitForTextbox('type DELETE to confirm')
+    await textBox.type('delete')
     await modal.clickButton(clickButtonText, {waitForClose: true});
     await waitWhileLoading(this.page);
-    const workspaceName = contentText[0].split('Workspace: ')[1].replace('?','');
-    console.log(`Deleted workspace "${workspaceName}"`);
-    return contentText;
+    return undefined;
   }
 
    /**
