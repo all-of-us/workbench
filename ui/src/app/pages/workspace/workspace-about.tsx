@@ -5,7 +5,7 @@ import * as React from 'react';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
-import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {cohortsApi, dataSetApi, profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
 import {Button} from 'app/components/buttons';
 import {FlexColumn} from 'app/components/flex';
@@ -197,10 +197,19 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
     this.loadUserRoles();
   }
 
+  submitJob() {
+    cohortsApi().extractCohortGenomes('aou-rw-local1-8839774f', 'lololol', 123);
+//     cohortsApi()
+//       .extractCohortGenomes('aou-rw-local1-8839774f', 'cohortextractiontest', 123)
+//       .then(resp => console.log(resp))
+//       .catch(resp => console.log(resp));
+  }
+
   render() {
     const {profileState: {profile}, cdrVersionListResponse} = this.props;
     const {workspace, workspaceUserRoles, sharing, publishing} = this.state;
     return <div style={styles.mainPage}>
+      <Button onClick={() => this.submitJob()}>Submit Terra Extract Job</Button>
       <FlexColumn style={{margin: '1rem', width: '98%'}}>
         <ResearchPurpose data-test-id='researchPurpose'/>
         {hasAuthorityForAction(profile, AuthorityGuardedAction.PUBLISH_WORKSPACE) &&

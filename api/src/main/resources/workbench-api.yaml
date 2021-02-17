@@ -1938,6 +1938,7 @@ paths:
           description: ACCEPTED
           schema:
             "$ref": "#/definitions/EmptyResponse"
+
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/materializeCohort":
     parameters:
     - "$ref": "#/parameters/workspaceNamespace"
@@ -2339,6 +2340,21 @@ paths:
           schema:
             type: boolean
             default: false
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/extractGenomesJob":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+      - "$ref": "#/parameters/cohortId"
+    post:
+      tags:
+        - cohorts
+      description: 'Initiates a Terra Cromwell job to extract genomes of the given cohort'
+      operationId: extractCohortGenomes
+      responses:
+        200:
+          description: The Terra Job for the extraction workflow
+          schema:
+            "$ref": "#/definitions/TerraJob"
   "/v1/{workspaceNamespace}/{workspaceId}/data-set/exportToNotebook":
     post:
       tags:
@@ -8642,3 +8658,17 @@ definitions:
         type: integer
         format: int64
         description: ''
+  TerraJob:
+    properties:
+      submissionId:
+        type: string
+        description: Terra SubmissionRequest unique identifier (matches Submission.submissionId in Terra)
+      status:
+        type: '#/definitions/TerraJobStatus'
+  TerraJobStatus:
+    type: string
+    description: 'Terra job status. Effectively a combination of Terras Submission status and Workflow status'
+    enum:
+      - RUNNING
+      - FAILED
+      - SUCCEEDED

@@ -13,10 +13,13 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
+import javax.xml.ws.Response;
+
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
+import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -34,19 +37,8 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.model.CdrQuery;
-import org.pmiops.workbench.model.Cohort;
-import org.pmiops.workbench.model.CohortAnnotationsRequest;
-import org.pmiops.workbench.model.CohortAnnotationsResponse;
-import org.pmiops.workbench.model.CohortListResponse;
-import org.pmiops.workbench.model.DataTableSpecification;
-import org.pmiops.workbench.model.DuplicateCohortRequest;
-import org.pmiops.workbench.model.EmptyResponse;
-import org.pmiops.workbench.model.MaterializeCohortRequest;
-import org.pmiops.workbench.model.MaterializeCohortResponse;
-import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.TableQuery;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.firecloud.api.SubmissionsApi;
+import org.pmiops.workbench.model.*;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -66,6 +58,7 @@ public class CohortsController implements CohortsApiDelegate {
   private final CohortFactory cohortFactory;
   private final CohortMapper cohortMapper;
   private final CohortReviewDao cohortReviewDao;
+  private final CohortService cohortService;
   private final ConceptSetDao conceptSetDao;
   private final CohortMaterializationService cohortMaterializationService;
   private Provider<DbUser> userProvider;
@@ -81,6 +74,7 @@ public class CohortsController implements CohortsApiDelegate {
       CohortFactory cohortFactory,
       CohortMapper cohortMapper,
       CohortReviewDao cohortReviewDao,
+      CohortService cohortService,
       ConceptSetDao conceptSetDao,
       CohortMaterializationService cohortMaterializationService,
       Provider<DbUser> userProvider,
@@ -93,6 +87,7 @@ public class CohortsController implements CohortsApiDelegate {
     this.cohortFactory = cohortFactory;
     this.cohortMapper = cohortMapper;
     this.cohortReviewDao = cohortReviewDao;
+    this.cohortService = cohortService;
     this.conceptSetDao = conceptSetDao;
     this.cohortMaterializationService = cohortMaterializationService;
     this.userProvider = userProvider;
@@ -434,6 +429,16 @@ public class CohortsController implements CohortsApiDelegate {
           new CohortAnnotationsResponse().columns(request.getAnnotationQuery().getColumns()));
     }
     return ResponseEntity.ok(cohortMaterializationService.getAnnotations(cohortReview, request));
+  }
+
+  @Override
+  public ResponseEntity<TerraJob> extractCohortGenomes(String workspaceNamespace, String workspaceId, Long cohortId) {
+    try {
+      return ResponseEntity.ok(cohortService.submitGenomicsCohortExtractionJob(workspaceNamespace, workspaceId));
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+        // Convert Firecloud exception to workbench exception
+      return ResponseEntity.badRequest().build();
+    }
   }
 
   private DbCohort getDbCohort(String workspaceNamespace, String workspaceId, Long cohortId) {
