@@ -300,9 +300,9 @@ commands:
       - store_artifacts:
           path: e2e/logs
           destination: logs
-          when: always
       - store_test_results:
-          path: ~/workbench/e2e/logs
+          path: ~/workbench/e2e
+          when: always
 
   store-commit-message:
     description: "Export Git commit message to environment variable"
