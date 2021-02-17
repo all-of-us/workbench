@@ -191,7 +191,7 @@ commands:
       - run:
           # Watch the port for 2m for MySQL start up
           name: Await MySQL startup
-          command: dockerize -wait http://127.0.0.1:3306 -timeout 2m
+          command: dockerize -wait tcp://127.0.0.1:3306 -timeout 2m
       - run:
           name: Run Local Migrations
           working_directory: ~/workbench/api
