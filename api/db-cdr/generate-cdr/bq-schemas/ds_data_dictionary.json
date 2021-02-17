@@ -1,0 +1,47 @@
+[
+  {
+    "mode": "REQUIRED",
+    "name": "ID",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "FIELD_NAME",
+    "type": "STRING"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "RELEVANT_OMOP_SQL",
+    "type": "STRING"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "DESCRIPTION",
+    "type": "STRING"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "FIELD_TYPE",
+    "type": "STRING"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "OMOP_CDM_STANDARD_OR_CUSTOM_FIELD",
+    "type": "STRING"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "DATA_PROVENANCE",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "SOURCE_PPI_MODULE",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "DOMAIN",
+    "type": "STRING"
+  }
+]

@@ -11,6 +11,7 @@ export DRY_RUN=$3     # dry run
 
 archiveList=$(gsutil ls gs://all-of-us-workbench-private-cloudsql/$BQ_DATASET/data_dictionary/archive/*.csv) > /dev/null || true;
 dataDictionaryList=$(gsutil ls gs://all-of-us-workbench-private-cloudsql/$BQ_DATASET/data_dictionary/*.csv) > /dev/null || true;
+dataDictionaryLength=$(gsutil du gs://all-of-us-workbench-private-cloudsql/$BQ_DATASET/data_dictionary/*.csv | wc -l)
 
 if [ "$DRY_RUN" == true ]
 then
@@ -30,34 +31,30 @@ then
   echo "Error: Data Dictionary file is missing!"
   exit 1;
 fi
+if [ "${dataDictionaryLength}" -gt 1 ]
+then
+  echo "Data Dictionary cannot have more than 1  CSV file"
+  exit 1;
+fi
+filename="${dataDictionaryList[0]}"
 
-tableCreated=false;
+echo "CREATE TABLE - ds_data_dictionary"
+schema_path=generate-cdr/bq-schemas
+create_tables=(ds_data_dictionary)
 
-for filename in $dataDictionaryList; do
-  if (! $tableCreated)
-  then
-    echo "CREATE TABLE - ds_data_dictionary"
-    bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-    "CREATE OR REPLACE TABLE \`$BQ_PROJECT.$BQ_DATASET.ds_data_dictionary\`
-    (
-      FIELD_NAME               STRING,
-      RELEVANT_OMOP_SQL        STRING,
-      DESCRIPTION              STRING,
-      FIELD_TYPE               STRING,
-      OMOP_CDM_STANDARD_OR_CUSTOM_FIELD  STRING,
-      DATA_PROVENANCE          STRING,
-      SOURCE_PPI_MODULE        STRING,
-      DOMAIN                   STRING
-    )"
-    tableCreated=true;
-  fi
-  echo "Load ${filename} into ds_data_dictionary"
-
-  bq load --skip_leading_rows=1  --project_id=$BQ_PROJECT --source_format=CSV \
-  $BQ_DATASET.ds_data_dictionary $filename
-
-  echo "move ${filename} to archive folder"
-  gsutil mv $filename \
-  "gs://all-of-us-workbench-private-cloudsql/$BQ_DATASET/data_dictionary/archive"
+for table in "${create_tables[@]}"
+do
+bq --project_id=$BQ_PROJECT rm -f $BQ_DATASET.$table
+bq --quiet --project_id=$BQ_PROJECT mk --schema=$schema_path/$table.json $BQ_DATASET.$t
 done
+
+echo "Load ${filename} into ds_data_dictionary"
+
+bq load --skip_leading_rows=1  --project_id=$BQ_PROJECT --source_format=CSV \
+$BQ_DATASET.ds_data_dictionary $filename
+
+echo "move ${filename} to archive folder"
+gsutil mv $filename \
+"gs://all-of-us-workbench-private-cloudsql/$BQ_DATASET/data_dictionary/archive"
+
 echo "The end"
