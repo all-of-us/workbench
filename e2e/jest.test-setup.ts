@@ -1,3 +1,4 @@
+import * as fp from 'lodash/fp';
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
 
 /**
@@ -21,6 +22,31 @@ beforeEach(async () => {
   const isWorkbenchApi = (url: string): boolean => {
     return url.startsWith('api-dot-all-of-us-workbench-test.appspot.com/v1');
   }
+
+  const stringifyData = (data) => {
+    JSON.stringify(JSON.parse(data), null, 2);
+  }
+
+  const isWorkbenchApiRequest = (request): Request | null => {
+    return request && request.url().startsWith('api-dot-all-of-us-workbench-test.appspot.com/v1') ? request : null;
+  }
+
+  const notOptionsRequest = (request) => {
+    return request && request.method() !== 'OPTIONS' ? request : null;
+  }
+
+  const getPostData = (request) => {
+    return request && request.postData() ? request.postData() : '';
+  }
+
+  const isApiRequest = fp.flow(isWorkbenchApiRequest, notOptionsRequest);
+
+  const getRequestResponse = async (request) => {
+    request && request.redirectChain().length === 0 ? await request.response() : null;
+  }
+
+  const getApiResponse = fp.flow(isApiRequest, getRequestResponse);
+  
 
   // Don't log response. Some requests response could be long, clutter up test log.
   const ignoreWorkbenchApi = (url: string): boolean => {
