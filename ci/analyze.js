@@ -36,7 +36,9 @@ fs.readFile('circleci_tests.json', 'utf-8', (err, data) => {
   });
 
   for (const [key, count] of Object.entries(failures).sort(([,a],[,b]) => b-a)) {
-    const [jobName, name] = key.split(":");
+   const [jobName, name] = key.split(":");
     console.log(`${jobName}, ${name}, ${count}`);
   }
+
+  fs.writeFile('circleci_test_failures.json', JSON.stringify(tests, null, 4), (err) => {});
 });
