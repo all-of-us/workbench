@@ -160,10 +160,10 @@ export class DemographicSurvey extends React.Component<Props, State> {
 
     return <div style={{marginTop: '1rem', paddingLeft: '1rem', width: '32rem'}}>
       <TextColumn>
-        <div style={{fontSize: 28, fontWeight: 400, marginBottom: '.8rem'}}>Optional Demographics Survey</div>
+        <div style={{fontSize: 28, fontWeight: 400, marginBottom: '.8rem'}}>Demographics Survey</div>
         {this.props.showStepCount &&
           <div style={{fontSize: 16, marginBottom: '.5rem'}}>
-            Please complete Step '3 of 3'
+            Please complete Step 3 of 3
           </div>
         }
         <div style={{
@@ -171,7 +171,7 @@ export class DemographicSurvey extends React.Component<Props, State> {
           padding: '1rem',
           borderRadius: '5px'
         }}>
-          <label style={{fontWeight: 600}}>Answering these questions is optional.</label> <AouTitle/> will
+          The <AouTitle/> will
           use this information to measure our success at reaching diverse researchers.
           We will not share your individual answers.
         </div>

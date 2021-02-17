@@ -7,6 +7,14 @@
       "servicePerimeter": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test",
       "authDomainName": "all-of-us-registered-test",
       "authDomainGroupEmail": "GROUP_all-of-us-registered-test@dev.test.firecloud.org"
+    },
+    {
+      "accessTierId": 2,
+      "shortName": "controlled_test",
+      "displayName": "Fake Controlled Tier For Test/Local",
+      "servicePerimeter": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test_2",
+      "authDomainName": "all-of-us-test-prototype-3",
+      "authDomainGroupEmail": "all-of-us-test-prototype-3@dev.test.firecloud.org"
     }
   ],
   "cdrVersions": [
@@ -68,6 +76,23 @@
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
+    },
+    {
+      "cdrVersionId": 5,
+      "isDefault": false,
+      "name": "CDR for Controlled Tier - DO NOT USE",
+      "dataAccessLevel": 1,
+      "bigqueryProject": "fc-aou-cdr-synth-test",
+      "bigqueryDataset": "SR2019q4r3",
+      "microarrayBigqueryDataset": "microarray_data",
+      "creationTime": "2020-08-26 00:09:51Z",
+      "releaseNumber": 3,
+      "numParticipants": 234525,
+      "cdrDbName": "cdr",
+      "elasticIndexBaseName": "cdr",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true,
+      "accessTier": "controlled_test"
     }
   ]
 }

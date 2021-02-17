@@ -8,10 +8,11 @@ import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {TextAreaWithLengthValidationMessage, TextInput, ValidationError} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
-import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
+import {Modal} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
+import {withProfileErrorModal, WithProfileErrorModalProps} from 'app/components/with-error-modal';
 import {getRegistrationTasksMap} from 'app/pages/homepage/registration-dashboard';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
@@ -29,9 +30,10 @@ import {
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {serverConfigStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
-import {ErrorResponse, InstitutionalRole, Profile} from 'generated/fetch';
+import {InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
+
 
 const styles = reactStyles({
   h1: {
@@ -136,7 +138,7 @@ enum RegistrationStepStatus {
   UNCOMPLETE
 }
 
-interface ProfilePageProps {
+interface ProfilePageProps extends WithProfileErrorModalProps {
   profileState: {
     profile: Profile;
     reload: () => {};
@@ -146,160 +148,161 @@ interface ProfilePageProps {
 interface ProfilePageState {
   currentProfile: Profile;
   institutions: Array<PublicInstitutionDetails>;
-  saveProfileErrorResponse: ErrorResponse;
   showDemographicSurveyModal: boolean;
   updating: boolean;
 }
 
-export const ProfilePage = withUserProfile()(class extends React.Component<
+export const ProfilePage = fp.flow(
+  withUserProfile(),
+  withProfileErrorModal({title: 'Error updating account'})
+  )(class extends React.Component<
     ProfilePageProps,
     ProfilePageState
 > {
-  static displayName = 'ProfilePage';
+    static displayName = 'ProfilePage';
 
-  constructor(props) {
-    super(props);
+    constructor(props) {
+      super(props);
 
-    this.state = {
-      currentProfile: this.initializeProfile(),
-      institutions: [],
-      saveProfileErrorResponse: null,
-      showDemographicSurveyModal: false,
-      updating: false
-    };
-  }
-
-  async componentDidMount() {
-    try {
-      const details = await institutionApi().getPublicInstitutionDetails();
-      this.setState({
-        institutions: details.institutions
-      });
-    } catch (e) {
-      reportError(e);
-    }
-  }
-
-  navigateToTraining(): void {
-    window.location.assign(
-      environment.trainingUrl + '/static/data-researcher.html?saml=on');
-  }
-
-  initializeProfile() {
-    if (!this.props.profileState.profile) {
-      return this.createInitialProfile();
-    }
-    if (!this.props.profileState.profile.address) {
-      this.props.profileState.profile.address = {
-        streetAddress1: '',
-        city: '',
-        state: '',
-        zipCode: '',
-        country: ''
+      this.state = {
+        currentProfile: this.initializeProfile(),
+        institutions: [],
+        showDemographicSurveyModal: false,
+        updating: false
       };
     }
-    return this.props.profileState.profile;
-  }
 
-  createInitialProfile(): Profile {
-    return {
-      ...this.props.profileState.profile,
-      demographicSurvey: {}
-    };
-  }
-
-  componentDidUpdate(prevProps) {
-    const {profileState: {profile}} = this.props;
-
-    if (!fp.isEqual(prevProps.profileState.profile, profile)) {
-      this.setState({currentProfile: profile}); // for when profile loads after component load
+    async componentDidMount() {
+      try {
+        const details = await institutionApi().getPublicInstitutionDetails();
+        this.setState({
+          institutions: details.institutions
+        });
+      } catch (e) {
+        reportError(e);
+      }
     }
-  }
 
-  getRoleOptions(): Array<{label: string, value: InstitutionalRole}> {
-    const {institutions, currentProfile} = this.state;
-    if (currentProfile) {
-      const selectedOrgType = institutions.find(
-        inst => inst.shortName === currentProfile.verifiedInstitutionalAffiliation.institutionShortName);
-      if (selectedOrgType) {
-        const sel = selectedOrgType.organizationTypeEnum;
+    navigateToTraining(): void {
+      window.location.assign(
+        environment.trainingUrl + '/static/data-researcher.html?saml=on');
+    }
 
-        const availableRoles: Array<InstitutionalRole> =
+    initializeProfile() {
+      if (!this.props.profileState.profile) {
+        return this.createInitialProfile();
+      }
+      if (!this.props.profileState.profile.address) {
+        this.props.profileState.profile.address = {
+          streetAddress1: '',
+          city: '',
+          state: '',
+          zipCode: '',
+          country: ''
+        };
+      }
+      return this.props.profileState.profile;
+    }
+
+    createInitialProfile(): Profile {
+      return {
+        ...this.props.profileState.profile,
+        demographicSurvey: {}
+      };
+    }
+
+    componentDidUpdate(prevProps) {
+      const {profileState: {profile}} = this.props;
+
+      if (!fp.isEqual(prevProps.profileState.profile, profile)) {
+        this.setState({currentProfile: profile}); // for when profile loads after component load
+      }
+    }
+
+    getRoleOptions(): Array<{label: string, value: InstitutionalRole}> {
+      const {institutions, currentProfile} = this.state;
+      if (currentProfile) {
+        const selectedOrgType = institutions.find(
+          inst => inst.shortName === currentProfile.verifiedInstitutionalAffiliation.institutionShortName);
+        if (selectedOrgType) {
+          const sel = selectedOrgType.organizationTypeEnum;
+
+          const availableRoles: Array<InstitutionalRole> =
            AccountCreationOptions.institutionalRolesByOrganizationType
                .find(obj => obj.type === sel)
                .roles;
 
-        return AccountCreationOptions.institutionalRoleOptions.filter(option =>
+          return AccountCreationOptions.institutionalRoleOptions.filter(option =>
            availableRoles.includes(option.value)
        );
+        }
       }
     }
-  }
 
-  saveProfileErrorMessage(errors) {
-    return <React.Fragment>
+    saveProfileErrorMessage(errors) {
+      return <React.Fragment>
       <div>You must correct errors before saving: </div>
       <BulletAlignedUnorderedList>
       {Object.keys(errors).map((key) => <li key={errors[key][0]}>{errors[key][0]}</li>)}
       </BulletAlignedUnorderedList>
     </React.Fragment>;
-  }
+    }
 
-  async saveProfile(profile: Profile): Promise<Profile> {
-    const {profileState: {reload}} = this.props;
+    async saveProfile(profile: Profile): Promise<Profile> {
+      const {profileState: {reload}} = this.props;
 
     // updating is only used to control spinner display. If the demographic survey modal
     // is open (and, by extension, it is causing this save), a spinner is being displayed over
     // that modal, so no need to show one here.
-    if (!this.state.showDemographicSurveyModal) {
-      this.setState({updating: true});
+      if (!this.state.showDemographicSurveyModal) {
+        this.setState({updating: true});
+      }
+
+      try {
+        await profileApi().updateProfile(profile);
+        await reload();
+        return profile;
+      } catch (error) {
+        reportError(error);
+        const errorResponse = await convertAPIError(error);
+        this.props.showProfileErrorModal(errorResponse.message);
+        console.error(error);
+        return Promise.reject();
+      } finally {
+        this.setState({updating: false});
+      }
     }
 
-    try {
-      await profileApi().updateProfile(profile);
-      await reload();
-      return profile;
-    } catch (error) {
-      reportError(error);
-      const errorResponse = await convertAPIError(error);
-      this.setState({saveProfileErrorResponse: errorResponse});
-      console.error(error);
-      return Promise.reject();
-    } finally {
-      this.setState({updating: false});
-    }
-  }
-
-  getRegistrationStatus(completionTime: number, bypassTime: number) {
-    return completionTime !== null && completionTime !== undefined ? RegistrationStepStatus.COMPLETED :
+    getRegistrationStatus(completionTime: number, bypassTime: number) {
+      return completionTime !== null && completionTime !== undefined ? RegistrationStepStatus.COMPLETED :
       bypassTime !== null && completionTime !== undefined ? RegistrationStepStatus.BYPASSED : RegistrationStepStatus.UNCOMPLETE;
-  }
+    }
 
-  private bypassedText(bypassTime) {
-    return <React.Fragment>
+    private bypassedText(bypassTime) {
+      return <React.Fragment>
       <div>Bypassed on:</div>
       <div>{displayDateWithoutHours(bypassTime)}</div>
     </React.Fragment>;
-  }
+    }
 
-  private getTwoFactorAuthCardText(profile) {
-    switch (this.getRegistrationStatus(profile.twoFactorAuthCompletionTime, profile.twoFactorAuthBypassTime)) {
-      case RegistrationStepStatus.COMPLETED:
-        return <React.Fragment>
+    private getTwoFactorAuthCardText(profile) {
+      switch (this.getRegistrationStatus(profile.twoFactorAuthCompletionTime, profile.twoFactorAuthBypassTime)) {
+        case RegistrationStepStatus.COMPLETED:
+          return <React.Fragment>
           <div>Completed on:</div>
           <div>{displayDateWithoutHours(profile.twoFactorAuthCompletionTime)}</div>
         </React.Fragment>;
-      case RegistrationStepStatus.BYPASSED:
-        return this.bypassedText(profile.twoFactorAuthBypassTime);
-      default:
-        return;
+        case RegistrationStepStatus.BYPASSED:
+          return this.bypassedText(profile.twoFactorAuthBypassTime);
+        default:
+          return;
+      }
     }
-  }
 
-  private getEraCommonsCardText(profile) {
-    switch (this.getRegistrationStatus(profile.eraCommonsCompletionTime, profile.eraCommonsBypassTime)) {
-      case RegistrationStepStatus.COMPLETED:
-        return <div>
+    private getEraCommonsCardText(profile) {
+      switch (this.getRegistrationStatus(profile.eraCommonsCompletionTime, profile.eraCommonsBypassTime)) {
+        case RegistrationStepStatus.COMPLETED:
+          return <div>
           {profile.eraCommonsLinkedNihUsername != null && <React.Fragment>
               <div> Username:</div>
               <div> {profile.eraCommonsLinkedNihUsername} </div>
@@ -314,56 +317,56 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
               </div>
           </React.Fragment>}
         </div>;
-      case RegistrationStepStatus.BYPASSED:
-        return this.bypassedText(profile.twoFactorAuthBypassTime);
-      default:
-        return;
+        case RegistrationStepStatus.BYPASSED:
+          return this.bypassedText(profile.twoFactorAuthBypassTime);
+        default:
+          return;
+      }
     }
-  }
 
-  private getComplianceTrainingText(profile) {
-    switch (this.getRegistrationStatus(profile.complianceTrainingCompletionTime, profile.complianceTrainingBypassTime)) {
-      case RegistrationStepStatus.COMPLETED:
-        return <React.Fragment>
+    private getComplianceTrainingText(profile) {
+      switch (this.getRegistrationStatus(profile.complianceTrainingCompletionTime, profile.complianceTrainingBypassTime)) {
+        case RegistrationStepStatus.COMPLETED:
+          return <React.Fragment>
           <div>Training Completed</div>
           <div>{displayDateWithoutHours(profile.complianceTrainingCompletionTime)}</div>
         </React.Fragment>;
-      case RegistrationStepStatus.BYPASSED:
-        return this.bypassedText(profile.complianceTrainingBypassTime);
-      default:
-        return;
+        case RegistrationStepStatus.BYPASSED:
+          return this.bypassedText(profile.complianceTrainingBypassTime);
+        default:
+          return;
+      }
     }
-  }
 
-  private getDataUseAgreementText(profile) {
-    const universalText = <a onClick={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}>
+    private getDataUseAgreementText(profile) {
+      const universalText = <a onClick={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}>
       View code of conduct
     </a>;
-    switch (this.getRegistrationStatus(profile.dataUseAgreementCompletionTime, profile.dataUseAgreementBypassTime)) {
-      case RegistrationStepStatus.COMPLETED:
-        return <React.Fragment>
+      switch (this.getRegistrationStatus(profile.dataUseAgreementCompletionTime, profile.dataUseAgreementBypassTime)) {
+        case RegistrationStepStatus.COMPLETED:
+          return <React.Fragment>
           <div>Signed On:</div>
           <div>
             {displayDateWithoutHours(profile.dataUseAgreementCompletionTime)}
           </div>
           {universalText}
         </React.Fragment>;
-      case RegistrationStepStatus.BYPASSED:
-        return <React.Fragment>
+        case RegistrationStepStatus.BYPASSED:
+          return <React.Fragment>
           {this.bypassedText(profile.dataUseAgreementBypassTime)}
           {universalText}
         </React.Fragment>;
-      case RegistrationStepStatus.UNCOMPLETE:
-        return universalText;
+        case RegistrationStepStatus.UNCOMPLETE:
+          return universalText;
+      }
     }
-  }
 
-  render() {
-    const {profileState: {profile}} = this.props;
-    const {currentProfile, saveProfileErrorResponse, updating, showDemographicSurveyModal} = this.state;
-    const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement} =
+    render() {
+      const {profileState: {profile}} = this.props;
+      const {currentProfile, updating, showDemographicSurveyModal} = this.state;
+      const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement} =
       serverConfigStore.getValue();
-    const {
+      const {
       givenName, familyName, areaOfResearch, professionalUrl,
         address: {
         streetAddress1,
@@ -375,47 +378,48 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
         }
     } = currentProfile;
 
-    const urlError = professionalUrl
+      const urlError = professionalUrl
       ? validate({website: professionalUrl}, {website: {url: {message: '^Professional URL %{value} is not a valid URL'}}})
       : undefined;
-    const errorMessages = {
-      ...urlError,
-      ...validate({
-        givenName,
-        familyName, areaOfResearch,
-        streetAddress1,
-        streetAddress2,
-        zipCode,
-        city,
-        state,
-        country
-      }, validators, {
-        prettify: v => ({
-          givenName: 'First Name',
-          familyName: 'Last Name',
-          areaOfResearch: 'Current Research'
-        }[v] || validate.prettify(v))
-      })
-    };
-    const errors = fp.isEmpty(errorMessages) ? undefined : errorMessages;
-
-    const makeProfileInput = ({title, valueKey, isLong = false, ...props}) => {
-      let errorText = profile && errors && errors[valueKey];
-      if (valueKey && Array.isArray(valueKey) && valueKey.length > 1) {
-        errorText = profile && errors && errors[valueKey[1]];
-      }
-      const inputProps = {
-        value: fp.get(valueKey, currentProfile) || '',
-        onChange: v => this.setState(fp.set(['currentProfile', ...valueKey], v)),
-        invalid: !!errorText,
-        style: props.style,
-        maxCharacters: props.maxCharacters,
-        tooLongWarningCharacters: props.tooLongWarningCharacters,
-        ...props
+      const errorMessages = {
+        ...urlError,
+        ...validate({
+          givenName,
+          familyName, areaOfResearch,
+          streetAddress1,
+          streetAddress2,
+          zipCode,
+          city,
+          state,
+          country
+        },
+          validators, {
+            prettify: v => ({
+              givenName: 'First Name',
+              familyName: 'Last Name',
+              areaOfResearch: 'Current Research'
+            }[v] || validate.prettify(v))
+          })
       };
-      const id = props.id || valueKey;
+      const errors = fp.isEmpty(errorMessages) ? undefined : errorMessages;
 
-      return <div style={{marginBottom: 40}}>
+      const makeProfileInput = ({title, valueKey, isLong = false, ...props}) => {
+        let errorText = profile && errors && errors[valueKey];
+        if (valueKey && Array.isArray(valueKey) && valueKey.length > 1) {
+          errorText = profile && errors && errors[valueKey[1]];
+        }
+        const inputProps = {
+          value: fp.get(valueKey, currentProfile) || '',
+          onChange: v => this.setState(fp.set(['currentProfile', ...valueKey], v)),
+          invalid: !!errorText,
+          style: props.style,
+          maxCharacters: props.maxCharacters,
+          tooLongWarningCharacters: props.tooLongWarningCharacters,
+          ...props
+        };
+        const id = props.id || valueKey;
+
+        return <div style={{marginBottom: 40}}>
         <div style={styles.inputLabel}>{title}</div>
         {isLong ? <TextAreaWithLengthValidationMessage
             id={id} data-test-id={id}
@@ -433,10 +437,10 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
           /></TooltipTrigger>}
         <ValidationError>{errorText}</ValidationError>
       </div>;
-    };
+      };
 
 
-    return <FadeBox style={styles.fadebox}>
+      return <FadeBox style={styles.fadebox}>
       <div style={{width: '95%'}}>
         {(!profile || updating) && <SpinnerOverlay/>}
         <div style={{...styles.h1, marginBottom: '0.7rem'}}>Profile</div>
@@ -693,31 +697,10 @@ export const ProfilePage = withUserProfile()(class extends React.Component<
                 showStepCount={false}
             />
         </Modal>}
-        {saveProfileErrorResponse &&
-        <Modal data-test-id='update-profile-error'>
-            <ModalTitle>Error creating account</ModalTitle>
-            <ModalBody>
-                <div>An error occurred while updating your profile. The following message was
-                    returned:
-                </div>
-                <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
-                    "{saveProfileErrorResponse.message}"
-                </div>
-                <div>
-                    Please try again or contact <a
-                    href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
-                </div>
-            </ModalBody>
-            <ModalFooter>
-                <Button onClick={() => this.setState({saveProfileErrorResponse: null})}
-                        type='primary'>Close</Button>
-            </ModalFooter>
-        </Modal>
-        }
       </div>
     </FadeBox>;
-  }
-});
+    }
+  });
 
 @Component({
   template: '<div #root></div>'

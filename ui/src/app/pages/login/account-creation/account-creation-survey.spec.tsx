@@ -71,9 +71,5 @@ it('should handle error when creating an account', async() => {
   // We need to await one tick to allow async processing of the error response to resolve.
   await waitOneTickAndUpdate(wrapper);
 
-  const errorModal = wrapper.find('Modal[data-test-id="create-account-error"]');
-  // Ensure the error modal contains explanatory intro text.
-  expect(errorModal.getDOMNode().textContent).toContain('An error occurred while creating your account');
-  // Ensure the error modal contains the server-side error message.
-  expect(errorModal.getDOMNode().textContent).toContain('Could not create account: invalid institutional affiliation');
+  expect(wrapper.find('Modal[role="alertdialog"]').length).toEqual(1);
 });

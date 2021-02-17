@@ -92,11 +92,16 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
     Response response = client.newCall(request).execute();
 
     // The first call seems to always fail for some reason. Just retry a few times
-    int retries = 0;
-    while (!response.isSuccessful() && retries < 3) {
-      response = client.newCall(request).execute();
-      retries++;
+    for (int retries = 0; !response.isSuccessful() && retries < 3; retries++) {
       Thread.sleep(5000);
+      response = client.newCall(request).execute();
+    }
+
+    if (!response.isSuccessful()) {
+      throw new RuntimeException(
+          "Could not fetch Pet Service Account. Try fetching manually by querying "
+              + request.urlString()
+              + "with the Extraction SA Access Token (printed above).");
     }
 
     return response.body().string();

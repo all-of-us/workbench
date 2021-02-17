@@ -20,6 +20,7 @@ export interface TextModalProps {
   body: string;
   buttonText: string;
   closeFunction: Function;
+  role?: 'dialog' | 'alertdialog';
 }
 
 export class TextModal extends React.Component<TextModalProps> {
@@ -33,13 +34,14 @@ export class TextModal extends React.Component<TextModalProps> {
   }
 
   render() {
+    const {closeFunction, title, body, buttonText, role = 'dialog'} = this.props;
     return (
       <React.Fragment>
-        <Modal onRequestClose={this.props.closeFunction}>
-          <ModalTitle>{this.props.title}</ModalTitle>
-          <ModalBody>{this.props.body}</ModalBody>
+        <Modal onRequestClose={closeFunction} role={role}>
+          <ModalTitle>{title}</ModalTitle>
+          <ModalBody>{body}</ModalBody>
           <ModalFooter>
-            <Button onClick={this.props.closeFunction}>{this.props.buttonText}</Button>
+            <Button onClick={closeFunction}>{buttonText}</Button>
           </ModalFooter>
         </Modal>
       </React.Fragment>
