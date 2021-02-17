@@ -12,6 +12,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -39,7 +40,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
-import org.assertj.core.util.Maps;
 import org.javers.common.collections.Sets;
 import org.junit.Before;
 import org.junit.Test;
@@ -206,39 +206,42 @@ public class BillingProjectBufferServiceTest {
     final String controlledTierServicePerimeter = "controlled/perimeter";
     DbAccessTier controlledTier =
         new DbAccessTier()
-            .setAccessTierId(1)
+            .setAccessTierId(2)
             .setShortName(controlledTierName)
-            .setDisplayName("Registered Tier")
+            .setDisplayName("Controlled Tier")
             .setAuthDomainGroupEmail("joel@example.com")
-            .setAuthDomainName("aou-reg-users")
+            .setAuthDomainName("aou-ct-users")
             .setServicePerimeter(controlledTierServicePerimeter);
     controlledTier = accessTierDao.save(controlledTier);
 
-    final Map<String, Integer> tierMap =
-        Maps.newHashMap(REGISTERED_TIER_NAME, REGISTERED_TIER_BUFFER_CAPACITY);
-    tierMap.put(controlledTierName, 3);
-    workbenchConfig.billing.bufferCapacity = tierMap;
+    workbenchConfig.billing.bufferCapacity =
+        ImmutableMap.of(REGISTERED_TIER_NAME, 1, controlledTierName, 1);
 
     billingProjectBufferService.bufferBillingProjects();
 
-    Set<String> servicePerimeters =
+    Set<String> expectedPerimeters =
         Sets.asSet(REGISTERED_TIER_SERVICE_PERIMETER, controlledTierServicePerimeter);
 
-    for (int i = 0; i < servicePerimeters.size(); i++) {
-      ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
-      ArgumentCaptor<String> perimeterCaptor = ArgumentCaptor.forClass(String.class);
-      verify(mockFireCloudService)
-          .createAllOfUsBillingProject(projectCaptor.capture(), perimeterCaptor.capture());
+    // one project per tier, per bufferRefillProjectsPerTask
+    final int expectedCreationCount =
+        workbenchConfig.billing.bufferRefillProjectsPerTask
+            * workbenchConfig.billing.bufferCapacity.size();
 
-      String billingProjectName = projectCaptor.getValue();
+    ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<String> perimeterCaptor = ArgumentCaptor.forClass(String.class);
+    verify(mockFireCloudService, times(expectedCreationCount))
+        .createAllOfUsBillingProject(projectCaptor.capture(), perimeterCaptor.capture());
+
+    for (String billingProjectName : projectCaptor.getAllValues()) {
       assertThat(billingProjectName).startsWith(workbenchConfig.billing.projectNamePrefix);
-      assertThat(perimeterCaptor.getValue()).isIn(servicePerimeters);
       assertThat(
               billingProjectBufferEntryDao
                   .findByFireCloudProjectName(billingProjectName)
                   .getStatusEnum())
           .isEqualTo(BufferEntryStatus.CREATING);
     }
+
+    assertThat(perimeterCaptor.getAllValues()).containsExactlyElementsIn(expectedPerimeters);
   }
 
   @Test
@@ -667,11 +670,11 @@ public class BillingProjectBufferServiceTest {
     final String controlledTierServicePerimeter = "controlled/perimeter";
     DbAccessTier controlledTier =
         new DbAccessTier()
-            .setAccessTierId(1)
+            .setAccessTierId(2)
             .setShortName(controlledTierName)
-            .setDisplayName("Registered Tier")
+            .setDisplayName("Controlled Tier")
             .setAuthDomainGroupEmail("joel@example.com")
-            .setAuthDomainName("aou-reg-users")
+            .setAuthDomainName("aou-ct-users")
             .setServicePerimeter(controlledTierServicePerimeter);
     controlledTier = accessTierDao.save(controlledTier);
 
