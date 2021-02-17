@@ -3,6 +3,10 @@
 # This generates the big query data dictionary tables by importing data from
 # csv at gs://all-of-us-workbench-private-cloudsql/$BQ_DATASET/data_dictionary.
 
+# This script is meant to be run as part of CDR process only. However if its being run individually,
+# parameters required for this scripts are:
+# BQ_PROJECT: workbench-project (eg all-of-us-rw-preprod) and required dataSet
+# eg ./project.rb make_bq_data_dictionary --bq-project all-of-us-workbench-test --bq-dataset synth_r_2019q4_11
 set -ex
 
 export BQ_PROJECT=$1  # project
