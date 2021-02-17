@@ -807,6 +807,8 @@ paths:
       responses:
         201:
           description: Successful Request
+          schema:
+            $ref: '#/definitions/SubmissionResponse'
         400:
           description: Expression eval failed or entities are not of type required
             by method config
@@ -1545,3 +1547,12 @@ definitions:
           - ContinueWhilePossible
     description: If the referenced method configuration takes no root entity, do
       not define `entityType`, `entityName` and `expression`.
+
+  SubmissionResponse:
+    required:
+      - submissionId
+    type: object
+    properties:
+      submissionId:
+        type: string
+        description: Submission Id
