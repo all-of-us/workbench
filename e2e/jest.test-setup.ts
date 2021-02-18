@@ -1,5 +1,5 @@
 import * as fp from 'lodash/fp';
-import {Response} from "puppeteer";
+import {Request} from 'puppeteer';
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
 
 /**
@@ -15,50 +15,104 @@ beforeEach(async () => {
   await page.setUserAgent(userAgent);
   await page.setViewport({width: 1300, height: 0});
   page.setDefaultNavigationTimeout(60000); // Puppeteer default timeout is 30 seconds.
-  page.setDefaultTimeout(30000);
   await page.setRequestInterception(true);
 
-  const stringifyData = (data) => {
-    JSON.stringify(JSON.parse(data), null, 2);
+  const getTitle = async () => {
+    return await page.$eval('title', title => {
+      return title.textContent;
+    });
   }
 
-  const isWorkbenchApi = (request): Request | null => {
-    return request && request.url().startsWith('api-dot-all-of-us-workbench-test.appspot.com/v1') ? request : null;
+  const stringifyData = (data: string): string => {
+    return data !== undefined ? JSON.stringify(JSON.parse(data), null, 2) : '';
   }
 
-  const notOptionsRequest = (request): Request | null => {
+  const includeUrl = (request: Request): Request | null => {
+    const filters = [
+      'google',
+      'content-security-index-report',
+      'analytics',
+      'status-alert',
+      'publicDetails'
+    ];
+    return !filters.some((urlPart) => request && request.url().includes(urlPart))
+       ? request
+       : null;
+  }
+
+  const includeResourceType = (request: Request): Request | null => {
+    const filters = [
+      'xhr',
+      'fetch',
+      'websocket'
+    ];
+    return filters.some((resource) => request && request.resourceType().includes(resource))
+       ? request
+       : null;
+  }
+
+  const isWorkbenchApi = (request: Request): Request | null => {
+    const isWorkbenchUrl = request.url().match('all-of-us-workbench-(test|staging).appspot.com') != null;
+    return request && isWorkbenchUrl ? request : null;
+  }
+
+  // Api "/workspaces" or "/cdrVersions" response can be truncated
+  const isWorkspacesApi = (request: Request): boolean => {
+    return request && (request.url().endsWith('/v1/workspaces') || request.url().endsWith('/v1/cdrVersions'));
+  }
+
+  const isApiFailure = (request: Request): boolean => {
+    return request.failure() != null || !request.response().ok();
+  }
+
+  const notOptionsRequest = (request: Request): Request | null => {
     return request && request.method() !== 'OPTIONS' ? request : null;
   }
 
-  const isWorkbenchRequest = fp.flow(isWorkbenchApi, notOptionsRequest);
+  const isWorkbenchRequest = fp.flow(isWorkbenchApi, notOptionsRequest, includeResourceType, includeUrl);
 
-  const getRequestPostData = (request): string | undefined => {
+  const getRequestPostData = (request: Request): string | undefined => {
     return request && request.postData() ? request.postData() : undefined;
   }
 
   const getRequestData = fp.flow(getRequestPostData, stringifyData);
 
-  const getResponse = async (request): Promise<Response | null> => {
+  const notRedirectRequest = (request: Request): boolean => {
     // Response body can only be accessed for non-redirect requests
-    return request && request.redirectChain().length === 0 ? await request.response() : null;
+    return request && request.redirectChain().length === 0;
   }
 
-  const getRequestResponse = fp.flow(isWorkbenchRequest, await getResponse)
-
-  const isFailedRequest = (request): boolean => {
-    return request.failure() || !request.response().ok();
+  const getResponseText = async (request: Request): Promise<string> => {
+    return (await (request.response()).buffer()).toString();
   }
 
-  // Don't log response. Some requests response could be long, clutter up test log.
-  const notLogResponse = (request): boolean => {
-    return request && request.url().endsWith('/readonly') ? request : null;
+  const logError = async (request: Request): Promise<void> => {
+    const response = request.response();
+    const failureText = stringifyData(request.failure().errorText);
+    const responseText = await getResponseText(request);
+    console.debug(`❗Request failed: ${response.status()} ${request.method()} ${request.url()}\n${failureText}\n\n${responseText}`);
   }
 
+  const logRequest = async (request: Request): Promise<void> => {
+    let responseText = stringifyData(await getResponseText(request));
+    if (isWorkspacesApi(request)) {
+      // truncate long response. get first two workspace details.
+      responseText = fp.isEmpty(JSON.parse(responseText).items)
+         ? responseText
+         : 'truncated...\n' + JSON.stringify(JSON.parse(responseText).items.slice(0, 2), null, 2);
+    }
+    console.debug(`❗Request finished: ${request.response().status()} ${request.method()} ${request.url()}\n${responseText}`);
+  }
+
+  const canLogResponse = fp.flow(isWorkbenchRequest, notRedirectRequest);
+
+
+  // New request initiated
   page.on('request', (request) => {
+    if (isWorkbenchRequest(request)) {
+      console.debug(`❗Request issued: ${request.method()} ${request.url()}\n${getRequestData(request)}`);
+    }
     try {
-      if (isWorkbenchRequest(request)) {
-        console.debug(`❗Request issued: ${request.method()} ${request.url()}\n${getRequestData(request)}`);
-      }
       request.continue();
       // tslint:disable-next-line:no-empty
     } catch (e) {
@@ -66,49 +120,14 @@ beforeEach(async () => {
   });
 
   page.on('requestfinished', async (request) => {
-    try {
-
-      const response = await getRequestResponse(request);
-      if (isFailedRequest(request)) {
-
+    if (canLogResponse(request)) {
+      if (isApiFailure(request)) {
+        await logError(request);
       } else {
-
+        await logRequest(request);
       }
-
-      const status = response.status();
-      const failure = request.failure();
-      const responseText = stringifyData((await response.buffer()).toString());
-
-
-      // response body can only be accessed for non-redirect responses.
-      if (request.redirectChain().length === 0) {
-        const method = request.method();
-        const response = await request.response();
-        if (response != null) {
-          if (isWorkbenchApi(request.url())) {
-            const status = response.status();
-            const failure = request.failure();
-            const responseText = (await response.buffer()).toString();
-            let responseTextJson = JSON.stringify(JSON.parse(responseText), null, 2);
-            if (failure != null || !response.ok()) {
-              const errorText = JSON.stringify(JSON.parse(failure.errorText), null, 2);
-              const errorTextJson = JSON.stringify(JSON.parse(await response.text()), null, 2);
-              console.debug(`❗Request failed: ${status} ${method} ${request.url()}\n${errorText}\n${errorTextJson}\n${responseTextJson}`);
-            } else {
-              if (notLogResponse(request.url())) {
-                console.debug(`❗Request finished: ${status} ${method} ${request.url()}\n`);
-              } else {
-                if (request.url().endsWith('/v1/workspaces')) {
-                  // Truncate response json. Too many workspaces clutter up log.
-                  const jsonBody = JSON.parse(responseText);
-                  responseTextJson = JSON.stringify(jsonBody.items.slice(0, 3), null, 2);
-                }
-                console.debug(`❗Request finished: ${status} ${method} ${request.url()}\n${responseTextJson}`);
-              }
-            }
-          }
-        }
-      }
+    }
+    try {
       await request.continue();
       // tslint:disable-next-line:no-empty
     } catch (e) {
@@ -119,6 +138,7 @@ beforeEach(async () => {
     if (!message.args().length) {
       return;
     }
+    const title = await getTitle();
     try {
       const texts = await Promise.all(
         message.args().map(async (arg) =>
@@ -134,7 +154,7 @@ beforeEach(async () => {
       switch (type) {
         case 'error':
         case 'warning':
-          console.debug(`❗Page console ${message.type()}: ${texts}`);
+          console.debug(`❗ [${title}]\n page console ${type}: ${texts}`);
           break;
         }
       // tslint:disable-next-line:no-empty
@@ -142,13 +162,15 @@ beforeEach(async () => {
     }
   });
 
-  page.on('error', (error) => {
-    console.debug(`❗Page error: ${error}`);
+  page.on('error', async (error) => {
+    const title = await getTitle();
+    console.debug(`❗ [${title}]\n page error: ${error}`);
   });
 
-  page.on('pageerror', (error) => {
+  page.on('pageerror', async (error) => {
+    const title = await getTitle();
     try {
-      console.debug(`❗Page error: ${error}`);
+      console.debug(`❗ [${title}]\n page error: ${error}`);
       // tslint:disable-next-line:no-empty
     } catch (err) {
     }
