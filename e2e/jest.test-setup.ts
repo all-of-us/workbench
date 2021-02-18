@@ -52,8 +52,9 @@ beforeEach(async () => {
   }
 
   const isWorkbenchApi = (request: Request): Request | null => {
-    const isWorkbenchUrl = request.url().match('all-of-us-workbench-(test|staging).appspot.com') != null;
-    return request && isWorkbenchUrl ? request : null;
+    return request && request.url().match('all-of-us-workbench-(test|staging).appspot.com') != null
+       ? request
+       : null;
   }
 
   // Api "/workspaces" or "/cdrVersions" response can be truncated
@@ -62,7 +63,7 @@ beforeEach(async () => {
   }
 
   const isApiFailure = (request: Request): boolean => {
-    return request.failure() != null || !request.response().ok();
+    return request && request.failure() != null || !request.response().ok();
   }
 
   const notOptionsRequest = (request: Request): Request | null => {
@@ -86,10 +87,10 @@ beforeEach(async () => {
 
   const logError = async (request: Request): Promise<void> => {
     const response = request.response();
-    const failureText = stringifyData(request.failure().errorText);
-    const responseText = await getResponseText(request);
+    const failureText = request.failure() !== null ? stringifyData(request.failure().errorText) : '';
+    const responseText = stringifyData(await getResponseText(request));
     console.debug('❗Request failed: ' +
-       `${response.status()} ${request.method()} ${request.url()}\n${failureText}\n\n${responseText}`);
+       `${response.status()} ${request.method()} ${request.url()}\n${responseText}\n${failureText}`);
   }
 
   const logResponse = async (request: Request): Promise<void> => {
