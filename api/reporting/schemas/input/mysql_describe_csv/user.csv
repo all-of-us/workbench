@@ -54,7 +54,7 @@ country,varchar(95),NO,"",,""
 institution_id,bigint(20),NO,MUL,NULL,
 institutional_role_enum,tinyint(4),NO,,NULL,
 institutional_role_other_text,varchar(80),YES,,NULL,
-degree,varchar(255),YES,"",,""
+degrees,varchar(255),YES,"",,""
 ethnicity,tinyint(4),YES,"",,""
 year_of_birth,smallint(6),YES,"",,""
 education,tinyint(4),YES,"",,""

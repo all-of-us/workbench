@@ -4,13 +4,24 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.pmiops.workbench.utils.TimeAssertions.assertTimeApprox;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
+import com.google.common.collect.ImmutableList;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.db.model.DbAddress;
+import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.model.Degree;
+import org.pmiops.workbench.model.Disability;
+import org.pmiops.workbench.model.Education;
+import org.pmiops.workbench.model.Ethnicity;
+import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.InstitutionalRole;
+import org.pmiops.workbench.model.Race;
 import org.pmiops.workbench.model.ReportingUser;
+import org.pmiops.workbench.model.SexAtBirth;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -88,6 +99,18 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
       InstitutionalRole.UNDERGRADUATE;
   public static final String USER__INSTITUTIONAL_ROLE_OTHER_TEXT = "foo_2";
 
+  // Those enums are manually added
+  public static Ethnicity USER__ETHNICITY = Ethnicity.PREFER_NO_ANSWER;
+  public static Disability USER__DISABILITY = Disability.PREFER_NO_ANSWER;
+  public static SexAtBirth USER__SEX_AT_BIRTH = SexAtBirth.PREFER_NO_ANSWER;
+  public static Education USER__EDUCATION = Education.PREFER_NO_ANSWER;
+  public static GenderIdentity USER__GENDER_IDENTITY = GenderIdentity.PREFER_NO_ANSWER;
+  public static Race USER__RACE = Race.PREFER_NO_ANSWER;
+  public static BigDecimal USER__YEAR_OF_BIRTH = BigDecimal.valueOf(2021);
+  public static String USER__LGBTQ_IDENTITY = "foo_28";
+  public static boolean USER__IDENTIFIES_AS_LGBTQ = false;
+  public static ImmutableList<Degree> USER__DEGREES = ImmutableList.of(Degree.BA, Degree.ME);
+
   @Override
   public void assertDTOFieldsMatchConstants(ReportingUser user) {
     assertThat(user.getAboutYou()).isEqualTo(USER__ABOUT_YOU);
@@ -132,6 +155,16 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     assertThat(user.getInstitutionId()).isEqualTo(USER__INSTITUTION_ID);
     assertThat(user.getInstitutionalRoleEnum()).isEqualTo(USER__INSTITUTIONAL_ROLE_ENUM);
     assertThat(user.getInstitutionalRoleOtherText()).isEqualTo(USER__INSTITUTIONAL_ROLE_OTHER_TEXT);
+    assertThat(user.getDisability()).isEqualTo(USER__DISABILITY);
+    assertThat(user.getHighestEducation()).isEqualTo(USER__EDUCATION);
+    assertThat(user.getSexAtBirth()).isEqualTo(USER__SEX_AT_BIRTH);
+    assertThat(user.getYearOfBirth()).isEqualTo(USER__YEAR_OF_BIRTH);
+    assertThat(user.getEthnicity()).isEqualTo(USER__ETHNICITY);
+    assertThat(user.getDegrees()).isEqualTo(USER__DEGREES);
+    assertThat(user.getRace()).isEqualTo(USER__RACE);
+    assertThat(user.getGenderIdentity()).isEqualTo(USER__GENDER_IDENTITY);
+    assertThat(user.getIdentifiesAsLgbtq()).isEqualTo(USER__IDENTIFIES_AS_LGBTQ);
+    assertThat(user.getLgbtqIdentity()).isEqualTo(USER__LGBTQ_IDENTITY);
   }
 
   @Override
@@ -163,8 +196,9 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     user.setProfessionalUrl(USER__PROFESSIONAL_URL);
     user.setTwoFactorAuthBypassTime(USER__TWO_FACTOR_AUTH_BYPASS_TIME);
     user.setTwoFactorAuthCompletionTime(USER__TWO_FACTOR_AUTH_COMPLETION_TIME);
-    //    user.setUserId(USER__USER_ID);
     user.setUsername(USER__USERNAME);
+    user.setDegreesEnum(USER__DEGREES);
+    user.setDemographicSurvey(createDbDemographicSurvey());
     return user;
   }
 
@@ -212,7 +246,17 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
         .zipCode(USER__ZIP_CODE)
         .institutionId(USER__INSTITUTION_ID)
         .institutionalRoleEnum(USER__INSTITUTIONAL_ROLE_ENUM)
-        .institutionalRoleOtherText(USER__INSTITUTIONAL_ROLE_OTHER_TEXT);
+        .institutionalRoleOtherText(USER__INSTITUTIONAL_ROLE_OTHER_TEXT)
+        .degrees(USER__DEGREES.stream().map(Degree::toString).collect(Collectors.joining(",")))
+        .ethnicity(USER__ETHNICITY)
+        .disability(USER__DISABILITY)
+        .highestEducation(USER__EDUCATION)
+        .sexAtBirth(USER__SEX_AT_BIRTH)
+        .race(USER__RACE)
+        .yearOfBirth(USER__YEAR_OF_BIRTH)
+        .genderIdentity(USER__GENDER_IDENTITY)
+        .lgbtqIdentity(USER__LGBTQ_IDENTITY)
+        .identifiesAsLgbtq(USER__IDENTIFIES_AS_LGBTQ);
   }
 
   /**
@@ -229,5 +273,19 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     address.setStreetAddress2(USER__STREET_ADDRESS_2);
     address.setZipCode(USER__ZIP_CODE);
     return address;
+  }
+
+  /** Creates a {@link DbDemographicSurvey}. */
+  public DbDemographicSurvey createDbDemographicSurvey() {
+    final DbDemographicSurvey demographicSurvey = new DbDemographicSurvey();
+    demographicSurvey.setEducation(DbStorageEnums.educationToStorage(USER__EDUCATION));
+    demographicSurvey.setDisability(DbStorageEnums.disabilityToStorage(USER__DISABILITY));
+    demographicSurvey.setEthnicity(DbStorageEnums.ethnicityToStorage(USER__ETHNICITY));
+    demographicSurvey.setGenderIdentityList(ImmutableList.of(DbStorageEnums.genderIdentityToStorage(USER__GENDER_IDENTITY)));
+    demographicSurvey.setRace(ImmutableList.of(DbStorageEnums.raceToStorage(USER__RACE)));
+    demographicSurvey.setSexAtBirth(ImmutableList.of(DbStorageEnums.sexAtBirthToStorage(USER__SEX_AT_BIRTH)));
+    demographicSurvey.setYear_of_birth(USER__YEAR_OF_BIRTH.intValue());
+    demographicSurvey.setIdentifiesAsLgbtq(USER__IDENTIFIES_AS_LGBTQ);
+    return demographicSurvey;
   }
 }

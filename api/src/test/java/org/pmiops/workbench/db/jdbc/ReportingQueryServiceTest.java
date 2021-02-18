@@ -134,6 +134,14 @@ public class ReportingQueryServiceTest {
     int currentSize = userDao.findUsers().size();
     final DbUser user1 = userDao.save(userFixture.createEntity());
     assertThat(userDao.count()).isEqualTo(currentSize + 1);
+
+    DbUser user2 = userDao.findAll().iterator().next();
+    System.out.println("~~~~~~USER");
+    System.out.println(user2.getDemographicSurvey().getUser());
+    System.out.println(user2.getDemographicSurvey().getEducationEnum());
+    System.out.println(user2.getDemographicSurvey().getEducation());
+    System.out.println(user2.getDemographicSurvey().getDisability());
+    System.out.println(user2.getDemographicSurvey().getEthnicityEnum());
     return user1;
   }
 
@@ -238,6 +246,17 @@ public class ReportingQueryServiceTest {
     assertThat(batch3).hasSize(1);
 
     assertThat(iterator.hasNext()).isFalse();
+  }
+
+  @Test
+  public void testQueryUser() {
+    createUsers(1);
+
+    final List<List<ReportingUser>> stream =
+        reportingQueryService.getUserStream().collect(Collectors.toList());
+    assertThat(stream.size()).isEqualTo(1);
+    ReportingUser reportingUser = stream.stream().findFirst().get().get(0);
+    System.out.println(reportingUser);
   }
 
   @Test

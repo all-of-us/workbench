@@ -3,9 +3,15 @@ package org.pmiops.workbench.db.jdbc;
 import static org.pmiops.workbench.db.model.DbStorageEnums.billingAccountTypeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.billingStatusFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.dataAccessLevelFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.disabilityFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.educationFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.ethnicityFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.genderIdentityFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.institutionDUATypeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.institutionalRoleFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.organizationTypeFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.raceFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.sexAtBirthFromStorage;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
 import java.util.List;
@@ -163,47 +169,81 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     return jdbcTemplate.query(
         String.format(
             "SELECT \n"
-                + "  u.about_you,\n"
-                + "  u.area_of_research,\n"
-                + "  u.compliance_training_bypass_time,\n"
-                + "  u.compliance_training_completion_time,\n"
-                + "  u.compliance_training_expiration_time,\n"
-                + "  u.contact_email,\n"
-                + "  u.creation_time,\n"
-                + "  u.current_position,\n"
-                + "  u.data_access_level,\n"
-                + "  u.data_use_agreement_bypass_time,\n"
-                + "  u.data_use_agreement_completion_time,\n"
-                + "  u.data_use_agreement_signed_version,\n"
-                + "  u.demographic_survey_completion_time,\n"
-                + "  u.disabled,\n"
-                + "  u.era_commons_bypass_time,\n"
-                + "  u.era_commons_completion_time,\n"
-                + "  u.family_name,\n"
-                + "  u.first_registration_completion_time,\n"
-                + "  u.first_sign_in_time,\n"
-                + "  u.free_tier_credits_limit_days_override,\n"
-                + "  u.free_tier_credits_limit_dollars_override,\n"
-                + "  u.given_name,\n"
-                + "  u.last_modified_time,\n"
-                + "  u.professional_url,\n"
-                + "  u.two_factor_auth_bypass_time,\n"
-                + "  u.two_factor_auth_completion_time,\n"
                 + "  u.user_id,\n"
-                + "  u.email AS username,\n"
-                + "  a.city,\n"
-                + "  a.country,\n"
-                + "  a.state,\n"
-                + "  a.street_address_1,\n"
-                + "  a.street_address_2,\n"
-                + "  a.zip_code,\n"
-                + "  via.institution_id AS institution_id,\n"
-                + "  via.institutional_role_enum,\n"
-                + "  via.institutional_role_other_text\n"
+                + "  GROUP_CONCAT(DISTINCT u.about_you) AS about_you,\n"
+                + "  GROUP_CONCAT(DISTINCT u.area_of_research) AS area_of_research,\n"
+                + "  GROUP_CONCAT(DISTINCT u.compliance_training_bypass_time) AS compliance_training_bypass_time,\n"
+                + "  GROUP_CONCAT(DISTINCT u.compliance_training_completion_time) AS compliance_training_completion_time,\n"
+                + "  GROUP_CONCAT(DISTINCT u.compliance_training_expiration_time) AS compliance_training_expiration_time,\n"
+                + "  GROUP_CONCAT(DISTINCT u.contact_email) AS contact_email,\n"
+                + "  GROUP_CONCAT(DISTINCT u.creation_time) AS creation_time,\n"
+                + "  GROUP_CONCAT(DISTINCT u.current_position) AS current_position,\n"
+                + "  GROUP_CONCAT(DISTINCT u.data_access_level) AS data_access_level,\n"
+                + "  GROUP_CONCAT(DISTINCT u.data_use_agreement_bypass_time) AS data_use_agreement_bypass_time,\n"
+                + "  GROUP_CONCAT(DISTINCT u.data_use_agreement_completion_time) AS data_use_agreement_completion_time,\n"
+                + "  GROUP_CONCAT(DISTINCT u.data_use_agreement_signed_version) AS data_use_agreement_signed_version,\n"
+                + "  GROUP_CONCAT(DISTINCT u.demographic_survey_completion_time) AS demographic_survey_completion_time,\n"
+                + "  GROUP_CONCAT(DISTINCT u.disabled) AS disabled,\n"
+                + "  GROUP_CONCAT(DISTINCT u.era_commons_bypass_time) AS era_commons_bypass_time,\n"
+                + "  GROUP_CONCAT(DISTINCT u.era_commons_completion_time) AS era_commons_completion_time,\n"
+                + "  GROUP_CONCAT(DISTINCT u.family_name) AS family_name,\n"
+                + "  GROUP_CONCAT(DISTINCT u.first_registration_completion_time) AS first_registration_completion_time,\n"
+                + "  GROUP_CONCAT(DISTINCT u.first_sign_in_time) AS first_sign_in_time,\n"
+                + "  GROUP_CONCAT(DISTINCT u.free_tier_credits_limit_days_override) AS free_tier_credits_limit_days_override,\n"
+                + "  GROUP_CONCAT(DISTINCT u.free_tier_credits_limit_dollars_override) AS free_tier_credits_limit_dollars_override,\n"
+                + "  GROUP_CONCAT(DISTINCT u.given_name) AS given_name,\n"
+                + "  GROUP_CONCAT(DISTINCT u.last_modified_time) AS last_modified_time,\n"
+                + "  GROUP_CONCAT(DISTINCT u.professional_url) AS professional_url,\n"
+                + "  GROUP_CONCAT(DISTINCT u.two_factor_auth_bypass_time) AS two_factor_auth_bypass_time,\n"
+                + "  GROUP_CONCAT(DISTINCT u.two_factor_auth_completion_time) AS two_factor_auth_completion_time,\n"
+                + "  GROUP_CONCAT(DISTINCT u.email) AS username,\n"
+                + "  GROUP_CONCAT(DISTINCT a.city) AS city,\n"
+                + "  GROUP_CONCAT(DISTINCT a.country) AS country,\n"
+                + "  GROUP_CONCAT(DISTINCT a.state) AS state,\n"
+                + "  GROUP_CONCAT(DISTINCT a.street_address_1) AS street_address_1,\n"
+                + "  GROUP_CONCAT(DISTINCT a.street_address_2) AS street_address_2,\n"
+                + "  GROUP_CONCAT(DISTINCT a.zip_code) AS zip_code,\n"
+                + "  GROUP_CONCAT(DISTINCT via.institution_id) AS institution_id,\n"
+                + "  GROUP_CONCAT(DISTINCT via.institutional_role_enum) AS institutional_role_enum,\n"
+                + "  GROUP_CONCAT(DISTINCT via.institutional_role_other_text) AS institutional_role_other_text,\n"
+                + "  GROUP_CONCAT(DISTINCT ud.degree) AS degrees,\n"
+                + "  GROUP_CONCAT(DISTINCT dm.ethnicity) AS ethnicity,\n"
+                + "  GROUP_CONCAT(DISTINCT dm.year_of_birth) AS year_of_birth,\n"
+                + "  GROUP_CONCAT(DISTINCT dm.disability) AS disability,\n"
+                + "  GROUP_CONCAT(DISTINCT dm.education) AS education,\n"
+                + "  GROUP_CONCAT(DISTINCT dm.identifies_as_lgbtq) AS identifies_as_lgbtq,\n"
+                + "  GROUP_CONCAT(DISTINCT dm.lgbtq_identity) AS lgbtq_identity,\n"
+                + "  GROUP_CONCAT(DISTINCT dm.gender_identity) AS gender_identity,\n"
+                + "  GROUP_CONCAT(DISTINCT dm.race) AS race,\n"
+                + "  GROUP_CONCAT(DISTINCT dm.sex_at_birth) AS sex_at_birth\n"
                 + "  \n"
                 + "FROM user u"
                 + "  LEFT OUTER JOIN address AS a ON u.user_id = a.user_id\n"
-                + "  LEFT OUTER JOIN user_verified_institutional_affiliation AS via on u.user_id = via.user_id"
+                + "  LEFT OUTER JOIN user_verified_institutional_affiliation AS via on u.user_id = via.user_id\n"
+                + "  LEFT OUTER JOIN user_degree AS ud on u.user_id = ud.user_id\n"
+                + "  LEFT OUTER JOIN "
+                + "  ( "
+                + "       SELECT \n"
+                + "             demo.user_id, "
+                + "             demo.ethnicity, "
+                + "             demo.year_of_birth, "
+                + "             demo.education, "
+                + "             demo.disability, "
+                + "             demo.identifies_as_lgbtq, "
+                + "             demo.lgbtq_identity, "
+                + "             di.gender_identity, "
+                + "             dr.race, "
+                + "             ds.sex_at_birth "
+                + "       FROM demographic_survey as demo "
+                + "         LEFT OUTER JOIN demographic_survey_gender_identity as di "
+                + "             ON demo.demographic_survey_id = di.demographic_survey_id\n"
+                + "         LEFT OUTER JOIN demographic_survey_race as dr "
+                + "             ON demo.demographic_survey_id = dr.demographic_survey_id\n"
+                + "         LEFT OUTER JOIN demographic_survey_sex_at_birth as ds "
+                + "             ON demo.demographic_survey_id = ds.demographic_survey_id"
+                + "  ) AS dm "
+                + "  on u.user_id = dm.user_id"
+                + "  GROUP BY u.user_id"
                 + "  ORDER BY u.user_id"
                 + "  LIMIT %d\n"
                 + "  OFFSET %d",
@@ -259,7 +299,17 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .institutionId(rs.getLong("institution_id"))
                 .institutionalRoleEnum(
                     institutionalRoleFromStorage(rs.getShort("institutional_role_enum")))
-                .institutionalRoleOtherText(rs.getString("institutional_role_other_text")));
+                .institutionalRoleOtherText(rs.getString("institutional_role_other_text"))
+                .highestEducation(educationFromStorage(rs.getShort("education")))
+                .ethnicity(ethnicityFromStorage(rs.getShort("ethnicity")))
+                .disability(disabilityFromStorage(rs.getShort("disability")))
+                .race(raceFromStorage(rs.getShort("race")))
+                .genderIdentity(genderIdentityFromStorage(rs.getShort("gender_identity")))
+                .lgbtqIdentity(rs.getString("lgbtq_identity"))
+                .identifiesAsLgbtq(rs.getBoolean("identifies_as_lgbtq"))
+                .yearOfBirth(rs.getBigDecimal("year_of_birth"))
+                .sexAtBirth(sexAtBirthFromStorage(rs.getShort("sex_at_birth")))
+                .degrees(rs.getString("degrees")));
   }
 
   @Override

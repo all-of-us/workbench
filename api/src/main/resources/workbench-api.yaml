@@ -8115,19 +8115,15 @@ definitions:
         format: int64
   ReportingUser:
     x-aou-note: |-
-      This code was generated using reporting-wizard.rb at 2021-02-16T20:35:21-05:00.
+      This code was generated using reporting-wizard.rb at 2020-09-30T16:18:29-04:00.
       Manual modification should be avoided if possible as this is a one-time generation
       and does not run on every build and updates must be merged manually for now.
     type: object
     properties:
       aboutYou:
         type: string
-        description: User's description of  their research background, experience and
-          research interests.
+        description: User's description of themselves.
       areaOfResearch:
-        type: string
-        description: User's research area of focus.
-      city:
         type: string
         description: ''
       complianceTrainingBypassTime:
@@ -8143,14 +8139,11 @@ definitions:
       complianceTrainingExpirationTime:
         type: string
         format: date-time
-        description: Time  User's compliance training will expire, or null if training
+        description: Time  User's compliance training will expire, or null training
           not taken or if bypassed
       contactEmail:
         type: string
         description: User's external email address on file.
-      country:
-        type: string
-        description: ''
       creationTime:
         type: string
         format: date-time
@@ -8177,25 +8170,14 @@ definitions:
         type: integer
         format: int32
         description: Version of DUCC last signed by this user.
-      degree:
-        type: string
-        description: ''
       demographicSurveyCompletionTime:
         type: string
         format: date-time
         description: Timestamp for completion of Demographic Survey (if completed).
-      disability:
-        type: integer
-        format: int32
-        description: ''
       disabled:
         type: boolean
         description: If true, this account has been disabled by an administrator (or
           potentially an automatic process).
-      education:
-        type: integer
-        format: int32
-        description: ''
       eraCommonsBypassTime:
         type: string
         format: date-time
@@ -8205,10 +8187,6 @@ definitions:
         type: string
         format: date-time
         description: Time user completed ERA Commons account link.
-      ethnicity:
-        type: integer
-        format: int32
-        description: ''
       familyName:
         type: string
         description: User last name (family name).
@@ -8228,54 +8206,16 @@ definitions:
         type: number
         format: double
         description: Override value for the default free tier spending limit (USD).
-      genderIdentity:
-        type: integer
-        format: int32
-        description: ''
       givenName:
         type: string
         description: User first name (given name).
-      identifiesAsLgbtq:
-        type: boolean
-        description: ''
-      institutionId:
-        type: integer
-        format: int64
-        description: ''
-      institutionalRoleEnum:
-        type: integer
-        format: int32
-        description: ''
-      institutionalRoleOtherText:
-        type: string
-        description: ''
       lastModifiedTime:
         type: string
         format: date-time
         description: Time of last modification to this user account.
-      lgbtqIdentity:
-        type: string
-        description: ''
       professionalUrl:
         type: string
         description: User's URL at primary place of work.
-      race:
-        type: integer
-        format: int32
-        description: ''
-      sexAtBirth:
-        type: integer
-        format: int32
-        description: ''
-      state:
-        type: string
-        description: ''
-      streetAddress1:
-        type: string
-        description: ''
-      streetAddress2:
-        type: string
-        description: ''
       twoFactorAuthBypassTime:
         type: string
         format: date-time
@@ -8299,13 +8239,80 @@ definitions:
         description: |-
           User's GSuite username, including appropriate domain for this environment. Uniquely describes a
           user account (but not constrained to be unique by BigQuery).
-      yearOfBirth:
-        type: integer
-        format: int32
-        description: ''
+      city:
+        type: string
+        description: User-reported city of residence.
+      country:
+        type: string
+        description: User-reported country of residence.
+      state:
+        type: string
+        description: User-reported state or province. Not guaranteed to match official
+          abbreviations or spellings.
+      streetAddress1:
+        type: string
+        description: First line of user street address.
+      streetAddress2:
+        type: string
+        description: Second line of user street address.
       zipCode:
         type: string
-        description: ''
+        description: Up to 10-digit zip code for use residence.
+      institutionId:
+        type: integer
+        format: int64
+        description: |-
+          Foreign key into institution table. Each user is only affiliated
+          with a single institution.
+      institutionalRoleEnum:
+        description: |-
+          Description of the user's role at the institution they are
+          affiliated with. Selected from a list of predefined values. If "other", see institutional_role_other_text
+          for custom description.
+        "$ref": "#/definitions/InstitutionalRole"
+      institutionalRoleOtherText:
+        type: string
+        description: |-
+          If the institutional_role_enum is "other", custom description
+          of this user's role in the institution.
+      race:
+        description: |-
+          User-reported identities as lgbtq information
+        "$ref": "#/definitions/Race"
+      ethnicity:
+        description: |-
+          User-reported identities as lgbtq information
+        "$ref": "#/definitions/Ethnicity"
+      identifiesAsLgbtq:
+        description: |-
+          User-reported identities as lgbtq information
+        type: boolean
+      lgbtqIdentity:
+        description: |-
+          User-reported identities as lgbtq information
+        type: string
+      genderIdentity:
+        description: |-
+          User-reported identities as lgbtq information
+        "$ref": "#/definitions/GenderIdentity"
+      sexAtBirth:
+        description: |-
+          User-reported identities as lgbtq information
+        "$ref": "#/definitions/SexAtBirth"
+      yearOfBirth:
+        description: |-
+          User-reported identities as lgbtq information
+        type: number
+      highestEducation:
+        description: |-
+          User-reported identities as lgbtq information
+        "$ref": "#/definitions/Education"
+      disability:
+        description: |-
+          User-reported identities as lgbtq information
+        "$ref": "#/definitions/Disability"
+      degrees:
+        type: string
   ReportingWorkspace:
     x-aou-note: |-
       This code was generated using reporting-wizard.rb at 2020-09-30T16:18:28-04:00.
