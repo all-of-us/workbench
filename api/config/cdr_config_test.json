@@ -82,7 +82,7 @@
       "isDefault": false,
       "name": "CDR for Controlled Tier - DO NOT USE",
       "dataAccessLevel": 1,
-      "bigqueryProject": "fc-aou-cdr-synth-test",
+      "bigqueryProject": "fc-aou-cdr-synth-test-2",
       "bigqueryDataset": "SR2019q4r3",
       "microarrayBigqueryDataset": "microarray_data",
       "creationTime": "2020-08-26 00:09:51Z",
