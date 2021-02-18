@@ -214,7 +214,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       bufferedBillingProject =
           billingProjectBufferService.assignBillingProject(user, cdrVersion.getAccessTier());
     } catch (EmptyBufferException e) {
-      throw new TooManyRequestsException();
+      throw new TooManyRequestsException(e);
     }
     final String billingProject = bufferedBillingProject.getFireCloudProjectName();
 
@@ -449,7 +449,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           billingProjectBufferService.assignBillingProject(
               user, fromWorkspace.getCdrVersion().getAccessTier());
     } catch (EmptyBufferException e) {
-      throw new TooManyRequestsException();
+      throw new TooManyRequestsException(e);
     }
     final String toWorkspaceProject = bufferedBillingProject.getFireCloudProjectName();
 
