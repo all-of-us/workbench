@@ -69,8 +69,6 @@ beforeEach(async () => {
     return request && request.method() !== 'OPTIONS' ? request : null;
   }
 
-  const isWorkbenchRequest = fp.flow(isWorkbenchApi, notOptionsRequest, includeResourceType, includeUrl);
-
   const getRequestPostData = (request: Request): string | undefined => {
     return request && request.postData() ? request.postData() : undefined;
   }
@@ -90,10 +88,11 @@ beforeEach(async () => {
     const response = request.response();
     const failureText = stringifyData(request.failure().errorText);
     const responseText = await getResponseText(request);
-    console.debug(`❗Request failed: ${response.status()} ${request.method()} ${request.url()}\n${failureText}\n\n${responseText}`);
+    console.debug('❗Request failed: ' +
+       `${response.status()} ${request.method()} ${request.url()}\n${failureText}\n\n${responseText}`);
   }
 
-  const logRequest = async (request: Request): Promise<void> => {
+  const logResponse = async (request: Request): Promise<void> => {
     let responseText = stringifyData(await getResponseText(request));
     if (isWorkspacesApi(request)) {
       // truncate long response. get first two workspace details.
@@ -101,16 +100,19 @@ beforeEach(async () => {
          ? responseText
          : 'truncated...\n' + JSON.stringify(JSON.parse(responseText).items.slice(0, 2), null, 2);
     }
-    console.debug(`❗Request finished: ${request.response().status()} ${request.method()} ${request.url()}\n${responseText}`);
+    console.debug('❗Request finished: ' +
+       `${request.response().status()} ${request.method()} ${request.url()}\n${responseText}`);
   }
 
-  const canLogResponse = fp.flow(isWorkbenchRequest, notRedirectRequest);
+  const isWorkbenchRequest = fp.flow(isWorkbenchApi, notOptionsRequest, includeResourceType, includeUrl);
 
+  const canLogResponse = fp.flow(isWorkbenchRequest, notRedirectRequest);
 
   // New request initiated
   page.on('request', (request) => {
     if (isWorkbenchRequest(request)) {
-      console.debug(`❗Request issued: ${request.method()} ${request.url()}\n${getRequestData(request)}`);
+      console.debug('❗Request issued: ' +
+         `${request.method()} ${request.url()}\n${getRequestData(request)}`);
     }
     try {
       request.continue();
@@ -124,7 +126,7 @@ beforeEach(async () => {
       if (isApiFailure(request)) {
         await logError(request);
       } else {
-        await logRequest(request);
+        await logResponse(request);
       }
     }
     try {
