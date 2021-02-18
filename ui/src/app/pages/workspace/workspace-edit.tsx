@@ -1311,6 +1311,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               <FlexColumn>
                 <FlexRow>
                 <RadioButton style={{marginTop: '0.2rem'}} name='reviewRequested'
+                             data-test-id='review-request-btn-true'
                              onChange={() => {
                                this.updateResearchPurpose('reviewRequested', true);
                              }}
@@ -1320,6 +1321,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 </FlexRow>
                 <FlexRow>
                 <RadioButton style={{marginTop: '0.2rem'}} name='reviewRequested'
+                             data-test-id='review-request-btn-false'
                              onChange={() => {
                                this.updateResearchPurpose('reviewRequested', false);
                              }}
