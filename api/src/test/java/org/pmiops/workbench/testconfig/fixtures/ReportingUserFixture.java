@@ -198,6 +198,8 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     user.setTwoFactorAuthCompletionTime(USER__TWO_FACTOR_AUTH_COMPLETION_TIME);
     user.setUsername(USER__USERNAME);
     user.setDegreesEnum(USER__DEGREES);
+    DbDemographicSurvey dbDemographicSurvey = createDbDemographicSurvey();
+    dbDemographicSurvey.setUser(user);
     user.setDemographicSurvey(createDbDemographicSurvey());
     return user;
   }
