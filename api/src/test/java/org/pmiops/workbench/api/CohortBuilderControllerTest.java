@@ -116,7 +116,7 @@ public class CohortBuilderControllerTest {
                 .domainId("CONDITION")
                 .name("Conditions")
                 .description("descr")
-                .allConceptCount(0)
+                .allConceptCount(10)
                 .standardConceptCount(0)
                 .participantCount(1000));
 
@@ -124,7 +124,7 @@ public class CohortBuilderControllerTest {
     assertThat(domainInfo.getName()).isEqualTo(dbDomainInfo.getName());
     assertThat(domainInfo.getDescription()).isEqualTo(dbDomainInfo.getDescription());
     assertThat(domainInfo.getParticipantCount()).isEqualTo(dbDomainInfo.getParticipantCount());
-    assertThat(domainInfo.getAllConceptCount()).isEqualTo(0);
+    assertThat(domainInfo.getAllConceptCount()).isEqualTo(10);
     assertThat(domainInfo.getStandardConceptCount()).isEqualTo(0);
   }
 
