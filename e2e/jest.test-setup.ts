@@ -74,8 +74,6 @@ beforeEach(async () => {
     return request && request.postData() ? request.postData() : undefined;
   }
 
-  const getRequestData = fp.flow(getRequestPostData, stringifyData);
-
   const notRedirectRequest = (request: Request): boolean => {
     // Response body can only be accessed for non-redirect requests
     return request && request.redirectChain().length === 0;
@@ -106,7 +104,7 @@ beforeEach(async () => {
   }
 
   const isWorkbenchRequest = fp.flow(isWorkbenchApi, notOptionsRequest, includeResourceType, includeUrl);
-
+  const getRequestData = fp.flow(getRequestPostData, stringifyData);
   const canLogResponse = fp.flow(isWorkbenchRequest, notRedirectRequest);
 
   // New request initiated
