@@ -341,7 +341,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
                                                      updating={surveysLoading.includes(survey.name)}/>)
                 }
               </div>
-              {environment.enableNewConceptTabs && !!physicalMeasurementsCard && <React.Fragment>
+              {!!physicalMeasurementsCard && <React.Fragment>
                 <div style={styles.sectionHeader}>
                   Program Physical Measurements
                 </div>
