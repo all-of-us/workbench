@@ -1984,7 +1984,6 @@ def create_wgs_cohort_extraction_bp_workspace(cmd_name, *args)
 
   flags = ([
       ["--config-json", get_config_file(op.opts.project)],
-      ["--billing-account", get_billing_config(op.opts.project)["accountId"]],
       ["--billing-project-name", op.opts.billing_project_name],
       ["--workspace-name", op.opts.workspace_name],
       ["--owners", op.opts.owners],

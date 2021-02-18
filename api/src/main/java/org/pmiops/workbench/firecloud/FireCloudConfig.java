@@ -4,6 +4,7 @@ import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -32,7 +33,7 @@ public class FireCloudConfig {
   //
   public static final String END_USER_API_CLIENT = "endUserApiClient";
   public static final String SERVICE_ACCOUNT_API_CLIENT = "serviceAccountApiClient";
-  public static final String WGS_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT = "wgsExtractionServiceAccountApiClient";
+  public static final String WGS_COHORT_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT = "wgsCohortExtractionServiceAccountApiClient";
   public static final String SERVICE_ACCOUNT_GROUPS_API = "serviceAccountGroupsApi";
   public static final String SERVICE_ACCOUNT_WORKSPACE_API = "workspaceAclsApi";
   public static final String END_USER_WORKSPACE_API = "workspacesApi";
@@ -67,30 +68,35 @@ public class FireCloudConfig {
     return apiClient;
   }
 
-  @Bean(name = WGS_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT)
+  @Bean(name = WGS_COHORT_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient wgsExtractionServiceAccountApiClient(WorkbenchConfig workbenchConfig, IamCredentialsClient iamCredentialsClient) {
-    List<String> delegates = Arrays.asList("projects/-/serviceAccounts/all-of-us-workbench-test@appspot.gserviceaccount.com");
-    Duration lifetime = Duration.newBuilder().setSeconds(60*60).build();
-    // TODO : does this get created per request or once per service?
-
-    String accessToken = iamCredentialsClient.generateAccessToken(
-            "projects/-/serviceAccounts/wgs-cohort-extraction@all-of-us-workbench-test.iam.gserviceaccount.com",
-            delegates,
-            BILLING_SCOPES,
-            lifetime
-    ).getAccessToken();
-
     ApiClient apiClient = buildApiClient(workbenchConfig);
-    apiClient.setAccessToken(accessToken);
+    apiClient.setAccessToken(
+            iamCredentialsClient
+                    .generateAccessToken(
+                            "projects/-/serviceAccounts/" + workbenchConfig.wgsCohortExtraction.serviceAccount,
+                            Collections.EMPTY_LIST,
+                            BILLING_SCOPES,
+                            Duration.newBuilder().setSeconds(60).build())
+                    .getAccessToken()
+    );
 
     return apiClient;
   }
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public SubmissionsApi submissionsApi(@Qualifier(WGS_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
+  public SubmissionsApi submissionsApi(@Qualifier(WGS_COHORT_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
     SubmissionsApi api = new SubmissionsApi();
+    api.setApiClient(apiClient);
+    return api;
+  }
+
+  @Bean
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public MethodConfigurationsApi methodConfigurationsApi(@Qualifier(WGS_COHORT_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
+    MethodConfigurationsApi api = new MethodConfigurationsApi();
     api.setApiClient(apiClient);
     return api;
   }

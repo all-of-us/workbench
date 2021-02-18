@@ -820,6 +820,41 @@ paths:
         500:
           description: Internal Error
 
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/methodconfigs:
+    post:
+      tags:
+        - methodConfigurations
+      summary: Create a Method Configuration in a workspace
+      operationId: createWorkspaceMethodConfig
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: Workspace Namespace
+          required: true
+          schema:
+            type: string
+        - name: workspaceName
+          in: path
+          description: Workspace Name
+          required: true
+          schema:
+            type: string
+        - in: body
+          name: newMethodConfigIngest
+          description: Method Configuration contents
+          required: true
+          schema:
+            $ref: '#/definitions/NewMethodConfigIngest'
+      responses:
+        201:
+          description: Successful Request
+        404:
+          description: Workspace not found
+        409:
+          description: Method Configuration already exists
+        500:
+          description: Internal Server Error
+
 ##########################################################################################
 ## PARAMETERS
 ##########################################################################################
@@ -1556,3 +1591,54 @@ definitions:
       submissionId:
         type: string
         description: Submission Id
+
+  NewMethodConfigIngest:
+    required:
+      - deleted
+      - inputs
+      - methodConfigVersion
+      - methodRepoMethod
+      - name
+      - namespace
+      - outputs
+      - prerequisites
+      - rootEntityType
+    type: object
+    properties:
+      namespace:
+        type: string
+        description: Method configuration namespace
+      name:
+        type: string
+        description: Method configuration name
+      rootEntityType:
+        type: string
+        description: Method configuration root entity type
+      inputs:
+        type: object
+        additionalProperties:
+          type: string
+        description: Input map - Map[string, string]
+      outputs:
+        type: object
+        additionalProperties:
+          type: string
+        description: Output map - Map[string, string]
+      prerequisites:
+        type: object
+        additionalProperties:
+          type: string
+        description: Prerequisites map - Map[string, string]
+      methodRepoMethod:
+        type: object
+        additionalProperties:
+          type: string
+        description: Method ID - Map
+      methodConfigVersion:
+        type: integer
+        description: Version number, incremented on edit
+        format: int32
+      deleted:
+        type: boolean
+        description: Is this config marked as deleted?
+        default: false

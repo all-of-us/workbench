@@ -1,3 +1,4 @@
+import * as fp from 'lodash/fp';
 import {Menu} from 'primereact/menu';
 import * as React from 'react';
 
@@ -14,12 +15,20 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {isAbortError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {AgeType, Cohort, GenderOrSexType, ResourceType, TemporalTime, WorkspaceAccessLevel} from 'generated/fetch';
+import {
+  AgeType,
+  CdrVersionListResponse,
+  Cohort,
+  GenderOrSexType,
+  ResourceType,
+  TemporalTime,
+  WorkspaceAccessLevel
+} from 'generated/fetch';
 
 const COHORT_TYPE = 'AoU_Discover';
 
@@ -135,6 +144,7 @@ interface Props {
   updateCount: any;
   updating: Function;
   workspace: WorkspaceData;
+  cdrVersionListResponse: CdrVersionListResponse;
 }
 
 interface State {
@@ -162,7 +172,7 @@ interface State {
   total: number;
 }
 
-export const ListOverview = withCurrentWorkspace()(
+export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
   class extends React.Component<Props, State> {
     private aborter = new AbortController();
     private ageMenu: any;
@@ -258,6 +268,10 @@ export const ListOverview = withCurrentWorkspace()(
       const request = mapRequest(searchRequest);
       return cohortBuilderApi()
         .findDemoChartInfo(+cdrVersionId, genderOrSexType.toString(), ageType.toString(), request, {signal: this.aborter.signal});
+    }
+
+    startGenomeExtractionJob() {
+      cohortsApi().extractCohortGenomes(this.props.workspace.namespace, this.props.workspace.id, this.props.cohort.id);
     }
 
     get hasActiveItems() {
@@ -402,10 +416,18 @@ export const ListOverview = withCurrentWorkspace()(
     }
 
     get saveItems() {
-      return [
+      const items = [
         {label: 'Save', command: () => this.saveCohort(), disabled: !this.props.cohortChanged},
         {label: 'Save as', command: () => this.openSaveModal()},
       ];
+
+      const cdrVersion = fp.find(c => c.cdrVersionId === this.props.workspace.cdrVersionId,
+        this.props.cdrVersionListResponse.items);
+      if (cdrVersion.hasMicroarrayData) {
+        items.push({label: 'Start Genome Extraction Job', command: () => this.startGenomeExtractionJob()});
+      }
+
+      return items;
     }
 
     get disableActionIcons() {
@@ -454,7 +476,8 @@ export const ListOverview = withCurrentWorkspace()(
           <div style={styles.overviewHeader}>
             <div style={{width: '100%'}}>
               {!!cohort.id ? <React.Fragment>
-                <Menu appendTo={document.body}
+                <Menu style={{width: 'fit-content', minWidth: '7.25rem'}}
+                  appendTo={document.body}
                   model={this.saveItems}
                   popup={true}
                   ref={el => this.saveMenu = el}/>
