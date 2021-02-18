@@ -32,7 +32,6 @@ import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
-import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
@@ -264,14 +263,8 @@ public class BillingProjectBufferService implements GaugeDataCollector {
         .collect(Collectors.toList());
   }
 
-  public DbBillingProjectBufferEntry assignBillingProject(DbUser dbUser, Workspace workspace) {
-    final String tierName = workspace.getAccessTierShortName();
-    DbAccessTier dbAccessTier = accessTierDao.findOneByShortName(tierName);
-    if (dbAccessTier == null) {
-      throw new NotFoundException(
-          String.format("Could not find Access Tier '%s' in database", tierName));
-    }
-
+  public DbBillingProjectBufferEntry assignBillingProject(
+      DbUser dbUser, DbAccessTier dbAccessTier) {
     DbBillingProjectBufferEntry bufferEntry = consumeBufferEntryForAssignment(dbAccessTier);
 
     fireCloudService.addOwnerToBillingProject(

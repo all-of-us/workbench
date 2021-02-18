@@ -62,7 +62,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
-import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.monitoring.views.GaugeMetric;
@@ -646,10 +645,8 @@ public class BillingProjectBufferServiceTest {
     DbUser user = mock(DbUser.class);
     doReturn("fake-email@aou.org").when(user).getUsername();
 
-    Workspace toCreate = new Workspace().accessTierShortName(REGISTERED_TIER_NAME);
-
     DbBillingProjectBufferEntry assignedEntry =
-        billingProjectBufferService.assignBillingProject(user, toCreate);
+        billingProjectBufferService.assignBillingProject(user, registeredTier);
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<String> secondCaptor = ArgumentCaptor.forClass(String.class);
@@ -688,10 +685,8 @@ public class BillingProjectBufferServiceTest {
     DbUser user = mock(DbUser.class);
     doReturn("fake-email@aou.org").when(user).getUsername();
 
-    Workspace toCreate = new Workspace().accessTierShortName(controlledTierName);
-
     DbBillingProjectBufferEntry assignedEntry =
-        billingProjectBufferService.assignBillingProject(user, toCreate);
+        billingProjectBufferService.assignBillingProject(user, controlledTier);
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<String> secondCaptor = ArgumentCaptor.forClass(String.class);
@@ -706,14 +701,12 @@ public class BillingProjectBufferServiceTest {
         .isEqualTo(BufferEntryStatus.ASSIGNED);
   }
 
-  @Test(expected = NotFoundException.class)
+  @Test(expected = EmptyBufferException.class)
   public void assignBillingProjectInvalidTier() {
     DbUser user = mock(DbUser.class);
     doReturn("fake-email@aou.org").when(user).getUsername();
 
-    Workspace toCreate = new Workspace().accessTierShortName("missing");
-
-    billingProjectBufferService.assignBillingProject(user, toCreate);
+    billingProjectBufferService.assignBillingProject(user, new DbAccessTier());
   }
 
   @Test
@@ -746,12 +739,10 @@ public class BillingProjectBufferServiceTest {
         .when(billingProjectBufferEntryDao)
         .save(any(DbBillingProjectBufferEntry.class));
 
-    Workspace toCreate = new Workspace().accessTierShortName(REGISTERED_TIER_NAME);
-
     Callable<DbBillingProjectBufferEntry> t1 =
-        () -> billingProjectBufferService.assignBillingProject(firstUser, toCreate);
+        () -> billingProjectBufferService.assignBillingProject(firstUser, registeredTier);
     Callable<DbBillingProjectBufferEntry> t2 =
-        () -> billingProjectBufferService.assignBillingProject(secondUser, toCreate);
+        () -> billingProjectBufferService.assignBillingProject(secondUser, registeredTier);
 
     List<Callable<DbBillingProjectBufferEntry>> callableTasks = new ArrayList<>();
     callableTasks.add(t1);

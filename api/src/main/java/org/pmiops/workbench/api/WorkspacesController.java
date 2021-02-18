@@ -158,7 +158,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return registeredDomainGroup.getGroupEmail();
   }
 
-  private DbCdrVersion setLiveCdrVersionId(DbWorkspace dbWorkspace, String cdrVersionId) {
+  private DbCdrVersion getLiveCdrVersionId(String cdrVersionId) {
     if (Strings.isNullOrEmpty(cdrVersionId)) {
       throw new BadRequestException("missing cdrVersionId");
     }
@@ -174,7 +174,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                 "CDR version with ID %s is not live, please select a different CDR version",
                 cdrVersionId));
       }
-      dbWorkspace.setCdrVersion(cdrVersion);
       return cdrVersion;
     } catch (NumberFormatException e) {
       throw new BadRequestException(String.format("Invalid cdr version ID: %s", cdrVersionId));
@@ -207,10 +206,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private Workspace createWorkspaceImpl(Workspace workspace) {
     validateWorkspaceApiModel(workspace);
 
+    DbCdrVersion cdrVersion = getLiveCdrVersionId(workspace.getCdrVersionId());
+
     DbUser user = userProvider.get();
     final DbBillingProjectBufferEntry bufferedBillingProject;
     try {
-      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user, workspace);
+      bufferedBillingProject =
+          billingProjectBufferService.assignBillingProject(user, cdrVersion.getAccessTier());
     } catch (EmptyBufferException e) {
       throw new TooManyRequestsException();
     }
@@ -231,7 +233,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workbenchConfigProvider.get().billing.freeTierBillingAccountName());
     setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
 
-    setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
+    dbWorkspace.setCdrVersion(cdrVersion);
 
     // TODO: enforce data access level authorization
     dbWorkspace.setDataAccessLevelEnum(workspace.getDataAccessLevel());
@@ -432,22 +434,24 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         fromWorkspaceNamespace, fromWorkspaceId, WorkspaceAccessLevel.READER);
 
-    DbUser user = userProvider.get();
-
-    final DbBillingProjectBufferEntry bufferedBillingProject;
-    try {
-      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user, toWorkspace);
-    } catch (EmptyBufferException e) {
-      throw new TooManyRequestsException();
-    }
-    final String toWorkspaceProject = bufferedBillingProject.getFireCloudProjectName();
-
     DbWorkspace fromWorkspace =
         workspaceService.getRequiredWithCohorts(fromWorkspaceNamespace, fromWorkspaceId);
     if (fromWorkspace == null) {
       throw new NotFoundException(
           String.format("DbWorkspace %s/%s not found", fromWorkspaceNamespace, fromWorkspaceId));
     }
+
+    DbUser user = userProvider.get();
+
+    final DbBillingProjectBufferEntry bufferedBillingProject;
+    try {
+      bufferedBillingProject =
+          billingProjectBufferService.assignBillingProject(
+              user, fromWorkspace.getCdrVersion().getAccessTier());
+    } catch (EmptyBufferException e) {
+      throw new TooManyRequestsException();
+    }
+    final String toWorkspaceProject = bufferedBillingProject.getFireCloudProjectName();
 
     FirecloudWorkspaceId toFcWorkspaceId =
         generateFirecloudWorkspaceId(toWorkspaceProject, toWorkspace.getName());
@@ -488,7 +492,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace.setCdrVersion(fromWorkspace.getCdrVersion());
       dbWorkspace.setDataAccessLevel(fromWorkspace.getDataAccessLevel());
     } else {
-      DbCdrVersion reqCdrVersion = setLiveCdrVersionId(dbWorkspace, reqCdrVersionId);
+      DbCdrVersion reqCdrVersion = getLiveCdrVersionId(reqCdrVersionId);
+      dbWorkspace.setCdrVersion(reqCdrVersion);
       dbWorkspace.setDataAccessLevelEnum(reqCdrVersion.getDataAccessLevelEnum());
     }
 
