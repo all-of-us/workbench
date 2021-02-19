@@ -831,14 +831,12 @@ paths:
           in: path
           description: Workspace Namespace
           required: true
-          schema:
-            type: string
+          type: string
         - name: workspaceName
           in: path
           description: Workspace Name
           required: true
-          schema:
-            type: string
+          type: string
         - in: body
           name: newMethodConfigIngest
           description: Method Configuration contents
@@ -868,26 +866,22 @@ paths:
           in: path
           description: Workspace Namespace
           required: true
-          schema:
-            type: string
+          type: string
         - name: workspaceName
           in: path
           description: Workspace Name
           required: true
-          schema:
-            type: string
+          type: string
         - name: configNamespace
           in: path
           description: Configuration Namespace
           required: true
-          schema:
-            type: string
+          type: string
         - name: configName
           in: path
           description: Configuration Name
           required: true
-          schema:
-            type: string
+          type: string
       responses:
         200:
           description: Successful request
