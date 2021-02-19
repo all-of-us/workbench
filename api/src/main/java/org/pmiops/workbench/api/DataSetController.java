@@ -473,7 +473,11 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DomainValuesResponse response = new DomainValuesResponse();
 
-    FieldList fieldList = bigQueryService.getTableFieldsFromDomain(Domain.valueOf(domainValue));
+    Domain domain =
+        Domain.PHYSICAL_MEASUREMENT_CSS.equals(Domain.valueOf(domainValue))
+            ? Domain.MEASUREMENT
+            : Domain.valueOf(domainValue);
+    FieldList fieldList = bigQueryService.getTableFieldsFromDomain(domain);
     response.setItems(
         fieldList.stream()
             .map(field -> new DomainValue().value(field.getName().toLowerCase()))

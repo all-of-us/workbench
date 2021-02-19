@@ -234,7 +234,8 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
 
     get displayDomainName() {
       const {conceptSet} = this.state;
-      return conceptSet.domain === Domain.PHYSICALMEASUREMENT ? 'Physical Measurements' : fp.capitalize(conceptSet.domain.toString()) ;
+      return (conceptSet.domain === Domain.PHYSICALMEASUREMENT ||
+        conceptSet.domain === Domain.PHYSICALMEASUREMENTCSS) ? 'Physical Measurements' : fp.capitalize(conceptSet.domain.toString()) ;
     }
 
     async showUnsavedModal() {

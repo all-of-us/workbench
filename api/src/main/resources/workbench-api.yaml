@@ -3576,6 +3576,7 @@ definitions:
     - FITBIT_HEART_RATE_LEVEL
     - FITBIT_ACTIVITY
     - FITBIT_INTRADAY_STEPS
+    - PHYSICAL_MEASUREMENT_CSS
   Surveys:
     type: string
     description: a survey for concepts
