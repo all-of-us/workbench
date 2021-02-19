@@ -82,19 +82,19 @@ user:
   zip_code: |
     Up to 10-digit zip code for user residence.
   degrees: |
-    List of user's degrees.
-  race: |
-    User-reported race information.
+    List of user's degrees, comma-delimited if multiple answers were provided.
+  races: |
+    User-reported race information, comma-delimited if multiple answers were provided.
   ethnicity: |
     User-reported Ethnicity information
-  gender_identity: |
-    User-reported gender identity information
+  gender_identifies: |
+    User-reported gender identity information, comma-delimited if multiple answers were provided.
   identifies_as_lgbtq: |
     User-reported identities as lgbtq information
   lgbtq_identity: |
     User-reported lgbtq identity information
-  set_at_birth: |
-    User-reported sex at birth information
+  sexes_at_birth: |
+    User-reported sex at birth information, comma-delimited if multiple answers were provided.
   year_of_birth: |
     User-reported year of birth information
   disability: |

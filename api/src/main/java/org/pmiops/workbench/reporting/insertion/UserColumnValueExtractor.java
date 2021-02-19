@@ -76,14 +76,14 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
   DISABILITY("disability", u -> enumToString(u.getDisability())),
   DEGREES("degrees", ReportingUser::getDegrees),
   ETHNICITY("ethnicity", u -> enumToString(u.getEthnicity())),
-  GENDER_IDENTITY("gender_identity", ReportingUser::getGenderIdentity),
+  GENDER_IDENTIFIES("gender_identifies", ReportingUser::getGenderIdentifies),
   HIGHEST_EDUCATION("highest_education", u -> enumToString(u.getHighestEducation())),
   IDENTIFIES_AS_LGBTQ(
       "identifies_as_lgbtq",
       u -> u.getIdentifiesAsLgbtq() == null ? null : u.getIdentifiesAsLgbtq().toString()),
   LGBTQ_IDENTITY("lgbtq_identity", ReportingUser::getLgbtqIdentity),
-  SEX_AT_BIRTH("sex_at_birth", ReportingUser::getSexAtBirth),
-  RACE("race", ReportingUser::getRace),
+  SEXES_AT_BIRTH("sexes_at_birth", ReportingUser::getSexesAtBirth),
+  RACES("races", ReportingUser::getRaces),
   YEAR_OF_BIRTH(
       "year_of_birth", u -> u.getYearOfBirth() == null ? null : u.getYearOfBirth().intValue());
 

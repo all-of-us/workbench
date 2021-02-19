@@ -308,14 +308,14 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .highestEducation(educationFromStorage(rs.getShort("education")))
                 .ethnicity(ethnicityFromStorage(rs.getShort("ethnicity")))
                 .disability(disabilityFromStorage(rs.getShort("disability")))
-                .race(
+                .races(
                     convertListEnumFromStorage(
                         rs.getString("race"), e -> raceFromStorage(e).toString()))
-                .genderIdentity(
+                .genderIdentifies(
                     convertListEnumFromStorage(
                         rs.getString("gender_identity"),
                         e -> genderIdentityFromStorage(e).toString()))
-                .sexAtBirth(
+                .sexesAtBirth(
                     convertListEnumFromStorage(
                         rs.getString("sex_at_birth"), e -> sexAtBirthFromStorage(e).toString()))
                 .lgbtqIdentity(rs.getString("lgbtq_identity"))

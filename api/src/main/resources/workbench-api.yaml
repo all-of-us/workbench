@@ -8301,19 +8301,19 @@ definitions:
         "$ref": "#/definitions/Disability"
       degrees:
         description: |-
-          User-reported degrees
+          User-reported degrees, comma-delimited if multiple answers were provided.
         type: string
-      genderIdentity:
+      genderIdentifies:
         description: |-
-          User-reported genderIdentity information
+          User-reported genderIdentity information, comma-delimited if multiple answers were provided.
         type: string
-      sexAtBirth:
+      sexesAtBirth:
         description: |-
-          User-reported sexAtBirth information
+          User-reported sexAtBirth information, comma-delimited if multiple answers were provided.
         type: string
-      race:
+      races:
         description: |-
-          User-reported race information
+          User-reported races information, comma-delimited if multiple answers were provided.
         type: string
   ReportingWorkspace:
     x-aou-note: |-
