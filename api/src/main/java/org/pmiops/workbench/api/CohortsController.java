@@ -13,7 +13,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
-
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.cohorts.CohortMapper;
@@ -443,11 +442,14 @@ public class CohortsController implements CohortsApiDelegate {
   }
 
   @Override
-  public ResponseEntity<TerraJob> extractCohortGenomes(String workspaceNamespace, String workspaceId, Long cohortId) {
+  public ResponseEntity<TerraJob> extractCohortGenomes(
+      String workspaceNamespace, String workspaceId, Long cohortId) {
     try {
-      return ResponseEntity.ok(cohortService.submitGenomicsCohortExtractionJob(workspaceNamespace, workspaceId));
+      return ResponseEntity.ok(
+          cohortService.submitGenomicsCohortExtractionJob(workspaceNamespace, workspaceId));
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      // Given that there are no input arguments ATM, any API exceptions are due to programming or Firecloud errors
+      // Given that there are no input arguments ATM, any API exceptions are due to programming or
+      // Firecloud errors
       throw new ServerErrorException();
     }
   }

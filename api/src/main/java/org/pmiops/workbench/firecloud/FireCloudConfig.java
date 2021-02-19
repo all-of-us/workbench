@@ -2,18 +2,24 @@ package org.pmiops.workbench.firecloud;
 
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Duration;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import com.google.protobuf.Duration;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.firecloud.api.*;
+import org.pmiops.workbench.firecloud.api.BillingApi;
+import org.pmiops.workbench.firecloud.api.GroupsApi;
+import org.pmiops.workbench.firecloud.api.MethodConfigurationsApi;
+import org.pmiops.workbench.firecloud.api.NihApi;
+import org.pmiops.workbench.firecloud.api.ProfileApi;
+import org.pmiops.workbench.firecloud.api.StaticNotebooksApi;
+import org.pmiops.workbench.firecloud.api.StatusApi;
+import org.pmiops.workbench.firecloud.api.SubmissionsApi;
+import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
@@ -33,7 +39,8 @@ public class FireCloudConfig {
   //
   public static final String END_USER_API_CLIENT = "endUserApiClient";
   public static final String SERVICE_ACCOUNT_API_CLIENT = "serviceAccountApiClient";
-  public static final String WGS_COHORT_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT = "wgsCohortExtractionServiceAccountApiClient";
+  public static final String WGS_COHORT_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT =
+      "wgsCohortExtractionServiceAccountApiClient";
   public static final String SERVICE_ACCOUNT_GROUPS_API = "serviceAccountGroupsApi";
   public static final String SERVICE_ACCOUNT_WORKSPACE_API = "workspaceAclsApi";
   public static final String END_USER_WORKSPACE_API = "workspacesApi";
@@ -70,24 +77,25 @@ public class FireCloudConfig {
 
   @Bean(name = WGS_COHORT_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public ApiClient wgsExtractionServiceAccountApiClient(WorkbenchConfig workbenchConfig, IamCredentialsClient iamCredentialsClient) {
+  public ApiClient wgsExtractionServiceAccountApiClient(
+      WorkbenchConfig workbenchConfig, IamCredentialsClient iamCredentialsClient) {
     ApiClient apiClient = buildApiClient(workbenchConfig);
     apiClient.setAccessToken(
-            iamCredentialsClient
-                    .generateAccessToken(
-                            "projects/-/serviceAccounts/" + workbenchConfig.wgsCohortExtraction.serviceAccount,
-                            Collections.emptyList(),
-                            BILLING_SCOPES,
-                            Duration.newBuilder().setSeconds(60).build())
-                    .getAccessToken()
-    );
+        iamCredentialsClient
+            .generateAccessToken(
+                "projects/-/serviceAccounts/" + workbenchConfig.wgsCohortExtraction.serviceAccount,
+                Collections.emptyList(),
+                BILLING_SCOPES,
+                Duration.newBuilder().setSeconds(60).build())
+            .getAccessToken());
 
     return apiClient;
   }
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public SubmissionsApi submissionsApi(@Qualifier(WGS_COHORT_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
+  public SubmissionsApi submissionsApi(
+      @Qualifier(WGS_COHORT_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
     SubmissionsApi api = new SubmissionsApi();
     api.setApiClient(apiClient);
     return api;
@@ -95,7 +103,8 @@ public class FireCloudConfig {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public MethodConfigurationsApi methodConfigurationsApi(@Qualifier(WGS_COHORT_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
+  public MethodConfigurationsApi methodConfigurationsApi(
+      @Qualifier(WGS_COHORT_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
     MethodConfigurationsApi api = new MethodConfigurationsApi();
     api.setApiClient(apiClient);
     return api;

@@ -440,7 +440,7 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<DataSetListResponse> getDataSetByResourceId(
-          String workspaceNamespace, String workspaceId, ResourceType resourceType, Long id) {
+      String workspaceNamespace, String workspaceId, ResourceType resourceType, Long id) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
