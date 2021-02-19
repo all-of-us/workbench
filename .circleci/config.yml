@@ -284,7 +284,6 @@ commands:
             filename=/tmp/tests-to-run.txt
             circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings > $filename
             grep -v "nightly" $filename > tmpfile.txt; mv tmpfile.txt $filename
-            cat $filename
             yarn test:ci $(cat $filename)
           no_output_timeout: 25m
       - run:
@@ -302,6 +301,7 @@ commands:
           when: always
       - store_artifacts:
           path: ~/workbench/e2e/logs
+          destination: logs
           when: always
       - store_test_results:
           path: ~/workbench/e2e/logs
