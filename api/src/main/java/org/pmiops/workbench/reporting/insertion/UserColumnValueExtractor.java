@@ -77,7 +77,7 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
   ETHNICITY("ethnicity", u -> enumToString(u.getEthnicity())),
   GENDER_IDENTITY("gender_identity", ReportingUser::getGenderIdentity),
   HIGHEST_EDUCATION("highest_education", u -> enumToString(u.getHighestEducation())),
-  IDENTIFIES_AS_LGBTQ("identity_as_lgbtq", ReportingUser::getIdentifiesAsLgbtq),
+  IDENTIFIES_AS_LGBTQ("identifies_as_lgbtq", ReportingUser::getIdentifiesAsLgbtq),
   LGBTQ_IDENTITY("lgbtq_identity", ReportingUser::getLgbtqIdentity),
   SEX_AT_BIRTH("sex_at_birth", ReportingUser::getSexAtBirth),
   RACE("race", ReportingUser::getRace),
