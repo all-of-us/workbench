@@ -301,10 +301,10 @@ commands:
               > ./logs/circleci_parameters.json
           when: always
       - store_artifacts:
-          path: e2e/logs
-          destination: logs
+          path: ~/workbench/e2e/logs
+          when: always
       - store_test_results:
-          path: e2e/logs
+          path: ~/workbench/e2e/logs
 
   store-commit-message:
     description: "Export Git commit message to environment variable"

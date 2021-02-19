@@ -59,7 +59,9 @@ beforeEach(async () => {
 
   // Api "/workspaces" or "/cdrVersions" response can be truncated
   const isWorkspacesApi = (request: Request): boolean => {
-    return request && (request.url().endsWith('/v1/workspaces') || request.url().endsWith('/v1/cdrVersions'));
+    return request && (request.url().endsWith('/v1/workspaces')
+       || request.url().endsWith('/v1/cdrVersions')
+       || request.url().indexOf('/search/term') != -1);
   }
 
   const isApiFailure = (request: Request): boolean => {
