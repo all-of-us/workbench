@@ -8277,7 +8277,7 @@ definitions:
           of this user's role in the institution.
       ethnicity:
         description: |-
-          User-reported identities as lgbtq information
+          User-reported ethnicity information
         "$ref": "#/definitions/Ethnicity"
       identifiesAsLgbtq:
         description: |-
@@ -8285,19 +8285,19 @@ definitions:
         type: boolean
       lgbtqIdentity:
         description: |-
-          User-reported identities as lgbtq information
+          User-reported lgbtqIdentity information
         type: string
       yearOfBirth:
         description: |-
-          User-reported identities as lgbtq information
+          User-reported yearOfBirth information
         type: number
       highestEducation:
         description: |-
-          User-reported identities as lgbtq information
+          User-reported highestEducation information
         "$ref": "#/definitions/Education"
       disability:
         description: |-
-          User-reported identities as lgbtq information
+          User-reported disability
         "$ref": "#/definitions/Disability"
       degrees:
         description: |-
@@ -8305,15 +8305,15 @@ definitions:
         type: string
       genderIdentity:
         description: |-
-          User-reported identities as lgbtq information
+          User-reported genderIdentity information
         type: string
       sexAtBirth:
         description: |-
-          User-reported identities as lgbtq information
+          User-reported sexAtBirth information
         type: string
       race:
         description: |-
-          User-reported identities as lgbtq information
+          User-reported race information
         type: string
   ReportingWorkspace:
     x-aou-note: |-

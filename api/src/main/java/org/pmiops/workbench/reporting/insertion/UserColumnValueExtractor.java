@@ -71,7 +71,7 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
   INSTITUTION_ID("institution_id", ReportingUser::getInstitutionId),
   INSTITUTIONAL_ROLE_ENUM(
       "institutional_role_enum", u -> enumToString(u.getInstitutionalRoleEnum())),
-  INSTITUTIONAL_ROLE_OTHER_TEXT("d", ReportingUser::getInstitutionalRoleOtherText),
+  INSTITUTIONAL_ROLE_OTHER_TEXT("institutional_role_other_text", ReportingUser::getInstitutionalRoleOtherText),
   DISABILITY("disability", u -> enumToString(u.getDisability())),
   DEGREES("degrees", ReportingUser::getDegrees),
   ETHNICITY("ethnicity", u -> enumToString(u.getEthnicity())),

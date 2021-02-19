@@ -421,11 +421,11 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
 
   /** Converts agreegated storage enums to String value. e.g. 0. 8 -> BA, MS. */
   private static String convertListEnumFromStorage(
-      String storageDegrees, Function<Short, String> convertDbEnum) {
-    if (Strings.isNullOrEmpty(storageDegrees)) {
+      String stringEnums, Function<Short, String> convertDbEnum) {
+    if (Strings.isNullOrEmpty(stringEnums)) {
       return "";
     }
-    return Arrays.stream(storageDegrees.split(","))
+    return Arrays.stream(stringEnums.split(","))
         .map(e -> convertDbEnum.apply(Short.parseShort(e)))
         .collect(Collectors.joining(","));
   }
