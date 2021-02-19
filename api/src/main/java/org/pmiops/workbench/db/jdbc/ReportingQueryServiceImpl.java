@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.jdbc;
 import static org.pmiops.workbench.db.model.DbStorageEnums.billingAccountTypeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.billingStatusFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.dataAccessLevelFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.degreeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.disabilityFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.educationFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.ethnicityFromStorage;
@@ -14,12 +15,13 @@ import static org.pmiops.workbench.db.model.DbStorageEnums.raceFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.sexAtBirthFromStorage;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
+import com.google.common.base.Strings;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
@@ -306,13 +308,13 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .highestEducation(educationFromStorage(rs.getShort("education")))
                 .ethnicity(ethnicityFromStorage(rs.getShort("ethnicity")))
                 .disability(disabilityFromStorage(rs.getShort("disability")))
-                .race(raceFromStorage(rs.getShort("race")))
-                .genderIdentity(genderIdentityFromStorage(rs.getShort("gender_identity")))
+                .race(convertListEnumFromStorage(rs.getString("race"), e -> raceFromStorage(e).toString()))
+                .genderIdentity(convertListEnumFromStorage(rs.getString("gender_identity"), e -> genderIdentityFromStorage(e).toString()))
+                .sexAtBirth(convertListEnumFromStorage(rs.getString("sex_at_birth"), e -> sexAtBirthFromStorage(e).toString()))
                 .lgbtqIdentity(rs.getString("lgbtq_identity"))
                 .identifiesAsLgbtq(rs.getBoolean("identifies_as_lgbtq"))
                 .yearOfBirth(rs.getBigDecimal("year_of_birth"))
-                .sexAtBirth(sexAtBirthFromStorage(rs.getShort("sex_at_birth")))
-                .degrees(convertDegreeListFromStorage(rs.getString("degrees"))));
+                .degrees(convertListEnumFromStorage(rs.getString("degrees"), e -> degreeFromStorage(e).toString())));
   }
 
   @Override
@@ -408,10 +410,13 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     return jdbcTemplate.queryForObject("SELECT count(*) FROM user", Integer.class);
   }
 
-  /** Converts agreegated storage degrees to String value. e.g. 0. 8 -> BA, MS. */
-  private static final String convertDegreeListFromStorage(String storage) {
-    return Arrays.stream(storage.split(","))
-        .map(e -> DbStorageEnums.degreeFromStorage(Short.parseShort(e)).toString())
+  /** Converts agreegated storage enums to String value. e.g. 0. 8 -> BA, MS. */
+  private static String convertListEnumFromStorage(String storageDegrees, Function<Short, String> convertDbEnum) {
+    if(Strings.isNullOrEmpty(storageDegrees)) {
+      return "";
+    }
+    return Arrays.stream(storageDegrees.split(","))
+        .map(e -> convertDbEnum.apply(Short.parseShort(e)))
         .collect(Collectors.joining(","));
   }
 }

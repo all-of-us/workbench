@@ -155,13 +155,13 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     assertThat(user.getInstitutionalRoleOtherText()).isEqualTo(USER__INSTITUTIONAL_ROLE_OTHER_TEXT);
     assertThat(user.getDisability()).isEqualTo(USER__DISABILITY);
     assertThat(user.getHighestEducation()).isEqualTo(USER__EDUCATION);
-    assertThat(user.getSexAtBirth()).isEqualTo(USER__SEX_AT_BIRTH);
+    assertThat(user.getSexAtBirth()).isEqualTo(USER__SEX_AT_BIRTH.toString());
     assertThat(user.getYearOfBirth()).isEqualTo(USER__YEAR_OF_BIRTH);
     assertThat(user.getEthnicity()).isEqualTo(USER__ETHNICITY);
     assertThat(user.getDegrees())
         .isEqualTo(USER__DEGREES.stream().map(Degree::toString).collect(Collectors.joining(",")));
-    assertThat(user.getRace()).isEqualTo(USER__RACE);
-    assertThat(user.getGenderIdentity()).isEqualTo(USER__GENDER_IDENTITY);
+    assertThat(user.getRace()).isEqualTo(USER__RACE.toString());
+    assertThat(user.getGenderIdentity()).isEqualTo(USER__GENDER_IDENTITY.toString());
     assertThat(user.getIdentifiesAsLgbtq()).isEqualTo(USER__IDENTIFIES_AS_LGBTQ);
     assertThat(user.getLgbtqIdentity()).isEqualTo(USER__LGBTQ_IDENTITY);
   }
@@ -252,10 +252,10 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
         .ethnicity(USER__ETHNICITY)
         .disability(USER__DISABILITY)
         .highestEducation(USER__EDUCATION)
-        .sexAtBirth(USER__SEX_AT_BIRTH)
-        .race(USER__RACE)
+        .sexAtBirth(USER__SEX_AT_BIRTH.toString())
+        .race(USER__RACE.toString())
         .yearOfBirth(USER__YEAR_OF_BIRTH)
-        .genderIdentity(USER__GENDER_IDENTITY)
+        .genderIdentity(USER__GENDER_IDENTITY.toString())
         .lgbtqIdentity(USER__LGBTQ_IDENTITY)
         .identifiesAsLgbtq(USER__IDENTIFIES_AS_LGBTQ);
   }

@@ -8275,10 +8275,6 @@ definitions:
         description: |-
           If the institutional_role_enum is "other", custom description
           of this user's role in the institution.
-      race:
-        description: |-
-          User-reported identities as lgbtq information
-        "$ref": "#/definitions/Race"
       ethnicity:
         description: |-
           User-reported identities as lgbtq information
@@ -8291,14 +8287,6 @@ definitions:
         description: |-
           User-reported identities as lgbtq information
         type: string
-      genderIdentity:
-        description: |-
-          User-reported identities as lgbtq information
-        "$ref": "#/definitions/GenderIdentity"
-      sexAtBirth:
-        description: |-
-          User-reported identities as lgbtq information
-        "$ref": "#/definitions/SexAtBirth"
       yearOfBirth:
         description: |-
           User-reported identities as lgbtq information
@@ -8312,6 +8300,20 @@ definitions:
           User-reported identities as lgbtq information
         "$ref": "#/definitions/Disability"
       degrees:
+        description: |-
+          User-reported degrees
+        type: string
+      genderIdentity:
+        description: |-
+          User-reported identities as lgbtq information
+        type: string
+      sexAtBirth:
+        description: |-
+          User-reported identities as lgbtq information
+        type: string
+      race:
+        description: |-
+          User-reported identities as lgbtq information
         type: string
   ReportingWorkspace:
     x-aou-note: |-

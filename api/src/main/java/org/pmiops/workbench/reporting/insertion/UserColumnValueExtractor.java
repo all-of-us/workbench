@@ -75,12 +75,12 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
   DISABILITY("disability", u -> enumToString(u.getDisability())),
   DEGREES("degrees", ReportingUser::getDegrees),
   ETHNICITY("ethnicity", u -> enumToString(u.getEthnicity())),
-  GENDER_IDENTITY("gender_identity", u -> enumToString(u.getGenderIdentity())),
+  GENDER_IDENTITY("gender_identity", ReportingUser::getGenderIdentity),
   HIGHEST_EDUCATION("highest_education", u -> enumToString(u.getHighestEducation())),
   IDENTIFIES_AS_LGBTQ("identity_as_lgbtq", ReportingUser::getIdentifiesAsLgbtq),
   LGBTQ_IDENTITY("lgbtq_identity", ReportingUser::getLgbtqIdentity),
-  SEX_AT_BIRTH("sex_at_birth", u -> enumToString(u.getSexAtBirth())),
-  RACE("race", u -> enumToString(u.getRace())),
+  SEX_AT_BIRTH("sex_at_birth", ReportingUser::getSexAtBirth),
+  RACE("race", ReportingUser::getRace),
   YEAR_OF_BIRTH("yaer_of_birth", ReportingUser::getYearOfBirth);
 
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
