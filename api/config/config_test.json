@@ -46,7 +46,7 @@
   },
   "wgsCohortExtraction": {
     "serviceAccount": "wgs-cohort-extraction@all-of-us-workbench-test.iam.gserviceaccount.com",
-    "terraWorkspaceNamespace": "aou-wgs-cohort-extraction",
+    "terraWorkspaceNamespace": "aouwgscohortextraction",
     "terraWorkspaceName": "aouwgscohortextraction",
     "terraExtractionMethodConfigurationNamespace": "aouwgscohortextraction",
     "terraExtractionMethodConfigurationName": "Test"

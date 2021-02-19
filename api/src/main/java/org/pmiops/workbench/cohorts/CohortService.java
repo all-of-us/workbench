@@ -1,6 +1,9 @@
 package org.pmiops.workbench.cohorts;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -44,28 +47,44 @@ public class CohortService {
   public TerraJob submitGenomicsCohortExtractionJob(String workspaceNamespace, String workspaceName) throws ApiException {
     WorkbenchConfig.WgsCohortExtractionConfig config = workbenchConfigProvider.get().wgsCohortExtraction;
 
-    FirecloudSubmissionRequest request = new FirecloudSubmissionRequest()
-            .deleteIntermediateOutputFiles(false)
-            .methodConfigurationNamespace(config.terraExtractionMethodConfigurationNamespace)
-            .methodConfigurationName(config.terraExtractionMethodConfigurationName)
-            .useCallCache(false);
+    Map<String, String> inputs = new HashMap<>();
+    inputs.put("TestWf.msg", "\"Hello from AoU!\"");
+    Map<String, String> repoMethod = new HashMap<>();
+    repoMethod.put("methodName", "HelloWorld");
+    repoMethod.put("methodVersion", "1");
+    repoMethod.put("methodNamespace", "aouwgscohortextraction");
+    repoMethod.put("methodUri", "agora://aouwgscohortextraction/HelloWorld/1");
+    repoMethod.put("sourceRepo", "agora");
+    Map<String, String> outputs = new HashMap<>();
 
-    FirecloudSubmissionResponse submissionResponse = submissionApiProvider.get().createSubmission(
-            config.terraWorkspaceNamespace, config.terraWorkspaceNamespace, request);
-    TerraJob job = new TerraJob().submissionId(submissionResponse.getSubmissionId());
+    String methodConfigurationName = UUID.randomUUID().toString();
 
     FirecloudNewMethodConfigIngest newMethodConfigIngest = new FirecloudNewMethodConfigIngest()
             .deleted(false)
-            .inputs()
-            .methodConfigVersion(1) // add to config
-            .methodRepoMethod()
-            .name("") //generate unique for this run
-            .namespace(config.terraWorkspaceNamespace)
-            .outputs() // why do we need this?
-            .prerequisites(null)
-            .rootEntityType("participant");
-    
-    methodConfigurationsApiProvider.get().createWorkspaceMethodConfig(config.terraWorkspaceNamespace, config.terraWorkspaceName);
+            .inputs(inputs)
+            .methodConfigVersion(1) // TODO: add to config
+            .methodRepoMethod(repoMethod)
+            .name(methodConfigurationName) // TODO: generate unique for this run
+            .namespace(config.terraExtractionMethodConfigurationNamespace)
+            .outputs(outputs);
+
+    methodConfigurationsApiProvider.get().createWorkspaceMethodConfig(config.terraWorkspaceNamespace, config.terraWorkspaceName, newMethodConfigIngest);
+
+    FirecloudSubmissionRequest request = new FirecloudSubmissionRequest()
+            .deleteIntermediateOutputFiles(false)
+            .methodConfigurationNamespace(config.terraExtractionMethodConfigurationNamespace)
+            .methodConfigurationName(methodConfigurationName)
+            .useCallCache(false);
+
+    FirecloudSubmissionResponse submissionResponse = null;
+    try {
+      submissionResponse = submissionApiProvider.get().createSubmission(
+              config.terraWorkspaceNamespace, config.terraWorkspaceName, request);
+    } catch (ApiException e) {
+      System.out.println(e);
+    }
+
+    TerraJob job = new TerraJob().submissionId(submissionResponse.getSubmissionId());
 
     return job;
   }
