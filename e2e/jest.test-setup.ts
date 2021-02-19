@@ -87,7 +87,7 @@ beforeEach(async () => {
     const response = request.response();
     const failureText = request.failure() !== null ? stringifyData(request.failure().errorText) : '';
     const responseText = stringifyData(await getResponseText(request));
-    console.debug('❗Request failed: ' +
+    console.error('❗ Request failed: ' +
        `${response.status()} ${request.method()} ${request.url()}\n${responseText}\n${failureText}`);
   }
 
@@ -99,7 +99,7 @@ beforeEach(async () => {
          ? responseText
          : 'truncated...\n' + JSON.stringify(JSON.parse(responseText).items.slice(0, 2), null, 2);
     }
-    console.debug('❗Request finished: ' +
+    console.debug('❗ Request finished: ' +
        `${request.response().status()} ${request.method()} ${request.url()}\n${responseText}`);
   }
 
@@ -110,7 +110,7 @@ beforeEach(async () => {
   // New request initiated
   page.on('request', (request) => {
     if (isWorkbenchRequest(request)) {
-      console.debug('❗Request issued: ' +
+      console.debug('❗ Request issued: ' +
          `${request.method()} ${request.url()}\n${getRequestData(request)}`);
     }
     try {
@@ -139,39 +139,25 @@ beforeEach(async () => {
     if (!message.args().length) {
       return;
     }
-    const title = await getTitle();
     try {
-      const texts = await Promise.all(
-        message.args().map(async (arg) =>
-          await arg.executionContext().evaluate((txt) => {
-            if (txt instanceof Error) {
-              return txt.stack;
-            }
-            return txt.toString();
-          }, arg))
-      )
-      const type = message.type();
-      // Don't log "log", "info", "debug"
-      switch (type) {
-        case 'error':
-        case 'warning':
-          console.debug(`❗ [${title}]\n page console ${type}: ${texts}`);
-          break;
-        }
+      const title = await getTitle();
+      const args = await Promise.all(message.args().map(a => a.jsonValue()));
+      console[message.type() === 'warning' ? 'warn' : message.type()](`❗ ${title}\n`, ...args);
       // tslint:disable-next-line:no-empty
     } catch (err) {
+      console.log(err);
     }
   });
 
   page.on('error', async (error) => {
     const title = await getTitle();
-    console.debug(`❗ [${title}]\n page error: ${error}`);
+    console.error(`❗ ${title}\npage error: ${error}`);
   });
 
   page.on('pageerror', async (error) => {
     const title = await getTitle();
     try {
-      console.debug(`❗ [${title}]\n page error: ${error}`);
+      console.error(`❗ ${title}\npage error: ${error}`);
       // tslint:disable-next-line:no-empty
     } catch (err) {
     }
