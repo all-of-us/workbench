@@ -81,7 +81,7 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
   LGBTQ_IDENTITY("lgbtq_identity", ReportingUser::getLgbtqIdentity),
   SEX_AT_BIRTH("sex_at_birth", ReportingUser::getSexAtBirth),
   RACE("race", ReportingUser::getRace),
-  YEAR_OF_BIRTH("yaer_of_birth", ReportingUser::getYearOfBirth);
+  YEAR_OF_BIRTH("year_of_birth", y -> y.getYearOfBirth().intValue());
 
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
   // as enums can't be abstract or extend abstract classes.
