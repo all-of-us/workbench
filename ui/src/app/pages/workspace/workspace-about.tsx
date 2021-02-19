@@ -5,7 +5,7 @@ import * as React from 'react';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 
-import {cohortsApi, dataSetApi, profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
+import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 
 import {Button} from 'app/components/buttons';
 import {FlexColumn} from 'app/components/flex';

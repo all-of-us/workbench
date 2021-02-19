@@ -423,6 +423,8 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
 
       const cdrVersion = fp.find(c => c.cdrVersionId === this.props.workspace.cdrVersionId,
         this.props.cdrVersionListResponse.items);
+
+      // TODO: Replace this check with hasWgsData when that is available RW-6336
       if (cdrVersion.hasMicroarrayData) {
         items.push({label: 'Start Genome Extraction Job', command: () => this.startGenomeExtractionJob()});
       }
