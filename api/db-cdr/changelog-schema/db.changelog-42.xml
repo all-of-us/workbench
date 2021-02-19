@@ -8,7 +8,7 @@
             <column name="id" type="BIGINT">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="FIELD_NAME" type="VARCHAR(200)">
+            <column name="field_name" type="VARCHAR(200)">
                 <constraints nullable="false"/>
             </column>
             <column name="relevant_omop_table" type="VARCHAR(100)">
@@ -17,7 +17,7 @@
             <column name="description" type="VARCHAR(200)">
                 <constraints nullable="false"/>
             </column>
-            <column name="FIELD_TYPE" type="VARCHAR(100)">
+            <column name="field_type" type="VARCHAR(100)">
                 <constraints nullable="false"/>
             </column>
             <column name="omop_cdm_standard_or_custom_field" type="VARCHAR(100)">
