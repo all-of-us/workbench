@@ -150,9 +150,7 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     assertThat(user.getProfessionalUrl()).isEqualTo(USER__PROFESSIONAL_URL);
     assertTimeApprox(user.getTwoFactorAuthBypassTime(), USER__TWO_FACTOR_AUTH_BYPASS_TIME);
     assertTimeApprox(user.getTwoFactorAuthCompletionTime(), USER__TWO_FACTOR_AUTH_COMPLETION_TIME);
-    assertThat(user.getUserId()).isEqualTo(USER__USER_ID);
     assertThat(user.getUsername()).isEqualTo(USER__USERNAME);
-    assertThat(user.getInstitutionId()).isEqualTo(USER__INSTITUTION_ID);
     assertThat(user.getInstitutionalRoleEnum()).isEqualTo(USER__INSTITUTIONAL_ROLE_ENUM);
     assertThat(user.getInstitutionalRoleOtherText()).isEqualTo(USER__INSTITUTIONAL_ROLE_OTHER_TEXT);
     assertThat(user.getDisability()).isEqualTo(USER__DISABILITY);
@@ -160,7 +158,8 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     assertThat(user.getSexAtBirth()).isEqualTo(USER__SEX_AT_BIRTH);
     assertThat(user.getYearOfBirth()).isEqualTo(USER__YEAR_OF_BIRTH);
     assertThat(user.getEthnicity()).isEqualTo(USER__ETHNICITY);
-    assertThat(user.getDegrees()).isEqualTo(USER__DEGREES);
+    assertThat(user.getDegrees())
+        .isEqualTo(USER__DEGREES.stream().map(Degree::toString).collect(Collectors.joining(",")));
     assertThat(user.getRace()).isEqualTo(USER__RACE);
     assertThat(user.getGenderIdentity()).isEqualTo(USER__GENDER_IDENTITY);
     assertThat(user.getIdentifiesAsLgbtq()).isEqualTo(USER__IDENTIFIES_AS_LGBTQ);
@@ -200,7 +199,7 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     user.setDegreesEnum(USER__DEGREES);
     DbDemographicSurvey dbDemographicSurvey = createDbDemographicSurvey();
     dbDemographicSurvey.setUser(user);
-    user.setDemographicSurvey(createDbDemographicSurvey());
+    user.setDemographicSurvey(dbDemographicSurvey);
     return user;
   }
 
@@ -283,11 +282,14 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     demographicSurvey.setEducation(DbStorageEnums.educationToStorage(USER__EDUCATION));
     demographicSurvey.setDisability(DbStorageEnums.disabilityToStorage(USER__DISABILITY));
     demographicSurvey.setEthnicity(DbStorageEnums.ethnicityToStorage(USER__ETHNICITY));
-    demographicSurvey.setGenderIdentityList(ImmutableList.of(DbStorageEnums.genderIdentityToStorage(USER__GENDER_IDENTITY)));
+    demographicSurvey.setGenderIdentityList(
+        ImmutableList.of(DbStorageEnums.genderIdentityToStorage(USER__GENDER_IDENTITY)));
     demographicSurvey.setRace(ImmutableList.of(DbStorageEnums.raceToStorage(USER__RACE)));
-    demographicSurvey.setSexAtBirth(ImmutableList.of(DbStorageEnums.sexAtBirthToStorage(USER__SEX_AT_BIRTH)));
+    demographicSurvey.setSexAtBirth(
+        ImmutableList.of(DbStorageEnums.sexAtBirthToStorage(USER__SEX_AT_BIRTH)));
     demographicSurvey.setYear_of_birth(USER__YEAR_OF_BIRTH.intValue());
     demographicSurvey.setIdentifiesAsLgbtq(USER__IDENTIFIES_AS_LGBTQ);
+    demographicSurvey.setLgbtqIdentity(USER__LGBTQ_IDENTITY);
     return demographicSurvey;
   }
 }

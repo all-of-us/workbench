@@ -14,9 +14,12 @@ import static org.pmiops.workbench.db.model.DbStorageEnums.raceFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.sexAtBirthFromStorage;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
@@ -309,7 +312,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .identifiesAsLgbtq(rs.getBoolean("identifies_as_lgbtq"))
                 .yearOfBirth(rs.getBigDecimal("year_of_birth"))
                 .sexAtBirth(sexAtBirthFromStorage(rs.getShort("sex_at_birth")))
-                .degrees(rs.getString("degrees")));
+                .degrees(convertDegreeListFromStorage(rs.getString("degrees"))));
   }
 
   @Override
@@ -403,5 +406,12 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   @Override
   public int getUserCount() {
     return jdbcTemplate.queryForObject("SELECT count(*) FROM user", Integer.class);
+  }
+
+  /** Converts agreegated storage degrees to String value. e.g. 0. 8 -> BA, MS. */
+  private static final String convertDegreeListFromStorage(String storage) {
+    return Arrays.stream(storage.split(","))
+        .map(e -> DbStorageEnums.degreeFromStorage(Short.parseShort(e)).toString())
+        .collect(Collectors.joining(","));
   }
 }

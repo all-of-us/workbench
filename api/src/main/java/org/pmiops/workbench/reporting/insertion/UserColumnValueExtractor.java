@@ -71,8 +71,17 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
   INSTITUTION_ID("institution_id", ReportingUser::getInstitutionId),
   INSTITUTIONAL_ROLE_ENUM(
       "institutional_role_enum", u -> enumToString(u.getInstitutionalRoleEnum())),
-  INSTITUTIONAL_ROLE_OTHER_TEXT(
-      "institutional_role_other_text", ReportingUser::getInstitutionalRoleOtherText);
+  INSTITUTIONAL_ROLE_OTHER_TEXT("d", ReportingUser::getInstitutionalRoleOtherText),
+  DISABILITY("disability", u -> enumToString(u.getDisability())),
+  DEGREES("degrees", ReportingUser::getDegrees),
+  ETHNICITY("ethnicity", u -> enumToString(u.getEthnicity())),
+  GENDER_IDENTITY("gender_identity", u -> enumToString(u.getGenderIdentity())),
+  HIGHEST_EDUCATION("highest_education", u -> enumToString(u.getHighestEducation())),
+  IDENTIFIES_AS_LGBTQ("identity_as_lgbtq", ReportingUser::getIdentifiesAsLgbtq),
+  LGBTQ_IDENTITY("identity_as_lgbtq", ReportingUser::getLgbtqIdentity),
+  SEX_AT_BIRTH("sex_at_birth", u -> enumToString(u.getSexAtBirth())),
+  RACE("race", u -> enumToString(u.getRace())),
+  YEAR_OF_BIRTH("yaer_of_birth", ReportingUser::getYearOfBirth);
 
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
   // as enums can't be abstract or extend abstract classes.
