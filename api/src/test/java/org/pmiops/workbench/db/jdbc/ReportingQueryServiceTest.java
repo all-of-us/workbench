@@ -81,8 +81,12 @@ public class ReportingQueryServiceTest {
   @TestConfiguration
   public static class config {}
 
+  private DbInstitution dbInstitution;
+
   @Before
-  public void setup() {}
+  public void setup() {
+    dbInstitution = createDbInstitution();
+  }
 
   @Test
   public void testGetReportingDatasetCohorts() {
@@ -150,11 +154,6 @@ public class ReportingQueryServiceTest {
   @Transactional
   public DbVerifiedInstitutionalAffiliation createDbVerifiedInstitutionalAffiliation(
       DbUser dbUser) {
-    DbInstitution dbInstitution = new DbInstitution();
-    dbInstitution.setShortName("dbInstitutionName");
-    dbInstitution.setDisplayName("dbInstitutionName");
-    institutionDao.save(dbInstitution);
-
     DbVerifiedInstitutionalAffiliation dbVerifiedInstitutionalAffiliation =
         new DbVerifiedInstitutionalAffiliation();
     dbVerifiedInstitutionalAffiliation.setVerifiedInstitutionalAffiliationId(USER__INSTITUTION_ID);
@@ -165,6 +164,15 @@ public class ReportingQueryServiceTest {
     dbVerifiedInstitutionalAffiliation.setUser(dbUser);
     verifiedInstitutionalAffiliationDao.save(dbVerifiedInstitutionalAffiliation);
     return dbVerifiedInstitutionalAffiliation;
+  }
+
+  @Transactional
+  public DbInstitution createDbInstitution() {
+    DbInstitution dbInstitution = new DbInstitution();
+    dbInstitution.setShortName("dbInstitutionName");
+    dbInstitution.setDisplayName("dbInstitutionName");
+    institutionDao.save(dbInstitution);
+    return dbInstitution;
   }
 
   @Test
