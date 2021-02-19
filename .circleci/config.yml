@@ -278,13 +278,14 @@ commands:
           # Needed for env-cmd to function on Circle.
           command: touch ~/workbench/e2e/.env
       - run:
-          name: Running Puppeteer e2e tests
+          name: "Create a file of tests to run. Exclude nightly tests."
+          command: yarn jest --listTests | grep -v "nightly" > all_tests.txt
+      - run:
+          name: "Running Puppeteer e2e tests"
           working_directory: ~/workbench/e2e
           command: |
-            filename=/tmp/tests-to-run.txt
-            circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings > $filename
-            grep -v "nightly" $filename > tmpfile.txt; mv tmpfile.txt $filename
-            yarn test:ci $(cat $filename)
+            FILE=$(circleci tests split --split-by=timings all_tests.txt)
+            yarn test:ci $FILE
           no_output_timeout: 25m
       - run:
           name: Create circleci_parameters.json
