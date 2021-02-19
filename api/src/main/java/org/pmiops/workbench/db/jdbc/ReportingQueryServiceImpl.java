@@ -308,13 +308,22 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .highestEducation(educationFromStorage(rs.getShort("education")))
                 .ethnicity(ethnicityFromStorage(rs.getShort("ethnicity")))
                 .disability(disabilityFromStorage(rs.getShort("disability")))
-                .race(convertListEnumFromStorage(rs.getString("race"), e -> raceFromStorage(e).toString()))
-                .genderIdentity(convertListEnumFromStorage(rs.getString("gender_identity"), e -> genderIdentityFromStorage(e).toString()))
-                .sexAtBirth(convertListEnumFromStorage(rs.getString("sex_at_birth"), e -> sexAtBirthFromStorage(e).toString()))
+                .race(
+                    convertListEnumFromStorage(
+                        rs.getString("race"), e -> raceFromStorage(e).toString()))
+                .genderIdentity(
+                    convertListEnumFromStorage(
+                        rs.getString("gender_identity"),
+                        e -> genderIdentityFromStorage(e).toString()))
+                .sexAtBirth(
+                    convertListEnumFromStorage(
+                        rs.getString("sex_at_birth"), e -> sexAtBirthFromStorage(e).toString()))
                 .lgbtqIdentity(rs.getString("lgbtq_identity"))
                 .identifiesAsLgbtq(rs.getBoolean("identifies_as_lgbtq"))
                 .yearOfBirth(rs.getBigDecimal("year_of_birth"))
-                .degrees(convertListEnumFromStorage(rs.getString("degrees"), e -> degreeFromStorage(e).toString())));
+                .degrees(
+                    convertListEnumFromStorage(
+                        rs.getString("degrees"), e -> degreeFromStorage(e).toString())));
   }
 
   @Override
@@ -411,8 +420,9 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   }
 
   /** Converts agreegated storage enums to String value. e.g. 0. 8 -> BA, MS. */
-  private static String convertListEnumFromStorage(String storageDegrees, Function<Short, String> convertDbEnum) {
-    if(Strings.isNullOrEmpty(storageDegrees)) {
+  private static String convertListEnumFromStorage(
+      String storageDegrees, Function<Short, String> convertDbEnum) {
+    if (Strings.isNullOrEmpty(storageDegrees)) {
       return "";
     }
     return Arrays.stream(storageDegrees.split(","))
