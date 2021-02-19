@@ -80,7 +80,7 @@ user:
   street_address_2: |
     Second line of user street address.
   zip_code: |
-    Up to 10-digit zip code for use residence.
+    Up to 10-digit zip code for user residence.
   degrees: |
     List of user's degrees.
   race: |

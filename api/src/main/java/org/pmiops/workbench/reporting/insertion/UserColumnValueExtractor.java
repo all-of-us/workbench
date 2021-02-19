@@ -71,18 +71,21 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
   INSTITUTION_ID("institution_id", ReportingUser::getInstitutionId),
   INSTITUTIONAL_ROLE_ENUM(
       "institutional_role_enum", u -> enumToString(u.getInstitutionalRoleEnum())),
-  INSTITUTIONAL_ROLE_OTHER_TEXT("institutional_role_other_text", ReportingUser::getInstitutionalRoleOtherText),
+  INSTITUTIONAL_ROLE_OTHER_TEXT(
+      "institutional_role_other_text", ReportingUser::getInstitutionalRoleOtherText),
   DISABILITY("disability", u -> enumToString(u.getDisability())),
   DEGREES("degrees", ReportingUser::getDegrees),
   ETHNICITY("ethnicity", u -> enumToString(u.getEthnicity())),
   GENDER_IDENTITY("gender_identity", ReportingUser::getGenderIdentity),
   HIGHEST_EDUCATION("highest_education", u -> enumToString(u.getHighestEducation())),
-  IDENTIFIES_AS_LGBTQ("identifies_as_lgbtq", u -> u.getIdentifiesAsLgbtq().toString()),
+  IDENTIFIES_AS_LGBTQ(
+      "identifies_as_lgbtq",
+      u -> u.getIdentifiesAsLgbtq() == null ? null : u.getIdentifiesAsLgbtq().toString()),
   LGBTQ_IDENTITY("lgbtq_identity", ReportingUser::getLgbtqIdentity),
   SEX_AT_BIRTH("sex_at_birth", ReportingUser::getSexAtBirth),
   RACE("race", ReportingUser::getRace),
   YEAR_OF_BIRTH(
-      "year_of_birth", y -> y.getYearOfBirth() == null ? null : y.getYearOfBirth().intValue());
+      "year_of_birth", u -> u.getYearOfBirth() == null ? null : u.getYearOfBirth().intValue());
 
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
   // as enums can't be abstract or extend abstract classes.
