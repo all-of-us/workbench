@@ -162,6 +162,7 @@ public class WorkbenchConfig {
     public String terraWorkspaceName;
     public String terraExtractionMethodConfigurationNamespace;
     public String terraExtractionMethodConfigurationName;
+    public Integer terraExtractionMethodConfigurationVersion;
   }
 
   public static class CdrConfig {

@@ -855,6 +855,45 @@ paths:
         500:
           description: Internal Server Error
 
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/method_configs/{configNamespace}/{configName}:
+    delete:
+      tags:
+        - methodConfigurations
+      summary: Delete a method configuration in a workspace
+      operationId: deleteWorkspaceMethodConfig
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: Workspace Namespace
+          required: true
+          schema:
+            type: string
+        - name: workspaceName
+          in: path
+          description: Workspace Name
+          required: true
+          schema:
+            type: string
+        - name: configNamespace
+          in: path
+          description: Configuration Namespace
+          required: true
+          schema:
+            type: string
+        - name: configName
+          in: path
+          description: Configuration Name
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful request
+        404:
+          description: Workspace or Method Configuration not found
+        500:
+          description: Internal Server Error
+
 ##########################################################################################
 ## PARAMETERS
 ##########################################################################################

@@ -48,12 +48,12 @@ public class CohortService {
     WorkbenchConfig.WgsCohortExtractionConfig config = workbenchConfigProvider.get().wgsCohortExtraction;
 
     Map<String, String> inputs = new HashMap<>();
-    inputs.put("TestWf.msg", "\"Hello from AoU!\"");
+    inputs.put("TestWf.msg", "\"Hello from AoU (" + workspaceNamespace + "/" + workspaceName + ")!\"");
     Map<String, String> repoMethod = new HashMap<>();
-    repoMethod.put("methodName", "HelloWorld");
-    repoMethod.put("methodVersion", "1");
-    repoMethod.put("methodNamespace", "aouwgscohortextraction");
-    repoMethod.put("methodUri", "agora://aouwgscohortextraction/HelloWorld/1");
+    repoMethod.put("methodName", config.terraExtractionMethodConfigurationName);
+    repoMethod.put("methodVersion", config.terraExtractionMethodConfigurationVersion.toString());
+    repoMethod.put("methodNamespace", config.terraExtractionMethodConfigurationNamespace);
+    repoMethod.put("methodUri", "agora://" + config.terraExtractionMethodConfigurationNamespace + "/" + config.terraExtractionMethodConfigurationName + "/" + config.terraExtractionMethodConfigurationVersion);
     repoMethod.put("sourceRepo", "agora");
     Map<String, String> outputs = new HashMap<>();
 
@@ -62,7 +62,7 @@ public class CohortService {
     FirecloudNewMethodConfigIngest newMethodConfigIngest = new FirecloudNewMethodConfigIngest()
             .deleted(false)
             .inputs(inputs)
-            .methodConfigVersion(1) // TODO: add to config
+            .methodConfigVersion(config.terraExtractionMethodConfigurationVersion)
             .methodRepoMethod(repoMethod)
             .name(methodConfigurationName) // TODO: generate unique for this run
             .namespace(config.terraExtractionMethodConfigurationNamespace)
@@ -76,17 +76,17 @@ public class CohortService {
             .methodConfigurationName(methodConfigurationName)
             .useCallCache(false);
 
-    FirecloudSubmissionResponse submissionResponse = null;
-    try {
-      submissionResponse = submissionApiProvider.get().createSubmission(
+    FirecloudSubmissionResponse submissionResponse = submissionApiProvider.get().createSubmission(
               config.terraWorkspaceNamespace, config.terraWorkspaceName, request);
-    } catch (ApiException e) {
-      System.out.println(e);
-    }
 
-    TerraJob job = new TerraJob().submissionId(submissionResponse.getSubmissionId());
+    methodConfigurationsApiProvider.get().deleteWorkspaceMethodConfig(
+            config.terraWorkspaceNamespace,
+            config.terraWorkspaceName,
+            config.terraExtractionMethodConfigurationNamespace,
+            methodConfigurationName
+    );
 
-    return job;
+    return new TerraJob().submissionId(submissionResponse.getSubmissionId());
   }
 
   public List<Cohort> findAll(List<Long> cohortIds) {
