@@ -279,6 +279,7 @@ commands:
           command: touch ~/workbench/e2e/.env
       - run:
           name: "Create a file of tests to run. Exclude nightly tests."
+          working_directory: ~/workbench/e2e
           command: yarn jest --listTests | grep -v "nightly" > all_tests.txt
       - run:
           name: "Running Puppeteer e2e tests"
