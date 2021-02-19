@@ -46,10 +46,11 @@
   },
   "wgsCohortExtraction": {
     "serviceAccount": "wgs-cohort-extraction@all-of-us-workbench-test.iam.gserviceaccount.com",
-    "terraWorkspaceNamespace": "aouwgscohortextraction",
+    "terraWorkspaceNamespace": "aou-wgs-cohort-extraction",
     "terraWorkspaceName": "aouwgscohortextraction",
     "terraExtractionMethodConfigurationNamespace": "aouwgscohortextraction",
-    "terraExtractionMethodConfigurationName": "Test"
+    "terraExtractionMethodConfigurationName": "HelloWorld",
+    "terraExtractionMethodConfigurationVersion": 1
   },
   "cdr": {
     "debugQueries": true

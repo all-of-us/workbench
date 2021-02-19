@@ -48,7 +48,12 @@
     ]
   },
   "wgsCohortExtraction": {
-    "serviceAccount": "wgs-cohort-extraction@all-of-us-rw-perf.iam.gserviceaccount.com"
+    "serviceAccount": "wgs-cohort-extraction@all-of-us-rw-perf.iam.gserviceaccount.com",
+    "terraWorkspaceNamespace": "",
+    "terraWorkspaceName": "",
+    "terraExtractionMethodConfigurationNamespace": "",
+    "terraExtractionMethodConfigurationName": "",
+    "terraExtractionMethodConfigurationVersion": 1
   },
   "cdr": {
     "debugQueries": true

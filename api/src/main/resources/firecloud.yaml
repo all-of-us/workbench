@@ -844,10 +844,12 @@ paths:
           description: Method Configuration contents
           required: true
           schema:
-            $ref: '#/definitions/NewMethodConfigIngest'
+            $ref: '#/definitions/MethodConfiguration'
       responses:
         201:
           description: Successful Request
+          schema:
+            $ref: '#/definitions/ValidatedMethodConfiguration'
         404:
           description: Workspace not found
         409:
@@ -1631,7 +1633,7 @@ definitions:
         type: string
         description: Submission Id
 
-  NewMethodConfigIngest:
+  MethodConfiguration:
     required:
       - deleted
       - inputs
@@ -1681,3 +1683,43 @@ definitions:
         type: boolean
         description: Is this config marked as deleted?
         default: false
+
+  ValidatedMethodConfiguration:
+    required:
+      - extraInputs
+      - invalidInputs
+      - invalidOutputs
+      - methodConfiguration
+      - missingInputs
+      - validInputs
+      - validOutputs
+    type: object
+    properties:
+      validInputs:
+        type: array
+        items:
+          type: string
+      invalidInputs:
+        type: object
+        additionalProperties:
+          type: object
+      missingInputs:
+        type: array
+        items:
+          type: string
+      extraInputs:
+        type: array
+        items:
+          type: string
+      validOutputs:
+        type: array
+        items:
+          type: string
+      invalidOutputs:
+        type: object
+        additionalProperties:
+          type: object
+      methodConfiguration:
+        $ref: '#/definitions/MethodConfiguration'
+    description: Information about the validity of a method configuration's expressions
+      relative to the method itself

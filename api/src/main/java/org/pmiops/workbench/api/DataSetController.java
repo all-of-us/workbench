@@ -38,9 +38,26 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.DataDictionaryEntry;
+import org.pmiops.workbench.model.DataSet;
+import org.pmiops.workbench.model.DataSetCodeResponse;
+import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetExportRequest.GenomicsAnalysisToolEnum;
 import org.pmiops.workbench.model.DataSetExportRequest.GenomicsDataTypeEnum;
+import org.pmiops.workbench.model.DataSetListResponse;
+import org.pmiops.workbench.model.DataSetPreviewRequest;
+import org.pmiops.workbench.model.DataSetPreviewResponse;
+import org.pmiops.workbench.model.DataSetPreviewValueList;
+import org.pmiops.workbench.model.DataSetRequest;
+import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainValue;
+import org.pmiops.workbench.model.DomainValuesResponse;
+import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.KernelTypeEnum;
+import org.pmiops.workbench.model.MarkDataSetRequest;
+import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
+import org.pmiops.workbench.model.ResourceType;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -421,10 +438,9 @@ public class DataSetController implements DataSetApiDelegate {
     return ResponseEntity.ok(dataSet);
   }
 
-
   @Override
   public ResponseEntity<DataSetListResponse> getDataSetByResourceId(
-      String workspaceNamespace, String workspaceId, ResourceType resourceType, Long id) {
+          String workspaceNamespace, String workspaceId, ResourceType resourceType, Long id) {
     workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 

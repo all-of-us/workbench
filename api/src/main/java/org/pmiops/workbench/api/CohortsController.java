@@ -13,7 +13,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.OptimisticLockException;
-import javax.xml.ws.Response;
 
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cohorts.CohortFactory;
@@ -37,8 +36,20 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.firecloud.api.SubmissionsApi;
-import org.pmiops.workbench.model.*;
+import org.pmiops.workbench.model.CdrQuery;
+import org.pmiops.workbench.model.Cohort;
+import org.pmiops.workbench.model.CohortAnnotationsRequest;
+import org.pmiops.workbench.model.CohortAnnotationsResponse;
+import org.pmiops.workbench.model.CohortListResponse;
+import org.pmiops.workbench.model.DataTableSpecification;
+import org.pmiops.workbench.model.DuplicateCohortRequest;
+import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.MaterializeCohortRequest;
+import org.pmiops.workbench.model.MaterializeCohortResponse;
+import org.pmiops.workbench.model.SearchRequest;
+import org.pmiops.workbench.model.TableQuery;
+import org.pmiops.workbench.model.TerraJob;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -436,8 +447,8 @@ public class CohortsController implements CohortsApiDelegate {
     try {
       return ResponseEntity.ok(cohortService.submitGenomicsCohortExtractionJob(workspaceNamespace, workspaceId));
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
-        // Convert Firecloud exception to workbench exception
-      return ResponseEntity.badRequest().build();
+      // Given that there are no input arguments ATM, any API exceptions are due to programming or Firecloud errors
+      throw new ServerErrorException();
     }
   }
 

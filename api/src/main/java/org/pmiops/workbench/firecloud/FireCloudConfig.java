@@ -76,7 +76,7 @@ public class FireCloudConfig {
             iamCredentialsClient
                     .generateAccessToken(
                             "projects/-/serviceAccounts/" + workbenchConfig.wgsCohortExtraction.serviceAccount,
-                            Collections.EMPTY_LIST,
+                            Collections.emptyList(),
                             BILLING_SCOPES,
                             Duration.newBuilder().setSeconds(60).build())
                     .getAccessToken()
