@@ -5,7 +5,6 @@ import {FlexColumn} from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
-import {environment} from 'environments/environment';
 
 const styles = reactStyles({
   container: {
@@ -30,14 +29,6 @@ const styles = reactStyles({
   successButton: {
     backgroundColor: colors.success,
     cursor: 'default'
-  },
-  buttonContainerToDeleteWithEnableProfileCapsFeatures: {
-    width: '50%',
-    marginTop: 6
-  },
-  detailsContainerToDeleteWithEnableProfileCapsFeatures: {
-    width: '50%',
-    marginLeft: 40
   }
 });
 
@@ -65,67 +56,40 @@ const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
       children
     } = props;
 
-    if (environment.enableProfileCapsFeatures) {
-      return (
-        <FlexColumn style={{...styles.container, ...props.containerStylesOverride}}>
-          <div style={styles.title}>
-            { title }
-          </div>
-          <FlexColumn style={{justifyContent: 'space-between', flex: '1 1 auto'}}>
-
-            { isComplete ? (
-              <React.Fragment>
-                <div style={props.childrenStyle}>
-                  { children }
-                </div>
-                <Button disabled={true} data-test-id='completed-button'
-                        style={{...styles.button, backgroundColor: colors.success,
-                          width: 'max-content', cursor: 'default'}}>
-                  <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : completedButtonText}
-                </Button>
-              </React.Fragment>
-            ) : (
-              <React.Fragment>
-                {/*This div exists to ensure spacing is consistent. We want to put the button at the bottom of the flex box*/}
-                <div/>
-                <Button
-                  type='purplePrimary'
-                  style={ styles.button }
-                  onClick={ completeStep }
-                >
-                  { incompleteButtonText }
-                </Button>
-              </React.Fragment>
-            ) }
-          </FlexColumn>
-        </FlexColumn>
-      );
-    } else { // TODO (RW-3441): delete this block below once enableProfileCapsFeatures is removed
-      return (
-        <div style={styles.container}>
-          <div style={styles.title}>
-            { title }
-          </div>
-          <div style={{ display: 'flex' }}>
-            <div style={styles.buttonContainerToDeleteWithEnableProfileCapsFeatures}>
-              { isComplete ? (
-                <Button type='purplePrimary' style={ {...styles.button, ...styles.successButton} } disabled={true}>
-                  <ClrIcon shape='check' style={ {width: 40, marginLeft: -10 } }/>
-                  { wasBypassed ? 'Bypassed By Admin' : completedButtonText }
-                </Button>
-              ) : (
-                <Button type='purplePrimary' style={ styles.button } onClick={ completeStep }>
-                  { incompleteButtonText }
-                </Button>
-              ) }
-            </div>
-            <div style={styles.detailsContainerToDeleteWithEnableProfileCapsFeatures}>
-              { children }
-            </div>
-          </div>
+    return (
+      <FlexColumn style={{...styles.container, ...props.containerStylesOverride}}>
+        <div style={styles.title}>
+          { title }
         </div>
-      );
-    }
+        <FlexColumn style={{justifyContent: 'space-between', flex: '1 1 auto'}}>
+
+          { isComplete ? (
+            <React.Fragment>
+              <div style={props.childrenStyle}>
+                { children }
+              </div>
+              <Button disabled={true} data-test-id='completed-button'
+                      style={{...styles.button, backgroundColor: colors.success,
+                        width: 'max-content', cursor: 'default'}}>
+                <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : completedButtonText}
+              </Button>
+            </React.Fragment>
+          ) : (
+            <React.Fragment>
+              {/*This div exists to ensure spacing is consistent. We want to put the button at the bottom of the flex box*/}
+              <div/>
+              <Button
+                type='purplePrimary'
+                style={ styles.button }
+                onClick={ completeStep }
+              >
+                { incompleteButtonText }
+              </Button>
+            </React.Fragment>
+          ) }
+        </FlexColumn>
+      </FlexColumn>
+    );
   };
 
 export {
