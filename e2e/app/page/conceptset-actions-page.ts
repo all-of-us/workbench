@@ -1,7 +1,7 @@
-import {Page} from 'puppeteer';
-import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
+import { Page } from 'puppeteer';
+import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import Button from 'app/element/button';
-import {LinkText} from 'app/text-labels';
+import { LinkText } from 'app/text-labels';
 import Link from 'app/element/link';
 import AuthenticatedPage from './authenticated-page';
 import ConceptSetPage from './conceptset-page';
@@ -11,41 +11,36 @@ import DatasetBuildPage from './dataset-build-page';
 const PageTitle = 'Concept Set Actions';
 
 export default class ConceptSetActionsPage extends AuthenticatedPage {
-
   constructor(page: Page) {
     super(page);
   }
 
   async isLoaded(): Promise<boolean> {
-    await Promise.all([
-      waitForDocumentTitle(this.page, PageTitle),
-      waitWhileLoading(this.page)
-    ]);
-    await Promise.all([
-      this.getCreateAnotherConceptSetButton(),
-      this.getCreateDatasetButton()
-    ]);
+    const createConceptButton = this.getCreateAnotherConceptSetButton();
+    const createDatasetButton = this.getCreateDatasetButton();
+    await Promise.all([waitForDocumentTitle(this.page, PageTitle), waitWhileLoading(this.page)]);
+    await Promise.all([createConceptButton.asElementHandle(), createDatasetButton.asElementHandle()]);
     return true;
   }
 
   async clickCreateAnotherConceptSetButton(): Promise<void> {
-    const button = await this.getCreateAnotherConceptSetButton();
+    const button = this.getCreateAnotherConceptSetButton();
     return button.clickAndWait();
   }
 
   async clickCreateDatasetButton(): Promise<DatasetBuildPage> {
-    const button = await this.getCreateDatasetButton();
+    const button = this.getCreateDatasetButton();
     await button.clickAndWait();
     const datasetBuildPage = new DatasetBuildPage(this.page);
     return datasetBuildPage.waitForLoad();
   }
 
-  async getCreateAnotherConceptSetButton(): Promise<Button> {
-    return Button.findByName(this.page, {name: LinkText.CreateAnotherConceptSet});
+  getCreateAnotherConceptSetButton(): Button {
+    return Button.findByName(this.page, { name: LinkText.CreateAnotherConceptSet });
   }
 
-  async getCreateDatasetButton(): Promise<Button> {
-    return Button.findByName(this.page, {name: LinkText.CreateDataset});
+  getCreateDatasetButton(): Button {
+    return Button.findByName(this.page, { name: LinkText.CreateDataset });
   }
 
   async openConceptSet(conceptName: string): Promise<ConceptSetPage> {
@@ -68,5 +63,4 @@ export default class ConceptSetActionsPage extends AuthenticatedPage {
     await conceptSearchPage.waitForLoad();
     return conceptSearchPage;
   }
-
 }

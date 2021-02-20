@@ -33,13 +33,14 @@ describe('Workspace owner Jupyter notebook action tests', () => {
       const modal = new NewNotebookModal(page);
       await modal.waitForLoad();
 
-      await modal.name().then((textbox) => textbox.type(notebookName));
+      const textbox = modal.name();
+      await textbox.type(notebookName);
 
       const errorTextXpath = `${modal.getXpath()}//*[text()="Name already exists"]`;
       const errorExists = await page.waitForXPath(errorTextXpath, { visible: true });
       expect(errorExists.asElement()).not.toBeNull();
 
-      const createButton = await modal.createNotebookButton();
+      const createButton = modal.createNotebookButton();
       const disabledButton = await createButton.isCursorNotAllowed();
       expect(disabledButton).toBe(true);
 

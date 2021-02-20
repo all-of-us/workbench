@@ -1,14 +1,13 @@
-import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
+import ConceptDomainCard, { Domain } from 'app/component/concept-domain-card';
 import Link from 'app/element/link';
 import ConceptSetActionsPage from 'app/page/conceptset-actions-page';
-import {SaveOption} from 'app/modal/conceptset-save-modal';
+import { SaveOption } from 'app/modal/conceptset-save-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {ResourceCard} from 'app/text-labels';
-import {makeRandomName, makeString} from 'utils/str-utils';
-import {createWorkspace, signInWithAccessToken} from 'utils/test-utils';
+import { ResourceCard } from 'app/text-labels';
+import { makeRandomName, makeString } from 'utils/str-utils';
+import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
 
 describe('Editing and rename Concept Set', () => {
-
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
@@ -22,11 +21,10 @@ describe('Editing and rename Concept Set', () => {
    * - Delete Concept Set.
    */
   test('Workspace OWNER can edit Concept Set', async () => {
-
-    const workspaceName = await createWorkspace(page).then(card => card.clickWorkspaceName());
+    const workspaceName = await createWorkspace(page).then((card) => card.clickWorkspaceName());
 
     const dataPage = new WorkspaceDataPage(page);
-    let {conceptSearchPage, criteriaSearch} = await dataPage.openConceptSetSearch(Domain.Procedures);
+    let { conceptSearchPage, criteriaSearch } = await dataPage.openConceptSetSearch(Domain.Procedures);
 
     // Search by Procedure name.
     let procedureName = 'Radiologic examination';
@@ -39,24 +37,24 @@ describe('Editing and rename Concept Set', () => {
     console.log('Selected Procedures table row 1: ', row1);
     console.log('Selected Procedures table row 2: ', row2);
 
-    // Verify Code are numberical values
+    // Verify Code are numerical values
     expect(Number.isNaN(parseInt(row1.code, 10))).toBe(false);
     expect(Number.isNaN(parseInt(row2.code, 10))).toBe(false);
 
-    // Verify Participant Count are numberical values
+    // Verify Participant Count are numerical values
     expect(Number.isNaN(parseInt(row1.rollUpCount.replace(/,/g, ''), 10))).toBe(false);
     expect(Number.isNaN(parseInt(row2.rollUpCount.replace(/,/g, ''), 10))).toBe(false);
 
     await conceptSearchPage.reviewAndSaveConceptSet();
 
     // Save new Concept Set.
-    const conceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
+    const conceptSetName: string = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
 
     // Add another Concept in Procedures domain.
     const conceptSetActionsPage = new ConceptSetActionsPage(page);
     conceptSearchPage = await conceptSetActionsPage.openConceptSearch();
 
-    const procedures = await ConceptDomainCard.findDomainCard(page, Domain.Procedures);
+    const procedures = ConceptDomainCard.findDomainCard(page, Domain.Procedures);
     criteriaSearch = await procedures.clickSelectConceptButton();
 
     // Search in Procedures domain
@@ -87,11 +85,9 @@ describe('Editing and rename Concept Set', () => {
     console.log(`Renamed Concept Set: "${conceptSetName}" to "${newName}"`);
 
     // Navigate to workspace Data page, then delete Concept Set
-    await (new Link(page, `//a[text()="${workspaceName}"]`)).click();
+    await new Link(page, `//a[text()="${workspaceName}"]`).click();
     await dataPage.waitForLoad();
     await dataPage.openConceptSetsSubtab();
     await dataPage.deleteResource(newName, ResourceCard.ConceptSet);
   });
-
-
 });

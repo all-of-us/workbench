@@ -45,7 +45,7 @@ module.exports = {
       1,
       {
         allowShortCircuit: true,
-        allowTernary: false
+        allowTernary: true
       }
     ],
     '@typescript-eslint/no-explicit-any': 1,

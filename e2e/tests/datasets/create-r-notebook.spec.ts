@@ -2,15 +2,14 @@ import Link from 'app/element/link';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import {makeRandomName} from 'utils/str-utils';
-import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
-import {waitForText, waitWhileLoading} from 'utils/waits-utils';
+import { makeRandomName } from 'utils/str-utils';
+import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import {Ethnicity} from 'app/page/cohort-search-page';
-import {Language, LinkText, ResourceCard} from 'app/text-labels';
+import { Ethnicity } from 'app/page/cohort-search-page';
+import { Language, LinkText, ResourceCard } from 'app/text-labels';
 
 describe('Create dataset and export to notebook at same time', () => {
-
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
@@ -41,7 +40,7 @@ describe('Create dataset and export to notebook at same time', () => {
     const group1Count = await group1.getGroupCount();
     const group1CountInt = Number(group1Count.replace(/,/g, ''));
     expect(group1CountInt).toBeGreaterThan(1);
-    console.log('Include Participants Group 1: ' + group1CountInt);
+    console.log(`Include Participants Group 1: ${group1CountInt}`);
 
     // Save new Cohort.
     const newCohortName = await cohortBuildPage.saveCohortAs();
@@ -71,8 +70,8 @@ describe('Create dataset and export to notebook at same time', () => {
     const code = await notebookPreviewPage.getFormattedCode();
     expect(code).toContain('library(bigrquery)');
 
-    // Navigate to Workpace Data page.
-    const notebooksLink = await Link.findByName(page, {name: workspaceName});
+    // Navigate to Workspace Data page.
+    const notebooksLink = Link.findByName(page, { name: workspaceName });
     await notebooksLink.clickAndWait();
     await dataPage.waitForLoad();
 
@@ -95,8 +94,5 @@ describe('Create dataset and export to notebook at same time', () => {
 
     const cohortDeleteDialogText = await dataPage.deleteResource(newCohortName, ResourceCard.Cohort);
     expect(cohortDeleteDialogText).toContain(`Are you sure you want to delete Cohort: ${newCohortName}?`);
-
   });
-
-
 });

@@ -54,10 +54,10 @@ export default class CohortBuildPage extends AuthenticatedPage {
 
     const modal = new Modal(this.page);
     await modal.waitForLoad();
-    const nameTextbox = await modal.waitForTextbox('COHORT NAME');
+    const nameTextbox = modal.waitForTextbox('COHORT NAME');
     await nameTextbox.type(cohortName);
 
-    const descriptionTextarea = await modal.waitForTextarea('DESCRIPTION');
+    const descriptionTextarea = modal.waitForTextarea('DESCRIPTION');
     await descriptionTextarea.type(description);
 
     await modal.clickButton(LinkText.Save, { waitForClose: true, timeout: 2 * 60 * 1000 });

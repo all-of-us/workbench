@@ -32,7 +32,7 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
   async getPhysicalMeasurementParticipantResult(filterSign: FilterSign, filterValue: number): Promise<string> {
     await this.waitUntilSectionVisible(SectionSelectors.AttributesForm);
 
-    const selectMenu = await SelectMenu.findByName(this.page, { ancestorLevel: 0 }, this);
+    const selectMenu = SelectMenu.findByName(this.page, { ancestorLevel: 0 }, this);
     await selectMenu.select(filterSign);
 
     const numberField = await this.page.waitForXPath(`${this.xpath}//input[@type="number"]`, { visible: true });
@@ -62,7 +62,7 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
     await this.clickButton(LinkText.ApplyModifiers);
     await this.waitUntilSectionVisible(SectionSelectors.ModifiersForm);
 
-    const selectMenu = await SelectMenu.findByName(this.page, { name: 'Age At Event', ancestorLevel: 1 }, this);
+    const selectMenu = SelectMenu.findByName(this.page, { name: 'Age At Event', ancestorLevel: 1 }, this);
     await selectMenu.select(filterSign);
     const numberField = await this.page.waitForXPath(`${this.xpath}//input[@type="number"]`, { visible: true });
     // Issue with Puppeteer type() function: typing value in this textbox doesn't always trigger change event. workaround is needed.

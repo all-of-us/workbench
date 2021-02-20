@@ -1,10 +1,8 @@
 import CreateAccountPage from 'app/page/create-account-page';
 import GoogleLoginPage from 'app/page/google-login';
-import {getPropValue} from 'utils/element-utils';
-
+import { getPropValue } from 'utils/element-utils';
 
 describe('User registration tests:', () => {
-
   test('Can register new user', async () => {
     // Load the landing page for login.
     const loginPage = new GoogleLoginPage(page);
@@ -18,26 +16,26 @@ describe('User registration tests:', () => {
 
     // Step 1: Terms of Service.
     await createAccountPage.acceptTermsOfUseAgreement();
-    let nextButton = await createAccountPage.getNextButton();
+    let nextButton = createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();
     await nextButton.click();
 
     // Step 2: Enter institution affiliation details
     await createAccountPage.fillOutInstitution();
-    nextButton = await createAccountPage.getNextButton();
+    nextButton = createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();
     await nextButton.clickWithEval();
 
     // Step 3: Enter user information
     const userId = await createAccountPage.fillOutUserInformation();
-    nextButton = await createAccountPage.getNextButton();
+    nextButton = createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();
     await nextButton.click();
 
     // Step 4: Enter demographic survey (All Survey Fields are optional)
     await createAccountPage.fillOutDemographicSurvey();
 
-    const submitButton = await createAccountPage.getSubmitButton();
+    const submitButton = createAccountPage.getSubmitButton();
     await submitButton.waitUntilEnabled();
     await submitButton.click();
 
@@ -45,7 +43,7 @@ describe('User registration tests:', () => {
 
     // "Resend Instructions" link exists
     const linkSelector = '//a[text()="Resend Instructions"]';
-    const resendInstrButton = await page.waitForXPath(linkSelector, {visible: true});
+    const resendInstrButton = await page.waitForXPath(linkSelector, { visible: true });
     expect(resendInstrButton).toBeTruthy();
 
     // Displayed texts checks
@@ -60,9 +58,8 @@ describe('User registration tests:', () => {
     expect(textsArray).toContain('Your All of Us research account has been created!');
     expect(textsArray).toContain(`${userId}@fake-research-aou.org`);
 
-    const note = 'Please note: For full access to the Research Workbench data and tools, you\'ll be required to complete the necessary registration steps.';
+    const note =
+      "Please note: For full access to the Research Workbench data and tools, you'll be required to complete the necessary registration steps.";
     expect(textsArray).toContain(note);
   });
-
-
 });

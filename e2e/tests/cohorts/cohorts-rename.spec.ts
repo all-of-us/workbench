@@ -48,7 +48,7 @@ describe('User can create, modify, rename and delete Cohort', () => {
     const group1Count = await waitForNumericalString(page, group1.getGroupCountXpath(), 60000);
     const group1CountInt = Number(group1Count.replace(/,/g, ''));
     expect(group1CountInt).toBeGreaterThan(1);
-    console.log('Include Participants Group 1 Demographics Age Count = ' + group1CountInt);
+    console.log(`Include Participants Group 1 Demographics Age Count = ${group1CountInt}`);
 
     let totalCount = await cohortBuildPage.getTotalCount();
     expect(totalCount).toEqual(group1Count);
@@ -59,20 +59,20 @@ describe('User can create, modify, rename and delete Cohort', () => {
 
     const group3CountInt = Number(group3Count.replace(/,/g, ''));
     expect(group3CountInt).toBeGreaterThan(1);
-    console.log('Exclude Participants Group 3 Demographics Deceased Count = ' + group3CountInt);
+    console.log(`Exclude Participants Group 3 Demographics Deceased Count = ${group3CountInt}`);
 
     // Log Total Count.
     totalCount = await cohortBuildPage.getTotalCount();
     const totalCountInt = Number(totalCount.replace(/,/g, ''));
     expect(totalCountInt).toBeGreaterThan(1);
-    console.log('Total Count: ' + totalCountInt);
+    console.log(`Total Count: ${totalCountInt}`);
 
     // Save cohort.
     const cohortName = await cohortBuildPage.saveCohortAs();
     console.log(`Created Cohort "${cohortName}"`);
 
     // Click cohort link. Open cohort build page.
-    const cohortLink = await Link.findByName(page, { name: cohortName });
+    const cohortLink = Link.findByName(page, { name: cohortName });
     await cohortLink.clickAndWait();
     await waitForText(page, totalCount, { xpath: FieldSelector.TotalCount }, 60000);
 

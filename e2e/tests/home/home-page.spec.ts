@@ -1,16 +1,14 @@
 import BaseElement from 'app/element/base-element';
 import HomePage from 'app/page/home-page';
 import WorkspaceCard from 'app/component/workspace-card';
-import {signInWithAccessToken} from 'utils/test-utils';
+import { signInWithAccessToken } from 'utils/test-utils';
 
 describe('Home page ui tests', () => {
-
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
 
   test('Check visibility of Workspace cards', async () => {
-
     await checkCreateNewWorkspaceLink();
 
     const allCards = await WorkspaceCard.findAllCards(page);
@@ -44,13 +42,11 @@ describe('Home page ui tests', () => {
       expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
     }
   });
-
 });
 
 async function checkCreateNewWorkspaceLink(): Promise<void> {
   const homePage = new HomePage(page);
-  const plusIcon = await homePage.getCreateNewWorkspaceLink();
-  expect(plusIcon).toBeTruthy();
+  const plusIcon = homePage.getCreateNewWorkspaceLink();
   const classname = await plusIcon.getProperty<string>('className');
   expect(classname).toBe('is-solid');
   const shape = await plusIcon.getAttribute('shape');

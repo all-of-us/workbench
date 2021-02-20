@@ -1,20 +1,18 @@
-import {Page} from 'puppeteer';
-import {PageUrl} from 'app/text-labels';
+import { Page } from 'puppeteer';
+import { PageUrl } from 'app/text-labels';
 import Link from 'app/element/link';
 import AuthenticatedPage from 'app/page/authenticated-page';
 import ClrIconLink from 'app/element/clr-icon-link';
-import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
+import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 
 export const PageTitle = 'Homepage';
 
 export const LabelAlias = {
   SeeAllWorkspaces: 'See all workspaces',
-  CreateNewWorkspace: 'Workspaces',
+  CreateNewWorkspace: 'Workspaces'
 };
 
-
 export default class HomePage extends AuthenticatedPage {
-
   constructor(page: Page) {
     super(page);
   }
@@ -23,17 +21,18 @@ export default class HomePage extends AuthenticatedPage {
     await waitForDocumentTitle(this.page, PageTitle);
     await waitWhileLoading(this.page);
     // Look for "See All Workspaces" link.
-    await this.getSeeAllWorkspacesLink().then( (element) => element.asElementHandle());
+    const allWorkspacesLink = this.getSeeAllWorkspacesLink();
+    await allWorkspacesLink.asElementHandle();
     // Look for either a workspace card or the "Create your first workspace" msg.
     await Promise.race([
-      this.page.waitForXPath('//*[@data-test-id="workspace-card"]', {visible: true}),
-      this.page.waitForXPath('//text()[contains(., "Create your first workspace")]', {visible: true}),
+      this.page.waitForXPath('//*[@data-test-id="workspace-card"]', { visible: true }),
+      this.page.waitForXPath('//text()[contains(., "Create your first workspace")]', { visible: true })
     ]);
     try {
       // Look for either the recent-resources table or the getting-started msg.
       await Promise.race([
-        this.page.waitForXPath('//*[@data-test-id="recent-resources-table"]', {visible: true}),
-        this.page.waitForXPath('//*[@data-test-id="getting-started"]', {visible: true}),
+        this.page.waitForXPath('//*[@data-test-id="recent-resources-table"]', { visible: true }),
+        this.page.waitForXPath('//*[@data-test-id="getting-started"]', { visible: true })
       ]);
     } catch (err) {
       // Bug https://precisionmedicineinitiative.atlassian.net/browse/RW-6005
@@ -42,8 +41,8 @@ export default class HomePage extends AuthenticatedPage {
     return true;
   }
 
-  async getCreateNewWorkspaceLink(): Promise<ClrIconLink> {
-    return ClrIconLink.findByName(this.page, {name: LabelAlias.CreateNewWorkspace, iconShape: 'plus-circle'});
+  getCreateNewWorkspaceLink(): ClrIconLink {
+    return ClrIconLink.findByName(this.page, { name: LabelAlias.CreateNewWorkspace, iconShape: 'plus-circle' });
   }
 
   /**
@@ -54,7 +53,7 @@ export default class HomePage extends AuthenticatedPage {
     return this;
   }
 
-  async getSeeAllWorkspacesLink(): Promise<Link> {
-    return Link.findByName(this.page, {name: LabelAlias.SeeAllWorkspaces});
+  getSeeAllWorkspacesLink(): Link {
+    return Link.findByName(this.page, { name: LabelAlias.SeeAllWorkspaces });
   }
 }
