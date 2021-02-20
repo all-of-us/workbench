@@ -252,10 +252,10 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
         .ethnicity(USER__ETHNICITY)
         .disability(USER__DISABILITY)
         .highestEducation(USER__EDUCATION)
-        .sexAtBirth(USER__SEX_AT_BIRTH.toString())
-        .race(USER__RACE.toString())
+        .sexesAtBirth(USER__SEX_AT_BIRTH.toString())
+        .races(USER__RACE.toString())
         .yearOfBirth(USER__YEAR_OF_BIRTH)
-        .genderIdentity(USER__GENDER_IDENTITY.toString())
+        .genderIdentifies(USER__GENDER_IDENTITY.toString())
         .lgbtqIdentity(USER__LGBTQ_IDENTITY)
         .identifiesAsLgbtq(USER__IDENTIFIES_AS_LGBTQ);
   }
