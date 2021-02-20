@@ -1,12 +1,11 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {MenuOption, WorkspaceAccessLevel} from 'app/text-labels';
+import { MenuOption, WorkspaceAccessLevel } from 'app/text-labels';
 import * as testData from 'resources/data/workspace-data';
-import {createWorkspace, findOrCreateWorkspace, performActions, signInWithAccessToken} from 'utils/test-utils';
+import { createWorkspace, findOrCreateWorkspace, performActions, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 
 describe('Editing workspace via workspace card snowman menu', () => {
-
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
@@ -25,19 +24,19 @@ describe('Editing workspace via workspace card snowman menu', () => {
   test('User as OWNER can edit workspace', async () => {
     const workspaceCard = await createWorkspace(page);
     workspaceName = await workspaceCard.getWorkspaceName();
-    await workspaceCard.selectSnowmanMenu(MenuOption.Edit, {waitForNav: true});
+    await workspaceCard.selectSnowmanMenu(MenuOption.Edit, { waitForNav: true });
 
     const workspaceEditPage = new WorkspaceEditPage(page);
 
     // CDR Version Select is readonly. Get selected value.
     const selectedOption = await workspaceEditPage.selectCdrVersion();
-    const cdrVersionSelect = await workspaceEditPage.getCdrVersionSelect();
+    const cdrVersionSelect = workspaceEditPage.getCdrVersionSelect();
     const selectedValue = await cdrVersionSelect.getOptionValue(selectedOption);
 
     // Change question #2 answer
     await performActions(page, testData.defaultAnswersResearchPurposeSummary);
 
-    const updateButton = await workspaceEditPage.getUpdateWorkspaceButton();
+    const updateButton = workspaceEditPage.getUpdateWorkspaceButton();
     await updateButton.waitUntilEnabled();
     await workspaceEditPage.clickCreateFinishButton(updateButton);
 
@@ -77,7 +76,6 @@ describe('Editing workspace via workspace card snowman menu', () => {
     expect(todayWeekday).toBe(lastUpdatedWeekday);
     expect(todayYear).toBe(lastUpdatedYear);
     expect(todayDay).toBe(lastUpdatedDay);
-
   });
   /**
    * Test:
@@ -89,7 +87,7 @@ describe('Editing workspace via workspace card snowman menu', () => {
    */
 
   test('User as OWNER can edit workspace via workspace action menu', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page, {workspaceName});
+    const workspaceCard = await findOrCreateWorkspace(page, { workspaceName });
     await workspaceCard.getWorkspaceName();
 
     // Verify Workspace Access Level is OWNER.
@@ -105,21 +103,21 @@ describe('Editing workspace via workspace card snowman menu', () => {
 
     const workspaceEditPage = new WorkspaceEditPage(page);
 
-     // CDR Version Select is readonly. Get selected value.
+    // CDR Version Select is readonly. Get selected value.
     const selectedOption = await workspaceEditPage.selectCdrVersion();
-    const cdrVersionSelect = await workspaceEditPage.getCdrVersionSelect();
+    const cdrVersionSelect = workspaceEditPage.getCdrVersionSelect();
     const selectedValue = await cdrVersionSelect.getOptionValue(selectedOption);
 
     // Change question #2 answer
-     await performActions(page, testData.defaultAnswersResearchPurposeSummary);
+    await performActions(page, testData.defaultAnswersResearchPurposeSummary);
 
-     const updateButton = await workspaceEditPage.getUpdateWorkspaceButton();
-     await updateButton.waitUntilEnabled();
-     await workspaceEditPage.clickCreateFinishButton(updateButton);
+    const updateButton = workspaceEditPage.getUpdateWorkspaceButton();
+    await updateButton.waitUntilEnabled();
+    await workspaceEditPage.clickCreateFinishButton(updateButton);
 
-     await dataPage.waitForLoad();
+    await dataPage.waitForLoad();
 
-     // navigate to About Page
+    // navigate to About Page
     await dataPage.openAboutPage();
 
     const cdrValue = await aboutPage.getCdrVersion();
@@ -150,7 +148,5 @@ describe('Editing workspace via workspace card snowman menu', () => {
     expect(todayWeekday).toBe(lastUpdatedWeekday);
     expect(todayYear).toBe(lastUpdatedYear);
     expect(todayDay).toBe(lastUpdatedDay);
-
   });
-
 });

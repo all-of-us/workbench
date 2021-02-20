@@ -117,14 +117,14 @@ export default class NotebookPage extends AuthenticatedPage {
     const idleIconSelector = `${CssSelector.kernelIcon}.kernel_idle_icon`;
     const notifSelector = '#notification_kernel';
     const frame = await this.getIFrame();
-    try {
-      await Promise.all([
-        frame.waitForSelector(idleIconSelector, { visible: true, timeout: timeOut }),
-        frame.waitForSelector(notifSelector, { hidden: true, timeout: timeOut })
-      ]);
-    } catch (e) {
-      throw new Error(`Notebook kernel is ${await this.getKernelStatus()}. waitForKernelIdle() encountered ${e}`);
-    }
+
+    await Promise.all([
+      frame.waitForSelector(idleIconSelector, { visible: true, timeout: timeOut }),
+      frame.waitForSelector(notifSelector, { hidden: true, timeout: timeOut })
+    ]).catch(async () => {
+      const status = await this.getKernelStatus();
+      throw new Error(`Notebook waitForKernelIdle() failed. kernel status is ${status}.`);
+    });
   }
 
   async getKernelStatus(): Promise<KernelStatus | string> {
