@@ -3,7 +3,7 @@ import {Page} from 'puppeteer';
 
 const faker = require('faker/locale/en_US');
 
-export function makeString(charLimit?: number) {
+export function makeString(charLimit?: number): string {
   let loremStr = faker.lorem.paragraphs();
   if (charLimit === undefined) {
     return loremStr;
@@ -14,7 +14,7 @@ export function makeString(charLimit?: number) {
   return loremStr;
 }
 
-export function makeUrl(charLimit?: number) {
+export function makeUrl(charLimit?: number): string {
   const randomPage = makeString(charLimit).replace(/\s/g, '');
   return `http://example.com/${randomPage}.html`;
 }
@@ -23,16 +23,16 @@ export function makeUrl(charLimit?: number) {
  * Generate a random filename.
  * @param namePrefix
  */
-export function makeDateTimeStr(namePrefix: string) {
+export function makeDateTimeStr(namePrefix: string): string {
   const timestamp = new Date().toISOString();
   return `${namePrefix.replace(/\s/g, '')}_${timestamp}`;
 }
 
-export function makeWorkspaceName() {
+export function makeWorkspaceName(): string {
   return `aoutest-${Math.floor(Math.random() * 100000)}${Math.floor(Date.now() / 1000)}`;
 }
 
-export function makeRandomName(prefix?: string) {
+export function makeRandomName(prefix?: string): string {
   prefix = prefix || 'aoutest';
   return `${prefix}-${Math.floor(Math.random() * 10000000)}`;
 }
