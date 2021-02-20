@@ -1,6 +1,6 @@
 {
   "name": "aou-puppeteer-test-automation",
-  "description": "All-of-Us test automation framework",
+  "description": "All-of-Us end-to-end test automation framework",
   "version": "0.0.1",
   "main": "index.js",
   "private": true,
@@ -21,23 +21,15 @@
     "test:ci": "yarn _test --no-color --ci --maxWorkers=2",
     "test:ci:debug": "yarn _test --ci --debug --maxWorkers=1 --bail 1",
     "test-nightly": "cross-env TEST_MODE=nightly-integration yarn _test --maxWorkers=1",
-    "test-nightly-local-devup": "cross-env TEST_MODE=nightly-integration yarn jest --maxWorkers=1",
-    "test-nightly-local-devup:debug": "cross-env TEST_MODE=nightly-integration PUPPETEER_HEADLESS=false DEBUG=true yarn jest --maxWorkers=1",
-    "lint": "tslint --project tsconfig.json",
-    "lint:fix": "yarn compile && yarn run lint --fix",
-    "tsc-build": "tsc --build --clean && tsc --skipLibCheck --project tsconfig.json",
-    "compile": "rimraf tsc-out/ && yarn run tsc-build"
-    "build": "tsc -p tsconfig.json --incremental",
+    "compile": "tsc -p tsconfig.json --incremental",
     "lint": "eslint . --ext .js,.ts --cache",
-    "format": "prettier --config .prettierrc.js --write --ignore-unknown \"**/*.{ts,js}\"",
-    "precommit": "lint-staged"
+    "lint:fix": "yarn lint -- --fix",
+    "format": "prettier --config .prettierrc.js --write --ignore-unknown \"**/*.{ts,js}\""
   },
   "keywords": [
     "test",
     "puppeteer",
-    "headless",
-    "chrome",
-    "ui"
+    "chrome"
   ],
   "engines": {
     "node": ">= 10.0.0"
@@ -74,7 +66,6 @@
     "jest-junit": "^11.0.1",
     "jest-puppeteer": "4.4.0",
     "jest-stare": "2.2.0",
-    "lint-staged": "^10.5.3",
     "lodash": "4.17.20",
     "prettier": "^2.2.1",
     "puppeteer": "5.5.0",

@@ -2,8 +2,7 @@ module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint'],
-  // TODO Add 'prettier/@typescript-eslint', 'plugin:prettier/recommended' in extends array.
-  extends: ['plugin:@typescript-eslint/recommended'],
+  extends: ['plugin:@typescript-eslint/recommended', 'prettier/@typescript-eslint', 'plugin:prettier/recommended'],
   env: {
     node: true,
     jest: true,
@@ -26,7 +25,7 @@ module.exports = {
     // 2 == error, 1 == warning, 0 == off
     'max-len': [
       2,
-      140,
+      160, // TODO Change to 120
       {
         ignoreComments: true,
         ignoreUrls: true,
@@ -49,7 +48,7 @@ module.exports = {
         allowTernary: false
       }
     ],
-    // TODO Fix warnings, then change to ERROR level.
+    // TODO Fix rule warnings, then remove the rule.
     '@typescript-eslint/restrict-template-expressions': 1,
     '@typescript-eslint/no-non-null-assertion': 1,
     '@typescript-eslint/no-unsafe-member-access': 1,
@@ -69,7 +68,7 @@ module.exports = {
     '@typescript-eslint/require-await': 1,
     '@typescript-eslint/no-floating-promises': 1,
     'quotes': [1, 'single', 'avoid-escape'],
-    'eqeqeq': [2, 'smart'],
+    'eqeqeq': [1, 'smart'],
     'semi': [2, 'always'],
     'require-jsdoc': 0,
     'valid-jsdoc': 0,
