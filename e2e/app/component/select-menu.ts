@@ -1,23 +1,23 @@
-import {Page} from 'puppeteer';
+import { Page } from 'puppeteer';
 import Container from 'app/container';
-import {buildXPath} from 'app/xpath-builders';
-import {ElementType, XPathOptions} from 'app/xpath-options';
-import {getPropValue} from 'utils/element-utils';
+import { buildXPath } from 'app/xpath-builders';
+import { ElementType, XPathOptions } from 'app/xpath-options';
+import { getPropValue } from 'utils/element-utils';
 import BaseMenu from './base-menu';
 
-const defaultMenuXpath = '//*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown ")]' +
-   '[.//*[contains(concat(" ", normalize-space(@class), " "), " p-input-overlay-visible ")]]';
+const defaultMenuXpath =
+  '//*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown ")]' +
+  '[.//*[contains(concat(" ", normalize-space(@class), " "), " p-input-overlay-visible ")]]';
 
 export default class SelectMenu extends BaseMenu {
-
-  static async findByName(page: Page, xOpt: XPathOptions = {}, container?: Container): Promise<SelectMenu> {
+  static findByName(page: Page, xOpt: XPathOptions = {}, container?: Container): SelectMenu {
     xOpt.type = ElementType.Dropdown;
     const menuXpath = buildXPath(xOpt, container);
     const selectMenu = new SelectMenu(page, menuXpath);
     return selectMenu;
   }
 
-  constructor(page: Page, xpath: string  = defaultMenuXpath) {
+  constructor(page: Page, xpath: string = defaultMenuXpath) {
     super(page, xpath);
   }
 
@@ -52,7 +52,7 @@ export default class SelectMenu extends BaseMenu {
    * Open Select dropdown.
    * @param {number} maxAttempts Default is 2.
    */
-  private async open(maxAttempts: number = 2): Promise<void> {
+  private async open(maxAttempts = 2): Promise<void> {
     const click = async () => {
       await this.toggle();
       const opened = await this.isOpen();
@@ -79,5 +79,4 @@ export default class SelectMenu extends BaseMenu {
   getMenuItemXpath(menuItemText: string): string {
     return `//*[@role="option" and normalize-space()="${menuItemText}"]`;
   }
-
 }

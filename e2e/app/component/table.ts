@@ -1,30 +1,28 @@
-import {ElementHandle, Page} from 'puppeteer';
+import { ElementHandle, Page } from 'puppeteer';
 import Container from 'app/container';
-import {getPropValue} from 'utils/element-utils';
+import { getPropValue } from 'utils/element-utils';
 
 // Table column names
 export enum TableColumn {
-   // Cohorts Criteria dialog: Condition search results table column names
-   Name = 'Name',
-   Code = 'Code',
-   Vocab = 'Vocab',
-   Count = 'Count',
-   ViewHierarchy =  'View Hierarchy',
-   // Add here some other table column names ...
+  // Cohorts Criteria dialog: Condition search results table column names
+  Name = 'Name',
+  Code = 'Code',
+  Vocab = 'Vocab',
+  Count = 'Count',
+  ViewHierarchy = 'View Hierarchy'
+  // Add here some other table column names ...
 }
 
 export default class Table extends Container {
-
   private trXpath: string = this.xpath + '//tbody/tr';
   private theadXpath: string = this.xpath + '/thead/tr/th';
 
   constructor(page: Page, xpath: string, container?: Container) {
-    super(page, (container === undefined) ? xpath : `${container.getXpath()}${xpath}`);
+    super(page, container === undefined ? xpath : `${container.getXpath()}${xpath}`);
   }
 
   async asElement(): Promise<ElementHandle> {
-    return this.page.waitForXPath(this.xpath, {timeout: 1000, visible: true})
-      .then( (elemt) => elemt.asElement());
+    return this.page.waitForXPath(this.xpath, { timeout: 1000, visible: true }).then((elemt) => elemt.asElement());
   }
 
   async exists(): Promise<boolean> {
@@ -36,12 +34,12 @@ export default class Table extends Container {
   }
 
   async waitForVisible(): Promise<ElementHandle> {
-    return this.page.waitForXPath(this.xpath, {visible: true});
+    return this.page.waitForXPath(this.xpath, { visible: true });
   }
 
   async getCell(rowIndex: number, columnIndex: number): Promise<ElementHandle> {
     const cellXpath = this.getCellXpath(rowIndex, columnIndex);
-    return this.page.waitForXPath(cellXpath, {visible: true});
+    return this.page.waitForXPath(cellXpath, { visible: true });
   }
 
   async getCellValue(rowIndex: number, columnIndex: number): Promise<string> {
@@ -62,7 +60,7 @@ export default class Table extends Container {
    * @param {number} rowNum Row number starts at 1.
    */
   async getRow(rowNum: number): Promise<ElementHandle> {
-      // $x() returns zero-indexed array
+    // $x() returns zero-indexed array
     const rows = await this.getRows();
     if (rows.length < rowNum) {
       throw new Error(`Table row ${rowNum} not found.`);
@@ -84,7 +82,7 @@ export default class Table extends Container {
    */
   async getColumnNames(): Promise<string[]> {
     const columns = await this.getColumns();
-    const columnNames = [];
+    const columnNames: string[] = [];
     for (const column of columns) {
       const textContent = await getPropValue<string>(column, 'innerText');
       columnNames.push(textContent);
@@ -95,15 +93,14 @@ export default class Table extends Container {
 
   async getColumnIndex(columName: string): Promise<number> {
     const columnIndexXpath = `count(${this.theadXpath}[contains(normalize-space(text()), "${columName}")]/preceding-sibling::*)`;
-    const handle = await this.page.waitForXPath(columnIndexXpath, {visible: true});
+    const handle = await this.page.waitForXPath(columnIndexXpath, { visible: true });
     const value = await handle.jsonValue();
-    console.log('getColumnIndex: ' + value);
     return Number(value.toString());
   }
 
   async getHeaderCell(columnIndex: number): Promise<ElementHandle> {
     const cellXpath = this.getHeaderXpath(columnIndex);
-    return this.page.waitForXPath(cellXpath, {visible: true});
+    return this.page.waitForXPath(cellXpath, { visible: true });
   }
 
   getCellXpath(rowIndex: number, columnIndex: number): string {
@@ -113,5 +110,4 @@ export default class Table extends Container {
   getHeaderXpath(columnIndex: number): string {
     return `${this.theadXpath}[${columnIndex}]`;
   }
-
 }

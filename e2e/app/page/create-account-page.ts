@@ -4,17 +4,16 @@ import Checkbox from 'app/element/checkbox';
 import ClrIconLink from 'app/element/clr-icon-link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
-import {findIframe} from 'app/xpath-finder';
+import { findIframe } from 'app/xpath-finder';
 import BasePage from 'app/page/base-page';
-import {ElementType} from 'app/xpath-options';
-import {Frame, Page} from 'puppeteer';
-import {defaultFieldValues} from 'resources/data/user-registration-data';
-import {config} from 'resources/workbench-config';
-import {waitForText, waitWhileLoading} from 'utils/waits-utils';
-import {LinkText} from 'app/text-labels';
-import {getPropValue} from 'utils/element-utils';
-
-const faker = require('faker/locale/en_US');
+import { ElementType } from 'app/xpath-options';
+import { Frame, Page } from 'puppeteer';
+import { defaultFieldValues } from 'resources/data/user-registration-data';
+import { config } from 'resources/workbench-config';
+import { waitForText, waitWhileLoading } from 'utils/waits-utils';
+import { LinkText } from 'app/text-labels';
+import { getPropValue } from 'utils/element-utils';
+import faker from 'faker/locale/en_US';
 
 export const InstitutionSelectValue = {
   Vanderbilt: 'Vanderbilt University Medical Center',
@@ -30,11 +29,11 @@ export const InstitutionRoleSelectValue = {
   Industry: 'Industry',
   ResearchAssistant: 'Research Assistant (pre-doctoral)',
   ResearchAssociate: 'Research associate (post-doctoral; early/mid career)',
-  SeniorResearcher: 'Senior Researcher (PI/Team Lead, senior scientist)',
+  SeniorResearcher: 'Senior Researcher (PI/Team Lead, senior scientist)'
 };
 
 export const EducationLevelValue = {
-  Doctorate: 'Doctorate',
+  Doctorate: 'Doctorate'
   // other option values here
 };
 
@@ -51,38 +50,48 @@ export const LabelAlias = {
 export const FieldSelector = {
   InstitutionEmailTextbox: {
     textOption: {
-      containsText: LabelAlias.InstitutionEmail, ancestorLevel: 2
+      containsText: LabelAlias.InstitutionEmail,
+      ancestorLevel: 2
     }
   },
   EducationLevelSelect: {
     textOption: {
-      type: ElementType.Dropdown, name: LabelAlias.EducationLevel, ancestorLevel: 2
+      type: ElementType.Dropdown,
+      name: LabelAlias.EducationLevel,
+      ancestorLevel: 2
     }
   },
   EthnicitySelect: {
     textOption: {
-      type: ElementType.Dropdown, name: LabelAlias.Ethnicity, ancestorLevel: 2
+      type: ElementType.Dropdown,
+      name: LabelAlias.Ethnicity,
+      ancestorLevel: 2
     }
   },
   BirthYearSelect: {
     textOption: {
-      type: ElementType.Dropdown, name: LabelAlias.YearOfBirth, ancestorLevel: 2
+      type: ElementType.Dropdown,
+      name: LabelAlias.YearOfBirth,
+      ancestorLevel: 2
     }
   },
   InstitutionSelect: {
     textOption: {
-      type:ElementType.Dropdown, name:'Select your institution', ancestorLevel: 2
+      type: ElementType.Dropdown,
+      name: 'Select your institution',
+      ancestorLevel: 2
     }
   },
   DescribeRole: {
     textOption: {
-      type: ElementType.Dropdown, containsText: 'describes your role', ancestorLevel: 2
+      type: ElementType.Dropdown,
+      containsText: 'describes your role',
+      ancestorLevel: 2
     }
   }
 };
 
 export default class CreateAccountPage extends BasePage {
-
   constructor(page: Page) {
     super(page);
   }
@@ -90,30 +99,30 @@ export default class CreateAccountPage extends BasePage {
   async isLoaded(): Promise<boolean> {
     await Promise.all([
       waitForText(this.page, 'Please read through the entire agreement to continue'),
-      this.page.waitForXPath('//*[@data-test-id="account-creation-tos"]', {visible: true}),
+      this.page.waitForXPath('//*[@data-test-id="account-creation-tos"]', { visible: true })
     ]);
     await waitWhileLoading(this.page);
     return true;
   }
 
-  async getSubmitButton(): Promise<Button> {
-    return Button.findByName(this.page, {name: LinkText.Submit});
+  getSubmitButton(): Button {
+    return Button.findByName(this.page, { name: LinkText.Submit });
   }
 
-  async getNextButton(): Promise<Button> {
-    return Button.findByName(this.page, {name: LinkText.Next});
+  getNextButton(): Button {
+    return Button.findByName(this.page, { name: LinkText.Next });
   }
 
   async agreementLoaded(): Promise<boolean> {
     const iframe = await findIframe(this.page, 'terms of service agreement');
     const bodyHandle = await iframe.$('body');
-    return iframe.evaluate(body => body.scrollHeight > 0, bodyHandle);
+    return iframe.evaluate((body) => body.scrollHeight > 0, bodyHandle);
   }
 
   async readAgreement(): Promise<Frame> {
     const iframe = await findIframe(this.page, 'terms of service agreement');
     const bodyHandle = await iframe.$('body');
-    await iframe.evaluate(body =>  body.scrollTo(0, body.scrollHeight), bodyHandle);
+    await iframe.evaluate((body) => body.scrollTo(0, body.scrollHeight), bodyHandle);
     await this.page.waitForTimeout(1000);
     return iframe;
   }
@@ -128,27 +137,27 @@ export default class CreateAccountPage extends BasePage {
     return new Checkbox(this.page, selector);
   }
 
-  async getInstitutionNameInput(): Promise<Textbox> {
-    return Textbox.findByName(this.page, {name: LabelAlias.InstitutionName});
+  getInstitutionNameInput(): Textbox {
+    return Textbox.findByName(this.page, { name: LabelAlias.InstitutionName });
   }
 
-  async getResearchBackgroundTextarea(): Promise<Textarea> {
-    return Textarea.findByName(this.page, {normalizeSpace: LabelAlias.ResearchBackground});
+  getResearchBackgroundTextarea(): Textarea {
+    return Textarea.findByName(this.page, { normalizeSpace: LabelAlias.ResearchBackground });
   }
 
   async getUsernameDomain(): Promise<string> {
-    const elem = await this.page.waitForXPath('//*[./input[@id="username"]]/i', {visible: true});
+    const elem = await this.page.waitForXPath('//*[./input[@id="username"]]/i', { visible: true });
     return getPropValue<string>(elem, 'innerText');
   }
 
-  async fillInFormFields(fields: { label: string; value: string; }[]): Promise<string> {
-    let newUserName;
+  async fillInFormFields(fields: { label: string; value: string }[]): Promise<string> {
+    let newUserName: string;
     for (const field of fields) {
-      const textbox = await Textbox.findByName(this.page, {name: field.label});
+      const textbox = Textbox.findByName(this.page, { name: field.label });
       await textbox.type(field.value);
       await textbox.pressTab();
       if (field.label === 'New Username') {
-        await ClrIconLink.findByName(this.page, {name: field.label, iconShape: 'success-standard'});
+        ClrIconLink.findByName(this.page, { name: field.label, iconShape: 'success-standard' });
         newUserName = field.value; // store new username for return
       }
     }
@@ -157,30 +166,30 @@ export default class CreateAccountPage extends BasePage {
 
   // select Institution Affiliation from a dropdown
   async selectInstitution(selectTextValue: string): Promise<void> {
-    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.InstitutionSelect.textOption);
+    const dropdown = SelectMenu.findByName(this.page, FieldSelector.InstitutionSelect.textOption);
     return dropdown.select(selectTextValue);
   }
 
   async getInstitutionValue(): Promise<string> {
-    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.InstitutionSelect.textOption);
+    const dropdown = SelectMenu.findByName(this.page, FieldSelector.InstitutionSelect.textOption);
     return dropdown.getSelectedValue();
   }
 
   // select Education Level from a dropdown
   async selectEducationLevel(selectTextValue: string): Promise<void> {
-    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.EducationLevelSelect.textOption);
+    const dropdown = SelectMenu.findByName(this.page, FieldSelector.EducationLevelSelect.textOption);
     return dropdown.select(selectTextValue);
   }
 
   // select Year of Birth from a dropdown
   async selectYearOfBirth(year: string): Promise<void> {
-    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.BirthYearSelect.textOption);
+    const dropdown = SelectMenu.findByName(this.page, FieldSelector.BirthYearSelect.textOption);
     return dropdown.select(year);
   }
 
   // select Ethnicity from a dropdown
   async selectEthnicity(option: string): Promise<void> {
-    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.EthnicitySelect.textOption);
+    const dropdown = SelectMenu.findByName(this.page, FieldSelector.EthnicitySelect.textOption);
     return dropdown.select(option);
   }
 
@@ -188,19 +197,21 @@ export default class CreateAccountPage extends BasePage {
 
   // Step 2: Fill out institution affiliation details
   async fillOutInstitution(): Promise<void> {
-    await Promise.all([
-      waitForText(this.page, 'complete Step 1 of 3', {css: 'body'}),
-      waitWhileLoading(this.page),
-    ]);
+    await Promise.all([waitForText(this.page, 'complete Step 1 of 3', { css: 'body' }), waitWhileLoading(this.page)]);
 
     await this.selectInstitution(InstitutionSelectValue.Broad);
     await this.getInstitutionValue();
-    const emailAddressTextbox = await Textbox.findByName(this.page, FieldSelector.InstitutionEmailTextbox.textOption);
+    const emailAddressTextbox = Textbox.findByName(this.page, FieldSelector.InstitutionEmailTextbox.textOption);
     await emailAddressTextbox.type(config.institutionContactEmail);
     await emailAddressTextbox.pressTab(); // tab out to start email validation
-    await ClrIconLink.findByName(this.page, {containsText: LabelAlias.InstitutionEmail, ancestorLevel: 2, iconShape: 'success-standard'});
+    const icon = ClrIconLink.findByName(this.page, {
+      containsText: LabelAlias.InstitutionEmail,
+      ancestorLevel: 2,
+      iconShape: 'success-standard'
+    });
+    await icon.waitForXPath();
 
-    const roleSelect = await SelectMenu.findByName(this.page, FieldSelector.DescribeRole.textOption);
+    const roleSelect = SelectMenu.findByName(this.page, FieldSelector.DescribeRole.textOption);
     await roleSelect.select(InstitutionRoleSelectValue.UndergraduteStudent);
   }
 
@@ -219,7 +230,7 @@ export default class CreateAccountPage extends BasePage {
   // Step 3: Fill out user information with default values
   async fillOutUserInformation(): Promise<string> {
     const newUserName = await this.fillInFormFields(defaultFieldValues);
-    await (await this.getResearchBackgroundTextarea()).type(faker.lorem.word());
+    await (this.getResearchBackgroundTextarea()).type(faker.lorem.word());
     return newUserName;
   }
 
@@ -227,7 +238,8 @@ export default class CreateAccountPage extends BasePage {
   async fillOutDemographicSurvey(): Promise<void> {
     await waitForText(this.page, 'Optional Demographics Survey');
     // Find and check on all checkboxes with same label: Prefer not to answer
-    const targetXpath = '//*[normalize-space(text())="Prefer not to answer"]/ancestor::node()[1]/input[@type="checkbox" or @type="radio"]';
+    const targetXpath =
+      '//*[normalize-space(text())="Prefer not to answer"]/ancestor::node()[1]/input[@type="checkbox" or @type="radio"]';
     await this.page.waitForXPath(targetXpath, { visible: true });
     const checkboxes = await this.page.$x(targetXpath);
     for (const ck of checkboxes) {
@@ -237,5 +249,4 @@ export default class CreateAccountPage extends BasePage {
     await this.selectYearOfBirth('1955');
     await this.selectEducationLevel(EducationLevelValue.Doctorate);
   }
-
 }

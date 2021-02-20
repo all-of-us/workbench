@@ -1,15 +1,14 @@
-import {Page} from 'puppeteer';
-import {LinkText} from 'app/text-labels';
+import { Page } from 'puppeteer';
+import { LinkText } from 'app/text-labels';
 import BaseHelpSidebar from './base-help-sidebar';
 
 export default class ReviewConceptSetSidebar extends BaseHelpSidebar {
-
   constructor(page: Page) {
     super(page);
   }
 
   // Not implemented because it's not triggered to open by sidebar tab.
-  async open(): Promise<void> {
+  open(): Promise<void> {
     throw new Error('Do not use. Method not to be implemented.');
   }
 
@@ -22,5 +21,4 @@ export default class ReviewConceptSetSidebar extends BaseHelpSidebar {
   async clickSaveConceptSetButton(): Promise<void> {
     await this.clickButton(LinkText.SaveConceptSet);
   }
-
 }

@@ -1,13 +1,12 @@
-import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
+import ConceptDomainCard, { Domain } from 'app/component/concept-domain-card';
 import DataResourceCard from 'app/component/data-resource-card';
 import ConceptSetActionsPage from 'app/page/conceptset-actions-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
-import {waitForText} from 'utils/waits-utils';
-import {ResourceCard} from 'app/text-labels';
+import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { waitForText } from 'utils/waits-utils';
+import { ResourceCard } from 'app/text-labels';
 
 describe('Create Concept Sets from Domains', () => {
-
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
@@ -29,7 +28,7 @@ describe('Create Concept Sets from Domains', () => {
     const conceptSetPage = await datasetBuildPage.clickAddConceptSetsButton();
 
     // Start: Add a Concept in Conditions domain
-    const conditionDomainCard = await ConceptDomainCard.findDomainCard(page, Domain.Conditions);
+    const conditionDomainCard = ConceptDomainCard.findDomainCard(page, Domain.Conditions);
 
     // In Conditions domain, both Concepts and Participants counts should be non-zero numberical digits.
     const conceptsCount = await conditionDomainCard.getConceptsCount();
@@ -52,12 +51,12 @@ describe('Create Concept Sets from Domains', () => {
     expect(rowValues.name).toBe(conditionName);
 
     await conceptSetPage.reviewAndSaveConceptSet();
-    
+
     // Save modal window
     const conceptSetName = await conceptSetPage.saveConceptSet();
 
     // Verify Concept Set created successfully.
-    const successMessage = `Concept Set Saved Successfully`;
+    const successMessage = 'Concept Set Saved Successfully';
     const isSuccess = await waitForText(page, successMessage);
     expect(isSuccess).toBe(true);
 
@@ -92,7 +91,7 @@ describe('Create Concept Sets from Domains', () => {
     const conceptSearchPage = await datasetBuildPage.clickAddConceptSetsButton();
 
     // Add new Concept in Drug Exposures domain
-    const drugDomainCard = await ConceptDomainCard.findDomainCard(page, Domain.DrugExposures);
+    const drugDomainCard = ConceptDomainCard.findDomainCard(page, Domain.DrugExposures);
 
     // In Drug Exposures domain, both Concepts and Participants counts should be non-zero numberical digits.
     const conceptsCount = await drugDomainCard.getConceptsCount();
@@ -123,7 +122,7 @@ describe('Create Concept Sets from Domains', () => {
     await conceptActionPage.clickCreateAnotherConceptSetButton();
 
     // Add new Concept in Measurements domain
-    const measurementsDomainCard = await ConceptDomainCard.findDomainCard(page, Domain.Measurements);
+    const measurementsDomainCard = ConceptDomainCard.findDomainCard(page, Domain.Measurements);
     await measurementsDomainCard.getConceptsCount();
     await measurementsDomainCard.clickSelectConceptButton();
 
@@ -164,5 +163,4 @@ describe('Create Concept Sets from Domains', () => {
     await dataPage.deleteResource(conceptSet1, ResourceCard.ConceptSet);
     await dataPage.deleteResource(conceptSet2, ResourceCard.ConceptSet);
   });
-
 });

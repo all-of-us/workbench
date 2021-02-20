@@ -1,12 +1,10 @@
 import BaseElement from 'app/element/base-element';
 import CreateAccountPage from 'app/page/create-account-page';
 import GoogleLoginPage from 'app/page/google-login';
-import {config} from 'resources/workbench-config';
-import {waitForText} from 'utils/waits-utils';
-
+import { config } from 'resources/workbench-config';
+import { waitForText } from 'utils/waits-utils';
 
 describe('User registration UI tests:', () => {
-
   test('Loading registration workflow', async () => {
     const loginPage = new GoogleLoginPage(page);
     await loginPage.load();
@@ -19,12 +17,12 @@ describe('User registration UI tests:', () => {
     expect(await createAccountPage.agreementLoaded()).toBe(true);
 
     // Before user read all pdf pages, checkboxes are unchecked and disabled
-    const privacyStatementCheckbox = await createAccountPage.getPrivacyStatementCheckbox();
+    const privacyStatementCheckbox = createAccountPage.getPrivacyStatementCheckbox();
     expect(privacyStatementCheckbox).toBeTruthy();
     expect(await privacyStatementCheckbox.isDisabled()).toBe(true);
     expect(await privacyStatementCheckbox.isChecked()).toBe(false);
 
-    const termsOfUseCheckbox = await createAccountPage.getTermsOfUseCheckbox();
+    const termsOfUseCheckbox = createAccountPage.getTermsOfUseCheckbox();
     expect(termsOfUseCheckbox).toBeTruthy();
     expect(await termsOfUseCheckbox.isDisabled()).toBe(true);
     expect(await termsOfUseCheckbox.isChecked()).toBe(false);
@@ -38,9 +36,9 @@ describe('User registration UI tests:', () => {
     expect(await termsOfUseCheckbox.isDisabled()).toBe(false);
 
     // check both checkboxes
-    await (await createAccountPage.getPrivacyStatementCheckbox()).check();
+    await createAccountPage.getPrivacyStatementCheckbox().check();
     expect(await nextButton.isCursorNotAllowed()).toEqual(true);
-    await (await createAccountPage.getTermsOfUseCheckbox()).check();
+    await createAccountPage.getTermsOfUseCheckbox().check();
 
     // verify checked
     expect(await privacyStatementCheckbox.isChecked()).toBe(true);
@@ -48,12 +46,12 @@ describe('User registration UI tests:', () => {
     expect(await nextButton.isCursorNotAllowed()).toEqual(false);
 
     // uncheck a checkbox then check NEXT button is again disabled
-    await (await createAccountPage.getTermsOfUseCheckbox()).unCheck();
+    await createAccountPage.getTermsOfUseCheckbox().unCheck();
     expect(await nextButton.isCursorNotAllowed()).toEqual(true);
 
     // check checkboxes
-    await (await createAccountPage.getPrivacyStatementCheckbox()).check();
-    await (await createAccountPage.getTermsOfUseCheckbox()).check();
+    await createAccountPage.getPrivacyStatementCheckbox().check();
+    await createAccountPage.getTermsOfUseCheckbox().check();
     const agreementPageButton = await createAccountPage.getNextButton();
     await agreementPageButton.clickWithEval();
 
@@ -89,8 +87,5 @@ describe('User registration UI tests:', () => {
     await userInforPageButton.isDisplayed();
     const cursor = await userInforPageButton.isCursorNotAllowed();
     expect(cursor).toEqual(true);
-
   });
-
-
 });

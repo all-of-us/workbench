@@ -1,18 +1,17 @@
-import {Page} from 'puppeteer';
+import { Page } from 'puppeteer';
 import Container from 'app/container';
-import {ElementType, XPathOptions} from 'app/xpath-options';
-import {getPropValue} from 'utils/element-utils';
+import { ElementType, XPathOptions } from 'app/xpath-options';
+import { getPropValue } from 'utils/element-utils';
 import BaseElement from './base-element';
-import {buildXPath} from 'app/xpath-builders';
+import { buildXPath } from 'app/xpath-builders';
 
 /**
  * <select> element
  */
 export default class Select extends BaseElement {
-
   private selectedOption: string;
-   
-  static async findByName(page: Page, xOpt: XPathOptions, container?: Container): Promise<Select> {
+
+  static findByName(page: Page, xOpt: XPathOptions, container?: Container): Select {
     xOpt.type = ElementType.Select;
     const selectXpath = buildXPath(xOpt, container);
     const select = new Select(page, selectXpath);
@@ -50,8 +49,8 @@ export default class Select extends BaseElement {
    *
    */
   async getSelectedValue(): Promise<string> {
-    const selectedValue = await this.page.waitForXPath(`${this.getXpath()}/label`, {visible: true});
-    const baseElement = await BaseElement.asBaseElement(this.page, selectedValue);
+    const selectedValue = await this.page.waitForXPath(`${this.getXpath()}/label`, { visible: true });
+    const baseElement = BaseElement.asBaseElement(this.page, selectedValue);
     return await baseElement.getTextContent();
   }
 }

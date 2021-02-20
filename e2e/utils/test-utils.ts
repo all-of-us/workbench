@@ -119,12 +119,12 @@ export async function performAction(
 ): Promise<void> {
   switch (identifier.textOption.type.toLowerCase()) {
     case 'radio': {
-      const radio = await RadioButton.findByName(page, identifier.textOption);
+      const radio = RadioButton.findByName(page, identifier.textOption);
       await radio.select();
       break;
     }
     case 'checkbox': {
-      const checkbox = await Checkbox.findByName(page, identifier.textOption);
+      const checkbox = Checkbox.findByName(page, identifier.textOption);
       await checkbox.toggle(selected);
       if (value) {
         // For Checkbox and its required Textarea or Textbox. Set value in Textbox or Textarea if Checkbox is checked.
@@ -134,13 +134,13 @@ export async function performAction(
       break;
     }
     case 'text': {
-      const textbox = await Textbox.findByName(page, identifier.textOption);
+      const textbox = Textbox.findByName(page, identifier.textOption);
       await textbox.type(value, { delay: 20 });
       await textbox.pressTab();
       break;
     }
     case 'textarea': {
-      const textarea = await Textarea.findByName(page, identifier.textOption);
+      const textarea = Textarea.findByName(page, identifier.textOption);
       await textarea.paste(value);
       await textarea.pressTab();
       break;

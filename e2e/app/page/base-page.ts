@@ -1,18 +1,17 @@
-import {Page, Response} from 'puppeteer';
+import { Page, Response } from 'puppeteer';
 
 /**
  * All Page Object classes will extends the BasePage.
  * Contains common functions/actions that help with tests creation.
  */
 export default abstract class BasePage {
-
   page: Page;
 
   protected constructor(page: Page) {
     this.page = page;
   }
 
-  async getPageTitle() : Promise<string> {
+  async getPageTitle(): Promise<string> {
     return this.page.title();
   }
 
@@ -20,14 +19,14 @@ export default abstract class BasePage {
    * Reload current page.
    */
   async reloadPage(): Promise<Response> {
-    return await this.page.reload( { waitUntil: ['networkidle0', 'load'] } );
+    return await this.page.reload({ waitUntil: ['networkidle0', 'load'] });
   }
 
   /**
    * Load a URL.
    */
   async gotoUrl(url: string): Promise<void> {
-    await this.page.goto(url, {waitUntil: ['networkidle0', 'load'], timeout: 0});
+    await this.page.goto(url, { waitUntil: ['networkidle0', 'load'], timeout: 0 });
   }
 
   /**
@@ -38,7 +37,7 @@ export default abstract class BasePage {
    * @returns {string} value - The text property value
    */
   async getTextContent(cssSelector: string): Promise<string> {
-    return this.page.$eval(`${cssSelector}`, elem => elem.textContent.trim())
+    return this.page.$eval(`${cssSelector}`, (elem) => elem.textContent.trim());
   }
 
   /**
@@ -46,9 +45,7 @@ export default abstract class BasePage {
    * @param txt
    */
   async containsText(txt: string): Promise<boolean> {
-    const indx = await (await this.page.content()).indexOf(txt);
+    const indx = (await this.page.content()).indexOf(txt);
     return indx !== -1;
   }
-
-
 }
