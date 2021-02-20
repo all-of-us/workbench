@@ -48,6 +48,7 @@ module.exports = {
         allowTernary: false
       }
     ],
+    '@typescript-eslint/no-explicit-any': 1,
     // TODO Fix rule warnings, then remove the rule.
     '@typescript-eslint/restrict-template-expressions': 1,
     '@typescript-eslint/no-non-null-assertion': 1,
