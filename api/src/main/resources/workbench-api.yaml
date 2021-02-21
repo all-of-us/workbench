@@ -8303,7 +8303,7 @@ definitions:
         description: |-
           User-reported degrees, comma-delimited if multiple answers were provided.
         type: string
-      genderIdentifies:
+      genderIdentities:
         description: |-
           User-reported genderIdentity information, comma-delimited if multiple answers were provided.
         type: string

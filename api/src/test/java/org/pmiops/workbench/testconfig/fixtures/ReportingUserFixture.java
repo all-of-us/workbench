@@ -161,7 +161,7 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     assertThat(user.getDegrees())
         .isEqualTo(USER__DEGREES.stream().map(Degree::toString).collect(Collectors.joining(",")));
     assertThat(user.getRaces()).isEqualTo(USER__RACE.toString());
-    assertThat(user.getGenderIdentifies()).isEqualTo(USER__GENDER_IDENTITY.toString());
+    assertThat(user.getGenderIdentities()).isEqualTo(USER__GENDER_IDENTITY.toString());
     assertThat(user.getIdentifiesAsLgbtq()).isEqualTo(USER__IDENTIFIES_AS_LGBTQ);
     assertThat(user.getLgbtqIdentity()).isEqualTo(USER__LGBTQ_IDENTITY);
   }
@@ -255,7 +255,7 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
         .sexesAtBirth(USER__SEX_AT_BIRTH.toString())
         .races(USER__RACE.toString())
         .yearOfBirth(USER__YEAR_OF_BIRTH)
-        .genderIdentifies(USER__GENDER_IDENTITY.toString())
+        .genderIdentities(USER__GENDER_IDENTITY.toString())
         .lgbtqIdentity(USER__LGBTQ_IDENTITY)
         .identifiesAsLgbtq(USER__IDENTIFIES_AS_LGBTQ);
   }
