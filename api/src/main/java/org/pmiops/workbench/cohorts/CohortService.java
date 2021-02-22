@@ -1,5 +1,6 @@
 package org.pmiops.workbench.cohorts;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudSubmissionRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionResponse;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.TerraJob;
+import org.pmiops.workbench.model.TerraJobStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,31 +46,26 @@ public class CohortService {
   }
 
   private Map<String, String> createInputParameter(String msg) {
-    Map<String, String> inputs = new HashMap<>();
-    inputs.put("TestWf.msg", "\"" + msg + "\"");
-    return inputs;
+    return new ImmutableMap.Builder<String, String>().put("TestWf.msg", "\"" + msg + "\"").build();
   }
 
   private Map<String, String> createRepoMethodParameter(
       WorkbenchConfig.WgsCohortExtractionConfig cohortExtractionConfig) {
-    Map<String, String> repoMethod = new HashMap<>();
-    repoMethod.put("methodName", cohortExtractionConfig.terraExtractionMethodConfigurationName);
-    repoMethod.put(
-        "methodVersion",
-        cohortExtractionConfig.terraExtractionMethodConfigurationVersion.toString());
-    repoMethod.put(
-        "methodNamespace", cohortExtractionConfig.terraExtractionMethodConfigurationNamespace);
-    repoMethod.put(
-        "methodUri",
-        "agora://"
-            + cohortExtractionConfig.terraExtractionMethodConfigurationNamespace
-            + "/"
-            + cohortExtractionConfig.terraExtractionMethodConfigurationName
-            + "/"
-            + cohortExtractionConfig.terraExtractionMethodConfigurationVersion);
-    repoMethod.put("sourceRepo", "agora");
-
-    return repoMethod;
+    return new ImmutableMap.Builder<String, String>()
+        .put("methodName", cohortExtractionConfig.extractionMethodConfigurationName)
+        .put(
+            "methodVersion", cohortExtractionConfig.extractionMethodConfigurationVersion.toString())
+        .put("methodNamespace", cohortExtractionConfig.extractionMethodConfigurationNamespace)
+        .put(
+            "methodUri",
+            "agora://"
+                + cohortExtractionConfig.extractionMethodConfigurationNamespace
+                + "/"
+                + cohortExtractionConfig.extractionMethodConfigurationName
+                + "/"
+                + cohortExtractionConfig.extractionMethodConfigurationVersion)
+        .put("sourceRepo", "agora")
+        .build();
   }
 
   public TerraJob submitGenomicsCohortExtractionJob(String workspaceNamespace, String workspaceName)
@@ -76,51 +73,48 @@ public class CohortService {
     WorkbenchConfig.WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;
 
-    FirecloudMethodConfiguration newMethodConfig =
-        new FirecloudMethodConfiguration()
-            .deleted(false)
-            .inputs(
-                createInputParameter(
-                    "Hello from AoU (" + workspaceNamespace + "/" + workspaceName + ")!"))
-            .methodConfigVersion(cohortExtractionConfig.terraExtractionMethodConfigurationVersion)
-            .methodRepoMethod(createRepoMethodParameter(cohortExtractionConfig))
-            .name(UUID.randomUUID().toString())
-            .namespace(cohortExtractionConfig.terraExtractionMethodConfigurationNamespace)
-            .outputs(new HashMap<>());
-
     FirecloudMethodConfiguration methodConfig =
         methodConfigurationsApiProvider
             .get()
             .createWorkspaceMethodConfig(
-                cohortExtractionConfig.terraWorkspaceNamespace,
-                cohortExtractionConfig.terraWorkspaceName,
-                newMethodConfig)
+                cohortExtractionConfig.operationalTerraWorkspaceNamespace,
+                cohortExtractionConfig.operationalTerraWorkspaceName,
+                new FirecloudMethodConfiguration()
+                    .deleted(false)
+                    .inputs(
+                        createInputParameter(
+                            "Hello from AoU (" + workspaceNamespace + "/" + workspaceName + ")!"))
+                    .methodConfigVersion(
+                        cohortExtractionConfig.extractionMethodConfigurationVersion)
+                    .methodRepoMethod(createRepoMethodParameter(cohortExtractionConfig))
+                    .name(UUID.randomUUID().toString())
+                    .namespace(cohortExtractionConfig.extractionMethodConfigurationNamespace)
+                    .outputs(new HashMap<>()))
             .getMethodConfiguration();
-
-    FirecloudSubmissionRequest submissionRequest =
-        new FirecloudSubmissionRequest()
-            .deleteIntermediateOutputFiles(false)
-            .methodConfigurationNamespace(methodConfig.getNamespace())
-            .methodConfigurationName(methodConfig.getName())
-            .useCallCache(false);
 
     FirecloudSubmissionResponse submissionResponse =
         submissionApiProvider
             .get()
             .createSubmission(
-                cohortExtractionConfig.terraWorkspaceNamespace,
-                cohortExtractionConfig.terraWorkspaceName,
-                submissionRequest);
+                cohortExtractionConfig.operationalTerraWorkspaceNamespace,
+                cohortExtractionConfig.operationalTerraWorkspaceName,
+                new FirecloudSubmissionRequest()
+                    .deleteIntermediateOutputFiles(false)
+                    .methodConfigurationNamespace(methodConfig.getNamespace())
+                    .methodConfigurationName(methodConfig.getName())
+                    .useCallCache(false));
 
     methodConfigurationsApiProvider
         .get()
         .deleteWorkspaceMethodConfig(
-            cohortExtractionConfig.terraWorkspaceNamespace,
-            cohortExtractionConfig.terraWorkspaceName,
-            cohortExtractionConfig.terraExtractionMethodConfigurationNamespace,
+            cohortExtractionConfig.operationalTerraWorkspaceNamespace,
+            cohortExtractionConfig.operationalTerraWorkspaceName,
+            cohortExtractionConfig.extractionMethodConfigurationNamespace,
             methodConfig.getName());
 
-    return new TerraJob().submissionId(submissionResponse.getSubmissionId());
+    return new TerraJob()
+        .submissionId(submissionResponse.getSubmissionId())
+        .status(TerraJobStatus.RUNNING);
   }
 
   public List<Cohort> findAll(List<Long> cohortIds) {

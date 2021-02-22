@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.TestCase.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
@@ -62,6 +63,7 @@ import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -857,5 +859,61 @@ public class CohortsControllerTest {
                 .materializeCohort(workspace.getNamespace(), WORKSPACE_NAME, request)
                 .getBody())
         .isEqualTo(response);
+  }
+
+  @Test
+  public void testWgsCohortExtraction_permissions() {
+    when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("NO ACCESS"));
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          cohortsController.extractCohortGenomes(
+              WORKSPACE_NAMESPACE, WORKSPACE_NAME, createDefaultCohort().getId());
+        });
+
+    when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("READER"));
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          cohortsController.extractCohortGenomes(
+              WORKSPACE_NAMESPACE, WORKSPACE_NAME, createDefaultCohort().getId());
+        });
+
+    when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("WRITER"));
+    cohortsController.extractCohortGenomes(
+        WORKSPACE_NAMESPACE, WORKSPACE_NAME, createDefaultCohort().getId());
+
+    when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("OWNER"));
+    cohortsController.extractCohortGenomes(
+        WORKSPACE_NAMESPACE, WORKSPACE_NAME, createDefaultCohort().getId());
+
+    when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("PROJECT_OWNER"));
+    cohortsController.extractCohortGenomes(
+        WORKSPACE_NAMESPACE, WORKSPACE_NAME, createDefaultCohort().getId());
+  }
+
+  @Test
+  public void testWgsCohortExtraction_validCdr() {
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          cohortsController.extractCohortGenomes(
+              workspace.getNamespace(), workspace.getName(), createDefaultCohort().getId());
+        });
+
+    DbCdrVersion cdrVersion = new DbCdrVersion();
+    cdrVersion.setCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
+    cdrVersion.setName(CDR_VERSION_NAME);
+    // TODO: (RW-6336) This should be swapped out for the Wgs field once that's implemented
+    cdrVersion.setMicroarrayBigqueryDataset("microarray");
+    cdrVersionDao.save(cdrVersion);
+
+    cohortsController.extractCohortGenomes(
+        workspace.getNamespace(), workspace.getName(), createDefaultCohort().getId());
   }
 }

@@ -444,13 +444,21 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<TerraJob> extractCohortGenomes(
       String workspaceNamespace, String workspaceId, Long cohortId) {
+    DbWorkspace workspace =
+        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    // TODO (RW-6336): Replace microarray with Wgs field
+    if (workspace.getCdrVersion().getMicroarrayBigqueryDataset() == null) {
+      throw new BadRequestException("Workspace CDR does not have access to WGS data");
+    }
+
     try {
       return ResponseEntity.ok(
           cohortService.submitGenomicsCohortExtractionJob(workspaceNamespace, workspaceId));
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       // Given that there are no input arguments ATM, any API exceptions are due to programming or
       // Firecloud errors
-      throw new ServerErrorException();
+      throw new ServerErrorException(e);
     }
   }
 

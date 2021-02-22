@@ -2339,7 +2339,7 @@ paths:
           schema:
             type: boolean
             default: false
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/extractGenomesJob":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/extractGenomes":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
@@ -2347,7 +2347,9 @@ paths:
     post:
       tags:
         - cohorts
-      description: 'Initiates a Terra Cromwell job to extract genomes of the given cohort'
+      description: 'Initiates a Terra Cromwell job to extract genomes of the given cohort.
+        Requires WRITER access on the workspace.
+        Workspace CDR must also have access to a Wgs dataset'
       operationId: extractCohortGenomes
       responses:
         200:
@@ -8666,7 +8668,8 @@ definitions:
         "$ref": '#/definitions/TerraJobStatus'
   TerraJobStatus:
     type: string
-    description: 'Terra job status. Effectively a combination of Terras Submission status and Workflow status'
+    description: 'Terra job status. Indicates if the Terra Submission and Workflows are still running, succeeded, or failed.
+      Effectively a collapsed model of Terras Submission status and Workflow status'
     enum:
       - RUNNING
       - FAILED

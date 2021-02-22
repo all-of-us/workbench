@@ -48,11 +48,16 @@ public class FireCloudConfig {
       "serviceAccountStaticNotebooksApi";
   public static final String END_USER_STATIC_NOTEBOOKS_API = "endUserStaticNotebooksApi";
 
-  public static final List<String> BILLING_SCOPES =
+  public static final List<String> TERRA_SCOPES =
       ImmutableList.of(
           "https://www.googleapis.com/auth/userinfo.profile",
-          "https://www.googleapis.com/auth/userinfo.email",
-          "https://www.googleapis.com/auth/cloud-billing");
+          "https://www.googleapis.com/auth/userinfo.email");
+
+  public static final List<String> BILLING_SCOPES =
+      ImmutableList.<String>builder()
+          .addAll(TERRA_SCOPES)
+          .add("https://wwww.googleapis.com/auth/cloud-billing")
+          .build();
 
   @Bean(name = END_USER_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
@@ -85,8 +90,8 @@ public class FireCloudConfig {
             .generateAccessToken(
                 "projects/-/serviceAccounts/" + workbenchConfig.wgsCohortExtraction.serviceAccount,
                 Collections.emptyList(),
-                BILLING_SCOPES,
-                Duration.newBuilder().setSeconds(60).build())
+                TERRA_SCOPES,
+                Duration.newBuilder().setSeconds(60 * 10).build())
             .getAccessToken());
 
     return apiClient;

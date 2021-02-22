@@ -197,7 +197,6 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
     this.loadUserRoles();
   }
 
-
   render() {
     const {profileState: {profile}, cdrVersionListResponse} = this.props;
     const {workspace, workspaceUserRoles, sharing, publishing} = this.state;
