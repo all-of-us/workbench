@@ -251,6 +251,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           .put(Domain.PROCEDURE, "procedure")
           .put(Domain.SURVEY, "answer")
           .put(Domain.VISIT, "visit")
+          .put(Domain.PHYSICAL_MEASUREMENT_CSS, "measurement")
           .build();
 
   @Override
