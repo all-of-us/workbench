@@ -446,7 +446,7 @@ from (select domain_id, sum(all_concept_count) as all_concept_count
       from (select c.domain_id as domain_id, c.is_standard, COUNT(DISTINCT c.concept_id) as all_concept_count
               from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c
               join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d2
-              on d2.domain_enum = c.domain_id and c.is_selectable = 1 and d2.domain_enum != 'PHYSICAL_MEASUREMENT'
+              on d2.domain_enum = c.domain_id and c.is_selectable = 1 and d2.domain_enum != 'PHYSICAL_MEASUREMENT_CSS'
               group by c.domain_id, c.is_standard ) a
       group by domain_id) c
 where d.domain_enum = c.domain_id"
@@ -457,7 +457,7 @@ set d.standard_concept_count = c.standard_concept_count
 from (select c.domain_id as domain_id, COUNT(DISTINCT c.concept_id) as standard_concept_count
 from \`$OUTPUT_PROJECT.$OUTPUT_DATASET.cb_criteria\` c
 join \`$OUTPUT_PROJECT.$OUTPUT_DATASET.domain_info\` d2
-on d2.domain_enum = c.domain_id and c.is_standard = 1 and c.is_selectable = 1  and d2.domain_enum != 'PHYSICAL_MEASUREMENT'
+on d2.domain_enum = c.domain_id and c.is_standard = 1 and c.is_selectable = 1  and d2.domain_enum != 'PHYSICAL_MEASUREMENT_CSS'
 group by c.domain_id) c
 where d.domain_enum = c.domain_id"
 
