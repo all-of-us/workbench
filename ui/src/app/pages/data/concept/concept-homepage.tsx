@@ -21,6 +21,7 @@ import {
 } from 'app/utils';
 import {currentCohortSearchContextStore, currentConceptStore, NavStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
+import {environment} from 'environments/environment';
 import {Concept, Domain, DomainInfo, SurveyModule} from 'generated/fetch';
 import {Key} from 'ts-key-enum';
 
@@ -340,7 +341,7 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
                                                      updating={surveysLoading.includes(survey.name)}/>)
                 }
               </div>
-              {!!physicalMeasurementsCard && <React.Fragment>
+              {environment.enableNewConceptTabs && !!physicalMeasurementsCard && <React.Fragment>
                 <div style={styles.sectionHeader}>
                   Program Physical Measurements
                 </div>
