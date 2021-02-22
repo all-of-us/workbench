@@ -88,6 +88,11 @@ const routes: Routes = [
         component: AppRouting,
         data: {}
       },
+      {
+        path: 'ras',
+        component: AppRouting,
+        data: {}
+      },
       // non-migrated routes go HERE
       {
         path: '',

@@ -99,7 +99,8 @@ function redirectToNiH(): void {
 
 function redirectToRas(): void {
   AnalyticsTracker.Registration.ERACommons();
-  const url = 'https://stsstg.nih.gov/auth/oauth/v2/authorize?client_id=e5c5d714-d597-48c8-b564-a249d729d0c9&prompt=login+consent&redirect_uri=http%3A%2F%2Flocalhost%3A4200%2Fras&response_type=code&scope=openid+profile+email';
+  const url = 'https://stsstg.nih.gov/auth/oauth/v2/authorize?client_id=e5c5d714-d597-48c8-b564-a249d729d0c9' +
+  '&prompt=login+consent&redirect_uri=http%3A%2F%2Flocalhost%3A4200%2Fras&response_type=code&scope=openid+profile+email';
   window.open(url, '_blank');
 }
 
@@ -132,6 +133,19 @@ interface RegistrationTask {
 // https://github.com/all-of-us/workbench/blob/master/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
 export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
   {
+      key: 'eraCommons',
+      completionPropsKey: 'eraCommonsLinked',
+      loadingPropsKey: 'eraCommonsLoading',
+      title: 'Connect Your RAS Commons Account',
+      description: 'Connect your Researcher Workbench account to your RAS account. There is no exchange of personal data in this step.',
+      buttonText: 'Connect',
+      completedText: 'Linked',
+      completionTimestamp: (profile: Profile) => {
+        return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
+      },
+      onClick: redirectToRas
+    },
+  {
     key: 'twoFactorAuth',
     completionPropsKey: 'twoFactorAuthCompleted',
     title: 'Turn on Google 2-Step Verification',
@@ -142,18 +156,6 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
       return profile.twoFactorAuthCompletionTime || profile.twoFactorAuthBypassTime;
     },
     onClick: redirectToTwoFactorSetup
-  }, {
-    key: 'eraCommons',
-    completionPropsKey: 'eraCommonsLinked',
-    loadingPropsKey: 'eraCommonsLoading',
-    title: 'Connect Your eRA Commons Account',
-    description: 'Connect your Researcher Workbench account to your RAS account. There is no exchange of personal data in this step.',
-    buttonText: 'Connect',
-    completedText: 'Linked',
-    completionTimestamp: (profile: Profile) => {
-      return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
-    },
-    onClick: redirectToRas
   }, {
     key: 'complianceTraining',
     completionPropsKey: 'trainingCompleted',
