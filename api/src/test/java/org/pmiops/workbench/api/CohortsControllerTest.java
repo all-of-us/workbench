@@ -863,38 +863,45 @@ public class CohortsControllerTest {
 
   @Test
   public void testWgsCohortExtraction_permissions() {
-    when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
+    DbCdrVersion cdrVersion = new DbCdrVersion();
+    cdrVersion.setCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
+    cdrVersion.setName(CDR_VERSION_NAME);
+    // TODO: (RW-6336) This should be swapped out for the Wgs field once that's implemented
+    cdrVersion.setMicroarrayBigqueryDataset("microarray");
+    cdrVersionDao.save(cdrVersion);
+
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
         .thenReturn(new FirecloudWorkspaceResponse().accessLevel("NO ACCESS"));
     assertThrows(
         ForbiddenException.class,
         () -> {
           cohortsController.extractCohortGenomes(
-              WORKSPACE_NAMESPACE, WORKSPACE_NAME, createDefaultCohort().getId());
+              workspace.getNamespace(), workspace.getName(), createDefaultCohort().getId());
         });
 
-    when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
         .thenReturn(new FirecloudWorkspaceResponse().accessLevel("READER"));
     assertThrows(
         ForbiddenException.class,
         () -> {
           cohortsController.extractCohortGenomes(
-              WORKSPACE_NAMESPACE, WORKSPACE_NAME, createDefaultCohort().getId());
+              workspace.getNamespace(), workspace.getName(), createDefaultCohort().getId());
         });
 
-    when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
         .thenReturn(new FirecloudWorkspaceResponse().accessLevel("WRITER"));
     cohortsController.extractCohortGenomes(
-        WORKSPACE_NAMESPACE, WORKSPACE_NAME, createDefaultCohort().getId());
+        workspace.getNamespace(), workspace.getName(), createDefaultCohort().getId());
 
-    when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
         .thenReturn(new FirecloudWorkspaceResponse().accessLevel("OWNER"));
     cohortsController.extractCohortGenomes(
-        WORKSPACE_NAMESPACE, WORKSPACE_NAME, createDefaultCohort().getId());
+        workspace.getNamespace(), workspace.getName(), createDefaultCohort().getId());
 
-    when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME))
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
         .thenReturn(new FirecloudWorkspaceResponse().accessLevel("PROJECT_OWNER"));
     cohortsController.extractCohortGenomes(
-        WORKSPACE_NAMESPACE, WORKSPACE_NAME, createDefaultCohort().getId());
+        workspace.getNamespace(), workspace.getName(), createDefaultCohort().getId());
   }
 
   @Test
