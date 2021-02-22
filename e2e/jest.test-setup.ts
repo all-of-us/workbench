@@ -96,15 +96,14 @@ beforeEach(async () => {
   const canLogResponse = fp.flow(isWorkbenchRequest, notRedirectRequest);
 
   // New request initiated
-  page.on('request', async (request) => {
+  page.on('request', (request) => {
     if (isWorkbenchRequest(request)) {
       console.debug('❗ Request issued: ' + `${request.method()} ${request.url()}\n${getRequestData(request)}`);
     }
     try {
-      await request.continue();
-    } catch (e) {
-      // continue regardless of error
-    }
+      request.continue();
+      // tslint:disable-next-line:no-empty
+    } catch (e) {}
   });
 
   page.on('requestfinished', async (request) => {
@@ -117,9 +116,8 @@ beforeEach(async () => {
     }
     try {
       await request.continue();
-    } catch (e) {
-      // continue regardless of error
-    }
+      // tslint:disable-next-line:no-empty
+    } catch (e) {}
   });
 
   page.on('console', async (message) => {
@@ -130,6 +128,7 @@ beforeEach(async () => {
       const title = await getTitle();
       const args = await Promise.all(message.args().map((a) => a.jsonValue()));
       console[message.type() === 'warning' ? 'warn' : message.type()](`❗ ${title}\n`, ...args);
+      // tslint:disable-next-line:no-empty
     } catch (err) {
       console.log(err);
     }
@@ -137,16 +136,15 @@ beforeEach(async () => {
 
   page.on('error', async (error) => {
     const title = await getTitle();
-    console.error(`❗ ${title}\npage error: ${error.stack}`);
+    console.error(`❗ ${title}\npage error: ${error}`);
   });
 
   page.on('pageerror', async (error) => {
     const title = await getTitle();
     try {
-      console.error(`❗ ${title}\npage error: ${error.stack}`);
-    } catch (err) {
-      // continue regardless of error
-    }
+      console.error(`❗ ${title}\npage error: ${error}`);
+      // tslint:disable-next-line:no-empty
+    } catch (err) {}
   });
 });
 
