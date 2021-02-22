@@ -24,7 +24,13 @@ beforeEach(async () => {
   }
 
   const stringifyData = (data: string): string => {
-    return data !== undefined ? JSON.stringify(JSON.parse(data), null, 2) : '';
+    if (!data) return '';
+    try {
+      return JSON.stringify(JSON.parse(data), null, 2);
+    } catch (err)  {
+      // If data is not json
+      return data;
+    }
   }
 
   const includeUrl = (request: Request): Request | null => {
@@ -33,7 +39,8 @@ beforeEach(async () => {
       'content-security-index-report',
       'analytics',
       'status-alert',
-      'publicDetails'
+      'publicDetails',
+      '.js'
     ];
     return !filters.some((urlPart) => request && request.url().includes(urlPart))
        ? request
@@ -145,7 +152,7 @@ beforeEach(async () => {
       console[message.type() === 'warning' ? 'warn' : message.type()](`❗ ${title}\n`, ...args);
       // tslint:disable-next-line:no-empty
     } catch (err) {
-      console.log(err);
+      console.error(`Exception occurred when getting console messages.\n${err}`);
     }
   });
 
