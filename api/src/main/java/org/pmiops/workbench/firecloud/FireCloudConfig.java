@@ -56,7 +56,7 @@ public class FireCloudConfig {
   public static final List<String> BILLING_SCOPES =
       ImmutableList.<String>builder()
           .addAll(TERRA_SCOPES)
-          .add("https://wwww.googleapis.com/auth/cloud-billing")
+          .add("https://www.googleapis.com/auth/cloud-billing")
           .build();
 
   @Bean(name = END_USER_API_CLIENT)
