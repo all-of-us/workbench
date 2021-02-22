@@ -152,7 +152,7 @@ beforeEach(async () => {
       console[message.type() === 'warning' ? 'warn' : message.type()](`❗ ${title}\n`, ...args);
       // tslint:disable-next-line:no-empty
     } catch (err) {
-      console.log(err);
+      console.error(`Exception occurred when getting console messages.\n${err}`);
     }
   });
 
