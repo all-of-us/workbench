@@ -158,6 +158,11 @@ public class WorkbenchConfig {
 
   public static class WgsCohortExtractionConfig {
     public String serviceAccount;
+    public String operationalTerraWorkspaceNamespace;
+    public String operationalTerraWorkspaceName;
+    public String extractionMethodConfigurationNamespace;
+    public String extractionMethodConfigurationName;
+    public Integer extractionMethodConfigurationVersion;
   }
 
   public static class CdrConfig {
