@@ -97,6 +97,12 @@ function redirectToNiH(): void {
   window.open(url, '_blank');
 }
 
+function redirectToRas(): void {
+  AnalyticsTracker.Registration.ERACommons();
+  const url = 'https://stsstg.nih.gov/auth/oauth/v2/authorize?client_id=e5c5d714-d597-48c8-b564-a249d729d0c9&prompt=login+consent&redirect_uri=http%3A%2F%2Flocalhost%3A4200%2Fras&response_type=code&scope=openid+profile+email';
+  window.open(url, '_blank');
+}
+
 async function redirectToTraining() {
   AnalyticsTracker.Registration.EthicsTraining();
   await profileApi().updatePageVisits({page: 'moodle'});
@@ -141,13 +147,13 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     completionPropsKey: 'eraCommonsLinked',
     loadingPropsKey: 'eraCommonsLoading',
     title: 'Connect Your eRA Commons Account',
-    description: 'Connect your Researcher Workbench account to your eRA Commons account. There is no exchange of personal data in this step.',
+    description: 'Connect your Researcher Workbench account to your RAS account. There is no exchange of personal data in this step.',
     buttonText: 'Connect',
     completedText: 'Linked',
     completionTimestamp: (profile: Profile) => {
       return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
     },
-    onClick: redirectToNiH
+    onClick: redirectToRas
   }, {
     key: 'complianceTraining',
     completionPropsKey: 'trainingCompleted',
