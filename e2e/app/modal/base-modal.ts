@@ -57,10 +57,7 @@ export default abstract class BaseModal extends Container {
       const handle = await button.asElementHandle();
       await handle.hover();
       if (waitForNav) {
-         const navPromise = this.page.waitForNavigation({waitUntil: ['load', 'networkidle0']});
-         await button.click({delay: 10});
-         await waitWhileLoading(this.page);
-         await navPromise;
+         await button.clickAndWait();
       } else {
          await button.click({delay: 10});
          await waitWhileLoading(this.page);
