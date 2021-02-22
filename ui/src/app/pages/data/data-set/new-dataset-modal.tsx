@@ -1,5 +1,5 @@
 import {AlertDanger} from 'app/components/alert';
-import {Button} from 'app/components/buttons';
+import {Button, Link} from 'app/components/buttons';
 import {styles as headerStyles} from 'app/components/headers';
 import {CheckBox, RadioButton, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
@@ -50,7 +50,6 @@ interface State {
   exportToNotebook: boolean;
   kernelType: KernelTypeEnum;
   loading: boolean;
-  missingDataSetInfo: boolean;
   name: string;
   newNotebook: boolean;
   notebookName: string;
@@ -60,6 +59,8 @@ interface State {
   seePreview: boolean;
   includeRawMicroarrayData: boolean;
   genomicsAnalysisTool: GenomicsAnalysisToolEnum;
+  saveError: boolean;
+  exportError: boolean;
 }
 
 class NewDataSetModal extends React.Component<Props, State> {
@@ -71,7 +72,6 @@ class NewDataSetModal extends React.Component<Props, State> {
       exportToNotebook: !props.billingLocked,
       kernelType: KernelTypeEnum.Python,
       loading: false,
-      missingDataSetInfo: false,
       name: '',
       newNotebook: true,
       notebookName: '',
@@ -80,7 +80,9 @@ class NewDataSetModal extends React.Component<Props, State> {
       queries: new Map([[KernelTypeEnum.Python, undefined], [KernelTypeEnum.R, undefined]]),
       seePreview: false,
       includeRawMicroarrayData: false,
-      genomicsAnalysisTool: GenomicsAnalysisToolEnum.NONE
+      genomicsAnalysisTool: GenomicsAnalysisToolEnum.NONE,
+      saveError: false,
+      exportError: false
     };
   }
 
@@ -110,7 +112,7 @@ class NewDataSetModal extends React.Component<Props, State> {
     if (!this.state.name) {
       return;
     }
-    this.setState({conflictDataSetName: false, missingDataSetInfo: false, loading: true});
+    this.setState({conflictDataSetName: false, loading: true, saveError: false, exportError: false});
     const {name} = this.state;
     const request: DataSetRequest = {
       name: name,
@@ -133,6 +135,16 @@ class NewDataSetModal extends React.Component<Props, State> {
       } else {
         await dataSetApi().createDataSet(workspaceNamespace, workspaceId, request);
       }
+    } catch (e) {
+      console.error(e);
+      if (e.status === 409) {
+        this.setState({conflictDataSetName: true, loading: false});
+      } else {
+        this.setState({saveError: true, loading: false});
+      }
+      return;
+    }
+    try {
       if (this.state.exportToNotebook) {
         await dataSetApi().exportToNotebook(
           workspaceNamespace, workspaceId,
@@ -152,11 +164,8 @@ class NewDataSetModal extends React.Component<Props, State> {
         window.history.back();
       }
     } catch (e) {
-      if (e.status === 409) {
-        this.setState({conflictDataSetName: true, loading: false});
-      } else if (e.status === 400) {
-        this.setState({missingDataSetInfo: true, loading: false});
-      }
+      console.error(e);
+      this.setState({exportError: true, loading: false});
     }
   }
 
@@ -193,16 +202,23 @@ class NewDataSetModal extends React.Component<Props, State> {
     };
     return dataSetRequest;
   }
+
+  navigateToDataPage() {
+    const {workspaceNamespace, workspaceId} = this.props;
+    navigateByUrl(`/workspaces/${workspaceNamespace}/${workspaceId}/data`);
+  }
+
   render() {
     const {
       conflictDataSetName,
       exportToNotebook,
       loading,
-      missingDataSetInfo,
       name,
       newNotebook,
       notebookName,
       existingNotebooks,
+      saveError,
+      exportError
     } = this.state;
 
     const errors = validate({name, notebookName}, {
@@ -217,16 +233,21 @@ class NewDataSetModal extends React.Component<Props, State> {
         }
       }
     });
+    const isApiError = conflictDataSetName || saveError || exportError;
     return <Modal loading={loading}>
       <ModalTitle>{this.props.dataSet ? 'Update' : 'Save'} Dataset</ModalTitle>
       <ModalBody>
         <div>
-          {conflictDataSetName &&
-          <AlertDanger>A Dataset with the same name exists</AlertDanger>
-          }
-          {missingDataSetInfo &&
-          <AlertDanger>Cannot save the Dataset because some information is missing</AlertDanger>
-          }
+          {isApiError && <AlertDanger style={{marginBottom: '0.25rem', padding: '0 0.25rem'}}>
+            {conflictDataSetName && <span>A Dataset with the same name exists</span>}
+            {saveError && <span>
+              The request cannot be completed. Please try again or contact Support in the left hand navigation
+            </span>}
+            {exportError && <span>
+              The Dataset was saved but there was an error exporting to the notebook. Please try exporting from the Dataset card on the
+              &nbsp;<Link style={{display: 'inline-block'}} onClick={() => this.navigateToDataPage()}>Data Page</Link>
+            </span>}
+          </AlertDanger>}
           <TextInput type='text' autoFocus placeholder='Dataset Name'
                      value={name} data-test-id='data-set-name-input'
                      onChange={v => this.setState({
