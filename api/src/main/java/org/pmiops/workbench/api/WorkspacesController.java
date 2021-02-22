@@ -191,11 +191,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return new FirecloudWorkspaceId(namespace, strippedName);
   }
 
-  private FirecloudWorkspace attemptFirecloudWorkspaceCreation(FirecloudWorkspaceId workspaceId) {
-    return fireCloudService.createWorkspace(
-        workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
-  }
-
   @Override
   public ResponseEntity<Workspace> createWorkspace(Workspace workspace) throws BadRequestException {
     return ResponseEntity.ok(
@@ -208,17 +203,21 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     validateWorkspaceApiModel(workspace);
 
     DbCdrVersion cdrVersion = getLiveCdrVersionId(workspace.getCdrVersionId());
-
+    DbAccessTier accessTier = cdrVersion.getAccessTier();
     DbUser user = userProvider.get();
-    final String billingProject = assignBillingProject(user, cdrVersion.getAccessTier());
 
-    // Note: please keep any initialization logic here in sync with CloneWorkspace().
+    // Note: please keep any initialization logic here in sync with cloneWorkspaceImpl().
+    final String billingProject = claimBillingProject(user, accessTier);
     FirecloudWorkspaceId workspaceId =
         generateFirecloudWorkspaceId(billingProject, workspace.getName());
-    FirecloudWorkspace fcWorkspace = attemptFirecloudWorkspaceCreation(workspaceId);
+    FirecloudWorkspace fcWorkspace =
+        fireCloudService.createWorkspace(
+            workspaceId.getWorkspaceNamespace(),
+            workspaceId.getWorkspaceName(),
+            accessTier.getAuthDomainName());
 
     DbWorkspace dbWorkspace =
-        initDbWorkspace(workspace, cdrVersion, user, workspaceId, fcWorkspace);
+        createDbWorkspace(workspace, cdrVersion, user, workspaceId, fcWorkspace);
     try {
       dbWorkspace = workspaceService.getDao().save(dbWorkspace);
     } catch (Exception e) {
@@ -239,7 +238,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return createdWorkspace;
   }
 
-  private DbWorkspace initDbWorkspace(
+  private DbWorkspace createDbWorkspace(
       Workspace workspace,
       DbCdrVersion cdrVersion,
       DbUser user,
@@ -291,14 +290,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return dbWorkspace;
   }
 
-  private String assignBillingProject(DbUser user, DbAccessTier accessTier) {
-    final DbBillingProjectBufferEntry bufferedBillingProject;
+  private String claimBillingProject(DbUser user, DbAccessTier accessTier) {
     try {
-      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user, accessTier);
+      final DbBillingProjectBufferEntry bufferedBillingProject =
+          billingProjectBufferService.assignBillingProject(user, accessTier);
+      return bufferedBillingProject.getFireCloudProjectName();
     } catch (EmptyBufferException e) {
       throw new TooManyRequestsException(e);
     }
-    return bufferedBillingProject.getFireCloudProjectName();
   }
 
   private void validateWorkspaceApiModel(Workspace workspace) {
@@ -306,10 +305,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("missing required field 'name'");
     } else if (workspace.getResearchPurpose() == null) {
       throw new BadRequestException("missing required field 'researchPurpose'");
-    } else if (workspace.getDataAccessLevel() == null) {
-      throw new BadRequestException("missing required field 'dataAccessLevel'");
     } else if (workspace.getName().length() > 80) {
-      throw new BadRequestException("DbWorkspace name must be 80 characters or less");
+      throw new BadRequestException("workspace name must be 80 characters or less");
     }
   }
 
@@ -471,24 +468,26 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       cdrVersion = getLiveCdrVersionId(reqCdrVersionId);
     }
 
-    DbUser user = userProvider.get();
     DbAccessTier accessTier = cdrVersion.getAccessTier();
 
     // TODO check vs fromWorkspace.getCdrVersion().getAccessTier();
 
-    final String toWorkspaceProject = assignBillingProject(user, accessTier);
+    DbUser user = userProvider.get();
 
+    // Note: please keep any initialization logic here in sync with createWorkspaceImpl().
+    final String billingProject = claimBillingProject(user, accessTier);
     FirecloudWorkspaceId toFcWorkspaceId =
-        generateFirecloudWorkspaceId(toWorkspaceProject, toWorkspace.getName());
+        generateFirecloudWorkspaceId(billingProject, toWorkspace.getName());
     FirecloudWorkspace toFcWorkspace =
         fireCloudService.cloneWorkspace(
             fromWorkspaceNamespace,
             fromWorkspaceId,
             toFcWorkspaceId.getWorkspaceNamespace(),
-            toFcWorkspaceId.getWorkspaceName());
+            toFcWorkspaceId.getWorkspaceName(),
+            accessTier.getAuthDomainName());
 
     DbWorkspace dbWorkspace =
-        initDbWorkspace(toWorkspace, cdrVersion, user, toFcWorkspaceId, toFcWorkspace);
+        createDbWorkspace(toWorkspace, cdrVersion, user, toFcWorkspaceId, toFcWorkspace);
 
     try {
       dbWorkspace =

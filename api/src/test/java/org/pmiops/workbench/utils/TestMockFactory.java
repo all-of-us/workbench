@@ -124,7 +124,7 @@ public class TestMockFactory {
               return fcWorkspace;
             })
         .when(fireCloudService)
-        .createWorkspace(anyString(), anyString());
+        .createWorkspace(anyString(), anyString(), anyString());
   }
 
   public void stubBufferBillingProject(BillingProjectBufferService billingProjectBufferService) {

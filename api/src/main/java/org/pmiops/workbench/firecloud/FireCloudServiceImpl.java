@@ -314,23 +314,22 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public FirecloudWorkspace createWorkspace(String projectName, String workspaceName) {
+  public FirecloudWorkspace createWorkspace(
+      String projectName, String workspaceName, String authDomainName) {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     FirecloudWorkspaceIngest workspaceIngest =
         new FirecloudWorkspaceIngest()
             .namespace(projectName)
             .name(workspaceName)
             .authorizationDomain(
-                ImmutableList.of(
-                    new FirecloudManagedGroupRef()
-                        .membersGroupName(configProvider.get().firecloud.registeredDomainName)));
+                ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName)));
 
     return retryHandler.run((context) -> workspacesApi.createWorkspace(workspaceIngest));
   }
 
   @Override
   public FirecloudWorkspace cloneWorkspace(
-      String fromProject, String fromName, String toProject, String toName) {
+      String fromProject, String fromName, String toProject, String toName, String authDomainName) {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     FirecloudWorkspaceRequestClone cloneRequest =
         new FirecloudWorkspaceRequestClone()
@@ -340,9 +339,7 @@ public class FireCloudServiceImpl implements FireCloudService {
             // propagating copies of large data files elswhere in the bucket.
             .copyFilesWithPrefix("notebooks/")
             .authorizationDomain(
-                ImmutableList.of(
-                    new FirecloudManagedGroupRef()
-                        .membersGroupName(configProvider.get().firecloud.registeredDomainName)));
+                ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName)));
 
     return retryHandler.run(
         (context) -> workspacesApi.cloneWorkspace(fromProject, fromName, cloneRequest));

@@ -93,6 +93,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -103,6 +104,7 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -141,7 +143,6 @@ import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.CreateReviewRequest;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
@@ -260,6 +261,8 @@ public class WorkspacesControllerTest {
   private static final String BUCKET_URI =
       String.format("gs://%s/", TestMockFactory.WORKSPACE_BUCKET_NAME);
 
+  private static final String TEST_AUTH_DOMAIN = "test-tier-users";
+
   @Autowired private BillingProjectBufferService billingProjectBufferService;
   @Autowired private WorkspaceAuditor mockWorkspaceAuditor;
   @Autowired private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
@@ -371,6 +374,7 @@ public class WorkspacesControllerTest {
   @Autowired BigQueryService bigQueryService;
   @SpyBean @Autowired WorkspaceDao workspaceDao;
   @Autowired UserDao userDao;
+  @Autowired AccessTierDao accessTierDao;
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired CohortDao cohortDao;
   @Autowired CohortReviewDao cohortReviewDao;
@@ -386,6 +390,7 @@ public class WorkspacesControllerTest {
   @Autowired ConceptBigQueryService conceptBigQueryService;
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
 
+  private DbAccessTier accessTier;
   private DbCdrVersion cdrVersion;
   private String cdrVersionId;
   private String archivedCdrVersionId;
@@ -401,11 +406,23 @@ public class WorkspacesControllerTest {
 
     testMockFactory = new TestMockFactory();
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
+
+    accessTier =
+        new DbAccessTier()
+            .setAccessTierId(1)
+            .setShortName("test")
+            .setDisplayName("Test Tier")
+            .setAuthDomainName(TEST_AUTH_DOMAIN)
+            .setAuthDomainGroupEmail("test-tier-users@fake-research-aou.org")
+            .setServicePerimeter("test/tier/perimeter");
+    accessTier = accessTierDao.save(accessTier);
+
     cdrVersion = new DbCdrVersion();
     cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
     cdrVersion.setCdrDbName("");
+    cdrVersion.setAccessTier(accessTier);
     cdrVersion = cdrVersionDao.save(cdrVersion);
     cdrVersionId = Long.toString(cdrVersion.getCdrVersionId());
 
@@ -512,7 +529,7 @@ public class WorkspacesControllerTest {
     fcResponse.setName(name);
     fcResponse.setCreatedBy(creator);
 
-    when(fireCloudService.cloneWorkspace(anyString(), anyString(), eq(ns), eq(name)))
+    when(fireCloudService.cloneWorkspace(anyString(), anyString(), eq(ns), eq(name), anyString()))
         .thenReturn(fcResponse);
 
     return fcResponse;
@@ -598,7 +615,8 @@ public class WorkspacesControllerTest {
   public void testCreateWorkspace() throws Exception {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    verify(fireCloudService).createWorkspace(workspace.getNamespace(), workspace.getName());
+    verify(fireCloudService)
+        .createWorkspace(workspace.getNamespace(), workspace.getName(), TEST_AUTH_DOMAIN);
 
     stubGetWorkspace(
         workspace.getNamespace(),
@@ -614,7 +632,6 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getLastModifiedTime()).isEqualTo(NOW_TIME);
     assertThat(workspace2.getCdrVersionId()).isEqualTo(cdrVersionId);
     assertThat(workspace2.getCreator()).isEqualTo(LOGGED_IN_USER_EMAIL);
-    assertThat(workspace2.getDataAccessLevel()).isEqualTo(DataAccessLevel.PROTECTED);
     assertThat(workspace2.getId()).isEqualTo("name");
     assertThat(workspace2.getName()).isEqualTo("name");
     assertThat(workspace2.getResearchPurpose().getDiseaseFocusedResearch()).isTrue();
@@ -1678,6 +1695,7 @@ public class WorkspacesControllerTest {
     DbCdrVersion cdrVersion2 = new DbCdrVersion();
     cdrVersion2.setName("2");
     cdrVersion2.setCdrDbName("");
+    cdrVersion2.setAccessTier(accessTier);
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
 
     DbConceptSetConceptId dbConceptSetConceptId1 =
@@ -1763,6 +1781,7 @@ public class WorkspacesControllerTest {
     DbCdrVersion cdrVersion2 = new DbCdrVersion();
     cdrVersion2.setName("2");
     cdrVersion2.setCdrDbName("");
+    cdrVersion2.setAccessTier(accessTier);
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
 
     final String expectedConceptSetName = "cs1";
@@ -1975,6 +1994,7 @@ public class WorkspacesControllerTest {
     DbCdrVersion cdrVersion2 = new DbCdrVersion();
     cdrVersion2.setName("2");
     cdrVersion2.setCdrDbName("");
+    cdrVersion2.setAccessTier(accessTier);
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
     String cdrVersionId2 = Long.toString(cdrVersion2.getCdrVersionId());
 

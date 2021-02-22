@@ -3541,7 +3541,7 @@ definitions:
     - ARCHIVED
   DataAccessLevel:
     type: string
-    description: levels of access to data in the curated data repository
+    description: DEPRECATED.  Will be replaced by Access Tiers.  Was -> levels of access to data in the curated data repository
     enum:
     - unregistered
     - registered
@@ -3694,6 +3694,7 @@ definitions:
         type: string
       dataAccessLevel:
         "$ref": "#/definitions/DataAccessLevel"
+        description: DEPRECATED.  Use accessTierShortName.
       archivalStatus:
         "$ref": "#/definitions/ArchivalStatus"
       hasMicroarrayData:
@@ -4147,6 +4148,7 @@ definitions:
         type: string
       dataAccessLevel:
         "$ref": "#/definitions/DataAccessLevel"
+        description: DEPRECATED.  Use accessTierShortName.
       researchPurpose:
         "$ref": "#/definitions/ResearchPurpose"
       billingStatus:
@@ -5126,6 +5128,7 @@ definitions:
         type: string
       dataAccessLevel:
         "$ref": "#/definitions/DataAccessLevel"
+        description: DEPRECATED.  Will be replaced by Access Tiers.
       givenName:
         type: string
       familyName:
@@ -5218,7 +5221,7 @@ definitions:
         type: integer
         format: int64
       dataAccessLevel:
-        description: what level of data access the user has
+        description: DEPRECATED.  Will be replaced by Access Tiers.  Was -> what level of data access the user has
         "$ref": "#/definitions/DataAccessLevel"
       degrees:
         type: array
@@ -8172,6 +8175,7 @@ definitions:
         description: User's current role/position.
       dataAccessLevel:
         description: |-
+          DEPRECATED.  Will be replaced by Ascess Tiers.
           An indication of whether the user has completed the requirements for access to the
           registered tier.
         "$ref": "#/definitions/DataAccessLevel"
