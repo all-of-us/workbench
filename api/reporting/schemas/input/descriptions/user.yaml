@@ -87,7 +87,7 @@ user:
     User-reported race information, comma-delimited if multiple answers were provided.
   ethnicity: |
     User-reported Ethnicity information
-  gender_identifies: |
+  gender_identities: |
     User-reported gender identity information, comma-delimited if multiple answers were provided.
   identifies_as_lgbtq: |
     User-reported identities as lgbtq information

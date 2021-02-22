@@ -225,7 +225,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "FROM user u"
                 + "  LEFT OUTER JOIN address AS a ON u.user_id = a.user_id\n"
                 + "  LEFT OUTER JOIN user_verified_institutional_affiliation AS via on u.user_id = via.user_id\n"
-                + "  LEFT OUTER JOIN user_degree AS ud on u.user_id = ud.user_id\n"
                 + "  LEFT OUTER JOIN "
                 + "  ( "
                 + "       SELECT \n"
