@@ -25,7 +25,13 @@ beforeEach(async () => {
   };
 
   const stringifyData = (data: string): string => {
-    return data !== 'undefined' ? JSON.stringify(JSON.parse(data), null, 2) : '';
+    if (!data) return '';
+    try {
+       JSON.stringify(JSON.parse(data), null, 2)
+    } catch (err)  {
+      // If data is not json
+      return data;
+    }
   };
 
   const includeUrl = (request: Request): Request | null => {
