@@ -1,7 +1,7 @@
 import {ClickOptions, ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
 import Container from 'app/container';
 import {getAttrValue, getPropValue} from 'utils/element-utils';
-import {waitWhileLoading} from "../../utils/waits-utils";
+import {waitWhileLoading} from 'utils/waits-utils';
 
 
 /**
