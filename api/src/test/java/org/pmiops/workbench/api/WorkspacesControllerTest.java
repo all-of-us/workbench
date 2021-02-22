@@ -1331,6 +1331,55 @@ public class WorkspacesControllerTest {
     verifyZeroInteractions(serviceAccountCloudbillingProvider.get());
   }
 
+  @Test(expected = BadRequestException.class)
+  public void testCloneWorkspace_accessTierMismatch() {
+    Workspace originalWorkspace = createWorkspace();
+    originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
+
+    endUserCloudbilling = TestMockFactory.createMockedCloudbilling();
+    serviceAccountCloudbilling = TestMockFactory.createMockedCloudbilling();
+
+    DbAccessTier altAccessTier =
+        new DbAccessTier()
+            .setAccessTierId(2)
+            .setShortName("controlled")
+            .setDisplayName("Controlled Tier")
+            .setAuthDomainName("a different one")
+            .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
+            .setServicePerimeter("controlled/tier/perimeter");
+    altAccessTier = accessTierDao.save(altAccessTier);
+
+    DbCdrVersion altCdrVersion = new DbCdrVersion();
+    altCdrVersion.setCdrVersionId(2);
+    altCdrVersion.setName("CDR 2");
+    // set the db name to be empty since test cases currently
+    // run in the workbench schema only.
+    altCdrVersion.setCdrDbName("");
+    altCdrVersion.setAccessTier(altAccessTier);
+    altCdrVersion = cdrVersionDao.save(altCdrVersion);
+
+    final Workspace modWorkspace = new Workspace();
+    modWorkspace.setName("cloned");
+    modWorkspace.setNamespace("cloned-ns");
+    modWorkspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
+    modWorkspace.setResearchPurpose(new ResearchPurpose());
+    modWorkspace.setCdrVersionId(String.valueOf(altCdrVersion.getCdrVersionId()));
+
+    final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+    req.setWorkspace(modWorkspace);
+    final FirecloudWorkspace clonedFirecloudWorkspace =
+        stubCloneWorkspace(
+            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+
+    mockBillingProjectBuffer("cloned-ns");
+
+    workspacesController.cloneWorkspace(
+        originalWorkspace.getNamespace(), originalWorkspace.getId(), req);
+
+    verifyZeroInteractions(endUserCloudbillingProvider.get());
+    verifyZeroInteractions(serviceAccountCloudbillingProvider.get());
+  }
+
   private void sortPopulationDetails(ResearchPurpose researchPurpose) {
     final List<SpecificPopulationEnum> populateionDetailsSorted =
         researchPurpose.getPopulationDetails().stream().sorted().collect(Collectors.toList());
@@ -2021,7 +2070,7 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getCdrVersionId()).isEqualTo(cdrVersionId2);
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test(expected = NumberFormatException.class)
   public void testCloneWorkspaceBadCdrVersion() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
@@ -2031,6 +2080,24 @@ public class WorkspacesControllerTest {
             .namespace("cloned-ns")
             .researchPurpose(workspace.getResearchPurpose())
             .cdrVersionId("bad-cdr-version-id");
+    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
+    mockBillingProjectBuffer("cloned-ns");
+    workspacesController.cloneWorkspace(
+        workspace.getNamespace(),
+        workspace.getId(),
+        new CloneWorkspaceRequest().workspace(modWorkspace));
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testCloneWorkspaceMissingCdrVersion() {
+    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+
+    Workspace modWorkspace =
+        new Workspace()
+            .name("cloned")
+            .namespace("cloned-ns")
+            .researchPurpose(workspace.getResearchPurpose())
+            .cdrVersionId("100");
     stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
     mockBillingProjectBuffer("cloned-ns");
     workspacesController.cloneWorkspace(

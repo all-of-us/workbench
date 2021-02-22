@@ -457,20 +457,25 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           String.format("DbWorkspace %s/%s not found", fromWorkspaceNamespace, fromWorkspaceId));
     }
 
+    DbAccessTier accessTier = fromWorkspace.getCdrVersion().getAccessTier();
+
     // Clone CDR version from the source, by default.
 
-    final DbCdrVersion cdrVersion;
+    final DbCdrVersion toCdrVersion;
     String reqCdrVersionId = body.getWorkspace().getCdrVersionId();
     if (Strings.isNullOrEmpty(reqCdrVersionId)
-        || reqCdrVersionId.equals(Long.toString(fromWorkspace.getCdrVersion().getCdrVersionId()))) {
-      cdrVersion = fromWorkspace.getCdrVersion();
+        || Long.parseLong(reqCdrVersionId) == fromWorkspace.getCdrVersion().getCdrVersionId()) {
+      toCdrVersion = fromWorkspace.getCdrVersion();
     } else {
-      cdrVersion = getLiveCdrVersionId(reqCdrVersionId);
+      toCdrVersion = getLiveCdrVersionId(reqCdrVersionId);
+
+      if (!toCdrVersion.getAccessTier().equals(accessTier)) {
+        throw new BadRequestException(
+            String.format(
+                "Destination workspace Access Tier '%s' does not match source workspace Access Tier '%s'",
+                toCdrVersion.getAccessTier().getShortName(), accessTier.getShortName()));
+      }
     }
-
-    DbAccessTier accessTier = cdrVersion.getAccessTier();
-
-    // TODO check vs fromWorkspace.getCdrVersion().getAccessTier();
 
     DbUser user = userProvider.get();
 
@@ -487,7 +492,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
             accessTier.getAuthDomainName());
 
     DbWorkspace dbWorkspace =
-        createDbWorkspace(toWorkspace, cdrVersion, user, toFcWorkspaceId, toFcWorkspace);
+        createDbWorkspace(toWorkspace, toCdrVersion, user, toFcWorkspaceId, toFcWorkspace);
 
     try {
       dbWorkspace =
