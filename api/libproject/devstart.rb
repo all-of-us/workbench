@@ -53,7 +53,7 @@ ENVIRONMENTS = {
     :config_json => "config_test.json",
     :cdr_config_json => "cdr_config_test.json",
     :featured_workspaces_json => "featured_workspaces_test.json",
-    :gae_vars => make_gae_vars(3, 10, 'F4'),
+    :gae_vars => make_gae_vars(0, 10, 'F4'),
     :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-rw-staging" => {
