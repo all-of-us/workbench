@@ -47,6 +47,7 @@ import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
@@ -434,6 +435,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     final ImmutableList.Builder<DbConceptSet> selectedConceptSetsBuilder = ImmutableList.builder();
     selectedConceptSetsBuilder.addAll(initialSelectedConceptSets);
 
+    // If pre packaged all survey concept set is selected create a temp concept set with concept ids
+    // of all survey questions
+    if (prePackagedConceptSet.contains(SURVEY)
+        || prePackagedConceptSet.contains(PrePackagedConceptSetEnum.BOTH)) {
+      selectedConceptSetsBuilder.add(buildPrePackagedSurveyConceptSet());
+    }
     return selectedConceptSetsBuilder.build();
   }
 
@@ -684,6 +691,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @VisibleForTesting
   public boolean conceptSetSelectionIsNonemptyAndEachDomainHasAtLeastOneConcept(
       List<DbConceptSet> conceptSetsSelected) {
+    if (preDefinedSurveyConceptSet(conceptSetsSelected)) {
+      return true;
+    }
     if (conceptSetsSelected.isEmpty()) {
       return false;
     }
@@ -1170,5 +1180,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   private static boolean getBuiltinBooleanFromNullable(Boolean boo) {
     return Optional.ofNullable(boo).orElse(false);
+  }
+
+  private DbConceptSet buildPrePackagedSurveyConceptSet() {
+    final DbConceptSet surveyConceptSet = new DbConceptSet();
+    surveyConceptSet.setName("All Surveys");
+    surveyConceptSet.setDomain(DbStorageEnums.domainToStorage(Domain.SURVEY));
+    return surveyConceptSet;
   }
 }
