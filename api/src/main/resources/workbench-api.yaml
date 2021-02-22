@@ -5191,7 +5191,6 @@ definitions:
     type: object
     required:
     - username
-    - dataAccessLevel
     properties:
       userId:
         description: researchallofus userId
