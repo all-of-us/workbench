@@ -677,7 +677,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   private boolean preDefinedSurveyConceptSet(List<DbConceptSet> dbConceptSets) {
-    return dbConceptSets.stream().anyMatch(c -> c.getConceptSetId() == 0);
+    return dbConceptSets.stream()
+        .anyMatch(c -> c.getConceptSetId() == 0 && Domain.SURVEY.equals(c.getDomainEnum()));
   }
 
   private QueryJobConfiguration buildQueryJobConfiguration(
