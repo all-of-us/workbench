@@ -23,9 +23,10 @@ module.exports = {
   ignorePatterns: ['tsc-out', 'node_modules', '.eslintrc.js'],
   rules: {
     // 2 == error, 1 == warning, 0 == off
+    // TODO Fix to 120
     'max-len': [
       2,
-      160, // TODO Change to 120
+      160,
       {
         ignoreComments: true,
         ignoreUrls: true,
@@ -49,7 +50,7 @@ module.exports = {
       }
     ],
     '@typescript-eslint/no-explicit-any': 1,
-    // TODO Fix rule warnings, then remove the rule.
+    // TODO Fix rule warnings, then remove the rule in this file.
     '@typescript-eslint/restrict-template-expressions': 1,
     '@typescript-eslint/no-non-null-assertion': 1,
     '@typescript-eslint/no-unsafe-member-access': 1,
