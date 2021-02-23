@@ -123,7 +123,7 @@ const NameCell = (props: NameCellProps) => {
   </FlexRow>;
 
   const navigateToPreview = () => navigate(
-      ['admin', 'workspaces', workspaceNamespace, filename],
+      ['admin', 'workspaces', workspaceNamespace, encodeURIComponent(filename)],
       { queryParams: { accessReason: accessReason } });
 
   const fileWithPreviewButton = () => <FlexRow>
