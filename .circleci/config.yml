@@ -306,15 +306,6 @@ commands:
       - store_test_results:
           path: ~/workbench/e2e/logs
 
-  store-commit-message:
-    description: "Export Git commit message to environment variable"
-    steps:
-      - run:
-          command: |
-            echo 'export COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")' >> $BASH_ENV
-            source $BASH_ENV
-          name: "Export COMMIT_MESSAGE environment variable"
-
   ui-cache:
     description: "workbench/ui: yarn install, save and restore cache"
     steps:
@@ -586,9 +577,13 @@ jobs:
 
   puppeteer-env-setup:
     executor: puppeteer-executor
+    parameters:
+      optional_steps:
+        type: steps
+        default: []
     steps:
       - checkout-code
-      - store-commit-message
+      - steps: << parameters.optional_steps >>
       - browser-tools/install-browser-tools
       - restore_cache:
           keys:
@@ -627,7 +622,9 @@ workflows:
           requires:
             - ui-unit-test
       # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only
-      - puppeteer-env-setup
+      - puppeteer-env-setup:
+          optional_steps:
+            - halt-puppeteer-check
       - puppeteer-test:
           <<: *filter-pr-branch
           env_name: "local"
