@@ -45,7 +45,6 @@ public class CohortDaoTest {
     dbWorkspace.setName("name");
     dbWorkspace.setWorkspaceNamespace("name");
     dbWorkspace.setFirecloudName("name");
-    dbWorkspace.setDataAccessLevel((short) 1);
     dbWorkspace.setCreationTime(timestamp);
     dbWorkspace.setLastModifiedTime(timestamp);
     workspaceDao.save(dbWorkspace);

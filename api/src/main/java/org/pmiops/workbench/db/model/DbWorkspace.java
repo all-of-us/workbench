@@ -23,7 +23,6 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
@@ -177,28 +176,6 @@ public class DbWorkspace {
 
   public void setFirecloudName(String firecloudName) {
     this.firecloudName = firecloudName;
-  }
-
-  @Column(name = "data_access_level")
-  @Deprecated // soon to be replaced by accessTier
-  public Short getDataAccessLevel() {
-    return dataAccessLevel;
-  }
-
-  @Deprecated // soon to be replaced by accessTier
-  public void setDataAccessLevel(Short dataAccessLevel) {
-    this.dataAccessLevel = dataAccessLevel;
-  }
-
-  @Transient
-  @Deprecated // soon to be replaced by accessTier
-  public DataAccessLevel getDataAccessLevelEnum() {
-    return DbStorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
-  }
-
-  @Deprecated // soon to be replaced by accessTier
-  public void setDataAccessLevelEnum(DataAccessLevel dataAccessLevel) {
-    setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
   }
 
   @ManyToOne

@@ -264,8 +264,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
     dbWorkspace.setCdrVersion(cdrVersion);
-    // TODO: update to use tiers
-    dbWorkspace.setDataAccessLevelEnum(cdrVersion.getDataAccessLevelEnum());
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
     workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, workspace.getResearchPurpose());
@@ -374,9 +372,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     if (dbWorkspace.getVersion() != version) {
       throw new ConflictException("Attempted to modify outdated workspace version");
     }
-    if (workspace.getDataAccessLevel() != null
-        && !dbWorkspace.getDataAccessLevelEnum().equals(workspace.getDataAccessLevel())) {
-      throw new BadRequestException("Attempted to change data access level");
+    // TODO unit test
+    if (!dbWorkspace
+        .getCdrVersion()
+        .getAccessTier()
+        .getShortName()
+        .equals(workspace.getAccessTierShortName())) {
+      throw new BadRequestException("Attempted to change data access tier");
     }
     if (workspace.getName() != null) {
       dbWorkspace.setName(workspace.getName());

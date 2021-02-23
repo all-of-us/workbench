@@ -41,7 +41,6 @@ import org.pmiops.workbench.model.WorkspaceResponse;
 public interface WorkspaceMapper {
 
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
-  @Mapping(target = "dataAccessLevel", source = "dbWorkspace.dataAccessLevelEnum")
   @Mapping(target = "etag", source = "dbWorkspace.version", qualifiedByName = "cdrVersionToEtag")
   @Mapping(target = "name", source = "dbWorkspace.name")
   @Mapping(target = "id", source = "fcWorkspace.name")

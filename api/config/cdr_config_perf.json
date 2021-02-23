@@ -13,7 +13,6 @@
     {
       "cdrVersionId": 1,
       "name": "[Removed] Synthetic Dataset v1",
-      "dataAccessLevel": 1,
       "archivalStatus": 1,
       "bigqueryProject": "",
       "bigqueryDataset": "",
@@ -27,7 +26,6 @@
     {
       "cdrVersionId": 2,
       "name": "[Removed] Synthetic Dataset v2",
-      "dataAccessLevel": 1,
       "archivalStatus": 1,
       "bigqueryProject": "",
       "bigqueryDataset": "",
@@ -42,7 +40,6 @@
       "cdrVersionId": 3,
       "isDefault": true,
       "name": "Synthetic Dataset v3",
-      "dataAccessLevel": 1,
       "bigqueryProject": "all-of-us-ehr-dev",
       "bigqueryDataset": "SR2019q4r3",
       "creationTime": "2019-09-30 00:00:00Z",

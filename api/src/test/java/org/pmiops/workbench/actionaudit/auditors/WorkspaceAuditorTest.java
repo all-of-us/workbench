@@ -34,7 +34,6 @@ import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -104,7 +103,6 @@ public class WorkspaceAuditorTest {
     workspace1.setCreationTime(now);
     workspace1.setLastModifiedTime(now);
     workspace1.setEtag("etag_1");
-    workspace1.setDataAccessLevel(DataAccessLevel.REGISTERED);
     workspace1.setPublished(false);
 
     dbWorkspace1 = new DbWorkspace();
@@ -273,7 +271,6 @@ public class WorkspaceAuditorTest {
             .creationTime(Y2K_EPOCH_MILLIS)
             .lastModifiedTime(Y2K_EPOCH_MILLIS)
             .etag("etag_1")
-            .dataAccessLevel(DataAccessLevel.REGISTERED)
             .published(false);
 
     workspaceAuditor.fireEditAction(workspace1, editedWorkspace, dbWorkspace1.getWorkspaceId());

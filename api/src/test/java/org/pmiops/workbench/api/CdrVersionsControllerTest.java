@@ -15,6 +15,7 @@ import org.pmiops.workbench.cdr.CdrVersionMapper;
 import org.pmiops.workbench.cdr.CdrVersionMapperImpl;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
@@ -24,6 +25,7 @@ import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.CdrVersionListResponse;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -43,6 +45,8 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class CdrVersionsControllerTest {
+
+  @Autowired private AccessTierDao accessTierDao;
 
   @Autowired private CdrVersionDao cdrVersionDao;
 
@@ -210,7 +214,7 @@ public class CdrVersionsControllerTest {
     cdrVersion.setCdrDbName("c");
     cdrVersion.setCdrVersionId(cdrVersionId);
     cdrVersion.setCreationTime(new Timestamp(creationTime));
-    cdrVersion.setDataAccessLevelEnum(dataAccessLevel);
+    cdrVersion.setAccessTier(TestMockFactory.createDefaultAccessTier(accessTierDao));
     cdrVersion.setName(name);
     cdrVersion.setNumParticipants(123);
     cdrVersion.setReleaseNumber((short) 1);
