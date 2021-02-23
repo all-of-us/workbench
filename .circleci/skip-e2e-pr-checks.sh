@@ -13,6 +13,8 @@ else
 fi
 
 # Exiting if the commit message contains 'skip e2e' string
+COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")
+
 # Double comma is "Parameter Expansion". It converts string to lowercase letters
 if [[ "${COMMIT_MESSAGE,,}" == *"skip e2e"* ]]; then
   echo "Skip e2e text found in commit message"

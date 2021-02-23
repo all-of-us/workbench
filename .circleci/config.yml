@@ -304,15 +304,6 @@ commands:
       - store_test_results:
           path: ~/workbench/e2e/logs
 
-  store-commit-message:
-    description: "Export Git commit message to environment variable"
-    steps:
-      - run:
-          command: |
-            echo 'export COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")' >> $BASH_ENV
-            source $BASH_ENV
-          name: "Export COMMIT_MESSAGE environment variable"
-
   ui-cache:
     description: "workbench/ui: yarn install, save and restore cache"
     steps:
@@ -588,7 +579,6 @@ jobs:
       TEST_MODE: << parameters.test_mode >>
     steps:
       - checkout-code
-      - store-commit-message
       - browser-tools/install-browser-tools
       - restore_cache:
           keys:
