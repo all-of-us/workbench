@@ -1,6 +1,9 @@
 package org.pmiops.workbench.db.jdbc;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTIONAL_ROLE_ENUM;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTIONAL_ROLE_OTHER_TEXT;
+import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTION_ID;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -16,13 +19,17 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
+import org.pmiops.workbench.db.dao.InstitutionDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingUser;
@@ -58,6 +65,8 @@ public class ReportingQueryServiceTest {
   @Autowired private CdrVersionDao cCdrVersionDao;
   @Autowired private CohortDao cohortDao;
   @Autowired private DataSetDao dataSetDao;
+  @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  @Autowired private InstitutionDao institutionDao;
   @Autowired private EntityManager entityManager;
 
   @Autowired
@@ -72,12 +81,16 @@ public class ReportingQueryServiceTest {
   @TestConfiguration
   public static class config {}
 
+  private DbInstitution dbInstitution;
+
   @Before
-  public void setup() {}
+  public void setup() {
+    dbInstitution = createDbInstitution();
+  }
 
   @Test
   public void testGetReportingDatasetCohorts() {
-    final DbUser user1 = createDbUser();
+    final DbUser user1 = createDbUserWithInstitute();
     final DbCdrVersion cdrVersion1 = createCdrVersion();
     final DbWorkspace workspace1 = createDbWorkspace(user1, cdrVersion1);
     final DbCohort cohort1 = createCohort(user1, workspace1);
@@ -130,16 +143,41 @@ public class ReportingQueryServiceTest {
   }
 
   @Transactional
-  public DbUser createDbUser() {
+  public DbUser createDbUserWithInstitute() {
     int currentSize = userDao.findUsers().size();
-    final DbUser user1 = userDao.save(userFixture.createEntity());
+    final DbUser user = userDao.save(userFixture.createEntity());
     assertThat(userDao.count()).isEqualTo(currentSize + 1);
-    return user1;
+    createDbVerifiedInstitutionalAffiliation(user);
+    return user;
+  }
+
+  @Transactional
+  public DbVerifiedInstitutionalAffiliation createDbVerifiedInstitutionalAffiliation(
+      DbUser dbUser) {
+    DbVerifiedInstitutionalAffiliation dbVerifiedInstitutionalAffiliation =
+        new DbVerifiedInstitutionalAffiliation();
+    dbVerifiedInstitutionalAffiliation.setVerifiedInstitutionalAffiliationId(USER__INSTITUTION_ID);
+    dbVerifiedInstitutionalAffiliation.setInstitutionalRoleEnum(USER__INSTITUTIONAL_ROLE_ENUM);
+    dbVerifiedInstitutionalAffiliation.setInstitution(dbInstitution);
+    dbVerifiedInstitutionalAffiliation.setInstitutionalRoleOtherText(
+        USER__INSTITUTIONAL_ROLE_OTHER_TEXT);
+    dbVerifiedInstitutionalAffiliation.setUser(dbUser);
+    verifiedInstitutionalAffiliationDao.save(dbVerifiedInstitutionalAffiliation);
+    return dbVerifiedInstitutionalAffiliation;
+  }
+
+  @Transactional
+  public DbInstitution createDbInstitution() {
+    DbInstitution dbInstitution = new DbInstitution();
+    dbInstitution.setShortName("dbInstitutionName");
+    dbInstitution.setDisplayName("dbInstitutionName");
+    institutionDao.save(dbInstitution);
+    return dbInstitution;
   }
 
   @Test
   public void testWorkspaceIterator_oneEntry() {
-    final DbUser user = createDbUser();
+    final DbUser user = createDbUserWithInstitute();
     final DbCdrVersion cdrVersion = createCdrVersion();
     final DbWorkspace workspace = createDbWorkspace(user, cdrVersion);
 
@@ -241,6 +279,17 @@ public class ReportingQueryServiceTest {
   }
 
   @Test
+  public void testQueryUser() {
+    createUsers(1);
+
+    final List<List<ReportingUser>> stream =
+        reportingQueryService.getUserStream().collect(Collectors.toList());
+    assertThat(stream.size()).isEqualTo(1);
+    ReportingUser reportingUser = stream.stream().findFirst().get().get(0);
+    userFixture.assertDTOFieldsMatchConstants(stream.stream().findFirst().get().get(0));
+  }
+
+  @Test
   public void testUserStream_twoAndAHalfBatches() {
     createUsers(5);
 
@@ -256,7 +305,7 @@ public class ReportingQueryServiceTest {
   }
 
   private void createWorkspaces(int count) {
-    final DbUser user = createDbUser();
+    final DbUser user = createDbUserWithInstitute();
     final DbCdrVersion cdrVersion = createCdrVersion();
     for (int i = 0; i < count; ++i) {
       createDbWorkspace(user, cdrVersion);
@@ -266,7 +315,7 @@ public class ReportingQueryServiceTest {
 
   private void createUsers(int count) {
     for (int i = 0; i < count; ++i) {
-      createDbUser();
+      createDbUserWithInstitute();
     }
     entityManager.flush();
   }

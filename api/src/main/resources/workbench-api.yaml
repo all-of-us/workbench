@@ -8295,6 +8295,46 @@ definitions:
         description: |-
           If the institutional_role_enum is "other", custom description
           of this user's role in the institution.
+      ethnicity:
+        description: |-
+          User-reported ethnicity information
+        "$ref": "#/definitions/Ethnicity"
+      identifiesAsLgbtq:
+        description: |-
+          User-reported identities as lgbtq information
+        type: boolean
+      lgbtqIdentity:
+        description: |-
+          User-reported lgbtqIdentity information
+        type: string
+      yearOfBirth:
+        description: |-
+          User-reported yearOfBirth information
+        type: number
+      highestEducation:
+        description: |-
+          User-reported highestEducation information
+        "$ref": "#/definitions/Education"
+      disability:
+        description: |-
+          User-reported disability
+        "$ref": "#/definitions/Disability"
+      degrees:
+        description: |-
+          User-reported degrees, comma-delimited if multiple answers were provided.
+        type: string
+      genderIdentities:
+        description: |-
+          User-reported genderIdentity information, comma-delimited if multiple answers were provided.
+        type: string
+      sexesAtBirth:
+        description: |-
+          User-reported sexAtBirth information, comma-delimited if multiple answers were provided.
+        type: string
+      races:
+        description: |-
+          User-reported races information, comma-delimited if multiple answers were provided.
+        type: string
   ReportingWorkspace:
     x-aou-note: |-
       This code was generated using reporting-wizard.rb at 2020-09-30T16:18:28-04:00.
