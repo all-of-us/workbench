@@ -101,9 +101,10 @@ const AdminNotebookView = () => {
   const {workspaceNamespace, nbName} = useParams();
   const accessReason = reactRouterUrlSearchParams().get('accessReason');
 
+  // react-router does not handling decoding of URL parameters, they must be decoded here.
   return <AdminNotebookViewComponent
       workspaceNamespace={workspaceNamespace}
-      notebookName={nbName}
+      notebookName={decodeURIComponent(nbName)}
       accessReason={accessReason}/>;
 };
 
