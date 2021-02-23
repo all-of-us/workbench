@@ -116,8 +116,6 @@ public interface WorkspaceMapper {
   @Mapping(target = "conceptSets", ignore = true)
   @Mapping(target = "creationTime", ignore = true)
   @Mapping(target = "creator", ignore = true)
-  @Mapping(target = "dataAccessLevel", ignore = true)
-  @Mapping(target = "dataAccessLevelEnum", ignore = true)
   @Mapping(target = "dataSets", ignore = true)
   @Mapping(target = "disseminateResearchSet", ignore = true)
   @Mapping(target = "firecloudName", ignore = true)
