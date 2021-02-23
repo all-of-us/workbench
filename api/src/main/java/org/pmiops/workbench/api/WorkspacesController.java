@@ -253,19 +253,19 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // transient failure.
     DbWorkspace dbWorkspace = new DbWorkspace();
 
-    // A little unintuitive but setting this here reflects the current state of the workspace
-    // while it was in the billing buffer. Setting this value will inform the update billing
-    // code to skip an unnecessary GCP API call if the billing account is being kept at the free
-    // tier
-    dbWorkspace.setBillingAccountName(
-        workbenchConfigProvider.get().billing.freeTierBillingAccountName());
-    setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
-
+    dbWorkspace.setName(workspace.getName());
+    dbWorkspace.setCreator(user);
+    dbWorkspace.setFirecloudName(workspaceId.getWorkspaceName());
+    dbWorkspace.setWorkspaceNamespace(workspaceId.getWorkspaceNamespace());
+    dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspaceId());
+    dbWorkspace.setCreationTime(now);
+    dbWorkspace.setLastModifiedTime(now);
+    dbWorkspace.setVersion(1);
+    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
     dbWorkspace.setCdrVersion(cdrVersion);
-
     // TODO: update to use tiers
     dbWorkspace.setDataAccessLevelEnum(cdrVersion.getDataAccessLevelEnum());
-    dbWorkspace.setName(workspace.getName());
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
     workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, workspace.getResearchPurpose());
@@ -275,7 +275,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     }
     dbWorkspace.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
 
-    dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
+    // A little unintuitive but setting this here reflects the current state of the workspace
+    // while it was in the billing buffer. Setting this value will inform the update billing
+    // code to skip an unnecessary GCP API call if the billing account is being kept at the free
+    // tier
+    dbWorkspace.setBillingAccountName(
+        workbenchConfigProvider.get().billing.freeTierBillingAccountName());
 
     try {
       workspaceService.updateWorkspaceBillingAccount(
@@ -308,22 +313,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     } else if (workspace.getName().length() > 80) {
       throw new BadRequestException("workspace name must be 80 characters or less");
     }
-  }
-
-  private void setDbWorkspaceFields(
-      DbWorkspace dbWorkspace,
-      DbUser user,
-      FirecloudWorkspaceId workspaceId,
-      FirecloudWorkspace fcWorkspace,
-      Timestamp createdAndLastModifiedTime) {
-    dbWorkspace.setFirecloudName(workspaceId.getWorkspaceName());
-    dbWorkspace.setWorkspaceNamespace(workspaceId.getWorkspaceNamespace());
-    dbWorkspace.setCreator(user);
-    dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspaceId());
-    dbWorkspace.setCreationTime(createdAndLastModifiedTime);
-    dbWorkspace.setLastModifiedTime(createdAndLastModifiedTime);
-    dbWorkspace.setVersion(1);
-    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
   }
 
   @Override
