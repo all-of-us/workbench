@@ -8175,7 +8175,7 @@ definitions:
         description: User's current role/position.
       dataAccessLevel:
         description: |-
-          DEPRECATED.  Will be replaced by Ascess Tiers.
+          DEPRECATED.  Will be replaced by Access Tiers.
           An indication of whether the user has completed the requirements for access to the
           registered tier.
         "$ref": "#/definitions/DataAccessLevel"
