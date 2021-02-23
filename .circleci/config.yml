@@ -270,7 +270,9 @@ commands:
     description: "Run puppeteer end-to-end integration test"
     steps:
       - run:
-          command: echo "Environment parameter WORKBENCH_ENV=${WORKBENCH_ENV}"
+          command: |
+            echo "WORKBENCH_ENV=${WORKBENCH_ENV}"
+            echo "TEST_MODE=${TEST_MODE}"
       - gcloud-auth-login:
           # Needed for yarn test, which invokes generate-impersonated-user-token
           with_application_default_credentials: true
@@ -549,6 +551,11 @@ jobs:
         default: "test"
         type: enum
         enum: ["test", "staging", "local"]
+      test_mode:
+        description: Switching between "nightly-integration" and normal "integration" test mode
+        default: "integration"
+        type: enum
+        enum: [ "integration", "nightly-integration" ]
       parallel_num:
         type: integer
         default: 1
@@ -557,6 +564,7 @@ jobs:
         default: []
     environment:
       WORKBENCH_ENV: << parameters.env_name >>
+      TEST_MODE: << parameters.test_mode >>
     parallelism: << parameters.parallel_num >>
     steps:
       - attach_workspace:
@@ -578,14 +586,6 @@ jobs:
 
   puppeteer-env-setup:
     executor: puppeteer-executor
-    parameters:
-      test_mode:
-        description: Switching between "nightly-integration" and normal "integration" test mode
-        default: "integration"
-        type: enum
-        enum: [ "integration", "nightly-integration" ]
-    environment:
-      TEST_MODE: << parameters.test_mode >>
     steps:
       - checkout-code
       - store-commit-message
@@ -701,11 +701,11 @@ workflows:
                 - master
     jobs:
       - api-bigquery-test
-      - puppeteer-env-setup:
-          test_mode: "nightly-integration"
+      - puppeteer-env-setup
       - puppeteer-test:
           parallel_num: 1
           env_name: "test"
+          test_mode: "nightly-integration"
           requires:
             - puppeteer-env-setup
 
