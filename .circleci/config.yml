@@ -561,7 +561,7 @@ jobs:
           at: .
       - steps: << parameters.optional_steps >>
       - run:
-          name: "Update environment variables for e2e test"
+          name: "Export e2e test user to environment variable"
           command: bash .circleci/export-e2e-test-user-vars.sh << parameters.env_name >>
       - when:
           condition:
