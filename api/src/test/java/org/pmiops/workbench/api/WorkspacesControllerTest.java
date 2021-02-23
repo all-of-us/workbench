@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
 import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
 import static org.pmiops.workbench.config.WorkbenchConfig.createEmptyConfig;
+import static org.pmiops.workbench.utils.TestMockFactory.createDefaultAccessTier;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.BillingAccount;
@@ -261,8 +262,6 @@ public class WorkspacesControllerTest {
   private static final String BUCKET_URI =
       String.format("gs://%s/", TestMockFactory.WORKSPACE_BUCKET_NAME);
 
-  private static final String TEST_AUTH_DOMAIN = "test-tier-users";
-
   @Autowired private BillingProjectBufferService billingProjectBufferService;
   @Autowired private WorkspaceAuditor mockWorkspaceAuditor;
   @Autowired private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
@@ -407,15 +406,7 @@ public class WorkspacesControllerTest {
     testMockFactory = new TestMockFactory();
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
 
-    accessTier =
-        new DbAccessTier()
-            .setAccessTierId(1)
-            .setShortName("test")
-            .setDisplayName("Test Tier")
-            .setAuthDomainName(TEST_AUTH_DOMAIN)
-            .setAuthDomainGroupEmail("test-tier-users@fake-research-aou.org")
-            .setServicePerimeter("test/tier/perimeter");
-    accessTier = accessTierDao.save(accessTier);
+    accessTier = createDefaultAccessTier(accessTierDao);
 
     cdrVersion = new DbCdrVersion();
     cdrVersion.setName("1");
@@ -616,7 +607,8 @@ public class WorkspacesControllerTest {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
     verify(fireCloudService)
-        .createWorkspace(workspace.getNamespace(), workspace.getName(), TEST_AUTH_DOMAIN);
+        .createWorkspace(
+            workspace.getNamespace(), workspace.getName(), accessTier.getAuthDomainName());
 
     stubGetWorkspace(
         workspace.getNamespace(),

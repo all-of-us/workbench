@@ -80,6 +80,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -185,6 +186,7 @@ public class DataSetControllerTest {
   private static DbUser currentUser;
   private Workspace workspace;
 
+  @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private CohortsController cohortsController;
   @Autowired private ConceptSetsController conceptSetsController;
@@ -314,11 +316,7 @@ public class DataSetControllerTest {
     user = userDao.save(user);
     currentUser = user;
 
-    DbCdrVersion cdrVersion = new DbCdrVersion();
-    cdrVersion.setName("1");
-    // set the db name to be empty since test cases currently
-    // run in the workbench schema only.
-    cdrVersion.setCdrDbName("");
+    DbCdrVersion cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
     cdrVersion.setMicroarrayBigqueryDataset("microarray");
     cdrVersion = cdrVersionDao.save(cdrVersion);
 

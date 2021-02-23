@@ -35,6 +35,7 @@ import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
 import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -61,6 +62,7 @@ import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.pmiops.workbench.utils.PaginationToken;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 
@@ -83,6 +85,8 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
   private static final String STANDARD_CONCEPT_CODE = "S";
 
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
+
+  @Autowired private AccessTierDao accessTierDao;
 
   @Autowired private CdrVersionDao cdrVersionDao;
 
@@ -121,7 +125,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   @Before
   public void setUp() {
-    DbCdrVersion cdrVersion = new DbCdrVersion();
+    DbCdrVersion cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     cdrVersion = cdrVersionDao.save(cdrVersion);

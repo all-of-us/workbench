@@ -42,6 +42,7 @@ import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
@@ -170,6 +171,8 @@ public class ConceptSetsControllerTest {
 
   @Autowired BillingProjectBufferService billingProjectBufferService;
 
+  @Autowired AccessTierDao accessTierDao;
+
   @Autowired CdrVersionDao cdrVersionDao;
 
   @Autowired CBCriteriaDao cbCriteriaDao;
@@ -271,12 +274,7 @@ public class ConceptSetsControllerTest {
     user = userDao.save(user);
     currentUser = user;
 
-    DbCdrVersion cdrVersion = new DbCdrVersion();
-    cdrVersion.setName("1");
-    // set the db name to be empty since test cases currently
-    // run in the workbench schema only.
-    cdrVersion.setCdrDbName("");
-    cdrVersion = cdrVersionDao.save(cdrVersion);
+    DbCdrVersion cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
 
     workspace = new Workspace();
     workspace.setName(WORKSPACE_NAME);
