@@ -780,6 +780,116 @@ paths:
           schema:
             $ref: '#/definitions/ErrorReport'
 
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/submissions:
+    post:
+      tags:
+        - Submissions
+      summary: |
+        Create a submission.
+      operationId: createSubmission
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: Workspace Namespace
+          required: true
+          type: string
+        - name: workspaceName
+          in: path
+          description: Workspace Name
+          required: true
+          type: string
+        - name: submissionRequest
+          in: body
+          description: Submission Request
+          required: true
+          schema:
+            $ref: '#/definitions/SubmissionRequest'
+      responses:
+        201:
+          description: Successful Request
+          schema:
+            $ref: '#/definitions/SubmissionResponse'
+        400:
+          description: Expression eval failed or entities are not of type required
+            by method config
+        404:
+          description: Method Configuration or Entity not found
+        409:
+          description: Method Configuration failed to resolve input expressions with
+            the supplied Entity
+        500:
+          description: Internal Error
+
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/methodconfigs:
+    post:
+      tags:
+        - methodConfigurations
+      summary: Create a Method Configuration in a workspace
+      operationId: createWorkspaceMethodConfig
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: Workspace Namespace
+          required: true
+          type: string
+        - name: workspaceName
+          in: path
+          description: Workspace Name
+          required: true
+          type: string
+        - in: body
+          name: newMethodConfigIngest
+          description: Method Configuration contents
+          required: true
+          schema:
+            $ref: '#/definitions/MethodConfiguration'
+      responses:
+        201:
+          description: Successful Request
+          schema:
+            $ref: '#/definitions/ValidatedMethodConfiguration'
+        404:
+          description: Workspace not found
+        409:
+          description: Method Configuration already exists
+        500:
+          description: Internal Server Error
+
+  /api/workspaces/{workspaceNamespace}/{workspaceName}/method_configs/{configNamespace}/{configName}:
+    delete:
+      tags:
+        - methodConfigurations
+      summary: Delete a method configuration in a workspace
+      operationId: deleteWorkspaceMethodConfig
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: Workspace Namespace
+          required: true
+          type: string
+        - name: workspaceName
+          in: path
+          description: Workspace Name
+          required: true
+          type: string
+        - name: configNamespace
+          in: path
+          description: Configuration Namespace
+          required: true
+          type: string
+        - name: configName
+          in: path
+          description: Configuration Name
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successful request
+        404:
+          description: Workspace or Method Configuration not found
+        500:
+          description: Internal Server Error
+
 ##########################################################################################
 ## PARAMETERS
 ##########################################################################################
@@ -1362,3 +1472,248 @@ definitions:
             ok: false
             messages:
               - "Thurloe misbehavior message"
+
+  Submission:
+    type: object
+    properties:
+      submissionId:
+        type: string
+        description: SubmissionRequest unique identifier
+      submissionDate:
+        type: string
+        description: SubmissionRequest date
+        format: date-time
+      submitter:
+        type: string
+        description: user that created the submission
+      methodConfigurationNamespace:
+        type: string
+        description: Method configuration namespace
+      methodConfigurationName:
+        type: string
+        description: Method configuration name
+      workflows:
+        type: array
+        description: Status of Workflow(s)
+        items:
+          $ref: '#/definitions/Workflow'
+      status:
+        $ref: '#/definitions/SubmissionStatus'
+      cost:
+        type: number
+        description: The compute cost of this submission
+        format: float
+      useCallCache:
+        type: boolean
+        description: Whether or not to read from cache for this submission
+      deleteIntermediateOutputFiles:
+        type: boolean
+        description: Whether or not to delete intermediate output files when the
+          workflow completes. See Cromwell docs for more information.
+      workflowFailureMode:
+        type: string
+        description: What happens after a task fails. Choose from ContinueWhilePossible
+          and NoNewCalls. Defaults to NoNewCalls if not specified. See Cromwell
+          docs for more information.
+        default: NoNewCalls
+        enum:
+          - NoNewCalls
+          - ContinueWhilePossible
+    description: ""
+
+  SubmissionStatus:
+    type: string
+    description: submission status
+    enum:
+      - Accepted
+      - Evaluating
+      - Submitting
+      - Submitted
+      - Aborting
+      - Aborted
+      - Done
+
+  Workflow:
+    type: object
+    properties:
+      workflowId:
+        type: string
+        description: Workflow unique identifier
+      status:
+        $ref: '#/definitions/WorkflowStatus'
+      statusLastChangedDate:
+        type: string
+        description: Status last-changed date
+        format: date-time
+      messages:
+        type: array
+        description: List of messages about this workflow
+        items:
+          type: string
+      cost:
+        type: number
+        description: The run cost of this workflow
+        format: float
+    description: ""
+
+  WorkflowStatus:
+    type: string
+    description: workflow status
+    enum:
+      - Queued
+      - Launching
+      - Submitted
+      - Running
+      - Failed
+      - Succeeded
+      - Aborting
+      - Aborted
+      - Unknown
+
+  SubmissionRequest:
+    required:
+      - methodConfigurationName
+      - methodConfigurationNamespace
+      - useCallCache
+    type: object
+    properties:
+      methodConfigurationNamespace:
+        type: string
+        description: Namespace of the method configuration to execute.
+      methodConfigurationName:
+        type: string
+        description: Name of the method configuration to execute.
+      entityType:
+        type: string
+        description: Type of root entity for expression. Optional if the method
+          configuration has no root entity.
+      entityName:
+        type: string
+        description: Name of root entity for expression. Optional if the method
+          configuration has no root entity.
+      expression:
+        type: string
+        description: Expression that resolves to one or more entities matching the
+          entity type in the method configuration. Optional if the method configuration
+          has no root entity.
+      useCallCache:
+        type: boolean
+        description: Whether or not to read from cache for this submission.
+      deleteIntermediateOutputFiles:
+        type: boolean
+        description: Whether or not to delete intermediate output files when the
+          workflow completes. See Cromwell docs for more information.
+      useReferenceDisks:
+        type: boolean
+        description: Whether or not to use pre-built disks for common genome references
+      workflowFailureMode:
+        type: string
+        description: What happens after a task fails. Choose from ContinueWhilePossible
+          and NoNewCalls. Defaults to NoNewCalls if not specified. See Cromwell
+          docs for more information.
+        default: NoNewCalls
+        enum:
+          - NoNewCalls
+          - ContinueWhilePossible
+    description: If the referenced method configuration takes no root entity, do
+      not define `entityType`, `entityName` and `expression`.
+
+  SubmissionResponse:
+    required:
+      - submissionId
+    type: object
+    properties:
+      submissionId:
+        type: string
+        description: Submission Id
+
+  MethodConfiguration:
+    required:
+      - deleted
+      - inputs
+      - methodConfigVersion
+      - methodRepoMethod
+      - name
+      - namespace
+      - outputs
+      - prerequisites
+      - rootEntityType
+    type: object
+    properties:
+      namespace:
+        type: string
+        description: Method configuration namespace
+      name:
+        type: string
+        description: Method configuration name
+      rootEntityType:
+        type: string
+        description: Method configuration root entity type
+      inputs:
+        type: object
+        additionalProperties:
+          type: string
+        description: Input map - Map[string, string]
+      outputs:
+        type: object
+        additionalProperties:
+          type: string
+        description: Output map - Map[string, string]
+      prerequisites:
+        type: object
+        additionalProperties:
+          type: string
+        description: Prerequisites map - Map[string, string]
+      methodRepoMethod:
+        type: object
+        additionalProperties:
+          type: string
+        description: Method ID - Map
+      methodConfigVersion:
+        type: integer
+        description: Version number, incremented on edit
+        format: int32
+      deleted:
+        type: boolean
+        description: Is this config marked as deleted?
+        default: false
+
+  ValidatedMethodConfiguration:
+    required:
+      - extraInputs
+      - invalidInputs
+      - invalidOutputs
+      - methodConfiguration
+      - missingInputs
+      - validInputs
+      - validOutputs
+    type: object
+    properties:
+      validInputs:
+        type: array
+        items:
+          type: string
+      invalidInputs:
+        type: object
+        additionalProperties:
+          type: object
+      missingInputs:
+        type: array
+        items:
+          type: string
+      extraInputs:
+        type: array
+        items:
+          type: string
+      validOutputs:
+        type: array
+        items:
+          type: string
+      invalidOutputs:
+        type: object
+        additionalProperties:
+          type: object
+      methodConfiguration:
+        $ref: '#/definitions/MethodConfiguration'
+    description: Information about the validity of a method configuration's expressions
+      relative to the method itself

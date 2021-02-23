@@ -279,6 +279,7 @@ public final class DbStorageEnums {
           .put(Domain.FITBIT_HEART_RATE_LEVEL, (short) 16)
           .put(Domain.FITBIT_ACTIVITY, (short) 17)
           .put(Domain.FITBIT_INTRADAY_STEPS, (short) 18)
+          .put(Domain.PHYSICAL_MEASUREMENT_CSS, (short) 19)
           .build();
 
   // A mapping from our Domain enum to OMOP domain ID values.
@@ -303,6 +304,7 @@ public final class DbStorageEnums {
           .put(Domain.FITBIT_HEART_RATE_LEVEL, "Fitbit: Heart Rate - Minute-Level")
           .put(Domain.FITBIT_ACTIVITY, "Fitbit: Activity - Daily Summary")
           .put(Domain.FITBIT_INTRADAY_STEPS, "Fitbit: Intraday Steps - Minute-Level")
+          .put(Domain.PHYSICAL_MEASUREMENT_CSS, "Physical Measurement CSS")
           .build();
 
   public static Domain domainFromStorage(Short domain) {

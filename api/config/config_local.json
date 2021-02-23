@@ -26,7 +26,10 @@
     "projectNamePrefix": "aou-rw-local1-",
     "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.rw_test_firecloud_view",
     "retryCount": 2,
-    "bufferCapacity": 10,
+    "bufferCapacity": {
+      "registered": 10,
+      "controlled_test": 10
+    },
     "bufferRefillProjectsPerTask": 1,
     "bufferStatusChecksPerTask": 10,
     "defaultFreeCreditsDollarLimit": 300.0,
@@ -45,7 +48,12 @@
     ]
   },
   "wgsCohortExtraction": {
-    "serviceAccount": "wgs-cohort-extraction@all-of-us-workbench-test.iam.gserviceaccount.com"
+    "serviceAccount": "wgs-cohort-extraction@all-of-us-workbench-test.iam.gserviceaccount.com",
+    "operationalTerraWorkspaceNamespace": "aou-wgs-cohort-extraction",
+    "operationalTerraWorkspaceName": "aouwgscohortextraction",
+    "extractionMethodConfigurationNamespace": "aouwgscohortextraction",
+    "extractionMethodConfigurationName": "HelloWorld",
+    "extractionMethodConfigurationVersion": 2
   },
   "cdr": {
     "debugQueries": false

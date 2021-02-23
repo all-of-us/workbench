@@ -288,7 +288,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
     const nodeId = `node${id}`;
     const node = document.getElementById(nodeId);
     if (node) {
-      setTimeout(() => node.scrollIntoView({behavior: 'smooth', block: 'center'}), 200);
+      node.scrollIntoView({behavior: 'smooth', block: 'start'});
     }
     this.setState({loadingSubtree: false});
   }

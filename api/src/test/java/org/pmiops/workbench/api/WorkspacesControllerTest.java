@@ -208,7 +208,6 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class WorkspacesControllerTest {
-
   private static final Timestamp NOW = Timestamp.from(Instant.now());
   private static final long NOW_TIME = NOW.getTime();
   private static final FakeClock CLOCK = new FakeClock(NOW.toInstant(), ZoneId.systemDefault());
@@ -463,7 +462,7 @@ public class WorkspacesControllerTest {
   private void mockBillingProjectBuffer(String projectName) {
     DbBillingProjectBufferEntry entry = mock(DbBillingProjectBufferEntry.class);
     doReturn(projectName).when(entry).getFireCloudProjectName();
-    doReturn(entry).when(billingProjectBufferService).assignBillingProject(any());
+    doReturn(entry).when(billingProjectBufferService).assignBillingProject(any(), any());
   }
 
   private void stubFcUpdateWorkspaceACL() {

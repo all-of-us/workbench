@@ -13,11 +13,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {CircleWithText} from 'app/icons/circleWithText';
 import {NewDataSetModal} from 'app/pages/data/data-set/new-dataset-modal';
-import {
-  cohortsApi,
-  conceptSetsApi,
-  dataSetApi
-} from 'app/services/swagger-fetch-clients';
+import {cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatDomain,
@@ -32,10 +28,7 @@ import {
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getCdrVersion} from 'app/utils/cdr-versions';
-import {
-  currentWorkspaceStore,
-  navigateAndPreventDefaultIfNoKeysPressed
-} from 'app/utils/navigation';
+import {currentWorkspaceStore, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -312,7 +305,7 @@ export class ValueListItem extends React.Component<
 
     dataSetApi().getDataDictionaryEntry(
       parseInt(currentWorkspaceStore.getValue().cdrVersionId, 10),
-      domain.toString(),
+      domain === Domain.PHYSICALMEASUREMENTCSS ? Domain.MEASUREMENT.toString() : domain.toString(),
       domainValue.value).then(dataDictionaryEntry => {
         this.setState({dataDictionaryEntry});
       }).catch(e => {
@@ -1189,6 +1182,8 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                 <FlexRow style={{paddingTop: '0.5rem'}}>
                   {fp.toPairs(previewList).map((value) => {
                     const domain: string = value[0];
+                    // Strip underscores so we get the correct enum value
+                    const domainEnumValue = Domain[domain.replace(/_/g, '')];
                     const previewRow: DataSetPreviewInfo = value[1];
                     return <TooltipTrigger key={domain}
                                            content={
@@ -1200,11 +1195,10 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                            side='top'>
                       <Clickable
                                  disabled={previewRow.isLoading}
-                                 onClick={() =>
-                                   this.setState({selectedPreviewDomain: Domain[domain]})}
-                                 style={stylesFunction.selectDomainForPreviewButton(selectedPreviewDomain === Domain[domain])}>
+                                 onClick={() => this.setState({selectedPreviewDomain: domainEnumValue})}
+                                 style={stylesFunction.selectDomainForPreviewButton(selectedPreviewDomain === domainEnumValue)}>
                         <FlexRow style={{alignItems: 'center', overflow: 'auto', wordBreak: 'break-all'}}>
-                          {domain.toString()}
+                          {formatDomainString(domain)}
                           {previewRow.isLoading &&
                           <Spinner style={{marginLeft: '4px', height: '18px', width: '18px'}}/>}
                         </FlexRow>

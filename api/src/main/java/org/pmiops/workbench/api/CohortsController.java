@@ -17,6 +17,7 @@ import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
+import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -46,6 +47,7 @@ import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TableQuery;
+import org.pmiops.workbench.model.TerraJob;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +68,7 @@ public class CohortsController implements CohortsApiDelegate {
   private final CohortFactory cohortFactory;
   private final CohortMapper cohortMapper;
   private final CohortReviewDao cohortReviewDao;
+  private final CohortService cohortService;
   private final ConceptSetDao conceptSetDao;
   private final CohortMaterializationService cohortMaterializationService;
   private Provider<DbUser> userProvider;
@@ -81,6 +84,7 @@ public class CohortsController implements CohortsApiDelegate {
       CohortFactory cohortFactory,
       CohortMapper cohortMapper,
       CohortReviewDao cohortReviewDao,
+      CohortService cohortService,
       ConceptSetDao conceptSetDao,
       CohortMaterializationService cohortMaterializationService,
       Provider<DbUser> userProvider,
@@ -93,6 +97,7 @@ public class CohortsController implements CohortsApiDelegate {
     this.cohortFactory = cohortFactory;
     this.cohortMapper = cohortMapper;
     this.cohortReviewDao = cohortReviewDao;
+    this.cohortService = cohortService;
     this.conceptSetDao = conceptSetDao;
     this.cohortMaterializationService = cohortMaterializationService;
     this.userProvider = userProvider;
@@ -434,6 +439,27 @@ public class CohortsController implements CohortsApiDelegate {
           new CohortAnnotationsResponse().columns(request.getAnnotationQuery().getColumns()));
     }
     return ResponseEntity.ok(cohortMaterializationService.getAnnotations(cohortReview, request));
+  }
+
+  @Override
+  public ResponseEntity<TerraJob> extractCohortGenomes(
+      String workspaceNamespace, String workspaceId, Long cohortId) {
+    DbWorkspace workspace =
+        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    // TODO (RW-6336): Replace microarray with Wgs field
+    if (workspace.getCdrVersion().getMicroarrayBigqueryDataset() == null) {
+      throw new BadRequestException("Workspace CDR does not have access to WGS data");
+    }
+
+    try {
+      return ResponseEntity.ok(
+          cohortService.submitGenomicsCohortExtractionJob(workspaceNamespace, workspaceId));
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+      // Given that there are no input arguments ATM, any API exceptions are due to programming or
+      // Firecloud errors
+      throw new ServerErrorException(e);
+    }
   }
 
   private DbCohort getDbCohort(String workspaceNamespace, String workspaceId, Long cohortId) {

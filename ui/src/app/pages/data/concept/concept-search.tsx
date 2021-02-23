@@ -121,6 +121,7 @@ interface State {
   loading: boolean;
   // Show if trying to navigate away with unsaved changes
   showUnsavedModal: boolean;
+  unsavedChanges: boolean;
 }
 
 export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurrentConcept(), withCurrentWorkspace(), withUrlParams())
@@ -141,7 +142,8 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
         errorMessage: '',
         deleting: false,
         loading: this.isDetailPage,
-        showUnsavedModal: false
+        showUnsavedModal: false,
+        unsavedChanges: false
       };
       this.showUnsavedModal = this.showUnsavedModal.bind(this);
     }
@@ -154,7 +156,7 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
       }
       this.subscription = currentConceptStore.subscribe(currentConcepts => {
         if (![null, undefined].includes(currentConcepts)) {
-          this.props.setUnsavedConceptChanges(this.checkUnsavedConceptChanges(currentConcepts));
+          this.checkUnsavedConceptChanges(currentConcepts);
         }
       });
       this.subscription.add(conceptSetUpdating.subscribe(updating => this.props.setConceptSetUpdating(updating)));
@@ -174,8 +176,10 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
         ['attributes', 'parameterId'].forEach(prop => delete concept[prop]);
         return concept;
       });
-      return (!currentConceptSet && currentConcepts.length > 0) ||
+      const unsavedChanges = (!currentConceptSet && currentConcepts.length > 0) ||
         (!!currentConceptSet && sortAndStringify(currentConceptSet.criteriums) !== sortAndStringify(currentConceptsMap));
+      this.setState({unsavedChanges});
+      this.props.setUnsavedConceptChanges(unsavedChanges);
     }
 
     async getConceptSet() {
@@ -234,7 +238,8 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
 
     get displayDomainName() {
       const {conceptSet} = this.state;
-      return conceptSet.domain === Domain.PHYSICALMEASUREMENT ? 'Physical Measurements' : fp.capitalize(conceptSet.domain.toString()) ;
+      return (conceptSet.domain === Domain.PHYSICALMEASUREMENT ||
+        conceptSet.domain === Domain.PHYSICALMEASUREMENTCSS) ? 'Physical Measurements' : fp.capitalize(conceptSet.domain.toString()) ;
     }
 
     async showUnsavedModal() {
@@ -249,7 +254,8 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
 
     get disableFinishButton() {
       const {concept, workspace: {accessLevel}} = this.props;
-      return !concept || concept.length === 0 || ![WorkspaceAccessLevel.OWNER, WorkspaceAccessLevel.WRITER].includes(accessLevel);
+      const {unsavedChanges} = this.state;
+      return !concept || !unsavedChanges || ![WorkspaceAccessLevel.OWNER, WorkspaceAccessLevel.WRITER].includes(accessLevel);
     }
 
     get isDetailPage() {

@@ -747,15 +747,15 @@ describe('RuntimePanel', () => {
     expect(runningCost().text()).toEqual('$0.40/hr');
     expect(storageCost().text()).toEqual('$0.02/hr');
 
-    // Selecting the General Analysis preset should bring the machine back to n1-standard-4 with 50GB storage.
+    // Selecting the General Analysis preset should bring the machine back to n1-standard-4 with 100GB storage.
     await pickPreset(wrapper, {displayName: 'General Analysis'});
     expect(runningCost().text()).toEqual('$0.20/hr');
     expect(storageCost().text()).toEqual('< $0.01/hr');
 
-    // After selecting Dataproc, the Dataproc defaults should make the running cost 71 cents an hour. The storage cost should remain unchanged.
+    // After selecting Dataproc, the Dataproc defaults should make the running cost 71 cents an hour. The storage cost increases due to worker disk.
     await pickComputeType(wrapper, ComputeType.Dataproc);
     expect(runningCost().text()).toEqual('$0.71/hr');
-    expect(storageCost().text()).toEqual('< $0.01/hr');
+    expect(storageCost().text()).toEqual('$0.01/hr');
 
     // Bump up all the worker values to increase the price on everything.
     await pickNumWorkers(wrapper, 4);
@@ -764,7 +764,7 @@ describe('RuntimePanel', () => {
     await pickWorkerRam(wrapper, 30);
     await pickWorkerDiskSize(wrapper, 300);
     expect(runningCost().text()).toEqual('$2.87/hr');
-    expect(storageCost().text()).toEqual('$0.13/hr');
+    expect(storageCost().text()).toEqual('$0.14/hr');
   });
 
   it('should update the cost estimator when master machine changes', async() => {

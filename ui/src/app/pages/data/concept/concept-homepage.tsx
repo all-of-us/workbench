@@ -21,7 +21,6 @@ import {
 } from 'app/utils';
 import {currentCohortSearchContextStore, currentConceptStore, NavStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {environment} from 'environments/environment';
 import {Concept, Domain, DomainInfo, SurveyModule} from 'generated/fetch';
 import {Key} from 'ts-key-enum';
 
@@ -279,8 +278,8 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
     render() {
       const {conceptDomainList, conceptSurveysList, currentInputString, currentSearchString, domainInfoError, domainsLoading, inputErrors,
         loadingDomains, surveyInfoError, showSearchError, surveysLoading} = this.state;
-      const conceptDomainCards = conceptDomainList.filter(domain => domain.domain !== Domain.PHYSICALMEASUREMENT);
-      const physicalMeasurementsCard = conceptDomainList.find(domain => domain.domain === Domain.PHYSICALMEASUREMENT);
+      const conceptDomainCards = conceptDomainList.filter(domain => domain.domain !== Domain.PHYSICALMEASUREMENTCSS);
+      const physicalMeasurementsCard = conceptDomainList.find(domain => domain.domain === Domain.PHYSICALMEASUREMENTCSS);
       return <React.Fragment>
         <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
           <div style={{display: 'flex', alignItems: 'center'}}>
@@ -341,20 +340,20 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
                                                      updating={surveysLoading.includes(survey.name)}/>)
                 }
               </div>
-              {environment.enableNewConceptTabs && !!physicalMeasurementsCard && <React.Fragment>
+              {!!physicalMeasurementsCard && <React.Fragment>
                 <div style={styles.sectionHeader}>
                   Program Physical Measurements
                 </div>
                 <div style={{...styles.cardList, marginBottom: '1rem'}}>
                   {domainInfoError
                     ? this.errorMessage()
-                    : domainsLoading.includes(Domain.PHYSICALMEASUREMENT)
+                    : domainsLoading.includes(Domain.PHYSICALMEASUREMENTCSS)
                       ? <Spinner size={42}/>
                       : physicalMeasurementsCard.allConceptCount === 0
                         ? 'No Program Physical Measurement Results. Please type in a new search term.'
                         : <PhysicalMeasurementsCard physicalMeasurement={physicalMeasurementsCard}
-                                                    browsePhysicalMeasurements={() => this.browseDomain(Domain.PHYSICALMEASUREMENT)}
-                                                    updating={domainsLoading.includes(Domain.PHYSICALMEASUREMENT)}/>
+                                                    browsePhysicalMeasurements={() => this.browseDomain(Domain.PHYSICALMEASUREMENTCSS)}
+                                                    updating={domainsLoading.includes(Domain.PHYSICALMEASUREMENTCSS)}/>
                   }
                 </div>
               </React.Fragment>}

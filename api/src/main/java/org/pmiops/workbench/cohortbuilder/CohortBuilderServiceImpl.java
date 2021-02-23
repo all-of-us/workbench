@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Ordering;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -28,11 +29,9 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
-import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
 import org.pmiops.workbench.cdr.model.DbMenuOption;
@@ -68,21 +67,18 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
 
   private static final Integer DEFAULT_TREE_SEARCH_LIMIT = 100;
   private static final Integer DEFAULT_CRITERIA_SEARCH_LIMIT = 250;
-  private static final String MEASUREMENT = "Measurement";
   private static final ImmutableList<String> MYSQL_FULL_TEXT_CHARS =
       ImmutableList.of("\"", "+", "-", "*", "(", ")");
-  private static final ImmutableList<String> STANDARD_CONCEPTS = ImmutableList.of("S", "C");
 
-  private BigQueryService bigQueryService;
-  private CohortQueryBuilder cohortQueryBuilder;
-  private CBCriteriaAttributeDao cbCriteriaAttributeDao;
-  private CBCriteriaDao cbCriteriaDao;
-  private ConceptDao conceptDao;
-  private CBDataFilterDao cbDataFilterDao;
-  private DomainInfoDao domainInfoDao;
-  private PersonDao personDao;
-  private SurveyModuleDao surveyModuleDao;
-  private CohortBuilderMapper cohortBuilderMapper;
+  private final BigQueryService bigQueryService;
+  private final CohortQueryBuilder cohortQueryBuilder;
+  private final CBCriteriaAttributeDao cbCriteriaAttributeDao;
+  private final CBCriteriaDao cbCriteriaDao;
+  private final CBDataFilterDao cbDataFilterDao;
+  private final DomainInfoDao domainInfoDao;
+  private final PersonDao personDao;
+  private final SurveyModuleDao surveyModuleDao;
+  private final CohortBuilderMapper cohortBuilderMapper;
 
   @Autowired
   public CohortBuilderServiceImpl(
@@ -90,7 +86,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       CohortQueryBuilder cohortQueryBuilder,
       CBCriteriaAttributeDao cbCriteriaAttributeDao,
       CBCriteriaDao cbCriteriaDao,
-      ConceptDao conceptDao,
       CBDataFilterDao cbDataFilterDao,
       DomainInfoDao domainInfoDao,
       PersonDao personDao,
@@ -100,7 +95,6 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     this.cohortQueryBuilder = cohortQueryBuilder;
     this.cbCriteriaAttributeDao = cbCriteriaAttributeDao;
     this.cbCriteriaDao = cbCriteriaDao;
-    this.conceptDao = conceptDao;
     this.cbDataFilterDao = cbDataFilterDao;
     this.domainInfoDao = domainInfoDao;
     this.personDao = personDao;
@@ -144,9 +138,9 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       String domainId, Collection<Long> sourceConceptIds, Collection<Long> standardConceptIds) {
     List<Criteria> criteriaList = new ArrayList<>();
     List<String> sourceIds =
-        sourceConceptIds.stream().map(l -> l.toString()).collect(Collectors.toList());
+        sourceConceptIds.stream().map(Object::toString).collect(Collectors.toList());
     List<String> standardIds =
-        standardConceptIds.stream().map(l -> l.toString()).collect(Collectors.toList());
+        standardConceptIds.stream().map(Object::toString).collect(Collectors.toList());
     if (!sourceIds.isEmpty()) {
       criteriaList.addAll(
           cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
@@ -231,23 +225,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     PageRequest pageRequest =
         new PageRequest(0, Optional.ofNullable(limit).orElse(DEFAULT_CRITERIA_SEARCH_LIMIT));
     if (term == null || term.trim().isEmpty()) {
-      // return top counts
-      if (Domain.fromValue(domain).equals(Domain.PHYSICAL_MEASUREMENT)) {
-        Page<DbConcept> dbConcepts = conceptDao.findPMConcepts(pageRequest);
-        List<Criteria> criteriaList =
-            dbConcepts.getContent().stream()
-                .map(
-                    c -> {
-                      boolean isStandard = STANDARD_CONCEPTS.contains(c.getStandardConcept());
-                      return cohortBuilderMapper.dbModelToClient(
-                          c, isStandard, isStandard ? c.getCountValue() : c.getSourceCountValue());
-                    })
-                .collect(Collectors.toList());
-        return new CriteriaListWithCountResponse()
-            .items(criteriaList)
-            .totalCount(dbConcepts.getTotalElements());
-      }
-      if (Domain.fromValue(domain).equals(Domain.SURVEY)) {
+      if (Domain.SURVEY.equals(Domain.fromValue(domain))) {
         Long id = cbCriteriaDao.findIdByDomainAndName(domain, surveyName);
         Page<DbCriteria> dbCriteriaPage =
             cbCriteriaDao.findSurveyQuestionCriteriaByDomainAndIdAndFullText(
@@ -267,23 +245,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
                   .collect(Collectors.toList()))
           .totalCount(dbCriteriaPage.getTotalElements());
     }
-    if (Domain.fromValue(domain).equals(Domain.PHYSICAL_MEASUREMENT)) {
-      Page<DbConcept> dbConcepts = conceptDao.findPMConcepts(modifyTermMatch(term), pageRequest);
-      List<Criteria> criteriaList =
-          dbConcepts.getContent().stream()
-              .map(
-                  c -> {
-                    boolean isStandard = STANDARD_CONCEPTS.contains(c.getStandardConcept());
-                    return cohortBuilderMapper.dbModelToClient(
-                        c, isStandard, isStandard ? c.getCountValue() : c.getSourceCountValue());
-                  })
-              .collect(Collectors.toList());
-      return new CriteriaListWithCountResponse()
-          .items(criteriaList)
-          .totalCount(dbConcepts.getTotalElements());
-    }
 
-    if (Domain.fromValue(domain).equals(Domain.SURVEY)) {
+    if (Domain.SURVEY.equals(Domain.fromValue(domain))) {
       Page<DbCriteria> dbCriteriaPage;
       if (surveyName.equals("All")) {
         dbCriteriaPage =
@@ -304,7 +267,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     }
 
     Page<DbCriteria> dbCriteriaPage =
-        cbCriteriaDao.findCriteriaByDomainAndTypeAndCode(domain, term, pageRequest);
+        cbCriteriaDao.findCriteriaByDomainAndTypeAndCode(
+            domain, term.replaceAll("[()+\"*-]", ""), pageRequest);
     if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
       dbCriteriaPage =
           cbCriteriaDao.findCriteriaByDomainAndFullText(domain, modifyTermMatch(term), pageRequest);
@@ -393,6 +357,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   @Override
   public List<DomainInfo> findDomainInfos() {
     return domainInfoDao.findByOrderByDomainId().stream()
+        .filter(dbDomainInfo -> dbDomainInfo.getAllConceptCount() > 0)
         .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
   }
@@ -503,17 +468,20 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   private String modifyTermMatch(String term) {
-    if (!MYSQL_FULL_TEXT_CHARS.stream()
-        .filter(term::contains)
-        .collect(Collectors.toList())
-        .isEmpty()) {
-      return term;
+    if (MYSQL_FULL_TEXT_CHARS.stream().anyMatch(term::contains)) {
+      return Arrays.stream(term.split("\\s+"))
+          .map(
+              s -> {
+                if (s.startsWith("(")
+                    || (!s.startsWith("+") && !s.startsWith("-") && !s.endsWith(")"))) {
+                  return "+" + s;
+                }
+                return s;
+              })
+          .collect(Collectors.joining(" "));
     }
 
     String[] keywords = term.split("\\W+");
-    if (keywords.length == 1 && keywords[0].length() <= 3) {
-      return "+\"" + keywords[0] + "+\"";
-    }
 
     return IntStream.range(0, keywords.length)
         .filter(i -> keywords[i].length() > 2)

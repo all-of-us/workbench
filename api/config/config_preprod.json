@@ -26,7 +26,9 @@
     "projectNamePrefix": "aou-rw-preprod-",
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "retryCount": 4,
-    "bufferCapacity": 20,
+    "bufferCapacity": {
+      "registered": 20
+    },
     "bufferRefillProjectsPerTask": 1,
     "bufferStatusChecksPerTask": 10,
     "defaultFreeCreditsDollarLimit": 300.0,
@@ -45,7 +47,12 @@
     ]
   },
   "wgsCohortExtraction": {
-    "serviceAccount": "wgs-cohort-extraction@all-of-us-rw-preprod.iam.gserviceaccount.com"
+    "serviceAccount": "wgs-cohort-extraction@all-of-us-rw-preprod.iam.gserviceaccount.com",
+    "operationalTerraWorkspaceNamespace": "",
+    "operationalTerraWorkspaceName": "",
+    "extractionMethodConfigurationNamespace": "",
+    "extractionMethodConfigurationName": "",
+    "extractionMethodConfigurationVersion": 1
   },
   "cdr": {
     "debugQueries": false

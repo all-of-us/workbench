@@ -15,7 +15,7 @@ export const cdrVersionListResponse: CdrVersionListResponse = {
       name: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION,
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
       dataAccessLevel: DataAccessLevel.Registered,
-      accessTier: 'registered',
+      accessTierShortName: 'registered',
       archivalStatus: ArchivalStatus.LIVE,
       hasMicroarrayData: true,
       creationTime: 0
@@ -24,7 +24,7 @@ export const cdrVersionListResponse: CdrVersionListResponse = {
       name: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION,
       cdrVersionId: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION_ID,
       dataAccessLevel: DataAccessLevel.Registered,
-      accessTier: 'registered',
+      accessTierShortName: 'registered',
       archivalStatus: ArchivalStatus.LIVE,
       hasMicroarrayData: false,
       creationTime: 0

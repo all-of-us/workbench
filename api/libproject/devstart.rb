@@ -53,7 +53,7 @@ ENVIRONMENTS = {
     :config_json => "config_test.json",
     :cdr_config_json => "cdr_config_test.json",
     :featured_workspaces_json => "featured_workspaces_test.json",
-    :gae_vars => make_gae_vars(3, 10, 'F4'),
+    :gae_vars => make_gae_vars(0, 10, 'F4'),
     :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-rw-staging" => {
@@ -1984,7 +1984,6 @@ def create_wgs_cohort_extraction_bp_workspace(cmd_name, *args)
 
   flags = ([
       ["--config-json", get_config_file(op.opts.project)],
-      ["--billing-account", get_billing_config(op.opts.project)["accountId"]],
       ["--billing-project-name", op.opts.billing_project_name],
       ["--workspace-name", op.opts.workspace_name],
       ["--owners", op.opts.owners],

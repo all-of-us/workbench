@@ -135,7 +135,7 @@ public class TestMockFactory {
               return entry;
             })
         .when(billingProjectBufferService)
-        .assignBillingProject(any());
+        .assignBillingProject(any(), any());
   }
 
   public static Cloudbilling createMockedCloudbilling() {

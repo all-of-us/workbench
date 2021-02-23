@@ -1,6 +1,7 @@
 package org.pmiops.workbench.config;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * A class representing the main workbench configuration; parsed from JSON stored in the database.
@@ -60,10 +61,10 @@ public class WorkbenchConfig {
   public static class BillingConfig {
     // This config variable seems to be unused.
     public Integer retryCount;
-    // The total capacity of the GCP project buffer. The buffering system will not attempt to create
-    // any new projects when the total number of in-progress & ready projects is at or above this
-    // level.
-    public Integer bufferCapacity;
+    // The total capacity of the GCP project buffer, per access tier. The buffering system will not
+    // attempt to create any new projects in a tier when the total number of in-progress & ready
+    // projects is at or above this level.
+    public Map<String, Integer> bufferCapacity;
     // The number of times to attempt project creation per cron task execution. This effectively
     // controls the max rate of project refill. If the cron task is configured to run once per
     // minute and this param is set to 5, then the buffer system will create up to approximately
@@ -158,6 +159,11 @@ public class WorkbenchConfig {
 
   public static class WgsCohortExtractionConfig {
     public String serviceAccount;
+    public String operationalTerraWorkspaceNamespace;
+    public String operationalTerraWorkspaceName;
+    public String extractionMethodConfigurationNamespace;
+    public String extractionMethodConfigurationName;
+    public Integer extractionMethodConfigurationVersion;
   }
 
   public static class CdrConfig {

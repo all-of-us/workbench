@@ -48,6 +48,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "googleBucketName", source = "fcWorkspace.bucketName")
   @Mapping(target = "creator", source = "fcWorkspace.createdBy")
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
+  @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   Workspace toApiWorkspace(DbWorkspace dbWorkspace, FirecloudWorkspace fcWorkspace);
 
   @Mapping(target = "cdrVersionId", source = "cdrVersion")
@@ -60,6 +61,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "id", source = "firecloudName")
   @Mapping(target = "namespace", source = "workspaceNamespace")
   @Mapping(target = "researchPurpose", source = "dbWorkspace")
+  @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
   Workspace toApiWorkspace(DbWorkspace dbWorkspace);
 
   WorkspaceResponse toApiWorkspaceResponse(Workspace workspace, String accessLevel);

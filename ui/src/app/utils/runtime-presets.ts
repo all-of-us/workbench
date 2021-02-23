@@ -11,7 +11,7 @@ export const runtimePresets: {
       // TODO: Support specifying toolDockerImage here.
       gceConfig: {
         machineType: 'n1-standard-4',
-        diskSize: 50
+        diskSize: 100
       },
     }
   },
@@ -21,9 +21,9 @@ export const runtimePresets: {
       configurationType: RuntimeConfigurationType.HailGenomicAnalysis,
       dataprocConfig: {
         masterMachineType: 'n1-standard-4',
-        masterDiskSize: 50,
+        masterDiskSize: 100,
         workerMachineType: 'n1-standard-4',
-        workerDiskSize: 50,
+        workerDiskSize: 100,
         numberOfWorkers: 2,
         numberOfPreemptibleWorkers: 0
       }

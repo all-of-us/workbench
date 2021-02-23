@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet author="nsaxena" id="changelog-42">
+        <createTable tableName="ds_data_dictionary">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="field_name" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="relevant_omop_table" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="field_type" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="omop_cdm_standard_or_custom_field" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="data_provenance" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="source_ppi_module" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="domain" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
