@@ -632,7 +632,7 @@ workflows:
           <<: *filter-pr-branch
           env_name: "local"
           test_mode: "nightly-integration"
-          parallel_num: 4
+          parallel_num: 1
           optional_steps:
             - halt-puppeteer-check
           requires:
