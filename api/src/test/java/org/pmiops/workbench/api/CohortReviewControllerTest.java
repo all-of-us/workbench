@@ -68,7 +68,6 @@ import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.CreateReviewRequest;
 import org.pmiops.workbench.model.CriteriaType;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -305,7 +304,6 @@ public class CohortReviewControllerTest {
     workspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
     workspace.setName(WORKSPACE_NAME);
     workspace.setFirecloudName(WORKSPACE_NAME);
-    workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
 
     cohort = new DbCohort();
