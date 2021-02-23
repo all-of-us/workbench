@@ -25,7 +25,7 @@ public class ConceptBigQueryService {
   private final BigQueryService bigQueryService;
   private static final ImmutableList<Domain> CHILD_LOOKUP_DOMAINS =
       ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE, Domain.MEASUREMENT, Domain.DRUG);
-  private static final String SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE =
+  public static final String SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE =
       "select DISTINCT(question_concept_id) as concept_id \n"
           + "from `${projectId}.${dataSetId}.ds_survey`\n";
 
