@@ -1336,9 +1336,6 @@ public class WorkspacesControllerTest {
     Workspace originalWorkspace = createWorkspace();
     originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
 
-    endUserCloudbilling = TestMockFactory.createMockedCloudbilling();
-    serviceAccountCloudbilling = TestMockFactory.createMockedCloudbilling();
-
     DbAccessTier altAccessTier =
         new DbAccessTier()
             .setAccessTierId(2)
@@ -1367,17 +1364,10 @@ public class WorkspacesControllerTest {
 
     final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
     req.setWorkspace(modWorkspace);
-    final FirecloudWorkspace clonedFirecloudWorkspace =
-        stubCloneWorkspace(
-            modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
-
-    mockBillingProjectBuffer("cloned-ns");
+    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
 
     workspacesController.cloneWorkspace(
         originalWorkspace.getNamespace(), originalWorkspace.getId(), req);
-
-    verifyZeroInteractions(endUserCloudbillingProvider.get());
-    verifyZeroInteractions(serviceAccountCloudbillingProvider.get());
   }
 
   private void sortPopulationDetails(ResearchPurpose researchPurpose) {
