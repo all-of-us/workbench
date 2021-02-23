@@ -158,7 +158,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return registeredDomainGroup.getGroupEmail();
   }
 
-  private DbCdrVersion setLiveCdrVersionId(DbWorkspace dbWorkspace, String cdrVersionId) {
+  private DbCdrVersion getLiveCdrVersionId(String cdrVersionId) {
     if (Strings.isNullOrEmpty(cdrVersionId)) {
       throw new BadRequestException("missing cdrVersionId");
     }
@@ -174,7 +174,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                 "CDR version with ID %s is not live, please select a different CDR version",
                 cdrVersionId));
       }
-      dbWorkspace.setCdrVersion(cdrVersion);
       return cdrVersion;
     } catch (NumberFormatException e) {
       throw new BadRequestException(String.format("Invalid cdr version ID: %s", cdrVersionId));
@@ -207,19 +206,21 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private Workspace createWorkspaceImpl(Workspace workspace) {
     validateWorkspaceApiModel(workspace);
 
+    DbCdrVersion cdrVersion = getLiveCdrVersionId(workspace.getCdrVersionId());
+
     DbUser user = userProvider.get();
-    String workspaceNamespace;
-    DbBillingProjectBufferEntry bufferedBillingProject;
+    final DbBillingProjectBufferEntry bufferedBillingProject;
     try {
-      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
+      bufferedBillingProject =
+          billingProjectBufferService.assignBillingProject(user, cdrVersion.getAccessTier());
     } catch (EmptyBufferException e) {
-      throw new TooManyRequestsException();
+      throw new TooManyRequestsException(e);
     }
-    workspaceNamespace = bufferedBillingProject.getFireCloudProjectName();
+    final String billingProject = bufferedBillingProject.getFireCloudProjectName();
 
     // Note: please keep any initialization logic here in sync with CloneWorkspace().
     FirecloudWorkspaceId workspaceId =
-        generateFirecloudWorkspaceId(workspaceNamespace, workspace.getName());
+        generateFirecloudWorkspaceId(billingProject, workspace.getName());
     FirecloudWorkspace fcWorkspace = attemptFirecloudWorkspaceCreation(workspaceId);
 
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
@@ -232,7 +233,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         workbenchConfigProvider.get().billing.freeTierBillingAccountName());
     setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
 
-    setLiveCdrVersionId(dbWorkspace, workspace.getCdrVersionId());
+    dbWorkspace.setCdrVersion(cdrVersion);
 
     // TODO: enforce data access level authorization
     dbWorkspace.setDataAccessLevelEnum(workspace.getDataAccessLevel());
@@ -433,17 +434,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
         fromWorkspaceNamespace, fromWorkspaceId, WorkspaceAccessLevel.READER);
 
-    DbUser user = userProvider.get();
-
-    String toWorkspaceName;
-    DbBillingProjectBufferEntry bufferedBillingProject;
-    try {
-      bufferedBillingProject = billingProjectBufferService.assignBillingProject(user);
-    } catch (EmptyBufferException e) {
-      throw new TooManyRequestsException();
-    }
-    toWorkspaceName = bufferedBillingProject.getFireCloudProjectName();
-
     DbWorkspace fromWorkspace =
         workspaceService.getRequiredWithCohorts(fromWorkspaceNamespace, fromWorkspaceId);
     if (fromWorkspace == null) {
@@ -451,8 +441,20 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           String.format("DbWorkspace %s/%s not found", fromWorkspaceNamespace, fromWorkspaceId));
     }
 
+    DbUser user = userProvider.get();
+
+    final DbBillingProjectBufferEntry bufferedBillingProject;
+    try {
+      bufferedBillingProject =
+          billingProjectBufferService.assignBillingProject(
+              user, fromWorkspace.getCdrVersion().getAccessTier());
+    } catch (EmptyBufferException e) {
+      throw new TooManyRequestsException(e);
+    }
+    final String toWorkspaceProject = bufferedBillingProject.getFireCloudProjectName();
+
     FirecloudWorkspaceId toFcWorkspaceId =
-        generateFirecloudWorkspaceId(toWorkspaceName, toWorkspace.getName());
+        generateFirecloudWorkspaceId(toWorkspaceProject, toWorkspace.getName());
     FirecloudWorkspace toFcWorkspace =
         fireCloudService.cloneWorkspace(
             fromWorkspaceNamespace,
@@ -490,7 +492,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       dbWorkspace.setCdrVersion(fromWorkspace.getCdrVersion());
       dbWorkspace.setDataAccessLevel(fromWorkspace.getDataAccessLevel());
     } else {
-      DbCdrVersion reqCdrVersion = setLiveCdrVersionId(dbWorkspace, reqCdrVersionId);
+      DbCdrVersion reqCdrVersion = getLiveCdrVersionId(reqCdrVersionId);
+      dbWorkspace.setCdrVersion(reqCdrVersion);
       dbWorkspace.setDataAccessLevelEnum(reqCdrVersion.getDataAccessLevelEnum());
     }
 

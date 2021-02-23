@@ -3683,14 +3683,14 @@ definitions:
     required:
     - cdrVersionId
     - name
-    - accessTier
+    - accessTierShortName
     - creationTime
     properties:
       cdrVersionId:
         type: string
       name:
         type: string
-      accessTier:
+      accessTierShortName:
         type: string
       dataAccessLevel:
         "$ref": "#/definitions/DataAccessLevel"
@@ -4142,6 +4142,8 @@ definitions:
       billingAccountType:
         "$ref": "#/definitions/BillingAccountType"
       googleBucketName:
+        type: string
+      accessTierShortName:
         type: string
       dataAccessLevel:
         "$ref": "#/definitions/DataAccessLevel"
