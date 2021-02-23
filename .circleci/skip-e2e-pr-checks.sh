@@ -12,7 +12,7 @@ else
   exit 0
 fi
 
-# Get the commit message. Exiting job early if the commit message contains 'skip e2e' string
+# Get the commit message. Exiting job early if the commit message contains 'skip e2e' string.
 COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")
 
 # Double comma is "Parameter Expansion". It converts string to lowercase letters
@@ -23,7 +23,7 @@ else
   echo "not found skip e2e text"
 fi
 
-# Exiting on PR branch when all (changed) file names matched ignore pattern
+# Exiting on PR branch when all (changed) file names matched ignore pattern.
 # The grep command exits with '0' status when it's successful (match were found). While it exits with status '1' when no match was found.
 git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep -qvFf .circleci/e2e-job-ignore-patterns.txt
 STATUS=$?

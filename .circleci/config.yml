@@ -298,7 +298,6 @@ commands:
               \"circleNodeIndex\": ${CIRCLE_NODE_INDEX} \
               }" \
               > ./logs/circleci_parameters.json
-          when: always
       - store_artifacts:
           path: e2e/logs
           destination: logs
@@ -577,13 +576,8 @@ jobs:
 
   puppeteer-env-setup:
     executor: puppeteer-executor
-    parameters:
-      optional_steps:
-        type: steps
-        default: []
     steps:
       - checkout-code
-      - steps: << parameters.optional_steps >>
       - browser-tools/install-browser-tools
       - restore_cache:
           keys:
@@ -622,9 +616,7 @@ workflows:
           requires:
             - ui-unit-test
       # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only
-      - puppeteer-env-setup:
-          optional_steps:
-            - halt-puppeteer-check
+      - puppeteer-env-setup
       - puppeteer-test:
           <<: *filter-pr-branch
           env_name: "local"
