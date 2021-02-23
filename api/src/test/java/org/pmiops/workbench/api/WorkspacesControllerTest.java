@@ -19,10 +19,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
-import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
-import static org.pmiops.workbench.config.WorkbenchConfig.createEmptyConfig;
-import static org.pmiops.workbench.utils.TestMockFactory.createDefaultAccessTier;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.BillingAccount;
@@ -66,6 +62,7 @@ import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.GoogleApisConfig;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -269,11 +266,11 @@ public class WorkspacesControllerTest {
 
   @MockBean FreeTierBillingService mockFreeTierBillingService;
 
-  @Qualifier(END_USER_CLOUD_BILLING)
+  @Qualifier(GoogleApisConfig.END_USER_CLOUD_BILLING)
   @Autowired
   private Provider<Cloudbilling> endUserCloudbillingProvider;
 
-  @Qualifier(SERVICE_ACCOUNT_CLOUD_BILLING)
+  @Qualifier(GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING)
   @Autowired
   private Provider<Cloudbilling> serviceAccountCloudbillingProvider;
 
@@ -334,13 +331,13 @@ public class WorkspacesControllerTest {
   })
   static class Configuration {
 
-    @Bean(END_USER_CLOUD_BILLING)
+    @Bean(GoogleApisConfig.END_USER_CLOUD_BILLING)
     @Scope("prototype")
     Cloudbilling endUserCloudbilling() {
       return endUserCloudbilling;
     }
 
-    @Bean(SERVICE_ACCOUNT_CLOUD_BILLING)
+    @Bean(GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING)
     @Scope("prototype")
     Cloudbilling serviceAccountCloudbilling() {
       return serviceAccountCloudbilling;
@@ -398,7 +395,7 @@ public class WorkspacesControllerTest {
 
   @Before
   public void setUp() {
-    workbenchConfig = createEmptyConfig();
+    workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.featureFlags.enableBillingUpgrade = true;
     workbenchConfig.firecloud.registeredDomainName = "allUsers";
     workbenchConfig.billing.accountId = "free-tier";
@@ -406,7 +403,7 @@ public class WorkspacesControllerTest {
     testMockFactory = new TestMockFactory();
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
 
-    accessTier = createDefaultAccessTier(accessTierDao);
+    accessTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
 
     cdrVersion = new DbCdrVersion();
     cdrVersion.setName("1");
