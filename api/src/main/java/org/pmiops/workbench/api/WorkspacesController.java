@@ -448,7 +448,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     DbAccessTier accessTier = fromWorkspace.getCdrVersion().getAccessTier();
 
-    // Clone CDR version from the source, by default.
+    // When specifying a CDR Version in the request, it must be live and
+    // in the same Access Tier as the source Workspace's CDR Version.
+    //
+    // If the request is lacking a CDR Version, use the source's.
 
     final DbCdrVersion toCdrVersion;
     String reqCdrVersionId = body.getWorkspace().getCdrVersionId();
