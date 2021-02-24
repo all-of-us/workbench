@@ -73,14 +73,23 @@ beforeEach(async () => {
   // Api response won't be logged.
   const skipApiResponseBody = (request: Request): boolean => {
     const filters = [
-      '/readonly', '/chartinfo/', 'page-visits', '/generateCode/', '/criteria/CONDITION/search/', '/criteria/'
+      '/readonly',
+      '/chartinfo/',
+      'page-visits',
+      '/generateCode/',
+      '/criteria/CONDITION/search/',
+      '/criteria/',
+      '/cdrVersions',
+      '/config',
+      '/user-recent-workspaces',
+      '/profile'
     ];
     return filters.some((partialUrl) => request && request.url().includes(partialUrl));
   }
 
-  // Make log less cluttered: truncate long Api response.
+  // Truncate long Api response.
   const shouldTruncateResponse = (request: Request): boolean => {
-    return request && (request.url().endsWith('/v1/workspaces') || request.url().endsWith('/v1/cdrVersions'));
+    return request && (request.url().endsWith('/v1/workspaces'));
   }
 
   const isApiFailure = (request: Request): boolean => {
