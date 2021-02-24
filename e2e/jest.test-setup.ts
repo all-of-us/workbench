@@ -25,7 +25,6 @@ beforeEach(async () => {
 
   const describeJsHandle = async (jsHandle)  => {
     return jsHandle.executionContext().evaluate(obj => {
-      // serialize |obj| however you want
       return obj.toString();
     }, jsHandle);
   }
