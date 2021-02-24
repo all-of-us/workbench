@@ -20,7 +20,7 @@
     "test-staging:debug": "cross-env WORKBENCH_ENV=staging PUPPETEER_HEADLESS=false DEBUG=true yarn _test --maxWorkers=1",
     "test:ci": "yarn _test --no-color --ci --maxWorkers=2 --forceExit",
     "test:ci:debug": "yarn _test --ci --debug --maxWorkers=1 --bail 1",
-    "test-nightly": "cross-env TEST_MODE=nightly-integration yarn _test --maxWorkers=1",
+    "test:ci:nightly": "cross-env TEST_MODE=nightly-integration yarn _test --no-color --ci --maxWorkers=1 --forceExit",
     "test-nightly-local-devup": "cross-env TEST_MODE=nightly-integration yarn jest --maxWorkers=1",
     "test-nightly-local-devup:debug": "cross-env TEST_MODE=nightly-integration PUPPETEER_HEADLESS=false DEBUG=true yarn jest --maxWorkers=1",
     "lint": "tslint --project tsconfig.json",
