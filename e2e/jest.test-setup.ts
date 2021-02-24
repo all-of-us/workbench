@@ -20,7 +20,14 @@ beforeEach(async () => {
   const getTitle = async () => {
     return await page.$eval('title', title => {
       return title.textContent;
-    });
+    }).catch(() =>  {return 'getTitle() func failed'});
+  }
+
+  const describeJsHandle = async (jsHandle)  => {
+    return jsHandle.executionContext().evaluate(obj => {
+      // serialize |obj| however you want
+      return obj.toString();
+    }, jsHandle);
   }
 
   const stringifyData = (data: string): string => {
@@ -64,8 +71,15 @@ beforeEach(async () => {
        : null;
   }
 
+  const skipApiResponseBody = (request: Request): boolean => {
+    const filters = [
+      '/readonly', '/chartinfo/', 'page-visits', '/generateCode/', '/criteria/CONDITION/search/', '/criteria/'
+    ];
+    return filters.some((partialUrl) => request && request.url().includes(partialUrl));
+  }
+
   // Api "/workspaces" or "/cdrVersions" response can be truncated
-  const isWorkspacesApi = (request: Request): boolean => {
+  const isApiTruncateResponse = (request: Request): boolean => {
     return request && (request.url().endsWith('/v1/workspaces') || request.url().endsWith('/v1/cdrVersions'));
   }
 
@@ -98,16 +112,17 @@ beforeEach(async () => {
        `${response.status()} ${request.method()} ${request.url()}\n${responseText}\n${failureText}`);
   }
 
-  const logResponse = async (request: Request): Promise<void> => {
-    let responseText = stringifyData(await getResponseText(request));
-    if (isWorkspacesApi(request)) {
-      // truncate long response. get first two workspace details.
-      responseText = fp.isEmpty(JSON.parse(responseText).items)
-         ? responseText
-         : 'truncated...\n' + JSON.stringify(JSON.parse(responseText).items.slice(0, 2), null, 2);
+  const transformResponseBody = async (request: Request): Promise<string> => {
+    if (request) {
+      let responseText = stringifyData(await getResponseText(request));
+      if (isApiTruncateResponse(request)) {
+        // truncate long response. get first two workspace details.
+        responseText = fp.isEmpty(JSON.parse(responseText).items)
+           ? responseText
+           : 'truncated...\n' + JSON.stringify(JSON.parse(responseText).items.slice(0, 2), null, 2);
+      }
+      return responseText;
     }
-    console.debug('❗ Request finished: ' +
-       `${request.response().status()} ${request.method()} ${request.url()}\n${responseText}`);
   }
 
   const isWorkbenchRequest = fp.flow(isWorkbenchApi, notOptionsRequest, includeResourceType, includeUrl);
@@ -133,24 +148,33 @@ beforeEach(async () => {
     let status;
     try {
       if (canLogResponse(request)) {
+        // Try find out what the request was if exception thrown.
         method = request.method();
         const resp = request.response();
         url = resp.url();
         status = resp.status();
+
         if (isApiFailure(request)) {
           await logError(request);
         } else {
-          await logResponse(request);
+          const responseBody = await transformResponseBody(request);
+          if (skipApiResponseBody(request)) {
+            console.debug('❗ Request finished: ' +
+               `${request.response().status()} ${request.method()} ${request.url()}`);
+          } else {
+            console.debug('❗ Request finished: ' +
+               `${request.response().status()} ${request.method()} ${request.url()}\n${responseBody}`);
+          }
         }
       }
     } catch (err) {
-      // Try find out what request was
-      console.error(`${status} ${method} ${url} : ${err}`);
+      // Try find out what the request was
+      console.error(`${err}\n${status} ${method} ${url}`);
     }
     try {
       await request.continue();
-      // tslint:disable-next-line:no-empty
     } catch (e) {
+      // Ignored
     }
   });
 
@@ -158,27 +182,30 @@ beforeEach(async () => {
     if (!message.args().length) {
       return;
     }
+    const title = await getTitle();
     try {
-      const title = await getTitle();
-      const args = await Promise.all(message.args().map(a => a.jsonValue()));
-      console[message.type() === 'warning' ? 'warn' : message.type()](`❗ ${title}\n`, ...args);
-      // tslint:disable-next-line:no-empty
+      const args = await Promise.all(message.args().map(a => describeJsHandle(a)));
+      console[message.type() === 'warning' ? 'warn' : message.type()](`❗ ${title}\n${message.text()}`, ...args);
     } catch (err) {
-      console.error(`Exception occurred when getting console message.\n${err}\n${message.text()}`);
+      console.error(`❗ ${title}\nException occurred when getting console message.\n${err}\n${message.text()}`);
     }
   });
 
   page.on('error', async (error) => {
     const title = await getTitle();
-    console.error(`❗ ${title}\npage error: ${error}`);
+    try {
+      console.error(`❗ ${title}\nError message: ${error.message}\nStack: ${error.stack}`);
+    } catch (err) {
+      console.error(`❗ ${title}\nException occurred when getting page error.\n${err}`);
+    }
   });
 
   page.on('pageerror', async (error) => {
     const title = await getTitle();
     try {
-      console.error(`❗ ${title}\npage error: ${error}`);
-      // tslint:disable-next-line:no-empty
+      console.error(`❗ ${title}\nError message: ${error.message}\nStack: ${error.stack}`);
     } catch (err) {
+      console.error(`❗ ${title}\nException occurred when getting pageerror.\n${err}`);
     }
   })
 
