@@ -35,6 +35,8 @@ import {PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 
 
+const controlledTierBadge = '/assets/icons/controlled-tier-badge.svg';
+
 const styles = reactStyles({
   h1: {
     color: colors.primary,
@@ -141,6 +143,10 @@ enum RegistrationStepStatus {
 interface ProfilePageProps extends WithProfileErrorModalProps {
   profileState: {
     profile: Profile;
+    controlledTierProfile: {
+      controlledTierCompletionTime?: number
+      controlledTierBypassTime?: number
+    };
     reload: () => {};
   };
 }
@@ -362,7 +368,7 @@ export const ProfilePage = fp.flow(
     }
 
     render() {
-      const {profileState: {profile}} = this.props;
+      const {profileState: {profile, controlledTierProfile = {}} } = this.props;
       const {currentProfile, updating, showDemographicSurveyModal} = this.state;
       const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement} =
       serverConfigStore.getValue();
@@ -440,6 +446,8 @@ export const ProfilePage = fp.flow(
       };
 
 
+      console.log(typeof getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))
+ 
       return <FadeBox style={styles.fadebox}>
       <div style={{width: '95%'}}>
         {(!profile || updating) && <SpinnerOverlay/>}
@@ -589,7 +597,20 @@ export const ProfilePage = fp.flow(
               Requirements for <AoU/> Workbench access
             </div>
             <hr style={{...styles.verticalLine, width: '15.8rem'}}/>
-            <FlexRow>
+            <div style={{display: 'grid', gap: '10px', gridAutoRows: '225px', gridTemplateColumns: '220px 220px'}}>
+              <ProfileRegistrationStepStatus
+                title={<span><i>All of Us</i> Controlled Tier Data Training</span>}
+                wasBypassed={!!controlledTierProfile.controlledTierBypassTime}
+                incompleteButtonText={'Get Started'}
+                completedButtonText={'Completed'} 
+                completionTimestamp={controlledTierProfile.controlledTierCompletionTime || controlledTierProfile.controlledTierBypassTime}
+                isComplete={!!(controlledTierProfile.controlledTierCompletionTime || controlledTierProfile.controlledTierBypassTime)}
+                completeStep={() => null}>
+                <React.Fragment>
+                  <div style={{fontSize: 14}}>To Be Completed</div>
+                  <img style={{height: 25, width: 24}} src={controlledTierBadge}/>
+                </React.Fragment>
+              </ProfileRegistrationStepStatus>
               <ProfileRegistrationStepStatus
                 title='Turn on Google 2-Step Verification'
                 wasBypassed={!!profile.twoFactorAuthBypassTime}
@@ -601,7 +622,6 @@ export const ProfilePage = fp.flow(
                 {this.getTwoFactorAuthCardText(profile)}
               </ProfileRegistrationStepStatus>
               {enableEraCommons && <ProfileRegistrationStepStatus
-                  containerStylesOverride={{marginLeft: '0.5rem'}}
                   title='Connect Your eRA Commons Account'
                   wasBypassed={!!profile.eraCommonsBypassTime}
                   incompleteButtonText='Link'
@@ -611,10 +631,8 @@ export const ProfilePage = fp.flow(
                   completeStep={getRegistrationTasksMap()['eraCommons'].onClick}>
                 {this.getEraCommonsCardText(profile)}
               </ProfileRegistrationStepStatus>}
-            </FlexRow>
-            <FlexRow style={{marginTop: 3}}>
               {enableComplianceTraining && <ProfileRegistrationStepStatus
-                  title={<span><i>All of Us</i> Responsible Conduct of Research Training'</span>}
+                  title={<span><i>All of Us</i> Responsible Conduct of Research Training</span>}
                   wasBypassed={!!profile.complianceTrainingBypassTime}
                   incompleteButtonText='Access Training'
                   completedButtonText={getRegistrationTasksMap()['complianceTraining'].completedText}
@@ -624,7 +642,6 @@ export const ProfilePage = fp.flow(
                 {this.getComplianceTrainingText(profile)}
               </ProfileRegistrationStepStatus>}
               {enableDataUseAgreement && <ProfileRegistrationStepStatus
-                  containerStylesOverride={{marginLeft: '0.5rem'}}
                   title='Sign Data User Code Of Conduct'
                   wasBypassed={!!profile.dataUseAgreementBypassTime}
                   incompleteButtonText='Sign'
@@ -635,7 +652,7 @@ export const ProfilePage = fp.flow(
                   childrenStyle={{marginLeft: '0rem'}}>
                 {this.getDataUseAgreementText(profile)}
               </ProfileRegistrationStepStatus>}
-            </FlexRow>
+              </div>
             <div style={{marginTop: '1rem', marginLeft: '1rem'}}>
 
               <div style={styles.title}>Optional Demographics Survey</div>

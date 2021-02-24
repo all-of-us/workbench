@@ -40,7 +40,7 @@ interface Props {
   incompleteButtonText: string;
   completedButtonText: string;
   completeStep: Function;
-  completionTimestamp: string;
+  completionTimestamp: number;
   childrenStyle?: React.CSSProperties;
 }
 
