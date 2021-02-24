@@ -11,6 +11,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.cdr.CdrVersionMapper;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -60,14 +62,15 @@ public class DataDictionaryTest {
 
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
+  private static DbCdrVersion cdrVersion;
 
   @TestConfiguration
   @Import({
-    CdrVersionService.class,
     CommonMappers.class,
     DataSetController.class,
     DataSetServiceImpl.class,
-    DataSetMapperImpl.class
+    DataSetMapperImpl.class,
+    CdrVersionService.class,
   })
   @MockBean({
     BigQueryService.class,
@@ -80,7 +83,9 @@ public class DataDictionaryTest {
     ConceptSetMapper.class,
     FireCloudService.class,
     NotebooksService.class,
-    WorkspaceService.class
+    WorkspaceService.class,
+    AccessTierService.class,
+    CdrVersionMapper.class,
   })
   static class Configuration {
     @Bean
@@ -91,7 +96,7 @@ public class DataDictionaryTest {
 
   @Before
   public void setUp() {
-    DbCdrVersion cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
+    cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
 
     DbDataDictionaryEntry dataDictionaryEntry = new DbDataDictionaryEntry();
     dataDictionaryEntry.setCdrVersion(cdrVersion);
@@ -112,9 +117,6 @@ public class DataDictionaryTest {
   public void testGetDataDictionaryEntry() {
     final Domain domain = Domain.DRUG;
     final String domainValue = "FIELD NAME / DOMAIN VALUE";
-
-    DbCdrVersion cdrVersion = new DbCdrVersion();
-    cdrVersionDao.save(cdrVersion);
 
     DbDataDictionaryEntry dataDictionaryEntry = new DbDataDictionaryEntry();
     dataDictionaryEntry.setCdrVersion(cdrVersion);

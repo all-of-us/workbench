@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
@@ -98,7 +99,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     CdrVersionService.class,
     CohortBuilderMapperImpl.class
   })
-  @MockBean({FireCloudService.class})
+  @MockBean({
+    FireCloudService.class,
+    AccessTierService.class,
+    CdrVersionService.class,
+  })
   static class Configuration {
     @Bean
     public DbUser user() {

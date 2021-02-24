@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
@@ -197,14 +198,16 @@ public class CohortReviewControllerTest {
     ParticipantCohortStatusMapperImpl.class,
     CohortReviewMapperImpl.class,
     ParticipantCohortAnnotationMapperImpl.class,
-    CommonMappers.class
+    CommonMappers.class,
   })
   @MockBean({
     BigQueryService.class,
     CohortBuilderMapper.class,
     FireCloudService.class,
     UserRecentResourceService.class,
-    WorkspaceService.class
+    WorkspaceService.class,
+    AccessTierService.class,
+    CdrVersionService.class,
   })
   static class Configuration {
     @Bean

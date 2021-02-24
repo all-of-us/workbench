@@ -11,7 +11,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.pmiops.workbench.model.ArchivalStatus;
-import org.pmiops.workbench.model.DataAccessLevel;
 
 @Entity
 @Table(name = "cdr_version")
@@ -61,28 +60,6 @@ public class DbCdrVersion {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  @Deprecated // soon to be replaced by accessTier
-  @Column(name = "data_access_level")
-  public Short getDataAccessLevel() {
-    return dataAccessLevel;
-  }
-
-  @Deprecated // soon to be replaced by accessTier
-  public void setDataAccessLevel(Short dataAccessLevel) {
-    this.dataAccessLevel = dataAccessLevel;
-  }
-
-  @Transient
-  @Deprecated // soon to be replaced by accessTier
-  public DataAccessLevel getDataAccessLevelEnum() {
-    return DbStorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
-  }
-
-  @Deprecated // soon to be replaced by accessTier
-  public void setDataAccessLevelEnum(DataAccessLevel dataAccessLevel) {
-    setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
   }
 
   @ManyToOne

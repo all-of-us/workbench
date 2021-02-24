@@ -10,7 +10,9 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class AccessTierServiceImpl implements AccessTierService {
 
   private final Provider<WorkbenchConfig> configProvider;

@@ -1,55 +1,50 @@
 package org.pmiops.workbench.cdr;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.model.CdrVersionListResponse;
+import org.pmiops.workbench.model.CdrVersionMapResponse;
+import org.pmiops.workbench.model.CdrVersionMapResponseInner;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CdrVersionService {
+  private final AccessTierDao accessTierDao;
+  private final AccessTierService accessTierService;
+  private final CdrVersionDao cdrVersionDao;
+  private final CdrVersionMapper cdrVersionMapper;
+  private final FireCloudService fireCloudService;
+  private final Provider<DbUser> userProvider;
 
-  private static final ImmutableSet<Short> REGISTERED_ONLY =
-      ImmutableSet.of(DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
-
-  private static final ImmutableSet<Short> REGISTERED_AND_PROTECTED =
-      ImmutableSet.of(
-          DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED),
-          DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.PROTECTED));
-
-  private static final ImmutableMap<DataAccessLevel, ImmutableSet<Short>>
-      DATA_ACCESS_LEVEL_TO_VISIBLE_VALUES =
-          ImmutableMap.<DataAccessLevel, ImmutableSet<Short>>builder()
-              .put(DataAccessLevel.REGISTERED, REGISTERED_ONLY)
-              .put(DataAccessLevel.PROTECTED, REGISTERED_AND_PROTECTED)
-              .build();
-
-  private Provider<DbUser> userProvider;
-  private Provider<WorkbenchConfig> configProvider;
-  private FireCloudService fireCloudService;
-  private CdrVersionDao cdrVersionDao;
+  private static final Logger log = Logger.getLogger(CdrVersionService.class.getName());
 
   @Autowired
   public CdrVersionService(
-      Provider<DbUser> userProvider,
-      Provider<WorkbenchConfig> configProvider,
+      AccessTierDao accessTierDao,
+      AccessTierService accessTierService,
+      CdrVersionDao cdrVersionDao,
+      CdrVersionMapper cdrVersionMapper,
       FireCloudService fireCloudService,
-      CdrVersionDao cdrVersionDao) {
-    this.userProvider = userProvider;
-    this.configProvider = configProvider;
-    this.fireCloudService = fireCloudService;
+      Provider<DbUser> userProvider) {
+    this.accessTierDao = accessTierDao;
+    this.accessTierService = accessTierService;
     this.cdrVersionDao = cdrVersionDao;
+    this.cdrVersionMapper = cdrVersionMapper;
+    this.fireCloudService = fireCloudService;
+    this.userProvider = userProvider;
   }
 
   /**
@@ -61,13 +56,22 @@ public class CdrVersionService {
    * @param version
    */
   public void setCdrVersion(DbCdrVersion version) {
-    // TODO: map data access level to authorization domain here (RW-943)
-    String authorizationDomain = configProvider.get().firecloud.registeredDomainName;
+    if (!accessTierService
+        .getAccessTiersForUser(userProvider.get())
+        .contains(version.getAccessTier())) {
+      throw new ForbiddenException(
+          "Requester does not have access to tier  "
+              + version.getAccessTier().getShortName()
+              + ", cannot access CDR");
+    }
+
+    String authorizationDomain = version.getAccessTier().getAuthDomainName();
     if (!fireCloudService.isUserMemberOfGroup(
         userProvider.get().getUsername(), authorizationDomain)) {
       throw new ForbiddenException(
           "Requester is not a member of " + authorizationDomain + ", cannot access CDR");
     }
+
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(version);
   }
 
@@ -97,27 +101,69 @@ public class CdrVersionService {
     return dbCdrVersion;
   }
 
-  /**
-   * Retrieve all the CDR versions visible to users with the specified data access level. When
-   * {@link DataAccessLevel#PROTECTED} is provided, CDR versions for both {@link
-   * DataAccessLevel#REGISTERED} and {@link DataAccessLevel#PROTECTED} are returned. Note: this
-   * relies on {@link DbUser#dataAccessLevel} accurately reflecting that the user is in the
-   * authorization domain that has access to the CDR version BigQuery data sets with the matching
-   * {@link DataAccessLevel} values.
-   *
-   * @param dataAccessLevel the data access level of the user
-   * @return a list of {@link DbCdrVersion} in descending timestamp, data access level order.
-   */
-  public List<DbCdrVersion> findAuthorizedCdrVersions(DataAccessLevel dataAccessLevel) {
-    ImmutableSet<Short> visibleValues = DATA_ACCESS_LEVEL_TO_VISIBLE_VALUES.get(dataAccessLevel);
-    if (visibleValues == null) {
-      return ImmutableList.of();
-    }
-    return cdrVersionDao.findByDataAccessLevelInOrderByCreationTimeDescDataAccessLevelDesc(
-        visibleValues);
-  }
-
   public Optional<DbCdrVersion> findByCdrVersionId(Long cdrVersionId) {
     return Optional.ofNullable(cdrVersionDao.findByCdrVersionId(cdrVersionId));
+  }
+
+  @Deprecated // only handles the Registered Tier
+  public CdrVersionListResponse getCdrVersions() {
+    DataAccessLevel accessLevel = userProvider.get().getDataAccessLevelEnum();
+    if (accessLevel == DataAccessLevel.REGISTERED) {
+      CdrVersionMapResponseInner registeredTierVersions =
+          getVersionsForTier(accessTierDao.findOneByShortName("registered"));
+      return new CdrVersionListResponse()
+          .items(registeredTierVersions.getVersions())
+          .defaultCdrVersionId(String.valueOf(registeredTierVersions.getDefaultCdrVersionId()));
+    } else {
+      throw new ForbiddenException("User does not have access to any CDR versions");
+    }
+  }
+
+  public CdrVersionMapResponse getCdrVersionsByTier() {
+    List<DbAccessTier> tiers = accessTierService.getAccessTiersForUser(userProvider.get());
+    if (tiers.isEmpty()) {
+      throw new ForbiddenException("User does not have access to any CDR versions");
+    }
+
+    final CdrVersionMapResponse response = new CdrVersionMapResponse();
+    response.addAll(tiers.stream().map(this::getVersionsForTier).collect(Collectors.toList()));
+    return response;
+  }
+
+  private CdrVersionMapResponseInner getVersionsForTier(DbAccessTier accessTier) {
+    List<DbCdrVersion> cdrVersions =
+        cdrVersionDao.findByAccessTierOrderByCreationTimeDesc(accessTier);
+    if (cdrVersions.isEmpty()) {
+      throw new ForbiddenException(
+          String.format(
+              "User does not have access to any CDR versions in access tier '%s'",
+              accessTier.getShortName()));
+    }
+
+    List<Long> defaultVersions =
+        cdrVersions.stream()
+            .filter(DbCdrVersion::getIsDefault)
+            .map(DbCdrVersion::getCdrVersionId)
+            .collect(Collectors.toList());
+    if (defaultVersions.isEmpty()) {
+      throw new ForbiddenException(
+          String.format(
+              "User does not have access to a default CDR version in access tier '%s'",
+              accessTier.getShortName()));
+    }
+    if (defaultVersions.size() > 1) {
+      log.severe(
+          String.format(
+              "Found multiple (%d) default CDR versions in access tier '%s', picking one",
+              defaultVersions.size(), accessTier.getShortName()));
+    }
+
+    return new CdrVersionMapResponseInner()
+        .versions(
+            cdrVersions.stream()
+                .map(cdrVersionMapper::dbModelToClient)
+                .collect(Collectors.toList()))
+        .defaultCdrVersionId(defaultVersions.get(0))
+        .accessTierShortName(accessTier.getShortName());
   }
 }

@@ -25,6 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -59,7 +60,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.ArchivalStatus;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValue;
@@ -98,6 +98,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   private DataSetController controller;
   private DataSetServiceImpl dataSetServiceImpl;
+
+  @Autowired private AccessTierDao accessTierDao;
   @Autowired private BigQueryService bigQueryService;
   @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   @Autowired private AccessTierDao accessTierDao;
@@ -164,6 +166,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     Provider.class,
     UserMapper.class,
     WorkspaceMapperImpl.class,
+    AccessTierService.class,
+    CdrVersionService.class,
   })
   static class Configuration {
     @Bean
@@ -238,8 +242,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbCdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
     dbCdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     dbCdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
-    dbCdrVersion.setDataAccessLevel(
-        DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
     dbCdrVersion.setArchivalStatus(DbStorageEnums.archivalStatusToStorage(ArchivalStatus.LIVE));
     dbCdrVersion = cdrVersionDao.save(dbCdrVersion);
 

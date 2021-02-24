@@ -212,11 +212,11 @@ public class TestMockFactory {
     final DbAccessTier accessTier =
         new DbAccessTier()
             .setAccessTierId(1)
-            .setShortName("test")
-            .setDisplayName("Test Tier")
-            .setAuthDomainName("Test Auth Domain")
-            .setAuthDomainGroupEmail("test-tier-users@fake-research-aou.org")
-            .setServicePerimeter("test/tier/perimeter");
+            .setShortName("registered")
+            .setDisplayName("Registered Tier")
+            .setAuthDomainName("Registered Tier Auth Domain")
+            .setAuthDomainGroupEmail("rt-users@fake-research-aou.org")
+            .setServicePerimeter("registered/tier/perimeter");
     return accessTierDao.save(accessTier);
   }
 

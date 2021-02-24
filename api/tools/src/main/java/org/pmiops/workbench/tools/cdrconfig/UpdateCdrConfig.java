@@ -1,6 +1,5 @@
 package org.pmiops.workbench.tools.cdrconfig;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -8,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -79,9 +79,9 @@ public class UpdateCdrConfig {
    *
    * <ul>
    *   <li>duplicate IDs (or lack one)
-   *   <li>have more than one default version
    *   <li>have an archived default version
    *   <li>belong to a tier which is not also present in this file
+   *   <li>have more or less than one default version per tier
    * </ul>
    */
   private void preCheck(CdrConfigVO cdrConfig) {
@@ -119,7 +119,7 @@ public class UpdateCdrConfig {
     }
 
     Set<Long> cdrVersionIds = new HashSet<>();
-    Set<Long> cdrDefaultVersionIds = new HashSet<>();
+    Map<String, Long> cdrDefaultVersionPerTier = new HashMap<>();
     for (CdrVersionVO v : cdrConfig.cdrVersions) {
       long id = v.cdrVersionId;
       if (id == 0) {
@@ -129,15 +129,6 @@ public class UpdateCdrConfig {
       if (!cdrVersionIds.add(id)) {
         throw new IllegalArgumentException(
             String.format("Input JSON contains duplicated CDR Version ID %d", id));
-      }
-
-      if (v.isDefault) {
-        if (v.archivalStatus != DbStorageEnums.archivalStatusToStorage(ArchivalStatus.LIVE)) {
-          throw new IllegalArgumentException(
-              String.format("Archived CDR Version %d cannot also be the default", id));
-        }
-
-        cdrDefaultVersionIds.add(id);
       }
 
       String accessTier = v.accessTier;
@@ -152,14 +143,31 @@ public class UpdateCdrConfig {
                 "CDR version %d is a member of Access Tier '%s' which is not present in the input file",
                 id, accessTier));
       }
+
+      if (v.isDefault) {
+        if (v.archivalStatus != DbStorageEnums.archivalStatusToStorage(ArchivalStatus.LIVE)) {
+          throw new IllegalArgumentException(
+              String.format("Archived CDR Version %d cannot be the default", id));
+        }
+
+        if (cdrDefaultVersionPerTier.containsKey(v.accessTier)) {
+          throw new IllegalArgumentException(
+              String.format(
+                  "Must be exactly one default CDR version for Access Tier '%s'. Attempted to set both %d and %d as default versions.",
+                  v.accessTier, cdrDefaultVersionPerTier.get(v.accessTier), v.cdrVersionId));
+        } else {
+          cdrDefaultVersionPerTier.put(v.accessTier, v.cdrVersionId);
+        }
+      }
     }
 
-    if (cdrDefaultVersionIds.size() != 1) {
-      throw new IllegalArgumentException(
-          String.format(
-              "Must be exactly one default CDR version, got %d: %s",
-              cdrDefaultVersionIds.size(), Joiner.on(", ").join(cdrDefaultVersionIds)));
-    }
+    accessTierShortNames.forEach(
+        t -> {
+          if (!cdrDefaultVersionPerTier.containsKey(t)) {
+            throw new IllegalArgumentException(
+                String.format("Missing default CDR version for Access Tier '%s'.", t));
+          }
+        });
   }
 
   /**

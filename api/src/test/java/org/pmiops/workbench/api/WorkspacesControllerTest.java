@@ -58,6 +58,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
@@ -308,7 +309,7 @@ public class WorkspacesControllerTest {
     WorkspaceMapperImpl.class,
     WorkspaceResourcesServiceImpl.class,
     WorkspacesController.class,
-    WorkspaceServiceImpl.class
+    WorkspaceServiceImpl.class,
   })
   @MockBean({
     BigQueryService.class,
@@ -329,7 +330,9 @@ public class WorkspacesControllerTest {
     UserRecentResourceService.class,
     UserService.class,
     WgsCohortExtractionService.class,
-    WorkspaceAuditor.class
+    WorkspaceAuditor.class,
+    AccessTierService.class,
+    CdrVersionService.class,
   })
   static class Configuration {
 
