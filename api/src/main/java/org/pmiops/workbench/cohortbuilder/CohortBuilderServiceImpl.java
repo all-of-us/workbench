@@ -24,8 +24,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
+import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.cdr.cache.MySQLStopWords;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
@@ -79,6 +81,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   private final PersonDao personDao;
   private final SurveyModuleDao surveyModuleDao;
   private final CohortBuilderMapper cohortBuilderMapper;
+  private final Provider<MySQLStopWords> mySQLStopWordsProvider;
 
   @Autowired
   public CohortBuilderServiceImpl(
@@ -90,7 +93,8 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       DomainInfoDao domainInfoDao,
       PersonDao personDao,
       SurveyModuleDao surveyModuleDao,
-      CohortBuilderMapper cohortBuilderMapper) {
+      CohortBuilderMapper cohortBuilderMapper,
+      Provider<MySQLStopWords> mySQLStopWordsProvider) {
     this.bigQueryService = bigQueryService;
     this.cohortQueryBuilder = cohortQueryBuilder;
     this.cbCriteriaAttributeDao = cbCriteriaAttributeDao;
@@ -100,6 +104,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     this.personDao = personDao;
     this.surveyModuleDao = surveyModuleDao;
     this.cohortBuilderMapper = cohortBuilderMapper;
+    this.mySQLStopWordsProvider = mySQLStopWordsProvider;
   }
 
   @Override
@@ -143,14 +148,16 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         standardConceptIds.stream().map(Object::toString).collect(Collectors.toList());
     if (!sourceIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
     }
     if (!standardConceptIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
@@ -246,17 +253,21 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
           .totalCount(dbCriteriaPage.getTotalElements());
     }
 
+    String modifiedSearchTerm = modifyTermMatch(term);
+    if (modifiedSearchTerm.isEmpty()) {
+      return new CriteriaListWithCountResponse().totalCount(0L);
+    }
     if (Domain.SURVEY.equals(Domain.fromValue(domain))) {
       Page<DbCriteria> dbCriteriaPage;
       if (surveyName.equals("All")) {
         dbCriteriaPage =
             cbCriteriaDao.findSurveyQuestionCriteriaByDomainAndFullText(
-                domain, modifyTermMatch(term), pageRequest);
+                domain, modifiedSearchTerm, pageRequest);
       } else {
         Long id = cbCriteriaDao.findIdByDomainAndName(domain, surveyName);
         dbCriteriaPage =
             cbCriteriaDao.findSurveyQuestionCriteriaByDomainAndIdAndFullText(
-                domain, id, modifyTermMatch(term), pageRequest);
+                domain, id, modifiedSearchTerm, pageRequest);
       }
       return new CriteriaListWithCountResponse()
           .items(
@@ -271,7 +282,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
             domain, term.replaceAll("[()+\"*-]", ""), pageRequest);
     if (dbCriteriaPage.getContent().isEmpty() && !term.contains(".")) {
       dbCriteriaPage =
-          cbCriteriaDao.findCriteriaByDomainAndFullText(domain, modifyTermMatch(term), pageRequest);
+          cbCriteriaDao.findCriteriaByDomainAndFullText(domain, modifiedSearchTerm, pageRequest);
     }
     return new CriteriaListWithCountResponse()
         .items(
@@ -468,6 +479,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   private String modifyTermMatch(String term) {
+    term = removeStopWords(term);
     if (MYSQL_FULL_TEXT_CHARS.stream().anyMatch(term::contains)) {
       return Arrays.stream(term.split("\\s+"))
           .map(
@@ -484,7 +496,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     String[] keywords = term.split("\\W+");
 
     return IntStream.range(0, keywords.length)
-        .filter(i -> keywords[i].length() > 2)
+        .filter(i -> keywords[i].length() >= 2)
         .mapToObj(
             i -> {
               if ((i + 1) != keywords.length) {
@@ -493,6 +505,16 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
               return "+" + keywords[i] + "*";
             })
         .collect(Collectors.joining());
+  }
+
+  @NotNull
+  private String removeStopWords(String term) {
+    List<String> stopWords = mySQLStopWordsProvider.get().getStopWords();
+    term =
+        Arrays.stream(term.split("\\s+"))
+            .filter(w -> !stopWords.contains(w))
+            .collect(Collectors.joining(" "));
+    return term;
   }
 
   @NotNull

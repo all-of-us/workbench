@@ -227,7 +227,7 @@ const columns = [
   },
 ];
 
-const searchTrigger = 3;
+const searchTrigger = 2;
 
 interface Props {
   cdrVersionListResponse: CdrVersionListResponse;
@@ -307,7 +307,7 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
       const {key, target: {value}} = event;
       if (key === Key.Enter) {
         if (value.trim().length < searchTrigger) {
-          this.setState({inputErrors: ['Minimum criteria search length is three characters']});
+          this.setState({inputErrors: ['Minimum criteria search length is two characters']});
         } else {
           const inputErrors = validateInputForMySQL(value);
           if (inputErrors.length > 0) {
