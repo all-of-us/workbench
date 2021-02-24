@@ -445,9 +445,10 @@ export const ProfilePage = fp.flow(
       </div>;
       };
 
+      //const x: never = getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile);
 
-      console.log(typeof getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))
- 
+      //console.log(typeof getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))
+
       return <FadeBox style={styles.fadebox}>
       <div style={{width: '95%'}}>
         {(!profile || updating) && <SpinnerOverlay/>}

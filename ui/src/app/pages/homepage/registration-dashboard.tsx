@@ -112,7 +112,7 @@ interface RegistrationTask {
   buttonText: string;
   completedText: string;
   completionTimestamp: (profile: Profile) => number;
-  onClick: Function;
+  onClick: () => void;
   featureFlag?: boolean;
 }
 
@@ -191,7 +191,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
   throw new Error('Cannot load registration tasks before config loaded');
 })();
 
-export const getRegistrationTasksMap = () => getRegistrationTasks().reduce((acc, curr) => {
+export const getRegistrationTasksMap = (): { [key: string]: RegistrationTask; } => getRegistrationTasks().reduce((acc, curr) => {
   acc[curr.key] = curr;
   return acc;
 }, {});
