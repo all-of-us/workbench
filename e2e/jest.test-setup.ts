@@ -70,6 +70,7 @@ beforeEach(async () => {
        : null;
   }
 
+  // Api response won't be logged.
   const skipApiResponseBody = (request: Request): boolean => {
     const filters = [
       '/readonly', '/chartinfo/', 'page-visits', '/generateCode/', '/criteria/CONDITION/search/', '/criteria/'
@@ -77,8 +78,8 @@ beforeEach(async () => {
     return filters.some((partialUrl) => request && request.url().includes(partialUrl));
   }
 
-  // Api "/workspaces" or "/cdrVersions" response can be truncated
-  const isApiTruncateResponse = (request: Request): boolean => {
+  // Make log less cluttered: truncate long Api response.
+  const shouldTruncateResponse = (request: Request): boolean => {
     return request && (request.url().endsWith('/v1/workspaces') || request.url().endsWith('/v1/cdrVersions'));
   }
 
@@ -114,7 +115,7 @@ beforeEach(async () => {
   const transformResponseBody = async (request: Request): Promise<string> => {
     if (request) {
       let responseText = stringifyData(await getResponseText(request));
-      if (isApiTruncateResponse(request)) {
+      if (shouldTruncateResponse(request)) {
         // truncate long response. get first two workspace details.
         responseText = fp.isEmpty(JSON.parse(responseText).items)
            ? responseText
