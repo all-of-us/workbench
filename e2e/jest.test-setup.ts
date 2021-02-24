@@ -71,7 +71,7 @@ beforeEach(async () => {
   }
 
   // Api response won't be logged.
-  const skipApiResponseBody = (request: Request): boolean => {
+  const shouldSkipApiResponseBody = (request: Request): boolean => {
     const filters = [
       '/readonly',
       '/chartinfo/',
@@ -157,7 +157,7 @@ beforeEach(async () => {
     let status;
     try {
       if (canLogResponse(request)) {
-        // Try find out what the request was if exception thrown.
+        // Save data for log in catch block when exception is thrown.
         method = request.method();
         const resp = request.response();
         url = resp.url();
@@ -166,13 +166,11 @@ beforeEach(async () => {
         if (isApiFailure(request)) {
           await logError(request);
         } else {
-          const responseBody = await transformResponseBody(request);
-          if (skipApiResponseBody(request)) {
-            console.debug('❗ Request finished: ' +
-               `${request.response().status()} ${request.method()} ${request.url()}`);
+          if (shouldSkipApiResponseBody(request)) {
+            console.debug(`❗ Request finished: ${status} ${method} ${url}`);
           } else {
             console.debug('❗ Request finished: ' +
-               `${request.response().status()} ${request.method()} ${request.url()}\n${responseBody}`);
+               `${status} ${method} ${url}\n${await transformResponseBody(request)}`);
           }
         }
       }
@@ -205,16 +203,16 @@ beforeEach(async () => {
     try {
       console.error(`❗ ${title}\nError message: ${error.message}\nStack: ${error.stack}`);
     } catch (err) {
-      console.error(`❗ ${title}\nException occurred when getting page error.\n${err}`);
+      console.error(`❗ ${title}\nException occurred when getting error.\n${err}`);
     }
   });
 
   page.on('pageerror', async (error) => {
     const title = await getTitle();
     try {
-      console.error(`❗ ${title}\nError message: ${error.message}\nStack: ${error.stack}`);
+      console.error(`❗ ${title}\nPage error message: ${error.message}\nStack: ${error.stack}`);
     } catch (err) {
-      console.error(`❗ ${title}\nException occurred when getting pageerror.\n${err}`);
+      console.error(`❗ ${title}\nPage exception occurred when getting pageerror.\n${err}`);
     }
   })
 
