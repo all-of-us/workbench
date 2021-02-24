@@ -325,7 +325,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   }
 
   private int getBufferMaxCapacity(String accessTierShortName) {
-    return workbenchConfigProvider.get().billing.bufferCapacity.get(accessTierShortName);
+    return workbenchConfigProvider.get().billing.bufferCapacityPerTier.get(accessTierShortName);
   }
 
   public BillingProjectBufferStatus getStatus() {

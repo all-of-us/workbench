@@ -26,7 +26,8 @@
     "projectNamePrefix": "aou-rw-staging-",
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "retryCount": 2,
-    "bufferCapacity": {
+    "bufferCapacity": 50,
+    "bufferCapacityPerTier": {
       "registered": 50
     },
     "bufferRefillProjectsPerTask": 1,
