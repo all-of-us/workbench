@@ -83,7 +83,7 @@ beforeEach(async () => {
 
   const notRedirectRequest = (request: Request): boolean => {
     // Response body can only be accessed for non-redirect requests
-    return request && request.redirectChain().length === 0;
+    return request && request.redirectChain().length === 0 && !request.isNavigationRequest();
   }
 
   const getResponseText = async (request: Request): Promise<string> => {
@@ -128,12 +128,24 @@ beforeEach(async () => {
   });
 
   page.on('requestfinished', async (request) => {
-    if (canLogResponse(request)) {
-      if (isApiFailure(request)) {
-        await logError(request);
-      } else {
-        await logResponse(request);
+    let method;
+    let url;
+    let status;
+    try {
+      if (canLogResponse(request)) {
+        method = request.method();
+        const resp = request.response();
+        url = resp.url();
+        status = resp.status();
+        if (isApiFailure(request)) {
+          await logError(request);
+        } else {
+          await logResponse(request);
+        }
       }
+    } catch (err) {
+      // Try find out what request was
+      console.error(`${status} ${method} ${url} : ${err}`);
     }
     try {
       await request.continue();
@@ -152,7 +164,7 @@ beforeEach(async () => {
       console[message.type() === 'warning' ? 'warn' : message.type()](`❗ ${title}\n`, ...args);
       // tslint:disable-next-line:no-empty
     } catch (err) {
-      console.error(`Exception occurred when getting console messages.\n${err}`);
+      console.error(`Exception occurred when getting console message.\n${err}\n${message.text()}`);
     }
   });
 
