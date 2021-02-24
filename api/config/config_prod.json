@@ -26,7 +26,8 @@
     "projectNamePrefix": "aou-rw-",
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "retryCount": 4,
-    "bufferCapacity": {
+    "bufferCapacity": 200,
+    "bufferCapacityPerTier": {
       "registered": 200
     },
     "bufferRefillProjectsPerTask": 1,

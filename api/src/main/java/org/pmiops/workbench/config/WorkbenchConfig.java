@@ -61,10 +61,14 @@ public class WorkbenchConfig {
   public static class BillingConfig {
     // This config variable seems to be unused.
     public Integer retryCount;
+    // The total capacity of the GCP project buffer, assuming a single tier.
+    // Scheduled to be removed after bufferCapacityPerTier is enabled in all environments.
+    // https://precisionmedicineinitiative.atlassian.net/browse/RW-6387
+    @Deprecated public Integer bufferCapacity;
     // The total capacity of the GCP project buffer, per access tier. The buffering system will not
     // attempt to create any new projects in a tier when the total number of in-progress & ready
     // projects is at or above this level.
-    public Map<String, Integer> bufferCapacity;
+    public Map<String, Integer> bufferCapacityPerTier;
     // The number of times to attempt project creation per cron task execution. This effectively
     // controls the max rate of project refill. If the cron task is configured to run once per
     // minute and this param is set to 5, then the buffer system will create up to approximately
