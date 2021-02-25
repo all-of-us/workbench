@@ -40,8 +40,8 @@ interface Props {
   incompleteButtonText: string;
   completedButtonText: string;
   completeStep: Function;
-  completionTimestamp: string;
   childrenStyle?: React.CSSProperties;
+  content?: JSX.Element | JSX.Element[]; 
 }
 
 const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
@@ -53,7 +53,9 @@ const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
       incompleteButtonText,
       completedButtonText,
       completeStep,
-      children
+      childrenStyle,
+      children,
+      content
     } = props;
 
     return (
@@ -61,32 +63,20 @@ const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
         <div style={styles.title}>
           { title }
         </div>
-        <FlexColumn style={{justifyContent: 'space-between', flex: '1 1 auto'}}>
-
-          { isComplete ? (
-            <React.Fragment>
-              <div style={props.childrenStyle}>
-                { children }
-              </div>
-              <Button disabled={true} data-test-id='completed-button'
-                      style={{...styles.button, backgroundColor: colors.success,
-                        width: 'max-content', cursor: 'default'}}>
-                <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : completedButtonText}
-              </Button>
-            </React.Fragment>
-          ) : (
-            <React.Fragment>
-              {/*This div exists to ensure spacing is consistent. We want to put the button at the bottom of the flex box*/}
-              <div/>
-              <Button
-                type='purplePrimary'
-                style={ styles.button }
-                onClick={ completeStep }
-              >
-                { incompleteButtonText }
-              </Button>
-            </React.Fragment>
-          ) }
+        <FlexColumn style={{
+          justifyContent: isComplete && children ? 'flex-end' : 'space-between', 
+          flex: '1 1 auto',
+          alignItems: 'baseline'
+          }}>
+          {isComplete && <div style={childrenStyle}>{ content }</div>}
+          {children}
+          {isComplete && <Button disabled={true} 
+                                data-test-id='completed-button' 
+                                style={{...styles.button, backgroundColor: colors.success, width: 'max-content', cursor: 'default'}}>
+              <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : completedButtonText}
+            </Button>
+          }
+          {!isComplete && <Button type='purplePrimary' style={ styles.button } onClick={ completeStep }>{ incompleteButtonText }</Button>}
         </FlexColumn>
       </FlexColumn>
     );
