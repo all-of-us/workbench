@@ -31,6 +31,7 @@ describe('Duplicate workspace', () => {
       const duplicateWorkspaceName = await workspaceEditPage.fillOutWorkspaceName();
 
       const finishButton = await workspaceEditPage.getDuplicateWorkspaceButton();
+      await workspaceEditPage.requestForReviewRadiobutton(false);
       await finishButton.waitUntilEnabled();
       await workspaceEditPage.clickCreateFinishButton(finishButton);
 
@@ -66,6 +67,7 @@ describe('Duplicate workspace', () => {
       await workspaceEditPage.clickShareWithCollaboratorsCheckbox();
 
       const finishButton = await workspaceEditPage.getDuplicateWorkspaceButton();
+      await workspaceEditPage.requestForReviewRadiobutton(false);
       await finishButton.waitUntilEnabled();
       await workspaceEditPage.clickCreateFinishButton(finishButton);
 

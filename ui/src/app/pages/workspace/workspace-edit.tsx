@@ -397,8 +397,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         // This is the only field which is not automatically handled/differentiated
         // on the API level.
         workspace.name = 'Duplicate of ' + workspace.name;
-        // if the original workspace was reviewed, it's unlikely that we need a re-review
-        workspace.researchPurpose.reviewRequested = false;
+        // unselect to prevent unneeded re-review
+        workspace.researchPurpose.reviewRequested = undefined;
       }
 
       // We preselect the default CDR version when a new workspace is being
@@ -1309,6 +1309,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
               <FlexColumn>
                 <FlexRow>
                 <RadioButton style={{marginTop: '0.2rem'}} name='reviewRequested'
+                             data-test-id='review-request-btn-true'
                              onChange={() => {
                                this.updateResearchPurpose('reviewRequested', true);
                              }}
@@ -1318,6 +1319,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
                 </FlexRow>
                 <FlexRow>
                 <RadioButton style={{marginTop: '0.2rem'}} name='reviewRequested'
+                             data-test-id='review-request-btn-false'
                              onChange={() => {
                                this.updateResearchPurpose('reviewRequested', false);
                              }}
