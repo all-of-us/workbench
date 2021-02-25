@@ -544,21 +544,17 @@ jobs:
       - run:
           # Needed for env-cmd to function on Circle.
           command: touch ~/workbench/e2e/.env
-      - when:
-          condition:
-            equal: [ "integration", << parameters.test_mode >> ]
-          steps:
-            - run:
-                name: "Create a file contains test names (exclude nightly tests)"
-                working_directory: ~/workbench/e2e
-                command: yarn jest --listTests | grep -v "nightly" | grep -o 'tests/.*.ts$' > all_tests.txt
-            - run:
-                name: "Running Puppeteer e2e tests"
-                working_directory: ~/workbench/e2e
-                command: |
-                  TESTS_FILE=$(circleci tests split --split-by=timings all_tests.txt)
-                  yarn test:ci $TESTS_FILE
-                no_output_timeout: 25m
+      - run:
+          name: "Create a file contains test names"
+          working_directory: ~/workbench/e2e
+          command: yarn jest --listTests | grep -o 'tests/.*.ts$' > e2e_tests.txt
+      - run:
+          name: "Running Puppeteer e2e tests"
+          working_directory: ~/workbench/e2e
+          command: |
+            TESTS_FILE=$(circleci tests split --split-by=timings e2e_tests.txt)
+            yarn test:ci $TESTS_FILE
+          no_output_timeout: 25m
       - when:
           condition:
             equal: [ "nightly-integration", << parameters.test_mode >> ]
