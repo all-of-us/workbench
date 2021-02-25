@@ -266,45 +266,6 @@ commands:
           destination: JunitTestResult
           when: always
 
-  run-puppeteer-test:
-    description: "Run puppeteer end-to-end integration test"
-    steps:
-      - run:
-          command: |
-            echo "WORKBENCH_ENV=${WORKBENCH_ENV}"
-            echo "TEST_MODE=${TEST_MODE}"
-      - gcloud-auth-login:
-          # Needed for yarn test, which invokes generate-impersonated-user-token
-          with_application_default_credentials: true
-      - run:
-          # Needed for env-cmd to function on Circle.
-          command: touch ~/workbench/e2e/.env
-      - run:
-          name: Running Puppeteer e2e tests
-          working_directory: ~/workbench/e2e
-          command: |
-            circleci tests glob "tests/**/*.spec.ts" | circleci tests split --split-by=timings > /tmp/tests-to-run
-            yarn test:ci $(cat /tmp/tests-to-run)
-          no_output_timeout: 25m
-      - run:
-          name: Create circleci_parameters.json
-          working_directory: ~/workbench/e2e
-          command: |
-            echo "{ \
-              \"circleBranch\": \"${CIRCLE_BRANCH}\", \
-              \"circleJob\": \"${CIRCLE_JOB}\", \
-              \"circleBuild\": ${CIRCLE_BUILD_NUM}, \
-              \"circleBuildUrl\": \"${CIRCLE_BUILD_URL}\", \
-              \"circleNodeIndex\": ${CIRCLE_NODE_INDEX} \
-              }" \
-              > ./logs/circleci_parameters.json
-      - store_artifacts:
-          path: e2e/logs
-          destination: logs
-          when: always
-      - store_test_results:
-          path: ~/workbench/e2e/logs
-
   ui-cache:
     description: "workbench/ui: yarn install, save and restore cache"
     steps:
@@ -572,7 +533,44 @@ jobs:
                 command: bash .circleci/choose-e2e-env.sh
             # Local UI server is started but unused if WORKBENCH_ENV reset to "test" value in above step
             - launch-local-ui
-      - run-puppeteer-test
+      - run:
+          name: "echo WORKBENCH_ENV & TEST_MODE"
+          command: |
+            echo "WORKBENCH_ENV=${WORKBENCH_ENV}"
+            echo "TEST_MODE=${TEST_MODE}"
+      - gcloud-auth-login:
+          # Needed for yarn test, which invokes generate-impersonated-user-token
+          with_application_default_credentials: true
+      - run:
+          # Needed for env-cmd to function on Circle.
+          command: touch ~/workbench/e2e/.env
+      - run:
+          name: "Create a file contains test names"
+          working_directory: ~/workbench/e2e
+          command: yarn jest --listTests | grep -o 'tests/.*.ts$' > e2e_tests.txt
+      - run:
+          name: "Running Puppeteer e2e tests"
+          working_directory: ~/workbench/e2e
+          command: |
+            TESTS_FILE=$(circleci tests split --split-by=timings e2e_tests.txt)
+            yarn test:ci $TESTS_FILE
+          no_output_timeout: 30m
+      - run:
+          name: Create circleci_parameters.json
+          working_directory: ~/workbench/e2e
+          command: |
+            echo "{ \
+              \"circleBranch\": \"${CIRCLE_BRANCH}\", \
+              \"circleJob\": \"${CIRCLE_JOB}\", \
+              \"circleBuild\": ${CIRCLE_BUILD_NUM}, \
+              \"circleBuildUrl\": \"${CIRCLE_BUILD_URL}\", \
+              \"circleNodeIndex\": ${CIRCLE_NODE_INDEX} \
+              }" > ./logs/circleci_parameters.json
+      - store_artifacts:
+          path: ~/workbench/e2e/logs
+          destination: logs
+      - store_test_results:
+          path: ~/workbench/e2e/logs
 
   puppeteer-env-setup:
     executor: puppeteer-executor
