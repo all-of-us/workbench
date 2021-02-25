@@ -633,6 +633,7 @@ export const ProfilePage = fp.flow(
                 incompleteButtonText={'Get Started'}
                 completedButtonText={'Completed'}
                 isComplete={!!(controlledTierCompletionTime || controlledTierBypassTime)}
+                // TODO: link to the training modules once they are available
                 completeStep={() => null}
                 content={getControlledTierContent({controlledTierCompletionTime, controlledTierBypassTime})}
                 >
