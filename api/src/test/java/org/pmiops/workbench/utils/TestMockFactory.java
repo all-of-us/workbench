@@ -18,7 +18,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
+import org.pmiops.workbench.db.dao.AccessTierDao;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
@@ -124,7 +128,7 @@ public class TestMockFactory {
               return fcWorkspace;
             })
         .when(fireCloudService)
-        .createWorkspace(anyString(), anyString());
+        .createWorkspace(anyString(), anyString(), anyString());
   }
 
   public void stubBufferBillingProject(BillingProjectBufferService billingProjectBufferService) {
@@ -204,5 +208,28 @@ public class TestMockFactory {
     dbWorkspace.setIntendedStudy(researchPurpose.getIntendedStudy());
     dbWorkspace.setAnticipatedFindings(researchPurpose.getAnticipatedFindings());
     return dbWorkspace;
+  }
+
+  public static DbAccessTier createDefaultAccessTier(AccessTierDao accessTierDao) {
+    final DbAccessTier accessTier =
+        new DbAccessTier()
+            .setAccessTierId(1)
+            .setShortName("test")
+            .setDisplayName("Test Tier")
+            .setAuthDomainName("Test Auth Domain")
+            .setAuthDomainGroupEmail("test-tier-users@fake-research-aou.org")
+            .setServicePerimeter("test/tier/perimeter");
+    return accessTierDao.save(accessTier);
+  }
+
+  public static DbCdrVersion createDefaultCdrVersion(
+      CdrVersionDao cdrVersionDao, AccessTierDao accessTierDao) {
+    final DbCdrVersion cdrVersion = new DbCdrVersion();
+    cdrVersion.setName("1");
+    // set the db name to be empty since test cases currently
+    // run in the workbench schema only.
+    cdrVersion.setCdrDbName("");
+    cdrVersion.setAccessTier(createDefaultAccessTier(accessTierDao));
+    return cdrVersionDao.save(cdrVersion);
   }
 }

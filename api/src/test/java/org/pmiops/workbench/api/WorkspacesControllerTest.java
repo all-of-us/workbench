@@ -19,9 +19,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.billing.GoogleApisConfig.END_USER_CLOUD_BILLING;
-import static org.pmiops.workbench.billing.GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING;
-import static org.pmiops.workbench.config.WorkbenchConfig.createEmptyConfig;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.BillingAccount;
@@ -65,6 +62,7 @@ import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
+import org.pmiops.workbench.billing.GoogleApisConfig;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
@@ -93,6 +91,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -103,6 +102,7 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
@@ -141,7 +141,6 @@ import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CopyRequest;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.CreateReviewRequest;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
@@ -267,11 +266,11 @@ public class WorkspacesControllerTest {
 
   @MockBean FreeTierBillingService mockFreeTierBillingService;
 
-  @Qualifier(END_USER_CLOUD_BILLING)
+  @Qualifier(GoogleApisConfig.END_USER_CLOUD_BILLING)
   @Autowired
   private Provider<Cloudbilling> endUserCloudbillingProvider;
 
-  @Qualifier(SERVICE_ACCOUNT_CLOUD_BILLING)
+  @Qualifier(GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING)
   @Autowired
   private Provider<Cloudbilling> serviceAccountCloudbillingProvider;
 
@@ -332,13 +331,13 @@ public class WorkspacesControllerTest {
   })
   static class Configuration {
 
-    @Bean(END_USER_CLOUD_BILLING)
+    @Bean(GoogleApisConfig.END_USER_CLOUD_BILLING)
     @Scope("prototype")
     Cloudbilling endUserCloudbilling() {
       return endUserCloudbilling;
     }
 
-    @Bean(SERVICE_ACCOUNT_CLOUD_BILLING)
+    @Bean(GoogleApisConfig.SERVICE_ACCOUNT_CLOUD_BILLING)
     @Scope("prototype")
     Cloudbilling serviceAccountCloudbilling() {
       return serviceAccountCloudbilling;
@@ -371,6 +370,7 @@ public class WorkspacesControllerTest {
   @Autowired BigQueryService bigQueryService;
   @SpyBean @Autowired WorkspaceDao workspaceDao;
   @Autowired UserDao userDao;
+  @Autowired AccessTierDao accessTierDao;
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired CohortDao cohortDao;
   @Autowired CohortReviewDao cohortReviewDao;
@@ -386,6 +386,7 @@ public class WorkspacesControllerTest {
   @Autowired ConceptBigQueryService conceptBigQueryService;
   @Autowired WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
 
+  private DbAccessTier accessTier;
   private DbCdrVersion cdrVersion;
   private String cdrVersionId;
   private String archivedCdrVersionId;
@@ -394,18 +395,22 @@ public class WorkspacesControllerTest {
 
   @Before
   public void setUp() {
-    workbenchConfig = createEmptyConfig();
+    workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.featureFlags.enableBillingUpgrade = true;
     workbenchConfig.firecloud.registeredDomainName = "allUsers";
     workbenchConfig.billing.accountId = "free-tier";
 
     testMockFactory = new TestMockFactory();
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
+
+    accessTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
+
     cdrVersion = new DbCdrVersion();
     cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
     cdrVersion.setCdrDbName("");
+    cdrVersion.setAccessTier(accessTier);
     cdrVersion = cdrVersionDao.save(cdrVersion);
     cdrVersionId = Long.toString(cdrVersion.getCdrVersionId());
 
@@ -512,7 +517,7 @@ public class WorkspacesControllerTest {
     fcResponse.setName(name);
     fcResponse.setCreatedBy(creator);
 
-    when(fireCloudService.cloneWorkspace(anyString(), anyString(), eq(ns), eq(name)))
+    when(fireCloudService.cloneWorkspace(anyString(), anyString(), eq(ns), eq(name), anyString()))
         .thenReturn(fcResponse);
 
     return fcResponse;
@@ -598,7 +603,9 @@ public class WorkspacesControllerTest {
   public void testCreateWorkspace() throws Exception {
     Workspace workspace = createWorkspace();
     workspace = workspacesController.createWorkspace(workspace).getBody();
-    verify(fireCloudService).createWorkspace(workspace.getNamespace(), workspace.getName());
+    verify(fireCloudService)
+        .createWorkspace(
+            workspace.getNamespace(), workspace.getName(), accessTier.getAuthDomainName());
 
     stubGetWorkspace(
         workspace.getNamespace(),
@@ -614,7 +621,6 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getLastModifiedTime()).isEqualTo(NOW_TIME);
     assertThat(workspace2.getCdrVersionId()).isEqualTo(cdrVersionId);
     assertThat(workspace2.getCreator()).isEqualTo(LOGGED_IN_USER_EMAIL);
-    assertThat(workspace2.getDataAccessLevel()).isEqualTo(DataAccessLevel.PROTECTED);
     assertThat(workspace2.getId()).isEqualTo("name");
     assertThat(workspace2.getName()).isEqualTo("name");
     assertThat(workspace2.getResearchPurpose().getDiseaseFocusedResearch()).isTrue();
@@ -1314,6 +1320,45 @@ public class WorkspacesControllerTest {
     verifyZeroInteractions(serviceAccountCloudbillingProvider.get());
   }
 
+  @Test(expected = BadRequestException.class)
+  public void testCloneWorkspace_accessTierMismatch() {
+    Workspace originalWorkspace = createWorkspace();
+    originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
+
+    DbAccessTier altAccessTier =
+        new DbAccessTier()
+            .setAccessTierId(2)
+            .setShortName("controlled")
+            .setDisplayName("Controlled Tier")
+            .setAuthDomainName("a different one")
+            .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
+            .setServicePerimeter("controlled/tier/perimeter");
+    altAccessTier = accessTierDao.save(altAccessTier);
+
+    DbCdrVersion altCdrVersion = new DbCdrVersion();
+    altCdrVersion.setCdrVersionId(2);
+    altCdrVersion.setName("CDR 2");
+    // set the db name to be empty since test cases currently
+    // run in the workbench schema only.
+    altCdrVersion.setCdrDbName("");
+    altCdrVersion.setAccessTier(altAccessTier);
+    altCdrVersion = cdrVersionDao.save(altCdrVersion);
+
+    final Workspace modWorkspace = new Workspace();
+    modWorkspace.setName("cloned");
+    modWorkspace.setNamespace("cloned-ns");
+    modWorkspace.setBillingAccountName(workbenchConfig.billing.freeTierBillingAccountName());
+    modWorkspace.setResearchPurpose(new ResearchPurpose());
+    modWorkspace.setCdrVersionId(String.valueOf(altCdrVersion.getCdrVersionId()));
+
+    final CloneWorkspaceRequest req = new CloneWorkspaceRequest();
+    req.setWorkspace(modWorkspace);
+    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), LOGGED_IN_USER_EMAIL);
+
+    workspacesController.cloneWorkspace(
+        originalWorkspace.getNamespace(), originalWorkspace.getId(), req);
+  }
+
   private void sortPopulationDetails(ResearchPurpose researchPurpose) {
     final List<SpecificPopulationEnum> populateionDetailsSorted =
         researchPurpose.getPopulationDetails().stream().sorted().collect(Collectors.toList());
@@ -1678,6 +1723,7 @@ public class WorkspacesControllerTest {
     DbCdrVersion cdrVersion2 = new DbCdrVersion();
     cdrVersion2.setName("2");
     cdrVersion2.setCdrDbName("");
+    cdrVersion2.setAccessTier(accessTier);
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
 
     DbConceptSetConceptId dbConceptSetConceptId1 =
@@ -1763,6 +1809,7 @@ public class WorkspacesControllerTest {
     DbCdrVersion cdrVersion2 = new DbCdrVersion();
     cdrVersion2.setName("2");
     cdrVersion2.setCdrDbName("");
+    cdrVersion2.setAccessTier(accessTier);
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
 
     final String expectedConceptSetName = "cs1";
@@ -1975,6 +2022,7 @@ public class WorkspacesControllerTest {
     DbCdrVersion cdrVersion2 = new DbCdrVersion();
     cdrVersion2.setName("2");
     cdrVersion2.setCdrDbName("");
+    cdrVersion2.setAccessTier(accessTier);
     cdrVersion2 = cdrVersionDao.save(cdrVersion2);
     String cdrVersionId2 = Long.toString(cdrVersion2.getCdrVersionId());
 
@@ -2001,7 +2049,7 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getCdrVersionId()).isEqualTo(cdrVersionId2);
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test(expected = NumberFormatException.class)
   public void testCloneWorkspaceBadCdrVersion() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
@@ -2011,6 +2059,24 @@ public class WorkspacesControllerTest {
             .namespace("cloned-ns")
             .researchPurpose(workspace.getResearchPurpose())
             .cdrVersionId("bad-cdr-version-id");
+    stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
+    mockBillingProjectBuffer("cloned-ns");
+    workspacesController.cloneWorkspace(
+        workspace.getNamespace(),
+        workspace.getId(),
+        new CloneWorkspaceRequest().workspace(modWorkspace));
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testCloneWorkspaceMissingCdrVersion() {
+    Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
+
+    Workspace modWorkspace =
+        new Workspace()
+            .name("cloned")
+            .namespace("cloned-ns")
+            .researchPurpose(workspace.getResearchPurpose())
+            .cdrVersionId("100");
     stubCloneWorkspace(modWorkspace.getNamespace(), modWorkspace.getName(), "cloner@gmail.com");
     mockBillingProjectBuffer("cloned-ns");
     workspacesController.cloneWorkspace(

@@ -66,10 +66,11 @@ public interface FireCloudService {
       String ownerEmailToRemove, String projectName, Optional<String> callerAccessToken);
 
   /** Creates a new FC workspace. */
-  FirecloudWorkspace createWorkspace(String projectName, String workspaceName);
+  FirecloudWorkspace createWorkspace(
+      String projectName, String workspaceName, String authDomainName);
 
   FirecloudWorkspace cloneWorkspace(
-      String fromProject, String fromName, String toProject, String toName);
+      String fromProject, String fromName, String toProject, String toName, String authDomainName);
 
   /** Retrieves all billing project memberships for the user from FireCloud. */
   List<FirecloudBillingProjectMembership> getBillingProjectMemberships();

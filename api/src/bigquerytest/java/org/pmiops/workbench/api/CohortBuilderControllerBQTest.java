@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.createDefaultAccessTier;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.collect.ImmutableList;
@@ -33,6 +34,7 @@ import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
@@ -125,6 +127,8 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
 
+  @Autowired private AccessTierDao accessTierDao;
+
   @Mock private Provider<WorkbenchConfig> configProvider;
 
   private DbCriteria drugNode1;
@@ -183,6 +187,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     cdrVersion.setCdrVersionId(1L);
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
+    cdrVersion.setAccessTier(createDefaultAccessTier(accessTierDao));
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
     cdrVersion = cdrVersionDao.save(cdrVersion);

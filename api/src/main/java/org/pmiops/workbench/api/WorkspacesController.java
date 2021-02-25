@@ -31,6 +31,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
@@ -190,11 +191,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     return new FirecloudWorkspaceId(namespace, strippedName);
   }
 
-  private FirecloudWorkspace attemptFirecloudWorkspaceCreation(FirecloudWorkspaceId workspaceId) {
-    return fireCloudService.createWorkspace(
-        workspaceId.getWorkspaceNamespace(), workspaceId.getWorkspaceName());
-  }
-
   @Override
   public ResponseEntity<Workspace> createWorkspace(Workspace workspace) throws BadRequestException {
     return ResponseEntity.ok(
@@ -207,57 +203,21 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     validateWorkspaceApiModel(workspace);
 
     DbCdrVersion cdrVersion = getLiveCdrVersionId(workspace.getCdrVersionId());
-
+    DbAccessTier accessTier = cdrVersion.getAccessTier();
     DbUser user = userProvider.get();
-    final DbBillingProjectBufferEntry bufferedBillingProject;
-    try {
-      bufferedBillingProject =
-          billingProjectBufferService.assignBillingProject(user, cdrVersion.getAccessTier());
-    } catch (EmptyBufferException e) {
-      throw new TooManyRequestsException(e);
-    }
-    final String billingProject = bufferedBillingProject.getFireCloudProjectName();
 
-    // Note: please keep any initialization logic here in sync with CloneWorkspace().
+    // Note: please keep any initialization logic here in sync with cloneWorkspaceImpl().
+    final String billingProject = claimBillingProject(user, accessTier);
     FirecloudWorkspaceId workspaceId =
         generateFirecloudWorkspaceId(billingProject, workspace.getName());
-    FirecloudWorkspace fcWorkspace = attemptFirecloudWorkspaceCreation(workspaceId);
+    FirecloudWorkspace fcWorkspace =
+        fireCloudService.createWorkspace(
+            workspaceId.getWorkspaceNamespace(),
+            workspaceId.getWorkspaceName(),
+            accessTier.getAuthDomainName());
 
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    DbWorkspace dbWorkspace = new DbWorkspace();
-    // A little unintuitive but setting this here reflects the current state of the workspace
-    // while it was in the billing buffer. Setting this value will inform the update billing
-    // code to skip an unnecessary GCP API call if the billing account is being kept at the free
-    // tier
-    dbWorkspace.setBillingAccountName(
-        workbenchConfigProvider.get().billing.freeTierBillingAccountName());
-    setDbWorkspaceFields(dbWorkspace, user, workspaceId, fcWorkspace, now);
-
-    dbWorkspace.setCdrVersion(cdrVersion);
-
-    // TODO: enforce data access level authorization
-    dbWorkspace.setDataAccessLevelEnum(workspace.getDataAccessLevel());
-    dbWorkspace.setName(workspace.getName());
-
-    // Ignore incoming fields pertaining to review status; clients can only request a review.
-    workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, workspace.getResearchPurpose());
-    if (workspace.getResearchPurpose().getReviewRequested()) {
-      // Use a consistent timestamp.
-      dbWorkspace.setTimeRequested(now);
-    }
-    dbWorkspace.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
-
-    dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
-
-    try {
-      workspaceService.updateWorkspaceBillingAccount(
-          dbWorkspace, workspace.getBillingAccountName());
-    } catch (ServerErrorException e) {
-      // Will be addressed with RW-4440
-      throw new ServerErrorException(
-          "This message is going to be swallowed due to a bug in ExceptionAdvice. ",
-          new ServerErrorException("Could not update the workspace's billing account", e));
-    }
+    DbWorkspace dbWorkspace =
+        createDbWorkspace(workspace, cdrVersion, user, workspaceId, fcWorkspace);
     try {
       dbWorkspace = workspaceService.getDao().save(dbWorkspace);
     } catch (Exception e) {
@@ -273,9 +233,76 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw e;
     }
 
-    Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
+    final Workspace createdWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, fcWorkspace);
     workspaceAuditor.fireCreateAction(createdWorkspace, dbWorkspace.getWorkspaceId());
     return createdWorkspace;
+  }
+
+  private DbWorkspace createDbWorkspace(
+      Workspace workspace,
+      DbCdrVersion cdrVersion,
+      DbUser user,
+      FirecloudWorkspaceId workspaceId,
+      FirecloudWorkspace fcWorkspace) {
+    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
+
+    // The final step in the process is to clone the AoU representation of the
+    // workspace. The implication here is that we may generate orphaned
+    // Firecloud workspaces / buckets, but a user should not be able to see
+    // half-way cloned workspaces via AoU - so it will just appear as a
+    // transient failure.
+    DbWorkspace dbWorkspace = new DbWorkspace();
+
+    dbWorkspace.setName(workspace.getName());
+    dbWorkspace.setCreator(user);
+    dbWorkspace.setFirecloudName(workspaceId.getWorkspaceName());
+    dbWorkspace.setWorkspaceNamespace(workspaceId.getWorkspaceNamespace());
+    dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspaceId());
+    dbWorkspace.setCreationTime(now);
+    dbWorkspace.setLastModifiedTime(now);
+    dbWorkspace.setVersion(1);
+    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
+    dbWorkspace.setCdrVersion(cdrVersion);
+    // TODO: update to use tiers
+    dbWorkspace.setDataAccessLevelEnum(cdrVersion.getDataAccessLevelEnum());
+
+    // Ignore incoming fields pertaining to review status; clients can only request a review.
+    workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, workspace.getResearchPurpose());
+    if (workspace.getResearchPurpose().getReviewRequested()) {
+      // Use a consistent timestamp.
+      dbWorkspace.setTimeRequested(now);
+    }
+    dbWorkspace.setReviewRequested(workspace.getResearchPurpose().getReviewRequested());
+
+    // A little unintuitive but setting this here reflects the current state of the workspace
+    // while it was in the billing buffer. Setting this value will inform the update billing
+    // code to skip an unnecessary GCP API call if the billing account is being kept at the free
+    // tier
+    dbWorkspace.setBillingAccountName(
+        workbenchConfigProvider.get().billing.freeTierBillingAccountName());
+
+    try {
+      workspaceService.updateWorkspaceBillingAccount(
+          dbWorkspace, workspace.getBillingAccountName());
+    } catch (ServerErrorException e) {
+      // Will be addressed with RW-4440
+      throw new ServerErrorException(
+          "This message is going to be swallowed due to a bug in ExceptionAdvice. ",
+          new ServerErrorException("Could not update the workspace's billing account", e));
+    }
+
+    return dbWorkspace;
+  }
+
+  private String claimBillingProject(DbUser user, DbAccessTier accessTier) {
+    try {
+      final DbBillingProjectBufferEntry bufferedBillingProject =
+          billingProjectBufferService.assignBillingProject(user, accessTier);
+      return bufferedBillingProject.getFireCloudProjectName();
+    } catch (EmptyBufferException e) {
+      throw new TooManyRequestsException(e);
+    }
   }
 
   private void validateWorkspaceApiModel(Workspace workspace) {
@@ -283,27 +310,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("missing required field 'name'");
     } else if (workspace.getResearchPurpose() == null) {
       throw new BadRequestException("missing required field 'researchPurpose'");
-    } else if (workspace.getDataAccessLevel() == null) {
-      throw new BadRequestException("missing required field 'dataAccessLevel'");
     } else if (workspace.getName().length() > 80) {
-      throw new BadRequestException("DbWorkspace name must be 80 characters or less");
+      throw new BadRequestException("workspace name must be 80 characters or less");
     }
-  }
-
-  private void setDbWorkspaceFields(
-      DbWorkspace dbWorkspace,
-      DbUser user,
-      FirecloudWorkspaceId workspaceId,
-      FirecloudWorkspace fcWorkspace,
-      Timestamp createdAndLastModifiedTime) {
-    dbWorkspace.setFirecloudName(workspaceId.getWorkspaceName());
-    dbWorkspace.setWorkspaceNamespace(workspaceId.getWorkspaceNamespace());
-    dbWorkspace.setCreator(user);
-    dbWorkspace.setFirecloudUuid(fcWorkspace.getWorkspaceId());
-    dbWorkspace.setCreationTime(createdAndLastModifiedTime);
-    dbWorkspace.setLastModifiedTime(createdAndLastModifiedTime);
-    dbWorkspace.setVersion(1);
-    dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
   }
 
   @Override
@@ -424,11 +433,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private ResponseEntity<CloneWorkspaceResponse> cloneWorkspaceImpl(
       String fromWorkspaceNamespace, String fromWorkspaceId, CloneWorkspaceRequest body) {
     Workspace toWorkspace = body.getWorkspace();
-    if (Strings.isNullOrEmpty(toWorkspace.getName())) {
-      throw new BadRequestException("missing required field 'workspace.name'");
-    } else if (toWorkspace.getResearchPurpose() == null) {
-      throw new BadRequestException("missing required field 'workspace.researchPurpose'");
-    }
+    validateWorkspaceApiModel(toWorkspace);
 
     // First verify the caller has read access to the source workspace.
     workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
@@ -441,73 +446,45 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           String.format("DbWorkspace %s/%s not found", fromWorkspaceNamespace, fromWorkspaceId));
     }
 
+    DbAccessTier accessTier = fromWorkspace.getCdrVersion().getAccessTier();
+
+    // When specifying a CDR Version in the request, it must be live and
+    // in the same Access Tier as the source Workspace's CDR Version.
+    //
+    // If the request is lacking a CDR Version, use the source's.
+
+    final DbCdrVersion toCdrVersion;
+    String reqCdrVersionId = body.getWorkspace().getCdrVersionId();
+    if (Strings.isNullOrEmpty(reqCdrVersionId)
+        || Long.parseLong(reqCdrVersionId) == fromWorkspace.getCdrVersion().getCdrVersionId()) {
+      toCdrVersion = fromWorkspace.getCdrVersion();
+    } else {
+      toCdrVersion = getLiveCdrVersionId(reqCdrVersionId);
+
+      if (!toCdrVersion.getAccessTier().equals(accessTier)) {
+        throw new BadRequestException(
+            String.format(
+                "Destination workspace Access Tier '%s' does not match source workspace Access Tier '%s'",
+                toCdrVersion.getAccessTier().getShortName(), accessTier.getShortName()));
+      }
+    }
+
     DbUser user = userProvider.get();
 
-    final DbBillingProjectBufferEntry bufferedBillingProject;
-    try {
-      bufferedBillingProject =
-          billingProjectBufferService.assignBillingProject(
-              user, fromWorkspace.getCdrVersion().getAccessTier());
-    } catch (EmptyBufferException e) {
-      throw new TooManyRequestsException(e);
-    }
-    final String toWorkspaceProject = bufferedBillingProject.getFireCloudProjectName();
-
+    // Note: please keep any initialization logic here in sync with createWorkspaceImpl().
+    final String billingProject = claimBillingProject(user, accessTier);
     FirecloudWorkspaceId toFcWorkspaceId =
-        generateFirecloudWorkspaceId(toWorkspaceProject, toWorkspace.getName());
+        generateFirecloudWorkspaceId(billingProject, toWorkspace.getName());
     FirecloudWorkspace toFcWorkspace =
         fireCloudService.cloneWorkspace(
             fromWorkspaceNamespace,
             fromWorkspaceId,
             toFcWorkspaceId.getWorkspaceNamespace(),
-            toFcWorkspaceId.getWorkspaceName());
+            toFcWorkspaceId.getWorkspaceName(),
+            accessTier.getAuthDomainName());
 
-    // The final step in the process is to clone the AoU representation of the
-    // workspace. The implication here is that we may generate orphaned
-    // Firecloud workspaces / buckets, but a user should not be able to see
-    // half-way cloned workspaces via AoU - so it will just appear as a
-    // transient failure.
-    DbWorkspace dbWorkspace = new DbWorkspace();
-    // A little unintuitive but setting this here reflects the current state of the workspace
-    // while it was in the billing buffer. Setting this value will inform the update billing code to
-    // skip an unnecessary GCP API call if the billing account is being kept at the free tier
-    dbWorkspace.setBillingAccountName(
-        workbenchConfigProvider.get().billing.freeTierBillingAccountName());
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    setDbWorkspaceFields(dbWorkspace, user, toFcWorkspaceId, toFcWorkspace, now);
-
-    dbWorkspace.setName(body.getWorkspace().getName());
-    ResearchPurpose researchPurpose = body.getWorkspace().getResearchPurpose();
-    workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, researchPurpose);
-    if (researchPurpose.getReviewRequested()) {
-      // Use a consistent timestamp.
-      dbWorkspace.setTimeRequested(now);
-    }
-    dbWorkspace.setReviewRequested(researchPurpose.getReviewRequested());
-
-    // Clone CDR version from the source, by default.
-    String reqCdrVersionId = body.getWorkspace().getCdrVersionId();
-    if (Strings.isNullOrEmpty(reqCdrVersionId)
-        || reqCdrVersionId.equals(Long.toString(fromWorkspace.getCdrVersion().getCdrVersionId()))) {
-      dbWorkspace.setCdrVersion(fromWorkspace.getCdrVersion());
-      dbWorkspace.setDataAccessLevel(fromWorkspace.getDataAccessLevel());
-    } else {
-      DbCdrVersion reqCdrVersion = getLiveCdrVersionId(reqCdrVersionId);
-      dbWorkspace.setCdrVersion(reqCdrVersion);
-      dbWorkspace.setDataAccessLevelEnum(reqCdrVersion.getDataAccessLevelEnum());
-    }
-
-    dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
-
-    try {
-      workspaceService.updateWorkspaceBillingAccount(
-          dbWorkspace, body.getWorkspace().getBillingAccountName());
-    } catch (ServerErrorException e) {
-      // Will be addressed with RW-4440
-      throw new ServerErrorException(
-          "This message is going to be swallowed due to a bug in ExceptionAdvice.",
-          new ServerErrorException("Could not update the workspace's billing account", e));
-    }
+    DbWorkspace dbWorkspace =
+        createDbWorkspace(toWorkspace, toCdrVersion, user, toFcWorkspaceId, toFcWorkspace);
 
     try {
       dbWorkspace =
@@ -544,7 +521,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
 
     final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
-
     workspaceAuditor.fireDuplicateAction(
         fromWorkspace.getWorkspaceId(), dbWorkspace.getWorkspaceId(), savedWorkspace);
     return ResponseEntity.ok(new CloneWorkspaceResponse().workspace(savedWorkspace));
