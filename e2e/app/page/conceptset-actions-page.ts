@@ -30,8 +30,7 @@ export default class ConceptSetActionsPage extends AuthenticatedPage {
 
   async clickCreateAnotherConceptSetButton(): Promise<void> {
     const button = await this.getCreateAnotherConceptSetButton();
-    await button.clickAndWait();
-    await waitWhileLoading(this.page);
+    return button.clickAndWait();
   }
 
   async clickCreateDatasetButton(): Promise<DatasetBuildPage> {
