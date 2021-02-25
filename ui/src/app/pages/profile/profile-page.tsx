@@ -158,6 +158,55 @@ interface ProfilePageState {
   updating: boolean;
 }
 
+interface CompletionTime {
+  completionTime: number;
+  bypassTime: number;
+}
+
+const mapProps = fp.curry((pairs: [string, string][], obj: object) => {
+  return fp.flow(
+    fp.map<[string, string], [string, any]>(([from, to]) => ([to, obj[from]])),
+    fp.fromPairs, 
+  )(pairs)
+})
+
+const getRegistrationStatus = (completionTime: number, bypassTime: number) => {
+  return completionTime !== null && completionTime !== undefined ? RegistrationStepStatus.COMPLETED :
+  bypassTime !== null && completionTime !== undefined ? RegistrationStepStatus.BYPASSED : RegistrationStepStatus.UNCOMPLETE;
+}
+
+const bypassedText = (bypassTime) => {
+  return <React.Fragment>
+  <div>Bypassed on:</div>
+  <div>{displayDateWithoutHours(bypassTime)}</div>
+</React.Fragment>;
+}
+
+
+const getCompleteOrBypassContent = ({bypassTime, completionTime}: CompletionTime) => {
+  switch (getRegistrationStatus(completionTime, bypassTime)) {
+    case RegistrationStepStatus.COMPLETED:
+      return <React.Fragment>
+      <div>Completed on:</div>
+      <div>{displayDateWithoutHours(completionTime)}</div>
+    </React.Fragment>;
+    case RegistrationStepStatus.BYPASSED:
+      return bypassedText(bypassTime);
+    default:
+      return;
+  }
+}
+
+const getTwoFactorContent = fp.flow(
+  mapProps([['twoFactorAuthCompletionTime', 'completionTime'], ['twoFactorAuthBypassTime', 'bypassTime']]),
+  getCompleteOrBypassContent
+)
+
+const getControlledTierContent = fp.flow(
+  mapProps([['controlledTierCompletionTime', 'completionTime'], ['controlledTierBypassTime', 'bypassTime']]), 
+  getCompleteOrBypassContent
+)
+
 export const ProfilePage = fp.flow(
   withUserProfile(),
   withProfileErrorModal({title: 'Error updating account'})
@@ -284,27 +333,6 @@ export const ProfilePage = fp.flow(
       bypassTime !== null && completionTime !== undefined ? RegistrationStepStatus.BYPASSED : RegistrationStepStatus.UNCOMPLETE;
     }
 
-    private bypassedText(bypassTime) {
-      return <React.Fragment>
-      <div>Bypassed on:</div>
-      <div>{displayDateWithoutHours(bypassTime)}</div>
-    </React.Fragment>;
-    }
-
-    private getTwoFactorAuthCardText(profile) {
-      switch (this.getRegistrationStatus(profile.twoFactorAuthCompletionTime, profile.twoFactorAuthBypassTime)) {
-        case RegistrationStepStatus.COMPLETED:
-          return <React.Fragment>
-          <div>Completed on:</div>
-          <div>{displayDateWithoutHours(profile.twoFactorAuthCompletionTime)}</div>
-        </React.Fragment>;
-        case RegistrationStepStatus.BYPASSED:
-          return this.bypassedText(profile.twoFactorAuthBypassTime);
-        default:
-          return;
-      }
-    }
-
     private getEraCommonsCardText(profile) {
       switch (this.getRegistrationStatus(profile.eraCommonsCompletionTime, profile.eraCommonsBypassTime)) {
         case RegistrationStepStatus.COMPLETED:
@@ -324,7 +352,7 @@ export const ProfilePage = fp.flow(
           </React.Fragment>}
         </div>;
         case RegistrationStepStatus.BYPASSED:
-          return this.bypassedText(profile.twoFactorAuthBypassTime);
+          return bypassedText(profile.twoFactorAuthBypassTime);
         default:
           return;
       }
@@ -338,7 +366,7 @@ export const ProfilePage = fp.flow(
           <div>{displayDateWithoutHours(profile.complianceTrainingCompletionTime)}</div>
         </React.Fragment>;
         case RegistrationStepStatus.BYPASSED:
-          return this.bypassedText(profile.complianceTrainingBypassTime);
+          return bypassedText(profile.complianceTrainingBypassTime);
         default:
           return;
       }
@@ -359,13 +387,15 @@ export const ProfilePage = fp.flow(
         </React.Fragment>;
         case RegistrationStepStatus.BYPASSED:
           return <React.Fragment>
-          {this.bypassedText(profile.dataUseAgreementBypassTime)}
+          {bypassedText(profile.dataUseAgreementBypassTime)}
           {universalText}
         </React.Fragment>;
         case RegistrationStepStatus.UNCOMPLETE:
           return universalText;
       }
     }
+
+
 
     render() {
       const {profileState: {profile, controlledTierProfile = {}} } = this.props;
@@ -444,9 +474,6 @@ export const ProfilePage = fp.flow(
         <ValidationError>{errorText}</ValidationError>
       </div>;
       };
-
-
-      console.log(typeof getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))
  
       return <FadeBox style={styles.fadebox}>
       <div style={{width: '95%'}}>
@@ -602,55 +629,56 @@ export const ProfilePage = fp.flow(
                 title={<span><i>All of Us</i> Controlled Tier Data Training</span>}
                 wasBypassed={!!controlledTierProfile.controlledTierBypassTime}
                 incompleteButtonText={'Get Started'}
-                completedButtonText={'Completed'} 
-                completionTimestamp={controlledTierProfile.controlledTierCompletionTime || controlledTierProfile.controlledTierBypassTime}
+                completedButtonText={'Completed'}
                 isComplete={!!(controlledTierProfile.controlledTierCompletionTime || controlledTierProfile.controlledTierBypassTime)}
-                completeStep={() => null}>
-                <React.Fragment>
-                  <div style={{fontSize: 14}}>To Be Completed</div>
+                completeStep={() => null}
+                content={getControlledTierContent(controlledTierProfile)}
+                >
+                <div>
+                  {!(controlledTierProfile.controlledTierCompletionTime || controlledTierProfile.controlledTierBypassTime) && <div>To be completed</div>}
                   <img style={{height: 25, width: 24}} src={controlledTierBadge}/>
-                </React.Fragment>
+                </div>
               </ProfileRegistrationStepStatus>
               <ProfileRegistrationStepStatus
                 title='Turn on Google 2-Step Verification'
-                wasBypassed={!!profile.twoFactorAuthBypassTime}
+                wasBypassed={!!profile.twoFactorAuthBypassTime} 
                 incompleteButtonText='Set Up'
                 completedButtonText={getRegistrationTasksMap()['twoFactorAuth'].completedText}
-                completionTimestamp={getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile)}
                 isComplete={!!(getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))}
-                completeStep={getRegistrationTasksMap()['twoFactorAuth'].onClick}>
-                {this.getTwoFactorAuthCardText(profile)}
+                completeStep={getRegistrationTasksMap()['twoFactorAuth'].onClick}
+                content={getTwoFactorContent(profile)}
+                >
               </ProfileRegistrationStepStatus>
               {enableEraCommons && <ProfileRegistrationStepStatus
-                  title='Connect Your eRA Commons Account'
+                  title='Connect Your eRA Commons Account' 
                   wasBypassed={!!profile.eraCommonsBypassTime}
                   incompleteButtonText='Link'
                   completedButtonText={getRegistrationTasksMap()['eraCommons'].completedText}
-                  completionTimestamp={getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile)}
                   isComplete={!!(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile))}
-                  completeStep={getRegistrationTasksMap()['eraCommons'].onClick}>
-                {this.getEraCommonsCardText(profile)}
+                  completeStep={getRegistrationTasksMap()['eraCommons'].onClick}
+                  content={this.getEraCommonsCardText(profile)}
+                >
               </ProfileRegistrationStepStatus>}
               {enableComplianceTraining && <ProfileRegistrationStepStatus
                   title={<span><i>All of Us</i> Responsible Conduct of Research Training</span>}
                   wasBypassed={!!profile.complianceTrainingBypassTime}
                   incompleteButtonText='Access Training'
                   completedButtonText={getRegistrationTasksMap()['complianceTraining'].completedText}
-                  completionTimestamp={getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile)}
                   isComplete={!!(getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile))}
-                  completeStep={getRegistrationTasksMap()['complianceTraining'].onClick}>
-                {this.getComplianceTrainingText(profile)}
+                  completeStep={getRegistrationTasksMap()['complianceTraining'].onClick}
+                  content={this.getComplianceTrainingText(profile)}
+                >
               </ProfileRegistrationStepStatus>}
               {enableDataUseAgreement && <ProfileRegistrationStepStatus
                   title='Sign Data User Code Of Conduct'
                   wasBypassed={!!profile.dataUseAgreementBypassTime}
                   incompleteButtonText='Sign'
                   completedButtonText={getRegistrationTasksMap()['dataUserCodeOfConduct'].completedText}
-                  completionTimestamp={getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile)}
                   isComplete={!!(getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile))}
                   completeStep={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}
-                  childrenStyle={{marginLeft: '0rem'}}>
-                {this.getDataUseAgreementText(profile)}
+                  childrenStyle={{marginLeft: '0rem'}}
+                  content={this.getDataUseAgreementText(profile)}
+                >
               </ProfileRegistrationStepStatus>}
               </div>
             <div style={{marginTop: '1rem', marginLeft: '1rem'}}>

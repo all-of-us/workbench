@@ -5,6 +5,8 @@ import {FlexColumn} from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
+import * as fp from 'lodash/fp';
+
 
 const styles = reactStyles({
   container: {
@@ -40,9 +42,30 @@ interface Props {
   incompleteButtonText: string;
   completedButtonText: string;
   completeStep: Function;
-  completionTimestamp: number;
   childrenStyle?: React.CSSProperties;
+  content?: JSX.Element | JSX.Element[]; // | React.ReactChildren;
 }
+
+const maybeRenderContent = fp.curry(({childrenStyle, content, isComplete}, components) => {
+  return isComplete ? [...components, (<div style={childrenStyle}>{ content }</div>)] : components
+})
+
+const maybeRenderCompleteButton = fp.curry(({isComplete, wasBypassed, completedButtonText}, components) => {
+  return isComplete ? 
+  [ ...components, (<Button disabled={true} data-test-id='completed-button'
+    style={{...styles.button, backgroundColor: colors.success,
+      width: 'max-content', cursor: 'default'}}>
+    <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : completedButtonText}
+  </Button>)] : components
+})
+
+const maybeRenderIncompleteButton = fp.curry(({isComplete, completeStep, incompleteButtonText}, components) => {
+  return !isComplete 
+    ? [...components, (<Button type='purplePrimary' style={ styles.button } onClick={ completeStep }>{ incompleteButtonText }</Button>)]
+    : components
+})
+
+const renderChildren = fp.curry((children, components) => [children, ...components] )
 
 const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
   (props) => {
@@ -53,40 +76,29 @@ const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
       incompleteButtonText,
       completedButtonText,
       completeStep,
-      children
+      childrenStyle,
+      children,
+      content
     } = props;
+
+    const contentToRender = fp.flow(
+      maybeRenderContent({childrenStyle, content, isComplete}), 
+      renderChildren(children),
+      maybeRenderCompleteButton({isComplete, wasBypassed, completedButtonText}), 
+      maybeRenderIncompleteButton({isComplete, completeStep, incompleteButtonText})
+    )([])
 
     return (
       <FlexColumn style={{...styles.container, ...props.containerStylesOverride}}>
         <div style={styles.title}>
           { title }
         </div>
-        <FlexColumn style={{justifyContent: 'space-between', flex: '1 1 auto'}}>
-
-          { isComplete ? (
-            <React.Fragment>
-              <div style={props.childrenStyle}>
-                { children }
-              </div>
-              <Button disabled={true} data-test-id='completed-button'
-                      style={{...styles.button, backgroundColor: colors.success,
-                        width: 'max-content', cursor: 'default'}}>
-                <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : completedButtonText}
-              </Button>
-            </React.Fragment>
-          ) : (
-            <React.Fragment>
-              {/*This div exists to ensure spacing is consistent. We want to put the button at the bottom of the flex box*/}
-              <div/>
-              <Button
-                type='purplePrimary'
-                style={ styles.button }
-                onClick={ completeStep }
-              >
-                { incompleteButtonText }
-              </Button>
-            </React.Fragment>
-          ) }
+        <FlexColumn style={{
+          justifyContent: contentToRender.length > 1 ? 'space-between' : 'flex-end', 
+          flex: '1 1 auto',
+          alignItems: 'baseline'
+          }}>
+          {React.createElement(React.Fragment, {}, ...contentToRender)}
         </FlexColumn>
       </FlexColumn>
     );
