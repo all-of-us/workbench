@@ -11,35 +11,85 @@ public enum BigQueryDataSetTableInfo {
       "ds_condition_occurrence",
       " condition_concept_id in "
           + String.format(
-              CHILD_LOOKUP_SQL, "'CONDITION'", 1, "@standardConceptIds", "'CONDITION'", 1),
+              CHILD_LOOKUP_SQL,
+              Constants.CONDITION,
+              1,
+              "@standardConceptIds",
+              Constants.CONDITION_RANK,
+              Constants.CONDITION,
+              1),
       " condition_source_concept_id in "
           + String.format(
-              CHILD_LOOKUP_SQL, "'CONDITION'", 0, "@sourceConceptIds", "'CONDITION'", 0)),
+              CHILD_LOOKUP_SQL,
+              Constants.CONDITION,
+              0,
+              "@sourceConceptIds",
+              Constants.CONDITION_RANK,
+              Constants.CONDITION,
+              0)),
   PROCEDURE(
       Domain.PROCEDURE,
       "ds_procedure_occurrence",
       " procedure_concept_id in "
           + String.format(
-              CHILD_LOOKUP_SQL, "'PROCEDURE'", 1, "@standardConceptIds", "'PROCEDURE'", 1),
+              CHILD_LOOKUP_SQL,
+              Constants.PROCEDURE,
+              1,
+              "@standardConceptIds",
+              Constants.PROCEDURE_RANK,
+              Constants.PROCEDURE,
+              1),
       " procedure_source_concept_id in "
           + String.format(
-              CHILD_LOOKUP_SQL, "'PROCEDURE'", 0, "@sourceConceptIds", "'PROCEDURE'", 0)),
+              CHILD_LOOKUP_SQL,
+              Constants.PROCEDURE,
+              0,
+              "@sourceConceptIds",
+              Constants.PROCEDURE_RANK,
+              Constants.PROCEDURE,
+              0)),
   DRUG(
       Domain.DRUG,
       "ds_drug_exposure",
       " drug_concept_id in "
-          + String.format(DRUG_CHILD_LOOKUP_SQL, "'DRUG'", 1, "@standardConceptIds", "'DRUG'", 1),
+          + String.format(
+              DRUG_CHILD_LOOKUP_SQL,
+              Constants.DRUG,
+              1,
+              "@standardConceptIds",
+              Constants.DRUG_RANK,
+              Constants.DRUG,
+              1),
       " drug_source_concept_id in "
-          + String.format(DRUG_CHILD_LOOKUP_SQL, "'DRUG'", 0, "@sourceConceptIds", "'DRUG'", 0)),
+          + String.format(
+              DRUG_CHILD_LOOKUP_SQL,
+              Constants.DRUG,
+              0,
+              "@sourceConceptIds",
+              Constants.DRUG_RANK,
+              Constants.DRUG,
+              0)),
   MEASUREMENT(
       Domain.MEASUREMENT,
       "ds_measurement",
       " measurement_concept_id in "
           + String.format(
-              CHILD_LOOKUP_SQL, "'MEASUREMENT'", 1, "@standardConceptIds", "'MEASUREMENT'", 1),
+              CHILD_LOOKUP_SQL,
+              Constants.MEASUREMENT,
+              1,
+              "@standardConceptIds",
+              Constants.MEASUREMENT_RANK,
+              Constants.MEASUREMENT,
+              1),
       " measurement_source_concept_id in "
           + String.format(
-              CHILD_LOOKUP_SQL, "'MEASUREMENT'", 0, "@sourceConceptIds", "'MEASUREMENT'", 0)),
+              CHILD_LOOKUP_SQL,
+              Constants.MEASUREMENT,
+              0,
+              "@sourceConceptIds",
+              Constants.MEASUREMENT_RANK,
+              Constants.MEASUREMENT,
+              0)),
   PHYSICAL_MEASUREMENT_CSS(
       Domain.PHYSICAL_MEASUREMENT_CSS,
       "ds_measurement",
@@ -86,5 +136,16 @@ public enum BigQueryDataSetTableInfo {
       }
     }
     return null;
+  }
+
+  private static class Constants {
+    private static final String CONDITION = "'CONDITION'";
+    private static final String CONDITION_RANK = "'%[condition_rank1]%'";
+    private static final String PROCEDURE = "'PROCEDURE'";
+    private static final String PROCEDURE_RANK = "'%[procedure_rank1]%'";
+    private static final String DRUG = "'DRUG'";
+    private static final String DRUG_RANK = "'%[drug_rank1]%'";
+    private static final String MEASUREMENT = "'MEASUREMENT'";
+    private static final String MEASUREMENT_RANK = "'%[measurement_rank1]%'";
   }
 }
