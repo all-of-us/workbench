@@ -84,7 +84,6 @@ export const MultiSelectWithLabel = (props) => {
 
 export interface AccountCreationProps {
   profile: Profile;
-  invitationKey: string;
   onComplete: (profile: Profile) => void;
   onPreviousClick: (profile: Profile) => void;
 }

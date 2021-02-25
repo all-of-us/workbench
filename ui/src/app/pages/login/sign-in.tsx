@@ -5,7 +5,6 @@ import {AccountCreation} from 'app/pages/login/account-creation/account-creation
 import {AccountCreationSuccess} from 'app/pages/login/account-creation/account-creation-success';
 import {AccountCreationSurvey} from 'app/pages/login/account-creation/account-creation-survey';
 import {AccountCreationTos} from 'app/pages/login/account-creation/account-creation-tos';
-import {InvitationKey} from 'app/pages/login/invitation-key';
 import {LoginReactComponent} from 'app/pages/login/login';
 import colors from 'app/styles/colors';
 import {
@@ -80,8 +79,6 @@ const styles = reactStyles({
 export enum SignInStep {
   // Landing page. User can choose to sign in or create an account.
   LANDING,
-  // Interstitial step, where a user must enter their invitation key.
-  INVITATION_KEY,
   // Terms of Service page. User must read and acknowledge the privacy statement & TOS.
   TERMS_OF_SERVICE,
   // Institutional affiliation step. Includes institution drop-down and contact email.
@@ -119,9 +116,6 @@ export interface SignInProps extends ServerConfigProps, WindowSizeProps {
 
 interface SignInState {
   currentStep: SignInStep;
-  // Tracks the invitation key provided by the user. This is a required parameter in the createUser
-  // API call.
-  invitationKey: string;
   profile: Profile;
   // Tracks the Terms of Service version that was viewed and acknowledged by the user.
   // This is an optional parameter in the createUser API call.
@@ -176,7 +170,6 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
     super(props);
     this.state = {
       currentStep: props.initialStep ? props.initialStep : SignInStep.LANDING,
-      invitationKey: null,
       termsOfServiceVersion: null,
       // This defines the profile state for a new user flow. This will get passed to each
       // step component as a prop. When each sub-step completes, it will pass the updated Profile
@@ -203,22 +196,14 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
    * Made visible for ease of unit-testing.
    */
   public getAccountCreationSteps(): Array<SignInStep> {
-    const {requireInvitationKey} = this.props.serverConfig;
-
-    let steps = [
+    return [
       SignInStep.LANDING,
-      SignInStep.INVITATION_KEY,
       SignInStep.TERMS_OF_SERVICE,
       SignInStep.INSTITUTIONAL_AFFILIATION,
       SignInStep.ACCOUNT_DETAILS,
       SignInStep.DEMOGRAPHIC_SURVEY,
       SignInStep.SUCCESS_PAGE
     ];
-
-    if (!requireInvitationKey) {
-      steps = fp.remove(step => step === SignInStep.INVITATION_KEY, steps);
-    }
-    return steps;
   }
 
   private getNextStep(currentStep: SignInStep) {
@@ -269,12 +254,6 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
             currentStep: this.getNextStep(currentStep)
           });
         }}/>;
-      case SignInStep.INVITATION_KEY:
-        return <InvitationKey onInvitationKeyVerified={(key: string) => this.setState({
-          invitationKey: key,
-          currentStep: this.getNextStep(currentStep),
-          isPreviousStep: false
-        })}/>;
       case SignInStep.TERMS_OF_SERVICE:
         return <AccountCreationTos
           filePath='/assets/documents/aou-tos.html'
@@ -292,14 +271,12 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
           onComplete={onComplete}
           onPreviousClick={onPrevious}/>;
       case SignInStep.ACCOUNT_DETAILS:
-        return <AccountCreation invitationKey={this.state.invitationKey}
-                                profile={this.state.profile}
+        return <AccountCreation profile={this.state.profile}
                                 onComplete={onComplete}
                                 onPreviousClick={onPrevious}/>;
       case SignInStep.DEMOGRAPHIC_SURVEY:
         return <AccountCreationSurvey
           profile={this.state.profile}
-          invitationKey={this.state.invitationKey}
           termsOfServiceVersion={this.state.termsOfServiceVersion}
           onComplete={onComplete}
           onPreviousClick={onPrevious}/>;

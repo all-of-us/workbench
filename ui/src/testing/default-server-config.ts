@@ -12,7 +12,6 @@ const defaultServerConfig: ConfigResponse = {
   unsafeAllowSelfBypass: false,
   defaultFreeCreditsDollarLimit: 300,
   enableBillingUpgrade: true,
-  requireInvitationKey: true,
 };
 
 export default defaultServerConfig;
