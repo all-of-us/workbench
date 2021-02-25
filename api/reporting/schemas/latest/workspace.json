@@ -5,6 +5,11 @@
     "type": "INTEGER"
   },
   {
+    "name": "access_tier_short_name",
+    "type": "STRING",
+    "description": "A brief string identifying the access tier of this workspace, e.g. 'registered'"
+  },
+  {
     "name": "billing_account_type",
     "type": "STRING",
     "description": "Whether the workspace's billing account is the free tier account, or a user-provided billing\naccount"
@@ -16,7 +21,7 @@
   },
   {
     "name": "cdr_version_id",
-    "type": "INT64",
+    "type": "INTEGER",
     "description": "Foreign key into CDR table."
   },
   {
@@ -26,7 +31,7 @@
   },
   {
     "name": "creator_id",
-    "type": "INT64",
+    "type": "INTEGER",
     "description": "User ID of user who initially created this workspace."
   },
   {
@@ -51,7 +56,7 @@
   },
   {
     "name": "needs_rp_review_prompt",
-    "type": "INT64",
+    "type": "INTEGER",
     "description": "If true, the owner of the workspace will be asked to review the Research purpose."
   },
   {
@@ -171,12 +176,12 @@
   },
   {
     "name": "workspace_id",
-    "type": "INT64",
+    "type": "INTEGER",
     "description": "Primary key of the workspace table in Workrbench application database. Along with\nsnapshot_timestamp, serves as a pseudo-primary key for this table."
   },
   {
     "name": "workspace_namespace",
     "type": "STRING",
-    "description": "The workspace \"namespace\", which corresponds to the Google Cloud Project ID associated with the workspace."
+    "description": "The workspace \"namespace\", which corresponds to the Google Cloud Project ID associated with\nthe workspace."
   }
 ]

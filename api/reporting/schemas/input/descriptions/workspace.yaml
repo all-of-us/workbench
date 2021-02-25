@@ -1,4 +1,6 @@
 workspace:
+  accessTierShortName: |
+    A brief string identifying the access tier of this workspace, e.g. 'registered'
   billing_account_type: |
     Whether the workspace's billing account is the free tier account, or a user-provided billing
     account

@@ -8345,6 +8345,9 @@ definitions:
       and does not run on every build and updates must be merged manually for now.
     type: object
     properties:
+      accessTierShortName:
+        type: string
+        description: a brief string identifying the access tier of this workspace, e.g. 'registered'
       billingAccountType:
         description: |-
           Whether the workspace's billing account is the free tier account, or a user-provided billing

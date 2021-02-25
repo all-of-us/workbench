@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.jdbc;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__ACCESS_TIER_SHORT_NAME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTIONAL_ROLE_ENUM;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTIONAL_ROLE_OTHER_TEXT;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTION_ID;
@@ -16,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
@@ -24,6 +26,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -62,7 +65,8 @@ public class ReportingQueryServiceTest {
 
   // It's necessary to bring in several Dao classes, since we aim to populate join tables
   // that have neither entities of their own nor stand-alone DAOs.
-  @Autowired private CdrVersionDao cCdrVersionDao;
+  @Autowired private AccessTierDao accessTierDao;
+  @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private CohortDao cohortDao;
   @Autowired private DataSetDao dataSetDao;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
@@ -91,7 +95,7 @@ public class ReportingQueryServiceTest {
   @Test
   public void testGetReportingDatasetCohorts() {
     final DbUser user1 = createDbUserWithInstitute();
-    final DbCdrVersion cdrVersion1 = createCdrVersion();
+    final DbCdrVersion cdrVersion1 = createCdrVersionWithAccessTier();
     final DbWorkspace workspace1 = createDbWorkspace(user1, cdrVersion1);
     final DbCohort cohort1 = createCohort(user1, workspace1);
     final DbDataset dataset1 = createDataset(workspace1, cohort1);
@@ -134,11 +138,21 @@ public class ReportingQueryServiceTest {
   }
 
   @Transactional
-  public DbCdrVersion createCdrVersion() {
+  public DbCdrVersion createCdrVersionWithAccessTier() {
+    DbAccessTier accessTier =
+        new DbAccessTier()
+            .setShortName(WORKSPACE__ACCESS_TIER_SHORT_NAME)
+            .setDisplayName("A Longer Name")
+            .setAuthDomainName("auth-domain")
+            .setAuthDomainGroupEmail("auth-domain@email.com")
+            .setServicePerimeter("service/perimeter");
+    accessTier = accessTierDao.save(accessTier);
+
     DbCdrVersion cdrVersion1 = new DbCdrVersion();
     cdrVersion1.setName("foo");
-    cdrVersion1 = cCdrVersionDao.save(cdrVersion1);
-    assertThat(cCdrVersionDao.count()).isEqualTo(1);
+    cdrVersion1.setAccessTier(accessTier);
+    cdrVersion1 = cdrVersionDao.save(cdrVersion1);
+    assertThat(cdrVersionDao.count()).isEqualTo(1);
     return cdrVersion1;
   }
 
@@ -178,7 +192,7 @@ public class ReportingQueryServiceTest {
   @Test
   public void testWorkspaceIterator_oneEntry() {
     final DbUser user = createDbUserWithInstitute();
-    final DbCdrVersion cdrVersion = createCdrVersion();
+    final DbCdrVersion cdrVersion = createCdrVersionWithAccessTier();
     final DbWorkspace workspace = createDbWorkspace(user, cdrVersion);
 
     final Iterator<List<ReportingWorkspace>> iterator =
@@ -306,7 +320,7 @@ public class ReportingQueryServiceTest {
 
   private void createWorkspaces(int count) {
     final DbUser user = createDbUserWithInstitute();
-    final DbCdrVersion cdrVersion = createCdrVersion();
+    final DbCdrVersion cdrVersion = createCdrVersionWithAccessTier();
     for (int i = 0; i < count; ++i) {
       createDbWorkspace(user, cdrVersion);
     }
