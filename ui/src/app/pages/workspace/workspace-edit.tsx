@@ -1005,8 +1005,6 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       // defined below in the OverlayPanel declaration
       let freeTierBalancePanel: OverlayPanel;
 
-      console.log(reviewRequested);
-
       const errors = this.validate();
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <div style={{width: '1120px'}}>
