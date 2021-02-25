@@ -590,9 +590,9 @@ export const ProfilePage = fp.flow(
             </div>
             <hr style={{...styles.verticalLine, width: '15.8rem'}}/>
             <div style={{display: 'grid', gap: '10px', gridAutoRows: '225px', gridTemplateColumns: '220px 220px'}}>
-            <ProfileRegistrationStepStatus
+              <ProfileRegistrationStepStatus
                 title='Turn on Google 2-Step Verification'
-                wasBypassed={!!profile.twoFactorAuthBypassTime} 
+                wasBypassed={!!profile.twoFactorAuthBypassTime}
                 incompleteButtonText='Set Up'
                 completedButtonText={getRegistrationTasksMap()['twoFactorAuth'].completedText}
                 isComplete={!!(getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))}
@@ -601,7 +601,7 @@ export const ProfilePage = fp.flow(
                 >
               </ProfileRegistrationStepStatus>
               {enableEraCommons && <ProfileRegistrationStepStatus
-                  title='Connect Your eRA Commons Account' 
+                  title='Connect Your eRA Commons Account'
                   wasBypassed={!!profile.eraCommonsBypassTime}
                   incompleteButtonText='Link'
                   completedButtonText={getRegistrationTasksMap()['eraCommons'].completedText}
@@ -627,7 +627,7 @@ export const ProfilePage = fp.flow(
                   completedButtonText={getRegistrationTasksMap()['dataUserCodeOfConduct'].completedText}
                   isComplete={!!(getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile))}
                   completeStep={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}
-                  childrenStyle={{marginLeft: '0rem'}}
+                  childrenStyle={{marginLeft: 0}}
                   content={this.getDataUseAgreementText(profile)}
                 >
               </ProfileRegistrationStepStatus>}

@@ -41,7 +41,7 @@ interface Props {
   completedButtonText: string;
   completeStep: Function;
   childrenStyle?: React.CSSProperties;
-  content?: JSX.Element | JSX.Element[]; 
+  content?: JSX.Element | JSX.Element[];
 }
 
 const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
@@ -64,19 +64,19 @@ const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
           { title }
         </div>
         <FlexColumn style={{
-          justifyContent: isComplete && children ? 'flex-end' : 'space-between', 
+          justifyContent: isComplete && children ? 'flex-end' : 'space-between',
           flex: '1 1 auto',
           alignItems: 'baseline'
-          }}>
+        }}>
           {isComplete && <div style={childrenStyle}>{ content }</div>}
           {children}
-          {isComplete && <Button disabled={true} 
-                                data-test-id='completed-button' 
+          {isComplete && <Button disabled={ true }
+                                data-test-id='completed-button'
                                 style={{...styles.button, backgroundColor: colors.success, width: 'max-content', cursor: 'default'}}>
               <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : completedButtonText}
             </Button>
           }
-          {!isComplete && <Button type='purplePrimary' style={ styles.button } onClick={ completeStep }>{ incompleteButtonText }</Button>}
+          {!isComplete && <Button type='purplePrimary' style={styles.button} onClick={completeStep}>{incompleteButtonText}</Button>}
         </FlexColumn>
       </FlexColumn>
     );
