@@ -627,7 +627,8 @@ workflows:
       - puppeteer-test:
           <<: *filter-pr-branch
           env_name: "local"
-          parallel_num: 4
+          parallel_num: 1
+          test_mode: "nightly-integration"
           optional_steps:
             - halt-puppeteer-check
           requires:
