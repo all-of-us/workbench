@@ -640,6 +640,7 @@ export const lensOnProps = fp.curry((setters: string[], getters: string[], obj: 
   )(setters);
 });
 
+// useId: provides a unique ID for an element. Useful for using aria-labelledby
 export const useId = () => {
   const [id] = useState(() => fp.uniqueId('element-'));
   return id;

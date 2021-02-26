@@ -26,7 +26,7 @@ import {
   lensOnProps,
   reactStyles,
   ReactWrapperBase,
-  withUserProfile,
+  withUserProfile
 } from 'app/utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {serverConfigStore} from 'app/utils/navigation';
@@ -171,7 +171,7 @@ const getRegistrationStatus = (completionTime: number, bypassTime: number) => {
   bypassTime !== null && completionTime !== undefined ? RegistrationStepStatus.BYPASSED : RegistrationStepStatus.UNCOMPLETE;
 };
 
-const bypassedText = (bypassTime): JSX.Element => {
+const bypassedText = (bypassTime: number): JSX.Element => {
   return <React.Fragment>
   <div>Bypassed on:</div>
   <div>{displayDateWithoutHours(bypassTime)}</div>
@@ -677,7 +677,7 @@ export const ProfilePage = fp.flow(
                   completedButtonText={getRegistrationTasksMap()['dataUserCodeOfConduct'].completedText}
                   isComplete={!!(getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile))}
                   completeStep={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}
-                  childrenStyle={{marginLeft: '0rem'}}
+                  childrenStyle={{marginLeft: 0}}
                   content={this.getDataUseAgreementText(profile)}
                 >
               </ProfileRegistrationStepStatus>}

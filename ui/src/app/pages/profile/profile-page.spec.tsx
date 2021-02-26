@@ -168,7 +168,7 @@ describe('ProfilePageComponent', () => {
     expect(profileCardCompleteButtons.length).toBe(5);
   });
 
-  it('should display a controlled tier card with a complete button user has completed training', async() => {
+  it('should display a controlled tier card with a complete button when the user has completed training', async() => {
     const wrapper = component({controlledTierEnabled: true, controlledTierCompletionTime: 1});
     const profileCardCompleteButtons = wrapper.find('[data-test-id="completed-button"]');
     expect(profileCardCompleteButtons.length).toBe(1);
