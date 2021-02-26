@@ -589,53 +589,49 @@ export const ProfilePage = fp.flow(
               Requirements for <AoU/> Workbench access
             </div>
             <hr style={{...styles.verticalLine, width: '15.8rem'}}/>
-            <FlexRow>
+            <div style={{display: 'grid', gap: '10px', gridAutoRows: '225px', gridTemplateColumns: '220px 220px'}}>
               <ProfileRegistrationStepStatus
                 title='Turn on Google 2-Step Verification'
                 wasBypassed={!!profile.twoFactorAuthBypassTime}
                 incompleteButtonText='Set Up'
                 completedButtonText={getRegistrationTasksMap()['twoFactorAuth'].completedText}
-                completionTimestamp={getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile)}
                 isComplete={!!(getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))}
-                completeStep={getRegistrationTasksMap()['twoFactorAuth'].onClick}>
-                {this.getTwoFactorAuthCardText(profile)}
+                completeStep={getRegistrationTasksMap()['twoFactorAuth'].onClick}
+                content={this.getTwoFactorAuthCardText(profile)}
+                >
               </ProfileRegistrationStepStatus>
               {enableEraCommons && <ProfileRegistrationStepStatus
-                  containerStylesOverride={{marginLeft: '0.5rem'}}
                   title='Connect Your eRA Commons Account'
                   wasBypassed={!!profile.eraCommonsBypassTime}
                   incompleteButtonText='Link'
                   completedButtonText={getRegistrationTasksMap()['eraCommons'].completedText}
-                  completionTimestamp={getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile)}
                   isComplete={!!(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile))}
-                  completeStep={getRegistrationTasksMap()['eraCommons'].onClick}>
-                {this.getEraCommonsCardText(profile)}
+                  completeStep={getRegistrationTasksMap()['eraCommons'].onClick}
+                  content={this.getEraCommonsCardText(profile)}
+                >
               </ProfileRegistrationStepStatus>}
-            </FlexRow>
-            <FlexRow style={{marginTop: 3}}>
               {enableComplianceTraining && <ProfileRegistrationStepStatus
-                  title={<span><i>All of Us</i> Responsible Conduct of Research Training'</span>}
+                  title={<span><i>All of Us</i> Responsible Conduct of Research Training</span>}
                   wasBypassed={!!profile.complianceTrainingBypassTime}
                   incompleteButtonText='Access Training'
                   completedButtonText={getRegistrationTasksMap()['complianceTraining'].completedText}
-                  completionTimestamp={getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile)}
                   isComplete={!!(getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile))}
-                  completeStep={getRegistrationTasksMap()['complianceTraining'].onClick}>
-                {this.getComplianceTrainingText(profile)}
+                  completeStep={getRegistrationTasksMap()['complianceTraining'].onClick}
+                  content={this.getComplianceTrainingText(profile)}
+                >
               </ProfileRegistrationStepStatus>}
               {enableDataUseAgreement && <ProfileRegistrationStepStatus
-                  containerStylesOverride={{marginLeft: '0.5rem'}}
                   title='Sign Data User Code Of Conduct'
                   wasBypassed={!!profile.dataUseAgreementBypassTime}
                   incompleteButtonText='Sign'
                   completedButtonText={getRegistrationTasksMap()['dataUserCodeOfConduct'].completedText}
-                  completionTimestamp={getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile)}
                   isComplete={!!(getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile))}
                   completeStep={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}
-                  childrenStyle={{marginLeft: '0rem'}}>
-                {this.getDataUseAgreementText(profile)}
+                  childrenStyle={{marginLeft: 0}}
+                  content={this.getDataUseAgreementText(profile)}
+                >
               </ProfileRegistrationStepStatus>}
-            </FlexRow>
+            </div>
             <div style={{marginTop: '1rem', marginLeft: '1rem'}}>
 
               <div style={styles.title}>Optional Demographics Survey</div>
