@@ -635,7 +635,7 @@ export function validateInputForMySQL(searchString: string): Array<string> {
 export const lensOnProps = fp.curry((setters: string[], getters: string[], obj: object): object => {
   return fp.flow(
     fp.zip(getters),
-    fp.map<[string, string], [string, object]>(([fromProp, toProp]) => [fromProp, obj[toProp]]),
+    fp.map<[string, string], [string, object]>(([fromProp, toProp]) => [toProp, obj[fromProp]]),
     fp.fromPairs
   )(setters);
 });

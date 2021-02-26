@@ -67,12 +67,14 @@ const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
           { title }
         </div>
         <FlexColumn style={{
-          justifyContent: isComplete && children ? 'flex-end' : 'space-between',
+          justifyContent: 'space-between',
           flex: '1 1 auto',
           alignItems: 'baseline'
         }}>
-          {isComplete && <div style={childrenStyle}>{ content }</div>}
-          {children}
+          <div style={childrenStyle}>
+            {isComplete && content}
+            {children}
+          </div>
           {isComplete && <Button disabled={true}
                                 data-test-id='completed-button'
                                 style={{...styles.button, backgroundColor: colors.success, width: 'max-content', cursor: 'default'}}>
