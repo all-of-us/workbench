@@ -73,7 +73,7 @@ const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
         }}>
           {isComplete && <div style={childrenStyle}>{ content }</div>}
           {children}
-          {isComplete && <Button disabled={true} 
+          {isComplete && <Button disabled={true}
                                 data-test-id='completed-button'
                                 style={{...styles.button, backgroundColor: colors.success, width: 'max-content', cursor: 'default'}}>
               <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : completedButtonText}

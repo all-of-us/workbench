@@ -28,7 +28,6 @@ import {
   DataAccessLevel as FetchDataAccessLevel,
   Domain as FetchDomain,
 } from 'generated/fetch';
-import { over } from 'lodash';
 
 export const WINDOW_REF = 'window-ref';
 
