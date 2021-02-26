@@ -79,7 +79,6 @@ import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.InstitutionalRole;
-import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.Profile;
@@ -155,7 +154,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
 
   private CreateAccountRequest createAccountRequest;
-  private InvitationVerificationRequest invitationVerificationRequest;
   private com.google.api.services.directory.model.User googleUser;
   private static DbUser dbUser;
 
