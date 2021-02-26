@@ -28,12 +28,19 @@ export const ProfileProvider = ({children}) => {
     return profile;
   };
 
+  // For this particular store, we want to fetch whenever the first ProfileProvider first renders,
+  // and then only when reload is explicitly called.
+  // When converting Angular services, pay attention to how they are used and copy that behavior in
+  // the store. For instance, the cdr version store and the server config store should only be
+  // populated once per session.
   useEffect(() => {
     async function getProfileWrapper() {
       await getProfile();
     }
 
-    getProfileWrapper();
+    if (reactProfileStore.get() !== undefined) {
+      getProfileWrapper();
+    }
   }, []);
 
   return <ProfileContext.Provider value={{
@@ -44,6 +51,8 @@ export const ProfileProvider = ({children}) => {
   </ProfileContext.Provider>;
 };
 
+// This HOC can be used to wrap class components that need ProfileContext injected.
+// For function components, using useContext(ProfileContext) is preferred.
 export const withProfileContext = Component =>
     props => (
         <ProfileContext.Consumer>
