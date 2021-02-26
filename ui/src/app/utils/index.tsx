@@ -628,3 +628,20 @@ export function validateInputForMySQL(searchString: string): Array<string> {
   }
   return Array.from(inputErrors);
 }
+
+// lensOnProps - inspired by lenses in RamdaJS https://ramdajs.com/docs/#lens
+// This is a lens implementation that will change the key names of a set of properties
+// lensProps(['a', 'b], ['x', 'y'], {x: 1, y: 2}) -> {a: 1, b: 2}
+export const lensOnProps = fp.curry((setters: string[], getters: string[], obj: object): object => {
+  return fp.flow(
+    fp.zip(getters),
+    fp.map<[string, string], [string, object]>(([fromProp, toProp]) => [toProp, obj[fromProp]]),
+    fp.fromPairs
+  )(setters);
+});
+
+// useId: provides a unique ID for an element. Useful for using aria-labelledby
+export const useId = () => {
+  const [id] = useState(() => fp.uniqueId('element-'));
+  return id;
+};
