@@ -28,6 +28,7 @@ import {
   DataAccessLevel as FetchDataAccessLevel,
   Domain as FetchDomain,
 } from 'generated/fetch';
+import { over } from 'lodash';
 
 export const WINDOW_REF = 'window-ref';
 
@@ -628,3 +629,14 @@ export function validateInputForMySQL(searchString: string): Array<string> {
   }
   return Array.from(inputErrors);
 }
+
+// lensOnProps - inspired by lenses in RamdaJS https://ramdajs.com/docs/#lens
+// This is a lens implementation that will change the key names of a set of properties
+// lensProps(['a', 'b], ['x', 'y'], {x: 1, y: 2}) -> {a: 1, b: 2}
+export const lensOnProps = fp.curry((setters: string[], getters: string[], obj: object): object => {
+  return fp.flow(
+    fp.zip(getters),
+    fp.map<[string, string], [string, object]>(([fromProp, toProp]) => [fromProp, obj[toProp]]),
+    fp.fromPairs
+  )(setters);
+});

@@ -68,7 +68,7 @@ const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
           justifyContent: isComplete && children ? 'flex-end' : 'space-between', 
           flex: '1 1 auto',
           alignItems: 'baseline'
-          }}>
+        }}>
           {isComplete && <div style={childrenStyle}>{ content }</div>}
           {children}
           {isComplete && <Button disabled={true} 
