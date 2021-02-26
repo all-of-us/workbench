@@ -239,10 +239,10 @@ export const DetailHeader = withCurrentWorkspace()(
       const totalPages = Math.ceil(pagination.queryResultSize / pagination.pageSize);
 
       this.setState({
-        afterId: statuses[index + 1] && statuses[index + 1]['participantId'],
+        afterId: statuses[index + 1] && statuses[index + 1].participantId,
         isFirstParticipant: pagination.page === 0 && index === 0,
         isLastParticipant: (pagination.page + 1) === totalPages && (index + 1) === statuses.length,
-        priorId: statuses[index - 1] && statuses[index - 1]['participantId']
+        priorId: statuses[index - 1] && statuses[index - 1].participantId
       });
     }
 

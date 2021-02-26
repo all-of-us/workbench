@@ -173,7 +173,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       if (domainId === Domain.PHYSICALMEASUREMENT.toString()) {
         let children = [];
         rootNodes.items.forEach(child => {
-          child['children'] = [];
+          child.children = [];
           if (child.parentId === 0) {
             children.push(child);
           } else {

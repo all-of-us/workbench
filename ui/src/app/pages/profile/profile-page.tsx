@@ -364,7 +364,7 @@ export const ProfilePage = fp.flow(
     }
 
     private getDataUseAgreementText(profile) {
-      const universalText = <a onClick={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}>
+      const universalText = <a onClick={getRegistrationTasksMap().dataUserCodeOfConduct.onClick}>
       View code of conduct
     </a>;
       switch (getRegistrationStatus(profile.dataUseAgreementCompletionTime, profile.dataUseAgreementBypassTime)) {
@@ -643,9 +643,9 @@ export const ProfilePage = fp.flow(
                 title='Turn on Google 2-Step Verification'
                 wasBypassed={!!profile.twoFactorAuthBypassTime}
                 incompleteButtonText='Set Up'
-                completedButtonText={getRegistrationTasksMap()['twoFactorAuth'].completedText}
-                isComplete={!!(getRegistrationTasksMap()['twoFactorAuth'].completionTimestamp(profile))}
-                completeStep={getRegistrationTasksMap()['twoFactorAuth'].onClick}
+                completedButtonText={getRegistrationTasksMap().twoFactorAuth.completedText}
+                isComplete={!!(getRegistrationTasksMap().twoFactorAuth.completionTimestamp(profile))}
+                completeStep={getRegistrationTasksMap().twoFactorAuth.onClick}
                 content={getTwoFactorContent(profile)}
                 >
               </ProfileRegistrationStepStatus>
@@ -653,9 +653,9 @@ export const ProfilePage = fp.flow(
                   title='Connect Your eRA Commons Account'
                   wasBypassed={!!profile.eraCommonsBypassTime}
                   incompleteButtonText='Link'
-                  completedButtonText={getRegistrationTasksMap()['eraCommons'].completedText}
-                  isComplete={!!(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile))}
-                  completeStep={getRegistrationTasksMap()['eraCommons'].onClick}
+                  completedButtonText={getRegistrationTasksMap().eraCommons.completedText}
+                  isComplete={!!(getRegistrationTasksMap().eraCommons.completionTimestamp(profile))}
+                  completeStep={getRegistrationTasksMap().eraCommons.onClick}
                   content={this.getEraCommonsCardText(profile)}
                 >
               </ProfileRegistrationStepStatus>}
@@ -663,9 +663,9 @@ export const ProfilePage = fp.flow(
                   title={<span><i>All of Us</i> Responsible Conduct of Research Training</span>}
                   wasBypassed={!!profile.complianceTrainingBypassTime}
                   incompleteButtonText='Access Training'
-                  completedButtonText={getRegistrationTasksMap()['complianceTraining'].completedText}
-                  isComplete={!!(getRegistrationTasksMap()['complianceTraining'].completionTimestamp(profile))}
-                  completeStep={getRegistrationTasksMap()['complianceTraining'].onClick}
+                  completedButtonText={getRegistrationTasksMap().complianceTraining.completedText}
+                  isComplete={!!(getRegistrationTasksMap().complianceTraining.completionTimestamp(profile))}
+                  completeStep={getRegistrationTasksMap().complianceTraining.onClick}
                   content={this.getComplianceTrainingText(profile)}
                 >
               </ProfileRegistrationStepStatus>}
@@ -673,9 +673,9 @@ export const ProfilePage = fp.flow(
                   title='Sign Data User Code Of Conduct'
                   wasBypassed={!!profile.dataUseAgreementBypassTime}
                   incompleteButtonText='Sign'
-                  completedButtonText={getRegistrationTasksMap()['dataUserCodeOfConduct'].completedText}
-                  isComplete={!!(getRegistrationTasksMap()['dataUserCodeOfConduct'].completionTimestamp(profile))}
-                  completeStep={getRegistrationTasksMap()['dataUserCodeOfConduct'].onClick}
+                  completedButtonText={getRegistrationTasksMap().dataUserCodeOfConduct.completedText}
+                  isComplete={!!(getRegistrationTasksMap().dataUserCodeOfConduct.completionTimestamp(profile))}
+                  completeStep={getRegistrationTasksMap().dataUserCodeOfConduct.onClick}
                   childrenStyle={{marginLeft: 0}}
                   content={this.getDataUseAgreementText(profile)}
                 >

@@ -79,28 +79,28 @@ export class AdminInstitution extends React.Component<{}, State> {
   }
 
   renderInstitutionName(row, col) {
-    const link = 'admin/institution/edit/' + row['shortName'];
-    return <a href={link}> {row['displayName']}</a>;
+    const link = 'admin/institution/edit/' + row.shortName;
+    return <a href={link}> {row.displayName}</a>;
   }
 
   renderOrganizationType(row, col) {
     // This should fail if the organization value is not in list
     const organizationLabel = OrganizationTypeOptions
-      .filter(organization => organization.value === row['organizationTypeEnum'])[0].label;
-    if (row['organizationTypeEnum'] === OrganizationType.OTHER) {
-      return organizationLabel + ' - ' + row['organizationTypeOtherText'];
+      .filter(organization => organization.value === row.organizationTypeEnum)[0].label;
+    if (row.organizationTypeEnum === OrganizationType.OTHER) {
+      return organizationLabel + ' - ' + row.organizationTypeOtherText;
     }
     return organizationLabel;
   }
 
   renderDuaType(row, col) {
-    return row['duaTypeEnum'] === DuaType.RESTRICTED ? 'Individual' : 'Master';
+    return row.duaTypeEnum === DuaType.RESTRICTED ? 'Individual' : 'Master';
   }
 
   // If email domain list has more than 4 entries show top 4 and replace others with ...
   renderEmailDomain(row, col) {
-    const emailDomain = fp.take(4, row['emailDomains']).join('\n') ;
-    if (row['emailDomains'] && row['emailDomains'].length > 4) {
+    const emailDomain = fp.take(4, row.emailDomains).join('\n') ;
+    if (row.emailDomains && row.emailDomains.length > 4) {
       return emailDomain + '...';
     }
     return emailDomain;
@@ -108,8 +108,8 @@ export class AdminInstitution extends React.Component<{}, State> {
 
   // If email address list has more than 4 entries show top 4 and replace others with ...
   renderEmailAddress(row, col) {
-    const emailAddresses = fp.take(4, row['emailAddresses']).join('\n') ;
-    if (row['emailAddresses'] && row['emailAddresses'].length > 4) {
+    const emailAddresses = fp.take(4, row.emailAddresses).join('\n') ;
+    if (row.emailAddresses && row.emailAddresses.length > 4) {
       return emailAddresses + '...';
     }
     return emailAddresses;

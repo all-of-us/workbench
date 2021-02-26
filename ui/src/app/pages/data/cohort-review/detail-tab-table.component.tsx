@@ -446,7 +446,7 @@ export const DetailTabTable = withCurrentWorkspace()(
         .then(response => {
           data = response.items.map(item => {
             if (domain === Domain.VITAL || domain === Domain.LAB) {
-              item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
+              item.itemTime = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
             }
             item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
             return item;

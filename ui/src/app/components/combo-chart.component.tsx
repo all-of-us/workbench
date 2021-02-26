@@ -106,7 +106,7 @@ export class ComboChart extends React.Component<Props, State> {
         acc[index].data.push(obj);
       }
       return acc;
-    }, []).sort((a, b) => a['name'] < b['name'] ? 1 : -1);
+    }, []).sort((a, b) => a.name < b.name ? 1 : -1);
     return {categories, series};
   }
 
