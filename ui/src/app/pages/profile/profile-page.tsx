@@ -146,7 +146,6 @@ interface ProfilePageProps extends WithProfileErrorModalProps {
     profile: Profile;
     reload: () => {};
   };
-  // TODO: when the controlled tier data is available fetch it from the serverConfigStore
   controlledTierProfile: {
     controlledTierCompletionTime?: number
     controlledTierBypassTime?: number
@@ -681,7 +680,7 @@ export const ProfilePage = fp.flow(
                   content={this.getDataUseAgreementText(profile)}
                 >
               </ProfileRegistrationStepStatus>}
-              </div>
+            </div>
             <div style={{marginTop: '1rem', marginLeft: '1rem'}}>
 
               <div style={styles.title}>Optional Demographics Survey</div>
