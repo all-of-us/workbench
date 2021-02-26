@@ -6,6 +6,7 @@ import * as React from 'react';
 // up into smaller line length
 export class ReminderIcon extends React.Component<{style: object}> {
   render() {
+    /* eslint-disable max-len */
     return <svg id='Layer_1' xmlns='http://www.w3.org/2000/svg'
                 viewBox='0 0 34 55' enableBackground='new 0 0 34 55' style={this.props.style}>
       <g id='Initializing-Notebook'>
@@ -52,6 +53,7 @@ export class ReminderIcon extends React.Component<{style: object}> {
         </g>
       </g>
     </svg>;
+    /* eslint-enable max-len */
   }
 }
 // tslint:enable:max-line-length

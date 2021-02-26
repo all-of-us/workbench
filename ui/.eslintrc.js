@@ -88,8 +88,8 @@ module.exports = {
     'eqeqeq': ['warn', 'always', {'null': 'ignore'}],
     
     /* Maintainability */
-    // 'eol-last': 'warn',
-    // 'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}', ignoreComments: true}], 
+    'eol-last': 'warn',
+    'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}', ignoreComments: true}], 
     // 'prefer-const': ['warn', {'destructuring': 'all'}], 
   }
 };
