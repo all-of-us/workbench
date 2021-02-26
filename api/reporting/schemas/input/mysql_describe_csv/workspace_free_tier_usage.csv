@@ -1,3 +1,0 @@
-user_id,bigint(20),NO,MUL,NULL,
-workspace_id,bigint(20),NO,UNI,NULL,
-cost,double,NO,MUL,NULL,
