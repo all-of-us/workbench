@@ -246,10 +246,9 @@ public class WorkbenchConfig {
     public boolean enableEraCommons;
     public boolean enableDataUseAgreement;
     public boolean enableBetaAccess;
-    // Controls whether an invitation key is required for user creation. When true, the account
-    // creation UI will show an invitation key form and the server will validate the key before
-    // proceeding.
-    public boolean requireInvitationKey;
+
+    // TODO(calbach): Remove after https://github.com/all-of-us/workbench/pull/4623 is released.
+    @Deprecated public boolean requireInvitationKey;
   }
 
   public static class FeatureFlagsConfig {
