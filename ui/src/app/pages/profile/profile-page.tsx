@@ -144,13 +144,13 @@ enum RegistrationStepStatus {
 interface ProfilePageProps extends WithProfileErrorModalProps {
   profileState: {
     profile: Profile;
-    // TODO: when the controlled tier data is available fetch it from the profile
-    controlledTierProfile: {
-      controlledTierCompletionTime?: number
-      controlledTierBypassTime?: number
-      controlledTierEnabled?: boolean
-    };
     reload: () => {};
+  };
+  // TODO: when the controlled tier data is available fetch it from the serverConfigStore
+  controlledTierProfile: {
+    controlledTierCompletionTime?: number
+    controlledTierBypassTime?: number
+    controlledTierEnabled?: boolean
   };
 }
 
@@ -390,12 +390,14 @@ export const ProfilePage = fp.flow(
 
 
     render() {
-      const {profileState: {
-        profile,
+      const {
+        profileState: {
+          profile,
+        },
         // TODO: when the controlled tier data is available fetch it from the profile
         controlledTierProfile: {
-          controlledTierEnabled = false, controlledTierBypassTime = null, controlledTierCompletionTime = null} = {}
-        }
+          controlledTierEnabled = false, controlledTierBypassTime = null, controlledTierCompletionTime = null
+        } = {}
       } = this.props;
       const {currentProfile, updating, showDemographicSurveyModal} = this.state;
       const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement} =

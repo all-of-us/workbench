@@ -640,3 +640,8 @@ export const lensOnProps = fp.curry((setters: string[], getters: string[], obj: 
     fp.fromPairs
   )(setters);
 });
+
+export const useId = () => {
+  const [id] = useState(() => fp.uniqueId('element-'));
+  return id;
+};

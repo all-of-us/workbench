@@ -2,15 +2,15 @@ import {mount, ReactWrapper} from 'enzyme';
 import * as React from 'react';
 
 import {TextInput} from 'app/components/inputs';
+import {ProfilePage} from 'app/pages/profile/profile-page';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {serverConfigStore, userProfileStore} from 'app/utils/navigation';
 import {InstitutionApi, ProfileApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
-import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {ProfilePage} from 'app/pages/profile/profile-page';
 import SpyInstance = jest.SpyInstance;
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
+import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
+import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 
 
 describe('ProfilePageComponent', () => {
@@ -35,8 +35,8 @@ describe('ProfilePageComponent', () => {
 
   let mockUpdateProfile: SpyInstance;
 
-  const component = () => {
-    return mount(<ProfilePage/>);
+  const component = (controlledTierProfile = {}) => {
+    return mount(<ProfilePage controlledTierProfile={controlledTierProfile}/>);
   };
 
   const reload = jest.fn();
@@ -49,7 +49,7 @@ describe('ProfilePageComponent', () => {
     mockUpdateProfile = jest.spyOn(profileApi, 'updateProfile');
 
     // mocking because we don't have access to the angular service
-    reload.mockImplementation(async () => {
+    reload.mockImplementation(async() => {
       const newProfile = await profileApi.getMe();
       userProfileStore.next({profile: newProfile, reload, updateCache});
     });
@@ -62,6 +62,7 @@ describe('ProfilePageComponent', () => {
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
+      enableComplianceTraining: true
     });
 
     const institutionApi = new InstitutionApiStub();
@@ -73,7 +74,7 @@ describe('ProfilePageComponent', () => {
     expect(wrapper.find(TextInput).first().prop('value')).toMatch(profile.givenName);
   });
 
-  it('should save correctly', async () => {
+  it('should save correctly', async() => {
     const wrapper = component();
     expect(userProfileStore.getValue().profile.givenName).toEqual(profile.givenName);
 
@@ -94,26 +95,25 @@ describe('ProfilePageComponent', () => {
       message: 'Could not create account: invalid institutional affiliation',
       statusCode: 412
     };
-    mockUpdateProfile.mockRejectedValueOnce(
-        new Response(JSON.stringify(errorResponseJson), {status: 412}));
+    mockUpdateProfile.mockRejectedValueOnce(new Response(JSON.stringify(errorResponseJson), {status: 412}));
 
     const wrapper = component();
 
     getDemographicSurveyButton(wrapper).simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
-    wrapper.find('[data-test-id="checkbox-race-PREFER_NO_ANSWER"]').at(1).simulate('change', {target: {checked: true}})
-    wrapper.find('[data-test-id="checkbox-genderIdentityList-PREFER_NO_ANSWER"]').at(1).simulate('change', {target: {checked: true}})
-    wrapper.find('[data-test-id="checkbox-sexAtBirth-PREFER_NO_ANSWER"]').at(1).simulate('change', {target: {checked: true}})
+    wrapper.find('[data-test-id="checkbox-race-PREFER_NO_ANSWER"]').at(1).simulate('change', {target: {checked: true}});
+    wrapper.find('[data-test-id="checkbox-genderIdentityList-PREFER_NO_ANSWER"]').at(1).simulate('change', {target: {checked: true}});
+    wrapper.find('[data-test-id="checkbox-sexAtBirth-PREFER_NO_ANSWER"]').at(1).simulate('change', {target: {checked: true}});
 
     wrapper.find('[data-test-id="radio-lgbtq-pnta"]').first().simulate('click');
     wrapper.find('[id="radio-disability-pnta"]').first().simulate('click');
 
     wrapper.find('[data-test-id="dropdown-ethnicity"]').first().simulate('click');
-    wrapper.find('[data-test-id="dropdown-ethnicity"] [aria-label=" Prefer not to answer"]').first().simulate('click')
+    wrapper.find('[data-test-id="dropdown-ethnicity"] [aria-label=" Prefer not to answer"]').first().simulate('click');
 
     wrapper.find('[data-test-id="year-of-birth"]').first().simulate('click');
-    wrapper.find('[aria-label="Prefer not to answer"]').first().simulate('click')
+    wrapper.find('[aria-label="Prefer not to answer"]').first().simulate('click');
 
     wrapper.find('[data-test-id="highest-education-level"]').first().simulate('click');
     wrapper.find('[data-test-id="highest-education-level"] [aria-label="Prefer not to answer"]').first().simulate('click');
@@ -148,11 +148,30 @@ describe('ProfilePageComponent', () => {
 
     const wrapper = component();
 
-    let streetAddress1 = wrapper.find('[data-test-id="streetAddress1"]').first();
+    const streetAddress1 = wrapper.find('[data-test-id="streetAddress1"]').first();
     expect(streetAddress1.prop('value')).toBe('Main street');
 
     streetAddress1.simulate('change', {target: {value: ''}});
 
     expect(getSaveProfileButton(wrapper).first().prop('disabled')).toBe(true);
   });
+
+  it('should not display controlled tier card when there is no controlled tier', async() => {
+    const wrapper = component();
+    const profileCardCompleteButtons = wrapper.find('[data-test-id="incomplete-button"]');
+    expect(profileCardCompleteButtons.length).toBe(4);
+  });
+
+  it('should display a controlled tier card when there is a controlled tier', async() => {
+    const wrapper = component({controlledTierEnabled: true});
+    const profileCardCompleteButtons = wrapper.find('[data-test-id="incomplete-button"]');
+    expect(profileCardCompleteButtons.length).toBe(5);
+  });
+
+  it('should display a controlled tier card with a complete button user has completed training', async() => {
+    const wrapper = component({controlledTierEnabled: true, controlledTierCompletionTime: 1});
+    const profileCardCompleteButtons = wrapper.find('[data-test-id="completed-button"]');
+    expect(profileCardCompleteButtons.length).toBe(1);
+  });
+
 });
