@@ -59,3 +59,45 @@ user:
   username: |
     User's GSuite username, including appropriate domain for this environment. Uniquely describes a
     user account (but not constrained to be unique by BigQuery).
+  institution_id: |
+    Foreign key into institution table. Each user is only affiliated
+    with a single institution.
+  institutional_role_enum: |
+    Description of the user's role at the institution they are
+    affiliated with. Selected from a list of predefined values. If "other", see institutional_role_other_text
+    for custom description.
+  institutional_role_other_text: |
+    If the institutional_role_enum is "other", custom description
+    of this user's role in the institution.
+  city: |
+    User-reported city of residence.
+  country: |
+    User-reported country of residence.
+  state: |
+    User-reported state or province. Not guaranteed to match official abbreviations or spellings.
+  street_address_1: |
+    First line of user street address.
+  street_address_2: |
+    Second line of user street address.
+  zip_code: |
+    Up to 10-digit zip code for user residence.
+  degrees: |
+    List of user's degrees, comma-delimited if multiple answers were provided.
+  races: |
+    User-reported race information, comma-delimited if multiple answers were provided.
+  ethnicity: |
+    User-reported Ethnicity information
+  gender_identities: |
+    User-reported gender identity information, comma-delimited if multiple answers were provided.
+  identifies_as_lgbtq: |
+    User-reported identities as lgbtq information
+  lgbtq_identity: |
+    User-reported lgbtq identity information
+  sexes_at_birth: |
+    User-reported sex at birth information, comma-delimited if multiple answers were provided.
+  year_of_birth: |
+    User-reported year of birth information
+  disability: |
+    User-reported disability information
+  highest_education: |
+    User-reported the highest education information

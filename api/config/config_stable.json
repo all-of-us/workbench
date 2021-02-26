@@ -27,6 +27,9 @@
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "retryCount": 2,
     "bufferCapacity": 10,
+    "bufferCapacityPerTier": {
+      "registered": 10
+    },
     "bufferRefillProjectsPerTask": 1,
     "bufferStatusChecksPerTask": 10,
     "defaultFreeCreditsDollarLimit": 300.0,
@@ -45,7 +48,12 @@
     ]
   },
   "wgsCohortExtraction": {
-    "serviceAccount": "wgs-cohort-extraction@all-of-us-rw-stable.iam.gserviceaccount.com"
+    "serviceAccount": "wgs-cohort-extraction@all-of-us-rw-stable.iam.gserviceaccount.com",
+    "operationalTerraWorkspaceNamespace": "",
+    "operationalTerraWorkspaceName": "",
+    "extractionMethodConfigurationNamespace": "",
+    "extractionMethodConfigurationName": "",
+    "extractionMethodConfigurationVersion": 1
   },
   "cdr": {
     "debugQueries": true

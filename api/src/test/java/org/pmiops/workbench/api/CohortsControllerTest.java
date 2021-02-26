@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.TestCase.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
@@ -50,6 +51,7 @@ import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -62,6 +64,7 @@ import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -173,21 +176,24 @@ public class CohortsControllerTest {
   String cohortCriteria;
   String badCohortCriteria;
   private TestMockFactory testMockFactory;
+
+  @Autowired CdrVersionService cdrVersionService;
+  @Autowired CloudStorageService cloudStorageService;
+  @Autowired CohortMaterializationService cohortMaterializationService;
+  @Autowired ComplianceService complianceService;
+  @Autowired FireCloudService fireCloudService;
+  @Autowired UserRecentResourceService userRecentResourceService;
+  @Autowired UserService userService;
   @Autowired WorkspaceService workspaceService;
+
+  @Autowired AccessTierDao accessTierDao;
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired CohortDao cohortDao;
-  @Autowired ConceptSetDao conceptSetDao;
-  @Autowired ConceptDao conceptDao;
   @Autowired CohortReviewDao cohortReviewDao;
+  @Autowired ConceptDao conceptDao;
+  @Autowired ConceptSetDao conceptSetDao;
   @Autowired DataSetService dataSetService;
-  @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired UserDao userDao;
-  @Autowired CohortMaterializationService cohortMaterializationService;
-  @Autowired FireCloudService fireCloudService;
-  @Autowired UserService userService;
-  @Autowired CloudStorageService cloudStorageService;
-  @Autowired CdrVersionService cdrVersionService;
-  @Autowired ComplianceService complianceService;
 
   @TestConfiguration
   @Import({
@@ -283,7 +289,7 @@ public class CohortsControllerTest {
     user = userDao.save(user);
     currentUser = user;
 
-    cdrVersion = new DbCdrVersion();
+    cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
     cdrVersion.setName(CDR_VERSION_NAME);
     cdrVersionDao.save(cdrVersion);
 
@@ -857,5 +863,68 @@ public class CohortsControllerTest {
                 .materializeCohort(workspace.getNamespace(), WORKSPACE_NAME, request)
                 .getBody())
         .isEqualTo(response);
+  }
+
+  @Test
+  public void testWgsCohortExtraction_permissions() {
+    DbCdrVersion cdrVersion = new DbCdrVersion();
+    cdrVersion.setCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
+    cdrVersion.setName(CDR_VERSION_NAME);
+    // TODO: (RW-6336) This should be swapped out for the Wgs field once that's implemented
+    cdrVersion.setMicroarrayBigqueryDataset("microarray");
+    cdrVersionDao.save(cdrVersion);
+
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("NO ACCESS"));
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          cohortsController.extractCohortGenomes(
+              workspace.getNamespace(), workspace.getName(), createDefaultCohort().getId());
+        });
+
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("READER"));
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          cohortsController.extractCohortGenomes(
+              workspace.getNamespace(), workspace.getName(), createDefaultCohort().getId());
+        });
+
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("WRITER"));
+    cohortsController.extractCohortGenomes(
+        workspace.getNamespace(), workspace.getName(), createDefaultCohort().getId());
+
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("OWNER"));
+    cohortsController.extractCohortGenomes(
+        workspace.getNamespace(), workspace.getName(), createDefaultCohort().getId());
+
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("PROJECT_OWNER"));
+    cohortsController.extractCohortGenomes(
+        workspace.getNamespace(), workspace.getName(), createDefaultCohort().getId());
+  }
+
+  @Test
+  public void testWgsCohortExtraction_validCdr() {
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          cohortsController.extractCohortGenomes(
+              workspace.getNamespace(), workspace.getName(), createDefaultCohort().getId());
+        });
+
+    DbCdrVersion cdrVersion = new DbCdrVersion();
+    cdrVersion.setCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
+    cdrVersion.setName(CDR_VERSION_NAME);
+    // TODO: (RW-6336) This should be swapped out for the Wgs field once that's implemented
+    cdrVersion.setMicroarrayBigqueryDataset("microarray");
+    cdrVersionDao.save(cdrVersion);
+
+    cohortsController.extractCohortGenomes(
+        workspace.getNamespace(), workspace.getName(), createDefaultCohort().getId());
   }
 }

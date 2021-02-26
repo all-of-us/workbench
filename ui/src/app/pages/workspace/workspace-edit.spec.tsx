@@ -205,6 +205,9 @@ describe('WorkspaceEdit', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
+    wrapper.find('[data-test-id="review-request-btn-false"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
     const numBefore = workspacesApi.workspaces.length;
     wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
@@ -217,7 +220,7 @@ describe('WorkspaceEdit', () => {
 
   it('defaults to upgrading the CDR Version when duplicating a workspace with an older CDR Version', async() => {
     // init the workspace to a non-default CDR version value
-    const altCdrWorkspace = {...workspace, cdrVersionId: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION_ID}
+    const altCdrWorkspace = {...workspace, cdrVersionId: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION_ID};
     currentWorkspaceStore.next(altCdrWorkspace);
 
     // duplication will involve a CDR version upgrade by default
@@ -260,6 +263,9 @@ describe('WorkspaceEdit', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
+    wrapper.find('[data-test-id="review-request-btn-false"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
     const numBefore = workspacesApi.workspaces.length;
     wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
@@ -287,6 +293,8 @@ describe('WorkspaceEdit', () => {
     };
 
     jest.useFakeTimers();
+    wrapper.find('[data-test-id="review-request-btn-false"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
@@ -317,6 +325,8 @@ describe('WorkspaceEdit', () => {
     };
 
     jest.useFakeTimers();
+    wrapper.find('[data-test-id="review-request-btn-false"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');

@@ -180,19 +180,23 @@ public class DbWorkspace {
   }
 
   @Column(name = "data_access_level")
+  @Deprecated // soon to be replaced by accessTier
   public Short getDataAccessLevel() {
     return dataAccessLevel;
   }
 
+  @Deprecated // soon to be replaced by accessTier
   public void setDataAccessLevel(Short dataAccessLevel) {
     this.dataAccessLevel = dataAccessLevel;
   }
 
   @Transient
+  @Deprecated // soon to be replaced by accessTier
   public DataAccessLevel getDataAccessLevelEnum() {
     return DbStorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
   }
 
+  @Deprecated // soon to be replaced by accessTier
   public void setDataAccessLevelEnum(DataAccessLevel dataAccessLevel) {
     setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
   }
