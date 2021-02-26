@@ -14,7 +14,7 @@ interface ProfileStore {
 
 const reactProfileStore = atom<ProfileStore>({});
 
-export const ProfileContext = React.createContext({
+const ProfileContext = React.createContext({
   profile: {},
   reload: () => {}
 });
