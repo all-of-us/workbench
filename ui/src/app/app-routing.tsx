@@ -21,6 +21,7 @@ import {NotebookRedirect} from './pages/analysis/notebook-redirect';
 import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
+import {ProfileProvider} from './services/profile-context';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
 
@@ -82,7 +83,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
     <ProtectedRoutes guards={[signInGuard]}>
       <AppRoute
         path='/'
-          component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
+        component={() => <ProfileProvider><HomepagePage routeData={{title: 'Homepage'}}/></ProfileProvider>}
       />
       <AppRoute
           path='/admin/user-audit'

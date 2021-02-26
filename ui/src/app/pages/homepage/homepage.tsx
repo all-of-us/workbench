@@ -19,9 +19,10 @@ import {QuickTourReact} from 'app/pages/homepage/quick-tour-modal';
 import {RecentResources} from 'app/pages/homepage/recent-resources';
 import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
 import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
+import {withProfileContext} from 'app/services/profile-context';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
-import {hasRegisteredAccessFetch, reactStyles, withUserProfile} from 'app/utils';
+import {hasRegisteredAccessFetch, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {supportUrls} from 'app/utils/zendesk';
@@ -68,9 +69,9 @@ export const styles = reactStyles({
 });
 
 interface Props {
-  profileState: {
-    profile: Profile,
-    reload: Function
+  profileContext: {
+    profile: Profile
+    reload: () => {},
   };
 }
 
@@ -93,7 +94,7 @@ interface State {
   videoId: string;
 }
 
-export const Homepage = withUserProfile()(class extends React.Component<Props, State> {
+export const Homepage = withProfileContext(class extends React.Component<Props, State> {
   private pageId = 'homepage';
   private timer: NodeJS.Timer;
   private quickTourResourcesDiv: HTMLDivElement;
@@ -127,8 +128,8 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
   }
 
   componentDidUpdate(prevProps) {
-    const {profileState: {profile}} = this.props;
-    if (!fp.isEqual(prevProps.profileState.profile, profile)) {
+    const {profile} = this.props.profileContext;
+    if (!fp.isEqual(prevProps.profileContext.profile, profile)) {
       this.callProfile();
     }
   }
@@ -183,7 +184,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
   }
 
   async callProfile() {
-    const {profileState: {profile, reload}} = this.props;
+    const {profile, reload} = this.props.profileContext;
 
     if (fp.isEmpty(profile)) {
       setTimeout(() => {

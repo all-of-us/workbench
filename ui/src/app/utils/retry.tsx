@@ -93,3 +93,39 @@ async function apiCallWithGatewayTimeoutRetriesAndRetryCount<T>(
       apiCall, maxRetries, retryCount + 1, initialWaitTime);
   }
 }
+
+/*
+ * A method to run an API call and retry up to three times on 409 errors. These have a likelihood
+ * to occur on initial user login because we lazily initialize several things via the /me profile
+ * endpoint.
+ */
+export async function apiCallWithConflictRetries<T>(
+  apiCall: () => Promise<T>,
+  maxRetries: number  = 3,
+  retryDelayMs: number = 500
+): Promise<T> {
+  return apiCallWithConflictRetriesAndRetryCount(apiCall, maxRetries, 1, retryDelayMs);
+}
+
+
+async function apiCallWithConflictRetriesAndRetryCount<T>(
+  apiCall: () => Promise<T>,
+  maxRetries: number  = 3,
+  retryCount = 1,
+  retryDelayMs: number = 500
+): Promise<T> {
+  try {
+    return await apiCall();
+  } catch (ex) {
+    if (ex.status !== 409 || retryCount > maxRetries) {
+      throw ex;
+    }
+    await new Promise(resolve => setTimeout(resolve, retryDelayMs));
+    return await apiCallWithConflictRetriesAndRetryCount(
+      apiCall,
+      maxRetries,
+      retryCount + 1,
+      retryDelayMs
+    );
+  }
+}
