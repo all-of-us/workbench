@@ -1,5 +1,5 @@
 /* SystemJS module definition */
-declare var module: NodeModule;
+declare let module: NodeModule;
 interface NodeModule {
   id: string;
 }
@@ -10,6 +10,6 @@ This gets included by the compiler; its symbols do not need to be imported by
 other source files but are globally available.
 */
 
-declare var ResizeObserver: any;
+declare let ResizeObserver: any;
 
 declare module 'outdated-browser-rework';

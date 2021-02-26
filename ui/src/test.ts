@@ -16,8 +16,8 @@ import {cohortReviewStore} from 'app/services/review-state.service';
 import {currentWorkspaceStore, currentCohortStore, currentConceptSetStore, urlParamsStore, queryParamsStore, routeConfigDataStore} from 'app/utils/navigation';
 
 // Unfortunately there's no typing for the `__karma__` variable. Just declare it as any.
-declare var __karma__: any;
-declare var require: any;
+declare let __karma__: any;
+declare let require: any;
 
 // Prevent Karma from running prematurely.
 __karma__.loaded = function () {};

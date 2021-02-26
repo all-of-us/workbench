@@ -83,7 +83,7 @@ module.exports = {
     // 'no-unused-vars': 'off', // Needed for TS 
     // '@typescript-eslint/no-unused-vars': 'warn', 
     'react/jsx-uses-vars': 'warn', 
-    // 'no-var': 'warn',
+    'no-var': 'warn',
     'radix': 'warn', // Add radix on parseInt
     'eqeqeq': ['warn', 'always', {'null': 'ignore'}],
     
