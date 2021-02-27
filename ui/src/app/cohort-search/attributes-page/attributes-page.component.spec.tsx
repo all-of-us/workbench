@@ -44,7 +44,8 @@ describe('AttributesPageV2', () => {
     mockCountParticipants = jest.spyOn(cohortBuilderApi(), 'countParticipants');
     mockFindCriteriaAttributeByConceptId = jest.spyOn(cohortBuilderApi(), 'findCriteriaAttributeByConceptId');
     mockFindSurveyVersionByQuestionConceptId = jest.spyOn(cohortBuilderApi(), 'findSurveyVersionByQuestionConceptId');
-    mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId = jest.spyOn(cohortBuilderApi(), 'findSurveyVersionByQuestionConceptIdAndAnswerConceptId');
+    mockFindSurveyVersionByQuestionConceptIdAndAnswerConceptId = jest.spyOn(cohortBuilderApi(),
+      'findSurveyVersionByQuestionConceptIdAndAnswerConceptId');
     props = {
       back: () => {},
       close: () => {},

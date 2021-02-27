@@ -234,7 +234,8 @@ describe('WorkspaceEdit', () => {
     // default CDR version, not the existing workspace's alt CDR version
     expect(cdrSelection).toBe(CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID);
 
-    const expectedUpgradeMessage = `${CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION} to ${CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION}.`;
+    const expectedUpgradeMessage =
+      `${CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION} to ${CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION}.`;
     const cdrUpgradeMessage = wrapper.find('[data-test-id="cdr-version-upgrade"]').first().text();
     expect(cdrUpgradeMessage).toContain(altCdrWorkspace.name);
     expect(cdrUpgradeMessage).toContain(expectedUpgradeMessage);
