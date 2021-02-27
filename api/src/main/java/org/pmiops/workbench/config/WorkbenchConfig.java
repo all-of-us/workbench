@@ -163,6 +163,9 @@ public class WorkbenchConfig {
     public String extractionMethodConfigurationNamespace;
     public String extractionMethodConfigurationName;
     public Integer extractionMethodConfigurationVersion;
+    public String extractionCohortsDataset;
+    public String extractionDestinationDataset;
+    public String extractionTempTablesDataset;
   }
 
   public static class CdrConfig {

@@ -454,7 +454,7 @@ public class CohortsController implements CohortsApiDelegate {
 
     try {
       return ResponseEntity.ok(
-          cohortService.submitGenomicsCohortExtractionJob(workspaceNamespace, workspaceId));
+          cohortService.submitGenomicsCohortExtractionJob(workspace, cohortId));
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       // Given that there are no input arguments ATM, any API exceptions are due to programming or
       // Firecloud errors

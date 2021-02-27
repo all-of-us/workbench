@@ -101,11 +101,11 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
-  public void writeFile(String bucketName, String fileName, byte[] bytes) {
+  public Blob writeFile(String bucketName, String fileName, byte[] bytes) {
     Storage storage = StorageOptions.getDefaultInstance().getService();
     BlobId blobId = BlobId.of(bucketName, fileName);
     BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("text/plain").build();
-    storage.create(blobInfo, bytes);
+    return storage.create(blobInfo, bytes);
   }
 
   @Override

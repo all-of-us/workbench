@@ -50,7 +50,10 @@
     "operationalTerraWorkspaceName": "",
     "extractionMethodConfigurationNamespace": "",
     "extractionMethodConfigurationName": "",
-    "extractionMethodConfigurationVersion": 1
+    "extractionMethodConfigurationVersion": 1,
+    "extractionCohortsDataset": "",
+    "extractionDestinationDataset": "",
+    "extractionTempTablesDataset": ""
   },
   "cdr": {
     "debugQueries": true

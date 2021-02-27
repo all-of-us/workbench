@@ -40,7 +40,7 @@ public interface CloudStorageService {
 
   Set<BlobId> getExistingBlobIdsIn(List<BlobId> id);
 
-  void writeFile(String bucketName, String fileName, byte[] bytes);
+  Blob writeFile(String bucketName, String fileName, byte[] bytes);
 
   void copyBlob(BlobId from, BlobId to);
 

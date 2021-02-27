@@ -50,7 +50,10 @@
     "operationalTerraWorkspaceName": "aouwgscohortextraction",
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction",
     "extractionMethodConfigurationName": "HelloWorld",
-    "extractionMethodConfigurationVersion": 2
+    "extractionMethodConfigurationVersion": 34,
+    "extractionCohortsDataset": "fc-aou-cdr-synth-test.wgs_extraction_cohorts",
+    "extractionDestinationDataset": "fc-aou-cdr-synth-test.wgs_extracted_cohorts",
+    "extractionTempTablesDataset": "fc-aou-cdr-synth-test.wgs_extraction_temp_tables"
   },
   "cdr": {
     "debugQueries": false
