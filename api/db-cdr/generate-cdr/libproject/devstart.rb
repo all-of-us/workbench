@@ -126,9 +126,17 @@ def publish_cdr(cmd_name, args)
       ->(opts, v) { opts.additional_reader_group = v},
       "Additional Google group to include in the reader ACL.")
   op.add_option(
+      "--additional-writer-group [writer_email]",
+      ->(opts, v) { opts.additional_writer_group = v},
+      "Additional Google group to include in the reader ACL.")
+  op.add_option(
     "--source-cdr-project-override [source-cdr-project]",
     ->(opts, v) { opts.source_cdr_project_override = v},
     "Override for the source cdr project where the source dataset is.")
+  op.add_option(
+    "--ttl [ttl]",
+    ->(opts, v) { opts.ttl = v},
+    "Add default ttl to dataset tables. Given in seconds.")
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_dataset and opts.project and opts.tier }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
   op.add_validator ->(opts) { raise ArgumentError.new("unsupported tier: #{opts.tier}") unless ENVIRONMENTS[opts.project][:accessTiers].key? opts.tier }
@@ -161,7 +169,7 @@ def publish_cdr(cmd_name, args)
     common.run_inline %W{gcloud auth activate-service-account -q --key-file #{key_file.path}}
 
     source_cdr_project = op.opts.source_cdr_project_override || tier.fetch(:source_cdr_project)
-    source_dataset = "#{tier.fetch(:source_cdr_project)}:#{op.opts.bq_dataset}"
+    source_dataset = "#{source_cdr_project}:#{op.opts.bq_dataset}"
     ingest_dataset = "#{tier.fetch(:ingest_cdr_project)}:#{op.opts.bq_dataset}"
     dest_dataset = "#{tier.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
     common.status "Copying from '#{source_dataset}' -> '#{ingest_dataset}' -> '#{dest_dataset}' as #{account}"
@@ -182,6 +190,10 @@ def publish_cdr(cmd_name, args)
     common.run_inline %W{./copy-bq-dataset.sh
         #{ingest_dataset} #{dest_dataset} #{tier.fetch(:ingest_cdr_project)}
         #{table_match_filter} #{table_skip_filter}}
+
+    if op.opts.ttl
+      common.run_inline %W{bq update --default_table_expiration #{op.opts.ttl} #{dest_dataset}}
+    end
 
     # Delete the intermediate dataset.
     common.run_inline %W{bq rm -r -f --dataset #{ingest_dataset}}
@@ -234,6 +246,18 @@ def publish_cdr(cmd_name, args)
         else
           common.status "Adding #{new_group} as a READER..."
           new_entry = { "groupByEmail" => new_group, "role" => "READER"}
+          json["access"].push(new_entry)
+        end
+      end
+
+      if op.opts.additional_writer_group
+        new_group = op.opts.additional_writer_group
+
+        if existing_groups.include?(new_group)
+          common.status "#{new_group} already in ACL, skipping..."
+        else
+          common.status "Adding #{new_group} as a WRITER..."
+          new_entry = { "groupByEmail" => new_group, "role" => "WRITER"}
           json["access"].push(new_entry)
         end
       end
