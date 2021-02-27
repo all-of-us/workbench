@@ -45,11 +45,13 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
 
   @Test
   public void testGetConceptCountNoConceptsSaved() {
-    DbConceptSetConceptId dbConceptSetConceptId =
+    DbConceptSetConceptId dbConceptSetConceptId1 =
         DbConceptSetConceptId.builder().addConceptId(6L).addStandard(true).build();
+    DbConceptSetConceptId dbConceptSetConceptId2 =
+        DbConceptSetConceptId.builder().addConceptId(9L).addStandard(false).build();
     assertThat(
             conceptBigQueryService.getParticipantCountForConcepts(
-                Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId)))
+                Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
         .isEqualTo(1);
   }
 }
