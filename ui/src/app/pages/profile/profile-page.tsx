@@ -205,7 +205,7 @@ const getControlledTierContent = fp.flow(
 
 export const ProfilePage = fp.flow(
   withUserProfile(),
-  withProfileErrorModal({title: 'Error updating account'})
+  withProfileErrorModal
   )(class extends React.Component<
     ProfilePageProps,
     ProfilePageState
@@ -302,12 +302,7 @@ export const ProfilePage = fp.flow(
     async saveProfile(profile: Profile): Promise<Profile> {
       const {profileState: {reload}} = this.props;
 
-    // updating is only used to control spinner display. If the demographic survey modal
-    // is open (and, by extension, it is causing this save), a spinner is being displayed over
-    // that modal, so no need to show one here.
-      if (!this.state.showDemographicSurveyModal) {
-        this.setState({updating: true});
-      }
+      this.setState({updating: true});
 
       try {
         await profileApi().updateProfile(profile);
@@ -732,11 +727,7 @@ export const ProfilePage = fp.flow(
                 onCancelClick={() => {
                   this.setState({showDemographicSurveyModal: false});
                 }}
-                saveProfile={async(profileWithUpdatedDemographicSurvey, captchaToken) => {
-                  const savedProfile = await this.saveProfile(profileWithUpdatedDemographicSurvey);
-                  this.setState({showDemographicSurveyModal: false});
-                  return savedProfile;
-                }}
+                saveProfile={ profileApi().updateProfile }
                 enableCaptcha={false}
                 enablePrevious={false}
                 showStepCount={false}

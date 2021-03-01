@@ -5,7 +5,6 @@ import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {convertAPIError, reportError} from 'app/utils/errors';
 import {environment} from 'environments/environment';
 import {Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -23,8 +22,7 @@ export interface AccountCreationState {
   captcha: boolean;
 }
 
-export const AccountCreationSurvey = withProfileErrorModal({title: 'Error creating account'})
-(class extends React.Component<AccountCreationSurveyProps, AccountCreationState> {
+export class AccountCreationSurvey extends React.Component<AccountCreationSurveyProps, AccountCreationState> {
   constructor(props: any) {
     super(props);
     this.state = {
@@ -61,4 +59,4 @@ export const AccountCreationSurvey = withProfileErrorModal({title: 'Error creati
       />
     </React.Fragment>;
   }
-});
+}

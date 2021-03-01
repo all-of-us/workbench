@@ -67,7 +67,7 @@ interface State {
 const isChecked = (demographicSurvey, optionKey, value) =>
   demographicSurvey && demographicSurvey[optionKey] && demographicSurvey[optionKey].includes(value);
 
-export const DemographicSurvey = withProfileErrorModal({title: 'Error updating account'})(
+export const DemographicSurvey = withProfileErrorModal(
   class DemographicSurveyComponent extends React.Component<Props, State> {
     private captchaRef = React.createRef<ReCAPTCHA>();
     constructor(props: any) {
@@ -157,20 +157,28 @@ export const DemographicSurvey = withProfileErrorModal({title: 'Error updating a
       return validate(demographicSurvey, validationCheck);
     }
 
-//     saveSurvey() {
-//       const {profileState: {reload}} = this.props;
-//        ry {
-//           this.props.saveProfile(this.state.profile)
-// ;        } catch (error) {
+    async saveSurvey() {
+      const {captchaToken} = this.state;
+      this.setState({loading: true});
 
-//         } finally {
-//           this.setState({updating: false});
-//         }
-
-//     }
+      try {
+        const savedProfile = await this.props.saveProfile(this.state.profile, captchaToken);
+        this.setState(prevState => ({profile: savedProfile || prevState.profile, loading: false}));
+      } catch (error) {
+        reportError(error);
+        const {message} = await convertAPIError(error);
+        this.props.showProfileErrorModal(message);
+        if (environment.enableCaptcha && this.props.enableCaptcha) {
+          // Reset captcha
+          this.captchaRef.current.reset();
+          this.setState({captcha: false});
+        }
+        this.setState({loading: false});
+      }
+    }
 
     render() {
-      const {profile: {demographicSurvey = {}}, captcha, captchaToken, loading} = this.state;
+      const {profile: {demographicSurvey = {}}, captcha, loading} = this.state;
 
       const errors = this.validateDemographicSurvey(demographicSurvey);
 
@@ -329,35 +337,7 @@ or another sexual and/or gender minority?'>
                     || (errors && Object.keys(errors).length > 0)
                     || (!environment.enableCaptcha && !this.props.enableCaptcha && !captcha)
                   }
-                  onClick={async() => {
-                    this.setState({loading: true});
-                    try {
-                      const savedProfile = await this.props.saveProfile(this.state.profile, captchaToken);
-                      // If the submit fails, then profile is null, and the try will apparently not
-                      // always break in time to prevent these next lines from executing. so we
-                      // null-check and don't null out the profile if it doesn't exist.
-                      if (!!savedProfile) {
-                        this.setState({profile: savedProfile, loading: false});
-                      } else {
-                        this.setState({loading: false});
-                      }
-                    } catch (error) {
-                      reportError(error);
-                      const errorResponse = await convertAPIError(error);
-                      this.props.showProfileErrorModal(errorResponse.message);
-                      console.error(error);
-                      return Promise.reject();
-                      // TODO: Check the behavior of Promise.reject in nested try/catch and async functions
-                      // TODO: we need to show some user-facing error message when create account fails.
-                      console.log(error);
-                      if (environment.enableCaptcha && this.props.enableCaptcha) {
-                        // Reset captcha
-                        this.captchaRef.current.reset();
-                        this.setState({captcha: false});
-                      }
-                      this.setState({loading: false});
-                    }
-                  }}
+                  onClick={_ => this.saveSurvey()}
                   data-test-id={'submit-button'}
           >
             Submit
