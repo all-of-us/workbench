@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import {withProfileErrorModal, WithProfileErrorModalProps} from 'app/components/with-error-modal';
 import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 
@@ -10,7 +9,7 @@ import {Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 
 
-export interface AccountCreationSurveyProps extends WithProfileErrorModalProps {
+export interface AccountCreationSurveyProps {
   invitationKey: string;
   termsOfServiceVersion?: number;
   profile: Profile;
