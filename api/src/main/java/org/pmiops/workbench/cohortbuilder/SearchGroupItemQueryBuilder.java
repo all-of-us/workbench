@@ -83,7 +83,8 @@ public final class SearchGroupItemQueryBuilder {
           + "where domain_id = %s\n"
           + "and is_standard = %s\n"
           + "and concept_id in unnest(%s)\n"
-          + "and is_selectable = 1) a\n"
+          + "and is_selectable = 1\n"
+          + "and full_text like %s) a\n"
           + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id) or c.path like concat(a.id, '.%%'))\n"
           + "where domain_id = %s\n"
           + "and is_standard = %s\n"
@@ -98,7 +99,8 @@ public final class SearchGroupItemQueryBuilder {
           + "where domain_id = %s\n"
           + "and is_standard = %s\n"
           + "and concept_id in unnest(%s)\n"
-          + "and is_selectable = 1) a\n"
+          + "and is_selectable = 1\n"
+          + "and full_text like %s) a\n"
           + "on (c.path like concat('%%.', a.id, '.%%') or c.path like concat('%%.', a.id))\n"
           + "where domain_id = %s\n"
           + "and is_standard = %s\n"
@@ -664,6 +666,9 @@ public final class SearchGroupItemQueryBuilder {
         String domainParam =
             QueryParameterUtil.addQueryParameterValue(
                 queryParams, QueryParameterValue.string(domain));
+        String rankParam =
+            QueryParameterUtil.addQueryParameterValue(
+                queryParams, QueryParameterValue.string("%[" + domain.toLowerCase() + "_rank1]%"));
         String conceptIdsParam =
             QueryParameterUtil.addQueryParameterValue(
                 queryParams,
@@ -676,6 +681,7 @@ public final class SearchGroupItemQueryBuilder {
                 domainParam,
                 standardOrSourceParam,
                 conceptIdsParam,
+                rankParam,
                 domainParam,
                 standardOrSourceParam));
       } else {

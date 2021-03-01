@@ -129,7 +129,8 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     key: 'twoFactorAuth',
     completionPropsKey: 'twoFactorAuthCompleted',
     title: 'Turn on Google 2-Step Verification',
-    description: 'Add an extra layer of security to your account by providing your phone number in addition to your password to verify your identity upon login.',
+    description: 'Add an extra layer of security to your account by providing your phone number' +
+      'in addition to your password to verify your identity upon login.',
     buttonText: 'Get Started',
     completedText: 'Completed',
     completionTimestamp: (profile: Profile) => {
@@ -141,7 +142,8 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     completionPropsKey: 'eraCommonsLinked',
     loadingPropsKey: 'eraCommonsLoading',
     title: 'Connect Your eRA Commons Account',
-    description: 'Connect your Researcher Workbench account to your eRA Commons account. There is no exchange of personal data in this step.',
+    description: 'Connect your Researcher Workbench account to your eRA Commons account. ' +
+      'There is no exchange of personal data in this step.',
     buttonText: 'Connect',
     completedText: 'Linked',
     completionTimestamp: (profile: Profile) => {
@@ -368,7 +370,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
                 {card.completedText}
                 <ClrIcon shape='check' style={{marginLeft: '0.5rem'}}/>
               </Button> :
-            <Button onClick={ () => this.isLoading(i) ? true : this.onCardClick(card) }
+            <Button onClick={() => this.isLoading(i) ? true : this.onCardClick(card)}
                     style={{width: 'max-content',
                       cursor: this.isEnabled(i) && !this.isLoading(i) ? 'pointer' : 'default'}}
                     disabled={!this.isEnabled(i)} data-test-id='registration-task-link'>

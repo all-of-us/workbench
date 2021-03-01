@@ -75,7 +75,7 @@ module.exports = {
     'no-irregular-whitespace': 'warn',
     '@typescript-eslint/no-misused-new': 'warn',
     // 'no-shadow': 'warn',
-    // 'dot-notation': 'warn', 
+    // 'dot-notation': 'warn',
     'no-throw-literal': 'warn', 
     'no-fallthrough': 'warn', // For switch statements
     'no-use-before-define': 'off', // Needed for TS
@@ -88,8 +88,8 @@ module.exports = {
     'eqeqeq': ['warn', 'always', {'null': 'ignore'}],
     
     /* Maintainability */
-    // 'eol-last': 'warn',
-    // 'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}', ignoreComments: true}], 
+    'eol-last': 'warn',
+    'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}', ignoreComments: true}], 
     // 'prefer-const': ['warn', {'destructuring': 'all'}], 
   }
 };

@@ -5,6 +5,8 @@ import {FlexColumn} from 'app/components/flex';
 import { ClrIcon } from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import { reactStyles } from 'app/utils';
+import {useId} from 'app/utils';
+
 
 const styles = reactStyles({
   container: {
@@ -57,26 +59,31 @@ const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
       children,
       content
     } = props;
+    const titleId = useId();
 
     return (
-      <FlexColumn style={{...styles.container, ...props.containerStylesOverride}}>
-        <div style={styles.title}>
+      <FlexColumn aria-labelledby={titleId} style={{...styles.container, ...props.containerStylesOverride}}>
+        <div id={titleId} style={styles.title}>
           { title }
         </div>
         <FlexColumn style={{
-          justifyContent: isComplete && children ? 'flex-end' : 'space-between',
+          justifyContent: 'space-between',
           flex: '1 1 auto',
           alignItems: 'baseline'
         }}>
-          {isComplete && <div style={childrenStyle}>{ content }</div>}
-          {children}
-          {isComplete && <Button disabled={ true }
+          <div style={childrenStyle}>
+            {isComplete && content}
+            {children}
+          </div>
+          {isComplete && <Button disabled={true}
                                 data-test-id='completed-button'
                                 style={{...styles.button, backgroundColor: colors.success, width: 'max-content', cursor: 'default'}}>
               <ClrIcon shape='check' style={{marginRight: '0.3rem'}}/>{wasBypassed ? 'Bypassed' : completedButtonText}
             </Button>
           }
-          {!isComplete && <Button type='purplePrimary' style={styles.button} onClick={completeStep}>{incompleteButtonText}</Button>}
+          {!isComplete && <Button data-test-id='incomplete-button'
+                                  type='purplePrimary' style={styles.button}
+                                  onClick={completeStep}>{ incompleteButtonText }</Button>}
         </FlexColumn>
       </FlexColumn>
     );
