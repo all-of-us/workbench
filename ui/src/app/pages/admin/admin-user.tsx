@@ -600,7 +600,9 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
               && <TextInputWithLabel
                 labelText={'Institutional role description'}
                 placeholder={updatedProfile.verifiedInstitutionalAffiliation.institutionalRoleOtherText}
-                onChange={(value) => this.setState(fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], value))}
+                onChange={(value) => this.setState(
+                  fp.set(['updatedProfile', 'verifiedInstitutionalAffiliation', 'institutionalRoleOtherText'], value))
+                }
                 dataTestId={'institutionalRoleOtherText'}
                 inputStyle={styles.textInput}
                 containerStyle={styles.textInputContainer}

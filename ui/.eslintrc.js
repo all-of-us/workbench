@@ -73,7 +73,7 @@ module.exports = {
     'no-irregular-whitespace': 'warn',
     '@typescript-eslint/no-misused-new': 'warn',
     // 'no-shadow': 'warn',
-    // 'dot-notation': 'warn', 
+    // 'dot-notation': 'warn',
     'no-throw-literal': 'warn', 
     'no-fallthrough': 'warn', // For switch statements
     'no-use-before-define': 'off', // Needed for TS
@@ -81,13 +81,14 @@ module.exports = {
     // 'no-unused-vars': 'off', // Needed for TS 
     // '@typescript-eslint/no-unused-vars': 'warn', 
     'react/jsx-uses-vars': 'warn', 
+    'react/jsx-curly-spacing': ["warn", {'when': 'never'}],
     // 'no-var': 'warn',
     'radix': 'warn', // Add radix on parseInt
     'eqeqeq': ['warn', 'always', {'null': 'ignore'}],
     
     /* Maintainability */
-    // 'eol-last': 'warn',
-    // 'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}', ignoreComments: true}], 
+    'eol-last': 'warn',
+    'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}', ignoreComments: true}], 
     // 'prefer-const': ['warn', {'destructuring': 'all'}], 
   }
 };

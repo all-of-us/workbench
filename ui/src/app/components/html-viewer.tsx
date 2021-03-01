@@ -83,7 +83,7 @@ export const HtmlViewer = withWindowSize()( class extends React.Component<Props,
           width: '100%'}}
           src = {filePath}
           ref = {this.iframeRef}
-          onLoad={() => this.handleIframeLoaded() }>
+          onLoad={() => this.handleIframeLoaded()}>
       </iframe>}
     </div>;
   }

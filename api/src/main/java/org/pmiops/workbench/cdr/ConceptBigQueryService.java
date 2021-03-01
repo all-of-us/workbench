@@ -90,7 +90,7 @@ public class ConceptBigQueryService {
     paramMap.put(standardParam, QueryParameterValue.int64(standardOrSource));
     if (CHILD_LOOKUP_DOMAINS.contains(domain)) {
       String domainParam = (standardOrSource == 1 ? "standardDomain" : "sourceDomain");
-      String rankParam = "rankParam";
+      String rankParam = (standardOrSource == 1 ? "standardRank" : "sourceRank");
       sqlBuilder.append(
           String.format(
               Domain.DRUG.equals(domain) ? DRUG_CHILD_LOOKUP_SQL : CHILD_LOOKUP_SQL,

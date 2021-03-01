@@ -82,8 +82,8 @@ const ProfileRegistrationStepStatus: React.FunctionComponent<Props> =
             </Button>
           }
           {!isComplete && <Button data-test-id='incomplete-button'
-                                  type='purplePrimary' style={ styles.button }
-                                  onClick={ completeStep }>{ incompleteButtonText }</Button>}
+                                  type='purplePrimary' style={styles.button}
+                                  onClick={completeStep}>{ incompleteButtonText }</Button>}
         </FlexColumn>
       </FlexColumn>
     );

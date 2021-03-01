@@ -280,7 +280,7 @@ const MachineSelector = ({
             // If the selected machine is not different from the current machine return null
             // maybeGetMachine,
             onChange
-            )(validMachineTypes) }
+            )(validMachineTypes)}
         disabled={disabled}
         value={memory}
         />
