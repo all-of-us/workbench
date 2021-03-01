@@ -261,6 +261,11 @@ public class WorkbenchConfig {
     // Allows a user to delete their own account. This is used for testing purposes so that
     // We can clean up after ourselves. This should never go to prod.
     public boolean unsafeAllowDeleteUser;
+    // Enables access to all tiers in an environment to Registered users.
+    // Intended for use in the Controlled Tier Alpha on Preprod and testing in lower levels.
+    // This will be removed when we implement Controlled Tier access modules for Beta launch.
+    // This should never go to Prod.
+    public boolean unsafeAllowAccessToAllTiersForRegisteredUsers;
     // Flag to indicate if USER/WORKSPACE data is exported to RDR
     public boolean enableRdrExport;
     // Setting this to true will enable the use of Billing Accounts controlled by the user
