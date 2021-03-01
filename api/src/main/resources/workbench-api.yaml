@@ -8145,6 +8145,10 @@ definitions:
       aboutYou:
         type: string
         description: User's description of themselves.
+      accessTierShortNames:
+        description: |-
+          Short names of access tiers available to the user, comma-delimited if multiple.
+        type: string
       areaOfResearch:
         type: string
         description: ''

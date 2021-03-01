@@ -98,6 +98,7 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
   public static final InstitutionalRole USER__INSTITUTIONAL_ROLE_ENUM =
       InstitutionalRole.UNDERGRADUATE;
   public static final String USER__INSTITUTIONAL_ROLE_OTHER_TEXT = "foo_2";
+  public static final String USER__ACCESS_TIER_SHORT_NAMES = "registered";
 
   // Those enums are manually added
   public static Ethnicity USER__ETHNICITY = Ethnicity.PREFER_NO_ANSWER;
@@ -127,6 +128,7 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
         .isEqualTo(
             DbStorageEnums.dataAccessLevelFromStorage(
                 USER__DATA_ACCESS_LEVEL)); // manual adjustment
+    assertThat(user.getAccessTierShortNames()).isEqualTo(USER__ACCESS_TIER_SHORT_NAMES);
     assertTimeApprox(user.getDataUseAgreementBypassTime(), USER__DATA_USE_AGREEMENT_BYPASS_TIME);
     assertTimeApprox(
         user.getDataUseAgreementCompletionTime(), USER__DATA_USE_AGREEMENT_COMPLETION_TIME);

@@ -22,6 +22,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
@@ -268,6 +269,12 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
                 .currentPosition(rs.getString("current_position"))
                 .dataAccessLevel(dataAccessLevelFromStorage(rs.getShort("data_access_level")))
+                // TODO placeholder until we have a proper association of users to tiers
+                .accessTierShortNames(
+                    dataAccessLevelFromStorage(rs.getShort("data_access_level"))
+                            == DataAccessLevel.REGISTERED
+                        ? "registered"
+                        : "none")
                 .dataUseAgreementBypassTime(
                     offsetDateTimeUtc(rs.getTimestamp("data_use_agreement_bypass_time")))
                 .dataUseAgreementCompletionTime(
