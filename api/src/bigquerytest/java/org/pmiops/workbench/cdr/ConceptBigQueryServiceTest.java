@@ -48,7 +48,7 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
     DbConceptSetConceptId dbConceptSetConceptId1 =
         DbConceptSetConceptId.builder().addConceptId(6L).addStandard(true).build();
     DbConceptSetConceptId dbConceptSetConceptId2 =
-        DbConceptSetConceptId.builder().addConceptId(9L).addStandard(false).build();
+        DbConceptSetConceptId.builder().addConceptId(10L).addStandard(false).build();
     assertThat(
             conceptBigQueryService.getParticipantCountForConcepts(
                 Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
