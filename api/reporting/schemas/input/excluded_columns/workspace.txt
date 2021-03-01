@@ -1,9 +1,0 @@
-active_status
-beta_access
-billing_account_name
-billing_migration_status
-data_access_level
-firecloud_name
-firecloud_uuid
-rp_population
-version

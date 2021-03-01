@@ -1,6 +1,0 @@
-institution_id,bigint(20),NO,PRI,,auto_increment
-short_name,varchar(80),NO,UNI,,""
-display_name,varchar(80),NO,UNI,,""
-organization_type_enum,tinyint(4),YES,"",,""
-organization_type_other_text,varchar(80),YES,"",,""
-dua_type_enum,tinyint(4),YES,"",,""

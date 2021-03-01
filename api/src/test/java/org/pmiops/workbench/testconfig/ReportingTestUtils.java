@@ -28,6 +28,7 @@ import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 
 public class ReportingTestUtils {
 
+  public static final String WORKSPACE__ACCESS_TIER_SHORT_NAME = "registered";
   public static final BillingAccountType WORKSPACE__BILLING_ACCOUNT_TYPE =
       BillingAccountType.FREE_TIER;
   public static final BillingStatus WORKSPACE__BILLING_STATUS = BillingStatus.ACTIVE;
@@ -145,6 +146,7 @@ public class ReportingTestUtils {
       long expectedWorkspaceId,
       long expectedCdrVersionId,
       long expectedCreatorId) {
+    assertThat(workspace.getAccessTierShortName()).isEqualTo(WORKSPACE__ACCESS_TIER_SHORT_NAME);
     assertThat(workspace.getBillingAccountType()).isEqualTo(WORKSPACE__BILLING_ACCOUNT_TYPE);
     assertThat(workspace.getBillingStatus()).isEqualTo(WORKSPACE__BILLING_STATUS);
     assertThat(workspace.getCdrVersionId()).isEqualTo(expectedCdrVersionId);
@@ -192,6 +194,7 @@ public class ReportingTestUtils {
 
   public static ReportingWorkspace createDtoWorkspace() {
     return new ReportingWorkspace()
+        .accessTierShortName(WORKSPACE__ACCESS_TIER_SHORT_NAME)
         .billingAccountType(WORKSPACE__BILLING_ACCOUNT_TYPE)
         .billingStatus(WORKSPACE__BILLING_STATUS)
         .cdrVersionId(WORKSPACE__CDR_VERSION_ID)

@@ -1,2 +1,0 @@
-id
-user_id
