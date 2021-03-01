@@ -732,7 +732,7 @@ export const ProfilePage = fp.flow(
                 onCancelClick={() => {
                   this.setState({showDemographicSurveyModal: false});
                 }}
-                onSubmit={async(profileWithUpdatedDemographicSurvey, captchaToken) => {
+                saveProfile={async(profileWithUpdatedDemographicSurvey, captchaToken) => {
                   const savedProfile = await this.saveProfile(profileWithUpdatedDemographicSurvey);
                   this.setState({showDemographicSurveyModal: false});
                   return savedProfile;

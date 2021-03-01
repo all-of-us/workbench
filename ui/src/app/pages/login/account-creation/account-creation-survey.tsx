@@ -36,27 +36,21 @@ export const AccountCreationSurvey = withProfileErrorModal({title: 'Error creati
   async createAccount(profile, captchaToken): Promise<Profile> {
     const {invitationKey, termsOfServiceVersion, onComplete} = this.props;
 
-    try {
-      const newProfile = await profileApi().createAccount({
-        profile: profile,
-        captchaVerificationToken: captchaToken,
-        invitationKey: invitationKey,
-        termsOfServiceVersion: termsOfServiceVersion
-      });
-      onComplete(newProfile);
-      return newProfile;
-    } catch (error) {
-      reportError(error);
-      const errorResponse = await convertAPIError(error);
-      this.props.showProfileErrorModal(errorResponse.message);
-    }
+    const newProfile = await profileApi().createAccount({
+      profile: profile,
+      captchaVerificationToken: captchaToken,
+      invitationKey: invitationKey,
+      termsOfServiceVersion: termsOfServiceVersion
+    });
+    onComplete(newProfile);
+    return newProfile;
   }
 
   render() {
     return <React.Fragment>
       <DemographicSurvey
           profile={fp.set('demographicSurvey', fp.mapValues(() => undefined, this.props.profile.demographicSurvey), this.props.profile)}
-          onSubmit={(profile, captchaToken) => {
+          saveProfile={(profile, captchaToken) => {
             AnalyticsTracker.Registration.DemographicSurvey();
             return this.createAccount(profile, captchaToken);
           }}
