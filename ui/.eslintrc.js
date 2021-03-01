@@ -56,8 +56,7 @@ module.exports = {
     // 'quotes': ['warn', 'single'], 
     // '@typescript-eslint/semi': 'warn',
     // 'space-before-function-paren': ['warn', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
-    // '@typescript-eslint/naming-convention': 'warn',	This rule will need extensive modification, or we could possibly use prettier to handle this
-
+    // 'warn',	// This rule will need extensive modification, or we could possibly use prettier to handle this
 
     /* Functionality */
     'curly': 'warn',
