@@ -47,7 +47,6 @@ module.exports = {
 
     /* Style */
     '@typescript-eslint/prefer-function-type': 'warn',
-    '@typescript-eslint/class-name-casing': 'warn',
     // 'spaced-comment': 'warn',
     '@typescript-eslint/consistent-type-definitions': ['warn', 'interface'],
     'no-trailing-spaces': 'warn',
@@ -56,7 +55,6 @@ module.exports = {
     // 'simple-import-sort/sort': 'warn',
     // 'quotes': ['warn', 'single'], 
     // '@typescript-eslint/semi': 'warn',
-    '@typescript-eslint/naming-convention': 'warn',
     // 'space-before-function-paren': ['warn', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
 
 
