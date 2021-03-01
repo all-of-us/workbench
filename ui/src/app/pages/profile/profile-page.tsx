@@ -727,7 +727,7 @@ export const ProfilePage = fp.flow(
                 onCancelClick={() => {
                   this.setState({showDemographicSurveyModal: false});
                 }}
-                saveProfile={ profileApi().updateProfile }
+                saveProfile={profileApi().updateProfile}
                 enableCaptcha={false}
                 enablePrevious={false}
                 showStepCount={false}
