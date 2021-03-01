@@ -1,5 +1,6 @@
 /* SystemJS module definition */
-declare let module: NodeModule;
+/* eslint-disable no-var */
+declare var module: NodeModule;
 interface NodeModule {
   id: string;
 }
@@ -10,6 +11,8 @@ This gets included by the compiler; its symbols do not need to be imported by
 other source files but are globally available.
 */
 
-declare let ResizeObserver: any;
+declare var ResizeObserver: any;
+
+/* eslint-enable no-var */
 
 declare module 'outdated-browser-rework';
