@@ -137,7 +137,7 @@ export class AdminUserBypass extends React.Component<Props, State> {
                     checked={selectedModules.includes(AccessModule.BETAACCESS)}
                     data-test-id='beta-access-toggle'
                     onToggle={() => {this.setState({selectedModules:
-                      fp.xor(selectedModules, [AccessModule.BETAACCESS])}); } }
+                      fp.xor(selectedModules, [AccessModule.BETAACCESS])}); }}
             />
             <TooltipTrigger content={'Grant beta access to a user.  This replaces verify/reject.'}>
               <ClrIcon shape='info' className='is-solid' style={styles.infoIcon}/>
@@ -148,13 +148,13 @@ export class AdminUserBypass extends React.Component<Props, State> {
                   checked={selectedModules.includes(AccessModule.COMPLIANCETRAINING)}
                   data-test-id='compliance-training-toggle'
                   onToggle={() => {this.setState({selectedModules:
-                      fp.xor(selectedModules, [AccessModule.COMPLIANCETRAINING])}); } }
+                      fp.xor(selectedModules, [AccessModule.COMPLIANCETRAINING])}); }}
           />}
           {enableEraCommons && <Toggle name='eRA Commons Linking'
                   checked={selectedModules.includes(AccessModule.ERACOMMONS)}
                   data-test-id='era-commons-toggle'
                   onToggle={() => {this.setState({selectedModules:
-                    fp.xor(selectedModules, [AccessModule.ERACOMMONS])}); } }
+                    fp.xor(selectedModules, [AccessModule.ERACOMMONS])}); }}
           />}
           <Toggle name='Two Factor Auth'
                   checked={selectedModules.includes(AccessModule.TWOFACTORAUTH)}

@@ -370,7 +370,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
                 {card.completedText}
                 <ClrIcon shape='check' style={{marginLeft: '0.5rem'}}/>
               </Button> :
-            <Button onClick={ () => this.isLoading(i) ? true : this.onCardClick(card) }
+            <Button onClick={() => this.isLoading(i) ? true : this.onCardClick(card)}
                     style={{width: 'max-content',
                       cursor: this.isEnabled(i) && !this.isLoading(i) ? 'pointer' : 'default'}}
                     disabled={!this.isEnabled(i)} data-test-id='registration-task-link'>
