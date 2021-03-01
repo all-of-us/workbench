@@ -254,10 +254,10 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
             <div style={styles.infoBoxHeader}>Last Updated</div>
             <div style={{fontSize: '0.5rem'}}>{this.workspaceLastModifiedTime}</div>
           </div>
-          <div style={styles.infoBox} data-test-id='dataAccessLevel'>
+          <div style={styles.infoBox} data-test-id='accessTierShortName'>
             <div style={styles.infoBoxHeader}>Data Access Level</div>
             <div style={{fontSize: '0.5rem'}}>{workspace ?
-              fp.capitalize(workspace.dataAccessLevel.toString()) : 'Loading...'}</div>
+              fp.capitalize(workspace.accessTierShortName) : 'Loading...'}</div>
           </div>
           {workspace && WorkspacePermissionsUtil.canWrite(workspace.accessLevel)
             && workspace.billingAccountType === BillingAccountType.FREETIER &&

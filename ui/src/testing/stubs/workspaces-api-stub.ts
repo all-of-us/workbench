@@ -6,7 +6,6 @@ import {CopyRequest, EmptyResponse} from 'generated';
 import {
   CloneWorkspaceRequest,
   CloneWorkspaceResponse,
-  DataAccessLevel,
   FileDetail,
   RecentWorkspace,
   RecentWorkspaceResponse,
@@ -49,6 +48,7 @@ function buildWorkspaceStub(suffix): Workspace {
     id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID + suffix,
     namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS + suffix,
     cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID + suffix,
+    accessTierShortName: CdrVersionsStubVariables.DEFAULT_ACCESS_TIER_SHORT_NAME,
     creationTime: new Date().getTime(),
     lastModifiedTime: new Date().getTime(),
     researchPurpose: {
@@ -75,7 +75,6 @@ function buildWorkspaceStub(suffix): Workspace {
       needsReviewPrompt: false
     },
     published: false,
-    dataAccessLevel: DataAccessLevel.Registered,
     billingAccountName: 'billing-account'
   };
 }
