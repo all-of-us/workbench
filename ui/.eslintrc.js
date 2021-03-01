@@ -82,9 +82,9 @@ module.exports = {
     // '@typescript-eslint/no-use-before-define': 'warn',
     // 'no-unused-vars': 'off', // Needed for TS 
     // '@typescript-eslint/no-unused-vars': 'warn', 
-    'react/jsx-uses-vars': 'warn', 
     'react/jsx-curly-spacing': ["warn", {'when': 'never'}],
-    // 'no-var': 'warn',
+    'react/jsx-uses-vars': 'warn',
+    'no-var': 'warn',
     'radix': 'warn', // Add radix on parseInt
     'eqeqeq': ['warn', 'always', {'null': 'ignore'}],
     
