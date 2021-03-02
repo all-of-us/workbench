@@ -17,13 +17,24 @@ module.exports = {
   ],
   "reporters": [
     "default",
-    "jest-junit",
-    [
-      "jest-stare", {
+    ["jest-stare", {
         "resultDir": "logs",
         "resultJson": "test-results.json",
         "reportTitle": "AoU integration tests",
-        "report": false
+        "report": true
+      }
+    ],
+    ["jest-junit", {
+        outputDirectory: "./logs/junit",
+        outputName: "test-results.xml",
+        classNameTemplate: "{filepath}",
+        suiteNameTemplate: "{filepath}",
+        suiteName: "Puppeteer end-to-end tests"
+      }
+    ],
+    ["<rootDir>/jest-custom-reporter.js", {
+        "outputdir": "logs/jest",
+        "filename": "jest-test-results.json"
       }
     ]
   ],
