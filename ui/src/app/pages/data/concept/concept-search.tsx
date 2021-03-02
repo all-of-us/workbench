@@ -52,7 +52,13 @@ const styles = reactStyles({
   },
   conceptSetData: {
     display: 'flex', flexDirection: 'row', color: colors.primary, fontWeight: 600
-  }
+  },
+  showMore: {
+    background: colors.white,
+    color: colors.accent,
+    cursor: 'pointer',
+    marginLeft: '0.25rem'
+  },
 });
 
 export interface ConceptSetMenuProps {
@@ -119,6 +125,7 @@ interface State {
   error: boolean;
   errorMessage: string;
   loading: boolean;
+  showMoreDescription: boolean;
   // Show if trying to navigate away with unsaved changes
   showUnsavedModal: boolean;
   unsavedChanges: boolean;
@@ -142,6 +149,7 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
         errorMessage: '',
         deleting: false,
         loading: this.isDetailPage,
+        showMoreDescription: false,
         showUnsavedModal: false,
         unsavedChanges: false
       };
@@ -275,8 +283,8 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
 
     render() {
       const {cohortContext, workspace: {accessLevel, cdrVersionId, id, namespace}} = this.props;
-      const {copying, conceptSet, editing, editDescription, editName, error, errorMessage, editSaving, deleting, loading, showUnsavedModal}
-        = this.state;
+      const {copying, conceptSet, editing, editDescription, editName, error, errorMessage, editSaving, deleting, loading,
+        showMoreDescription, showUnsavedModal} = this.state;
       const errors = validate(
         {editName: editName},
         {editName: {presence: {allowEmpty: false}}}
@@ -333,7 +341,16 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
                             </Clickable>
                           </div>
                           <div style={{marginBottom: '1.5rem', color: colors.primary}} data-test-id='concept-set-description'>
-                            {conceptSet.description}
+                            {showMoreDescription ?
+                              conceptSet.description :
+                              conceptSet.description.slice(0, 250)
+                            }
+                            {conceptSet.description.length > 250 &&
+                              <span style={styles.showMore}
+                                    onClick={() => this.setState({showMoreDescription: !showMoreDescription})}>
+                                Show {showMoreDescription ? 'less' : 'more'}
+                              </span>
+                            }
                           </div>
                         </React.Fragment>}
                       <div style={styles.conceptSetData}>
