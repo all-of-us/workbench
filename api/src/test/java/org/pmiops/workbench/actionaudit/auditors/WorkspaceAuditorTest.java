@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -25,6 +24,7 @@ import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
 import org.pmiops.workbench.actionaudit.TargetType;
 import org.pmiops.workbench.actionaudit.targetproperties.AclTargetProperty;
+import org.pmiops.workbench.actionaudit.targetproperties.WorkspaceTargetProperty;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortService;
@@ -34,13 +34,14 @@ import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.model.BillingAccountType;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
-import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -52,19 +53,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class WorkspaceAuditorTest {
 
   private static final long WORKSPACE_1_DB_ID = 101L;
-  private static final long Y2K_EPOCH_MILLIS =
-      Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli();
+  private static final long WORKSPACE_2_DB_ID = 201L;
   private static final long REMOVED_USER_ID = 301L;
   private static final long ADDED_USER_ID = 401L;
 
   private Workspace workspace1;
-  private Workspace workspace2;
-  private DbUser user1;
   private DbWorkspace dbWorkspace1;
-  private DbWorkspace dbWorkspace2;
 
   @Autowired private WorkspaceAuditor workspaceAuditor;
-  @Autowired private WorkspaceMapper workspaceMapper;
   @MockBean private Provider<DbUser> mockUserProvider;
   @MockBean private ActionAuditService mockActionAuditService;
 
@@ -88,40 +84,61 @@ public class WorkspaceAuditorTest {
 
   @Before
   public void setUp() {
-    final ResearchPurpose researchPurpose1 = new ResearchPurpose();
-    researchPurpose1.setIntendedStudy("stubbed toes");
-    researchPurpose1.setAdditionalNotes("I really like the cloud.");
-    researchPurpose1.setNeedsReviewPrompt(false);
+    final ResearchPurpose researchPurpose1 =
+        new ResearchPurpose()
+            .additionalNotes("I really like the cloud.")
+            .approved(true)
+            .ancestry(false)
+            .anticipatedFindings("knowledge")
+            .commercialPurpose(true)
+            .controlSet(false)
+            .diseaseFocusedResearch(true)
+            .diseaseOfFocus("lack of focus")
+            .drugDevelopment(true)
+            .educational(false)
+            .intendedStudy("stubbed toes")
+            .scientificApproach("wild conjecture")
+            .methodsDevelopment(true)
+            .otherPopulationDetails("strictly Rhode Islanders")
+            .otherPurpose(true)
+            .otherPurposeDetails("deriving lottery numbers")
+            .ethics(false)
+            .populationDetails(Collections.emptyList())
+            .populationHealth(true)
+            .reasonForAllOfUs("the biggest data")
+            .reviewRequested(false)
+            .socialBehavioral(true)
+            .timeRequested(1000L)
+            .timeReviewed(10000L)
+            .disseminateResearchFindingList(Collections.emptyList())
+            .researchOutcomeList(Collections.emptyList())
+            .needsReviewPrompt(false);
     final long now = System.currentTimeMillis();
 
-    workspace1 = new Workspace();
-    workspace1.setName("DbWorkspace 1");
-    workspace1.setId("fc-id-1");
-    workspace1.setNamespace("aou-rw-local1-c4be869a");
-    workspace1.setCreator("user@fake-research-aou.org");
-    workspace1.setCdrVersionId("1");
-    workspace1.setResearchPurpose(researchPurpose1);
-    workspace1.setCreationTime(now);
-    workspace1.setLastModifiedTime(now);
-    workspace1.setEtag("etag_1");
-    workspace1.setDataAccessLevel(DataAccessLevel.REGISTERED);
-    workspace1.setPublished(false);
+    workspace1 =
+        new Workspace()
+            .id("fc-id-1")
+            .etag("etag_1")
+            .name("DbWorkspace 1")
+            .namespace("aou-rw-local1-c4be869a")
+            .cdrVersionId("1")
+            .creator("user@fake-research-aou.org")
+            .dataAccessLevel(DataAccessLevel.REGISTERED)
+            .billingAccountName("big-bux")
+            .billingAccountType(BillingAccountType.FREE_TIER)
+            .googleBucketName("bucket o' science")
+            .accessTierShortName("registered")
+            .researchPurpose(researchPurpose1)
+            .billingStatus(BillingStatus.ACTIVE)
+            .creationTime(now)
+            .lastModifiedTime(now)
+            .published(false);
 
     dbWorkspace1 = new DbWorkspace();
     dbWorkspace1.setWorkspaceId(WORKSPACE_1_DB_ID);
     dbWorkspace1.setLastAccessedTime(new Timestamp(now));
     dbWorkspace1.setLastModifiedTime(new Timestamp(now));
     dbWorkspace1.setCreationTime(new Timestamp(now));
-
-    dbWorkspace2 = new DbWorkspace();
-    dbWorkspace2.setWorkspaceId(201L);
-    dbWorkspace2.setPublished(false);
-    dbWorkspace2.setLastModifiedTime(new Timestamp(now));
-    dbWorkspace2.setCreationTime(new Timestamp(now));
-    dbWorkspace2.setCreator(user1);
-    dbWorkspace2.setNeedsReviewPrompt(true);
-
-    workspace2 = workspaceMapper.toApiWorkspace(dbWorkspace2, null);
 
     // By default, have the mock user provider return the test-config default user.
     doReturn(ActionAuditTestConfig.getUser()).when(mockUserProvider).get();
@@ -132,7 +149,7 @@ public class WorkspaceAuditorTest {
     workspaceAuditor.fireCreateAction(workspace1, WORKSPACE_1_DB_ID);
     verify(mockActionAuditService).send(eventCollectionCaptor.capture());
     Collection<ActionAuditEvent> eventsSent = eventCollectionCaptor.getValue();
-    assertThat(eventsSent).hasSize(19);
+    assertThat(eventsSent).hasSize(WorkspaceTargetProperty.values().length);
     Optional<ActionAuditEvent> firstEvent = eventsSent.stream().findFirst();
     assertThat(firstEvent.isPresent()).isTrue();
     assertThat(firstEvent.map(ActionAuditEvent::getActionType).orElse(null))
@@ -156,11 +173,15 @@ public class WorkspaceAuditorTest {
 
   @Test
   public void testFiresDuplicateEvent() {
+    final Workspace workspace2 = clone(workspace1).id(String.valueOf(WORKSPACE_2_DB_ID));
     workspaceAuditor.fireDuplicateAction(
-        dbWorkspace1.getWorkspaceId(), dbWorkspace2.getWorkspaceId(), workspace2);
+        dbWorkspace1.getWorkspaceId(), WORKSPACE_2_DB_ID, workspace2);
     verify(mockActionAuditService).send(eventCollectionCaptor.capture());
     final Collection<ActionAuditEvent> eventsSent = eventCollectionCaptor.getValue();
-    assertThat(eventsSent).hasSize(13);
+
+    // 1 workspace-from + N workspace-to attribute events
+    final int expectedEvents = 1 + WorkspaceTargetProperty.values().length;
+    assertThat(eventsSent).hasSize(expectedEvents);
 
     // need same actionId for all events
     assertThat(eventsSent.stream().map(ActionAuditEvent::getActionId).distinct().count())
@@ -194,7 +215,10 @@ public class WorkspaceAuditorTest {
     workspaceAuditor.fireCollaborateAction(dbWorkspace1.getWorkspaceId(), aclsByUserId);
     verify(mockActionAuditService).send(eventCollectionCaptor.capture());
     Collection<ActionAuditEvent> eventsSent = eventCollectionCaptor.getValue();
-    assertThat(eventsSent).hasSize(4);
+
+    // 1 workspace + N user COLLABORATE events
+    final int expectedEvents = 1 + aclsByUserId.size();
+    assertThat(eventsSent).hasSize(expectedEvents);
 
     Map<String, Long> countByTargetType =
         eventsSent.stream()
@@ -256,29 +280,82 @@ public class WorkspaceAuditorTest {
   @Test
   public void testFireEditAction_sendsChangedProperties() {
     final ResearchPurpose editedResearchPurpose =
-        new ResearchPurpose()
-            .intendedStudy("stubbed toes")
-            .additionalNotes("I really like the cloud.")
-            .anticipatedFindings("I want to find my keys.")
-            .controlSet(true);
+        clone(workspace1.getResearchPurpose())
+            // changes
+            .intendedStudy("height")
+            .additionalNotes("tall folks are tall")
+            .anticipatedFindings("something to earn tenure")
+            .timeReviewed(workspace1.getResearchPurpose().getTimeReviewed() + 1000L)
+            .controlSet(!workspace1.getResearchPurpose().getControlSet());
+    final int rpChanges = 5;
 
     Workspace editedWorkspace =
-        new Workspace()
-            .name("New name")
-            .id("fc-id-1")
-            .namespace("aou-rw-local1-c4be869a")
-            .creator("user@fake-research-aou.org")
-            .cdrVersionId("1")
+        clone(workspace1)
+            // changes included above
             .researchPurpose(editedResearchPurpose)
-            .creationTime(Y2K_EPOCH_MILLIS)
-            .lastModifiedTime(Y2K_EPOCH_MILLIS)
-            .etag("etag_1")
-            .dataAccessLevel(DataAccessLevel.REGISTERED)
-            .published(false);
+            // changes
+            .name("a new name")
+            .namespace("a new namespace")
+            .creator("user10@fake-research-aou.org")
+            .published(!workspace1.getPublished());
+    final int wsChanges = 4;
 
     workspaceAuditor.fireEditAction(workspace1, editedWorkspace, dbWorkspace1.getWorkspaceId());
     verify(mockActionAuditService).send(eventCollectionCaptor.capture());
 
-    assertThat(eventCollectionCaptor.getValue()).hasSize(3);
+    Collection<ActionAuditEvent> events = eventCollectionCaptor.getValue();
+    assertThat(events).hasSize(rpChanges + wsChanges);
+  }
+
+  private Workspace clone(Workspace in) {
+    return new Workspace()
+        .id(in.getId())
+        .etag(in.getEtag())
+        .name(in.getName())
+        .namespace(in.getNamespace())
+        .cdrVersionId(in.getCdrVersionId())
+        .creator(in.getCreator())
+        .dataAccessLevel(in.getDataAccessLevel())
+        .billingAccountName(in.getBillingAccountName())
+        .billingAccountType(in.getBillingAccountType())
+        .googleBucketName(in.getGoogleBucketName())
+        .accessTierShortName(in.getAccessTierShortName())
+        .researchPurpose(in.getResearchPurpose())
+        .billingStatus(in.getBillingStatus())
+        .creationTime(in.getCreationTime())
+        .lastModifiedTime(in.getLastModifiedTime())
+        .published(in.getPublished());
+  }
+
+  private ResearchPurpose clone(ResearchPurpose in) {
+    return new ResearchPurpose()
+        .additionalNotes(in.getAdditionalNotes())
+        .approved(in.getApproved())
+        .ancestry(in.getAncestry())
+        .anticipatedFindings(in.getAnticipatedFindings())
+        .commercialPurpose(in.getCommercialPurpose())
+        .controlSet(in.getControlSet())
+        .diseaseFocusedResearch(in.getDiseaseFocusedResearch())
+        .diseaseOfFocus(in.getDiseaseOfFocus())
+        .drugDevelopment(in.getDrugDevelopment())
+        .educational(in.getEducational())
+        .intendedStudy(in.getIntendedStudy())
+        .scientificApproach(in.getScientificApproach())
+        .methodsDevelopment(in.getMethodsDevelopment())
+        .otherPopulationDetails(in.getOtherPopulationDetails())
+        .otherPurpose(in.getOtherPurpose())
+        .otherPurposeDetails(in.getOtherPurposeDetails())
+        .ethics(in.getEthics())
+        .populationDetails(in.getPopulationDetails())
+        .populationHealth(in.getPopulationHealth())
+        .reasonForAllOfUs(in.getReasonForAllOfUs())
+        .reviewRequested(in.getReviewRequested())
+        .socialBehavioral(in.getSocialBehavioral())
+        .timeRequested(in.getTimeRequested())
+        .timeReviewed(in.getTimeReviewed())
+        .disseminateResearchFindingList(in.getDisseminateResearchFindingList())
+        .otherDisseminateResearchFindings(in.getOtherDisseminateResearchFindings())
+        .researchOutcomeList(in.getResearchOutcomeList())
+        .needsReviewPrompt(in.getNeedsReviewPrompt());
   }
 }
