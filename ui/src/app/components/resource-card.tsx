@@ -39,7 +39,7 @@ const styles = reactStyles({
   },
   resourceDescription: {
     textOverflow: 'ellipsis', overflow: 'hidden', display: '-webkit-box',
-    WebkitLineClamp: 4, WebkitBoxOrient: 'vertical'
+    WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflowWrap: 'anywhere'
   },
   lastModified: {
     color: colors.primary,

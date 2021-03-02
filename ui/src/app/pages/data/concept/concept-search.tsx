@@ -10,7 +10,7 @@ import {FadeBox} from 'app/components/containers';
 import {CopyModal} from 'app/components/copy-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SnowmanIcon} from 'app/components/icons';
-import {TextArea, TextAreaWithLengthValidationMessage, TextInput, ValidationError} from 'app/components/inputs';
+import {TextAreaWithLengthValidationMessage, TextInput, ValidationError} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -312,8 +312,8 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
                             {summarizeErrors( errors && errors.editName)}
                           </ValidationError>}
                           <TextAreaWithLengthValidationMessage initialText={editDescription}
-                                                               data-test-id='edit-description'
-                                                               maxCharacters={1000} id={''}
+                                                               id='edit-description'
+                                                               maxCharacters={1000}
                                                                tooLongWarningCharacters={950}
                                                                onChange={v => this.setState({editDescription: v})}/>
                           <div style={{margin: '0.5rem 0'}}>

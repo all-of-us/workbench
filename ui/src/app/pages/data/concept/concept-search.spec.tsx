@@ -53,7 +53,8 @@ describe('ConceptSearch', () => {
     wrapper.find('[data-test-id="edit-concept-set"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="edit-name"]').first().simulate('change', {target: {value: newName}});
-    wrapper.find('[data-test-id="edit-description"]').first().simulate('change', {target: {value: newDesc}});
+    const editDescription = wrapper.find('[id="edit-description"]');
+    editDescription.find('textarea#edit-description').simulate('change', {target: {value: newDesc}});
     wrapper.find('[data-test-id="save-edit-concept-set"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="concept-set-title"]').text()).toContain(newName);
@@ -84,7 +85,8 @@ describe('ConceptSearch', () => {
     wrapper.find('[data-test-id="edit-concept-set"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="edit-name"]').first().simulate('change', {target: {value: newName}});
-    wrapper.find('[data-test-id="edit-description"]').first().simulate('change', {target: {value: newDesc}});
+    const editDescription = wrapper.find('[id="edit-description"]');
+    editDescription.find('textarea#edit-description').simulate('change', {target: {value: newDesc}});
     wrapper.find('[data-test-id="cancel-edit-concept-set"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="concept-set-title"]').text()).toContain(conceptSet.name);
