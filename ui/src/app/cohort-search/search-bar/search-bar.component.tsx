@@ -74,7 +74,7 @@ const styles = reactStyles({
   }
 });
 
-const searchTrigger = 3;
+const searchTrigger = 2;
 
 interface OptionProps {
   onClick: Function;
