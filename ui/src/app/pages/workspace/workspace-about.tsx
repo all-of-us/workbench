@@ -255,7 +255,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
             <div style={{fontSize: '0.5rem'}}>{this.workspaceLastModifiedTime}</div>
           </div>
           <div style={styles.infoBox} data-test-id='accessTierShortName'>
-            <div style={styles.infoBoxHeader}>Data Access Level</div>
+            <div style={styles.infoBoxHeader}>Data Access Tier</div>
             <div style={{fontSize: '0.5rem'}}>{workspace ?
               fp.capitalize(workspace.accessTierShortName) : 'Loading...'}</div>
           </div>
