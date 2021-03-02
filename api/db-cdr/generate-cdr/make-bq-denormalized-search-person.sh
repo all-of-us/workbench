@@ -56,6 +56,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , dob
         , is_deceased
         , has_fitbit
+        , has_whole_genome_variant
     )
 SELECT
       p.person_id
@@ -84,6 +85,10 @@ SELECT
         WHEN f.person_id is null THEN 0
         ELSE 1
       END has_fitbit
+    , CASE
+        WHEN f.person_id is null THEN 0
+        ELSE 1
+      END has_fitbit
 FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` g on (p.gender_concept_id = g.concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` s on (p.sex_at_birth_concept_id = s.concept_id)
@@ -103,7 +108,11 @@ LEFT JOIN
         SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_summary\`
         union distinct
         SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.steps_intraday\`
-    ) f on (p.person_id = f.person_id)"
+    ) f on (p.person_id = f.person_id)
+LEFT JOIN
+    (
+        SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.activity_summary\`
+    ) g on (p.person_id = g.person_id)"
 
 ################################################
 # calculate age_at_consent and age_at_cdr

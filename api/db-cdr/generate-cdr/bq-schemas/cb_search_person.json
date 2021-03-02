@@ -63,5 +63,10 @@
     "mode": "NULLABLE",
     "name": "has_fitbit",
     "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "has_whole_genome_variant",
+    "type": "INTEGER"
   }
 ]
