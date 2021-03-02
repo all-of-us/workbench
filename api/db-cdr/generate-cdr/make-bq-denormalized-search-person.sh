@@ -4,10 +4,12 @@
 
 set -ex
 
-export BQ_PROJECT=$1        # project
-export BQ_DATASET=$2        # dataset
-export CDR_DATE=$3          # cdr date
-export DRY_RUN=$4           # dry run
+export BQ_PROJECT=$1        # CDR project
+export BQ_DATASET=$2        # CDR dataset
+export WGV_PROJECT=$3       # whole genome variant project
+export WGV_DATASET=$4       # whole genome variant dataset
+export CDR_DATE=$5          # cdr date
+export DRY_RUN=$6           # dry run
 
 if [ "$DRY_RUN" == true ]
 then
@@ -29,11 +31,13 @@ then
   test=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation_ext")
   test=$(bq show "$BQ_PROJECT:$BQ_DATASET.measurement_ext")
   test=$(bq show "$BQ_PROJECT:$BQ_DATASET.visit_occurrence_ext")
+  test=$(bq show "$WGV_PROJECT:$WGV_DATASET.metadata")
   exit 0
 fi
 
 # Test that datset exists
 test=$(bq show "$BQ_PROJECT:$BQ_DATASET")
+test=$(bq show "$WGV_PROJECT:$WGV_DATASET")
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
@@ -86,9 +90,9 @@ SELECT
         ELSE 1
       END has_fitbit
     , CASE
-        WHEN f.person_id is null THEN 0
+        WHEN g.person_id is null THEN 0
         ELSE 1
-      END has_fitbit
+      END has_whole_genome_variant
 FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` g on (p.gender_concept_id = g.concept_id)
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` s on (p.sex_at_birth_concept_id = s.concept_id)
@@ -109,10 +113,7 @@ LEFT JOIN
         union distinct
         SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.steps_intraday\`
     ) f on (p.person_id = f.person_id)
-LEFT JOIN
-    (
-        SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.activity_summary\`
-    ) g on (p.person_id = g.person_id)"
+LEFT JOIN \`$WGV_PROJECT.$WGV_DATASET.metadata\` g on (p.person_id = g.person_id)"
 
 ################################################
 # calculate age_at_consent and age_at_cdr
