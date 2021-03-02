@@ -12,7 +12,6 @@ import * as fp from 'lodash/fp';
 
 
 export interface AccountCreationSurveyProps extends WithProfileErrorModalProps {
-  invitationKey: string;
   termsOfServiceVersion?: number;
   profile: Profile;
   onComplete: (profile: Profile) => void;
@@ -34,13 +33,12 @@ export const AccountCreationSurvey = withProfileErrorModal({title: 'Error creati
   }
 
   async createAccount(profile, captchaToken): Promise<Profile> {
-    const {invitationKey, termsOfServiceVersion, onComplete} = this.props;
+    const {termsOfServiceVersion, onComplete} = this.props;
 
     try {
       const newProfile = await profileApi().createAccount({
         profile: profile,
         captchaVerificationToken: captchaToken,
-        invitationKey: invitationKey,
         termsOfServiceVersion: termsOfServiceVersion
       });
       onComplete(newProfile);

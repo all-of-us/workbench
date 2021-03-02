@@ -13,8 +13,6 @@ import org.pmiops.workbench.model.FileDetail;
 /** Encapsulate Google APIs for interfacing with Google Cloud Storage. */
 public interface CloudStorageService {
 
-  String readInvitationKey();
-
   String readMandrillApiKey();
 
   String getImageUrl(String image_name);

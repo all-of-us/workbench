@@ -35,11 +35,6 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   }
 
   @Override
-  public String readInvitationKey() {
-    return getCredentialsBucketString("invitation-key.txt");
-  }
-
-  @Override
   public String readMandrillApiKey() {
     JSONObject mandrillKeys = getCredentialsBucketJSON("mandrill-keys.json");
     return mandrillKeys.getString("api-key");

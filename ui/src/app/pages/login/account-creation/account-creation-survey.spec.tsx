@@ -28,7 +28,6 @@ beforeEach(() => {
   mockCreateAccount = jest.spyOn(profileApi(), 'createAccount');
 
   props = {
-    invitationKey: '',
     termsOfServiceVersion: 0,
     profile: createEmptyProfile(),
     onComplete: () => {},
