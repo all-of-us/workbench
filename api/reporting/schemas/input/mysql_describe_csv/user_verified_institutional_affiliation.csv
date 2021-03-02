@@ -1,5 +1,0 @@
-user_verified_institutional_affiliation_id,bigint(20),NO,PRI,NULL,auto_increment
-user_id,bigint(20),NO,UNI,NULL,
-institution_id,bigint(20),NO,MUL,NULL,
-institutional_role_enum,tinyint(4),NO,,NULL,
-institutional_role_other_text,varchar(80),YES,,NULL,

@@ -20,11 +20,23 @@ beforeEach(async () => {
   const getTitle = async () => {
     return await page.$eval('title', title => {
       return title.textContent;
-    });
+    }).catch(() =>  {return 'getTitle() func failed'});
+  }
+
+  const describeJsHandle = async (jsHandle)  => {
+    return jsHandle.executionContext().evaluate(obj => {
+      return obj.toString();
+    }, jsHandle);
   }
 
   const stringifyData = (data: string): string => {
-    return data !== undefined ? JSON.stringify(JSON.parse(data), null, 2) : '';
+    if (!data) return '';
+    try {
+      return JSON.stringify(JSON.parse(data), null, 2);
+    } catch (err)  {
+      // If data is not json
+      return data;
+    }
   }
 
   const includeUrl = (request: Request): Request | null => {
@@ -33,7 +45,8 @@ beforeEach(async () => {
       'content-security-index-report',
       'analytics',
       'status-alert',
-      'publicDetails'
+      'publicDetails',
+      '.js'
     ];
     return !filters.some((urlPart) => request && request.url().includes(urlPart))
        ? request
@@ -57,9 +70,26 @@ beforeEach(async () => {
        : null;
   }
 
-  // Api "/workspaces" or "/cdrVersions" response can be truncated
-  const isWorkspacesApi = (request: Request): boolean => {
-    return request && (request.url().endsWith('/v1/workspaces') || request.url().endsWith('/v1/cdrVersions'));
+  // Api response won't be logged.
+  const shouldSkipApiResponseBody = (request: Request): boolean => {
+    const filters = [
+      '/readonly',
+      '/chartinfo/',
+      'page-visits',
+      '/generateCode/',
+      '/criteria/CONDITION/search/',
+      '/criteria/',
+      '/cdrVersions',
+      '/config',
+      '/user-recent-workspaces',
+      '/profile'
+    ];
+    return filters.some((partialUrl) => request && request.url().includes(partialUrl));
+  }
+
+  // Truncate long Api response.
+  const shouldTruncateResponse = (request: Request): boolean => {
+    return request && (request.url().endsWith('/v1/workspaces'));
   }
 
   const isApiFailure = (request: Request): boolean => {
@@ -76,7 +106,7 @@ beforeEach(async () => {
 
   const notRedirectRequest = (request: Request): boolean => {
     // Response body can only be accessed for non-redirect requests
-    return request && request.redirectChain().length === 0;
+    return request && request.redirectChain().length === 0 && !request.isNavigationRequest();
   }
 
   const getResponseText = async (request: Request): Promise<string> => {
@@ -91,16 +121,17 @@ beforeEach(async () => {
        `${response.status()} ${request.method()} ${request.url()}\n${responseText}\n${failureText}`);
   }
 
-  const logResponse = async (request: Request): Promise<void> => {
-    let responseText = stringifyData(await getResponseText(request));
-    if (isWorkspacesApi(request)) {
-      // truncate long response. get first two workspace details.
-      responseText = fp.isEmpty(JSON.parse(responseText).items)
-         ? responseText
-         : 'truncated...\n' + JSON.stringify(JSON.parse(responseText).items.slice(0, 2), null, 2);
+  const transformResponseBody = async (request: Request): Promise<string> => {
+    if (request) {
+      let responseText = stringifyData(await getResponseText(request));
+      if (shouldTruncateResponse(request)) {
+        // truncate long response. get first two workspace details.
+        responseText = fp.isEmpty(JSON.parse(responseText).items)
+           ? responseText
+           : 'truncated...\n' + JSON.stringify(JSON.parse(responseText).items.slice(0, 2), null, 2);
+      }
+      return responseText;
     }
-    console.debug('❗ Request finished: ' +
-       `${request.response().status()} ${request.method()} ${request.url()}\n${responseText}`);
   }
 
   const isWorkbenchRequest = fp.flow(isWorkbenchApi, notOptionsRequest, includeResourceType, includeUrl);
@@ -121,17 +152,36 @@ beforeEach(async () => {
   });
 
   page.on('requestfinished', async (request) => {
-    if (canLogResponse(request)) {
-      if (isApiFailure(request)) {
-        await logError(request);
-      } else {
-        await logResponse(request);
+    let method;
+    let url;
+    let status;
+    try {
+      if (canLogResponse(request)) {
+        // Save data for log in catch block when exception is thrown.
+        method = request.method();
+        const resp = request.response();
+        url = resp.url();
+        status = resp.status();
+
+        if (isApiFailure(request)) {
+          await logError(request);
+        } else {
+          if (shouldSkipApiResponseBody(request)) {
+            console.debug(`❗ Request finished: ${status} ${method} ${url}`);
+          } else {
+            console.debug('❗ Request finished: ' +
+               `${status} ${method} ${url}\n${await transformResponseBody(request)}`);
+          }
+        }
       }
+    } catch (err) {
+      // Try find out what the request was
+      console.error(`${err}\n${status} ${method} ${url}`);
     }
     try {
       await request.continue();
-      // tslint:disable-next-line:no-empty
     } catch (e) {
+      // Ignored
     }
   });
 
@@ -139,27 +189,30 @@ beforeEach(async () => {
     if (!message.args().length) {
       return;
     }
+    const title = await getTitle();
     try {
-      const title = await getTitle();
-      const args = await Promise.all(message.args().map(a => a.jsonValue()));
-      console[message.type() === 'warning' ? 'warn' : message.type()](`❗ ${title}\n`, ...args);
-      // tslint:disable-next-line:no-empty
+      const args = await Promise.all(message.args().map(a => describeJsHandle(a)));
+      console[message.type() === 'warning' ? 'warn' : message.type()](`❗ ${title}\n${message.text()}`, ...args);
     } catch (err) {
-      console.log(err);
+      console.error(`❗ ${title}\nException occurred when getting console message.\n${err}\n${message.text()}`);
     }
   });
 
   page.on('error', async (error) => {
     const title = await getTitle();
-    console.error(`❗ ${title}\npage error: ${error}`);
+    try {
+      console.error(`❗ ${title}\nError message: ${error.message}\nStack: ${error.stack}`);
+    } catch (err) {
+      console.error(`❗ ${title}\nException occurred when getting error.\n${err}`);
+    }
   });
 
   page.on('pageerror', async (error) => {
     const title = await getTitle();
     try {
-      console.error(`❗ ${title}\npage error: ${error}`);
-      // tslint:disable-next-line:no-empty
+      console.error(`❗ ${title}\nPage error message: ${error.message}\nStack: ${error.stack}`);
     } catch (err) {
+      console.error(`❗ ${title}\nPage exception occurred when getting pageerror.\n${err}`);
     }
   })
 

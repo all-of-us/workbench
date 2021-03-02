@@ -172,7 +172,8 @@ describe('resources.tsx', () => {
     });
 
     it('should return resource URLs', () => {
-        const WORKSPACE_URL_PREFIX = `/workspaces/${WorkspaceStubVariables.DEFAULT_WORKSPACE_NS}/${WorkspaceStubVariables.DEFAULT_WORKSPACE_ID}`;
+        const WORKSPACE_URL_PREFIX =
+            `/workspaces/${WorkspaceStubVariables.DEFAULT_WORKSPACE_NS}/${WorkspaceStubVariables.DEFAULT_WORKSPACE_ID}`;
         const EXPECTED_COHORT_URL = `${WORKSPACE_URL_PREFIX}/data/cohorts/build?cohortId=${COHORT_ID}`;
         const EXPECTED_COHORT_REVIEW_URL = `${WORKSPACE_URL_PREFIX}/data/cohorts/${COHORT_REVIEW_COHORT_ID}/review`;
         const EXPECTED_CONCEPT_SET_URL = `${WORKSPACE_URL_PREFIX}/data/concepts/sets/${CONCEPT_SET_ID}`;

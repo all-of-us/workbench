@@ -109,7 +109,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
       />
       <AppRoute
           path='/data-code-of-conduct'
-          component={ () => <DataUserCodeOfConductPage routeData={{
+          component={() => <DataUserCodeOfConductPage routeData={{
             title: 'Data User Code of Conduct',
             minimizeChrome: true
           }} />}

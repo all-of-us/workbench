@@ -1,8 +1,0 @@
-demographic_survey_id,bigint(20),NO,PRI,,auto_increment
-ethnicity,tinyint(4),YES,"",,""
-year_of_birth,smallint(6),YES,"",,""
-education,tinyint(4),YES,"",,""
-disability,tinyint(4),YES,"",,""
-user_id,bigint(20),NO,MUL,,""
-identifies_as_lgbtq,bit(1),YES,"",,""
-lgbtq_identity,text,YES,"",,""

@@ -13,7 +13,7 @@
     "xAppIdValue": "test-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.0.14",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.0.23",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com/dev",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com/dev",
     "runtimeImages": {
@@ -27,6 +27,10 @@
     "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.rw_test_firecloud_view",
     "retryCount": 2,
     "bufferCapacity": 300,
+    "bufferCapacityPerTier": {
+      "registered": 300,
+      "controlled_test": 100
+    },
     "bufferRefillProjectsPerTask": 1,
     "bufferStatusChecksPerTask": 10,
     "defaultFreeCreditsDollarLimit": 300.0,

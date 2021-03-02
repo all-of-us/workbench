@@ -15,7 +15,8 @@
     "has_hierarchy": 1,
     "has_ancestor_data": 0,
     "path": "1.5.6",
-    "synonyms": "Cholera|Cholera|Cholera|[condition_rank1]"
+    "synonyms": "Cholera|Cholera|Cholera|[condition_rank1]",
+    "full_text": "Cholera|Cholera|Cholera|[condition_rank1]"
   },
   {
     "id": 6,
@@ -33,7 +34,8 @@
     "has_hierarchy": 1,
     "has_ancestor_data": 0,
     "path": "1.5.6",
-    "synonyms": "Cholera|Cholera|Cholera"
+    "synonyms": "Cholera|Cholera|Cholera",
+    "full_text": "Cholera|Cholera|Cholera|[condition_rank1]"
   },
   {
     "id": 1413,
@@ -51,7 +53,8 @@
     "has_hierarchy": 1,
     "has_ancestor_data": 0,
     "path": "1.5.6.1413",
-    "synonyms": "Cholera|Cholera|Cholera"
+    "synonyms": "Cholera|Cholera|Cholera",
+    "full_text": "Cholera|Cholera|Cholera|[condition_rank1]"
   },
   {
     "id": 1414,
@@ -69,7 +72,8 @@
     "has_hierarchy": 1,
     "has_ancestor_data": 0,
     "path": "1.5.6.1414",
-    "synonyms": "Cholera due to vibrio cholerae|Cholera d/t vib cholerae|Cholera d/t vib cholerae|Cholera due to vibrio cholerae|Cholera due to vibrio cholerae|[condition_rank1]"
+    "synonyms": "Cholera due to vibrio cholerae|Cholera d/t vib cholerae|Cholera d/t vib cholerae|Cholera due to vibrio cholerae|Cholera due to vibrio cholerae|[condition_rank1]",
+    "full_text": "Cholera due to vibrio cholerae|Cholera d/t vib cholerae|Cholera d/t vib cholerae|Cholera due to vibrio cholerae|Cholera due to vibrio cholerae|[condition_rank1]"
   },
   {
     "id": 35665,
@@ -87,7 +91,8 @@
     "has_hierarchy": 1,
     "has_ancestor_data": 0,
     "path": "23670.23679.35652.35665",
-    "synonyms": "Aortic aneurysm of unspecified site"
+    "synonyms": "Aortic aneurysm of unspecified site",
+    "full_text": "[condition_rank1]"
   },
   {
     "id": 35666,
@@ -105,7 +110,8 @@
     "has_hierarchy": 1,
     "has_ancestor_data": 0,
     "path": "23670.23679.35653.35666",
-    "synonyms": "Aortic aneurysm of unspecified site"
+    "synonyms": "Aortic aneurysm of unspecified site",
+    "full_text": "Aortic aneurysm of unspecified site|[condition_rank1]"
   },
   {
     "id": 2994225,
@@ -123,7 +129,8 @@
     "has_hierarchy": 1,
     "has_ancestor_data": 1,
     "path": "2994175.2994225",
-    "synonyms": "Gynecological antiinfectives and antiseptics"
+    "synonyms": "Gynecological antiinfectives and antiseptics",
+    "full_text": "Gynecological antiinfectives and antiseptics|[drug_rank1]"
   },
   {
     "id": 2994224,
@@ -141,7 +148,8 @@
     "has_hierarchy": 1,
     "has_ancestor_data": 1,
     "path": "2994174.2994224",
-    "synonyms": "Gynecological antiinfectives and antiseptics"
+    "synonyms": "Gynecological antiinfectives and antiseptics",
+    "full_text": "Gynecological antiinfectives and antiseptics|[drug_rank1]"
   },
   {
     "id": 2996787,
@@ -159,7 +167,8 @@
     "has_hierarchy": 1,
     "has_ancestor_data": 1,
     "path": "2994179.2994253.2994426.2994929.2996787",
-    "synonyms": "Amobarbital|Amobarbital|Amobarbital|[drug_rank1]"
+    "synonyms": "Amobarbital|Amobarbital|Amobarbital|[drug_rank1]",
+    "full_text": "Amobarbital|Amobarbital|Amobarbital|[drug_rank1]"
   },
   {
     "id": 1871061,
@@ -177,7 +186,8 @@
     "has_hierarchy": 1,
     "has_ancestor_data": 0,
     "path": "1297944.1297957.1298239.1300274.1306695.1322640.1361587.1453546.1623752.1871061",
-    "synonyms": "Cervical disc disorder with myelopathy|Cervical disc disorder with myelopathy|Cervical disc disorder with myelopathy|Cervical disc disorder with myelopathy (disorder)"
+    "synonyms": "Cervical disc disorder with myelopathy|Cervical disc disorder with myelopathy|Cervical disc disorder with myelopathy|Cervical disc disorder with myelopathy (disorder)",
+    "full_text": "Cervical disc disorder with myelopathy|Cervical disc disorder with myelopathy|Cervical disc disorder with myelopathy|Cervical disc disorder with myelopathy (disorder)|[condition_rank1]"
   },
   {
     "id": 1871888,
@@ -195,7 +205,8 @@
     "has_hierarchy": 1,
     "has_ancestor_data": 0,
     "path": "99999.1871888",
-    "synonyms": "Obstetric procedure|[PROCEDURE_rank1]"
+    "synonyms": "Obstetric procedure|[procedure_rank1]",
+    "full_text": "Obstetric procedure|[procedure_rank1]"
   },
   {
     "id": 1871889,
@@ -213,7 +224,8 @@
     "has_hierarchy": 1,
     "has_ancestor_data": 0,
     "path": "99999.1871888.1871889",
-    "synonyms": "Termination of pregnancy|[PROCEDURE_rank1]"
+    "synonyms": "Termination of pregnancy|[procedure_rank1]",
+    "full_text": "Termination of pregnancy|[procedure_rank1]"
   },
   {
     "id": 2991522,
@@ -231,7 +243,8 @@
     "has_hierarchy": 1,
     "has_ancestor_data": 0,
     "path": "2985961.2985995.2986079.2986708.2988049.2989968.2991522",
-    "synonyms": "Ampicillin [Susceptibility] by Disk diffusion (KB)"
+    "synonyms": "Ampicillin [Susceptibility] by Disk diffusion (KB)",
+    "full_text": "Ampicillin [Susceptibility] by Disk diffusion (KB)|[measurement_rank1]"
   },
   {
     "id": 321152,
@@ -249,7 +262,8 @@
     "has_hierarchy": 1,
     "has_ancestor_data": 0,
     "path": "311096.311122.311454.313124.316493.321152",
-    "synonyms": "Excision or curettage of bone cyst or benign tumor, tibia or fibula"
+    "synonyms": "Excision or curettage of bone cyst or benign tumor, tibia or fibula",
+    "full_text": "Excision or curettage of bone cyst or benign tumor, tibia or fibula|[procedure_rank1]"
   },
   {
     "id": 3211943,
@@ -267,7 +281,8 @@
     "has_hierarchy": 1,
     "has_ancestor_data": 0,
     "path": "3211944.3211943",
-    "synonyms": "Excision or curettage of bone cyst or benign tumor, tibia or fibula"
+    "synonyms": "Excision or curettage of bone cyst or benign tumor, tibia or fibula",
+    "full_text": "Excision or curettage of bone cyst or benign tumor, tibia or fibula|[condition_rank1]"
   },
   {
     "id": 23487234,
@@ -285,7 +300,8 @@
     "has_hierarchy": 1,
     "has_ancestor_data": 0,
     "path": "23487234",
-    "synonyms": "Survey"
+    "synonyms": "Survey",
+    "full_text": "[survey_rank1]"
   },
   {
     "id": 23487235,
@@ -303,7 +319,8 @@
     "has_hierarchy": 1,
     "has_ancestor_data": 0,
     "path": "23487234.23487235",
-    "synonyms": "Question"
+    "synonyms": "Question",
+    "full_text": "[survey_rank1]"
   },
   {
     "id": 23487236,
@@ -321,7 +338,8 @@
     "has_hierarchy": 1,
     "has_ancestor_data": 0,
     "path": "23487234.23487235.23487236",
-    "synonyms": "Answer"
+    "synonyms": "Answer",
+    "full_text": "[survey_rank1]"
   },
   {
     "id": 23746,
@@ -339,6 +357,7 @@
     "has_hierarchy": 1,
     "has_ancestor_data": 0,
     "path": "1.5.6.23746",
-    "synonyms": "Cholera due to vibrio cholerae|Cholera d/t vib cholerae|Cholera d/t vib cholerae|Cholera due to vibrio cholerae|Cholera due to vibrio cholerae|[condition_rank1]"
+    "synonyms": "Cholera due to vibrio cholerae|Cholera d/t vib cholerae|Cholera d/t vib cholerae|Cholera due to vibrio cholerae|Cholera due to vibrio cholerae|[procedure_rank1]",
+    "full_text": "Cholera due to vibrio cholerae|Cholera d/t vib cholerae|Cholera d/t vib cholerae|Cholera due to vibrio cholerae|Cholera due to vibrio cholerae|[procedure_rank1]"
   }
 ]

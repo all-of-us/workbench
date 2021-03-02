@@ -69,7 +69,8 @@ describe('DataUserCodeOfConduct', () => {
     serverConfigStore.next({...defaultConfig, enableV3DataUserCodeOfConduct: false});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="dua-name-input"]').props().value).toBe(ProfileStubVariables.PROFILE_STUB.givenName + ' ' + ProfileStubVariables.PROFILE_STUB.familyName);
+    expect(wrapper.find('[data-test-id="dua-name-input"]').props().value).toBe(ProfileStubVariables.PROFILE_STUB.givenName +
+      ' ' + ProfileStubVariables.PROFILE_STUB.familyName);
     expect(wrapper.find('[data-test-id="dua-contact-email-input"]').props().value).toBe(ProfileStubVariables.PROFILE_STUB.contactEmail);
     expect(wrapper.find('[data-test-id="dua-username-input"]').props().value).toBe(ProfileStubVariables.PROFILE_STUB.username);
 

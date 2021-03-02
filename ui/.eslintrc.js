@@ -47,7 +47,6 @@ module.exports = {
 
     /* Style */
     '@typescript-eslint/prefer-function-type': 'warn',
-    '@typescript-eslint/class-name-casing': 'warn',
     // 'spaced-comment': 'warn',
     '@typescript-eslint/consistent-type-definitions': ['warn', 'interface'],
     'no-trailing-spaces': 'warn',
@@ -56,9 +55,7 @@ module.exports = {
     // 'simple-import-sort/sort': 'warn',
     // 'quotes': ['warn', 'single'], 
     // '@typescript-eslint/semi': 'warn',
-    '@typescript-eslint/naming-convention': 'warn',
     // 'space-before-function-paren': ['warn', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
-
 
     /* Functionality */
     'curly': 'warn',
@@ -75,21 +72,22 @@ module.exports = {
     'no-irregular-whitespace': 'warn',
     '@typescript-eslint/no-misused-new': 'warn',
     // 'no-shadow': 'warn',
-    // 'dot-notation': 'warn', 
+    // 'dot-notation': 'warn',
     'no-throw-literal': 'warn', 
     'no-fallthrough': 'warn', // For switch statements
     'no-use-before-define': 'off', // Needed for TS
     // '@typescript-eslint/no-use-before-define': 'warn',
     // 'no-unused-vars': 'off', // Needed for TS 
     // '@typescript-eslint/no-unused-vars': 'warn', 
-    'react/jsx-uses-vars': 'warn', 
-    // 'no-var': 'warn',
+    'react/jsx-curly-spacing': ["warn", {'when': 'never'}],
+    'react/jsx-uses-vars': 'warn',
+    'no-var': 'warn',
     'radix': 'warn', // Add radix on parseInt
     'eqeqeq': ['warn', 'always', {'null': 'ignore'}],
     
     /* Maintainability */
-    // 'eol-last': 'warn',
-    // 'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}', ignoreComments: true}], 
+    'eol-last': 'warn',
+    'max-len': ['warn', {code: 140, ignorePattern: '^import |^export\\{(.*?)\\}', ignoreComments: true}], 
     // 'prefer-const': ['warn', {'destructuring': 'all'}], 
   }
 };

@@ -293,7 +293,11 @@ it('should call callback with correct form data', async() => {
   getInstitutionDropdown(wrapper).props.onChange({originalEvent: undefined, value: 'VUMC', target: {name: '', id: '', value: 'VUMC'}});
   getEmailInput(wrapper).simulate('change', {target: {value: 'asdf@vumc.org'}});
   getEmailInput(wrapper).simulate('blur');
-  getRoleDropdown(wrapper).props.onChange({originalEvent: undefined, value: InstitutionalRole.UNDERGRADUATE, target: {name: '', id: '', value: InstitutionalRole.UNDERGRADUATE}});
+  getRoleDropdown(wrapper).props.onChange({
+    originalEvent: undefined,
+    value: InstitutionalRole.UNDERGRADUATE,
+    target: {name: '', id: '', value: InstitutionalRole.UNDERGRADUATE}
+  });
   // Await one tick for the APi response to update state and allow form submission.
   await waitOneTickAndUpdate(wrapper);
 

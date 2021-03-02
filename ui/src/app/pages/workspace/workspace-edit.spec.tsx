@@ -205,6 +205,9 @@ describe('WorkspaceEdit', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
+    wrapper.find('[data-test-id="review-request-btn-false"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
+
     const numBefore = workspacesApi.workspaces.length;
     wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
@@ -217,7 +220,7 @@ describe('WorkspaceEdit', () => {
 
   it('defaults to upgrading the CDR Version when duplicating a workspace with an older CDR Version', async() => {
     // init the workspace to a non-default CDR version value
-    const altCdrWorkspace = {...workspace, cdrVersionId: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION_ID}
+    const altCdrWorkspace = {...workspace, cdrVersionId: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION_ID};
     currentWorkspaceStore.next(altCdrWorkspace);
 
     // duplication will involve a CDR version upgrade by default
@@ -231,7 +234,8 @@ describe('WorkspaceEdit', () => {
     // default CDR version, not the existing workspace's alt CDR version
     expect(cdrSelection).toBe(CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID);
 
-    const expectedUpgradeMessage = `${CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION} to ${CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION}.`;
+    const expectedUpgradeMessage =
+      `${CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION} to ${CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION}.`;
     const cdrUpgradeMessage = wrapper.find('[data-test-id="cdr-version-upgrade"]').first().text();
     expect(cdrUpgradeMessage).toContain(altCdrWorkspace.name);
     expect(cdrUpgradeMessage).toContain(expectedUpgradeMessage);
@@ -258,6 +262,9 @@ describe('WorkspaceEdit', () => {
   it('prevents multiple Workspace creations via the same confirmation dialog', async() => {
     routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
     const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    wrapper.find('[data-test-id="review-request-btn-false"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
 
     const numBefore = workspacesApi.workspaces.length;
@@ -287,6 +294,8 @@ describe('WorkspaceEdit', () => {
     };
 
     jest.useFakeTimers();
+    wrapper.find('[data-test-id="review-request-btn-false"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');
@@ -317,6 +326,8 @@ describe('WorkspaceEdit', () => {
     };
 
     jest.useFakeTimers();
+    wrapper.find('[data-test-id="review-request-btn-false"]').first().simulate('click');
+    await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="workspace-save-btn"]').first().simulate('click');
     await waitOneTickAndUpdate(wrapper);
     wrapper.find('[data-test-id="workspace-confirm-save-btn"]').first().simulate('click');

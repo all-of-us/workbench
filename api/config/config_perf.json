@@ -13,7 +13,7 @@
     "xAppIdValue": "perf-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/228353087260/servicePerimeters/terra_perf_aou_perf",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.0.14",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.0.23",
     "shibbolethApiBaseUrl": "",
     "shibbolethUiBaseUrl": "",
     "runtimeImages": {
@@ -27,6 +27,9 @@
     "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.rw_test_firecloud_view",
     "retryCount": 4,
     "bufferCapacity": 300,
+    "bufferCapacityPerTier": {
+      "registered": 300
+    },
     "bufferRefillProjectsPerTask": 5,
     "bufferStatusChecksPerTask": 10,
     "defaultFreeCreditsDollarLimit": 300.0,

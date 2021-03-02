@@ -19,6 +19,6 @@ public class CloudStorageServiceImplIntegrationTest extends BaseIntegrationTest 
 
   @Test
   public void testCanReadFile() {
-    assertThat(service.readInvitationKey().length() > 4).isTrue();
+    assertThat(service.getCaptchaServerKey()).isNotEmpty();
   }
 }

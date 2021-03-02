@@ -3,6 +3,7 @@ package org.pmiops.workbench.billing;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -11,14 +12,18 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.Period;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -35,6 +40,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
+import org.javers.common.collections.Sets;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,8 +48,10 @@ import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.CallsRealMethodsWithDelay;
 import org.pmiops.workbench.TestLock;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -115,20 +123,35 @@ public class BillingProjectBufferServiceTest {
   @Autowired @SpyBean private BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   @Autowired private FireCloudService mockFireCloudService;
   @Autowired private MonitoringService mockMonitoringService;
+  @Autowired private AccessTierDao accessTierDao;
 
   @Autowired private BillingProjectBufferService billingProjectBufferService;
 
-  private final long BUFFER_CAPACITY = 5;
+  private final String REGISTERED_TIER_NAME = "registered";
+  private final String REGISTERED_TIER_SERVICE_PERIMETER = "registered/tier/perimeter";
+  private final int REGISTERED_TIER_BUFFER_CAPACITY = 5;
+
+  private DbAccessTier registeredTier =
+      new DbAccessTier()
+          .setAccessTierId(1)
+          .setShortName(REGISTERED_TIER_NAME)
+          .setDisplayName("Registered Tier")
+          .setAuthDomainGroupEmail("joel@example.com")
+          .setAuthDomainName("aou-reg-users")
+          .setServicePerimeter(REGISTERED_TIER_SERVICE_PERIMETER);
 
   @Before
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.billing.projectNamePrefix = "test-prefix";
-    workbenchConfig.billing.bufferCapacity = (int) BUFFER_CAPACITY;
+    workbenchConfig.billing.bufferCapacityPerTier =
+        Collections.singletonMap(REGISTERED_TIER_NAME, REGISTERED_TIER_BUFFER_CAPACITY);
     workbenchConfig.billing.bufferRefillProjectsPerTask = 1;
     workbenchConfig.billing.bufferStatusChecksPerTask = 10;
 
     CLOCK.setInstant(NOW);
+
+    registeredTier = accessTierDao.save(registeredTier);
 
     billingProjectBufferEntryDao = spy(billingProjectBufferEntryDao);
     TestLock lock = new TestLock();
@@ -141,7 +164,11 @@ public class BillingProjectBufferServiceTest {
 
     billingProjectBufferService =
         new BillingProjectBufferService(
-            billingProjectBufferEntryDao, clock, mockFireCloudService, workbenchConfigProvider);
+            accessTierDao,
+            billingProjectBufferEntryDao,
+            clock,
+            mockFireCloudService,
+            workbenchConfigProvider);
   }
 
   @Test
@@ -149,19 +176,22 @@ public class BillingProjectBufferServiceTest {
     workbenchConfig.billing.bufferRefillProjectsPerTask = 2;
     billingProjectBufferService.bufferBillingProjects();
 
-    verify(mockFireCloudService, times(2)).createAllOfUsBillingProject(anyString());
+    verify(mockFireCloudService, times(2)).createAllOfUsBillingProject(anyString(), anyString());
   }
 
   @Test
   public void fillBuffer() {
     billingProjectBufferService.bufferBillingProjects();
 
-    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService).createAllOfUsBillingProject(captor.capture());
+    ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<String> perimeterCaptor = ArgumentCaptor.forClass(String.class);
+    verify(mockFireCloudService)
+        .createAllOfUsBillingProject(projectCaptor.capture(), perimeterCaptor.capture());
 
-    String billingProjectName = captor.getValue();
-
+    String billingProjectName = projectCaptor.getValue();
+    String servicePerimeter = perimeterCaptor.getValue();
     assertThat(billingProjectName).startsWith(workbenchConfig.billing.projectNamePrefix);
+    assertThat(servicePerimeter).isEqualTo(REGISTERED_TIER_SERVICE_PERIMETER);
     assertThat(
             billingProjectBufferEntryDao
                 .findByFireCloudProjectName(billingProjectName)
@@ -170,12 +200,56 @@ public class BillingProjectBufferServiceTest {
   }
 
   @Test
+  public void fillBufferMultiTier() {
+    final String controlledTierName = "controlled";
+    final String controlledTierServicePerimeter = "controlled/perimeter";
+    DbAccessTier controlledTier =
+        new DbAccessTier()
+            .setAccessTierId(2)
+            .setShortName(controlledTierName)
+            .setDisplayName("Controlled Tier")
+            .setAuthDomainGroupEmail("joel@example.com")
+            .setAuthDomainName("aou-ct-users")
+            .setServicePerimeter(controlledTierServicePerimeter);
+    controlledTier = accessTierDao.save(controlledTier);
+
+    workbenchConfig.billing.bufferCapacityPerTier =
+        ImmutableMap.of(REGISTERED_TIER_NAME, 1, controlledTierName, 1);
+
+    billingProjectBufferService.bufferBillingProjects();
+
+    Set<String> expectedPerimeters =
+        Sets.asSet(REGISTERED_TIER_SERVICE_PERIMETER, controlledTierServicePerimeter);
+
+    // one project per tier, per bufferRefillProjectsPerTask
+    final int expectedCreationCount =
+        workbenchConfig.billing.bufferRefillProjectsPerTask
+            * workbenchConfig.billing.bufferCapacityPerTier.size();
+
+    ArgumentCaptor<String> projectCaptor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<String> perimeterCaptor = ArgumentCaptor.forClass(String.class);
+    verify(mockFireCloudService, times(expectedCreationCount))
+        .createAllOfUsBillingProject(projectCaptor.capture(), perimeterCaptor.capture());
+
+    for (String billingProjectName : projectCaptor.getAllValues()) {
+      assertThat(billingProjectName).startsWith(workbenchConfig.billing.projectNamePrefix);
+      assertThat(
+              billingProjectBufferEntryDao
+                  .findByFireCloudProjectName(billingProjectName)
+                  .getStatusEnum())
+          .isEqualTo(BufferEntryStatus.CREATING);
+    }
+
+    assertThat(perimeterCaptor.getAllValues()).containsExactlyElementsIn(expectedPerimeters);
+  }
+
+  @Test
   public void fillBuffer_failedCreateRequest() {
     long expectedCount = billingProjectBufferEntryDao.count() + 1;
 
     doThrow(RuntimeException.class)
         .when(mockFireCloudService)
-        .createAllOfUsBillingProject(anyString());
+        .createAllOfUsBillingProject(anyString(), anyString());
     try {
       billingProjectBufferService.bufferBillingProjects();
     } catch (Exception e) {
@@ -190,7 +264,7 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService).createAllOfUsBillingProject(captor.capture());
+    verify(mockFireCloudService).createAllOfUsBillingProject(captor.capture(), anyString());
 
     String billingProjectName = captor.getValue();
 
@@ -200,13 +274,13 @@ public class BillingProjectBufferServiceTest {
   @Test
   public void fillBuffer_capacity() {
     // fill up buffer
-    for (int i = 0; i < BUFFER_CAPACITY; i++) {
+    for (int i = 0; i < REGISTERED_TIER_BUFFER_CAPACITY; i++) {
       billingProjectBufferService.bufferBillingProjects();
     }
     int expectedCallCount = 0;
     billingProjectBufferService.bufferBillingProjects();
-    verify(mockFireCloudService, times((int) BUFFER_CAPACITY + expectedCallCount))
-        .createAllOfUsBillingProject(anyString());
+    verify(mockFireCloudService, times((int) REGISTERED_TIER_BUFFER_CAPACITY + expectedCallCount))
+        .createAllOfUsBillingProject(anyString(), anyString());
 
     // free up buffer
     DbBillingProjectBufferEntry entry = billingProjectBufferEntryDao.findAll().iterator().next();
@@ -214,35 +288,37 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferEntryDao.save(entry);
     expectedCallCount++;
     billingProjectBufferService.bufferBillingProjects();
-    verify(mockFireCloudService, times((int) BUFFER_CAPACITY + expectedCallCount))
-        .createAllOfUsBillingProject(anyString());
+    verify(mockFireCloudService, times((int) REGISTERED_TIER_BUFFER_CAPACITY + expectedCallCount))
+        .createAllOfUsBillingProject(anyString(), anyString());
 
     // increase buffer capacity
     expectedCallCount++;
-    workbenchConfig.billing.bufferCapacity = (int) BUFFER_CAPACITY + 1;
+    workbenchConfig.billing.bufferCapacityPerTier =
+        Collections.singletonMap(REGISTERED_TIER_NAME, REGISTERED_TIER_BUFFER_CAPACITY + 1);
     billingProjectBufferService.bufferBillingProjects();
-    verify(mockFireCloudService, times((int) BUFFER_CAPACITY + expectedCallCount))
-        .createAllOfUsBillingProject(anyString());
+    verify(mockFireCloudService, times((int) REGISTERED_TIER_BUFFER_CAPACITY + expectedCallCount))
+        .createAllOfUsBillingProject(anyString(), anyString());
 
     // should be at capacity
     billingProjectBufferService.bufferBillingProjects();
-    verify(mockFireCloudService, times((int) BUFFER_CAPACITY + expectedCallCount))
-        .createAllOfUsBillingProject(anyString());
+    verify(mockFireCloudService, times((int) REGISTERED_TIER_BUFFER_CAPACITY + expectedCallCount))
+        .createAllOfUsBillingProject(anyString(), anyString());
   }
 
   @Test
   public void fillBuffer_decreaseCapacity() {
     // fill up buffer
-    for (int i = 0; i < BUFFER_CAPACITY; i++) {
+    for (int i = 0; i < REGISTERED_TIER_BUFFER_CAPACITY; i++) {
       billingProjectBufferService.bufferBillingProjects();
     }
 
-    workbenchConfig.billing.bufferCapacity = (int) BUFFER_CAPACITY - 2;
+    workbenchConfig.billing.bufferCapacityPerTier =
+        Collections.singletonMap(REGISTERED_TIER_NAME, REGISTERED_TIER_BUFFER_CAPACITY - 2);
 
     // should no op since we're at capacity + 2
     billingProjectBufferService.bufferBillingProjects();
-    verify(mockFireCloudService, times((int) BUFFER_CAPACITY))
-        .createAllOfUsBillingProject(anyString());
+    verify(mockFireCloudService, times((int) REGISTERED_TIER_BUFFER_CAPACITY))
+        .createAllOfUsBillingProject(anyString(), anyString());
 
     // should no op since we're at capacity + 1
     Iterator<DbBillingProjectBufferEntry> bufferEntries =
@@ -251,24 +327,24 @@ public class BillingProjectBufferServiceTest {
     entry.setStatusEnum(BufferEntryStatus.ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
     billingProjectBufferService.bufferBillingProjects();
-    verify(mockFireCloudService, times((int) BUFFER_CAPACITY))
-        .createAllOfUsBillingProject(anyString());
+    verify(mockFireCloudService, times((int) REGISTERED_TIER_BUFFER_CAPACITY))
+        .createAllOfUsBillingProject(anyString(), anyString());
 
     // should no op since we're at capacity
     entry = bufferEntries.next();
     entry.setStatusEnum(BufferEntryStatus.ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
     billingProjectBufferService.bufferBillingProjects();
-    verify(mockFireCloudService, times((int) BUFFER_CAPACITY))
-        .createAllOfUsBillingProject(anyString());
+    verify(mockFireCloudService, times((int) REGISTERED_TIER_BUFFER_CAPACITY))
+        .createAllOfUsBillingProject(anyString(), anyString());
 
     // should invoke since we're below capacity
     entry = bufferEntries.next();
     entry.setStatusEnum(BufferEntryStatus.ASSIGNED, this::getCurrentTimestamp);
     billingProjectBufferEntryDao.save(entry);
     billingProjectBufferService.bufferBillingProjects();
-    verify(mockFireCloudService, times((int) BUFFER_CAPACITY + 1))
-        .createAllOfUsBillingProject(anyString());
+    verify(mockFireCloudService, times((int) REGISTERED_TIER_BUFFER_CAPACITY + 1))
+        .createAllOfUsBillingProject(anyString(), anyString());
   }
 
   @Test
@@ -276,7 +352,8 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService).createAllOfUsBillingProject(captor.capture());
+    verify(mockFireCloudService)
+        .createAllOfUsBillingProject(captor.capture(), eq(REGISTERED_TIER_SERVICE_PERIMETER));
     String billingProjectName = captor.getValue();
 
     FirecloudBillingProjectStatus billingProjectStatus = new FirecloudBillingProjectStatus();
@@ -310,7 +387,8 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService).createAllOfUsBillingProject(captor.capture());
+    verify(mockFireCloudService)
+        .createAllOfUsBillingProject(captor.capture(), eq(REGISTERED_TIER_SERVICE_PERIMETER));
     String billingProjectName = captor.getValue();
 
     FirecloudBillingProjectStatus billingProjectStatus = new FirecloudBillingProjectStatus();
@@ -331,7 +409,8 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService).createAllOfUsBillingProject(captor.capture());
+    verify(mockFireCloudService)
+        .createAllOfUsBillingProject(captor.capture(), eq(REGISTERED_TIER_SERVICE_PERIMETER));
     String billingProjectName = captor.getValue();
 
     FirecloudBillingProjectStatus billingProjectStatus =
@@ -352,7 +431,8 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService).createAllOfUsBillingProject(captor.capture());
+    verify(mockFireCloudService)
+        .createAllOfUsBillingProject(captor.capture(), eq(REGISTERED_TIER_SERVICE_PERIMETER));
     String billingProjectName = captor.getValue();
 
     doThrow(NotFoundException.class)
@@ -374,7 +454,8 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService, times(3)).createAllOfUsBillingProject(captor.capture());
+    verify(mockFireCloudService, times(3))
+        .createAllOfUsBillingProject(captor.capture(), eq(REGISTERED_TIER_SERVICE_PERIMETER));
     List<String> capturedProjectNames = captor.getAllValues();
     doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.READY))
         .when(mockFireCloudService)
@@ -411,7 +492,8 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.bufferBillingProjects();
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService, times(3)).createAllOfUsBillingProject(captor.capture());
+    verify(mockFireCloudService, times(3))
+        .createAllOfUsBillingProject(captor.capture(), eq(REGISTERED_TIER_SERVICE_PERIMETER));
     List<String> capturedProjectNames = captor.getAllValues();
     doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
         .when(mockFireCloudService)
@@ -445,7 +527,8 @@ public class BillingProjectBufferServiceTest {
     // test demonstrates that with an appropriate set of configuration values, a 300-project
     // buffer can recover almost immediately after the first non-error project is ready.
 
-    workbenchConfig.billing.bufferCapacity = (int) 300;
+    workbenchConfig.billing.bufferCapacityPerTier =
+        Collections.singletonMap(REGISTERED_TIER_NAME, 300);
     workbenchConfig.billing.bufferRefillProjectsPerTask = 5;
     workbenchConfig.billing.bufferStatusChecksPerTask = 10;
 
@@ -557,13 +640,14 @@ public class BillingProjectBufferServiceTest {
     entry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
     entry.setFireCloudProjectName("test-project-name");
     entry.setCreationTime(getCurrentTimestamp());
+    entry.setAccessTier(registeredTier);
     billingProjectBufferEntryDao.save(entry);
 
     DbUser user = mock(DbUser.class);
     doReturn("fake-email@aou.org").when(user).getUsername();
 
     DbBillingProjectBufferEntry assignedEntry =
-        billingProjectBufferService.assignBillingProject(user);
+        billingProjectBufferService.assignBillingProject(user, registeredTier);
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<String> secondCaptor = ArgumentCaptor.forClass(String.class);
@@ -579,6 +663,54 @@ public class BillingProjectBufferServiceTest {
   }
 
   @Test
+  public void assignBillingProjectMultiTier() {
+    final String controlledTierName = "controlled";
+    final String controlledTierServicePerimeter = "controlled/perimeter";
+    DbAccessTier controlledTier =
+        new DbAccessTier()
+            .setAccessTierId(2)
+            .setShortName(controlledTierName)
+            .setDisplayName("Controlled Tier")
+            .setAuthDomainGroupEmail("joel@example.com")
+            .setAuthDomainName("aou-ct-users")
+            .setServicePerimeter(controlledTierServicePerimeter);
+    controlledTier = accessTierDao.save(controlledTier);
+
+    DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
+    entry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
+    entry.setFireCloudProjectName("test-project-name");
+    entry.setCreationTime(getCurrentTimestamp());
+    entry.setAccessTier(controlledTier);
+    billingProjectBufferEntryDao.save(entry);
+
+    DbUser user = mock(DbUser.class);
+    doReturn("fake-email@aou.org").when(user).getUsername();
+
+    DbBillingProjectBufferEntry assignedEntry =
+        billingProjectBufferService.assignBillingProject(user, controlledTier);
+
+    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<String> secondCaptor = ArgumentCaptor.forClass(String.class);
+    verify(mockFireCloudService).addOwnerToBillingProject(captor.capture(), secondCaptor.capture());
+    String invokedEmail = captor.getValue();
+    String invokedProjectName = secondCaptor.getValue();
+
+    assertThat(invokedEmail).isEqualTo("fake-email@aou.org");
+    assertThat(invokedProjectName).isEqualTo("test-project-name");
+
+    assertThat(billingProjectBufferEntryDao.findOne(assignedEntry.getId()).getStatusEnum())
+        .isEqualTo(BufferEntryStatus.ASSIGNED);
+  }
+
+  @Test(expected = EmptyBufferException.class)
+  public void assignBillingProjectInvalidTier() {
+    DbUser user = mock(DbUser.class);
+    doReturn("fake-email@aou.org").when(user).getUsername();
+
+    billingProjectBufferService.assignBillingProject(user, new DbAccessTier());
+  }
+
+  @Test
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
   public void assignBillingProject_locking() throws InterruptedException, ExecutionException {
@@ -586,6 +718,7 @@ public class BillingProjectBufferServiceTest {
     firstEntry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
     firstEntry.setFireCloudProjectName("test-project-name-1");
     firstEntry.setCreationTime(getCurrentTimestamp());
+    firstEntry.setAccessTier(registeredTier);
     billingProjectBufferEntryDao.save(firstEntry);
 
     DbUser firstUser = new DbUser();
@@ -596,6 +729,7 @@ public class BillingProjectBufferServiceTest {
     secondEntry.setStatusEnum(BufferEntryStatus.AVAILABLE, this::getCurrentTimestamp);
     secondEntry.setFireCloudProjectName("test-project-name-2");
     secondEntry.setCreationTime(getCurrentTimestamp());
+    secondEntry.setAccessTier(registeredTier);
     billingProjectBufferEntryDao.save(secondEntry);
 
     DbUser secondUser = new DbUser();
@@ -607,9 +741,9 @@ public class BillingProjectBufferServiceTest {
         .save(any(DbBillingProjectBufferEntry.class));
 
     Callable<DbBillingProjectBufferEntry> t1 =
-        () -> billingProjectBufferService.assignBillingProject(firstUser);
+        () -> billingProjectBufferService.assignBillingProject(firstUser, registeredTier);
     Callable<DbBillingProjectBufferEntry> t2 =
-        () -> billingProjectBufferService.assignBillingProject(secondUser);
+        () -> billingProjectBufferService.assignBillingProject(secondUser, registeredTier);
 
     List<Callable<DbBillingProjectBufferEntry>> callableTasks = new ArrayList<>();
     callableTasks.add(t1);
@@ -629,6 +763,7 @@ public class BillingProjectBufferServiceTest {
     entry.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
     entry.setCreationTime(getCurrentTimestamp());
     entry.setLastSyncRequestTime(getCurrentTimestamp());
+    entry.setAccessTier(registeredTier);
     billingProjectBufferEntryDao.save(entry);
 
     doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
@@ -649,6 +784,7 @@ public class BillingProjectBufferServiceTest {
     entry.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
     entry.setCreationTime(getCurrentTimestamp());
     entry.setLastSyncRequestTime(getCurrentTimestamp());
+    entry.setAccessTier(registeredTier);
     billingProjectBufferEntryDao.save(entry);
 
     doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
@@ -670,6 +806,7 @@ public class BillingProjectBufferServiceTest {
     entry.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
     entry.setCreationTime(getCurrentTimestamp());
     entry.setLastSyncRequestTime(getCurrentTimestamp());
+    entry.setAccessTier(registeredTier);
     billingProjectBufferEntryDao.save(entry);
 
     doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
@@ -696,6 +833,7 @@ public class BillingProjectBufferServiceTest {
     DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
     entry.setStatusEnum(BufferEntryStatus.ASSIGNING, this::getCurrentTimestamp);
     entry.setCreationTime(getCurrentTimestamp());
+    entry.setAccessTier(registeredTier);
     billingProjectBufferEntryDao.save(entry);
 
     CLOCK.setInstant(AFTER_ASSIGNING_TIMEOUT_ELAPSED);
@@ -710,6 +848,7 @@ public class BillingProjectBufferServiceTest {
     DbBillingProjectBufferEntry assigning = new DbBillingProjectBufferEntry();
     assigning.setStatusEnum(BufferEntryStatus.ASSIGNING, this::getCurrentTimestamp);
     assigning.setCreationTime(getCurrentTimestamp());
+    assigning.setAccessTier(registeredTier);
     billingProjectBufferEntryDao.save(assigning);
 
     CLOCK.setInstant(BEFORE_ASSIGNING_TIMEOUT_ELAPSES);
@@ -721,6 +860,7 @@ public class BillingProjectBufferServiceTest {
     DbBillingProjectBufferEntry creating = new DbBillingProjectBufferEntry();
     creating.setStatusEnum(BufferEntryStatus.CREATING, this::getCurrentTimestamp);
     creating.setCreationTime(getCurrentTimestamp());
+    creating.setAccessTier(registeredTier);
     billingProjectBufferEntryDao.save(creating);
 
     CLOCK.setInstant(BEFORE_CREATING_TIMEOUT_ELAPSES);
@@ -739,7 +879,8 @@ public class BillingProjectBufferServiceTest {
     billingProjectBufferService.bufferBillingProjects();
 
     final ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(mockFireCloudService, times(3)).createAllOfUsBillingProject(captor.capture());
+    verify(mockFireCloudService, times(3))
+        .createAllOfUsBillingProject(captor.capture(), eq(REGISTERED_TIER_SERVICE_PERIMETER));
     final List<String> capturedProjectNames = captor.getAllValues();
     doReturn(new FirecloudBillingProjectStatus().creationStatus(CreationStatusEnum.CREATING))
         .when(mockFireCloudService)
@@ -822,10 +963,73 @@ public class BillingProjectBufferServiceTest {
     assertThat(statusToCount).hasSize(2);
   }
 
-  private DbBillingProjectBufferEntry makeSimpleEntry(BufferEntryStatus bufferEntryStatus) {
-    DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
-    entry.setStatusEnum(bufferEntryStatus, () -> Timestamp.from(CLOCK.instant()));
+  @Test
+  public void testFindEntriesWithExpiredGracePeriod() {
+
+    // populate a variety of entries, including 2 which are older than the Creating grace period
+    // and 3 which have passed the Assigning grace period
+
+    Instant baseTime = NOW.minus(Period.ofDays(1));
+    Instant testTime = baseTime.plus(Duration.ofMinutes(100));
+
+    // past grace period of 60 minutes ago
+    makeEntry(BufferEntryStatus.CREATING, testTime.minus(Duration.ofMinutes(90)));
+    makeEntry(BufferEntryStatus.CREATING, testTime.minus(Duration.ofMinutes(70)));
+
+    // within grace period
+    makeEntry(BufferEntryStatus.CREATING, testTime.minus(Duration.ofMinutes(40)));
+
+    // past grace period of 10 minutes ago
+    makeEntry(BufferEntryStatus.ASSIGNING, testTime.minus(Duration.ofMinutes(35)));
+    makeEntry(BufferEntryStatus.ASSIGNING, testTime.minus(Duration.ofMinutes(25)));
+    makeEntry(BufferEntryStatus.ASSIGNING, testTime.minus(Duration.ofMinutes(15)));
+
+    // within grace period
+    makeEntry(BufferEntryStatus.ASSIGNING, testTime.minus(Duration.ofMinutes(5)));
+
+    // other irrelevant entries
+    makeEntry(BufferEntryStatus.ERROR, baseTime);
+    makeEntry(BufferEntryStatus.GARBAGE_COLLECTED, baseTime.plus(Duration.ofMinutes(20)));
+    makeEntry(BufferEntryStatus.AVAILABLE, baseTime.plus(Duration.ofMinutes(99)));
+
+    List<Timestamp> expectedExpiredCreating =
+        Lists.newArrayList(
+            Timestamp.from(testTime.minus(Duration.ofMinutes(90))),
+            Timestamp.from(testTime.minus(Duration.ofMinutes(70))));
+
+    List<Timestamp> observedExpiredCreating =
+        billingProjectBufferService
+            .findEntriesWithExpiredGracePeriod(testTime, BufferEntryStatus.CREATING).stream()
+            .map(DbBillingProjectBufferEntry::getLastSyncRequestTime)
+            .collect(Collectors.toList());
+
+    assertThat(observedExpiredCreating).containsExactlyElementsIn(expectedExpiredCreating);
+
+    List<Timestamp> expectedExpiredAssigning =
+        Lists.newArrayList(
+            Timestamp.from(testTime.minus(Duration.ofMinutes(35))),
+            Timestamp.from(testTime.minus(Duration.ofMinutes(25))),
+            Timestamp.from(testTime.minus(Duration.ofMinutes(15))));
+
+    List<Timestamp> observedExpiredAssigning =
+        billingProjectBufferService
+            .findEntriesWithExpiredGracePeriod(testTime, BufferEntryStatus.ASSIGNING).stream()
+            .map(DbBillingProjectBufferEntry::getLastSyncRequestTime)
+            .collect(Collectors.toList());
+
+    assertThat(observedExpiredAssigning).containsExactlyElementsIn(expectedExpiredAssigning);
+  }
+
+  private DbBillingProjectBufferEntry makeEntry(BufferEntryStatus status, Instant lastUpdatedTime) {
+    final DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
+    entry.setStatusEnum(status, () -> Timestamp.from(lastUpdatedTime));
+    entry.setLastSyncRequestTime(Timestamp.from(lastUpdatedTime));
+    entry.setAccessTier(registeredTier);
     return billingProjectBufferEntryDao.save(entry);
+  }
+
+  private DbBillingProjectBufferEntry makeSimpleEntry(BufferEntryStatus bufferEntryStatus) {
+    return makeEntry(bufferEntryStatus, CLOCK.instant());
   }
 
   private Timestamp getCurrentTimestamp() {

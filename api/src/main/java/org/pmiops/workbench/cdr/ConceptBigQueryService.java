@@ -25,7 +25,7 @@ public class ConceptBigQueryService {
   private final BigQueryService bigQueryService;
   private static final ImmutableList<Domain> CHILD_LOOKUP_DOMAINS =
       ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE, Domain.MEASUREMENT, Domain.DRUG);
-  private static final String SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE =
+  public static final String SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE =
       "select DISTINCT(question_concept_id) as concept_id \n"
           + "from `${projectId}.${dataSetId}.ds_survey`\n";
 
@@ -90,15 +90,19 @@ public class ConceptBigQueryService {
     paramMap.put(standardParam, QueryParameterValue.int64(standardOrSource));
     if (CHILD_LOOKUP_DOMAINS.contains(domain)) {
       String domainParam = (standardOrSource == 1 ? "standardDomain" : "sourceDomain");
+      String rankParam = (standardOrSource == 1 ? "standardRank" : "sourceRank");
       sqlBuilder.append(
           String.format(
               Domain.DRUG.equals(domain) ? DRUG_CHILD_LOOKUP_SQL : CHILD_LOOKUP_SQL,
               "@" + domainParam,
               "@" + standardParam,
               "@" + conceptIdsParam,
+              "@" + rankParam,
               "@" + domainParam,
               "@" + standardParam));
-
+      paramMap.put(
+          rankParam,
+          QueryParameterValue.string("%[" + domain.toString().toLowerCase() + "_rank1]%"));
       paramMap.put(domainParam, QueryParameterValue.string(domain.toString()));
     } else {
       sqlBuilder.append(" unnest(@" + conceptIdsParam + ")");

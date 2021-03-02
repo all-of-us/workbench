@@ -51,6 +51,7 @@ import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -175,21 +176,24 @@ public class CohortsControllerTest {
   String cohortCriteria;
   String badCohortCriteria;
   private TestMockFactory testMockFactory;
+
+  @Autowired CdrVersionService cdrVersionService;
+  @Autowired CloudStorageService cloudStorageService;
+  @Autowired CohortMaterializationService cohortMaterializationService;
+  @Autowired ComplianceService complianceService;
+  @Autowired FireCloudService fireCloudService;
+  @Autowired UserRecentResourceService userRecentResourceService;
+  @Autowired UserService userService;
   @Autowired WorkspaceService workspaceService;
+
+  @Autowired AccessTierDao accessTierDao;
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired CohortDao cohortDao;
-  @Autowired ConceptSetDao conceptSetDao;
-  @Autowired ConceptDao conceptDao;
   @Autowired CohortReviewDao cohortReviewDao;
+  @Autowired ConceptDao conceptDao;
+  @Autowired ConceptSetDao conceptSetDao;
   @Autowired DataSetService dataSetService;
-  @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired UserDao userDao;
-  @Autowired CohortMaterializationService cohortMaterializationService;
-  @Autowired FireCloudService fireCloudService;
-  @Autowired UserService userService;
-  @Autowired CloudStorageService cloudStorageService;
-  @Autowired CdrVersionService cdrVersionService;
-  @Autowired ComplianceService complianceService;
 
   @TestConfiguration
   @Import({
@@ -285,7 +289,7 @@ public class CohortsControllerTest {
     user = userDao.save(user);
     currentUser = user;
 
-    cdrVersion = new DbCdrVersion();
+    cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
     cdrVersion.setName(CDR_VERSION_NAME);
     cdrVersionDao.save(cdrVersion);
 

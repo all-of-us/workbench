@@ -34,6 +34,7 @@ describe('Duplicate workspace, changing CDR versions', () => {
         await modal.consentToOldCdrRestrictions();
 
         const finishButton = await workspaceEditPage.getDuplicateWorkspaceButton();
+        await workspaceEditPage.requestForReviewRadiobutton(false);
         await finishButton.waitUntilEnabled();
         await workspaceEditPage.clickCreateFinishButton(finishButton);
 
@@ -78,6 +79,7 @@ describe('Duplicate workspace, changing CDR versions', () => {
         expect(upgradeMessage).toContain(`${config.altCdrVersionName} to ${config.defaultCdrVersionName}.`);
 
         const finishButton = await workspaceEditPage.getDuplicateWorkspaceButton();
+        await workspaceEditPage.requestForReviewRadiobutton(false);
         await finishButton.waitUntilEnabled();
         await workspaceEditPage.clickCreateFinishButton(finishButton);
 

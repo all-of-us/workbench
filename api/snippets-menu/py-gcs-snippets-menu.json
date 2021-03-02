@@ -37,7 +37,7 @@
       "sub-menu": [
         {
           "name": "interact_with_html_snapshots.py",
-          "snippet": "from terra_widgets.html_snapshots import display_html_snapshots_widget\n# You may see some 'FutureWarning' messages emitted by Tensorflow and numpy. These are\n# safe to ignore and will go away the next time the base image updates its package versions.\n\n# This will display a user interface to interact with HTML snapshots stored in the workspace bucket.\ndisplay_html_snapshots_widget()\n"
+          "snippet": "from terra_widgets.html_snapshots import display_html_snapshots_widget\n\n# This will display a user interface to interact with HTML snapshots stored in the workspace bucket.\ndisplay_html_snapshots_widget()\n"
         }
       ]
     }

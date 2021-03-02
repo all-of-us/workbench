@@ -13,6 +13,7 @@ import org.pmiops.workbench.model.ReportingUser;
  */
 public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUser> {
   ABOUT_YOU("about_you", ReportingUser::getAboutYou),
+  ACCESS_TIER_SHORT_NAMES("access_tier_short_names", ReportingUser::getAccessTierShortNames),
   AREA_OF_RESEARCH("area_of_research", ReportingUser::getAreaOfResearch),
   COMPLIANCE_TRAINING_BYPASS_TIME(
       "compliance_training_bypass_time",
@@ -72,7 +73,20 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
   INSTITUTIONAL_ROLE_ENUM(
       "institutional_role_enum", u -> enumToString(u.getInstitutionalRoleEnum())),
   INSTITUTIONAL_ROLE_OTHER_TEXT(
-      "institutional_role_other_text", ReportingUser::getInstitutionalRoleOtherText);
+      "institutional_role_other_text", ReportingUser::getInstitutionalRoleOtherText),
+  DISABILITY("disability", u -> enumToString(u.getDisability())),
+  DEGREES("degrees", ReportingUser::getDegrees),
+  ETHNICITY("ethnicity", u -> enumToString(u.getEthnicity())),
+  GENDER_IDENTIFIES("gender_identities", ReportingUser::getGenderIdentities),
+  HIGHEST_EDUCATION("highest_education", u -> enumToString(u.getHighestEducation())),
+  IDENTIFIES_AS_LGBTQ(
+      "identifies_as_lgbtq",
+      u -> u.getIdentifiesAsLgbtq() == null ? null : u.getIdentifiesAsLgbtq().toString()),
+  LGBTQ_IDENTITY("lgbtq_identity", ReportingUser::getLgbtqIdentity),
+  SEXES_AT_BIRTH("sexes_at_birth", ReportingUser::getSexesAtBirth),
+  RACES("races", ReportingUser::getRaces),
+  YEAR_OF_BIRTH(
+      "year_of_birth", u -> u.getYearOfBirth() == null ? null : u.getYearOfBirth().intValue());
 
   // Much of the repetitive boilerplate below (constructor, setters, etc) can't really be helped,
   // as enums can't be abstract or extend abstract classes.

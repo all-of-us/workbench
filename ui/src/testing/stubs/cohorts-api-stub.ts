@@ -32,7 +32,8 @@ export const exampleCohortStubs = [
     id: DEFAULT_COHORT_ID_2,
     name: 'sample name 2',
     description: 'sample description 2',
-    criteria: '{"includes":[{"temporal": false,"items":[]},{"temporal": false,"items":[]}],"excludes":[{"temporal": false,"items":[]}],"dataFilters":[]}',
+    criteria: '{"includes":[{"temporal": false,"items":[]},{"temporal": false,"items":[]}],' +
+      '"excludes":[{"temporal": false,"items":[]}],"dataFilters":[]}',
     type: '',
     workspaceId: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID,
     creationTime: new Date().getTime(),

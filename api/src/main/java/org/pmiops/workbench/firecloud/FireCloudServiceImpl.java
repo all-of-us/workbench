@@ -53,18 +53,23 @@ public class FireCloudServiceImpl implements FireCloudService {
   private static final Logger log = Logger.getLogger(FireCloudServiceImpl.class.getName());
 
   private final Provider<WorkbenchConfig> configProvider;
-  private final Provider<ProfileApi> profileApiProvider;
+
   private final Provider<BillingApi> billingApiProvider;
   private final Provider<GroupsApi> groupsApiProvider;
   private final Provider<NihApi> nihApiProvider;
+  private final Provider<ProfileApi> profileApiProvider;
+  private final Provider<StatusApi> statusApiProvider;
+
+  // We call some of the endpoints in these APIs with the user's credentials
+  // and others with the app's Service Account credentials
+
+  private final Provider<StaticNotebooksApi> endUserStaticNotebooksApiProvider;
+  private final Provider<StaticNotebooksApi> serviceAccountStaticNotebooksApiProvider;
+
   private final Provider<WorkspacesApi> endUserWorkspacesApiProvider;
   private final Provider<WorkspacesApi> serviceAccountWorkspaceApiProvider;
 
-  private final Provider<StatusApi> statusApiProvider;
-  private final Provider<StaticNotebooksApi> endUserStaticNotebooksApiProvider;
-  private final Provider<StaticNotebooksApi> serviceAccountStaticNotebooksApiProvider;
   private final FirecloudRetryHandler retryHandler;
-
   private final IamCredentialsClient iamCredentialsClient;
   private final HttpTransport httpTransport;
 
@@ -224,7 +229,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public void createAllOfUsBillingProject(String projectName) {
+  public void createAllOfUsBillingProject(String projectName, String servicePerimeter) {
     if (projectName.contains(WORKSPACE_DELIMITER)) {
       throw new IllegalArgumentException(
           String.format(
@@ -239,7 +244,7 @@ public class FireCloudServiceImpl implements FireCloudService {
             .highSecurityNetwork(true)
             .enableFlowLogs(true)
             .privateIpGoogleAccess(true)
-            .servicePerimeter(configProvider.get().firecloud.vpcServicePerimeterName);
+            .servicePerimeter(servicePerimeter);
 
     BillingApi billingApi = billingApiProvider.get();
     retryHandler.run(
@@ -309,23 +314,22 @@ public class FireCloudServiceImpl implements FireCloudService {
   }
 
   @Override
-  public FirecloudWorkspace createWorkspace(String projectName, String workspaceName) {
+  public FirecloudWorkspace createWorkspace(
+      String projectName, String workspaceName, String authDomainName) {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     FirecloudWorkspaceIngest workspaceIngest =
         new FirecloudWorkspaceIngest()
             .namespace(projectName)
             .name(workspaceName)
             .authorizationDomain(
-                ImmutableList.of(
-                    new FirecloudManagedGroupRef()
-                        .membersGroupName(configProvider.get().firecloud.registeredDomainName)));
+                ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName)));
 
     return retryHandler.run((context) -> workspacesApi.createWorkspace(workspaceIngest));
   }
 
   @Override
   public FirecloudWorkspace cloneWorkspace(
-      String fromProject, String fromName, String toProject, String toName) {
+      String fromProject, String fromName, String toProject, String toName, String authDomainName) {
     WorkspacesApi workspacesApi = endUserWorkspacesApiProvider.get();
     FirecloudWorkspaceRequestClone cloneRequest =
         new FirecloudWorkspaceRequestClone()
@@ -335,9 +339,7 @@ public class FireCloudServiceImpl implements FireCloudService {
             // propagating copies of large data files elswhere in the bucket.
             .copyFilesWithPrefix("notebooks/")
             .authorizationDomain(
-                ImmutableList.of(
-                    new FirecloudManagedGroupRef()
-                        .membersGroupName(configProvider.get().firecloud.registeredDomainName)));
+                ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName)));
 
     return retryHandler.run(
         (context) -> workspacesApi.cloneWorkspace(fromProject, fromName, cloneRequest));

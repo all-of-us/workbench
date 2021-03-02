@@ -1,7 +1,0 @@
-workspace_free_tier_usage:
-  user_id: |
-    ID of the user whose free tier quota was billed for this workspace.
-  workspace_id: |
-    ID of the workspace associated with this free tier cost.
-  cost: |
-    Free tier usage cost for this workspace, in USD.

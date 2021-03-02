@@ -3,14 +3,26 @@ package org.pmiops.workbench.db.jdbc;
 import static org.pmiops.workbench.db.model.DbStorageEnums.billingAccountTypeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.billingStatusFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.dataAccessLevelFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.degreeFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.disabilityFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.educationFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.ethnicityFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.genderIdentityFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.institutionDUATypeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.institutionalRoleFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.organizationTypeFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.raceFromStorage;
+import static org.pmiops.workbench.db.model.DbStorageEnums.sexAtBirthFromStorage;
 import static org.pmiops.workbench.utils.mappers.CommonMappers.offsetDateTimeUtc;
 
+import com.google.common.base.Strings;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
@@ -163,6 +175,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     return jdbcTemplate.query(
         String.format(
             "SELECT \n"
+                + "  u.user_id,\n"
                 + "  u.about_you,\n"
                 + "  u.area_of_research,\n"
                 + "  u.compliance_training_bypass_time,\n"
@@ -189,7 +202,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  u.professional_url,\n"
                 + "  u.two_factor_auth_bypass_time,\n"
                 + "  u.two_factor_auth_completion_time,\n"
-                + "  u.user_id,\n"
                 + "  u.email AS username,\n"
                 + "  a.city,\n"
                 + "  a.country,\n"
@@ -199,11 +211,46 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  a.zip_code,\n"
                 + "  via.institution_id AS institution_id,\n"
                 + "  via.institutional_role_enum,\n"
-                + "  via.institutional_role_other_text\n"
+                + "  via.institutional_role_other_text,\n"
+                + "  dm.degrees,\n"
+                + "  dm.ethnicity,\n"
+                + "  dm.year_of_birth,\n"
+                + "  dm.disability,\n"
+                + "  dm.education,\n"
+                + "  dm.identifies_as_lgbtq,\n"
+                + "  dm.lgbtq_identity,\n"
+                + "  dm.gender_identity,\n"
+                + "  dm.race,\n"
+                + "  dm.sex_at_birth\n"
                 + "  \n"
                 + "FROM user u"
                 + "  LEFT OUTER JOIN address AS a ON u.user_id = a.user_id\n"
-                + "  LEFT OUTER JOIN user_verified_institutional_affiliation AS via on u.user_id = via.user_id"
+                + "  LEFT OUTER JOIN user_verified_institutional_affiliation AS via on u.user_id = via.user_id\n"
+                + "  LEFT OUTER JOIN "
+                + "  ( "
+                + "       SELECT \n"
+                + "             demo.user_id, "
+                + "             GROUP_CONCAT(DISTINCT ud.degree) as degrees, "
+                + "             GROUP_CONCAT(DISTINCT demo.ethnicity) as ethnicity, "
+                + "             GROUP_CONCAT(DISTINCT demo.year_of_birth) as year_of_birth, "
+                + "             GROUP_CONCAT(DISTINCT demo.education) as education, "
+                + "             GROUP_CONCAT(DISTINCT demo.disability) as disability, "
+                + "             GROUP_CONCAT(DISTINCT demo.identifies_as_lgbtq) as identifies_as_lgbtq, "
+                + "             GROUP_CONCAT(DISTINCT demo.lgbtq_identity) as lgbtq_identity, "
+                + "             GROUP_CONCAT(DISTINCT di.gender_identity) as gender_identity, "
+                + "             GROUP_CONCAT(DISTINCT dr.race) as race, "
+                + "             GROUP_CONCAT(DISTINCT ds.sex_at_birth) as sex_at_birth"
+                + "       FROM demographic_survey as demo "
+                + "         LEFT OUTER JOIN demographic_survey_gender_identity as di "
+                + "             ON demo.demographic_survey_id = di.demographic_survey_id\n"
+                + "         LEFT OUTER JOIN demographic_survey_race as dr "
+                + "             ON demo.demographic_survey_id = dr.demographic_survey_id\n"
+                + "         LEFT OUTER JOIN demographic_survey_sex_at_birth as ds "
+                + "             ON demo.demographic_survey_id = ds.demographic_survey_id\n"
+                + "         LEFT OUTER JOIN user_degree AS ud on demo.user_id = ud.user_id "
+                + "         GROUP BY demo.user_id "
+                + "  ) AS dm "
+                + "  on u.user_id = dm.user_id"
                 + "  ORDER BY u.user_id"
                 + "  LIMIT %d\n"
                 + "  OFFSET %d",
@@ -222,6 +269,12 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
                 .currentPosition(rs.getString("current_position"))
                 .dataAccessLevel(dataAccessLevelFromStorage(rs.getShort("data_access_level")))
+                // TODO placeholder until we have a proper association of users to tiers
+                .accessTierShortNames(
+                    dataAccessLevelFromStorage(rs.getShort("data_access_level"))
+                            == DataAccessLevel.REGISTERED
+                        ? "registered"
+                        : "none")
                 .dataUseAgreementBypassTime(
                     offsetDateTimeUtc(rs.getTimestamp("data_use_agreement_bypass_time")))
                 .dataUseAgreementCompletionTime(
@@ -259,7 +312,26 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .institutionId(rs.getLong("institution_id"))
                 .institutionalRoleEnum(
                     institutionalRoleFromStorage(rs.getShort("institutional_role_enum")))
-                .institutionalRoleOtherText(rs.getString("institutional_role_other_text")));
+                .institutionalRoleOtherText(rs.getString("institutional_role_other_text"))
+                .highestEducation(educationFromStorage(rs.getShort("education")))
+                .ethnicity(ethnicityFromStorage(rs.getShort("ethnicity")))
+                .disability(disabilityFromStorage(rs.getShort("disability")))
+                .races(
+                    convertListEnumFromStorage(
+                        rs.getString("race"), e -> raceFromStorage(e).toString()))
+                .genderIdentities(
+                    convertListEnumFromStorage(
+                        rs.getString("gender_identity"),
+                        e -> genderIdentityFromStorage(e).toString()))
+                .sexesAtBirth(
+                    convertListEnumFromStorage(
+                        rs.getString("sex_at_birth"), e -> sexAtBirthFromStorage(e).toString()))
+                .lgbtqIdentity(rs.getString("lgbtq_identity"))
+                .identifiesAsLgbtq(rs.getBoolean("identifies_as_lgbtq"))
+                .yearOfBirth(rs.getBigDecimal("year_of_birth"))
+                .degrees(
+                    convertListEnumFromStorage(
+                        rs.getString("degrees"), e -> degreeFromStorage(e).toString())));
   }
 
   @Override
@@ -269,13 +341,13 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             "SELECT \n"
                 + "  billing_account_type,\n"
                 + "  billing_status,\n"
-                + "  cdr_version_id,\n"
-                + "  creation_time,\n"
+                + "  w.cdr_version_id AS cdr_version_id,\n"
+                + "  w.creation_time AS creation_time,\n"
                 + "  creator_id,\n"
                 + "  disseminate_research_other,\n"
                 + "  last_accessed_time,\n"
                 + "  last_modified_time,\n"
-                + "  name,\n"
+                + "  w.name AS name,\n"
                 + "  needs_rp_review_prompt,\n"
                 + "  published,\n"
                 + "  rp_additional_notes,\n"
@@ -300,14 +372,18 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  rp_scientific_approach,\n"
                 + "  rp_social_behavioral,\n"
                 + "  rp_time_requested,\n"
-                + "  workspace_id\n"
-                + "FROM workspace\n"
+                + "  workspace_id,\n"
+                + "  a.short_name AS access_tier_short_name\n"
+                + "FROM workspace w\n"
+                + "  JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
+                + "  JOIN access_tier a ON c.access_tier = a.access_tier_id\n"
                 + "ORDER BY workspace_id\n"
                 + "LIMIT %d\n"
                 + "OFFSET %d",
             limit, offset),
         (rs, unused) ->
             new ReportingWorkspace()
+                .accessTierShortName(rs.getString("access_tier_short_name"))
                 .billingAccountType(
                     billingAccountTypeFromStorage(rs.getShort("billing_account_type")))
                 .billingStatus(billingStatusFromStorage(rs.getShort("billing_status")))
@@ -353,5 +429,16 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
   @Override
   public int getUserCount() {
     return jdbcTemplate.queryForObject("SELECT count(*) FROM user", Integer.class);
+  }
+
+  /** Converts agreegated storage enums to String value. e.g. 0. 8 -> BA, MS. */
+  private static String convertListEnumFromStorage(
+      String stringEnums, Function<Short, String> convertDbEnum) {
+    if (Strings.isNullOrEmpty(stringEnums)) {
+      return "";
+    }
+    return Arrays.stream(stringEnums.split(","))
+        .map(e -> convertDbEnum.apply(Short.parseShort(e)))
+        .collect(Collectors.joining(","));
   }
 }

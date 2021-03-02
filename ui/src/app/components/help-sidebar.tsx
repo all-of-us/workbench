@@ -715,7 +715,9 @@ export const HelpSidebar = fp.flow(
               </Clickable>
             </FlexRow>}
             {activeIcon === helpIconName(helpContentKey) && <div style={contentStyle(helpIconName(helpContentKey))}>
-              <h3 style={{...styles.sectionTitle, marginTop: 0}}>{helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Workspace storage' : 'Help Tips'}</h3>
+              <h3 style={{...styles.sectionTitle, marginTop: 0}}>
+                {helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Workspace storage' : 'Help Tips'}
+              </h3>
               {helpContentKey !== NOTEBOOK_HELP_CONTENT &&
                 <div style={styles.textSearch}>
                   <ClrIcon style={{color: colors.primary, margin: '0 0.25rem'}} shape='search' size={16} />
