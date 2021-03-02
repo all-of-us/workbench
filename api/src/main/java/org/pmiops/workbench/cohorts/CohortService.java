@@ -3,18 +3,15 @@ package org.pmiops.workbench.cohorts;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.storage.Blob;
 import com.google.common.collect.ImmutableMap;
-
+import com.google.common.collect.Streams;
+import com.google.gson.Gson;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-
-import com.google.common.collect.Streams;
-import com.google.gson.Gson;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
@@ -35,7 +32,6 @@ import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TerraJob;
 import org.pmiops.workbench.model.TerraJobStatus;
-import org.pmiops.workbench.notebooks.NotebooksService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -99,12 +95,14 @@ public class CohortService {
     final SearchRequest searchRequest = new Gson().fromJson(cohortDefinition, SearchRequest.class);
 
     final QueryJobConfiguration participantIdQuery =
-            cohortQueryBuilder.buildParticipantIdQuery(new ParticipantCriteria(searchRequest));
+        cohortQueryBuilder.buildParticipantIdQuery(new ParticipantCriteria(searchRequest));
 
-    return Streams.stream(bigQueryService.executeQuery(bigQueryService.filterBigQueryConfig(participantIdQuery))
-            .getValues())
-            .map(personId -> personId.get(0).getValue().toString())
-            .collect(Collectors.toList());
+    return Streams.stream(
+            bigQueryService
+                .executeQuery(bigQueryService.filterBigQueryConfig(participantIdQuery))
+                .getValues())
+        .map(personId -> personId.get(0).getValue().toString())
+        .collect(Collectors.toList());
   }
 
   public TerraJob submitGenomicsCohortExtractionJob(DbWorkspace workspace, Long cohortId)
@@ -115,8 +113,11 @@ public class CohortService {
     FirecloudWorkspace fcWorkspace = fireCloudService.getWorkspace(workspace).get().getWorkspace();
     String extractionUuid = UUID.randomUUID().toString();
     String filename = extractionUuid + "_person_ids.txt";
-    Blob personIdsFile = cloudStorageService.writeFile(
-            fcWorkspace.getBucketName(), filename, String.join("\n", getPersonIds(cohortId)).getBytes(StandardCharsets.UTF_8));
+    Blob personIdsFile =
+        cloudStorageService.writeFile(
+            fcWorkspace.getBucketName(),
+            filename,
+            String.join("\n", getPersonIds(cohortId)).getBytes(StandardCharsets.UTF_8));
 
     FirecloudMethodConfiguration methodConfig =
         methodConfigurationsApiProvider
@@ -126,14 +127,31 @@ public class CohortService {
                 cohortExtractionConfig.operationalTerraWorkspaceName,
                 new FirecloudMethodConfiguration()
                     .deleted(false)
-                    .inputs(new ImmutableMap.Builder<String, String>()
-                            .put("WgsCohortExtract.participant_ids", "\"gs://" + personIdsFile.getBlobId().getBucket() + "/" + personIdsFile.getBlobId().getName() + "\"")
-                            .put("WgsCohortExtract.query_project", "\"" + fcWorkspace.getNamespace()  + "\"")
-                            .put("WgsCohortExtract.extraction_uuid", "\"" + extractionUuid  + "\"")
-                            .put("WgsCohortExtract.wgs_dataset", "\"fc-aou-cdr-synth-test.1kg_wgs\"") // TODO swap out with RW-6336
-                            .put("WgsCohortExtract.wgs_extraction_cohorts_dataset", "\"" + cohortExtractionConfig.extractionCohortsDataset  + "\"")
-                            .put("WgsCohortExtract.wgs_extraction_destination_dataset", "\"" + cohortExtractionConfig.extractionDestinationDataset  + "\"")
-                            .put("WgsCohortExtract.wgs_extraction_temp_tables_dataset", "\"" + cohortExtractionConfig.extractionTempTablesDataset  + "\"")
+                    .inputs(
+                        new ImmutableMap.Builder<String, String>()
+                            .put(
+                                "WgsCohortExtract.participant_ids",
+                                "\"gs://"
+                                    + personIdsFile.getBlobId().getBucket()
+                                    + "/"
+                                    + personIdsFile.getBlobId().getName()
+                                    + "\"")
+                            .put(
+                                "WgsCohortExtract.query_project",
+                                "\"" + fcWorkspace.getNamespace() + "\"")
+                            .put("WgsCohortExtract.extraction_uuid", "\"" + extractionUuid + "\"")
+                            .put(
+                                "WgsCohortExtract.wgs_dataset",
+                                "\"fc-aou-cdr-synth-test.1kg_wgs\"") // TODO swap out with RW-6336
+                            .put(
+                                "WgsCohortExtract.wgs_extraction_cohorts_dataset",
+                                "\"" + cohortExtractionConfig.extractionCohortsDataset + "\"")
+                            .put(
+                                "WgsCohortExtract.wgs_extraction_destination_dataset",
+                                "\"" + cohortExtractionConfig.extractionDestinationDataset + "\"")
+                            .put(
+                                "WgsCohortExtract.wgs_extraction_temp_tables_dataset",
+                                "\"" + cohortExtractionConfig.extractionTempTablesDataset + "\"")
                             .build())
                     .methodConfigVersion(
                         cohortExtractionConfig.extractionMethodConfigurationVersion)
