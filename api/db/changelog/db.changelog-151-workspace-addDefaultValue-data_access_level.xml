@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="thibault" id="db.changelog-151-workspace-addDefaultValue-data_access_level">
+    <!--
+    Set default value to REGISTERED (1) as a step in the deletion of this field.
+    After removing DbWorkspace accessors, Hibernate complains about the lack of a default value here.
+    -->
+    <addDefaultValue tableName="workspace" columnName="data_access_level" defaultValue="1"/>
+   </changeSet>
+</databaseChangeLog>
