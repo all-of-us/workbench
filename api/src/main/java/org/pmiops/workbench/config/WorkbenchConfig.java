@@ -270,6 +270,8 @@ public class WorkbenchConfig {
     public boolean enableResearchPurposePrompt;
     // If true, reporting cron job will write data to configured BigQuery reporting dataset.
     public boolean enableReportingUploadCron;
+    // If true, user account setup requires link account via RAS account instead of eRA Commons.
+    public boolean enableRasLinking;
   }
 
   public static class ActionAuditConfig {
