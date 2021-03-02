@@ -74,13 +74,6 @@ public class CohortService {
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
-  private Map<String, String> createInputParameter(FirecloudWorkspace fcWorkspace) {
-    return new ImmutableMap.Builder<String, String>()
-            .put("WgsCohortExtract.participant_ids", "\"gs://fc-secure-29a76157-95db-49d6-842c-68bdc869e99d/sample_names.txt\"")
-            .put("WgsCohortExtract.query_project", "\"" + fcWorkspace.getNamespace()  + "\"")
-            .build();
-  }
-
   private Map<String, String> createRepoMethodParameter(
       WorkbenchConfig.WgsCohortExtractionConfig cohortExtractionConfig) {
     return new ImmutableMap.Builder<String, String>()
