@@ -3924,7 +3924,7 @@ definitions:
       enableRasLinking:
         type: boolean
         default: false
-        description: Whether to use enable RAS-Aou linking flow when user setup accont.
+        description: Whether to use enable RAS-AoU linking flow when user setup accont.
       runtimeImages:
         type: array
         items:
