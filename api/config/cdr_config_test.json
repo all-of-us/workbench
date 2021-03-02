@@ -93,6 +93,23 @@
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "controlled_test"
+    },
+    {
+      "cdrVersionId": 6,
+      "isDefault": false,
+      "name": "Synthetic Dataset v3 with Microarray and WGS",
+      "dataAccessLevel": 1,
+      "bigqueryProject": "fc-aou-cdr-synth-test",
+      "bigqueryDataset": "SR2019q4r3",
+      "microarrayBigqueryDataset": "microarray_data",
+      "wgsBigqueryDataset": "wgs_data",
+      "creationTime": "2020-08-26 00:09:51Z",
+      "releaseNumber": 3,
+      "numParticipants": 234525,
+      "cdrDbName": "synth_r_2019q4_12",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true,
+      "accessTier": "registered"
     }
   ]
 }
