@@ -3921,6 +3921,10 @@ definitions:
         type: boolean
         default: false
         description: Whether user should see a prompt if Workspace Research Purpose needs Review
+      enableRasLinking:
+        type: boolean
+        default: false
+        description: Whether to use enable RAS-AoU linking flow when user setup account.
       runtimeImages:
         type: array
         items:
