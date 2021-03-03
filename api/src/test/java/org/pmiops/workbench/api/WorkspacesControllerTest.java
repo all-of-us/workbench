@@ -1059,8 +1059,29 @@ public class WorkspacesControllerTest {
     request.setWorkspace(ws);
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.READER);
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+  }
 
+  @Test(expected = ForbiddenException.class)
+  public void testWriterUpdateWorkspaceThrows() {
+    Workspace ws = createWorkspace();
+    ws = workspacesController.createWorkspace(ws).getBody();
+
+    ws.setName("updated-name");
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    request.setWorkspace(ws);
     stubGetWorkspace(ws.getNamespace(), ws.getId(), ws.getCreator(), WorkspaceAccessLevel.WRITER);
+    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testUpdateWorkspaceAccessTierThrows() {
+    Workspace ws = createWorkspace();
+    ws = workspacesController.createWorkspace(ws).getBody();
+
+    ws.setName("updated-name");
+    ws.setAccessTierShortName("new tier");
+    UpdateWorkspaceRequest request = new UpdateWorkspaceRequest();
+    request.setWorkspace(ws);
     workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
   }
 
@@ -1073,16 +1094,18 @@ public class WorkspacesControllerTest {
         new Workspace()
             .name("updated-name")
             .billingAccountName("billing-account")
+            .accessTierShortName(ws.getAccessTierShortName())
             .etag(ws.getEtag()));
-    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
+    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
 
     // Still using the initial now-stale etag; this should throw.
     request.setWorkspace(
         new Workspace()
             .name("updated-name2")
             .billingAccountName("billing-account")
+            .accessTierShortName(ws.getAccessTierShortName())
             .etag(ws.getEtag()));
-    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request).getBody();
+    workspacesController.updateWorkspace(ws.getNamespace(), ws.getId(), request);
   }
 
   @Test

@@ -36,7 +36,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -123,7 +122,6 @@ public class WorkspaceAuditorTest {
             .namespace("aou-rw-local1-c4be869a")
             .cdrVersionId("1")
             .creator("user@fake-research-aou.org")
-            .dataAccessLevel(DataAccessLevel.REGISTERED)
             .billingAccountName("big-bux")
             .billingAccountType(BillingAccountType.FREE_TIER)
             .googleBucketName("bucket o' science")
@@ -315,7 +313,6 @@ public class WorkspaceAuditorTest {
         .namespace(in.getNamespace())
         .cdrVersionId(in.getCdrVersionId())
         .creator(in.getCreator())
-        .dataAccessLevel(in.getDataAccessLevel())
         .billingAccountName(in.getBillingAccountName())
         .billingAccountType(in.getBillingAccountType())
         .googleBucketName(in.getGoogleBucketName())
