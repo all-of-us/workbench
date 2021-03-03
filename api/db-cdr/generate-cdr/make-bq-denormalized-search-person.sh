@@ -38,6 +38,7 @@ fi
 # Test that datset exists
 test=$(bq show "$BQ_PROJECT:$BQ_DATASET")
 test=$(bq show "$WGV_PROJECT:$WGV_DATASET")
+echo "$test"
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
