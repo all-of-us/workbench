@@ -1469,7 +1469,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     )
 SELECT
     (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS id
-    , 0
+    , -1
     , 'WHOLE_GENOME_VARIANT'
     , 1
     , 'WHOLE_GENOME_VARIANT'
