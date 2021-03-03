@@ -143,19 +143,19 @@ public class CdrVersionsControllerTest {
     List<CdrVersion> cdrVersions = cdrVersionsController.getCdrVersions().getBody().getItems();
 
     assertThat(
-        cdrVersions.stream()
-            .filter(v -> v.getName().equals("Test Registered CDR"))
-            .findFirst()
-            .get()
-            .getHasWgsData())
+            cdrVersions.stream()
+                .filter(v -> v.getName().equals("Test Registered CDR"))
+                .findFirst()
+                .get()
+                .getHasWgsData())
         .isFalse();
 
     assertThat(
-        cdrVersions.stream()
-            .filter(v -> v.getName().equals("Test Protected CDR"))
-            .findFirst()
-            .get()
-            .getHasWgsData())
+            cdrVersions.stream()
+                .filter(v -> v.getName().equals("Test Protected CDR"))
+                .findFirst()
+                .get()
+                .getHasWgsData())
         .isTrue();
   }
 
@@ -173,7 +173,15 @@ public class CdrVersionsControllerTest {
     assertThat(cdrVersions.stream().filter(cdr -> !cdr.getHasFitbitData()).count())
         .isEqualTo(cdrVersions.size());
     makeCdrVersion(
-        3L, true, "Test Registered FITBIT CDR", 123L, DataAccessLevel.REGISTERED, null, null, true, null);
+        3L,
+        true,
+        "Test Registered FITBIT CDR",
+        123L,
+        DataAccessLevel.REGISTERED,
+        null,
+        null,
+        true,
+        null);
     cdrVersions = cdrVersionsController.getCdrVersions().getBody().getItems();
 
     assertThat(
@@ -192,7 +200,15 @@ public class CdrVersionsControllerTest {
     assertThat(cdrVersions.stream().filter(cdr -> !cdr.getHasCopeSurveyData()).count())
         .isEqualTo(cdrVersions.size());
     makeCdrVersion(
-        3L, true, "Test Registered FITBIT CDR", 123L, DataAccessLevel.REGISTERED, null,  null,true, true);
+        3L,
+        true,
+        "Test Registered FITBIT CDR",
+        123L,
+        DataAccessLevel.REGISTERED,
+        null,
+        null,
+        true,
+        true);
     cdrVersions = cdrVersionsController.getCdrVersions().getBody().getItems();
 
     assertThat(
