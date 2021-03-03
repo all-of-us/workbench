@@ -8,12 +8,14 @@ import {SessionExpired} from 'app/pages/session-expired';
 import {SignInAgain} from 'app/pages/sign-in-again';
 import {UserDisabled} from 'app/pages/user-disabled';
 import {SignInService} from 'app/services/sign-in.service';
-import {hasRegisteredAccess, ReactWrapperBase, withUrlParams} from 'app/utils';
+import {hasRegisteredAccess, ReactWrapperBase} from 'app/utils';
 import {authStore, profileStore, useStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
 import {NOTEBOOK_HELP_CONTENT} from './components/help-sidebar';
+import {AdminInstitution} from './pages/admin/admin-institution';
+import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
 import {AdminNotebookView} from './pages/admin/admin-notebook-view';
 import {InteractiveNotebook} from './pages/analysis/interactive-notebook';
 import {NotebookList} from './pages/analysis/notebook-list';
@@ -23,8 +25,6 @@ import {SignIn} from './pages/login/sign-in';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
-import {AdminInstitutionEdit} from "./pages/admin/admin-institution-edit";
-import {AdminInstitution} from "./pages/admin/admin-institution";
 
 
 const signInGuard: Guard = {

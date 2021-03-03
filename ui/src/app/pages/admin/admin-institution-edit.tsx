@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -10,7 +9,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Scroll} from 'app/icons/scroll';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, UrlParamsProps, withUrlParams} from 'app/utils';
+import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
 import {convertAPIError} from 'app/utils/errors';
 import {navigate} from 'app/utils/navigation';
 import {DuaType, Institution, OrganizationType} from 'generated/fetch';
