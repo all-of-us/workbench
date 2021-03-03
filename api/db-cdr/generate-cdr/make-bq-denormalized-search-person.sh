@@ -90,7 +90,7 @@ SELECT
         ELSE 1
       END has_fitbit
     , CASE
-        WHEN g.person_id is null THEN 0
+        WHEN w.sample_name is null THEN 0
         ELSE 1
       END has_whole_genome_variant
 FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
@@ -113,7 +113,7 @@ LEFT JOIN
         union distinct
         SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.steps_intraday\`
     ) f on (p.person_id = f.person_id)
-LEFT JOIN \`$WGV_PROJECT.$WGV_DATASET.metadata\` g on (p.person_id = g.person_id)"
+LEFT JOIN \`$WGV_PROJECT.$WGV_DATASET.metadata\` w on (p.person_id = CAST(w.sample_name as int64))"
 
 ################################################
 # calculate age_at_consent and age_at_cdr
