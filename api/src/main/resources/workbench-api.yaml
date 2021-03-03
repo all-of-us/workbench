@@ -5384,7 +5384,7 @@ definitions:
   LinkedAccountInfo:
     description: 'User valid account linking information. Getting this response means the account is
     validated. For now, we just need eRA Commons username, moving forward, we may add login.gov,
-    IAL status when needed. Getting '
+    IAL status when needed.'
     type: object
     properties:
       eraCommonsUserName:
