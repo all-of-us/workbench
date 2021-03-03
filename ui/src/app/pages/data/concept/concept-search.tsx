@@ -313,6 +313,7 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
                           </ValidationError>}
                           <TextAreaWithLengthValidationMessage initialText={editDescription}
                                                                id='edit-description'
+                                                               textBoxStyleOverrides={{width: '100%'}}
                                                                maxCharacters={1000}
                                                                tooLongWarningCharacters={950}
                                                                onChange={v => this.setState({editDescription: v})}/>

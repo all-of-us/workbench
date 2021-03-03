@@ -59,7 +59,7 @@ export default class ConceptSetPage extends AuthenticatedPage {
     }
     // edit description
     if (newDescription !== undefined) {
-      const descInputXpath = '//*[@data-test-id="edit-description"]';
+      const descInputXpath = '//*[@id="edit-description"]';
       const descInput = new Textbox(this.page, descInputXpath);
       await descInput.paste(newDescription);
     }
