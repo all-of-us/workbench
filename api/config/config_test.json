@@ -50,6 +50,7 @@
   },
   "wgsCohortExtraction": {
     "serviceAccount": "wgs-cohort-extraction@all-of-us-workbench-test.iam.gserviceaccount.com",
+    "serviceAccountTerraProxyGroup": "PROXY_118217329794842274136@dev.test.firecloud.org",
     "operationalTerraWorkspaceNamespace": "aou-wgs-cohort-extraction",
     "operationalTerraWorkspaceName": "aouwgscohortextraction",
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction",

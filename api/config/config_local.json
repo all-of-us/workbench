@@ -50,14 +50,16 @@
   },
   "wgsCohortExtraction": {
     "serviceAccount": "wgs-cohort-extraction@all-of-us-workbench-test.iam.gserviceaccount.com",
+    "serviceAccountTerraProxyGroup": "PROXY_118217329794842274136@dev.test.firecloud.org",
     "operationalTerraWorkspaceNamespace": "aou-wgs-cohort-extraction",
     "operationalTerraWorkspaceName": "aouwgscohortextraction",
+    "extractionPetServiceAccount": "pet-118217329794842274136@aou-wgs-cohort-extraction.iam.gserviceaccount.com",
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction",
     "extractionMethodConfigurationName": "HelloWorld",
     "extractionMethodConfigurationVersion": 34,
-    "extractionCohortsDataset": "fc-aou-cdr-synth-test.wgs_extraction_cohorts",
-    "extractionDestinationDataset": "fc-aou-cdr-synth-test.wgs_extracted_cohorts",
-    "extractionTempTablesDataset": "fc-aou-cdr-synth-test.wgs_extraction_temp_tables"
+    "extractionCohortsDataset": "fc-aou-cdr-synth-test.wgs_extraction_cohorts_test_1",
+    "extractionDestinationDataset": "fc-aou-cdr-synth-test.wgs_extracted_cohorts_test_1",
+    "extractionTempTablesDataset": "fc-aou-cdr-synth-test.wgs_extraction_temp_tables_test_1"
   },
   "cdr": {
     "debugQueries": false

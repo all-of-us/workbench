@@ -49,6 +49,7 @@
   },
   "wgsCohortExtraction": {
     "serviceAccount": "wgs-cohort-extraction@all-of-us-rw-prod.iam.gserviceaccount.com",
+    "serviceAccountTerraProxyGroup": "",
     "operationalTerraWorkspaceNamespace": "",
     "operationalTerraWorkspaceName": "",
     "extractionMethodConfigurationNamespace": "",
