@@ -102,7 +102,7 @@
       "bigqueryProject": "fc-aou-cdr-synth-test",
       "bigqueryDataset": "SR2019q4r3",
       "microarrayBigqueryDataset": "microarray_data",
-      "wgsBigqueryDataset": "wgs_data",
+      "wgsBigqueryDataset": "1kg_wgs",
       "creationTime": "2020-08-26 00:09:51Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
