@@ -111,6 +111,7 @@ public class CdrVersionServiceTest {
             registeredTier,
             null,
             null,
+            null,
             null);
 
     controlledTier =
@@ -130,6 +131,7 @@ public class CdrVersionServiceTest {
             "Test Controlled CDR",
             456L,
             controlledTier,
+            null,
             null,
             null,
             null);
@@ -302,14 +304,27 @@ public class CdrVersionServiceTest {
     testGetCdrVersionsHasDataType(CdrVersion::getHasMicroarrayData);
   }
 
+  @Test
+  public void testGetCdrVersionsHasWgsData() {
+    testGetCdrVersionsHasDataType(CdrVersion::getHasWgsData);
+  }
+
   private void testGetCdrVersionsHasDataType(Predicate<CdrVersion> hasType) {
     final List<CdrVersion> cdrVersions =
         parseRegisteredTier(cdrVersionService.getCdrVersionsByTier());
-    // hasFitBitData, hasCopeSurveyData, and hasMicroarrayData are false by default
+    // hasFitBitData, hasCopeSurveyData, hasMicroarrayData, and hasWgsData are false by default
     assertThat(cdrVersions.stream().anyMatch(hasType)).isFalse();
 
     makeCdrVersion(
-        3L, true, "Test CDR With Data Types", 123L, registeredTier, "microarray", true, true);
+        3L,
+        true,
+        "Test CDR With Data Types",
+        123L,
+        registeredTier,
+        "microarray",
+        "wgs",
+        true,
+        true);
     final List<CdrVersion> newVersions =
         parseRegisteredTier(cdrVersionService.getCdrVersionsByTier());
 
@@ -337,6 +352,7 @@ public class CdrVersionServiceTest {
       long creationTime,
       DbAccessTier accessTier,
       String microarrayDataset,
+      String wgsDataset,
       Boolean hasFitbit,
       Boolean hasCopeSurveyData) {
     DbCdrVersion cdrVersion = new DbCdrVersion();
@@ -351,6 +367,7 @@ public class CdrVersionServiceTest {
     cdrVersion.setNumParticipants(123);
     cdrVersion.setReleaseNumber((short) 1);
     cdrVersion.setMicroarrayBigqueryDataset(microarrayDataset);
+    cdrVersion.setWgsBigqueryDataset(wgsDataset);
     cdrVersion.setHasFitbitData(hasFitbit);
     cdrVersion.setHasCopeSurveyData(hasCopeSurveyData);
     return cdrVersionDao.save(cdrVersion);
