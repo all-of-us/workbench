@@ -4,11 +4,13 @@
 
 set -e
 
-export BQ_PROJECT=$1          # project
-export BQ_DATASET=$2          # dataset
-export CDR_DATE=$3            # cdr date
-export DATA_BROWSER=$4        # data browser flag
-export DRY_RUN=$5             # dry run
+export BQ_PROJECT=$1        # CDR project
+export BQ_DATASET=$2        # CDR dataset
+export WGV_PROJECT=$3       # whole genome variant project
+export WGV_DATASET=$4       # whole genome variant dataset
+export CDR_DATE=$5          # cdr date
+export DATA_BROWSER=$6      # data browser flag
+export DRY_RUN=$7           # dry run
 
 echo ""
 echo 'Making denormalized search events table'
@@ -35,7 +37,7 @@ then
 
   echo ""
   echo 'Making denormalized search person table'
-  if ./generate-cdr/make-bq-denormalized-search-person.sh $BQ_PROJECT $BQ_DATASET $CDR_DATE $DRY_RUN
+  if ./generate-cdr/make-bq-denormalized-search-person.sh $BQ_PROJECT $BQ_DATASET $WGV_PROJECT $WGV_DATASET $CDR_DATE $DRY_RUN
   then
       echo "Making denormalized search person table complete"
   else
