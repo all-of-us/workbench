@@ -350,6 +350,33 @@ paths:
           description: Bad request
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/link-ras-account":
+    post:
+      tags:
+      - profile
+      consumes:
+      - application/json
+      description: Link user with a RAS account
+      operationId: linkRasAccount
+      parameters:
+      - in: body
+        name: authcode
+        description: The authorization code from RAS.
+        schema:
+          "$ref": "#/definitions/RasLinkRequestBody"
+      responses:
+        200:
+          description: The user's account linking information.
+          schema:
+            "$ref": "#/definitions/AccountLinkInfo"
+        400:
+          description: Bad request
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        500:
+          description: Internal Error
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
   "/v1/page-visits":
     post:
       tags:
@@ -5091,6 +5118,14 @@ definitions:
       jwt:
         type: string
         description: the encoded/signed JWT
+  RasLinkRequestBody:
+    required:
+    - authcode
+    type: object
+    properties:
+      authcode:
+        type: string
+        description: the authorization code
   AdminTableUser:
     type: object
     properties:
@@ -5345,6 +5380,14 @@ definitions:
         format: int64
         description: 'Timestamp when the user first changed from Unregistered to Registered
           data access level. May be null if the user has never done so.'
+  AccountLinkInfo:
+    description: 'User account linking information. For now, we just need eRA Commons username,
+    moving forward, we may add loin.gov, IAL status when needed.'
+    type: object
+    properties:
+      eraCommonsUserName:
+        description: user eRA Commons username.
+        type: string
   DemographicSurvey:
     type: object
     properties:
