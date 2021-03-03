@@ -793,12 +793,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    // tmp record all workspaces as Registered Tier.
-    // This is mostly true in test/local and fully true in higher environments.
-    // RW-6137: Replace with AccessTier
-    final Short registeredTier =
-        DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED);
-
     final List<ActiveStatusToCountResult> rows = workspaceDao.getActiveStatusToCount();
     return rows.stream()
         .map(
@@ -809,8 +803,11 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
                         DbStorageEnums.workspaceActiveStatusFromStorage(
                                 row.getWorkspaceActiveStatus())
                             .toString())
-                    // TODO replace with AccessTier RW-6137
-                    .addTag(MetricLabel.DATA_ACCESS_LEVEL, registeredTier.toString())
+
+                    // tmp record all workspaces as Registered Tier.
+                    // This is mostly true in test/local and fully true in higher environments.
+                    // RW-6137: Replace with AccessTier
+                    .addTag(MetricLabel.DATA_ACCESS_LEVEL, DataAccessLevel.REGISTERED.toString())
                     .addMeasurement(GaugeMetric.WORKSPACE_COUNT, row.getWorkspaceCount())
                     .build())
         .collect(ImmutableList.toImmutableList());
