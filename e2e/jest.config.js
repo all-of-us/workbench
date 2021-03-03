@@ -34,7 +34,7 @@ module.exports = {
     ],
     ["<rootDir>/jest-custom-reporter.js", {
         "outputdir": "logs/jest",
-        "filename": "jest-test-results.json"
+        "filename": "test-results-summary.json"
       }
     ]
   ],

@@ -13,6 +13,7 @@ module.exports = class JestCustomReporter {
     }
     this.testResults = [];
     this.logDir = this._options.outputdir || 'logs/jest';
+    this.fileName = this._options.filename || 'test-results-summary.json';
   }
 
   // onTestResult() {
@@ -42,8 +43,6 @@ module.exports = class JestCustomReporter {
 
   onTestResult(testRunConfig, testResult, runResults) {
     const testName = path.parse(testResult.testFilePath).name;
-    console.log(`fileName: ${testName}`);
-
     testResult.testResults.forEach((result) => {
       const failure = result.failureMessage;
       console.log(`failure: ${failure}`);
@@ -85,7 +84,6 @@ module.exports = class JestCustomReporter {
   }
 
   onRunComplete(test, runResults) {
-    const fileName = this._options.filename || 'jest-test-results-summary.json';
     runResults.testResults.forEach(result => {
       const testFilePath = result.testFilePath.split('e2e/')[1];
       const failure = [];
@@ -98,8 +96,7 @@ module.exports = class JestCustomReporter {
       })
     });
 
-    this.saveLog(fileName, JSON.stringify(this.testResults, null, 2), this.logDir);
-    console.log("📦 reporter:", fileName);
+    this.saveLog(this.fileName, JSON.stringify(this.testResults, null, 2), this.logDir);
     return runResults;
   }
 
@@ -117,7 +114,8 @@ module.exports = class JestCustomReporter {
       fs.mkdirSync(dir);
     }
     fs.writeFileSync(`${dir}/${logFileName}`, contents, 'utf-8');
-    console.log(`Saved ${logFileName} to ${dir}`);
+    console.info('');
+    console.info(`**  **  Saved ${logFileName} to ${dir}  **  **`);
   }
 
 }
