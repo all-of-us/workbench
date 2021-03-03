@@ -44,8 +44,7 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
   }
 
   render() {
-    return <React.Fragment>
-      <DemographicSurvey
+    return <DemographicSurvey
           profile={fp.set('demographicSurvey', fp.mapValues(() => undefined, this.props.profile.demographicSurvey), this.props.profile)}
           saveProfile={(profile, captchaToken) => {
             AnalyticsTracker.Registration.DemographicSurvey();
@@ -55,7 +54,6 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
           enableCaptcha={true}
           enablePrevious={true}
           showStepCount={true}
-      />
-    </React.Fragment>;
+      />;
   }
 }
