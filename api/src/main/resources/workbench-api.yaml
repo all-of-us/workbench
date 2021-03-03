@@ -377,6 +377,10 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
+        501:
+          description: Not implemented/Not support
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
   "/v1/page-visits":
     post:
       tags:
