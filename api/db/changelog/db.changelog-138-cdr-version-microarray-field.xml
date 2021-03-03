@@ -6,8 +6,7 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="ericsong" id="changelog-138-cdr-version-microarray-field">
     <addColumn tableName="cdr_version">
-      <column name="microarray_bigquery_dataset" type="varchar(100)">
-      </column>
+      <column name="microarray_bigquery_dataset" type="varchar(100)"/>
     </addColumn>
   </changeSet>
 </databaseChangeLog>
