@@ -152,12 +152,3 @@ export class AdminInstitution extends React.Component<{}, State> {
     </div>;
   }
 }
-
-@Component({
-  template: '<div #root></div>'
-})
-export class AdminInstitutionComponent extends ReactWrapperBase {
-  constructor() {
-    super(AdminInstitution, []);
-  }
-}

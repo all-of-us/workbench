@@ -53,7 +53,7 @@ interface InstitutionEditState {
 let title = 'Add new Institution';
 let institutionToEdit;
 
-export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, InstitutionEditState> {
+export const AdminInstitutionEdit = withUrlParams()(class extends React.Component<UrlParamsProps, InstitutionEditState> {
   constructor(props) {
     super(props);
     this.state = {
@@ -404,16 +404,4 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
       </FadeBox>
       </div>;
   }
-
-}
-
-export const AdminInstitutionEdit = withUrlParams()(AdminInstitutionEditImpl);
-
-@Component({
-  template: '<div #root></div>'
-})
-export class AdminInstitutionEditComponent extends ReactWrapperBase {
-  constructor() {
-    super(AdminInstitutionEdit, []);
-  }
-}
+});

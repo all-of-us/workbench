@@ -8,7 +8,7 @@ import {SessionExpired} from 'app/pages/session-expired';
 import {SignInAgain} from 'app/pages/sign-in-again';
 import {UserDisabled} from 'app/pages/user-disabled';
 import {SignInService} from 'app/services/sign-in.service';
-import {hasRegisteredAccess, ReactWrapperBase} from 'app/utils';
+import {hasRegisteredAccess, ReactWrapperBase, withUrlParams} from 'app/utils';
 import {authStore, profileStore, useStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -23,6 +23,8 @@ import {SignIn} from './pages/login/sign-in';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
+import {AdminInstitutionEdit} from "./pages/admin/admin-institution-edit";
+import {AdminInstitution} from "./pages/admin/admin-institution";
 
 
 const signInGuard: Guard = {
@@ -39,6 +41,8 @@ const AdminNotebookViewPage = withRouteData(AdminNotebookView);
 const CookiePolicyPage = withRouteData(CookiePolicy);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
 const HomepagePage = withRouteData(Homepage); // this name is bad i am sorry
+const InstitutionAdminPage = withRouteData(AdminInstitution);
+const InstitutionEditAdminPage = withRouteData(AdminInstitutionEdit);
 const InteractiveNotebookPage = withRouteData(InteractiveNotebook);
 const NotebookListPage = withRouteData(NotebookList);
 const NotebookRedirectPage = withRouteData(NotebookRedirect);
@@ -83,6 +87,18 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
       <AppRoute
         path='/'
           component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
+      />
+      <AppRoute
+          path='/admin/institution'
+          component={() => <InstitutionAdminPage routeData={{title: 'Institution Admin'}}/>}
+      />
+      <AppRoute
+          path='/admin/institution/add'
+          component={() => <InstitutionEditAdminPage routeData={{title: 'Institution Admin'}}/>}
+      />
+      <AppRoute
+          path='/admin/institution/edit/:institutionId'
+          component={() => <InstitutionEditAdminPage routeData={{title: 'Institution Admin'}}/>}
       />
       <AppRoute
           path='/admin/user-audit'
