@@ -368,7 +368,7 @@ paths:
         200:
           description: The user's account linking information.
           schema:
-            "$ref": "#/definitions/AccountLinkInfo"
+            "$ref": "#/definitions/LinkedAccountInfo"
         400:
           description: Bad request
           schema:
@@ -5129,7 +5129,8 @@ definitions:
     properties:
       authcode:
         type: string
-        description: the authorization code
+        description: 'the standard OAuth authorization code from RAS that we can use to exchange
+        access token.'
   AdminTableUser:
     type: object
     properties:
@@ -5384,9 +5385,10 @@ definitions:
         format: int64
         description: 'Timestamp when the user first changed from Unregistered to Registered
           data access level. May be null if the user has never done so.'
-  AccountLinkInfo:
-    description: 'User account linking information. For now, we just need eRA Commons username,
-    moving forward, we may add loin.gov, IAL status when needed.'
+  LinkedAccountInfo:
+    description: 'User valid account linking information. Getting this response means the account is
+    validated. For now, we just need eRA Commons username, moving forward, we may add login.gov,
+    IAL status when needed. Getting '
     type: object
     properties:
       eraCommonsUserName:

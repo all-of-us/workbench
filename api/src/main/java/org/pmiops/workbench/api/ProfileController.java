@@ -43,7 +43,6 @@ import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
-import org.pmiops.workbench.model.AccountLinkInfo;
 import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.AdminUserListResponse;
@@ -53,6 +52,7 @@ import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Institution;
+import org.pmiops.workbench.model.LinkedAccountInfo;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
@@ -613,8 +613,8 @@ public class ProfileController implements ProfileApiDelegate {
   }
 
   @Override
-  public ResponseEntity<AccountLinkInfo> linkRasAccount(RasLinkRequestBody body) {
-    // TODO(RW-6346): Implement this endpoint.
+  public ResponseEntity<LinkedAccountInfo> linkRasAccount(RasLinkRequestBody body) {
+    // TODO(RW-6364): Implement this endpoint.
     return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
   }
 }
