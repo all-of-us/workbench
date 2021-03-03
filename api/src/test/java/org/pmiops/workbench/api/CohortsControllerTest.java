@@ -867,8 +867,7 @@ public class CohortsControllerTest {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
     cdrVersion.setName(CDR_VERSION_NAME);
-    // TODO: (RW-6336) This should be swapped out for the Wgs field once that's implemented
-    cdrVersion.setMicroarrayBigqueryDataset("microarray");
+    cdrVersion.setWgsBigqueryDataset("wgs");
     cdrVersionDao.save(cdrVersion);
 
     when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
@@ -917,8 +916,7 @@ public class CohortsControllerTest {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
     cdrVersion.setName(CDR_VERSION_NAME);
-    // TODO: (RW-6336) This should be swapped out for the Wgs field once that's implemented
-    cdrVersion.setMicroarrayBigqueryDataset("microarray");
+    cdrVersion.setWgsBigqueryDataset("wgs");
     cdrVersionDao.save(cdrVersion);
 
     cohortsController.extractCohortGenomes(
