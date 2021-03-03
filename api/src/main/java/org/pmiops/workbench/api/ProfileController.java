@@ -43,6 +43,7 @@ import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AccessBypassRequest;
+import org.pmiops.workbench.model.AccountLinkInfo;
 import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.AdminUserListResponse;
@@ -55,6 +56,7 @@ import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.RasLinkRequestBody;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
@@ -608,5 +610,11 @@ public class ProfileController implements ProfileApiDelegate {
         Optional.ofNullable(beforeMillisNullable).map(Instant::ofEpochMilli).orElse(Instant.now());
     return ResponseEntity.ok(
         actionAuditQueryService.queryEventsForUser(userDatabaseId, limit, after, before));
+  }
+
+  @Override
+  public ResponseEntity<AccountLinkInfo> linkRasAccount(RasLinkRequestBody body) {
+    // TODO(RW-6346): Implement this endpoint.
+    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
   }
 }
