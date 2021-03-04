@@ -362,6 +362,6 @@ end
 
 Common.register_command({
   :invocation => "create-wgs-extraction-dataset",
-  :description => "", # TODO
+  :description => "Create datasets with TTL tables for WGS cohort extraction",
   :fn => ->(*args) { create_wgs_extraction_dataset("create-wgs-extraction-dataset", args) }
 })

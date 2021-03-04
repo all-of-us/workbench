@@ -53,6 +53,7 @@
     "operationalTerraWorkspaceNamespace": "",
     "operationalTerraWorkspaceName": "",
     "operationalTerraWorkspaceBucket": "",
+    "extractionPetServiceAccount": "",
     "extractionMethodConfigurationNamespace": "",
     "extractionMethodConfigurationName": "",
     "extractionMethodConfigurationVersion": 1,
