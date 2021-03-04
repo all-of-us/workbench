@@ -366,8 +366,7 @@ public class WorkspacesControllerTest {
   private static WorkbenchConfig workbenchConfig;
   @Autowired FireCloudService fireCloudService;
   @Autowired private WorkspaceService workspaceService;
-  @Autowired
-  CloudStorageClient cloudStorageClient;
+  @Autowired CloudStorageClient cloudStorageClient;
   @Autowired BigQueryService bigQueryService;
   @SpyBean @Autowired WorkspaceDao workspaceDao;
   @Autowired UserDao userDao;

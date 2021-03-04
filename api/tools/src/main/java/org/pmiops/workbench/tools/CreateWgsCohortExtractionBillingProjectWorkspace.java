@@ -179,7 +179,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
       log.info(
           "Pet SA account is " + getExtractionPetSa(workspace.getNamespace(), workbenchConfig));
 
-/* TODO format this
+      /* TODO format this
       "serviceAccount": "wgs-cohort-extraction@all-of-us-rw-staging.iam.gserviceaccount.com",
               "serviceAccountTerraProxyGroup": "",
               "operationalTerraWorkspaceNamespace": "",

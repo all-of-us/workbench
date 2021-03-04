@@ -193,7 +193,7 @@ public class UserMetricsControllerTest {
             mockUserRecentResourceService,
             mockWorkspaceService,
             mockFireCloudService,
-                mockCloudStorageClient,
+            mockCloudStorageClient,
             commonMappers,
             firecloudMapper);
     userMetricsController.setDistinctWorkspaceLimit(5);

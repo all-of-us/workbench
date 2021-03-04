@@ -86,24 +86,29 @@ public class FireCloudConfig {
 
   @Bean(name = WGS_EXTRACTION_SA_CREDENTIALS)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public GoogleCredentials wgsExtractionAccessToken(WorkbenchConfig workbenchConfig, IamCredentialsClient iamCredentialsClient) {
+  public GoogleCredentials wgsExtractionAccessToken(
+      WorkbenchConfig workbenchConfig, IamCredentialsClient iamCredentialsClient) {
     return GoogleCredentials.create(
-            new AccessToken(iamCredentialsClient
-            .generateAccessToken(
-                    "projects/-/serviceAccounts/" + workbenchConfig.wgsCohortExtraction.serviceAccount,
+        new AccessToken(
+            iamCredentialsClient
+                .generateAccessToken(
+                    "projects/-/serviceAccounts/"
+                        + workbenchConfig.wgsCohortExtraction.serviceAccount,
                     Collections.emptyList(),
                     ImmutableList.<String>builder()
-                            .addAll(TERRA_SCOPES)
-                            .add("https://www.googleapis.com/auth/devstorage.read_write")
-                            .build(),
+                        .addAll(TERRA_SCOPES)
+                        .add("https://www.googleapis.com/auth/devstorage.read_write")
+                        .build(),
                     Duration.newBuilder().setSeconds(60 * 10).build())
-            .getAccessToken(), null));
+                .getAccessToken(),
+            null));
   }
 
   @Bean(name = WGS_COHORT_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient wgsExtractionServiceAccountApiClient(
-      WorkbenchConfig workbenchConfig, @Qualifier(WGS_EXTRACTION_SA_CREDENTIALS) GoogleCredentials credentials) {
+      WorkbenchConfig workbenchConfig,
+      @Qualifier(WGS_EXTRACTION_SA_CREDENTIALS) GoogleCredentials credentials) {
     ApiClient apiClient = buildApiClient(workbenchConfig);
     apiClient.setAccessToken(credentials.getAccessToken().getTokenValue());
 

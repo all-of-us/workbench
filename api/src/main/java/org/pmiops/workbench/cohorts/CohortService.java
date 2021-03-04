@@ -56,7 +56,8 @@ public class CohortService {
       CohortQueryBuilder cohortQueryBuilder,
       CohortDao cohortDao,
       CohortMapper cohortMapper,
-      @Qualifier(StorageConfig.WGS_EXTRACTION_STORAGE_CLIENT) Provider<CloudStorageClient> cloudStorageClient,
+      @Qualifier(StorageConfig.WGS_EXTRACTION_STORAGE_CLIENT)
+          Provider<CloudStorageClient> cloudStorageClient,
       FireCloudService fireCloudService,
       Provider<SubmissionsApi> submissionsApiProvider,
       Provider<MethodConfigurationsApi> methodConfigurationsApiProvider,
@@ -119,10 +120,12 @@ public class CohortService {
     String extractionUuid = UUID.randomUUID().toString();
     String filename = "person_ids.txt";
     Blob personIdsFile =
-        cloudStorageClientProvider.get().writeFile(
-            cohortExtractionConfig.operationalTerraWorkspaceBucket,
+        cloudStorageClientProvider
+            .get()
+            .writeFile(
+                cohortExtractionConfig.operationalTerraWorkspaceBucket,
                 "wgs-cohort-extractions/" + extractionUuid + "/" + filename,
-            String.join("\n", getPersonIds(cohortId)).getBytes(StandardCharsets.UTF_8));
+                String.join("\n", getPersonIds(cohortId)).getBytes(StandardCharsets.UTF_8));
 
     FirecloudMethodConfiguration methodConfig =
         methodConfigurationsApiProvider
@@ -146,7 +149,8 @@ public class CohortService {
                             .put("WgsCohortExtract.extraction_uuid", "\"" + extractionUuid + "\"")
                             .put(
                                 "WgsCohortExtract.wgs_dataset",
-                                "\"fc-aou-cdr-synth-test.1kg_wgs\"") // TODO eric: merge in master and swap out with RW-6336
+                                "\"fc-aou-cdr-synth-test.1kg_wgs\"") // TODO eric: merge in master
+                            // and swap out with RW-6336
                             .put(
                                 "WgsCohortExtract.wgs_extraction_cohorts_dataset",
                                 "\"" + cohortExtractionConfig.extractionCohortsDataset + "\"")

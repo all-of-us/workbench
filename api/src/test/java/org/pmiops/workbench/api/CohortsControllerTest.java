@@ -178,8 +178,7 @@ public class CohortsControllerTest {
   private TestMockFactory testMockFactory;
 
   @Autowired CdrVersionService cdrVersionService;
-  @Autowired
-  CloudStorageClient cloudStorageClient;
+  @Autowired CloudStorageClient cloudStorageClient;
   @Autowired CohortMaterializationService cohortMaterializationService;
   @Autowired ComplianceService complianceService;
   @Autowired FireCloudService fireCloudService;
