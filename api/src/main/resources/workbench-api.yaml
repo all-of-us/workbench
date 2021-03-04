@@ -373,6 +373,10 @@ paths:
           description: Bad request
           schema:
             "$ref": "#/definitions/ErrorResponse"
+        403:
+          description: Forbidden
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
         500:
           description: Internal Error
           schema:
