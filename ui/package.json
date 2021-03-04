@@ -17,7 +17,9 @@
     "codegen-swagger-fetch": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-fetch --input-spec ../api/src/main/resources/workbench-api.yaml --output src/generated/fetch",
     "post-codegen": "sed -i.bak -e 's/OpaqueToken/InjectionToken/' src/generated/variables.ts",
     "notebooks-codegen-swagger-fetch": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-fetch --input-spec ../api/src/main/resources/notebooks.yaml --output src/notebooks-generated/fetch",
-    "coverage": "ng test --source-map=false --watch=false --code-coverage"
+    "coverage": "ng test --source-map=false --watch=false --code-coverage",
+    "play-infer": "yarn ts-node-dev --respawn TypeInferenceIssue.ts",
+    "play-fn": "yarn ts-node-dev --respawn TypeFunctionIssue.ts"
   },
   "jest": {
     "clearMocks": true,
