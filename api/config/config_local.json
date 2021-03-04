@@ -57,10 +57,10 @@
     "extractionPetServiceAccount": "pet-118217329794842274136@aou-wgs-cohort-extraction.iam.gserviceaccount.com",
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction",
     "extractionMethodConfigurationName": "HelloWorld",
-    "extractionMethodConfigurationVersion": 34,
-    "extractionCohortsDataset": "fc-aou-cdr-synth-test.wgs_extraction_cohorts_test_1",
-    "extractionDestinationDataset": "fc-aou-cdr-synth-test.wgs_extracted_cohorts_test_1",
-    "extractionTempTablesDataset": "fc-aou-cdr-synth-test.wgs_extraction_temp_tables_test_1"
+    "extractionMethodConfigurationVersion": 51,
+    "extractionCohortsDataset": "fc-aou-cdr-synth-test.wgs_extraction_cohorts_test",
+    "extractionDestinationDataset": "fc-aou-cdr-synth-test.wgs_extracted_cohorts_test",
+    "extractionTempTablesDataset": "fc-aou-cdr-synth-test.wgs_extraction_temp_tables_test"
   },
   "cdr": {
     "debugQueries": false

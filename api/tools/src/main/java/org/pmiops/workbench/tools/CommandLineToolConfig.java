@@ -9,6 +9,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.DbConfig;
 import org.pmiops.workbench.google.CloudStorageClientImpl;
+import org.pmiops.workbench.google.StorageConfig;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -35,7 +36,7 @@ import org.springframework.retry.backoff.ThreadWaitSleeper;
  */
 @Configuration
 @EnableAutoConfiguration
-@Import({RetryConfig.class, CommonConfig.class, CloudStorageClientImpl.class})
+@Import({RetryConfig.class, CommonConfig.class, StorageConfig.class})
 @EnableJpaRepositories({"org.pmiops.workbench.db.dao"})
 @EntityScan("org.pmiops.workbench.db.model")
 public class CommandLineToolConfig {
