@@ -117,8 +117,8 @@ beforeEach(async () => {
     const response = request.response();
     const failureText = request.failure() !== null ? stringifyData(request.failure().errorText) : '';
     const responseText = stringifyData(await getResponseText(request));
-    console.error('❗ Request failed: ' +
-       `${response.status()} ${request.method()} ${request.url()}\n${responseText}\n${failureText}`);
+    console.error('Request failed: '
+       + `${response.status()} ${request.method()} ${request.url()}\n ${responseText}\n ${failureText}`);
   }
 
   const transformResponseBody = async (request: Request): Promise<string> => {
@@ -128,7 +128,7 @@ beforeEach(async () => {
         // truncate long response. get first two workspace details.
         responseText = fp.isEmpty(JSON.parse(responseText).items)
            ? responseText
-           : 'truncated...\n' + JSON.stringify(JSON.parse(responseText).items.slice(0, 2), null, 2);
+           : `truncated...\n${JSON.stringify(JSON.parse(responseText).items.slice(0, 2), null, 2)}`;
       }
       return responseText;
     }
@@ -141,8 +141,8 @@ beforeEach(async () => {
   // New request initiated
   page.on('request', (request) => {
     if (isWorkbenchRequest(request)) {
-      console.debug('❗ Request issued: ' +
-         `${request.method()} ${request.url()}\n${getRequestData(request)}`);
+      const requestBody = getRequestData(request);
+      console.debug(`Request issued: ${request.method()} ${request.url()} ${requestBody.length === 0 ? '' : requestBody}`);
     }
     try {
       request.continue();
@@ -167,16 +167,16 @@ beforeEach(async () => {
           await logError(request);
         } else {
           if (shouldSkipApiResponseBody(request)) {
-            console.debug(`❗ Request finished: ${status} ${method} ${url}`);
+            console.debug(`Request finished: ${status} ${method} ${url}`);
           } else {
-            console.debug('❗ Request finished: ' +
-               `${status} ${method} ${url}\n${await transformResponseBody(request)}`);
+            console.debug('Request finished: ' +
+               `${status} ${method} ${url}\n ${await transformResponseBody(request)}`);
           }
         }
       }
     } catch (err) {
       // Try find out what the request was
-      console.error(`${err}\n${status} ${method} ${url}`);
+      console.error(`${err}\n ${status} ${method} ${url}`);
     }
     try {
       await request.continue();
@@ -192,27 +192,27 @@ beforeEach(async () => {
     const title = await getTitle();
     try {
       const args = await Promise.all(message.args().map(a => describeJsHandle(a)));
-      console[message.type() === 'warning' ? 'warn' : message.type()](`❗ ${title}\n${message.text()}`, ...args);
+      console[message.type() === 'warning' ? 'warn' : message.type()](`${title}\n`, ...args);
     } catch (err) {
-      console.error(`❗ ${title}\nException occurred when getting console message.\n${err}\n${message.text()}`);
+      console.error(`${title}\n Exception occurred when getting console message.\n ${err}\n ${message.text()}`);
     }
   });
 
   page.on('error', async (error) => {
     const title = await getTitle();
     try {
-      console.error(`❗ ${title}\nError message: ${error.message}\nStack: ${error.stack}`);
+      console.error(`${title}\n Error message: ${error.message} \n Stack: ${error.stack}`);
     } catch (err) {
-      console.error(`❗ ${title}\nException occurred when getting error.\n${err}`);
+      console.error(`${title}\n Exception occurred when getting error. \n ${err}`);
     }
   });
 
   page.on('pageerror', async (error) => {
     const title = await getTitle();
     try {
-      console.error(`❗ ${title}\nPage error message: ${error.message}\nStack: ${error.stack}`);
+      console.error(`${title}\n Page error message: ${error.message} \n Stack: ${error.stack}`);
     } catch (err) {
-      console.error(`❗ ${title}\nPage exception occurred when getting pageerror.\n${err}`);
+      console.error(`${title}\n Page exception occurred when getting pageerror. \n ${err}`);
     }
   })
 

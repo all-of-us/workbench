@@ -21,7 +21,7 @@ module.exports = {
         "resultDir": "logs",
         "resultJson": "test-results.json",
         "reportTitle": "AoU integration tests",
-        "report": true
+        "report": false
       }
     ],
     ["jest-junit", {

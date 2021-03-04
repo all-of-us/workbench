@@ -1,6 +1,6 @@
-// @ts-nocheck
 const fs = require('fs-extra');
 const path = require('path');
+const util = require('util');
 
 module.exports = class JestCustomReporter {
 
@@ -11,112 +11,84 @@ module.exports = class JestCustomReporter {
     if (globalConfig.verbose === true) {
       throw Error("Invalid configuration. Verbose must be false or Console messages won't be available.")
     }
-    this.testResults = [];
     this.logDir = this._options.outputdir || 'logs/jest';
     this.fileName = this._options.filename || 'test-results-summary.json';
   }
 
-  // onTestResult() {
-    // tslint:disable-next-line:no-console
-    // console.log('onTestResult start');
-    /*
-    if (testResult.console) {
-      for (const logObj of testResult.console) {
-        this._logMessages.push(logObj.message)
-      }
-    }
-    // tslint:disable-next-line:no-console
-    console.log(`onTestResult: ${JSON.stringify(this._logMessages)}`);
-
-    const testPath = path.parse(test.path);
-    const testResultsDir = path.join(
-      testPath.dir,
-      this._options.outputdir || 'logs',
-    );
-    const testFileName = testPath.base.replace(/\./g, '-');
-    // tslint:disable-next-line:no-console
-    console.log(testResultsDir);
-    // tslint:disable-next-line:no-console
-    console.log(`testFileName: ${testFileName}`);
-    */
- //  }
-
-  onTestResult(testRunConfig, testResult, runResults) {
-    const testName = path.parse(testResult.testFilePath).name;
-    testResult.testResults.forEach((result) => {
-      const failure = result.failureMessage;
-      console.log(`failure: ${failure}`);
-
-      // testResult contains console logs if Jest config verbose: false
-      if (testResult.console && testResult.console.length > 0) {
-        testResult.console.forEach(log => {
-          console.log(`log: ${log.message}`);
-        });
-      }
-
-      if (result.status === "failed") {
-        try {
-          const stack = result.failureDetails[0].stack.split("\n");
-
-          const frame1 = stack.findIndex((row) => row.startsWith("    at"));
-          const location = stack[frame1].match(/[^:]*:([^:]*:[^:]*)/);
-
-          console.log(
-            `-- failed;${testResult.testFilePath};${
-              location[1]
-            };${result.failureDetails[0].message.replace(/\n/g, " ")}`
-          );
-        } catch (e) {
-          console.log("ERROR", e);
-        }
-      }
-
-      this.saveLog(`${testName}.json`, JSON.stringify(testResult, null, 2), this.logDir);
-
-    });
-
-
-
-    this.testResults.push(testResult);
-    console.log('');
-    console.log(this._consoleLogs);
-    console.log('');
+  onTestStart(test) {
+    this.log(`Starting ${path.parse(test.path).name} at ${new Date().toLocaleTimeString('en-US',{timeZone:'America/New_York'})}`);
   }
 
+  // @ts-ignore
+  onTestResult(testRunConfig, testResult, runResults) {
+    const consoleLogs = [];
+
+    // Get test name.
+    const testName = path.parse(testResult.testFilePath).name;
+    consoleLogs.push(testName);
+    consoleLogs.push('');
+
+    // Get all console logs.
+    if (testResult.console && testResult.console.length > 0) {
+      testResult.console.forEach((log) => {
+        consoleLogs.push(util.format(log.message));
+      });
+    }
+
+    // Iterate testResults array.
+    testResult.testResults.forEach((suite) => {
+      // Get failure message.
+      if (suite.testResults && suite.testResults.status === "failed") {
+        const failure = suite.testResults.failureMessages;
+        consoleLogs.push(`failure: ${failure}`);
+      }
+    });
+    const data = consoleLogs.reduce((a, b) => a + util.inspect(b, { maxArrayLength: null, compact: false }) + `\n`, "");
+    this.saveLog(`${testName}.log`, data, this.logDir);
+  }
+
+  // @ts-ignore
   onRunComplete(test, runResults) {
-    runResults.testResults.forEach(result => {
-      const testFilePath = result.testFilePath.split('e2e/')[1];
-      const failure = [];
-      result.testResults.forEach(test => {
-        if (test.status === 'failed') {
-          failure.push(`yarn test ${testFilePath}`);
-          // tslint:disable-next-line:no-console
-          console.log(failure);
-        }
+    this.log('CUSTOM REPORTER');
+    this.failTestsSummary(runResults);
+
+    runResults.testResults.forEach(suite => {
+      suite.console.forEach(log => {
+        JSON.stringify(log.messsage, null, 2);
       })
     });
 
-    this.saveLog(this.fileName, JSON.stringify(this.testResults, null, 2), this.logDir);
+    // Write all test results to a file.
+    this.saveLog(this.fileName, JSON.stringify(runResults, null, 2), this.logDir);
+
     return runResults;
   }
 
-
-  trimTestResult(testResult) {
-    console.log(`trimTestResults: ${testResult}`);
-    testResult.snapshot = undefined;
-    testResult.perfStats = undefined;
-    console.log(`trimTestResults: ${testResult}`);
-    return testResult;
+  failTestsSummary(runResults) {
+    runResults.testResults.forEach(suite => {
+      const testFilePath = suite.testFilePath.split('e2e/')[1];
+      const failedTests = [];
+      suite.testResults.forEach(test => {
+        if (test.status === 'failed') {
+          failedTests.push(`yarn test ${testFilePath}`);
+        }
+      });
+      if (failedTests.length > 0) {
+        console.info(`****  To rerun failed tests:\n      ${failedTests}`);
+      }
+    });
   }
 
   saveLog(logFileName, contents, dir) {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir);
     }
-    fs.writeFileSync(`${dir}/${logFileName}`, contents, 'utf-8');
-    console.info('');
-    console.info(`**  **  Saved ${logFileName} to ${dir}  **  **`);
+    fs.writeFileSync(`${dir}/${logFileName}`, contents);
+    this.log(`Saved file: ${dir}/${logFileName}`);
+  }
+
+  log(message) {
+    console.info(`****  ${message}  ****`);
   }
 
 }
-
