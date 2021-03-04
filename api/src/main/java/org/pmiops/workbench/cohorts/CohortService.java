@@ -109,16 +109,19 @@ public class CohortService {
 
   public TerraJob submitGenomicsCohortExtractionJob(DbWorkspace workspace, Long cohortId)
       throws ApiException {
+    // Currently only creates the temporary extraction tables
+    // No files are being written to the user bucket
+
     WorkbenchConfig.WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;
 
     FirecloudWorkspace fcWorkspace = fireCloudService.getWorkspace(workspace).get().getWorkspace();
     String extractionUuid = UUID.randomUUID().toString();
-    String filename = extractionUuid + "_person_ids.txt";
+    String filename = "person_ids.txt";
     Blob personIdsFile =
         cloudStorageClientProvider.get().writeFile(
             cohortExtractionConfig.operationalTerraWorkspaceBucket,
-            filename,
+                "wgs-cohort-extractions/" + extractionUuid + "/" + filename,
             String.join("\n", getPersonIds(cohortId)).getBytes(StandardCharsets.UTF_8));
 
     FirecloudMethodConfiguration methodConfig =
