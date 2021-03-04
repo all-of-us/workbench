@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -10,7 +9,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Scroll} from 'app/icons/scroll';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, UrlParamsProps, withUrlParams} from 'app/utils';
+import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
 import {convertAPIError} from 'app/utils/errors';
 import {navigate} from 'app/utils/navigation';
 import {DuaType, Institution, OrganizationType} from 'generated/fetch';
@@ -53,7 +52,7 @@ interface InstitutionEditState {
 let title = 'Add new Institution';
 let institutionToEdit;
 
-export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, InstitutionEditState> {
+export const AdminInstitutionEdit = withUrlParams()(class extends React.Component<UrlParamsProps, InstitutionEditState> {
   constructor(props) {
     super(props);
     this.state = {
@@ -404,16 +403,4 @@ export class AdminInstitutionEditImpl extends React.Component<UrlParamsProps, In
       </FadeBox>
       </div>;
   }
-
-}
-
-export const AdminInstitutionEdit = withUrlParams()(AdminInstitutionEditImpl);
-
-@Component({
-  template: '<div #root></div>'
-})
-export class AdminInstitutionEditComponent extends ReactWrapperBase {
-  constructor() {
-    super(AdminInstitutionEdit, []);
-  }
-}
+});

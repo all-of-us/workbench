@@ -14,6 +14,8 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
 import {NOTEBOOK_HELP_CONTENT} from './components/help-sidebar';
+import {AdminInstitution} from './pages/admin/admin-institution';
+import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
 import {AdminNotebookView} from './pages/admin/admin-notebook-view';
 import {InteractiveNotebook} from './pages/analysis/interactive-notebook';
 import {NotebookList} from './pages/analysis/notebook-list';
@@ -39,6 +41,8 @@ const AdminNotebookViewPage = withRouteData(AdminNotebookView);
 const CookiePolicyPage = withRouteData(CookiePolicy);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
 const HomepagePage = withRouteData(Homepage); // this name is bad i am sorry
+const InstitutionAdminPage = withRouteData(AdminInstitution);
+const InstitutionEditAdminPage = withRouteData(AdminInstitutionEdit);
 const InteractiveNotebookPage = withRouteData(InteractiveNotebook);
 const NotebookListPage = withRouteData(NotebookList);
 const NotebookRedirectPage = withRouteData(NotebookRedirect);
@@ -83,6 +87,18 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
       <AppRoute
         path='/'
           component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
+      />
+      <AppRoute
+          path='/admin/institution'
+          component={() => <InstitutionAdminPage routeData={{title: 'Institution Admin'}}/>}
+      />
+      <AppRoute
+          path='/admin/institution/add'
+          component={() => <InstitutionEditAdminPage routeData={{title: 'Institution Admin'}}/>}
+      />
+      <AppRoute
+          path='/admin/institution/edit/:institutionId'
+          component={() => <InstitutionEditAdminPage routeData={{title: 'Institution Admin'}}/>}
       />
       <AppRoute
           path='/admin/user-audit'
