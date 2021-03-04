@@ -149,8 +149,7 @@ public class CohortService {
                             .put("WgsCohortExtract.extraction_uuid", "\"" + extractionUuid + "\"")
                             .put(
                                 "WgsCohortExtract.wgs_dataset",
-                                "\"fc-aou-cdr-synth-test.1kg_wgs\"") // TODO eric: merge in master
-                            // and swap out with RW-6336
+                                "\"" + workspace.getCdrVersion().getWgsBigqueryDataset() + ".1kg_wgs\"")
                             .put(
                                 "WgsCohortExtract.wgs_extraction_cohorts_dataset",
                                 "\"" + cohortExtractionConfig.extractionCohortsDataset + "\"")
