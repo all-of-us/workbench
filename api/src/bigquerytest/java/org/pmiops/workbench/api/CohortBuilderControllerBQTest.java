@@ -81,7 +81,11 @@ import org.springframework.http.ResponseEntity;
 @RunWith(BeforeAfterSpringTestRunner.class)
 // Note: normally we shouldn't need to explicitly import our own @TestConfiguration. This might be
 // a bad interaction with BeforeAfterSpringTestRunner.
-@Import({TestJpaConfig.class, CohortBuilderControllerBQTest.Configuration.class, StorageConfig.class})
+@Import({
+  TestJpaConfig.class,
+  CohortBuilderControllerBQTest.Configuration.class,
+  StorageConfig.class
+})
 public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @TestConfiguration

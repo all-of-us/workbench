@@ -58,9 +58,9 @@
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction",
     "extractionMethodConfigurationName": "HelloWorld",
     "extractionMethodConfigurationVersion": 51,
-    "extractionCohortsDataset": "fc-aou-cdr-synth-test.wgs_extraction_cohorts_test",
-    "extractionDestinationDataset": "fc-aou-cdr-synth-test.wgs_extracted_cohorts_test",
-    "extractionTempTablesDataset": "fc-aou-cdr-synth-test.wgs_extraction_temp_tables_test"
+    "extractionCohortsDataset": "fc-aou-cdr-synth-test.wgs_extraction_cohorts",
+    "extractionDestinationDataset": "fc-aou-cdr-synth-test.wgs_extracted_cohorts",
+    "extractionTempTablesDataset": "fc-aou-cdr-synth-test.wgs_extraction_temp_tables"
   },
   "cdr": {
     "debugQueries": false
