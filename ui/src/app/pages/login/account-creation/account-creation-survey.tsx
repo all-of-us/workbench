@@ -1,18 +1,15 @@
 import * as React from 'react';
 
-import {withProfileErrorModal, WithProfileErrorModalProps} from 'app/components/with-error-modal';
 import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {convertAPIError, reportError} from 'app/utils/errors';
 import {environment} from 'environments/environment';
 import {Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 
 
-export interface AccountCreationSurveyProps extends WithProfileErrorModalProps {
-  invitationKey: string;
+export interface AccountCreationSurveyProps {
   termsOfServiceVersion?: number;
   profile: Profile;
   onComplete: (profile: Profile) => void;
@@ -23,8 +20,7 @@ export interface AccountCreationState {
   captcha: boolean;
 }
 
-export const AccountCreationSurvey = withProfileErrorModal({title: 'Error creating account'})
-(class extends React.Component<AccountCreationSurveyProps, AccountCreationState> {
+export class AccountCreationSurvey extends React.Component<AccountCreationSurveyProps, AccountCreationState> {
   constructor(props: any) {
     super(props);
     this.state = {
@@ -34,29 +30,21 @@ export const AccountCreationSurvey = withProfileErrorModal({title: 'Error creati
   }
 
   async createAccount(profile, captchaToken): Promise<Profile> {
-    const {invitationKey, termsOfServiceVersion, onComplete} = this.props;
+    const {termsOfServiceVersion, onComplete} = this.props;
 
-    try {
-      const newProfile = await profileApi().createAccount({
-        profile: profile,
-        captchaVerificationToken: captchaToken,
-        invitationKey: invitationKey,
-        termsOfServiceVersion: termsOfServiceVersion
-      });
-      onComplete(newProfile);
-      return newProfile;
-    } catch (error) {
-      reportError(error);
-      const errorResponse = await convertAPIError(error);
-      this.props.showProfileErrorModal(errorResponse.message);
-    }
+    const newProfile = await profileApi().createAccount({
+      profile: profile,
+      captchaVerificationToken: captchaToken,
+      termsOfServiceVersion: termsOfServiceVersion
+    });
+    onComplete(newProfile);
+    return newProfile;
   }
 
   render() {
-    return <React.Fragment>
-      <DemographicSurvey
+    return <DemographicSurvey
           profile={fp.set('demographicSurvey', fp.mapValues(() => undefined, this.props.profile.demographicSurvey), this.props.profile)}
-          onSubmit={(profile, captchaToken) => {
+          saveProfile={(profile, captchaToken) => {
             AnalyticsTracker.Registration.DemographicSurvey();
             return this.createAccount(profile, captchaToken);
           }}
@@ -64,7 +52,6 @@ export const AccountCreationSurvey = withProfileErrorModal({title: 'Error creati
           enableCaptcha={true}
           enablePrevious={true}
           showStepCount={true}
-      />
-    </React.Fragment>;
+      />;
   }
-});
+}

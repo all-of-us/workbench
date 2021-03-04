@@ -4,7 +4,6 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.pmiops.workbench.model.DataAccessLevel
 import org.pmiops.workbench.model.ResearchPurpose
 import org.pmiops.workbench.model.SpecificPopulationEnum
 import org.pmiops.workbench.model.Workspace
@@ -47,7 +46,7 @@ class WorkspaceTargetPropertyTest {
             .apply { creationTime = now }
             .apply { lastModifiedTime = now }
             .apply { etag = "etag_1" }
-            .apply { dataAccessLevel = DataAccessLevel.REGISTERED }
+            .apply { accessTierShortName = "registered" }
             .apply { published = false }
 
         workspace2 = Workspace()
@@ -60,7 +59,7 @@ class WorkspaceTargetPropertyTest {
             .apply { creationTime = now }
             .apply { lastModifiedTime = now }
             .apply { etag = "etag_1" }
-            .apply { dataAccessLevel = DataAccessLevel.REGISTERED }
+            .apply { accessTierShortName = "registered" }
             .apply { published = false }
     }
 

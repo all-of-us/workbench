@@ -117,7 +117,8 @@
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
-    "enableReportingUploadCron": true
+    "enableReportingUploadCron": true,
+    "enableRasLinking": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",

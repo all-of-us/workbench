@@ -30,7 +30,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.BillingAccountType;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -57,7 +56,6 @@ public class TestMockFactory {
         .etag("\"1\"")
         .name(workspaceName)
         .namespace(workspaceNameSpace)
-        .dataAccessLevel(DataAccessLevel.PROTECTED)
         .cdrVersionId(CDR_VERSION_ID)
         .googleBucketName(WORKSPACE_BUCKET_NAME)
         .billingAccountName(WORKSPACE_BILLING_ACCOUNT_NAME)

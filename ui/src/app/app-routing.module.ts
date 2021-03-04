@@ -33,8 +33,6 @@ import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/com
 import {environment} from 'environments/environment';
 import {DisabledGuard} from './guards/disabled-guard.service';
 import {WorkspaceGuard} from './guards/workspace-guard.service';
-import {AdminInstitutionComponent} from './pages/admin/admin-institution';
-import {AdminInstitutionEditComponent} from './pages/admin/admin-institution-edit';
 import {BreadcrumbType, NavStore} from './utils/navigation';
 
 
@@ -391,16 +389,16 @@ const routes: Routes = [
             data: { title: 'Workspace Admin'}
           }, {
             path: 'institution',
-            component: AdminInstitutionComponent,
-            data: { title: 'Institution Admin'}
+            component: AppRouting,
+            data: {}
           }, {
             path: 'institution/add',
-            component: AdminInstitutionEditComponent,
-            data: { title: 'Institution Admin'},
+            component: AppRouting,
+            data: {},
           }, {
             path: 'institution/edit/:institutionId',
-            component: AdminInstitutionEditComponent,
-            data: { title: 'Institution Admin'},
+            component: AppRouting,
+            data: {},
           }
         ]
       },

@@ -2,7 +2,9 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doReturn;
 
+import java.util.Arrays;
 import java.util.List;
 import javax.inject.Provider;
 import org.junit.Before;
@@ -10,6 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cdr.CdrVersionService;
+import org.pmiops.workbench.cdr.cache.MySQLStopWords;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
@@ -70,6 +73,7 @@ public class CohortBuilderControllerTest {
   @Autowired private JdbcTemplate jdbcTemplate;
   @Autowired private CohortBuilderMapper cohortBuilderMapper;
   @Mock private Provider<WorkbenchConfig> configProvider;
+  @Mock private Provider<MySQLStopWords> mySQLStopWordsProvider;
 
   @TestConfiguration
   @Import({CohortBuilderMapperImpl.class})
@@ -90,10 +94,14 @@ public class CohortBuilderControllerTest {
             domainInfoDao,
             personDao,
             surveyModuleDao,
-            cohortBuilderMapper);
+            cohortBuilderMapper,
+            mySQLStopWordsProvider);
     controller =
         new CohortBuilderController(
             cdrVersionService, elasticSearchService, configProvider, cohortBuilderService);
+
+    MySQLStopWords mySQLStopWords = new MySQLStopWords(Arrays.asList("about"));
+    doReturn(mySQLStopWords).when(mySQLStopWordsProvider).get();
   }
 
   @Test

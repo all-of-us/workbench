@@ -90,41 +90,6 @@ describe('ProfilePageComponent', () => {
     expect(wrapper.find(TextInput).first().prop('invalid')).toBeTruthy();
   });
 
-  it('should handle error when creating an account', async() => {
-    const errorResponseJson = {
-      message: 'Could not create account: invalid institutional affiliation',
-      statusCode: 412
-    };
-    mockUpdateProfile.mockRejectedValueOnce(new Response(JSON.stringify(errorResponseJson), {status: 412}));
-
-    const wrapper = component();
-
-    getDemographicSurveyButton(wrapper).simulate('click');
-    await waitOneTickAndUpdate(wrapper);
-
-    wrapper.find('[data-test-id="checkbox-race-PREFER_NO_ANSWER"]').at(1).simulate('change', {target: {checked: true}});
-    wrapper.find('[data-test-id="checkbox-genderIdentityList-PREFER_NO_ANSWER"]').at(1).simulate('change', {target: {checked: true}});
-    wrapper.find('[data-test-id="checkbox-sexAtBirth-PREFER_NO_ANSWER"]').at(1).simulate('change', {target: {checked: true}});
-
-    wrapper.find('[data-test-id="radio-lgbtq-pnta"]').first().simulate('click');
-    wrapper.find('[id="radio-disability-pnta"]').first().simulate('click');
-
-    wrapper.find('[data-test-id="dropdown-ethnicity"]').first().simulate('click');
-    wrapper.find('[data-test-id="dropdown-ethnicity"] [aria-label=" Prefer not to answer"]').first().simulate('click');
-
-    wrapper.find('[data-test-id="year-of-birth"]').first().simulate('click');
-    wrapper.find('[aria-label="Prefer not to answer"]').first().simulate('click');
-
-    wrapper.find('[data-test-id="highest-education-level"]').first().simulate('click');
-    wrapper.find('[data-test-id="highest-education-level"] [aria-label="Prefer not to answer"]').first().simulate('click');
-
-    getSubmitButton(wrapper).simulate('click');
-    // We need to await one tick to allow async processing of the error response to resolve.
-    await waitOneTickAndUpdate(wrapper);
-
-    expect(wrapper.find('Modal[role="alertdialog"]').length).toEqual(1);
-  });
-
   it('should display/update address', async() => {
 
     const wrapper = component();

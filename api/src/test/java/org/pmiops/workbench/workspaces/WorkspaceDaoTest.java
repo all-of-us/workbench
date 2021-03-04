@@ -41,7 +41,7 @@ public class WorkspaceDaoTest {
   @TestConfiguration
   @Import({CommonMappers.class, ReportingTestConfig.class})
   @MockBean({Clock.class})
-  public static class conifg {}
+  public static class config {}
 
   @Test
   public void testWorkspaceVersionLocking() {

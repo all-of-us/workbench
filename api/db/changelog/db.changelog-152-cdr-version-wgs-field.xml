@@ -4,9 +4,10 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-  <changeSet author="ericsong" id="changelog-138-cdr-version-microarray-field">
+  <changeSet author="als364" id="changelog-151-cdr-version-wgs-field">
     <addColumn tableName="cdr_version">
-      <column name="microarray_bigquery_dataset" type="varchar(100)"/>
+      <column name="wgs_bigquery_dataset" type="varchar(100)">
+      </column>
     </addColumn>
   </changeSet>
 </databaseChangeLog>

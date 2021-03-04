@@ -33,6 +33,7 @@ public class DbCdrVersion {
   private String cdrDbName;
   private String elasticIndexBaseName;
   private String microarrayBigqueryDataset;
+  private String wgsBigqueryDataset;
   private Boolean hasFitbitData;
   private Boolean hasCopeSurveyData;
 
@@ -185,6 +186,15 @@ public class DbCdrVersion {
 
   public void setMicroarrayBigqueryDataset(String microarrayBigqueryDataset) {
     this.microarrayBigqueryDataset = microarrayBigqueryDataset;
+  }
+
+  @Column(name = "wgs_bigquery_dataset")
+  public String getWgsBigqueryDataset() {
+    return wgsBigqueryDataset;
+  }
+
+  public void setWgsBigqueryDataset(String wgsBigqueryDataset) {
+    this.wgsBigqueryDataset = wgsBigqueryDataset;
   }
 
   @Column(name = "has_fitbit_data")
