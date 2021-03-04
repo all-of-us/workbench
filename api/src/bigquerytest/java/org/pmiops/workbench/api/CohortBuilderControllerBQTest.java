@@ -43,6 +43,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.CloudStorageClientImpl;
+import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
@@ -80,7 +81,7 @@ import org.springframework.http.ResponseEntity;
 @RunWith(BeforeAfterSpringTestRunner.class)
 // Note: normally we shouldn't need to explicitly import our own @TestConfiguration. This might be
 // a bad interaction with BeforeAfterSpringTestRunner.
-@Import({TestJpaConfig.class, CohortBuilderControllerBQTest.Configuration.class})
+@Import({TestJpaConfig.class, CohortBuilderControllerBQTest.Configuration.class, StorageConfig.class})
 public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @TestConfiguration
