@@ -318,10 +318,13 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
                                                                tooLongWarningCharacters={950}
                                                                onChange={v => this.setState({editDescription: v})}/>
                           <div style={{margin: '0.5rem 0'}}>
+                            <TooltipTrigger content={<span>Description cannot exceed 1000 characters</span>}
+                                            disabled={!errors || !errors.editDescription}>
                             <Button type='primary' style={{marginRight: '0.5rem'}}
                                     data-test-id='save-edit-concept-set'
                                     disabled={editSaving || errors}
                                     onClick={() => this.submitEdits()}>Save</Button>
+                            </TooltipTrigger>
                             <Button type='secondary' disabled={editSaving}
                                     data-test-id='cancel-edit-concept-set'
                                     onClick={() => this.setState({
