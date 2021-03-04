@@ -45,7 +45,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudMonitoringService;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
@@ -79,7 +79,7 @@ public class WorkspaceAdminServiceTest {
   private static final String WORKSPACE_NAME = "Gone with the Wind";
 
   @MockBean private CloudMonitoringService mockCloudMonitoringService;
-  @MockBean private CloudStorageService mockCloudStorageService;
+  @MockBean private CloudStorageClient mockCloudStorageClient;
   @MockBean private FireCloudService mockFirecloudService;
   @MockBean private NotebooksService mockNotebooksService;
   @MockBean private WorkspaceDao mockWorkspaceDao;
@@ -136,7 +136,7 @@ public class WorkspaceAdminServiceTest {
         .findFirstByWorkspaceNamespaceOrderByFirecloudNameAsc(WORKSPACE_NAMESPACE);
 
     // required to enable the use of default method blobToFileDetail()
-    when(mockCloudStorageService.blobToFileDetail(any(), anyString())).thenCallRealMethod();
+    when(mockCloudStorageClient.blobToFileDetail(any(), anyString())).thenCallRealMethod();
   }
 
   @Test
@@ -233,7 +233,7 @@ public class WorkspaceAdminServiceTest {
             mockBlob("bucket", "notebooks/test2.ipynb", 2000L),
             mockBlob("bucket", "notebooks/scratch.txt", 123L),
             mockBlob("bucket", "notebooks/hidden/sneaky.ipynb", 1000L * 1000L));
-    when(mockCloudStorageService.getBlobPage("bucket")).thenReturn(blobs);
+    when(mockCloudStorageClient.getBlobPage("bucket")).thenReturn(blobs);
 
     final List<FileDetail> expectedFiles =
         ImmutableList.of(

@@ -92,7 +92,10 @@ public class FireCloudConfig {
             .generateAccessToken(
                     "projects/-/serviceAccounts/" + workbenchConfig.wgsCohortExtraction.serviceAccount,
                     Collections.emptyList(),
-                    TERRA_SCOPES,
+                    ImmutableList.<String>builder()
+                            .addAll(TERRA_SCOPES)
+                            .add("https://www.googleapis.com/auth/devstorage.read_write")
+                            .build(),
                     Duration.newBuilder().setSeconds(60 * 10).build())
             .getAccessToken(), null));
   }

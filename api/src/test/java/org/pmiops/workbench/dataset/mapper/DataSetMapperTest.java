@@ -38,7 +38,7 @@ import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbDatasetValue;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataDictionaryEntry;
@@ -80,7 +80,7 @@ public class DataSetMapperTest {
   @MockBean({
     BigQueryService.class,
     Clock.class,
-    CloudStorageService.class,
+    CloudStorageClient.class,
     ConceptDao.class,
     ConceptSetDao.class,
     ConceptBigQueryService.class,

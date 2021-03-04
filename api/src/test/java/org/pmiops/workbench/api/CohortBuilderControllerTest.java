@@ -28,7 +28,7 @@ import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
@@ -58,7 +58,7 @@ public class CohortBuilderControllerTest {
 
   private CohortBuilderController controller;
   @Mock private BigQueryService bigQueryService;
-  @Mock private CloudStorageService cloudStorageService;
+  @Mock private CloudStorageClient cloudStorageClient;
   @Mock private CohortQueryBuilder cohortQueryBuilder;
   @Mock private CdrVersionService cdrVersionService;
   @Autowired private CBCriteriaDao cbCriteriaDao;
@@ -78,7 +78,7 @@ public class CohortBuilderControllerTest {
   @Before
   public void setUp() {
     ElasticSearchService elasticSearchService =
-        new ElasticSearchService(cbCriteriaDao, cloudStorageService, configProvider);
+        new ElasticSearchService(cbCriteriaDao, cloudStorageClient, configProvider);
 
     CohortBuilderService cohortBuilderService =
         new CohortBuilderServiceImpl(

@@ -11,7 +11,7 @@ import org.json.JSONObject;
 import org.pmiops.workbench.model.FileDetail;
 
 /** Encapsulate Google APIs for interfacing with Google Cloud Storage. */
-public interface CloudStorageService {
+public interface CloudStorageClient {
 
   String readInvitationKey();
 

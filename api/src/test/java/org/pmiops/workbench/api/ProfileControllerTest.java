@@ -55,7 +55,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionMapperImpl;
 import org.pmiops.workbench.institution.InstitutionService;
@@ -139,7 +139,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final double TIME_TOLERANCE_MILLIS = 100.0;
 
   @MockBean private CaptchaVerificationService mockCaptchaVerificationService;
-  @MockBean private CloudStorageService mockCloudStorageService;
+  @MockBean private CloudStorageClient mockCloudStorageClient;
   @MockBean private DirectoryService mockDirectoryService;
   @MockBean private FireCloudService mockFireCloudService;
   @MockBean private MailService mockMailService;
@@ -255,11 +255,11 @@ public class ProfileControllerTest extends BaseControllerTest {
     DUA_VERSION = userService.getCurrentDuccVersion();
 
     when(mockDirectoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
-    when(mockCloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
+    when(mockCloudStorageClient.readInvitationKey()).thenReturn(INVITATION_KEY);
     when(mockDirectoryService.createUser(
             GIVEN_NAME, FAMILY_NAME, USER_PREFIX + "@" + GSUITE_DOMAIN, CONTACT_EMAIL))
         .thenReturn(googleUser);
-    when(mockCloudStorageService.getCaptchaServerKey()).thenReturn("Server_Key");
+    when(mockCloudStorageClient.getCaptchaServerKey()).thenReturn("Server_Key");
 
     try {
       doNothing().when(mockMailService).sendBetaAccessRequestEmail(Mockito.any());
@@ -279,7 +279,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountAndDbUserWithAffiliation();
 
     config.access.requireInvitationKey = true;
-    when(mockCloudStorageService.readInvitationKey()).thenReturn("BLAH");
+    when(mockCloudStorageClient.readInvitationKey()).thenReturn("BLAH");
     profileController.createAccount(createAccountRequest);
   }
 
@@ -297,7 +297,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     // When invitation key verification is turned off, even a bad invitation key should
     // allow a user to be created.
     config.access.requireInvitationKey = false;
-    when(mockCloudStorageService.readInvitationKey()).thenReturn("BLAH");
+    when(mockCloudStorageClient.readInvitationKey()).thenReturn("BLAH");
     profileController.createAccount(createAccountRequest);
   }
 
@@ -456,7 +456,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testCreateAccount_invalidUser() {
-    when(mockCloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
+    when(mockCloudStorageClient.readInvitationKey()).thenReturn(INVITATION_KEY);
     CreateAccountRequest accountRequest = new CreateAccountRequest();
     accountRequest.setInvitationKey(INVITATION_KEY);
     accountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);

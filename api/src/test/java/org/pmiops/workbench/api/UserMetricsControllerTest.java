@@ -32,7 +32,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.RecentResourceRequest;
@@ -54,7 +54,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DataJpaTest
 public class UserMetricsControllerTest {
 
-  @Mock private CloudStorageService mockCloudStorageService;
+  @Mock private CloudStorageClient mockCloudStorageClient;
   @Mock private UserRecentResourceService mockUserRecentResourceService;
   @Mock private Provider<DbUser> mockUserProvider;
   @Mock private FireCloudService mockFireCloudService;
@@ -176,7 +176,7 @@ public class UserMetricsControllerTest {
     when(mockFireCloudService.getWorkspace(dbWorkspace2))
         .thenReturn(Optional.of(workspaceResponse2));
 
-    when(mockCloudStorageService.getExistingBlobIdsIn(anyList()))
+    when(mockCloudStorageClient.getExistingBlobIdsIn(anyList()))
         .then(
             (i) -> {
               List<BlobId> ids = i.getArgument(0);
@@ -193,7 +193,7 @@ public class UserMetricsControllerTest {
             mockUserRecentResourceService,
             mockWorkspaceService,
             mockFireCloudService,
-            mockCloudStorageService,
+                mockCloudStorageClient,
             commonMappers,
             firecloudMapper);
     userMetricsController.setDistinctWorkspaceLimit(5);
@@ -274,7 +274,7 @@ public class UserMetricsControllerTest {
     dbUserRecentResource2.setNotebookName("gs://bkt/notebooks/not-found.ipynb");
     when(mockUserRecentResourceService.findAllResourcesByUser(dbUser.getUserId()))
         .thenReturn(ImmutableList.of(dbUserRecentResource1, dbUserRecentResource2));
-    when(mockCloudStorageService.getExistingBlobIdsIn(anyList()))
+    when(mockCloudStorageClient.getExistingBlobIdsIn(anyList()))
         .thenReturn(ImmutableSet.of(BlobId.of("bkt", "notebooks/notebook.ipynb")));
 
     WorkspaceResourceResponse recentResources =

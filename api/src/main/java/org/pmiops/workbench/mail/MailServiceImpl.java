@@ -23,7 +23,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringSubstitutor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessage;
@@ -36,7 +36,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MailServiceImpl implements MailService {
   private final Provider<MandrillApi> mandrillApiProvider;
-  private final Provider<CloudStorageService> cloudStorageServiceProvider;
+  private final Provider<CloudStorageClient> cloudStorageClientProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   private static final Logger log = Logger.getLogger(MailServiceImpl.class.getName());
@@ -60,10 +60,10 @@ public class MailServiceImpl implements MailService {
   @Autowired
   public MailServiceImpl(
       Provider<MandrillApi> mandrillApiProvider,
-      Provider<CloudStorageService> cloudStorageServiceProvider,
+      Provider<CloudStorageClient> cloudStorageClientProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.mandrillApiProvider = mandrillApiProvider;
-    this.cloudStorageServiceProvider = cloudStorageServiceProvider;
+    this.cloudStorageClientProvider = cloudStorageClientProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
@@ -180,16 +180,16 @@ public class MailServiceImpl implements MailService {
 
   private Map<EmailSubstitutionField, String> welcomeMessageSubstitutionMap(
       final String password, final User user) {
-    final CloudStorageService cloudStorageService = cloudStorageServiceProvider.get();
+    final CloudStorageClient cloudStorageClient = cloudStorageClientProvider.get();
     return new ImmutableMap.Builder<EmailSubstitutionField, String>()
         .put(EmailSubstitutionField.USERNAME, user.getPrimaryEmail())
         .put(EmailSubstitutionField.PASSWORD, password)
         .put(EmailSubstitutionField.URL, workbenchConfigProvider.get().admin.loginUrl)
         .put(EmailSubstitutionField.HEADER_IMG, getAllOfUsLogo())
         .put(EmailSubstitutionField.REGISTRATION_IMG, getRegistrationImage())
-        .put(EmailSubstitutionField.BULLET_1, cloudStorageService.getImageUrl("bullet_1.png"))
-        .put(EmailSubstitutionField.BULLET_2, cloudStorageService.getImageUrl("bullet_2.png"))
-        .put(EmailSubstitutionField.BULLET_3, cloudStorageService.getImageUrl("bullet_3.png"))
+        .put(EmailSubstitutionField.BULLET_1, cloudStorageClient.getImageUrl("bullet_1.png"))
+        .put(EmailSubstitutionField.BULLET_2, cloudStorageClient.getImageUrl("bullet_2.png"))
+        .put(EmailSubstitutionField.BULLET_3, cloudStorageClient.getImageUrl("bullet_3.png"))
         .build();
   }
 
@@ -286,7 +286,7 @@ public class MailServiceImpl implements MailService {
   }
 
   private void sendWithRetries(MandrillMessage msg, String description) throws MessagingException {
-    String apiKey = cloudStorageServiceProvider.get().readMandrillApiKey();
+    String apiKey = cloudStorageClientProvider.get().readMandrillApiKey();
     int retries = workbenchConfigProvider.get().mandrill.sendRetries;
     MandrillApiKeyAndMessage keyAndMessage = new MandrillApiKeyAndMessage();
     keyAndMessage.setKey(apiKey);
@@ -349,11 +349,11 @@ public class MailServiceImpl implements MailService {
   }
 
   private String getAllOfUsLogo() {
-    return cloudStorageServiceProvider.get().getImageUrl("all_of_us_logo.png");
+    return cloudStorageClientProvider.get().getImageUrl("all_of_us_logo.png");
   }
 
   private String getRegistrationImage() {
-    return cloudStorageServiceProvider.get().getImageUrl("email_registration_example.png");
+    return cloudStorageClientProvider.get().getImageUrl("email_registration_example.png");
   }
 
   // TODO choose desired date format

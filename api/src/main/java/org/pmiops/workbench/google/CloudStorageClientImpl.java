@@ -7,7 +7,6 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.CopyWriter;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.Storage.CopyRequest;
-import com.google.cloud.storage.StorageOptions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.io.ByteArrayInputStream;
@@ -21,14 +20,13 @@ import javax.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 
-public class CloudStorageServiceImpl implements CloudStorageService {
+public class CloudStorageClientImpl implements CloudStorageClient {
 
   final Provider<WorkbenchConfig> configProvider;
   final Storage storage;
 
-  public CloudStorageServiceImpl(Storage storage, Provider<WorkbenchConfig> configProvider) {
+  public CloudStorageClientImpl(Storage storage, Provider<WorkbenchConfig> configProvider) {
     this.configProvider = configProvider;
     this.storage = storage;
   }

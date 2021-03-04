@@ -27,12 +27,14 @@ import org.pmiops.workbench.firecloud.model.FirecloudMethodConfiguration;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionResponse;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TerraJob;
 import org.pmiops.workbench.model.TerraJobStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -42,7 +44,7 @@ public class CohortService {
   private final CohortQueryBuilder cohortQueryBuilder;
   private final CohortDao cohortDao;
   private final CohortMapper cohortMapper;
-  private final CloudStorageService cloudStorageService;
+  private final Provider<CloudStorageClient> cloudStorageClientProvider;
   private final FireCloudService fireCloudService;
   private final Provider<SubmissionsApi> submissionApiProvider;
   private final Provider<MethodConfigurationsApi> methodConfigurationsApiProvider;
@@ -54,7 +56,7 @@ public class CohortService {
       CohortQueryBuilder cohortQueryBuilder,
       CohortDao cohortDao,
       CohortMapper cohortMapper,
-      CloudStorageService cloudStorageService,
+      @Qualifier(StorageConfig.WGS_EXTRACTION_STORAGE_CLIENT) Provider<CloudStorageClient> cloudStorageClient,
       FireCloudService fireCloudService,
       Provider<SubmissionsApi> submissionsApiProvider,
       Provider<MethodConfigurationsApi> methodConfigurationsApiProvider,
@@ -64,7 +66,7 @@ public class CohortService {
     this.cohortDao = cohortDao;
     this.cohortMapper = cohortMapper;
     this.submissionApiProvider = submissionsApiProvider;
-    this.cloudStorageService = cloudStorageService;
+    this.cloudStorageClientProvider = cloudStorageClient;
     this.fireCloudService = fireCloudService;
     this.methodConfigurationsApiProvider = methodConfigurationsApiProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -114,7 +116,7 @@ public class CohortService {
     String extractionUuid = UUID.randomUUID().toString();
     String filename = extractionUuid + "_person_ids.txt";
     Blob personIdsFile =
-        cloudStorageService.writeFile(
+        cloudStorageClientProvider.get().writeFile(
             cohortExtractionConfig.operationalTerraWorkspaceBucket,
             filename,
             String.join("\n", getPersonIds(cohortId)).getBytes(StandardCharsets.UTF_8));
@@ -126,7 +128,6 @@ public class CohortService {
                 cohortExtractionConfig.operationalTerraWorkspaceNamespace,
                 cohortExtractionConfig.operationalTerraWorkspaceName,
                 new FirecloudMethodConfiguration()
-                    .deleted(false) // TODO eric: do I really need this? figure this is the default
                     .inputs(
                         new ImmutableMap.Builder<String, String>()
                             .put(

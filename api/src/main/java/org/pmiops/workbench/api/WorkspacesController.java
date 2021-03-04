@@ -49,7 +49,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloneWorkspaceRequest;
@@ -103,7 +103,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final BillingProjectBufferService billingProjectBufferService;
   private final CdrVersionDao cdrVersionDao;
   private final Clock clock;
-  private final CloudStorageService cloudStorageService;
+  private final CloudStorageClient cloudStorageClient;
   private final FireCloudService fireCloudService;
   private final FreeTierBillingService freeTierBillingService;
   private final LogsBasedMetricService logsBasedMetricService;
@@ -122,7 +122,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       BillingProjectBufferService billingProjectBufferService,
       CdrVersionDao cdrVersionDao,
       Clock clock,
-      CloudStorageService cloudStorageService,
+      CloudStorageClient cloudStorageClient,
       FireCloudService fireCloudService,
       FreeTierBillingService freeTierBillingService,
       LogsBasedMetricService logsBasedMetricService,
@@ -138,7 +138,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.billingProjectBufferService = billingProjectBufferService;
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
-    this.cloudStorageService = cloudStorageService;
+    this.cloudStorageClient = cloudStorageClient;
     this.fireCloudService = fireCloudService;
     this.freeTierBillingService = freeTierBillingService;
     this.logsBasedMetricService = logsBasedMetricService;
@@ -744,7 +744,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // throws NotFoundException if the notebook is not in GCS
     // returns null if found but no user-metadata
     Map<String, String> metadata =
-        cloudStorageService.getMetadata(bucketName, "notebooks/" + notebookName);
+        cloudStorageClient.getMetadata(bucketName, "notebooks/" + notebookName);
 
     if (metadata != null) {
       String lockExpirationTime = metadata.get("lockExpiresAt");

@@ -2,7 +2,7 @@ package org.pmiops.workbench.opsgenie;
 
 import com.ifountain.opsgenie.client.OpsGenieClient;
 import com.ifountain.opsgenie.client.swagger.api.AlertApi;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,11 +19,11 @@ public class OpsGenieConfig {
   // App Engine tasks.
   @Bean
   @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-  public AlertApi getAlertApi(CloudStorageService cloudStorageService) {
+  public AlertApi getAlertApi(CloudStorageClient cloudStorageClient) {
     AlertApi client = new OpsGenieClient().alertV2();
     client
         .getApiClient()
-        .setApiKey(cloudStorageService.getCredentialsBucketString(OPSGENIE_API_KEY_FILENAME));
+        .setApiKey(cloudStorageClient.getCredentialsBucketString(OPSGENIE_API_KEY_FILENAME));
     return client;
   }
 }

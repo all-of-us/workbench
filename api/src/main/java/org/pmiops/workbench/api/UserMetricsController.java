@@ -28,7 +28,7 @@ import org.pmiops.workbench.db.model.DbUserRecentResource;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.EmptyResponse;
@@ -54,7 +54,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   private final UserRecentResourceService userRecentResourceService;
   private final WorkspaceService workspaceService;
   private final FireCloudService fireCloudService;
-  private final CloudStorageService cloudStorageService;
+  private final CloudStorageClient cloudStorageClient;
   private final CommonMappers commonMappers;
   private FirecloudMapper firecloudMapper;
   private int distinctWorkspacelimit = 5;
@@ -119,7 +119,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       UserRecentResourceService userRecentResourceService,
       WorkspaceService workspaceService,
       FireCloudService fireCloudService,
-      CloudStorageService cloudStorageService,
+      CloudStorageClient cloudStorageClient,
       CommonMappers commonMappers,
       FirecloudMapper firecloudMapper) {
     this.userProvider = userProvider;
@@ -127,7 +127,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     this.userRecentResourceService = userRecentResourceService;
     this.workspaceService = workspaceService;
     this.fireCloudService = fireCloudService;
-    this.cloudStorageService = cloudStorageService;
+    this.cloudStorageClient = cloudStorageClient;
     this.commonMappers = commonMappers;
     this.firecloudMapper = firecloudMapper;
   }
@@ -227,7 +227,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     // personally like GET endpoints to have side effects, and besides, we're not touching enough
     // of the notebooks to keep the cache up-to-date from here.
     final Set<BlobId> foundBlobIds =
-        cloudStorageService.getExistingBlobIdsIn(
+        cloudStorageClient.getExistingBlobIdsIn(
             workspaceFilteredResources.stream()
                 .map(DbUserRecentResource::getNotebookName)
                 .map(this::uriToBlobId)
