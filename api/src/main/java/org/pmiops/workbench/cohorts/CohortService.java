@@ -115,7 +115,7 @@ public class CohortService {
     String filename = extractionUuid + "_person_ids.txt";
     Blob personIdsFile =
         cloudStorageService.writeFile(
-            fcWorkspace.getBucketName(),
+            cohortExtractionConfig.operationalTerraWorkspaceBucket,
             filename,
             String.join("\n", getPersonIds(cohortId)).getBytes(StandardCharsets.UTF_8));
 
@@ -126,7 +126,7 @@ public class CohortService {
                 cohortExtractionConfig.operationalTerraWorkspaceNamespace,
                 cohortExtractionConfig.operationalTerraWorkspaceName,
                 new FirecloudMethodConfiguration()
-                    .deleted(false)
+                    .deleted(false) // TODO eric: do I really need this? figure this is the default
                     .inputs(
                         new ImmutableMap.Builder<String, String>()
                             .put(
@@ -142,7 +142,7 @@ public class CohortService {
                             .put("WgsCohortExtract.extraction_uuid", "\"" + extractionUuid + "\"")
                             .put(
                                 "WgsCohortExtract.wgs_dataset",
-                                "\"fc-aou-cdr-synth-test.1kg_wgs\"") // TODO swap out with RW-6336
+                                "\"fc-aou-cdr-synth-test.1kg_wgs\"") // TODO eric: merge in master and swap out with RW-6336
                             .put(
                                 "WgsCohortExtract.wgs_extraction_cohorts_dataset",
                                 "\"" + cohortExtractionConfig.extractionCohortsDataset + "\"")

@@ -52,6 +52,7 @@
     "serviceAccountTerraProxyGroup": "",
     "operationalTerraWorkspaceNamespace": "",
     "operationalTerraWorkspaceName": "",
+    "operationalTerraWorkspaceBucket": "",
     "extractionMethodConfigurationNamespace": "",
     "extractionMethodConfigurationName": "",
     "extractionMethodConfigurationVersion": 1,

@@ -5,9 +5,9 @@
     - This will have to go through sysadmins for non test environments
 
 2. Register service account as a Terra user 
-     1. Grab sa-creds.json for the service account. I used gcloud admin UI.
-     2. ```
-        curl -H "$(oauth2l header --json sa-creds.json userinfo.email userinfo.profile cloud-billing)" \
+     - ```
+        curl \
+        -H "Authorization: Bearer $(gcloud auth --impersonate-service-account EXTRACTION_SA print-access-token)" \
         -H "Content-Type: application/json" \
         -X POST -d' ' \
         https://sam.dsde-dev.broadinstitute.org/register/user/v1
@@ -38,7 +38,7 @@
     - extractionCohortsDataset - wgs_extraction_cohorts
     - extractionDestinationDataset - wgs_extracted_cohorts
     - extractionTempTablesDataset - wgs_extraction_temp_tables
-    - `./project.rb publish-cdr --project all-of-us-workbench-test --bq-dataset wgs_extraction_cohorts --exclude-sa-acl --exclude-auth-domain-acl --additional-writer-group PROXY_118217329794842274136@dev.test.firecloud.org --source-cdr-project-override all-of-us-workbench-test`
+    - `./project.rb create-wgs-extraction-dataset  --project all-of-us-workbench-test --bq-dataset wgs_extraction_temp_tables`
 
 7. Publish the WGS dataset and grant read permissions to the cohort extraction service account's proxy group
     - This is the WGS equivalent to publishing a CDR so this is not necessary for every environment.
