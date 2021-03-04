@@ -174,13 +174,26 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
 
       String proxyGroup = apiClientFactory.profileApi().getProxyGroup(workspace.getCreatedBy());
 
-      log.info("Add the following values to WorkbenchConfig.wgsCohortExtraction" +
-              "serviceAccount: " + workbenchConfig.wgsCohortExtraction.serviceAccount + "\n" +
-              "serviceAccountTerraProxyGroup: " + proxyGroup + "\n" +
-              "extractionPetServiceAccount: " + getExtractionPetSa(workspace.getNamespace(), workbenchConfig) + "\n" +
-              "operationalTerraWorkspaceNamespace: " + workspace.getNamespace() + "\n" +
-              "operationalTerraWorkspaceName: " + workspace.getName() + "\n" +
-              "operationalTerraWorkspaceBucket: " + workspace.getBucketName() + "\n");
+      log.info(
+          "Add the following values to WorkbenchConfig.wgsCohortExtraction"
+              + "serviceAccount: "
+              + workbenchConfig.wgsCohortExtraction.serviceAccount
+              + "\n"
+              + "serviceAccountTerraProxyGroup: "
+              + proxyGroup
+              + "\n"
+              + "extractionPetServiceAccount: "
+              + getExtractionPetSa(workspace.getNamespace(), workbenchConfig)
+              + "\n"
+              + "operationalTerraWorkspaceNamespace: "
+              + workspace.getNamespace()
+              + "\n"
+              + "operationalTerraWorkspaceName: "
+              + workspace.getName()
+              + "\n"
+              + "operationalTerraWorkspaceBucket: "
+              + workspace.getBucketName()
+              + "\n");
     };
   }
 
