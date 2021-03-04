@@ -149,7 +149,11 @@ public class CohortService {
                             .put("WgsCohortExtract.extraction_uuid", "\"" + extractionUuid + "\"")
                             .put(
                                 "WgsCohortExtract.wgs_dataset",
-                                "\"" + workspace.getCdrVersion().getWgsBigqueryDataset() + ".1kg_wgs\"")
+                                "\""
+                                    + workspace.getCdrVersion().getBigqueryProject()
+                                    + "."
+                                    + workspace.getCdrVersion().getWgsBigqueryDataset()
+                                    + "\"")
                             .put(
                                 "WgsCohortExtract.wgs_extraction_cohorts_dataset",
                                 "\"" + cohortExtractionConfig.extractionCohortsDataset + "\"")
