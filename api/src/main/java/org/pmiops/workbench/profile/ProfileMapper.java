@@ -57,5 +57,7 @@ public interface ProfileMapper {
       target = "moodleId",
       ignore = true) // handled by UserService.syncComplianceTraining[V1|V2]
   @Mapping(target = "version", ignore = true)
+  @Mapping(target = "rasLinkLoginGovName", ignore = true) // TODO(RW-6364): Remove this once ready
+  @Mapping(target = "rasLinkCompletionTime", ignore = true) // TODO(RW-6364): Remove this once ready
   DbUser profileToDbUser(Profile profile);
 }
