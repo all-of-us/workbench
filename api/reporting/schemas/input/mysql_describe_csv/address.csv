@@ -1,8 +1,0 @@
-id,bigint(20),NO,PRI,,auto_increment
-street_address_1,varchar(95),NO,"",,""
-street_address_2,varchar(95),YES,"",,""
-zip_code,varchar(10),YES,"",,""
-city,varchar(95),NO,"",,""
-state,varchar(95),NO,"",,""
-country,varchar(95),NO,"",,""
-user_id,bigint(20),NO,MUL,,""

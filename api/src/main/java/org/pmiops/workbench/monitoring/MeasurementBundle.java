@@ -143,8 +143,10 @@ public class MeasurementBundle {
         if (!entry.getKey().supportsDiscreteValue(attachmentValue.asString())) {
           throw new IllegalStateException(
               String.format(
-                  "Attachment %s does not support provided value %s",
-                  attachment.getName(), attachmentValue));
+                  "Metric attachment %s does not support provided value %s: value must be in set (%s)",
+                  attachment.getName(),
+                  attachmentValue,
+                  String.join(",", entry.getKey().getAllowedDiscreteValues())));
         }
       }
     }

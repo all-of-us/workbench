@@ -28,7 +28,6 @@ import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ResearchOutcomeEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
@@ -53,7 +52,6 @@ public class WorkspaceMapperTest {
   private static final String WORKSPACE_FIRECLOUD_NAME = "aaaa-bbbb-cccc-dddd";
   private static final String BILLING_ACCOUNT_NAME = "billing-account";
 
-  private static final DataAccessLevel DATA_ACCESS_LEVEL = DataAccessLevel.REGISTERED;
   private static final Timestamp DB_CREATION_TIMESTAMP =
       Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
   private static final int CDR_VERSION_ID = 2;
@@ -101,7 +99,6 @@ public class WorkspaceMapperTest {
 
     final DbUser creatorUser = new DbUser();
     creatorUser.setUsername(CREATOR_EMAIL);
-    creatorUser.setDataAccessLevelEnum(DATA_ACCESS_LEVEL);
     creatorUser.setUserId(CREATOR_USER_ID);
 
     final DbAccessTier accessTier = new DbAccessTier().setShortName(ACCESS_TIER_SHORT_NAME);
@@ -115,7 +112,6 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setVersion(WORKSPACE_VERSION);
     sourceDbWorkspace.setName(WORKSPACE_AOU_NAME);
     sourceDbWorkspace.setFirecloudName(WORKSPACE_FIRECLOUD_NAME);
-    sourceDbWorkspace.setDataAccessLevelEnum(DATA_ACCESS_LEVEL);
     sourceDbWorkspace.setCdrVersion(cdrVersion);
     sourceDbWorkspace.setCreator(creatorUser);
     sourceDbWorkspace.setCreationTime(DB_CREATION_TIMESTAMP);
@@ -169,7 +165,6 @@ public class WorkspaceMapperTest {
     assertThat(ws.getCdrVersionId()).isEqualTo(Long.toString(CDR_VERSION_ID));
     assertThat(ws.getCreator()).isEqualTo(CREATOR_EMAIL);
     assertThat(ws.getGoogleBucketName()).isEqualTo(FIRECLOUD_BUCKET_NAME);
-    assertThat(ws.getDataAccessLevel()).isEqualTo(DATA_ACCESS_LEVEL);
     assertThat(ws.getBillingAccountName()).isEqualTo(BILLING_ACCOUNT_NAME);
     assertThat(ws.getAccessTierShortName()).isEqualTo(ACCESS_TIER_SHORT_NAME);
 

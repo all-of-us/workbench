@@ -95,6 +95,7 @@ public class CdrVersionsControllerTest {
             DataAccessLevel.REGISTERED,
             null,
             null,
+            null,
             null);
     protectedCdrVersion =
         makeCdrVersion(
@@ -104,6 +105,7 @@ public class CdrVersionsControllerTest {
             456L,
             DataAccessLevel.PROTECTED,
             "microarray",
+            "wgs",
             null,
             null);
   }
@@ -136,6 +138,28 @@ public class CdrVersionsControllerTest {
   }
 
   @Test
+  public void testGetCdrVrsions_wgs() {
+    user.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
+    List<CdrVersion> cdrVersions = cdrVersionsController.getCdrVersions().getBody().getItems();
+
+    assertThat(
+            cdrVersions.stream()
+                .filter(v -> v.getName().equals("Test Registered CDR"))
+                .findFirst()
+                .get()
+                .getHasWgsData())
+        .isFalse();
+
+    assertThat(
+            cdrVersions.stream()
+                .filter(v -> v.getName().equals("Test Protected CDR"))
+                .findFirst()
+                .get()
+                .getHasWgsData())
+        .isTrue();
+  }
+
+  @Test
   public void testGetCdrVersionsProtected() {
     user.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     assertResponse(
@@ -149,7 +173,15 @@ public class CdrVersionsControllerTest {
     assertThat(cdrVersions.stream().filter(cdr -> !cdr.getHasFitbitData()).count())
         .isEqualTo(cdrVersions.size());
     makeCdrVersion(
-        3L, true, "Test Registered FITBIT CDR", 123L, DataAccessLevel.REGISTERED, null, true, null);
+        3L,
+        true,
+        "Test Registered FITBIT CDR",
+        123L,
+        DataAccessLevel.REGISTERED,
+        null,
+        null,
+        true,
+        null);
     cdrVersions = cdrVersionsController.getCdrVersions().getBody().getItems();
 
     assertThat(
@@ -168,7 +200,15 @@ public class CdrVersionsControllerTest {
     assertThat(cdrVersions.stream().filter(cdr -> !cdr.getHasCopeSurveyData()).count())
         .isEqualTo(cdrVersions.size());
     makeCdrVersion(
-        3L, true, "Test Registered FITBIT CDR", 123L, DataAccessLevel.REGISTERED, null, true, true);
+        3L,
+        true,
+        "Test Registered FITBIT CDR",
+        123L,
+        DataAccessLevel.REGISTERED,
+        null,
+        null,
+        true,
+        true);
     cdrVersions = cdrVersionsController.getCdrVersions().getBody().getItems();
 
     assertThat(
@@ -201,6 +241,7 @@ public class CdrVersionsControllerTest {
       long creationTime,
       DataAccessLevel dataAccessLevel,
       String microarrayDataset,
+      String wgsDataset,
       Boolean hasFitbit,
       Boolean hasCopeSurveyData) {
     DbCdrVersion cdrVersion = new DbCdrVersion();
@@ -215,6 +256,7 @@ public class CdrVersionsControllerTest {
     cdrVersion.setNumParticipants(123);
     cdrVersion.setReleaseNumber((short) 1);
     cdrVersion.setMicroarrayBigqueryDataset(microarrayDataset);
+    cdrVersion.setWgsBigqueryDataset(wgsDataset);
     cdrVersion.setHasFitbitData(hasFitbit);
     cdrVersion.setHasCopeSurveyData(hasCopeSurveyData);
     cdrVersionDao.save(cdrVersion);

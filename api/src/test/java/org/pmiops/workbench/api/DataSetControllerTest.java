@@ -106,7 +106,6 @@ import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetExportRequest.GenomicsAnalysisToolEnum;
 import org.pmiops.workbench.model.DataSetExportRequest.GenomicsDataTypeEnum;
@@ -322,7 +321,6 @@ public class DataSetControllerTest {
 
     workspace = new Workspace();
     workspace.setName(WORKSPACE_NAME);
-    workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(new ResearchPurpose());
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
     workspace.setBillingAccountName("billing-account");

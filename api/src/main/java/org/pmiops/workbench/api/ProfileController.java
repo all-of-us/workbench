@@ -52,7 +52,6 @@ import org.pmiops.workbench.model.CreateAccountRequest;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.Institution;
-import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
@@ -230,11 +229,6 @@ public class ProfileController implements ProfileApiDelegate {
     if (workbenchConfigProvider.get().captcha.enableCaptcha) {
       verifyCaptcha(request.getCaptchaVerificationToken());
     }
-
-    if (workbenchConfigProvider.get().access.requireInvitationKey) {
-      verifyInvitationKey(request.getInvitationKey());
-    }
-
     profileService.validateAffiliation(request.getProfile());
 
     final Profile profile = request.getProfile();
@@ -381,22 +375,6 @@ public class ProfileController implements ProfileApiDelegate {
   public ResponseEntity<Profile> syncTwoFactorAuthStatus() {
     userService.syncTwoFactorAuthStatus();
     return getProfileResponse(userProvider.get());
-  }
-
-  @Override
-  public ResponseEntity<Void> invitationKeyVerification(
-      InvitationVerificationRequest invitationVerificationRequest) {
-    verifyInvitationKey(invitationVerificationRequest.getInvitationKey());
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-  }
-
-  private void verifyInvitationKey(String invitationKey) {
-    if (invitationKey == null
-        || invitationKey.equals("")
-        || !invitationKey.equals(cloudStorageService.readInvitationKey())) {
-      throw new BadRequestException(
-          "Missing or incorrect invitationKey (this API is not yet publicly launched)");
-    }
   }
 
   private void verifyCaptcha(String captchaToken) {

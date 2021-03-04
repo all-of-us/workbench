@@ -566,6 +566,7 @@ jobs:
               \"circleBuildUrl\": \"${CIRCLE_BUILD_URL}\", \
               \"circleNodeIndex\": ${CIRCLE_NODE_INDEX} \
               }" > ./logs/circleci_parameters.json
+          when: always
       - store_artifacts:
           path: ~/workbench/e2e/logs
           destination: logs

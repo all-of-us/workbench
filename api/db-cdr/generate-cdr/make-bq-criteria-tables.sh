@@ -1450,6 +1450,36 @@ SELECT
     , 0"
 
 ################################################
+# WHOLE GENOME VARIANT DATA
+################################################
+echo "WHOLE GENOME VARIANT DATA"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , name
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+    )
+SELECT
+    (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS id
+    , -1
+    , 'WHOLE_GENOME_VARIANT'
+    , 1
+    , 'WHOLE_GENOME_VARIANT'
+    , 'Whole Genome Variant'
+    , 1
+    , 0
+    , 0
+    , 0"
+
+################################################
 # DEMOGRAPHICS
 ################################################
 echo "DEMOGRAPHICS - Age"

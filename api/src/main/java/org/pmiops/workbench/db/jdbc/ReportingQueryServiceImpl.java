@@ -22,6 +22,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
@@ -268,6 +269,12 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
                 .currentPosition(rs.getString("current_position"))
                 .dataAccessLevel(dataAccessLevelFromStorage(rs.getShort("data_access_level")))
+                // TODO placeholder until we have a proper association of users to tiers
+                .accessTierShortNames(
+                    dataAccessLevelFromStorage(rs.getShort("data_access_level"))
+                            == DataAccessLevel.REGISTERED
+                        ? "registered"
+                        : "none")
                 .dataUseAgreementBypassTime(
                     offsetDateTimeUtc(rs.getTimestamp("data_use_agreement_bypass_time")))
                 .dataUseAgreementCompletionTime(
@@ -334,13 +341,13 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
             "SELECT \n"
                 + "  billing_account_type,\n"
                 + "  billing_status,\n"
-                + "  cdr_version_id,\n"
-                + "  creation_time,\n"
+                + "  w.cdr_version_id AS cdr_version_id,\n"
+                + "  w.creation_time AS creation_time,\n"
                 + "  creator_id,\n"
                 + "  disseminate_research_other,\n"
                 + "  last_accessed_time,\n"
                 + "  last_modified_time,\n"
-                + "  name,\n"
+                + "  w.name AS name,\n"
                 + "  needs_rp_review_prompt,\n"
                 + "  published,\n"
                 + "  rp_additional_notes,\n"
@@ -365,14 +372,18 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  rp_scientific_approach,\n"
                 + "  rp_social_behavioral,\n"
                 + "  rp_time_requested,\n"
-                + "  workspace_id\n"
-                + "FROM workspace\n"
+                + "  workspace_id,\n"
+                + "  a.short_name AS access_tier_short_name\n"
+                + "FROM workspace w\n"
+                + "  JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
+                + "  JOIN access_tier a ON c.access_tier = a.access_tier_id\n"
                 + "ORDER BY workspace_id\n"
                 + "LIMIT %d\n"
                 + "OFFSET %d",
             limit, offset),
         (rs, unused) ->
             new ReportingWorkspace()
+                .accessTierShortName(rs.getString("access_tier_short_name"))
                 .billingAccountType(
                     billingAccountTypeFromStorage(rs.getShort("billing_account_type")))
                 .billingStatus(billingStatusFromStorage(rs.getShort("billing_status")))

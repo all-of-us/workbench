@@ -447,8 +447,7 @@ public class CohortsController implements CohortsApiDelegate {
     DbWorkspace workspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    // TODO (RW-6336): Replace microarray with Wgs field
-    if (workspace.getCdrVersion().getMicroarrayBigqueryDataset() == null) {
+    if (workspace.getCdrVersion().getWgsBigqueryDataset() == null) {
       throw new BadRequestException("Workspace CDR does not have access to WGS data");
     }
 

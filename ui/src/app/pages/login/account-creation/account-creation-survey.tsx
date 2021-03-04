@@ -10,7 +10,6 @@ import * as fp from 'lodash/fp';
 
 
 export interface AccountCreationSurveyProps {
-  invitationKey: string;
   termsOfServiceVersion?: number;
   profile: Profile;
   onComplete: (profile: Profile) => void;
@@ -31,12 +30,11 @@ export class AccountCreationSurvey extends React.Component<AccountCreationSurvey
   }
 
   async createAccount(profile, captchaToken): Promise<Profile> {
-    const {invitationKey, termsOfServiceVersion, onComplete} = this.props;
+    const {termsOfServiceVersion, onComplete} = this.props;
 
     const newProfile = await profileApi().createAccount({
       profile: profile,
       captchaVerificationToken: captchaToken,
-      invitationKey: invitationKey,
       termsOfServiceVersion: termsOfServiceVersion
     });
     onComplete(newProfile);

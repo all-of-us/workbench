@@ -79,7 +79,6 @@ import org.pmiops.workbench.model.GenderIdentity;
 import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.InstitutionUserInstructions;
 import org.pmiops.workbench.model.InstitutionalRole;
-import org.pmiops.workbench.model.InvitationVerificationRequest;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.Profile;
@@ -125,7 +124,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static final String FAMILY_NAME = "Bobberson";
   private static final String GIVEN_NAME = "Bob";
   private static final String GSUITE_DOMAIN = "researchallofus.org";
-  private static final String INVITATION_KEY = "secretpassword";
   private static final String NONCE = Long.toString(NONCE_LONG);
   private static final String ORGANIZATION = "Test";
   private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
@@ -156,7 +154,6 @@ public class ProfileControllerTest extends BaseControllerTest {
   @Autowired private UserTermsOfServiceDao userTermsOfServiceDao;
 
   private CreateAccountRequest createAccountRequest;
-  private InvitationVerificationRequest invitationVerificationRequest;
   private com.google.api.services.directory.model.User googleUser;
   private static DbUser dbUser;
 
@@ -240,11 +237,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     createAccountRequest = new CreateAccountRequest();
     createAccountRequest.setProfile(profile);
-    createAccountRequest.setInvitationKey(INVITATION_KEY);
     createAccountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);
-
-    invitationVerificationRequest = new InvitationVerificationRequest();
-    invitationVerificationRequest.setInvitationKey(INVITATION_KEY);
 
     googleUser = new com.google.api.services.directory.model.User();
     googleUser.setPrimaryEmail(PRIMARY_EMAIL);
@@ -255,7 +248,6 @@ public class ProfileControllerTest extends BaseControllerTest {
     DUA_VERSION = userService.getCurrentDuccVersion();
 
     when(mockDirectoryService.getUser(PRIMARY_EMAIL)).thenReturn(googleUser);
-    when(mockCloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
     when(mockDirectoryService.createUser(
             GIVEN_NAME, FAMILY_NAME, USER_PREFIX + "@" + GSUITE_DOMAIN, CONTACT_EMAIL))
         .thenReturn(googleUser);
@@ -275,36 +267,10 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void testCreateAccount_invitationKeyMismatch() {
-    createAccountAndDbUserWithAffiliation();
-
-    config.access.requireInvitationKey = true;
-    when(mockCloudStorageService.readInvitationKey()).thenReturn("BLAH");
-    profileController.createAccount(createAccountRequest);
-  }
-
-  @Test(expected = BadRequestException.class)
   public void testCreateAccount_invalidCaptchaToken() {
     createAccountAndDbUserWithAffiliation();
     createAccountRequest.setCaptchaVerificationToken(WRONG_CAPTCHA_TOKEN);
     profileController.createAccount(createAccountRequest);
-  }
-
-  @Test
-  public void testCreateAccount_noRequireInvitationKey() {
-    createAccountAndDbUserWithAffiliation();
-
-    // When invitation key verification is turned off, even a bad invitation key should
-    // allow a user to be created.
-    config.access.requireInvitationKey = false;
-    when(mockCloudStorageService.readInvitationKey()).thenReturn("BLAH");
-    profileController.createAccount(createAccountRequest);
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void testInvitationKeyVerification_invitationKeyMismatch() {
-    invitationVerificationRequest.setInvitationKey("wrong key");
-    profileController.invitationKeyVerification(invitationVerificationRequest);
   }
 
   @Test(expected = BadRequestException.class)
@@ -456,9 +422,7 @@ public class ProfileControllerTest extends BaseControllerTest {
 
   @Test
   public void testCreateAccount_invalidUser() {
-    when(mockCloudStorageService.readInvitationKey()).thenReturn(INVITATION_KEY);
     CreateAccountRequest accountRequest = new CreateAccountRequest();
-    accountRequest.setInvitationKey(INVITATION_KEY);
     accountRequest.setCaptchaVerificationToken(CAPTCHA_TOKEN);
     createAccountRequest.getProfile().setUsername("12");
     accountRequest.setProfile(createAccountRequest.getProfile());

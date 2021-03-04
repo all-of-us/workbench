@@ -41,7 +41,6 @@ import org.pmiops.workbench.model.CdrQuery;
 import org.pmiops.workbench.model.CohortAnnotationsRequest;
 import org.pmiops.workbench.model.CohortAnnotationsResponse;
 import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DataTableSpecification;
 import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
@@ -126,7 +125,6 @@ public class CohortMaterializationServiceTest {
     DbWorkspace workspace = new DbWorkspace();
     workspace.setCdrVersion(cdrVersion);
     workspace.setName("name");
-    workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspaceDao.save(workspace);
 
     DbCohort cohort = new DbCohort();

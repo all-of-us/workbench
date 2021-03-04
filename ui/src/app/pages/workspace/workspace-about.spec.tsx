@@ -99,8 +99,8 @@ describe('WorkspaceAbout', () => {
   it('should display workspace metadata', async () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
-    expect(wrapper.find('[data-test-id="dataAccessLevel"]').text())
-      .toContain(fp.capitalize(workspace.dataAccessLevel.toString()));
+    expect(wrapper.find('[data-test-id="accessTierShortName"]').text())
+      .toContain(fp.capitalize(workspace.accessTierShortName));
     expect(wrapper.find('[data-test-id="creationDate"]').text())
       .toContain(new Date(workspace.creationTime).toDateString());
     expect(wrapper.find('[data-test-id="lastUpdated"]').text())

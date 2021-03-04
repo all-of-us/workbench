@@ -13,6 +13,7 @@ import org.pmiops.workbench.model.ReportingUser;
  */
 public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUser> {
   ABOUT_YOU("about_you", ReportingUser::getAboutYou),
+  ACCESS_TIER_SHORT_NAMES("access_tier_short_names", ReportingUser::getAccessTierShortNames),
   AREA_OF_RESEARCH("area_of_research", ReportingUser::getAreaOfResearch),
   COMPLIANCE_TRAINING_BYPASS_TIME(
       "compliance_training_bypass_time",

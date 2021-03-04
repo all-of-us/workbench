@@ -47,7 +47,6 @@ module.exports = {
 
     /* Style */
     '@typescript-eslint/prefer-function-type': 'warn',
-    '@typescript-eslint/class-name-casing': 'warn',
     // 'spaced-comment': 'warn',
     '@typescript-eslint/consistent-type-definitions': ['warn', 'interface'],
     'no-trailing-spaces': 'warn',
@@ -56,9 +55,7 @@ module.exports = {
     // 'simple-import-sort/sort': 'warn',
     // 'quotes': ['warn', 'single'], 
     // '@typescript-eslint/semi': 'warn',
-    '@typescript-eslint/naming-convention': 'warn',
     // 'space-before-function-paren': ['warn', { 'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always' }],
-
 
     /* Functionality */
     'curly': 'warn',
@@ -82,9 +79,9 @@ module.exports = {
     // '@typescript-eslint/no-use-before-define': 'warn',
     // 'no-unused-vars': 'off', // Needed for TS 
     // '@typescript-eslint/no-unused-vars': 'warn', 
-    'react/jsx-uses-vars': 'warn', 
     'react/jsx-curly-spacing': ["warn", {'when': 'never'}],
-    // 'no-var': 'warn',
+    'react/jsx-uses-vars': 'warn',
+    'no-var': 'warn',
     'radix': 'warn', // Add radix on parseInt
     'eqeqeq': ['warn', 'always', {'null': 'ignore'}],
     
