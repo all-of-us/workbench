@@ -98,6 +98,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.genomics.WgsCohortExtractionService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.BillingStatus;
@@ -250,6 +251,7 @@ public class DataSetControllerTest {
     UserRecentResourceService.class,
     UserServiceAuditor.class,
     WorkspaceAuditor.class,
+    WgsCohortExtractionService.class
   })
   static class Configuration {
 
