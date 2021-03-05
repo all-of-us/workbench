@@ -123,8 +123,10 @@ public class CohortService {
         cloudStorageClientProvider
             .get()
             .writeFile(
+                // It is critical that this file is written to a bucket that the user cannot write to
+                // because its contents will feed into a SQL query with the cohort extraction SA's permissions
                 cohortExtractionConfig.operationalTerraWorkspaceBucket,
-                "wgs-cohort-extractions/" + extractionUuid + "/" + filename,
+                "wgs-cohort-extractions/" + extractionUuid + "/person_ids.txt",
                 String.join("\n", getPersonIds(cohortId)).getBytes(StandardCharsets.UTF_8));
 
     FirecloudMethodConfiguration methodConfig =
@@ -138,7 +140,7 @@ public class CohortService {
                         new ImmutableMap.Builder<String, String>()
                             .put(
                                 "WgsCohortExtract.participant_ids",
-                                "\"gs://"
+                                "\"gs://" // Cromwell string inputs require double quotes
                                     + personIdsFile.getBlobId().getBucket()
                                     + "/"
                                     + personIdsFile.getBlobId().getName()

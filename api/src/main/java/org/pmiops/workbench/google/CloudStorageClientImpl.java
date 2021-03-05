@@ -24,11 +24,11 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 public class CloudStorageClientImpl implements CloudStorageClient {
 
   final Provider<WorkbenchConfig> configProvider;
-  final Storage storage;
+  final Provider<Storage> storageProvider;
 
-  public CloudStorageClientImpl(Storage storage, Provider<WorkbenchConfig> configProvider) {
+  public CloudStorageClientImpl(Provider<Storage> storageProvider, Provider<WorkbenchConfig> configProvider) {
     this.configProvider = configProvider;
-    this.storage = storage;
+    this.storageProvider = storageProvider;
   }
 
   @Override
@@ -49,14 +49,14 @@ public class CloudStorageClientImpl implements CloudStorageClient {
 
   @Override
   public List<Blob> getBlobPage(String bucketName) {
-    Iterable<Blob> blobList = storage.get(bucketName).list().getValues();
+    Iterable<Blob> blobList = storageProvider.get().get(bucketName).list().getValues();
     return ImmutableList.copyOf(blobList);
   }
 
   @Override
   public List<Blob> getBlobPageForPrefix(String bucketName, String directory) {
     Iterable<Blob> blobList =
-        storage.get(bucketName).list(Storage.BlobListOption.prefix(directory)).getValues();
+        storageProvider.get().get(bucketName).list(Storage.BlobListOption.prefix(directory)).getValues();
     return ImmutableList.copyOf(blobList);
   }
 
@@ -71,7 +71,7 @@ public class CloudStorageClientImpl implements CloudStorageClient {
   // wrapper for storage.get() which throws NotFoundException instead of NullPointerException
   @Override
   public Blob getBlob(String bucketName, String objectPath) {
-    Blob result = storage.get(bucketName, objectPath);
+    Blob result = storageProvider.get().get(bucketName, objectPath);
     if (result == null) {
       throw new NotFoundException(String.format("Bucket %s, Object %s", bucketName, objectPath));
     }
@@ -82,7 +82,7 @@ public class CloudStorageClientImpl implements CloudStorageClient {
   public void copyBlob(BlobId from, BlobId to) {
     // Clears user-defined metadata, e.g. locking information on notebooks.
     BlobInfo toInfo = BlobInfo.newBuilder(to).build();
-    CopyWriter w = storage.copy(CopyRequest.newBuilder().setSource(from).setTarget(toInfo).build());
+    CopyWriter w = storageProvider.get().copy(CopyRequest.newBuilder().setSource(from).setTarget(toInfo).build());
     while (!w.isDone()) {
       w.copyChunk();
     }
@@ -92,7 +92,7 @@ public class CloudStorageClientImpl implements CloudStorageClient {
   public Blob writeFile(String bucketName, String fileName, byte[] bytes) {
     BlobId blobId = BlobId.of(bucketName, fileName);
     BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("text/plain").build();
-    return storage.create(blobInfo, bytes);
+    return storageProvider.get().create(blobInfo, bytes);
   }
 
   @Override
@@ -137,7 +137,7 @@ public class CloudStorageClientImpl implements CloudStorageClient {
 
   @Override
   public void deleteBlob(BlobId blobId) {
-    storage.delete(blobId);
+    storageProvider.get().delete(blobId);
   }
 
   @Override
@@ -145,7 +145,7 @@ public class CloudStorageClientImpl implements CloudStorageClient {
     if (ids.isEmpty()) {
       return ImmutableSet.of();
     }
-    return storage.get(ids).stream()
+    return storageProvider.get().get(ids).stream()
         .filter(Objects::nonNull)
         // Clear the "generation" of the blob ID for better symmetry to the input.
         .map(b -> BlobId.of(b.getBucket(), b.getName()))
