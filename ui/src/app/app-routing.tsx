@@ -26,6 +26,7 @@ import {AdminWorkspaceSearch} from './pages/admin/admin-workspace-search';
 import {InteractiveNotebook} from './pages/analysis/interactive-notebook';
 import {NotebookList} from './pages/analysis/notebook-list';
 import {NotebookRedirect} from './pages/analysis/notebook-redirect';
+import {CohortActions} from './pages/data/cohort/cohort-actions';
 import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
 import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
@@ -46,6 +47,7 @@ const registrationGuard: Guard = {
 
 const AdminBannerPage = withRouteData(AdminBanner);
 const AdminNotebookViewPage = withRouteData(AdminNotebookView);
+const CohortActionsPage = withRouteData(CohortActions);
 const AdminReviewWorkspacePage = withRouteData(AdminReviewWorkspace);
 const CookiePolicyPage = withRouteData(CookiePolicy);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
@@ -238,6 +240,14 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             helpContentKey: NOTEBOOK_HELP_CONTENT,
             notebookHelpSidebarStyles: true,
             minimizeChrome: true
+          }}/>}
+        />
+        <AppRoute
+          path='/workspaces/:ns/:wsid/data/cohorts/:cid/actions'
+          component={() => <CohortActionsPage routeData={{
+            title: 'Cohort Actions',
+            breadcrumb: BreadcrumbType.Cohort,
+            helpContentKey: 'cohortBuilder'
           }}/>}
         />
       </ProtectedRoutes>
