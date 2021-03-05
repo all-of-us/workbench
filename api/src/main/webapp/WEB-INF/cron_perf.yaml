@@ -1,0 +1,96 @@
+cron:
+- description: 'Periodic notebook runtime checks'
+  url: /v1/cron/checkRuntimes
+  schedule: every 3 hours
+  timezone: UTC
+  target: api
+- description: |
+    Daily sync of compliance training status (via Moodle API). This is just a backup to the primary
+    flow. It should catch expired compliance training, fixup compliance status independent of user
+    navigation, and update on removal of Moodle course completion for some reason.
+  url: /v1/cron/bulkSyncComplianceTrainingStatus
+  schedule: every 24 hours
+  timezone: UTC
+  target: api
+- description: >
+    Daily sync of eRA Commons linkage status (via FireCloud API). Records changes in the log,
+    but currently does not drive any downstream processes.
+  url: /v1/cron/bulkSyncEraCommonsStatus
+  schedule: every 24 hours
+  timezone: UTC
+  target: api
+- description: >
+    Update our database cache of users' two-factor authentication settings on their GSuite accounts
+    via Google Directory Service.
+  url: /v1/cron/bulkSyncTwoFactorAuthStatus
+  schedule: every 24 hours
+  timezone: UTC
+  target: api
+# This cron job is disabled in perf env. See RW-6430 for details.
+#- description: 'Daily audit of gcp resources that users have access to'
+#  url: /v1/cron/bulkAuditProjectAccess
+#  schedule: every 1 hours
+#  timezone: UTC
+#  target: api
+- description: 'If the AoU Billing Project buffer is not full, refill with one or more projects.'
+  url: /v1/cron/bufferBillingProjects
+  schedule: every 1 minutes
+  timezone: UTC
+  target: api
+- description: 'Fetch a BillingProjectBufferEntry that is in the CREATING state and check its status on Firecloud'
+  url: /v1/cron/syncBillingProjectStatus
+  schedule: every 1 minutes
+  timezone: UTC
+  target: api
+- description: 'Find BillingProjectBufferEntries that have failed during the creation or assignment step and set their statuses to ERROR'
+  url: /v1/cron/cleanBillingBuffer
+  schedule: every 1 hours
+  timezone: UTC
+  target: api
+# This cron job is disabled in perf env. See RW-6430 for details.
+#- description: 'Find and alert users that have exceeded their free tier billing usage'
+#  url: /v1/cron/checkFreeTierBillingUsage
+#  schedule: every 30 minutes
+#  timezone: UTC
+#  target: api
+- description: >
+    Find billing projects associated with deleted workspaces and transfer ownership to
+    designated "Garbage Collection" Service Accounts. This legacy process works around the lack of
+    API support for deleting these billing projects directly.
+
+    The Terra delete Account API is now available, and this cron job is deprecated. To be removed
+    as part of RW-3627.
+  url: /v1/cron/billingProjectGarbageCollection
+  schedule: every 1 hours
+  timezone: UTC
+  target: api
+- description: >
+    Sample all gauge metrics for OpenCensus Monitoring and record them. The one-minute interval is
+    the highest granularity for Stackdriver Monitoring and the lowest interval for an AppEngine
+    cron job.
+  url: /v1/cron/monitoring/updateGaugeMetrics
+  schedule: every 1 minutes
+  timezone: UTC
+  target: api
+- description: >
+    Export user and workspace data to RDR.
+    RDR export is hard-coded to 9pm CT, to align with VUMC expectations that the daily export is run at a time
+    that is (1) after the close of normal business working hours, and (2) early enough in the evening that the
+    entire export (and downstream data flows) can complete before start of the next business day.
+  url: /v1/cron/exportToRdr
+  schedule: every day 22:00
+  timezone: America/Chicago
+  target: api
+- description: >
+    For each workspace update the attribute need_rp_prompt if it has been created 15 days/an Year earlier
+  url: /v1/cron/updateResearchPurposeReviewPrompt
+  schedule: every day 21:00
+  timezone: America/Chicago
+  target: api
+- description: >
+    Compile a snapshot of workbench data for reporting and upload it to  BigQuery.
+  url: /v1/cron/uploadReportingSnapshot
+  schedule: every day 19:00
+  timezone: America/Chicago
+  target: api
+
