@@ -314,6 +314,7 @@ public class WorkbenchConfig {
     public Integer maxRowsPerInsert;
   }
 
+  /** RAS(Researcher Auth Service) configurations. */
   public static class RasConfig {
     // RAS hostname
     public String host;
