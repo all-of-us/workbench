@@ -29,6 +29,7 @@ public class WorkbenchConfig {
   public RdrExportConfig rdrExport;
   public CaptchaConfig captcha;
   public ReportingConfig reporting;
+  public RasConfig ras;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -53,6 +54,7 @@ public class WorkbenchConfig {
     config.rdrExport = new RdrExportConfig();
     config.captcha = new CaptchaConfig();
     config.reporting = new ReportingConfig();
+    config.ras = new RasConfig();
     return config;
   }
 
