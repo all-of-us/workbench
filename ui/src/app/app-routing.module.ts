@@ -13,8 +13,6 @@ import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
 import {AdminUsersComponent} from './pages/admin/admin-users';
-import {AdminWorkspaceComponent} from './pages/admin/admin-workspace';
-import {AdminWorkspaceSearchComponent} from './pages/admin/admin-workspace-search';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
 import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
@@ -380,22 +378,25 @@ const routes: Routes = [
           },
           {
             path: 'workspaces',
-            component: AdminWorkspaceSearchComponent,
-            data: { title: 'Workspace Admin'},
+            component: AppRouting,
+            data: {},
           },
           {
             path: 'workspaces/:workspaceNamespace',
-            component: AdminWorkspaceComponent,
-            data: { title: 'Workspace Admin'}
-          }, {
+            component: AppRouting,
+            data: {}
+          },
+          {
             path: 'institution',
             component: AppRouting,
             data: {}
-          }, {
+          },
+          {
             path: 'institution/add',
             component: AppRouting,
             data: {},
-          }, {
+          },
+          {
             path: 'institution/edit/:institutionId',
             component: AppRouting,
             data: {},

@@ -51,12 +51,3 @@ class AdminWorkspaceSearchImpl extends React.Component<UrlParamsProps, State> {
 
 export const AdminWorkspaceSearch = withUrlParams()(AdminWorkspaceSearchImpl);
 
-@Component({
-  template: '<div #root></div>'
-})
-export class AdminWorkspaceSearchComponent extends ReactWrapperBase {
-  constructor() {
-    super(AdminWorkspaceSearch, []);
-  }
-}
-

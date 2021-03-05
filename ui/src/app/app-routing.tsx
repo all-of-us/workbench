@@ -25,6 +25,8 @@ import {SignIn} from './pages/login/sign-in';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
+import {AdminWorkspace} from "./pages/admin/admin-workspace";
+import {AdminWorkspaceSearch} from "./pages/admin/admin-workspace-search";
 
 
 const signInGuard: Guard = {
@@ -51,7 +53,9 @@ const SignInAgainPage = withRouteData(SignInAgain);
 const SignInPage = withRouteData(SignIn);
 const UserAuditPage = withRouteData(UserAudit);
 const UserDisabledPage = withRouteData(UserDisabled);
+const WorkspaceAdminPage = withRouteData(AdminWorkspace);
 const WorkspaceAuditPage = withRouteData(WorkspaceAudit);
+const WorkspaceSearchAdminPage = withRouteData(AdminWorkspaceSearch);
 const WorkspaceLibraryPage = withRouteData(WorkspaceLibrary);
 
 interface RoutingProps {
@@ -107,6 +111,14 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
       <AppRoute
           path='/admin/user-audit/:username'
           component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}
+      />
+      <AppRoute
+          path='/admin/workspaces'
+          component={() => <WorkspaceSearchAdminPage routeData={{title: 'Workspace Admin'}}/>}
+      />
+      <AppRoute
+          path='/admin/workspaces/:workspaceNamespace'
+          component={() => <WorkspaceAdminPage routeData={{title: 'Workspace Admin'}}/>}
       />
       <AppRoute
           path='/admin/workspace-audit'

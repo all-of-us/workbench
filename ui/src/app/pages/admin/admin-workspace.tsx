@@ -490,12 +490,3 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
 }
 
 export const AdminWorkspace = withUrlParams()(AdminWorkspaceImpl);
-
-@Component({
-  template: '<div #root></div>'
-})
-export class AdminWorkspaceComponent extends ReactWrapperBase {
-  constructor() {
-    super(AdminWorkspace, []);
-  }
-}
