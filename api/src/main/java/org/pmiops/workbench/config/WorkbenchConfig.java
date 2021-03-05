@@ -313,4 +313,11 @@ public class WorkbenchConfig {
     // on the smallest App Engine machine.
     public Integer maxRowsPerInsert;
   }
+
+  public static class RasConfig {
+    // RAS hostname
+    public String host;
+    // RAS client id to finish the OAuth flow.
+    public String clientId;
+  }
 }
