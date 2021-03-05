@@ -132,5 +132,9 @@
   "reporting": {
     "dataset": "reporting_stable",
     "maxRowsPerInsert": 800
+  },
+  "ras": {
+    "host": "not implemented",
+    "clientId": "not implemented"
   }
 }
