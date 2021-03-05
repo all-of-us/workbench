@@ -631,6 +631,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .ancestorData(false);
   }
 
+  private static SearchParameter wholeGenomeVariant() {
+    return new SearchParameter()
+        .domain(Domain.WHOLE_GENOME_VARIANT.toString())
+        .group(false)
+        .standard(false)
+        .ancestorData(false);
+  }
+
   private static SearchParameter survey() {
     return new SearchParameter()
         .domain(Domain.SURVEY.toString())
@@ -1503,10 +1511,21 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countParticipants() {
+  public void countParticipantsFitbit() {
     SearchRequest searchRequest =
         createSearchRequests(
             Domain.FITBIT.toString(), ImmutableList.of(fitbit()), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countParticipantsWholeGenomeVariant() {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            Domain.WHOLE_GENOME_VARIANT.toString(),
+            ImmutableList.of(wholeGenomeVariant()),
+            new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }

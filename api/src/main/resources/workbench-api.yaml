@@ -3573,6 +3573,7 @@ definitions:
     - FITBIT_ACTIVITY
     - FITBIT_INTRADAY_STEPS
     - PHYSICAL_MEASUREMENT_CSS
+    - WHOLE_GENOME_VARIANT
   Surveys:
     type: string
     description: a survey for concepts
