@@ -1,3 +1,4 @@
+import { logger } from 'libs/logger';
 import * as fp from 'lodash/fp';
 import {Request} from 'puppeteer';
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
@@ -117,8 +118,8 @@ beforeEach(async () => {
     const response = request.response();
     const failureText = request.failure() !== null ? stringifyData(request.failure().errorText) : '';
     const responseText = stringifyData(await getResponseText(request));
-    console.error('Request failed: '
-       + `${response.status()} ${request.method()} ${request.url()}\n ${responseText}\n ${failureText}`);
+    logger.error('Request failed: '
+       + `${response.status()} ${request.method()} ${request.url()}\n${responseText}\n${failureText}`);
   }
 
   const transformResponseBody = async (request: Request): Promise<string> => {
@@ -142,7 +143,8 @@ beforeEach(async () => {
   page.on('request', (request) => {
     if (isWorkbenchRequest(request)) {
       const requestBody = getRequestData(request);
-      console.debug(`Request issued: ${request.method()} ${request.url()} ${requestBody.length === 0 ? '' : requestBody}`);
+      const body = requestBody.length === 0 ? '' : `\n${requestBody}`;
+      logger.debug(`Request issued: ${request.method()} ${request.url()}` + body);
     }
     try {
       request.continue();
@@ -167,16 +169,16 @@ beforeEach(async () => {
           await logError(request);
         } else {
           if (shouldSkipApiResponseBody(request)) {
-            console.debug(`Request finished: ${status} ${method} ${url}`);
+            logger.info(`Request finished: ${status} ${method} ${url}`);
           } else {
-            console.debug('Request finished: ' +
-               `${status} ${method} ${url}\n ${await transformResponseBody(request)}`);
+            logger.info('Request finished: ' +
+               `${status} ${method} ${url}\n${await transformResponseBody(request)}`);
           }
         }
       }
     } catch (err) {
       // Try find out what the request was
-      console.error(`${err}\n ${status} ${method} ${url}`);
+      logger.error(`${err}\n${status} ${method} ${url}`);
     }
     try {
       await request.continue();
@@ -192,27 +194,36 @@ beforeEach(async () => {
     const title = await getTitle();
     try {
       const args = await Promise.all(message.args().map(a => describeJsHandle(a)));
-      console[message.type() === 'warning' ? 'warn' : message.type()](`${title}\n`, ...args);
+      switch (message.type()) {
+        case "warning":
+          logger.warn(`${title}\n`, ...args);
+          break;
+        case "error":
+          logger.error(`${title}\n`, ...args);
+          break;
+        default:
+          logger.info(`${title}\n`, ...args);
+      }
     } catch (err) {
-      console.error(`${title}\n Exception occurred when getting console message.\n ${err}\n ${message.text()}`);
+      logger.error(`${title}\nException occurred when getting Console message.\n${err}\n${message.text()}`);
     }
   });
 
   page.on('error', async (error) => {
     const title = await getTitle();
     try {
-      console.error(`${title}\n Error message: ${error.message} \n Stack: ${error.stack}`);
+      logger.error(`${title}\nError message: ${error.message}\nStack: ${error.stack}`);
     } catch (err) {
-      console.error(`${title}\n Exception occurred when getting error. \n ${err}`);
+      logger.error(`${title}\nException occurred when getting error.\n${err}`);
     }
   });
 
   page.on('pageerror', async (error) => {
     const title = await getTitle();
     try {
-      console.error(`${title}\n Page error message: ${error.message} \n Stack: ${error.stack}`);
+      logger.error(`${title}\nPage error message: ${error.message}\nStack: ${error.stack}`);
     } catch (err) {
-      console.error(`${title}\n Page exception occurred when getting pageerror. \n ${err}`);
+      logger.error(`${title}\nPage exception occurred when getting pageerror.\n${err}`);
     }
   })
 
