@@ -7,5 +7,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface AccessTierService {
+  public final String REGISTERED_TIER_SHORT_NAME = "registered";
+
   List<DbAccessTier> getAccessTiersForUser(DbUser user);
 }

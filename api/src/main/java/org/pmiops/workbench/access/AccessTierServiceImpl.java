@@ -17,8 +17,6 @@ public class AccessTierServiceImpl implements AccessTierService {
 
   private final AccessTierDao accessTierDao;
 
-  private final String REGISTERED_TIER_SHORT_NAME = "registered";
-
   @Autowired
   public AccessTierServiceImpl(
       Provider<WorkbenchConfig> configProvider, AccessTierDao accessTierDao) {
