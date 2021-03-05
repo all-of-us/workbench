@@ -17,6 +17,8 @@ import {NOTEBOOK_HELP_CONTENT} from './components/help-sidebar';
 import {AdminInstitution} from './pages/admin/admin-institution';
 import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
 import {AdminNotebookView} from './pages/admin/admin-notebook-view';
+import {AdminWorkspace} from './pages/admin/admin-workspace';
+import {AdminWorkspaceSearch} from './pages/admin/admin-workspace-search';
 import {InteractiveNotebook} from './pages/analysis/interactive-notebook';
 import {NotebookList} from './pages/analysis/notebook-list';
 import {NotebookRedirect} from './pages/analysis/notebook-redirect';
@@ -25,8 +27,6 @@ import {SignIn} from './pages/login/sign-in';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
-import {AdminWorkspace} from "./pages/admin/admin-workspace";
-import {AdminWorkspaceSearch} from "./pages/admin/admin-workspace-search";
 
 
 const signInGuard: Guard = {

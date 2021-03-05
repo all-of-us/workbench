@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import * as HighCharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import * as fp from 'lodash/fp';
@@ -13,7 +12,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {runtimeApi, workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, UrlParamsProps, withUrlParams} from 'app/utils';
+import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
 import {
   getSelectedPopulations,
