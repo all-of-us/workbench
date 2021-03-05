@@ -31,7 +31,6 @@ public class WgsCohortExtractionService {
 
   private final CohortService cohortService;
   private final Provider<CloudStorageClient> cloudStorageClientProvider;
-  private final FireCloudService fireCloudService;
   private final Provider<SubmissionsApi> submissionApiProvider;
   private final Provider<MethodConfigurationsApi> methodConfigurationsApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -40,15 +39,13 @@ public class WgsCohortExtractionService {
   public WgsCohortExtractionService(
       CohortService cohortService,
       @Qualifier(StorageConfig.WGS_EXTRACTION_STORAGE_CLIENT)
-          Provider<CloudStorageClient> cloudStorageClient,
-      FireCloudService fireCloudService,
+          Provider<CloudStorageClient> cloudStorageClientProvider,
       Provider<SubmissionsApi> submissionsApiProvider,
       Provider<MethodConfigurationsApi> methodConfigurationsApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.cohortService = cohortService;
     this.submissionApiProvider = submissionsApiProvider;
-    this.cloudStorageClientProvider = cloudStorageClient;
-    this.fireCloudService = fireCloudService;
+    this.cloudStorageClientProvider = cloudStorageClientProvider;
     this.methodConfigurationsApiProvider = methodConfigurationsApiProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
@@ -80,17 +77,14 @@ public class WgsCohortExtractionService {
     WorkbenchConfig.WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;
 
-    FirecloudWorkspace fcWorkspace = fireCloudService.getWorkspace(workspace).get().getWorkspace();
     String extractionUuid = UUID.randomUUID().toString();
-    String filename = "person_ids.txt";
     Blob personIdsFile =
         cloudStorageClientProvider
             .get()
             .writeFile(
                 // It is critical that this file is written to a bucket that the user cannot write
-                // to
-                // because its contents will feed into a SQL query with the cohort extraction SA's
-                // permissions
+                // to because its contents will feed into a SQL query with the cohort
+                // extraction SA's permissions
                 cohortExtractionConfig.operationalTerraWorkspaceBucket,
                 "wgs-cohort-extractions/" + extractionUuid + "/person_ids.txt",
                 String.join("\n", cohortService.getPersonIds(cohortId))
@@ -108,13 +102,13 @@ public class WgsCohortExtractionService {
                             .put(
                                 "WgsCohortExtract.participant_ids",
                                 "\"gs://" // Cromwell string inputs require double quotes
-                                    + personIdsFile.getBlobId().getBucket()
+                                    + personIdsFile.getBucket()
                                     + "/"
-                                    + personIdsFile.getBlobId().getName()
+                                    + personIdsFile.getName()
                                     + "\"")
                             .put(
                                 "WgsCohortExtract.query_project",
-                                "\"" + fcWorkspace.getNamespace() + "\"")
+                                "\"" + workspace.getWorkspaceNamespace() + "\"")
                             .put("WgsCohortExtract.extraction_uuid", "\"" + extractionUuid + "\"")
                             .put(
                                 "WgsCohortExtract.wgs_dataset",

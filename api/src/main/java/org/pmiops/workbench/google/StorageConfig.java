@@ -34,15 +34,15 @@ public class StorageConfig {
 
   @Bean
   @Primary
-  CloudStorageClient cloudStorageClient(Storage storage, Provider<WorkbenchConfig> configProvider) {
-    return new CloudStorageClientImpl(storage, configProvider);
+  CloudStorageClient cloudStorageClient(Provider<Storage> storageProvider, Provider<WorkbenchConfig> configProvider) {
+    return new CloudStorageClientImpl(storageProvider, configProvider);
   }
 
   @Bean(name = WGS_EXTRACTION_STORAGE_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   CloudStorageClient wgsExtractioncloudStorageClient(
-      @Qualifier(WGS_EXTRACTION_STORAGE) Storage storage,
+      @Qualifier(WGS_EXTRACTION_STORAGE) Provider<Storage> storageProvider,
       Provider<WorkbenchConfig> configProvider) {
-    return new CloudStorageClientImpl(storage, configProvider);
+    return new CloudStorageClientImpl(storageProvider, configProvider);
   }
 }
