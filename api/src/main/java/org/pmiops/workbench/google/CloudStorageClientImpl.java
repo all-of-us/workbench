@@ -26,7 +26,8 @@ public class CloudStorageClientImpl implements CloudStorageClient {
   final Provider<WorkbenchConfig> configProvider;
   final Provider<Storage> storageProvider;
 
-  public CloudStorageClientImpl(Provider<Storage> storageProvider, Provider<WorkbenchConfig> configProvider) {
+  public CloudStorageClientImpl(
+      Provider<Storage> storageProvider, Provider<WorkbenchConfig> configProvider) {
     this.configProvider = configProvider;
     this.storageProvider = storageProvider;
   }
@@ -56,7 +57,11 @@ public class CloudStorageClientImpl implements CloudStorageClient {
   @Override
   public List<Blob> getBlobPageForPrefix(String bucketName, String directory) {
     Iterable<Blob> blobList =
-        storageProvider.get().get(bucketName).list(Storage.BlobListOption.prefix(directory)).getValues();
+        storageProvider
+            .get()
+            .get(bucketName)
+            .list(Storage.BlobListOption.prefix(directory))
+            .getValues();
     return ImmutableList.copyOf(blobList);
   }
 
@@ -82,7 +87,10 @@ public class CloudStorageClientImpl implements CloudStorageClient {
   public void copyBlob(BlobId from, BlobId to) {
     // Clears user-defined metadata, e.g. locking information on notebooks.
     BlobInfo toInfo = BlobInfo.newBuilder(to).build();
-    CopyWriter w = storageProvider.get().copy(CopyRequest.newBuilder().setSource(from).setTarget(toInfo).build());
+    CopyWriter w =
+        storageProvider
+            .get()
+            .copy(CopyRequest.newBuilder().setSource(from).setTarget(toInfo).build());
     while (!w.isDone()) {
       w.copyChunk();
     }

@@ -17,7 +17,6 @@ import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cohorts.CohortFactory;
 import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
-import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -35,6 +34,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.genomics.WgsCohortExtractionService;
 import org.pmiops.workbench.model.CdrQuery;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortAnnotationsRequest;
@@ -68,7 +68,7 @@ public class CohortsController implements CohortsApiDelegate {
   private final CohortFactory cohortFactory;
   private final CohortMapper cohortMapper;
   private final CohortReviewDao cohortReviewDao;
-  private final CohortService cohortService;
+  private final WgsCohortExtractionService wgsCohortExtractionService;
   private final ConceptSetDao conceptSetDao;
   private final CohortMaterializationService cohortMaterializationService;
   private Provider<DbUser> userProvider;
@@ -84,7 +84,7 @@ public class CohortsController implements CohortsApiDelegate {
       CohortFactory cohortFactory,
       CohortMapper cohortMapper,
       CohortReviewDao cohortReviewDao,
-      CohortService cohortService,
+      WgsCohortExtractionService wgsCohortExtractionService,
       ConceptSetDao conceptSetDao,
       CohortMaterializationService cohortMaterializationService,
       Provider<DbUser> userProvider,
@@ -97,7 +97,7 @@ public class CohortsController implements CohortsApiDelegate {
     this.cohortFactory = cohortFactory;
     this.cohortMapper = cohortMapper;
     this.cohortReviewDao = cohortReviewDao;
-    this.cohortService = cohortService;
+    this.wgsCohortExtractionService = wgsCohortExtractionService;
     this.conceptSetDao = conceptSetDao;
     this.cohortMaterializationService = cohortMaterializationService;
     this.userProvider = userProvider;
@@ -453,7 +453,7 @@ public class CohortsController implements CohortsApiDelegate {
 
     try {
       return ResponseEntity.ok(
-          cohortService.submitGenomicsCohortExtractionJob(workspace, cohortId));
+          wgsCohortExtractionService.submitGenomicsCohortExtractionJob(workspace, cohortId));
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       // Given that there are no input arguments ATM, any API exceptions are due to programming or
       // Firecloud errors
