@@ -34,7 +34,8 @@ public class StorageConfig {
 
   @Bean
   @Primary
-  CloudStorageClient cloudStorageClient(Provider<Storage> storageProvider, Provider<WorkbenchConfig> configProvider) {
+  CloudStorageClient cloudStorageClient(
+      Provider<Storage> storageProvider, Provider<WorkbenchConfig> configProvider) {
     return new CloudStorageClientImpl(storageProvider, configProvider);
   }
 
