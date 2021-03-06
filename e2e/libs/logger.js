@@ -1,37 +1,38 @@
 const winston = require('winston');
+const { createLogger, format } = winston;
 
-// Only log message (no timestamp and log level) to Console.
-const simpleLogger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format( (info) => {
-      info.level = info.level.toUpperCase();
-      return info;
-    })(),
-    winston.format.printf( (info) => {return `${info.message}`; }),
+const options = {
+  console: {
+    handleExceptions: true,
+    prettyPrint : true,
+    json: false,
+  }
+};
+
+// Used by jest-custom-reporter to read Jest console messages and save to file.
+const fileLogger = createLogger({
+  level: process.env.LOG_LEVEL || "info",
+  format: format.combine(
+    format.printf( (info) => {return `${info.message}`; })
+  ),
+  exitOnError: false
+});
+
+// Log timestamp, log level and message to Console.
+const logger = createLogger({
+  level: process.env.LOG_LEVEL || "info",
+  format: format.combine(
+    format.prettyPrint(),
+    format.splat(),
+    format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    format.printf( (info) => {
+      return `${info.level.toUpperCase()}: [${info.timestamp}] - ${info.message}`;
+    }),
   ),
   transports: [
-    new winston.transports.Console({handleExceptions: true})
+    new winston.transports.Console(options.console),
   ],
   exitOnError: false
 });
 
-// Default: Log timestamp, log level and message to Console.
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format.splat(),
-    winston.format( (info) => {
-      info.level = info.level.toUpperCase();
-      return info;
-    })(),
-    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
-    winston.format.printf( (info) => {return `[${info.timestamp}] ${info.level} -- ${info.message}`; }),
-  ),
-  transports: [
-    new winston.transports.Console({handleExceptions: true})
-  ],
-  exitOnError: false
-});
-
-module.exports = { logger, simpleLogger}
+module.exports = { logger, simpleLogger: fileLogger}

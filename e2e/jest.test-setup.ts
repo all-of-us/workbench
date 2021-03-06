@@ -1,6 +1,8 @@
+// @ts-ignore
+import util from 'util';
 import { logger } from 'libs/logger';
 import * as fp from 'lodash/fp';
-import {Request} from 'puppeteer';
+import { Request } from 'puppeteer';
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
 
 /**
@@ -18,14 +20,17 @@ beforeEach(async () => {
   page.setDefaultNavigationTimeout(60000); // Puppeteer default timeout is 30 seconds.
   await page.setRequestInterception(true);
 
-  const getTitle = async () => {
+  const getPageTitle = async () => {
     return await page.$eval('title', title => {
       return title.textContent;
-    }).catch(() =>  {return 'getTitle() func failed'});
+    }).catch(() =>  {return 'getPageTitle() func failed'});
   }
 
+  // @ts-ignore
   const describeJsHandle = async (jsHandle)  => {
     return jsHandle.executionContext().evaluate(obj => {
+      if (obj instanceof Error)
+        return obj.message;
       return obj.toString();
     }, jsHandle);
   }
@@ -83,6 +88,7 @@ beforeEach(async () => {
       '/cdrVersions',
       '/config',
       '/user-recent-workspaces',
+      '/user-recent-resources',
       '/profile'
     ];
     return filters.some((partialUrl) => request && request.url().includes(partialUrl));
@@ -118,8 +124,8 @@ beforeEach(async () => {
     const response = request.response();
     const failureText = request.failure() !== null ? stringifyData(request.failure().errorText) : '';
     const responseText = stringifyData(await getResponseText(request));
-    logger.error('Request failed: '
-       + `${response.status()} ${request.method()} ${request.url()}\n${responseText}\n${failureText}`);
+    logger.log('error', 'Request failed: %s %s %s\n%s %s',
+       response.status(), request.method(), request.url(), responseText, failureText);
   }
 
   const transformResponseBody = async (request: Request): Promise<string> => {
@@ -129,7 +135,7 @@ beforeEach(async () => {
         // truncate long response. get first two workspace details.
         responseText = fp.isEmpty(JSON.parse(responseText).items)
            ? responseText
-           : `truncated...\n${JSON.stringify(JSON.parse(responseText).items.slice(0, 2), null, 2)}`;
+           : `truncated...\n${JSON.stringify(JSON.parse(responseText).items.slice(0, 1), null, 2)}`;
       }
       return responseText;
     }
@@ -144,7 +150,7 @@ beforeEach(async () => {
     if (isWorkbenchRequest(request)) {
       const requestBody = getRequestData(request);
       const body = requestBody.length === 0 ? '' : `\n${requestBody}`;
-      logger.debug(`Request issued: ${request.method()} ${request.url()}` + body);
+      logger.log('info', 'Request issued: %s %s %s', request.method(), request.url(), body);
     }
     try {
       request.continue();
@@ -168,17 +174,16 @@ beforeEach(async () => {
         if (isApiFailure(request)) {
           await logError(request);
         } else {
-          if (shouldSkipApiResponseBody(request)) {
-            logger.info(`Request finished: ${status} ${method} ${url}`);
-          } else {
-            logger.info('Request finished: ' +
-               `${status} ${method} ${url}\n${await transformResponseBody(request)}`);
+          let text = `Request finished: ${status} ${method} ${url}`;
+          if (!shouldSkipApiResponseBody(request)) {
+            text = `${text}\n${await transformResponseBody(request)}`;
           }
+          logger.log('info', text);
         }
       }
     } catch (err) {
       // Try find out what the request was
-      logger.error(`${err}\n${status} ${method} ${url}`);
+      logger.log('error', '%s %s %s\n%s', status, method, url, err);
     }
     try {
       await request.continue();
@@ -188,42 +193,44 @@ beforeEach(async () => {
   });
 
   page.on('console', async (message) => {
-    if (!message.args().length) {
-      return;
-    }
-    const title = await getTitle();
+    if (!message.args().length) return;
+    const title = await getPageTitle();
     try {
-      const args = await Promise.all(message.args().map(a => describeJsHandle(a)));
       switch (message.type()) {
-        case "warning":
-          logger.warn(`${title}\n`, ...args);
-          break;
-        case "error":
-          logger.error(`${title}\n`, ...args);
+        case 'error':
+        case 'warning':
+        case 'debug':
+          const args = await Promise.all(message.args().map(a => describeJsHandle(a)));
+          console.info(`Page console: "${title}"`);
+          console[message.type() === 'warning' ? 'warn' : message.type()](...args);
+          console.log('');
           break;
         default:
-          logger.info(`${title}\n`, ...args);
+          // Do nothing for other console types.
+          break;
       }
     } catch (err) {
-      logger.error(`${title}\nException occurred when getting Console message.\n${err}\n${message.text()}`);
+      console.error(`❗ "${title}"\nException occurred when getting page console message.\n${err}\n${message.text()}`);
     }
   });
 
   page.on('error', async (error) => {
-    const title = await getTitle();
+    const title = await getPageTitle();
     try {
-      logger.error(`${title}\nError message: ${error.message}\nStack: ${error.stack}`);
+      console.error(`PAGE ERROR: "${title}"\n${error.message}\n${error.stack}`);
+      console.log('');
     } catch (err) {
-      logger.error(`${title}\nException occurred when getting error.\n${err}`);
+      console.error(`❗ "${title}"\nException occurred when getting page error.\n${err}`);
     }
   });
 
   page.on('pageerror', async (error) => {
-    const title = await getTitle();
+    const title = await getPageTitle();
     try {
-      logger.error(`${title}\nPage error message: ${error.message}\nStack: ${error.stack}`);
+      console.error(`PAGEERROR: "${title}"\n${error.message}\n${error.stack}`);
+      console.log('');
     } catch (err) {
-      logger.error(`${title}\nPage exception occurred when getting pageerror.\n${err}`);
+      console.error(`❗ "${title}"\nPage exception occurred when getting pageerror.\n${err}`);
     }
   })
 
