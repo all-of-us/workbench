@@ -23,7 +23,7 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.test.FakeClock;
@@ -55,7 +55,7 @@ public class NotebooksServiceTest {
   @MockBean private LogsBasedMetricService mockLogsBasedMetricsService;
 
   @MockBean private FireCloudService mockFirecloudService;
-  @MockBean private CloudStorageService mockCloudStorageService;
+  @MockBean private CloudStorageClient mockCloudStorageClient;
   @MockBean private WorkspaceService mockWorkspaceService;
 
   @Autowired private NotebooksService notebooksService;
@@ -190,6 +190,6 @@ public class NotebooksServiceTest {
             new FirecloudWorkspaceResponse()
                 .workspace(new FirecloudWorkspace().bucketName("bkt ")));
     when(mockBlob.getContent()).thenReturn("{}".getBytes());
-    when(mockCloudStorageService.getBlob(anyString(), anyString())).thenReturn(mockBlob);
+    when(mockCloudStorageClient.getBlob(anyString(), anyString())).thenReturn(mockBlob);
   }
 }

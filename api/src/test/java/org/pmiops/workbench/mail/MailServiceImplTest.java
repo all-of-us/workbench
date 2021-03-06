@@ -14,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.google.CloudStorageServiceImpl;
+import org.pmiops.workbench.google.CloudStorageClientImpl;
 import org.pmiops.workbench.mandrill.ApiException;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
@@ -32,7 +32,7 @@ public class MailServiceImplTest {
   private static final String PRIMARY_EMAIL = "bob@researchallofus.org";
   private static final String API_KEY = "this-is-an-api-key";
 
-  @Mock private CloudStorageServiceImpl cloudStorageService;
+  @Mock private CloudStorageClientImpl cloudStorageClient;
   @Mock private MandrillApi mandrillApi;
   @Mock private MandrillMessageStatus msgStatus;
   @Rule public MockitoRule mockitoRule = MockitoJUnit.rule();
@@ -42,13 +42,13 @@ public class MailServiceImplTest {
     MandrillMessageStatuses msgStatuses = new MandrillMessageStatuses();
     msgStatuses.add(msgStatus);
     when(mandrillApi.send(any())).thenReturn(msgStatuses);
-    when(cloudStorageService.readMandrillApiKey()).thenReturn(API_KEY);
-    when(cloudStorageService.getImageUrl(any())).thenReturn("test_img");
+    when(cloudStorageClient.readMandrillApiKey()).thenReturn(API_KEY);
+    when(cloudStorageClient.getImageUrl(any())).thenReturn("test_img");
 
     service =
         new MailServiceImpl(
             Providers.of(mandrillApi),
-            Providers.of(cloudStorageService),
+            Providers.of(cloudStorageClient),
             Providers.of(createWorkbenchConfig()));
   }
 

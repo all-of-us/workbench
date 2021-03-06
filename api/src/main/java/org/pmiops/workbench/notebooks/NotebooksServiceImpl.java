@@ -18,7 +18,7 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.GoogleCloudLocators;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
@@ -69,7 +69,7 @@ public class NotebooksServiceImpl implements NotebooksService {
                   .toFactory());
 
   private final Clock clock;
-  private final CloudStorageService cloudStorageService;
+  private final CloudStorageClient cloudStorageClient;
   private final FireCloudService fireCloudService;
   private final Provider<DbUser> userProvider;
   private final UserRecentResourceService userRecentResourceService;
@@ -79,14 +79,14 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Autowired
   public NotebooksServiceImpl(
       Clock clock,
-      CloudStorageService cloudStorageService,
+      CloudStorageClient cloudStorageClient,
       FireCloudService fireCloudService,
       Provider<DbUser> userProvider,
       UserRecentResourceService userRecentResourceService,
       WorkspaceService workspaceService,
       LogsBasedMetricService logsBasedMetricService) {
     this.clock = clock;
-    this.cloudStorageService = cloudStorageService;
+    this.cloudStorageClient = cloudStorageClient;
     this.fireCloudService = fireCloudService;
     this.userProvider = userProvider;
     this.userRecentResourceService = userRecentResourceService;
@@ -108,10 +108,10 @@ public class NotebooksServiceImpl implements NotebooksService {
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   @Override
   public List<FileDetail> getNotebooksAsService(String bucketName) {
-    return cloudStorageService.getBlobPageForPrefix(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY)
+    return cloudStorageClient.getBlobPageForPrefix(bucketName, NOTEBOOKS_WORKSPACE_DIRECTORY)
         .stream()
         .filter(this::isNotebookBlob)
-        .map(blob -> cloudStorageService.blobToFileDetail(blob, bucketName))
+        .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName))
         .collect(Collectors.toList());
   }
 
@@ -140,12 +140,12 @@ public class NotebooksServiceImpl implements NotebooksService {
     GoogleCloudLocators newNotebookLocators =
         getNotebookLocators(toWorkspaceNamespace, toWorkspaceName, newNotebookName);
 
-    if (!cloudStorageService
+    if (!cloudStorageClient
         .getExistingBlobIdsIn(Collections.singletonList(newNotebookLocators.blobId))
         .isEmpty()) {
       throw new BlobAlreadyExistsException();
     }
-    cloudStorageService.copyBlob(fromNotebookLocators.blobId, newNotebookLocators.blobId);
+    cloudStorageClient.copyBlob(fromNotebookLocators.blobId, newNotebookLocators.blobId);
 
     FileDetail fileDetail = new FileDetail();
     fileDetail.setName(newNotebookName);
@@ -180,7 +180,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   public void deleteNotebook(String workspaceNamespace, String workspaceName, String notebookName) {
     GoogleCloudLocators notebookLocators =
         getNotebookLocators(workspaceNamespace, workspaceName, notebookName);
-    cloudStorageService.deleteBlob(notebookLocators.blobId);
+    cloudStorageClient.deleteBlob(notebookLocators.blobId);
     userRecentResourceService.deleteNotebookEntry(
         workspaceService.getRequired(workspaceNamespace, workspaceName).getWorkspaceId(),
         userProvider.get().getUserId(),
@@ -207,12 +207,12 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public JSONObject getNotebookContents(String bucketName, String notebookName) {
     Blob blob = getBlobWithSizeConstraint(bucketName, notebookName);
-    return cloudStorageService.readBlobAsJson(blob);
+    return cloudStorageClient.readBlobAsJson(blob);
   }
 
   private Blob getBlobWithSizeConstraint(String bucketName, String notebookName) {
     Blob blob =
-        cloudStorageService.getBlob(
+        cloudStorageClient.getBlob(
             bucketName, "notebooks/".concat(NotebooksService.withNotebookExtension(notebookName)));
     if (blob.getSize() >= MAX_NOTEBOOK_READ_SIZE_BYTES) {
       throw new FailedPreconditionException(
@@ -224,7 +224,7 @@ public class NotebooksServiceImpl implements NotebooksService {
 
   @Override
   public void saveNotebook(String bucketName, String notebookName, JSONObject notebookContents) {
-    cloudStorageService.writeFile(
+    cloudStorageClient.writeFile(
         bucketName,
         "notebooks/" + NotebooksService.withNotebookExtension(notebookName),
         notebookContents.toString().getBytes(StandardCharsets.UTF_8));

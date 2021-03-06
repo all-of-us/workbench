@@ -31,7 +31,7 @@ import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.ElasticsearchConfig;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.GenderOrSexType;
@@ -45,16 +45,16 @@ public class ElasticSearchService {
   private static final Logger log = Logger.getLogger(ElasticSearchService.class.getName());
   private RestHighLevelClient client;
   private CBCriteriaDao cbCriteriaDao;
-  private CloudStorageService cloudStorageService;
+  private CloudStorageClient cloudStorageClient;
   private Provider<WorkbenchConfig> configProvider;
 
   @Autowired
   public ElasticSearchService(
       CBCriteriaDao cbCriteriaDao,
-      CloudStorageService cloudStorageService,
+      CloudStorageClient cloudStorageClient,
       Provider<WorkbenchConfig> configProvider) {
     this.cbCriteriaDao = cbCriteriaDao;
-    this.cloudStorageService = cloudStorageService;
+    this.cloudStorageClient = cloudStorageClient;
     this.configProvider = configProvider;
   }
 
@@ -114,7 +114,7 @@ public class ElasticSearchService {
       RestClientBuilder builder =
           RestClient.builder(new HttpHost(url.getHost(), url.getPort(), url.getProtocol()));
       if (esConfig.enableBasicAuth) {
-        JSONObject creds = cloudStorageService.getElasticCredentials();
+        JSONObject creds = cloudStorageClient.getElasticCredentials();
         CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(
             AuthScope.ANY,

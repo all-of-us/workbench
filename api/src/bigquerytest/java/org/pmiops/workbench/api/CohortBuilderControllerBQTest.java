@@ -41,8 +41,9 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.google.CloudStorageServiceImpl;
+import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.google.CloudStorageClientImpl;
+import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
@@ -80,13 +81,17 @@ import org.springframework.http.ResponseEntity;
 @RunWith(BeforeAfterSpringTestRunner.class)
 // Note: normally we shouldn't need to explicitly import our own @TestConfiguration. This might be
 // a bad interaction with BeforeAfterSpringTestRunner.
-@Import({TestJpaConfig.class, CohortBuilderControllerBQTest.Configuration.class})
+@Import({
+  TestJpaConfig.class,
+  CohortBuilderControllerBQTest.Configuration.class,
+  StorageConfig.class
+})
 public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @TestConfiguration
   @Import({
     BigQueryTestService.class,
-    CloudStorageServiceImpl.class,
+    CloudStorageClientImpl.class,
     CohortQueryBuilder.class,
     CohortBuilderServiceImpl.class,
     SearchGroupItemQueryBuilder.class,
@@ -109,7 +114,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private BigQueryService bigQueryService;
 
-  @Autowired private CloudStorageService cloudStorageService;
+  @Autowired private CloudStorageClient cloudStorageClient;
 
   @Autowired private CohortBuilderService cohortBuilderService;
 
@@ -177,7 +182,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     when(firecloudService.isUserMemberOfGroup(anyString(), anyString())).thenReturn(true);
 
     ElasticSearchService elasticSearchService =
-        new ElasticSearchService(cbCriteriaDao, cloudStorageService, configProvider);
+        new ElasticSearchService(cbCriteriaDao, cloudStorageClient, configProvider);
 
     controller =
         new CohortBuilderController(

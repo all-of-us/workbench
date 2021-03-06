@@ -72,7 +72,8 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.genomics.WgsCohortExtractionService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortStatus;
@@ -177,7 +178,7 @@ public class CohortsControllerTest {
   private TestMockFactory testMockFactory;
 
   @Autowired CdrVersionService cdrVersionService;
-  @Autowired CloudStorageService cloudStorageService;
+  @Autowired CloudStorageClient cloudStorageClient;
   @Autowired CohortMaterializationService cohortMaterializationService;
   @Autowired ComplianceService complianceService;
   @Autowired FireCloudService fireCloudService;
@@ -223,7 +224,7 @@ public class CohortsControllerTest {
     BillingProjectAuditor.class,
     BillingProjectBufferService.class,
     CdrVersionService.class,
-    CloudStorageService.class,
+    CloudStorageClient.class,
     CohortBuilderMapper.class,
     CohortBuilderService.class,
     CohortMaterializationService.class,
@@ -242,6 +243,7 @@ public class CohortsControllerTest {
     ReviewQueryBuilder.class,
     UserRecentResourceService.class,
     UserServiceAuditor.class,
+    WgsCohortExtractionService.class,
     WorkspaceAuditor.class,
   })
   static class Configuration {

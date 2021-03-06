@@ -10,7 +10,7 @@ import org.mockito.Mockito;
 import org.pmiops.workbench.captcha.api.CaptchaApi;
 import org.pmiops.workbench.captcha.model.CaptchaVerificationResponse;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -27,7 +27,7 @@ public class CaptchaVerificationServiceTest {
   final String testUrl = "testkey.google.com";
   final String responseToken = "responseToken";
 
-  @MockBean private CloudStorageService cloudStorageService;
+  @MockBean private CloudStorageClient cloudStorageClient;
   @MockBean private CaptchaApi captchaApiProvider;
 
   @Autowired private CaptchaVerificationServiceImpl captchaVerificationService;
@@ -48,7 +48,7 @@ public class CaptchaVerificationServiceTest {
   public void setUp() throws IOException, ApiException {
     config = WorkbenchConfig.createEmptyConfig();
     config.admin.loginUrl = "hostname";
-    Mockito.when(cloudStorageService.getCaptchaServerKey()).thenReturn("key");
+    Mockito.when(cloudStorageClient.getCaptchaServerKey()).thenReturn("key");
     mockCaptchaResponse("hostName", true);
   }
 

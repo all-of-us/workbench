@@ -9,12 +9,12 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
-public class CloudStorageServiceImplIntegrationTest extends BaseIntegrationTest {
-  @Autowired private CloudStorageService service;
+public class CloudStorageClientImplIntegrationTest extends BaseIntegrationTest {
+  @Autowired private CloudStorageClient service;
 
   @TestConfiguration
-  @ComponentScan(basePackageClasses = CloudStorageServiceImpl.class)
-  @Import(CloudStorageServiceImpl.class)
+  @ComponentScan(basePackageClasses = CloudStorageClientImpl.class)
+  @Import(CloudStorageClientImpl.class)
   static class Configuration {}
 
   @Test

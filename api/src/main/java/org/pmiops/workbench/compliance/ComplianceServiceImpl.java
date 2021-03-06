@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.api.MoodleApi;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
@@ -27,7 +27,7 @@ public class ComplianceServiceImpl implements ComplianceService {
       "research_ethics_training"; // 'ret' too much like 'return'
   private static final String MOODLE_EXCEPTION = "moodle_exception";
   private static final String MOODLE_USER_NOT_ALLOWED_ERROR_CODE = "guestsarenotallowed";
-  private CloudStorageService cloudStorageService;
+  private CloudStorageClient cloudStorageClient;
   private Provider<WorkbenchConfig> configProvider;
 
   private Provider<MoodleApi> moodleApiProvider;
@@ -36,16 +36,16 @@ public class ComplianceServiceImpl implements ComplianceService {
 
   @Autowired
   public ComplianceServiceImpl(
-      CloudStorageService cloudStorageService,
+      CloudStorageClient cloudStorageClient,
       Provider<WorkbenchConfig> configProvider,
       Provider<MoodleApi> moodleApiProvider) {
-    this.cloudStorageService = cloudStorageService;
+    this.cloudStorageClient = cloudStorageClient;
     this.configProvider = configProvider;
     this.moodleApiProvider = moodleApiProvider;
   }
 
   private String getToken() {
-    return this.cloudStorageService.getMoodleApiKey();
+    return this.cloudStorageClient.getMoodleApiKey();
   }
 
   private boolean enableMoodleCalls() {

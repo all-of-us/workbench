@@ -163,11 +163,17 @@ public class WorkbenchConfig {
 
   public static class WgsCohortExtractionConfig {
     public String serviceAccount;
+    public String serviceAccountTerraProxyGroup;
     public String operationalTerraWorkspaceNamespace;
     public String operationalTerraWorkspaceName;
+    public String operationalTerraWorkspaceBucket;
+    public String extractionPetServiceAccount;
     public String extractionMethodConfigurationNamespace;
     public String extractionMethodConfigurationName;
     public Integer extractionMethodConfigurationVersion;
+    public String extractionCohortsDataset;
+    public String extractionDestinationDataset;
+    public String extractionTempTablesDataset;
   }
 
   public static class CdrConfig {
