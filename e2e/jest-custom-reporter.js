@@ -6,9 +6,10 @@ const winston = require("winston");
 module.exports = class JestCustomReporter {
 
   constructor(globalConfig, options) {
-    if (globalConfig.verbose === true) {
+    console.log(`onRunStart arguments: ${JSON.stringify(arguments)}`);
+    /*if (globalConfig.verbose === true) {
       throw Error("Invalid configuration. Verbose must be false or Console messages won't be available.")
-    }
+    }*/
     this._globalConfig = globalConfig;
     this._options = options;
     this.logDir = this._options.outputdir || 'logs/jest';
@@ -20,15 +21,16 @@ module.exports = class JestCustomReporter {
     console.info(`Starting ${path.parse(test.path).name} at ${time}`);
   }
 
-  // @ts-ignore
   onTestResult(testRunConfig, testResult, runResults) {
+    console.log(`onTestResult arguments: ${JSON.stringify(arguments)}`);
+
     // Get test name.
     const testName = path.parse(testResult.testFilePath).name;
     const today = new Date();
     const transports = new winston.transports.File({
         filename: `${this.logDir}/${testName}-${today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()}.log`,
         options: { flags: 'w' },
-        handleExceptions: true
+        handleExceptions: true,
       });
     simpleLogger.clear().add(transports);
 
@@ -42,16 +44,21 @@ module.exports = class JestCustomReporter {
 
     // Iterate testResults array.
     testResult.testResults.forEach((suite) => {
+
+      console.log(`suite: ${suite}`);
       // Get failure message.
       if (suite.testResults && suite.testResults.status === "failed") {
-        const failure = suite.testResults.failureMessages;
+        console.log(`suite.testResults.status: ${suite.testResults.status}`);
+        const failure = suite.failureMessages;
         simpleLogger.info(`failure: ${failure}`);
       }
     });
+
   }
 
   // @ts-ignore
   onRunComplete(test, runResults) {
+    //console.log(`onRunComplete arguments: ${JSON.stringify(arguments)}`);
     runResults.testResults.forEach(suite => {
       const testFilePath = suite.testFilePath.split('e2e/')[1];
       const failedTests = [];

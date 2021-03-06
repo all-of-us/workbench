@@ -14,7 +14,7 @@
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": false,
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    //"noUnusedParameters": true,
     "pretty": true,
     "noFallthroughCasesInSwitch": true,
     "outDir": "./tsc-out",

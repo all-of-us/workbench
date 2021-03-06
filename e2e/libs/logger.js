@@ -1,13 +1,6 @@
 const winston = require('winston');
 const { createLogger, format } = winston;
 
-const options = {
-  console: {
-    handleExceptions: true,
-    prettyPrint : true,
-    json: false,
-  }
-};
 
 // Used by jest-custom-reporter to read Jest console messages and save to file.
 const fileLogger = createLogger({
@@ -30,9 +23,10 @@ const logger = createLogger({
     }),
   ),
   transports: [
-    new winston.transports.Console(options.console),
+    new winston.transports.Console({ handleExceptions: true}),
   ],
   exitOnError: false
 });
+
 
 module.exports = { logger, simpleLogger: fileLogger}

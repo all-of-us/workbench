@@ -1,5 +1,3 @@
-// @ts-ignore
-import util from 'util';
 import { logger } from 'libs/logger';
 import * as fp from 'lodash/fp';
 import { Request } from 'puppeteer';
@@ -26,7 +24,6 @@ beforeEach(async () => {
     }).catch(() =>  {return 'getPageTitle() func failed'});
   }
 
-  // @ts-ignore
   const describeJsHandle = async (jsHandle)  => {
     return jsHandle.executionContext().evaluate(obj => {
       if (obj instanceof Error)

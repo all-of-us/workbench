@@ -27,6 +27,7 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
   }
 
   // Take a screenshot right after failure
+  /*
   async handleTestEvent(event, state) {
     switch (event.name) {
       case 'test_fn_failure':
@@ -57,7 +58,7 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
     }
 
   }
-
+  */
   async takeScreenshot(filePath) {
     await this.global.page.screenshot({path: filePath, fullPage: true});
     console.info(`Saved screenshot: ${filePath}`);

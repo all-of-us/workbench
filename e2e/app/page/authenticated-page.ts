@@ -19,7 +19,7 @@ export default abstract class AuthenticatedPage extends BasePage {
   }
 
   protected async isSignedIn(): Promise<boolean> {
-    return this.page.waitForSelector(signedInIndicator, {timeout: 5 * 60 * 1000})
+    return this.page.waitForSelector(signedInIndicator, {timeout: 2 * 1000})
       .then( (elemt) => elemt.asElement() !== null);
   }
 
