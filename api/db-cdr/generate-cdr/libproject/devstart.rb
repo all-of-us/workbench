@@ -297,8 +297,7 @@ def create_wgs_extraction_dataset(cmd_name, args)
   op.add_option(
     "--bq-dataset [dataset]",
     ->(opts, v) { opts.bq_dataset = v},
-    "BigQuery dataset name for the CDR version (project not included), e.g. " +
-      "'2019Q4R3'. Required."
+    "BigQuery dataset name to be created"
   )
   op.add_option(
     "--project [project]",
@@ -306,7 +305,7 @@ def create_wgs_extraction_dataset(cmd_name, args)
     "The Google Cloud project associated with this workbench environment, " +
       "e.g. all-of-us-rw-staging. Required."
   )
-  op.opts.tier = "registered"
+  op.opts.tier = "controlled_test"
   op.add_option(
     "--tier [tier]",
     ->(opts, v) { opts.tier = v},

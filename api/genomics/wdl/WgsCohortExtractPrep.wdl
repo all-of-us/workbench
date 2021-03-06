@@ -46,7 +46,7 @@ task CreateCohortTable {
     String query_project
     String table_name
   }
-  
+
   command <<<
     echo "SELECT
       sample_id,
@@ -58,7 +58,7 @@ task CreateCohortTable {
 
     PARTICIPANT_IDS=$(cat ~{participant_ids} | awk '{print "\""$0"\""}' | paste -sd ",")
     echo "($PARTICIPANT_IDS)" >> create_cohort.sql
-    
+
     DESTINATION_TABLE=$(echo ~{wgs_extraction_cohorts_dataset} | tr '.' ':')
 
     bq query \
@@ -68,7 +68,7 @@ task CreateCohortTable {
       --max_rows=10000000 \
       --allow_large_results < create_cohort.sql
   >>>
-  
+
   output { }
 
   runtime {
@@ -78,7 +78,7 @@ task CreateCohortTable {
     preemptible: 3
     docker: "us.gcr.io/broad-gatk/gatk:4.1.8.0"
   }
-} 
+}
 
 
 task CreateCohortExtractTable {
@@ -91,10 +91,10 @@ task CreateCohortExtractTable {
     String wgs_extraction_temp_tables_dataset
     String query_project
   }
-  
+
   command <<<
     set -e
-    
+
     echo "Exporting to ~{wgs_extraction_destination_dataset}.~{cohort_uuid}"
 
     python /app/ngs_cohort_extract.py \
@@ -106,10 +106,10 @@ task CreateCohortExtractTable {
       --min_variant_samples 0 \
       --query_project ~{query_project} \
       --fq_sample_mapping_table ~{wgs_dataset}.metadata
-      
+
     echo ~{wgs_extraction_destination_dataset}.~{cohort_uuid} > cohort_extract_table.txt
   >>>
-  
+
   output {
     String cohort_extract_table = read_string("cohort_extract_table.txt")
   }
@@ -119,7 +119,9 @@ task CreateCohortExtractTable {
     bootDiskSizeGb: "15"
     disks: "local-disk 10 HDD"
     preemptible: 3
+    # Temporary GATK that I'm using to get unblocked. We will realign with the mainstream GATK ah_var_store branch
+    # once they incorporate my changes.
     docker: "gcr.io/all-of-us-workbench-test/variantstore-extract-prep:2"
   }
-} 
+}
 
