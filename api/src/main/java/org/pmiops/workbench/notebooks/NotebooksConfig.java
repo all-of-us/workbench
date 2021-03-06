@@ -1,9 +1,12 @@
 package org.pmiops.workbench.notebooks;
 
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.pmiops.workbench.auth.UserAuthentication;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -15,6 +18,7 @@ import org.pmiops.workbench.notebooks.api.ProxyApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.context.annotation.RequestScope;
 
 @org.springframework.context.annotation.Configuration
@@ -29,6 +33,8 @@ public class NotebooksConfig {
   private static final String USER_LEONARDO_CLIENT = "leonardoApiClient";
   private static final String SERVICE_LEONARDO_CLIENT = "leonardoServiceAPiClient";
 
+  private static final Logger log = Logger.getLogger(NotebooksConfig.class.getName());
+
   private static final List<String> NOTEBOOK_SCOPES =
       ImmutableList.of(
           "https://www.googleapis.com/auth/userinfo.profile",
@@ -37,9 +43,21 @@ public class NotebooksConfig {
   @Bean(name = USER_NOTEBOOKS_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient notebooksApiClient(
-      UserAuthentication userAuthentication, WorkbenchConfig workbenchConfig) {
+      UserAuthentication userAuthentication, WorkbenchConfig workbenchConfig, HttpHeaders headers) {
     ApiClient apiClient = buildNotebooksApiClient(workbenchConfig);
     apiClient.setAccessToken(userAuthentication.getCredentials());
+
+    // We pass-through the "Referer" header to outgoing Proxy API requests. Leonardo verifies this
+    // Header for all incoming traffic. See IA-2469, RW-6412.
+    Optional<String> referer =
+        Optional.ofNullable(headers.get("Referer"))
+            .filter(Predicates.not(List::isEmpty))
+            .map(h -> h.get(0));
+    if (referer.isPresent()) {
+      apiClient.addDefaultHeader("Referer", referer.get());
+    } else {
+      log.info("no Referer request header found, requests to the Leo proxy API may be rejected");
+    }
     return apiClient;
   }
 
