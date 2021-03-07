@@ -3,7 +3,7 @@ const path = require('path');
 const { fileLogger } = require('./logger');
 const winston = require("winston");
 
-module.exports = class JestCustomReporter {
+module.exports = class JestReporter {
 
   constructor(globalConfig, options) {
     if (globalConfig.verbose === true) {

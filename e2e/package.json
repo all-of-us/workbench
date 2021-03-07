@@ -40,9 +40,6 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@jest/reporters": "^26.6.2",
-    "@jest/test-result": "^26.6.2",
-    "@jest/types": "^26.6.2",
     "@types/expect-puppeteer": "4.4.5",
     "@types/faker": "5.1.5",
     "@types/fs-extra": "^9.0.8",
