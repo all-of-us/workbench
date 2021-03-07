@@ -39,7 +39,7 @@ export async function waitForDocumentTitle(page: Page, titleSubstr: string): Pro
     const jsHandle = await page.waitForFunction(t => {
       const actualTitle = document.title;
       return actualTitle.includes(t);
-    }, {timeout: 2 * 1000}, titleSubstr);
+    }, {timeout: 10 * 60 * 1000}, titleSubstr);
     return (await jsHandle.jsonValue()) as boolean;
   } catch (e) {
     console.error(`waitForDocumentTitle contains "${titleSubstr}" failed. ${e}`);
@@ -273,6 +273,7 @@ export async function waitWhileLoading(page: Page, timeout: number = (2 * 60 * 1
 
   const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
   const spinElementsSelector = `[style*="running spin"], .spinner:empty, [style*="running rotation"]${waitForRuntime ? ':not([aria-hidden="true"])' : ''}`;
+  const appErrorSelector = 'app-initial-error h1';
 
   // To prevent checking on blank page, wait for elements exist in DOM.
   await Promise.race([
@@ -280,11 +281,13 @@ export async function waitWhileLoading(page: Page, timeout: number = (2 * 60 * 1
     page.waitForSelector(spinElementsSelector),
   ]);
 
-  // Wait for spinners stop and gone.
-  await page.waitForFunction((css) => {
-    const elements = document.querySelectorAll(css);
-    return elements && elements.length === 0;
-  }, {polling: 'mutation', timeout}, spinElementsSelector);
+  // Waiting for spinner (loading) to stop and checking for page error.
+  await page.waitForFunction((spinnerCss, errCss) => {
+    const appError = document.querySelector(errCss);
+    if (appError) throw new Error(appError);
+    const spinner = document.querySelectorAll(spinnerCss);
+    return spinner && spinner.length === 0;
+  }, {polling: 'mutation', timeout}, spinElementsSelector, appErrorSelector);
 
   await page.waitForTimeout(500);
 }

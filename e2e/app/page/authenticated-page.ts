@@ -3,10 +3,8 @@ import {PageUrl} from 'app/text-labels';
 import BasePage from 'app/page/base-page';
 import {getPropValue} from 'utils/element-utils';
 import HelpTipsSidebar from 'app/component/help-tips-sidebar';
-import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
 
 const signedInIndicator = 'app-signed-in';
-
 
 /**
  * AuthenticatedPage represents the base page for any AoU page after user has successfully logged in (aka authenticated).
@@ -19,7 +17,7 @@ export default abstract class AuthenticatedPage extends BasePage {
   }
 
   protected async isSignedIn(): Promise<boolean> {
-    return this.page.waitForSelector(signedInIndicator, {timeout: 2 * 1000})
+    return this.page.waitForSelector(signedInIndicator, {timeout: 5 * 60 * 1000})
       .then( (elemt) => elemt.asElement() !== null);
   }
 
@@ -33,14 +31,8 @@ export default abstract class AuthenticatedPage extends BasePage {
    * Wait until current page is loaded and without spinners spinning.
    */
   async waitForLoad(): Promise<this> {
-    try {
-      await this.isSignedIn();
-      await this.isLoaded();
-    } catch (err) {
-      await savePageToFile(this.page);
-      await takeScreenshot(this.page);
-      throw (err);
-    }
+    await this.isSignedIn();
+    await this.isLoaded();
     await this.closeHelpSidebarIfOpen();
     return this;
   }

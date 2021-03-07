@@ -14,7 +14,7 @@
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": false,
     "noUnusedLocals": true,
-    //"noUnusedParameters": true,
+    "noUnusedParameters": true,
     "pretty": true,
     "noFallthroughCasesInSwitch": true,
     "outDir": "./tsc-out",
@@ -31,5 +31,5 @@
     "esModuleInterop": true
   },
   "inclue": ["/*"],
-  "exclude": [ "tsc-out", "node_modules", "logs" ]
+  "exclude": [ "tsc-out", "node_modules" ]
 }

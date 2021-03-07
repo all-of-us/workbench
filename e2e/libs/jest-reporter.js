@@ -1,19 +1,18 @@
 const fs = require('fs-extra');
 const path = require('path');
-const { simpleLogger } = require('./libs/logger');
+const { fileLogger } = require('./logger');
 const winston = require("winston");
 
 module.exports = class JestCustomReporter {
 
   constructor(globalConfig, options) {
-    console.log(`onRunStart arguments: ${JSON.stringify(arguments)}`);
-    /*if (globalConfig.verbose === true) {
-      throw Error("Invalid configuration. Verbose must be false or Console messages won't be available.")
-    }*/
+    if (globalConfig.verbose === true) {
+      throw Error("Verbose must be false or Console messages won't be available.")
+    }
     this._globalConfig = globalConfig;
     this._options = options;
     this.logDir = this._options.outputdir || 'logs/jest';
-    this.fileName = this._options.filename || 'test-results-summary.json';
+    this.summaryFile = this._options.filename || 'test-results-summary.json';
   }
 
   onTestStart(test) {
@@ -21,44 +20,43 @@ module.exports = class JestCustomReporter {
     console.info(`Starting ${path.parse(test.path).name} at ${time}`);
   }
 
+  // @ts-ignore
   onTestResult(testRunConfig, testResult, runResults) {
-    console.log(`onTestResult arguments: ${JSON.stringify(arguments)}`);
-
     // Get test name.
-    const testName = path.parse(testResult.testFilePath).name;
     const today = new Date();
+    const testName = path.parse(testResult.testFilePath).name;
+    const testLog = `${this.logDir}/${testName}-${today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()}.log`;
+
     const transports = new winston.transports.File({
-        filename: `${this.logDir}/${testName}-${today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()}.log`,
+        filename: testLog,
         options: { flags: 'w' },
         handleExceptions: true,
       });
-    simpleLogger.clear().add(transports);
+    fileLogger.clear().add(transports);
 
     // Get all console logs.
     if (testResult.console && testResult.console.length > 0) {
       testResult.console.forEach((log) => {
-        // simpleLogger.info(util.format(log.message));
-        simpleLogger.info(log.message);
+        fileLogger.info(log.message);
       });
     }
 
-    // Iterate testResults array.
-    testResult.testResults.forEach((suite) => {
-
-      console.log(`suite: ${suite}`);
+    // Get failure messages.
+    testResult.testResults.forEach((test) => {
+      fileLogger.info('--------------------');
+      fileLogger.log('info', 'test name: %s', test.title);
+      fileLogger.log('info', 'status: %s', test.status);
       // Get failure message.
-      if (suite.testResults && suite.testResults.status === "failed") {
-        console.log(`suite.testResults.status: ${suite.testResults.status}`);
-        const failure = suite.failureMessages;
-        simpleLogger.info(`failure: ${failure}`);
+      if (test.failureMessages) {
+        const failure = test.failureMessages;
+        fileLogger.log('info', 'failure: %s', failure);
       }
     });
-
+    console.log(`Save test log: ${testLog}`);
   }
 
   // @ts-ignore
   onRunComplete(test, runResults) {
-    //console.log(`onRunComplete arguments: ${JSON.stringify(arguments)}`);
     runResults.testResults.forEach(suite => {
       const testFilePath = suite.testFilePath.split('e2e/')[1];
       const failedTests = [];
@@ -73,11 +71,9 @@ module.exports = class JestCustomReporter {
     });
 
     // Save test results to a file.
-    if (!fs.existsSync(this.logDir)) {
-      fs.mkdirSync(this.logDir);
-    }
-    fs.writeFileSync(`${this.logDir}/${this.fileName}`, JSON.stringify(runResults, null, 2));
-    console.info(`Saved file: ${this.logDir}/${this.fileName}`);
+    if (!fs.existsSync(this.logDir)) fs.mkdirSync(this.logDir);
+    fs.writeFileSync(`${this.logDir}/${this.summaryFile}`, JSON.stringify(runResults, null, 2));
+    console.info(`Saved tests results summary file: ${this.logDir}/${this.summaryFile}`);
     return runResults;
   }
 

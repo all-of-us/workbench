@@ -1,17 +1,17 @@
 const winston = require('winston');
 const { createLogger, format } = winston;
 
-
 // Used by jest-custom-reporter to read Jest console messages and save to file.
 const fileLogger = createLogger({
   level: process.env.LOG_LEVEL || "info",
   format: format.combine(
+    format.splat(),
     format.printf( (info) => {return `${info.message}`; })
   ),
   exitOnError: false
 });
 
-// Log timestamp, log level and message to Console.
+// Log to Console.
 const logger = createLogger({
   level: process.env.LOG_LEVEL || "info",
   format: format.combine(
@@ -28,5 +28,4 @@ const logger = createLogger({
   exitOnError: false
 });
 
-
-module.exports = { logger, simpleLogger: fileLogger}
+module.exports = { logger, fileLogger};

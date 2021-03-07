@@ -2,8 +2,7 @@ const { defaults } = require('jest-config');
 const { TEST_MODE } = process.env;
 
 module.exports = {
-  "verbose": true,
-  "bail": 1,  // Stop running tests after `n` failures
+  "verbose": false,
   "preset": "jest-puppeteer",
   "testTimeout": 1200000,
   "testRunner": "jest-circus/runner",
@@ -32,7 +31,7 @@ module.exports = {
         suiteName: "Puppeteer end-to-end tests"
       }
     ],
-    ["<rootDir>/jest-custom-reporter.js", {
+    ["<rootDir>/libs/jest-reporter.js", {
         "outputdir": "logs/jest",
         "filename": "test-results-summary.json"
       }
