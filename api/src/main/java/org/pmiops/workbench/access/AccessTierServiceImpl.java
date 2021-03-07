@@ -3,8 +3,6 @@ package org.pmiops.workbench.access;
 import com.google.common.collect.ImmutableList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -41,8 +39,7 @@ public class AccessTierServiceImpl implements AccessTierService {
   public List<DbAccessTier> getAccessTiersForUser(DbUser user) {
     if (user.getDataAccessLevelEnum() == DataAccessLevel.REGISTERED) {
       if (configProvider.get().featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers) {
-        return StreamSupport.stream(accessTierDao.findAll().spliterator(), false)
-            .collect(Collectors.toList());
+        return accessTierDao.findAll();
       } else {
         return ImmutableList.of(accessTierDao.findOneByShortName(REGISTERED_TIER_SHORT_NAME));
       }
