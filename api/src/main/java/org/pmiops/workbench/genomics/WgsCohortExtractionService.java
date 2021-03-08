@@ -83,6 +83,8 @@ public class WgsCohortExtractionService {
     FirecloudWorkspace fcWorkspace = fireCloudService.getWorkspace(workspace).get().getWorkspace();
 
     String extractionUuid = UUID.randomUUID().toString();
+    String extractionFolder = "wgs-cohort-extractions/" + extractionUuid;
+
     Blob personIdsFile =
         cloudStorageClientProvider
             .get()
@@ -91,7 +93,7 @@ public class WgsCohortExtractionService {
                 // to because its contents will feed into a SQL query with the cohort
                 // extraction SA's permissions
                 cohortExtractionConfig.operationalTerraWorkspaceBucket,
-                "wgs-cohort-extractions/" + extractionUuid + "/person_ids.txt",
+                extractionFolder + "/person_ids.txt",
                 String.join("\n", cohortService.getPersonIds(cohortId))
                     .getBytes(StandardCharsets.UTF_8));
 
@@ -132,12 +134,12 @@ public class WgsCohortExtractionService {
                                 "WgsCohortExtract.wgs_extraction_temp_tables_dataset",
                                 "\"" + cohortExtractionConfig.extractionTempTablesDataset + "\"")
                             .put("WgsCohortExtract.wgs_intervals", "\"gs://gcp-public-data--broad-references/hg38/v0/wgs_calling_regions.hg38.interval_list\"")
-                            .put("WgsCohortExtract.scatter_count", "100")
+                            .put("WgsCohortExtract.scatter_count", "1000") // This value will need to be dynamically adjusted through testing.
                             .put("WgsCohortExtract.reference", "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta\"")
                             .put("WgsCohortExtract.reference_index", "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.fai\"")
                             .put("WgsCohortExtract.reference_dict", "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.dict\"")
-                            .put("WgsCohortExtract.output_file_base_name", "\"cohort_" + cohortId + "\"")
-                            .put("WgsCohortExtract.output_gcs_dir", "\"gs://" + fcWorkspace.getBucketName() + "/cohort-" + cohortId + "_vcfs/\"")
+                            .put("WgsCohortExtract.output_file_base_name", "\"interval\"") // Will produce files named "interval_1.vcf.gz", "interval_32.vcf.gz", etc
+                            .put("WgsCohortExtract.output_gcs_dir", "\"gs://" + fcWorkspace.getBucketName() + "/" + extractionFolder + "/vcfs/\"")
                             .put("WgsCohortExtract.gatk_override", "\"gs://all-of-us-workbench-test-genomics/wgs/gatk-package-4.1.9.0-200-gfabc915-SNAPSHOT-local.jar\"")
                             .build())
                     .methodConfigVersion(
