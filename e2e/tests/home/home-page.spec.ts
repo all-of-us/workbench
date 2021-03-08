@@ -5,6 +5,7 @@ import {signInWithAccessToken} from 'utils/test-utils';
 
 describe('Home page ui tests', () => {
 
+
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

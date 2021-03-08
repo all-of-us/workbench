@@ -304,6 +304,21 @@ commands:
           # Stop running Puppeteer end-to-end test if code in relevant directories is unchanged.
           dir_names: "ui e2e .circleci"
 
+  run-changed-puppeteer-test:
+    description: "Run only changed Puppeteer tests on PR branch"
+    steps:
+      - run:
+          command: |
+            CHANGED_TESTS=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) -- e2e/tests | grep -o 'tests/.*.ts$')
+            if [ -n "$CHANGED_TESTS" ]; then
+              echo "Running following changed Puppeteer tests"
+              echo $CHANGED_TESTS
+              cd e2e/
+              yarn test:ci $CHANGED_TESTS
+              circleci-agent step halt
+            fi
+          name: "Run only changed Puppeteer tests"
+
 # -------------------------
 #        JOBS
 # -------------------------
@@ -622,6 +637,7 @@ workflows:
           parallel_num: 4
           optional_steps:
             - halt-puppeteer-check
+            - run-changed-puppeteer-test
           requires:
             - puppeteer-env-setup
       # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
