@@ -175,6 +175,9 @@ public final class SearchGroupItemQueryBuilder {
   private static final String FITBIT_SQL =
       "select person_id\n"
           + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere has_fitbit = 1\n";
+  private static final String HAS_PM_DATA_SQL =
+      "select person_id\n"
+          + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere has_physical_measurement_data = 1\n";
   private static final String WHOLE_GENOME_VARIANT_SQL =
       "select person_id\n"
           + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere has_whole_genome_variant = 1\n";
@@ -219,6 +222,9 @@ public final class SearchGroupItemQueryBuilder {
     }
     if (Domain.WHOLE_GENOME_VARIANT.equals(domain)) {
       return WHOLE_GENOME_VARIANT_SQL;
+    }
+    if (hasPhysicalMeasurementData(searchGroupItem)) {
+      return HAS_PM_DATA_SQL;
     }
     // Otherwise build sql against flat denormalized search table
     for (SearchParameter param : searchGroupItem.getSearchParameters()) {
@@ -780,5 +786,14 @@ public final class SearchGroupItemQueryBuilder {
                     modifier.getName().toString());
           }
         });
+  }
+
+  private static boolean hasPhysicalMeasurementData(SearchGroupItem searchGroupItem) {
+    return searchGroupItem.getSearchParameters().size() == 1
+        && searchGroupItem.getSearchParameters().stream()
+            .allMatch(
+                sp ->
+                    Domain.PHYSICAL_MEASUREMENT.toString().equals(sp.getDomain())
+                        && sp.getConceptId() == null);
   }
 }
