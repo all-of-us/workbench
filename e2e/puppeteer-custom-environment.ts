@@ -4,6 +4,10 @@ require('jest-circus');
 
 class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
 
+  failedTest = false;
+  screenshotDir = `logs/screenshot`;
+  htmlDir = `logs/html`;
+
   async setup() {
     await super.setup();
   }
@@ -34,28 +38,31 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
         const runningTest = state.currentlyRunningTest;
         let testName;
         if (runningTest != null) {
-          testName = state.currentlyRunningTest.name.replace(/\W/g, '-');
+          testName = runningTest.parent.name.replace(/\W/g, '-');
         } else {
           testName = event.test.name.replace(/\W/g, '-');
         }
 
-        const screenshotDir = `logs/screenshot`;
-        const htmlDir = `logs/html`;
-        await fs.ensureDir(screenshotDir);
-        await fs.ensureDir(htmlDir);
+        await fs.ensureDir(this.screenshotDir);
+        await fs.ensureDir(this.htmlDir);
 
         const timestamp = this.localDateTimeString();
-
-        const screenshotFile = `${screenshotDir}/${testName}_${timestamp}.png`;
+        const screenshotFile = `${this.screenshotDir}/${testName}_${timestamp}.png`;
         await this.takeScreenshot(screenshotFile);
-
-        const htmlFile = `${htmlDir}/${testName}_${timestamp}.html`;
+        const htmlFile = `${this.htmlDir}/${testName}_${timestamp}.html`;
         await this.savePageToFile(htmlFile);
+
+        this.failedTest = true;
         break;
       default:
         break;
     }
-
+    if (this.failedTest && event.name === 'test_start') {
+      event.test.mode = 'skip';
+    }
+    if (super.handleTestEvent) {
+      super.handleTestEvent(event, state)
+    }
   }
 
   async takeScreenshot(filePath) {

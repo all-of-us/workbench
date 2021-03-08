@@ -17,7 +17,7 @@ module.exports = class JestReporter {
 
   onTestStart(test) {
     const time = new Date().toLocaleTimeString();
-    console.info(`Starting ${path.parse(test.path).name} at ${time}`);
+    console.info(`Running ${path.parse(test.path).name} at ${time}`);
   }
 
   // @ts-ignore
@@ -43,7 +43,7 @@ module.exports = class JestReporter {
 
     // Get failure messages.
     testResult.testResults.forEach((test) => {
-      fileLogger.info('--------------------');
+      fileLogger.info('----------------------------------------');
       fileLogger.log('info', 'test name: %s', test.title);
       fileLogger.log('info', 'status: %s', test.status);
       // Get failure message.
@@ -60,8 +60,8 @@ module.exports = class JestReporter {
     runResults.testResults.forEach(suite => {
       const testFilePath = suite.testFilePath.split('e2e/')[1];
       const failedTests = [];
-      suite.testResults.forEach(test => {
-        if (test.status === 'failed') {
+      suite.testResults.forEach(result => {
+        if (result.status === 'failed') {
           failedTests.push(`yarn test ${testFilePath}`);
         }
       });
@@ -73,7 +73,7 @@ module.exports = class JestReporter {
     // Save test results to a file.
     if (!fs.existsSync(this.logDir)) fs.mkdirSync(this.logDir);
     fs.writeFileSync(`${this.logDir}/${this.summaryFile}`, JSON.stringify(runResults, null, 2));
-    console.info(`Saved tests results summary file: ${this.logDir}/${this.summaryFile}`);
+    console.info(`Save tests results summary file: ${this.logDir}/${this.summaryFile}`);
     return runResults;
   }
 

@@ -1,6 +1,6 @@
 import { logger } from 'libs/logger';
 import * as fp from 'lodash/fp';
-import { Request } from 'puppeteer';
+import {JSHandle, Request} from 'puppeteer';
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
 
 /**
@@ -24,7 +24,7 @@ beforeEach(async () => {
     }).catch(() =>  {return 'getPageTitle() func failed'});
   }
 
-  const describeJsHandle = async (jsHandle)  => {
+  const describeJsHandle = async (jsHandle: JSHandle): Promise<string>  => {
     return jsHandle.executionContext().evaluate(obj => {
       if (obj instanceof Error)
         return obj.message;
@@ -193,19 +193,9 @@ beforeEach(async () => {
     if (!message.args().length) return;
     const title = await getPageTitle();
     try {
-      switch (message.type()) {
-        case 'error':
-        case 'warning':
-        case 'debug':
-          const args = await Promise.all(message.args().map(a => describeJsHandle(a)));
-          console.info(`Page console: "${title}"`);
-          console[message.type() === 'warning' ? 'warn' : message.type()](...args);
-          console.log('');
-          break;
-        default:
-          // Do nothing for other console types.
-          break;
-      }
+      const args = await Promise.all(message.args().map(a => describeJsHandle(a)));
+      console[message.type() === 'warning' ? 'warn' : message.type()](`Page console: "${title}"\n`, ...args);
+      console.log('');
     } catch (err) {
       console.error(`❗ "${title}"\nException occurred when getting page console message.\n${err}\n${message.text()}`);
     }

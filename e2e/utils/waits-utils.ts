@@ -273,7 +273,6 @@ export async function waitWhileLoading(page: Page, timeout: number = (2 * 60 * 1
 
   const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
   const spinElementsSelector = `[style*="running spin"], .spinner:empty, [style*="running rotation"]${waitForRuntime ? ':not([aria-hidden="true"])' : ''}`;
-  const appErrorSelector = 'app-initial-error h1';
 
   // To prevent checking on blank page, wait for elements exist in DOM.
   await Promise.race([
@@ -281,13 +280,11 @@ export async function waitWhileLoading(page: Page, timeout: number = (2 * 60 * 1
     page.waitForSelector(spinElementsSelector),
   ]);
 
-  // Waiting for spinner (loading) to stop and checking for page error.
-  await page.waitForFunction((spinnerCss, errCss) => {
-    const appError = document.querySelector(errCss);
-    if (appError) throw new Error(appError);
-    const spinner = document.querySelectorAll(spinnerCss);
-    return spinner && spinner.length === 0;
-  }, {polling: 'mutation', timeout}, spinElementsSelector, appErrorSelector);
+  // Wait for spinners stop and gone.
+  await page.waitForFunction((css) => {
+    const elements = document.querySelectorAll(css);
+    return elements && elements.length === 0;
+  }, {polling: 'mutation', timeout}, spinElementsSelector);
 
   await page.waitForTimeout(500);
 }

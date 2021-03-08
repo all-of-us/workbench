@@ -4,7 +4,7 @@ import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
 import {waitForText} from 'utils/waits-utils';
-import { logger } from 'libs/logger';
+
 
 describe('Cohorts', () => {
 
@@ -43,7 +43,7 @@ describe('Cohorts', () => {
     // Checking Group 1 Count. should match Group 1 participants count.
     const group1CountInt = Number((await group1.getGroupCount()).replace(/,/g, ''));
     expect(group1CountInt).toBeGreaterThan(1);
-    logger.info('Group 1: Physical Measurement -> BMI count: ' + group1CountInt);
+    console.log('Group 1: Physical Measurement -> BMI count: ' + group1CountInt);
 
     // Checking Total Count: should match Group 1 participants count.
     const totalCount = await cohortPage.getTotalCount();
@@ -54,18 +54,18 @@ describe('Cohorts', () => {
     const group2Count = await group2.includeDemographicsDeceased();
     const group2CountInt = Number(group2Count.replace(/,/g, ''));
     expect(group2CountInt).toBeGreaterThan(1);
-    logger.info('Group 2: Demographics -> Deceased count: ' + group2CountInt);
+    console.log('Group 2: Demographics -> Deceased count: ' + group2CountInt);
 
     // Compare the new Total Count with the old Total Count.
     const newTotalCount = await cohortPage.getTotalCount();
     const newTotalCountInt = Number(newTotalCount.replace(/,/g, ''));
     // Adding additional group decreased Total Count.
     expect(newTotalCountInt).toBeLessThan(group1CountInt);
-    logger.info('New Total Count: ' + newTotalCountInt);
+    console.log('New Total Count: ' + newTotalCountInt);
 
     // Save new cohort - click create cohort button
     const cohortName = await cohortPage.saveCohortAs();
-    logger.info(`Created Cohort "${cohortName}"`);
+    console.log(`Created Cohort "${cohortName}"`);
 
     // Open Cohort details.
     const cohortLink = await Link.findByName(page, {name: cohortName});
@@ -95,7 +95,7 @@ describe('Cohorts', () => {
     const modalContent = await cohortPage.deleteCohort();
     // Verify dialog content text
     expect(modalContent).toContain(`Are you sure you want to delete Cohort: ${cohortName}?`);
-    logger.info(`Deleted Cohort "${cohortName}"`);
+    console.log(`Deleted Cohort "${cohortName}"`);
 
   });
 
