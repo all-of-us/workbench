@@ -41,10 +41,22 @@ public class AccessTierServiceImpl implements AccessTierService {
       if (configProvider.get().featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers) {
         return accessTierDao.findAll();
       } else {
-        return ImmutableList.of(accessTierDao.findOneByShortName(REGISTERED_TIER_SHORT_NAME));
+        return ImmutableList.of(getRegisteredTier());
       }
     } else {
       return Collections.emptyList();
     }
+  }
+
+  public DbAccessTier getRegisteredTier() {
+    return getAccessTier(REGISTERED_TIER_SHORT_NAME);
+  }
+
+  public DbAccessTier getAccessTier(String shortName) {
+    return accessTierDao.findOneByShortName(shortName);
+  }
+
+  public List<DbAccessTier> getAllTiers() {
+    return accessTierDao.findAll();
   }
 }

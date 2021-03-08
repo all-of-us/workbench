@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessTierService;
-import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CdrVersionService {
-  private final AccessTierDao accessTierDao;
   private final AccessTierService accessTierService;
   private final CdrVersionDao cdrVersionDao;
   private final CdrVersionMapper cdrVersionMapper;
@@ -33,13 +31,11 @@ public class CdrVersionService {
 
   @Autowired
   public CdrVersionService(
-      AccessTierDao accessTierDao,
       AccessTierService accessTierService,
       CdrVersionDao cdrVersionDao,
       CdrVersionMapper cdrVersionMapper,
       FireCloudService fireCloudService,
       Provider<DbUser> userProvider) {
-    this.accessTierDao = accessTierDao;
     this.accessTierService = accessTierService;
     this.cdrVersionDao = cdrVersionDao;
     this.cdrVersionMapper = cdrVersionMapper;
@@ -110,7 +106,7 @@ public class CdrVersionService {
     DataAccessLevel accessLevel = userProvider.get().getDataAccessLevelEnum();
     if (accessLevel == DataAccessLevel.REGISTERED) {
       CdrVersionMapResponseInner registeredTierVersions =
-          getVersionsForTier(accessTierDao.findOneByShortName("registered"));
+          getVersionsForTier(accessTierService.getRegisteredTier());
       return new CdrVersionListResponse()
           .items(registeredTierVersions.getVersions())
           .defaultCdrVersionId(String.valueOf(registeredTierVersions.getDefaultCdrVersionId()));

@@ -19,8 +19,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.jetbrains.annotations.NotNull;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
@@ -53,7 +53,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
           BufferEntryStatus.CREATING, CREATING_TIMEOUT,
           BufferEntryStatus.ASSIGNING, ASSIGNING_TIMEOUT);
 
-  private final AccessTierDao accessTierDao;
+  private final AccessTierService accessTierService;
   private final BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   private final Clock clock;
   private final FireCloudService fireCloudService;
@@ -61,12 +61,12 @@ public class BillingProjectBufferService implements GaugeDataCollector {
 
   @Autowired
   public BillingProjectBufferService(
-      AccessTierDao accessTierDao,
+      AccessTierService accessTierService,
       BillingProjectBufferEntryDao billingProjectBufferEntryDao,
       Clock clock,
       FireCloudService fireCloudService,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
-    this.accessTierDao = accessTierDao;
+    this.accessTierService = accessTierService;
     this.billingProjectBufferEntryDao = billingProjectBufferEntryDao;
     this.clock = clock;
     this.fireCloudService = fireCloudService;
@@ -81,7 +81,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   public void bufferBillingProjects() {
     WorkbenchConfig config = this.workbenchConfigProvider.get();
 
-    for (DbAccessTier accessTier : accessTierDao.findAll()) {
+    for (DbAccessTier accessTier : accessTierService.getAllTiers()) {
       for (int i = 0; i < config.billing.bufferRefillProjectsPerTask; i++) {
         bufferBillingProject(accessTier);
       }
