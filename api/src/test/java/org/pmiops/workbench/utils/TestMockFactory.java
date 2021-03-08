@@ -223,6 +223,7 @@ public class TestMockFactory {
   public static DbCdrVersion createDefaultCdrVersion(
       CdrVersionDao cdrVersionDao, AccessTierDao accessTierDao) {
     final DbCdrVersion cdrVersion = new DbCdrVersion();
+    cdrVersion.setCdrVersionId(1);
     cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
