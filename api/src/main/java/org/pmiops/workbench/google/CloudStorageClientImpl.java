@@ -7,7 +7,6 @@ import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.CopyWriter;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.Storage.CopyRequest;
-import com.google.cloud.storage.StorageOptions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.io.ByteArrayInputStream;
@@ -21,17 +20,16 @@ import javax.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.NotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
-public class CloudStorageServiceImpl implements CloudStorageService {
+public class CloudStorageClientImpl implements CloudStorageClient {
 
   final Provider<WorkbenchConfig> configProvider;
+  final Provider<Storage> storageProvider;
 
-  @Autowired
-  public CloudStorageServiceImpl(Provider<WorkbenchConfig> configProvider) {
+  public CloudStorageClientImpl(
+      Provider<Storage> storageProvider, Provider<WorkbenchConfig> configProvider) {
     this.configProvider = configProvider;
+    this.storageProvider = storageProvider;
   }
 
   @Override
@@ -52,16 +50,18 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   @Override
   public List<Blob> getBlobPage(String bucketName) {
-    Storage storage = StorageOptions.getDefaultInstance().getService();
-    Iterable<Blob> blobList = storage.get(bucketName).list().getValues();
+    Iterable<Blob> blobList = storageProvider.get().get(bucketName).list().getValues();
     return ImmutableList.copyOf(blobList);
   }
 
   @Override
   public List<Blob> getBlobPageForPrefix(String bucketName, String directory) {
-    Storage storage = StorageOptions.getDefaultInstance().getService();
     Iterable<Blob> blobList =
-        storage.get(bucketName).list(Storage.BlobListOption.prefix(directory)).getValues();
+        storageProvider
+            .get()
+            .get(bucketName)
+            .list(Storage.BlobListOption.prefix(directory))
+            .getValues();
     return ImmutableList.copyOf(blobList);
   }
 
@@ -76,8 +76,7 @@ public class CloudStorageServiceImpl implements CloudStorageService {
   // wrapper for storage.get() which throws NotFoundException instead of NullPointerException
   @Override
   public Blob getBlob(String bucketName, String objectPath) {
-    Storage storage = StorageOptions.getDefaultInstance().getService();
-    Blob result = storage.get(bucketName, objectPath);
+    Blob result = storageProvider.get().get(bucketName, objectPath);
     if (result == null) {
       throw new NotFoundException(String.format("Bucket %s, Object %s", bucketName, objectPath));
     }
@@ -86,21 +85,22 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   @Override
   public void copyBlob(BlobId from, BlobId to) {
-    Storage storage = StorageOptions.getDefaultInstance().getService();
     // Clears user-defined metadata, e.g. locking information on notebooks.
     BlobInfo toInfo = BlobInfo.newBuilder(to).build();
-    CopyWriter w = storage.copy(CopyRequest.newBuilder().setSource(from).setTarget(toInfo).build());
+    CopyWriter w =
+        storageProvider
+            .get()
+            .copy(CopyRequest.newBuilder().setSource(from).setTarget(toInfo).build());
     while (!w.isDone()) {
       w.copyChunk();
     }
   }
 
   @Override
-  public void writeFile(String bucketName, String fileName, byte[] bytes) {
-    Storage storage = StorageOptions.getDefaultInstance().getService();
+  public Blob writeFile(String bucketName, String fileName, byte[] bytes) {
     BlobId blobId = BlobId.of(bucketName, fileName);
     BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("text/plain").build();
-    storage.create(blobInfo, bytes);
+    return storageProvider.get().create(blobInfo, bytes);
   }
 
   @Override
@@ -145,8 +145,7 @@ public class CloudStorageServiceImpl implements CloudStorageService {
 
   @Override
   public void deleteBlob(BlobId blobId) {
-    Storage storage = StorageOptions.getDefaultInstance().getService();
-    storage.delete(blobId);
+    storageProvider.get().delete(blobId);
   }
 
   @Override
@@ -154,7 +153,7 @@ public class CloudStorageServiceImpl implements CloudStorageService {
     if (ids.isEmpty()) {
       return ImmutableSet.of();
     }
-    return StorageOptions.getDefaultInstance().getService().get(ids).stream()
+    return storageProvider.get().get(ids).stream()
         .filter(Objects::nonNull)
         // Clear the "generation" of the blob ID for better symmetry to the input.
         .map(b -> BlobId.of(b.getBucket(), b.getName()))

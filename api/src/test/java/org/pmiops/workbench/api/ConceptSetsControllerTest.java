@@ -56,13 +56,12 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.Criteria;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.ResearchPurpose;
@@ -207,7 +206,7 @@ public class ConceptSetsControllerTest {
     BigQueryService.class,
     BillingProjectAuditor.class,
     BillingProjectBufferService.class,
-    CloudStorageService.class,
+    CloudStorageClient.class,
     CohortCloningService.class,
     CohortFactoryImpl.class,
     CohortMapperImpl.class,
@@ -279,7 +278,6 @@ public class ConceptSetsControllerTest {
     workspace = new Workspace();
     workspace.setName(WORKSPACE_NAME);
     workspace.setNamespace(WORKSPACE_NAMESPACE);
-    workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(new ResearchPurpose());
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
     workspace.setBillingAccountName("billing-account");
@@ -287,7 +285,6 @@ public class ConceptSetsControllerTest {
     workspace2 = new Workspace();
     workspace2.setName(WORKSPACE_NAME_2);
     workspace2.setNamespace(WORKSPACE_NAMESPACE);
-    workspace2.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace2.setResearchPurpose(new ResearchPurpose());
     workspace2.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
     workspace2.setBillingAccountName("billing-account");

@@ -52,11 +52,9 @@ export interface WithProfileErrorModalProps {
   showProfileErrorModal?: (message: string) => void;
 }
 
-export const withProfileErrorWrapper = ({title = ''}) => {
+export const withProfileErrorWrapper = WrappedComponent => {
   const body = ({message}) => (<React.Fragment>
-    <div>An error occurred while saving your profile. The following message was
-        returned:
-    </div>
+    <div>An error occurred while saving your profile. The following message was returned:</div>
     <div style={{marginTop: '1rem', marginBottom: '1rem'}}>
         "{message}"
     </div>
@@ -64,15 +62,13 @@ export const withProfileErrorWrapper = ({title = ''}) => {
         Please try again or contact <a
         href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
     </div>
-    </React.Fragment>);
+  </React.Fragment>);
 
-  return WrappedComponent => {
-    const ProileErrorWrapper = ({showErrorModal, ...props}) => {
-      return <WrappedComponent showProfileErrorModal={(message) => showErrorModal(title, body({message}))} {...props}/>;
-    };
-
-    return ProileErrorWrapper;
+  const ProfileErrorWrapper = ({showErrorModal, ...props}) => {
+    return <WrappedComponent showProfileErrorModal={(message) => showErrorModal('Error saving profile', body({message}))} {...props}/>;
   };
+
+  return ProfileErrorWrapper;
 };
 
-export const withProfileErrorModal = ({title = '' }) => fp.flow(withProfileErrorWrapper({title}), withErrorModal());
+export const withProfileErrorModal = fp.flow(withProfileErrorWrapper, withErrorModal());

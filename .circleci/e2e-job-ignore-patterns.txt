@@ -6,8 +6,9 @@
 .log
 .pdf
 .gitignore
-Test.java
-Test.kt
+.java
+.kt
+.rb
 .spec.tsx
 .git
 LICENSE.txt

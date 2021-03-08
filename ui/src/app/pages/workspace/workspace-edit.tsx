@@ -58,7 +58,6 @@ import {
   BillingAccount,
   CdrVersion,
   CdrVersionListResponse,
-  DataAccessLevel,
   DisseminateResearchEnum,
   Profile,
   ResearchOutcomeEnum,
@@ -354,7 +353,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
       if (this.isMode(WorkspaceEditMode.Create)) {
         workspace = {
           name: '',
-          dataAccessLevel: DataAccessLevel.Registered,
+          accessTierShortName: 'registered',
           cdrVersionId: '',
           researchPurpose: {
             ancestry: false,

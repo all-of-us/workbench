@@ -50,7 +50,6 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.CohortStatus;
 import org.pmiops.workbench.model.ColumnFilter;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.FieldSet;
 import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
@@ -134,7 +133,6 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
     DbWorkspace workspace = new DbWorkspace();
     workspace.setCdrVersion(cdrVersion);
     workspace.setName("name");
-    workspace.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     workspace = workspaceDao.save(workspace);
 
     DbCohort cohort = new DbCohort();

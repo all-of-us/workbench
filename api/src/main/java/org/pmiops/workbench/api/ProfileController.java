@@ -37,7 +37,7 @@ import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership.CreationStatusEnum;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
@@ -107,7 +107,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final ActionAuditQueryService actionAuditQueryService;
   private final CaptchaVerificationService captchaVerificationService;
   private final Clock clock;
-  private final CloudStorageService cloudStorageService;
+  private final CloudStorageClient cloudStorageClient;
   private final DemographicSurveyMapper demographicSurveyMapper;
   private final DirectoryService directoryService;
   private final FireCloudService fireCloudService;
@@ -129,7 +129,7 @@ public class ProfileController implements ProfileApiDelegate {
       ActionAuditQueryService actionAuditQueryService,
       CaptchaVerificationService captchaVerificationService,
       Clock clock,
-      CloudStorageService cloudStorageService,
+      CloudStorageClient cloudStorageClient,
       DemographicSurveyMapper demographicSurveyMapper,
       DirectoryService directoryService,
       FireCloudService fireCloudService,
@@ -148,7 +148,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.actionAuditQueryService = actionAuditQueryService;
     this.captchaVerificationService = captchaVerificationService;
     this.clock = clock;
-    this.cloudStorageService = cloudStorageService;
+    this.cloudStorageClient = cloudStorageClient;
     this.demographicSurveyMapper = demographicSurveyMapper;
     this.directoryService = directoryService;
     this.fireCloudService = fireCloudService;

@@ -26,7 +26,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudMonitoringService;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
@@ -109,7 +109,7 @@ public class WorkspaceAdminControllerTest {
     WorkspaceMapperImpl.class,
   })
   @MockBean({
-    CloudStorageService.class,
+    CloudStorageClient.class,
     NotebooksService.class,
     ConceptSetService.class,
     CohortService.class,

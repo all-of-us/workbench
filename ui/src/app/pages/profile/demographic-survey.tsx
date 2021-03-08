@@ -6,6 +6,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
 import {AouTitle} from 'app/components/text-wrappers';
+import {withProfileErrorModal, WithProfileErrorModalProps} from 'app/components/with-error-modal';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {
   DropDownSection,
@@ -14,6 +15,7 @@ import {
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, toggleIncludes} from 'app/utils';
 
+import {convertAPIError, reportError} from 'app/utils/errors';
 import {environment} from 'environments/environment';
 import {Disability, GenderIdentity, Profile, Race, SexAtBirth} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -44,12 +46,12 @@ const SelectAllText = () => {
   return <div style={{color: colors.primary, fontSize: '12px', }}>Select all that apply.</div>;
 };
 
-export interface Props {
+export interface Props extends WithProfileErrorModalProps {
   profile: Profile;
   // Required if enablePrevious is true.
   onPreviousClick?: (profile: Profile) => void;
   onCancelClick?: (profile: Profile) => void;
-  onSubmit: (profile: Profile, captchaToken: string) => Promise<Profile>;
+  saveProfile: (profile: Profile, captchaToken: string) => Promise<Profile>;
   enableCaptcha: boolean;
   enablePrevious: boolean;
   showStepCount: boolean;
@@ -64,23 +66,25 @@ interface State {
 
 const isChecked = (demographicSurvey, optionKey, value) =>
   demographicSurvey && demographicSurvey[optionKey] && demographicSurvey[optionKey].includes(value);
-export class DemographicSurvey extends React.Component<Props, State> {
-  private captchaRef = React.createRef<ReCAPTCHA>();
-  constructor(props: any) {
-    super(props);
-    this.state = {
-      captcha: false,
-      captchaToken: '',
-      loading: false,
-      profile: {...this.props.profile},
-    };
-  }
+
+export const DemographicSurvey = withProfileErrorModal(
+  class DemographicSurveyComponent extends React.Component<Props, State> {
+    private captchaRef = React.createRef<ReCAPTCHA>();
+    constructor(props: any) {
+      super(props);
+      this.state = {
+        captcha: false,
+        captchaToken: '',
+        loading: false,
+        profile: {...this.props.profile},
+      };
+    }
 
   // Clicking this checkbox will remove other answers within the 'checkbox group'
-  createNoAnswerCheckbox({value, label}, optionKey: string) {
-    const {profile: {demographicSurvey}} = this.state;
+    createNoAnswerCheckbox({value, label}, optionKey: string) {
+      const {profile: {demographicSurvey}} = this.state;
 
-    return <CheckBox label={label}
+      return <CheckBox label={label}
                      data-test-id={`checkbox-${optionKey}-${value}`}
                      style={styles.checkbox}
                      key={value.toString()}
@@ -89,14 +93,14 @@ export class DemographicSurvey extends React.Component<Props, State> {
                      manageOwnState={false}
                      onChange={nextValue => this.setState(fp.set(['profile', 'demographicSurvey', optionKey], nextValue ? [value] : []))}
     />;
-  }
+    }
 
   // Clicking one of these options will remove the prefer not to answer selection, if selected
-  createOptionCheckbox(optionKey: string, optionObject: any, preferNoAnswerValue: any) {
-    const {profile: {demographicSurvey}} = this.state;
-    const initialValue = demographicSurvey && demographicSurvey[optionKey] && demographicSurvey[optionKey].includes(optionObject.value);
+    createOptionCheckbox(optionKey: string, optionObject: any, preferNoAnswerValue: any) {
+      const {profile: {demographicSurvey}} = this.state;
+      const initialValue = demographicSurvey && demographicSurvey[optionKey] && demographicSurvey[optionKey].includes(optionObject.value);
 
-    return <CheckBox label={optionObject.label}
+      return <CheckBox label={optionObject.label}
                      data-test-id={'checkbox-' + optionObject.value.toString()}
                      style={styles.checkbox} key={optionObject.value.toString()}
                      checked={initialValue}
@@ -104,61 +108,81 @@ export class DemographicSurvey extends React.Component<Props, State> {
                      wrapperStyle={styles.checkboxWrapper} labelStyle={styles.checkboxLabel}
                      onChange={(value) => this.updateList(optionKey, optionObject.value, preferNoAnswerValue)}
     />;
-  }
+    }
 
-  captureCaptchaResponse(token) {
-    this.setState({captchaToken: token, captcha: true});
-  }
+    captureCaptchaResponse(token) {
+      this.setState({captchaToken: token, captcha: true});
+    }
 
-  checkboxArea(optionKey, pntaOption, allOptions) {
-    return fp.flow(
-      fp.remove({value: pntaOption}), // Remove the PNTA checkbox from the list, return list w/o PNTA
-      fp.map(item => this.createOptionCheckbox(optionKey, item, pntaOption)), // Create checkboxes sans PNTA
-      v => [...v, this.createNoAnswerCheckbox(fp.find({value: pntaOption}, allOptions), optionKey )] // Append PNTA checkbox to list
+    checkboxArea(optionKey, pntaOption, allOptions) {
+      return fp.flow(
+        fp.remove({value: pntaOption}), // Remove the PNTA checkbox from the list, return list w/o PNTA
+        fp.map(item => this.createOptionCheckbox(optionKey, item, pntaOption)), // Create checkboxes sans PNTA
+        v => [...v, this.createNoAnswerCheckbox(fp.find({value: pntaOption}, allOptions), optionKey )] // Append PNTA checkbox to list
     )(allOptions);
-  }
+    }
 
-  updateList(key, value, preferNoAnswerValue) {
+    updateList(key, value, preferNoAnswerValue) {
     // Toggle Includes removes the element if it already exists and adds if not
-    const attributeList = fp.flow(
-      toggleIncludes(value),
-      fp.remove(v => v === preferNoAnswerValue)
+      const attributeList = fp.flow(
+        toggleIncludes(value),
+        fp.remove(v => v === preferNoAnswerValue)
     )(this.state.profile.demographicSurvey[key] || []);
-    this.updateDemographicAttribute(key, attributeList);
-  }
+      this.updateDemographicAttribute(key, attributeList);
+    }
 
-  updateDemographicAttribute(attribute, value) {
-    this.setState(fp.set(['profile', 'demographicSurvey', attribute], value));
-  }
+    updateDemographicAttribute(attribute, value) {
+      this.setState(fp.set(['profile', 'demographicSurvey', attribute], value));
+    }
 
-  validateDemographicSurvey(demographicSurvey) {
-    validate.validators.nullBoolean = v => (v === true || v === false || v === null) ? undefined : 'value must be selected';
-    const validationCheck = {
-      race: { presence: { allowEmpty: false},  },
-      ethnicity: { presence: { allowEmpty: false } },
-      genderIdentityList: { presence: { allowEmpty: false } },
-      identifiesAsLgbtq: { nullBoolean: {} },
-      sexAtBirth: { presence: { allowEmpty: false } },
-      yearOfBirth: { presence: { allowEmpty: false } },
-      disability: { presence: { allowEmpty: false } },
-      education: { presence: { allowEmpty: false } },
-      lgbtqIdentity: {
-        length: {
-          maximum: 255,
-          tooLong: '^LGBTQ identity description is too long for our system. ' +
+    validateDemographicSurvey(demographicSurvey) {
+      validate.validators.nullBoolean = v => (v === true || v === false || v === null) ? undefined : 'value must be selected';
+      const validationCheck = {
+        race: { presence: { allowEmpty: false},  },
+        ethnicity: { presence: { allowEmpty: false } },
+        genderIdentityList: { presence: { allowEmpty: false } },
+        identifiesAsLgbtq: { nullBoolean: {} },
+        sexAtBirth: { presence: { allowEmpty: false } },
+        yearOfBirth: { presence: { allowEmpty: false } },
+        disability: { presence: { allowEmpty: false } },
+        education: { presence: { allowEmpty: false } },
+        lgbtqIdentity: {
+          length: {
+            maximum: 255,
+            tooLong: '^LGBTQ identity description is too long for our system. ' +
               'Please reduce to 255 or fewer characters.'
+          }
+        },
+      };
+      return validate(demographicSurvey, validationCheck);
+    }
+
+    async saveSurvey() {
+      const {captchaToken} = this.state;
+      this.setState({loading: true});
+
+      try {
+        const savedProfile = await this.props.saveProfile(this.state.profile, captchaToken);
+        this.setState(prevState => ({profile: savedProfile || prevState.profile, loading: false}));
+      } catch (error) {
+        reportError(error);
+        const {message} = await convertAPIError(error);
+        this.props.showProfileErrorModal(message);
+        if (environment.enableCaptcha && this.props.enableCaptcha) {
+          // Reset captcha
+          this.captchaRef.current.reset();
+          this.setState({captcha: false});
         }
-      },
-    };
-    return validate(demographicSurvey, validationCheck);
-  }
+        this.setState({loading: false});
+      }
+    }
 
-  render() {
-    const {profile: {demographicSurvey = {}}, captcha, captchaToken, loading} = this.state;
+    render() {
+      const {profile: {demographicSurvey = {}}, captcha, loading} = this.state;
 
-    const errors = this.validateDemographicSurvey(demographicSurvey);
+      const errors = this.validateDemographicSurvey(demographicSurvey);
 
-    return <div style={{marginTop: '1rem', paddingLeft: '1rem', width: '32rem'}}>
+      return <div style={{marginTop: '1rem', paddingLeft: '1rem', width: '32rem'}}>
       <TextColumn>
         <div style={{fontSize: 28, fontWeight: 400, marginBottom: '.8rem'}}>Demographics Survey</div>
         {this.props.showStepCount &&
@@ -313,29 +337,7 @@ or another sexual and/or gender minority?'>
                     || (errors && Object.keys(errors).length > 0)
                     || (!environment.enableCaptcha && !this.props.enableCaptcha && !captcha)
                   }
-                  onClick={async() => {
-                    this.setState({loading: true});
-                    try {
-                      const savedProfile = await this.props.onSubmit(this.state.profile, captchaToken);
-                      // If the submit fails, then profile is null, and the try will apparently not
-                      // always break in time to prevent these next lines from executing. so we
-                      // null-check and don't null out the profile if it doesn't exist.
-                      if (!!savedProfile) {
-                        this.setState({profile: savedProfile, loading: false});
-                      } else {
-                        this.setState({loading: false});
-                      }
-                    } catch (error) {
-                      // TODO: we need to show some user-facing error message when create account fails.
-                      console.log(error);
-                      if (environment.enableCaptcha && this.props.enableCaptcha) {
-                        // Reset captcha
-                        this.captchaRef.current.reset();
-                        this.setState({captcha: false});
-                      }
-                      this.setState({loading: false});
-                    }
-                  }}
+                  onClick={_ => this.saveSurvey()}
                   data-test-id={'submit-button'}
           >
             Submit
@@ -344,5 +346,5 @@ or another sexual and/or gender minority?'>
       </FormSection>
       {loading && <SpinnerOverlay overrideStylesOverlay={{position: 'fixed'}}/>}
     </div>;
-  }
-}
+    }
+  });

@@ -49,11 +49,17 @@
   },
   "wgsCohortExtraction": {
     "serviceAccount": "wgs-cohort-extraction@all-of-us-rw-staging.iam.gserviceaccount.com",
+    "serviceAccountTerraProxyGroup": "",
     "operationalTerraWorkspaceNamespace": "",
     "operationalTerraWorkspaceName": "",
+    "operationalTerraWorkspaceBucket": "",
+    "extractionPetServiceAccount": "",
     "extractionMethodConfigurationNamespace": "",
     "extractionMethodConfigurationName": "",
-    "extractionMethodConfigurationVersion": 1
+    "extractionMethodConfigurationVersion": 1,
+    "extractionCohortsDataset": "",
+    "extractionDestinationDataset": "",
+    "extractionTempTablesDataset": ""
   },
   "cdr": {
     "debugQueries": true

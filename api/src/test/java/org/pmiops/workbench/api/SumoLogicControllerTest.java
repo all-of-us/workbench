@@ -19,7 +19,7 @@ import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.UnauthorizedException;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.EgressEventRequest;
 import org.pmiops.workbench.opsgenie.EgressEventService;
@@ -38,7 +38,7 @@ public class SumoLogicControllerTest {
   private static final String API_KEY = "12345";
 
   @MockBean private EgressEventAuditor mockEgressEventAuditor;
-  @MockBean private CloudStorageService mockCloudStorageService;
+  @MockBean private CloudStorageClient mockCloudStorageClient;
   @MockBean private EgressEventService mockEgressEventService;
   private static WorkbenchConfig config;
 
@@ -77,7 +77,7 @@ public class SumoLogicControllerTest {
     request = new EgressEventRequest();
     request.setEventsJsonArray(objectMapper.writeValueAsString(Collections.singletonList(event)));
 
-    when(mockCloudStorageService.getCredentialsBucketString(
+    when(mockCloudStorageClient.getCredentialsBucketString(
             SumoLogicController.SUMOLOGIC_KEY_FILENAME))
         .thenReturn(API_KEY);
   }

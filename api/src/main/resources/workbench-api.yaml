@@ -3709,6 +3709,8 @@ definitions:
         "$ref": "#/definitions/ArchivalStatus"
       hasMicroarrayData:
         type: boolean
+      hasWgsData:
+        type: boolean
       hasFitbitData:
         type: boolean
       hasCopeSurveyData:
@@ -4094,7 +4096,6 @@ definitions:
       cdrVersionId: "2"
       creationTime: 1588097211621
       creator: "user@aou-domain.org"
-      dataAccessLevel: "registered"
       etag: "\"1\""
       googleBucketName: "gcs-bucket-AAAAAAAA-BBBBB"
       id: "mynewestworkspace"
@@ -4160,9 +4161,6 @@ definitions:
         type: string
       accessTierShortName:
         type: string
-      dataAccessLevel:
-        "$ref": "#/definitions/DataAccessLevel"
-        description: DEPRECATED.  Use accessTierShortName.
       researchPurpose:
         "$ref": "#/definitions/ResearchPurpose"
       billingStatus:

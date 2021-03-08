@@ -301,8 +301,8 @@ commands:
           name: "Check commit message and find changed file names that do not match ignore patterns"
           command: bash .circleci/skip-e2e-pr-checks.sh
       - halt-test-check:
-          # Stop running Puppeteer end-to-end test if code are not changed in "api", "ui" and "e2e" directories
-          dir_names: "api ui e2e .circleci"
+          # Stop running Puppeteer end-to-end test if code in relevant directories is unchanged.
+          dir_names: "ui e2e .circleci"
 
 # -------------------------
 #        JOBS
@@ -566,6 +566,7 @@ jobs:
               \"circleBuildUrl\": \"${CIRCLE_BUILD_URL}\", \
               \"circleNodeIndex\": ${CIRCLE_NODE_INDEX} \
               }" > ./logs/circleci_parameters.json
+          when: always
       - store_artifacts:
           path: ~/workbench/e2e/logs
           destination: logs

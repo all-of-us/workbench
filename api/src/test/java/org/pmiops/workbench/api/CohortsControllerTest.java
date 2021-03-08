@@ -72,7 +72,8 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.genomics.WgsCohortExtractionService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortStatus;
@@ -80,7 +81,6 @@ import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DuplicateCohortRequest;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -178,7 +178,7 @@ public class CohortsControllerTest {
   private TestMockFactory testMockFactory;
 
   @Autowired CdrVersionService cdrVersionService;
-  @Autowired CloudStorageService cloudStorageService;
+  @Autowired CloudStorageClient cloudStorageClient;
   @Autowired CohortMaterializationService cohortMaterializationService;
   @Autowired ComplianceService complianceService;
   @Autowired FireCloudService fireCloudService;
@@ -224,7 +224,7 @@ public class CohortsControllerTest {
     BillingProjectAuditor.class,
     BillingProjectBufferService.class,
     CdrVersionService.class,
-    CloudStorageService.class,
+    CloudStorageClient.class,
     CohortBuilderMapper.class,
     CohortBuilderService.class,
     CohortMaterializationService.class,
@@ -243,6 +243,7 @@ public class CohortsControllerTest {
     ReviewQueryBuilder.class,
     UserRecentResourceService.class,
     UserServiceAuditor.class,
+    WgsCohortExtractionService.class,
     WorkspaceAuditor.class,
   })
   static class Configuration {
@@ -341,7 +342,6 @@ public class CohortsControllerTest {
     workspace = new Workspace();
     workspace.setName(WORKSPACE_NAME);
     workspace.setNamespace(WORKSPACE_NAMESPACE);
-    workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(new ResearchPurpose());
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
     workspace.setBillingAccountName("billing-account");
@@ -349,7 +349,6 @@ public class CohortsControllerTest {
     workspace2 = new Workspace();
     workspace2.setName(WORKSPACE_NAME_2);
     workspace2.setNamespace(WORKSPACE_NAMESPACE);
-    workspace2.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace2.setResearchPurpose(new ResearchPurpose());
     workspace2.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
     workspace2.setBillingAccountName("billing-account");
@@ -870,8 +869,7 @@ public class CohortsControllerTest {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
     cdrVersion.setName(CDR_VERSION_NAME);
-    // TODO: (RW-6336) This should be swapped out for the Wgs field once that's implemented
-    cdrVersion.setMicroarrayBigqueryDataset("microarray");
+    cdrVersion.setWgsBigqueryDataset("wgs");
     cdrVersionDao.save(cdrVersion);
 
     when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
@@ -920,8 +918,7 @@ public class CohortsControllerTest {
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
     cdrVersion.setName(CDR_VERSION_NAME);
-    // TODO: (RW-6336) This should be swapped out for the Wgs field once that's implemented
-    cdrVersion.setMicroarrayBigqueryDataset("microarray");
+    cdrVersion.setWgsBigqueryDataset("wgs");
     cdrVersionDao.save(cdrVersion);
 
     cohortsController.extractCohortGenomes(

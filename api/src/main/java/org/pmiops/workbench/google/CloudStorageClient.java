@@ -11,7 +11,7 @@ import org.json.JSONObject;
 import org.pmiops.workbench.model.FileDetail;
 
 /** Encapsulate Google APIs for interfacing with Google Cloud Storage. */
-public interface CloudStorageService {
+public interface CloudStorageClient {
 
   String readMandrillApiKey();
 
@@ -38,7 +38,7 @@ public interface CloudStorageService {
 
   Set<BlobId> getExistingBlobIdsIn(List<BlobId> id);
 
-  void writeFile(String bucketName, String fileName, byte[] bytes);
+  Blob writeFile(String bucketName, String fileName, byte[] bytes);
 
   void copyBlob(BlobId from, BlobId to);
 

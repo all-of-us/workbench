@@ -29,7 +29,6 @@ import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
 import {AdminUsersComponent} from './pages/admin/admin-users';
-import {AdminWorkspaceComponent} from './pages/admin/admin-workspace';
 import {AppComponent, overriddenUrlKey} from './pages/app/component';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
@@ -64,13 +63,10 @@ import {
 } from 'notebooks-generated/fetch';
 
 import {TextModalComponent} from 'app/components/text-modal';
-import {AdminWorkspaceSearchComponent} from 'app/pages/admin/admin-workspace-search';
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
 import {FooterComponent} from './components/footer';
-import {AdminInstitutionComponent} from './pages/admin/admin-institution';
-import {AdminInstitutionEditComponent} from './pages/admin/admin-institution-edit';
 
 
 
@@ -123,10 +119,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
   ],
   declarations: [
     AdminBannerComponent,
-    AdminInstitutionComponent,
-    AdminInstitutionEditComponent,
-    AdminWorkspaceComponent,
-    AdminWorkspaceSearchComponent,
     AdminReviewWorkspaceComponent,
     AdminUserComponent,
     AdminUsersComponent,

@@ -24,7 +24,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +34,7 @@ public class BillingGarbageCollectionService {
   private final BillingProjectBufferEntryDao billingProjectBufferEntryDao;
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final Provider<CloudStorageService> cloudStorageServiceProvider;
+  private final Provider<CloudStorageClient> cloudStorageClientProvider;
   private final Clock clock;
   private final LoadingCache<String, GoogleCredentials> credentialsLoadingCache;
   private static final Logger log =
@@ -46,13 +46,13 @@ public class BillingGarbageCollectionService {
       BillingProjectBufferEntryDao billingProjectBufferEntryDao,
       FireCloudService fireCloudService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      Provider<CloudStorageService> cloudStorageServiceProvider,
+      Provider<CloudStorageClient> cloudStorageClientProvider,
       Clock clock) {
     this.billingProjectGarbageCollectionDao = billingProjectGarbageCollectionDao;
     this.billingProjectBufferEntryDao = billingProjectBufferEntryDao;
     this.fireCloudService = fireCloudService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.cloudStorageServiceProvider = cloudStorageServiceProvider;
+    this.cloudStorageClientProvider = cloudStorageClientProvider;
     this.clock = clock;
 
     this.credentialsLoadingCache = initializeCredentialsLoadingCache();
@@ -81,7 +81,7 @@ public class BillingGarbageCollectionService {
             new CacheLoader<String, GoogleCredentials>() {
               @Override
               public GoogleCredentials load(String saEmail) throws IOException {
-                return cloudStorageServiceProvider
+                return cloudStorageClientProvider
                     .get()
                     .getGarbageCollectionServiceAccountCredentials(saEmail)
                     .createScoped(FireCloudServiceImpl.FIRECLOUD_API_OAUTH_SCOPES);

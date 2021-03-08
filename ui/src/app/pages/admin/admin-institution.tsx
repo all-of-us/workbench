@@ -1,11 +1,9 @@
-import {Component} from '@angular/core';
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {SemiBoldHeader} from 'app/components/headers';
 import {ClrIcon} from 'app/components/icons';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {ReactWrapperBase} from 'app/utils';
 import {reactStyles} from 'app/utils';
 import {navigateByUrl} from 'app/utils/navigation';
 import {Institution} from 'generated/fetch';
@@ -150,14 +148,5 @@ export class AdminInstitution extends React.Component<{}, State> {
         </DataTable>
       </FadeBox>
     </div>;
-  }
-}
-
-@Component({
-  template: '<div #root></div>'
-})
-export class AdminInstitutionComponent extends ReactWrapperBase {
-  constructor() {
-    super(AdminInstitution, []);
   }
 }

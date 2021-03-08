@@ -13,8 +13,6 @@ import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AdminUserComponent} from './pages/admin/admin-user';
 import {AdminUsersComponent} from './pages/admin/admin-users';
-import {AdminWorkspaceComponent} from './pages/admin/admin-workspace';
-import {AdminWorkspaceSearchComponent} from './pages/admin/admin-workspace-search';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
 import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
@@ -33,8 +31,6 @@ import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/com
 import {environment} from 'environments/environment';
 import {DisabledGuard} from './guards/disabled-guard.service';
 import {WorkspaceGuard} from './guards/workspace-guard.service';
-import {AdminInstitutionComponent} from './pages/admin/admin-institution';
-import {AdminInstitutionEditComponent} from './pages/admin/admin-institution-edit';
 import {BreadcrumbType, NavStore} from './utils/navigation';
 
 
@@ -354,6 +350,31 @@ const routes: Routes = [
             component: AppRouting,
             data: {}
           },
+          {
+            path: 'workspaces',
+            component: AppRouting,
+            data: {},
+          },
+          {
+            path: 'workspaces/:workspaceNamespace',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'institution',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'institution/add',
+            component: AppRouting,
+            data: {},
+          },
+          {
+            path: 'institution/edit/:institutionId',
+            component: AppRouting,
+            data: {},
+          },
           // non-migrated routes go HERE
           {
             path: 'review-workspace',
@@ -379,28 +400,6 @@ const routes: Routes = [
             path: 'banner',
             component: AdminBannerComponent,
             data: {title: 'Create Banner'}
-          },
-          {
-            path: 'workspaces',
-            component: AdminWorkspaceSearchComponent,
-            data: { title: 'Workspace Admin'},
-          },
-          {
-            path: 'workspaces/:workspaceNamespace',
-            component: AdminWorkspaceComponent,
-            data: { title: 'Workspace Admin'}
-          }, {
-            path: 'institution',
-            component: AdminInstitutionComponent,
-            data: { title: 'Institution Admin'}
-          }, {
-            path: 'institution/add',
-            component: AdminInstitutionEditComponent,
-            data: { title: 'Institution Admin'},
-          }, {
-            path: 'institution/edit/:institutionId',
-            component: AdminInstitutionEditComponent,
-            data: { title: 'Institution Admin'},
           }
         ]
       },

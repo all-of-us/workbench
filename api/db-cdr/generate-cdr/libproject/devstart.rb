@@ -7,6 +7,7 @@ require "tempfile"
 
 ENVIRONMENTS = {
   "all-of-us-workbench-test" => {
+    :config_json => "config_test.json",
     :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
     :accessTiers => {
       "registered" => {
@@ -24,6 +25,7 @@ ENVIRONMENTS = {
     }
   },
   "all-of-us-rw-staging" => {
+    :config_json => "config_staging.json",
     :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
     :accessTiers => {
       "registered" => {
@@ -34,7 +36,20 @@ ENVIRONMENTS = {
       },
     }
   },
+  "all-of-us-rw-perf" => {
+    :config_json => "config_perf.json",
+    :publisher_account => "circle-deploy-account@all-of-us-workbench-perf.iam.gserviceaccount.com",
+    :accessTiers => {
+      "registered" => {
+        :source_cdr_project => "all-of-us-ehr-dev",
+        :ingest_cdr_project => "fc-aou-vpc-ingest-perf", # DNE yet. Follow up w/ RW-6423
+        :dest_cdr_project => "fc-aou-cdr-synth-perf", # DNE yet. Follow up w/ RW-6423
+        :auth_domain_group_email => "all-of-us-registered-perf@perf.test.firecloud.org",
+      },
+    }
+  },
   "all-of-us-rw-stable" => {
+    :config_json => "config_stable.json",
     :publisher_account => "deploy@all-of-us-rw-stable.iam.gserviceaccount.com",
     :accessTiers => {
       "registered" => {
@@ -46,6 +61,7 @@ ENVIRONMENTS = {
     }
   },
   "all-of-us-rw-preprod" => {
+    :config_json => "config_preprod.json",
     :publisher_account => "deploy@all-of-us-rw-preprod.iam.gserviceaccount.com",
     :accessTiers => {
       "registered" => {
@@ -57,6 +73,7 @@ ENVIRONMENTS = {
     }
   },
   "all-of-us-rw-prod" => {
+    :config_json => "config_prod.json",
     :publisher_account => "deploy@all-of-us-rw-prod.iam.gserviceaccount.com",
     :accessTiers => {
       "registered" => {
@@ -68,6 +85,24 @@ ENVIRONMENTS = {
     }
   }
 }
+
+# TODO: RW-6426. Refactor ENVIRONMENTS object in this file and api/libproject/devstart.rb
+# Share ENVIRONMENT related code and config parsing
+def must_get_env_value(env, key)
+  unless ENVIRONMENTS.fetch(env, {}).has_key?(key)
+    raise ArgumentError.new("env '#{env}' lacks key #{key}")
+  end
+  return ENVIRONMENTS[env][key]
+end
+
+def get_config_file(project)
+  config_json = must_get_env_value(project, :config_json)
+  return "../../config/#{config_json}"
+end
+
+def get_config(project)
+  return JSON.parse(File.read(get_config_file(project)))
+end
 
 def ensure_docker(cmd_name, args=nil)
   args = (args or [])
@@ -161,7 +196,7 @@ def publish_cdr(cmd_name, args)
     common.run_inline %W{gcloud auth activate-service-account -q --key-file #{key_file.path}}
 
     source_cdr_project = op.opts.source_cdr_project_override || tier.fetch(:source_cdr_project)
-    source_dataset = "#{tier.fetch(:source_cdr_project)}:#{op.opts.bq_dataset}"
+    source_dataset = "#{source_cdr_project}:#{op.opts.bq_dataset}"
     ingest_dataset = "#{tier.fetch(:ingest_cdr_project)}:#{op.opts.bq_dataset}"
     dest_dataset = "#{tier.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
     common.status "Copying from '#{source_dataset}' -> '#{ingest_dataset}' -> '#{dest_dataset}' as #{account}"
@@ -252,4 +287,80 @@ Common.register_command({
   :invocation => "publish-cdr",
   :description => "Publishes a CDR dataset by copying it into a Firecloud CDR project and making it readable by registered users in the corresponding environment",
   :fn => ->(*args) { publish_cdr("publish-cdr", args) }
+})
+
+def create_wgs_extraction_dataset(cmd_name, args)
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+
+  op.add_option(
+    "--bq-dataset [dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BigQuery dataset name to be created"
+  )
+  op.add_option(
+    "--project [project]",
+    ->(opts, v) { opts.project = v},
+    "The Google Cloud project associated with this workbench environment, " +
+      "e.g. all-of-us-rw-staging. Required."
+  )
+  op.opts.tier = "controlled_test"
+  op.add_option(
+    "--tier [tier]",
+    ->(opts, v) { opts.tier = v},
+    "The access tier associated with this CDR, " +
+      "e.g. registered. Default is registered."
+  )
+  op.opts.ttl = 60 * 60 * 24 * 7
+  op.add_option(
+    "--ttl [ttl]",
+    ->(opts, v) { opts.ttl = v},
+    "Add default ttl to dataset tables. Given in seconds.")
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_dataset and opts.project and opts.tier and opts.ttl }
+  op.add_validator ->(opts) { raise ArgumentError.new("unsupported project: #{opts.project}") unless ENVIRONMENTS.key? opts.project }
+  op.add_validator ->(opts) { raise ArgumentError.new("unsupported tier: #{opts.tier}") unless ENVIRONMENTS[opts.project][:accessTiers].key? opts.tier }
+  op.parse.validate
+
+  common = Common.new
+  env = ENVIRONMENTS[op.opts.project]
+  account = env.fetch(:publisher_account)
+  tier = env.fetch(:accessTiers)[op.opts.tier]
+
+  # TODO(RW-3208): Investigate using a temporary / impersonated SA credential instead of a key.
+  key_file = Tempfile.new(["#{account}-key", ".json"], "/tmp")
+  ServiceAccountContext.new(
+    op.opts.project, account, key_file.path).run do
+    # TODO(RW-3768): This currently leaves the user session with an activated service
+    # account user. Ideally the activation would be hermetic within the docker
+    # session, or else we would revert the active account after running.
+    common.run_inline %W{gcloud auth activate-service-account -q --key-file #{key_file.path}}
+
+    dest_dataset = "#{tier.fetch(:dest_cdr_project)}:#{op.opts.bq_dataset}"
+    common.run_inline %W{bq mk --default_table_expiration #{op.opts.ttl}  --dataset #{dest_dataset}}
+
+    config_file = Tempfile.new("#{op.opts.bq_dataset}-config.json")
+    begin
+      json = JSON.parse(
+        common.capture_stdout %{bq show --format=prettyjson #{dest_dataset}})
+
+      proxy_group = get_config(op.opts.project)["wgsCohortExtraction"]["serviceAccountTerraProxyGroup"]
+      common.status "Adding #{proxy_group} as a WRITER..."
+      new_entry = { "groupByEmail" => proxy_group, "role" => "WRITER"}
+      json["access"].push(new_entry)
+
+      File.open(config_file.path, "w") do |f|
+        f.write(JSON.pretty_generate(json))
+      end
+      common.run_inline %{bq update --source #{config_file.path} #{dest_dataset}}
+    ensure
+      config_file.unlink
+    end
+  end
+end
+
+Common.register_command({
+  :invocation => "create-wgs-extraction-dataset",
+  :description => "Create datasets with TTL tables for WGS cohort extraction",
+  :fn => ->(*args) { create_wgs_extraction_dataset("create-wgs-extraction-dataset", args) }
 })

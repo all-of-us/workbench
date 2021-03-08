@@ -98,7 +98,8 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.genomics.WgsCohortExtractionService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.Cohort;
@@ -106,7 +107,6 @@ import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetExportRequest.GenomicsAnalysisToolEnum;
 import org.pmiops.workbench.model.DataSetExportRequest.GenomicsDataTypeEnum;
@@ -235,7 +235,7 @@ public class DataSetControllerTest {
     BillingProjectAuditor.class,
     CdrBigQuerySchemaConfigService.class,
     CdrVersionService.class,
-    CloudStorageService.class,
+    CloudStorageClient.class,
     CohortBuilderMapper.class,
     CohortBuilderService.class,
     CohortCloningService.class,
@@ -251,6 +251,7 @@ public class DataSetControllerTest {
     UserRecentResourceService.class,
     UserServiceAuditor.class,
     WorkspaceAuditor.class,
+    WgsCohortExtractionService.class
   })
   static class Configuration {
 
@@ -322,7 +323,6 @@ public class DataSetControllerTest {
 
     workspace = new Workspace();
     workspace.setName(WORKSPACE_NAME);
-    workspace.setDataAccessLevel(DataAccessLevel.PROTECTED);
     workspace.setResearchPurpose(new ResearchPurpose());
     workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
     workspace.setBillingAccountName("billing-account");

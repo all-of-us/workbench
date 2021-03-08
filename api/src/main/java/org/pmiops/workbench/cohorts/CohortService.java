@@ -1,120 +1,54 @@
 package org.pmiops.workbench.cohorts;
 
-import com.google.common.collect.ImmutableMap;
-import java.util.HashMap;
+import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.common.collect.Streams;
+import com.google.gson.Gson;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
-import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.api.BigQueryService;
+import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.model.DbCohort;
-import org.pmiops.workbench.firecloud.ApiException;
-import org.pmiops.workbench.firecloud.api.MethodConfigurationsApi;
-import org.pmiops.workbench.firecloud.api.SubmissionsApi;
-import org.pmiops.workbench.firecloud.model.FirecloudMethodConfiguration;
-import org.pmiops.workbench.firecloud.model.FirecloudSubmissionRequest;
-import org.pmiops.workbench.firecloud.model.FirecloudSubmissionResponse;
 import org.pmiops.workbench.model.Cohort;
-import org.pmiops.workbench.model.TerraJob;
-import org.pmiops.workbench.model.TerraJobStatus;
+import org.pmiops.workbench.model.SearchRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CohortService {
 
+  private final BigQueryService bigQueryService;
+  private final CohortQueryBuilder cohortQueryBuilder;
   private final CohortDao cohortDao;
   private final CohortMapper cohortMapper;
-  private final Provider<SubmissionsApi> submissionApiProvider;
-  private final Provider<MethodConfigurationsApi> methodConfigurationsApiProvider;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   public CohortService(
+      BigQueryService bigQueryService,
+      CohortQueryBuilder cohortQueryBuilder,
       CohortDao cohortDao,
-      CohortMapper cohortMapper,
-      Provider<SubmissionsApi> submissionsApiProvider,
-      Provider<MethodConfigurationsApi> methodConfigurationsApiProvider,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      CohortMapper cohortMapper) {
+    this.bigQueryService = bigQueryService;
+    this.cohortQueryBuilder = cohortQueryBuilder;
     this.cohortDao = cohortDao;
     this.cohortMapper = cohortMapper;
-    this.submissionApiProvider = submissionsApiProvider;
-    this.methodConfigurationsApiProvider = methodConfigurationsApiProvider;
-    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
-  private Map<String, String> createInputParameter(String msg) {
-    return new ImmutableMap.Builder<String, String>().put("TestWf.msg", "\"" + msg + "\"").build();
-  }
+  public List<String> getPersonIds(Long cohortId) {
+    String cohortDefinition = cohortDao.findOne(cohortId).getCriteria();
 
-  private Map<String, String> createRepoMethodParameter(
-      WorkbenchConfig.WgsCohortExtractionConfig cohortExtractionConfig) {
-    return new ImmutableMap.Builder<String, String>()
-        .put("methodName", cohortExtractionConfig.extractionMethodConfigurationName)
-        .put(
-            "methodVersion", cohortExtractionConfig.extractionMethodConfigurationVersion.toString())
-        .put("methodNamespace", cohortExtractionConfig.extractionMethodConfigurationNamespace)
-        .put(
-            "methodUri",
-            "agora://"
-                + cohortExtractionConfig.extractionMethodConfigurationNamespace
-                + "/"
-                + cohortExtractionConfig.extractionMethodConfigurationName
-                + "/"
-                + cohortExtractionConfig.extractionMethodConfigurationVersion)
-        .put("sourceRepo", "agora")
-        .build();
-  }
+    final SearchRequest searchRequest = new Gson().fromJson(cohortDefinition, SearchRequest.class);
 
-  public TerraJob submitGenomicsCohortExtractionJob(String workspaceNamespace, String workspaceName)
-      throws ApiException {
-    WorkbenchConfig.WgsCohortExtractionConfig cohortExtractionConfig =
-        workbenchConfigProvider.get().wgsCohortExtraction;
+    final QueryJobConfiguration participantIdQuery =
+        cohortQueryBuilder.buildParticipantIdQuery(new ParticipantCriteria(searchRequest));
 
-    FirecloudMethodConfiguration methodConfig =
-        methodConfigurationsApiProvider
-            .get()
-            .createWorkspaceMethodConfig(
-                cohortExtractionConfig.operationalTerraWorkspaceNamespace,
-                cohortExtractionConfig.operationalTerraWorkspaceName,
-                new FirecloudMethodConfiguration()
-                    .deleted(false)
-                    .inputs(
-                        createInputParameter(
-                            "Hello from AoU (" + workspaceNamespace + "/" + workspaceName + ")!"))
-                    .methodConfigVersion(
-                        cohortExtractionConfig.extractionMethodConfigurationVersion)
-                    .methodRepoMethod(createRepoMethodParameter(cohortExtractionConfig))
-                    .name(UUID.randomUUID().toString())
-                    .namespace(cohortExtractionConfig.extractionMethodConfigurationNamespace)
-                    .outputs(new HashMap<>()))
-            .getMethodConfiguration();
-
-    FirecloudSubmissionResponse submissionResponse =
-        submissionApiProvider
-            .get()
-            .createSubmission(
-                cohortExtractionConfig.operationalTerraWorkspaceNamespace,
-                cohortExtractionConfig.operationalTerraWorkspaceName,
-                new FirecloudSubmissionRequest()
-                    .deleteIntermediateOutputFiles(false)
-                    .methodConfigurationNamespace(methodConfig.getNamespace())
-                    .methodConfigurationName(methodConfig.getName())
-                    .useCallCache(false));
-
-    methodConfigurationsApiProvider
-        .get()
-        .deleteWorkspaceMethodConfig(
-            cohortExtractionConfig.operationalTerraWorkspaceNamespace,
-            cohortExtractionConfig.operationalTerraWorkspaceName,
-            cohortExtractionConfig.extractionMethodConfigurationNamespace,
-            methodConfig.getName());
-
-    return new TerraJob()
-        .submissionId(submissionResponse.getSubmissionId())
-        .status(TerraJobStatus.RUNNING);
+    return Streams.stream(
+            bigQueryService
+                .executeQuery(bigQueryService.filterBigQueryConfig(participantIdQuery))
+                .getValues())
+        .map(personId -> personId.get(0).getValue().toString())
+        .collect(Collectors.toList());
   }
 
   public List<Cohort> findAll(List<Long> cohortIds) {
