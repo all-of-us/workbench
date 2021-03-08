@@ -350,6 +350,31 @@ const routes: Routes = [
             component: AppRouting,
             data: {}
           },
+          {
+            path: 'workspaces',
+            component: AppRouting,
+            data: {},
+          },
+          {
+            path: 'workspaces/:workspaceNamespace',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'institution',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'institution/add',
+            component: AppRouting,
+            data: {},
+          },
+          {
+            path: 'institution/edit/:institutionId',
+            component: AppRouting,
+            data: {},
+          },
           // non-migrated routes go HERE
           {
             path: 'review-workspace',
@@ -375,31 +400,6 @@ const routes: Routes = [
             path: 'banner',
             component: AdminBannerComponent,
             data: {title: 'Create Banner'}
-          },
-          {
-            path: 'workspaces',
-            component: AppRouting,
-            data: {},
-          },
-          {
-            path: 'workspaces/:workspaceNamespace',
-            component: AppRouting,
-            data: {}
-          },
-          {
-            path: 'institution',
-            component: AppRouting,
-            data: {}
-          },
-          {
-            path: 'institution/add',
-            component: AppRouting,
-            data: {},
-          },
-          {
-            path: 'institution/edit/:institutionId',
-            component: AppRouting,
-            data: {},
           }
         ]
       },
