@@ -10,7 +10,7 @@ import {FadeBox} from 'app/components/containers';
 import {CopyModal} from 'app/components/copy-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SnowmanIcon} from 'app/components/icons';
-import {TextAreaWithLengthValidationMessage, TextInput, ValidationError} from 'app/components/inputs';
+import {TextAreaWithLengthValidationMessage, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -21,7 +21,6 @@ import colors from 'app/styles/colors';
 import {
   reactStyles,
   ReactWrapperBase,
-  summarizeErrors,
   withCurrentCohortSearchContext,
   withCurrentConcept,
   withCurrentWorkspace,
@@ -281,6 +280,13 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
       }
     }
 
+    tooltipContent(errors) {
+      return !!errors ? <ul>
+        {errors.editName && <li>Name cannot be blank</li>}
+        {errors.editDescription && <li>Description cannot exceed 1000 characters</li>}
+      </ul> : '';
+    }
+
     render() {
       const {cohortContext, workspace: {accessLevel, cdrVersionId, id, namespace}} = this.props;
       const {copying, conceptSet, editing, editDescription, editName, error, errorMessage, editSaving, deleting, loading,
@@ -308,9 +314,6 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
                                      id='edit-name'
                                      style={{marginBottom: '0.5rem'}} data-test-id='edit-name'
                                      onChange={v => this.setState({editName: v})}/>
-                          {errors && <ValidationError>
-                            {summarizeErrors( errors && errors.editName)}
-                          </ValidationError>}
                           <TextAreaWithLengthValidationMessage initialText={editDescription}
                                                                id='edit-description'
                                                                textBoxStyleOverrides={{width: '100%'}}
@@ -318,8 +321,8 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
                                                                tooLongWarningCharacters={950}
                                                                onChange={v => this.setState({editDescription: v})}/>
                           <div style={{margin: '0.5rem 0'}}>
-                            <TooltipTrigger content={<span>Description cannot exceed 1000 characters</span>}
-                                            disabled={!errors || !errors.editDescription}>
+                            <TooltipTrigger content={this.tooltipContent(errors)}
+                                            disabled={!errors}>
                             <Button type='primary' style={{marginRight: '0.5rem'}}
                                     data-test-id='save-edit-concept-set'
                                     disabled={editSaving || errors}
