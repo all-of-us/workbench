@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -212,7 +213,7 @@ public class TestMockFactory {
     final DbAccessTier accessTier =
         new DbAccessTier()
             .setAccessTierId(1)
-            .setShortName("registered")
+            .setShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
             .setDisplayName("Registered Tier")
             .setAuthDomainName("Registered Tier Auth Domain")
             .setAuthDomainGroupEmail("rt-users@fake-research-aou.org")
