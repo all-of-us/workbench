@@ -29,6 +29,10 @@ import {SignIn} from './pages/login/sign-in';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
+import {AdminUser} from "./pages/admin/admin-user";
+import {AdminUsers} from "./pages/admin/admin-users";
+import {AdminWorkspace} from "./pages/admin/admin-workspace";
+import {AdminWorkspaceSearch} from "./pages/admin/admin-workspace-search";
 
 
 const signInGuard: Guard = {
