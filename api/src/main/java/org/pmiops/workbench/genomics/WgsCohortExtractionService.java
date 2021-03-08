@@ -136,10 +136,8 @@ public class WgsCohortExtractionService {
                             .put(
                                 "WgsCohortExtract.wgs_intervals",
                                 "\"gs://gcp-public-data--broad-references/hg38/v0/wgs_calling_regions.hg38.interval_list\"")
-                            .put(
-                                "WgsCohortExtract.scatter_count",
-                                "1000") // This value will need to be dynamically adjusted through
-                            // testing.
+                            // This value will need to be dynamically adjusted through testing
+                            .put("WgsCohortExtract.scatter_count", "1000")
                             .put(
                                 "WgsCohortExtract.reference",
                                 "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta\"")
@@ -149,10 +147,9 @@ public class WgsCohortExtractionService {
                             .put(
                                 "WgsCohortExtract.reference_dict",
                                 "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.dict\"")
-                            .put(
-                                "WgsCohortExtract.output_file_base_name",
-                                "\"interval\"") // Will produce files named "interval_1.vcf.gz",
-                            // "interval_32.vcf.gz", etc
+                            // Will produce files named "interval_1.vcf.gz", "interval_32.vcf.gz",
+                            // etc
+                            .put("WgsCohortExtract.output_file_base_name", "\"interval\"")
                             .put(
                                 "WgsCohortExtract.output_gcs_dir",
                                 "\"gs://"
