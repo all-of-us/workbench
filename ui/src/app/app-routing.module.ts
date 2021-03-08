@@ -359,6 +359,36 @@ const routes: Routes = [
             data: {}
           },
           {
+            path: 'institution/add',
+            component: AppRouting,
+            data: {},
+          },
+          {
+            path: 'institution/edit/:institutionId',
+            component: AppRouting,
+            data: {},
+          },
+          {
+            path: 'user', // included for backwards compatibility
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'users',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'users/:usernameWithoutGsuiteDomain',
+            component: AppRouting,
+            data: {title: 'User Admin'}
+          },
+          {
+            path: 'user-audit',
+            component: AppRouting,
+            data: {}
+          },
+          {
             path: 'user-audit/:username',
             component: AppRouting,
             data: {}
