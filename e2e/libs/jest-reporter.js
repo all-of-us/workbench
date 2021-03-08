@@ -42,13 +42,13 @@ module.exports = class JestReporter {
     }
 
     // Get failure messages.
-    testResult.testResults.forEach((test) => {
+    testResult.testResults.forEach((result) => {
       fileLogger.info('----------------------------------------');
-      fileLogger.log('info', 'test name: %s', test.title);
-      fileLogger.log('info', 'status: %s', test.status);
+      fileLogger.log('info', 'test name: %s', result.title);
+      fileLogger.log('info', 'status: %s', result.status);
       // Get failure message.
-      if (test.failureMessages) {
-        const failure = test.failureMessages;
+      if (result.failureMessages) {
+        const failure = result.failureMessages;
         fileLogger.log('info', 'failure: %s', failure);
       }
     });
