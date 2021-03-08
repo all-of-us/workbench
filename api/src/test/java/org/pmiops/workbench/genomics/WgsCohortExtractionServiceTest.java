@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import com.google.cloud.storage.Blob;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,8 +38,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Optional;
-
 @RunWith(SpringRunner.class)
 public class WgsCohortExtractionServiceTest {
 
@@ -52,7 +51,12 @@ public class WgsCohortExtractionServiceTest {
 
   @TestConfiguration
   @Import({WgsCohortExtractionService.class})
-  @MockBean({CohortService.class, FireCloudService.class, MethodConfigurationsApi.class, SubmissionsApi.class})
+  @MockBean({
+    CohortService.class,
+    FireCloudService.class,
+    MethodConfigurationsApi.class,
+    SubmissionsApi.class
+  })
   static class Configuration {
     @Bean
     @Scope("prototype")
@@ -82,10 +86,9 @@ public class WgsCohortExtractionServiceTest {
     workbenchConfig.wgsCohortExtraction.extractionMethodConfigurationNamespace = "methodNamespace";
     workbenchConfig.wgsCohortExtraction.extractionMethodConfigurationVersion = 1;
 
-    FirecloudWorkspace fcWorkspace = new FirecloudWorkspace()
-            .bucketName("user-bucket");
-    FirecloudWorkspaceResponse fcWorkspaceResponse = new FirecloudWorkspaceResponse()
-            .workspace(fcWorkspace);
+    FirecloudWorkspace fcWorkspace = new FirecloudWorkspace().bucketName("user-bucket");
+    FirecloudWorkspaceResponse fcWorkspaceResponse =
+        new FirecloudWorkspaceResponse().workspace(fcWorkspace);
     doReturn(Optional.of(fcWorkspaceResponse)).when(fireCloudService).getWorkspace(any());
 
     FirecloudMethodConfiguration firecloudMethodConfiguration = new FirecloudMethodConfiguration();
@@ -119,12 +122,14 @@ public class WgsCohortExtractionServiceTest {
   public void submitExtractionJob_outputVcfsInCorrectBucket() throws ApiException {
     wgsCohortExtractionService.submitGenomicsCohortExtractionJob(mockWorkspace(), 1l);
 
-    ArgumentCaptor<FirecloudMethodConfiguration> argument = ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
+    ArgumentCaptor<FirecloudMethodConfiguration> argument =
+        ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
 
     verify(methodConfigurationsApi).createWorkspaceMethodConfig(any(), any(), argument.capture());
     String actualOutputDir = argument.getValue().getInputs().get("WgsCohortExtract.output_gcs_dir");
 
-    assertThat(actualOutputDir).matches("\"gs:\\/\\/user-bucket\\/wgs-cohort-extractions\\/.*\\/vcfs\\/\"");
+    assertThat(actualOutputDir)
+        .matches("\"gs:\\/\\/user-bucket\\/wgs-cohort-extractions\\/.*\\/vcfs\\/\"");
   }
 
   private DbWorkspace mockWorkspace() {
