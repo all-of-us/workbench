@@ -5387,11 +5387,15 @@ definitions:
           data access level. May be null if the user has never done so.'
       rasLinkLoginGovName:
         type: string
-        description: The user's identity name in RAS.
-      rasLinkCompletionTime:
+        description: The user's identity name in login.gov.
+      rasLinkLoginGovExpireTime:
         type: integer
         format: int64
-        description: Timestamp when the user completed RAS linking.
+        description: The user's login.gov/AoU link expiration time
+      rasLinkLoginGovCompletionTime:
+        type: integer
+        format: int64
+        description: Timestamp when the user completed RAS linking(login.gov).
 
   DemographicSurvey:
     type: object

@@ -28,6 +28,9 @@ public interface ProfileMapper {
   @Mapping(source = "latestTermsOfService.tosVersion", target = "latestTermsOfServiceVersion")
   @Mapping(source = "latestTermsOfService.agreementTime", target = "latestTermsOfServiceTime")
   @Mapping(source = "dbUser.userId", target = "userId")
+  @Mapping(target = "rasLinkLoginGovName", ignore = true) // TODO(RW-6364): Remove this once ready
+  @Mapping(target = "rasLinkLoginGovExpireTime", ignore = true) // TODO(RW-6364): Remove this once ready
+  @Mapping(target = "rasLinkLoginGovCompletionTime", ignore = true) // TODO(RW-6364): Remove this once ready
   Profile toModel(
       DbUser dbUser,
       VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation,
@@ -57,7 +60,5 @@ public interface ProfileMapper {
       target = "moodleId",
       ignore = true) // handled by UserService.syncComplianceTraining[V1|V2]
   @Mapping(target = "version", ignore = true)
-  @Mapping(target = "rasLinkLoginGovName", ignore = true) // TODO(RW-6364): Remove this once ready
-  @Mapping(target = "rasLinkCompletionTime", ignore = true) // TODO(RW-6364): Remove this once ready
   DbUser profileToDbUser(Profile profile);
 }
