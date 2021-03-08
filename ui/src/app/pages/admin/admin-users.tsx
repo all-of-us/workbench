@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
@@ -9,7 +8,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {AdminUserBypass} from 'app/pages/admin/admin-user-bypass';
 import {authDomainApi, profileApi} from 'app/services/swagger-fetch-clients';
-import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {reactStyles, withUserProfile} from 'app/utils';
 import {usernameWithoutDomain} from 'app/utils/audit-utils';
 import {
   AdminTableUser,

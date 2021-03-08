@@ -1,7 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {Component} from '@angular/core';
 
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
@@ -17,7 +16,6 @@ import {
   formatFreeCreditsUSD,
   isBlank,
   reactStyles,
-  ReactWrapperBase,
   withUrlParams
 } from 'app/utils';
 
