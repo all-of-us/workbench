@@ -41,6 +41,7 @@ import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
@@ -73,6 +74,7 @@ import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
@@ -98,6 +100,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private DataSetServiceImpl dataSetServiceImpl;
   @Autowired private BigQueryService bigQueryService;
   @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
+  @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private CdrVersionService cdrVersionService;
   @Autowired private CohortDao cohortDao;
@@ -232,7 +235,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         .thenReturn(fcResponse)
         .thenReturn(fcResponse);
 
-    dbCdrVersion = new DbCdrVersion();
+    dbCdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
     dbCdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     dbCdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     dbCdrVersion.setDataAccessLevel(

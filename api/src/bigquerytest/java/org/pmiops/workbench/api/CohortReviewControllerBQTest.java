@@ -38,6 +38,7 @@ import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
@@ -80,6 +81,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
@@ -169,6 +171,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private UserDao userDao;
 
+  @Autowired private AccessTierDao accessTierDao;
+
   private DbCohortReview reviewWithoutEHRData;
   private DbCohortReview reviewWithEHRData;
   private static DbUser currentUser;
@@ -202,7 +206,7 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
                         currentUser.getUsername(),
                         new FirecloudWorkspaceAccessEntry().accessLevel("OWNER"))));
 
-    cdrVersion = new DbCdrVersion();
+    cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
     cdrVersion = cdrVersionDao.save(cdrVersion);
