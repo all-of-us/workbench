@@ -163,7 +163,7 @@ interface State {
 }
 
 
-const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
+export const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
 
   private aborter: AbortController;
 
@@ -650,12 +650,3 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     </FadeBox>;
   }
 });
-
-@Component({
-  template: '<div #root></div>'
-})
-export class AdminUserComponent extends ReactWrapperBase {
-  constructor() {
-    super(AdminUser, []);
-  }
-}

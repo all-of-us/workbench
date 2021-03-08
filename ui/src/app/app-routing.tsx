@@ -27,6 +27,8 @@ import {SignIn} from './pages/login/sign-in';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
+import {AdminUser} from "./pages/admin/admin-user";
+import {AdminUsers} from "./pages/admin/admin-users";
 
 
 const signInGuard: Guard = {
@@ -51,6 +53,8 @@ const NotebookRedirectPage = withRouteData(NotebookRedirect);
 const SessionExpiredPage = withRouteData(SessionExpired);
 const SignInAgainPage = withRouteData(SignInAgain);
 const SignInPage = withRouteData(SignIn);
+const UserAdminPage = withRouteData(AdminUser);
+const UsersAdminPage = withRouteData(AdminUsers);
 const UserAuditPage = withRouteData(UserAudit);
 const UserDisabledPage = withRouteData(UserDisabled);
 const WorkspaceAdminPage = withRouteData(AdminWorkspace);
@@ -103,6 +107,18 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
       <AppRoute
           path='/admin/institution/edit/:institutionId'
           component={() => <InstitutionEditAdminPage routeData={{title: 'Institution Admin'}}/>}
+      />
+      <AppRoute
+          path='/admin/user' // included for backwards compatibility
+          component={() => <UsersAdminPage routeData={{title: 'User Admin Table'}}/>}
+      />
+      <AppRoute
+          path='/admin/users'
+          component={() => <UsersAdminPage routeData={{title: 'User Admin Table'}}/>}
+      />
+      <AppRoute
+          path='/admin/users/:usernameWithoutGsuiteDomain'
+          component={() => <UserAdminPage routeData={{title: 'User Admin'}}/>}
       />
       <AppRoute
           path='/admin/user-audit'

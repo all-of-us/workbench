@@ -327,13 +327,3 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
   }
 
 });
-
-
-@Component({
-  template: '<div #root></div>'
-})
-export class AdminUsersComponent extends ReactWrapperBase {
-  constructor() {
-    super(AdminUsers, []);
-  }
-}
