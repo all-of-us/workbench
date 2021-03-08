@@ -35,6 +35,9 @@ public interface ProfileMapper {
   @Mapping(
       target = "rasLinkLoginGovCompletionTime",
       ignore = true) // TODO(RW-6364): Remove this once ready
+  @Mapping(
+      target = "rasLinkLoginGovBypassTime",
+      ignore = true) // TODO(RW-6364): Remove this once ready
   Profile toModel(
       DbUser dbUser,
       VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation,
