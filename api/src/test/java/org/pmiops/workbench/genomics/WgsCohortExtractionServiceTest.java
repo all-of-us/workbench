@@ -1,5 +1,6 @@
 package org.pmiops.workbench.genomics;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
@@ -11,16 +12,20 @@ import com.google.cloud.storage.Blob;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.MethodConfigurationsApi;
 import org.pmiops.workbench.firecloud.api.SubmissionsApi;
 import org.pmiops.workbench.firecloud.model.FirecloudMethodConfiguration;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionResponse;
 import org.pmiops.workbench.firecloud.model.FirecloudValidatedMethodConfiguration;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +37,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Optional;
+
 @RunWith(SpringRunner.class)
 public class WgsCohortExtractionServiceTest {
 
   @Autowired WgsCohortExtractionService wgsCohortExtractionService;
+  @Autowired FireCloudService fireCloudService;
   @Autowired MethodConfigurationsApi methodConfigurationsApi;
   @Autowired SubmissionsApi submissionsApi;
 
@@ -44,7 +52,7 @@ public class WgsCohortExtractionServiceTest {
 
   @TestConfiguration
   @Import({WgsCohortExtractionService.class})
-  @MockBean({CohortService.class, MethodConfigurationsApi.class, SubmissionsApi.class})
+  @MockBean({CohortService.class, FireCloudService.class, MethodConfigurationsApi.class, SubmissionsApi.class})
   static class Configuration {
     @Bean
     @Scope("prototype")
@@ -74,6 +82,12 @@ public class WgsCohortExtractionServiceTest {
     workbenchConfig.wgsCohortExtraction.extractionMethodConfigurationNamespace = "methodNamespace";
     workbenchConfig.wgsCohortExtraction.extractionMethodConfigurationVersion = 1;
 
+    FirecloudWorkspace fcWorkspace = new FirecloudWorkspace()
+            .bucketName("user-bucket");
+    FirecloudWorkspaceResponse fcWorkspaceResponse = new FirecloudWorkspaceResponse()
+            .workspace(fcWorkspace);
+    doReturn(Optional.of(fcWorkspaceResponse)).when(fireCloudService).getWorkspace(any());
+
     FirecloudMethodConfiguration firecloudMethodConfiguration = new FirecloudMethodConfiguration();
     firecloudMethodConfiguration.setNamespace("methodNamespace");
     firecloudMethodConfiguration.setName("methodName");
@@ -99,6 +113,18 @@ public class WgsCohortExtractionServiceTest {
             eq(workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceBucket),
             matches("wgs-cohort-extractions\\/.*\\/person_ids.txt"),
             any());
+  }
+
+  @Test
+  public void submitExtractionJob_outputVcfsInCorrectBucket() throws ApiException {
+    wgsCohortExtractionService.submitGenomicsCohortExtractionJob(mockWorkspace(), 1l);
+
+    ArgumentCaptor<FirecloudMethodConfiguration> argument = ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
+
+    verify(methodConfigurationsApi).createWorkspaceMethodConfig(any(), any(), argument.capture());
+    String actualOutputDir = argument.getValue().getInputs().get("WgsCohortExtract.output_gcs_dir");
+
+    assertThat(actualOutputDir).matches("\"gs:\\/\\/user-bucket\\/wgs-cohort-extractions\\/.*\\/vcfs\\/\"");
   }
 
   private DbWorkspace mockWorkspace() {
