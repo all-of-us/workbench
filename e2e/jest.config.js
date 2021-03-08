@@ -28,7 +28,7 @@ module.exports = {
         outputName: "test-results.xml",
         classNameTemplate: "{filepath}",
         suiteNameTemplate: "{filepath}",
-        suiteName: "Puppeteer end-to-end tests"
+        suiteName: "AoU integration tests"
       }
     ],
     ["<rootDir>/libs/jest-reporter.js", {
