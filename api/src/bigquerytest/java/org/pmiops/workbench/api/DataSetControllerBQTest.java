@@ -96,34 +96,32 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private static final String WORKSPACE_NAME = "name";
   private static final String DATASET_NAME = "Arbitrary Dataset v1.0";
 
-  private DataSetController controller;
-  private DataSetServiceImpl dataSetServiceImpl;
-
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private BigQueryService bigQueryService;
   @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
-  @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private CdrVersionService cdrVersionService;
   @Autowired private CohortDao cohortDao;
   @Autowired private CohortQueryBuilder cohortQueryBuilder;
   @Autowired private ConceptBigQueryService conceptBigQueryService;
   @Autowired private ConceptSetDao conceptSetDao;
+  @Autowired private DSLinkingDao dsLinkingDao;
   @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
   @Autowired private DataSetDao dataSetDao;
   @Autowired private DataSetMapperImpl dataSetMapper;
-  @Autowired private DSLinkingDao dsLinkingDao;
   @Autowired private FireCloudService fireCloudService;
   @Autowired private NotebooksService notebooksService;
-  @Autowired private TestWorkbenchConfig testWorkbenchConfig;
   @Autowired private Provider<DbUser> userProvider;
+  @Autowired private TestWorkbenchConfig testWorkbenchConfig;
+  @Autowired private WorkspaceDao workspaceDao;
+  @Autowired private WorkspaceService workspaceService;
 
   @Autowired
   @Qualifier(DatasetConfig.DATASET_PREFIX_CODE)
   Provider<String> prefixProvider;
 
-  @Autowired private WorkspaceDao workspaceDao;
-  @Autowired private WorkspaceService workspaceService;
+  private DataSetController controller;
+  private DataSetServiceImpl dataSetServiceImpl;
 
   private DbCdrVersion dbCdrVersion;
   private DbCohort dbCohort1;
