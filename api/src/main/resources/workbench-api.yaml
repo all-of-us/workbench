@@ -5391,13 +5391,12 @@ definitions:
       rasLinkLoginGovExpireTime:
         type: integer
         format: int64
-        description: 'The user's login.gov/AoU link expiration time'
+        description: The user's login.gov/AoU link expiration time
       rasLinkLoginGovCompletionTime:
         type: integer
         format: int64
         description: 'Timestamp when the user completed RAS linking(login.gov). Note: All AoU users
-        are required to have login.gov IAL2 enabled, fali to do so will not have any of those
-        login.gov record.'
+        are required to have IAL2 setup in login.gov.'
       rasLinkLoginGovBypassTime:
         type: integer
         format: int64
