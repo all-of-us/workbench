@@ -22,6 +22,7 @@ import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -33,6 +34,7 @@ import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class DataDictionaryTest {
 
+  @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
   @Autowired private DataSetController dataSetController;
@@ -88,8 +91,7 @@ public class DataDictionaryTest {
 
   @Before
   public void setUp() {
-    DbCdrVersion cdrVersion = new DbCdrVersion();
-    cdrVersionDao.save(cdrVersion);
+    DbCdrVersion cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
 
     DbDataDictionaryEntry dataDictionaryEntry = new DbDataDictionaryEntry();
     dataDictionaryEntry.setCdrVersion(cdrVersion);

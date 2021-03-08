@@ -407,7 +407,7 @@ public class WorkspacesControllerTest {
 
     accessTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
 
-    cdrVersion = new DbCdrVersion();
+    cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 1);
     cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
@@ -416,7 +416,8 @@ public class WorkspacesControllerTest {
     cdrVersion = cdrVersionDao.save(cdrVersion);
     cdrVersionId = Long.toString(cdrVersion.getCdrVersionId());
 
-    DbCdrVersion archivedCdrVersion = new DbCdrVersion();
+    DbCdrVersion archivedCdrVersion =
+        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
     archivedCdrVersion.setName("archived");
     archivedCdrVersion.setCdrDbName("");
     archivedCdrVersion.setArchivalStatusEnum(ArchivalStatus.ARCHIVED);
