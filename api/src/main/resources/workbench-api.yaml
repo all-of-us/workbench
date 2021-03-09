@@ -350,6 +350,37 @@ paths:
           description: Bad request
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/link-ras-account":
+    post:
+      tags:
+      - profile
+      consumes:
+      - application/json
+      description: Link user with a RAS account
+      operationId: linkRasAccount
+      parameters:
+      - in: body
+        name: authcode
+        description: The authorization code from RAS.
+        schema:
+          "$ref": "#/definitions/RasLinkRequestBody"
+      responses:
+        200:
+          description: The user's account linking information.
+          schema:
+            "$ref": "#/definitions/Profile"
+        400:
+          description: Bad request
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        403:
+          description: Forbidden
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        500:
+          description: Internal Error
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
   "/v1/page-visits":
     post:
       tags:
@@ -5089,6 +5120,15 @@ definitions:
       jwt:
         type: string
         description: the encoded/signed JWT
+  RasLinkRequestBody:
+    required:
+    - authCode
+    type: object
+    properties:
+      authCode:
+        type: string
+        description: 'the standard OAuth authorization code from RAS that we can use to exchange
+        access token.'
   AdminTableUser:
     type: object
     properties:
@@ -5343,6 +5383,24 @@ definitions:
         format: int64
         description: 'Timestamp when the user first changed from Unregistered to Registered
           data access level. May be null if the user has never done so.'
+      rasLinkLoginGovName:
+        type: string
+        description: The user's identity name in login.gov.
+      rasLinkLoginGovExpireTime:
+        type: integer
+        format: int64
+        description: The user's login.gov/AoU link expiration time
+      rasLinkLoginGovCompletionTime:
+        type: integer
+        format: int64
+        description: 'Timestamp when the user completed RAS linking(login.gov). Note: All AoU users
+        are required to have IAL2 setup in login.gov.'
+      rasLinkLoginGovBypassTime:
+        type: integer
+        format: int64
+        description: Timestamp when the user was bypassed for completing login.gov linking
+          linking.
+
   DemographicSurvey:
     type: object
     properties:
