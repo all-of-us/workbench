@@ -26,8 +26,11 @@ beforeEach(async () => {
 
   const describeJsHandle = async (jsHandle: JSHandle): Promise<string>  => {
     return jsHandle.executionContext().evaluate(obj => {
-      if (obj instanceof Error)
+      // Get error message if obj is an error. Error is not serializeable.
+      if (obj instanceof Error) {
         return obj.message;
+      }
+      // Return JSON value of the argument or `undefined`.
       return obj.toString();
     }, jsHandle);
   }
@@ -73,12 +76,13 @@ beforeEach(async () => {
        : null;
   }
 
-  // Api response won't be logged.
+  // Disable logging of API response body in test log to make log less cluttered.
+  // Following API response body are not helpful for error troubleshooting.
   const shouldSkipApiResponseBody = (request: Request): boolean => {
     const filters = [
       '/readonly',
       '/chartinfo/',
-      'page-visits',
+      '/page-visits',
       '/generateCode/',
       '/criteria/CONDITION/search/',
       '/criteria/',

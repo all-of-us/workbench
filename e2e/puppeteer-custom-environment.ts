@@ -30,6 +30,7 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
         .slice(0, 15);
   }
 
+  // jest-circus: https://github.com/facebook/jest/blob/master/packages/jest-circus/README.md#overview
   // Take a screenshot right after failure
   async handleTestEvent(event, state) {
     switch (event.name) {
@@ -57,6 +58,10 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
       default:
         break;
     }
+    
+    // Fail fast: Can't use `bail` option with a custom logger.
+    // Another way to stop tests in queue from running after first failure.
+    // If first failure has happened, all following unexecuted tests will be marked as skip.
     if (this.failedTest && event.name === 'test_start') {
       event.test.mode = 'skip';
     }

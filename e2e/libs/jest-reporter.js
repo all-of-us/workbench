@@ -23,9 +23,8 @@ module.exports = class JestReporter {
   // @ts-ignore
   onTestResult(testRunConfig, testResult, runResults) {
     // Get test name.
-    const today = new Date();
     const testName = path.parse(testResult.testFilePath).name;
-    const testLog = `${this.logDir}/${testName}-${today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()}.log`;
+    const testLog = `${this.logDir}/${testName}.log`;
 
     const transports = new winston.transports.File({
         filename: testLog,
@@ -71,7 +70,9 @@ module.exports = class JestReporter {
     });
 
     // Save test results to a file.
-    if (!fs.existsSync(this.logDir)) fs.mkdirSync(this.logDir);
+    if (!fs.existsSync(this.logDir)) {
+      fs.mkdirSync(this.logDir);
+    }
     fs.writeFileSync(`${this.logDir}/${this.summaryFile}`, JSON.stringify(runResults, null, 2));
     console.info(`Save tests results summary file: ${this.logDir}/${this.summaryFile}`);
     return runResults;
