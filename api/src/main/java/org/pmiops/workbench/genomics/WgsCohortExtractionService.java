@@ -31,7 +31,7 @@ public class WgsCohortExtractionService {
 
   private final CohortService cohortService;
   private final FireCloudService fireCloudService;
-  private final Provider<CloudStorageClient> cloudStorageClientProvider;
+  private final Provider<CloudStorageClient> extractionServiceAccountCloudStorageClientProvider;
   private final Provider<SubmissionsApi> submissionApiProvider;
   private final Provider<MethodConfigurationsApi> methodConfigurationsApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -41,14 +41,14 @@ public class WgsCohortExtractionService {
       CohortService cohortService,
       FireCloudService fireCloudService,
       @Qualifier(StorageConfig.WGS_EXTRACTION_STORAGE_CLIENT)
-          Provider<CloudStorageClient> cloudStorageClientProvider,
+          Provider<CloudStorageClient> extractionServiceAccountCloudStorageClientProvider,
       Provider<SubmissionsApi> submissionsApiProvider,
       Provider<MethodConfigurationsApi> methodConfigurationsApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.cohortService = cohortService;
     this.fireCloudService = fireCloudService;
     this.submissionApiProvider = submissionsApiProvider;
-    this.cloudStorageClientProvider = cloudStorageClientProvider;
+    this.extractionServiceAccountCloudStorageClientProvider = extractionServiceAccountCloudStorageClientProvider;
     this.methodConfigurationsApiProvider = methodConfigurationsApiProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
@@ -80,13 +80,13 @@ public class WgsCohortExtractionService {
     WorkbenchConfig.WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;
 
-    FirecloudWorkspace fcWorkspace = fireCloudService.getWorkspace(workspace).get().getWorkspace();
+    FirecloudWorkspace fcUserWorkspace = fireCloudService.getWorkspace(workspace).get().getWorkspace();
 
     String extractionUuid = UUID.randomUUID().toString();
     String extractionFolder = "wgs-cohort-extractions/" + extractionUuid;
 
     Blob personIdsFile =
-        cloudStorageClientProvider
+        extractionServiceAccountCloudStorageClientProvider
             .get()
             .writeFile(
                 // It is critical that this file is written to a bucket that the user cannot write
@@ -153,13 +153,13 @@ public class WgsCohortExtractionService {
                             .put(
                                 "WgsCohortExtract.output_gcs_dir",
                                 "\"gs://"
-                                    + fcWorkspace.getBucketName()
+                                    + fcUserWorkspace.getBucketName()
                                     + "/"
                                     + extractionFolder
                                     + "/vcfs/\"")
                             .put(
                                 "WgsCohortExtract.gatk_override",
-                                "\"gs://all-of-us-workbench-test-genomics/wgs/gatk-package-4.1.9.0-200-gfabc915-SNAPSHOT-local.jar\"")
+                                "\"gs://all-of-us-workbench-test-genomics/wgs/gatk-package-4.1.9.0-204-g6449d52-SNAPSHOT-local.jar\"")
                             .build())
                     .methodConfigVersion(
                         cohortExtractionConfig.extractionMethodConfigurationVersion)

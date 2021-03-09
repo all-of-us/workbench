@@ -170,6 +170,7 @@ task CreateCohortExtractTable {
     bootDiskSizeGb: "15"
     disks: "local-disk 10 HDD"
     preemptible: 3
+	  # Temporary GATK that I'm using to get unblocked. We will realign with the mainstream GATK ah_var_store branch
     docker: "gcr.io/all-of-us-workbench-test/variantstore-extract-prep:2"
   }
 } 
@@ -214,11 +215,9 @@ task ExtractTask {
         set -e
         export GATK_LOCAL_JAR=~{default="/root/gatk.jar" gatk_override}
 
-        bq query --project_id ~{read_project_id} --max_rows=10000000 --format=csv --nouse_legacy_sql \
-          'select sample_id, sample_name FROM `~{fq_sample_table}`' | sed -e 1d \
-          > sample_map.csv
-
-        cat sample_map.csv
+        #bq query --project_id ~{read_project_id} --max_rows=10000000 --format=csv --nouse_legacy_sql \
+        #  'select sample_id, sample_name FROM `~{fq_sample_table}`' | sed -e 1d \
+        #  > sample_map.csv
 
         gatk --java-options "-Xmx9g" \
             ExtractCohort \
@@ -226,7 +225,7 @@ task ExtractTask {
                 -R "~{reference}" \
                 -O "~{output_file}" \
                 --local-sort-max-records-in-ram ~{local_sort_max_records_in_ram} \
-                --sample-file sample_map.csv \
+                --sample-table ~{fq_sample_table} \
                 --cohort-extract-table ~{fq_cohort_extract_table} \
                 -L ~{intervals} \
                 --project-id ~{read_project_id} \
