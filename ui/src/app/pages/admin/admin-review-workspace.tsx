@@ -124,13 +124,3 @@ export const AdminReviewWorkspace = withUserProfile()(class extends React.Compon
     </div>;
   }
 });
-
-
-@Component({
-  template: '<div #root></div>'
-})
-export class AdminReviewWorkspaceComponent extends ReactWrapperBase {
-  constructor() {
-    super(AdminReviewWorkspace, []);
-  }
-}

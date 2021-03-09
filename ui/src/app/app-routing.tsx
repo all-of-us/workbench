@@ -29,6 +29,8 @@ import {SignIn} from './pages/login/sign-in';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
+import { AdminBanner } from './pages/admin/admin-banner';
+import {AdminReviewWorkspace} from "./pages/admin/admin-review-workspace";
 
 
 const signInGuard: Guard = {
@@ -41,7 +43,9 @@ const registrationGuard: Guard = {
   redirectPath: '/'
 };
 
+const AdminBannerPage = withRouteData(AdminBanner);
 const AdminNotebookViewPage = withRouteData(AdminNotebookView);
+const AdminReviewWorkspacePage = withRouteData(AdminReviewWorkspace);
 const CookiePolicyPage = withRouteData(CookiePolicy);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
 const HomepagePage = withRouteData(Homepage); // this name is bad i am sorry
@@ -97,6 +101,10 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
       />
       <AppRoute
+          path='/admin/banner'
+          component={() => <AdminBannerPage routeData={{title: 'Create Banner'}}/>}
+      />
+      <AppRoute
           path='/admin/institution'
           component={() => <InstitutionAdminPage routeData={{title: 'Institution Admin'}}/>}
       />
@@ -111,6 +119,10 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
       <AppRoute
           path='/admin/user' // included for backwards compatibility
           component={() => <UsersAdminPage routeData={{title: 'User Admin Table'}}/>}
+      />
+      <AppRoute
+          path='/admin/review-workspace'
+          component={() => <AdminReviewWorkspacePage routeData={{title: 'Review Workspaces'}}/>}
       />
       <AppRoute
           path='/admin/users'

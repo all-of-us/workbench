@@ -127,12 +127,3 @@ export class AdminBanner extends React.Component<{}, AdminBannerState> {
     </div>;
   }
 }
-
-@Component({
-  template: '<div #root></div>'
-})
-export class AdminBannerComponent extends ReactWrapperBase {
-  constructor() {
-    super(AdminBanner, []);
-  }
-}
