@@ -10,8 +10,6 @@ import org.pmiops.workbench.interceptors.ClearCdrVersionContextInterceptor;
 import org.pmiops.workbench.interceptors.CloudTaskInterceptor;
 import org.pmiops.workbench.interceptors.CorsInterceptor;
 import org.pmiops.workbench.interceptors.CronInterceptor;
-import org.pmiops.workbench.interceptors.HttpHeaderBindingInterceptor;
-import org.pmiops.workbench.interceptors.HttpHeadersContext;
 import org.pmiops.workbench.interceptors.RequestTimeMetricInterceptor;
 import org.pmiops.workbench.interceptors.SecurityHeadersInterceptor;
 import org.pmiops.workbench.interceptors.TracingInterceptor;
@@ -20,7 +18,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -53,8 +50,6 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
   @Autowired private TracingInterceptor tracingInterceptor;
 
-  @Autowired private HttpHeaderBindingInterceptor httpHeaderBindingInterceptor;
-
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public UserAuthentication userAuthentication() {
@@ -77,12 +72,6 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
     return userAuthentication.map(UserAuthentication::getUser).orElse(null);
   }
 
-  @Bean
-  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public HttpHeaders httpHeaders() {
-    return HttpHeadersContext.getHttpHeaders();
-  }
-
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(corsInterceptor);
@@ -93,7 +82,6 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter {
     registry.addInterceptor(cloudTaskInterceptor);
     registry.addInterceptor(clearCdrVersionInterceptor);
     registry.addInterceptor(securityHeadersInterceptor);
-    registry.addInterceptor(httpHeaderBindingInterceptor);
   }
 
   @Override
