@@ -4,11 +4,15 @@ import com.google.cloud.storage.Blob;
 import com.google.common.collect.ImmutableMap;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.inject.Provider;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -34,6 +38,8 @@ public class WgsCohortExtractionService {
   private final Provider<CloudStorageClient> extractionServiceAccountCloudStorageClientProvider;
   private final Provider<SubmissionsApi> submissionApiProvider;
   private final Provider<MethodConfigurationsApi> methodConfigurationsApiProvider;
+  private final WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao;
+  private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
@@ -44,6 +50,8 @@ public class WgsCohortExtractionService {
           Provider<CloudStorageClient> extractionServiceAccountCloudStorageClientProvider,
       Provider<SubmissionsApi> submissionsApiProvider,
       Provider<MethodConfigurationsApi> methodConfigurationsApiProvider,
+      WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao,
+      Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.cohortService = cohortService;
     this.fireCloudService = fireCloudService;
@@ -51,6 +59,8 @@ public class WgsCohortExtractionService {
     this.extractionServiceAccountCloudStorageClientProvider =
         extractionServiceAccountCloudStorageClientProvider;
     this.methodConfigurationsApiProvider = methodConfigurationsApiProvider;
+    this.wgsExtractCromwellSubmissionDao = wgsExtractCromwellSubmissionDao;
+    this.userProvider = userProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
@@ -182,6 +192,15 @@ public class WgsCohortExtractionService {
                     .methodConfigurationNamespace(methodConfig.getNamespace())
                     .methodConfigurationName(methodConfig.getName())
                     .useCallCache(false));
+
+    // Note: if this save fails we may have an orphaned job. Will likely need a cleanup task to
+    // check for such jobs.
+    DbWgsExtractCromwellSubmission dbSubmission = new DbWgsExtractCromwellSubmission();
+    dbSubmission.setSubmissionId(submissionResponse.getSubmissionId());
+    dbSubmission.setWorkspace(workspace);
+    dbSubmission.setCreator(userProvider.get());
+    dbSubmission.setSampleCount(personIds.size());
+    wgsExtractCromwellSubmissionDao.save(dbSubmission);
 
     methodConfigurationsApiProvider
         .get()
