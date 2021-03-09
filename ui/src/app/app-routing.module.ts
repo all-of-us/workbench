@@ -323,7 +323,7 @@ const routes: Routes = [
           {
             path: 'banner',
             component: AppRouting,
-            data: {title: 'Create Banner'}
+            data: {}
           },
           {
             path: 'institution',
