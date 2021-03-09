@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="calbach" id="changelog-154-wgs-cromwell-extract-submission">
+
+    <createTable tableName="wgs_extract_cromwell_submission">
+      <column name="wgs_extract_cromwell_submission_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="submission_id" type="VARCHAR(80)">
+        <constraints unique="true" nullable="false"/>
+      </column>
+      <column name="workspace_id" type="bigint">
+        <constraints nullable="false" />
+      </column>
+      <column name="creator_id" type="bigint" />
+      <column name="data_set_id" type="bigint" />
+      <column name="sample_count" type="bigint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="creation_time" type="timestamp">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint
+        constraintName="fk_wgs_extract_workspace_id"
+        baseTableName="wgs_extract_cromwell_submission"
+        baseColumnNames="workspace_id"
+        referencedTableName="workspace"
+        referencedColumnNames="workspace_id"
+        onDelete="CASCADE" />
+    <addForeignKeyConstraint
+        constraintName="fk_wgs_extract_creator_id"
+        baseTableName="wgs_extract_cromwell_submission"
+        baseColumnNames="creator_id"
+        referencedTableName="user"
+        referencedColumnNames="user_id"
+        onDelete="SET NULL" />
+    <addForeignKeyConstraint
+        constraintName="fk_wgs_extract_data_set_id"
+        baseTableName="wgs_extract_cromwell_submission"
+        baseColumnNames="data_set_id"
+        referencedTableName="data_set"
+        referencedColumnNames="data_set_id"
+        onDelete="SET NULL" />
+
+    <createIndex tableName="wgs_extract_cromwell_submission" indexName="wgs_extract_submission_id_idx" unique="true">
+      <column name="submission_id"/>
+    </createIndex>
+
+  </changeSet>
+</databaseChangeLog>
