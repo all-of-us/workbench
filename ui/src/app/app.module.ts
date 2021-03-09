@@ -27,8 +27,6 @@ import {HelpSidebarComponent} from './components/help-sidebar';
 import {RoutingSpinnerComponent} from './components/routing-spinner/component';
 import {AdminBannerComponent} from './pages/admin/admin-banner';
 import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
-import {AdminUserComponent} from './pages/admin/admin-user';
-import {AdminUsersComponent} from './pages/admin/admin-users';
 import {AppComponent, overriddenUrlKey} from './pages/app/component';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
@@ -120,8 +118,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
   declarations: [
     AdminBannerComponent,
     AdminReviewWorkspaceComponent,
-    AdminUserComponent,
-    AdminUsersComponent,
     AppComponent,
     AppRouting,
     BugReportComponent,

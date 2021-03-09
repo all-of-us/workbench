@@ -1,7 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {Component} from '@angular/core';
 
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
@@ -17,7 +16,6 @@ import {
   formatFreeCreditsUSD,
   isBlank,
   reactStyles,
-  ReactWrapperBase,
   withUrlParams
 } from 'app/utils';
 
@@ -163,7 +161,7 @@ interface State {
 }
 
 
-const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
+export const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
 
   private aborter: AbortController;
 
@@ -650,12 +648,3 @@ const AdminUser = withUrlParams()(class extends React.Component<Props, State> {
     </FadeBox>;
   }
 });
-
-@Component({
-  template: '<div #root></div>'
-})
-export class AdminUserComponent extends ReactWrapperBase {
-  constructor() {
-    super(AdminUser, []);
-  }
-}
