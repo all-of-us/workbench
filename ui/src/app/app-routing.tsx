@@ -17,6 +17,10 @@ import {NOTEBOOK_HELP_CONTENT} from './components/help-sidebar';
 import {AdminInstitution} from './pages/admin/admin-institution';
 import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
 import {AdminNotebookView} from './pages/admin/admin-notebook-view';
+import {AdminUser} from './pages/admin/admin-user';
+import {AdminUsers} from './pages/admin/admin-users';
+import {AdminWorkspace} from './pages/admin/admin-workspace';
+import {AdminWorkspaceSearch} from './pages/admin/admin-workspace-search';
 import {InteractiveNotebook} from './pages/analysis/interactive-notebook';
 import {NotebookList} from './pages/analysis/notebook-list';
 import {NotebookRedirect} from './pages/analysis/notebook-redirect';
@@ -49,9 +53,13 @@ const NotebookRedirectPage = withRouteData(NotebookRedirect);
 const SessionExpiredPage = withRouteData(SessionExpired);
 const SignInAgainPage = withRouteData(SignInAgain);
 const SignInPage = withRouteData(SignIn);
+const UserAdminPage = withRouteData(AdminUser);
+const UsersAdminPage = withRouteData(AdminUsers);
 const UserAuditPage = withRouteData(UserAudit);
 const UserDisabledPage = withRouteData(UserDisabled);
+const WorkspaceAdminPage = withRouteData(AdminWorkspace);
 const WorkspaceAuditPage = withRouteData(WorkspaceAudit);
+const WorkspaceSearchAdminPage = withRouteData(AdminWorkspaceSearch);
 const WorkspaceLibraryPage = withRouteData(WorkspaceLibrary);
 
 interface RoutingProps {
@@ -101,12 +109,32 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           component={() => <InstitutionEditAdminPage routeData={{title: 'Institution Admin'}}/>}
       />
       <AppRoute
+          path='/admin/user' // included for backwards compatibility
+          component={() => <UsersAdminPage routeData={{title: 'User Admin Table'}}/>}
+      />
+      <AppRoute
+          path='/admin/users'
+          component={() => <UsersAdminPage routeData={{title: 'User Admin Table'}}/>}
+      />
+      <AppRoute
+          path='/admin/users/:usernameWithoutGsuiteDomain'
+          component={() => <UserAdminPage routeData={{title: 'User Admin'}}/>}
+      />
+      <AppRoute
           path='/admin/user-audit'
           component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}
       />
       <AppRoute
           path='/admin/user-audit/:username'
           component={() => <UserAuditPage routeData={{title: 'User Audit'}}/>}
+      />
+      <AppRoute
+          path='/admin/workspaces'
+          component={() => <WorkspaceSearchAdminPage routeData={{title: 'Workspace Admin'}}/>}
+      />
+      <AppRoute
+          path='/admin/workspaces/:workspaceNamespace'
+          component={() => <WorkspaceAdminPage routeData={{title: 'Workspace Admin'}}/>}
       />
       <AppRoute
           path='/admin/workspace-audit'

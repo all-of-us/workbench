@@ -47,7 +47,6 @@ cron:
   schedule: every 1 hours
   timezone: UTC
   target: api
- This cron job is disabled in perf env. See RW-6430 for details.
 - description: 'Find and alert users that have exceeded their free tier billing usage'
   url: /v1/cron/checkFreeTierBillingUsage
   # This is a change specific to the perf environment. Rather than run every 30 mins, we reduce the frequency of the

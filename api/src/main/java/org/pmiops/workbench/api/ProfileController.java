@@ -55,6 +55,7 @@ import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.RasLinkRequestBody;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
@@ -608,5 +609,11 @@ public class ProfileController implements ProfileApiDelegate {
         Optional.ofNullable(beforeMillisNullable).map(Instant::ofEpochMilli).orElse(Instant.now());
     return ResponseEntity.ok(
         actionAuditQueryService.queryEventsForUser(userDatabaseId, limit, after, before));
+  }
+
+  @Override
+  public ResponseEntity<Profile> linkRasAccount(RasLinkRequestBody body) {
+    // TODO(RW-6364): Implement this endpoint.
+    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
   }
 }
