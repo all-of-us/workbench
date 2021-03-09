@@ -13,6 +13,7 @@
     {
       "cdrVersionId": 1,
       "name": "[Removed] Synthetic Dataset v1 (Legacy)",
+      "dataAccessLevel": 1,
       "archivalStatus": 1,
       "bigqueryProject": "",
       "bigqueryDataset": "",
@@ -26,6 +27,7 @@
     {
       "cdrVersionId": 2,
       "name": "[Removed] Synthetic Dataset v2 (Legacy)",
+      "dataAccessLevel": 1,
       "archivalStatus": 1,
       "bigqueryProject": "",
       "bigqueryDataset": "",
@@ -39,6 +41,7 @@
     {
       "cdrVersionId": 3,
       "name": "[Removed] Synthetic Dataset v1",
+      "dataAccessLevel": 1,
       "archivalStatus": 1,
       "bigqueryProject": "",
       "bigqueryDataset": "",
@@ -52,6 +55,7 @@
     {
       "cdrVersionId": 4,
       "name": "[Removed] Synthetic Dataset v2",
+      "dataAccessLevel": 1,
       "archivalStatus": 1,
       "bigqueryProject": "",
       "bigqueryDataset": "",
@@ -65,6 +69,7 @@
     {
       "cdrVersionId": 5,
       "name": "Synthetic Dataset v3",
+      "dataAccessLevel": 1,
       "bigqueryProject": "fc-aou-cdr-synth-stable",
       "bigqueryDataset": "SR2019q4r4",
       "creationTime": "2019-09-30 00:00:00Z",
@@ -79,6 +84,7 @@
       "cdrVersionId": 6,
       "isDefault": true,
       "name": "Synthetic Dataset v4",
+      "dataAccessLevel": 1,
       "bigqueryProject": "fc-aou-cdr-synth-stable",
       "bigqueryDataset": "SR2019q4r4",
       "creationTime": "2019-09-30 00:00:00Z",
