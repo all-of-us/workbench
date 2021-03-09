@@ -48,7 +48,8 @@ public class WgsCohortExtractionService {
     this.cohortService = cohortService;
     this.fireCloudService = fireCloudService;
     this.submissionApiProvider = submissionsApiProvider;
-    this.extractionServiceAccountCloudStorageClientProvider = extractionServiceAccountCloudStorageClientProvider;
+    this.extractionServiceAccountCloudStorageClientProvider =
+        extractionServiceAccountCloudStorageClientProvider;
     this.methodConfigurationsApiProvider = methodConfigurationsApiProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
@@ -80,7 +81,8 @@ public class WgsCohortExtractionService {
     WorkbenchConfig.WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;
 
-    FirecloudWorkspace fcUserWorkspace = fireCloudService.getWorkspace(workspace).get().getWorkspace();
+    FirecloudWorkspace fcUserWorkspace =
+        fireCloudService.getWorkspace(workspace).get().getWorkspace();
 
     String extractionUuid = UUID.randomUUID().toString();
     String extractionFolder = "wgs-cohort-extractions/" + extractionUuid;
