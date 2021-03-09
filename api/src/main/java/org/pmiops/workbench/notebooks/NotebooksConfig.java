@@ -54,7 +54,6 @@ public class NotebooksConfig {
     // cannot be injected outside a Spring controller method.
     Optional<String> referer = Optional.ofNullable(req.getHeader("Referer"));
     if (referer.isPresent()) {
-      System.out.println(referer);
       apiClient.addDefaultHeader("Referer", referer.get());
     } else {
       log.info("no Referer request header found, requests to the Leo proxy API may be rejected");
