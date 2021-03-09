@@ -208,7 +208,7 @@ beforeEach(async () => {
   page.on('error', async (error) => {
     const title = await getPageTitle();
     try {
-      console.error(`PAGE ERROR: "${title}"\n${error.message}\n${error.stack}`);
+      console.error(`PAGE ERROR: "${title}"\n${error.toString()}\n${error.message}\n${error.stack}`);
       console.log('');
     } catch (err) {
       console.error(`❗ "${title}"\nException occurred when getting page error.\n${err}`);
@@ -218,7 +218,7 @@ beforeEach(async () => {
   page.on('pageerror', async (error) => {
     const title = await getPageTitle();
     try {
-      console.error(`PAGEERROR: "${title}"\n${error.message}\n${error.stack}`);
+      console.error(`PAGEERROR: "${title}"\n${error.toString()}\n${error.message}\n${error.stack}`);
       console.log('');
     } catch (err) {
       console.error(`❗ "${title}"\nPage exception occurred when getting pageerror.\n${err}`);
