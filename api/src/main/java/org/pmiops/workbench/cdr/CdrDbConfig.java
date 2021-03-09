@@ -59,7 +59,7 @@ public class CdrDbConfig {
     //
     // See also https://precisionmedicineinitiative.atlassian.net/browse/RW-6432
 
-    private final Long defaultRTCdrVersionId;
+    private final Long defaultCdrVersionId;
 
     @Autowired
     public CdrDataSource(
@@ -136,7 +136,7 @@ public class CdrDbConfig {
       if (defaultId == null) {
         throw new ServerErrorException("Default Registered Tier CDR version not found!");
       }
-      this.defaultRTCdrVersionId = defaultId;
+      this.defaultCdrVersionId = defaultId;
       setTargetDataSources(cdrVersionDataSourceMap);
       afterPropertiesSet();
     }
@@ -158,7 +158,7 @@ public class CdrDbConfig {
         // Return the the default Registered Tier CDR version for configuring metadata.
         // After Spring beans are finished being initialized, init() will
         // be called and we will start requiring clients to specify a CDR version.
-        return defaultRTCdrVersionId;
+        return defaultCdrVersionId;
       }
       return cdrVersion.getCdrVersionId();
     }
