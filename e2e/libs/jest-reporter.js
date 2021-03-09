@@ -1,6 +1,5 @@
 const fs = require('fs-extra');
 const path = require('path');
-const { fileLogger } = require('./logger');
 const winston = require("winston");
 
 module.exports = class JestReporter {
@@ -22,17 +21,26 @@ module.exports = class JestReporter {
 
   // @ts-ignore
   onTestResult(testRunConfig, testResult, runResults) {
-    // Get test name.
     const testName = path.parse(testResult.testFilePath).name;
     const testLog = `${this.logDir}/${testName}.log`;
 
-    const transports = new winston.transports.File({
-        filename: testLog,
-        options: { flags: 'w' },
-        handleExceptions: true,
-      });
-    fileLogger.clear().add(transports);
+    const fileLogger = winston.createLogger({
+      level: process.env.LOG_LEVEL || "info",
+      format: winston.format.combine(
+        winston.format.splat(),
+        winston.format.printf( (info) => {return `${info.message}`; })
+      ),
+      transports: [
+        new winston.transports.File({
+          filename: testLog,
+          options: { flags: 'w' },
+          handleExceptions: true,
+        })
+      ],
+      exitOnError: false
+    });
 
+    // Read jest console messages and save to a log file.
     // Get all console logs.
     if (testResult.console && testResult.console.length > 0) {
       testResult.console.forEach((log) => {
