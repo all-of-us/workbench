@@ -22,7 +22,15 @@ module.exports = class JestReporter {
   // @ts-ignore
   onTestResult(testRunConfig, testResult, runResults) {
     const testName = path.parse(testResult.testFilePath).name;
-    const testLog = `${this.logDir}/${testName}.log`;
+    let testLogName;
+    testResult.testResults.forEach((result) => {
+      const status = result.status;
+      if (status === 'failed') {
+        testLogName = `${this.logDir}/${testName}-FAILED.log`;
+      } else {
+        testLogName = `${this.logDir}/${testName}.log`;
+      }
+    });
 
     const fileLogger = winston.createLogger({
       level: process.env.LOG_LEVEL || "info",
@@ -30,9 +38,8 @@ module.exports = class JestReporter {
         winston.format.splat(),
         winston.format.printf( (info) => {return `${info.message}`; })
       ),
-      transports: [
-        new winston.transports.File({
-          filename: testLog,
+      transports: [new winston.transports.File({
+          filename: testLogName,
           options: { flags: 'w' },
           handleExceptions: true,
         })
@@ -59,7 +66,7 @@ module.exports = class JestReporter {
         fileLogger.log('info', 'failure: %s', failure);
       }
     });
-    console.log(`Save test log: ${testLog}`);
+    console.log(`Save test log: ${testLogName}`);
   }
 
   // @ts-ignore
