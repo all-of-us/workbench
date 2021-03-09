@@ -11,11 +11,13 @@ import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.MethodConfigurationsApi;
 import org.pmiops.workbench.firecloud.api.SubmissionsApi;
 import org.pmiops.workbench.firecloud.model.FirecloudMethodConfiguration;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionResponse;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.model.TerraJob;
@@ -28,7 +30,8 @@ import org.springframework.stereotype.Service;
 public class WgsCohortExtractionService {
 
   private final CohortService cohortService;
-  private final Provider<CloudStorageClient> cloudStorageClientProvider;
+  private final FireCloudService fireCloudService;
+  private final Provider<CloudStorageClient> extractionServiceAccountCloudStorageClientProvider;
   private final Provider<SubmissionsApi> submissionApiProvider;
   private final Provider<MethodConfigurationsApi> methodConfigurationsApiProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -36,14 +39,17 @@ public class WgsCohortExtractionService {
   @Autowired
   public WgsCohortExtractionService(
       CohortService cohortService,
+      FireCloudService fireCloudService,
       @Qualifier(StorageConfig.WGS_EXTRACTION_STORAGE_CLIENT)
-          Provider<CloudStorageClient> cloudStorageClientProvider,
+          Provider<CloudStorageClient> extractionServiceAccountCloudStorageClientProvider,
       Provider<SubmissionsApi> submissionsApiProvider,
       Provider<MethodConfigurationsApi> methodConfigurationsApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.cohortService = cohortService;
+    this.fireCloudService = fireCloudService;
     this.submissionApiProvider = submissionsApiProvider;
-    this.cloudStorageClientProvider = cloudStorageClientProvider;
+    this.extractionServiceAccountCloudStorageClientProvider =
+        extractionServiceAccountCloudStorageClientProvider;
     this.methodConfigurationsApiProvider = methodConfigurationsApiProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
   }
@@ -75,16 +81,21 @@ public class WgsCohortExtractionService {
     WorkbenchConfig.WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;
 
+    FirecloudWorkspace fcUserWorkspace =
+        fireCloudService.getWorkspace(workspace).get().getWorkspace();
+
     String extractionUuid = UUID.randomUUID().toString();
+    String extractionFolder = "wgs-cohort-extractions/" + extractionUuid;
+
     Blob personIdsFile =
-        cloudStorageClientProvider
+        extractionServiceAccountCloudStorageClientProvider
             .get()
             .writeFile(
                 // It is critical that this file is written to a bucket that the user cannot write
                 // to because its contents will feed into a SQL query with the cohort
                 // extraction SA's permissions
                 cohortExtractionConfig.operationalTerraWorkspaceBucket,
-                "wgs-cohort-extractions/" + extractionUuid + "/person_ids.txt",
+                extractionFolder + "/person_ids.txt",
                 String.join("\n", cohortService.getPersonIds(cohortId))
                     .getBytes(StandardCharsets.UTF_8));
 
@@ -124,6 +135,33 @@ public class WgsCohortExtractionService {
                             .put(
                                 "WgsCohortExtract.wgs_extraction_temp_tables_dataset",
                                 "\"" + cohortExtractionConfig.extractionTempTablesDataset + "\"")
+                            .put(
+                                "WgsCohortExtract.wgs_intervals",
+                                "\"gs://gcp-public-data--broad-references/hg38/v0/wgs_calling_regions.hg38.interval_list\"")
+                            // This value will need to be dynamically adjusted through testing
+                            .put("WgsCohortExtract.scatter_count", "1000")
+                            .put(
+                                "WgsCohortExtract.reference",
+                                "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta\"")
+                            .put(
+                                "WgsCohortExtract.reference_index",
+                                "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.fai\"")
+                            .put(
+                                "WgsCohortExtract.reference_dict",
+                                "\"gs://gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.dict\"")
+                            // Will produce files named "interval_1.vcf.gz", "interval_32.vcf.gz",
+                            // etc
+                            .put("WgsCohortExtract.output_file_base_name", "\"interval\"")
+                            .put(
+                                "WgsCohortExtract.output_gcs_dir",
+                                "\"gs://"
+                                    + fcUserWorkspace.getBucketName()
+                                    + "/"
+                                    + extractionFolder
+                                    + "/vcfs/\"")
+                            .put(
+                                "WgsCohortExtract.gatk_override",
+                                "\"gs://all-of-us-workbench-test-genomics/wgs/gatk-package-4.1.9.0-204-g6449d52-SNAPSHOT-local.jar\"")
                             .build())
                     .methodConfigVersion(
                         cohortExtractionConfig.extractionMethodConfigurationVersion)

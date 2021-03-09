@@ -57,7 +57,7 @@
     "extractionPetServiceAccount": "pet-118217329794842274136@aou-wgs-cohort-extraction.iam.gserviceaccount.com",
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction",
     "extractionMethodConfigurationName": "HelloWorld",
-    "extractionMethodConfigurationVersion": 51,
+    "extractionMethodConfigurationVersion": 54,
     "extractionCohortsDataset": "fc-aou-cdr-synth-test.wgs_extraction_cohorts",
     "extractionDestinationDataset": "fc-aou-cdr-synth-test.wgs_extracted_cohorts",
     "extractionTempTablesDataset": "fc-aou-cdr-synth-test.wgs_extraction_temp_tables"
