@@ -3684,7 +3684,7 @@ definitions:
         accessTierShortName:
           type: string
         defaultCdrVersionId:
-          type: integer
+          type: string
           format: int64
         versions:
           type: array
