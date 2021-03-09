@@ -4,7 +4,6 @@ require('jest-circus');
 
 class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
 
-  failedTest = false;
   screenshotDir = `logs/screenshot`;
   htmlDir = `logs/html`;
 
@@ -46,27 +45,14 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
 
         await fs.ensureDir(this.screenshotDir);
         await fs.ensureDir(this.htmlDir);
-
         const timestamp = this.localDateTimeString();
         const screenshotFile = `${this.screenshotDir}/${testName}_${timestamp}.png`;
         await this.takeScreenshot(screenshotFile);
         const htmlFile = `${this.htmlDir}/${testName}_${timestamp}.html`;
         await this.savePageToFile(htmlFile);
-
-        this.failedTest = true;
         break;
       default:
         break;
-    }
-    
-    // Fail fast: Can't use `bail` option with a custom logger.
-    // Another way to stop tests in queue from running after first failure.
-    // If first failure has happened, all following unexecuted tests will be marked as skip.
-    if (this.failedTest && event.name === 'test_start') {
-      event.test.mode = 'skip';
-    }
-    if (super.handleTestEvent) {
-      super.handleTestEvent(event, state)
     }
   }
 

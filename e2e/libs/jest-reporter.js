@@ -22,13 +22,11 @@ module.exports = class JestReporter {
   // @ts-ignore
   onTestResult(testRunConfig, testResult, runResults) {
     const testName = path.parse(testResult.testFilePath).name;
-    let testLogName;
+    let testLogName = `${this.logDir}/${testName}.log`;
     testResult.testResults.forEach((result) => {
       const status = result.status;
       if (status === 'failed') {
         testLogName = `${this.logDir}/${testName}-FAILED.log`;
-      } else {
-        testLogName = `${this.logDir}/${testName}.log`;
       }
     });
 
