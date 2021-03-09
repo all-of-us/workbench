@@ -14,9 +14,11 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
 import {NOTEBOOK_HELP_CONTENT} from './components/help-sidebar';
+import { AdminBanner } from './pages/admin/admin-banner';
 import {AdminInstitution} from './pages/admin/admin-institution';
 import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
 import {AdminNotebookView} from './pages/admin/admin-notebook-view';
+import {AdminReviewWorkspace} from './pages/admin/admin-review-workspace';
 import {AdminUser} from './pages/admin/admin-user';
 import {AdminUsers} from './pages/admin/admin-users';
 import {AdminWorkspace} from './pages/admin/admin-workspace';
@@ -29,8 +31,6 @@ import {SignIn} from './pages/login/sign-in';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
-import { AdminBanner } from './pages/admin/admin-banner';
-import {AdminReviewWorkspace} from "./pages/admin/admin-review-workspace";
 
 
 const signInGuard: Guard = {
