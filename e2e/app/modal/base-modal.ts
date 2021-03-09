@@ -64,7 +64,7 @@ export default abstract class BaseModal extends Container {
       if (waitForClose) {
          await this.waitUntilClose(timeout);
       }
-      await waitWhileLoading(this.page);
+      await waitWhileLoading(this.page, timeout);
    }
 
    async waitForButton(buttonLabel: LinkText): Promise<Button> {
