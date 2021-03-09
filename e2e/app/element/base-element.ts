@@ -334,11 +334,13 @@ export default class BaseElement extends Container {
   /**
    * Click on element then wait for page navigation to finish.
    */
-  async clickAndWait(): Promise<void> {
-    const navigationPromise = this.page.waitForNavigation({waitUntil: ['load', 'domcontentloaded', 'networkidle0']});
+  async clickAndWait(timeout: number = (2 * 60 * 1000)): Promise<void> {
+    const navigationPromise = this.page.waitForNavigation({waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout});
     await this.click({delay: 10});
     // Wait for spinner first then wait for navigation to finish.
-    await waitWhileLoading(this.page);
+    await waitWhileLoading(this.page, timeout).catch(() => {
+      // Do nothing
+    });
     await navigationPromise;
   }
 
