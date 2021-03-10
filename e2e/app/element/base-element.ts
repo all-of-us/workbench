@@ -1,8 +1,6 @@
 import {ClickOptions, ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
 import Container from 'app/container';
 import {getAttrValue, getPropValue} from 'utils/element-utils';
-import {waitWhileLoading} from 'utils/waits-utils';
-
 
 /**
  * BaseElement represents a web element in the DOM.
@@ -335,12 +333,10 @@ export default class BaseElement extends Container {
    * Click on element then wait for page navigation to finish.
    */
   async clickAndWait(timeout: number = (2 * 60 * 1000)): Promise<void> {
-    const navigationPromise = this.page.waitForNavigation({waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout});
-    await this.click({delay: 10});
-    // Wait for spinner first then wait for navigation to finish.
-    await waitWhileLoading(this.page, timeout).catch(() => {
-      // Do nothing
+    const navigationPromise = this.page.waitForNavigation({
+      waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout
     });
+    await this.click({delay: 10});
     await navigationPromise;
   }
 

@@ -57,14 +57,13 @@ export default abstract class BaseModal extends Container {
       const handle = await button.asElementHandle();
       await handle.hover();
       if (waitForNav) {
-         await button.clickAndWait();
+         await button.clickAndWait(timeout);
       } else {
          await button.click({delay: 10});
       }
       if (waitForClose) {
          await this.waitUntilClose(timeout);
       }
-      await waitWhileLoading(this.page, timeout);
    }
 
    async waitForButton(buttonLabel: LinkText): Promise<Button> {
