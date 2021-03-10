@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 import org.apache.log4j.Logger;
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.CacheSpringConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -49,6 +50,14 @@ public class CdrDbConfig {
   public static class CdrDataSource extends AbstractRoutingDataSource {
 
     private boolean finishedInitialization = false;
+
+    // Each access tier has a default version, but we don't know which tier is desired.
+    //
+    // This is because the default CDR Version is only returned when we have no knowledge about
+    // which CDR version is desired, and therefore also the access tier.  We have to choose one,
+    // and the Registered Tier is the safer choice.
+    //
+    // See also https://precisionmedicineinitiative.atlassian.net/browse/RW-6432
 
     private final Long defaultCdrVersionId;
 
@@ -108,19 +117,24 @@ public class CdrDbConfig {
               "not using Tomcat pool or initializing pool configuration; "
                   + "this should only happen within tests");
         }
+
         cdrVersionDataSourceMap.put(cdrVersion.getCdrVersionId(), dataSource);
-        if (cdrVersion.getIsDefault()) {
+        if (cdrVersion
+                .getAccessTier()
+                .getShortName()
+                .equals(AccessTierService.REGISTERED_TIER_SHORT_NAME)
+            && cdrVersion.getIsDefault()) {
           if (defaultId != null) {
             throw new ServerErrorException(
                 String.format(
-                    "Multiple CDR versions are marked as the default: %d, %d",
+                    "Multiple Registered Tier CDR versions are marked as the default: %d, %d",
                     defaultId, cdrVersion.getCdrVersionId()));
           }
           defaultId = cdrVersion.getCdrVersionId();
         }
       }
       if (defaultId == null) {
-        throw new ServerErrorException("Default CDR version not found!");
+        throw new ServerErrorException("Default Registered Tier CDR version not found!");
       }
       this.defaultCdrVersionId = defaultId;
       setTargetDataSources(cdrVersionDataSourceMap);
@@ -141,7 +155,7 @@ public class CdrDbConfig {
         }
         // While Spring beans are being initialized, this method can be called
         // in the course of attempting to determine metadata about the data source.
-        // Return the the default CDR version for configuring metadata.
+        // Return the the default Registered Tier CDR version for configuring metadata.
         // After Spring beans are finished being initialized, init() will
         // be called and we will start requiring clients to specify a CDR version.
         return defaultCdrVersionId;

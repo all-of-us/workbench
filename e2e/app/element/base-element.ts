@@ -2,7 +2,6 @@ import {ClickOptions, ElementHandle, Page, WaitForSelectorOptions} from 'puppete
 import Container from 'app/container';
 import {getAttrValue, getPropValue} from 'utils/element-utils';
 
-
 /**
  * BaseElement represents a web element in the DOM.
  * It implements useful methods for querying and interacting with this element.
@@ -333,10 +332,12 @@ export default class BaseElement extends Container {
   /**
    * Click on element then wait for page navigation to finish.
    */
-  async clickAndWait(): Promise<void> {
+  async clickAndWait(timeout: number = (2 * 60 * 1000)): Promise<void> {
     await Promise.all([
-      this.page.waitForNavigation({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'] }),
-      this.click(),
+      this.page.waitForNavigation({
+        waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout
+      }),
+      this.click({delay: 10})
     ]);
   }
 

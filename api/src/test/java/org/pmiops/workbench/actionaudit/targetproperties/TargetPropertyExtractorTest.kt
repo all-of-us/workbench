@@ -3,6 +3,7 @@ package org.pmiops.workbench.actionaudit.targetproperties
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.pmiops.workbench.access.AccessTierService
 import org.pmiops.workbench.model.ResearchPurpose
 import org.pmiops.workbench.model.Workspace
 import kotlin.reflect.KClass
@@ -29,7 +30,7 @@ class TargetPropertyExtractorTest {
             .apply { creationTime = now }
             .apply { lastModifiedTime = now }
             .apply { etag = "etag_1" }
-            .apply { accessTierShortName = "registered" }
+            .apply { accessTierShortName = AccessTierService.REGISTERED_TIER_SHORT_NAME }
             .apply { published = false }
     }
 

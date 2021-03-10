@@ -107,6 +107,7 @@
   },
   "access": {
     "enableComplianceTraining": true,
+    "unsafeAllowAccessToAllTiersForRegisteredUsers": false,
     "enableEraCommons": true,
     "enableDataUseAgreement": true,
     "enableBetaAccess": false,
@@ -141,5 +142,9 @@
   "reporting": {
     "dataset": "reporting_perf",
     "maxRowsPerInsert": 2500
+  },
+  "ras": {
+    "host": "",
+    "clientId": ""
   }
 }

@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
@@ -98,7 +99,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     CdrVersionService.class,
     CohortBuilderMapperImpl.class
   })
-  @MockBean({FireCloudService.class})
+  @MockBean({
+    FireCloudService.class,
+    AccessTierService.class,
+    CdrVersionService.class,
+  })
   static class Configuration {
     @Bean
     public DbUser user() {
@@ -575,6 +580,19 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .standard(false);
   }
 
+  /**
+   * This SearchParameter specifically represents the case that uses the
+   * has_physical_measurement_data flag.
+   */
+  private static SearchParameter physicalMeasurementDataNoConceptId() {
+    return new SearchParameter()
+        .domain(Domain.PHYSICAL_MEASUREMENT.toString())
+        .type(CriteriaType.PPI.toString())
+        .group(false)
+        .ancestorData(false)
+        .standard(false);
+  }
+
   private static SearchParameter age() {
     return new SearchParameter()
         .domain(Domain.PERSON.toString())
@@ -628,6 +646,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .domain(Domain.FITBIT.toString())
         .group(false)
         .standard(true)
+        .ancestorData(false);
+  }
+
+  private static SearchParameter wholeGenomeVariant() {
+    return new SearchParameter()
+        .domain(Domain.WHOLE_GENOME_VARIANT.toString())
+        .group(false)
+        .standard(false)
         .ancestorData(false);
   }
 
@@ -1503,10 +1529,21 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countParticipants() {
+  public void countParticipantsFitbit() {
     SearchRequest searchRequest =
         createSearchRequests(
             Domain.FITBIT.toString(), ImmutableList.of(fitbit()), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countParticipantsWholeGenomeVariant() {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            Domain.WHOLE_GENOME_VARIANT.toString(),
+            ImmutableList.of(wholeGenomeVariant()),
+            new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -2034,6 +2071,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+  }
+
+  @Test
+  public void countSubjectHasPhysicalMeasurementData() {
+    SearchParameter pm = physicalMeasurementDataNoConceptId();
+    SearchRequest searchRequest =
+        createSearchRequests(
+            Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
+
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test

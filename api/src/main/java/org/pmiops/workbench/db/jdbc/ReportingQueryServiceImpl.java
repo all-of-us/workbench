@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ReportingCohort;
@@ -273,7 +274,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .accessTierShortNames(
                     dataAccessLevelFromStorage(rs.getShort("data_access_level"))
                             == DataAccessLevel.REGISTERED
-                        ? "registered"
+                        ? AccessTierService.REGISTERED_TIER_SHORT_NAME
                         : "none")
                 .dataUseAgreementBypassTime(
                     offsetDateTimeUtc(rs.getTimestamp("data_use_agreement_bypass_time")))

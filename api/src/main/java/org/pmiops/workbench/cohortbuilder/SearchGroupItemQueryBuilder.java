@@ -172,9 +172,15 @@ public final class SearchGroupItemQueryBuilder {
           + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere %s %s %s\n";
   private static final String AGE_DEC_SQL = "and not " + DEC_SQL;
   private static final String DEMO_IN_SQL = "%s in unnest(%s)\n";
-  private static final String FITBIT_SQL =
+  private static final String HAS_FITBIT_SQL =
       "select person_id\n"
           + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere has_fitbit = 1\n";
+  private static final String HAS_PM_DATA_SQL =
+      "select person_id\n"
+          + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere has_physical_measurement_data = 1\n";
+  private static final String WHOLE_GENOME_VARIANT_SQL =
+      "select person_id\n"
+          + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere has_whole_genome_variant = 1\n";
   private static final String CB_SEARCH_ALL_EVENTS_WHERE =
       "select person_id from `${projectId}.${dataSetId}.cb_search_all_events`\nwhere ";
   private static final String PERSON_ID_IN = "person_id in (";
@@ -212,7 +218,13 @@ public final class SearchGroupItemQueryBuilder {
       return buildDemoSql(queryParams, searchGroupItem);
     }
     if (Domain.FITBIT.equals(domain)) {
-      return FITBIT_SQL;
+      return HAS_FITBIT_SQL;
+    }
+    if (Domain.WHOLE_GENOME_VARIANT.equals(domain)) {
+      return WHOLE_GENOME_VARIANT_SQL;
+    }
+    if (hasPhysicalMeasurementData(searchGroupItem)) {
+      return HAS_PM_DATA_SQL;
     }
     // Otherwise build sql against flat denormalized search table
     for (SearchParameter param : searchGroupItem.getSearchParameters()) {
@@ -774,5 +786,14 @@ public final class SearchGroupItemQueryBuilder {
                     modifier.getName().toString());
           }
         });
+  }
+
+  private static boolean hasPhysicalMeasurementData(SearchGroupItem searchGroupItem) {
+    return searchGroupItem.getSearchParameters().size() == 1
+        && searchGroupItem.getSearchParameters().stream()
+            .allMatch(
+                sp ->
+                    Domain.PHYSICAL_MEASUREMENT.toString().equals(sp.getDomain())
+                        && sp.getConceptId() == null);
   }
 }

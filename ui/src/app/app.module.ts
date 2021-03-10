@@ -25,8 +25,6 @@ import {BugReportComponent} from './components/bug-report';
 import {ConfirmDeleteModalComponent} from './components/confirm-delete-modal';
 import {HelpSidebarComponent} from './components/help-sidebar';
 import {RoutingSpinnerComponent} from './components/routing-spinner/component';
-import {AdminBannerComponent} from './pages/admin/admin-banner';
-import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AppComponent, overriddenUrlKey} from './pages/app/component';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
@@ -40,7 +38,6 @@ import {InitialErrorComponent} from './pages/initial-error/component';
 import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
-import {WorkspaceEditComponent} from './pages/workspace/workspace-edit';
 import {WorkspaceListComponent} from './pages/workspace/workspace-list';
 import {WorkspaceNavBarComponent} from './pages/workspace/workspace-nav-bar';
 import {WorkspaceShareComponent} from './pages/workspace/workspace-share';
@@ -116,8 +113,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ClarityModule,
   ],
   declarations: [
-    AdminBannerComponent,
-    AdminReviewWorkspaceComponent,
     AppComponent,
     AppRouting,
     BugReportComponent,
@@ -142,7 +137,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     TablePage,
     TextModalComponent,
     WorkspaceAboutComponent,
-    WorkspaceEditComponent,
     WorkspaceListComponent,
     WorkspaceNavBarComponent,
     WorkspaceShareComponent,

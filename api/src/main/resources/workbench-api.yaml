@@ -159,14 +159,29 @@ paths:
     get:
       tags:
       - cdrVersions
-      description: Returns all curated data repository (CDR) versions that the user
-        has access to
+      description: >
+        DEPRECATED.
+        Returns all curated data repository (CDR) versions in the Registered Tier
+        that the user has access to
       operationId: getCdrVersions
       responses:
         200:
           description: A list of CDR versions.
           schema:
             "$ref": "#/definitions/CdrVersionListResponse"
+  "/v1/cdrVersionsByTier":
+    get:
+      tags:
+        - cdrVersions
+      description: >
+        Returns all curated data repository (CDR) versions in all tiers
+        that the user has access to
+      operationId: getCdrVersionsByTier
+      responses:
+        200:
+          description: A mapping of tiers to CDR versions.
+          schema:
+            "$ref": "#/definitions/CdrVersionTiersResponse"
   "/v1/status-alert":
     get:
       tags:
@@ -3604,6 +3619,7 @@ definitions:
     - FITBIT_ACTIVITY
     - FITBIT_INTRADAY_STEPS
     - PHYSICAL_MEASUREMENT_CSS
+    - WHOLE_GENOME_VARIANT
   Surveys:
     type: string
     description: a survey for concepts
@@ -3688,6 +3704,31 @@ definitions:
       defaultCdrVersionId:
         type: string
         description: ID of the CDR versions that should be used by the user by default
+  CdrVersionTiersResponse:
+    type: object
+    required:
+      - tiers
+    properties:
+      tiers:
+        type: array
+        items:
+          "$ref": "#/definitions/CdrVersionTier"
+  CdrVersionTier:
+    type: object
+    required:
+      - accessTierShortName
+      - defaultCdrVersionId
+      - versions
+    properties:
+      accessTierShortName:
+        type: string
+      defaultCdrVersionId:
+        type: string
+        format: int64
+      versions:
+        type: array
+        items:
+          "$ref": "#/definitions/CdrVersion"
   CdrVersion:
     type: object
     required:
@@ -3702,9 +3743,6 @@ definitions:
         type: string
       accessTierShortName:
         type: string
-      dataAccessLevel:
-        "$ref": "#/definitions/DataAccessLevel"
-        description: DEPRECATED.  Use accessTierShortName.
       archivalStatus:
         "$ref": "#/definitions/ArchivalStatus"
       hasMicroarrayData:

@@ -9,8 +9,6 @@ import {SignInGuard} from './guards/sign-in-guard.service';
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {CohortPageComponent} from './cohort-search/cohort-page/cohort-page.component';
-import {AdminBannerComponent} from './pages/admin/admin-banner';
-import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
 import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
@@ -22,7 +20,6 @@ import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actio
 import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
-import {WorkspaceEditComponent, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceListComponent} from './pages/workspace/workspace-list';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
@@ -99,6 +96,13 @@ const routes: Routes = [
             path: 'workspaces',
             canActivateChild: [WorkspaceGuard],
             children: [
+              // legacy / duplicated routes go HERE
+              {
+                path: 'build',
+                component: AppRouting,
+                data: {}
+              },
+              // non-migrated routes go HERE
               {
                 path: '',
                 component: WorkspaceListComponent,
@@ -115,6 +119,18 @@ const routes: Routes = [
                 component: WorkspaceWrapperComponent,
                 runGuardsAndResolvers: 'always',
                 children: [
+                  // legacy / duplicated routes go HERE
+                  {
+                    path: 'edit',
+                    component: AppRouting,
+                    data: {}
+                  },
+                  {
+                    path: 'duplicate',
+                    component: AppRouting,
+                    data: {}
+                  },
+                  // non-migrated routes go HERE
                   {
                     path: 'about',
                     component: WorkspaceAboutComponent,
@@ -122,26 +138,6 @@ const routes: Routes = [
                       title: 'View Workspace Details',
                       breadcrumb: BreadcrumbType.Workspace,
                       helpContentKey: 'about'
-                    }
-                  },
-                  {
-                    path: 'edit',
-                    component: WorkspaceEditComponent,
-                    data: {
-                      title: 'Edit Workspace',
-                      mode: WorkspaceEditMode.Edit,
-                      breadcrumb: BreadcrumbType.WorkspaceEdit,
-                      helpContentKey: 'edit'
-                    }
-                  },
-                  {
-                    path: 'duplicate',
-                    component: WorkspaceEditComponent,
-                    data: {
-                      title: 'Duplicate Workspace',
-                      mode: WorkspaceEditMode.Duplicate,
-                      breadcrumb: BreadcrumbType.WorkspaceDuplicate,
-                      helpContentKey: 'duplicate'
                     }
                   },
                   {
@@ -311,20 +307,54 @@ const routes: Routes = [
             path: 'profile',
             component: ProfilePageComponent,
             data: {title: 'Profile'}
-          },
-          {
-            path: 'workspaces/build',
-            component: WorkspaceEditComponent,
-            data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
           }
         ]
       },
       {
         path: 'admin',
         children: [
-          // legacy / duplicated routes go HERE
+          {
+            path: 'banner',
+            component: AppRouting,
+            data: {}
+          },
           {
             path: 'institution',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'institution/add',
+            component: AppRouting,
+            data: {},
+          },
+          {
+            path: 'institution/edit/:institutionId',
+            component: AppRouting,
+            data: {},
+          },
+          {
+            path: 'review-workspace',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'user', // included for backwards compatibility
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'users',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'users/:usernameWithoutGsuiteDomain',
+            component: AppRouting,
+            data: {title: 'User Admin'}
+          },
+          {
+            path: 'user-audit',
             component: AppRouting,
             data: {}
           },
@@ -387,17 +417,6 @@ const routes: Routes = [
             path: 'workspaces/:workspaceNamespace',
             component: AppRouting,
             data: {}
-          },
-          // non-migrated routes go HERE
-          {
-            path: 'review-workspace',
-            component: AdminReviewWorkspaceComponent,
-            data: {title: 'Review Workspaces'}
-          },
-          {
-            path: 'banner',
-            component: AdminBannerComponent,
-            data: {title: 'Create Banner'}
           }
         ]
       },

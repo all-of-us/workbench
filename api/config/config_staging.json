@@ -113,6 +113,7 @@
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
+    "unsafeAllowAccessToAllTiersForRegisteredUsers": false,
     "enableRdrExport": true,
     "enableBillingUpgrade": true,
     "enableV3DataUserCodeOfConduct": true,
@@ -138,5 +139,9 @@
   "reporting": {
     "dataset": "reporting_staging",
     "maxRowsPerInsert": 2500
+  },
+  "ras": {
+    "host": "",
+    "clientId": ""
   }
 }
