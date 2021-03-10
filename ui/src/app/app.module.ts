@@ -25,8 +25,6 @@ import {BugReportComponent} from './components/bug-report';
 import {ConfirmDeleteModalComponent} from './components/confirm-delete-modal';
 import {HelpSidebarComponent} from './components/help-sidebar';
 import {RoutingSpinnerComponent} from './components/routing-spinner/component';
-import {AdminBannerComponent} from './pages/admin/admin-banner';
-import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {AppComponent, overriddenUrlKey} from './pages/app/component';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
@@ -116,8 +114,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ClarityModule,
   ],
   declarations: [
-    AdminBannerComponent,
-    AdminReviewWorkspaceComponent,
     AppComponent,
     AppRouting,
     BugReportComponent,

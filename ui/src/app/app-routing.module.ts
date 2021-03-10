@@ -9,8 +9,6 @@ import {SignInGuard} from './guards/sign-in-guard.service';
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {CohortPageComponent} from './cohort-search/cohort-page/cohort-page.component';
-import {AdminBannerComponent} from './pages/admin/admin-banner';
-import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
 import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
@@ -322,9 +320,48 @@ const routes: Routes = [
       {
         path: 'admin',
         children: [
-          // legacy / duplicated routes go HERE
+          {
+            path: 'banner',
+            component: AppRouting,
+            data: {}
+          },
           {
             path: 'institution',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'institution/add',
+            component: AppRouting,
+            data: {},
+          },
+          {
+            path: 'institution/edit/:institutionId',
+            component: AppRouting,
+            data: {},
+          },
+          {
+            path: 'review-workspace',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'user', // included for backwards compatibility
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'users',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'users/:usernameWithoutGsuiteDomain',
+            component: AppRouting,
+            data: {title: 'User Admin'}
+          },
+          {
+            path: 'user-audit',
             component: AppRouting,
             data: {}
           },
@@ -387,17 +424,6 @@ const routes: Routes = [
             path: 'workspaces/:workspaceNamespace',
             component: AppRouting,
             data: {}
-          },
-          // non-migrated routes go HERE
-          {
-            path: 'review-workspace',
-            component: AdminReviewWorkspaceComponent,
-            data: {title: 'Review Workspaces'}
-          },
-          {
-            path: 'banner',
-            component: AdminBannerComponent,
-            data: {title: 'Create Banner'}
           }
         ]
       },
