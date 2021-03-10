@@ -1,12 +1,12 @@
 package org.pmiops.workbench.access;
 
 import java.util.List;
-import java.util.Optional;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 
 public interface AccessTierService {
+  // TODO remove once we are no longer special-casing the Registered Tier
   String REGISTERED_TIER_SHORT_NAME = "registered";
 
   /**
@@ -17,16 +17,9 @@ public interface AccessTierService {
   List<DbAccessTier> getAllTiers();
 
   /**
-   * Return the access tier referred to by the shortName in the database
-   *
-   * @param shortName the short name of the access tier to look up in the database
-   * @return an {@code Optional<DbAccessTier>} if one matches the shortName passed in, EMPTY
-   *     otherwise
-   */
-  Optional<DbAccessTier> getAccessTier(String shortName);
-
-  /**
    * Return the Registered Tier if it exists in the database
+   *
+   * <p>TODO remove once we are no longer special-casing the Registered Tier
    *
    * @return a DbAccessTier representing the Registered Tier
    * @throws ServerErrorException if there is no Registered Tier
@@ -42,6 +35,24 @@ public interface AccessTierService {
   void addUserToAllTiers(DbUser user);
 
   /**
+   * Add a tier membership to a user if none exists by inserting a DB row set to ENABLED. If such a
+   * membership exists and is DISABLED, set it to ENABLED.
+   *
+   * @param user the DbUser in the user-accessTier mapping we're updating
+   * @param accessTier the DbAccessTier in the user-accessTier mapping we're updating
+   */
+  void addUserToTier(DbUser user, DbAccessTier accessTier);
+
+  /**
+   * Remove a tier membership from a user if one exists and is ENABLED by marking that membership as
+   * DISABLED. Do nothing if no membership exists.
+   *
+   * @param user the DbUser in the user-accessTier mapping we're updating
+   * @param accessTier the DbAccessTier in the user-accessTier mapping we're updating
+   */
+  void removeUserFromTier(DbUser user, DbAccessTier accessTier);
+
+  /**
    * Remove a Registered Tier membership from a user if one exists and is ENABLED by marking that
    * membership as DISABLED. Do nothing if no membership exists.
    *
@@ -49,6 +60,8 @@ public interface AccessTierService {
    * when the user_access_tier table is the source of truth for tier membership. The existing method
    * UserServiceImpl.removeFromRegisteredTierGroupIdempotent() continues to handle group membership
    * until then.
+   *
+   * <p>TODO remove once we are no longer special-casing the Registered Tier
    *
    * @param user the DbUser in the user-accessTier mapping we're updating
    */
@@ -63,17 +76,15 @@ public interface AccessTierService {
    * UserServiceImpl.addToRegisteredTierGroupIdempotent() continues to handle group membership until
    * then.
    *
+   * <p>TODO remove once we are no longer special-casing the Registered Tier
+   *
    * @param user the DbUser in the user-accessTier mapping we're updating
    */
   void addUserToRegisteredTier(DbUser user);
 
   /**
-   * A placeholder implementation until we establish userAccessTierDao as the source of truth for
-   * access tier membership.
-   *
-   * <p>For registered users, return the registered tier or all tiers if we're in an environment
-   * which has enabled all tiers for registered users. Return no access tiers for unregistered
-   * users.
+   * Return the list of tiers a user has access to: those where a DbUserAccessTier exists with
+   * status ENABLED
    *
    * @param user the user whose access we're checking
    * @return The List of DbAccessTiers the DbUser has access to in this environment
