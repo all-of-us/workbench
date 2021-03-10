@@ -199,6 +199,9 @@ public class WgsCohortExtractionService {
     dbSubmission.setSubmissionId(submissionResponse.getSubmissionId());
     dbSubmission.setWorkspace(workspace);
     dbSubmission.setCreator(userProvider.get());
+    // TODO: This is currently an overestimate of the size, since these participants may not have
+    // corresponding genomics data. Once we move this knowledge into the service/controller, update
+    // this value to reflect the actual number of samples that we're processing in the workflow.
     dbSubmission.setSampleCount(personIds.size());
     wgsExtractCromwellSubmissionDao.save(dbSubmission);
 
