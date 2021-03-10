@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as validate from 'validate.js';
@@ -25,7 +24,6 @@ import {
   formatFreeCreditsUSD,
   lensOnProps,
   reactStyles,
-  ReactWrapperBase,
   withUserProfile
 } from 'app/utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
