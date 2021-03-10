@@ -30,6 +30,7 @@ import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
@@ -90,6 +91,7 @@ public class DataSetMapperTest {
     ConceptService.class,
     CohortDao.class,
     FireCloudService.class,
+    WgsExtractCromwellSubmissionDao.class,
     UserDao.class
   })
   static class Configuration {
