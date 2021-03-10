@@ -2,8 +2,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
-import {Location} from '@angular/common';
-import {Component} from '@angular/core';
 import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -39,7 +37,6 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatFreeCreditsUSD,
   reactStyles,
-  ReactWrapperBase,
   sliceByHalfLength,
   withCdrVersions,
   withCurrentWorkspace,
@@ -252,7 +249,7 @@ export interface WorkspaceEditState {
   workspace: Workspace;
   workspaceCreationConflictError: boolean;
   workspaceCreationError: boolean;
-  workspaceCreationErrorMessage: string
+  workspaceCreationErrorMessage: string;
   workspaceNewAclDelayed: boolean;
   workspaceNewAclDelayedContinueFn: Function;
 }
