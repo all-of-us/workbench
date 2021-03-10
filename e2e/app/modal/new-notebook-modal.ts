@@ -33,7 +33,7 @@ export default class NewNotebookModal extends Modal {
     await this.name().then( (textbox) => textbox.type(notebookName));
     const radio = language === Language.Python ? this.getPythonRadioButton() : this.getRRadioButton();
     await radio.select();
-    return this.clickButton(LinkText.CreateNotebook, {waitForClose: true, waitForNav: true, timeout: 1000});
+    return this.clickButton(LinkText.CreateNotebook, {waitForClose: true, waitForNav: true});
   }
 
   async name(): Promise<Textbox> {
