@@ -1,4 +1,6 @@
 import {Component as AComponent} from '@angular/core';
+import {CohortPage} from 'app/cohort-search/cohort-page/cohort-page.component';
+import {AppRoute, AppRouter, Guard, ProtectedRoutes, withFullHeight, withRouteData, withRouterPrompt} from 'app/components/app-router';
 import {AppRoute, AppRouter, Guard, Navigate, ProtectedRoutes, withFullHeight, withRouteData} from 'app/components/app-router';
 import {AccessRenewalPage} from 'app/pages/access/access-renewal-page';
 import {WorkspaceAudit} from 'app/pages/admin/admin-workspace-audit';
@@ -69,6 +71,7 @@ const AdminBannerPage = withRouteData(AdminBanner);
 const AdminNotebookViewPage = withRouteData(AdminNotebookView);
 const AdminReviewWorkspacePage = withRouteData(AdminReviewWorkspace);
 const CohortActionsPage = withRouteData(CohortActions);
+const CohortPagePage = fp.flow(withRouteData, withRouterPrompt)(CohortPage);
 const CohortReviewPage = withRouteData(CohortReview);
 const ConceptHomepagePage = withRouteData(ConceptHomepage);
 const ConceptSetActionsPage = withRouteData(ConceptSetActions);
@@ -379,6 +382,15 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
               breadcrumb: BreadcrumbType.ConceptSet,
               pageKey: 'conceptSetActions'
             }}/>}
+          />
+          <AppRoute
+              path='/workspaces/:ns/:wsid/data/cohorts/build'
+              component={({routeHistory}) => <CohortPagePage routeData={{
+                title: 'Build Cohort Criteria',
+                breadcrumb: BreadcrumbType.CohortAdd,
+                pageKey: 'cohortBuilder'
+              }}
+              routeHistory={routeHistory}/>}
           />
         </ProtectedRoutes>
       </ProtectedRoutes>

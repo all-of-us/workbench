@@ -14,7 +14,6 @@ import {WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
 import {AppRouting} from './app-routing';
-import {CohortPageComponent} from './cohort-search/cohort-page/cohort-page.component';
 import {BugReportComponent} from './components/bug-report';
 import {ConfirmDeleteModalComponent} from './components/confirm-delete-modal';
 import {HelpSidebarComponent} from './components/help-sidebar';
@@ -56,7 +55,6 @@ import {FooterComponent} from './components/footer';
     AppComponent,
     AppRouting,
     BugReportComponent,
-    CohortPageComponent,
     ConceptSearchComponent,
     ConfirmDeleteModalComponent,
     FooterComponent,

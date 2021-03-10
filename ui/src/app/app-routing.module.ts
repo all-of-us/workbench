@@ -187,13 +187,8 @@ const routes: Routes = [
                             children: [
                               {
                                 path: '',
-                                component: CohortPageComponent,
-                                canDeactivate: [CanDeactivateGuard],
-                                data: {
-                                  title: 'Build Cohort Criteria',
-                                  breadcrumb: BreadcrumbType.CohortAdd,
-                                  pageKey: 'cohortBuilder'
-                                }
+                                component: AppRouting,
+                                data: {}
                               },
                             ]
                           },

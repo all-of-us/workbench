@@ -2,7 +2,7 @@ import {navigate} from 'app/utils/navigation';
 import {routeDataStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import { BrowserRouter, Link, Redirect, Route, Switch, useHistory, useLocation, useParams, useRouteMatch} from 'react-router-dom';
+import { BrowserRouter, Link, Prompt, Redirect, Route, Switch, useHistory, useLocation, useParams, useRouteMatch} from 'react-router-dom';
 
 const {Fragment} = React;
 
@@ -23,6 +23,14 @@ export const withRouteData = WrappedComponent => ({routeData, ...props}) => {
 
 export const withFullHeight = WrappedComponent => ({...props}) => {
   return <div style={{height: '100%'}}><WrappedComponent {...props} /></div>;
+};
+
+export const withRouterPrompt = WrappedComponent => ({...props}) => {
+  let showPrompt = false;
+  return <Fragment>
+    <WrappedComponent setPrompt={(s) => showPrompt = s} {...props} />
+    <Prompt message={'You have unsaved changes'} when={showPrompt}/>
+  </Fragment>;
 };
 
 export const SubRoute = ({children}): React.ReactElement => <Switch>{children}</Switch>;
@@ -46,6 +54,7 @@ export const AppRoute = ({path, data = {}, guards = [], component: Component}): 
   return <Route exact={true} path={path} render={
     () => {
       const { redirectPath = null } = fp.find(({allowed}) => !allowed(), guards) || {};
+      console.log(routeHistory);
       return redirectPath
         ? <NavRedirect path={redirectPath}/>
         : <Component urlParams={routeParams} routeHistory={routeHistory} routeConfig={data}/>;
