@@ -40,7 +40,6 @@ import {
   sliceByHalfLength,
   withCdrVersions,
   withCurrentWorkspace,
-  withRouteConfigData,
   withUserProfile
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
@@ -223,7 +222,6 @@ const CdrVersionUpgrade = (props: UpgradeProps) => {
 };
 
 export interface WorkspaceEditProps {
-  routeConfigData: any;
   cdrVersionListResponse: CdrVersionListResponse;
   workspace: WorkspaceData;
   cancel: Function;
@@ -254,7 +252,7 @@ export interface WorkspaceEditState {
   workspaceNewAclDelayedContinueFn: Function;
 }
 
-export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace(), withCdrVersions(), withUserProfile())(
+export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), withUserProfile())(
   class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
     constructor(props: WorkspaceEditProps) {
       super(props);
