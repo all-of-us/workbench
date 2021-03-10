@@ -139,5 +139,9 @@
   "reporting": {
     "dataset": "reporting_prod",
     "maxRowsPerInsert": 2500
+  },
+  "ras": {
+    "host": "",
+    "clientId": ""
   }
 }

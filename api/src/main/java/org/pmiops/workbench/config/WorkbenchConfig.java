@@ -29,6 +29,7 @@ public class WorkbenchConfig {
   public RdrExportConfig rdrExport;
   public CaptchaConfig captcha;
   public ReportingConfig reporting;
+  public RasConfig ras;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -53,6 +54,7 @@ public class WorkbenchConfig {
     config.rdrExport = new RdrExportConfig();
     config.captcha = new CaptchaConfig();
     config.reporting = new ReportingConfig();
+    config.ras = new RasConfig();
     return config;
   }
 
@@ -323,5 +325,13 @@ public class WorkbenchConfig {
     // possible is 10000, though around 2500 may be the most Workspace rows we can load into memory
     // on the smallest App Engine machine.
     public Integer maxRowsPerInsert;
+  }
+
+  /** RAS(Researcher Auth Service) configurations. */
+  public static class RasConfig {
+    // RAS hostname
+    public String host;
+    // RAS client id to finish the OAuth flow.
+    public String clientId;
   }
 }

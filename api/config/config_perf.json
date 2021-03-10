@@ -142,5 +142,9 @@
   "reporting": {
     "dataset": "reporting_perf",
     "maxRowsPerInsert": 2500
+  },
+  "ras": {
+    "host": "",
+    "clientId": ""
   }
 }
