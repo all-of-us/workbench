@@ -580,7 +580,11 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .standard(false);
   }
 
-  private static SearchParameter hasPMData() {
+  /**
+   * This SearchParameter specifically represents the case that uses the
+   * has_physical_measurement_data flag.
+   */
+  private static SearchParameter physicalMeasurementDataNoConceptId() {
     return new SearchParameter()
         .domain(Domain.PHYSICAL_MEASUREMENT.toString())
         .type(CriteriaType.PPI.toString())
@@ -2071,7 +2075,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Test
   public void countSubjectHasPhysicalMeasurementData() {
-    SearchParameter pm = hasPMData();
+    SearchParameter pm = physicalMeasurementDataNoConceptId();
     SearchRequest searchRequest =
         createSearchRequests(
             Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());

@@ -172,7 +172,7 @@ public final class SearchGroupItemQueryBuilder {
           + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere %s %s %s\n";
   private static final String AGE_DEC_SQL = "and not " + DEC_SQL;
   private static final String DEMO_IN_SQL = "%s in unnest(%s)\n";
-  private static final String FITBIT_SQL =
+  private static final String HAS_FITBIT_SQL =
       "select person_id\n"
           + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere has_fitbit = 1\n";
   private static final String HAS_PM_DATA_SQL =
@@ -218,7 +218,7 @@ public final class SearchGroupItemQueryBuilder {
       return buildDemoSql(queryParams, searchGroupItem);
     }
     if (Domain.FITBIT.equals(domain)) {
-      return FITBIT_SQL;
+      return HAS_FITBIT_SQL;
     }
     if (Domain.WHOLE_GENOME_VARIANT.equals(domain)) {
       return WHOLE_GENOME_VARIANT_SQL;
