@@ -19,7 +19,7 @@ import {ConceptSearchComponent} from './pages/data/concept/concept-search';
 import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
-import {WorkspaceEditComponent, WorkspaceEditMode} from './pages/workspace/workspace-edit';
+import {WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceListComponent} from './pages/workspace/workspace-list';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
