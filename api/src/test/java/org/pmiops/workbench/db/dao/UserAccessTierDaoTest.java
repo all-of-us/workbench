@@ -26,9 +26,9 @@ public class UserAccessTierDaoTest {
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private UserAccessTierDao userAccessTierDao;
 
-  DbUser user;
-  DbAccessTier registeredTier;
-  DbAccessTier controlledTier;
+  private DbUser user;
+  private DbAccessTier registeredTier;
+  private DbAccessTier controlledTier;
 
   @Before
   public void setup() {
@@ -56,13 +56,16 @@ public class UserAccessTierDaoTest {
 
   @Test
   public void test_getByUserAndAccessTier_RT() {
-    final Instant testStart = Instant.now();
+    // arbitrary nonzero time amount
+    final Instant recently = Instant.now().minusSeconds(10);
 
     userAccessTierDao.save(
         new DbUserAccessTier()
             .setUser(user)
             .setAccessTier(registeredTier)
-            .setAccessStatus(TierAccessStatus.ENABLED));
+            .setTierAccessStatus(TierAccessStatus.ENABLED)
+            .setFirstEnabled()
+            .setLastUpdated());
 
     Optional<DbUserAccessTier> entryMaybe =
         userAccessTierDao.getByUserAndAccessTier(user, registeredTier);
@@ -70,9 +73,9 @@ public class UserAccessTierDaoTest {
     DbUserAccessTier entry = entryMaybe.get();
     assertThat(entry.getUser()).isEqualTo(user);
     assertThat(entry.getAccessTier()).isEqualTo(registeredTier);
-    assertThat(entry.getAccessStatus()).isEqualTo(TierAccessStatus.ENABLED);
-    assertThat(entry.getFirstEnabled().toInstant().isAfter(testStart)).isTrue();
-    assertThat(entry.getLastUpdated().toInstant().isAfter(testStart)).isTrue();
+    assertThat(entry.getTierAccessStatusEnum()).isEqualTo(TierAccessStatus.ENABLED);
+    assertThat(entry.getFirstEnabled().toInstant().isAfter(recently)).isTrue();
+    assertThat(entry.getLastUpdated().toInstant().isAfter(recently)).isTrue();
   }
 
   @Test
@@ -81,13 +84,15 @@ public class UserAccessTierDaoTest {
         new DbUserAccessTier()
             .setUser(user)
             .setAccessTier(registeredTier)
-            .setAccessStatus(TierAccessStatus.DISABLED));
+            .setTierAccessStatus(TierAccessStatus.DISABLED)
+            .setFirstEnabled()
+            .setLastUpdated());
 
     Optional<DbUserAccessTier> entryMaybe =
         userAccessTierDao.getByUserAndAccessTier(user, registeredTier);
     assertThat(entryMaybe).isPresent();
     DbUserAccessTier entry = entryMaybe.get();
-    assertThat(entry.getAccessStatus()).isEqualTo(TierAccessStatus.DISABLED);
+    assertThat(entry.getTierAccessStatusEnum()).isEqualTo(TierAccessStatus.DISABLED);
   }
 
   @Test
@@ -96,7 +101,9 @@ public class UserAccessTierDaoTest {
         new DbUserAccessTier()
             .setUser(user)
             .setAccessTier(registeredTier)
-            .setAccessStatus(TierAccessStatus.ENABLED));
+            .setTierAccessStatus(TierAccessStatus.ENABLED)
+            .setFirstEnabled()
+            .setLastUpdated());
 
     assertThat(userAccessTierDao.getByUserAndAccessTier(user, controlledTier)).isEmpty();
   }

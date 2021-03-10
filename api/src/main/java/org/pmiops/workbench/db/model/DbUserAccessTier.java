@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import org.pmiops.workbench.model.TierAccessStatus;
 
 @Entity
@@ -60,12 +61,21 @@ public class DbUserAccessTier {
   }
 
   @Column(name = "access_status", nullable = false)
-  public TierAccessStatus getAccessStatus() {
-    return DbStorageEnums.tierAccessStatusFromStorage(tierAccessStatus);
+  public Short getTierAccessStatus() {
+    return tierAccessStatus;
   }
 
-  public DbUserAccessTier setAccessStatus(TierAccessStatus status) {
-    this.tierAccessStatus = DbStorageEnums.tierAccessStatusToStorage(status);
+  @Transient
+  public TierAccessStatus getTierAccessStatusEnum() {
+    return DbStorageEnums.tierAccessStatusFromStorage(getTierAccessStatus());
+  }
+
+  public DbUserAccessTier setTierAccessStatus(TierAccessStatus status) {
+    return setTierAccessStatus(DbStorageEnums.tierAccessStatusToStorage(status));
+  }
+
+  public DbUserAccessTier setTierAccessStatus(Short tierAccessStatus) {
+    this.tierAccessStatus = tierAccessStatus;
     return this;
   }
 
@@ -74,9 +84,13 @@ public class DbUserAccessTier {
     return firstEnabled;
   }
 
-  public DbUserAccessTier setFirstEnabled() {
-    this.firstEnabled = Timestamp.from(Instant.now());
+  public DbUserAccessTier setFirstEnabled(Timestamp firstEnabled) {
+    this.firstEnabled = firstEnabled;
     return this;
+  }
+
+  public DbUserAccessTier setFirstEnabled() {
+    return setFirstEnabled(Timestamp.from(Instant.now()));
   }
 
   @Column(name = "last_updated", nullable = false)
@@ -84,8 +98,12 @@ public class DbUserAccessTier {
     return lastUpdated;
   }
 
-  public DbUserAccessTier setLastUpdated() {
-    this.lastUpdated = Timestamp.from(Instant.now());
+  public DbUserAccessTier setLastUpdated(Timestamp lastUpdated) {
+    this.lastUpdated = lastUpdated;
     return this;
+  }
+
+  public DbUserAccessTier setLastUpdated() {
+    return setLastUpdated(Timestamp.from(Instant.now()));
   }
 }

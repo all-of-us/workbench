@@ -11,6 +11,7 @@ import org.pmiops.workbench.db.dao.UserAccessTierDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,11 @@ public class AccessTierServiceImpl implements AccessTierService {
   }
 
   public DbAccessTier getRegisteredTier() {
-    return getAccessTier(REGISTERED_TIER_SHORT_NAME);
+    final DbAccessTier registeredTier = getAccessTier(REGISTERED_TIER_SHORT_NAME);
+    if (registeredTier == null) {
+      throw new ServerErrorException("Cannot find Registered Tier in database.");
+    }
+    return registeredTier;
   }
 
   /**
@@ -89,14 +94,14 @@ public class AccessTierServiceImpl implements AccessTierService {
 
     if (existingEntryMaybe.isPresent()) {
       final DbUserAccessTier entryToUpdate =
-          existingEntryMaybe.get().setAccessStatus(TierAccessStatus.ENABLED).setLastUpdated();
+          existingEntryMaybe.get().setTierAccessStatus(TierAccessStatus.ENABLED).setLastUpdated();
       userAccessTierDao.save(entryToUpdate);
     } else {
       final DbUserAccessTier entryToInsert =
           new DbUserAccessTier()
               .setUser(user)
               .setAccessTier(accessTier)
-              .setAccessStatus(TierAccessStatus.ENABLED)
+              .setTierAccessStatus(TierAccessStatus.ENABLED)
               .setFirstEnabled()
               .setLastUpdated();
       userAccessTierDao.save(entryToInsert);
@@ -116,12 +121,14 @@ public class AccessTierServiceImpl implements AccessTierService {
         .ifPresent(
             entryToSoftDelete ->
                 userAccessTierDao.save(
-                    entryToSoftDelete.setAccessStatus(TierAccessStatus.DISABLED).setLastUpdated()));
+                    entryToSoftDelete
+                        .setTierAccessStatus(TierAccessStatus.DISABLED)
+                        .setLastUpdated()));
   }
 
   /**
    * A placeholder implementation until we establish userAccessTierDao as the source of truth for
-   * user - access tier membership.
+   * access tier membership.
    *
    * <p>For registered users, return the registered tier or all tiers if we're in an environment
    * which has enabled all tiers for registered users. Return no access tiers for unregistered
