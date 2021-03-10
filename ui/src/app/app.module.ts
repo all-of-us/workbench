@@ -35,7 +35,6 @@ import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
 import {ConceptSearchComponent} from './pages/data/concept/concept-search';
 import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
 import {InitialErrorComponent} from './pages/initial-error/component';
-import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceListComponent} from './pages/workspace/workspace-list';
@@ -129,7 +128,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     FooterComponent,
     HelpSidebarComponent,
     InitialErrorComponent,
-    ProfilePageComponent,
     QueryReportComponent,
     RoutingSpinnerComponent,
     SignedInComponent,

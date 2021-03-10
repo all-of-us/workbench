@@ -737,12 +737,3 @@ export const ProfilePage = fp.flow(
     </FadeBox>;
     }
   });
-
-@Component({
-  template: '<div #root></div>'
-})
-export class ProfilePageComponent extends ReactWrapperBase {
-  constructor() {
-    super(ProfilePage, []);
-  }
-}

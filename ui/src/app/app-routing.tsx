@@ -32,6 +32,7 @@ import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
+import {ProfilePage} from "./pages/profile/profile-page";
 
 
 const signInGuard: Guard = {
@@ -55,6 +56,7 @@ const InstitutionEditAdminPage = withRouteData(AdminInstitutionEdit);
 const InteractiveNotebookPage = withRouteData(InteractiveNotebook);
 const NotebookListPage = withRouteData(NotebookList);
 const NotebookRedirectPage = withRouteData(NotebookRedirect);
+const ProfilePagePage = withRouteData(ProfilePage); // again bad sorry
 const SessionExpiredPage = withRouteData(SessionExpired);
 const SignInAgainPage = withRouteData(SignInAgain);
 const SignInPage = withRouteData(SignIn);
@@ -178,6 +180,10 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         <AppRoute
           path='/library'
           component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>}
+        />
+        <AppRoute
+          path='/profile'
+          component={() => <ProfilePagePage routeData={{title: 'Profile'}}/>}
         />
         <AppRoute
             path='/workspaces/build'
