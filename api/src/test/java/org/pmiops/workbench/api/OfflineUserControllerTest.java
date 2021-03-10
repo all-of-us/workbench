@@ -19,6 +19,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
@@ -50,7 +51,11 @@ public class OfflineUserControllerTest {
 
   @TestConfiguration
   @Import({OfflineUserController.class})
-  @MockBean({CloudResourceManagerService.class, UserService.class})
+  @MockBean({
+    AccessTierService.class,
+    CloudResourceManagerService.class,
+    UserService.class,
+  })
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

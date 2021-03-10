@@ -12,14 +12,15 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.google.CloudResourceManagerService;
 import org.pmiops.workbench.model.AccessModule;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
           "394551486437" // pmi-ops.org
           );
 
+  private final AccessTierService accessTierService;
   private final CloudResourceManagerService cloudResourceManagerService;
   private final UserService userService;
   private final Map<AccessModule, String> accessModuleLogText =
@@ -46,7 +48,10 @@ public class OfflineUserController implements OfflineUserApiDelegate {
 
   @Autowired
   public OfflineUserController(
-      CloudResourceManagerService cloudResourceManagerService, UserService userService) {
+      AccessTierService accessTierService,
+      CloudResourceManagerService cloudResourceManagerService,
+      UserService userService) {
+    this.accessTierService = accessTierService;
     this.cloudResourceManagerService = cloudResourceManagerService;
     this.userService = userService;
   }
@@ -79,16 +84,16 @@ public class OfflineUserController implements OfflineUserApiDelegate {
       userCount++;
       try {
         Timestamp oldTime = user.getComplianceTrainingCompletionTime();
-        DataAccessLevel oldLevel = user.getDataAccessLevelEnum();
+        List<String> oldTiers = getAccessTiers(user);
 
         DbUser updatedUser = userService.syncComplianceTrainingStatusV2(user, Agent.asSystem());
 
         Timestamp newTime = updatedUser.getComplianceTrainingCompletionTime();
-        DataAccessLevel newLevel = updatedUser.getDataAccessLevelEnum();
+        List<String> newTiers = getAccessTiers(user);
 
         completionChangeCount +=
             logCompletionChange(user, oldTime, newTime, AccessModule.COMPLIANCE_TRAINING);
-        accessLevelChangeCount += logChange(user, oldLevel, newLevel, "Data access level");
+        accessLevelChangeCount += logAccessTierChange(user, oldTiers, newTiers);
       } catch (org.pmiops.workbench.moodle.ApiException | NotFoundException e) {
         errorCount++;
         logSyncError(user, e, AccessModule.COMPLIANCE_TRAINING);
@@ -124,17 +129,17 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         }
 
         Timestamp oldTime = user.getEraCommonsCompletionTime();
-        DataAccessLevel oldLevel = user.getDataAccessLevelEnum();
+        List<String> oldTiers = getAccessTiers(user);
 
         DbUser updatedUser =
             userService.syncEraCommonsStatusUsingImpersonation(user, Agent.asSystem());
 
         Timestamp newTime = updatedUser.getEraCommonsCompletionTime();
-        DataAccessLevel newLevel = updatedUser.getDataAccessLevelEnum();
+        List<String> newTiers = getAccessTiers(user);
 
         completionChangeCount +=
             logCompletionChange(user, oldTime, newTime, AccessModule.ERA_COMMONS);
-        accessLevelChangeCount += logChange(user, oldLevel, newLevel, "Data access level");
+        accessLevelChangeCount += logAccessTierChange(user, oldTiers, newTiers);
       } catch (org.pmiops.workbench.firecloud.ApiException e) {
         errorCount++;
         logSyncError(user, e, AccessModule.ERA_COMMONS);
@@ -169,16 +174,16 @@ public class OfflineUserController implements OfflineUserApiDelegate {
       userCount++;
       try {
         Timestamp oldTime = user.getTwoFactorAuthCompletionTime();
-        DataAccessLevel oldLevel = user.getDataAccessLevelEnum();
+        List<String> oldTiers = getAccessTiers(user);
 
         DbUser updatedUser = userService.syncTwoFactorAuthStatus(user, Agent.asSystem());
 
         Timestamp newTime = updatedUser.getTwoFactorAuthCompletionTime();
-        DataAccessLevel newLevel = updatedUser.getDataAccessLevelEnum();
+        List<String> newTiers = getAccessTiers(user);
 
         completionChangeCount +=
             logCompletionChange(user, oldTime, newTime, AccessModule.TWO_FACTOR_AUTH);
-        accessLevelChangeCount += logChange(user, oldLevel, newLevel, "Data access level");
+        accessLevelChangeCount += logAccessTierChange(user, oldTiers, newTiers);
       } catch (Exception e) {
         errorCount++;
         logSyncError(user, e, AccessModule.TWO_FACTOR_AUTH);
@@ -244,6 +249,16 @@ public class OfflineUserController implements OfflineUserApiDelegate {
   private int logCompletionChange(
       DbUser user, Timestamp oldTime, Timestamp newTime, AccessModule module) {
     return logChange(user, oldTime, newTime, accessModuleLogText.get(module) + " completion");
+  }
+
+  private List<String> getAccessTiers(DbUser user) {
+    return accessTierService.getAccessTiersForUser(user).stream()
+        .map(DbAccessTier::getShortName)
+        .collect(Collectors.toList());
+  }
+
+  private int logAccessTierChange(DbUser user, List<String> oldTiers, List<String> newTiers) {
+    return logChange(user, oldTiers, newTiers, "Data access tiers");
   }
 
   private int logChange(DbUser user, Object oldValue, Object newValue, String initialText) {

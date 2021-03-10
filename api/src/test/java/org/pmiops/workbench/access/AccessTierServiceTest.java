@@ -19,7 +19,6 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -100,44 +99,6 @@ public class AccessTierServiceTest {
     assertThat(accessTierService.getAllTiers()).containsExactly(registeredTier, controlledTier);
   }
 
-  @Test
-  public void test_getAccessTier_empty() {
-    assertThat(accessTierService.getAccessTier("n/a")).isEmpty();
-  }
-
-  @Test
-  public void test_getAccessTier_registered() {
-    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-    assertThat(accessTierService.getAccessTier(registeredTier.getShortName()))
-        .hasValue(registeredTier);
-  }
-
-  @Test
-  public void test_getAccessTier_missing() {
-    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-    assertThat(accessTierService.getAccessTier("some other tier")).isEmpty();
-  }
-
-  @Test
-  public void test_getAccessTier_multi() {
-    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-
-    final DbAccessTier controlledTier =
-        accessTierDao.save(
-            new DbAccessTier()
-                .setAccessTierId(2)
-                .setShortName("controlled")
-                .setDisplayName("Controlled Tier")
-                .setAuthDomainName("Controlled Tier Auth Domain")
-                .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
-                .setServicePerimeter("controlled/tier/perimeter"));
-
-    assertThat(accessTierService.getAccessTier(registeredTier.getShortName()))
-        .hasValue(registeredTier);
-    assertThat(accessTierService.getAccessTier(controlledTier.getShortName()))
-        .hasValue(controlledTier);
-  }
-
   @Test(expected = ServerErrorException.class)
   public void test_getRegisteredTier_empty() {
     accessTierService.getRegisteredTier();
@@ -163,26 +124,9 @@ public class AccessTierServiceTest {
     accessTierService.getRegisteredTier();
   }
 
-  // we expect to see the Registered Tier in the DB
-  // but we have not defined it for this test
-
-  @Test(expected = ServerErrorException.class)
-  public void test_getAccessTiersForUser_registered_empty() {
-    user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
-    accessTierService.getAccessTiersForUser(user);
-  }
-
   @Test
-  public void test_getAccessTiersForUser_unregistered_empty() {
-    user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
+  public void test_getAccessTiersForUser_empty() {
     assertThat(accessTierService.getAccessTiersForUser(user)).isEmpty();
-  }
-
-  @Test
-  public void test_getAccessTiersForUser_registered() {
-    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-    user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
-    assertThat(accessTierService.getAccessTiersForUser(user)).containsExactly(registeredTier);
   }
 
   @Test
@@ -191,9 +135,63 @@ public class AccessTierServiceTest {
     assertThat(accessTierService.getAccessTiersForUser(user)).isEmpty();
   }
 
-  @Test(expected = ServerErrorException.class)
-  public void test_addUserToRegisteredTier_missing() {
-    accessTierService.addUserToRegisteredTier(user);
+  @Test
+  public void test_getAccessTiersForUser_registered() {
+    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    userAccessTierDao.save(
+        new DbUserAccessTier()
+            .setUser(user)
+            .setAccessTier(registeredTier)
+            .setTierAccessStatus(TierAccessStatus.ENABLED)
+            .setFirstEnabled(now())
+            .setLastUpdated(now()));
+    assertThat(accessTierService.getAccessTiersForUser(user)).containsExactly(registeredTier);
+  }
+
+  @Test
+  public void test_getAccessTiersForUser_registered_disabled() {
+    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    userAccessTierDao.save(
+        new DbUserAccessTier()
+            .setUser(user)
+            .setAccessTier(registeredTier)
+            .setTierAccessStatus(TierAccessStatus.DISABLED)
+            .setFirstEnabled(now())
+            .setLastUpdated(now()));
+    assertThat(accessTierService.getAccessTiersForUser(user)).isEmpty();
+  }
+
+  @Test
+  public void test_getAccessTiersForUser_registered_controlled() {
+    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+
+    final DbAccessTier controlledTier =
+        accessTierDao.save(
+            new DbAccessTier()
+                .setAccessTierId(2)
+                .setShortName("controlled")
+                .setDisplayName("Controlled Tier")
+                .setAuthDomainName("Controlled Tier Auth Domain")
+                .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
+                .setServicePerimeter("controlled/tier/perimeter"));
+
+    userAccessTierDao.save(
+        new DbUserAccessTier()
+            .setUser(user)
+            .setAccessTier(registeredTier)
+            .setTierAccessStatus(TierAccessStatus.ENABLED)
+            .setFirstEnabled(now())
+            .setLastUpdated(now()));
+    userAccessTierDao.save(
+        new DbUserAccessTier()
+            .setUser(user)
+            .setAccessTier(controlledTier)
+            .setTierAccessStatus(TierAccessStatus.ENABLED)
+            .setFirstEnabled(now())
+            .setLastUpdated(now()));
+
+    assertThat(accessTierService.getAccessTiersForUser(user))
+        .containsExactly(registeredTier, controlledTier);
   }
 
   @Test
@@ -437,5 +435,9 @@ public class AccessTierServiceTest {
     assertThat(controlledMembership.getUser()).isEqualTo(user);
     assertThat(controlledMembership.getAccessTier()).isEqualTo(controlledTier);
     assertThat(controlledMembership.getTierAccessStatusEnum()).isEqualTo(TierAccessStatus.ENABLED);
+  }
+
+  private Timestamp now() {
+    return Timestamp.from(Instant.now());
   }
 }

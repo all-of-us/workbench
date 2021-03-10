@@ -1,11 +1,10 @@
 package org.pmiops.workbench.access;
 
-import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -14,7 +13,6 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +20,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AccessTierServiceImpl implements AccessTierService {
 
+  // TODO remove?
   private final Provider<WorkbenchConfig> configProvider;
   private final Clock clock;
 
@@ -50,24 +49,14 @@ public class AccessTierServiceImpl implements AccessTierService {
   }
 
   /**
-   * Return the access tier referred to by the shortName in the database
-   *
-   * @param shortName the short name of the access tier to look up in the database
-   * @return an {@code Optional<DbAccessTier>} if one matches the shortName passed in, EMPTY
-   *     otherwise
-   */
-  public Optional<DbAccessTier> getAccessTier(String shortName) {
-    return accessTierDao.findOneByShortName(shortName);
-  }
-
-  /**
    * Return the Registered Tier if it exists in the database
    *
    * @return a DbAccessTier representing the Registered Tier
    * @throws ServerErrorException if there is no Registered Tier
    */
   public DbAccessTier getRegisteredTier() {
-    return getAccessTier(REGISTERED_TIER_SHORT_NAME)
+    return accessTierDao
+        .findOneByShortName(REGISTERED_TIER_SHORT_NAME)
         .orElseThrow(() -> new ServerErrorException("Cannot find Registered Tier in database."));
   }
 
@@ -118,7 +107,7 @@ public class AccessTierServiceImpl implements AccessTierService {
    * @param user the DbUser in the user-accessTier mapping we're updating
    * @param accessTier the DbAccessTier in the user-accessTier mapping we're updating
    */
-  private void addUserToTier(DbUser user, DbAccessTier accessTier) {
+  public void addUserToTier(DbUser user, DbAccessTier accessTier) {
     Optional<DbUserAccessTier> existingEntryMaybe =
         userAccessTierDao.getByUserAndAccessTier(user, accessTier);
 
@@ -149,7 +138,7 @@ public class AccessTierServiceImpl implements AccessTierService {
    * @param user the DbUser in the user-accessTier mapping we're updating
    * @param accessTier the DbAccessTier in the user-accessTier mapping we're updating
    */
-  private void removeUserFromTier(DbUser user, DbAccessTier accessTier) {
+  public void removeUserFromTier(DbUser user, DbAccessTier accessTier) {
     userAccessTierDao
         .getByUserAndAccessTier(user, accessTier)
         .filter(entry -> entry.getTierAccessStatusEnum() == TierAccessStatus.ENABLED)
@@ -162,26 +151,17 @@ public class AccessTierServiceImpl implements AccessTierService {
   }
 
   /**
-   * A placeholder implementation until we establish userAccessTierDao as the source of truth for
-   * access tier membership.
-   *
-   * <p>For registered users, return the registered tier or all tiers if we're in an environment
-   * which has enabled all tiers for registered users. Return no access tiers for unregistered
-   * users.
+   * Return the list of tiers a user has access to: those where a DbUserAccessTier exists with
+   * status ENABLED
    *
    * @param user the user whose access we're checking
    * @return The List of DbAccessTiers the DbUser has access to in this environment
    */
   public List<DbAccessTier> getAccessTiersForUser(DbUser user) {
-    if (user.getDataAccessLevelEnum() == DataAccessLevel.REGISTERED) {
-      if (configProvider.get().featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers) {
-        return accessTierDao.findAll();
-      } else {
-        return ImmutableList.of(getRegisteredTier());
-      }
-    } else {
-      return Collections.emptyList();
-    }
+    return userAccessTierDao.getAllByUser(user).stream()
+        .filter(uat -> uat.getTierAccessStatusEnum() == TierAccessStatus.ENABLED)
+        .map(DbUserAccessTier::getAccessTier)
+        .collect(Collectors.toList());
   }
 
   private Timestamp now() {
