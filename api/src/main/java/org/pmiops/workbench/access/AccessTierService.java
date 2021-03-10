@@ -7,12 +7,17 @@ import org.pmiops.workbench.db.model.DbUser;
 public interface AccessTierService {
   String REGISTERED_TIER_SHORT_NAME = "registered";
 
-  List<DbAccessTier> getAccessTiersForUser(DbUser user);
-
-  // currently the required tier in some contexts
-  DbAccessTier getRegisteredTier();
+  List<DbAccessTier> getAllTiers();
 
   DbAccessTier getAccessTier(String shortName);
 
-  List<DbAccessTier> getAllTiers();
+  DbAccessTier getRegisteredTier();
+
+  void addUserToAllTiers(DbUser user);
+
+  void removeUserFromRegisteredTier(DbUser user);
+
+  void addUserToRegisteredTier(DbUser user);
+
+  List<DbAccessTier> getAccessTiersForUser(DbUser user);
 }

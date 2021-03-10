@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.hibernate.exception.GenericJDBCException;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
@@ -93,6 +94,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final FireCloudService fireCloudService;
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
+  private final AccessTierService accessTierService;
 
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
@@ -110,7 +112,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       FireCloudService fireCloudService,
       ComplianceService complianceService,
-      DirectoryService directoryService) {
+      DirectoryService directoryService,
+      AccessTierService accessTierService) {
     this.configProvider = configProvider;
     this.userProvider = userProvider;
     this.clock = clock;
@@ -124,6 +127,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     this.fireCloudService = fireCloudService;
     this.complianceService = complianceService;
     this.directoryService = directoryService;
+    this.accessTierService = accessTierService;
   }
 
   @VisibleForTesting
@@ -200,6 +204,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       addToRegisteredTierGroupIdempotent(dbUser);
       newDataAccessLevel = DataAccessLevel.REGISTERED;
 
+      // record the user as having Registered Tier membership in user_access_tier
+      // which will eventually serve as the source of truth (TODO)
+      accessTierService.addUserToRegisteredTier(dbUser);
+
       // if this is the first time the user has completed registration, record it
       // this starts the Free Tier Credits countdown clock
       if (dbUser.getFirstRegistrationCompletionTime() == null) {
@@ -208,6 +216,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     } else {
       removeFromRegisteredTierGroupIdempotent(dbUser);
       newDataAccessLevel = DataAccessLevel.UNREGISTERED;
+
+      // record the user as lacking Registered Tier membership in user_access_tier
+      // which will eventually serve as the source of truth (TODO)
+      accessTierService.removeUserFromRegisteredTier(dbUser);
     }
     if (!newDataAccessLevel.equals(previousDataAccessLevel)) {
       dbUser.setDataAccessLevelEnum(newDataAccessLevel);
@@ -283,7 +295,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
     try {
-      return userDao.save(user);
+      user = userDao.save(user);
     } catch (DataIntegrityViolationException e) {
       // For certain test workflows, it's possible to have concurrent user creation.
       // We attempt to handle that gracefully here.
@@ -307,9 +319,15 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
                     + "indicating possible concurrent creation.",
                 username, userByUserName.getUserId()),
             e);
-        return userByUserName;
+        user = userByUserName;
       }
     }
+
+    // record the Service Account's access level as belonging to all tiers in user_access_tier
+    // which will eventually serve as the source of truth (TODO)
+    // this needs to occur after the user has been saved to the DB
+    accessTierService.addUserToAllTiers(user);
+    return user;
   }
 
   @Override
