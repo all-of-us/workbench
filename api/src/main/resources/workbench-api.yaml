@@ -5383,7 +5383,7 @@ definitions:
         format: int64
         description: 'Timestamp when the user first changed from Unregistered to Registered
           data access level. May be null if the user has never done so.'
-      rasLinkLoginGovName:
+      rasLinkLoginGovUsername:
         type: string
         description: The user's identity name in login.gov.
       rasLinkLoginGovExpireTime:
