@@ -5,6 +5,7 @@ module.exports = {
     '@typescript-eslint'
   ],
   extends: [
+    'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
     'prettier/@typescript-eslint',
@@ -39,7 +40,7 @@ module.exports = {
       "error",
       {
         "singleQuote": true,
-        "tabWidth": 4
+        "tabWidth": 2
       }
     ],
     'max-len': [

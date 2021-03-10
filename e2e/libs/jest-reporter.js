@@ -1,12 +1,11 @@
 const fs = require('fs-extra');
 const path = require('path');
-const winston = require("winston");
+const winston = require('winston');
 
 module.exports = class JestReporter {
-
   constructor(globalConfig, options) {
     if (globalConfig.verbose === true) {
-      throw Error("Verbose must be false or Console messages won't be available.")
+      throw Error("Verbose must be false or Console messages won't be available.");
     }
     this._globalConfig = globalConfig;
     this._options = options;
@@ -19,8 +18,7 @@ module.exports = class JestReporter {
     console.info(`Running ${path.parse(test.path).name} at ${time}`);
   }
 
-  // @ts-ignore
-  onTestResult(testRunConfig, testResult, runResults) {
+  onTestResult(_testRunConfig, testResult, _runResults) {
     const testName = path.parse(testResult.testFilePath).name;
     let testLogName = `${this.logDir}/${testName}.log`;
     testResult.testResults.forEach((result) => {
@@ -31,15 +29,18 @@ module.exports = class JestReporter {
     });
 
     const fileLogger = winston.createLogger({
-      level: process.env.LOG_LEVEL || "info",
+      level: process.env.LOG_LEVEL || 'info',
       format: winston.format.combine(
         winston.format.splat(),
-        winston.format.printf( (info) => {return `${info.message}`; })
+        winston.format.printf((info) => {
+          return `${info.message}`;
+        })
       ),
-      transports: [new winston.transports.File({
+      transports: [
+        new winston.transports.File({
           filename: testLogName,
           options: { flags: 'w' },
-          handleExceptions: true,
+          handleExceptions: true
         })
       ],
       exitOnError: false
@@ -67,12 +68,11 @@ module.exports = class JestReporter {
     console.log(`Save test log: ${testLogName}`);
   }
 
-  // @ts-ignore
-  onRunComplete(test, runResults) {
-    runResults.testResults.forEach(suite => {
+  onRunComplete(_test, runResults) {
+    runResults.testResults.forEach((suite) => {
       const testFilePath = suite.testFilePath.split('e2e/')[1];
       const failedTests = [];
-      suite.testResults.forEach(result => {
+      suite.testResults.forEach((result) => {
         if (result.status === 'failed') {
           failedTests.push(`yarn test ${testFilePath}`);
         }
@@ -90,5 +90,4 @@ module.exports = class JestReporter {
     console.info(`Save tests results summary file: ${this.logDir}/${this.summaryFile}`);
     return runResults;
   }
-
-}
+};
