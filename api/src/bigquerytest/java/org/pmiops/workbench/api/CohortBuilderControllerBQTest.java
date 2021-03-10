@@ -580,6 +580,19 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .standard(false);
   }
 
+  /**
+   * This SearchParameter specifically represents the case that uses the
+   * has_physical_measurement_data flag.
+   */
+  private static SearchParameter physicalMeasurementDataNoConceptId() {
+    return new SearchParameter()
+        .domain(Domain.PHYSICAL_MEASUREMENT.toString())
+        .type(CriteriaType.PPI.toString())
+        .group(false)
+        .ancestorData(false)
+        .standard(false);
+  }
+
   private static SearchParameter age() {
     return new SearchParameter()
         .domain(Domain.PERSON.toString())
@@ -2058,6 +2071,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+  }
+
+  @Test
+  public void countSubjectHasPhysicalMeasurementData() {
+    SearchParameter pm = physicalMeasurementDataNoConceptId();
+    SearchRequest searchRequest =
+        createSearchRequests(
+            Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
+
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test
