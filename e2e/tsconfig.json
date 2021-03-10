@@ -1,35 +1,29 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
-    "allowUnreachableCode": false,
-    "suppressExcessPropertyErrors": false,
-    "moduleResolution": "node",
-    "module": "ES2015",
-    "importHelpers": true,
-    "sourceMap": true,
-    "declaration": false,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "target": "ES2017",
-    "resolveJsonModule": true,
-    "forceConsistentCasingInFileNames": false,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "pretty": true,
-    "noFallthroughCasesInSwitch": true,
-    "outDir": "./tsc-out",
     "allowJs": true,
     "checkJs": true,
+    "allowSyntheticDefaultImports": true,
+    "allowUnreachableCode": false,
+    "skipLibCheck": true,
+    "target": "es2018",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "importHelpers": true,
+    // "noImplicitAny": true,
+    // "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "outDir": "tsc-out",
     "baseUrl": ".",
-    "typeRoots": [
-      "./node_modules/@types"
-    ],
-    "lib": [
-      "ES2017",
-      "dom"
-    ],
-    "esModuleInterop": true
+    "lib": ["es2018", "dom"]
   },
-  "inclue": ["/*"],
   "exclude": [ "tsc-out", "node_modules" ]
 }
