@@ -467,15 +467,6 @@ public class DbUser {
     this.eraCommonsCompletionTime = eraCommonsCompletionTime;
   }
 
-  @Column(name = "ras_link_login_gov_expire_time")
-  public Timestamp getRasLinkLoinGovExpireTime() {
-    return rasLinkLoinGovExpireTime;
-  }
-
-  public void setRasLinkLoinGovExpireTime(Timestamp rasLinkLoinGovExpireTime) {
-    this.rasLinkLoinGovExpireTime = rasLinkLoinGovExpireTime;
-  }
-
   @Column(name = "ras_link_login_gov_username")
   public String getRasLinkLoinGovUsername() {
     return rasLinkLoinGovUsername;
@@ -501,6 +492,15 @@ public class DbUser {
 
   public void setRasLinkLoinGovBypassTime(Timestamp rasLinkLoinGovBypassTime) {
     this.rasLinkLoinGovBypassTime = rasLinkLoinGovBypassTime;
+  }
+
+  @Column(name = "ras_link_login_gov_expire_time")
+  public Timestamp getRasLinkLoinGovExpireTime() {
+    return rasLinkLoinGovExpireTime;
+  }
+
+  public void setRasLinkLoinGovExpireTime(Timestamp rasLinkLoinGovExpireTime) {
+    this.rasLinkLoinGovExpireTime = rasLinkLoinGovExpireTime;
   }
 
   @Column(name = "data_use_agreement_completion_time")
