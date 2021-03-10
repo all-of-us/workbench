@@ -18,10 +18,8 @@
       </column>
       <column name="creator_id" type="bigint" />
       <column name="data_set_id" type="bigint" />
-      <column name="sample_count" type="bigint">
-        <constraints nullable="false"/>
-      </column>
-      <column name="creation_time" type="timestamp">
+      <column name="sample_count" type="bigint" />
+      <column name="creation_time" type="datetime">
         <constraints nullable="false"/>
       </column>
     </createTable>

@@ -11,6 +11,9 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.storage.Blob;
 import com.google.common.collect.ImmutableList;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import org.junit.Before;
@@ -38,6 +41,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
+import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -54,6 +58,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class WgsCohortExtractionServiceTest {
 
+  private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
   private static final String FC_SUBMISSION_ID = "123";
 
   @Autowired WgsCohortExtractionService wgsCohortExtractionService;
@@ -98,6 +103,11 @@ public class WgsCohortExtractionServiceTest {
     @Scope("prototype")
     WorkbenchConfig workbenchConfig() {
       return workbenchConfig;
+    }
+
+    @Bean
+    Clock clock() {
+      return CLOCK;
     }
   }
 
@@ -162,7 +172,6 @@ public class WgsCohortExtractionServiceTest {
         ImmutableList.copyOf(wgsExtractCromwellSubmissionDao.findAll());
     assertThat(dbSubmissions.size()).isEqualTo(1);
     assertThat(dbSubmissions.get(0).getSubmissionId()).isEqualTo(FC_SUBMISSION_ID);
-    assertThat(dbSubmissions.get(0).getSampleCount()).isEqualTo(3);
   }
 
   @Test

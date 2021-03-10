@@ -3,8 +3,9 @@ package org.pmiops.workbench.genomics;
 import com.google.cloud.storage.Blob;
 import com.google.common.collect.ImmutableMap;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
+import java.time.Clock;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.inject.Provider;
@@ -41,6 +42,7 @@ public class WgsCohortExtractionService {
   private final WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao;
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final Clock clock;
 
   @Autowired
   public WgsCohortExtractionService(
@@ -52,7 +54,8 @@ public class WgsCohortExtractionService {
       Provider<MethodConfigurationsApi> methodConfigurationsApiProvider,
       WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao,
       Provider<DbUser> userProvider,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      Clock clock) {
     this.cohortService = cohortService;
     this.fireCloudService = fireCloudService;
     this.submissionApiProvider = submissionsApiProvider;
@@ -62,6 +65,7 @@ public class WgsCohortExtractionService {
     this.wgsExtractCromwellSubmissionDao = wgsExtractCromwellSubmissionDao;
     this.userProvider = userProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.clock = clock;
   }
 
   private Map<String, String> createRepoMethodParameter(
@@ -199,10 +203,8 @@ public class WgsCohortExtractionService {
     dbSubmission.setSubmissionId(submissionResponse.getSubmissionId());
     dbSubmission.setWorkspace(workspace);
     dbSubmission.setCreator(userProvider.get());
-    // TODO: This is currently an overestimate of the size, since these participants may not have
-    // corresponding genomics data. Once we move this knowledge into the service/controller, update
-    // this value to reflect the actual number of samples that we're processing in the workflow.
-    dbSubmission.setSampleCount(personIds.size());
+    dbSubmission.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
+    // TODO(RW-6455): Store the sample count, once we have a filtered sample count available here.
     wgsExtractCromwellSubmissionDao.save(dbSubmission);
 
     methodConfigurationsApiProvider

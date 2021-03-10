@@ -20,7 +20,7 @@ public class DbWgsExtractCromwellSubmission {
   private DbWorkspace workspace;
   private DbUser creator;
   private DbDataset dataset;
-  private long sampleCount;
+  private Long sampleCount;
   private Timestamp creationTime;
 
   @Id
@@ -74,11 +74,11 @@ public class DbWgsExtractCromwellSubmission {
   }
 
   @Column(name = "sample_count")
-  public long getSampleCount() {
+  public Long getSampleCount() {
     return sampleCount;
   }
 
-  public void setSampleCount(long sampleCount) {
+  public void setSampleCount(Long sampleCount) {
     this.sampleCount = sampleCount;
   }
 
