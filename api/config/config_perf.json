@@ -137,7 +137,7 @@
     "maxRowsPerInsert": 2500
   },
   "ras": {
-    "host": "not implemented",
-    "clientId": "not implemented"
+    "host": "",
+    "clientId": ""
   }
 }
