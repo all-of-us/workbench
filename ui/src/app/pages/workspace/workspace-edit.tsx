@@ -233,6 +233,7 @@ export interface WorkspaceEditProps {
   profileState: {
     profile: Profile;
   };
+  workspaceEditMode: WorkspaceEditMode;
 }
 
 export interface WorkspaceEditState {
@@ -251,7 +252,7 @@ export interface WorkspaceEditState {
   workspace: Workspace;
   workspaceCreationConflictError: boolean;
   workspaceCreationError: boolean;
-  workspaceCreationErrorMessage: string;
+  workspaceCreationErrorMessage: string
   workspaceNewAclDelayed: boolean;
   workspaceNewAclDelayedContinueFn: Function;
 }
@@ -280,6 +281,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         workspaceNewAclDelayed: false,
         workspaceNewAclDelayedContinueFn: () => {},
       };
+    }
+
+    cancel(): void {
+      history.back();
     }
 
     async fetchBillingAccounts() {
@@ -615,8 +620,8 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     renderHeader() {
       // use workspace name from props instead of state here
       // because it's a record of the initial value
-      const {routeConfigData: {mode}, workspace} = this.props;
-      switch (mode) {
+      const {workspace, workspaceEditMode} = this.props;
+      switch (workspaceEditMode) {
         case WorkspaceEditMode.Create:
           return 'Create a new workspace';
         case WorkspaceEditMode.Edit:
@@ -627,7 +632,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     renderButtonText() {
-      switch (this.props.routeConfigData.mode) {
+      switch (this.props.workspaceEditMode) {
         case WorkspaceEditMode.Create: return 'Create Workspace';
         case WorkspaceEditMode.Edit: return 'Update Workspace';
         case WorkspaceEditMode.Duplicate: return 'Duplicate Workspace';
@@ -787,7 +792,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             errorMsg = error.message;
           } else {
             errorMsg = `Could not
-            ${this.props.routeConfigData.mode === WorkspaceEditMode.Create ?
+            ${this.props.workspaceEditMode === WorkspaceEditMode.Create ?
                 ' create ' : ' update '} workspace.`;
           }
 
@@ -807,7 +812,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
     isMode(mode) {
-      return this.props.routeConfigData.mode === mode;
+      return this.props.workspaceEditMode === mode;
     }
 
     buildBillingAccountOptions() {
@@ -1334,7 +1339,7 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
         <div>
           <FlexRow style={{marginTop: '1rem', marginBottom: '1rem'}}>
             <Button type='secondary' style={{marginRight: '1rem'}}
-                    onClick = {() => this.props.cancel()}>
+                    onClick = {() => this.cancel()}>
               Cancel
             </Button>
             <TooltipTrigger content={
@@ -1378,10 +1383,10 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
             { workspaceCreationErrorMessage }
           </ModalBody>
           <ModalFooter>
-            <Button onClick = {() => this.props.cancel()}
+            <Button onClick = {() => this.cancel()}
                 type='secondary' style={{marginRight: '2rem'}}>
               Cancel
-              {this.props.routeConfigData.mode === WorkspaceEditMode.Create ?
+              {this.props.workspaceEditMode === WorkspaceEditMode.Create ?
                 ' Creation' : ' Update'}
                 </Button>
             <Button type='primary' onClick={() => this.resetWorkspaceEditor()}>Keep Editing</Button>
@@ -1392,17 +1397,17 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
           <CreateBillingAccountModal onClose={() => this.setState({showCreateBillingAccountModal: false})} />}
         {workspaceCreationConflictError &&
         <Modal>
-          <ModalTitle>{this.props.routeConfigData.mode === WorkspaceEditMode.Create ?
+          <ModalTitle>{this.props.workspaceEditMode === WorkspaceEditMode.Create ?
               'Error: ' : 'Conflicting update:'}</ModalTitle>
           <ModalBody>
-            {this.props.routeConfigData.mode === WorkspaceEditMode.Create ?
+            {this.props.workspaceEditMode === WorkspaceEditMode.Create ?
               'You already have a workspace named ' + name +
               ' Please choose another name' :
               'Another client has modified this workspace since the beginning of this editing ' +
               'session. Please reload to avoid overwriting those changes.'}
           </ModalBody>
           <ModalFooter>
-            <Button type='secondary' onClick = {() => this.props.cancel()}
+            <Button type='secondary' onClick = {() => this.cancel()}
                     style={{marginRight: '2rem'}}>Cancel Creation</Button>
             <Button type='primary' onClick={() => this.resetWorkspaceEditor()}>Keep Editing</Button>
           </ModalFooter>
@@ -1470,18 +1475,3 @@ export const WorkspaceEdit = fp.flow(withRouteConfigData(), withCurrentWorkspace
     }
 
   });
-
-@Component({
-  template: '<div #root></div>'
-})
-export class WorkspaceEditComponent extends ReactWrapperBase {
-
-  constructor(private _location: Location) {
-    super(WorkspaceEdit, ['cancel']);
-    this.cancel = this.cancel.bind(this);
-  }
-
-  cancel(): void {
-    this._location.back();
-  }
-}

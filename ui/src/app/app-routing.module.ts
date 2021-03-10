@@ -97,6 +97,13 @@ const routes: Routes = [
             path: 'workspaces',
             canActivateChild: [WorkspaceGuard],
             children: [
+              // legacy / duplicated routes go HERE
+              {
+                path: 'build',
+                component: AppRouting,
+                data: {}
+              },
+              // non-migrated routes go HERE
               {
                 path: '',
                 component: WorkspaceListComponent,
@@ -113,6 +120,18 @@ const routes: Routes = [
                 component: WorkspaceWrapperComponent,
                 runGuardsAndResolvers: 'always',
                 children: [
+                  // legacy / duplicated routes go HERE
+                  {
+                    path: 'edit',
+                    component: AppRouting,
+                    data: {}
+                  },
+                  {
+                    path: 'duplicate',
+                    component: AppRouting,
+                    data: {}
+                  },
+                  // non-migrated routes go HERE
                   {
                     path: 'about',
                     component: WorkspaceAboutComponent,
@@ -120,26 +139,6 @@ const routes: Routes = [
                       title: 'View Workspace Details',
                       breadcrumb: BreadcrumbType.Workspace,
                       helpContentKey: 'about'
-                    }
-                  },
-                  {
-                    path: 'edit',
-                    component: WorkspaceEditComponent,
-                    data: {
-                      title: 'Edit Workspace',
-                      mode: WorkspaceEditMode.Edit,
-                      breadcrumb: BreadcrumbType.WorkspaceEdit,
-                      helpContentKey: 'edit'
-                    }
-                  },
-                  {
-                    path: 'duplicate',
-                    component: WorkspaceEditComponent,
-                    data: {
-                      title: 'Duplicate Workspace',
-                      mode: WorkspaceEditMode.Duplicate,
-                      breadcrumb: BreadcrumbType.WorkspaceDuplicate,
-                      helpContentKey: 'duplicate'
                     }
                   },
                   {
@@ -309,11 +308,6 @@ const routes: Routes = [
             path: 'profile',
             component: ProfilePageComponent,
             data: {title: 'Profile'}
-          },
-          {
-            path: 'workspaces/build',
-            component: WorkspaceEditComponent,
-            data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
           }
         ]
       },
