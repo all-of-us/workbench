@@ -175,6 +175,9 @@ public final class SearchGroupItemQueryBuilder {
   private static final String FITBIT_SQL =
       "select person_id\n"
           + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere has_fitbit = 1\n";
+  private static final String WHOLE_GENOME_VARIANT_SQL =
+      "select person_id\n"
+          + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere has_whole_genome_variant = 1\n";
   private static final String CB_SEARCH_ALL_EVENTS_WHERE =
       "select person_id from `${projectId}.${dataSetId}.cb_search_all_events`\nwhere ";
   private static final String PERSON_ID_IN = "person_id in (";
@@ -213,6 +216,9 @@ public final class SearchGroupItemQueryBuilder {
     }
     if (Domain.FITBIT.equals(domain)) {
       return FITBIT_SQL;
+    }
+    if (Domain.WHOLE_GENOME_VARIANT.equals(domain)) {
+      return WHOLE_GENOME_VARIANT_SQL;
     }
     // Otherwise build sql against flat denormalized search table
     for (SearchParameter param : searchGroupItem.getSearchParameters()) {
