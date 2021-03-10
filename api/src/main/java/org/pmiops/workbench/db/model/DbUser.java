@@ -73,10 +73,10 @@ public class DbUser {
   private String eraCommonsLinkedNihUsername;
   private Timestamp eraCommonsLinkExpireTime;
   private Timestamp eraCommonsCompletionTime;
-  private String rasLinkLoinGovUsername;
-  private Timestamp rasLinkLoinGovCompletionTime;
-  private Timestamp rasLinkLoinGovExpireTime;
-  private Timestamp rasLinkLoinGovBypassTime;
+  private String rasLinkLoginGovUsername;
+  private Timestamp rasLinkLoginGovCompletionTime;
+  private Timestamp rasLinkLoginGovExpireTime;
+  private Timestamp rasLinkLoginGovBypassTime;
   private Timestamp betaAccessRequestTime;
   private Timestamp betaAccessBypassTime;
   private Timestamp dataUseAgreementCompletionTime;
@@ -468,39 +468,39 @@ public class DbUser {
   }
 
   @Column(name = "ras_link_login_gov_username")
-  public String getRasLinkLoinGovUsername() {
-    return rasLinkLoinGovUsername;
+  public String getRasLinkLoginGovUsername() {
+    return rasLinkLoginGovUsername;
   }
 
-  public void setRasLinkLoinGovUsername(String rasLinkLoinGovUsername) {
-    this.rasLinkLoinGovUsername = rasLinkLoinGovUsername;
+  public void setRasLinkLoginGovUsername(String rasLinkLoginGovUsername) {
+    this.rasLinkLoginGovUsername = rasLinkLoginGovUsername;
   }
 
   @Column(name = "ras_link_login_gov_completion_time")
-  public Timestamp getRasLinkLoinGovCompletionTime() {
-    return rasLinkLoinGovCompletionTime;
+  public Timestamp getRasLinkLoginGovCompletionTime() {
+    return rasLinkLoginGovCompletionTime;
   }
 
-  public void setRasLinkLoinGovCompletionTime(Timestamp rasLinkLoinGovCompletionTime) {
-    this.rasLinkLoinGovCompletionTime = rasLinkLoinGovCompletionTime;
+  public void setRasLinkLoginGovCompletionTime(Timestamp rasLinkLoginGovCompletionTime) {
+    this.rasLinkLoginGovCompletionTime = rasLinkLoginGovCompletionTime;
   }
 
   @Column(name = "ras_link_login_gov_bypass_time")
-  public Timestamp getRasLinkLoinGovBypassTime() {
-    return rasLinkLoinGovBypassTime;
+  public Timestamp getRasLinkLoginGovBypassTime() {
+    return rasLinkLoginGovBypassTime;
   }
 
-  public void setRasLinkLoinGovBypassTime(Timestamp rasLinkLoinGovBypassTime) {
-    this.rasLinkLoinGovBypassTime = rasLinkLoinGovBypassTime;
+  public void setRasLinkLoginGovBypassTime(Timestamp rasLinkLoginGovBypassTime) {
+    this.rasLinkLoginGovBypassTime = rasLinkLoginGovBypassTime;
   }
 
   @Column(name = "ras_link_login_gov_expire_time")
-  public Timestamp getRasLinkLoinGovExpireTime() {
-    return rasLinkLoinGovExpireTime;
+  public Timestamp getRasLinkLoginGovExpireTime() {
+    return rasLinkLoginGovExpireTime;
   }
 
-  public void setRasLinkLoinGovExpireTime(Timestamp rasLinkLoinGovExpireTime) {
-    this.rasLinkLoinGovExpireTime = rasLinkLoinGovExpireTime;
+  public void setRasLinkLoginGovExpireTime(Timestamp rasLinkLoginGovExpireTime) {
+    this.rasLinkLoginGovExpireTime = rasLinkLoginGovExpireTime;
   }
 
   @Column(name = "data_use_agreement_completion_time")
