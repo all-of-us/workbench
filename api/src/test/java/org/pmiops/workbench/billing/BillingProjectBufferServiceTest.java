@@ -47,6 +47,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.pmiops.workbench.CallsRealMethodsWithDelay;
 import org.pmiops.workbench.TestLock;
+import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
@@ -98,8 +100,14 @@ public class BillingProjectBufferServiceTest {
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
   @TestConfiguration
-  @Import({BillingProjectBufferService.class})
-  @MockBean({FireCloudService.class, MonitoringService.class})
+  @Import({
+    AccessTierServiceImpl.class,
+    BillingProjectBufferService.class,
+  })
+  @MockBean({
+    FireCloudService.class,
+    MonitoringService.class,
+  })
   static class Configuration {
     @Bean
     public Clock clock() {
@@ -124,6 +132,7 @@ public class BillingProjectBufferServiceTest {
   @Autowired private FireCloudService mockFireCloudService;
   @Autowired private MonitoringService mockMonitoringService;
   @Autowired private AccessTierDao accessTierDao;
+  @Autowired private AccessTierService accessTierService;
 
   @Autowired private BillingProjectBufferService billingProjectBufferService;
 
@@ -164,7 +173,7 @@ public class BillingProjectBufferServiceTest {
 
     billingProjectBufferService =
         new BillingProjectBufferService(
-            accessTierDao,
+            accessTierService,
             billingProjectBufferEntryDao,
             clock,
             mockFireCloudService,

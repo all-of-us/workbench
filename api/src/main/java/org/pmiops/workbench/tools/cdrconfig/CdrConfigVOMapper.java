@@ -29,7 +29,6 @@ public interface CdrConfigVOMapper {
   // currently unambiguous, but adding the qualifiedByName to future-proof
   @Mapping(source = "accessTier", target = "accessTier", qualifiedByName = "findOneByShortName")
   @Mapping(source = "archivalStatus", target = "archivalStatusEnum")
-  @Mapping(source = "dataAccessLevel", target = "dataAccessLevelEnum")
   DbCdrVersion toDbVersion(CdrVersionVO localVersion);
 
   List<DbCdrVersion> toDbVersions(List<CdrVersionVO> localVersions);

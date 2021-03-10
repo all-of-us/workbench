@@ -85,7 +85,7 @@
     },
     {
       "cdrVersionId": 5,
-      "isDefault": false,
+      "isDefault": true,
       "name": "CDR for Controlled Tier - DO NOT USE",
       "dataAccessLevel": 1,
       "bigqueryProject": "fc-aou-cdr-synth-test-2",

@@ -9,6 +9,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -28,7 +29,8 @@ import org.pmiops.workbench.model.ReportingWorkspaceFreeTierUsage;
 
 public class ReportingTestUtils {
 
-  public static final String WORKSPACE__ACCESS_TIER_SHORT_NAME = "registered";
+  public static final String WORKSPACE__ACCESS_TIER_SHORT_NAME =
+      AccessTierService.REGISTERED_TIER_SHORT_NAME;
   public static final BillingAccountType WORKSPACE__BILLING_ACCOUNT_TYPE =
       BillingAccountType.FREE_TIER;
   public static final BillingStatus WORKSPACE__BILLING_STATUS = BillingStatus.ACTIVE;

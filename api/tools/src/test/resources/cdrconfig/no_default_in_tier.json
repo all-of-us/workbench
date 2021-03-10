@@ -7,13 +7,21 @@
       "servicePerimeter": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test",
       "authDomainName": "all-of-us-registered-test",
       "authDomainGroupEmail": "GROUP_all-of-us-registered-test@dev.test.firecloud.org"
+    },
+    {
+      "accessTierId": 2,
+      "shortName": "controlled",
+      "displayName": "Controlled Tier",
+      "servicePerimeter": "controlled/perimeter",
+      "authDomainName": "aou-controlled",
+      "authDomainGroupEmail": "aou-controlled@dev.test.firecloud.org"
     }
   ],
   "cdrVersions": [
     {
       "cdrVersionId": 1,
-      "name": "[Removed] Synthetic Dataset v1",
-      "archivalStatus": 1,
+      "isDefault": true,
+      "name": "Default Dataset v1",
       "bigqueryProject": "",
       "bigqueryDataset": "",
       "creationTime": "2018-06-06 00:00:00Z",
@@ -24,9 +32,9 @@
       "accessTier": "registered"
     },
     {
-      "cdrVersionId": 1,
-      "name": "Invalid Duplicate of Synthetic Dataset v1 ",
-      "archivalStatus": 1,
+      "cdrVersionId": 2,
+      "isDefault": false,
+      "name": "Invalid Second Default Dataset v2",
       "bigqueryProject": "",
       "bigqueryDataset": "",
       "creationTime": "2018-06-06 00:00:00Z",
@@ -35,6 +43,19 @@
       "cdrDbName": "cdr",
       "elasticIndexBaseName": "cdr",
       "accessTier": "registered"
+    },
+    {
+      "cdrVersionId": 3,
+      "isDefault": false,
+      "name": "Controlled Non-Default Dataset",
+      "bigqueryProject": "",
+      "bigqueryDataset": "",
+      "creationTime": "2018-06-06 00:00:00Z",
+      "releaseNumber": 2,
+      "numParticipants": 0,
+      "cdrDbName": "cdr",
+      "elasticIndexBaseName": "cdr",
+      "accessTier": "controlled"
     }
   ]
 }

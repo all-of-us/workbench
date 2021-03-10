@@ -1,4 +1,4 @@
-import {ArchivalStatus, CdrVersion, CdrVersionListResponse, CdrVersionsApi, DataAccessLevel} from 'generated/fetch';
+import {ArchivalStatus, CdrVersion, CdrVersionListResponse, CdrVersionsApi} from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export class CdrVersionsStubVariables {
@@ -15,7 +15,6 @@ export const cdrVersionListResponse: CdrVersionListResponse = {
     {
       name: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION,
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
-      dataAccessLevel: DataAccessLevel.Registered,
       accessTierShortName: CdrVersionsStubVariables.DEFAULT_ACCESS_TIER_SHORT_NAME,
       archivalStatus: ArchivalStatus.LIVE,
       hasMicroarrayData: true,
@@ -24,7 +23,6 @@ export const cdrVersionListResponse: CdrVersionListResponse = {
     {
       name: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION,
       cdrVersionId: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION_ID,
-      dataAccessLevel: DataAccessLevel.Registered,
       accessTierShortName: CdrVersionsStubVariables.DEFAULT_ACCESS_TIER_SHORT_NAME,
       archivalStatus: ArchivalStatus.LIVE,
       hasMicroarrayData: false,

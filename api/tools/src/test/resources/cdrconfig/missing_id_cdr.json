@@ -12,7 +12,6 @@
   "cdrVersions": [
     {
       "name": "[Removed] Synthetic Dataset v1",
-      "dataAccessLevel": 1,
       "archivalStatus": 1,
       "bigqueryProject": "",
       "bigqueryDataset": "",

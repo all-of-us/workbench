@@ -19,12 +19,14 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -59,10 +61,11 @@ public class OfflineAuditControllerTest {
     }
   }
 
+  @Autowired AccessTierDao accessTierDao;
   @Autowired BigQueryService bigQueryService;
-  @Autowired UserDao userDao;
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired OfflineAuditController offlineAuditController;
+  @Autowired UserDao userDao;
   @Autowired WorkspaceDao workspaceDao;
 
   @Before
@@ -73,10 +76,11 @@ public class OfflineAuditControllerTest {
     user.setDisabled(false);
     user = userDao.save(user);
 
-    DbCdrVersion cdrV1 = new DbCdrVersion();
+    DbCdrVersion cdrV1 = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 1);
     cdrV1.setBigqueryProject(CDR_V1_PROJECT_ID);
     cdrV1 = cdrVersionDao.save(cdrV1);
-    DbCdrVersion cdrV2 = new DbCdrVersion();
+
+    DbCdrVersion cdrV2 = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
     cdrV2.setBigqueryProject(CDR_V2_PROJECT_ID);
     cdrV2 = cdrVersionDao.save(cdrV2);
 

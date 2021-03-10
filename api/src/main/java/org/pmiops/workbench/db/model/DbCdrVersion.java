@@ -4,8 +4,6 @@ import java.sql.Timestamp;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -13,7 +11,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.pmiops.workbench.model.ArchivalStatus;
-import org.pmiops.workbench.model.DataAccessLevel;
 
 @Entity
 @Table(name = "cdr_version")
@@ -38,7 +35,6 @@ public class DbCdrVersion {
   private Boolean hasCopeSurveyData;
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "cdr_version_id")
   public long getCdrVersionId() {
     return cdrVersionId;
@@ -64,28 +60,6 @@ public class DbCdrVersion {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  @Deprecated // soon to be replaced by accessTier
-  @Column(name = "data_access_level")
-  public Short getDataAccessLevel() {
-    return dataAccessLevel;
-  }
-
-  @Deprecated // soon to be replaced by accessTier
-  public void setDataAccessLevel(Short dataAccessLevel) {
-    this.dataAccessLevel = dataAccessLevel;
-  }
-
-  @Transient
-  @Deprecated // soon to be replaced by accessTier
-  public DataAccessLevel getDataAccessLevelEnum() {
-    return DbStorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
-  }
-
-  @Deprecated // soon to be replaced by accessTier
-  public void setDataAccessLevelEnum(DataAccessLevel dataAccessLevel) {
-    setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
   }
 
   @ManyToOne
