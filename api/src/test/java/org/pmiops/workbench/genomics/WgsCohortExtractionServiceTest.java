@@ -176,7 +176,7 @@ public class WgsCohortExtractionServiceTest {
 
   @Test
   public void submitExtractionJob_outputVcfsInCorrectBucket() throws ApiException {
-    wgsCohortExtractionService.submitGenomicsCohortExtractionJob(mockWorkspace(), 1l);
+    wgsCohortExtractionService.submitGenomicsCohortExtractionJob(targetWorkspace, 1l);
 
     ArgumentCaptor<FirecloudMethodConfiguration> argument =
         ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
