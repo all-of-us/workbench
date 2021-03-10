@@ -5386,10 +5386,6 @@ definitions:
       rasLinkLoginGovUsername:
         type: string
         description: The user's identity name in login.gov.
-      rasLinkLoginGovExpireTime:
-        type: integer
-        format: int64
-        description: The user's login.gov/AoU link expiration time
       rasLinkLoginGovCompletionTime:
         type: integer
         format: int64

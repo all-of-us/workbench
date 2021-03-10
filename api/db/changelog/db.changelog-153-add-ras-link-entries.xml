@@ -8,7 +8,6 @@
     <addColumn tableName="user">
       <column name="ras_link_login_gov_username" type="varchar(255)"/>
       <column name="ras_link_login_gov_completion_time" type="datetime"/>
-      <column name="ras_link_login_gov_expire_time" type="datetime"/>
       <column name="ras_link_login_gov_bypass_time" type="datetime"/>
     </addColumn>
   </changeSet>

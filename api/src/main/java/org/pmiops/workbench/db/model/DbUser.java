@@ -494,15 +494,6 @@ public class DbUser {
     this.rasLinkLoginGovBypassTime = rasLinkLoginGovBypassTime;
   }
 
-  @Column(name = "ras_link_login_gov_expire_time")
-  public Timestamp getRasLinkLoginGovExpireTime() {
-    return rasLinkLoginGovExpireTime;
-  }
-
-  public void setRasLinkLoginGovExpireTime(Timestamp rasLinkLoginGovExpireTime) {
-    this.rasLinkLoginGovExpireTime = rasLinkLoginGovExpireTime;
-  }
-
   @Column(name = "data_use_agreement_completion_time")
   public Timestamp getDataUseAgreementCompletionTime() {
     return dataUseAgreementCompletionTime;
