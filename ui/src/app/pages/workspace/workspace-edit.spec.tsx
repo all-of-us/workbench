@@ -2,6 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
 
+
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {cdrVersionStore, currentWorkspaceStore, navigate, serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
