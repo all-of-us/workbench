@@ -28,6 +28,7 @@ import {NotebookList} from './pages/analysis/notebook-list';
 import {NotebookRedirect} from './pages/analysis/notebook-redirect';
 import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
+import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
@@ -63,6 +64,7 @@ const UserAuditPage = withRouteData(UserAudit);
 const UserDisabledPage = withRouteData(UserDisabled);
 const WorkspaceAdminPage = withRouteData(AdminWorkspace);
 const WorkspaceAuditPage = withRouteData(WorkspaceAudit);
+const WorkspaceEditPage = withRouteData(WorkspaceEdit);
 const WorkspaceSearchAdminPage = withRouteData(AdminWorkspaceSearch);
 const WorkspaceLibraryPage = withRouteData(WorkspaceLibrary);
 
@@ -176,6 +178,35 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         <AppRoute
           path='/library'
           component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>}
+        />
+        <AppRoute
+            path='/workspaces/build'
+            component={() => <WorkspaceEditPage
+                routeData={{title: 'Create Workspace'}}
+                workspaceEditMode={WorkspaceEditMode.Create}
+            />}
+        />
+        <AppRoute
+            path='/workspaces/:ns/:wsid/duplicate'
+            component={() => <WorkspaceEditPage
+                routeData={{
+                  title: 'Duplicate Workspace',
+                  breadcrumb: BreadcrumbType.WorkspaceDuplicate,
+                  helpContentKey: 'duplicate'
+                }}
+                workspaceEditMode={WorkspaceEditMode.Duplicate}
+            />}
+        />
+        <AppRoute
+            path='/workspaces/:ns/:wsid/edit'
+            component={() => <WorkspaceEditPage
+                routeData={{
+                  title: 'Edit Workspace',
+                  breadcrumb: BreadcrumbType.WorkspaceEdit,
+                  helpContentKey: 'edit'
+                }}
+                workspaceEditMode={WorkspaceEditMode.Edit}
+            />}
         />
         <AppRoute
           path='/workspaces/:ns/:wsid/notebooks'
