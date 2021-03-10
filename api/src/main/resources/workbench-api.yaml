@@ -181,7 +181,7 @@ paths:
         200:
           description: A mapping of tiers to CDR versions.
           schema:
-            "$ref": "#/definitions/CdrVersionMapResponse"
+            "$ref": "#/definitions/CdrVersionTiersResponse"
   "/v1/status-alert":
     get:
       tags:
@@ -3672,24 +3672,31 @@ definitions:
       defaultCdrVersionId:
         type: string
         description: ID of the CDR versions that should be used by the user by default
-  CdrVersionMapResponse:
-    type: array
-    items:
-      type: object
-      required:
-        - accessTierShortName
-        - defaultCdrVersionId
-        - versions
-      properties:
-        accessTierShortName:
-          type: string
-        defaultCdrVersionId:
-          type: string
-          format: int64
-        versions:
-          type: array
-          items:
-            "$ref": "#/definitions/CdrVersion"
+  CdrVersionTiersResponse:
+    type: object
+    required:
+      - tiers
+    properties:
+      tiers:
+        type: array
+        items:
+          "$ref": "#/definitions/CdrVersionTier"
+  CdrVersionTier:
+    type: object
+    required:
+      - accessTierShortName
+      - defaultCdrVersionId
+      - versions
+    properties:
+      accessTierShortName:
+        type: string
+      defaultCdrVersionId:
+        type: string
+        format: int64
+      versions:
+        type: array
+        items:
+          "$ref": "#/definitions/CdrVersion"
   CdrVersion:
     type: object
     required:

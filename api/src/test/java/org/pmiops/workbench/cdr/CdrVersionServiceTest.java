@@ -28,8 +28,8 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.CdrVersionListResponse;
-import org.pmiops.workbench.model.CdrVersionMapResponse;
-import org.pmiops.workbench.model.CdrVersionMapResponseInner;
+import org.pmiops.workbench.model.CdrVersionTier;
+import org.pmiops.workbench.model.CdrVersionTiersResponse;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -250,14 +250,14 @@ public class CdrVersionServiceTest {
   @Test
   public void testGetCdrVersionsByTierRegisteredOnly() {
     config.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
-    CdrVersionMapResponse response = cdrVersionService.getCdrVersionsByTier();
+    CdrVersionTiersResponse response = cdrVersionService.getCdrVersionsByTier();
     assertResponseMultiTier(response, ImmutableList.of("registered"), defaultCdrVersion);
   }
 
   @Test
   public void testGetCdrVersionsByTierAllTiers() {
     config.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = true;
-    CdrVersionMapResponse response = cdrVersionService.getCdrVersionsByTier();
+    CdrVersionTiersResponse response = cdrVersionService.getCdrVersionsByTier();
     assertResponseMultiTier(
         response,
         ImmutableList.of("registered", "controlled"),
@@ -272,16 +272,18 @@ public class CdrVersionServiceTest {
   }
 
   private void assertResponseMultiTier(
-      CdrVersionMapResponse response, List<String> accessTierShortNames, DbCdrVersion... versions) {
+      CdrVersionTiersResponse response,
+      List<String> accessTierShortNames,
+      DbCdrVersion... versions) {
     List<String> responseTiers =
-        response.stream()
-            .map(CdrVersionMapResponseInner::getAccessTierShortName)
+        response.getTiers().stream()
+            .map(CdrVersionTier::getAccessTierShortName)
             .collect(Collectors.toList());
     assertThat(responseTiers).containsExactlyElementsIn(accessTierShortNames);
 
     List<CdrVersion> responseVersions =
-        response.stream()
-            .map(CdrVersionMapResponseInner::getVersions)
+        response.getTiers().stream()
+            .map(CdrVersionTier::getVersions)
             .flatMap(List::stream)
             .collect(Collectors.toList());
     List<CdrVersion> expectedVersions =
@@ -336,9 +338,9 @@ public class CdrVersionServiceTest {
     assertThat(hasType.test(cdrVersionMaybe.get())).isTrue();
   }
 
-  private List<CdrVersion> parseRegisteredTier(CdrVersionMapResponse cdrVersionsByTier) {
-    Optional<CdrVersionMapResponseInner> tierVersions =
-        cdrVersionsByTier.stream()
+  private List<CdrVersion> parseRegisteredTier(CdrVersionTiersResponse cdrVersionsByTier) {
+    Optional<CdrVersionTier> tierVersions =
+        cdrVersionsByTier.getTiers().stream()
             .filter(x -> x.getAccessTierShortName().equals(registeredTier.getShortName()))
             .findFirst();
     assertThat(tierVersions).isPresent();

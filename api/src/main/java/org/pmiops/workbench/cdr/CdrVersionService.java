@@ -13,8 +13,8 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.CdrVersionListResponse;
-import org.pmiops.workbench.model.CdrVersionMapResponse;
-import org.pmiops.workbench.model.CdrVersionMapResponseInner;
+import org.pmiops.workbench.model.CdrVersionTier;
+import org.pmiops.workbench.model.CdrVersionTiersResponse;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -105,7 +105,7 @@ public class CdrVersionService {
   public CdrVersionListResponse getCdrVersions() {
     DataAccessLevel accessLevel = userProvider.get().getDataAccessLevelEnum();
     if (accessLevel == DataAccessLevel.REGISTERED) {
-      CdrVersionMapResponseInner registeredTierVersions =
+      CdrVersionTier registeredTierVersions =
           getVersionsForTier(accessTierService.getRegisteredTier());
       return new CdrVersionListResponse()
           .items(registeredTierVersions.getVersions())
@@ -115,18 +115,17 @@ public class CdrVersionService {
     }
   }
 
-  public CdrVersionMapResponse getCdrVersionsByTier() {
+  public CdrVersionTiersResponse getCdrVersionsByTier() {
     List<DbAccessTier> tiers = accessTierService.getAccessTiersForUser(userProvider.get());
     if (tiers.isEmpty()) {
       throw new ForbiddenException("User does not have access to any CDR versions");
     }
 
-    final CdrVersionMapResponse response = new CdrVersionMapResponse();
-    response.addAll(tiers.stream().map(this::getVersionsForTier).collect(Collectors.toList()));
-    return response;
+    return new CdrVersionTiersResponse()
+        .tiers(tiers.stream().map(this::getVersionsForTier).collect(Collectors.toList()));
   }
 
-  private CdrVersionMapResponseInner getVersionsForTier(DbAccessTier accessTier) {
+  private CdrVersionTier getVersionsForTier(DbAccessTier accessTier) {
     List<DbCdrVersion> cdrVersions =
         cdrVersionDao.findByAccessTierOrderByCreationTimeDesc(accessTier);
     if (cdrVersions.isEmpty()) {
@@ -154,7 +153,7 @@ public class CdrVersionService {
               defaultVersions.size(), accessTier.getShortName()));
     }
 
-    return new CdrVersionMapResponseInner()
+    return new CdrVersionTier()
         .versions(
             cdrVersions.stream()
                 .map(cdrVersionMapper::dbModelToClient)

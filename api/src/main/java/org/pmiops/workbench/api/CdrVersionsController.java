@@ -2,7 +2,7 @@ package org.pmiops.workbench.api;
 
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.model.CdrVersionListResponse;
-import org.pmiops.workbench.model.CdrVersionMapResponse;
+import org.pmiops.workbench.model.CdrVersionTiersResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,7 +23,7 @@ public class CdrVersionsController implements CdrVersionsApiDelegate {
   }
 
   @Override
-  public ResponseEntity<CdrVersionMapResponse> getCdrVersionsByTier() {
+  public ResponseEntity<CdrVersionTiersResponse> getCdrVersionsByTier() {
     return ResponseEntity.ok(cdrVersionService.getCdrVersionsByTier());
   }
 }
