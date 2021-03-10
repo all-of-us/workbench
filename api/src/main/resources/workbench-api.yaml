@@ -2436,6 +2436,10 @@ paths:
         to send Workspace data'
       operationId: exportWorkspaceData
       parameters:
+      - in: query
+        name: backfill
+        type: boolean
+        required: false
       - in: body
         name: researchIds
         required: true

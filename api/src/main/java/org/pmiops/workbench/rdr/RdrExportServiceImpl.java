@@ -155,7 +155,7 @@ public class RdrExportServiceImpl implements RdrExportService {
    * @param workspaceIds
    */
   @Override
-  public void exportWorkspaces(List<Long> workspaceIds) {
+  public void exportWorkspaces(List<Long> workspaceIds, Boolean backfill) {
     List<RdrWorkspace> rdrWorkspacesList;
     try {
       rdrWorkspacesList =
@@ -167,8 +167,11 @@ public class RdrExportServiceImpl implements RdrExportService {
               .collect(Collectors.toList());
       if (!rdrWorkspacesList.isEmpty()) {
         rdrApiProvider.get().getApiClient().setDebugging(true);
-        rdrApiProvider.get().exportWorkspaces(rdrWorkspacesList);
-        updateDbRdrExport(RdrEntity.WORKSPACE, workspaceIds);
+        rdrApiProvider.get().exportWorkspaces(rdrWorkspacesList, backfill);
+
+        if (backfill != null && backfill != true) {
+          updateDbRdrExport(RdrEntity.WORKSPACE, workspaceIds);
+        }
       }
     } catch (ApiException ex) {
       log.severe("Error while sending workspace data to RDR");
@@ -299,7 +302,8 @@ public class RdrExportServiceImpl implements RdrExportService {
       } catch (Exception ex) {
         log.warning(
             String.format(
-                "Exception while retrieving workspace collaborators for workspace id %s, skipping this workspace for RDR Export",
+                "Exception while retrieving workspace collaborators for workspace id %s, skipping"
+                    + " this workspace for RDR Export",
                 rdrWorkspace.getWorkspaceId()));
         return null;
       }

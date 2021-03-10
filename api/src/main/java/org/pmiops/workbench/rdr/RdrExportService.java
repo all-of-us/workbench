@@ -10,7 +10,7 @@ public interface RdrExportService {
 
   void exportUsers(List<Long> usersToExport);
 
-  void exportWorkspaces(List<Long> workspacesToExport);
+  void exportWorkspaces(List<Long> workspacesToExport, Boolean backfill);
 
   void updateDbRdrExport(RdrEntity entity, List<Long> idList);
 

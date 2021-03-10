@@ -27,6 +27,9 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
   @Query("SELECT distinct w.workspaceNamespace, w from DbWorkspace w")
   Set<String> findAllWorkspaceNamespaces();
 
+  @Query("SELECT workspaceId FROM DbWorkspace")
+  List<Long> findAllDbWorkspaceIds();
+
   @Query(
       "SELECT w FROM DbWorkspace w LEFT JOIN FETCH w.cohorts c LEFT JOIN FETCH c.cohortReviews"
           + " WHERE w.workspaceNamespace = (:ns) AND w.firecloudName = (:fcName)"
@@ -89,7 +92,8 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
   //    }
 
   @Query(
-      "SELECT activeStatus, COUNT(workspaceId) FROM DbWorkspace GROUP BY activeStatus ORDER BY activeStatus")
+      "SELECT activeStatus, COUNT(workspaceId) FROM DbWorkspace GROUP BY activeStatus ORDER BY"
+          + " activeStatus")
   List<ActiveStatusToCountResult> getActiveStatusToCount();
 
   interface ActiveStatusToCountResult {
