@@ -1,6 +1,7 @@
 .md
 .jpg
 .png
+.jpeg
 .svg
 .mp4
 .log

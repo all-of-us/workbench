@@ -23,17 +23,17 @@ else
   echo "not found skip e2e text"
 fi
 
-# Exiting CI job when files matching ignore patterns are the only changed files in the last commit.
+# On PR branch, exiting CI job when files matching ignore patterns are the only changed files in last commit.
 # The grep command exits with '0' status when it's successful (match were found).
 # While it exits with status '1' when no match was found.
 git diff --name-only HEAD^ HEAD | grep -qvFf .circleci/e2e-job-ignore-patterns.txt
 STATUS=$?
 if [[ "$STATUS" -eq 1 ]]; then
-  echo "Files matching ignore patterns are the only changed files made in the last commit. Exiting job."
+  echo "Files matching ignore patterns are the only changed files made in last commit. Exiting job."
   circleci-agent step halt
 fi
 
-# Exiting on PR branch when all (changed) file names matched ignore pattern.
+# On PR branch, exiting CI job when all (changed) file names matches the ignore patterns.
 git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep -qvFf .circleci/e2e-job-ignore-patterns.txt
 STATUS=$?
 if [[ "$STATUS" -eq 1 ]]; then

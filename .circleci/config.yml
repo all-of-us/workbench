@@ -167,23 +167,36 @@ commands:
       - run:
           command: |
             if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ]; then
-              diff=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) -- api/src/main/resources | wc -l | xargs)
-              if [ ${diff} -eq 0 ]; then
-                changed=false
-                for dir_name in << parameters.dir_names >>; do
-                  dir_diff=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) -- ${dir_name} | wc -l | xargs)
-                  if [ ${dir_diff} -gt 0 ]; then
-                    changed=true
-                    break
-                  fi
-                done
-                if [[ $changed = false ]]; then
-                  echo "Code in '<< parameters.dir_names >>' directories are not changed. Exiting job."
-                  circleci-agent step halt
+              changed=false
+              for dir_name in << parameters.dir_names >>; do
+                dir_diff=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) -- ${dir_name} | wc -l | xargs)
+                if [ ${dir_diff} -gt 0 ]; then
+                  changed=true
+                  break
                 fi
+              done
+              if [[ $changed = false ]]; then
+                echo "Code in '<< parameters.dir_names >>' directories are not changed. Exiting job."
+                circleci-agent step halt
               fi
             fi
-          name: "Halt job if code in '<< parameters.dir_names >>' directories are not changed"
+          name: "On PR branch, halt job if code in '<< parameters.dir_names >>' dir are not changed in last commit"
+
+  halt-test-if-e2e:
+    description: "Skip non-e2e test if e2e test files are the only changed files in last commit on PR and master branch"
+    steps:
+      - run:
+          command: |
+            # Always run test on tag builds. Check is done on PR and master branch
+            if [[ -z "$CIRCLE_TAG" ]]; then
+              # if no changes, exit 0. otherwise, exit 1
+              CHANGES=$(git diff HEAD~1 --quiet --name-only -- . ':!e2e')
+              if [[ "$CHANGES" == 0 ]]; then
+                echo "non-e2e files are not changed in last commit. Exiting job."
+                circleci-agent step halt
+              fi
+            fi
+          name: "On PR and master branch, halt non-e2e test if e2e files are the only changed files in last commit"
 
   launch-local-api:
     description: "Launch local API server"
@@ -244,6 +257,7 @@ commands:
         default: []
     steps:
       - checkout-code
+      - halt-test-if-e2e
       - halt-test-check:
           dir_names: "api"
       - restore_cache:
@@ -293,16 +307,6 @@ commands:
             STORAGE_BUCKET=gs://circleci-puppeteer-test-results
             gsutil cp ${NEW_JSON} ${STORAGE_BUCKET}
           when: always
-
-  halt-puppeteer-check:
-    description: "Stop running Puppeteer end-to-end test if conditions are met"
-    steps:
-      - run:
-          name: "Check commit message and find changed file names that do not match ignore patterns"
-          command: bash .circleci/skip-e2e-pr-checks.sh
-      - halt-test-check:
-          # Stop running Puppeteer end-to-end test if code in relevant directories is unchanged.
-          dir_names: "ui e2e .circleci"
 
 # -------------------------
 #        JOBS
@@ -408,6 +412,7 @@ jobs:
     executor: workbench-executor
     steps:
       - checkout-code
+      - halt-test-if-e2e
       - halt-test-check:
           dir_names: "ui"
       - run:
@@ -497,6 +502,9 @@ jobs:
   puppeteer-test:
     executor: puppeteer-executor
     parameters:
+      branch:
+        type: string
+        default: "pr" # Value is "pr" or "master". For skip test check.
       env_name:
         description: The target environment for run Puppeteer end-to-end test. Must be one of "test", "staging", "local".
         default: "test"
@@ -521,6 +529,33 @@ jobs:
       - attach_workspace:
           at: .
       - steps: << parameters.optional_steps >>
+      - when:
+          condition:
+            equal: [ "pr", << parameters.branch >> ]
+          steps:
+            - run:
+                name: "Check commit message and find changed file names that do not match ignore patterns"
+                command: bash .circleci/skip-e2e-pr-checks.sh
+            - halt-test-check:
+                # Stop running Puppeteer end-to-end test if code in relevant directories is unchanged.
+                dir_names: "ui e2e .circleci"
+      - when:
+          condition:
+            equal: [ "master", << parameters.branch >> ]
+          steps:
+            - run:
+                command: |
+                  if [[ "$CIRCLE_BRANCH" == "master" ]]; then
+                    # if no changes, exit 0. otherwise, exit 1
+                    CHANGES=$(git diff HEAD~1 --quiet --name-only -- . ':!e2e')
+                    if [[ "$CHANGES" == 0 ]]; then
+                      echo "non-e2e files are not changed in last commit on master branch. Exiting job."
+                      circleci-agent step halt
+                    fi
+                  fi
+                name: ""
+
+
       - run:
           name: "Export e2e test user to environment variable"
           command: bash .circleci/export-e2e-test-user-vars.sh << parameters.env_name >>
@@ -618,15 +653,15 @@ workflows:
       - puppeteer-env-setup
       - puppeteer-test:
           <<: *filter-pr-branch
+          branch: "pr"
           env_name: "local"
           parallel_num: 4
-          optional_steps:
-            - halt-puppeteer-check
           requires:
             - puppeteer-env-setup
       # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
       - puppeteer-test:
           parallel_num: 4
+          branch: "master"
           env_name: "test"
           <<: *filter-master-branch
           requires:
