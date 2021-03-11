@@ -137,17 +137,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   /**
-   * Updates the currently-authenticated user with a modifier function.
-   *
-   * <p>Ensures that the data access level for the user reflects the state of other fields on the
-   * user; handles conflicts with concurrent updates by retrying.
-   */
-  private DbUser updateUserWithRetries(Function<DbUser, DbUser> modifyUser) {
-    DbUser user = userProvider.get();
-    return updateUserWithRetries(modifyUser, user, Agent.asUser(user));
-  }
-
-  /**
    * Updates a user record with a modifier function.
    *
    * <p>Ensures that the data access level for the user reflects the state of other fields on the
