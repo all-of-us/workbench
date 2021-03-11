@@ -118,12 +118,12 @@ const routes: Routes = [
                 children: [
                   // legacy / duplicated routes go HERE
                   {
-                    path: 'duplicate',
+                    path: 'edit',
                     component: AppRouting,
                     data: {}
                   },
                   {
-                    path: 'edit',
+                    path: 'duplicate',
                     component: AppRouting,
                     data: {}
                   },
