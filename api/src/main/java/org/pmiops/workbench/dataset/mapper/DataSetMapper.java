@@ -14,6 +14,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.NullValueCheckStrategy;
+import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
@@ -135,4 +136,11 @@ public interface DataSetMapper {
 
   @Mapping(target = "cdrVersionId", source = "dbModel.cdrVersion.cdrVersionId")
   DataDictionaryEntry dbModelToClient(DbDataDictionaryEntry dbModel);
+
+
+//  transformedByRegisteredTierPrivacyMethods and definedTime are not used in UI we can delete this later
+  @Mapping(target = "cdrVersionId", ignore = true)
+  @Mapping(target = "transformedByRegisteredTierPrivacyMethods", ignore = true)
+  @Mapping(target = "definedTime", ignore = true)
+  DataDictionaryEntry dbDsModelToClient(DbDSDataDictionary dbModel);
 }

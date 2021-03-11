@@ -66,5 +66,6 @@ public interface DataSetService {
 
   void markDirty(ResourceType resourceType, long resourceId);
 
-  DataDictionaryEntry findDataDictionaryEntry(String fieldName, DbCdrVersion cdrVersion);
+  DataDictionaryEntry findDataDictionaryEntry(
+      String fieldName, String domain, DbCdrVersion cdrVersion);
 }

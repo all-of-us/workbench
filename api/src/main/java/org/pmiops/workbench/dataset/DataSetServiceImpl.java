@@ -30,8 +30,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.Etags;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
 import org.pmiops.workbench.cdr.dao.DSLinkingDao;
+import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
 import org.pmiops.workbench.cdr.model.DbDSLinking;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
@@ -45,7 +48,6 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
-import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -180,6 +182,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private final DataDictionaryEntryDao dataDictionaryEntryDao;
   private final DataSetDao dataSetDao;
   private final DSLinkingDao dsLinkingDao;
+  private final DSDataDictionaryDao dsDataDictionaryDao;
   private final DataSetMapper dataSetMapper;
   private final Clock clock;
 
@@ -195,6 +198,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       DataDictionaryEntryDao dataDictionaryEntryDao,
       DataSetDao dataSetDao,
       DSLinkingDao dsLinkingDao,
+      DSDataDictionaryDao dsDataDictionaryDao,
       DataSetMapper dataSetMapper,
       Clock clock) {
     this.bigQueryService = bigQueryService;
@@ -206,6 +210,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     this.dataDictionaryEntryDao = dataDictionaryEntryDao;
     this.dataSetDao = dataSetDao;
     this.dsLinkingDao = dsLinkingDao;
+    this.dsDataDictionaryDao = dsDataDictionaryDao;
     this.dataSetMapper = dataSetMapper;
     this.clock = clock;
   }
@@ -998,18 +1003,21 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
-  public DataDictionaryEntry findDataDictionaryEntry(String fieldName, DbCdrVersion cdrVersion) {
-    List<DbDataDictionaryEntry> dataDictionaryEntries =
-        dataDictionaryEntryDao.findByFieldNameAndCdrVersion(fieldName, cdrVersion);
-
-    if (dataDictionaryEntries.isEmpty()) {
+  public DataDictionaryEntry findDataDictionaryEntry(
+      String fieldName, String domain, DbCdrVersion cdrVersion) {
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
+    DbDSDataDictionary dbDSDataDictionary =
+        dsDataDictionaryDao.findDbDSDataDictionaryByFieldNameAndDomain(fieldName, domain);
+    if (dbDSDataDictionary == null) {
       throw new NotFoundException(
           "No Data Dictionary Entry found for domain: "
               + fieldName
               + " cdr version: "
               + cdrVersion);
     }
-    return dataSetMapper.dbModelToClient(dataDictionaryEntries.get(0));
+    DataDictionaryEntry dataDictionaryEntry = dataSetMapper.dbDsModelToClient(dbDSDataDictionary);
+    dataDictionaryEntry.setCdrVersionId(cdrVersion.getCdrVersionId());
+    return dataDictionaryEntry;
   }
 
   private ValuesLinkingPair getValueSelectsAndJoins(List<DomainValuePair> domainValuePairs) {
