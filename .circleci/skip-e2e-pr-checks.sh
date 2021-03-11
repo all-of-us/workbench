@@ -17,10 +17,10 @@ COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")
 
 # Double comma is "Parameter Expansion". It converts string to lowercase letters.
 if [[ "${COMMIT_MESSAGE,,}" == *"skip e2e"* ]]; then
-  echo "Skip e2e text found in commit message"
+  echo "'skip e2e' text was found in commit message"
   circleci-agent step halt
 else
-  echo "not found skip e2e text"
+  echo "'skip e2e' text was not found in commit message."
 fi
 
 # On PR branch, exiting CI job when files matching ignore patterns are the only changed files in last commit.
