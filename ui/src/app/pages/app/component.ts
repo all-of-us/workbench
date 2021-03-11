@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
+import {buildPageTitleForEnvironment} from 'app/utils/title';
 import {
   ActivatedRoute,
   Event as RouterEvent,
@@ -36,7 +37,6 @@ export class AppComponent implements OnInit {
   initialSpinner = true;
   cookiesEnabled = true;
   overriddenUrl: string = null;
-  private baseTitle: string;
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -76,10 +76,8 @@ export class AppComponent implements OnInit {
 
     // Pick up the global site title from HTML, and (for non-prod) add a tag
     // naming the current environment.
-    this.baseTitle = this.titleService.getTitle();
     if (environment.shouldShowDisplayTag) {
-      this.baseTitle = `[${environment.displayTag}] ${this.baseTitle}`;
-      this.titleService.setTitle(this.baseTitle);
+      this.titleService.setTitle(buildPageTitleForEnvironment());
     }
 
     this.router.events.subscribe((e: RouterEvent) => {
@@ -104,6 +102,17 @@ export class AppComponent implements OnInit {
     return route.firstChild ? this.getLeafRoute(route.firstChild) : route;
   }
 
+  private titleFromPathElement(currentRoute, pathElement?): string|undefined {
+    if (!pathElement) {
+      return undefined;
+    }
+    const value = currentRoute.params.getValue()[pathElement];
+    if (!value) {
+      return undefined;
+    }
+    return decodeURIComponent(value);
+  }
+
   /**
    * Uses the title service to set the page title after navigation events
    */
@@ -113,9 +122,9 @@ export class AppComponent implements OnInit {
       const currentRoute = this.getLeafRoute();
       if (currentRoute.outlet === 'primary') {
         currentRoute.data.subscribe(value => {
-          const routeTitle = value.title ||
-            decodeURIComponent(currentRoute.params.getValue()[value.pathElementForTitle]);
-          this.titleService.setTitle(`${routeTitle} | ${this.baseTitle}`);
+          const routeTitle = value.title || this.titleFromPathElement(currentRoute, value.pathElementForTitle);
+          this.titleService.setTitle(buildPageTitleForEnvironment(routeTitle));
+          console.log(value, `ng route: ${routeTitle}, ${buildPageTitleForEnvironment(routeTitle)}`)
         });
       }
     }
@@ -125,9 +134,9 @@ export class AppComponent implements OnInit {
     const currentRoute = this.getLeafRoute();
     if (currentRoute.outlet === 'primary') {
       currentRoute.data.subscribe(() => {
-        const routeTitle = title ||
-          decodeURIComponent(currentRoute.params.getValue()[pathElementForTitle]);
-        this.titleService.setTitle(`${routeTitle} | ${this.baseTitle}`);
+        const routeTitle = title || this.titleFromPathElement(currentRoute, pathElementForTitle);
+        this.titleService.setTitle(buildPageTitleForEnvironment(routeTitle));
+        console.log(`react route: ${buildPageTitleForEnvironment(routeTitle)}`)
       });
     }
   }
