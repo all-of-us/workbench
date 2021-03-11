@@ -26,7 +26,7 @@ fi
 # On PR branch, exiting CI job when files matching ignore patterns are the only changed files in last commit.
 # The grep command exits with '0' status when it's successful (match were found).
 # While it exits with status '1' when no match was found.
-git diff --name-only HEAD^ HEAD | grep -qvFf .circleci/e2e-job-ignore-patterns.txt
+git diff --name-only HEAD^ HEAD | grep -qvFf .circleci/pr-e2e-ignore-patterns.txt
 STATUS=$?
 if [[ "$STATUS" -eq 1 ]]; then
   echo "Files matching ignore patterns are the only changed files made in last commit. Exiting job."
@@ -34,7 +34,7 @@ if [[ "$STATUS" -eq 1 ]]; then
 fi
 
 # On PR branch, exiting CI job when all (changed) file names matches the ignore patterns.
-git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep -qvFf .circleci/e2e-job-ignore-patterns.txt
+git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep -qvFf .circleci/pr-e2e-ignore-patterns.txt
 STATUS=$?
 if [[ "$STATUS" -eq 1 ]]; then
   echo "Workbench application code were not changed. Exiting job."

@@ -510,16 +510,13 @@ jobs:
   puppeteer-test:
     executor: puppeteer-executor
     parameters:
-      branch:
-        type: string
-        default: "pr" # Value is "pr" or "master". For skip test check.
       env_name:
-        description: The target environment for run Puppeteer end-to-end test. Must be one of "test", "staging", "local".
+        description: "The target environment for run Puppeteer end-to-end test. Must be one of 'test', 'staging', 'local'".
         default: "test"
         type: enum
         enum: ["test", "staging", "local"]
       test_mode:
-        description: Switching between "nightly-integration" and normal "integration" test mode
+        description: "Set TEST_MODE: 'nightly-integration' or 'integration'."
         default: "integration"
         type: enum
         enum: [ "integration", "nightly-integration" ]
@@ -539,31 +536,11 @@ jobs:
       - steps: << parameters.optional_steps >>
       - when:
           condition:
-            equal: [ "pr", << parameters.branch >> ]
+            equal: [ "test", << parameters.env_name >> ]
           steps:
             - run:
-                name: "Check commit message and find changed file names that do not match ignore patterns"
-                command: bash .circleci/skip-e2e-pr-checks.sh
-            - halt-test-check:
-                # Stop running Puppeteer end-to-end test if code in relevant directories is unchanged.
-                dir_names: "ui e2e .circleci"
-      - when:
-          condition:
-            equal: [ "master", << parameters.branch >> ]
-          steps:
-            - run:
-                command: |
-                  if [[ "$CIRCLE_BRANCH" == "master" ]]; then
-                    # if no changes, exit 0. otherwise, exit 1
-                    CHANGES=$(git diff HEAD~1 --quiet --name-only -- . ':!e2e')
-                    if [[ "$CHANGES" == 0 ]]; then
-                      echo "non-e2e files are not changed in last commit on master branch. Exiting job."
-                      circleci-agent step halt
-                    fi
-                  fi
-                name: ""
-
-
+                name: "Determine whether to skip e2e test on master branch. Check for any non-e2e files that were changed in last commit."
+                command: bash .circleci/skip-e2e-master-checks.sh
       - run:
           name: "Export e2e test user to environment variable"
           command: bash .circleci/export-e2e-test-user-vars.sh << parameters.env_name >>
@@ -572,9 +549,15 @@ jobs:
             equal: [ "local", << parameters.env_name >> ]
           steps:
             - run:
-                name: Change WORKBENCH_ENV to "test" if needed
+                name: "Check commit message and find changed file names that do not match ignore patterns."
+                command: bash .circleci/skip-e2e-pr-checks.sh
+            - halt-test-check:
+                # Stop running Puppeteer end-to-end test if code in relevant directories is unchanged.
+                dir_names: "ui e2e .circleci"
+            - run:
+                name: "Override WORKBENCH_ENV to 'test' from 'local' if needed"
                 command: bash .circleci/choose-e2e-env.sh
-            # Local UI server is started but unused if WORKBENCH_ENV reset to "test" value in above step
+            # Local UI server is started but is unused if WORKBENCH_ENV reset to "test" value in step above
             - launch-local-ui
       - run:
           name: "echo WORKBENCH_ENV & TEST_MODE"
@@ -661,7 +644,6 @@ workflows:
       - puppeteer-env-setup
       - puppeteer-test:
           <<: *filter-pr-branch
-          branch: "pr"
           env_name: "local"
           parallel_num: 4
           requires:
@@ -669,7 +651,6 @@ workflows:
       # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
       - puppeteer-test:
           parallel_num: 4
-          branch: "master"
           env_name: "test"
           <<: *filter-master-branch
           requires:

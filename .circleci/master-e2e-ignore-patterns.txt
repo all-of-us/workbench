@@ -1,0 +1,15 @@
+.md
+.jpg
+.png
+.jpeg
+.svg
+.mp4
+.log
+.pdf
+.gitignore
+Test.java
+Test.kt
+.spec.tsx
+.git
+LICENSE.txt
+tslint.json

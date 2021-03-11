@@ -13,3 +13,4 @@
 .spec.tsx
 .git
 LICENSE.txt
+tslint.json
