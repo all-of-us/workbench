@@ -30,8 +30,10 @@ import {CohortActions} from './pages/data/cohort/cohort-actions';
 import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
 import {ProfilePage} from './pages/profile/profile-page';
+import {WorkspaceAbout} from './pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
+import {WorkspaceList} from './pages/workspace/workspace-list';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
 
@@ -66,11 +68,13 @@ const UserAdminPage = withRouteData(AdminUser);
 const UsersAdminPage = withRouteData(AdminUsers);
 const UserAuditPage = withRouteData(UserAudit);
 const UserDisabledPage = withRouteData(UserDisabled);
+const WorkspaceAboutPage = withRouteData(WorkspaceAbout);
 const WorkspaceAdminPage = withRouteData(AdminWorkspace);
 const WorkspaceAuditPage = withRouteData(WorkspaceAudit);
 const WorkspaceEditPage = withRouteData(WorkspaceEdit);
-const WorkspaceSearchAdminPage = withRouteData(AdminWorkspaceSearch);
 const WorkspaceLibraryPage = withRouteData(WorkspaceLibrary);
+const WorkspaceListPage = withRouteData(WorkspaceList);
+const WorkspaceSearchAdminPage = withRouteData(AdminWorkspaceSearch);
 
 interface RoutingProps {
   onSignIn: () => void;
@@ -188,10 +192,29 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           component={() => <ProfilePagePage routeData={{title: 'Profile'}}/>}
         />
         <AppRoute
+          path='/workspaces'
+          component={() => <WorkspaceListPage
+              routeData={{
+                title: 'View Workspaces',
+                breadcrumb: BreadcrumbType.Workspaces
+              }}
+          />}
+        />
+        <AppRoute
             path='/workspaces/build'
             component={() => <WorkspaceEditPage
                 routeData={{title: 'Create Workspace'}}
                 workspaceEditMode={WorkspaceEditMode.Create}
+            />}
+        />
+        <AppRoute
+            path='/workspaces/:ns/:wsid/about'
+            component={() => <WorkspaceAboutPage
+                routeData={{
+                  title: 'View Workspace Details',
+                  breadcrumb: BreadcrumbType.Workspace,
+                  helpContentKey: 'about'
+                }}
             />}
         />
         <AppRoute

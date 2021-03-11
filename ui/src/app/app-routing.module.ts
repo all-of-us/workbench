@@ -17,8 +17,6 @@ import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
 import {ConceptSearchComponent} from './pages/data/concept/concept-search';
 import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
 import {SignedInComponent} from './pages/signed-in/component';
-import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
-import {WorkspaceListComponent} from './pages/workspace/workspace-list';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
 import {environment} from 'environments/environment';
@@ -101,19 +99,16 @@ const routes: Routes = [
             children: [
               // legacy / duplicated routes go HERE
               {
+                path: '',
+                component: AppRouting,
+                data: {}
+              },
+              {
                 path: 'build',
                 component: AppRouting,
                 data: {}
               },
               // non-migrated routes go HERE
-              {
-                path: '',
-                component: WorkspaceListComponent,
-                data: {
-                  title: 'View Workspaces',
-                  breadcrumb: BreadcrumbType.Workspaces
-                }
-              },
               {
                 /* TODO The children under ./views need refactoring to use the data
                  * provided by the route rather than double-requesting it.
@@ -124,6 +119,11 @@ const routes: Routes = [
                 children: [
                   // legacy / duplicated routes go HERE
                   {
+                    path: 'about',
+                    component: AppRouting,
+                    data: {}
+                  },
+                  {
                     path: 'edit',
                     component: AppRouting,
                     data: {}
@@ -132,16 +132,6 @@ const routes: Routes = [
                     path: 'duplicate',
                     component: AppRouting,
                     data: {}
-                  },
-                  // non-migrated routes go HERE
-                  {
-                    path: 'about',
-                    component: WorkspaceAboutComponent,
-                    data: {
-                      title: 'View Workspace Details',
-                      breadcrumb: BreadcrumbType.Workspace,
-                      helpContentKey: 'about'
-                    }
                   },
                   {
                     path: 'notebooks',
@@ -163,6 +153,7 @@ const routes: Routes = [
                       }
                     ]
                   },
+                  // non-migrated routes go HERE
                   {
                     path: 'data',
                     children: [
