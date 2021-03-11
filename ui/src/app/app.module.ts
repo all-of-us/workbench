@@ -35,7 +35,6 @@ import {ConceptSearchComponent} from './pages/data/concept/concept-search';
 import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
 import {InitialErrorComponent} from './pages/initial-error/component';
 import {SignedInComponent} from './pages/signed-in/component';
-import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceNavBarComponent} from './pages/workspace/workspace-nav-bar';
 import {WorkspaceShareComponent} from './pages/workspace/workspace-share';
 
@@ -131,7 +130,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     NavBarComponent,
     TablePage,
     TextModalComponent,
-    WorkspaceAboutComponent,
     WorkspaceNavBarComponent,
     WorkspaceShareComponent,
     WorkspaceWrapperComponent,

@@ -121,6 +121,11 @@ const routes: Routes = [
                 children: [
                   // legacy / duplicated routes go HERE
                   {
+                    path: 'about',
+                    component: AppRouting,
+                    data: {}
+                  },
+                  {
                     path: 'edit',
                     component: AppRouting,
                     data: {}
@@ -129,16 +134,6 @@ const routes: Routes = [
                     path: 'duplicate',
                     component: AppRouting,
                     data: {}
-                  },
-                  // non-migrated routes go HERE
-                  {
-                    path: 'about',
-                    component: WorkspaceAboutComponent,
-                    data: {
-                      title: 'View Workspace Details',
-                      breadcrumb: BreadcrumbType.Workspace,
-                      helpContentKey: 'about'
-                    }
                   },
                   {
                     path: 'notebooks',
@@ -160,6 +155,7 @@ const routes: Routes = [
                       }
                     ]
                   },
+                  // non-migrated routes go HERE
                   {
                     path: 'data',
                     children: [

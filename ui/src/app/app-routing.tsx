@@ -35,6 +35,7 @@ import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
 import {WorkspaceList} from "./pages/workspace/workspace-list";
+import {WorkspaceAbout} from "./pages/workspace/workspace-about";
 
 
 const signInGuard: Guard = {
@@ -67,6 +68,7 @@ const UserAdminPage = withRouteData(AdminUser);
 const UsersAdminPage = withRouteData(AdminUsers);
 const UserAuditPage = withRouteData(UserAudit);
 const UserDisabledPage = withRouteData(UserDisabled);
+const WorkspaceAboutPage = withRouteData(WorkspaceAbout);
 const WorkspaceAdminPage = withRouteData(AdminWorkspace);
 const WorkspaceAuditPage = withRouteData(WorkspaceAudit);
 const WorkspaceEditPage = withRouteData(WorkspaceEdit);
@@ -203,6 +205,16 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             component={() => <WorkspaceEditPage
                 routeData={{title: 'Create Workspace'}}
                 workspaceEditMode={WorkspaceEditMode.Create}
+            />}
+        />
+        <AppRoute
+            path='/workspaces/:ns/:wsid/about'
+            component={() => <WorkspaceAboutPage
+                routeData={{
+                  title: 'View Workspace Details',
+                  breadcrumb: BreadcrumbType.Workspace,
+                  helpContentKey: 'about'
+                }}
             />}
         />
         <AppRoute

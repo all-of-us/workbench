@@ -279,12 +279,3 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
     </div>;
   }
 });
-
-@Component({
-  template: '<div #root></div>'
-})
-export class WorkspaceAboutComponent extends ReactWrapperBase {
-  constructor() {
-    super(WorkspaceAbout, []);
-  }
-}
