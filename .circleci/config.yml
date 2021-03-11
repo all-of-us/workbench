@@ -199,7 +199,7 @@ commands:
               else
                 CHANGES=$(git diff-tree --no-commit-id --name-only -r origin/master..HEAD -- . ':!e2e')
                 if [[ "$CHANGES" == 0 ]]; then
-                  echo "non-e2e files are not changed in last commit on PR branch. Exiting job."
+                  echo "non-e2e files are not changed on PR branch. Exiting job."
                   circleci-agent step halt
                 fi
               fi
