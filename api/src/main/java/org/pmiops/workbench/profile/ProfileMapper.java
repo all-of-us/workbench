@@ -28,16 +28,6 @@ public interface ProfileMapper {
   @Mapping(source = "latestTermsOfService.tosVersion", target = "latestTermsOfServiceVersion")
   @Mapping(source = "latestTermsOfService.agreementTime", target = "latestTermsOfServiceTime")
   @Mapping(source = "dbUser.userId", target = "userId")
-  @Mapping(target = "rasLinkLoginGovName", ignore = true) // TODO(RW-6364): Remove this once ready
-  @Mapping(
-      target = "rasLinkLoginGovExpireTime",
-      ignore = true) // TODO(RW-6364): Remove this once ready
-  @Mapping(
-      target = "rasLinkLoginGovCompletionTime",
-      ignore = true) // TODO(RW-6364): Remove this once ready
-  @Mapping(
-      target = "rasLinkLoginGovBypassTime",
-      ignore = true) // TODO(RW-6364): Remove this once ready
   Profile toModel(
       DbUser dbUser,
       VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation,
