@@ -37,7 +37,7 @@ fi
 
 # Test that datset exists
 test=$(bq show "$BQ_PROJECT:$BQ_DATASET")
-test=$(bq show "$WGV_PROJECT:$WGV_DATASET")
+# test=$(bq show "$WGV_PROJECT:$WGV_DATASET")
 echo "$test"
 
 # Create bq tables we have json schema for
@@ -50,6 +50,68 @@ bq --quiet --project_id=$BQ_PROJECT mk --schema=$schema_path/cb_search_person.js
 # insert person data into cb_search_person
 ################################################
 echo "Inserting person data into cb_search_person"
+if [ -z "$WGV_PROJECT" ]
+then
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`
+    (
+          person_id
+        , gender
+        , sex_at_birth
+        , race
+        , ethnicity
+        , dob
+        , is_deceased
+        , has_fitbit
+    )
+SELECT
+      p.person_id
+    , CASE
+        WHEN p.gender_concept_id = 0 THEN 'Unknown'
+        ELSE g.concept_name
+      END as gender
+    , CASE
+        WHEN p.sex_at_birth_concept_id = 0 THEN 'Unknown'
+        ELSE s.concept_name
+      END as sex_at_birth
+    , CASE
+        WHEN p.race_concept_id = 0 THEN 'Unknown'
+        ELSE regexp_replace(r.concept_name, r'^.+:\s', '')
+      END as race
+    , CASE
+        WHEN e.concept_name is null THEN 'Unknown'
+        ELSE regexp_replace(e.concept_name, r'^.+:\s', '')
+      END as ethnicity
+    , date(birth_datetime) as dob
+    , CASE
+        WHEN d.death_date is null THEN 0
+        ELSE 1
+      END is_deceased
+    , CASE
+        WHEN f.person_id is null THEN 0
+        ELSE 1
+      END has_fitbit
+FROM \`$BQ_PROJECT.$BQ_DATASET.person\` p
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` g on (p.gender_concept_id = g.concept_id)
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` s on (p.sex_at_birth_concept_id = s.concept_id)
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` r on (p.race_concept_id = r.concept_id)
+LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` e on (p.ethnicity_concept_id = e.concept_id)
+LEFT JOIN
+    (
+        SELECT DISTINCT person_id, death_date
+        FROM \`$BQ_PROJECT.$BQ_DATASET.death\`
+    ) d on (p.person_id = d.person_id)
+LEFT JOIN
+    (
+        SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.activity_summary\`
+        union distinct
+        SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_minute_level\`
+        union distinct
+        SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.heart_rate_summary\`
+        union distinct
+        SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.steps_intraday\`
+    ) f on (p.person_id = f.person_id)"
+else
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_search_person\`
     (
@@ -115,6 +177,7 @@ LEFT JOIN
         SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.steps_intraday\`
     ) f on (p.person_id = f.person_id)
 LEFT JOIN \`$WGV_PROJECT.$WGV_DATASET.metadata\` w on (p.person_id = CAST(w.sample_name as int64))"
+fi
 
 ################################################
 # calculate age_at_consent and age_at_cdr
