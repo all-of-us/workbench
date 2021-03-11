@@ -100,6 +100,13 @@ const routes: Routes = [
             path: 'workspaces',
             canActivateChild: [WorkspaceGuard],
             children: [
+              // legacy / duplicated routes go HERE
+              {
+                path: 'build',
+                component: AppRouting,
+                data: {}
+              },
+              // non-migrated routes go HERE
               {
                 path: '',
                 component: WorkspaceListComponent,
