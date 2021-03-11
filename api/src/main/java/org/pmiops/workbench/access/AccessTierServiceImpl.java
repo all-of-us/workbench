@@ -35,20 +35,34 @@ public class AccessTierServiceImpl implements AccessTierService {
     this.userAccessTierDao = userAccessTierDao;
   }
 
+  /**
+   * Return all access tiers in the database
+   *
+   * @return the List of all DbAccessTiers in the database
+   */
   public List<DbAccessTier> getAllTiers() {
     return accessTierDao.findAll();
   }
 
-  public DbAccessTier getAccessTier(String shortName) {
+  /**
+   * Return the access tier referred to by the shortName in the database
+   *
+   * @param shortName the short name of the access tier to look up in the database
+   * @return an Option\<DbAccessTier\> if one matches the shortName passed in, EMPTY otherwise
+   */
+  public Optional<DbAccessTier> getAccessTier(String shortName) {
     return accessTierDao.findOneByShortName(shortName);
   }
 
+  /**
+   * Return the Registered Tier if it exists in the database
+   *
+   * @return a DbAccessTier representing the Registered Tier
+   * @throws ServerErrorException if there is no Registered Tier
+   */
   public DbAccessTier getRegisteredTier() {
-    final DbAccessTier registeredTier = getAccessTier(REGISTERED_TIER_SHORT_NAME);
-    if (registeredTier == null) {
-      throw new ServerErrorException("Cannot find Registered Tier in database.");
-    }
-    return registeredTier;
+    return getAccessTier(REGISTERED_TIER_SHORT_NAME)
+        .orElseThrow(() -> new ServerErrorException("Cannot find Registered Tier in database."));
   }
 
   /**

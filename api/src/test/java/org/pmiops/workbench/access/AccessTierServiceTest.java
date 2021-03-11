@@ -90,20 +90,20 @@ public class AccessTierServiceTest {
 
   @Test
   public void test_getAccessTier_empty() {
-    assertThat(accessTierService.getAccessTier("n/a")).isNull();
+    assertThat(accessTierService.getAccessTier("n/a")).isEmpty();
   }
 
   @Test
   public void test_getAccessTier_registered() {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
     assertThat(accessTierService.getAccessTier(registeredTier.getShortName()))
-        .isEqualTo(registeredTier);
+        .hasValue(registeredTier);
   }
 
   @Test
   public void test_getAccessTier_missing() {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-    assertThat(accessTierService.getAccessTier("some other tier")).isNull();
+    assertThat(accessTierService.getAccessTier("some other tier")).isEmpty();
   }
 
   @Test
@@ -121,9 +121,9 @@ public class AccessTierServiceTest {
                 .setServicePerimeter("controlled/tier/perimeter"));
 
     assertThat(accessTierService.getAccessTier(registeredTier.getShortName()))
-        .isEqualTo(registeredTier);
+        .hasValue(registeredTier);
     assertThat(accessTierService.getAccessTier(controlledTier.getShortName()))
-        .isEqualTo(controlledTier);
+        .hasValue(controlledTier);
   }
 
   @Test(expected = ServerErrorException.class)
