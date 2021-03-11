@@ -73,7 +73,7 @@ public class AccessTierServiceTest {
 
   @Test
   public void test_getAllTiers_2() {
-    final DbAccessTier registeredTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
+    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     final DbAccessTier controlledTier =
         accessTierDao.save(
@@ -95,20 +95,20 @@ public class AccessTierServiceTest {
 
   @Test
   public void test_getAccessTier_registered() {
-    final DbAccessTier registeredTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
+    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
     assertThat(accessTierService.getAccessTier(registeredTier.getShortName()))
         .isEqualTo(registeredTier);
   }
 
   @Test
   public void test_getAccessTier_missing() {
-    final DbAccessTier registeredTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
+    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
     assertThat(accessTierService.getAccessTier("some other tier")).isNull();
   }
 
   @Test
   public void test_getAccessTier_multi() {
-    final DbAccessTier registeredTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
+    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     final DbAccessTier controlledTier =
         accessTierDao.save(
@@ -133,7 +133,7 @@ public class AccessTierServiceTest {
 
   @Test
   public void test_getRegisteredTier_registered() {
-    final DbAccessTier registeredTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
+    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
     assertThat(accessTierService.getRegisteredTier()).isEqualTo(registeredTier);
   }
 
@@ -168,14 +168,14 @@ public class AccessTierServiceTest {
 
   @Test
   public void test_getAccessTiersForUser_registered() {
-    final DbAccessTier registeredTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
+    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
     user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
     assertThat(accessTierService.getAccessTiersForUser(user)).containsExactly(registeredTier);
   }
 
   @Test
   public void test_getAccessTiersForUser_unregistered() {
-    final DbAccessTier registeredTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
+    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
     assertThat(accessTierService.getAccessTiersForUser(user)).isEmpty();
   }
 
@@ -188,7 +188,7 @@ public class AccessTierServiceTest {
   public void test_addUserToRegisteredTier_new() {
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
-    final DbAccessTier registeredTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
+    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     // simply to show a non-Registered tier exists but we don't add the user to it
     final DbAccessTier controlledTier =
@@ -216,7 +216,7 @@ public class AccessTierServiceTest {
 
   @Test
   public void test_addUserToRegisteredTier_twice() {
-    final DbAccessTier registeredTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
+    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     accessTierService.addUserToRegisteredTier(user);
 
@@ -259,7 +259,7 @@ public class AccessTierServiceTest {
   public void test_removeUserFromRegisteredTier_new() {
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
-    final DbAccessTier registeredTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
+    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     // does nothing
     accessTierService.removeUserFromRegisteredTier(user);
@@ -270,7 +270,7 @@ public class AccessTierServiceTest {
   public void test_removeUserFromRegisteredTier_existing() {
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
-    final DbAccessTier registeredTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
+    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     // adds a DB entry for (user, registered)
     accessTierService.addUserToRegisteredTier(user);
@@ -297,7 +297,7 @@ public class AccessTierServiceTest {
   public void test_addUserToAllTiers_two() {
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
-    final DbAccessTier registeredTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
+    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     final DbAccessTier controlledTier =
         accessTierDao.save(

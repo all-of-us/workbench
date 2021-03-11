@@ -18,6 +18,7 @@ import javax.annotation.Nullable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
@@ -33,6 +34,7 @@ import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -51,11 +53,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class UserServiceTest {
 
   private static final String USERNAME = "abc@fake-research-aou.org";
-  private static final int MOODLE_ID = 1001;
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
   private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
-  @Deprecated private static final long TIMESTAMP_MSECS = START_INSTANT.toEpochMilli();
   private static final long TIMESTAMP_SECS = START_INSTANT.getEpochSecond();
   private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
   private static final int CLOCK_INCREMENT_MILLIS = 1000;
@@ -70,8 +70,12 @@ public class UserServiceTest {
 
   @Autowired private UserService userService;
   @Autowired private UserDao userDao;
+  @Autowired private AccessTierDao accessTierDao;
 
-  @Import(UserServiceTestConfiguration.class)
+  @Import({
+    UserServiceTestConfiguration.class,
+    AccessTierServiceImpl.class,
+  })
   @TestConfiguration
   static class Configuration {
     @Bean
@@ -105,6 +109,9 @@ public class UserServiceTest {
     providedDbUser = user;
 
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
+
+    // key UserService logic depends on the existence of the Registered Tier
+    TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     // Since we're injecting the same static instance of this FakeClock,
     // increments and other mutations will carry across tests if we don't reset it here.

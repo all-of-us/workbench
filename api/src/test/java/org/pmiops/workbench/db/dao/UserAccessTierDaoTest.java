@@ -36,7 +36,7 @@ public class UserAccessTierDaoTest {
     user.setUserId(100);
     user = userDao.save(user);
 
-    registeredTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
+    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     controlledTier =
         accessTierDao.save(
