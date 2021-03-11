@@ -189,11 +189,19 @@ commands:
           command: |
             # Always run test on tag builds. Check is done on PR and master branch
             if [[ -z "$CIRCLE_TAG" ]]; then
-              # if no changes, exit 0. otherwise, exit 1
-              CHANGES=$(git diff HEAD~1 --quiet --name-only -- . ':!e2e')
-              if [[ "$CHANGES" == 0 ]]; then
-                echo "non-e2e files are not changed in last commit. Exiting job."
-                circleci-agent step halt
+              if [[ "$CIRCLE_BRANCH" == "master" ]]; then
+                # if no changes, exit 0. otherwise, exit 1
+                CHANGES=$(git diff HEAD~1 --quiet --name-only -- . ':!e2e')
+                if [[ "$CHANGES" == 0 ]]; then
+                  echo "non-e2e files are not changed in last commit on master branch. Exiting job."
+                  circleci-agent step halt
+                fi
+              else
+                CHANGES=$(git diff-tree --no-commit-id --name-only -r origin/master..HEAD -- . ':!e2e')
+                if [[ "$CHANGES" == 0 ]]; then
+                  echo "non-e2e files are not changed in last commit on PR branch. Exiting job."
+                  circleci-agent step halt
+                fi
               fi
             fi
           name: "On PR and master branch, halt non-e2e test if e2e files are the only changed files in last commit"
