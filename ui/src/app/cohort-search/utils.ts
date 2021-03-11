@@ -33,12 +33,7 @@ export function nameDisplay(parameter): string {
 }
 
 export function toTitleCase(str: string): string {
-  const tokens = str.toLowerCase().split(' ');
-  const titleCasedTokens = fp.flow(
-    fp.filter((token: string) => token.length > 0),
-    fp.map((token: string) => token.charAt[0].toUpperCase() + token.slice(1))
-  )(tokens);
-  return titleCasedTokens.join(' ');
+  return fp.startCase(fp.toLower(str));
 }
 
 export function attributeDisplay(parameter): string {
