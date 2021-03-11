@@ -34,6 +34,7 @@ import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
+import {WorkspaceList} from "./pages/workspace/workspace-list";
 
 
 const signInGuard: Guard = {
@@ -69,8 +70,9 @@ const UserDisabledPage = withRouteData(UserDisabled);
 const WorkspaceAdminPage = withRouteData(AdminWorkspace);
 const WorkspaceAuditPage = withRouteData(WorkspaceAudit);
 const WorkspaceEditPage = withRouteData(WorkspaceEdit);
-const WorkspaceSearchAdminPage = withRouteData(AdminWorkspaceSearch);
 const WorkspaceLibraryPage = withRouteData(WorkspaceLibrary);
+const WorkspaceListPage = withRouteData(WorkspaceList);
+const WorkspaceSearchAdminPage = withRouteData(AdminWorkspaceSearch);
 
 interface RoutingProps {
   onSignIn: () => void;
@@ -186,6 +188,15 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         <AppRoute
           path='/profile'
           component={() => <ProfilePagePage routeData={{title: 'Profile'}}/>}
+        />
+        <AppRoute
+          path='/workspaces'
+          component={() => <WorkspaceListPage
+              routeData={{
+                title: 'View Workspaces',
+                breadcrumb: BreadcrumbType.Workspaces
+              }}
+          />}
         />
         <AppRoute
             path='/workspaces/build'

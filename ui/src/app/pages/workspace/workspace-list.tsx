@@ -130,15 +130,4 @@ export const WorkspaceList = withUserProfile()
       </FadeBox>
     </React.Fragment>;
   }
-
-
 });
-
-@Component({
-  template: '<div #root></div>'
-})
-export class WorkspaceListComponent extends ReactWrapperBase {
-  constructor() {
-    super(WorkspaceList, []);
-  }
-}

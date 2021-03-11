@@ -101,19 +101,16 @@ const routes: Routes = [
             children: [
               // legacy / duplicated routes go HERE
               {
+                path: '',
+                component: AppRouting,
+                data: {}
+              },
+              {
                 path: 'build',
                 component: AppRouting,
                 data: {}
               },
               // non-migrated routes go HERE
-              {
-                path: '',
-                component: WorkspaceListComponent,
-                data: {
-                  title: 'View Workspaces',
-                  breadcrumb: BreadcrumbType.Workspaces
-                }
-              },
               {
                 /* TODO The children under ./views need refactoring to use the data
                  * provided by the route rather than double-requesting it.
