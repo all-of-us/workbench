@@ -16,7 +16,6 @@ import {TablePage} from './pages/data/cohort-review/table-page';
 import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
 import {ConceptSearchComponent} from './pages/data/concept/concept-search';
 import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
-import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
 import {WorkspaceListComponent} from './pages/workspace/workspace-list';
@@ -87,6 +86,11 @@ const routes: Routes = [
           // legacy / duplicated routes go HERE
           {
             path: 'library',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'profile',
             component: AppRouting,
             data: {}
           },
@@ -297,11 +301,6 @@ const routes: Routes = [
                     ]
                   }]
               }]
-          },
-          {
-            path: 'profile',
-            component: ProfilePageComponent,
-            data: {title: 'Profile'}
           }
         ]
       },
