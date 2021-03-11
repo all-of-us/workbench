@@ -9,19 +9,23 @@ API to launch and manage notebook servers. This service handles server state
 tracking, monitoring, authenticated notebook UI access, and autopausing of idle
 servers, among other features.
 
-"Cluster" and "notebook server" will often be used interchangeably in code or
-discussion. "Cluster" is the RESTful name of the notebook server resource in
-Leonardo. In All of Us, we currently only allocate single-node "clusters" to fit
-our product requirements, but Leonardo is implemented on top of Dataproc which
-supports running a Spark cluster of multiple machines.
+"Runtime" and "notebook server" will often be used interchangeably in code or
+discussion. "Runtime" is the RESTful name of the notebook server resource in
+Leonardo. In All of Us production, we currently only allow users to create
+GCE VM (single-node) runtimes, but Leonardo supports using Dataproc as well - this
+capability will be launched with the introduction of genomics data.
+
+Historical note: "runtime" used to be named less generically as "cluster" (originating
+from when Leo exclusively supported Dataproc). You may find comments / documentation
+which still refer to it this way.
 
 ## Configuration
 
-Leo notebook servers are configured [here](https://github.com/all-of-us/workbench/blob/30db5b4a2f4b255f3ddeec9d80f7abda7d4eac99/api/src/main/java/org/pmiops/workbench/api/OfflineClusterController.java#L53-L68).
+Leo notebook servers are configured [here](https://github.com/all-of-us/workbench/blob/478d6eb6ae08a8e670ccba3bb26a3f9ab5661085/api/src/main/java/org/pmiops/workbench/notebooks/LeonardoNotebooksClientImpl.java#L82).
 All of Us uses a custom docker image for our notebook servers, which is defined
 [here](https://github.com/DataBiosphere/terra-docker/tree/master/terra-jupyter-aou).
 Notably, this image is configured for client-side [egress limiting via wondershaper](https://docs.google.com/document/d/1SO77UGE41lH5ffa0Gg6KoiMszc6I33dIbm48sA-_5-U/edit)
-Finally, All of Us configures all Leo clusters with a set of startup scripts and
+Finally, All of Us configures all Leo notebooks with a set of startup scripts and
 Jupyter extensions such as code snippets and data use reminders, as described
 [here](../src/main/webapp/static). These static assets are all hosted publicly via
 the Workench API server, allowing Leonardo to pull them onto the VM at runtime.
@@ -52,7 +56,7 @@ as follows for use with Leonardo.
 
 - AoU calls `/setCookie` on Leonardo, bootstrapping Workbench UI oauth2 token
   for subsequent requests
-- AoU creates clusters with a `defaultClientId`, which gets injected into the
+- AoU creates runtimes with a `defaultClientId`, which gets injected into the
   Leo Jupyter UI, and is used to periodically refresh the auth token while a
   browser session is active.
 - For this reason, the Workbench UI client ID whitelists notebooks.firecloud.org
@@ -63,7 +67,7 @@ approach also works in separate popped out Leonardo windows/tabs.
 
 ## Notebook server lifecycle
 
-See this [writeup](https://github.com/all-of-us/workbench/blob/094523134b66952e17a35d9a60970c046615eb05/ui/src/app/utils/cluster-initializer.tsx#L93-L109)
+See this [writeup](https://github.com/all-of-us/workbench/blob/478d6eb6ae08a8e670ccba3bb26a3f9ab5661085/ui/src/app/utils/leo-runtime-initializer.tsx#L101-L114)
 for details on how a notebook server is created.
 
 - When necessitated by a user action in the Workbench, e.g. opening a notebook
@@ -73,11 +77,11 @@ for details on how a notebook server is created.
 - If a notebook server remains idle for >30m (no UI interaction or active kernels), it
   will be autopaused.
 - A user can manually request a "reset" of their notebook server if there is an
-  issue, which is implemented as a deleteCluster -> createCluster.
+  issue, which is implemented as a deleteRuntime -> createRuntime.
 - Finally, a notebook server will be deleted by an offline cronjob after they
-  exceed a certain age. This ensures that all clusters have a maximum age which
-  allows us to reason about rolling out new cluster configurations/features. The
-  logic for cluster deletion is described [here](https://github.com/all-of-us/workbench/blob/30db5b4a2f4b255f3ddeec9d80f7abda7d4eac99/api/src/main/java/org/pmiops/workbench/api/OfflineClusterController.java#L53-L68).
+  exceed a certain age. This ensures that all runtimes have a maximum age which
+  allows us to reason about rolling out new runtime configurations/features. The
+  logic for runtime deletion is described [here](https://github.com/all-of-us/workbench/blob/478d6eb6ae08a8e670ccba3bb26a3f9ab5661085/api/src/main/java/org/pmiops/workbench/api/OfflineRuntimeController.java#L53-L66).
 
 ## Persistence
 
