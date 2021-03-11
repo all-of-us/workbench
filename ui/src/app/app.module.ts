@@ -30,7 +30,6 @@ import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
 import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
 import {TablePage} from './pages/data/cohort-review/table-page';
-import {CohortActionsComponent} from './pages/data/cohort/cohort-actions';
 import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
 import {ConceptSearchComponent} from './pages/data/concept/concept-search';
 import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
@@ -116,7 +115,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     AppComponent,
     AppRouting,
     BugReportComponent,
-    CohortActionsComponent,
     CohortPageComponent,
     CohortReviewComponent,
     ConceptSetActionsComponent,
