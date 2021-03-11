@@ -30,12 +30,12 @@ import {CohortActions} from './pages/data/cohort/cohort-actions';
 import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
 import {ProfilePage} from './pages/profile/profile-page';
+import {WorkspaceAbout} from './pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
+import {WorkspaceList} from './pages/workspace/workspace-list';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
-import {WorkspaceList} from "./pages/workspace/workspace-list";
-import {WorkspaceAbout} from "./pages/workspace/workspace-about";
 
 
 const signInGuard: Guard = {
