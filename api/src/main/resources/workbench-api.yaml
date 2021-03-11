@@ -3971,10 +3971,10 @@ definitions:
         type: boolean
         default: false
         description: Whether user should see a prompt if Workspace Research Purpose needs Review
-      enableRasLinking:
+      enableRasLoginGovLinking:
         type: boolean
         default: false
-        description: Whether to use enable RAS-AoU linking flow when user setup account.
+        description: Whether to use enable RAS-AoU linking for login.gov when user setup account.
       runtimeImages:
         type: array
         items:

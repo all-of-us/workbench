@@ -123,7 +123,7 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableReportingUploadCron": false,
-    "enableRasLinking": false
+    "enableRasLoginGovLinking": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",
