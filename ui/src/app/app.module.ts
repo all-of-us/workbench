@@ -40,7 +40,6 @@ import {WorkspaceShareComponent} from './pages/workspace/workspace-share';
 
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
-import {IconsModule} from './icons/icons.module';
 import {FetchModule} from './services/fetch.module';
 
 import {
@@ -105,7 +104,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ReactiveFormsModule,
 
     FetchModule,
-    IconsModule,
     ClarityModule,
   ],
   declarations: [
