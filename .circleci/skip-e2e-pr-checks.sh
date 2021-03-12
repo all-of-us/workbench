@@ -37,6 +37,6 @@ fi
 git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep -qvFf .circleci/pr-e2e-ignore-patterns.txt
 STATUS=$?
 if [[ "$STATUS" -eq 1 ]]; then
-  echo "Workbench application code were not changed. Exiting job."
+  echo "non-e2e application code are not changed in last commit. Exiting job."
   circleci-agent step halt
 fi
