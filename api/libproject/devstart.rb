@@ -866,6 +866,11 @@ def make_bq_denormalized_tables(cmd_name, *args)
     "CDR date is Required. Please use the date from the source CDR. <YYYY-mm-dd>"
   )
   op.add_option(
+    "--bucket [bucket]",
+    ->(opts, v) { opts.bucket = v},
+    "GCS bucket. Required."
+  )
+  op.add_option(
     "--data-browser [data-browser]",
     ->(opts, v) { opts.data_browser = v},
     "Is this run for data browser. Default is false"
@@ -875,12 +880,12 @@ def make_bq_denormalized_tables(cmd_name, *args)
     ->(opts, v) { opts.dry_run = v},
     "Is this dry a run. Default is false"
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.cdr_version }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.cdr_version and opts.bucket }
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.cdr_version} #{op.opts.cdr_date} #{op.opts.data_browser} #{op.opts.dry_run}}
+    common.run_inline %W{./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.cdr_version} #{op.opts.cdr_date} #{op.opts.bucket} #{op.opts.data_browser} #{op.opts.dry_run}}
   end
 end
 

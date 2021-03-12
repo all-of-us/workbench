@@ -10,19 +10,19 @@ export WGV_PROJECT=$3       # whole genome variant project
 export WGV_DATASET=$4       # whole genome variant dataset
 export CDR_VERSION=$5       # CDR version
 export CDR_DATE=$6          # cdr date
-export DATA_BROWSER=$7      # data browser flag
-export DRY_RUN=$8           # dry run
+export BUCKET=$7            # bucket
+export DATA_BROWSER=$8      # data browser flag
+export DRY_RUN=$9           # dry run
 
 echo ""
 echo 'Validating that all prerequisites exist'
-if ./generate-cdr/validate-prerequisites-exist.sh $BQ_PROJECT $BQ_DATASET $CDR_VERSION
+if ./generate-cdr/validate-prerequisites-exist.sh $BQ_PROJECT $BQ_DATASET $CDR_VERSION $BUCKET
 then
     echo "Validation is complete"
 else
     echo "Validation failed!"
     exit 1
 fi
-exit1
 
 echo ""
 echo 'Making denormalized search events table'
