@@ -13,3 +13,7 @@ Test.kt
 .git
 LICENSE.txt
 tslint.json
+.eslintignore
+.eslintrc.js
+.prettierignore
+.prettierrc.js
