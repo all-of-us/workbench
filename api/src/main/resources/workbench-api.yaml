@@ -365,7 +365,9 @@ paths:
           description: Bad request
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/link-ras-account":
+  "/v1/{userId}/link-ras-account":
+    parameters:
+    - "$ref": "#/parameters/userId"
     post:
       tags:
       - profile
