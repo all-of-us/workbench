@@ -167,17 +167,20 @@ commands:
       - run:
           command: |
             if [ ${CIRCLE_BRANCH} != "" ] && [ ${CIRCLE_BRANCH} != "master" ]; then
-              changed=false
-              for dir_name in << parameters.dir_names >>; do
-                dir_diff=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) -- ${dir_name} | wc -l | xargs)
-                if [ ${dir_diff} -gt 0 ]; then
-                  changed=true
-                  break
+              diff=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) -- api/src/main/resources | wc -l | xargs)
+              if [ ${diff} -eq 0 ]; then
+                changed=false
+                for dir_name in << parameters.dir_names >>; do
+                  dir_diff=$(git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) -- ${dir_name} | wc -l | xargs)
+                  if [ ${dir_diff} -gt 0 ]; then
+                    changed=true
+                    break
+                  fi
+                done
+                if [[ $changed = false ]]; then
+                  echo "Code in '<< parameters.dir_names >>' directories are not changed. Exiting job."
+                  circleci-agent step halt
                 fi
-              done
-              if [[ $changed = false ]]; then
-                echo "Code in '<< parameters.dir_names >>' directories are not changed. Exiting job."
-                circleci-agent step halt
               fi
             fi
           name: "On PR branch, halt job if code in '<< parameters.dir_names >>' dir are not changed in last commit"
