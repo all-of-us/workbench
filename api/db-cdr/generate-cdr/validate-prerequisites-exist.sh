@@ -15,6 +15,12 @@ PREP_CRITERIA_ANCESTOR="prep_criteria_ancestor.csv"
 PREP_CLINICAL_TERMS="prep_clinical_terms_nc.csv"
 All_FILES=("$CRITERIA_MENU" "$PREP_CRITERIA" "$PREP_CRITERIA_ANCESTOR" "$PREP_CLINICAL_TERMS")
 
+if [[ "$BQ_DATASET" == "R2019Q4R3" || "$BQ_DATASET" == "R2019Q4R4" ]];
+  then
+  echo "Can't run CDR build indices against older Datasets!"
+  exit 1
+fi
+
 rm -rf "$FILE_DIR"
 mkdir "$FILE_DIR"
 
