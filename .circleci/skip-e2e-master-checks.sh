@@ -16,7 +16,7 @@ fi
 git diff HEAD~1 --quiet --name-only | grep -qvFf .circleci/master-e2e-ignore-patterns.txt
 STATUS=$?
 if [[ "$STATUS" -eq 1 ]]; then
-  echo "non-e2e application code are not changed in last commit on master branch. Exiting job."
+  echo "Changed files in last commit match ignore patterns on master branch. Exiting job."
   circleci-agent step halt
 fi
 
