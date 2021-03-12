@@ -23,7 +23,6 @@ else
     echo "Validation failed!"
     exit 1
 fi
-exit 1
 
 echo ""
 echo 'Making denormalized search events table'
