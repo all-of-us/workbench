@@ -316,6 +316,29 @@ commands:
             gsutil cp ${NEW_JSON} ${STORAGE_BUCKET}
           when: always
 
+  halt-puppeteer-check:
+    description: "Determine whether to skip puppeteer test on PR branch."
+    parameters:
+      branch:
+        type: string
+        default: 'pr' # pr or master
+    steps:
+      - when:
+          condition:
+            equal: [ "pr", << parameters.branch >> ]
+          steps:
+            - run:
+                name: "Check commit message and find changed file names that do not match ignore patterns on PR branch."
+                command: bash .circleci/skip-e2e-pr-checks.sh
+      - when:
+          condition:
+            equal: [ "master", << parameters.branch >> ]
+          steps:
+            - run:
+                name: "Check for any non-e2e files that were changed in last commit on master branch."
+                command: bash .circleci/skip-e2e-master-checks.sh
+
+
 # -------------------------
 #        JOBS
 # -------------------------
@@ -534,13 +557,6 @@ jobs:
       - attach_workspace:
           at: .
       - steps: << parameters.optional_steps >>
-      - when:
-          condition:
-            equal: [ "test", << parameters.env_name >> ]
-          steps:
-            - run:
-                name: "Determine whether to skip e2e test on master branch. Check for any non-e2e files that were changed in last commit."
-                command: bash .circleci/skip-e2e-master-checks.sh
       - run:
           name: "Export e2e test user to environment variable"
           command: bash .circleci/export-e2e-test-user-vars.sh << parameters.env_name >>
@@ -548,12 +564,6 @@ jobs:
           condition:
             equal: [ "local", << parameters.env_name >> ]
           steps:
-            - run:
-                name: "Check commit message and find changed file names that do not match ignore patterns."
-                command: bash .circleci/skip-e2e-pr-checks.sh
-            - halt-test-check:
-                # Stop running Puppeteer end-to-end test if code in relevant directories is unchanged.
-                dir_names: "ui e2e .circleci"
             - run:
                 name: "Override WORKBENCH_ENV to 'test' from 'local' if needed"
                 command: bash .circleci/choose-e2e-env.sh
@@ -598,11 +608,6 @@ jobs:
           destination: logs
       - store_test_results:
           path: ~/workbench/e2e/logs
-      - when:
-          condition:
-            equal: [ "test", << parameters.env_name >> ]
-          steps:
-            - gcs-load-test-results
 
   puppeteer-env-setup:
     executor: puppeteer-executor
@@ -651,17 +656,25 @@ workflows:
           <<: *filter-pr-branch
           env_name: "local"
           parallel_num: 4
+          optional_steps:
+            - halt-puppeteer-check
+                branch: "pr"
           requires:
             - puppeteer-env-setup
       # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
       - puppeteer-test:
+          <<: *filter-master-branch
           parallel_num: 4
           env_name: "test"
-          <<: *filter-master-branch
+          optional_steps:
+            - halt-puppeteer-check
+              branch: "master"
           requires:
             - puppeteer-env-setup
             - api-deploy-to-test
             - ui-deploy-to-test
+          post-steps:
+            - gcs-load-test-results
 
   deploy-staging:
     jobs:
