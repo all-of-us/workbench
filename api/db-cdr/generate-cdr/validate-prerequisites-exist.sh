@@ -14,10 +14,11 @@ PREP_CRITERIA="prep_criteria.csv"
 PREP_CRITERIA_ANCESTOR="prep_criteria_ancestor.csv"
 PREP_CLINICAL_TERMS="prep_clinical_terms_nc.csv"
 All_FILES=("$CRITERIA_MENU" "$PREP_CRITERIA" "$PREP_CRITERIA_ANCESTOR" "$PREP_CLINICAL_TERMS")
+INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4")
 
-if [[ "$BQ_DATASET" == "R2019Q4R3" || "$BQ_DATASET" == "R2019Q4R4" ]];
+if [[ "${INCOMPATIBLE_DATASETS[@]}" =~ "$BQ_DATASET" ]];
   then
-  echo "Can't run CDR build indices against older Datasets!"
+  echo "Can't run CDR build indices against "$BQ_DATASET"!"
   exit 1
 fi
 
