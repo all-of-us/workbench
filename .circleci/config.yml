@@ -320,7 +320,7 @@ commands:
           when: always
 
   halt-puppeteer-check:
-    description: "Determine whether to skip puppeteer test on PR branch."
+    description: "Determine whether to skip puppeteer test."
     parameters:
       branch:
         type: string
