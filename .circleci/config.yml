@@ -511,7 +511,7 @@ jobs:
     executor: puppeteer-executor
     parameters:
       env_name:
-        description: "The target environment for run Puppeteer end-to-end test. Must be one of 'test', 'staging', 'local'".
+        description: "The target environment for run Puppeteer end-to-end test. Must be one of 'test', 'staging', 'local'."
         default: "test"
         type: enum
         enum: ["test", "staging", "local"]
@@ -598,6 +598,11 @@ jobs:
           destination: logs
       - store_test_results:
           path: ~/workbench/e2e/logs
+      - when:
+          condition:
+            equal: [ "test", << parameters.env_name >> ]
+          steps:
+            - gcs-load-test-results
 
   puppeteer-env-setup:
     executor: puppeteer-executor
@@ -657,8 +662,6 @@ workflows:
             - puppeteer-env-setup
             - api-deploy-to-test
             - ui-deploy-to-test
-          post-steps:
-            - gcs-load-test-results
 
   deploy-staging:
     jobs:
