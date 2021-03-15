@@ -26,7 +26,7 @@ export default class Select extends BaseElement {
   async selectOption(value: string): Promise<string> {
     const disabled = await this.isDisabled();
     if (disabled) {
-      console.warn(`Select is disabled. Cannot select option value: "${value}".`);
+      throw new Error(`Select is disabled. Cannot select option value: "${value}".`);
     }
     const selector = `${this.xpath}/option[text()="${value}"]`;
     await this.page.waitForXPath(selector);
