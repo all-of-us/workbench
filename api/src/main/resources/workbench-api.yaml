@@ -3103,6 +3103,26 @@ paths:
           description: A collection of criteria menu options
           schema:
             "$ref": "#/definitions/CriteriaMenuOptionsListResponse"
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/menu/{parentId}":
+    parameters:
+    - "$ref": "#/parameters/cdrVersionId"
+    get:
+      tags:
+      - cohortBuilder
+      description: 'Returns criteria menu'
+      operationId: findCriteriaMenu
+      parameters:
+      - in: path
+        name: parentId
+        type: integer
+        format: int64
+        required: true
+        description: the parent id
+      responses:
+        200:
+          description: A collection of criteria menu options
+          schema:
+            "$ref": "#/definitions/CriteriaMenuListResponse"
   "/v1/cohortbuilder/{cdrVersionId}/criteria/domaininfo":
     get:
       tags:
@@ -7178,6 +7198,15 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/CriteriaMenuOption"
+  CriteriaMenuListResponse:
+    type: object
+    required:
+    - items
+    properties:
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/CriteriaMenu"
   Criteria:
     type: object
     required:
@@ -7295,6 +7324,45 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/CriteriaMenuSubOption"
+  CriteriaMenu:
+    type: object
+    required:
+    - id
+    - parentId
+    - category
+    - domainId
+    - name
+    - group
+    - sortOrder
+    properties:
+      id:
+        description: The unique identifier for the menu item
+        type: integer
+        format: int64
+      parentId:
+        description: The unique identifier for the menu parent
+        type: integer
+        format: int64
+      category: 
+        description: The category for this menu item(Program Data or Domains)
+        type: string
+      domainId:
+        description: The domain for this menu item
+        type: string
+      type:
+        description: The type for this menu item
+        type: string
+      name: 
+        description: The name
+        type: string
+      group:
+        description: Is this a parent
+        type: boolean
+        default: false
+      sortOrder: 
+        description: The order
+        type: integer
+        format: int64
   CriteriaMenuSubOption:
     type: object
     required:
