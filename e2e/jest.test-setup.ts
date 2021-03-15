@@ -1,6 +1,7 @@
 import { logger } from 'libs/logger';
 import * as fp from 'lodash/fp';
-import {JSHandle, Request} from 'puppeteer';
+import {ConsoleMessage, JSHandle, Request} from 'puppeteer';
+
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
 
 /**
@@ -146,8 +147,13 @@ beforeEach(async () => {
   const getRequestData = fp.flow(getRequestPostData, stringifyData);
   const canLogResponse = fp.flow(isWorkbenchRequest, notRedirectRequest);
 
-  // New request initiated
-  page.on('request', (request) => {
+  // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/puppeteer/index.d.ts
+
+  /**
+   * Emitted when a page issues a request. The request object is read-only.
+   * In order to intercept and mutate requests, see page.setRequestInterceptionEnabled.
+   */
+  page.on('request', (request: Request) => {
     if (isWorkbenchRequest(request)) {
       const requestBody = getRequestData(request);
       const body = requestBody.length === 0 ? '' : `\n${requestBody}`;
@@ -160,7 +166,8 @@ beforeEach(async () => {
     }
   });
 
-  page.on('requestfinished', async (request) => {
+  /** Emitted when a request fails. */
+  page.on('requestfinished', async (request: Request) => {
     let method;
     let url;
     let status;
@@ -193,7 +200,11 @@ beforeEach(async () => {
     }
   });
 
-  page.on('console', async (message) => {
+  /**
+   * Emitted when JavaScript within the page calls one of console API methods, e.g. console.log.
+   * Also emitted if the page throws an error or a warning.
+   */
+  page.on('console', async (message: ConsoleMessage) => {
     if (!message.args().length) return;
     const title = await getPageTitle();
     try {
@@ -205,7 +216,8 @@ beforeEach(async () => {
     }
   });
 
-  page.on('error', async (error) => {
+  /** Emitted when the page crashes. */
+  page.on('error', async (error: Error) => {
     const title = await getPageTitle();
     try {
       console.error(`PAGE ERROR: "${title}"\n${error.toString()}\n${error.message}\n${error.stack}`);
@@ -215,7 +227,8 @@ beforeEach(async () => {
     }
   });
 
-  page.on('pageerror', async (error) => {
+  /** Emitted when an uncaught exception happens within the page. */
+  page.on('pageerror', async (error: Error) => {
     const title = await getPageTitle();
     try {
       console.error(`PAGEERROR: "${title}"\n${error.toString()}\n${error.message}\n${error.stack}`);
