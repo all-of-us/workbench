@@ -1,6 +1,7 @@
 import { logger } from 'libs/logger';
 import * as fp from 'lodash/fp';
 import {ConsoleMessage, JSHandle, Request} from 'puppeteer';
+
 const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
 
 /**
@@ -219,7 +220,7 @@ beforeEach(async () => {
   page.on('error', async (error: Error) => {
     const title = await getPageTitle();
     try {
-      console.error(`PAGE ERROR: "${title}"\n${error}`);
+      console.error(`PAGE ERROR: "${title}"\n${error.toString()}\n${error.message}\n${error.stack}`);
       console.log('');
     } catch (err) {
       console.error(`❗ "${title}"\nException occurred when getting page error.\n${err}`);
@@ -230,7 +231,7 @@ beforeEach(async () => {
   page.on('pageerror', async (error: Error) => {
     const title = await getPageTitle();
     try {
-      console.error(`PAGEERROR: "${title}"\n${error}`);
+      console.log(`PAGEERROR: "${title}"\n${error.toString()}\n${error.message}\n${error.stack}`);
       console.log('');
     } catch (err) {
       console.error(`❗ "${title}"\nPage exception occurred when getting pageerror.\n${err}`);
