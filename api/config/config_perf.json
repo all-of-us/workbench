@@ -107,7 +107,6 @@
   },
   "access": {
     "enableComplianceTraining": true,
-    "unsafeAllowAccessToAllTiersForRegisteredUsers": false,
     "enableEraCommons": true,
     "enableDataUseAgreement": true,
     "enableBetaAccess": false,
@@ -117,6 +116,7 @@
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
+    "unsafeAllowAccessToAllTiersForRegisteredUsers": false,
     "enableRdrExport": true,
     "enableBillingUpgrade": true,
     "enableV3DataUserCodeOfConduct": true,
