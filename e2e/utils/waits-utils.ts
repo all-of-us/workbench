@@ -272,7 +272,7 @@ export async function waitWhileLoading(page: Page, timeout: number = (2 * 60 * 1
   const {waitForRuntime = false}  = opts;
 
   const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
-  const spinElementsSelector = `[style*="running spin"], .spinner:empty, [style*="running rotation"]${waitForRuntime ? ':not([aria-hidden="true"])' : ''}`;
+  const spinElementsSelector = `[style*="running spin"], .spinner:empty, [style*="running rotation"]${waitForRuntime ? '' : ':not([aria-hidden="true"])'}`;
 
   // To prevent checking on blank page, wait for elements exist in DOM.
   await Promise.race([
