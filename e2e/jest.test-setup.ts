@@ -152,7 +152,7 @@ beforeEach(async () => {
    * Emitted when a page issues a request. The request object is read-only.
    * In order to intercept and mutate requests, see page.setRequestInterceptionEnabled.
    */
-  page.on('request', (request) => {
+  page.on('request', (request: Request) => {
     if (isWorkbenchRequest(request)) {
       const requestBody = getRequestData(request);
       const body = requestBody.length === 0 ? '' : `\n${requestBody}`;
@@ -166,7 +166,7 @@ beforeEach(async () => {
   });
 
   /** Emitted when a request fails. */
-  page.on('requestfinished', async (request) => {
+  page.on('requestfinished', async (request: Request) => {
     let method;
     let url;
     let status;
@@ -200,7 +200,7 @@ beforeEach(async () => {
   });
 
   /**
-   * Emitted when JavaScript within the page calls one of console API methods, e.g. console.log or console.dir.
+   * Emitted when JavaScript within the page calls one of console API methods, e.g. console.log.
    * Also emitted if the page throws an error or a warning.
    */
   page.on('console', async (message: ConsoleMessage) => {
@@ -226,7 +226,7 @@ beforeEach(async () => {
     }
   });
 
-  // Emitted when an uncaught exception happens within the page.
+  /** Emitted when an uncaught exception happens within the page. */
   page.on('pageerror', async (error: Error) => {
     const title = await getPageTitle();
     try {
