@@ -231,7 +231,7 @@ beforeEach(async () => {
   page.on('pageerror', async (error: Error) => {
     const title = await getPageTitle();
     try {
-      console.log(`PAGEERROR: "${title}"\n${error.toString()}\n${error.message}\n${error.stack}`);
+      console.error(`PAGEERROR: "${title}"\n${error.toString()}\n${error.message}\n${error.stack}`);
       console.log('');
     } catch (err) {
       console.error(`❗ "${title}"\nPage exception occurred when getting pageerror.\n${err}`);
