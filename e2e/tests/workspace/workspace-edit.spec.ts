@@ -30,9 +30,8 @@ describe('Editing workspace via workspace card snowman menu', () => {
     const workspaceEditPage = new WorkspaceEditPage(page);
 
     // CDR Version Select is readonly. Get selected value.
-    const selectedOption = await workspaceEditPage.selectCdrVersion();
     const cdrVersionSelect = await workspaceEditPage.getCdrVersionSelect();
-    const selectedValue = await cdrVersionSelect.getOptionValue(selectedOption);
+    const selectedValue = await cdrVersionSelect.getSelectedValue();
 
     // Change question #2 answer
     await performActions(page, testData.defaultAnswersResearchPurposeSummary);
@@ -105,10 +104,9 @@ describe('Editing workspace via workspace card snowman menu', () => {
 
     const workspaceEditPage = new WorkspaceEditPage(page);
 
-     // CDR Version Select is readonly. Get selected value.
-    const selectedOption = await workspaceEditPage.selectCdrVersion();
+    // CDR Version Select is readonly. Get selected value.
     const cdrVersionSelect = await workspaceEditPage.getCdrVersionSelect();
-    const selectedValue = await cdrVersionSelect.getOptionValue(selectedOption);
+    const selectedValue = await cdrVersionSelect.getSelectedValue();
 
     // Change question #2 answer
      await performActions(page, testData.defaultAnswersResearchPurposeSummary);
