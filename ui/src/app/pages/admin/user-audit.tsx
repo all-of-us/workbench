@@ -28,7 +28,7 @@ const getAdminPageUrl = (subject: string) => {
 };
 
 export const UserAudit = () => {
-  const {username = ''} = useParams();
+  const {username = ''} = useParams<{ username: string}>();
   return <AuditPageComponent auditSubjectType='User'
                              buttonLabel='Username without domain'
                              initialAuditSubject={username}

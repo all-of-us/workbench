@@ -191,7 +191,7 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
 
     updateRequest = () => {
       // timeout prevents Angular 'Expression changed after checked' error
-      setTimeout(() => this.setState({updateCount: this.state.updateCount + 1}));
+      global.setTimeout(() => this.setState({updateCount: this.state.updateCount + 1}), 1000);
     }
 
     setSearchContext(context: any) {

@@ -48,15 +48,6 @@ export class InstitutionApiStub extends InstitutionApi {
     });
   }
 
-  deleteInstitution(shortName: string): Promise<Response> {
-    return new Promise<Response>(resolve => {
-      this.institutions = this.institutions.filter(institution => {
-        return institution.shortName !== shortName;
-      });
-      resolve();
-    });
-  }
-
   getInstitution(shortName: string): Promise<Institution> {
     return new Promise((resolve, reject) => {
       const institution = this.institutions.find(x => x.shortName === shortName);

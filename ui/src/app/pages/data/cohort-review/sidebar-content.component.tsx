@@ -163,7 +163,7 @@ const AnnotationItem = fp.flow(
       console.error(error);
       this.setState({saving: false, error: true});
     } finally {
-      const timeout = setTimeout(() => this.setState({error: false, success: false}), 5000);
+      const timeout = global.setTimeout(() => this.setState({error: false, success: false}), 5000);
       this.setState({savingValue: undefined, timeout});
     }
   }

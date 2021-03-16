@@ -184,7 +184,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
   closeSearch() {
     currentCohortSearchContextStore.next(undefined);
     // Delay hiding attributes page until sidebar is closed
-    setTimeout(() => attributesSelectionStore.next(undefined), 500);
+    global.setTimeout(() => attributesSelectionStore.next(undefined), 500);
   }
 
   setUnsavedChanges() {
@@ -248,7 +248,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
       clearTimeout(this.growlTimer);
     }
     // This is to set style display: 'none' on the growl so it doesn't block the nav icons in the sidebar
-    this.growlTimer = setTimeout(() => this.setState({growlVisible: false}), 2500);
+    this.growlTimer = global.setTimeout(() => this.setState({growlVisible: false}), 2500);
     this.setState({growlVisible: true});
   }
 
