@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Bean;
 
 public class WorkbenchConfigTest {
 
+  // TODO: Revert me.
+  
   @Test
   public void testUnsafeEndpointsDisabledInProd() throws FileNotFoundException {
     WorkbenchConfig workbenchConfig = getConfigFromFile("../api/config/config_prod.json");
