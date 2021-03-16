@@ -1,6 +1,5 @@
 import {Component, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
-import {buildPageTitleForEnvironment} from 'app/utils/title';
 import {
   ActivatedRoute,
   Event as RouterEvent,
@@ -8,6 +7,7 @@ import {
   NavigationError,
   Router,
 } from '@angular/router';
+import {buildPageTitleForEnvironment} from 'app/utils/title';
 
 
 import {ServerConfigService} from 'app/services/server-config.service';
