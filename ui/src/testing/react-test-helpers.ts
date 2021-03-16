@@ -7,7 +7,7 @@ import {act} from 'react-dom/test-utils';
 //   import {ComponentFixture, tick} from '@angular/core/testing';
 // And fails with:
 //   ReferenceError: Zone is not defined
-export async function waitOneTickAndUpdate(wrapper: ReactWrapper) {
+export async function waitOneTickAndUpdate(wrapper: ReactWrapper): Promise<void> {
   await act(() => new Promise(setImmediate).then(() => wrapper.update()));
 }
 

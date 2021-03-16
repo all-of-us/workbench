@@ -22,8 +22,12 @@
     "module": "es2015",
     "baseUrl": "./",
     "jsx": "react",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "skipLibCheck": true
     // "noUnusedLocals": false,
     // "noUnusedParameters": true
+  },
+  "angularCompilerOptions": {
+    "disableTypeScriptVersionCheck": true,
   }
 }

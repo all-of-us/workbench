@@ -40,7 +40,7 @@ test('dropdown is displayed when results are available', async() => {
   const input = mount(<SearchInput onSearch={onSearch} />);
   input.find('[data-test-id="search-input"]')
     .first().simulate('change', {target: {value: 'foo'}});
-  await new Promise((accept, reject) => {
+  await new Promise<void>((accept, reject) => {
     input.update();
     setTimeout(() => {
       input.update();
@@ -60,7 +60,7 @@ test('selecting a result from the dropdown closes the dropdown', async() => {
   const input = mount(<SearchInput onSearch={onSearch} />);
   input.find('[data-test-id="search-input"]')
     .first().simulate('change', {target: {value: 'foo'}});
-  await new Promise((accept, reject) => {
+  await new Promise<void>((accept, reject) => {
     input.update();
     setTimeout(() => {
       input.update();
