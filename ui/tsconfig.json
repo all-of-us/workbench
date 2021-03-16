@@ -23,5 +23,10 @@
     "baseUrl": "./",
     "jsx": "react",
     "resolveJsonModule": true
+    // "noUnusedLocals": false,
+    // "noUnusedParameters": true
+  },
+  "angularCompilerOptions": {
+    "disableTypeScriptVersionCheck": true,
   }
 }
