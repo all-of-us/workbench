@@ -124,7 +124,6 @@ export class AppComponent implements OnInit {
         currentRoute.data.subscribe(value => {
           const routeTitle = value.title || this.titleFromPathElement(currentRoute, value.pathElementForTitle);
           this.titleService.setTitle(buildPageTitleForEnvironment(routeTitle));
-          console.log(value, `ng route: ${routeTitle}, ${buildPageTitleForEnvironment(routeTitle)}`)
         });
       }
     }
@@ -136,7 +135,6 @@ export class AppComponent implements OnInit {
       currentRoute.data.subscribe(() => {
         const routeTitle = title || this.titleFromPathElement(currentRoute, pathElementForTitle);
         this.titleService.setTitle(buildPageTitleForEnvironment(routeTitle));
-        console.log(`react route: ${buildPageTitleForEnvironment(routeTitle)}`)
       });
     }
   }
