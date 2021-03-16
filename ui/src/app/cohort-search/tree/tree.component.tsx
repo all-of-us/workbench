@@ -103,6 +103,17 @@ const scrollbarCSS = `
   }
 `;
 
+const ANY_PM_SELECTION = {
+  parameterId: 'hasAnyPM',
+  domainId: Domain.PHYSICALMEASUREMENT.toString(),
+  group: false,
+  hasAncestorData: false,
+  isStandard: false,
+  name: 'Has Any Physical Measurements Data',
+  type: CriteriaType.PPI.toString(),
+  attributes: []
+};
+
 interface Props {
   autocompleteSelection: any;
   back: Function;
@@ -146,11 +157,15 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
   }
 
   componentDidMount(): void {
+    const {node: {domainId}, selectedIds} = this.props;
     this.loadRootNodes();
+    if (domainId === Domain.PHYSICALMEASUREMENT.toString()) {
+      this.setState({hasAnyPM: selectedIds.includes(ANY_PM_SELECTION.parameterId)});
+    }
   }
 
   componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any) {
-    const {concept, node: {domainId}, source} = this.props;
+    const {concept, node: {domainId}, selectedIds, source} = this.props;
     if (source === 'conceptSetDetails') {
       if (prevProps.concept !== concept) {
         const {cdrVersionId} = (currentWorkspaceStore.getValue());
@@ -163,6 +178,9 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
           }
         }
       }
+    }
+    if (domainId === Domain.PHYSICALMEASUREMENT.toString() && prevProps.selectedIds !== selectedIds) {
+      this.setState({hasAnyPM: selectedIds.includes(ANY_PM_SELECTION.parameterId)});
     }
   }
 
@@ -300,10 +318,17 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
     return source !== 'cohort' && selectedIds && selectedIds.length >= 1000;
   }
 
+  onHasAnyPMChange() {
+    currentCohortCriteriaStore.next([]);
+    if (!this.state.hasAnyPM) {
+      setTimeout(() => this.props.select(ANY_PM_SELECTION));
+    }
+  }
+
   render() {
     const {
       autocompleteSelection, back, groupSelections, node, scrollToMatch, searchTerms,
-      select, selectedIds, selectOption, setAttributes, setSearchTerms
+      select, selectedIds, selectOption, setAttributes, setSearchTerms, source
     } = this.props;
     const {children, error, hasAnyPM, ingredients, loading} = this.state;
     return <React.Fragment>
@@ -338,20 +363,22 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
           {node.domainId === Domain.PHYSICALMEASUREMENT.toString() && <div style={{margin: '0.5rem 0 0 0.5rem'}}>
             <CheckBox manageOwnState={false}
                       checked={hasAnyPM}
-                      onChange={() => this.setState({hasAnyPM: !hasAnyPM})}/>
+                      onChange={() => this.onHasAnyPMChange()}/>
             <span style={{color: colors.primary, marginLeft: '0.5rem'}}>Has Any Physical Measurements Data</span>
-            <div style={styles.orCircle}>OR</div>
+            {!hasAnyPM && <div style={styles.orCircle}>OR</div>}
           </div>}
-          {!!children && children.map((child, c) => this.showNode(child) && <TreeNode key={c}
-                                                                                      source={this.props.source}
-                                                                                      autocompleteSelection={autocompleteSelection}
-                                                                                      groupSelections={groupSelections}
-                                                                                      node={child}
-                                                                                      scrollToMatch={scrollToMatch}
-                                                                                      searchTerms={searchTerms}
-                                                                                      select={(s) => select(s)}
-                                                                                      selectedIds={selectedIds}
-                                                                                      setAttributes={setAttributes}/>)}
+          {!!children && !hasAnyPM && children.map((child, c) => this.showNode(child) &&
+            <TreeNode key={c}
+                      source={source}
+                      autocompleteSelection={autocompleteSelection}
+                      groupSelections={groupSelections}
+                      node={child}
+                      scrollToMatch={scrollToMatch}
+                      searchTerms={searchTerms}
+                      select={(s) => select(s)}
+                      selectedIds={selectedIds}
+                      setAttributes={setAttributes}/>
+          )}
         </div>
       </div>}
       {loading && !this.showHeader && <SpinnerOverlay/>}
