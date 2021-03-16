@@ -794,6 +794,7 @@ public final class SearchGroupItemQueryBuilder {
             .allMatch(
                 sp ->
                     Domain.PHYSICAL_MEASUREMENT.toString().equals(sp.getDomain())
-                        && sp.getConceptId() == null);
+                        && sp.getConceptId() == null
+                        && sp.getAttributes().isEmpty());
   }
 }
