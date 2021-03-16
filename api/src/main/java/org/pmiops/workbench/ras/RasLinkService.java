@@ -1,14 +1,22 @@
 package org.pmiops.workbench.ras;
 
 import static org.pmiops.workbench.ras.OAuthHelper.decodedJwt;
+import static org.pmiops.workbench.ras.RasLinkConstants.ACR_CLAIM;
+import static org.pmiops.workbench.ras.RasLinkConstants.AUTHORIZE_URL_SUFFIX;
+import static org.pmiops.workbench.ras.RasLinkConstants.Id_TOKEN_FIELD_NAME;
+import static org.pmiops.workbench.ras.RasLinkConstants.LOGIN_GOV_IDENTIFIER_LOWER_CASE;
+import static org.pmiops.workbench.ras.RasLinkConstants.RAS_AUTH_CODE_SCOPES;
+import static org.pmiops.workbench.ras.RasLinkConstants.RAS_SECRET_BUCKET_NAME;
+import static org.pmiops.workbench.ras.RasLinkConstants.TOKEN_URL_SUFFIX;
+import static org.pmiops.workbench.ras.RasLinkConstants.USERNAME_FIELD_NAME;
+import static org.pmiops.workbench.ras.RasLinkConstants.USER_INFO_URL_SUFFIX;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.TokenResponse;
-import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -26,35 +34,54 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Extracts user's login.gov account from UserInfo response in Json format.
+ * Service handles link login.gov account with All of Us account. It finishes OAuth dance with RAS
+ * then validate users use their login.gov account with IAL2 enabled.
  *
- * <p>A valid login.gov userInfo response should contain <i>preferred_username</i> field which
- * ends with <i>@Login.Gov</i> and <i>userid</i> field. Example:
+ * <p>Key steps:
+ * Step1: Finish OAuth and get {@link TokenResponse}. A sample response:
  * <pre>{@code
- *  "sub":"123456abc",
- *  "name" : " ",
- *  "preferred_username":"user1@Login.Gov",
- *  "userid":"user1",
- *  "email" : "foo@gmail.com"
+ * "access_token":"JWT token"
+ * "token_type":"Bearer",
+ * "expires_in":1800,
+ * "refresh_token":"refresh token",
+ * "scope":"openid profile email ga4gh_passport_v1",
+ * "sub":"subId",
+ * "id_token":"JWT token"
+ * "id_token_type":"urn:ietf:params:oauth:grant-type:jwt-bearer"
  * }</pre>
+ *
+ * Step2: Decode JWT id_token to extract IAL status. Decoded id_token:
+ * <pre>{@code
+ * "sub": "subId",
+ * "aud": "client id",
+ * "c_hash": "",
+ * "acr": "https://stsstg.nih.gov/assurance/ial/1 https://stsstg.nih.gov/assurance/aal/1",
+ * "azp": "",
+ * "auth_time": 1615910504,
+ * "iss": "https://stsstg.nih.gov",
+ * "exp": 1615996939,
+ * "iat": 1615910539
+ * }</pre>
+ * The acr claim contains user IAL status, the number after /assurance/ial/
+ *
+ * Step3: User access_token to pull RAS user info. A sample userInfo in Json format:
+ * <pre>{@code
+ *  "sub":"subId",
+ *  "name" : "",
+ *  "preferred_username":"user1@Login.Gov",
+ *  "userId":"user1"
+ *  "email":"foo@gmail.com"
+ * }</pre>
+ * The {@code preferred_username} is what we use should use to extract login.goc username. If that
+ * field is missing or does not have Login.Gov suffix, that means user not using login.gov to login.
+ * In this case, returns {@link ForbiddenException}.
+ *
+ * Step4: Use step3's login.gov username to update AoU database by
+ * {@link UserService#updateRasLinkLoginGovStatus(String)}. Then return it as user profile.
  */
 @Service
 public class RasLinkService {
   private static final Logger log = Logger.getLogger(RasLinkService.class.getName());
-
-  //The RAS url suffix for exchanging token using auth code.
-  private static final String TOKEN_URL_SUFFIX = "/auth/oauth/v2/token";
-  // The RAS url suffix for initializing authorize request.
-  private static final String AUTHORIZE_URL_SUFFIX = "/auth/oauth/v2/authorize";
-  // The RAS url suffix for fetching user info, i.e. GA4GH Passport.
-  private static final String USER_INFO_URL_SUFFIX = "/openid/connect/v1.1/userinfo";
-  // The GCP bucket name that stores RAS secret
-  private static final String RAS_SECRET_BUCKET_NAME = "ras-client-secret.txt";
-  // The scopes for RAS's auth code exchange. Use ga4gh_passport_v1 to be able to get GA4GH passport
-  // using the access token.
-
-
-  private static final Set<String> RAS_AUTH_CODE_SCOPES = ImmutableSet.of("ga4gh_passport_v1");
 
   private final CloudStorageClient cloudStorageClient;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
@@ -77,31 +104,35 @@ public class RasLinkService {
     this.objectMapper = new ObjectMapper();
   }
 
+  /** Links RAS login.gov account with AoU account. */
   public Profile linkRasLoginGovAccount(String authCode, String redirectUrl) {
     String rasClientSecret = cloudStorageClient.getCredentialsBucketString(RAS_SECRET_BUCKET_NAME);
     String rasClientId = workbenchConfigProvider.get().ras.clientId;
     String rasTokenUrl = workbenchConfigProvider.get().ras.host + TOKEN_URL_SUFFIX;
     String rasAuthorizeUrl = workbenchConfigProvider.get().ras.host + AUTHORIZE_URL_SUFFIX;
-
+    JsonNode userInfoResponse = NullNode.getInstance();
     try {
+      // Oauth dance to get id token and access token.
     AuthorizationCodeFlow flow = OAuthHelper.newAuthCodeFlow(rasClientId, rasClientSecret, rasTokenUrl, rasAuthorizeUrl);
     TokenResponse tokenResponse = OAuthHelper.codeExchange(flow, authCode, redirectUrl, RAS_AUTH_CODE_SCOPES);
-    String acrClaim = decodedJwt(tokenResponse.get("id_token").toString()).getClaim("acr").asString();
+    // Validate IAL status.
+    String acrClaim = decodedJwt(tokenResponse.get(Id_TOKEN_FIELD_NAME).toString()).getClaim(ACR_CLAIM).asString();
     if(!isIal2(acrClaim)) {
       throw new ForbiddenException(String.format("User does not have IAL2 enabled, acrClaim: %s", acrClaim));
     }
-    JsonNode userInfoResponse = objectMapper.readTree(OAuthHelper.fetchUserInfo(tokenResponse.getAccessToken(), workbenchConfigProvider.get().ras.host + USER_INFO_URL_SUFFIX));
-    userService.updateRasLinkLoginGovStatus(getLoginGovUserId(userInfoResponse));
+    // Fetch user info.
+    userInfoResponse = objectMapper.readTree(OAuthHelper.fetchUserInfo(tokenResponse.getAccessToken(), workbenchConfigProvider.get().ras.host + USER_INFO_URL_SUFFIX));
     } catch (IOException e) {
       log.log(Level.WARNING, "Failed to link RAS account", e);
     }
-    return profileService.getProfile(userProvider.get());
+    DbUser dbUser = userService.updateRasLinkLoginGovStatus(getLoginGovUserId(userInfoResponse));
+    return profileService.getProfile(dbUser);
   }
 
-  /***/
+  /** Validates user has IAL2 setup. See class javadoc Step2 for more details. */
   private static boolean isIal2(String acrClaim) {
-    Pattern p = Pattern.compile("ial/\\d");
-    Matcher m = p.matcher("aclClaim");
+    Pattern p = Pattern.compile("ial/\\d", Pattern.CASE_INSENSITIVE);
+    Matcher m = p.matcher(acrClaim);
     if(m.matches()) {
       return m.group().equals("2");
     }
@@ -109,20 +140,12 @@ public class RasLinkService {
   }
 
   /**
-   * Extracts user's login.gov account from UserInfo response in Json format.
-   *
-   * <p>A valid login.gov userInfo response should contain <i>preferred_username</i> field which
-   * ends with <i>@Login.Gov</i> and we can use that as user's unique identifier. Example:
-   * <pre>{@code
-   *  "sub":"123456abc",
-   *  "name" : " ",
-   *  "preferred_username":"user1@Login.Gov",
-   *  "email" : "foo@gmail.com"
-   * }</pre>
+   * Extracts user's login.gov account from UserInfo response in Json format. See class javadoc
+   * Step3 for more details.
    */
   private static String getLoginGovUserId(JsonNode userInfo) {
-    String preferredUsername = userInfo.get("preferred_username").asText("");
-    if(!preferredUsername.toLowerCase().contains("@login.gov")) {
+    String preferredUsername = userInfo.get(USERNAME_FIELD_NAME).asText("");
+    if(!preferredUsername.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
       throw new ForbiddenException(String.format("User does not have valid login.gov account, invalid preferred_username: %s", preferredUsername));
     }
     return preferredUsername;
