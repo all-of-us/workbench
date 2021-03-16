@@ -26,7 +26,7 @@ parameters:
 # -------------------------
 anchors:
   env-default: &env-default
-    JAVA_TOOL_OPTIONS: -Xmx2g
+    JAVA_TOOL_OPTIONS: -Xmx2g -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=~/workbench/api/heapdump.bin
     # See: https://support.circleci.com/hc/en-us/articles/360021812453-Common-Android-memory-issues
     GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dkotlin.incremental=false -Dkotlin.compiler.execution.strategy=in-process
     TERM: dumb
@@ -276,6 +276,10 @@ commands:
       - store_artifacts:
           path: ~/workbench/api/build/test-results/test
           destination: JunitTestResult
+          when: always
+      - store_artifacts:
+          path: ~/workbench/api/heapdump.bin
+          destination: oom
           when: always
 
   ui-cache:
