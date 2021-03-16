@@ -9,6 +9,7 @@ import org.pmiops.workbench.cdr.model.DbAgeTypeCount;
 import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
+import org.pmiops.workbench.cdr.model.DbCriteriaMenu;
 import org.pmiops.workbench.cdr.model.DbDataFilter;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
@@ -16,6 +17,7 @@ import org.pmiops.workbench.cdr.model.DbSurveyVersion;
 import org.pmiops.workbench.model.AgeTypeCount;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
+import org.pmiops.workbench.model.CriteriaMenu;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DomainInfo;
 import org.pmiops.workbench.model.SurveyModule;
@@ -75,4 +77,6 @@ public interface CohortBuilderMapper {
   DomainInfo dbModelToClient(DbDomainInfo source);
 
   SurveyModule dbModelToClient(DbSurveyModule source);
+
+  CriteriaMenu dbModelToClient(DbCriteriaMenu source);
 }

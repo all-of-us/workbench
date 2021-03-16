@@ -23,6 +23,7 @@ import org.pmiops.workbench.model.AgeTypeCountListResponse;
 import org.pmiops.workbench.model.CriteriaAttributeListResponse;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
+import org.pmiops.workbench.model.CriteriaMenuListResponse;
 import org.pmiops.workbench.model.CriteriaMenuOptionsListResponse;
 import org.pmiops.workbench.model.CriteriaRequest;
 import org.pmiops.workbench.model.CriteriaSubType;
@@ -145,6 +146,16 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
             .items(
                 cohortBuilderService.findCriteriaByDomainIdAndConceptIds(
                     domain, request.getSourceConceptIds(), request.getStandardConceptIds())));
+  }
+
+  @Override
+  public ResponseEntity<CriteriaMenuListResponse> findCriteriaMenu(
+      Long cdrVersionId, Long parentId) {
+    cdrVersionService.setCdrVersion(cdrVersionId);
+    CriteriaMenuListResponse response =
+        new CriteriaMenuListResponse()
+            .items(cohortBuilderService.findCriteriaMenuByParentId(parentId));
+    return ResponseEntity.ok(response);
   }
 
   @Override
@@ -311,7 +322,7 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
         .findFirst()
         .orElseThrow(
             () -> new BadRequestException(String.format(BAD_REQUEST_MESSAGE, "domain", domain)));
-    if (Domain.fromValue(domain).equals(Domain.SURVEY)) {
+    if (Domain.SURVEY.equals(Domain.fromValue(domain))) {
       Optional.ofNullable(surveyName)
           .orElseThrow(
               () ->

@@ -31,6 +31,7 @@ import org.pmiops.workbench.cdr.cache.MySQLStopWords;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
+import org.pmiops.workbench.cdr.dao.CriteriaMenuDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
@@ -45,6 +46,7 @@ import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
+import org.pmiops.workbench.model.CriteriaMenu;
 import org.pmiops.workbench.model.CriteriaMenuOption;
 import org.pmiops.workbench.model.CriteriaMenuSubOption;
 import org.pmiops.workbench.model.DataFilter;
@@ -76,6 +78,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   private final CohortQueryBuilder cohortQueryBuilder;
   private final CBCriteriaAttributeDao cbCriteriaAttributeDao;
   private final CBCriteriaDao cbCriteriaDao;
+  private final CriteriaMenuDao criteriaMenuDao;
   private final CBDataFilterDao cbDataFilterDao;
   private final DomainInfoDao domainInfoDao;
   private final PersonDao personDao;
@@ -89,6 +92,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       CohortQueryBuilder cohortQueryBuilder,
       CBCriteriaAttributeDao cbCriteriaAttributeDao,
       CBCriteriaDao cbCriteriaDao,
+      CriteriaMenuDao criteriaMenuDao,
       CBDataFilterDao cbDataFilterDao,
       DomainInfoDao domainInfoDao,
       PersonDao personDao,
@@ -99,6 +103,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     this.cohortQueryBuilder = cohortQueryBuilder;
     this.cbCriteriaAttributeDao = cbCriteriaAttributeDao;
     this.cbCriteriaDao = cbCriteriaDao;
+    this.criteriaMenuDao = criteriaMenuDao;
     this.cbDataFilterDao = cbDataFilterDao;
     this.domainInfoDao = domainInfoDao;
     this.personDao = personDao;
@@ -288,6 +293,13 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
                 .map(cohortBuilderMapper::dbModelToClient)
                 .collect(Collectors.toList()))
         .totalCount(dbCriteriaPage.getTotalElements());
+  }
+
+  @Override
+  public List<CriteriaMenu> findCriteriaMenuByParentId(long parentId) {
+    return criteriaMenuDao.findByParentIdOrderBySortOrderAsc(parentId).stream()
+        .map(cohortBuilderMapper::dbModelToClient)
+        .collect(Collectors.toList());
   }
 
   @Override

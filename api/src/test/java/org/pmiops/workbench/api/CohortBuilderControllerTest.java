@@ -16,11 +16,13 @@ import org.pmiops.workbench.cdr.cache.MySQLStopWords;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
+import org.pmiops.workbench.cdr.dao.CriteriaMenuDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
+import org.pmiops.workbench.cdr.model.DbCriteriaMenu;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
@@ -67,6 +69,7 @@ public class CohortBuilderControllerTest {
   @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
   @Autowired private CBDataFilterDao cbDataFilterDao;
+  @Autowired private CriteriaMenuDao criteriaMenuDao;
   @Autowired private DomainInfoDao domainInfoDao;
   @Autowired private PersonDao personDao;
   @Autowired private SurveyModuleDao surveyModuleDao;
@@ -90,6 +93,7 @@ public class CohortBuilderControllerTest {
             cohortQueryBuilder,
             cbCriteriaAttributeDao,
             cbCriteriaDao,
+            criteriaMenuDao,
             cbDataFilterDao,
             domainInfoDao,
             personDao,
@@ -102,6 +106,22 @@ public class CohortBuilderControllerTest {
 
     MySQLStopWords mySQLStopWords = new MySQLStopWords(Arrays.asList("about"));
     doReturn(mySQLStopWords).when(mySQLStopWordsProvider).get();
+  }
+
+  @Test
+  public void findCriteriaMenu() {
+    DbCriteriaMenu dbCriteriaMenu =
+        criteriaMenuDao.save(
+            DbCriteriaMenu.builder()
+                .addParentId(0L)
+                .addCategory("Program Data")
+                .addDomainId("Condition")
+                .addGroup(true)
+                .addName("Condition")
+                .addSortOrder(2L)
+                .build());
+    assertThat(controller.findCriteriaMenu(1L, 0L).getBody().getItems().get(0))
+        .isEqualTo(cohortBuilderMapper.dbModelToClient(dbCriteriaMenu));
   }
 
   @Test
