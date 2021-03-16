@@ -25,18 +25,19 @@ public class OAuthHelper {
   private static final JacksonFactory DEFAULT_JACKSON_FACTORY = new JacksonFactory();
 
   /** Get access token by code. */
-  public static TokenResponse codeExchange(AuthorizationCodeFlow flow, String code, String redirectUrl, Set<String> scopes) throws Exception {
+   static TokenResponse codeExchange(AuthorizationCodeFlow flow, String code, String redirectUrl, Set<String> scopes)
+       throws IOException {
     return flow.newTokenRequest(code)
         .setScopes(scopes).setRedirectUri(redirectUrl)
         .setGrantType("authorization_code").execute();
   }
 
-  public static DecodedJWT decodedJwt(String token) {
+   static DecodedJWT decodedJwt(String token) {
     return JWT.decode(token);
   }
 
-  public static String fetchUserInfo(String accessToken, GenericUrl url) throws Exception {
-    HttpResponse response = executeGet(DEFAULT_HTTP_TRANSPORT, DEFAULT_JACKSON_FACTORY, accessToken, url);
+   static String fetchUserInfo(String accessToken, String userInfoUrl) throws IOException {
+    HttpResponse response = executeGet(DEFAULT_HTTP_TRANSPORT, DEFAULT_JACKSON_FACTORY, accessToken, new GenericUrl(userInfoUrl));
     return response.getContentEncoding();
   }
 

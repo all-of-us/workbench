@@ -938,4 +938,19 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   public Set<DbUser> findAllUsersWithAuthoritiesAndPageVisits() {
     return userDao.findAllUsersWithAuthoritiesAndPageVisits();
   }
+
+  @Override
+  public DbUser updateRasLinkLoginGovStatus(String loginGovUserName) {
+    DbUser dbUser = userProvider.get();
+
+    return updateUserWithRetries(
+        user -> {
+          user.setRasLinkLoginGovUsername(loginGovUserName);
+          user.setRasLinkLoginGovCompletionTime(new Timestamp(clock.instant().toEpochMilli()));
+          // TODO(RW-6480): Determine if need to set link expiration time.
+          return user;
+        },
+        dbUser,
+        Agent.asUser(dbUser));
+  }
 }
