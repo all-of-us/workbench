@@ -12,12 +12,15 @@ import org.pmiops.workbench.google.CloudStorageClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.web.context.annotation.RequestScope;
 
 @Configuration
 public class RasOidcClientConfig {
   static final String RAS_OIDC_CLIENT = "RAS_OIDC_CLIENT";
 
   @Bean(RAS_OIDC_CLIENT)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   @Lazy
   public OpenIdConnectClient rasOidcClient(
       CloudStorageClient cloudStorageClient, Provider<WorkbenchConfig> workbenchConfigProvider)
