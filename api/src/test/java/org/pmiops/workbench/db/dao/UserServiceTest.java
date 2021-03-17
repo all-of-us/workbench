@@ -273,6 +273,14 @@ public class UserServiceTest {
   }
 
   @Test
+  public void testUpdateRasLink() throws ApiException {
+    String loginGovName = "loginGov@email.com";
+    userService.updateRasLinkLoginGovStatus(loginGovName);
+    assertThat(providedDbUser.getRasLinkLoginGovUsername()).isEqualTo(loginGovName);
+    assertThat(providedDbUser.getRasLinkLoginGovCompletionTime()).isEqualTo(Timestamp.from(START_INSTANT));
+  }
+
+  @Test
   public void testSyncTwoFactorAuthStatus() {
     com.google.api.services.directory.model.User googleUser =
         new com.google.api.services.directory.model.User();
