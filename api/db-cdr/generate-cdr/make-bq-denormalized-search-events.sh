@@ -7,24 +7,18 @@ set -ex
 export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
 export DATA_BROWSER=$3      # data browser flag
-export DRY_RUN=$4           # dry run
 
-if [ "$DRY_RUN" == true ]
-then
-  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.person")
-  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept")
-  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.condition_occurrence")
-  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.procedure_occurrence")
-  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.drug_exposure")
-  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation")
-  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation_ext")
-  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.measurement")
-  test=$(bq show "$BQ_PROJECT:$BQ_DATASET.visit_occurrence")
-  exit 0
-fi
-
-# Test that datset exists
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET")
+# Test that dependant tables exist
+test=$(bq show "$BQ_PROJECT:$BQ_DATASET.person")
+test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept")
+test=$(bq show "$BQ_PROJECT:$BQ_DATASET.condition_occurrence")
+test=$(bq show "$BQ_PROJECT:$BQ_DATASET.procedure_occurrence")
+test=$(bq show "$BQ_PROJECT:$BQ_DATASET.drug_exposure")
+test=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation")
+test=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation_ext")
+test=$(bq show "$BQ_PROJECT:$BQ_DATASET.measurement")
+test=$(bq show "$BQ_PROJECT:$BQ_DATASET.visit_occurrence")
+echo "$test"
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas

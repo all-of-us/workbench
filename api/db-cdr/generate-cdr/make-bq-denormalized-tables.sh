@@ -12,7 +12,6 @@ export CDR_VERSION=$5       # CDR version
 export CDR_DATE=$6          # cdr date
 export BUCKET=$7            # bucket
 export DATA_BROWSER=$8      # data browser flag
-export DRY_RUN=$9           # dry run
 
 echo ""
 echo 'Validating that all prerequisites exist'
@@ -26,7 +25,7 @@ fi
 
 echo ""
 echo 'Making denormalized search events table'
-if ./generate-cdr/make-bq-denormalized-search-events.sh $BQ_PROJECT $BQ_DATASET $DATA_BROWSER $DRY_RUN
+if ./generate-cdr/make-bq-denormalized-search-events.sh $BQ_PROJECT $BQ_DATASET $DATA_BROWSER
 then
     echo "Making denormalized search table complete"
 else
@@ -36,7 +35,7 @@ fi
 
 echo ""
 echo "Making criteria tables"
-if ./generate-cdr/make-bq-criteria-tables.sh $BQ_PROJECT $BQ_DATASET $DATA_BROWSER $DRY_RUN
+if ./generate-cdr/make-bq-criteria-tables.sh $BQ_PROJECT $BQ_DATASET $DATA_BROWSER
 then
     echo "Making criteria tables complete"
 else
@@ -49,7 +48,7 @@ then
 
   echo ""
   echo 'Making denormalized search person table'
-  if ./generate-cdr/make-bq-denormalized-search-person.sh $BQ_PROJECT $BQ_DATASET $WGV_PROJECT $WGV_DATASET $CDR_DATE $DRY_RUN
+  if ./generate-cdr/make-bq-denormalized-search-person.sh $BQ_PROJECT $BQ_DATASET $WGV_PROJECT $WGV_DATASET $CDR_DATE
   then
       echo "Making denormalized search person table complete"
   else
@@ -59,7 +58,7 @@ then
 
   echo ""
   echo "Making denormalized review tables"
-  if ./generate-cdr/make-bq-denormalized-review.sh $BQ_PROJECT $BQ_DATASET $DRY_RUN
+  if ./generate-cdr/make-bq-denormalized-review.sh $BQ_PROJECT $BQ_DATASET
   then
       echo "Making denormalized review tables complete"
   else
@@ -69,7 +68,7 @@ then
 
   echo ""
   echo "Making denormalized dataset tables"
-  if ./generate-cdr/make-bq-denormalized-dataset.sh $BQ_PROJECT $BQ_DATASET $DRY_RUN
+  if ./generate-cdr/make-bq-denormalized-dataset.sh $BQ_PROJECT $BQ_DATASET
   then
       echo "Making denormalized dataset tables complete"
   else
@@ -79,7 +78,7 @@ then
 
   echo ""
   echo "Making dataset linking tables"
-  if ./generate-cdr/make-bq-dataset-linking.sh $BQ_PROJECT $BQ_DATASET $DRY_RUN
+  if ./generate-cdr/make-bq-dataset-linking.sh $BQ_PROJECT $BQ_DATASET
   then
       echo "Making dataset linking tables complete"
   else
