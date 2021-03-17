@@ -25,7 +25,6 @@
     "resolveJsonModule": true,
     "skipLibCheck": true
     // "noUnusedLocals": false,
-    // "noUnusedParameters": true
   },
   "angularCompilerOptions": {
     "disableTypeScriptVersionCheck": true,
