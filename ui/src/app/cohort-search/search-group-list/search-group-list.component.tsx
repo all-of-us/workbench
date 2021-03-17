@@ -117,7 +117,17 @@ const css = `
 
 function mapMenuItem(item: CriteriaMenu) {
   const {category, domainId, group, id, name, sortOrder, type} = item;
-  return {category, children: null, domain: domainId, group, id, name, sortOrder, type};
+  return {
+    category,
+    children: null,
+    domain: domainId,
+    group,
+    id,
+    name,
+    sortOrder,
+    standard: domainId === Domain.VISIT.toString() ? true : null,
+    type
+  };
 }
 
 const sortMenuItems = (a, b) => a.sortOrder - b.sortOrder;
