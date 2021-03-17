@@ -159,7 +159,8 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
   componentDidMount(): void {
     const {node: {domainId}, selectedIds} = this.props;
     this.loadRootNodes();
-    if (domainId === Domain.PHYSICALMEASUREMENT.toString()) {
+    if (domainId === Domain.PHYSICALMEASUREMENT.toString() && selectedIds.length) {
+      // Set hasAnyPM if editing a PM item
       this.setState({hasAnyPM: selectedIds.includes(ANY_PM_SELECTION.parameterId)});
     }
   }
@@ -180,6 +181,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       }
     }
     if (domainId === Domain.PHYSICALMEASUREMENT.toString() && prevProps.selectedIds !== selectedIds) {
+      // Check for hasAnyPM changes if in PM tree and selections have changed
       this.setState({hasAnyPM: selectedIds.includes(ANY_PM_SELECTION.parameterId)});
     }
   }
@@ -321,6 +323,7 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
   onHasAnyPMChange() {
     currentCohortCriteriaStore.next([]);
     if (!this.state.hasAnyPM) {
+      // timeout allows selections to clear before adding ANY_PM_SELECTION
       setTimeout(() => this.props.select(ANY_PM_SELECTION));
     }
   }
