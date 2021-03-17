@@ -184,7 +184,7 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
   closeSearch() {
     currentCohortSearchContextStore.next(undefined);
     // Delay hiding attributes page until sidebar is closed
-    global.setTimeout(() => attributesSelectionStore.next(undefined), 500);
+    window.setTimeout(() => attributesSelectionStore.next(undefined), 500);
   }
 
   setUnsavedChanges() {

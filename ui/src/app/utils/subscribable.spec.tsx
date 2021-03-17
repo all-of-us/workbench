@@ -19,7 +19,7 @@ const makeSubscribeFn = (assertions): [() => Promise<void>, (newValue: any, oldV
   const subscribeFn = (newValue, oldValue) => new Promise((resolve) => {
     assertions.forEach(assertion => assertion(newValue, oldValue));
     resolveHandler(true);
-    resolve(true);
+    resolve(undefined);
   });
 
   return [promiseHandler, subscribeFn];

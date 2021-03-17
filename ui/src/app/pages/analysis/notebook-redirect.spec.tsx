@@ -223,8 +223,10 @@ describe('NotebookRedirect', () => {
     await waitForFakeTimersAndUpdate(wrapper);
 
     // Wait for the "redirecting" timer to elapse, rendering the iframe.
-    // @ts-ignore
-    act(() => jest.advanceTimersByTime(2000));
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper.find(Iframe).exists()).toBeTruthy();

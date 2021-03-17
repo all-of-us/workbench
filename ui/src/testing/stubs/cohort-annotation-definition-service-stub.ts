@@ -19,7 +19,7 @@ export class CohortAnnotationDefinitionServiceStub extends CohortAnnotationDefin
   }
 
   deleteCohortAnnotationDefinition(): Promise<EmptyResponse> {
-    return new Promise<EmptyResponse>(resolve => resolve(null));
+    return new Promise<EmptyResponse>(resolve => resolve({}));
   }
 
   getCohortAnnotationDefinition(): Promise<CohortAnnotationDefinition> {
