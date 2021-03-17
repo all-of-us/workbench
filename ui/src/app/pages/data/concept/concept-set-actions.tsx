@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import {Button} from 'app/components/buttons';
 import {ActionCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
@@ -6,7 +5,7 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {conceptSetsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {conceptSetUpdating, navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConceptSet} from 'generated/fetch';
@@ -155,13 +154,3 @@ export const ConceptSetActions = withCurrentWorkspace()(
     }
   }
 );
-
-@Component({
-  template: '<div #root></div>'
-})
-export class ConceptSetActionsComponent extends ReactWrapperBase {
-
-  constructor() {
-    super(ConceptSetActions, []);
-  }
-}
