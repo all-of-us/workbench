@@ -251,6 +251,10 @@ commands:
       - restore_cache:
           key: v5-gradle-cache-{{ .Branch }}-{{ checksum "~/workbench/api/build.gradle" }}
       - steps: << parameters.additional_steps >>
+      - run: |
+          # tell the operating system to remove the file size limit on core dump files 
+          ulimit -c unlimited
+          ./bin
       - save_cache:
           paths:
             - ~/.gradle/wrapper
