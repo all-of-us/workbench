@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.ras.RasLinkConstants.ACR_CLAIM;
 import static org.pmiops.workbench.ras.RasLinkConstants.Id_TOKEN_FIELD_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.RAS_AUTH_CODE_SCOPES;
+import static org.pmiops.workbench.ras.RasOidcClientConfig.RAS_OIDC_CLIENT;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -34,6 +35,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -77,16 +79,24 @@ public class RasLinkServiceTest {
   private long userId;
   private static DbUser currentUser;
 
-  private RasLinkService rasLinkService;
+  @Autowired private RasLinkService rasLinkService;
   private ObjectMapper objectMapper = new ObjectMapper();
 
   @Autowired private UserService userService;
   @Autowired private UserDao userDao;
-  @Mock private OpenIdConnectClient mockOidcClient;
+  @Mock private static OpenIdConnectClient mockOidcClient;
 
   @TestConfiguration
   @Import({
+      RasLinkService.class,
     UserServiceTestConfiguration.class,
+  })
+  @MockBean({
+      FireCloudService.class,
+      ComplianceService.class,
+      DirectoryService.class,
+      UserServiceAuditor.class,
+      FreeTierBillingService.class,
   })
   static class Configuration {
     @Bean
@@ -97,6 +107,12 @@ public class RasLinkServiceTest {
     @Bean
     Random random() {
       return new FakeLongRandom(123);
+    }
+
+    @Bean
+    @Qualifier(RAS_OIDC_CLIENT)
+    OpenIdConnectClient rasOidcClient() {
+      return mockOidcClient;
     }
 
     @Bean
@@ -112,11 +128,6 @@ public class RasLinkServiceTest {
     }
   }
 
-  @MockBean UserServiceAuditor mockUserServiceAuditor;
-  @MockBean FireCloudService mockFireCloudService;
-  @MockBean ComplianceService mockComplianceService;
-  @MockBean DirectoryService mockDirectoryService;
-  @MockBean private FreeTierBillingService mockFreeTierBillingService;
   @Mock private OpenIdConnectClient mockRasOidcClient;
 
   @Before
