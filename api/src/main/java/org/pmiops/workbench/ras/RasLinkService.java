@@ -37,8 +37,8 @@ import org.springframework.stereotype.Service;
  * Service handles link login.gov account with All of Us account. It finishes OAuth dance with RAS
  * then validate users use their login.gov account with IAL2 enabled.
  *
- * <p>Key steps:
- * Step1: Finish OAuth and get {@link TokenResponse}. A sample response:
+ * <p>Key steps: Step1: Finish OAuth and get {@link TokenResponse}. A sample response:
+ *
  * <pre>{@code
  * "access_token":"JWT token"
  * "token_type":"Bearer",
@@ -51,6 +51,7 @@ import org.springframework.stereotype.Service;
  * }</pre>
  *
  * Step2: Decode JWT id_token to extract IAL status. Decoded id_token:
+ *
  * <pre>{@code
  * "sub": "subId",
  * "aud": "client id",
@@ -62,22 +63,25 @@ import org.springframework.stereotype.Service;
  * "exp": 1615996939,
  * "iat": 1615910539
  * }</pre>
+ *
  * The acr claim contains user IAL status, the number after /assurance/ial/
  *
- * Step3: User access_token to pull RAS user info. A sample userInfo in Json format:
+ * <p>Step3: User access_token to pull RAS user info. A sample userInfo in Json format:
+ *
  * <pre>{@code
- *  "sub":"subId",
- *  "name" : "",
- *  "preferred_username":"user1@Login.Gov",
- *  "userId":"user1"
- *  "email":"foo@gmail.com"
+ * "sub":"subId",
+ * "name" : "",
+ * "preferred_username":"user1@Login.Gov",
+ * "userId":"user1"
+ * "email":"foo@gmail.com"
  * }</pre>
+ *
  * The {@code preferred_username} is what we use should use to extract login.goc username. If that
  * field is missing or does not have Login.Gov suffix, that means user not using login.gov to login.
  * In this case, returns {@link ForbiddenException}.
  *
- * Step4: Use step3's login.gov username to update AoU database by
- * {@link UserService#updateRasLinkLoginGovStatus(String)}. Then return it as user profile.
+ * <p>Step4: Use step3's login.gov username to update AoU database by {@link
+ * UserService#updateRasLinkLoginGovStatus(String)}. Then return it as user profile.
  */
 @Service
 public class RasLinkService {
@@ -94,7 +98,8 @@ public class RasLinkService {
   public RasLinkService(
       CloudStorageClient cloudStorageClient,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      ProfileService profileService, UserService userService,
+      ProfileService profileService,
+      UserService userService,
       Provider<DbUser> userProvider) {
     this.cloudStorageClient = cloudStorageClient;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -113,15 +118,25 @@ public class RasLinkService {
     JsonNode userInfoResponse = NullNode.getInstance();
     try {
       // Oauth dance to get id token and access token.
-    AuthorizationCodeFlow flow = OAuthHelper.newAuthCodeFlow(rasClientId, rasClientSecret, rasTokenUrl, rasAuthorizeUrl);
-    TokenResponse tokenResponse = OAuthHelper.codeExchange(flow, authCode, redirectUrl, RAS_AUTH_CODE_SCOPES);
-    // Validate IAL status.
-    String acrClaim = decodedJwt(tokenResponse.get(Id_TOKEN_FIELD_NAME).toString()).getClaim(ACR_CLAIM).asString();
-    if(!isIal2(acrClaim)) {
-      throw new ForbiddenException(String.format("User does not have IAL2 enabled, acrClaim: %s", acrClaim));
-    }
-    // Fetch user info.
-    userInfoResponse = objectMapper.readTree(OAuthHelper.fetchUserInfo(tokenResponse.getAccessToken(), workbenchConfigProvider.get().ras.host + USER_INFO_URL_SUFFIX));
+      AuthorizationCodeFlow flow =
+          OAuthHelper.newAuthCodeFlow(rasClientId, rasClientSecret, rasTokenUrl, rasAuthorizeUrl);
+      TokenResponse tokenResponse =
+          OAuthHelper.codeExchange(flow, authCode, redirectUrl, RAS_AUTH_CODE_SCOPES);
+      // Validate IAL status.
+      String acrClaim =
+          decodedJwt(tokenResponse.get(Id_TOKEN_FIELD_NAME).toString())
+              .getClaim(ACR_CLAIM)
+              .asString();
+      if (!isIal2(acrClaim)) {
+        throw new ForbiddenException(
+            String.format("User does not have IAL2 enabled, acrClaim: %s", acrClaim));
+      }
+      // Fetch user info.
+      userInfoResponse =
+          objectMapper.readTree(
+              OAuthHelper.fetchUserInfo(
+                  tokenResponse.getAccessToken(),
+                  workbenchConfigProvider.get().ras.host + USER_INFO_URL_SUFFIX));
     } catch (IOException e) {
       log.log(Level.WARNING, "Failed to link RAS account", e);
     }
@@ -133,10 +148,11 @@ public class RasLinkService {
   private static boolean isIal2(String acrClaim) {
     Pattern p = Pattern.compile("ial/\\d", Pattern.CASE_INSENSITIVE);
     Matcher m = p.matcher(acrClaim);
-    if(m.matches()) {
+    if (m.matches()) {
       return m.group().equals("2");
     }
-    throw new ServerErrorException(String.format("Invalid acl Claim in OIDC id token for %s", acrClaim));
+    throw new ServerErrorException(
+        String.format("Invalid acl Claim in OIDC id token for %s", acrClaim));
   }
 
   /**
@@ -145,8 +161,11 @@ public class RasLinkService {
    */
   private static String getLoginGovUserId(JsonNode userInfo) {
     String preferredUsername = userInfo.get(USERNAME_FIELD_NAME).asText("");
-    if(!preferredUsername.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
-      throw new ForbiddenException(String.format("User does not have valid login.gov account, invalid preferred_username: %s", preferredUsername));
+    if (!preferredUsername.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
+      throw new ForbiddenException(
+          String.format(
+              "User does not have valid login.gov account, invalid preferred_username: %s",
+              preferredUsername));
     }
     return preferredUsername;
   }

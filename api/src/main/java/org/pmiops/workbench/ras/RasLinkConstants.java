@@ -5,28 +5,28 @@ import java.util.Set;
 
 /** Constants used in to process RAS linkage. */
 public class RasLinkConstants {
-  private RasLinkConstants(){}
+  private RasLinkConstants() {}
 
-  //The RAS url suffix for exchanging token using auth code.
+  // The RAS url suffix for exchanging token using auth code.
   static final String TOKEN_URL_SUFFIX = "/auth/oauth/v2/token";
 
   // The RAS url suffix for initializing authorize request.
-   static final String AUTHORIZE_URL_SUFFIX = "/auth/oauth/v2/authorize";
+  static final String AUTHORIZE_URL_SUFFIX = "/auth/oauth/v2/authorize";
 
   // The RAS url suffix for fetching user info, i.e. GA4GH Passport.
-   static final String USER_INFO_URL_SUFFIX = "/openid/connect/v1.1/userinfo";
+  static final String USER_INFO_URL_SUFFIX = "/openid/connect/v1.1/userinfo";
 
   // The GCP bucket name that stores RAS secret
-   static final String RAS_SECRET_BUCKET_NAME = "ras-client-secret.txt";
+  static final String RAS_SECRET_BUCKET_NAME = "ras-client-secret.txt";
 
-   // The OIDC acr (Authentication Context Class Reference) claim name in JWT
-   static final String ACR_CLAIM = "acr";
+  // The OIDC acr (Authentication Context Class Reference) claim name in JWT
+  static final String ACR_CLAIM = "acr";
 
   // The Id Token field name from RAS's TokenResponse
-   static final String Id_TOKEN_FIELD_NAME = "id_token";
+  static final String Id_TOKEN_FIELD_NAME = "id_token";
   // The login.gov's username field from RAS UserInfo endpoint
 
-   static final String USERNAME_FIELD_NAME = "preferred_username";
+  static final String USERNAME_FIELD_NAME = "preferred_username";
 
   // The identifier that indicate users login using login.gov account.
   static final String LOGIN_GOV_IDENTIFIER_LOWER_CASE = "@login.gov";

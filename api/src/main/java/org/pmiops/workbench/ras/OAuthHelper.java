@@ -25,36 +25,43 @@ public class OAuthHelper {
   private static final JacksonFactory DEFAULT_JACKSON_FACTORY = new JacksonFactory();
 
   /** Get access token by code. */
-   static TokenResponse codeExchange(AuthorizationCodeFlow flow, String code, String redirectUrl, Set<String> scopes)
-       throws IOException {
+  static TokenResponse codeExchange(
+      AuthorizationCodeFlow flow, String code, String redirectUrl, Set<String> scopes)
+      throws IOException {
     return flow.newTokenRequest(code)
-        .setScopes(scopes).setRedirectUri(redirectUrl)
-        .setGrantType("authorization_code").execute();
+        .setScopes(scopes)
+        .setRedirectUri(redirectUrl)
+        .setGrantType("authorization_code")
+        .execute();
   }
 
-   static DecodedJWT decodedJwt(String token) {
+  static DecodedJWT decodedJwt(String token) {
     return JWT.decode(token);
   }
 
-   static String fetchUserInfo(String accessToken, String userInfoUrl) throws IOException {
-    HttpResponse response = executeGet(DEFAULT_HTTP_TRANSPORT, DEFAULT_JACKSON_FACTORY, accessToken, new GenericUrl(userInfoUrl));
+  static String fetchUserInfo(String accessToken, String userInfoUrl) throws IOException {
+    HttpResponse response =
+        executeGet(
+            DEFAULT_HTTP_TRANSPORT,
+            DEFAULT_JACKSON_FACTORY,
+            accessToken,
+            new GenericUrl(userInfoUrl));
     return response.getContentEncoding();
   }
 
   /** Helper class to */
-  static AuthorizationCodeFlow newAuthCodeFlow(String clientId, String clientSecret, String tokenUrl,
-      String authorizeUrl)
+  static AuthorizationCodeFlow newAuthCodeFlow(
+      String clientId, String clientSecret, String tokenUrl, String authorizeUrl)
       throws IOException {
-    return new AuthorizationCodeFlow.Builder(BearerToken.queryParameterAccessMethod(),
-        DEFAULT_HTTP_TRANSPORT,
-        DEFAULT_JACKSON_FACTORY,
-        new GenericUrl(tokenUrl),
-        new BasicAuthentication(clientId, clientSecret),
-        clientId,
-        authorizeUrl)
-        .setCredentialDataStore(
-            StoredCredential.getDefaultDataStore(
-                new MemoryDataStoreFactory()))
+    return new AuthorizationCodeFlow.Builder(
+            BearerToken.queryParameterAccessMethod(),
+            DEFAULT_HTTP_TRANSPORT,
+            DEFAULT_JACKSON_FACTORY,
+            new GenericUrl(tokenUrl),
+            new BasicAuthentication(clientId, clientSecret),
+            clientId,
+            authorizeUrl)
+        .setCredentialDataStore(StoredCredential.getDefaultDataStore(new MemoryDataStoreFactory()))
         .build();
   }
 
