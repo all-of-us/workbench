@@ -28,7 +28,7 @@ public class RasLinkConstants {
   static final String PREFERRED_USERNAME_FIELD_NAME = "preferred_username";
 
   // The login.gov's email field which we choose as login.gov username.
-  static final String EMAIl_FIELD_NAME = "preferred_username";
+  static final String EMAIl_FIELD_NAME = "email";
 
   // The identifier that indicate users login using login.gov account.
   static final String LOGIN_GOV_IDENTIFIER_LOWER_CASE = "@login.gov";

@@ -114,7 +114,7 @@ public class RasLinkService {
     } catch (IOException e) {
       log.log(Level.WARNING, "Failed to link RAS account", e);
     }
-    return userService.updateRasLinkLoginGovStatus(getLoginGovUserId(userInfoResponse));
+    return userService.updateRasLinkLoginGovStatus(getLoginGovUsername(userInfoResponse));
   }
 
   /** Validates user has IAL2 setup. See class javadoc Step2 for more details. */
@@ -132,7 +132,7 @@ public class RasLinkService {
    * Validates and extracts user's login.gov account from UserInfo response in Json format. See
    * class javadoc Step3 for more details.
    */
-  private static String getLoginGovUserId(JsonNode userInfo) {
+  private static String getLoginGovUsername(JsonNode userInfo) {
     String preferredUsername = userInfo.get(PREFERRED_USERNAME_FIELD_NAME).asText("");
     String email = userInfo.get(EMAIl_FIELD_NAME).asText("");
     if (email.isEmpty()
@@ -142,12 +142,6 @@ public class RasLinkService {
               "User does not have valid login.gov account, preferred_username: %s, email: %s",
               preferredUsername, email));
     }
-    if (userInfo.get(EMAIl_FIELD_NAME) == null) {
-      throw new ForbiddenException(
-          String.format(
-              "User does not have valid login.gov account, invalid preferred_username: %s",
-              preferredUsername));
-    }
-    return userInfo.get(EMAIl_FIELD_NAME).asText();
+    return email;
   }
 }
