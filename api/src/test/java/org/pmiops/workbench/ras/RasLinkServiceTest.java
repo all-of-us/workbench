@@ -57,12 +57,22 @@ public class RasLinkServiceTest {
       "{\"preferred_username\":\"user1@Login.Gov.com\", \"email\":\"" + LOGIN_GOV_USERNAME + "\"}";
   private static final String USER_INFO_JSON_ERA =
       "{\"preferred_username\":\"user2@eraCommons.com\", \"email\":\"" + LOGIN_GOV_USERNAME + "\"}";
-  private static final String ID_TOKEN_JWT_IAL_1 = JWT.create().withClaim(ACR_CLAIM, "https://stsstg.nih.gov/assurance/ial/1 https://stsstg.nih.gov/assurance/aal/1").sign(Algorithm.none());
-  private static final String ID_TOKEN_JWT_IAL_2 = JWT.create().withClaim(ACR_CLAIM, "https://stsstg.nih.gov/assurance/ial/2 https://stsstg.nih.gov/assurance/aal/1").sign(Algorithm.none());
-  private static final TokenResponse TOKEN_RESPONSE_IAL1 = new TokenResponse().setAccessToken(ACCESS_TOKEN)
-      .set(Id_TOKEN_FIELD_NAME, ID_TOKEN_JWT_IAL_1);
-  private static final TokenResponse TOKEN_RESPONSE_IAL2 = new TokenResponse().setAccessToken(ACCESS_TOKEN)
-      .set(Id_TOKEN_FIELD_NAME, ID_TOKEN_JWT_IAL_2);
+  private static final String ID_TOKEN_JWT_IAL_1 =
+      JWT.create()
+          .withClaim(
+              ACR_CLAIM,
+              "https://stsstg.nih.gov/assurance/ial/1 https://stsstg.nih.gov/assurance/aal/1")
+          .sign(Algorithm.none());
+  private static final String ID_TOKEN_JWT_IAL_2 =
+      JWT.create()
+          .withClaim(
+              ACR_CLAIM,
+              "https://stsstg.nih.gov/assurance/ial/2 https://stsstg.nih.gov/assurance/aal/1")
+          .sign(Algorithm.none());
+  private static final TokenResponse TOKEN_RESPONSE_IAL1 =
+      new TokenResponse().setAccessToken(ACCESS_TOKEN).set(Id_TOKEN_FIELD_NAME, ID_TOKEN_JWT_IAL_1);
+  private static final TokenResponse TOKEN_RESPONSE_IAL2 =
+      new TokenResponse().setAccessToken(ACCESS_TOKEN).set(Id_TOKEN_FIELD_NAME, ID_TOKEN_JWT_IAL_2);
 
   private long userId;
   private static DbUser currentUser;
@@ -70,30 +80,31 @@ public class RasLinkServiceTest {
   private RasLinkService rasLinkService;
   private ObjectMapper objectMapper = new ObjectMapper();
 
-  @Autowired
-  private UserService userService;
+  @Autowired private UserService userService;
   @Autowired private UserDao userDao;
-  @Mock
-  private OpenIdConnectClient mockOidcClient;
+  @Mock private OpenIdConnectClient mockOidcClient;
 
   @TestConfiguration
   @Import({
-      UserServiceTestConfiguration.class,
+    UserServiceTestConfiguration.class,
   })
   static class Configuration {
     @Bean
     Clock clock() {
       return CLOCK;
     }
+
     @Bean
     Random random() {
       return new FakeLongRandom(123);
     }
+
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public WorkbenchConfig getWorkbenchConfig() {
       return WorkbenchConfig.createEmptyConfig();
     }
+
     @Bean
     @Scope("prototype")
     DbUser user() {
@@ -101,14 +112,10 @@ public class RasLinkServiceTest {
     }
   }
 
-  @MockBean
-  UserServiceAuditor mockUserServiceAuditor;
-  @MockBean
-  FireCloudService mockFireCloudService;
-  @MockBean
-  ComplianceService mockComplianceService;
-  @MockBean
-  DirectoryService mockDirectoryService;
+  @MockBean UserServiceAuditor mockUserServiceAuditor;
+  @MockBean FireCloudService mockFireCloudService;
+  @MockBean ComplianceService mockComplianceService;
+  @MockBean DirectoryService mockDirectoryService;
   @MockBean private FreeTierBillingService mockFreeTierBillingService;
   @Mock private OpenIdConnectClient mockRasOidcClient;
 
@@ -125,25 +132,36 @@ public class RasLinkServiceTest {
 
   @Test
   public void testLinkRasSuccess() throws Exception {
-    when(mockRasOidcClient.codeExchange(AUTH_CODE, REDIRECT_URL, RAS_AUTH_CODE_SCOPES)).thenReturn(TOKEN_RESPONSE_IAL2);
-    when(mockRasOidcClient.fetchUserInfo(ACCESS_TOKEN)).thenReturn(objectMapper.readTree(USER_INFO_JSON_LOGIN_GOV));
+    when(mockRasOidcClient.codeExchange(AUTH_CODE, REDIRECT_URL, RAS_AUTH_CODE_SCOPES))
+        .thenReturn(TOKEN_RESPONSE_IAL2);
+    when(mockRasOidcClient.fetchUserInfo(ACCESS_TOKEN))
+        .thenReturn(objectMapper.readTree(USER_INFO_JSON_LOGIN_GOV));
     rasLinkService.linkRasLoginGovAccount(AUTH_CODE, REDIRECT_URL);
 
-    assertThat(userDao.findUserByUserId(userId).getRasLinkLoginGovUsername()).isEqualTo(LOGIN_GOV_USERNAME);
+    assertThat(userDao.findUserByUserId(userId).getRasLinkLoginGovUsername())
+        .isEqualTo(LOGIN_GOV_USERNAME);
     assertThat(userDao.findUserByUserId(userId).getRasLinkLoginGovCompletionTime()).isEqualTo(NOW);
   }
 
   @Test
   public void testLinkRasFail_ial1() throws Exception {
-    when(mockRasOidcClient.codeExchange(AUTH_CODE, REDIRECT_URL, RAS_AUTH_CODE_SCOPES)).thenReturn(TOKEN_RESPONSE_IAL1);
-    when(mockRasOidcClient.fetchUserInfo(ACCESS_TOKEN)).thenReturn(objectMapper.readTree(USER_INFO_JSON_LOGIN_GOV));
-    assertThrows(ForbiddenException.class, () -> rasLinkService.linkRasLoginGovAccount(AUTH_CODE, REDIRECT_URL));
+    when(mockRasOidcClient.codeExchange(AUTH_CODE, REDIRECT_URL, RAS_AUTH_CODE_SCOPES))
+        .thenReturn(TOKEN_RESPONSE_IAL1);
+    when(mockRasOidcClient.fetchUserInfo(ACCESS_TOKEN))
+        .thenReturn(objectMapper.readTree(USER_INFO_JSON_LOGIN_GOV));
+    assertThrows(
+        ForbiddenException.class,
+        () -> rasLinkService.linkRasLoginGovAccount(AUTH_CODE, REDIRECT_URL));
   }
 
   @Test
   public void testLinkRasFail_notLoginGov() throws Exception {
-    when(mockRasOidcClient.codeExchange(AUTH_CODE, REDIRECT_URL, RAS_AUTH_CODE_SCOPES)).thenReturn(TOKEN_RESPONSE_IAL2);
-    when(mockRasOidcClient.fetchUserInfo(ACCESS_TOKEN)).thenReturn(objectMapper.readTree(USER_INFO_JSON_ERA));
-    assertThrows(ForbiddenException.class, () -> rasLinkService.linkRasLoginGovAccount(AUTH_CODE, REDIRECT_URL));
+    when(mockRasOidcClient.codeExchange(AUTH_CODE, REDIRECT_URL, RAS_AUTH_CODE_SCOPES))
+        .thenReturn(TOKEN_RESPONSE_IAL2);
+    when(mockRasOidcClient.fetchUserInfo(ACCESS_TOKEN))
+        .thenReturn(objectMapper.readTree(USER_INFO_JSON_ERA));
+    assertThrows(
+        ForbiddenException.class,
+        () -> rasLinkService.linkRasLoginGovAccount(AUTH_CODE, REDIRECT_URL));
   }
 }

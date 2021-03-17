@@ -1472,10 +1472,13 @@ public class ProfileControllerTest extends BaseControllerTest {
 
     dbUser.setRasLinkLoginGovUsername(loginGovUsername);
     dbUser.setRasLinkLoginGovCompletionTime(TIMESTAMP);
-    when(mockRasLinkService.linkRasLoginGovAccount(body.getAuthCode(), body.getRedirectUrl())).thenReturn(dbUser);
+    when(mockRasLinkService.linkRasLoginGovAccount(body.getAuthCode(), body.getRedirectUrl()))
+        .thenReturn(dbUser);
 
-    assertThat(profileController.linkRasAccount(body).getBody().getRasLinkLoginGovUsername()).isEqualTo(loginGovUsername);
-    assertThat(profileController.linkRasAccount(body).getBody().getRasLinkLoginGovCompletionTime()).isEqualTo(TIMESTAMP.toInstant().toEpochMilli());
+    assertThat(profileController.linkRasAccount(body).getBody().getRasLinkLoginGovUsername())
+        .isEqualTo(loginGovUsername);
+    assertThat(profileController.linkRasAccount(body).getBody().getRasLinkLoginGovCompletionTime())
+        .isEqualTo(TIMESTAMP.toInstant().toEpochMilli());
   }
 
   private Profile createAccountAndDbUserWithAffiliation(

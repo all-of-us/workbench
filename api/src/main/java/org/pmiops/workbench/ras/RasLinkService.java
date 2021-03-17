@@ -68,15 +68,15 @@ import org.springframework.stereotype.Service;
  * "email":"foo@gmail.com"
  * }</pre>
  *
- * The {@code preferred_username} field should end with "@login.gov" if using that to login.
- * The {@code email} field is the user used to sign in in login.gov. We can use that as login.gov
- * user name.
+ * The {@code preferred_username} field should end with "@login.gov" if using that to login. The
+ * {@code email} field is the user used to sign in in login.gov. We can use that as login.gov user
+ * name.
  *
  * <p>Step4: Use step3's login.gov username to update AoU database by {@link
  * UserService#updateRasLinkLoginGovStatus(String)}. Then return it as user profile.
  *
- * TODO(yonghao): Fow now we return {@llink ForbiddenException} for all scenarios, determine if we
- * need to differentiate IAL vs Login.gov scenarios, and give that information to UI.
+ * <p>TODO(yonghao): Fow now we return {@llink ForbiddenException} for all scenarios, determine if
+ * we need to differentiate IAL vs Login.gov scenarios, and give that information to UI.
  */
 @Service
 public class RasLinkService {
@@ -97,7 +97,8 @@ public class RasLinkService {
     JsonNode userInfoResponse = NullNode.getInstance();
     try {
       // Oauth dance to get id token and access token.
-      TokenResponse tokenResponse = rasOidcClient.codeExchange(authCode, redirectUrl, RAS_AUTH_CODE_SCOPES);
+      TokenResponse tokenResponse =
+          rasOidcClient.codeExchange(authCode, redirectUrl, RAS_AUTH_CODE_SCOPES);
 
       // Validate IAL status.
       String acrClaim =
@@ -109,9 +110,7 @@ public class RasLinkService {
             String.format("User does not have IAL2 enabled, acrClaim: %s", acrClaim));
       }
       // Fetch user info.
-      userInfoResponse =
-              rasOidcClient.fetchUserInfo(
-                  tokenResponse.getAccessToken());
+      userInfoResponse = rasOidcClient.fetchUserInfo(tokenResponse.getAccessToken());
     } catch (IOException e) {
       log.log(Level.WARNING, "Failed to link RAS account", e);
     }
@@ -119,7 +118,7 @@ public class RasLinkService {
   }
 
   /** Validates user has IAL2 setup. See class javadoc Step2 for more details. */
-   static boolean isIal2(String acrClaim) {
+  static boolean isIal2(String acrClaim) {
     Pattern p = Pattern.compile("ial/\\d", Pattern.CASE_INSENSITIVE);
     Matcher m = p.matcher(acrClaim);
     if (m.find()) {
@@ -130,19 +129,20 @@ public class RasLinkService {
   }
 
   /**
-   * Validates and extracts user's login.gov account from UserInfo response in Json format.
-   * See class javadoc Step3 for more details.
+   * Validates and extracts user's login.gov account from UserInfo response in Json format. See
+   * class javadoc Step3 for more details.
    */
   private static String getLoginGovUserId(JsonNode userInfo) {
     String preferredUsername = userInfo.get(PREFERRED_USERNAME_FIELD_NAME).asText("");
     String email = userInfo.get(EMAIl_FIELD_NAME).asText("");
-    if (email.isEmpty() || !preferredUsername.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
+    if (email.isEmpty()
+        || !preferredUsername.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
       throw new ForbiddenException(
           String.format(
               "User does not have valid login.gov account, preferred_username: %s, email: %s",
               preferredUsername, email));
     }
-    if(userInfo.get(EMAIl_FIELD_NAME) == null) {
+    if (userInfo.get(EMAIl_FIELD_NAME) == null) {
       throw new ForbiddenException(
           String.format(
               "User does not have valid login.gov account, invalid preferred_username: %s",

@@ -32,19 +32,23 @@ public class OpenIdConnectClient {
   private final String userInfoUrl;
   private final ObjectMapper objectMapper;
 
-  OpenIdConnectClient(String clientId, String clientSecret, String tokenUrl, String authorizeUrl,
+  OpenIdConnectClient(
+      String clientId,
+      String clientSecret,
+      String tokenUrl,
+      String authorizeUrl,
       String userInfoUrl)
       throws IOException {
     this.userInfoUrl = userInfoUrl;
-    this.codeFlow = newAuthCodeFlow(clientId,clientSecret, tokenUrl, authorizeUrl);
+    this.codeFlow = newAuthCodeFlow(clientId, clientSecret, tokenUrl, authorizeUrl);
     this.objectMapper = new ObjectMapper();
   }
 
   /** Get access token by code. */
-  public TokenResponse codeExchange(
-    String code, String redirectUrl, Set<String> scopes)
+  public TokenResponse codeExchange(String code, String redirectUrl, Set<String> scopes)
       throws IOException {
-    return codeFlow.newTokenRequest(code)
+    return codeFlow
+        .newTokenRequest(code)
         .setScopes(scopes)
         .setRedirectUri(redirectUrl)
         .setGrantType("authorization_code")
@@ -52,15 +56,12 @@ public class OpenIdConnectClient {
   }
 
   /**
-   * Get OIDC user info by hitting UserInfo endpoint.
-   * See <a href="https://openid.net/specs/openid-connect-core-1_0.html#UserInfo">OIDC UserInfo</a>
+   * Get OIDC user info by hitting UserInfo endpoint. See <a
+   * href="https://openid.net/specs/openid-connect-core-1_0.html#UserInfo">OIDC UserInfo</a>
    */
   public JsonNode fetchUserInfo(String accessToken) throws IOException {
     HttpResponse response =
-        executeGet(
-            DEFAULT_HTTP_TRANSPORT,
-            accessToken,
-            new GenericUrl(userInfoUrl));
+        executeGet(DEFAULT_HTTP_TRANSPORT, accessToken, new GenericUrl(userInfoUrl));
     return objectMapper.readTree(response.getContentEncoding());
   }
 
@@ -86,8 +87,7 @@ public class OpenIdConnectClient {
   }
 
   private static HttpResponse executeGet(
-      HttpTransport transport, String accessToken, GenericUrl url)
-      throws IOException {
+      HttpTransport transport, String accessToken, GenericUrl url) throws IOException {
     Credential credential =
         new Credential(BearerToken.authorizationHeaderAccessMethod()).setAccessToken(accessToken);
     HttpRequestFactory requestFactory = transport.createRequestFactory(credential);

@@ -277,7 +277,8 @@ public class UserServiceTest {
     String loginGovName = "loginGov@email.com";
     userService.updateRasLinkLoginGovStatus(loginGovName);
     assertThat(providedDbUser.getRasLinkLoginGovUsername()).isEqualTo(loginGovName);
-    assertThat(providedDbUser.getRasLinkLoginGovCompletionTime()).isEqualTo(Timestamp.from(START_INSTANT));
+    assertThat(providedDbUser.getRasLinkLoginGovCompletionTime())
+        .isEqualTo(Timestamp.from(START_INSTANT));
   }
 
   @Test
