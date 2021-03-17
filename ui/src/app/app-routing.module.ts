@@ -13,7 +13,6 @@ import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
 import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
 import {TablePage} from './pages/data/cohort-review/table-page';
-import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
 import {ConceptSearchComponent} from './pages/data/concept/concept-search';
 import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
 import {SignedInComponent} from './pages/signed-in/component';
@@ -251,12 +250,8 @@ const routes: Routes = [
                         path: 'concepts',
                         children: [{
                           path: '',
-                          component: ConceptHomepageComponent,
-                          data: {
-                            title: 'Search Concepts',
-                            breadcrumb: BreadcrumbType.SearchConcepts,
-                            helpContentKey: 'conceptSets'
-                          }
+                          component: AppRouting,
+                          data: {}
                         }, {
                           path: ':domain',
                           component: ConceptSearchComponent,

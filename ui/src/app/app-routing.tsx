@@ -27,6 +27,7 @@ import {InteractiveNotebook} from './pages/analysis/interactive-notebook';
 import {NotebookList} from './pages/analysis/notebook-list';
 import {NotebookRedirect} from './pages/analysis/notebook-redirect';
 import {CohortActions} from './pages/data/cohort/cohort-actions';
+import {ConceptHomepage} from './pages/data/concept/concept-homepage';
 import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
 import {ProfilePage} from './pages/profile/profile-page';
@@ -50,8 +51,9 @@ const registrationGuard: Guard = {
 
 const AdminBannerPage = withRouteData(AdminBanner);
 const AdminNotebookViewPage = withRouteData(AdminNotebookView);
-const CohortActionsPage = withRouteData(CohortActions);
 const AdminReviewWorkspacePage = withRouteData(AdminReviewWorkspace);
+const CohortActionsPage = withRouteData(CohortActions);
+const ConceptHomepagePage = withRouteData(ConceptHomepage);
 const CookiePolicyPage = withRouteData(CookiePolicy);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
 const HomepagePage = withRouteData(Homepage); // this name is bad i am sorry
@@ -277,6 +279,14 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             title: 'Cohort Actions',
             breadcrumb: BreadcrumbType.Cohort,
             helpContentKey: 'cohortBuilder'
+          }}/>}
+        />
+        <AppRoute
+          path='/workspaces/:ns/:wsid/data/concepts'
+          component={() => <ConceptHomepagePage routeData={{
+            title: 'Search Concepts',
+            breadcrumb: BreadcrumbType.SearchConcepts,
+            helpContentKey: 'conceptSets'
           }}/>}
         />
       </ProtectedRoutes>

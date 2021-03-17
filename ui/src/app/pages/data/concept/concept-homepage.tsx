@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -364,12 +363,3 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
     }
   }
 );
-
-@Component({
-  template: '<div #root></div>'
-})
-export class ConceptHomepageComponent extends ReactWrapperBase {
-  constructor() {
-    super(ConceptHomepage, []);
-  }
-}
