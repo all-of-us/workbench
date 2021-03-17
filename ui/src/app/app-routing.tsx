@@ -28,6 +28,7 @@ import {NotebookList} from './pages/analysis/notebook-list';
 import {NotebookRedirect} from './pages/analysis/notebook-redirect';
 import {CohortActions} from './pages/data/cohort/cohort-actions';
 import {ConceptHomepage} from './pages/data/concept/concept-homepage';
+import {ConceptSetActions} from './pages/data/concept/concept-set-actions';
 import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
 import {ProfilePage} from './pages/profile/profile-page';
@@ -54,6 +55,7 @@ const AdminNotebookViewPage = withRouteData(AdminNotebookView);
 const AdminReviewWorkspacePage = withRouteData(AdminReviewWorkspace);
 const CohortActionsPage = withRouteData(CohortActions);
 const ConceptHomepagePage = withRouteData(ConceptHomepage);
+const ConceptSetActionsPage = withRouteData(ConceptSetActions);
 const CookiePolicyPage = withRouteData(CookiePolicy);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
 const HomepagePage = withRouteData(Homepage); // this name is bad i am sorry
@@ -286,6 +288,14 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           component={() => <ConceptHomepagePage routeData={{
             title: 'Search Concepts',
             breadcrumb: BreadcrumbType.SearchConcepts,
+            helpContentKey: 'conceptSets'
+          }}/>}
+        />
+        <AppRoute
+          path='/workspaces/:ns/:wsid/data/concepts/sets/:csid/actions'
+          component={() => <ConceptSetActionsPage routeData={{
+            title: 'Concept Set Actions',
+            breadcrumb: BreadcrumbType.ConceptSet,
             helpContentKey: 'conceptSets'
           }}/>}
         />

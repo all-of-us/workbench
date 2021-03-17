@@ -14,7 +14,6 @@ import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
 import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
 import {TablePage} from './pages/data/cohort-review/table-page';
 import {ConceptSearchComponent} from './pages/data/concept/concept-search';
-import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
@@ -276,12 +275,8 @@ const routes: Routes = [
                           },
                         }, {
                           path: ':csid/actions',
-                          component: ConceptSetActionsComponent,
-                          data: {
-                            title: 'Concept Set Actions',
-                            breadcrumb: BreadcrumbType.ConceptSet,
-                            helpContentKey: 'conceptSets'
-                          },
+                          component: AppRouting,
+                          data: {},
                         }, ]
                       }
                     ]

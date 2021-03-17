@@ -12,7 +12,6 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   reactStyles,
-  ReactWrapperBase,
   validateInputForMySQL,
   withCurrentCohortSearchContext,
   withCurrentConcept,
