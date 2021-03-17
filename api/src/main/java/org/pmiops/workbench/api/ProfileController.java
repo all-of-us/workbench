@@ -617,10 +617,10 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> linkRasAccount(RasLinkRequestBody body) {
-    Profile profile =
+    DbUser dbUser =
         rasLinkServiceProvider
             .get()
             .linkRasLoginGovAccount(body.getAuthCode(), body.getRedirectUrl());
-    return ResponseEntity.ok(profile);
+    return ResponseEntity.ok(profileService.getProfile(dbUser));
   }
 }

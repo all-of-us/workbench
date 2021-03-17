@@ -24,9 +24,11 @@ public class RasLinkConstants {
 
   // The Id Token field name from RAS's TokenResponse
   static final String Id_TOKEN_FIELD_NAME = "id_token";
-  // The login.gov's username field from RAS UserInfo endpoint
+  // The login.gov's PREFERRED_USERNAME field from RAS UserInfo endpoint
+  static final String PREFERRED_USERNAME_FIELD_NAME = "preferred_username";
 
-  static final String USERNAME_FIELD_NAME = "preferred_username";
+  // The login.gov's email field which we choose as login.gov username.
+  static final String EMAIl_FIELD_NAME = "preferred_username";
 
   // The identifier that indicate users login using login.gov account.
   static final String LOGIN_GOV_IDENTIFIER_LOWER_CASE = "@login.gov";

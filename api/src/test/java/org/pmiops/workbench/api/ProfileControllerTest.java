@@ -83,6 +83,7 @@ import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.OrganizationType;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.Race;
+import org.pmiops.workbench.model.RasLinkRequestBody;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
@@ -92,6 +93,7 @@ import org.pmiops.workbench.profile.DemographicSurveyMapperImpl;
 import org.pmiops.workbench.profile.PageVisitMapperImpl;
 import org.pmiops.workbench.profile.ProfileMapperImpl;
 import org.pmiops.workbench.profile.ProfileService;
+import org.pmiops.workbench.ras.RasLinkService;
 import org.pmiops.workbench.shibboleth.ShibbolethService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -144,6 +146,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private ProfileAuditor mockProfileAuditor;
   @MockBean private ShibbolethService mockShibbolethService;
   @MockBean private UserServiceAuditor mockUserServiceAuditor;
+  @MockBean private RasLinkService mockRasLinkService;
 
   @Autowired private InstitutionService institutionService;
   @Autowired private ProfileController profileController;
@@ -1457,6 +1460,22 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(profileService.getProfile(dbUser).getFreeTierDollarQuota())
         .isWithin(0.01)
         .of(345.67);
+  }
+
+  @Test
+  public void linkRasAccount() {
+    createAccountAndDbUserWithAffiliation();
+    String loginGovUsername = "username@food.com";
+    RasLinkRequestBody body = new RasLinkRequestBody();
+    body.setAuthCode("code");
+    body.setRedirectUrl("url");
+
+    dbUser.setRasLinkLoginGovUsername(loginGovUsername);
+    dbUser.setRasLinkLoginGovCompletionTime(TIMESTAMP);
+    when(mockRasLinkService.linkRasLoginGovAccount(body.getAuthCode(), body.getRedirectUrl())).thenReturn(dbUser);
+
+    assertThat(profileController.linkRasAccount(body).getBody().getRasLinkLoginGovUsername()).isEqualTo(loginGovUsername);
+    assertThat(profileController.linkRasAccount(body).getBody().getRasLinkLoginGovCompletionTime()).isEqualTo(TIMESTAMP.toInstant().toEpochMilli());
   }
 
   private Profile createAccountAndDbUserWithAffiliation(

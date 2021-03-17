@@ -1,36 +1,28 @@
 package org.pmiops.workbench.ras;
 
-import static org.pmiops.workbench.ras.OAuthHelper.decodedJwt;
+import static org.pmiops.workbench.ras.OpenIdConnectClient.decodedJwt;
 import static org.pmiops.workbench.ras.RasLinkConstants.ACR_CLAIM;
-import static org.pmiops.workbench.ras.RasLinkConstants.AUTHORIZE_URL_SUFFIX;
+import static org.pmiops.workbench.ras.RasLinkConstants.EMAIl_FIELD_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.Id_TOKEN_FIELD_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.LOGIN_GOV_IDENTIFIER_LOWER_CASE;
+import static org.pmiops.workbench.ras.RasLinkConstants.PREFERRED_USERNAME_FIELD_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.RAS_AUTH_CODE_SCOPES;
-import static org.pmiops.workbench.ras.RasLinkConstants.RAS_SECRET_BUCKET_NAME;
-import static org.pmiops.workbench.ras.RasLinkConstants.TOKEN_URL_SUFFIX;
-import static org.pmiops.workbench.ras.RasLinkConstants.USERNAME_FIELD_NAME;
-import static org.pmiops.workbench.ras.RasLinkConstants.USER_INFO_URL_SUFFIX;
+import static org.pmiops.workbench.ras.RasOidcClientConfig.RAS_OIDC_CLIENT;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
-import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.inject.Provider;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.google.CloudStorageClient;
-import org.pmiops.workbench.model.Profile;
-import org.pmiops.workbench.profile.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
@@ -76,52 +68,37 @@ import org.springframework.stereotype.Service;
  * "email":"foo@gmail.com"
  * }</pre>
  *
- * The {@code preferred_username} is what we use should use to extract login.goc username. If that
- * field is missing or does not have Login.Gov suffix, that means user not using login.gov to login.
- * In this case, returns {@link ForbiddenException}.
+ * The {@code preferred_username} field should end with "@login.gov" if using that to login.
+ * The {@code email} field is the user used to sign in in login.gov. We can use that as login.gov
+ * user name.
  *
  * <p>Step4: Use step3's login.gov username to update AoU database by {@link
  * UserService#updateRasLinkLoginGovStatus(String)}. Then return it as user profile.
+ *
+ * TODO(yonghao): Fow now we return {@llink ForbiddenException} for all scenarios, determine if we
+ * need to differentiate IAL vs Login.gov scenarios, and give that information to UI.
  */
 @Service
 public class RasLinkService {
   private static final Logger log = Logger.getLogger(RasLinkService.class.getName());
 
-  private final CloudStorageClient cloudStorageClient;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final ObjectMapper objectMapper;
-  private final ProfileService profileService;
   private final UserService userService;
-  private final Provider<DbUser> userProvider;
+  private final OpenIdConnectClient rasOidcClient;
 
   @Autowired
   public RasLinkService(
-      CloudStorageClient cloudStorageClient,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
-      ProfileService profileService,
-      UserService userService,
-      Provider<DbUser> userProvider) {
-    this.cloudStorageClient = cloudStorageClient;
-    this.workbenchConfigProvider = workbenchConfigProvider;
-    this.profileService = profileService;
+      UserService userService, @Qualifier(RAS_OIDC_CLIENT) OpenIdConnectClient rasOidcClient) {
     this.userService = userService;
-    this.userProvider = userProvider;
-    this.objectMapper = new ObjectMapper();
+    this.rasOidcClient = rasOidcClient;
   }
 
   /** Links RAS login.gov account with AoU account. */
-  public Profile linkRasLoginGovAccount(String authCode, String redirectUrl) {
-    String rasClientSecret = cloudStorageClient.getCredentialsBucketString(RAS_SECRET_BUCKET_NAME);
-    String rasClientId = workbenchConfigProvider.get().ras.clientId;
-    String rasTokenUrl = workbenchConfigProvider.get().ras.host + TOKEN_URL_SUFFIX;
-    String rasAuthorizeUrl = workbenchConfigProvider.get().ras.host + AUTHORIZE_URL_SUFFIX;
+  public DbUser linkRasLoginGovAccount(String authCode, String redirectUrl) {
     JsonNode userInfoResponse = NullNode.getInstance();
     try {
       // Oauth dance to get id token and access token.
-      AuthorizationCodeFlow flow =
-          OAuthHelper.newAuthCodeFlow(rasClientId, rasClientSecret, rasTokenUrl, rasAuthorizeUrl);
-      TokenResponse tokenResponse =
-          OAuthHelper.codeExchange(flow, authCode, redirectUrl, RAS_AUTH_CODE_SCOPES);
+      TokenResponse tokenResponse = rasOidcClient.codeExchange(authCode, redirectUrl, RAS_AUTH_CODE_SCOPES);
+
       // Validate IAL status.
       String acrClaim =
           decodedJwt(tokenResponse.get(Id_TOKEN_FIELD_NAME).toString())
@@ -133,40 +110,44 @@ public class RasLinkService {
       }
       // Fetch user info.
       userInfoResponse =
-          objectMapper.readTree(
-              OAuthHelper.fetchUserInfo(
-                  tokenResponse.getAccessToken(),
-                  workbenchConfigProvider.get().ras.host + USER_INFO_URL_SUFFIX));
+              rasOidcClient.fetchUserInfo(
+                  tokenResponse.getAccessToken());
     } catch (IOException e) {
       log.log(Level.WARNING, "Failed to link RAS account", e);
     }
-    DbUser dbUser = userService.updateRasLinkLoginGovStatus(getLoginGovUserId(userInfoResponse));
-    return profileService.getProfile(dbUser);
+    return userService.updateRasLinkLoginGovStatus(getLoginGovUserId(userInfoResponse));
   }
 
   /** Validates user has IAL2 setup. See class javadoc Step2 for more details. */
-  private static boolean isIal2(String acrClaim) {
+   static boolean isIal2(String acrClaim) {
     Pattern p = Pattern.compile("ial/\\d", Pattern.CASE_INSENSITIVE);
     Matcher m = p.matcher(acrClaim);
-    if (m.matches()) {
-      return m.group().equals("2");
+    if (m.find()) {
+      return m.group().equals("ial/2");
     }
     throw new ServerErrorException(
         String.format("Invalid acl Claim in OIDC id token for %s", acrClaim));
   }
 
   /**
-   * Extracts user's login.gov account from UserInfo response in Json format. See class javadoc
-   * Step3 for more details.
+   * Validates and extracts user's login.gov account from UserInfo response in Json format.
+   * See class javadoc Step3 for more details.
    */
   private static String getLoginGovUserId(JsonNode userInfo) {
-    String preferredUsername = userInfo.get(USERNAME_FIELD_NAME).asText("");
-    if (!preferredUsername.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
+    String preferredUsername = userInfo.get(PREFERRED_USERNAME_FIELD_NAME).asText("");
+    String email = userInfo.get(EMAIl_FIELD_NAME).asText("");
+    if (email.isEmpty() || !preferredUsername.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
+      throw new ForbiddenException(
+          String.format(
+              "User does not have valid login.gov account, preferred_username: %s, email: %s",
+              preferredUsername, email));
+    }
+    if(userInfo.get(EMAIl_FIELD_NAME) == null) {
       throw new ForbiddenException(
           String.format(
               "User does not have valid login.gov account, invalid preferred_username: %s",
               preferredUsername));
     }
-    return preferredUsername;
+    return userInfo.get(EMAIl_FIELD_NAME).asText();
   }
 }
