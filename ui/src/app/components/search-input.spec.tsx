@@ -40,11 +40,11 @@ test('dropdown is displayed when results are available', async() => {
   const input = mount(<SearchInput onSearch={onSearch} />);
   input.find('[data-test-id="search-input"]')
     .first().simulate('change', {target: {value: 'foo'}});
-  await new Promise<void>((accept, reject) => {
+  await new Promise((accept, reject) => {
     input.update();
-    setTimeout(() => {
+    global.setTimeout(() => {
       input.update();
-      accept();
+      accept(true);
     }, DROPDOWN_DELAY_MS);
   }).then(() => {
     expect(input.find('[data-test-id="search-input-drop-down"]').exists()).toBeTruthy();
@@ -60,11 +60,11 @@ test('selecting a result from the dropdown closes the dropdown', async() => {
   const input = mount(<SearchInput onSearch={onSearch} />);
   input.find('[data-test-id="search-input"]')
     .first().simulate('change', {target: {value: 'foo'}});
-  await new Promise<void>((accept, reject) => {
+  await new Promise((accept, reject) => {
     input.update();
-    setTimeout(() => {
+    global.setTimeout(() => {
       input.update();
-      accept();
+      accept(true);
     }, DROPDOWN_DELAY_MS);
   }).then(async() => {
     const match = input.find('[data-test-id="search-input-drop-down-element-0"]');
