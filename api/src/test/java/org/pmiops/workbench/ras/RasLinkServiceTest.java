@@ -88,15 +88,15 @@ public class RasLinkServiceTest {
 
   @TestConfiguration
   @Import({
-      RasLinkService.class,
+    RasLinkService.class,
     UserServiceTestConfiguration.class,
   })
   @MockBean({
-      FireCloudService.class,
-      ComplianceService.class,
-      DirectoryService.class,
-      UserServiceAuditor.class,
-      FreeTierBillingService.class,
+    FireCloudService.class,
+    ComplianceService.class,
+    DirectoryService.class,
+    UserServiceAuditor.class,
+    FreeTierBillingService.class,
   })
   static class Configuration {
     @Bean
