@@ -254,7 +254,7 @@ commands:
       - run: |
           # tell the operating system to remove the file size limit on core dump files 
           ulimit -c unlimited
-          ./bin
+          ./dump
       - save_cache:
           paths:
             - ~/.gradle/wrapper
