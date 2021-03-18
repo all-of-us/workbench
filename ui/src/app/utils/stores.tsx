@@ -30,7 +30,7 @@ interface CdrVersionStore {
   defaultCdrVersionId: string;
 }
 
-export const cdrVersionStore = atom<CdrVersionStore>({items: [], defaultCdrVersionId: "-1"});
+export const cdrVersionStore = atom<CdrVersionStore>({items: [], defaultCdrVersionId: '-1'});
 
 interface ProfileStore {
   profile?: Profile;

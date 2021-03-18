@@ -12,7 +12,7 @@ import {debouncer, hasRegisteredAccessFetch} from 'app/utils';
 import Timeout = NodeJS.Timeout;
 import {setInstitutionCategoryState} from 'app/utils/analytics';
 import {navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
-import {compoundRuntimeOpStore, routeDataStore, cdrVersionStore} from 'app/utils/stores';
+import {cdrVersionStore, compoundRuntimeOpStore, routeDataStore} from 'app/utils/stores';
 import {initializeZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Profile as FetchProfile} from 'generated/fetch';

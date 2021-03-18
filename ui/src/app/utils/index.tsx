@@ -27,7 +27,7 @@ import {
   DataAccessLevel as FetchDataAccessLevel,
   Domain as FetchDomain,
 } from 'generated/fetch';
-import {cdrVersionStore, withStore} from "./stores";
+import {cdrVersionStore, withStore} from './stores';
 
 export const WINDOW_REF = 'window-ref';
 
