@@ -870,28 +870,21 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void sendUserInstructions_sanitized() throws MessagingException {
+  public void sendUserInstructions_withInstructions() throws MessagingException {
     final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
         createVerifiedInstitutionalAffiliation();
-
-    final String rawInstructions =
-        "<html><script>window.alert('hacked');</script></html>"
-            + "Wash your hands for 20 seconds"
-            + "<STYLE type=\"text/css\">BODY{background:url(\"javascript:alert('XSS')\")} "
-            + "div {color: 'red'}</STYLE>\n"
-            + "<img src=\"https://eviltrackingpixel.com\" />\n";
-
-    final String sanitizedInstructions = "Wash your hands for 20 seconds";
 
     final InstitutionUserInstructions instructions =
         new InstitutionUserInstructions()
             .institutionShortName(verifiedInstitutionalAffiliation.getInstitutionShortName())
-            .instructions(rawInstructions);
+            .instructions(
+                "Wash your hands for 20 seconds <img src=\"https://this.is.escaped.later.com\" />");
     institutionService.setInstitutionUserInstructions(instructions);
 
     createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
     verify(mockMailService).sendWelcomeEmail(any(), any(), any());
-    verify(mockMailService).sendInstitutionUserInstructions(CONTACT_EMAIL, sanitizedInstructions);
+    verify(mockMailService)
+        .sendInstitutionUserInstructions(CONTACT_EMAIL, instructions.getInstructions());
   }
 
   @Test

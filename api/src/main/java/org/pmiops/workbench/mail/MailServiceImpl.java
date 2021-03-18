@@ -101,7 +101,7 @@ public class MailServiceImpl implements MailService {
       throws MessagingException {
     // TODO(RW-6482): Use a templating system rather than manual oneoff escaping.
     // These institutional instructions are stored unescaped. Though they are input by admins,
-    // the strings should note be trusted as HTML.
+    // the strings should not be trusted as HTML.
     String escapedUserInstructions = HtmlEscapers.htmlEscaper().escape(userInstructions);
     final MandrillMessage msg =
         new MandrillMessage()
