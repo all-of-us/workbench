@@ -81,7 +81,7 @@ public class RasLinkServiceTest {
   private long userId;
   private static DbUser currentUser;
 
-  @Autowired private RasLinkService rasLinkService;
+  private RasLinkService rasLinkService;
   private ObjectMapper objectMapper = new ObjectMapper();
 
   @Autowired private UserService userService;
@@ -89,6 +89,7 @@ public class RasLinkServiceTest {
   @Mock private static OpenIdConnectClient mockOidcClient;
   @Mock private static Provider<OpenIdConnectClient> mockOidcClientProvider;
   @Mock private static HttpTransport mockHttpTransport;
+  @Mock private OpenIdConnectClient mockRasOidcClient;
 
   @TestConfiguration
   @Import({
@@ -145,6 +146,7 @@ public class RasLinkServiceTest {
 
   @Before
   public void setUp() throws Exception {
+    rasLinkService = new RasLinkService(userService, mockOidcClientProvider);
     when(mockOidcClientProvider.get()).thenReturn(mockOidcClient);
 
     currentUser = new DbUser();
