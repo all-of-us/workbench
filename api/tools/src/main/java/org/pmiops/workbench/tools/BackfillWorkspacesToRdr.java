@@ -63,15 +63,15 @@ public class BackfillWorkspacesToRdr {
       Integer limit = ((Number) opts.getParsedOptionValue("limit")).intValue();
       boolean dryRun = opts.hasOption(dryRunOpt.getLongOpt());
 
-      List<Long> workspaceListToExport =
+      List<BigInteger> nativeWorkspaceListToExport =
           limit != null
-              ? workspaceDao.findTopDbWorkspaceIds(limit).stream()
-                  .map(BigInteger::longValue)
-                  .collect(Collectors.toList())
-              : workspaceDao.findAllDbWorkspaceIds().stream()
-                  .map(BigInteger::longValue)
-                  .collect(Collectors.toList());
+              ? workspaceDao.findTopDbWorkspaceIds(limit)
+              : workspaceDao.findAllDbWorkspaceIds();
 
+      List<Long> workspaceListToExport =
+          nativeWorkspaceListToExport.stream()
+              .map(BigInteger::longValue)
+              .collect(Collectors.toList());
       if (dryRun) {
         System.out.printf(
             "\nThis is a dry run. %d workspaces will be exported when running this command.\n\n",
