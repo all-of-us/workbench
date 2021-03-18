@@ -1951,7 +1951,6 @@ def create_wgs_cohort_extraction_bp_workspace(cmd_name, *args)
 
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.dry_run = true
   op.add_option(
       "--billing-project-name [billing-project-name]",
       ->(opts, v) { opts.billing_project_name = v},
@@ -1994,6 +1993,55 @@ Common.register_command({
   :invocation => "create-wgs-cohort-extraction-bp-workspace",
   :description => "Create Terra billing project and workspace impersonating the Genomics Cohort Extraction SA. This will NOT show up as an AoU workspace.",
   :fn => ->(*args) { create_wgs_cohort_extraction_bp_workspace("create-wgs-cohort-extraction-bp-workspace", *args) }
+})
+
+def create_terra_method_snapshot(cmd_name, *args)
+  ensure_docker cmd_name, args
+
+  common = Common.new
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--source-git-repo [source-git-repo]",
+    ->(opts, v) { opts.source_git_repo = v},
+    "git owner/repo where the source file is located. ex. (broadinstitute/gatk)")
+  op.add_option(
+    "--source-git-path [source-git-path]",
+    ->(opts, v) { opts.source_git_path = v},
+    "git path where the source file is located, relative to the repo's root directory. ex. ()") #TODO eric: add this
+  op.add_option(
+    "--source-git-ref [source-git-ref]",
+    ->(opts, v) { opts.source_git_ref = v},
+    "git commit/branch/tag where the source file is located")
+  op.add_validator ->(opts) {
+    unless (opts.source_git_repo or opt.source_git_path or opts.source_git_ref)
+      common.error "all arguments must be provided"
+      raise ArgumentError
+    end
+  }
+
+  gcc = GcloudContextV2.new(op)
+  op.parse.validate
+  gcc.validate
+
+  flags = ([
+    ["--config-json", get_config_file(op.opts.project)],
+    ["--source-git-repo", op.opts.source_git_repo],
+    ["--source-git-path", op.opts.source_git_path],
+    ["--source-git-ref", op.opts.source_git_ref],
+  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+  flags.map! { |f| "'#{f}'" }
+
+  ServiceAccountContext.new(gcc.project).run do
+    common.run_inline %W{
+       gradle createTerraMethodSnapshot
+       -PappArgs=[#{flags.join(',')}]}
+  end
+end
+
+Common.register_command({
+  :invocation => "create-terra-method-snapshot",
+  :description => "Create Terra Method snapshot",
+  :fn => ->(*args) { create_terra_method_snapshot("create-terra-method-snapshot", *args) }
 })
 
 def delete_runtimes(cmd_name, *args)

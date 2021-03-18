@@ -777,11 +777,20 @@ task loadDataDictionary(type: JavaExec) {
   }
 }
 
-
 // See project.rb command: create-wgs-cohort-extraction-bp-workspace
 task createWgsCohortExtractionBillingProjectWorkspace(type: JavaExec) {
   classpath sourceSets.__tools__.runtimeClasspath
   main = "org.pmiops.workbench.tools.CreateWgsCohortExtractionBillingProjectWorkspace"
+  systemProperties = commandLineSpringProperties
+  if (project.hasProperty("appArgs")) {
+    args Eval.me(appArgs)
+  }
+}
+
+// See project.rb command: create-terra-method-snapshot
+task createTerraMethodSnapshot(type: JavaExec) {
+  classpath sourceSets.__tools__.runtimeClasspath
+  main = "org.pmiops.workbench.tools.CreateTerraMethodSnapshot"
   systemProperties = commandLineSpringProperties
   if (project.hasProperty("appArgs")) {
     args Eval.me(appArgs)
