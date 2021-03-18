@@ -2,10 +2,11 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {WorkspaceNavBarReact} from 'app/pages/workspace/workspace-nav-bar';
-import {cdrVersionStore, currentWorkspaceStore, NavStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, NavStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
+import {cdrVersionStore} from "app/utils/stores";
 
 describe('WorkspaceNavBarComponent', () => {
 
@@ -22,7 +23,7 @@ describe('WorkspaceNavBarComponent', () => {
     urlParamsStore.next({ns: workspaceDataStub.namespace, wsid: workspaceDataStub.id});
     serverConfigStore.next({
       gsuiteDomain: 'fake-research-aou.org', enableResearchReviewPrompt: true});
-    cdrVersionStore.next(cdrVersionListResponse);
+    cdrVersionStore.set(cdrVersionListResponse);
   });
 
   it('should render', () => {

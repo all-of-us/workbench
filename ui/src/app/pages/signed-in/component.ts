@@ -11,8 +11,8 @@ import {FooterTypeEnum} from 'app/components/footer';
 import {debouncer, hasRegisteredAccessFetch} from 'app/utils';
 import Timeout = NodeJS.Timeout;
 import {setInstitutionCategoryState} from 'app/utils/analytics';
-import {cdrVersionStore, navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
-import {compoundRuntimeOpStore, routeDataStore} from 'app/utils/stores';
+import {navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
+import {compoundRuntimeOpStore, routeDataStore, cdrVersionStore} from 'app/utils/stores';
 import {initializeZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Profile as FetchProfile} from 'generated/fetch';
@@ -94,7 +94,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
         setInstitutionCategoryState(this.profile.verifiedInstitutionalAffiliation);
         if (hasRegisteredAccessFetch(this.profile.dataAccessLevel)) {
           cdrVersionsApi().getCdrVersions().then(resp => {
-            cdrVersionStore.next(resp);
+            cdrVersionStore.set(resp);
           });
         }
       });

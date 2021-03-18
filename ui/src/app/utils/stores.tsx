@@ -1,7 +1,7 @@
 import { BreadcrumbType } from 'app/utils/navigation';
 import {atom, Atom} from 'app/utils/subscribable';
 import {Profile} from 'generated';
-import {Runtime} from 'generated/fetch';
+import {CdrVersion, Runtime} from 'generated/fetch';
 import * as React from 'react';
 
 const {useEffect, useState} = React;
@@ -24,6 +24,13 @@ interface AuthStore {
 }
 
 export const authStore = atom<AuthStore>({authLoaded: false, isSignedIn: false});
+
+interface CdrVersionStore {
+  items?: Array<CdrVersion>;
+  defaultCdrVersionId: string;
+}
+
+export const cdrVersionStore = atom<CdrVersionStore>({items: [], defaultCdrVersionId: "-1"});
 
 interface ProfileStore {
   profile?: Profile;
