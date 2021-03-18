@@ -41,6 +41,7 @@ import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
 import org.pmiops.workbench.cdr.dao.DSLinkingDao;
+import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
 import org.pmiops.workbench.cdr.model.DbDSLinking;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortService;
@@ -51,10 +52,12 @@ import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DataSetServiceImpl.QueryAndParameters;
 import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
@@ -490,6 +493,17 @@ public class DataSetServiceTest {
         .contains("GROUP BY PERSON_ID, DATE");
   }
 
+  @Test
+  public void testDataDictionary() {
+    mockDataDictionaryDao();
+    DbCdrVersion cdrVersion = new DbCdrVersion();
+    cdrVersion.setCdrVersionId(1l);
+    DataDictionaryEntry dataDictionaryEntry =
+        dataSetServiceImpl.findDataDictionaryEntry("gender", "PERSON", cdrVersion);
+    assertThat(dataDictionaryEntry).isNotNull();
+    assertThat(dataDictionaryEntry.getDescription()).isEqualTo("Gender testing");
+  }
+
   private void mockDsLinkingTableForFitbit() {
     DbDSLinking dbDSLinkingFitbit_personId = new DbDSLinking();
     dbDSLinkingFitbit_personId.setDenormalizedName("PERSON_ID");
@@ -534,5 +548,15 @@ public class DataSetServiceTest {
         .getValues();
 
     doReturn(tableResultMock).when(mockBigQueryService).executeQuery(any());
+  }
+
+  private void mockDataDictionaryDao() {
+    DbDSDataDictionary dsDataDictionary = new DbDSDataDictionary();
+    dsDataDictionary.setDomain("PERSON");
+    dsDataDictionary.setFieldName("gender");
+    dsDataDictionary.setDescription("Gender testing");
+    dsDataDictionary.setFieldType("string");
+    when(dsDataDictionaryDao.findDbDSDataDictionaryByFieldNameAndDomain("gender", "PERSON"))
+        .thenReturn(dsDataDictionary);
   }
 }

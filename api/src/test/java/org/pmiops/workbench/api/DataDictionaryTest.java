@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -15,6 +14,8 @@ import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.cdr.CdrVersionMapper;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
+import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.concept.ConceptService;
@@ -28,7 +29,6 @@ import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -56,6 +56,7 @@ public class DataDictionaryTest {
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
+  @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
   @Autowired private DataSetController dataSetController;
 
   @Rule public ExpectedException expectedEx = ExpectedException.none();
@@ -98,19 +99,17 @@ public class DataDictionaryTest {
   public void setUp() {
     cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
 
-    DbDataDictionaryEntry dataDictionaryEntry = new DbDataDictionaryEntry();
-    dataDictionaryEntry.setCdrVersion(cdrVersion);
-    dataDictionaryEntry.setDefinedTime(new Timestamp(CLOCK.millis()));
-    dataDictionaryEntry.setRelevantOmopTable(BigQueryTableInfo.getTableName(Domain.DRUG));
-    dataDictionaryEntry.setFieldName("TEST FIELD");
-    dataDictionaryEntry.setOmopCdmStandardOrCustomField("A");
-    dataDictionaryEntry.setDescription("B");
-    dataDictionaryEntry.setFieldType("C");
-    dataDictionaryEntry.setDataProvenance("D");
-    dataDictionaryEntry.setSourcePpiModule("E");
-    dataDictionaryEntry.setTransformedByRegisteredTierPrivacyMethods(true);
+    DbDSDataDictionary dbDSDataDictionary = new DbDSDataDictionary();
+    dbDSDataDictionary.setRelevantOmopTable(BigQueryTableInfo.getTableName(Domain.DRUG));
+    dbDSDataDictionary.setFieldName("TEST FIELD");
+    dbDSDataDictionary.setOmopCdmStandardOrCustomField("A");
+    dbDSDataDictionary.setDescription("B");
+    dbDSDataDictionary.setFieldType("C");
+    dbDSDataDictionary.setDataProvenance("D");
+    dbDSDataDictionary.setSourcePpiModule("E");
+    dbDSDataDictionary.setDomain("Drug");
 
-    dataDictionaryEntryDao.save(dataDictionaryEntry);
+    dsDataDictionaryDao.save(dbDSDataDictionary);
   }
 
   @Test
@@ -118,40 +117,32 @@ public class DataDictionaryTest {
     final Domain domain = Domain.DRUG;
     final String domainValue = "FIELD NAME / DOMAIN VALUE";
 
-    DbDataDictionaryEntry dataDictionaryEntry = new DbDataDictionaryEntry();
-    dataDictionaryEntry.setCdrVersion(cdrVersion);
-    dataDictionaryEntry.setDefinedTime(new Timestamp(CLOCK.millis()));
-    dataDictionaryEntry.setRelevantOmopTable(BigQueryTableInfo.getTableName(domain));
-    dataDictionaryEntry.setFieldName(domainValue);
-    dataDictionaryEntry.setOmopCdmStandardOrCustomField("A");
-    dataDictionaryEntry.setDescription("B");
-    dataDictionaryEntry.setFieldType("C");
-    dataDictionaryEntry.setDataProvenance("D");
-    dataDictionaryEntry.setSourcePpiModule("E");
-    dataDictionaryEntry.setTransformedByRegisteredTierPrivacyMethods(true);
-
-    dataDictionaryEntryDao.save(dataDictionaryEntry);
+    DbDSDataDictionary dbDSDataDictionary = new DbDSDataDictionary();
+    dbDSDataDictionary.setRelevantOmopTable(BigQueryTableInfo.getTableName(domain));
+    dbDSDataDictionary.setFieldName(domainValue);
+    dbDSDataDictionary.setOmopCdmStandardOrCustomField("A");
+    dbDSDataDictionary.setDescription("B");
+    dbDSDataDictionary.setFieldType("C");
+    dbDSDataDictionary.setDataProvenance("D");
+    dbDSDataDictionary.setSourcePpiModule("E");
+    dbDSDataDictionary.setDomain("DRUG");
+    dsDataDictionaryDao.save(dbDSDataDictionary);
 
     DataDictionaryEntry response =
         dataSetController
             .getDataDictionaryEntry(cdrVersion.getCdrVersionId(), domain.toString(), domainValue)
             .getBody();
 
-    assertThat(response.getCdrVersionId())
-        .isEqualTo(dataDictionaryEntry.getCdrVersion().getCdrVersionId());
-    assertThat(new Timestamp(response.getDefinedTime()))
-        .isEqualTo(dataDictionaryEntry.getDefinedTime());
+    assertThat(response.getCdrVersionId()).isEqualTo(cdrVersion.getCdrVersionId());
     assertThat(response.getRelevantOmopTable())
-        .isEqualTo(dataDictionaryEntry.getRelevantOmopTable());
-    assertThat(response.getFieldName()).isEqualTo(dataDictionaryEntry.getFieldName());
+        .isEqualTo(dbDSDataDictionary.getRelevantOmopTable());
+    assertThat(response.getFieldName()).isEqualTo(dbDSDataDictionary.getFieldName());
     assertThat(response.getOmopCdmStandardOrCustomField())
-        .isEqualTo(dataDictionaryEntry.getOmopCdmStandardOrCustomField());
-    assertThat(response.getDescription()).isEqualTo(dataDictionaryEntry.getDescription());
-    assertThat(response.getFieldType()).isEqualTo(dataDictionaryEntry.getFieldType());
-    assertThat(response.getDataProvenance()).isEqualTo(dataDictionaryEntry.getDataProvenance());
-    assertThat(response.getSourcePpiModule()).isEqualTo(dataDictionaryEntry.getSourcePpiModule());
-    assertThat(response.getTransformedByRegisteredTierPrivacyMethods())
-        .isEqualTo(dataDictionaryEntry.getTransformedByRegisteredTierPrivacyMethods());
+        .isEqualTo(dbDSDataDictionary.getOmopCdmStandardOrCustomField());
+    assertThat(response.getDescription()).isEqualTo(dbDSDataDictionary.getDescription());
+    assertThat(response.getFieldType()).isEqualTo(dbDSDataDictionary.getFieldType());
+    assertThat(response.getDataProvenance()).isEqualTo(dbDSDataDictionary.getDataProvenance());
+    assertThat(response.getSourcePpiModule()).isEqualTo(dbDSDataDictionary.getSourcePpiModule());
   }
 
   @Test
