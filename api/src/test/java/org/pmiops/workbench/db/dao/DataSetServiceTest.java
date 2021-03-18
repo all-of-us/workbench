@@ -39,6 +39,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
 import org.pmiops.workbench.cdr.dao.DSLinkingDao;
 import org.pmiops.workbench.cdr.model.DbDSLinking;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -97,9 +98,9 @@ public class DataSetServiceTest {
   @Autowired private ConceptSetDao conceptSetDao;
   @Autowired private ConceptBigQueryService conceptBigQueryService;
   @Autowired private CohortQueryBuilder cohortQueryBuilder;
-  @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
   @Autowired private DataSetDao dataSetDao;
   @Autowired private DSLinkingDao dsLinkingDao;
+  @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
   @Autowired private DataSetMapper dataSetMapper;
 
   @MockBean private BigQueryService mockBigQueryService;
@@ -118,7 +119,8 @@ public class DataSetServiceTest {
     ConceptSetService.class,
     CohortQueryBuilder.class,
     DataSetDao.class,
-    DSLinkingDao.class
+    DSLinkingDao.class,
+    DSDataDictionaryDao.class,
   })
   static class Configuration {
     @Bean
@@ -142,9 +144,9 @@ public class DataSetServiceTest {
             conceptBigQueryService,
             conceptSetDao,
             cohortQueryBuilder,
-            dataDictionaryEntryDao,
             dataSetDao,
             dsLinkingDao,
+            dsDataDictionaryDao,
             dataSetMapper,
             CLOCK);
 
