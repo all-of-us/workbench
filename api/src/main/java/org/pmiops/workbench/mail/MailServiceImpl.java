@@ -2,6 +2,7 @@ package org.pmiops.workbench.mail;
 
 import com.google.api.services.directory.model.User;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.html.HtmlEscapers;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -98,10 +99,16 @@ public class MailServiceImpl implements MailService {
   @Override
   public void sendInstitutionUserInstructions(String contactEmail, String userInstructions)
       throws MessagingException {
+    // TODO(RW-6482): Use a templating system rather than manual oneoff escaping.
+    // These institutional instructions are stored unescaped. Though they are input by admins,
+    // the strings should note be trusted as HTML.
+    String escapedUserInstructions = HtmlEscapers.htmlEscaper().escape(userInstructions);
     final MandrillMessage msg =
         new MandrillMessage()
             .to(Collections.singletonList(validatedRecipient(contactEmail)))
-            .html(buildHtml(INSTRUCTIONS_RESOURCE, instructionsSubstitutionMap(userInstructions)))
+            .html(
+                buildHtml(
+                    INSTRUCTIONS_RESOURCE, instructionsSubstitutionMap(escapedUserInstructions)))
             .subject("Instructions from your institution on using the Researcher Workbench")
             .fromEmail(workbenchConfigProvider.get().mandrill.fromEmail);
 
