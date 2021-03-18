@@ -1983,10 +1983,12 @@ def create_wgs_cohort_extraction_bp_workspace(cmd_name, *args)
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   flags.map! { |f| "'#{f}'" }
 
-  ServiceAccountContext.new(gcc.project).run do
-    common.run_inline %W{
-       gradle createWgsCohortExtractionBillingProjectWorkspace
-       -PappArgs=[#{flags.join(',')}]}
+  with_cloud_proxy_and_db(gcc) do
+    ServiceAccountContext.new(gcc.project).run do
+      common.run_inline %W{
+         gradle createWgsCohortExtractionBillingProjectWorkspace
+         -PappArgs=[#{flags.join(',')}]}
+    end
   end
 end
 
