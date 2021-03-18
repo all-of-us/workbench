@@ -1,19 +1,4 @@
-import {AttrName, Domain, ModifierType, Operator} from 'generated/fetch';
-
-export const PROGRAM_TYPES = [
-  Domain[Domain.PERSON],
-  Domain[Domain.SURVEY],
-  Domain[Domain.PHYSICALMEASUREMENT],
-  Domain[Domain.FITBIT]
-];
-
-export const DOMAIN_TYPES = [
-  Domain[Domain.CONDITION],
-  Domain[Domain.PROCEDURE],
-  Domain[Domain.DRUG],
-  Domain[Domain.MEASUREMENT],
-  Domain[Domain.VISIT]
-];
+import {AttrName, ModifierType, Operator} from 'generated/fetch';
 
 export const PM_UNITS = {
   'HEIGHT': 'cm',
