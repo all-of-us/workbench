@@ -25,7 +25,8 @@ fi
 
 # Purge all backup csv files except for the last 10 versions
 fileCount=$(gsutil ls gs://all-of-us-workbench-private-cloudsql/DummySR/cdr_csv_files/backup | wc -l)
-numberToDelete=$(($fileCount - ${#All_FILES[@]} * 10))
+allFilesCount=${#All_FILES[@]}
+numberToDelete=$((fileCount - allFilesCount * 10))
 if [[ $numberToDelete > 0 ]];
 then
   echo "Purging backup files"
