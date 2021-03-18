@@ -1933,9 +1933,9 @@ def backfill_workspaces_to_rdr(cmd_name, *args)
     "--dry_run=[dry_run]",
     TrueClass,
     ->(opts, v) { opts.dry_run = v},
-    "When true, print debug lines instead of performing writes. Defaults to true.")
+    "When true, print the number of workspaces that will be exported, will not export")
   op.add_typed_option(
-    "--limit [LIMIT]",
+    "--limit=[LIMIT]",
     String,
     ->(opts, v) { opts.limit = v},
     "The number of workspaces exported will not to exceed this limit.")
@@ -1947,16 +1947,15 @@ def backfill_workspaces_to_rdr(cmd_name, *args)
   op.parse.validate
   context.validate()
 
-  hasLimit = op.opts.limit ? "--limit=#{op.opts.limit}" : ""
-  isDryRun = op.opts.dry_run ? "--dry-run" : ""
-
-  print %W{
+  hasLimit = op.opts.limit ? "--limit=#{op.opts.limit}" : nil
+  isDryRun = op.opts.dry_run ? "--dry-run" : nil
+  flags = [hasLimit, isDryRun].map{ |v| v && "'#{v}'" }.select{ |v| v != nil }
+  gradleCommand = %W{
     gradle backfillWorkspacesToRdr
-   -PappArgs=['#{hasLimit}, #{isDryRun}']}
+   -PappArgs=[#{flags.join(',')}]}
+
   with_optional_cloud_proxy_and_db(context) do
-    common.run_inline %W{
-        gradle backfillWorkspacesToRdr
-       -PappArgs=['#{hasLimit}']}
+    common.run_inline gradleCommand
   end
 end
 
