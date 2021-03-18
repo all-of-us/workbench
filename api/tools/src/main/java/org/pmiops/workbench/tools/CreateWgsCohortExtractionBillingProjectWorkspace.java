@@ -55,7 +55,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
   private static final Logger log =
       Logger.getLogger(CreateWgsCohortExtractionBillingProjectWorkspace.class.getName());
 
-  WorkbenchConfig workbenchConfig(String configJsonFilepath) throws IOException {
+  public static WorkbenchConfig workbenchConfig(String configJsonFilepath) throws IOException {
     ObjectMapper jackson = new ObjectMapper();
     String rawJson =
         new String(Files.readAllBytes(Paths.get(configJsonFilepath)), Charset.defaultCharset());
@@ -66,7 +66,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
     return (new Gson()).fromJson(newJson.toString(), WorkbenchConfig.class);
   }
 
-  ImpersonatedServiceAccountApiClientFactory wgsCohortExtractionServiceAccountApiClientFactory(
+  public static ImpersonatedServiceAccountApiClientFactory wgsCohortExtractionServiceAccountApiClientFactory(
       WorkbenchConfig config) throws IOException {
     return new ImpersonatedServiceAccountApiClientFactory(
         config.wgsCohortExtraction.serviceAccount, config.firecloud.baseUrl);

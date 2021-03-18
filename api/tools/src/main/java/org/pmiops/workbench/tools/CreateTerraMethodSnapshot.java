@@ -12,9 +12,15 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
+import org.pmiops.workbench.firecloud.model.FirecloudMethodID;
+import org.pmiops.workbench.firecloud.model.FirecloudMethodIO;
+import org.pmiops.workbench.firecloud.model.FirecloudMethodInput;
+import org.pmiops.workbench.firecloud.model.FirecloudMethodQuery;
+import org.pmiops.workbench.firecloud.model.FirecloudMethodResponse;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceIngest;
@@ -37,6 +43,10 @@ import java.util.stream.Stream;
 
 /**
  * Create new Terra method snapshot in Agora
+ *
+ * Assumptions
+ *   - The provided Agora method namespace does not exist yet OR the cohort extraction service
+ *   account has write permission to it if it exists.
  */
 @Configuration
 public class CreateTerraMethodSnapshot {
@@ -53,32 +63,23 @@ public class CreateTerraMethodSnapshot {
   private static Option sourceGitRefOpt =
           Option.builder().longOpt("source-git-ref").required().hasArg().build();
 
+  private static Option methodNamespaceOpt =
+          Option.builder().longOpt("method-namespace").required().hasArg().build();
+
+  private static Option methodNameOpt =
+          Option.builder().longOpt("method-name").required().hasArg().build();
+
   private static Options options =
       new Options()
           .addOption(configJsonOpt)
           .addOption(sourceGitRepoOpt)
           .addOption(sourceGitPathOpt)
-          .addOption(sourceGitRefOpt);
+          .addOption(sourceGitRefOpt)
+          .addOption(methodNamespaceOpt)
+          .addOption(methodNameOpt);
 
   private static final Logger log =
       Logger.getLogger(CreateTerraMethodSnapshot.class.getName());
-
-  WorkbenchConfig workbenchConfig(String configJsonFilepath) throws IOException {
-    ObjectMapper jackson = new ObjectMapper();
-    String rawJson =
-        new String(Files.readAllBytes(Paths.get(configJsonFilepath)), Charset.defaultCharset());
-
-    String strippedJson = rawJson.replaceAll("\\s*//.*", "");
-    JsonNode newJson = jackson.readTree(strippedJson);
-
-    return (new Gson()).fromJson(newJson.toString(), WorkbenchConfig.class);
-  }
-
-  ImpersonatedServiceAccountApiClientFactory wgsCohortExtractionServiceAccountApiClientFactory(
-      WorkbenchConfig config) throws IOException {
-    return new ImpersonatedServiceAccountApiClientFactory(
-        config.wgsCohortExtraction.serviceAccount, config.firecloud.baseUrl);
-  }
 
   @Bean
   public CommandLineRunner run() {
@@ -89,27 +90,91 @@ public class CreateTerraMethodSnapshot {
       String sourceGitRepo = opts.getOptionValue(sourceGitRepoOpt.getLongOpt());
       String sourceGitPath = opts.getOptionValue(sourceGitPathOpt.getLongOpt());
       String sourceGitRef = opts.getOptionValue(sourceGitRefOpt.getLongOpt());
+      String methodNamespace = opts.getOptionValue(methodNamespaceOpt.getLongOpt());
+      String methodName = opts.getOptionValue(methodNameOpt.getLongOpt());
 
-      WorkbenchConfig workbenchConfig = workbenchConfig(configJsonFilepath);
+      WorkbenchConfig workbenchConfig = CreateWgsCohortExtractionBillingProjectWorkspace.workbenchConfig(configJsonFilepath);
       ApiClientFactory apiClientFactory =
-          wgsCohortExtractionServiceAccountApiClientFactory(workbenchConfig);
+          CreateWgsCohortExtractionBillingProjectWorkspace.wgsCohortExtractionServiceAccountApiClientFactory(workbenchConfig);
 
-      Request request =
-              new Request.Builder()
-                      .url(
-                              "https://api.github.com/repos/" +
-                                      sourceGitRepo +
-                                      "/contents/" +
-                                      sourceGitPath +
-                                      "?ref=" + sourceGitRef)
-                      .addHeader("Accept", "application/vnd.github.v3.raw")
-                      .build();
+      String sourceFileContents = getGithubFileContents(sourceGitRepo, sourceGitPath, sourceGitRef);
 
-      final OkHttpClient client = new OkHttpClient();
-      Response response = client.newCall(request).execute();
-      System.out.println(response.body().string());
+      List<FirecloudMethodResponse> existingMethods = apiClientFactory.methodRepositoryApi().listMethodRepositoryMethods(
+              methodNamespace,
+              methodName,
+              null, null, null, null, null, null, null
+      );
 
+      FirecloudMethodQuery newMethodQuery = new FirecloudMethodQuery()
+              .namespace(methodNamespace)
+              .name(methodName)
+              .entityType("Workflow")
+              .snapshotComment("test comment")
+              .payload(sourceFileContents);
+
+      FirecloudMethodResponse methodResponse;
+      if (existingMethods.isEmpty()) {
+        log.info("No existing methods found with given namespace/name; creating new method.");
+        try {
+          methodResponse = apiClientFactory.methodRepositoryApi().createMethod(newMethodQuery);
+        } catch (ApiException e) {
+          log.warning(e.getResponseBody());
+          throw e;
+        }
+      } else {
+        log.info("Method already exists. Creating new snapshot.");
+        int latestSnapshotId = existingMethods.stream().map(method -> method.getSnapshotId()).max(Integer::compare).get();
+
+        try {
+          methodResponse = apiClientFactory.methodRepositoryApi()
+                  .createMethodSnapshot(methodNamespace, methodName, Integer.toString(latestSnapshotId), newMethodQuery, "false");
+        } catch (ApiException e) {
+          log.warning(e.getResponseBody());
+          throw e;
+        }
+      }
+
+      FirecloudMethodIO methodIO = apiClientFactory.methodRepositoryApi().getMethodIO(
+              new FirecloudMethodID()
+              .methodNamespace(methodResponse.getNamespace())
+              .methodName(methodResponse.getName())
+              .methodVersion(methodResponse.getSnapshotId())
+      );
+
+      log.info("\n\n\n" +
+              "New snapshot namespace/name/version: " +
+              methodResponse.getNamespace() + "/" +
+              methodResponse.getName() + "/" +
+              methodResponse.getSnapshotId() + "\n\n" +
+              "New snapshot inputs: \n" +
+              methodIO.getInputs().stream().map(input ->
+                      input.getInputType() + " " + input.getName() + " " + (input.getOptional() ? "(optional)" : "(required)")
+              ).collect(Collectors.joining("\n")) +
+              "\n\n\n");
     };
+  }
+
+  private String getGithubFileContents(String sourceGitRepo, String sourceGitPath, String sourceGitRef) throws IOException {
+    Request request =
+            new Request.Builder()
+                    .url(
+                            "https://api.github.com/repos/" +
+                                    sourceGitRepo +
+                                    "/contents/" +
+                                    sourceGitPath +
+                                    "?ref=" + sourceGitRef)
+                    .addHeader("Accept", "application/vnd.github.v3.raw")
+                    .build();
+
+    final OkHttpClient client = new OkHttpClient();
+    Response response = client.newCall(request).execute();
+
+    if (response.code() != 200) {
+      log.warning(response.body().string());
+      throw new RuntimeException("Could not fetch source file from Github. Response Code: " + response.code());
+    }
+
+    return response.body().string();
   }
 
   public static void main(String[] args) {

@@ -820,6 +820,205 @@ paths:
         500:
           description: Internal Error
 
+  /api/methods:
+    get:
+      tags:
+        - methodRepository
+      summary: |
+        Lists Method Repository methods.
+      operationId: listMethodRepositoryMethods
+      parameters:
+        - name: namespace
+          in: query
+          description: Namespace of method.
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: Name of method.
+          schema:
+            type: string
+        - name: snapshotId
+          in: query
+          description: Snapshot ID of method.
+          schema:
+            type: integer
+            format: int32
+        - name: snapshotComment
+          in: query
+          description: Snapshot comment of AgoraEntity
+          schema:
+            type: string
+        - name: synopsis
+          in: query
+          description: Synopsis of method.
+          schema:
+            type: string
+        - name: documentation
+          in: query
+          description: Documentation of method.
+          schema:
+            type: string
+        - name: owner
+          in: query
+          description: Owner of method.
+          schema:
+            type: string
+        - name: payload
+          in: query
+          description: Payload of method in WDL.
+          schema:
+            type: string
+        - name: entityType
+          in: query
+          description: Type of Method - Task or Workflow
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of methods
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/MethodResponse'
+        400:
+          description: Invalid arguments
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        500:
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+    post:
+      tags:
+        - methodRepository
+      summary: Add a Method.
+      operationId: createMethod
+      description: |
+        Inserts a method into the method repository and
+        gives the owner full access permissions. Must supply a namespace
+        name, payload, and entityType. Cannot supply a snapshotId
+      parameters:
+        - name: methodQuery
+          in: body
+          description: Method Query
+          required: true
+          schema:
+            $ref: '#/definitions/MethodQuery'
+      responses:
+        201:
+          description: Method successfully added.
+          schema:
+            $ref: '#/definitions/MethodResponse'
+        400:
+          description: Malformed input.
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        500:
+          description: Internal error.
+          schema:
+            $ref: '#/definitions/ErrorReport'
+
+  /api/methods/{namespace}/{name}/{snapshotId}:
+    post:
+      tags:
+        - methodRepository
+      summary: Create a new snapshot of an existing Method.
+      operationId: createMethodSnapshot
+      description: |
+        Inserts a new snapshot of the method into the method repository and
+        copies access permissions from previous snapshot, optionally redacting
+        the source snapshot. Documentation, synopsis, and payload are the only
+        arguments considered for the new snapshot; everything else is copied
+        from the source.
+      parameters:
+        - name: namespace
+          in: path
+          description: Method Namespace
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: path
+          description: Method Name
+          required: true
+          schema:
+            type: string
+        - name: snapshotId
+          in: path
+          description: Method snapshot ID
+          required: true
+          schema:
+            type: string
+        - name: redact
+          in: query
+          description: Should the source method be redacted?
+          schema:
+            type: boolean
+            default: false
+        - name: methodQuery
+          in: body
+          description: Method Query
+          required: true
+          schema:
+            $ref: '#/definitions/MethodQuery'
+      responses:
+        200:
+          description: Method successfully copied.
+          schema:
+            $ref: '#/definitions/MethodResponse'
+        206:
+          description: Method successfully copied, but error while redacting.
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        400:
+          description: Malformed input.
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        403:
+          description: Forbidden to create copy.
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        404:
+          description: Source snapshot not found.
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        500:
+          description: Internal error.
+          schema:
+            $ref: '#/definitions/ErrorReport'
+
+  /api/inputsOutputs:
+    post:
+      tags:
+        - methodRepository
+      summary: Get information about a method's inputs and outputs
+      operationId: getMethodIO
+      parameters:
+        - name: methodId
+          in: body
+          description: Method ID
+          required: true
+          schema:
+            $ref: '#/definitions/MethodID'
+      responses:
+        200:
+          description: Method Configuration inputs and outputs
+          schema:
+            $ref: '#/definitions/MethodIO'
+        400:
+          description: Method WDL can't be parsed
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        404:
+          description: No Such Method
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        500:
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+
   /api/workspaces/{workspaceNamespace}/{workspaceName}/methodconfigs:
     post:
       tags:
@@ -1717,3 +1916,141 @@ definitions:
         $ref: '#/definitions/MethodConfiguration'
     description: Information about the validity of a method configuration's expressions
       relative to the method itself
+
+  MethodResponse:
+    required:
+      - managers
+      - name
+      - namespace
+      - snapshotId
+    type: object
+    properties:
+      managers:
+        type: array
+        description: List of Owners.
+        items:
+          type: string
+      namespace:
+        type: string
+        description: Namespace which contains AgoraEntity.
+        default: YOUR_NAMESPACE
+      name:
+        type: string
+        description: Name of the AgoraEntity.
+        default: BWA
+      snapshotId:
+        type: integer
+        description: SnapshotId of AgoraEntity
+        format: int32
+      snapshotComment:
+        type: string
+        description: Snapshot comment of AgoraEntity
+        default: Improved spline reticulation
+      synopsis:
+        type: string
+        description: Synopsis which contains AgoraEntity.
+        default: Quickly aligns short nucleotide sequences.
+      documentation:
+        type: string
+        description: Documentation of the AgoraEntity. MUST BE REQUESTED EXPLICITLY.
+        default: |
+          BWA is a software package for mapping low-divergent sequences
+          against a large reference genome, such as the human genome.
+          It consists of three algorithms: BWA-backtrack, BWA-SW and BWA-MEM.
+      createDate:
+        type: string
+        description: Timestamp of creation
+      url:
+        type: string
+        description: URL where resource can be accessed.
+      payload:
+        type: string
+        description: Payload of method -- must be in WDL format. MUST BE REQUESTED
+          EXPLICITLY.
+        default: |
+          task wc {File in_file command { cat ${in_file} | wc -l } output { Int count = read_int(stdout()) }}
+      entityType:
+        type: string
+        description: Type of the AgoraEntity -- Task or Workflow.
+        default: Task
+
+  MethodQuery:
+    type: object
+    properties:
+      namespace:
+        type: string
+        description: Namespace which contains AgoraEntity.
+        default: YOUR_NAMESPACE
+      name:
+        type: string
+        description: Name of the AgoraEntity.
+        default: BWA
+      synopsis:
+        type: string
+        description: Synopsis which contains AgoraEntity.
+        default: Quickly aligns short nucleotide sequences.
+      snapshotComment:
+        type: string
+        description: Snapshot comment of AgoraEntity
+        default: Improved spline reticulation
+      documentation:
+        type: string
+        description: Documentation of the AgoraEntity.
+        default: |
+          BWA is a software package for mapping low-divergent sequences
+          against a large reference genome, such as the human genome.
+          It consists of three algorithms: BWA-backtrack, BWA-SW and BWA-MEM.
+      payload:
+        type: string
+        description: Payload of method -- must be in WDL format
+        default: |
+          task wc {File in_file command { cat ${in_file} | wc -l } output { Int count = read_int(stdout()) }}
+      entityType:
+        type: string
+        description: Type of the AgoraEntity -- Task or Workflow.
+        default: Task
+
+  MethodID:
+    type: object
+    properties:
+      methodNamespace:
+        type: string
+        description: Method namespace
+      methodName:
+        type: string
+        description: Method name
+      methodVersion:
+        type: integer
+        description: Method version
+        format: int32
+        default: 0
+
+  MethodIO:
+    type: object
+    properties:
+      inputs:
+        type: array
+        items:
+          $ref: '#/definitions/MethodInput'
+      outputs:
+        type: array
+        items:
+          $ref: '#/definitions/MethodOutput'
+
+  MethodInput:
+    type: object
+    properties:
+      inputType:
+        type: string
+      name:
+        type: string
+      optional:
+        type: boolean
+
+  MethodOutput:
+    type: object
+    properties:
+      outputType:
+        type: string
+      name:
+        type: string
