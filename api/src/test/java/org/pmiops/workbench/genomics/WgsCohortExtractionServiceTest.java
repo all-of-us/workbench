@@ -93,6 +93,7 @@ public class WgsCohortExtractionServiceTest {
       return cloudStorageClient;
     }
 
+    // XXX: revert - CI trigger
     @Bean
     @Scope("prototype")
     DbUser user() {
