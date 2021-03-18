@@ -2,6 +2,7 @@ package org.pmiops.workbench.ras;
 
 import static org.pmiops.workbench.ras.OpenIdConnectClient.decodedJwt;
 import static org.pmiops.workbench.ras.RasLinkConstants.ACR_CLAIM;
+import static org.pmiops.workbench.ras.RasLinkConstants.ACR_CLAIM_IAL_PREFIX;
 import static org.pmiops.workbench.ras.RasLinkConstants.EMAIl_FIELD_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.Id_TOKEN_FIELD_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.LOGIN_GOV_IDENTIFIER_LOWER_CASE;
@@ -10,13 +11,13 @@ import static org.pmiops.workbench.ras.RasLinkConstants.RAS_AUTH_CODE_SCOPES;
 import static org.pmiops.workbench.ras.RasOidcClientConfig.RAS_OIDC_CLIENT;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.NullNode;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -83,18 +84,20 @@ public class RasLinkService {
   private static final Logger log = Logger.getLogger(RasLinkService.class.getName());
 
   private final UserService userService;
-  private final OpenIdConnectClient rasOidcClient;
+  private final Provider<OpenIdConnectClient> rasOidcClientProvider;
 
   @Autowired
   public RasLinkService(
-      UserService userService, @Qualifier(RAS_OIDC_CLIENT) OpenIdConnectClient rasOidcClient) {
+      UserService userService,
+      @Qualifier(RAS_OIDC_CLIENT) Provider<OpenIdConnectClient> rasOidcClientProvider) {
     this.userService = userService;
-    this.rasOidcClient = rasOidcClient;
+    this.rasOidcClientProvider = rasOidcClientProvider;
   }
 
   /** Links RAS login.gov account with AoU account. */
   public DbUser linkRasLoginGovAccount(String authCode, String redirectUrl) {
-    JsonNode userInfoResponse = NullNode.getInstance();
+    OpenIdConnectClient rasOidcClient = rasOidcClientProvider.get();
+    JsonNode userInfoResponse;
     try {
       // Oauth dance to get id token and access token.
       TokenResponse tokenResponse =
@@ -113,16 +116,17 @@ public class RasLinkService {
       userInfoResponse = rasOidcClient.fetchUserInfo(tokenResponse.getAccessToken());
     } catch (IOException e) {
       log.log(Level.WARNING, "Failed to link RAS account", e);
+      throw new ServerErrorException("Failed to link RAS account", e);
     }
     return userService.updateRasLinkLoginGovStatus(getLoginGovUsername(userInfoResponse));
   }
 
   /** Validates user has IAL2 setup. See class javadoc Step2 for more details. */
   static boolean isIal2(String acrClaim) {
-    Pattern p = Pattern.compile("ial/\\d", Pattern.CASE_INSENSITIVE);
+    Pattern p = Pattern.compile(ACR_CLAIM_IAL_PREFIX + "\\d", Pattern.CASE_INSENSITIVE);
     Matcher m = p.matcher(acrClaim);
     if (m.find()) {
-      return m.group().equals("ial/2");
+      return m.group().equals(ACR_CLAIM_IAL_PREFIX + "2");
     }
     throw new ServerErrorException(
         String.format("Invalid acl Claim in OIDC id token for %s", acrClaim));

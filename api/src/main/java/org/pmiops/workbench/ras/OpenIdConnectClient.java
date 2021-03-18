@@ -1,5 +1,7 @@
 package org.pmiops.workbench.ras;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -14,7 +16,6 @@ import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.MemoryDataStoreFactory;
 import java.io.IOException;
@@ -25,22 +26,24 @@ import java.util.Set;
  * Connect call</a> using Google OAuth Library.
  */
 public class OpenIdConnectClient {
-  private static final NetHttpTransport DEFAULT_HTTP_TRANSPORT = new NetHttpTransport();
   private static final JacksonFactory DEFAULT_JACKSON_FACTORY = new JacksonFactory();
 
   private final AuthorizationCodeFlow codeFlow;
   private final String userInfoUrl;
   private final ObjectMapper objectMapper;
+  private final HttpTransport httpTransport;
 
-  OpenIdConnectClient(
+  private OpenIdConnectClient(
       String clientId,
       String clientSecret,
       String tokenUrl,
       String authorizeUrl,
-      String userInfoUrl)
+      String userInfoUrl,
+      HttpTransport httpTransport)
       throws IOException {
     this.userInfoUrl = userInfoUrl;
-    this.codeFlow = newAuthCodeFlow(clientId, clientSecret, tokenUrl, authorizeUrl);
+    this.httpTransport = httpTransport;
+    this.codeFlow = newAuthCodeFlow(clientId, clientSecret, tokenUrl, authorizeUrl, httpTransport);
     this.objectMapper = new ObjectMapper();
   }
 
@@ -60,8 +63,7 @@ public class OpenIdConnectClient {
    * href="https://openid.net/specs/openid-connect-core-1_0.html#UserInfo">OIDC UserInfo</a>
    */
   public JsonNode fetchUserInfo(String accessToken) throws IOException {
-    HttpResponse response =
-        executeGet(DEFAULT_HTTP_TRANSPORT, accessToken, new GenericUrl(userInfoUrl));
+    HttpResponse response = executeGet(httpTransport, accessToken, new GenericUrl(userInfoUrl));
     return objectMapper.readTree(response.getContentEncoding());
   }
 
@@ -72,11 +74,15 @@ public class OpenIdConnectClient {
 
   /** Helper method to create a {@link AuthorizationCodeFlow}. */
   private static AuthorizationCodeFlow newAuthCodeFlow(
-      String clientId, String clientSecret, String tokenUrl, String authorizeUrl)
+      String clientId,
+      String clientSecret,
+      String tokenUrl,
+      String authorizeUrl,
+      HttpTransport httpTransport)
       throws IOException {
     return new AuthorizationCodeFlow.Builder(
             BearerToken.queryParameterAccessMethod(),
-            DEFAULT_HTTP_TRANSPORT,
+            httpTransport,
             DEFAULT_JACKSON_FACTORY,
             new GenericUrl(tokenUrl),
             new BasicAuthentication(clientId, clientSecret),
@@ -92,5 +98,62 @@ public class OpenIdConnectClient {
         new Credential(BearerToken.authorizationHeaderAccessMethod()).setAccessToken(accessToken);
     HttpRequestFactory requestFactory = transport.createRequestFactory(credential);
     return requestFactory.buildGetRequest(url).execute();
+  }
+
+  public static class Builder {
+    private String clientId;
+    private String clientSecret;
+    private String tokenUrl;
+    private String authorizeUrl;
+    private String userInfoUrl;
+    private HttpTransport httpTransport;
+
+    private Builder() {}
+
+    /** Builder for {@link OpenIdConnectClient}. */
+    public static Builder newBuilder() {
+      return new Builder();
+    }
+
+    public Builder setClientId(String clientId) {
+      this.clientId = clientId;
+      return this;
+    }
+
+    public Builder setClientSecret(String clientSecret) {
+      this.clientSecret = clientSecret;
+      return this;
+    }
+
+    public Builder setTokenUrl(String tokenUrl) {
+      this.tokenUrl = tokenUrl;
+      return this;
+    }
+
+    public Builder setAuthorizeUrl(String authorizeUrl) {
+      this.authorizeUrl = authorizeUrl;
+      return this;
+    }
+
+    public Builder setUserInfoUrl(String userInfoUrl) {
+      this.userInfoUrl = userInfoUrl;
+      return this;
+    }
+
+    public Builder setHttpTransport(HttpTransport httpTransport) {
+      this.httpTransport = httpTransport;
+      return this;
+    }
+
+    public OpenIdConnectClient build() throws IOException {
+      checkNotNull(clientId, String.format("Missing clientId"));
+      checkNotNull(clientSecret, String.format("Missing clientSecret"));
+      checkNotNull(tokenUrl, String.format("Missing tokenUrl"));
+      checkNotNull(authorizeUrl, String.format("Missing authorizeUrl"));
+      checkNotNull(userInfoUrl, String.format("Missing userInfoUrl"));
+      checkNotNull(httpTransport, String.format("Missing httpTransport"));
+      return new OpenIdConnectClient(
+          clientId, clientSecret, tokenUrl, authorizeUrl, userInfoUrl, httpTransport);
+    }
   }
 }

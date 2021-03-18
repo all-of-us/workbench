@@ -12,11 +12,13 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.auth.oauth2.TokenResponse;
+import com.google.api.client.http.HttpTransport;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Random;
+import javax.inject.Provider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -85,6 +87,8 @@ public class RasLinkServiceTest {
   @Autowired private UserService userService;
   @Autowired private UserDao userDao;
   @Mock private static OpenIdConnectClient mockOidcClient;
+  @Mock private static Provider<OpenIdConnectClient> mockOidcClientProvider;
+  @Mock private static HttpTransport mockHttpTransport;
 
   @TestConfiguration
   @Import({
@@ -110,6 +114,17 @@ public class RasLinkServiceTest {
     }
 
     @Bean
+    HttpTransport httpTransport() {
+      return mockHttpTransport;
+    }
+
+    @Bean
+    @Qualifier(RAS_OIDC_CLIENT)
+    Provider<OpenIdConnectClient> rasOidcClientProvider() {
+      return mockOidcClientProvider;
+    }
+
+    @Bean
     @Qualifier(RAS_OIDC_CLIENT)
     OpenIdConnectClient rasOidcClient() {
       return mockOidcClient;
@@ -128,11 +143,9 @@ public class RasLinkServiceTest {
     }
   }
 
-  @Mock private OpenIdConnectClient mockRasOidcClient;
-
   @Before
   public void setUp() throws Exception {
-    rasLinkService = new RasLinkService(userService, mockRasOidcClient);
+    when(mockOidcClientProvider.get()).thenReturn(mockOidcClient);
 
     currentUser = new DbUser();
     currentUser.setUsername("mock@mock.com");
@@ -143,9 +156,9 @@ public class RasLinkServiceTest {
 
   @Test
   public void testLinkRasSuccess() throws Exception {
-    when(mockRasOidcClient.codeExchange(AUTH_CODE, REDIRECT_URL, RAS_AUTH_CODE_SCOPES))
+    when(mockOidcClient.codeExchange(AUTH_CODE, REDIRECT_URL, RAS_AUTH_CODE_SCOPES))
         .thenReturn(TOKEN_RESPONSE_IAL2);
-    when(mockRasOidcClient.fetchUserInfo(ACCESS_TOKEN))
+    when(mockOidcClient.fetchUserInfo(ACCESS_TOKEN))
         .thenReturn(objectMapper.readTree(USER_INFO_JSON_LOGIN_GOV));
     rasLinkService.linkRasLoginGovAccount(AUTH_CODE, REDIRECT_URL);
 
@@ -156,10 +169,8 @@ public class RasLinkServiceTest {
 
   @Test
   public void testLinkRasFail_ial1() throws Exception {
-    when(mockRasOidcClient.codeExchange(AUTH_CODE, REDIRECT_URL, RAS_AUTH_CODE_SCOPES))
+    when(mockOidcClient.codeExchange(AUTH_CODE, REDIRECT_URL, RAS_AUTH_CODE_SCOPES))
         .thenReturn(TOKEN_RESPONSE_IAL1);
-    when(mockRasOidcClient.fetchUserInfo(ACCESS_TOKEN))
-        .thenReturn(objectMapper.readTree(USER_INFO_JSON_LOGIN_GOV));
     assertThrows(
         ForbiddenException.class,
         () -> rasLinkService.linkRasLoginGovAccount(AUTH_CODE, REDIRECT_URL));
@@ -167,9 +178,9 @@ public class RasLinkServiceTest {
 
   @Test
   public void testLinkRasFail_notLoginGov() throws Exception {
-    when(mockRasOidcClient.codeExchange(AUTH_CODE, REDIRECT_URL, RAS_AUTH_CODE_SCOPES))
+    when(mockOidcClient.codeExchange(AUTH_CODE, REDIRECT_URL, RAS_AUTH_CODE_SCOPES))
         .thenReturn(TOKEN_RESPONSE_IAL2);
-    when(mockRasOidcClient.fetchUserInfo(ACCESS_TOKEN))
+    when(mockOidcClient.fetchUserInfo(ACCESS_TOKEN))
         .thenReturn(objectMapper.readTree(USER_INFO_JSON_ERA));
     assertThrows(
         ForbiddenException.class,

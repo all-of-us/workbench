@@ -33,6 +33,10 @@ public class RasLinkConstants {
   // The identifier that indicate users login using login.gov account.
   static final String LOGIN_GOV_IDENTIFIER_LOWER_CASE = "@login.gov";
 
+  // The prefix in ACR claim that we can use to identify user IAL status.
+  // ACR_CLAIM_IAL_PREFIX + {1/2} is the user's IAL tier.
+  static final String ACR_CLAIM_IAL_PREFIX = "stsstg.nih.gov/assurance/ial/";
+
   // The required scopes to finish RAS OAuth flow, and get enough information AoU needs.
   static final Set<String> RAS_AUTH_CODE_SCOPES = ImmutableSet.of("ga4gh_passport_v1");
 }
