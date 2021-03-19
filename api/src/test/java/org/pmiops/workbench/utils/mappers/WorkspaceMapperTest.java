@@ -169,7 +169,7 @@ public class WorkspaceMapperTest {
     assertThat(ws.getGoogleBucketName()).isEqualTo(FIRECLOUD_BUCKET_NAME);
     assertThat(ws.getBillingAccountName()).isEqualTo(BILLING_ACCOUNT_NAME);
     assertThat(ws.getAccessTierShortName()).isEqualTo(ACCESS_TIER_SHORT_NAME);
-    assertThat(ws.getAccessTierShortName()).isEqualTo(ACCESS_TIER_SHORT_NAME);
+    assertThat(ws.getGoogleProject()).isEqualTo(GOOGLE_PROJECT);
 
     final ResearchPurpose rp = ws.getResearchPurpose();
     assertResearchPurposeMatches(rp);
