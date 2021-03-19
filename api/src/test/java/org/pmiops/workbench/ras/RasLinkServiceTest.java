@@ -102,6 +102,7 @@ public class RasLinkServiceTest {
     DirectoryService.class,
     UserServiceAuditor.class,
     FreeTierBillingService.class,
+    HttpTransport.class,
   })
   static class Configuration {
     @Bean
@@ -112,17 +113,6 @@ public class RasLinkServiceTest {
     @Bean
     Random random() {
       return new FakeLongRandom(123);
-    }
-
-    @Bean
-    HttpTransport httpTransport() {
-      return mockHttpTransport;
-    }
-
-    @Bean
-    @Qualifier(RAS_OIDC_CLIENT)
-    Provider<OpenIdConnectClient> rasOidcClientProvider() {
-      return mockOidcClientProvider;
     }
 
     @Bean

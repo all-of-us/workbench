@@ -124,7 +124,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final UserDao userDao;
   private final UserService userService;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
-  private final Provider<RasLinkService> rasLinkServiceProvider;
+  private final RasLinkService rasLinkService;
 
   @Autowired
   ProfileController(
@@ -147,7 +147,7 @@ public class ProfileController implements ProfileApiDelegate {
       UserDao userDao,
       UserService userService,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
-      Provider<RasLinkService> rasLinkServiceProvider) {
+      RasLinkService rasLinkService) {
     this.actionAuditQueryService = actionAuditQueryService;
     this.captchaVerificationService = captchaVerificationService;
     this.clock = clock;
@@ -167,7 +167,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.userService = userService;
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.rasLinkServiceProvider = rasLinkServiceProvider;
+    this.rasLinkService = rasLinkService;
   }
 
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {
@@ -618,9 +618,7 @@ public class ProfileController implements ProfileApiDelegate {
   @Override
   public ResponseEntity<Profile> linkRasAccount(RasLinkRequestBody body) {
     DbUser dbUser =
-        rasLinkServiceProvider
-            .get()
-            .linkRasLoginGovAccount(body.getAuthCode(), body.getRedirectUrl());
+        rasLinkService.linkRasLoginGovAccount(body.getAuthCode(), body.getRedirectUrl());
     return ResponseEntity.ok(profileService.getProfile(dbUser));
   }
 }
