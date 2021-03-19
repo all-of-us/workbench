@@ -179,6 +179,7 @@ public class WgsCohortExtractionServiceTest {
 
   @Test
   public void submitExtractionJob_outputVcfsInCorrectBucket() throws ApiException {
+    when(mockCohortService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of("1"));
     wgsCohortExtractionService.submitGenomicsCohortExtractionJob(targetWorkspace, 1l);
 
     ArgumentCaptor<FirecloudMethodConfiguration> argument =
