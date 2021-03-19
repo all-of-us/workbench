@@ -365,7 +365,7 @@ paths:
           description: Bad request
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/link-ras-account":
+  "/v1/user/link-ras-account":
     post:
       tags:
       - profile
@@ -375,7 +375,7 @@ paths:
       operationId: linkRasAccount
       parameters:
       - in: body
-        name: authcode
+        name: rasLinkRequestBody
         description: The authorization code from RAS.
         schema:
           "$ref": "#/definitions/RasLinkRequestBody"
@@ -5181,12 +5181,17 @@ definitions:
   RasLinkRequestBody:
     required:
     - authCode
+    - redirectUrl
     type: object
     properties:
       authCode:
         type: string
         description: 'the standard OAuth authorization code from RAS that we can use to exchange
         access token.'
+      redirectUrl:
+        type: string
+        description: 'The redirect url that was used when generating the authorization code.'
+        example: "https://all-of-us-workbench-test.appspot.com/ras-callback"
   AdminTableUser:
     type: object
     properties:
