@@ -54,7 +54,7 @@ public class CohortService {
                         .addSearchParametersItem(
                             new SearchParameter()
                                 .domain(Domain.WHOLE_GENOME_VARIANT.toString())
-                                .type("PPI")
+                                .type(CriteriaType.PPI.toString())
                                 .group(false)))));
     final QueryJobConfiguration participantIdQuery =
         cohortQueryBuilder.buildParticipantIdQuery(new ParticipantCriteria(searchRequest));
