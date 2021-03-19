@@ -17,7 +17,9 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
+import org.springframework.stereotype.Service;
 
+@Service
 public class RdrTaskQueue {
   private static final Logger log = Logger.getLogger(RdrTaskQueue.class.getName());
   private static final String BASE_PATH = "/v1/cloudTask";

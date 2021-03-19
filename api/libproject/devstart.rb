@@ -1949,7 +1949,7 @@ def backfill_workspaces_to_rdr(cmd_name, *args)
 
   hasLimit = op.opts.limit ? "--limit=#{op.opts.limit}" : nil
   isDryRun = op.opts.dry_run ? "--dry-run" : nil
-  flags = [hasLimit, isDryRun].map{ |v| v && "'#{v}'" }.select{ |v| v != nil }
+  flags = [hasLimit, isDryRun].map{ |v| v && "'#{v}'" }.select{ |v| !v.nil? }
   gradleCommand = %W{
     gradle backfillWorkspacesToRdr
    -PappArgs=[#{flags.join(',')}]}
