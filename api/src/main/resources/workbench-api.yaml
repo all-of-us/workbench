@@ -5171,6 +5171,7 @@ definitions:
       redirectUrl:
         type: string
         description: 'The redirect url that was used when generating the authorization code.'
+        example: "https://all-of-us-workbench-test.appspot.com/ras-callback"
   AdminTableUser:
     type: object
     properties:

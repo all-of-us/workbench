@@ -146,12 +146,12 @@ public class OpenIdConnectClient {
     }
 
     public OpenIdConnectClient build() throws IOException {
-      checkNotNull(clientId, String.format("Missing clientId"));
-      checkNotNull(clientSecret, String.format("Missing clientSecret"));
-      checkNotNull(tokenUrl, String.format("Missing tokenUrl"));
-      checkNotNull(authorizeUrl, String.format("Missing authorizeUrl"));
-      checkNotNull(userInfoUrl, String.format("Missing userInfoUrl"));
-      checkNotNull(httpTransport, String.format("Missing httpTransport"));
+      checkNotNull(clientId, "Missing clientId");
+      checkNotNull(clientSecret, "Missing clientSecret");
+      checkNotNull(tokenUrl, "Missing tokenUrl");
+      checkNotNull(authorizeUrl, "Missing authorizeUrl");
+      checkNotNull(userInfoUrl, "Missing userInfoUrl");
+      checkNotNull(httpTransport, "Missing httpTransport");
       return new OpenIdConnectClient(
           clientId, clientSecret, tokenUrl, authorizeUrl, userInfoUrl, httpTransport);
     }

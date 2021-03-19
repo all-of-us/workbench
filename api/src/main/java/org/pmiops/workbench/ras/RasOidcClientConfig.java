@@ -31,18 +31,16 @@ public class RasOidcClientConfig {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       @Qualifier(RAS_HTTP_TRANSPORT) HttpTransport httpTransport)
       throws IOException {
+    String rasHost = workbenchConfigProvider.get().ras.host;
     String rasClientSecret = cloudStorageClient.getCredentialsBucketString(RAS_SECRET_BUCKET_NAME);
     String rasClientId = workbenchConfigProvider.get().ras.clientId;
-    String rasTokenUrl = workbenchConfigProvider.get().ras.host + TOKEN_URL_SUFFIX;
-    String rasAuthorizeUrl = workbenchConfigProvider.get().ras.host + AUTHORIZE_URL_SUFFIX;
-    String rasUserInfoUrl = workbenchConfigProvider.get().ras.host + USER_INFO_URL_SUFFIX;
 
     return OpenIdConnectClient.Builder.newBuilder()
         .setClientId(rasClientId)
         .setClientSecret(rasClientSecret)
-        .setAuthorizeUrl(rasAuthorizeUrl)
-        .setTokenUrl(rasTokenUrl)
-        .setUserInfoUrl(rasUserInfoUrl)
+        .setAuthorizeUrl(rasHost + AUTHORIZE_URL_SUFFIX)
+        .setTokenUrl(rasHost + TOKEN_URL_SUFFIX)
+        .setUserInfoUrl(rasHost + USER_INFO_URL_SUFFIX)
         .setHttpTransport(httpTransport)
         .build();
   }

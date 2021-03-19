@@ -2,7 +2,7 @@ package org.pmiops.workbench.ras;
 
 import static org.pmiops.workbench.ras.OpenIdConnectClient.decodedJwt;
 import static org.pmiops.workbench.ras.RasLinkConstants.ACR_CLAIM;
-import static org.pmiops.workbench.ras.RasLinkConstants.ACR_CLAIM_IAL_PREFIX;
+import static org.pmiops.workbench.ras.RasLinkConstants.ACR_CLAIM_IAL_2_IDENTIFIER;
 import static org.pmiops.workbench.ras.RasLinkConstants.EMAIl_FIELD_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.Id_TOKEN_FIELD_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.LOGIN_GOV_IDENTIFIER_LOWER_CASE;
@@ -13,10 +13,9 @@ import static org.pmiops.workbench.ras.RasOidcClientConfig.RAS_OIDC_CLIENT;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.inject.Provider;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
@@ -123,13 +122,7 @@ public class RasLinkService {
 
   /** Validates user has IAL2 setup. See class javadoc Step2 for more details. */
   static boolean isIal2(String acrClaim) {
-    Pattern p = Pattern.compile(ACR_CLAIM_IAL_PREFIX + "\\d", Pattern.CASE_INSENSITIVE);
-    Matcher m = p.matcher(acrClaim);
-    if (m.find()) {
-      return m.group().equals(ACR_CLAIM_IAL_PREFIX + "2");
-    }
-    throw new ServerErrorException(
-        String.format("Invalid acl Claim in OIDC id token for %s", acrClaim));
+    return Arrays.asList(acrClaim.split(" ")).contains(ACR_CLAIM_IAL_2_IDENTIFIER);
   }
 
   /**
