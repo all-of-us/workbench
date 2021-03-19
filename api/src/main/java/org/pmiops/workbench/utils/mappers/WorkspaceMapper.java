@@ -132,6 +132,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceActiveStatusEnum", ignore = true)
   @Mapping(target = "workspaceId", ignore = true)
   @Mapping(target = "workspaceNamespace", ignore = true)
+  @Mapping(target = "googleProject", ignore = true)
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
 

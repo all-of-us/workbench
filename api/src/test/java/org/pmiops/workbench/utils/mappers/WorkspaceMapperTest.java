@@ -51,6 +51,7 @@ public class WorkspaceMapperTest {
   private static final String WORKSPACE_AOU_NAME = "studyallthethings";
   private static final String WORKSPACE_FIRECLOUD_NAME = "aaaa-bbbb-cccc-dddd";
   private static final String BILLING_ACCOUNT_NAME = "billing-account";
+  private static final String GOOGLE_PROJECT = "google_project";
 
   private static final Timestamp DB_CREATION_TIMESTAMP =
       Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
@@ -95,7 +96,7 @@ public class WorkspaceMapperTest {
             .bucketName(FIRECLOUD_BUCKET_NAME)
             .createdBy(CREATOR_EMAIL)
             .namespace(FIRECLOUD_NAMESPACE)
-            .name(WORKSPACE_FIRECLOUD_NAME);
+            .name(WORKSPACE_FIRECLOUD_NAME).googleProject(GOOGLE_PROJECT);
 
     final DbUser creatorUser = new DbUser();
     creatorUser.setUsername(CREATOR_EMAIL);
@@ -151,6 +152,7 @@ public class WorkspaceMapperTest {
     sourceDbWorkspace.setResearchOutcomeEnumSet(RESEARCH_OUTCOMES);
     sourceDbWorkspace.setDisseminateResearchEnumSet(Collections.emptySet());
     sourceDbWorkspace.setDisseminateResearchOther(DISSEMINATE_FINDINGS_OTHER);
+    sourceDbWorkspace.setGoogleProject(GOOGLE_PROJECT);
   }
 
   @Test
@@ -166,6 +168,7 @@ public class WorkspaceMapperTest {
     assertThat(ws.getCreator()).isEqualTo(CREATOR_EMAIL);
     assertThat(ws.getGoogleBucketName()).isEqualTo(FIRECLOUD_BUCKET_NAME);
     assertThat(ws.getBillingAccountName()).isEqualTo(BILLING_ACCOUNT_NAME);
+    assertThat(ws.getAccessTierShortName()).isEqualTo(ACCESS_TIER_SHORT_NAME);
     assertThat(ws.getAccessTierShortName()).isEqualTo(ACCESS_TIER_SHORT_NAME);
 
     final ResearchPurpose rp = ws.getResearchPurpose();
