@@ -130,8 +130,6 @@ function mapMenuItem(item: CriteriaMenu) {
   };
 }
 
-const sortMenuItems = (a, b) => a.sortOrder - b.sortOrder;
-
 interface Props {
   groups: Array<any>;
   setSearchContext: (context: any) => void;
@@ -190,13 +188,13 @@ const SearchGroupList = fp.flow(withCurrentWorkspace(), withCdrVersions())(
           const option = mapMenuItem(item);
           if (option.group) {
             const children = await cohortBuilderApi().findCriteriaMenu(+cdrVersionId, option.id);
-            option.children = children.items.map(mapMenuItem).sort(sortMenuItems);
+            option.children = children.items.map(mapMenuItem);
           }
           return option;
         }));
         criteriaMenuOptions[cdrVersionId] = {
-          programTypes: menuOptions.filter(opt => opt.category === 'Program Data').sort(sortMenuItems),
-          domainTypes: menuOptions.filter(opt => opt.category === 'Domains').sort(sortMenuItems)
+          programTypes: menuOptions.filter(opt => opt.category === 'Program Data'),
+          domainTypes: menuOptions.filter(opt => opt.category === 'Domains')
         };
         criteriaMenuOptionsStore.next(criteriaMenuOptions);
         this.setState({loadingMenuOptions: false});
