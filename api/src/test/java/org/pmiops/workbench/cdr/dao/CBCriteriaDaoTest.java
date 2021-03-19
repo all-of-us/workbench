@@ -9,7 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.model.DbCriteria;
-import org.pmiops.workbench.cdr.model.DbMenuOption;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
@@ -324,55 +323,6 @@ public class CBCriteriaDaoTest {
   public void findDomainCountOnCode() {
     assertThat(cbCriteriaDao.findDomainCountOnCode("120", Domain.CONDITION.toString()))
         .isEqualTo(2);
-  }
-
-  @Test
-  public void findMenuOptions() {
-    List<DbMenuOption> options = cbCriteriaDao.findMenuOptions();
-    DbMenuOption option1 = options.get(0);
-    assertThat(option1.getDomain()).isEqualTo(Domain.CONDITION.toString());
-    assertThat(option1.getType()).isEqualTo("ICD10CM");
-    assertThat(option1.getStandard()).isFalse();
-
-    DbMenuOption option2 = options.get(1);
-    assertThat(option2.getDomain()).isEqualTo(Domain.CONDITION.toString());
-    assertThat(option2.getType()).isEqualTo("ICD9CM");
-    assertThat(option2.getStandard()).isFalse();
-
-    DbMenuOption option3 = options.get(2);
-    assertThat(option3.getDomain()).isEqualTo(Domain.CONDITION.toString());
-    assertThat(option3.getType()).isEqualTo("SNOMED");
-    assertThat(option3.getStandard()).isTrue();
-
-    DbMenuOption option4 = options.get(3);
-    assertThat(option4.getDomain()).isEqualTo(Domain.MEASUREMENT.toString());
-    assertThat(option4.getType()).isEqualTo("LOINC");
-    assertThat(option4.getStandard()).isTrue();
-
-    DbMenuOption option5 = options.get(4);
-    assertThat(option5.getDomain()).isEqualTo(Domain.PERSON.toString());
-    assertThat(option5.getType()).isEqualTo("ETHNICITY");
-    assertThat(option5.getStandard()).isTrue();
-
-    DbMenuOption option6 = options.get(5);
-    assertThat(option6.getDomain()).isEqualTo(Domain.PERSON.toString());
-    assertThat(option6.getType()).isEqualTo("GENDER");
-    assertThat(option6.getStandard()).isTrue();
-
-    DbMenuOption option7 = options.get(6);
-    assertThat(option7.getDomain()).isEqualTo(Domain.PERSON.toString());
-    assertThat(option7.getType()).isEqualTo("RACE");
-    assertThat(option7.getStandard()).isTrue();
-
-    DbMenuOption option8 = options.get(7);
-    assertThat(option8.getDomain()).isEqualTo(Domain.PERSON.toString());
-    assertThat(option8.getType()).isEqualTo("SEX");
-    assertThat(option8.getStandard()).isTrue();
-
-    DbMenuOption option9 = options.get(8);
-    assertThat(option9.getDomain()).isEqualTo(Domain.SURVEY.toString());
-    assertThat(option9.getType()).isEqualTo("PPI");
-    assertThat(option9.getStandard()).isFalse();
   }
 
   @Test
