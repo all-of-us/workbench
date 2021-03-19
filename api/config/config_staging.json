@@ -26,7 +26,6 @@
     "projectNamePrefix": "aou-rw-staging-",
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "retryCount": 2,
-    "bufferCapacity": 50,
     "bufferCapacityPerTier": {
       "registered": 50
     },
@@ -49,11 +48,17 @@
   },
   "wgsCohortExtraction": {
     "serviceAccount": "wgs-cohort-extraction@all-of-us-rw-staging.iam.gserviceaccount.com",
-    "operationalTerraWorkspaceNamespace": "",
-    "operationalTerraWorkspaceName": "",
+    "serviceAccountTerraProxyGroup": "PROXY_112406122740824430926@firecloud.org",
+    "operationalTerraWorkspaceNamespace": "aouwgscohortextraction-staging",
+    "operationalTerraWorkspaceName": "aouwgscohortextractionstaging",
+    "operationalTerraWorkspaceBucket": "fc-c143d305-0ffd-4ca5-b585-9b222691da6c",
+    "extractionPetServiceAccount": "pet-112406122740824430926@aouwgscohortextraction-staging.iam.gserviceaccount.com",
     "extractionMethodConfigurationNamespace": "",
     "extractionMethodConfigurationName": "",
-    "extractionMethodConfigurationVersion": 1
+    "extractionMethodConfigurationVersion": 1,
+    "extractionCohortsDataset": "",
+    "extractionDestinationDataset": "",
+    "extractionTempTablesDataset": ""
   },
   "cdr": {
     "debugQueries": true
@@ -107,13 +112,14 @@
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
+    "unsafeAllowAccessToAllTiersForRegisteredUsers": false,
     "enableRdrExport": true,
     "enableBillingUpgrade": true,
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableReportingUploadCron": true,
-    "enableRasLinking": false
+    "enableRasLoginGovLinking": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",
@@ -132,5 +138,9 @@
   "reporting": {
     "dataset": "reporting_staging",
     "maxRowsPerInsert": 2500
+  },
+  "ras": {
+    "host": "",
+    "clientId": ""
   }
 }

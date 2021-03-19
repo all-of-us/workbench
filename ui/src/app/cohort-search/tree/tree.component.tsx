@@ -5,6 +5,7 @@ import {SearchBar} from 'app/cohort-search/search-bar/search-bar.component';
 import {ppiSurveys} from 'app/cohort-search/search-state.service';
 import {TreeNode} from 'app/cohort-search/tree-node/tree-node.component';
 import {ClrIcon} from 'app/components/icons';
+import {CheckBox} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -75,7 +76,19 @@ const styles = reactStyles({
     overflow: 'auto',
     border: `1px solid ${colorWithWhiteness(colors.black, 0.8)}`,
     borderTop: 'none'
-  }
+  },
+  orCircle: {
+    backgroundColor: colors.primary,
+    borderRadius: '50%',
+    color: colors.white,
+    width: '1.25rem',
+    height: '1.25rem',
+    margin: '0.5rem 2rem',
+    lineHeight: '1.25rem',
+    textAlign: 'center',
+    fontSize: '11px',
+    fontWeight: 600
+  },
 });
 
 const scrollbarCSS = `
@@ -89,6 +102,17 @@ const scrollbarCSS = `
     box-shadow: 0 0 1px rgba(255, 255, 255, .5);
   }
 `;
+
+const ANY_PM_SELECTION = {
+  parameterId: 'hasAnyPM',
+  domainId: Domain.PHYSICALMEASUREMENT.toString(),
+  group: false,
+  hasAncestorData: false,
+  isStandard: false,
+  name: 'Has Any Physical Measurements Data',
+  type: CriteriaType.PPI.toString(),
+  attributes: []
+};
 
 interface Props {
   autocompleteSelection: any;
@@ -113,6 +137,7 @@ interface State {
   autocompleteSelection: any;
   children: any;
   error: boolean;
+  hasAnyPM: boolean;
   ingredients: any;
   loading: boolean;
 }
@@ -125,17 +150,23 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       autocompleteSelection: undefined,
       children: undefined,
       error: false,
+      hasAnyPM: false,
       ingredients: undefined,
       loading: true,
     };
   }
 
   componentDidMount(): void {
+    const {node: {domainId}, selectedIds} = this.props;
     this.loadRootNodes();
+    if (domainId === Domain.PHYSICALMEASUREMENT.toString() && selectedIds.length) {
+      // Set hasAnyPM if editing a PM item
+      this.setState({hasAnyPM: selectedIds.includes(ANY_PM_SELECTION.parameterId)});
+    }
   }
 
   componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any) {
-    const {concept, node: {domainId}, source} = this.props;
+    const {concept, node: {domainId}, selectedIds, source} = this.props;
     if (source === 'conceptSetDetails') {
       if (prevProps.concept !== concept) {
         const {cdrVersionId} = (currentWorkspaceStore.getValue());
@@ -148,6 +179,10 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
           }
         }
       }
+    }
+    if (domainId === Domain.PHYSICALMEASUREMENT.toString() && prevProps.selectedIds !== selectedIds) {
+      // Check for hasAnyPM changes if in PM tree and selections have changed
+      this.setState({hasAnyPM: selectedIds.includes(ANY_PM_SELECTION.parameterId)});
     }
   }
 
@@ -285,16 +320,23 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
     return source !== 'cohort' && selectedIds && selectedIds.length >= 1000;
   }
 
+  onHasAnyPMChange() {
+    currentCohortCriteriaStore.next([]);
+    if (!this.state.hasAnyPM) {
+      // timeout allows selections to clear before adding ANY_PM_SELECTION
+      setTimeout(() => this.props.select(ANY_PM_SELECTION));
+    }
+  }
+
   render() {
     const {
       autocompleteSelection, back, groupSelections, node, scrollToMatch, searchTerms,
-      select, selectedIds, selectOption, setAttributes, setSearchTerms
+      select, selectedIds, selectOption, setAttributes, setSearchTerms, source
     } = this.props;
-    const {children, error, ingredients, loading} = this.state;
+    const {children, error, hasAnyPM, ingredients, loading} = this.state;
     return <React.Fragment>
       <style>{scrollbarCSS}</style>
-      {this.selectIconDisabled() &&
-      <div style={{color: colors.warning, fontWeight: 'bold', maxWidth: '1000px'}}>
+      {this.selectIconDisabled() && <div style={{color: colors.warning, fontWeight: 'bold', maxWidth: '1000px'}}>
         NOTE: Concept Set can have only 1000 concepts. Please delete some concepts before adding
         more.
       </div>}
@@ -321,16 +363,25 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
           Sorry, the request cannot be completed. Please try again or contact Support in the left hand navigation
         </div>}
         <div style={this.showHeader ? styles.node : {...styles.node, border: 'none'}} className='show-scrollbar'>
-          {!!children && children.map((child, c) => this.showNode(child) && <TreeNode key={c}
-                                                                                      source={this.props.source}
-                                                                                      autocompleteSelection={autocompleteSelection}
-                                                                                      groupSelections={groupSelections}
-                                                                                      node={child}
-                                                                                      scrollToMatch={scrollToMatch}
-                                                                                      searchTerms={searchTerms}
-                                                                                      select={(s) => select(s)}
-                                                                                      selectedIds={selectedIds}
-                                                                                      setAttributes={setAttributes}/>)}
+          {node.domainId === Domain.PHYSICALMEASUREMENT.toString() && <div style={{margin: '0.5rem 0 0 0.5rem'}}>
+            <CheckBox manageOwnState={false}
+                      checked={hasAnyPM}
+                      onChange={() => this.onHasAnyPMChange()}/>
+            <span style={{color: colors.primary, marginLeft: '0.5rem'}}>Has Any Physical Measurements Data</span>
+            {!hasAnyPM && <div style={styles.orCircle}>OR</div>}
+          </div>}
+          {!!children && !hasAnyPM && children.map((child, c) => this.showNode(child) &&
+            <TreeNode key={c}
+                      source={source}
+                      autocompleteSelection={autocompleteSelection}
+                      groupSelections={groupSelections}
+                      node={child}
+                      scrollToMatch={scrollToMatch}
+                      searchTerms={searchTerms}
+                      select={(s) => select(s)}
+                      selectedIds={selectedIds}
+                      setAttributes={setAttributes}/>
+          )}
         </div>
       </div>}
       {loading && !this.showHeader && <SpinnerOverlay/>}

@@ -1,5 +1,7 @@
 package org.pmiops.workbench.firecloud;
 
+import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Duration;
@@ -80,19 +82,35 @@ public class FireCloudConfig {
     return apiClient;
   }
 
+  public static final String WGS_EXTRACTION_SA_CREDENTIALS = "WGS_EXTRACTION_SA_CREDENTIALS";
+
+  @Bean(name = WGS_EXTRACTION_SA_CREDENTIALS)
+  @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
+  public GoogleCredentials wgsExtractionAccessToken(
+      WorkbenchConfig workbenchConfig, IamCredentialsClient iamCredentialsClient) {
+    return GoogleCredentials.create(
+        new AccessToken(
+            iamCredentialsClient
+                .generateAccessToken(
+                    "projects/-/serviceAccounts/"
+                        + workbenchConfig.wgsCohortExtraction.serviceAccount,
+                    Collections.emptyList(),
+                    ImmutableList.<String>builder()
+                        .addAll(TERRA_SCOPES)
+                        .add("https://www.googleapis.com/auth/devstorage.read_write")
+                        .build(),
+                    Duration.newBuilder().setSeconds(60 * 10).build())
+                .getAccessToken(),
+            null));
+  }
+
   @Bean(name = WGS_COHORT_EXTRACTION_SERVICE_ACCOUNT_API_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
   public ApiClient wgsExtractionServiceAccountApiClient(
-      WorkbenchConfig workbenchConfig, IamCredentialsClient iamCredentialsClient) {
+      WorkbenchConfig workbenchConfig,
+      @Qualifier(WGS_EXTRACTION_SA_CREDENTIALS) GoogleCredentials credentials) {
     ApiClient apiClient = buildApiClient(workbenchConfig);
-    apiClient.setAccessToken(
-        iamCredentialsClient
-            .generateAccessToken(
-                "projects/-/serviceAccounts/" + workbenchConfig.wgsCohortExtraction.serviceAccount,
-                Collections.emptyList(),
-                TERRA_SCOPES,
-                Duration.newBuilder().setSeconds(60 * 10).build())
-            .getAccessToken());
+    apiClient.setAccessToken(credentials.getAccessToken().getTokenValue());
 
     return apiClient;
   }

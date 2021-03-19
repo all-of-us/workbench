@@ -87,7 +87,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   private static final String PERSON_ID_COLUMN_NAME = "PERSON_ID";
   private static final ImmutableList<Domain> OUTER_QUERY_DOMAIN =
       ImmutableList.of(
-          Domain.CONDITION, Domain.DRUG, Domain.MEASUREMENT, Domain.OBSERVATION, Domain.PROCEDURE);
+          Domain.CONDITION,
+          Domain.DRUG,
+          Domain.MEASUREMENT,
+          Domain.OBSERVATION,
+          Domain.PROCEDURE,
+          Domain.PHYSICAL_MEASUREMENT_CSS);
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {

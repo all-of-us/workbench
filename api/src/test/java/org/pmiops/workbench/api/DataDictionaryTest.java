@@ -11,6 +11,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.cdr.CdrVersionMapper;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -22,6 +24,7 @@ import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -33,6 +36,7 @@ import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +53,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class DataDictionaryTest {
 
+  @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
   @Autowired private DataSetController dataSetController;
@@ -57,14 +62,15 @@ public class DataDictionaryTest {
 
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
+  private static DbCdrVersion cdrVersion;
 
   @TestConfiguration
   @Import({
-    CdrVersionService.class,
     CommonMappers.class,
     DataSetController.class,
     DataSetServiceImpl.class,
-    DataSetMapperImpl.class
+    DataSetMapperImpl.class,
+    CdrVersionService.class,
   })
   @MockBean({
     BigQueryService.class,
@@ -77,7 +83,9 @@ public class DataDictionaryTest {
     ConceptSetMapper.class,
     FireCloudService.class,
     NotebooksService.class,
-    WorkspaceService.class
+    WorkspaceService.class,
+    AccessTierService.class,
+    CdrVersionMapper.class,
   })
   static class Configuration {
     @Bean
@@ -88,8 +96,7 @@ public class DataDictionaryTest {
 
   @Before
   public void setUp() {
-    DbCdrVersion cdrVersion = new DbCdrVersion();
-    cdrVersionDao.save(cdrVersion);
+    cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
 
     DbDataDictionaryEntry dataDictionaryEntry = new DbDataDictionaryEntry();
     dataDictionaryEntry.setCdrVersion(cdrVersion);
@@ -110,9 +117,6 @@ public class DataDictionaryTest {
   public void testGetDataDictionaryEntry() {
     final Domain domain = Domain.DRUG;
     final String domainValue = "FIELD NAME / DOMAIN VALUE";
-
-    DbCdrVersion cdrVersion = new DbCdrVersion();
-    cdrVersionDao.save(cdrVersion);
 
     DbDataDictionaryEntry dataDictionaryEntry = new DbDataDictionaryEntry();
     dataDictionaryEntry.setCdrVersion(cdrVersion);

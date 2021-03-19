@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -15,7 +14,7 @@ import {Spinner} from 'app/components/spinners';
 import {ResearchPurpose} from 'app/pages/workspace/research-purpose';
 import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCdrVersions, withUrlParams, withUserProfile} from 'app/utils';
+import {reactStyles, withCdrVersions, withUrlParams, withUserProfile} from 'app/utils';
 import {AuthorityGuardedAction, hasAuthorityForAction} from 'app/utils/authorities';
 import {getCdrVersion} from 'app/utils/cdr-versions';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -279,12 +278,3 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
     </div>;
   }
 });
-
-@Component({
-  template: '<div #root></div>'
-})
-export class WorkspaceAboutComponent extends ReactWrapperBase {
-  constructor() {
-    super(WorkspaceAbout, []);
-  }
-}

@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.List;
 import org.bitbucket.radistao.test.runner.BeforeAfterSpringTestRunner;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryBaseTest;
@@ -44,6 +45,7 @@ public class ConceptBigQueryServiceTest extends BigQueryBaseTest {
   }
 
   @Test
+  @Ignore("RW-5707")
   public void testGetConceptCountNoConceptsSaved() {
     DbConceptSetConceptId dbConceptSetConceptId1 =
         DbConceptSetConceptId.builder().addConceptId(6L).addStandard(true).build();

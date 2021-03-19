@@ -10,7 +10,7 @@ import {FadeBox} from 'app/components/containers';
 import {CopyModal} from 'app/components/copy-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SnowmanIcon} from 'app/components/icons';
-import {TextArea, TextInput, ValidationError} from 'app/components/inputs';
+import {TextAreaWithLengthValidationMessage, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -21,7 +21,6 @@ import colors from 'app/styles/colors';
 import {
   reactStyles,
   ReactWrapperBase,
-  summarizeErrors,
   withCurrentCohortSearchContext,
   withCurrentConcept,
   withCurrentWorkspace,
@@ -41,7 +40,7 @@ import {ConceptSet, CopyRequest, Criteria, Domain, ResourceType, WorkspaceAccess
 
 const styles = reactStyles({
   conceptSetHeader: {
-    display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingBottom: '1.5rem'
+    display: 'flex', flexDirection: 'row', justifyContent: 'space-between'
   },
   conceptSetTitle: {
     color: colors.primary, fontSize: 20, fontWeight: 600, marginBottom: '0.5rem',
@@ -52,7 +51,13 @@ const styles = reactStyles({
   },
   conceptSetData: {
     display: 'flex', flexDirection: 'row', color: colors.primary, fontWeight: 600
-  }
+  },
+  showMore: {
+    background: colors.white,
+    color: colors.accent,
+    cursor: 'pointer',
+    marginLeft: '0.25rem'
+  },
 });
 
 export interface ConceptSetMenuProps {
@@ -119,6 +124,7 @@ interface State {
   error: boolean;
   errorMessage: string;
   loading: boolean;
+  showMoreDescription: boolean;
   // Show if trying to navigate away with unsaved changes
   showUnsavedModal: boolean;
   unsavedChanges: boolean;
@@ -142,6 +148,7 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
         errorMessage: '',
         deleting: false,
         loading: this.isDetailPage,
+        showMoreDescription: false,
         showUnsavedModal: false,
         unsavedChanges: false
       };
@@ -273,13 +280,20 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
       }
     }
 
+    tooltipContent(errors) {
+      return !!errors ? <ul>
+        {errors.editName && <li>Name cannot be blank</li>}
+        {errors.editDescription && <li>Description cannot exceed 1000 characters</li>}
+      </ul> : '';
+    }
+
     render() {
       const {cohortContext, workspace: {accessLevel, cdrVersionId, id, namespace}} = this.props;
-      const {copying, conceptSet, editing, editDescription, editName, error, errorMessage, editSaving, deleting, loading, showUnsavedModal}
-        = this.state;
+      const {copying, conceptSet, editing, editDescription, editName, error, errorMessage, editSaving, deleting, loading,
+        showMoreDescription, showUnsavedModal} = this.state;
       const errors = validate(
-        {editName: editName},
-        {editName: {presence: {allowEmpty: false}}}
+        {editDescription, editName},
+        {editName: {presence: {allowEmpty: false}}, editDescription: {length: {maximum: 1000}}}
       );
       return <React.Fragment>
         <FadeBox style={{margin: 'auto', paddingTop: '1rem', width: '95.7%'}}>
@@ -300,17 +314,20 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
                                      id='edit-name'
                                      style={{marginBottom: '0.5rem'}} data-test-id='edit-name'
                                      onChange={v => this.setState({editName: v})}/>
-                          {errors && <ValidationError>
-                            {summarizeErrors( errors && errors.editName)}
-                          </ValidationError>}
-                          <TextArea value={editDescription} disabled={editSaving}
-                                    style={{marginBottom: '0.5rem'}} data-test-id='edit-description'
-                                    onChange={v => this.setState({editDescription: v})}/>
-                          <div style={{marginBottom: '0.5rem'}}>
+                          <TextAreaWithLengthValidationMessage initialText={editDescription}
+                                                               id='edit-description'
+                                                               textBoxStyleOverrides={{width: '100%'}}
+                                                               maxCharacters={1000}
+                                                               tooLongWarningCharacters={950}
+                                                               onChange={v => this.setState({editDescription: v})}/>
+                          <div style={{margin: '0.5rem 0'}}>
+                            <TooltipTrigger content={this.tooltipContent(errors)}
+                                            disabled={!errors}>
                             <Button type='primary' style={{marginRight: '0.5rem'}}
                                     data-test-id='save-edit-concept-set'
                                     disabled={editSaving || errors}
                                     onClick={() => this.submitEdits()}>Save</Button>
+                            </TooltipTrigger>
                             <Button type='secondary' disabled={editSaving}
                                     data-test-id='cancel-edit-concept-set'
                                     onClick={() => this.setState({
@@ -333,7 +350,16 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
                             </Clickable>
                           </div>
                           <div style={{marginBottom: '1.5rem', color: colors.primary}} data-test-id='concept-set-description'>
-                            {conceptSet.description}
+                            {showMoreDescription ?
+                              conceptSet.description :
+                              conceptSet.description.slice(0, 250)
+                            }
+                            {conceptSet.description.length > 250 &&
+                              <span style={styles.showMore}
+                                    onClick={() => this.setState({showMoreDescription: !showMoreDescription})}>
+                                Show {showMoreDescription ? 'less' : 'more'}
+                              </span>
+                            }
                           </div>
                         </React.Fragment>}
                       <div style={styles.conceptSetData}>

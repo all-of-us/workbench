@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
 import org.pmiops.workbench.actionaudit.ActionAuditService;
 import org.pmiops.workbench.actionaudit.ActionType;
@@ -125,7 +126,7 @@ public class WorkspaceAuditorTest {
             .billingAccountName("big-bux")
             .billingAccountType(BillingAccountType.FREE_TIER)
             .googleBucketName("bucket o' science")
-            .accessTierShortName("registered")
+            .accessTierShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
             .researchPurpose(researchPurpose1)
             .billingStatus(BillingStatus.ACTIVE)
             .creationTime(now)

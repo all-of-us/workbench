@@ -37,7 +37,7 @@ import org.pmiops.workbench.exceptions.UnauthorizedException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMembership.CreationStatusEnum;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
@@ -55,6 +55,7 @@ import org.pmiops.workbench.model.Institution;
 import org.pmiops.workbench.model.NihToken;
 import org.pmiops.workbench.model.PageVisit;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.RasLinkRequestBody;
 import org.pmiops.workbench.model.ResendWelcomeEmailRequest;
 import org.pmiops.workbench.model.UpdateContactEmailRequest;
 import org.pmiops.workbench.model.UserAuditLogQueryResponse;
@@ -64,6 +65,7 @@ import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.profile.DemographicSurveyMapper;
 import org.pmiops.workbench.profile.PageVisitMapper;
 import org.pmiops.workbench.profile.ProfileService;
+import org.pmiops.workbench.ras.RasLinkService;
 import org.pmiops.workbench.shibboleth.ShibbolethService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -106,7 +108,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final ActionAuditQueryService actionAuditQueryService;
   private final CaptchaVerificationService captchaVerificationService;
   private final Clock clock;
-  private final CloudStorageService cloudStorageService;
+  private final CloudStorageClient cloudStorageClient;
   private final DemographicSurveyMapper demographicSurveyMapper;
   private final DirectoryService directoryService;
   private final FireCloudService fireCloudService;
@@ -122,13 +124,14 @@ public class ProfileController implements ProfileApiDelegate {
   private final UserDao userDao;
   private final UserService userService;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
+  private final RasLinkService rasLinkService;
 
   @Autowired
   ProfileController(
       ActionAuditQueryService actionAuditQueryService,
       CaptchaVerificationService captchaVerificationService,
       Clock clock,
-      CloudStorageService cloudStorageService,
+      CloudStorageClient cloudStorageClient,
       DemographicSurveyMapper demographicSurveyMapper,
       DirectoryService directoryService,
       FireCloudService fireCloudService,
@@ -143,11 +146,12 @@ public class ProfileController implements ProfileApiDelegate {
       ShibbolethService shibbolethService,
       UserDao userDao,
       UserService userService,
-      VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
+      VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
+      RasLinkService rasLinkService) {
     this.actionAuditQueryService = actionAuditQueryService;
     this.captchaVerificationService = captchaVerificationService;
     this.clock = clock;
-    this.cloudStorageService = cloudStorageService;
+    this.cloudStorageClient = cloudStorageClient;
     this.demographicSurveyMapper = demographicSurveyMapper;
     this.directoryService = directoryService;
     this.fireCloudService = fireCloudService;
@@ -163,6 +167,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.userService = userService;
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.rasLinkService = rasLinkService;
   }
 
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {
@@ -608,5 +613,12 @@ public class ProfileController implements ProfileApiDelegate {
         Optional.ofNullable(beforeMillisNullable).map(Instant::ofEpochMilli).orElse(Instant.now());
     return ResponseEntity.ok(
         actionAuditQueryService.queryEventsForUser(userDatabaseId, limit, after, before));
+  }
+
+  @Override
+  public ResponseEntity<Profile> linkRasAccount(RasLinkRequestBody body) {
+    DbUser dbUser =
+        rasLinkService.linkRasLoginGovAccount(body.getAuthCode(), body.getRedirectUrl());
+    return ResponseEntity.ok(profileService.getProfile(dbUser));
   }
 }

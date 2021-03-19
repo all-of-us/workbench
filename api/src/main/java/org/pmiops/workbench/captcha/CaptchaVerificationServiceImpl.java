@@ -7,7 +7,7 @@ import javax.inject.Provider;
 import org.pmiops.workbench.captcha.api.CaptchaApi;
 import org.pmiops.workbench.captcha.model.CaptchaVerificationResponse;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +23,7 @@ public class CaptchaVerificationServiceImpl implements CaptchaVerificationServic
   // which will send the following as the hostName if successful
   final String googleTestHost = "testkey.google.com";
 
-  private CloudStorageService cloudStorageService;
+  private CloudStorageClient cloudStorageClient;
   final Provider<WorkbenchConfig> configProvider;
   private Provider<CaptchaApi> captchaApiProvider;
 
@@ -32,10 +32,10 @@ public class CaptchaVerificationServiceImpl implements CaptchaVerificationServic
 
   @Autowired
   public CaptchaVerificationServiceImpl(
-      CloudStorageService cloudStorageService,
+      CloudStorageClient cloudStorageClient,
       javax.inject.Provider<WorkbenchConfig> configProvider,
       javax.inject.Provider<CaptchaApi> captchaApiProvider) {
-    this.cloudStorageService = cloudStorageService;
+    this.cloudStorageClient = cloudStorageClient;
     this.configProvider = configProvider;
     this.captchaApiProvider = captchaApiProvider;
   }
@@ -51,7 +51,7 @@ public class CaptchaVerificationServiceImpl implements CaptchaVerificationServic
   @Override
   public boolean verifyCaptcha(String responseToken) throws ApiException {
     CaptchaVerificationResponse response =
-        captchaApiProvider.get().verify(cloudStorageService.getCaptchaServerKey(), responseToken);
+        captchaApiProvider.get().verify(cloudStorageClient.getCaptchaServerKey(), responseToken);
     if (!response.getSuccess()) {
       log.log(
           Level.WARNING,

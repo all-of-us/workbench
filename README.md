@@ -527,6 +527,6 @@ flexible [queries](api/docs/action-audit-queries.md). Read more about its design
 implementation in this [document](api/docs/action-audit.md).
 
 ### Workbench Reporting Dataset
-To support analytics, we have a reporting pipeline that exports data to a BigQuery dataset. See the [wiki](https://github.com/all-of-us/workbench/wiki/Workbench-Reporting-Dataset-(WRD) for details.
+To support analytics, we have a reporting pipeline that exports data to a BigQuery dataset. See the [wiki](https://github.com/all-of-us/workbench/wiki/Workbench-Reporting-Dataset-(WRD)) for details.
 
 

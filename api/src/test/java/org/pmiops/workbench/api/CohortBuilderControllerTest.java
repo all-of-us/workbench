@@ -16,11 +16,13 @@ import org.pmiops.workbench.cdr.cache.MySQLStopWords;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
+import org.pmiops.workbench.cdr.dao.CriteriaMenuDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
+import org.pmiops.workbench.cdr.model.DbCriteriaMenu;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.pmiops.workbench.cdr.model.DbSurveyModule;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
@@ -31,7 +33,7 @@ import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
@@ -61,12 +63,13 @@ public class CohortBuilderControllerTest {
 
   private CohortBuilderController controller;
   @Mock private BigQueryService bigQueryService;
-  @Mock private CloudStorageService cloudStorageService;
+  @Mock private CloudStorageClient cloudStorageClient;
   @Mock private CohortQueryBuilder cohortQueryBuilder;
   @Mock private CdrVersionService cdrVersionService;
   @Autowired private CBCriteriaDao cbCriteriaDao;
   @Autowired private CBCriteriaAttributeDao cbCriteriaAttributeDao;
   @Autowired private CBDataFilterDao cbDataFilterDao;
+  @Autowired private CriteriaMenuDao criteriaMenuDao;
   @Autowired private DomainInfoDao domainInfoDao;
   @Autowired private PersonDao personDao;
   @Autowired private SurveyModuleDao surveyModuleDao;
@@ -82,7 +85,7 @@ public class CohortBuilderControllerTest {
   @Before
   public void setUp() {
     ElasticSearchService elasticSearchService =
-        new ElasticSearchService(cbCriteriaDao, cloudStorageService, configProvider);
+        new ElasticSearchService(cbCriteriaDao, cloudStorageClient, configProvider);
 
     CohortBuilderService cohortBuilderService =
         new CohortBuilderServiceImpl(
@@ -90,6 +93,7 @@ public class CohortBuilderControllerTest {
             cohortQueryBuilder,
             cbCriteriaAttributeDao,
             cbCriteriaDao,
+            criteriaMenuDao,
             cbDataFilterDao,
             domainInfoDao,
             personDao,
@@ -102,6 +106,22 @@ public class CohortBuilderControllerTest {
 
     MySQLStopWords mySQLStopWords = new MySQLStopWords(Arrays.asList("about"));
     doReturn(mySQLStopWords).when(mySQLStopWordsProvider).get();
+  }
+
+  @Test
+  public void findCriteriaMenu() {
+    DbCriteriaMenu dbCriteriaMenu =
+        criteriaMenuDao.save(
+            DbCriteriaMenu.builder()
+                .addParentId(0L)
+                .addCategory("Program Data")
+                .addDomainId("Condition")
+                .addGroup(true)
+                .addName("Condition")
+                .addSortOrder(2L)
+                .build());
+    assertThat(controller.findCriteriaMenu(1L, 0L).getBody().getItems().get(0))
+        .isEqualTo(cohortBuilderMapper.dbModelToClient(dbCriteriaMenu));
   }
 
   @Test

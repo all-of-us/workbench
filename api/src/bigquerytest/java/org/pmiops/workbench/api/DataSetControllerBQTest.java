@@ -25,6 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
@@ -41,6 +42,7 @@ import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
@@ -58,7 +60,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.ArchivalStatus;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValue;
@@ -73,6 +74,7 @@ import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.test.TestBigQueryCdrSchemaConfig;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
 import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
@@ -94,8 +96,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   private static final String WORKSPACE_NAME = "name";
   private static final String DATASET_NAME = "Arbitrary Dataset v1.0";
 
-  private DataSetController controller;
-  private DataSetServiceImpl dataSetServiceImpl;
+  @Autowired private AccessTierDao accessTierDao;
   @Autowired private BigQueryService bigQueryService;
   @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   @Autowired private CdrVersionDao cdrVersionDao;
@@ -104,21 +105,23 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private CohortQueryBuilder cohortQueryBuilder;
   @Autowired private ConceptBigQueryService conceptBigQueryService;
   @Autowired private ConceptSetDao conceptSetDao;
+  @Autowired private DSLinkingDao dsLinkingDao;
   @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
   @Autowired private DataSetDao dataSetDao;
   @Autowired private DataSetMapperImpl dataSetMapper;
-  @Autowired private DSLinkingDao dsLinkingDao;
   @Autowired private FireCloudService fireCloudService;
   @Autowired private NotebooksService notebooksService;
-  @Autowired private TestWorkbenchConfig testWorkbenchConfig;
   @Autowired private Provider<DbUser> userProvider;
+  @Autowired private TestWorkbenchConfig testWorkbenchConfig;
+  @Autowired private WorkspaceDao workspaceDao;
+  @Autowired private WorkspaceService workspaceService;
 
   @Autowired
   @Qualifier(DatasetConfig.DATASET_PREFIX_CODE)
   Provider<String> prefixProvider;
 
-  @Autowired private WorkspaceDao workspaceDao;
-  @Autowired private WorkspaceService workspaceService;
+  private DataSetController controller;
+  private DataSetServiceImpl dataSetServiceImpl;
 
   private DbCdrVersion dbCdrVersion;
   private DbCohort dbCohort1;
@@ -161,6 +164,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     Provider.class,
     UserMapper.class,
     WorkspaceMapperImpl.class,
+    AccessTierService.class,
+    CdrVersionService.class,
   })
   static class Configuration {
     @Bean
@@ -232,11 +237,9 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
         .thenReturn(fcResponse)
         .thenReturn(fcResponse);
 
-    dbCdrVersion = new DbCdrVersion();
+    dbCdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
     dbCdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     dbCdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
-    dbCdrVersion.setDataAccessLevel(
-        DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
     dbCdrVersion.setArchivalStatus(DbStorageEnums.archivalStatusToStorage(ArchivalStatus.LIVE));
     dbCdrVersion = cdrVersionDao.save(dbCdrVersion);
 

@@ -414,6 +414,7 @@ dependencies {
   compile "org.apache.commons:commons-text:1.8"
   compile "org.apache.httpcomponents:httpclient:4.5.13"
   compile "commons-codec:commons-codec:1.15"
+  compile 'com.auth0:java-jwt:3.14.0'
 
   // Elasticsearch client
   compile "org.elasticsearch.client:elasticsearch-rest-high-level-client:$project.ext.ELASTICSEARCH_VERSION"

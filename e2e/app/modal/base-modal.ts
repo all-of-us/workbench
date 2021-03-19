@@ -57,14 +57,10 @@ export default abstract class BaseModal extends Container {
       const handle = await button.asElementHandle();
       await handle.hover();
       if (waitForNav) {
-         await Promise.all([
-            this.page.waitForNavigation({waitUntil: ['load', 'networkidle0']}),
-            button.click({delay: 10}),
-         ]);
+         await button.clickAndWait(timeout);
       } else {
          await button.click({delay: 10});
       }
-
       if (waitForClose) {
          await this.waitUntilClose(timeout);
       }

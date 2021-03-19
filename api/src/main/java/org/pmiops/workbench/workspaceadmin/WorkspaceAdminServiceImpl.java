@@ -28,7 +28,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.google.CloudMonitoringService;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.AccessReason;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
@@ -56,7 +56,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   private final ActionAuditQueryService actionAuditQueryService;
   private final AdminAuditor adminAuditor;
-  private final CloudStorageService cloudStorageService;
+  private final CloudStorageClient cloudStorageClient;
   private final CohortDao cohortDao;
   private final CloudMonitoringService cloudMonitoringService;
   private final ConceptSetDao conceptSetDao;
@@ -75,7 +75,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   public WorkspaceAdminServiceImpl(
       ActionAuditQueryService actionAuditQueryService,
       AdminAuditor adminAuditor,
-      CloudStorageService cloudStorageService,
+      CloudStorageClient cloudStorageClient,
       CohortDao cohortDao,
       CloudMonitoringService cloudMonitoringService,
       ConceptSetDao conceptSetDao,
@@ -91,7 +91,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       WorkspaceService workspaceService) {
     this.actionAuditQueryService = actionAuditQueryService;
     this.adminAuditor = adminAuditor;
-    this.cloudStorageService = cloudStorageService;
+    this.cloudStorageClient = cloudStorageClient;
     this.cohortDao = cohortDao;
     this.cloudMonitoringService = cloudMonitoringService;
     this.conceptSetDao = conceptSetDao;
@@ -255,15 +255,15 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
             .getWorkspace()
             .getBucketName();
 
-    return cloudStorageService.getBlobPage(bucketName).stream()
-        .map(blob -> cloudStorageService.blobToFileDetail(blob, bucketName))
+    return cloudStorageClient.getBlobPage(bucketName).stream()
+        .map(blob -> cloudStorageClient.blobToFileDetail(blob, bucketName))
         .collect(Collectors.toList());
   }
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   private int getNonNotebookFileCount(String bucketName) {
     return (int)
-        cloudStorageService
+        cloudStorageClient
             .getBlobPageForPrefix(bucketName, NotebooksService.NOTEBOOKS_WORKSPACE_DIRECTORY)
             .stream()
             .filter(((Predicate<Blob>) notebooksService::isNotebookBlob).negate())
@@ -272,7 +272,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
 
   // NOTE: may be an undercount since we only retrieve the first Page of Storage List results
   private long getStorageSizeBytes(String bucketName) {
-    return cloudStorageService.getBlobPage(bucketName).stream()
+    return cloudStorageClient.getBlobPage(bucketName).stream()
         .map(BlobInfo::getSize)
         .reduce(0L, Long::sum);
   }

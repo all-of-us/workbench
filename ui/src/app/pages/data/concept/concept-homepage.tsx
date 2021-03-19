@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -13,7 +12,6 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   reactStyles,
-  ReactWrapperBase,
   validateInputForMySQL,
   withCurrentCohortSearchContext,
   withCurrentConcept,
@@ -364,12 +362,3 @@ export const ConceptHomepage = fp.flow(withCurrentCohortSearchContext(), withCur
     }
   }
 );
-
-@Component({
-  template: '<div #root></div>'
-})
-export class ConceptHomepageComponent extends ReactWrapperBase {
-  constructor() {
-    super(ConceptHomepage, []);
-  }
-}

@@ -3,7 +3,7 @@ import * as React from 'react';
 import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {cdrVersionStore, currentWorkspaceStore, navigate, routeConfigDataStore, serverConfigStore} from 'app/utils/navigation';
+import {cdrVersionStore, currentWorkspaceStore, navigate, serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {DisseminateResearchEnum, ResearchOutcomeEnum, SpecificPopulationEnum,UserApi, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
@@ -33,9 +33,10 @@ describe('WorkspaceEdit', () => {
   let workspacesApi: WorkspacesApiStub;
   let userApi: UserApiStub;
   let workspace: WorkspaceData;
+  let workspaceEditMode: WorkspaceEditMode;
 
   const component = () => {
-    return mount(<WorkspaceEdit cancel={() => {}} />);
+    return mount(<WorkspaceEdit cancel={() => {}} workspaceEditMode={workspaceEditMode}/>);
   };
 
   beforeEach(() => {
@@ -58,6 +59,8 @@ describe('WorkspaceEdit', () => {
       }
     };
 
+    workspaceEditMode = WorkspaceEditMode.Create;
+
     userApi = new UserApiStub();
     registerApiClient(UserApi, userApi);
 
@@ -66,7 +69,6 @@ describe('WorkspaceEdit', () => {
 
     currentWorkspaceStore.next(workspace);
     cdrVersionStore.next(cdrVersionListResponse);
-    routeConfigDataStore.next({mode: WorkspaceEditMode.Create});
     serverConfigStore.next({enableBillingUpgrade: true, defaultFreeCreditsDollarLimit: 100.0, gsuiteDomain: ''});
   });
 
@@ -85,7 +87,7 @@ describe('WorkspaceEdit', () => {
   });
 
   it('displays workspaces duplicate page', async () => {
-    routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
+    workspaceEditMode = WorkspaceEditMode.Duplicate;
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find(WorkspaceEditSection).first().text()).toContain(`Duplicate workspace "${workspace.name}"`);
@@ -96,7 +98,7 @@ describe('WorkspaceEdit', () => {
   });
 
   it('displays workspaces edit page', async () => {
-    routeConfigDataStore.next({mode: WorkspaceEditMode.Edit});
+    workspaceEditMode = WorkspaceEditMode.Edit;
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find(WorkspaceEditSection).first().text()).toContain('Edit workspace');
@@ -111,7 +113,7 @@ describe('WorkspaceEdit', () => {
     // specific population group.
     workspace.researchPurpose.populationDetails = [SpecificPopulationEnum.AGECHILDREN];
 
-    routeConfigDataStore.next({mode: WorkspaceEditMode.Edit});
+    workspaceEditMode = WorkspaceEditMode.Edit;
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -129,7 +131,7 @@ describe('WorkspaceEdit', () => {
     workspace.researchPurpose.populationDetails = [SpecificPopulationEnum.AGECHILDREN,
       SpecificPopulationEnum.RACEMENA, SpecificPopulationEnum.DISABILITYSTATUS];
 
-    routeConfigDataStore.next({mode: WorkspaceEditMode.Edit});
+    workspaceEditMode = WorkspaceEditMode.Edit
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -188,7 +190,7 @@ describe('WorkspaceEdit', () => {
   });
 
   it('supports disable save button if Research Outcome is not answered', async () => {
-    routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
+    workspaceEditMode = WorkspaceEditMode.Duplicate;
     workspace.researchPurpose.researchOutcomeList = []
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -201,7 +203,7 @@ describe('WorkspaceEdit', () => {
   });
 
   it('supports successful duplication', async() => {
-    routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
+    workspaceEditMode = WorkspaceEditMode.Duplicate;
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -224,7 +226,7 @@ describe('WorkspaceEdit', () => {
     currentWorkspaceStore.next(altCdrWorkspace);
 
     // duplication will involve a CDR version upgrade by default
-    routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
+    workspaceEditMode = WorkspaceEditMode.Duplicate;
 
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -246,7 +248,7 @@ describe('WorkspaceEdit', () => {
     const defaultCdrWorkspace = {...workspace, cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID}
     currentWorkspaceStore.next(defaultCdrWorkspace);
 
-    routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
+    workspaceEditMode = WorkspaceEditMode.Duplicate;
 
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -260,7 +262,7 @@ describe('WorkspaceEdit', () => {
 
   // regression test for RW-5132
   it('prevents multiple Workspace creations via the same confirmation dialog', async() => {
-    routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
+    workspaceEditMode = WorkspaceEditMode.Duplicate;
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -285,7 +287,7 @@ describe('WorkspaceEdit', () => {
   });
 
   it('supports waiting on access delays', async () => {
-    routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
+    workspaceEditMode = WorkspaceEditMode.Duplicate;
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
@@ -317,7 +319,7 @@ describe('WorkspaceEdit', () => {
   });
 
   it('shows confirmation on extended access delays', async() => {
-    routeConfigDataStore.next({mode: WorkspaceEditMode.Duplicate});
+    workspaceEditMode = WorkspaceEditMode.Duplicate;
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 

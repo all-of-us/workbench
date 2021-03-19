@@ -113,4 +113,6 @@ public interface UserService {
   Set<DbUser> findAllUsersWithAuthoritiesAndPageVisits();
 
   Optional<DbUser> findUserWithAuthoritiesAndPageVisits(long userId);
+
+  DbUser updateRasLinkLoginGovStatus(String loginGovUserName);
 }

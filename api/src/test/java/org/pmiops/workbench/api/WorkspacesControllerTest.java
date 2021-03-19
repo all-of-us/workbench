@@ -58,6 +58,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
@@ -125,7 +126,8 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.genomics.WgsCohortExtractionService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.ArchivalStatus;
@@ -307,14 +309,14 @@ public class WorkspacesControllerTest {
     WorkspaceMapperImpl.class,
     WorkspaceResourcesServiceImpl.class,
     WorkspacesController.class,
-    WorkspaceServiceImpl.class
+    WorkspaceServiceImpl.class,
   })
   @MockBean({
     BigQueryService.class,
     BillingProjectAuditor.class,
     BillingProjectBufferService.class,
     CdrBigQuerySchemaConfigService.class,
-    CloudStorageService.class,
+    CloudStorageClient.class,
     CohortBuilderMapper.class,
     CohortBuilderService.class,
     CohortMaterializationService.class,
@@ -327,7 +329,10 @@ public class WorkspacesControllerTest {
     MonitoringService.class,
     UserRecentResourceService.class,
     UserService.class,
-    WorkspaceAuditor.class
+    WgsCohortExtractionService.class,
+    WorkspaceAuditor.class,
+    AccessTierService.class,
+    CdrVersionService.class,
   })
   static class Configuration {
 
@@ -366,7 +371,7 @@ public class WorkspacesControllerTest {
   private static WorkbenchConfig workbenchConfig;
   @Autowired FireCloudService fireCloudService;
   @Autowired private WorkspaceService workspaceService;
-  @Autowired CloudStorageService cloudStorageService;
+  @Autowired CloudStorageClient cloudStorageClient;
   @Autowired BigQueryService bigQueryService;
   @SpyBean @Autowired WorkspaceDao workspaceDao;
   @Autowired UserDao userDao;
@@ -405,7 +410,7 @@ public class WorkspacesControllerTest {
 
     accessTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
 
-    cdrVersion = new DbCdrVersion();
+    cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 1);
     cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
@@ -414,7 +419,8 @@ public class WorkspacesControllerTest {
     cdrVersion = cdrVersionDao.save(cdrVersion);
     cdrVersionId = Long.toString(cdrVersion.getCdrVersionId());
 
-    DbCdrVersion archivedCdrVersion = new DbCdrVersion();
+    DbCdrVersion archivedCdrVersion =
+        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
     archivedCdrVersion.setName("archived");
     archivedCdrVersion.setCdrDbName("");
     archivedCdrVersion.setArchivalStatusEnum(ArchivalStatus.ARCHIVED);
@@ -430,7 +436,7 @@ public class WorkspacesControllerTest {
     serviceAccountCloudbilling = TestMockFactory.createMockedCloudbilling();
 
     // required to enable the use of default method blobToFileDetail()
-    when(cloudStorageService.blobToFileDetail(any(), anyString())).thenCallRealMethod();
+    when(cloudStorageClient.blobToFileDetail(any(), anyString())).thenCallRealMethod();
   }
 
   private DbUser createUser(String email) {
@@ -2540,7 +2546,7 @@ public class WorkspacesControllerTest {
     when(mockBlob2.getName()).thenReturn("notebooks/mockFile.text");
     when(mockBlob3.getName())
         .thenReturn(NotebooksService.withNotebookExtension("notebooks/two words"));
-    when(cloudStorageService.getBlobPageForPrefix("bucket", "notebooks"))
+    when(cloudStorageClient.getBlobPageForPrefix("bucket", "notebooks"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2, mockBlob3));
 
     // Will return 1 entry as only python files in notebook folder are return
@@ -2566,7 +2572,7 @@ public class WorkspacesControllerTest {
     when(mockBlob1.getName())
         .thenReturn(NotebooksService.withNotebookExtension("notebooks/extra/nope"));
     when(mockBlob2.getName()).thenReturn(NotebooksService.withNotebookExtension("notebooks/foo"));
-    when(cloudStorageService.getBlobPageForPrefix("bucket", "notebooks"))
+    when(cloudStorageClient.getBlobPageForPrefix("bucket", "notebooks"))
         .thenReturn(ImmutableList.of(mockBlob1, mockBlob2));
 
     List<String> gotNames =
@@ -2615,11 +2621,11 @@ public class WorkspacesControllerTest {
     rename.setName(NotebooksService.withNotebookExtension("nb1"));
     rename.setNewName(newName);
     workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
-    verify(cloudStorageService)
+    verify(cloudStorageClient)
         .copyBlob(
             BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1),
             BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
-    verify(cloudStorageService).deleteBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1));
+    verify(cloudStorageClient).deleteBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1));
     verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
     verify(userRecentResourceService)
         .deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
@@ -2640,11 +2646,11 @@ public class WorkspacesControllerTest {
     rename.setName(NotebooksService.withNotebookExtension("nb1"));
     rename.setNewName(newName);
     workspacesController.renameNotebook(workspace.getNamespace(), workspace.getId(), rename);
-    verify(cloudStorageService)
+    verify(cloudStorageClient)
         .copyBlob(
             BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1),
             BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
-    verify(cloudStorageService).deleteBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1));
+    verify(cloudStorageClient).deleteBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1));
     verify(userRecentResourceService).updateNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
     verify(userRecentResourceService)
         .deleteNotebookEntry(workspaceIdInDb, userIdInDb, origFullPath);
@@ -2673,7 +2679,7 @@ public class WorkspacesControllerTest {
         fromNotebookName,
         copyNotebookRequest);
 
-    verify(cloudStorageService)
+    verify(cloudStorageClient)
         .copyBlob(
             BlobId.of(
                 TestMockFactory.WORKSPACE_BUCKET_NAME,
@@ -2706,7 +2712,7 @@ public class WorkspacesControllerTest {
         fromNotebookName,
         copyNotebookRequest);
 
-    verify(cloudStorageService)
+    verify(cloudStorageClient)
         .copyBlob(
             BlobId.of(
                 TestMockFactory.WORKSPACE_BUCKET_NAME,
@@ -2795,7 +2801,7 @@ public class WorkspacesControllerTest {
         BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, "notebooks/" + newNotebookName);
 
     doReturn(Collections.singleton(newBlobId))
-        .when(cloudStorageService)
+        .when(cloudStorageClient)
         .getExistingBlobIdsIn(Collections.singletonList(newBlobId));
 
     workspacesController.copyNotebook(
@@ -2816,7 +2822,7 @@ public class WorkspacesControllerTest {
     long userIdInDb = 1;
     workspacesController.cloneNotebook(
         workspace.getNamespace(), workspace.getId(), NotebooksService.withNotebookExtension("nb1"));
-    verify(cloudStorageService)
+    verify(cloudStorageClient)
         .copyBlob(
             BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1),
             BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, newPath));
@@ -2833,7 +2839,7 @@ public class WorkspacesControllerTest {
     long userIdInDb = 1;
     workspacesController.deleteNotebook(
         workspace.getNamespace(), workspace.getId(), NotebooksService.withNotebookExtension("nb1"));
-    verify(cloudStorageService).deleteBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1));
+    verify(cloudStorageClient).deleteBlob(BlobId.of(TestMockFactory.WORKSPACE_BUCKET_NAME, nb1));
     verify(userRecentResourceService).deleteNotebookEntry(workspaceIdInDb, userIdInDb, fullPath);
   }
 
@@ -2992,7 +2998,7 @@ public class WorkspacesControllerTest {
 
     final String testNotebookPath = "notebooks/" + testNotebook;
     doReturn(gcsMetadata)
-        .when(cloudStorageService)
+        .when(cloudStorageClient)
         .getMetadata(TestMockFactory.WORKSPACE_BUCKET_NAME, testNotebookPath);
 
     assertThat(

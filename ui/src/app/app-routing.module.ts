@@ -9,25 +9,12 @@ import {SignInGuard} from './guards/sign-in-guard.service';
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {CohortPageComponent} from './cohort-search/cohort-page/cohort-page.component';
-import {AdminBannerComponent} from './pages/admin/admin-banner';
-import {AdminReviewWorkspaceComponent} from './pages/admin/admin-review-workspace';
-import {AdminUserComponent} from './pages/admin/admin-user';
-import {AdminUsersComponent} from './pages/admin/admin-users';
-import {AdminWorkspaceComponent} from './pages/admin/admin-workspace';
-import {AdminWorkspaceSearchComponent} from './pages/admin/admin-workspace-search';
 import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
 import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
 import {TablePage} from './pages/data/cohort-review/table-page';
-import {CohortActionsComponent} from './pages/data/cohort/cohort-actions';
-import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
 import {ConceptSearchComponent} from './pages/data/concept/concept-search';
-import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
-import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SignedInComponent} from './pages/signed-in/component';
-import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
-import {WorkspaceEditComponent, WorkspaceEditMode} from './pages/workspace/workspace-edit';
-import {WorkspaceListComponent} from './pages/workspace/workspace-list';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
 import {environment} from 'environments/environment';
@@ -98,19 +85,28 @@ const routes: Routes = [
             component: AppRouting,
             data: {}
           },
+          {
+            path: 'profile',
+            component: AppRouting,
+            data: {}
+          },
           // non-migrated routes go HERE
           {
             path: 'workspaces',
             canActivateChild: [WorkspaceGuard],
             children: [
+              // legacy / duplicated routes go HERE
               {
                 path: '',
-                component: WorkspaceListComponent,
-                data: {
-                  title: 'View Workspaces',
-                  breadcrumb: BreadcrumbType.Workspaces
-                }
+                component: AppRouting,
+                data: {}
               },
+              {
+                path: 'build',
+                component: AppRouting,
+                data: {}
+              },
+              // non-migrated routes go HERE
               {
                 /* TODO The children under ./views need refactoring to use the data
                  * provided by the route rather than double-requesting it.
@@ -119,34 +115,21 @@ const routes: Routes = [
                 component: WorkspaceWrapperComponent,
                 runGuardsAndResolvers: 'always',
                 children: [
+                  // legacy / duplicated routes go HERE
                   {
                     path: 'about',
-                    component: WorkspaceAboutComponent,
-                    data: {
-                      title: 'View Workspace Details',
-                      breadcrumb: BreadcrumbType.Workspace,
-                      helpContentKey: 'about'
-                    }
+                    component: AppRouting,
+                    data: {}
                   },
                   {
                     path: 'edit',
-                    component: WorkspaceEditComponent,
-                    data: {
-                      title: 'Edit Workspace',
-                      mode: WorkspaceEditMode.Edit,
-                      breadcrumb: BreadcrumbType.WorkspaceEdit,
-                      helpContentKey: 'edit'
-                    }
+                    component: AppRouting,
+                    data: {}
                   },
                   {
                     path: 'duplicate',
-                    component: WorkspaceEditComponent,
-                    data: {
-                      title: 'Duplicate Workspace',
-                      mode: WorkspaceEditMode.Duplicate,
-                      breadcrumb: BreadcrumbType.WorkspaceDuplicate,
-                      helpContentKey: 'duplicate'
-                    }
+                    component: AppRouting,
+                    data: {}
                   },
                   {
                     path: 'notebooks',
@@ -168,6 +151,7 @@ const routes: Routes = [
                       }
                     ]
                   },
+                  // non-migrated routes go HERE
                   {
                     path: 'data',
                     children: [
@@ -202,12 +186,8 @@ const routes: Routes = [
                         children: [
                           {
                             path: ':cid/actions',
-                            component: CohortActionsComponent,
-                            data: {
-                              title: 'Cohort Actions',
-                              breadcrumb: BreadcrumbType.Cohort,
-                              helpContentKey: 'cohortBuilder'
-                            },
+                            component: AppRouting,
+                            data: {},
                           },
                           {
                             path: 'build',
@@ -269,12 +249,8 @@ const routes: Routes = [
                         path: 'concepts',
                         children: [{
                           path: '',
-                          component: ConceptHomepageComponent,
-                          data: {
-                            title: 'Search Concepts',
-                            breadcrumb: BreadcrumbType.SearchConcepts,
-                            helpContentKey: 'conceptSets'
-                          }
+                          component: AppRouting,
+                          data: {}
                         }, {
                           path: ':domain',
                           component: ConceptSearchComponent,
@@ -299,34 +275,89 @@ const routes: Routes = [
                           },
                         }, {
                           path: ':csid/actions',
-                          component: ConceptSetActionsComponent,
-                          data: {
-                            title: 'Concept Set Actions',
-                            breadcrumb: BreadcrumbType.ConceptSet,
-                            helpContentKey: 'conceptSets'
-                          },
+                          component: AppRouting,
+                          data: {},
                         }, ]
                       }
                     ]
                   }]
               }]
-          },
-          {
-            path: 'profile',
-            component: ProfilePageComponent,
-            data: {title: 'Profile'}
-          },
-          {
-            path: 'workspaces/build',
-            component: WorkspaceEditComponent,
-            data: {title: 'Create Workspace', mode: WorkspaceEditMode.Create}
           }
         ]
       },
       {
         path: 'admin',
         children: [
-          // legacy / duplicated routes go HERE
+          {
+            path: 'banner',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'institution',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'institution/add',
+            component: AppRouting,
+            data: {},
+          },
+          {
+            path: 'institution/edit/:institutionId',
+            component: AppRouting,
+            data: {},
+          },
+          {
+            path: 'review-workspace',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'user', // included for backwards compatibility
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'users',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'users/:usernameWithoutGsuiteDomain',
+            component: AppRouting,
+            data: {title: 'User Admin'}
+          },
+          {
+            path: 'user-audit',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'institution/add',
+            component: AppRouting,
+            data: {},
+          },
+          {
+            path: 'institution/edit/:institutionId',
+            component: AppRouting,
+            data: {},
+          },
+          {
+            path: 'user', // included for backwards compatibility
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'users',
+            component: AppRouting,
+            data: {}
+          },
+          {
+            path: 'users/:usernameWithoutGsuiteDomain',
+            component: AppRouting,
+            data: {title: 'User Admin'}
+          },
           {
             path: 'user-audit',
             component: AppRouting,
@@ -352,53 +383,15 @@ const routes: Routes = [
             component: AppRouting,
             data: {}
           },
-          // non-migrated routes go HERE
-          {
-            path: 'review-workspace',
-            component: AdminReviewWorkspaceComponent,
-            data: {title: 'Review Workspaces'}
-          },
-          {
-            path: 'users',
-            component: AdminUsersComponent,
-            data: {title: 'User Admin Table'}
-          },
-          {
-            path: 'users/:usernameWithoutGsuiteDomain',
-            component: AdminUserComponent,
-            data: {title: 'User Admin'}
-          },
-          {
-            path: 'user', // included for backwards compatibility
-            component: AdminUsersComponent,
-            data: {title: 'User Admin Table'}
-          },
-          {
-            path: 'banner',
-            component: AdminBannerComponent,
-            data: {title: 'Create Banner'}
-          },
           {
             path: 'workspaces',
-            component: AdminWorkspaceSearchComponent,
-            data: { title: 'Workspace Admin'},
+            component: AppRouting,
+            data: {},
           },
           {
             path: 'workspaces/:workspaceNamespace',
-            component: AdminWorkspaceComponent,
-            data: { title: 'Workspace Admin'}
-          }, {
-            path: 'institution',
             component: AppRouting,
             data: {}
-          }, {
-            path: 'institution/add',
-            component: AppRouting,
-            data: {},
-          }, {
-            path: 'institution/edit/:institutionId',
-            component: AppRouting,
-            data: {},
           }
         ]
       },

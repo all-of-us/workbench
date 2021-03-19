@@ -162,6 +162,11 @@
   <include file="changelog/db.changelog-150-add-access-tier-to-billing-buffer.xml"/>
   <include file="changelog/db.changelog-151-workspace-addDefaultValue-data_access_level.xml"/>
   <include file="changelog/db.changelog-152-cdr-version-wgs-field.xml"/>
+  <include file="changelog/db.changelog-153-cdr-version-addDefaultValue-data_access_level.xml"/>
+  <include file="changelog/db.changelog-154-wgs-cromwell-extract-submission.xml"/>
+  <include file="changelog/db.changelog-155-add-ras-link-entries.xml"/>
+  <include file="changelog/db.changelog-156-billing-buffer-entry-status-index.xml"/>
+
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

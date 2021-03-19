@@ -13,7 +13,6 @@
     {
       "cdrVersionId": 1,
       "name": "[Removed] Synthetic Dataset v1",
-      "dataAccessLevel": 1,
       "archivalStatus": 1,
       "bigqueryProject": "",
       "bigqueryDataset": "",
@@ -27,7 +26,6 @@
     {
       "cdrVersionId": 1,
       "name": "Invalid Duplicate of Synthetic Dataset v1 ",
-      "dataAccessLevel": 1,
       "archivalStatus": 1,
       "bigqueryProject": "",
       "bigqueryDataset": "",

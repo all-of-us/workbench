@@ -3,7 +3,6 @@ import {TieredMenu} from 'primereact/tieredmenu';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
-import {DOMAIN_TYPES, PROGRAM_TYPES} from 'app/cohort-search/constant';
 import {SearchGroup} from 'app/cohort-search/search-group/search-group.component';
 import {criteriaMenuOptionsStore, searchRequestStore} from 'app/cohort-search/search-state.service';
 import {domainToTitle, generateId, typeToTitle} from 'app/cohort-search/utils';
@@ -12,10 +11,9 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {getCdrVersion} from 'app/utils/cdr-versions';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {CdrVersionListResponse, Domain, SearchRequest} from 'generated/fetch';
+import {CdrVersionListResponse, CriteriaMenu, Domain, SearchRequest} from 'generated/fetch';
 
 function initItem(id: string, type: string) {
   return {
@@ -117,6 +115,21 @@ const css = `
   }
 `;
 
+function mapMenuItem(item: CriteriaMenu) {
+  const {category, domainId, group, id, name, sortOrder, type} = item;
+  return {
+    category,
+    children: null,
+    domain: domainId,
+    group,
+    id,
+    name,
+    sortOrder,
+    standard: domainId === Domain.VISIT.toString() ? true : null,
+    type
+  };
+}
+
 interface Props {
   groups: Array<any>;
   setSearchContext: (context: any) => void;
@@ -167,38 +180,22 @@ const SearchGroupList = fp.flow(withCurrentWorkspace(), withCdrVersions())(
 
     getMenuOptions() {
       this.setState({loadingMenuOptions: true});
-      const {workspace, cdrVersionListResponse} = this.props;
+      const {workspace} = this.props;
       const {cdrVersionId} = workspace;
       const criteriaMenuOptions = criteriaMenuOptionsStore.getValue();
-      cohortBuilderApi().findCriteriaMenuOptions(+cdrVersionId).then(res => {
-        criteriaMenuOptions[cdrVersionId] = res.items.reduce((acc, opt) => {
-          const {domain, types} = opt;
-          if (PROGRAM_TYPES.includes(Domain[domain]) &&
-          !(!getCdrVersion(workspace, cdrVersionListResponse).hasFitbitData && domain === Domain.FITBIT.toString())) {
-            const option = {
-              name: domainToTitle(domain),
-              domain,
-              type: types[0].type,
-              standard: types[0].standardFlags[0].standard,
-              order: PROGRAM_TYPES.indexOf(Domain[domain])
-            };
-            if (domain === Domain[Domain.PERSON]) {
-              option['children'] = types.map(subopt => ({name: typeToTitle(subopt.type), domain, type: subopt.type}));
-            }
-            acc.programTypes.push(option);
+      cohortBuilderApi().findCriteriaMenu(+cdrVersionId, 0).then(async res => {
+        const menuOptions = await Promise.all(res.items.map(async item => {
+          const option = mapMenuItem(item);
+          if (option.group) {
+            const children = await cohortBuilderApi().findCriteriaMenu(+cdrVersionId, option.id);
+            option.children = children.items.map(mapMenuItem);
           }
-          if (DOMAIN_TYPES.includes(Domain[domain])) {
-            acc.domainTypes.push({
-              name: domainToTitle(domain),
-              domain,
-              type: types[0].type,
-              standard: types[0].standardFlags[0].standard,
-              order: DOMAIN_TYPES.indexOf(Domain[domain])});
-          }
-          return acc;
-        }, {programTypes: [], domainTypes: []});
-        criteriaMenuOptions[cdrVersionId].programTypes.sort((a, b) => a.order - b.order);
-        criteriaMenuOptions[cdrVersionId].domainTypes.sort((a, b) => a.order - b.order);
+          return option;
+        }));
+        criteriaMenuOptions[cdrVersionId] = {
+          programTypes: menuOptions.filter(opt => opt.category === 'Program Data'),
+          domainTypes: menuOptions.filter(opt => opt.category === 'Domains')
+        };
         criteriaMenuOptionsStore.next(criteriaMenuOptions);
         this.setState({loadingMenuOptions: false});
       });

@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
@@ -41,8 +42,9 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.elasticsearch.ElasticSearchService;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.google.CloudStorageService;
-import org.pmiops.workbench.google.CloudStorageServiceImpl;
+import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.google.CloudStorageClientImpl;
+import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
@@ -80,20 +82,28 @@ import org.springframework.http.ResponseEntity;
 @RunWith(BeforeAfterSpringTestRunner.class)
 // Note: normally we shouldn't need to explicitly import our own @TestConfiguration. This might be
 // a bad interaction with BeforeAfterSpringTestRunner.
-@Import({TestJpaConfig.class, CohortBuilderControllerBQTest.Configuration.class})
+@Import({
+  TestJpaConfig.class,
+  CohortBuilderControllerBQTest.Configuration.class,
+  StorageConfig.class
+})
 public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @TestConfiguration
   @Import({
     BigQueryTestService.class,
-    CloudStorageServiceImpl.class,
+    CloudStorageClientImpl.class,
     CohortQueryBuilder.class,
     CohortBuilderServiceImpl.class,
     SearchGroupItemQueryBuilder.class,
     CdrVersionService.class,
     CohortBuilderMapperImpl.class
   })
-  @MockBean({FireCloudService.class})
+  @MockBean({
+    FireCloudService.class,
+    AccessTierService.class,
+    CdrVersionService.class,
+  })
   static class Configuration {
     @Bean
     public DbUser user() {
@@ -109,7 +119,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private BigQueryService bigQueryService;
 
-  @Autowired private CloudStorageService cloudStorageService;
+  @Autowired private CloudStorageClient cloudStorageClient;
 
   @Autowired private CohortBuilderService cohortBuilderService;
 
@@ -177,7 +187,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     when(firecloudService.isUserMemberOfGroup(anyString(), anyString())).thenReturn(true);
 
     ElasticSearchService elasticSearchService =
-        new ElasticSearchService(cbCriteriaDao, cloudStorageService, configProvider);
+        new ElasticSearchService(cbCriteriaDao, cloudStorageClient, configProvider);
 
     controller =
         new CohortBuilderController(
@@ -570,6 +580,19 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .standard(false);
   }
 
+  /**
+   * This SearchParameter specifically represents the case that uses the
+   * has_physical_measurement_data flag.
+   */
+  private static SearchParameter physicalMeasurementDataNoConceptId() {
+    return new SearchParameter()
+        .domain(Domain.PHYSICAL_MEASUREMENT.toString())
+        .type(CriteriaType.PPI.toString())
+        .group(false)
+        .ancestorData(false)
+        .standard(false);
+  }
+
   private static SearchParameter age() {
     return new SearchParameter()
         .domain(Domain.PERSON.toString())
@@ -623,6 +646,14 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .domain(Domain.FITBIT.toString())
         .group(false)
         .standard(true)
+        .ancestorData(false);
+  }
+
+  private static SearchParameter wholeGenomeVariant() {
+    return new SearchParameter()
+        .domain(Domain.WHOLE_GENOME_VARIANT.toString())
+        .group(false)
+        .standard(false)
         .ancestorData(false);
   }
 
@@ -1498,10 +1529,21 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
   }
 
   @Test
-  public void countParticipants() {
+  public void countParticipantsFitbit() {
     SearchRequest searchRequest =
         createSearchRequests(
             Domain.FITBIT.toString(), ImmutableList.of(fitbit()), new ArrayList<>());
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
+  }
+
+  @Test
+  public void countParticipantsWholeGenomeVariant() {
+    SearchRequest searchRequest =
+        createSearchRequests(
+            Domain.WHOLE_GENOME_VARIANT.toString(),
+            ImmutableList.of(wholeGenomeVariant()),
+            new ArrayList<>());
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
@@ -2029,6 +2071,17 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
 
     assertParticipants(
         controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 2);
+  }
+
+  @Test
+  public void countSubjectHasPhysicalMeasurementData() {
+    SearchParameter pm = physicalMeasurementDataNoConceptId();
+    SearchRequest searchRequest =
+        createSearchRequests(
+            Domain.PHYSICAL_MEASUREMENT.toString(), ImmutableList.of(pm), new ArrayList<>());
+
+    assertParticipants(
+        controller.countParticipants(cdrVersion.getCdrVersionId(), searchRequest), 1);
   }
 
   @Test

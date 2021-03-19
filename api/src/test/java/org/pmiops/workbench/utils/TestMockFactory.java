@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -212,17 +213,23 @@ public class TestMockFactory {
     final DbAccessTier accessTier =
         new DbAccessTier()
             .setAccessTierId(1)
-            .setShortName("test")
-            .setDisplayName("Test Tier")
-            .setAuthDomainName("Test Auth Domain")
-            .setAuthDomainGroupEmail("test-tier-users@fake-research-aou.org")
-            .setServicePerimeter("test/tier/perimeter");
+            .setShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME)
+            .setDisplayName("Registered Tier")
+            .setAuthDomainName("Registered Tier Auth Domain")
+            .setAuthDomainGroupEmail("rt-users@fake-research-aou.org")
+            .setServicePerimeter("registered/tier/perimeter");
     return accessTierDao.save(accessTier);
   }
 
   public static DbCdrVersion createDefaultCdrVersion(
       CdrVersionDao cdrVersionDao, AccessTierDao accessTierDao) {
+    return createDefaultCdrVersion(cdrVersionDao, accessTierDao, 1);
+  }
+
+  public static DbCdrVersion createDefaultCdrVersion(
+      CdrVersionDao cdrVersionDao, AccessTierDao accessTierDao, long id) {
     final DbCdrVersion cdrVersion = new DbCdrVersion();
+    cdrVersion.setCdrVersionId(id);
     cdrVersion.setName("1");
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.

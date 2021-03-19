@@ -66,12 +66,24 @@ anchors:
 # -------------------------
 executors:
   # Default workbench docker image environment which is used in all jobs
-  workbench-executor:
+  workbench-executor: &workbench-executor
     environment:
       <<: *env-default
     docker:
       - image: << pipeline.parameters.workbench-image >>
     working_directory: ~/workbench
+  
+  # Variant of the default executor with a higher heap size. This is currently needed as Junit4 does not
+  # release test memory across unit test runs, and certain combinations of tests will trigger OOM errors
+  # due to garbage collection timeout. This should be reassessed after upgrading to Junit 5. See RW-6460.
+  api-unit-test-executor:
+    <<: *workbench-executor
+    environment:
+      <<: *env-default
+      # This still assumes a 4G (medium) machine. This increase is possible for unit tests as they are run
+      # as a ~single-process workflow - in other cases using 3GB may starve other processes. For example,
+      # this should not be used for the Local API integration test (which starts both a server, and a test process).
+      JAVA_TOOL_OPTIONS: -Xmx3g
 
   # Default workbench environment plus MySQL database docker image
   db-executor:
@@ -301,8 +313,8 @@ commands:
           name: "Check commit message and find changed file names that do not match ignore patterns"
           command: bash .circleci/skip-e2e-pr-checks.sh
       - halt-test-check:
-          # Stop running Puppeteer end-to-end test if code are not changed in "api", "ui" and "e2e" directories
-          dir_names: "api ui e2e .circleci"
+          # Stop running Puppeteer end-to-end test if code in relevant directories is unchanged.
+          dir_names: "ui e2e .circleci"
 
 # -------------------------
 #        JOBS
@@ -310,7 +322,7 @@ commands:
 jobs:
   api-unit-test:
     parallelism: 4
-    executor: workbench-executor
+    executor: api-unit-test-executor
     steps:
       - run-api-test:
           additional_steps:

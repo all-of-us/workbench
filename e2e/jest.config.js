@@ -3,7 +3,6 @@ const { TEST_MODE } = process.env;
 
 module.exports = {
   "verbose": false,
-  "bail": 1,  // Stop running tests after `n` failures
   "preset": "jest-puppeteer",
   "testTimeout": 1200000,
   "testRunner": "jest-circus/runner",
@@ -17,13 +16,24 @@ module.exports = {
   ],
   "reporters": [
     "default",
-    "jest-junit",
-    [
-      "jest-stare", {
+    ["jest-stare", {
         "resultDir": "logs",
         "resultJson": "test-results.json",
         "reportTitle": "AoU integration tests",
         "report": false
+      }
+    ],
+    ["jest-junit", {
+        outputDirectory: "./logs/junit",
+        outputName: "test-results.xml",
+        classNameTemplate: "{filepath}",
+        suiteNameTemplate: "{filepath}",
+        suiteName: "AoU integration tests"
+      }
+    ],
+    ["<rootDir>/libs/jest-reporter.js", {
+        "outputdir": "logs/jest",
+        "filename": "test-results-summary.json"
       }
     ]
   ],

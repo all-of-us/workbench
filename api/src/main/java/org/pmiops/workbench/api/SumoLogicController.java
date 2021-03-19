@@ -14,7 +14,7 @@ import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.UnauthorizedException;
-import org.pmiops.workbench.google.CloudStorageService;
+import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.EgressEventRequest;
 import org.pmiops.workbench.opsgenie.EgressEventService;
@@ -33,18 +33,18 @@ public class SumoLogicController implements SumoLogicApiDelegate {
   public static final String SUMOLOGIC_KEY_FILENAME = "inbound-sumologic-keys.txt";
   private static final Logger log = Logger.getLogger(SumoLogicController.class.getName());
 
-  private final CloudStorageService cloudStorageService;
+  private final CloudStorageClient cloudStorageClient;
   private final EgressEventAuditor egressEventAuditor;
   private final EgressEventService egressEventService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   SumoLogicController(
-      CloudStorageService cloudStorageService,
+      CloudStorageClient cloudStorageClient,
       EgressEventAuditor egressEventAuditor,
       EgressEventService egressEventService,
       Provider<WorkbenchConfig> workbenchConfigProvider) {
-    this.cloudStorageService = cloudStorageService;
+    this.cloudStorageClient = cloudStorageClient;
     this.egressEventAuditor = egressEventAuditor;
     this.egressEventService = egressEventService;
     this.workbenchConfigProvider = workbenchConfigProvider;
@@ -94,7 +94,7 @@ public class SumoLogicController implements SumoLogicApiDelegate {
    * @throws IOException
    */
   private Set<String> getSumoLogicApiKeys() throws IOException {
-    String apiKeys = cloudStorageService.getCredentialsBucketString(SUMOLOGIC_KEY_FILENAME);
+    String apiKeys = cloudStorageClient.getCredentialsBucketString(SUMOLOGIC_KEY_FILENAME);
     return Sets.newHashSet(apiKeys.split("[\\r\\n]+"));
   }
 

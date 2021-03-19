@@ -9,18 +9,22 @@ Duplicate Short Name: duplicate_tier_shortName.json
 Duplicate Display Name: duplicate_tier_displayName.json
 
 ### CDR Version
-CDR Version Duplicate ID: duplicate_cdr_id.json
+CDR Version duplicate ID: duplicate_cdr_id.json
 
-CDR Version Missing ID: missing_id_cdr.json
+CDR Version missing ID: missing_id_cdr.json
 
-CDR Version Multiple Defaults: multi_default_cdr.json
-
-CDR Version Archived Default: archived_default_cdr.json
+CDR Version archived default: archived_default_cdr.json
 
 ### Tier/CDR Integration
-CDR Version / Access Tier Mismatch: cdr_tier_mismatch.json
+CDR Version / Access Tier mismatch: cdr_tier_mismatch.json
 
 CDR Version has no Access Tier: cdr_no_tier.json
+
+Access Tier has no CDR Versions: no_cdrs_in_tier.json
+
+CDR Version multiple defaults in a tier: multi_default_in_tier.json
+
+CDR Version no default in a tier: no_default_in_tier.json
 
 ## Tier migration test
 Confirm that it's possible to add Access Tiers concurrently with CDR Versions.

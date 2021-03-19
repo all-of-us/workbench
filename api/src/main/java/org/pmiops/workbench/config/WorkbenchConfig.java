@@ -29,6 +29,7 @@ public class WorkbenchConfig {
   public RdrExportConfig rdrExport;
   public CaptchaConfig captcha;
   public ReportingConfig reporting;
+  public RasConfig ras;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -53,6 +54,7 @@ public class WorkbenchConfig {
     config.rdrExport = new RdrExportConfig();
     config.captcha = new CaptchaConfig();
     config.reporting = new ReportingConfig();
+    config.ras = new RasConfig();
     return config;
   }
 
@@ -61,10 +63,6 @@ public class WorkbenchConfig {
   public static class BillingConfig {
     // This config variable seems to be unused.
     public Integer retryCount;
-    // The total capacity of the GCP project buffer, assuming a single tier.
-    // Scheduled to be removed after bufferCapacityPerTier is enabled in all environments.
-    // https://precisionmedicineinitiative.atlassian.net/browse/RW-6387
-    @Deprecated public Integer bufferCapacity;
     // The total capacity of the GCP project buffer, per access tier. The buffering system will not
     // attempt to create any new projects in a tier when the total number of in-progress & ready
     // projects is at or above this level.
@@ -163,11 +161,17 @@ public class WorkbenchConfig {
 
   public static class WgsCohortExtractionConfig {
     public String serviceAccount;
+    public String serviceAccountTerraProxyGroup;
     public String operationalTerraWorkspaceNamespace;
     public String operationalTerraWorkspaceName;
+    public String operationalTerraWorkspaceBucket;
+    public String extractionPetServiceAccount;
     public String extractionMethodConfigurationNamespace;
     public String extractionMethodConfigurationName;
     public Integer extractionMethodConfigurationVersion;
+    public String extractionCohortsDataset;
+    public String extractionDestinationDataset;
+    public String extractionTempTablesDataset;
   }
 
   public static class CdrConfig {
@@ -255,6 +259,11 @@ public class WorkbenchConfig {
     // Allows a user to delete their own account. This is used for testing purposes so that
     // We can clean up after ourselves. This should never go to prod.
     public boolean unsafeAllowDeleteUser;
+    // Enables access to all tiers in an environment to Registered users.
+    // Intended for use in the Controlled Tier Alpha on Preprod and testing in lower levels.
+    // This will be removed when we implement Controlled Tier access modules for Beta launch.
+    // This should never go to Prod.
+    public boolean unsafeAllowAccessToAllTiersForRegisteredUsers;
     // Flag to indicate if USER/WORKSPACE data is exported to RDR
     public boolean enableRdrExport;
     // Setting this to true will enable the use of Billing Accounts controlled by the user
@@ -270,7 +279,7 @@ public class WorkbenchConfig {
     // If true, reporting cron job will write data to configured BigQuery reporting dataset.
     public boolean enableReportingUploadCron;
     // If true, user account setup requires linking eRA commons via RAS instead of Shibboleth.
-    public boolean enableRasLinking;
+    public boolean enableRasLoginGovLinking;
   }
 
   public static class ActionAuditConfig {
@@ -312,5 +321,13 @@ public class WorkbenchConfig {
     // possible is 10000, though around 2500 may be the most Workspace rows we can load into memory
     // on the smallest App Engine machine.
     public Integer maxRowsPerInsert;
+  }
+
+  /** RAS(Researcher Auth Service) configurations. */
+  public static class RasConfig {
+    // RAS hostname
+    public String host;
+    // RAS client id to finish the OAuth flow.
+    public String clientId;
   }
 }

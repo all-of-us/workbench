@@ -159,14 +159,29 @@ paths:
     get:
       tags:
       - cdrVersions
-      description: Returns all curated data repository (CDR) versions that the user
-        has access to
+      description: >
+        DEPRECATED.
+        Returns all curated data repository (CDR) versions in the Registered Tier
+        that the user has access to
       operationId: getCdrVersions
       responses:
         200:
           description: A list of CDR versions.
           schema:
             "$ref": "#/definitions/CdrVersionListResponse"
+  "/v1/cdrVersionsByTier":
+    get:
+      tags:
+        - cdrVersions
+      description: >
+        Returns all curated data repository (CDR) versions in all tiers
+        that the user has access to
+      operationId: getCdrVersionsByTier
+      responses:
+        200:
+          description: A mapping of tiers to CDR versions.
+          schema:
+            "$ref": "#/definitions/CdrVersionTiersResponse"
   "/v1/status-alert":
     get:
       tags:
@@ -348,6 +363,37 @@ paths:
             "$ref": "#/definitions/Profile"
         400:
           description: Bad request
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+  "/v1/user/link-ras-account":
+    post:
+      tags:
+      - profile
+      consumes:
+      - application/json
+      description: Link user with a RAS account
+      operationId: linkRasAccount
+      parameters:
+      - in: body
+        name: rasLinkRequestBody
+        description: The authorization code from RAS.
+        schema:
+          "$ref": "#/definitions/RasLinkRequestBody"
+      responses:
+        200:
+          description: The user's account linking information.
+          schema:
+            "$ref": "#/definitions/Profile"
+        400:
+          description: Bad request
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        403:
+          description: Forbidden
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+        500:
+          description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
   "/v1/page-visits":
@@ -3061,6 +3107,26 @@ paths:
           description: A collection of criteria menu options
           schema:
             "$ref": "#/definitions/CriteriaMenuOptionsListResponse"
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/menu/{parentId}":
+    parameters:
+    - "$ref": "#/parameters/cdrVersionId"
+    get:
+      tags:
+      - cohortBuilder
+      description: 'Returns criteria menu'
+      operationId: findCriteriaMenu
+      parameters:
+      - in: path
+        name: parentId
+        type: integer
+        format: int64
+        required: true
+        description: the parent id
+      responses:
+        200:
+          description: A collection of criteria menu options
+          schema:
+            "$ref": "#/definitions/CriteriaMenuListResponse"
   "/v1/cohortbuilder/{cdrVersionId}/criteria/domaininfo":
     get:
       tags:
@@ -3577,6 +3643,7 @@ definitions:
     - FITBIT_ACTIVITY
     - FITBIT_INTRADAY_STEPS
     - PHYSICAL_MEASUREMENT_CSS
+    - WHOLE_GENOME_VARIANT
   Surveys:
     type: string
     description: a survey for concepts
@@ -3661,6 +3728,31 @@ definitions:
       defaultCdrVersionId:
         type: string
         description: ID of the CDR versions that should be used by the user by default
+  CdrVersionTiersResponse:
+    type: object
+    required:
+      - tiers
+    properties:
+      tiers:
+        type: array
+        items:
+          "$ref": "#/definitions/CdrVersionTier"
+  CdrVersionTier:
+    type: object
+    required:
+      - accessTierShortName
+      - defaultCdrVersionId
+      - versions
+    properties:
+      accessTierShortName:
+        type: string
+      defaultCdrVersionId:
+        type: string
+        format: int64
+      versions:
+        type: array
+        items:
+          "$ref": "#/definitions/CdrVersion"
   CdrVersion:
     type: object
     required:
@@ -3675,9 +3767,6 @@ definitions:
         type: string
       accessTierShortName:
         type: string
-      dataAccessLevel:
-        "$ref": "#/definitions/DataAccessLevel"
-        description: DEPRECATED.  Use accessTierShortName.
       archivalStatus:
         "$ref": "#/definitions/ArchivalStatus"
       hasMicroarrayData:
@@ -3906,10 +3995,10 @@ definitions:
         type: boolean
         default: false
         description: Whether user should see a prompt if Workspace Research Purpose needs Review
-      enableRasLinking:
+      enableRasLoginGovLinking:
         type: boolean
         default: false
-        description: Whether to use enable RAS-AoU linking flow when user setup account.
+        description: Whether to use enable RAS-AoU linking for login.gov when user setup account.
       runtimeImages:
         type: array
         items:
@@ -5093,6 +5182,20 @@ definitions:
       jwt:
         type: string
         description: the encoded/signed JWT
+  RasLinkRequestBody:
+    required:
+    - authCode
+    - redirectUrl
+    type: object
+    properties:
+      authCode:
+        type: string
+        description: 'the standard OAuth authorization code from RAS that we can use to exchange
+        access token.'
+      redirectUrl:
+        type: string
+        description: 'The redirect url that was used when generating the authorization code.'
+        example: "https://all-of-us-workbench-test.appspot.com/ras-callback"
   AdminTableUser:
     type: object
     properties:
@@ -5347,6 +5450,20 @@ definitions:
         format: int64
         description: 'Timestamp when the user first changed from Unregistered to Registered
           data access level. May be null if the user has never done so.'
+      rasLinkLoginGovUsername:
+        type: string
+        description: The user's identity name in login.gov.
+      rasLinkLoginGovCompletionTime:
+        type: integer
+        format: int64
+        description: 'Timestamp when the user completed RAS linking(login.gov). Note: All AoU users
+        are required to have IAL2 setup in login.gov.'
+      rasLinkLoginGovBypassTime:
+        type: integer
+        format: int64
+        description: Timestamp when the user was bypassed for completing login.gov linking
+          linking.
+
   DemographicSurvey:
     type: object
     properties:
@@ -7090,6 +7207,15 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/CriteriaMenuOption"
+  CriteriaMenuListResponse:
+    type: object
+    required:
+    - items
+    properties:
+      items:
+        type: array
+        items:
+          "$ref": "#/definitions/CriteriaMenu"
   Criteria:
     type: object
     required:
@@ -7207,6 +7333,45 @@ definitions:
         type: array
         items:
           "$ref": "#/definitions/CriteriaMenuSubOption"
+  CriteriaMenu:
+    type: object
+    required:
+    - id
+    - parentId
+    - category
+    - domainId
+    - name
+    - group
+    - sortOrder
+    properties:
+      id:
+        description: The unique identifier for the menu item
+        type: integer
+        format: int64
+      parentId:
+        description: The unique identifier for the menu parent
+        type: integer
+        format: int64
+      category: 
+        description: The category for this menu item(Program Data or Domains)
+        type: string
+      domainId:
+        description: The domain for this menu item
+        type: string
+      type:
+        description: The type for this menu item
+        type: string
+      name: 
+        description: The name
+        type: string
+      group:
+        description: Is this a parent
+        type: boolean
+        default: false
+      sortOrder: 
+        description: The order
+        type: integer
+        format: int64
   CriteriaMenuSubOption:
     type: object
     required:
