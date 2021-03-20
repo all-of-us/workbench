@@ -1,7 +1,7 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
+import {WorkspaceStubVariables} from 'testing/stubs/workspaces';
 
 import {ResourceCardBase} from 'app/components/card';
 import {DataPage} from 'app/pages/data/data-page';
@@ -13,7 +13,8 @@ import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-r
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
-import {WorkspacesApiStub, workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 

@@ -23,7 +23,7 @@ import {
     toDisplay,
 } from "./resources";
 import {exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
-import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
+import {WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {stubResource} from 'testing/stubs/resources-stub';
 
 const COHORT_NAME = exampleCohortStubs[0].name;

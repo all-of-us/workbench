@@ -5,7 +5,7 @@ import {
   FeaturedWorkspacesConfigResponse
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
-import {WorkspaceStubVariables} from './workspaces-api-stub';
+import {WorkspaceStubVariables} from './workspaces';
 
 const phenotypeWorkspace = {
   name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME + ' Phenotype Library',

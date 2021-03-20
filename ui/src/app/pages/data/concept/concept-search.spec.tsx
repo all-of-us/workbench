@@ -7,7 +7,8 @@ import {currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {ConceptSet, ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
-import {workspaceDataStub, WorkspacesApiStub, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
+import {workspaceDataStub, WorkspaceStubVariables} from 'testing/stubs/workspaces';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {ConceptSearch} from './concept-search';
 
 describe('ConceptSearch', () => {

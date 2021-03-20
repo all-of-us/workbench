@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import {WorkspaceNavBarReact} from 'app/pages/workspace/workspace-nav-bar';
 import {cdrVersionStore, currentWorkspaceStore, NavStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
-import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 
