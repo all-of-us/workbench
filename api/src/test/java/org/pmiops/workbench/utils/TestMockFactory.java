@@ -43,6 +43,7 @@ public class TestMockFactory {
   public static final String WORKSPACE_BILLING_ACCOUNT_NAME = "billingAccounts/00000-AAAAA-BBBBB";
   private static final String WORKSPACE_FIRECLOUD_NAME =
       "gonewiththewind"; // should match workspace name w/o spaces
+  public static final String DEFAULT_GOOGLE_PROJECT = "aou-rw-test-123";
 
   public Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
     List<DisseminateResearchEnum> disseminateResearchEnumsList = new ArrayList<>();
@@ -99,7 +100,8 @@ public class TestMockFactory {
         .workspaceId(ns)
         .name(name)
         .createdBy(creator)
-        .bucketName(WORKSPACE_BUCKET_NAME);
+        .bucketName(WORKSPACE_BUCKET_NAME)
+        .googleProject(DEFAULT_GOOGLE_PROJECT);
   }
 
   public LeonardoListRuntimeResponse createLeonardoListRuntimesResponse() {
@@ -206,6 +208,7 @@ public class TestMockFactory {
     dbWorkspace.setReasonForAllOfUs(researchPurpose.getReasonForAllOfUs());
     dbWorkspace.setIntendedStudy(researchPurpose.getIntendedStudy());
     dbWorkspace.setAnticipatedFindings(researchPurpose.getAnticipatedFindings());
+    dbWorkspace.setGoogleProject(workspace.getGoogleProject());
     return dbWorkspace;
   }
 
