@@ -22,7 +22,6 @@
     "module": "es2015",
     "baseUrl": "./",
     "jsx": "react",
-    "resolveJsonModule": true,
-    "skipLibCheck": true
+    "resolveJsonModule": true
   }
 }
