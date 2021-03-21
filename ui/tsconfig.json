@@ -24,10 +24,5 @@
     "jsx": "react",
     "resolveJsonModule": true,
     "skipLibCheck": true
-    // "noUnusedLocals": false,
-  },
-  "angularCompilerOptions": {
-    "disableTypeScriptVersionCheck": true,
   }
-
 }

@@ -14,6 +14,7 @@
     ]
   },
   "rules": {
+    "no-unused-variable": [true, {"ignore-pattern": "^_$"}],
     "no-relative-imports": [
       true,
       "allow-siblings"
