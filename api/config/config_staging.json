@@ -26,9 +26,8 @@
     "projectNamePrefix": "aou-rw-staging-",
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "retryCount": 2,
-    "bufferCapacity": 50,
     "bufferCapacityPerTier": {
-      "registered": 50
+      "registered": 150
     },
     "bufferRefillProjectsPerTask": 1,
     "bufferStatusChecksPerTask": 10,
@@ -49,11 +48,11 @@
   },
   "wgsCohortExtraction": {
     "serviceAccount": "wgs-cohort-extraction@all-of-us-rw-staging.iam.gserviceaccount.com",
-    "serviceAccountTerraProxyGroup": "",
-    "operationalTerraWorkspaceNamespace": "",
-    "operationalTerraWorkspaceName": "",
-    "operationalTerraWorkspaceBucket": "",
-    "extractionPetServiceAccount": "",
+    "serviceAccountTerraProxyGroup": "PROXY_112406122740824430926@firecloud.org",
+    "operationalTerraWorkspaceNamespace": "aouwgscohortextraction-staging",
+    "operationalTerraWorkspaceName": "aouwgscohortextractionstaging",
+    "operationalTerraWorkspaceBucket": "fc-c143d305-0ffd-4ca5-b585-9b222691da6c",
+    "extractionPetServiceAccount": "pet-112406122740824430926@aouwgscohortextraction-staging.iam.gserviceaccount.com",
     "extractionMethodConfigurationNamespace": "",
     "extractionMethodConfigurationName": "",
     "extractionMethodConfigurationVersion": 1,

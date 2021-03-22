@@ -9,7 +9,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.pmiops.workbench.model.ArchivalStatus;
 
 @Entity
@@ -196,39 +195,46 @@ public class DbCdrVersion {
         isDefault,
         name,
         dataAccessLevel,
-        archivalStatus,
+        accessTier,
         releaseNumber,
+        archivalStatus,
         bigqueryProject,
         bigqueryDataset,
         creationTime,
         numParticipants,
         cdrDbName,
         elasticIndexBaseName,
+        microarrayBigqueryDataset,
+        wgsBigqueryDataset,
         hasFitbitData,
         hasCopeSurveyData);
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (!(obj instanceof DbCdrVersion)) {
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    DbCdrVersion that = (DbCdrVersion) obj;
-    return new EqualsBuilder()
-        .append(this.cdrVersionId, that.cdrVersionId)
-        .append(this.isDefault, that.isDefault)
-        .append(this.name, that.name)
-        .append(this.dataAccessLevel, that.dataAccessLevel)
-        .append(this.archivalStatus, that.archivalStatus)
-        .append(this.releaseNumber, that.releaseNumber)
-        .append(this.bigqueryProject, that.bigqueryProject)
-        .append(this.creationTime, that.creationTime)
-        .append(this.numParticipants, that.numParticipants)
-        .append(this.cdrDbName, that.cdrDbName)
-        .append(this.elasticIndexBaseName, that.elasticIndexBaseName)
-        .append(this.hasFitbitData, that.hasFitbitData)
-        .append(this.hasCopeSurveyData, that.hasCopeSurveyData)
-        .append(this.accessTier, that.accessTier)
-        .build();
+    DbCdrVersion that = (DbCdrVersion) o;
+    return cdrVersionId == that.cdrVersionId
+        && isDefault == that.isDefault
+        && releaseNumber == that.releaseNumber
+        && archivalStatus == that.archivalStatus
+        && numParticipants == that.numParticipants
+        && Objects.equals(name, that.name)
+        && Objects.equals(dataAccessLevel, that.dataAccessLevel)
+        && Objects.equals(accessTier, that.accessTier)
+        && Objects.equals(bigqueryProject, that.bigqueryProject)
+        && Objects.equals(bigqueryDataset, that.bigqueryDataset)
+        && Objects.equals(creationTime, that.creationTime)
+        && Objects.equals(cdrDbName, that.cdrDbName)
+        && Objects.equals(elasticIndexBaseName, that.elasticIndexBaseName)
+        && Objects.equals(microarrayBigqueryDataset, that.microarrayBigqueryDataset)
+        && Objects.equals(wgsBigqueryDataset, that.wgsBigqueryDataset)
+        && Objects.equals(hasFitbitData, that.hasFitbitData)
+        && Objects.equals(hasCopeSurveyData, that.hasCopeSurveyData);
   }
 }

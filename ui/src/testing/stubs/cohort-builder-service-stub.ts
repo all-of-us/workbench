@@ -3,7 +3,7 @@ import {
   Criteria,
   CriteriaAttributeListResponse,
   CriteriaListResponse,
-  CriteriaMenuOptionsListResponse,
+  CriteriaMenuListResponse,
   CriteriaSubType,
   CriteriaType,
   DemoChartInfoListResponse,
@@ -14,10 +14,10 @@ import {
   ParticipantDemographics,
   SurveyCount,
   SurveyModule,
-  SurveysResponse
+  SurveysResponse,
+  SurveyVersionListResponse
 } from 'generated/fetch';
-import {stubNotImplementedError} from 'testing/stubs/stub-utils';
-import {SurveyVersionListResponse} from '../../generated/fetch';
+import {stubNotImplementedError} from 'testing/stubs/stub-utils'
 
 export class SurveyStubVariables {
   static STUB_SURVEYS: SurveyModule[] = [
@@ -398,8 +398,8 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
     return new Promise<ParticipantDemographics>(resolve => resolve({genderList: [], ethnicityList: [], raceList: [], sexAtBirthList: []}));
   }
 
-  findCriteriaMenuOptions(): Promise<CriteriaMenuOptionsListResponse> {
-    return new Promise<CriteriaMenuOptionsListResponse>(resolve => resolve({items: []}));
+  findCriteriaMenu(): Promise<CriteriaMenuListResponse> {
+    return new Promise<CriteriaMenuListResponse>(resolve => resolve({items: []}));
   }
 
   findDomainInfos(): Promise<DomainInfoResponse> {

@@ -845,16 +845,6 @@ def make_bq_denormalized_tables(cmd_name, *args)
     "BQ dataset. Required."
   )
   op.add_option(
-    "--wgv-project [wgv-project]",
-    ->(opts, v) { opts.wgv_project = v},
-    "Whole Genome Variant Project. Required."
-  )
-  op.add_option(
-    "--wgv-dataset [wgv-dataset]",
-    ->(opts, v) { opts.wgv_dataset = v},
-    "Whole Genome Variant Dataset. Required."
-  )
-  op.add_option(
     "--cdr-version [cdr-version]",
     ->(opts, v) { opts.cdr_version = v},
     "CDR version. Required."
@@ -870,9 +860,19 @@ def make_bq_denormalized_tables(cmd_name, *args)
     "GCS bucket. Required."
   )
   op.add_option(
+    "--wgv-project [wgv-project]",
+    ->(opts, v) { opts.wgv_project = v},
+    "Whole Genome Variant Project. Optional."
+  )
+  op.add_option(
+    "--wgv-dataset [wgv-dataset]",
+    ->(opts, v) { opts.wgv_dataset = v},
+    "Whole Genome Variant Dataset. Optional."
+  )
+  op.add_option(
     "--data-browser [data-browser]",
     ->(opts, v) { opts.data_browser = v},
-    "Is this run for data browser. Default is false"
+    "Is this run for data browser. Optional - Default is false"
   )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.cdr_version and opts.bucket }
   op.parse.validate
@@ -1982,10 +1982,12 @@ def create_wgs_cohort_extraction_bp_workspace(cmd_name, *args)
   ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
   flags.map! { |f| "'#{f}'" }
 
-  ServiceAccountContext.new(gcc.project).run do
-    common.run_inline %W{
-       gradle createWgsCohortExtractionBillingProjectWorkspace
-       -PappArgs=[#{flags.join(',')}]}
+  with_cloud_proxy_and_db(gcc) do
+    ServiceAccountContext.new(gcc.project).run do
+      common.run_inline %W{
+         gradle createWgsCohortExtractionBillingProjectWorkspace
+         -PappArgs=[#{flags.join(',')}]}
+    end
   end
 end
 

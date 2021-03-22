@@ -1,7 +1,11 @@
 package org.pmiops.workbench.mail;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.api.services.directory.model.User;
 import com.google.api.services.directory.model.UserEmail;
@@ -18,6 +22,7 @@ import org.pmiops.workbench.google.CloudStorageClientImpl;
 import org.pmiops.workbench.mandrill.ApiException;
 import org.pmiops.workbench.mandrill.api.MandrillApi;
 import org.pmiops.workbench.mandrill.model.MandrillApiKeyAndMessage;
+import org.pmiops.workbench.mandrill.model.MandrillMessage;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatus;
 import org.pmiops.workbench.mandrill.model.MandrillMessageStatuses;
 import org.pmiops.workbench.test.Providers;
@@ -80,6 +85,21 @@ public class MailServiceImplTest {
     User user = createUser();
     service.sendWelcomeEmail(CONTACT_EMAIL, PASSWORD, user);
     verify(mandrillApi, times(1)).send(any(MandrillApiKeyAndMessage.class));
+  }
+
+  @Test
+  public void testSendInstructions() throws Exception {
+    service.sendInstitutionUserInstructions(
+        "asdf@gmail.com", "Ask for help at help@myinstitute.org <script>window.alert()</script>>");
+    verify(mandrillApi, times(1))
+        .send(
+            argThat(
+                got -> {
+                  String gotHtml = ((MandrillMessage) got.getMessage()).getHtml();
+                  // tags should be escaped, email addresses shouldn't.
+                  return gotHtml.contains("help@myinstitute.org")
+                      && gotHtml.contains("&lt;script&gt;window.alert()&lt;/script&gt;&gt;");
+                }));
   }
 
   private User createUser() {
