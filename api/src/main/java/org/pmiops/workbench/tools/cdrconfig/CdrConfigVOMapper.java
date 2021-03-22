@@ -1,8 +1,11 @@
 package org.pmiops.workbench.tools.cdrconfig;
 
 import java.util.List;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -15,7 +18,7 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(
     config = MapStructConfig.class,
-    uses = {CommonMappers.class, DbStorageEnums.class, AccessTierDao.class})
+    uses = {CommonMappers.class, DbStorageEnums.class})
 public interface CdrConfigVOMapper {
 
   DbAccessTier toDbTier(AccessTierVO localTier);
@@ -26,14 +29,24 @@ public interface CdrConfigVOMapper {
     return toDbTiers(cdrConfig.accessTiers);
   }
 
-  // currently unambiguous, but adding the qualifiedByName to future-proof
-  @Mapping(source = "accessTier", target = "accessTier", qualifiedByName = "findOneByShortName")
+  // MapStruct gets the accessTier mapping wrong, by choosing the wrong AccessTierDao method
+  // (TODO: why?) but we can specify it explicitly using the AfterMapping below
+  @Mapping(target = "accessTier", ignore = true)
   @Mapping(source = "archivalStatus", target = "archivalStatusEnum")
-  DbCdrVersion toDbVersion(CdrVersionVO localVersion);
+  DbCdrVersion toDbVersion(CdrVersionVO localVersion, @Context AccessTierDao accessTierDao);
 
-  List<DbCdrVersion> toDbVersions(List<CdrVersionVO> localVersions);
+  @AfterMapping
+  default void populateAccessTier(
+      CdrVersionVO localVersion,
+      @MappingTarget DbCdrVersion dbCdrVersion,
+      @Context AccessTierDao accessTierDao) {
+    dbCdrVersion.setAccessTier(accessTierDao.findOneByShortName(localVersion.accessTier));
+  }
 
-  default List<DbCdrVersion> cdrVersions(CdrConfigVO cdrConfig) {
-    return toDbVersions(cdrConfig.cdrVersions);
+  List<DbCdrVersion> toDbVersions(
+      List<CdrVersionVO> localVersions, @Context AccessTierDao accessTierDao);
+
+  default List<DbCdrVersion> cdrVersions(CdrConfigVO cdrConfig, AccessTierDao accessTierDao) {
+    return toDbVersions(cdrConfig.cdrVersions, accessTierDao);
   }
 }
