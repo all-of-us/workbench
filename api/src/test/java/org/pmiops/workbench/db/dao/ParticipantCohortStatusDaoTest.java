@@ -11,8 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.CdrVersionContext;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cohortreview.util.PageRequest;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
@@ -42,7 +40,6 @@ public class ParticipantCohortStatusDaoTest {
   private static final int PAGE_SIZE = 25;
 
   @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
-  @Autowired private ConceptDao conceptDao;
   @Autowired private JdbcTemplate jdbcTemplate;
 
   @Before
@@ -80,45 +77,6 @@ public class ParticipantCohortStatusDaoTest {
             .sexAtBirthConceptId(8507L)
             .deceased(false);
     participantCohortStatusDao.save(status2);
-
-    DbConcept male =
-        new DbConcept()
-            .conceptId(8507)
-            .conceptName("MALE")
-            .domainId("3")
-            .vocabularyId("Gender")
-            .conceptClassId("1")
-            .standardConcept("c")
-            .conceptCode("c")
-            .count(1)
-            .prevalence(1);
-    conceptDao.save(male);
-
-    DbConcept race =
-        new DbConcept()
-            .conceptId(8515)
-            .conceptName("Asian")
-            .domainId("3")
-            .vocabularyId("Race")
-            .conceptClassId("1")
-            .standardConcept("c")
-            .conceptCode("c")
-            .count(1)
-            .prevalence(1);
-    conceptDao.save(race);
-
-    DbConcept ethnicity =
-        new DbConcept()
-            .conceptId(38003564)
-            .conceptName("Not Hispanic or Latino")
-            .domainId("3")
-            .vocabularyId("Ethnicity")
-            .conceptClassId("1")
-            .standardConcept("c")
-            .conceptCode("c")
-            .count(1)
-            .prevalence(1);
-    conceptDao.save(ethnicity);
   }
 
   @Test

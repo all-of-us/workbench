@@ -113,6 +113,23 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
+  public ConceptIds classifyConceptIds(Set<Long> conceptIds) {
+    ImmutableList.Builder<Long> standardConceptIds = ImmutableList.builder();
+    ImmutableList.Builder<Long> sourceConceptIds = ImmutableList.builder();
+    cbCriteriaDao
+        .findByConceptIdIn(conceptIds.stream().map(String::valueOf).collect(Collectors.toList()))
+        .forEach(
+            c -> {
+              if (c.getStandard()) {
+                standardConceptIds.add(Long.valueOf(c.getConceptId()));
+              } else {
+                sourceConceptIds.add(Long.valueOf(c.getConceptId()));
+              }
+            });
+    return new ConceptIds(standardConceptIds.build(), sourceConceptIds.build());
+  }
+
+  @Override
   public List<Criteria> findCriteriaByDomainIdAndConceptIds(
       String domainId, Collection<DbConceptSetConceptId> dbConceptSetConceptIds) {
     List<DbCriteria> criteriaList = new ArrayList<>();
@@ -153,14 +170,16 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         standardConceptIds.stream().map(Object::toString).collect(Collectors.toList());
     if (!sourceIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, false, sourceIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));
     }
     if (!standardConceptIds.isEmpty()) {
       criteriaList.addAll(
-          cbCriteriaDao.findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
+          cbCriteriaDao
+              .findCriteriaByDomainIdAndStandardAndConceptIds(domainId, true, standardIds)
               .stream()
               .map(cohortBuilderMapper::dbModelToClient)
               .collect(Collectors.toList()));

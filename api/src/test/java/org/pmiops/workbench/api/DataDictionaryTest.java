@@ -17,7 +17,6 @@ import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
@@ -79,7 +78,6 @@ public class DataDictionaryTest {
     CohortQueryBuilder.class,
     ConceptBigQueryService.class,
     ConceptSetService.class,
-    ConceptService.class,
     ConceptSetMapper.class,
     FireCloudService.class,
     NotebooksService.class,

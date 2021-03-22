@@ -338,4 +338,6 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(value = "SELECT * FROM INFORMATION_SCHEMA.INNODB_FT_DEFAULT_STOPWORD", nativeQuery = true)
   List<String> findMySQLStopWords();
+
+  List<DbCriteria> findByConceptIdIn(List<String> conceptIds);
 }
