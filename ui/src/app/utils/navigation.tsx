@@ -100,6 +100,13 @@ export const encodeURIComponentStrict = (uri: string): string => {
   });
 };
 
+/** Build the RAS OAuth redirect URL. It should be AoU hostname/ras-callback. */
+export const buildRasRedirectUrl = (windowOrigin: string): string => {
+  return encodeURIComponent(uri).replace(/[!'()*]/g, (c) => {
+    return encodeURIComponent(windowOrigin + '/ras-callback');
+  });
+};
+
 // if modifier keys are pressed (like shift or cmd) use the href
 // if no keys are pressed, prevent default behavior and route using navigateByUrl
 export const navigateAndPreventDefaultIfNoKeysPressed = (e: React.MouseEvent, url: string) => {

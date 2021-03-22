@@ -82,6 +82,9 @@ interface State {
   eraCommonsError: string;
   eraCommonsLinked: boolean;
   eraCommonsLoading: boolean;
+  rasLoginGovLinkError: string;
+  rasLoginGovLinked: boolean;
+  rasLoginGovLoading: boolean;
   firstVisit: boolean;
   firstVisitTraining: boolean;
   quickTour: boolean;
@@ -108,6 +111,9 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
       eraCommonsError: '',
       eraCommonsLinked: undefined,
       eraCommonsLoading: false,
+      rasLoginGovLinkError: '',
+      rasLoginGovLinked: undefined,
+      rasLoginGovLoading: false,
       firstVisit: undefined,
       firstVisitTraining: true,
       quickTour: false,
@@ -123,6 +129,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
   componentDidMount() {
     this.checkWorkspaces();
     this.validateNihToken();
+    this.validateRasLoginGovLink();
     this.callProfile();
   }
 
@@ -152,6 +159,21 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         }
       } catch (e) {
         this.setState({eraCommonsError: 'Error saving NIH Authentication status.'});
+      }
+    }
+  }
+
+  async validateRasLoginGovLink(redirectUrl) {
+    const token = (new URL(window.location.href)).searchParams.get('code');
+    if (code) {
+      this.setState({rasLoginGovLoading: true});
+      try {
+        const profileResponse = await profileApi().linkRasAccount({ authCode: code, redirectUrl: redirectUrl});
+        if (profileResponse.rasLinkLoginGovUsername !== undefined) {
+          this.setState({rasLoginGovLinked: true});
+        }
+      } catch (e) {
+        this.setState({rasLoginGovLinkError: 'Error saving RAS Login.Gov linkage status.'});
       }
     }
   }
@@ -211,6 +233,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
           (() => !!(getRegistrationTasksMap()['dataUserCodeOfConduct']
             .completionTimestamp(profile)))() : true)
       });
+      // TODO(RW-6493): Update rasCommonsLinked similar to what we are doing for eraCommons
       this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});
 
       const {workbenchAccessTasks} = queryParamsStore.getValue();
@@ -230,6 +253,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
     this.setState((state, props) => ({
       quickTour: state.firstVisit && state.accessTasksRemaining === false
     }));
+    // TODO(RW-6494): Update accessTasksRemaining from user tier status and RAS link status.
   }
 
   async checkWorkspaces() {

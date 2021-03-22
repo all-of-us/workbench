@@ -97,6 +97,14 @@ function redirectToNiH(): void {
   window.open(url, '_blank');
 }
 
+function redirectToRas(): void {
+  AnalyticsTracker.Registration.ERACommons();
+  const url = serverConfigStore.getValue().ras.host + '/auth/oauth/v2/authorize?client_id=' + serverConfigStore.getValue().ras.clientId
+  + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl(window.location.origin.toString())
+  + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1';
+  window.open(url, '_blank');
+}
+
 async function redirectToTraining() {
   AnalyticsTracker.Registration.EthicsTraining();
   await profileApi().updatePageVisits({page: 'moodle'});
@@ -143,6 +151,19 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     loadingPropsKey: 'eraCommonsLoading',
     title: 'Connect Your eRA Commons Account',
     description: 'Connect your Researcher Workbench account to your eRA Commons account. ' +
+      'There is no exchange of personal data in this step.',
+    buttonText: 'Connect',
+    completedText: 'Linked',
+    completionTimestamp: (profile: Profile) => {
+      return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
+    },
+    onClick: redirectToNiH
+  }, {
+    key: 'rasLoginGov',
+    completionPropsKey: 'rasLoginGovLinked',
+    loadingPropsKey: 'rasLoginGovLoading',
+    title: 'Connect Your Login.Gov Account',
+    description: 'Connect your Researcher Workbench account to your Login.Gov account. ' +
       'There is no exchange of personal data in this step.',
     buttonText: 'Connect',
     completedText: 'Linked',
