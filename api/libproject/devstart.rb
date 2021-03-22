@@ -2025,15 +2025,11 @@ def create_terra_method_snapshot(cmd_name, *args)
     ->(opts, v) { opts.source_git_ref = v},
     "git commit/branch/tag where the source file is located")
   op.add_option(
-    "--method-namespace [method-namespace]",
-    ->(opts, v) { opts.method_namespace = v},
-    "Agora method namespace to create the snapshot in")
-  op.add_option(
     "--method-name [method-name]",
     ->(opts, v) { opts.method_name = v},
     "Agora method name to create snapshot in")
   op.add_validator ->(opts) {
-    unless (opts.source_git_repo or opt.source_git_path or opts.source_git_ref)
+    unless (opts.source_git_repo or opt.source_git_path or opts.source_git_ref or opts.method_name)
       common.error "all arguments must be provided"
       raise ArgumentError
     end
@@ -2058,7 +2054,7 @@ def create_terra_method_snapshot(cmd_name, *args)
       ["--source-git-repo", op.opts.source_git_repo],
       ["--source-git-path", op.opts.source_git_path],
       ["--source-git-ref", op.opts.source_git_ref],
-      ["--method-namespace", op.opts.method_namespace],
+      ["--method-namespace", get_config(project)['wgsCohortExtraction']['extractionMethodConfigurationNamespace']],
       ["--method-name", op.opts.method_name],
     ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
     flags.map! { |f| "'#{f}'" }
