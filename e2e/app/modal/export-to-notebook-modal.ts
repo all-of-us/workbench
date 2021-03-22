@@ -1,17 +1,16 @@
 import RadioButton from 'app/element/radiobutton';
 import Textbox from 'app/element/textbox';
-import {Page} from 'puppeteer';
-import {Language, LinkText} from 'app/text-labels';
+import { Page } from 'puppeteer';
+import { Language, LinkText } from 'app/text-labels';
 import Modal from './modal';
 
 export default class ExportToNotebookModal extends Modal {
-
   constructor(page: Page, xpath?: string) {
     super(page, xpath);
   }
 
   async isLoaded(): Promise<boolean> {
-    await (this.getNotebookNameInput()).asElementHandle();
+    await this.getNotebookNameInput().asElementHandle();
     return true;
   }
 
@@ -43,7 +42,6 @@ export default class ExportToNotebookModal extends Modal {
     await notebookNameInput.type(notebookName);
     const radio = language === Language.Python ? this.getPythonRadioButton() : this.getRRadioButton();
     await radio.select();
-    return this.clickButton(LinkText.ExportAndOpen, {waitForClose: true});
+    return this.clickButton(LinkText.ExportAndOpen, { waitForClose: true });
   }
-
 }

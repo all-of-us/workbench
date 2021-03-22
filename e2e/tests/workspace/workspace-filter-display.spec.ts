@@ -1,11 +1,10 @@
 import WorkspacesPage from 'app/page/workspaces-page';
-import {signIn} from 'utils/test-utils';
+import { signIn } from 'utils/test-utils';
 import WorkspaceCard from 'app/component/workspace-card';
 import ReactSelect from 'app/element/react-select';
-import {config} from 'resources/workbench-config';
+import { config } from 'resources/workbench-config';
 
 describe('Workspaces Filter Select menu tests', () => {
-
   beforeEach(async () => {
     await signIn(page, config.collaboratorUsername, config.userPassword);
   });
@@ -19,18 +18,13 @@ describe('Workspaces Filter Select menu tests', () => {
    *
    */
   test('Display workspaces by access levels', async () => {
-
-    const filterMenuOptions = [
-      'Owner',
-      'Writer',
-      'Reader'
-    ];
+    const filterMenuOptions = ['Owner', 'Writer', 'Reader'];
 
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
 
     // Default Filter by Select menu value is 'All'.
-    const selectMenu = new ReactSelect(page, {name: 'Filter by'});
+    const selectMenu = new ReactSelect(page, { name: 'Filter by' });
     const defaultSelectedValue = await selectMenu.getSelectedOption();
     expect(defaultSelectedValue).toEqual('All');
 
@@ -45,8 +39,5 @@ describe('Workspaces Filter Select menu tests', () => {
         expect(cardLevel).toEqual(menuOption.toUpperCase());
       }
     }
-
   });
-
-
 });

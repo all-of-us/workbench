@@ -1,5 +1,5 @@
-import {Page} from 'puppeteer';
-import {MenuOption} from 'app/text-labels';
+import { Page } from 'puppeteer';
+import { MenuOption } from 'app/text-labels';
 import Link from 'app/element/link';
 import BaseMenu from './base-menu';
 
@@ -7,7 +7,6 @@ export const snowmanIconXpath = '//clr-icon[@shape="ellipsis-vertical"]';
 const defaultXpath = '//*[@id="popup-root"]';
 
 export default class SnowmanMenu extends BaseMenu {
-
   constructor(page: Page, xpath: string = defaultXpath) {
     super(page, xpath);
   }
@@ -37,5 +36,4 @@ export default class SnowmanMenu extends BaseMenu {
     const selector = `${this.getXpath()}${this.getMenuItemXpath(option)}`;
     return new Link(this.page, selector);
   }
-
 }

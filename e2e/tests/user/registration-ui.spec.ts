@@ -1,12 +1,10 @@
 import BaseElement from 'app/element/base-element';
 import CreateAccountPage from 'app/page/create-account-page';
 import GoogleLoginPage from 'app/page/google-login';
-import {config} from 'resources/workbench-config';
-import {waitForText} from 'utils/waits-utils';
-
+import { config } from 'resources/workbench-config';
+import { waitForText } from 'utils/waits-utils';
 
 describe('User registration UI tests:', () => {
-
   test('Loading registration workflow', async () => {
     const loginPage = new GoogleLoginPage(page);
     await loginPage.load();
@@ -89,8 +87,5 @@ describe('User registration UI tests:', () => {
     await userInforPageButton.isDisplayed();
     const cursor = await userInforPageButton.isCursorNotAllowed();
     expect(cursor).toEqual(true);
-
   });
-
-
 });

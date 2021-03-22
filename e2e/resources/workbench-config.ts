@@ -16,7 +16,7 @@ const urlPath = {
   workspacesUrlPath: '/workspaces',
   profileUrlPath: '/profile',
   libraryUrlPath: '/library',
-  adminUrlPath: '/admin/user',
+  adminUrlPath: '/admin/user'
 };
 
 // localhost development server
@@ -26,7 +26,7 @@ const local = {
   userEmailDomain: '@fake-research-aou.org',
   collaboratorUsername: process.env.DEV_COLLABORATOR || 'puppetmaster@fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v3',
-  altCdrVersionName: 'Synthetic Dataset v3 with Microarray',
+  altCdrVersionName: 'Synthetic Dataset v3 with Microarray'
 };
 
 // workbench test environment
@@ -36,7 +36,7 @@ const test = {
   userEmailDomain: '@fake-research-aou.org',
   collaboratorUsername: process.env.TEST_COLLABORATOR || 'puppetmaster@fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v3',
-  altCdrVersionName: 'Synthetic Dataset v3 with Microarray',
+  altCdrVersionName: 'Synthetic Dataset v3 with Microarray'
 };
 
 // workbench staging environment
@@ -46,7 +46,7 @@ const staging = {
   userEmailDomain: '@staging.fake-research-aou.org',
   collaboratorUsername: process.env.STAGING_COLLABORATOR || 'puppetcitester4@staging.fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v4',
-  altCdrVersionName: 'Synthetic Dataset v3',
+  altCdrVersionName: 'Synthetic Dataset v3'
 };
 
 // workbench stable environment
@@ -55,15 +55,14 @@ const stable = {
   apiBaseUrl: process.env.STABLE_API_URL,
   userEmailDomain: '@stable.fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v4',
-  altCdrVersionName: 'Synthetic Dataset v3',
+  altCdrVersionName: 'Synthetic Dataset v3'
 };
-
 
 const environment = {
   local,
   test,
   staging,
-  stable,
+  stable
 };
 
 export const config = fp.mergeAll([environment[env], userCredential, urlPath]);
