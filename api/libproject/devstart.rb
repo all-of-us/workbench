@@ -2005,13 +2005,13 @@ def create_terra_method_snapshot(cmd_name, *args)
   op.add_option(
     "--project [GOOGLE_PROJECT]",
     ->(opts, v) { opts.project = v},
-    "Google project to act on (e.g. all-of-us-workbench-test)"
+    "Google project to act on (e.g. all-of-us-workbench-test). Cannot be used with --all-projects"
   )
   op.opts.all_projects = false
   op.add_option(
     "--all-projects [all-projects]",
     ->(opts, _) { opts.all_projects = true},
-    "Create snapshot in every AoU environment")
+    "Create snapshot in every AoU environment. Cannot be used with --project.")
   op.add_option(
     "--source-git-repo [source-git-repo]",
     ->(opts, v) { opts.source_git_repo = v},
@@ -2019,17 +2019,17 @@ def create_terra_method_snapshot(cmd_name, *args)
   op.add_option(
     "--source-git-path [source-git-path]",
     ->(opts, v) { opts.source_git_path = v},
-    "git path where the source file is located, relative to the repo's root directory. ex. ()") #TODO eric: add this
+    "git path where the source file is located, relative to the repo's root directory. ex. (scripts/variantstore/wdl/ngs_cohort_extract.wdl)")
   op.add_option(
     "--source-git-ref [source-git-ref]",
     ->(opts, v) { opts.source_git_ref = v},
-    "git commit/branch/tag where the source file is located")
+    "git commit/branch/tag where the source file is located. ex. (main)")
   op.add_option(
     "--method-name [method-name]",
     ->(opts, v) { opts.method_name = v},
-    "Agora method name to create snapshot in")
+    "Agora method name to create snapshot in. Method Namespace will be pulled from WorkbenchConfig.wgsCohortExtraction.extractionMethodConfigurationNamespace")
   op.add_validator ->(opts) {
-    unless (opts.source_git_repo or opt.source_git_path or opts.source_git_ref or opts.method_name)
+    unless (opts.source_git_repo or opts.source_git_path or opts.source_git_ref or opts.method_name)
       common.error "all arguments must be provided"
       raise ArgumentError
     end
@@ -2069,7 +2069,8 @@ end
 
 Common.register_command({
   :invocation => "create-terra-method-snapshot",
-  :description => "Create Terra Method snapshot",
+  :description => "Create Terra Method snapshot in single or all environments.
+    Method Namespace will be pulled from WorkbenchConfig.wgsCohortExtraction.extractionMethodConfigurationNamespace",
   :fn => ->(*args) { create_terra_method_snapshot("create-terra-method-snapshot", *args) }
 })
 
