@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.inject.Provider;
@@ -15,6 +16,7 @@ import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.MethodConfigurationsApi;
@@ -101,6 +103,12 @@ public class WgsCohortExtractionService {
     String extractionUuid = UUID.randomUUID().toString();
     String extractionFolder = "wgs-cohort-extractions/" + extractionUuid;
 
+    List<String> personIds = cohortService.getPersonIdsWithWholeGenome(cohortId);
+    if (personIds.isEmpty()) {
+      throw new FailedPreconditionException(
+          "provided cohort contains no participants with whole genome data");
+    }
+
     Blob personIdsFile =
         extractionServiceAccountCloudStorageClientProvider
             .get()
@@ -110,8 +118,7 @@ public class WgsCohortExtractionService {
                 // extraction SA's permissions
                 cohortExtractionConfig.operationalTerraWorkspaceBucket,
                 extractionFolder + "/person_ids.txt",
-                String.join("\n", cohortService.getPersonIds(cohortId))
-                    .getBytes(StandardCharsets.UTF_8));
+                String.join("\n", personIds).getBytes(StandardCharsets.UTF_8));
 
     FirecloudMethodConfiguration methodConfig =
         methodConfigurationsApiProvider
@@ -204,7 +211,7 @@ public class WgsCohortExtractionService {
     dbSubmission.setWorkspace(workspace);
     dbSubmission.setCreator(userProvider.get());
     dbSubmission.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
-    // TODO(RW-6455): Store the sample count, once we have a filtered sample count available here.
+    dbSubmission.setSampleCount((long) personIds.size());
     wgsExtractCromwellSubmissionDao.save(dbSubmission);
 
     methodConfigurationsApiProvider

@@ -3090,19 +3090,6 @@ paths:
           description: CohortAnnotationDefinition deletion request accepted
           schema:
             "$ref": "#/definitions/EmptyResponse"
-  "/v1/cohortbuilder/{cdrVersionId}/criteria/menu":
-    parameters:
-    - "$ref": "#/parameters/cdrVersionId"
-    get:
-      tags:
-      - cohortBuilder
-      description: 'Returns criteria menu options'
-      operationId: findCriteriaMenuOptions
-      responses:
-        200:
-          description: A collection of criteria menu options
-          schema:
-            "$ref": "#/definitions/CriteriaMenuOptionsListResponse"
   "/v1/cohortbuilder/{cdrVersionId}/criteria/menu/{parentId}":
     parameters:
     - "$ref": "#/parameters/cdrVersionId"
@@ -7198,15 +7185,6 @@ definitions:
       totalCount:
         type: integer
         format: int64
-  CriteriaMenuOptionsListResponse:
-    type: object
-    required:
-    - items
-    properties:
-      items:
-        type: array
-        items:
-          "$ref": "#/definitions/CriteriaMenuOption"
   CriteriaMenuListResponse:
     type: object
     required:
@@ -7320,19 +7298,6 @@ definitions:
         description: Reveals if this criteria is standard or source.
         type: boolean
         default: false
-  CriteriaMenuOption:
-    type: object
-    required:
-    - domain
-    - types
-    properties:
-      domain:
-        description: The criteria domains that are searchable in Cohort Builder
-        type: string
-      types:
-        type: array
-        items:
-          "$ref": "#/definitions/CriteriaMenuSubOption"
   CriteriaMenu:
     type: object
     required:
@@ -7372,28 +7337,6 @@ definitions:
         description: The order
         type: integer
         format: int64
-  CriteriaMenuSubOption:
-    type: object
-    required:
-    - type
-    - standardFlags
-    properties:
-      type:
-        description: The criteria types that are searchable in Cohort Builder
-        type: string
-      standardFlags:
-        type: array
-        items:
-          "$ref": "#/definitions/StandardFlag"
-  StandardFlag:
-    type: object
-    required:
-    - standard
-    properties:
-      standard:
-        description: flag that determines standard or source
-        type: boolean
-        default: false
   CriteriaAttributeListResponse:
     type: object
     required:
