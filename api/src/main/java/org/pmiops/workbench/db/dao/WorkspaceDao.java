@@ -1,6 +1,5 @@
 package org.pmiops.workbench.db.dao;
 
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -27,12 +26,6 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
 
   @Query("SELECT distinct w.workspaceNamespace, w from DbWorkspace w")
   Set<String> findAllWorkspaceNamespaces();
-
-  @Query(value = "SELECT workspace_id FROM workspace limit :limit", nativeQuery = true)
-  List<BigInteger> findTopDbWorkspaceIds(@Param("limit") Integer limit);
-
-  @Query(value = "SELECT workspace_id FROM workspace", nativeQuery = true)
-  List<BigInteger> findAllDbWorkspaceIds();
 
   @Query(
       "SELECT w FROM DbWorkspace w LEFT JOIN FETCH w.cohorts c LEFT JOIN FETCH c.cohortReviews"

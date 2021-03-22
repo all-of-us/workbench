@@ -11,7 +11,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchLocationConfigService;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.dao.RdrExportDao;
 import org.pmiops.workbench.rdr.RdrTaskQueue;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -57,7 +57,7 @@ public class BackfillWorkspacesToRdr {
   }
 
   @Bean
-  public CommandLineRunner run(WorkspaceDao workspaceDao, RdrTaskQueue rdrTaskQueue) {
+  public CommandLineRunner run(RdrExportDao rdrExportDao, RdrTaskQueue rdrTaskQueue) {
     return (args) -> {
       CommandLine opts = new DefaultParser().parse(options, args);
       Integer limit = ((Number) opts.getParsedOptionValue("limit")).intValue();
@@ -65,8 +65,8 @@ public class BackfillWorkspacesToRdr {
 
       List<BigInteger> nativeWorkspaceListToExport =
           limit != null
-              ? workspaceDao.findTopDbWorkspaceIds(limit)
-              : workspaceDao.findAllDbWorkspaceIds();
+              ? rdrExportDao.findTopUnchangedDbWorkspaceIds(limit)
+              : rdrExportDao.findAllUnchangedDbWorkspaceIds();
 
       List<Long> workspaceListToExport =
           nativeWorkspaceListToExport.stream()
