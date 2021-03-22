@@ -27,7 +27,7 @@
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "retryCount": 2,
     "bufferCapacityPerTier": {
-      "registered": 50
+      "registered": 150
     },
     "bufferRefillProjectsPerTask": 1,
     "bufferStatusChecksPerTask": 10,
