@@ -2001,6 +2001,16 @@ def create_terra_method_snapshot(cmd_name, *args)
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
+    "--project [GOOGLE_PROJECT]",
+    ->(opts, v) { opts.project = v},
+    "Google project to act on (e.g. all-of-us-workbench-test)"
+  )
+  op.opts.all_projects = false
+  op.add_option(
+    "--all-projects [all-projects]",
+    ->(opts, _) { opts.all_projects = true},
+    "Create snapshot in every AoU environment")
+  op.add_option(
     "--source-git-repo [source-git-repo]",
     ->(opts, v) { opts.source_git_repo = v},
     "git owner/repo where the source file is located. ex. (broadinstitute/gatk)")
@@ -2026,26 +2036,37 @@ def create_terra_method_snapshot(cmd_name, *args)
       raise ArgumentError
     end
   }
+  op.add_validator ->(opts) {
+    if (!opts.project and !opts.all_projects)
+      common.error "A project must be set or --all-projects must be true"
+      raise ArgumentError
+    end
+  }
 
-  gcc = GcloudContextV2.new(op)
+  # Use GcloudContextV2 to validate gcloud auth but we need to drop the
+  # --project argument validation that's built into the constructor
+  GcloudContextV2.validate_gcloud_auth()
   op.parse.validate
-  gcc.validate
 
-  flags = ([
-    ["--config-json", get_config_file(op.opts.project)],
-    ["--source-git-repo", op.opts.source_git_repo],
-    ["--source-git-path", op.opts.source_git_path],
-    ["--source-git-ref", op.opts.source_git_ref],
-    ["--method-namespace", op.opts.method_namespace],
-    ["--method-name", op.opts.method_name],
-  ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
-  flags.map! { |f| "'#{f}'" }
+  projects = op.opts.all_projects ? ENVIRONMENTS.keys - ["local"] : [op.opts.project]
 
-  ServiceAccountContext.new(gcc.project).run do
-    common.run_inline %W{
+  projects.each { |project|
+    flags = ([
+      ["--config-json", get_config_file(project)],
+      ["--source-git-repo", op.opts.source_git_repo],
+      ["--source-git-path", op.opts.source_git_path],
+      ["--source-git-ref", op.opts.source_git_ref],
+      ["--method-namespace", op.opts.method_namespace],
+      ["--method-name", op.opts.method_name],
+    ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+    flags.map! { |f| "'#{f}'" }
+
+    ServiceAccountContext.new(project).run do
+      common.run_inline %W{
        gradle createTerraMethodSnapshot
        -PappArgs=[#{flags.join(',')}]}
-  end
+    end
+  }
 end
 
 Common.register_command({

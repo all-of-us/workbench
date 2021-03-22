@@ -32,24 +32,30 @@ class GcloudContextV2
     if @creds_file
       common.run_inline %W{gcloud auth activate-service-account --key-file #{@creds_file}}
     else
-      common.status "Reading gcloud configuration..."
-      configs = common.capture_stdout %W{gcloud --format=json config configurations list}
-      active_config = JSON.parse(configs).select{|x| x["is_active"]}.first
-      common.status "Using '#{active_config["name"]}' gcloud configuration"
-      @account = active_config["properties"]["core"]["account"]
-      common.status "  account: #{@account}"
-      unless @account
-        common.error "Account must be set in gcloud config. Try:\n" \
-            "  gcloud auth login your.name@pmi-ops.org"
-        exit 1
-      end
-      unless @account.end_with?("@pmi-ops.org") \
-          || @account.end_with?("iam.gserviceaccount.com") \
-          || @creds_file
-        common.error "Account is not a pmi-ops.org or service account:" \
-            " #{@account}. Try:\n gcloud auth login your.name@pmi-ops.org"
-        exit 1
-      end
+      @account = GcloudContextV2.validate_gcloud_auth
     end
+  end
+
+  def self.validate_gcloud_auth()
+    common = Common.new
+    common.status "Reading gcloud configuration..."
+    configs = common.capture_stdout %W{gcloud --format=json config configurations list}
+    active_config = JSON.parse(configs).select{|x| x["is_active"]}.first
+    common.status "Using '#{active_config["name"]}' gcloud configuration"
+    account = active_config["properties"]["core"]["account"]
+    common.status "  account: #{account}"
+    unless account
+      common.error "Account must be set in gcloud config. Try:\n" \
+            "  gcloud auth login your.name@pmi-ops.org"
+      exit 1
+    end
+    unless account.end_with?("@pmi-ops.org") \
+          || account.end_with?("iam.gserviceaccount.com")
+      common.error "Account is not a pmi-ops.org or service account:" \
+            " #{account}. Try:\n gcloud auth login your.name@pmi-ops.org"
+      exit 1
+    end
+
+    return account
   end
 end
