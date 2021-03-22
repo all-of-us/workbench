@@ -31,7 +31,7 @@ const getAdminPageUrl = (subject: string) => {
 };
 
 export const WorkspaceAudit = () => {
-  const {workspaceNamespace = ''} = useParams<{ workspaceNamespace: string}>();
+  const {workspaceNamespace = ''} = useParams<{workspaceNamespace: string}>();
   return <AuditPageComponent auditSubjectType='Workspace'
                              buttonLabel='Workspace namespace (begins with aou-rw-)'
                              initialAuditSubject={workspaceNamespace}
