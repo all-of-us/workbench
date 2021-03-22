@@ -24,7 +24,6 @@ import org.pmiops.workbench.model.CriteriaAttributeListResponse;
 import org.pmiops.workbench.model.CriteriaListResponse;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
 import org.pmiops.workbench.model.CriteriaMenuListResponse;
-import org.pmiops.workbench.model.CriteriaMenuOptionsListResponse;
 import org.pmiops.workbench.model.CriteriaRequest;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
@@ -155,15 +154,6 @@ public class CohortBuilderController implements CohortBuilderApiDelegate {
     CriteriaMenuListResponse response =
         new CriteriaMenuListResponse()
             .items(cohortBuilderService.findCriteriaMenuByParentId(parentId));
-    return ResponseEntity.ok(response);
-  }
-
-  @Override
-  public ResponseEntity<CriteriaMenuOptionsListResponse> findCriteriaMenuOptions(
-      Long cdrVersionId) {
-    cdrVersionService.setCdrVersion(cdrVersionId);
-    CriteriaMenuOptionsListResponse response =
-        new CriteriaMenuOptionsListResponse().items(cohortBuilderService.findCriteriaMenuOptions());
     return ResponseEntity.ok(response);
   }
 
