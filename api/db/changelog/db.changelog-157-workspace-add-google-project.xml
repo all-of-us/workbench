@@ -7,7 +7,7 @@
   <changeSet author="yonghao" id="changelog-157-workspace-add-google-project">
     <addColumn tableName="workspace">
       <column name="google_project" type="varchar(255)">
-        <constraints nullable="false"/>
+        <constraints nullable="true"/>
       </column>
     </addColumn>
   </changeSet>
