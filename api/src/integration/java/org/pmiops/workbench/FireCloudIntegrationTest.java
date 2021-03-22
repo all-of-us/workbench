@@ -4,7 +4,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import java.io.IOException;
 import org.junit.Test;
-import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -21,7 +20,6 @@ import org.springframework.context.annotation.Import;
 public class FireCloudIntegrationTest extends BaseIntegrationTest {
 
   @Autowired private FireCloudService service;
-  @Autowired private BillingProjectBufferService billingProjectBufferService;
 
   @TestConfiguration
   @ComponentScan(basePackageClasses = FireCloudServiceImpl.class)
