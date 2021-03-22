@@ -12,6 +12,7 @@ import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.model.Cohort;
+import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
