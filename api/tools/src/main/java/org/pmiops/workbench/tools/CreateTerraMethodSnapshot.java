@@ -34,9 +34,13 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -105,11 +109,16 @@ public class CreateTerraMethodSnapshot {
               null, null, null, null, null, null, null
       );
 
+      DateFormat formatter = new SimpleDateFormat
+              ("EEE MMM dd HH:mm:ss zzz yyyy");
+      formatter.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+
+      String snapshotComment = "Sourced from Github (repo, ref, path) (" + sourceGitRepo + ", " + sourceGitRef + ", " + sourceGitPath + ") on " + formatter.format(new Date());
       FirecloudMethodQuery newMethodQuery = new FirecloudMethodQuery()
               .namespace(methodNamespace)
               .name(methodName)
               .entityType("Workflow")
-              .snapshotComment("test comment")
+              .snapshotComment(snapshotComment)
               .payload(sourceFileContents);
 
       FirecloudMethodResponse methodResponse;
@@ -142,6 +151,7 @@ public class CreateTerraMethodSnapshot {
       );
 
       log.info("\n\n\n" +
+              "Environment: " + workbenchConfig.server.projectId + "\n" +
               "New snapshot namespace/name/version: " +
               methodResponse.getNamespace() + "/" +
               methodResponse.getName() + "/" +
