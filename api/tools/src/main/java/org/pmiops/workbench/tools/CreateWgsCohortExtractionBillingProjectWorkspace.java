@@ -66,8 +66,8 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
     return (new Gson()).fromJson(newJson.toString(), WorkbenchConfig.class);
   }
 
-  public static ImpersonatedServiceAccountApiClientFactory wgsCohortExtractionServiceAccountApiClientFactory(
-      WorkbenchConfig config) throws IOException {
+  public static ImpersonatedServiceAccountApiClientFactory
+      wgsCohortExtractionServiceAccountApiClientFactory(WorkbenchConfig config) throws IOException {
     return new ImpersonatedServiceAccountApiClientFactory(
         config.wgsCohortExtraction.serviceAccount, config.firecloud.baseUrl);
   }
