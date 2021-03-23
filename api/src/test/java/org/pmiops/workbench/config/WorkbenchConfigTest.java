@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 
 public class WorkbenchConfigTest {
 
+  // XXX: trigger CI - revert.
   @Test
   public void testUnsafeEndpointsDisabledInProd() throws FileNotFoundException {
     WorkbenchConfig workbenchConfig = getConfigFromFile("../api/config/config_prod.json");
