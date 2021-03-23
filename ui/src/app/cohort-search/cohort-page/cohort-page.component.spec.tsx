@@ -9,7 +9,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
-import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {CohortPage} from './cohort-page.component';
 
 describe('CohortPage', () => {

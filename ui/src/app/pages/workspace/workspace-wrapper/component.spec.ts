@@ -16,13 +16,13 @@ import {WorkspaceNavBarComponent} from 'app/pages/workspace/workspace-nav-bar';
 import {WorkspaceShareComponent} from 'app/pages/workspace/workspace-share';
 import {WorkspaceWrapperComponent} from 'app/pages/workspace/workspace-wrapper/component';
 
-import {UserService, WorkspaceAccessLevel} from 'generated';
-import {RuntimeApi, WorkspacesApi} from 'generated/fetch';
+import {RuntimeApi, UserApi, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
-import {UserServiceStub} from 'testing/stubs/user-service-stub';
+import {UserApiStub} from 'testing/stubs/user-api-stub';
 import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
-import {WorkspacesApiStub, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
+import {WorkspaceStubVariables} from 'testing/stubs/workspaces';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
 import {findElements} from 'testing/react-testing-utility';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
@@ -64,11 +64,11 @@ describe('WorkspaceWrapperComponent', () => {
       ],
       providers: [
         {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
-        {provide: UserService, useValue: new UserServiceStub()},
       ]
     }).compileComponents().then(() => {
       registerApiClient(WorkspacesApi, new WorkspacesApiStub());
       registerApiClient(RuntimeApi, new RuntimeApiStub());
+      registerApiClient(UserApi, new UserApiStub());
       fixture = TestBed.createComponent(WorkspaceWrapperComponent);
       setupModals(fixture);
 

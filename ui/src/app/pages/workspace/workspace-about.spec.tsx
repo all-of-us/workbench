@@ -9,7 +9,7 @@ import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {cdrVersionStore, currentWorkspaceStore, serverConfigStore, userProfileStore} from 'app/utils/navigation';
-import {userRolesStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
+import {userRolesStub, workspaceStubs} from 'testing/stubs/workspaces';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {CdrVersionsStubVariables, cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';

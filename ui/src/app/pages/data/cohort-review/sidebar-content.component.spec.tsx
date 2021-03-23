@@ -7,7 +7,7 @@ import {currentWorkspaceStore} from 'app/utils/navigation';
 import {CohortAnnotationDefinitionApi, CohortReviewApi} from 'generated/fetch';
 import {CohortAnnotationDefinitionServiceStub} from 'testing/stubs/cohort-annotation-definition-service-stub';
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
-import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {SidebarContent} from './sidebar-content.component';
 
 describe('SidebarContent', () => {

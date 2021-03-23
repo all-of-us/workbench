@@ -7,7 +7,7 @@ import {ConceptSetsApi, WorkspacesApi} from 'generated/fetch';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
-import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces';
 
 describe('ConceptNavigationBar', () => {
 

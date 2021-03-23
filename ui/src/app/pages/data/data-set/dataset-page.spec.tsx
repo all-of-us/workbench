@@ -18,11 +18,7 @@ import {cdrVersionListResponse, CdrVersionsApiStub} from 'testing/stubs/cdr-vers
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
-import {
-  workspaceDataStub,
-  workspaceStubs,
-  WorkspaceStubVariables
-} from 'testing/stubs/workspaces-api-stub';
+import {workspaceDataStub, workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
 
 describe('DataSetPage', () => {
   beforeEach(() => {
