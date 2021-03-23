@@ -7,7 +7,7 @@ import {ConceptSetsApi} from 'generated/fetch/api';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {DomainCountStubVariables} from 'testing/stubs/cohort-builder-service-stub';
 import {ConceptSetsApiStub, ConceptStubVariables} from 'testing/stubs/concept-sets-api-stub';
-import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {ConceptAddModal} from './concept-add-modal';
 
 

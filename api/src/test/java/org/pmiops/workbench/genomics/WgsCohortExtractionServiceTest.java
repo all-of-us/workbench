@@ -30,6 +30,7 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.MethodConfigurationsApi;
@@ -160,7 +161,8 @@ public class WgsCohortExtractionServiceTest {
 
   @Test
   public void submitExtractionJob() throws ApiException {
-    when(mockCohortService.getPersonIds(any())).thenReturn(ImmutableList.of("1", "2", "3"));
+    when(mockCohortService.getPersonIdsWithWholeGenome(any()))
+        .thenReturn(ImmutableList.of("1", "2", "3"));
     wgsCohortExtractionService.submitGenomicsCohortExtractionJob(targetWorkspace, 1l);
 
     verify(cloudStorageClient)
@@ -172,10 +174,12 @@ public class WgsCohortExtractionServiceTest {
         ImmutableList.copyOf(wgsExtractCromwellSubmissionDao.findAll());
     assertThat(dbSubmissions.size()).isEqualTo(1);
     assertThat(dbSubmissions.get(0).getSubmissionId()).isEqualTo(FC_SUBMISSION_ID);
+    assertThat(dbSubmissions.get(0).getSampleCount()).isEqualTo(3);
   }
 
   @Test
   public void submitExtractionJob_outputVcfsInCorrectBucket() throws ApiException {
+    when(mockCohortService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of("1"));
     wgsCohortExtractionService.submitGenomicsCohortExtractionJob(targetWorkspace, 1l);
 
     ArgumentCaptor<FirecloudMethodConfiguration> argument =
@@ -186,6 +190,12 @@ public class WgsCohortExtractionServiceTest {
 
     assertThat(actualOutputDir)
         .matches("\"gs:\\/\\/user-bucket\\/wgs-cohort-extractions\\/.*\\/vcfs\\/\"");
+  }
+
+  @Test(expected = FailedPreconditionException.class)
+  public void submitExtractionJob_noWgsData() throws ApiException {
+    when(mockCohortService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of());
+    wgsCohortExtractionService.submitGenomicsCohortExtractionJob(targetWorkspace, 1l);
   }
 
   private DbUser createUser(String email) {

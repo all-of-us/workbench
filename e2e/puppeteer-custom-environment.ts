@@ -3,7 +3,6 @@ const fs = require('fs-extra');
 require('jest-circus');
 
 class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
-
   screenshotDir = `logs/screenshot`;
   htmlDir = `logs/html`;
 
@@ -21,12 +20,8 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
   // 20201103_084435
   localDateTimeString() {
     const localTime = new Date();
-    const fakeUtcTime = new Date(localTime.getTime() - (localTime.getTimezoneOffset() * 60000));
-    return fakeUtcTime
-        .toISOString()
-        .replace(/[-:]/g,'')
-        .replace('T', '_')
-        .slice(0, 15);
+    const fakeUtcTime = new Date(localTime.getTime() - localTime.getTimezoneOffset() * 60000);
+    return fakeUtcTime.toISOString().replace(/[-:]/g, '').replace('T', '_').slice(0, 15);
   }
 
   // jest-circus: https://github.com/facebook/jest/blob/master/packages/jest-circus/README.md#overview
@@ -57,14 +52,14 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
   }
 
   async takeScreenshot(filePath) {
-    await this.global.page.screenshot({path: filePath, fullPage: true});
+    await this.global.page.screenshot({ path: filePath, fullPage: true });
     console.info(`Saved screenshot: ${filePath}`);
   }
 
   async savePageToFile(htmlFile) {
     const htmlContent = await this.global.page.content();
     return new Promise((resolve, reject) => {
-      fs.writeFile(htmlFile, htmlContent, 'utf8', error => {
+      fs.writeFile(htmlFile, htmlContent, 'utf8', (error) => {
         if (error) {
           console.error(`Failed to save html file. ` + error);
           reject(false);
@@ -72,10 +67,9 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
           console.info('Saved html file: ' + htmlFile);
           resolve(true);
         }
-      })
+      });
     });
   }
-
 }
 
 module.exports = PuppeteerCustomEnvironment;

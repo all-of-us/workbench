@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaLookup;
-import org.pmiops.workbench.cdr.model.DbMenuOption;
 import org.pmiops.workbench.cdr.model.DbSurveyVersion;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -275,12 +274,6 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(value = "select c.id from DbCriteria c where domainId = :domainId and name = :name")
   Long findIdByDomainAndName(@Param("domainId") String domainId, @Param("name") String name);
-
-  @Query(
-      value =
-          "select distinct domain_id as domain, type, is_standard as standard from cb_criteria order by domain, type, is_standard",
-      nativeQuery = true)
-  List<DbMenuOption> findMenuOptions();
 
   @Query(
       value =

@@ -4,7 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.utils.TestMockFactory.createDefaultAccessTier;
+import static org.pmiops.workbench.utils.TestMockFactory.createRegisteredTierForTests;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.common.collect.ImmutableList;
@@ -49,8 +49,6 @@ import org.pmiops.workbench.model.AgeType;
 import org.pmiops.workbench.model.AttrName;
 import org.pmiops.workbench.model.Attribute;
 import org.pmiops.workbench.model.Criteria;
-import org.pmiops.workbench.model.CriteriaMenuOption;
-import org.pmiops.workbench.model.CriteriaMenuSubOption;
 import org.pmiops.workbench.model.CriteriaRequest;
 import org.pmiops.workbench.model.CriteriaSubType;
 import org.pmiops.workbench.model.CriteriaType;
@@ -66,7 +64,6 @@ import org.pmiops.workbench.model.SearchGroup;
 import org.pmiops.workbench.model.SearchGroupItem;
 import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.StandardFlag;
 import org.pmiops.workbench.model.TemporalMention;
 import org.pmiops.workbench.model.TemporalTime;
 import org.pmiops.workbench.testconfig.TestJpaConfig;
@@ -197,7 +194,7 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
     cdrVersion.setCdrVersionId(1L);
     cdrVersion.setBigqueryDataset(testWorkbenchConfig.bigquery.dataSetId);
     cdrVersion.setBigqueryProject(testWorkbenchConfig.bigquery.projectId);
-    cdrVersion.setAccessTier(createDefaultAccessTier(accessTierDao));
+    cdrVersion.setAccessTier(createRegisteredTierForTests(accessTierDao));
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
     cdrVersion = cdrVersionDao.save(cdrVersion);
@@ -876,66 +873,6 @@ public class CohortBuilderControllerBQTest extends BigQueryBaseTest {
         .addAncestorData(false)
         .addConceptId("1")
         .build();
-  }
-
-  @Test
-  public void findCriteriaMenuOptions() {
-    ImmutableList<StandardFlag> standardFlag = ImmutableList.of(new StandardFlag().standard(true));
-    ImmutableList<StandardFlag> sourceFlag = ImmutableList.of(new StandardFlag().standard(false));
-    ImmutableList<StandardFlag> sourceAndStandardFlags =
-        ImmutableList.of(new StandardFlag().standard(false), new StandardFlag().standard(true));
-    List<CriteriaMenuOption> options =
-        controller.findCriteriaMenuOptions(cdrVersion.getCdrVersionId()).getBody().getItems();
-
-    assertThat(options.size()).isEqualTo(4);
-    CriteriaMenuOption option1 =
-        new CriteriaMenuOption()
-            .domain(Domain.CONDITION.toString())
-            .addTypesItem(
-                new CriteriaMenuSubOption()
-                    .type(CriteriaType.ICD10CM.toString())
-                    .standardFlags(sourceFlag))
-            .addTypesItem(
-                new CriteriaMenuSubOption()
-                    .type(CriteriaType.ICD9CM.toString())
-                    .standardFlags(sourceFlag))
-            .addTypesItem(
-                new CriteriaMenuSubOption()
-                    .type(CriteriaType.SNOMED.toString())
-                    .standardFlags(sourceAndStandardFlags));
-    CriteriaMenuOption option2 =
-        new CriteriaMenuOption()
-            .domain(Domain.DRUG.toString())
-            .addTypesItem(
-                new CriteriaMenuSubOption()
-                    .type(CriteriaType.ATC.toString())
-                    .standardFlags(standardFlag))
-            .addTypesItem(
-                new CriteriaMenuSubOption()
-                    .type(CriteriaType.RXNORM.toString())
-                    .standardFlags(sourceFlag));
-    CriteriaMenuOption option3 =
-        new CriteriaMenuOption()
-            .domain(Domain.PROCEDURE.toString())
-            .addTypesItem(
-                new CriteriaMenuSubOption()
-                    .type(CriteriaType.CPT4.toString())
-                    .standardFlags(sourceFlag))
-            .addTypesItem(
-                new CriteriaMenuSubOption()
-                    .type(CriteriaType.SNOMED.toString())
-                    .standardFlags(sourceAndStandardFlags));
-    CriteriaMenuOption option4 =
-        new CriteriaMenuOption()
-            .domain(Domain.SURVEY.toString())
-            .addTypesItem(
-                new CriteriaMenuSubOption()
-                    .type(CriteriaType.PPI.toString())
-                    .standardFlags(sourceFlag));
-    assertThat(options.contains(option1)).isTrue();
-    assertThat(options.contains(option2)).isTrue();
-    assertThat(options.contains(option3)).isTrue();
-    assertThat(options.contains(option4)).isTrue();
   }
 
   @Test

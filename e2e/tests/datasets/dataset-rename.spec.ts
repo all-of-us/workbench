@@ -1,11 +1,10 @@
 import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {LinkText, ResourceCard} from 'app/text-labels';
-import {makeRandomName} from 'utils/str-utils';
-import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
+import { LinkText, ResourceCard } from 'app/text-labels';
+import { makeRandomName } from 'utils/str-utils';
+import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 
 describe('Dataset test', () => {
-
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
@@ -53,6 +52,4 @@ describe('Dataset test', () => {
     const textContent = await dataPage.deleteResource(newDatasetName, ResourceCard.Dataset);
     expect(textContent).toContain(`Are you sure you want to delete Dataset: ${newDatasetName}?`);
   });
-
-
 });

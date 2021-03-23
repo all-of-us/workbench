@@ -1,22 +1,21 @@
 import DataResourceCard from 'app/component/data-resource-card';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {LinkText, ResourceCard} from 'app/text-labels';
-import {makeRandomName} from 'utils/str-utils';
-import {createWorkspace, signInWithAccessToken} from 'utils/test-utils';
-import {waitWhileLoading} from 'utils/waits-utils';
+import { LinkText, ResourceCard } from 'app/text-labels';
+import { makeRandomName } from 'utils/str-utils';
+import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { waitWhileLoading } from 'utils/waits-utils';
 
 describe('Create dataset and export to notebook at same time', () => {
-
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
 
-   /**
-    * Create new Dataset, export to notebook in Python language
-    * Finally delete Dataset.
-    */
-   test('Jupyter Notebook for Python programming language can be created', async () => {
+  /**
+   * Create new Dataset, export to notebook in Python language
+   * Finally delete Dataset.
+   */
+  test('Jupyter Notebook for Python programming language can be created', async () => {
     const workspaceCard = await createWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
@@ -34,7 +33,7 @@ describe('Create dataset and export to notebook at same time', () => {
 
     const saveModal = await datasetBuildPage.clickSaveAndAnalyzeButton();
     const newNotebookName = makeRandomName();
-    const newDatasetName = await saveModal.saveDataset({exportToNotebook: true, notebookName: newNotebookName});
+    const newDatasetName = await saveModal.saveDataset({ exportToNotebook: true, notebookName: newNotebookName });
     await waitWhileLoading(page);
 
     // Verify Notebook preview. Not going to start the Jupyter notebook.
@@ -71,6 +70,4 @@ describe('Create dataset and export to notebook at same time', () => {
     // Delete workspace
     await dataPage.deleteWorkspace();
   });
-
-
 });

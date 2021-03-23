@@ -4,7 +4,6 @@ import {
   CriteriaAttributeListResponse,
   CriteriaListResponse,
   CriteriaMenuListResponse,
-  CriteriaMenuOptionsListResponse,
   CriteriaSubType,
   CriteriaType,
   DemoChartInfoListResponse,
@@ -401,10 +400,6 @@ export class CohortBuilderServiceStub extends CohortBuilderApi {
 
   findCriteriaMenu(): Promise<CriteriaMenuListResponse> {
     return new Promise<CriteriaMenuListResponse>(resolve => resolve({items: []}));
-  }
-
-  findCriteriaMenuOptions(): Promise<CriteriaMenuOptionsListResponse> {
-    return new Promise<CriteriaMenuOptionsListResponse>(resolve => resolve({items: []}));
   }
 
   findDomainInfos(): Promise<DomainInfoResponse> {

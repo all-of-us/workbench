@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="thibault" id="changelog-157-add-user-access-tier">
+
+    <createTable tableName="user_access_tier">
+      <column name="user_access_tier_id" type="bigint" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="user_id" type="bigint">
+        <constraints nullable="false"
+          foreignKeyName="fk_user_access_tier_user"
+          references="user(user_id)"
+          deleteCascade="true"/>
+      </column>
+      <column name="access_tier_id" type="bigint">
+        <constraints nullable="false"
+          foreignKeyName="fk_user_access_tier_access_tier"
+          references="access_tier(access_tier_id)"
+          deleteCascade="true"/>
+      </column>
+      <column name="access_status" type="tinyint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="first_enabled" type="datetime">
+       <constraints nullable="false"/>
+      </column>
+      <column name="last_updated" type="datetime">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addUniqueConstraint
+      columnNames="user_id, access_tier_id"
+      constraintName="user_access_tier_pair"
+      tableName="user_access_tier"
+    />
+
+    <!--
+    migration from user.data_access_level:
+    Populate this table with a Registered Tier entry for all users who are Registered.
+    There are no Protected or Controlled Tier users to migrate.
+    -->
+
+    <sql>
+      INSERT INTO user_access_tier
+      (user_id, access_tier_id, access_status, first_enabled, last_updated)
+
+      SELECT
+      u.user_id,
+      a.access_tier_id,
+      1 AS access_status, -- TierAccessStatus.ENABLED
+      u.first_registration_completion_time AS first_enabled,
+      NOW() AS last_updated
+
+      FROM user u, access_tier a
+      WHERE a.short_name = 'registered'
+
+      -- Registered and Protected; no Protected users exist in Prod
+      AND u.data_access_level IN (1, 2)
+
+      -- valid dates exist for all Registered users in Prod
+      AND u.first_registration_completion_time IS NOT NULL
+    </sql>
+
+    <!--
+    A step in the migration away from data_access_level before we can delete it: when we remove
+    accessors to a column but not the column itself, Hibernate requires a default value.
+    Set it to DataAccessLevel.UNREGISTERED (0)
+     -->
+    <addDefaultValue tableName="user" columnName="data_access_level" defaultValue="0"/>
+
+  </changeSet>
+</databaseChangeLog>

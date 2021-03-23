@@ -1,5 +1,5 @@
 import Container from 'app/container';
-import {ElementType, XPathOptions} from 'app/xpath-options';
+import { ElementType, XPathOptions } from 'app/xpath-options';
 
 export function iframeXpath(label: string) {
   return `//body[@id='body']//*[contains(@aria-label, '${label}')]//iframe`;
@@ -11,8 +11,7 @@ export function iframeXpath(label: string) {
  * @param container
  */
 export function buildXPath(xOpts: XPathOptions, container?: Container): string {
-
-  const  { type, name, containsText, normalizeSpace, ancestorLevel = 1, iconShape, startsWith, dataTestId, id } = xOpts;
+  const { type, name, containsText, normalizeSpace, ancestorLevel = 1, iconShape, startsWith, dataTestId, id } = xOpts;
 
   // optional function parameters check
   if (type === 'icon') {
@@ -23,7 +22,7 @@ export function buildXPath(xOpts: XPathOptions, container?: Container): string {
 
   // HTML id is unique throughout the page, so just return that if it's there
   if (id) {
-    return `//*[@id="${id}"]`
+    return `//*[@id="${id}"]`;
   }
 
   let str = '';
@@ -39,41 +38,42 @@ export function buildXPath(xOpts: XPathOptions, container?: Container): string {
     str = `[starts-with(normalize-space(), "${startsWith}")]`;
   }
 
-  const nodeLevel = (ancestorLevel === 0) ? '' : `/ancestor::node()[${ancestorLevel}]`;
-  const containerXpath = (container === undefined) ? '' : container.getXpath();
+  const nodeLevel = ancestorLevel === 0 ? '' : `/ancestor::node()[${ancestorLevel}]`;
+  const containerXpath = container === undefined ? '' : container.getXpath();
   // empty str means element is not tied to a specific label.
-  const textExpr = (str === '') ? `${containerXpath}` : `(${containerXpath}//label | ${containerXpath}//*)${str}${nodeLevel}`;
+  const textExpr =
+    str === '' ? `${containerXpath}` : `(${containerXpath}//label | ${containerXpath}//*)${str}${nodeLevel}`;
 
   let selector;
   switch (type) {
-  case ElementType.Button:
-    selector = `(${containerXpath}//button | ${containerXpath}//*[@role="button"])${str}`;
-    break;
-  case ElementType.Icon: // clickable icon
-    const tag = (iconShape === undefined) ? '*' : `clr-icon[@shape="${iconShape}"]`;
-    selector = `${textExpr}//${tag}[*[@role="img"]]`;
-    break;
-  case ElementType.Number:
-  case ElementType.Checkbox:
-  case ElementType.RadioButton:
-  case ElementType.Textbox:
-    selector = `${textExpr}//input[@type="${type}"]`;
-    break;
-  case ElementType.Link:
-    selector = `(${containerXpath}//a | ${containerXpath}//span | ${containerXpath}//*[@role="button"])${str}`;
-    break;
-  case ElementType.Textarea:
-  case ElementType.Select:
-    selector = `${textExpr}//${type}`;
-    break;
-  case ElementType.Dropdown:
-    selector = `${textExpr}//*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown ")]`;
-    break;
-  case ElementType.Tab:
-    selector = `//*[(@aria-selected | @tabindex) and @role="button" and text()="${name}"]`;
-    break;
-  default:
-    console.debug(`Implement unhandled type: ${type}. 
+    case ElementType.Button:
+      selector = `(${containerXpath}//button | ${containerXpath}//*[@role="button"])${str}`;
+      break;
+    case ElementType.Icon: // clickable icon
+      const tag = iconShape === undefined ? '*' : `clr-icon[@shape="${iconShape}"]`;
+      selector = `${textExpr}//${tag}[*[@role="img"]]`;
+      break;
+    case ElementType.Number:
+    case ElementType.Checkbox:
+    case ElementType.RadioButton:
+    case ElementType.Textbox:
+      selector = `${textExpr}//input[@type="${type}"]`;
+      break;
+    case ElementType.Link:
+      selector = `(${containerXpath}//a | ${containerXpath}//span | ${containerXpath}//*[@role="button"])${str}`;
+      break;
+    case ElementType.Textarea:
+    case ElementType.Select:
+      selector = `${textExpr}//${type}`;
+      break;
+    case ElementType.Dropdown:
+      selector = `${textExpr}//*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown ")]`;
+      break;
+    case ElementType.Tab:
+      selector = `//*[(@aria-selected | @tabindex) and @role="button" and text()="${name}"]`;
+      break;
+    default:
+      console.debug(`Implement unhandled type: ${type}. 
       XPathOptions configuration: 
         "type": ${type}, 
         "name": ${name}, 
@@ -81,8 +81,8 @@ export function buildXPath(xOpts: XPathOptions, container?: Container): string {
         "normalizeSpace: ${normalizeSpace}, 
         "ancestorLevel": ${ancestorLevel}, 
         "iconShape": ${iconShape}`);
-    throw new Error(`Implement unhandled type: ${type}`);
+      throw new Error(`Implement unhandled type: ${type}`);
   }
 
-  return this.xpath = selector;
+  return (this.xpath = selector);
 }

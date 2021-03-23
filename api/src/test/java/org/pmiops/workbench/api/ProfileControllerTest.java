@@ -31,6 +31,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
+import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -42,6 +43,7 @@ import org.pmiops.workbench.captcha.ApiException;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.compliance.ComplianceServiceImpl;
 import org.pmiops.workbench.config.CommonConfig;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
@@ -98,6 +100,7 @@ import org.pmiops.workbench.shibboleth.ShibbolethService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.AuditLogEntryMapperImpl;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,6 +151,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private UserServiceAuditor mockUserServiceAuditor;
   @MockBean private RasLinkService mockRasLinkService;
 
+  @Autowired private AccessTierDao accessTierDao;
   @Autowired private InstitutionService institutionService;
   @Autowired private ProfileController profileController;
   @Autowired private ProfileService profileService;
@@ -184,6 +188,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     UserServiceImpl.class,
     UserServiceTestConfiguration.class,
     VerifiedInstitutionalAffiliationMapperImpl.class,
+    AccessTierServiceImpl.class,
   })
   @MockBean({BigQueryService.class})
   static class Configuration {
@@ -218,6 +223,9 @@ public class ProfileControllerTest extends BaseControllerTest {
     super.setUp();
 
     config.googleDirectoryService.gSuiteDomain = GSUITE_DOMAIN;
+
+    // key UserService logic depends on the existence of the Registered Tier
+    TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     Profile profile = new Profile();
     profile.setContactEmail(CONTACT_EMAIL);
@@ -873,28 +881,21 @@ public class ProfileControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void sendUserInstructions_sanitized() throws MessagingException {
+  public void sendUserInstructions_withInstructions() throws MessagingException {
     final VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation =
         createVerifiedInstitutionalAffiliation();
-
-    final String rawInstructions =
-        "<html><script>window.alert('hacked');</script></html>"
-            + "Wash your hands for 20 seconds"
-            + "<STYLE type=\"text/css\">BODY{background:url(\"javascript:alert('XSS')\")} "
-            + "div {color: 'red'}</STYLE>\n"
-            + "<img src=\"https://eviltrackingpixel.com\" />\n";
-
-    final String sanitizedInstructions = "Wash your hands for 20 seconds";
 
     final InstitutionUserInstructions instructions =
         new InstitutionUserInstructions()
             .institutionShortName(verifiedInstitutionalAffiliation.getInstitutionShortName())
-            .instructions(rawInstructions);
+            .instructions(
+                "Wash your hands for 20 seconds <img src=\"https://this.is.escaped.later.com\" />");
     institutionService.setInstitutionUserInstructions(instructions);
 
     createAccountAndDbUserWithAffiliation(verifiedInstitutionalAffiliation);
     verify(mockMailService).sendWelcomeEmail(any(), any(), any());
-    verify(mockMailService).sendInstitutionUserInstructions(CONTACT_EMAIL, sanitizedInstructions);
+    verify(mockMailService)
+        .sendInstitutionUserInstructions(CONTACT_EMAIL, instructions.getInstructions());
   }
 
   @Test

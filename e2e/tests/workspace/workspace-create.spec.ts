@@ -1,12 +1,12 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import WorkspacesPage, {FieldSelector} from 'app/page/workspaces-page';
-import {signInWithAccessToken, performActions} from 'utils/test-utils';
+import WorkspacesPage, { FieldSelector } from 'app/page/workspaces-page';
+import { signInWithAccessToken, performActions } from 'utils/test-utils';
 import Button from 'app/element/button';
 import * as testData from 'resources/data/workspace-data';
-import {makeWorkspaceName} from 'utils/str-utils';
-import {UseFreeCredits} from 'app/page/workspace-base';
+import { makeWorkspaceName } from 'utils/str-utils';
+import { UseFreeCredits } from 'app/page/workspace-base';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
-import {config} from 'resources/workbench-config';
+import { config } from 'resources/workbench-config';
 
 describe('Creating new workspaces', () => {
   beforeEach(async () => {
@@ -23,7 +23,9 @@ describe('Creating new workspaces', () => {
 
     // Pick out few sentenses to verify
     expect(modalTextContent).toContain('Create Workspace');
-    expect(modalTextContent).toContain('Primary purpose of your project (Question 1)Summary of research purpose (Question 2)Population of interest (Question 5)');
+    expect(modalTextContent).toContain(
+      'Primary purpose of your project (Question 1)Summary of research purpose (Question 2)Population of interest (Question 5)'
+    );
     expect(modalTextContent).toContain('You can also make changes to your answers after you create your workspace.');
 
     const dataPage = new WorkspaceDataPage(page);
@@ -40,7 +42,7 @@ describe('Creating new workspaces', () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
 
-    const createNewWorkspaceButton  = await Button.findByName(page, FieldSelector.CreateNewWorkspaceButton.textOption );
+    const createNewWorkspaceButton = await Button.findByName(page, FieldSelector.CreateNewWorkspaceButton.textOption);
     await createNewWorkspaceButton.clickAndWait();
 
     const workspaceEditPage = new WorkspaceEditPage(page);

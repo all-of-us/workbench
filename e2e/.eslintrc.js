@@ -1,13 +1,11 @@
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
-  plugins: [
-    '@typescript-eslint'
-  ],
+  plugins: ['@typescript-eslint'],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
-    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'prettier/@typescript-eslint',
     'plugin:prettier/recommended'
   ],
@@ -28,19 +26,15 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: 'module'
   },
-  ignorePatterns: [
-    'tsc-out',
-    'node_modules',
-    '.eslintrc.js'
-  ],
+  ignorePatterns: ['tsc-out', 'node_modules', '.eslintrc.js'],
   rules: {
     // 2 == error, 1 == warning, 0 == off
     // TODO Fix to 120
-    "prettier/prettier": [
-      "error",
+    'prettier/prettier': [
+      'error',
       {
-        "singleQuote": true,
-        "tabWidth": 2
+        singleQuote: true,
+        tabWidth: 2
       }
     ],
     'max-len': [

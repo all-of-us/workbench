@@ -1,7 +1,7 @@
-import ProfilePage, {MissingErrorAlias} from 'app/page/profile-page';
-import {signInWithAccessToken} from 'utils/test-utils';
-import navigation, {NavLink} from 'app/component/navigation';
-import {makeString, makeUrl} from 'utils/str-utils';
+import ProfilePage, { MissingErrorAlias } from 'app/page/profile-page';
+import { signInWithAccessToken } from 'utils/test-utils';
+import navigation, { NavLink } from 'app/component/navigation';
+import { makeString, makeUrl } from 'utils/str-utils';
 import Button from 'app/element/button';
 
 describe('Profile', () => {
@@ -10,7 +10,7 @@ describe('Profile', () => {
 
   async function waitForSaveButton(isActive: boolean): Promise<Button> {
     const button = await profilePage.getSaveProfileButton();
-    const isCursorEnabled = ! (await button.isCursorNotAllowed());
+    const isCursorEnabled = !(await button.isCursorNotAllowed());
     expect(isCursorEnabled).toBe(isActive);
     return button;
   }
@@ -25,7 +25,6 @@ describe('Profile', () => {
   async function isMissingErrorPresent(fieldText: string): Promise<boolean> {
     return isDivWithTextPresent(`${fieldText} can't be blank`);
   }
-
 
   beforeEach(async () => {
     await signInWithAccessToken(page);
@@ -135,15 +134,15 @@ describe('Profile', () => {
 
     const testText = makeString(10);
 
-    for (const {element, missingError} of [
-      {element: firstName, missingError: MissingErrorAlias.FirstName},
-      {element: lastName, missingError: MissingErrorAlias.LastName},
-      {element: researchBackground, missingError: MissingErrorAlias.ResearchBackground},
-      {element: address1, missingError: MissingErrorAlias.Address1},
-      {element: city, missingError: MissingErrorAlias.City},
-      {element: state, missingError: MissingErrorAlias.State},
-      {element: zip, missingError: MissingErrorAlias.Zip},
-      {element: country, missingError: MissingErrorAlias.Country},
+    for (const { element, missingError } of [
+      { element: firstName, missingError: MissingErrorAlias.FirstName },
+      { element: lastName, missingError: MissingErrorAlias.LastName },
+      { element: researchBackground, missingError: MissingErrorAlias.ResearchBackground },
+      { element: address1, missingError: MissingErrorAlias.Address1 },
+      { element: city, missingError: MissingErrorAlias.City },
+      { element: state, missingError: MissingErrorAlias.State },
+      { element: zip, missingError: MissingErrorAlias.Zip },
+      { element: country, missingError: MissingErrorAlias.Country }
     ]) {
       const originalValue = await element.getValue();
 
@@ -169,13 +168,7 @@ describe('Profile', () => {
   test('Typing an invalid URL disables the save button', async () => {
     const url = await profilePage.getProfessionalUrlInput();
     const validUrl = makeUrl(10);
-    const invalidUrls = [
-      'hello',
-      'hello.com',
-      'http://',
-      'https://broad    institute.org',
-      '*http://google.com/',
-    ]
+    const invalidUrls = ['hello', 'hello.com', 'http://', 'https://broad    institute.org', '*http://google.com/'];
 
     await url.type(validUrl);
 
@@ -191,6 +184,4 @@ describe('Profile', () => {
       await url.type(validUrl);
     }
   });
-
-
 });
