@@ -22,6 +22,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
@@ -218,6 +219,7 @@ public class CohortsControllerTest {
     WorkspaceResourcesServiceImpl.class,
     WorkspaceServiceImpl.class,
     WorkspacesController.class,
+    AccessTierServiceImpl.class,
   })
   @MockBean({
     BigQueryService.class,

@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.AuthDomainAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.compliance.ComplianceService;
@@ -51,15 +52,17 @@ public class AuthDomainControllerTest {
   private static final String CURRENT_POSITION = "Tester";
   private static final String RESEARCH_PURPOSE = "To test things";
 
+  @Autowired private UserDao userDao;
+
+  @Mock private AccessTierService accessTierService;
   @Mock private AdminActionHistoryDao adminActionHistoryDao;
-  @Mock private FireCloudService fireCloudService;
-  @Mock private Provider<DbUser> userProvider;
+  @Mock private AuthDomainAuditor mockAuthDomainAuditAdapter;
   @Mock private ComplianceService complianceService;
   @Mock private DirectoryService directoryService;
-  @Mock private UserServiceAuditor mockUserServiceAuditAdapter;
-  @Mock private AuthDomainAuditor mockAuthDomainAuditAdapter;
-  @Autowired private UserDao userDao;
+  @Mock private FireCloudService fireCloudService;
+  @Mock private Provider<DbUser> userProvider;
   @Mock private UserDataUseAgreementDao userDataUseAgreementDao;
+  @Mock private UserServiceAuditor mockUserServiceAuditAdapter;
   @Mock private UserTermsOfServiceDao userTermsOfServiceDao;
   @Mock private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
 
@@ -93,7 +96,8 @@ public class AuthDomainControllerTest {
             verifiedInstitutionalAffiliationDao,
             fireCloudService,
             complianceService,
-            directoryService);
+            directoryService,
+            accessTierService);
     this.authDomainController =
         new AuthDomainController(
             fireCloudService, userService, userDao, mockAuthDomainAuditAdapter);
