@@ -556,7 +556,7 @@ public class DataSetServiceTest {
     dsDataDictionary.setFieldName("gender");
     dsDataDictionary.setDescription("Gender testing");
     dsDataDictionary.setFieldType("string");
-    when(dsDataDictionaryDao.findDbDSDataDictionaryByFieldNameAndDomain("gender", "PERSON"))
+    when(dsDataDictionaryDao.findByFieldNameAndDomain("gender", "PERSON"))
         .thenReturn(dsDataDictionary);
   }
 }

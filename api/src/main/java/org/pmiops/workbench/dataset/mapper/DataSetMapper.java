@@ -134,13 +134,7 @@ public interface DataSetMapper {
         .domain(dbDatasetValue.getDomainEnum());
   }
 
-  @Mapping(target = "cdrVersionId", source = "dbModel.cdrVersion.cdrVersionId")
   DataDictionaryEntry dbModelToClient(DbDataDictionaryEntry dbModel);
 
-  //  transformedByRegisteredTierPrivacyMethods and definedTime are not used in UI we can delete
-  // this later
-  @Mapping(target = "cdrVersionId", ignore = true)
-  @Mapping(target = "transformedByRegisteredTierPrivacyMethods", ignore = true)
-  @Mapping(target = "definedTime", ignore = true)
   DataDictionaryEntry dbDsModelToClient(DbDSDataDictionary dbModel);
 }

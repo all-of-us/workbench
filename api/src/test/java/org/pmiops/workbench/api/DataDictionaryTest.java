@@ -133,7 +133,6 @@ public class DataDictionaryTest {
             .getDataDictionaryEntry(cdrVersion.getCdrVersionId(), domain.toString(), domainValue)
             .getBody();
 
-    assertThat(response.getCdrVersionId()).isEqualTo(cdrVersion.getCdrVersionId());
     assertThat(response.getRelevantOmopTable())
         .isEqualTo(dbDSDataDictionary.getRelevantOmopTable());
     assertThat(response.getFieldName()).isEqualTo(dbDSDataDictionary.getFieldName());

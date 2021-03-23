@@ -102,4 +102,83 @@ public class DbDSDataDictionary {
   public void setDomain(String domain) {
     this.domain = domain;
   }
+
+  public static DbDSDataDictionary.Builder builder() {
+    return new DbDSDataDictionary.Builder();
+  }
+
+  public static class Builder {
+
+    private long id;
+    private String fieldName;
+    private String relevantOmopTable;
+    private String description;
+    private String fieldType;
+    private String omopCdmStandardOrCustomField;
+    private String dataProvenance;
+    private String sourcePpiModule;
+    private String domain;
+
+    private Builder() {}
+
+    public DbDSDataDictionary.Builder addDataDictionaryEntryId(long id) {
+      this.id = id;
+      return this;
+    }
+
+    public DbDSDataDictionary.Builder addDomain(String domain) {
+      this.domain = domain;
+      return this;
+    }
+
+    public DbDSDataDictionary.Builder addRelevantOmopTable(String relevantOmopTable) {
+      this.relevantOmopTable = relevantOmopTable;
+      return this;
+    }
+
+    public DbDSDataDictionary.Builder addFieldName(String fieldName) {
+      this.fieldName = fieldName;
+      return this;
+    }
+
+    public DbDSDataDictionary.Builder addOmopCdmStandardOrCustomField(
+        String omopCdmStandardOrCustomField) {
+      this.omopCdmStandardOrCustomField = omopCdmStandardOrCustomField;
+      return this;
+    }
+
+    public DbDSDataDictionary.Builder addDescription(String description) {
+      this.description = description;
+      return this;
+    }
+
+    public DbDSDataDictionary.Builder addFieldType(String fieldType) {
+      this.fieldType = fieldType;
+      return this;
+    }
+
+    public DbDSDataDictionary.Builder addDataProvenance(String dataProvenance) {
+      this.dataProvenance = dataProvenance;
+      return this;
+    }
+
+    public DbDSDataDictionary.Builder addSourcePpiModule(String sourcePpiModule) {
+      this.sourcePpiModule = sourcePpiModule;
+      return this;
+    }
+
+    public DbDSDataDictionary build() {
+      DbDSDataDictionary dbDataDictionary = new DbDSDataDictionary();
+      dbDataDictionary.setId(this.id);
+      dbDataDictionary.setRelevantOmopTable(this.relevantOmopTable);
+      dbDataDictionary.setFieldName(this.fieldName);
+      dbDataDictionary.setOmopCdmStandardOrCustomField(this.omopCdmStandardOrCustomField);
+      dbDataDictionary.setDescription(this.description);
+      dbDataDictionary.setFieldType(this.fieldType);
+      dbDataDictionary.setDataProvenance(this.dataProvenance);
+      dbDataDictionary.setSourcePpiModule(this.sourcePpiModule);
+      dbDataDictionary.setDomain(this.domain);
+      return dbDataDictionary;
+    }
+  }
 }

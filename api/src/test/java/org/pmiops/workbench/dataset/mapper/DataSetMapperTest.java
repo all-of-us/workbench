@@ -250,10 +250,6 @@ public class DataSetMapperTest {
 
   private void assertDbModelToClient(
       DataDictionaryEntry dataDictionaryEntry, DbDataDictionaryEntry dbDataDictionaryEntry) {
-    assertThat(dbDataDictionaryEntry.getCdrVersion().getCdrVersionId())
-        .isEqualTo(dataDictionaryEntry.getCdrVersionId());
-    assertThat(dbDataDictionaryEntry.getDefinedTime().toInstant().toEpochMilli())
-        .isEqualTo(dataDictionaryEntry.getDefinedTime());
     assertThat(dbDataDictionaryEntry.getDataProvenance())
         .isEqualTo(dataDictionaryEntry.getDataProvenance());
     assertThat(dbDataDictionaryEntry.getRelevantOmopTable())
@@ -268,7 +264,5 @@ public class DataSetMapperTest {
     assertThat(dbDataDictionaryEntry.getFieldType()).isEqualTo(dataDictionaryEntry.getFieldType());
     assertThat(dbDataDictionaryEntry.getSourcePpiModule())
         .isEqualTo(dataDictionaryEntry.getSourcePpiModule());
-    assertThat(dbDataDictionaryEntry.getTransformedByRegisteredTierPrivacyMethods())
-        .isEqualTo(dataDictionaryEntry.getTransformedByRegisteredTierPrivacyMethods());
   }
 }

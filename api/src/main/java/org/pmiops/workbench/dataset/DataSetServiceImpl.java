@@ -30,7 +30,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.Etags;
-import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
 import org.pmiops.workbench.cdr.dao.DSLinkingDao;
@@ -1001,9 +1000,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public DataDictionaryEntry findDataDictionaryEntry(
       String fieldName, String domain, DbCdrVersion cdrVersion) {
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
     DbDSDataDictionary dbDSDataDictionary =
-        dsDataDictionaryDao.findDbDSDataDictionaryByFieldNameAndDomain(fieldName, domain);
+        dsDataDictionaryDao.findByFieldNameAndDomain(fieldName, domain);
     if (dbDSDataDictionary == null) {
       throw new NotFoundException(
           "No Data Dictionary Entry found for domain: "
@@ -1012,7 +1010,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
               + cdrVersion);
     }
     DataDictionaryEntry dataDictionaryEntry = dataSetMapper.dbDsModelToClient(dbDSDataDictionary);
-    dataDictionaryEntry.setCdrVersionId(cdrVersion.getCdrVersionId());
     return dataDictionaryEntry;
   }
 
