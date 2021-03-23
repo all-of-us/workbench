@@ -10,5 +10,11 @@
         <constraints nullable="true"/>
       </column>
     </addColumn>
+
+    <sql>
+      UPDATE workspace
+      SET google_project = namespace
+      WHERE google_project IS NULL
+    </sql>
   </changeSet>
 </databaseChangeLog>
