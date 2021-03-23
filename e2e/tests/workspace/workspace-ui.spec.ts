@@ -2,11 +2,10 @@ import BaseElement from 'app/element/base-element';
 import HomePage from 'app/page/home-page';
 import WorkspaceCard from 'app/component/workspace-card';
 import WorkspacesPage from 'app/page/workspaces-page';
-import {signInWithAccessToken} from 'utils/test-utils';
-import Navigation, {NavLink} from 'app/component/navigation';
+import { signInWithAccessToken } from 'utils/test-utils';
+import Navigation, { NavLink } from 'app/component/navigation';
 
 describe('Workspace ui tests', () => {
-
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
@@ -37,7 +36,7 @@ describe('Workspace ui tests', () => {
   test('Check Workspace cards on the Workspaces page', async () => {
     const home = new HomePage(page);
     await home.load();
-    
+
     await Navigation.navMenu(page, NavLink.YOUR_WORKSPACES);
     await new WorkspacesPage(page).waitForLoad();
 
@@ -74,5 +73,4 @@ describe('Workspace ui tests', () => {
     await workspaces.waitForLoad();
     expect(await workspaces.isLoaded()).toBe(true);
   });
-
 });

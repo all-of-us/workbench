@@ -1,11 +1,10 @@
-import {Page} from 'puppeteer';
+import { Page } from 'puppeteer';
 import Container from 'app/container';
-import {ElementType, XPathOptions} from 'app/xpath-options';
+import { ElementType, XPathOptions } from 'app/xpath-options';
 import BaseElement from './base-element';
-import {buildXPath} from 'app/xpath-builders';
+import { buildXPath } from 'app/xpath-builders';
 
 export default class Checkbox extends BaseElement {
-   
   static async findByName(page: Page, xOpt: XPathOptions, container?: Container): Promise<Checkbox> {
     xOpt.type = ElementType.Checkbox;
     const checkboxXpath = buildXPath(xOpt, container);
@@ -72,5 +71,4 @@ export default class Checkbox extends BaseElement {
     }
     return this.unCheck();
   }
-
 }

@@ -1,7 +1,7 @@
 module.exports = {
-	trailingComma: 'none',
-	singleQuote: true,
-	quoteProps: 'consistent',
-	parser: 'typescript',
-	printWidth: 120
+  trailingComma: 'none',
+  singleQuote: true,
+  quoteProps: 'consistent',
+  parser: 'typescript',
+  printWidth: 120
 };
