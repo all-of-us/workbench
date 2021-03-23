@@ -17,7 +17,17 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-/** Add desc */
+/**
+ * This will trigger a process to backfill the RDR database. This may be needed when new data is
+ * being added to the RDR export. It will take all of the *unchanged* workspaces from the RDR and
+ * push them to the same task queue that is used for the nightly export, adding the backfill flag to
+ * the return endpoint. The backfill will not trigger a manual review on the RDR side, as it should
+ * only consist of programmatic changes. The usual manual review will still take place for all
+ * modified workspaces. This differs from DeleteFromRdrExport in that it does not take in a list of
+ * IDS to export / backfill and does not modify the rdr_export table. Also, the last_modified times
+ * would need to change in order for the RDR side to process the workspace if the backfill flag is
+ * not set.
+ */
 @Import({
   WorkbenchLocationConfigService.class,
 })
@@ -77,9 +87,9 @@ public class BackfillWorkspacesToRdr {
             "\nThis is a dry run. %d workspaces will be exported when running this command.\n\n",
             workspaceListToExport.size());
       } else {
-        System.out.printf("\n\n%d workspaces queued for export\n\n", workspaceListToExport.size());
         rdrTaskQueue.groupIdsAndPushTask(
             workspaceListToExport, RdrTaskQueue.EXPORT_USER_PATH + "?backfill=true");
+        System.out.printf("\n\n%d workspaces queued for export\n\n", workspaceListToExport.size());
       }
     };
   }

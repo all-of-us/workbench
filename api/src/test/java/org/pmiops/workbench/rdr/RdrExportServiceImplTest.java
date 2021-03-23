@@ -197,7 +197,7 @@ public class RdrExportServiceImplTest {
     workspaceID.add(1l);
     RdrWorkspace rdrWorkspace = toDefaultRdrWorkspace(mockWorkspace);
     when(rdrMapper.toRdrModel(mockWorkspace)).thenReturn(rdrWorkspace);
-    rdrExportService.exportWorkspaces(workspaceID, false);
+    rdrExportService.exportWorkspaces(workspaceID, NO_BACKFILL);
     verify(mockWorkspaceService)
         .getFirecloudUserRoles(
             mockWorkspace.getWorkspaceNamespace(), mockWorkspace.getFirecloudName());

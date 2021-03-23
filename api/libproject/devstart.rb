@@ -1883,7 +1883,6 @@ Common.register_command({
 })
 
 def backfill_workspaces_to_rdr(cmd_name, *args)
-  # setup_local_environment
   common = Common.new
   ensure_docker cmd_name, args
 
@@ -1924,7 +1923,7 @@ BACKFILL_WORKSPACES_TO_RDR = "backfill-workspaces-to-rdr";
 
 Common.register_command({
     :invocation => BACKFILL_WORKSPACES_TO_RDR,
-    :description => "Backfille workspaces from workspace table, exporting them to the rdr.\n",
+    :description => "Backfill workspaces from workspace table, exporting them to the rdr.\n",
     :fn => ->(*args) {backfill_workspaces_to_rdr(BACKFILL_WORKSPACES_TO_RDR, *args)}
 })
 
