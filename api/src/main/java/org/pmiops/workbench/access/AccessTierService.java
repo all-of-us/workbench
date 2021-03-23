@@ -33,16 +33,16 @@ public interface AccessTierService {
   DbAccessTier getRegisteredTier();
 
   /**
-   * Add memberships to all tiers for a user if they don't exist by inserting DB row(s). For any
-   * memberships which exist, update them (whether enabled or not) set them to ENABLED.
+   * Add memberships to all tiers for a user if they don't exist by inserting DB row(s) set to
+   * ENABLED. For any memberships which exist and are DISABLED, set them to ENABLED.
    *
    * @param user the DbUser in the user-accessTier mappings we're updating
    */
   void addUserToAllTiers(DbUser user);
 
   /**
-   * Remove a Registered Tier membership from a user if one exists by marking that membership as
-   * DISABLED. Do nothing if no membership exists.
+   * Remove a Registered Tier membership from a user if one exists and is ENABLED by marking that
+   * membership as DISABLED. Do nothing if no membership exists.
    *
    * <p>Currently, this does not synchronize Terra Auth Domain group membership, but it will do so
    * when the user_access_tier table is the source of truth for tier membership. The existing method
@@ -54,8 +54,8 @@ public interface AccessTierService {
   void removeUserFromRegisteredTier(DbUser user);
 
   /**
-   * Add a Registered Tier membership to a user if none exists by inserting a DB row. If such a
-   * membership exists (whether enabled or not) set it to ENABLED.
+   * Add a Registered Tier membership to a user if none exists by inserting a DB row set to ENABLED.
+   * If such a membership exists and is DISABLED, set it to ENABLED.
    *
    * <p>Currently, this does not synchronize Terra Auth Domain group membership, but it will do so
    * when the user_access_tier table is the source of truth for tier membership. The existing method

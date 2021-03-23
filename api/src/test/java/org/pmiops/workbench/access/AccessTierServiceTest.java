@@ -303,11 +303,12 @@ public class AccessTierServiceTest {
 
     accessTierService.removeUserFromRegisteredTier(user);
 
+    // no change
+
+    assertThat(userAccessTierDao.findAll()).hasSize(1);
+
     uat = userAccessTierDao.getByUserAndAccessTier(user, registeredTier);
     assertThat(uat).isPresent();
-
-    // unchanged
-
     assertThat(uat.get().getLastUpdated()).isEqualTo(lastUpdated);
   }
 
