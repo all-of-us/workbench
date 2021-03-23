@@ -1,11 +1,12 @@
 package org.pmiops.workbench.api;
 
 import com.google.api.services.cloudresourcemanager.model.ResourceId;
+import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,6 +17,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.google.CloudResourceManagerService;
+import org.pmiops.workbench.model.AccessModule;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,6 +37,11 @@ public class OfflineUserController implements OfflineUserApiDelegate {
 
   private final CloudResourceManagerService cloudResourceManagerService;
   private final UserService userService;
+  private final Map<AccessModule, String> accessModuleLogText =
+      ImmutableMap.of(
+          AccessModule.COMPLIANCE_TRAINING, "Compliance training",
+          AccessModule.ERA_COMMONS, "eRA Commons",
+          AccessModule.TWO_FACTOR_AUTH, "Two-factor auth");
 
   @Autowired
   public OfflineUserController(
@@ -78,16 +85,17 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         Timestamp newTime = updatedUser.getComplianceTrainingCompletionTime();
         DataAccessLevel newLevel = updatedUser.getDataAccessLevelEnum();
 
-        completionChangeCount += logCompletionChange(user, oldTime, newTime, "Compliance training");
-        accessLevelChangeCount += logAccessLevelChange(user, oldLevel, newLevel);
+        completionChangeCount +=
+            logCompletionChange(user, oldTime, newTime, AccessModule.COMPLIANCE_TRAINING);
+        accessLevelChangeCount += logChange(user, oldLevel, newLevel, "Data access level");
       } catch (org.pmiops.workbench.moodle.ApiException | NotFoundException e) {
         errorCount++;
-        logSyncError(user, e, "compliance training");
+        logSyncError(user, e, AccessModule.COMPLIANCE_TRAINING);
       }
     }
 
     logChangeTotals(userCount, completionChangeCount, accessLevelChangeCount);
-    throwIfErrors(errorCount, "compliance training");
+    throwIfErrors(errorCount, AccessModule.COMPLIANCE_TRAINING);
 
     return ResponseEntity.noContent().build();
   }
@@ -123,11 +131,12 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         Timestamp newTime = updatedUser.getEraCommonsCompletionTime();
         DataAccessLevel newLevel = updatedUser.getDataAccessLevelEnum();
 
-        completionChangeCount += logCompletionChange(user, oldTime, newTime, "eRA Commons");
-        accessLevelChangeCount += logAccessLevelChange(user, oldLevel, newLevel);
+        completionChangeCount +=
+            logCompletionChange(user, oldTime, newTime, AccessModule.ERA_COMMONS);
+        accessLevelChangeCount += logChange(user, oldLevel, newLevel, "Data access level");
       } catch (org.pmiops.workbench.firecloud.ApiException e) {
         errorCount++;
-        logSyncError(user, e, "eRA Commons");
+        logSyncError(user, e, AccessModule.ERA_COMMONS);
       } catch (IOException e) {
         errorCount++;
         log.severe(
@@ -138,7 +147,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     }
 
     logChangeTotals(userCount, completionChangeCount, accessLevelChangeCount);
-    throwIfErrors(errorCount, "eRA Commons");
+    throwIfErrors(errorCount, AccessModule.ERA_COMMONS);
 
     return ResponseEntity.noContent().build();
   }
@@ -166,16 +175,17 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         Timestamp newTime = updatedUser.getTwoFactorAuthCompletionTime();
         DataAccessLevel newLevel = updatedUser.getDataAccessLevelEnum();
 
-        completionChangeCount += logCompletionChange(user, oldTime, newTime, "Two-factor auth");
-        accessLevelChangeCount += logAccessLevelChange(user, oldLevel, newLevel);
+        completionChangeCount +=
+            logCompletionChange(user, oldTime, newTime, AccessModule.TWO_FACTOR_AUTH);
+        accessLevelChangeCount += logChange(user, oldLevel, newLevel, "Data access level");
       } catch (Exception e) {
         errorCount++;
-        logSyncError(user, e, "two-factor auth");
+        logSyncError(user, e, AccessModule.TWO_FACTOR_AUTH);
       }
     }
 
     logChangeTotals(userCount, completionChangeCount, accessLevelChangeCount);
-    throwIfErrors(errorCount, "two-factor auth");
+    throwIfErrors(errorCount, AccessModule.TWO_FACTOR_AUTH);
 
     return ResponseEntity.noContent().build();
   }
@@ -230,36 +240,29 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     return ResponseEntity.noContent().build();
   }
 
-  private int logAccessLevelChange(
-      DbUser user, DataAccessLevel oldLevel, DataAccessLevel newLevel) {
-    if (oldLevel != newLevel) {
-      log.info(
-          String.format(
-              "Data access level changed for user %s. Old %s, new %s",
-              user.getUsername(), oldLevel.toString(), newLevel.toString()));
-      return 1;
-    }
-
-    return 0;
-  }
-
   private int logCompletionChange(
-      DbUser user, Timestamp oldTime, Timestamp newTime, String moduleText) {
-    if (!Objects.equals(newTime, oldTime)) {
+      DbUser user, Timestamp oldTime, Timestamp newTime, AccessModule module) {
+    return logChange(user, oldTime, newTime, accessModuleLogText.get(module) + " completion");
+  }
+
+  private int logChange(DbUser user, Object oldValue, Object newValue, String initialText) {
+    if (!oldValue.equals(newValue)) {
       log.info(
           String.format(
-              "%s completion changed for user %s. Old %s, new %s",
-              moduleText, user.getUsername(), oldTime, newTime));
+              "%s changed for user %s. Old %s, new %s",
+              initialText, user.getUsername(), oldValue.toString(), newValue.toString()));
       return 1;
     }
 
     return 0;
   }
 
-  private void logSyncError(DbUser user, Exception e, String moduleText) {
+  private void logSyncError(DbUser user, Exception e, AccessModule module) {
     log.log(
         Level.SEVERE,
-        String.format("Error syncing %s status for user %s", moduleText, user.getUsername()),
+        String.format(
+            "Error syncing %s status for user %s",
+            accessModuleLogText.get(module), user.getUsername()),
         e);
   }
 
@@ -271,10 +274,11 @@ public class OfflineUserController implements OfflineUserApiDelegate {
             userCount, completionChangeCount, accessLevelChangeCount));
   }
 
-  private void throwIfErrors(int errorCount, String moduleText) {
+  private void throwIfErrors(int errorCount, AccessModule module) {
     if (errorCount > 0) {
       throw new ServerErrorException(
-          String.format("%d errors encountered during %s sync", errorCount, moduleText));
+          String.format(
+              "%d errors encountered during %s sync", errorCount, accessModuleLogText.get(module)));
     }
   }
 }
