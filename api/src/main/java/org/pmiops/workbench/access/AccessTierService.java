@@ -20,7 +20,7 @@ public interface AccessTierService {
    * Return the access tier referred to by the shortName in the database
    *
    * @param shortName the short name of the access tier to look up in the database
-   * @return an {@code Option<DbAccessTier>} if one matches the shortName passed in, EMPTY otherwise
+   * @return an {@code Optional<DbAccessTier>} if one matches the shortName passed in, EMPTY otherwise
    */
   Optional<DbAccessTier> getAccessTier(String shortName);
 
