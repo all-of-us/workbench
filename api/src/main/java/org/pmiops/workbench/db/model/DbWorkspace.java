@@ -356,7 +356,7 @@ public class DbWorkspace {
     return googleProject;
   }
 
-  public void setGoogleProject(String string) {
+  public void setGoogleProject(String googleProject) {
     this.googleProject = googleProject;
   }
 

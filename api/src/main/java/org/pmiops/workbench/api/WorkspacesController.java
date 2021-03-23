@@ -339,6 +339,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   public ResponseEntity<WorkspaceResponseListResponse> getWorkspaces() {
     final WorkspaceResponseListResponse response = new WorkspaceResponseListResponse();
     response.setItems(recordOperationTime(workspaceService::getWorkspaces, "getWorkspaces"));
+    System.out.println("~~~~~~~~~555555555");
+    System.out.println("~~~~~~~~~555555555");
+    System.out.println("~~~~~~~~~555555555");
+    System.out.println("~~~~~~~~~555555555");
+    System.out.println(response.getItems().get(0).getWorkspace().getGoogleProject());
     return ResponseEntity.ok(response);
   }
 

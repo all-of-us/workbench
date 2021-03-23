@@ -96,7 +96,8 @@ public class WorkspaceMapperTest {
             .bucketName(FIRECLOUD_BUCKET_NAME)
             .createdBy(CREATOR_EMAIL)
             .namespace(FIRECLOUD_NAMESPACE)
-            .name(WORKSPACE_FIRECLOUD_NAME).googleProject(GOOGLE_PROJECT);
+            .name(WORKSPACE_FIRECLOUD_NAME)
+            .googleProject(GOOGLE_PROJECT);
 
     final DbUser creatorUser = new DbUser();
     creatorUser.setUsername(CREATOR_EMAIL);
