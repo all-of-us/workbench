@@ -6,7 +6,7 @@ export interface XPathOptions {
   ancestorLevel?: number;
   iconShape?: string;
   startsWith?: string;
-  dataTestId? : string;
+  dataTestId?: string;
   id?: string;
 }
 
@@ -21,5 +21,5 @@ export enum ElementType {
   Select = 'select',
   Dropdown = 'dropdown',
   Tab = 'Tab',
-  Number = 'number',
+  Number = 'number'
 }

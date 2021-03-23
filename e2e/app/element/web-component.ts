@@ -1,5 +1,5 @@
-import {Page} from 'puppeteer';
-import {XPathOptions} from 'app/xpath-options';
+import { Page } from 'puppeteer';
+import { XPathOptions } from 'app/xpath-options';
 import Button from './button';
 import Checkbox from './checkbox';
 import Link from './link';
@@ -14,10 +14,7 @@ import Textbox from './textbox';
  * If you create an instance of WebComponent, you do not need to create an instances of Checkbox and Textbox oTextarea separately.
  */
 export default class WebComponent {
-
-  constructor(private readonly page: Page, private readonly xpathOptions: XPathOptions) {
-
-  }
+  constructor(private readonly page: Page, private readonly xpathOptions: XPathOptions) {}
 
   async asCheckBox(): Promise<Checkbox> {
     return await Checkbox.findByName(this.page, this.xpathOptions);
@@ -46,5 +43,4 @@ export default class WebComponent {
   async asLink(): Promise<Link> {
     return await Link.findByName(this.page, this.xpathOptions);
   }
-
 }

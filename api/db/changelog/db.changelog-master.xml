@@ -166,8 +166,8 @@
   <include file="changelog/db.changelog-154-wgs-cromwell-extract-submission.xml"/>
   <include file="changelog/db.changelog-155-add-ras-link-entries.xml"/>
   <include file="changelog/db.changelog-156-billing-buffer-entry-status-index.xml"/>
-  <include file="changelog/db.changelog-157-workspace-add-google-project.xml"/>
-
+  <include file="changelog/db.changelog-157-add-user-access-tier.xml"/>
+  <include file="changelog/db.changelog-158-workspace-add-google-project.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

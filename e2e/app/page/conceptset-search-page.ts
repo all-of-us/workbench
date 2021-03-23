@@ -1,27 +1,23 @@
-import {Page} from 'puppeteer';
-import {waitForDocumentTitle, waitWhileLoading} from 'utils/waits-utils';
+import { Page } from 'puppeteer';
+import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import Textbox from 'app/element/textbox';
 import DataTable from 'app/component/data-table';
 import Button from 'app/element/button';
-import {LinkText} from 'app/text-labels';
-import {getPropValue, waitUntilChanged} from 'utils/element-utils';
+import { LinkText } from 'app/text-labels';
+import { getPropValue, waitUntilChanged } from 'utils/element-utils';
 import ReviewConceptSetSidebar from 'app/component/review-conceptset-sidebar';
 import AuthenticatedPage from './authenticated-page';
-import ConceptSetSaveModal, {SaveOption} from 'app/modal/conceptset-save-modal';
+import ConceptSetSaveModal, { SaveOption } from 'app/modal/conceptset-save-modal';
 
 const PageTitle = 'Search Concepts';
 
-export default class ConceptSetSearchPage extends AuthenticatedPage{
-
+export default class ConceptSetSearchPage extends AuthenticatedPage {
   constructor(page: Page) {
     super(page);
   }
 
   async isLoaded(): Promise<boolean> {
-    await Promise.all([
-      waitForDocumentTitle(this.page, PageTitle),
-      waitWhileLoading(this.page)
-    ]);
+    await Promise.all([waitForDocumentTitle(this.page, PageTitle), waitWhileLoading(this.page)]);
     const searchTextbox = this.getSearchTextbox();
     await searchTextbox.waitForXPath();
     return true;
@@ -46,7 +42,7 @@ export default class ConceptSetSearchPage extends AuthenticatedPage{
   }
 
   async searchConcepts(searchKeywords: string): Promise<void> {
-    const dataTable = await (this.getDataTable()).asElement();
+    const dataTable = await this.getDataTable().asElement();
     const searchInput = this.getSearchTextbox();
     await searchInput.type(searchKeywords);
     await searchInput.pressReturn();
@@ -61,8 +57,10 @@ export default class ConceptSetSearchPage extends AuthenticatedPage{
    * @return {code: string; vocabulary: string; participantCount: string}
    *  The Code, Vocabulary and Participant Count values in same table row.
    */
-  async dataTableSelectRow(rowIndex: number = 1,
-                           selctionColumnIndex = 1): Promise<{name: string, code: string; vocabulary: string; participantCount: string}> {
+  async dataTableSelectRow(
+    rowIndex: number = 1,
+    selctionColumnIndex = 1
+  ): Promise<{ name: string; code: string; vocabulary: string; participantCount: string }> {
     const dataTable = this.getDataTable();
     const bodyTable = dataTable.getBodyTable();
 
@@ -110,7 +108,7 @@ export default class ConceptSetSearchPage extends AuthenticatedPage{
   }
 
   async reviewAndSaveConceptSet(): Promise<void> {
-    const finishAndReviewButton = await Button.findByName(this.page, {name: LinkText.FinishAndReview});
+    const finishAndReviewButton = await Button.findByName(this.page, { name: LinkText.FinishAndReview });
     await finishAndReviewButton.waitUntilEnabled();
     await finishAndReviewButton.click();
 
@@ -119,5 +117,4 @@ export default class ConceptSetSearchPage extends AuthenticatedPage{
     await reviewConceptSetSidebar.waitUntilVisible();
     await reviewConceptSetSidebar.clickSaveConceptSetButton();
   }
-
 }

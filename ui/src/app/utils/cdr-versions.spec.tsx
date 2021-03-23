@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import {Workspace, CdrVersion, CdrVersionListResponse} from 'generated/fetch';
-import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
+import {WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {getCdrVersion, getDefaultCdrVersion, hasDefaultCdrVersion} from "./cdr-versions";
 

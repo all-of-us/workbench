@@ -6,7 +6,7 @@ import {currentCohortCriteriaStore, currentCohortSearchContextStore, currentWork
 import {CohortBuilderApi, CriteriaType, Domain} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortBuilderServiceStub, CriteriaStubVariables} from 'testing/stubs/cohort-builder-service-stub';
-import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {CohortSearch} from './cohort-search.component';
 
 const searchContextStubs = [

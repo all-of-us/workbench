@@ -409,7 +409,7 @@ public class WorkspacesControllerTest {
     testMockFactory = new TestMockFactory();
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
 
-    accessTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
+    accessTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 1);
     cdrVersion.setName("1");

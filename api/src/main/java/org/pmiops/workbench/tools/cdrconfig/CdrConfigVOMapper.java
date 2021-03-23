@@ -40,7 +40,9 @@ public interface CdrConfigVOMapper {
       CdrVersionVO localVersion,
       @MappingTarget DbCdrVersion dbCdrVersion,
       @Context AccessTierDao accessTierDao) {
-    dbCdrVersion.setAccessTier(accessTierDao.findOneByShortName(localVersion.accessTier));
+    accessTierDao
+        .findOneByShortName(localVersion.accessTier)
+        .ifPresent(dbCdrVersion::setAccessTier);
   }
 
   List<DbCdrVersion> toDbVersions(

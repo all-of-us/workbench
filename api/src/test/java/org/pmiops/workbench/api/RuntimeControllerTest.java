@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapperImpl;
@@ -160,7 +161,8 @@ public class RuntimeControllerTest {
     LeonardoNotebooksClientImpl.class,
     NotebooksRetryHandler.class,
     LeonardoRetryHandler.class,
-    NoBackOffPolicy.class
+    NoBackOffPolicy.class,
+    AccessTierServiceImpl.class,
   })
   @MockBean({ConceptSetService.class, CohortService.class})
   static class Configuration {

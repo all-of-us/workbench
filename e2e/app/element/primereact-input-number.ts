@@ -1,5 +1,5 @@
 import BaseElement from './base-element';
-import {ElementHandle, Page} from 'puppeteer';
+import { ElementHandle, Page } from 'puppeteer';
 
 export default class PrimereactInputNumber extends BaseElement {
   constructor(page: Page, xpath?: string) {
@@ -12,12 +12,11 @@ export default class PrimereactInputNumber extends BaseElement {
     // its specified mins and maxes and is very finicky around 1) copy/paste and 2) manual manipulation
     // of its value prop so instead we must do shenanigans!
     await input.click();
-    while (await this.getInputValue() !== value) {
+    while ((await this.getInputValue()) !== value) {
       const curr = await this.getInputValue();
       if (curr > value) {
         await this.page.keyboard.press('ArrowDown');
-      }
-      else if (curr < value) {
+      } else if (curr < value) {
         await this.page.keyboard.press('ArrowUp');
       }
     }
@@ -33,10 +32,10 @@ export default class PrimereactInputNumber extends BaseElement {
   }
 
   private async getInputElementHandle(): Promise<ElementHandle> {
-    return await this.page.waitForXPath(this.getInputXPath(), {visible: true})
+    return await this.page.waitForXPath(this.getInputXPath(), { visible: true });
   }
 
   private getInputXPath(): string {
-    return `${this.getXpath()}/input`
+    return `${this.getXpath()}/input`;
   }
 }

@@ -1,59 +1,56 @@
 import { ElementHandle, Page } from 'puppeteer';
-import {config} from 'resources/workbench-config';
+import { config } from 'resources/workbench-config';
 import Button from 'app/element/button';
-import {savePageToFile, takeScreenshot} from 'utils/save-file-utils';
+import { savePageToFile, takeScreenshot } from 'utils/save-file-utils';
 
 export enum FieldSelector {
-  LoginButton= '//*[@role="button"]/*[contains(normalize-space(text()),"Sign In")]',
+  LoginButton = '//*[@role="button"]/*[contains(normalize-space(text()),"Sign In")]',
   CookiePolicyLink = '//a[text()="Cookie Policy"]',
   EmailInput = '//input[@type="email"]',
   NextButton = '//*[text()="Next" or @value="Next"]',
   SubmitButton = '//*[@id="passwordNext" or @id="submit"]',
-  PasswordInput = '//input[@type="password"]',
+  PasswordInput = '//input[@type="password"]'
 }
 
-
 export default class GoogleLoginPage {
-
-  constructor(private readonly page: Page) {
-  }
+  constructor(private readonly page: Page) {}
 
   /**
    * Login email input field.
    */
   async email(): Promise<ElementHandle> {
-    return this.page.waitForXPath(FieldSelector.EmailInput, {visible: true, timeout: 60000});
+    return this.page.waitForXPath(FieldSelector.EmailInput, { visible: true, timeout: 60000 });
   }
 
   /**
    * Login password input field.
    */
   async password(): Promise<ElementHandle> {
-    return this.page.waitForXPath(FieldSelector.PasswordInput, {visible: true, timeout: 60000});
+    return this.page.waitForXPath(FieldSelector.PasswordInput, { visible: true, timeout: 60000 });
   }
 
   /**
    * Google login button.
    */
   async loginButton(): Promise<ElementHandle> {
-    return this.page.waitForXPath(FieldSelector.LoginButton, {visible: true, timeout: 60000});
+    return this.page.waitForXPath(FieldSelector.LoginButton, { visible: true, timeout: 60000 });
   }
 
   async cookiePolicyLink(): Promise<ElementHandle> {
-    return this.page.waitForXPath(FieldSelector.CookiePolicyLink, {visible: true, timeout: 60000});
+    return this.page.waitForXPath(FieldSelector.CookiePolicyLink, { visible: true, timeout: 60000 });
   }
 
   /**
    * Enter login email and click Next button.
    * @param email
    */
-  async enterEmail(userEmail: string) : Promise<void> {
+  async enterEmail(userEmail: string): Promise<void> {
     try {
       // Handle Google "Use another account" modal if it exists
       const useAnotherAccountXpath = '//*[@role="link"]//*[text()="Use another account"]';
       const elemt1 = await Promise.race([
-        this.page.waitForXPath(FieldSelector.EmailInput, {visible: true, timeout: 60000}),
-        this.page.waitForXPath(useAnotherAccountXpath, {visible: true, timeout: 60000}),
+        this.page.waitForXPath(FieldSelector.EmailInput, { visible: true, timeout: 60000 }),
+        this.page.waitForXPath(useAnotherAccountXpath, { visible: true, timeout: 60000 })
       ]);
 
       // compare to the "Use another Account" link
@@ -69,13 +66,13 @@ export default class GoogleLoginPage {
 
       const emailInput = await this.email();
       await emailInput.focus();
-      await emailInput.type(userEmail, {delay: 15});
+      await emailInput.type(userEmail, { delay: 15 });
       await emailInput.dispose();
 
-      const nextButton = await this.page.waitForXPath(FieldSelector.NextButton, {visible: true});
+      const nextButton = await this.page.waitForXPath(FieldSelector.NextButton, { visible: true });
       await nextButton.click();
       await nextButton.dispose();
-    } catch(error) {
+    } catch (error) {
       await takeScreenshot(this.page);
       await savePageToFile(this.page);
       throw error;
@@ -86,11 +83,11 @@ export default class GoogleLoginPage {
    * Enter login password.
    * @param pwd
    */
-  async enterPassword(pwd: string) : Promise<void> {
+  async enterPassword(pwd: string): Promise<void> {
     try {
       const input = await this.password();
       await input.focus();
-      await input.type(pwd, {delay: 15});
+      await input.type(pwd, { delay: 15 });
       await input.dispose();
     } catch (error) {
       await takeScreenshot(this.page);
@@ -105,18 +102,17 @@ export default class GoogleLoginPage {
   async submit(): Promise<void> {
     const submitButton = new Button(this.page, FieldSelector.SubmitButton);
     await Promise.all([
-      this.page.waitForNavigation({waitUntil: ['networkidle0', 'load'], timeout: (2 * 60 * 1000)}), // 2 minutes
-      submitButton.click(),
+      this.page.waitForNavigation({ waitUntil: ['networkidle0', 'load'], timeout: 2 * 60 * 1000 }), // 2 minutes
+      submitButton.click()
     ]);
     await submitButton.dispose();
-    await this.page.waitForSelector('app-signed-in', {timeout: (2 * 60 * 1000)})
-      .catch(async (err) => {
-        // Two main reasons why error is throw are caused by "Enter Recovery Email" page or login captcha.
-        // At this time, we can only handle "Enter Recover Email" page if it exists.
-        const found = await this.fillOutRecoverEmail();
-        if (!found) {
-          throw err;
-        }
+    await this.page.waitForSelector('app-signed-in', { timeout: 2 * 60 * 1000 }).catch(async (err) => {
+      // Two main reasons why error is throw are caused by "Enter Recovery Email" page or login captcha.
+      // At this time, we can only handle "Enter Recover Email" page if it exists.
+      const found = await this.fillOutRecoverEmail();
+      if (!found) {
+        throw err;
+      }
     });
   }
 
@@ -125,13 +121,16 @@ export default class GoogleLoginPage {
    */
   async load(): Promise<void> {
     const url = config.uiBaseUrl + config.loginUrlPath;
-    const response = await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded', 'load'], timeout: 2 * 60 * 1000});
+    const response = await this.page.goto(url, {
+      waitUntil: ['networkidle0', 'domcontentloaded', 'load'],
+      timeout: 2 * 60 * 1000
+    });
     if (response && response.ok()) {
       return;
     }
     // Retry load Login page.
     console.warn(`Retry loading Login page`);
-    await this.page.goto(url, {waitUntil: ['networkidle0', 'domcontentloaded', 'load'], timeout: 30 * 1000});
+    await this.page.goto(url, { waitUntil: ['networkidle0', 'domcontentloaded', 'load'], timeout: 30 * 1000 });
   }
 
   /**
@@ -145,11 +144,11 @@ export default class GoogleLoginPage {
     const pwd = paswd || config.userPassword;
 
     if (!user || user.trim().length === 0) {
-      console.warn('Login user email: value is empty!!!')
+      console.warn('Login user email: value is empty!!!');
     }
 
     await this.load(); // Load the Google Sign In page.
-    await this.loginButton().then(button => button.click());
+    await this.loginButton().then((button) => button.click());
 
     await this.enterEmail(user);
     await this.page.waitForTimeout(500); // Reduces probablity of getting Google login captcha
@@ -163,7 +162,7 @@ export default class GoogleLoginPage {
   }
 
   async clickCreateAccountButton(): Promise<void> {
-    const button = await Button.findByName(this.page, {name: 'Create Account'});
+    const button = await Button.findByName(this.page, { name: 'Create Account' });
     await button.clickWithEval();
   }
 
@@ -177,9 +176,9 @@ export default class GoogleLoginPage {
     if (elementHandle) {
       await elementHandle.type(config.institutionContactEmail);
       await Promise.all([
-        this.page.waitForNavigation({waitUntil: ['networkidle2', 'load'], timeout: 30000}),
+        this.page.waitForNavigation({ waitUntil: ['networkidle2', 'load'], timeout: 30000 }),
         this.page.keyboard.press(String.fromCharCode(13)), // press Enter key
-        this.page.waitForSelector('app-signed-in', {timeout: 0}),
+        this.page.waitForSelector('app-signed-in', { timeout: 0 })
       ]);
       await elementHandle.dispose();
       return true;
@@ -187,5 +186,4 @@ export default class GoogleLoginPage {
     // "Enter Recover Email" input not found.
     return false;
   }
-
 }

@@ -1,18 +1,17 @@
-import {ElementHandle, Frame, Page} from 'puppeteer';
-import {getPropValue} from 'utils/element-utils';
+import { ElementHandle, Frame, Page } from 'puppeteer';
+import { getPropValue } from 'utils/element-utils';
 
 export enum CellType {
   // To append to css selector
   Code = '.code_cell',
   Markdown = '.text_cell',
-  Any = '',
+  Any = ''
 }
 
 /**
  * Notebook Cell represents the root element that contains both the code input and output cells.
  */
 export default class NotebookCell {
-
   private iframe: Frame; // Jupyter notebook iframe
 
   /**
@@ -21,10 +20,11 @@ export default class NotebookCell {
    * @param {CellType} cellType: Code or Markdown cell. Default value is Code cell.
    * @param {number} cellIndex Cell index. (first index is 1)
    */
-  constructor(private readonly page: Page,
-              private readonly cellType: CellType = CellType.Code,
-              private cellIndex: number = 1) {
-  }
+  constructor(
+    private readonly page: Page,
+    private readonly cellType: CellType = CellType.Code,
+    private cellIndex: number = 1
+  ) {}
 
   async getLastCell(): Promise<NotebookCell | null> {
     const elements = await this.findAllCells();
@@ -40,8 +40,8 @@ export default class NotebookCell {
   async focus(maxAttempts: number = 3): Promise<ElementHandle> {
     const clickInCell = async (iframe: Frame): Promise<ElementHandle> => {
       const selector = this.cellSelector(this.getCellIndex());
-      const cell = await iframe.waitForSelector(`${selector} .CodeMirror-code`, {visible: true});
-      await cell.click({delay: 10}); // focus
+      const cell = await iframe.waitForSelector(`${selector} .CodeMirror-code`, { visible: true });
+      await cell.click({ delay: 10 }); // focus
       return cell;
     };
 
@@ -69,10 +69,7 @@ export default class NotebookCell {
    * @param {number} timeOut The timeout time in milliseconds.
    */
   async waitForOutput(timeOut: number = 30 * 1000): Promise<string> {
-    return Promise.race([
-      this.getOutputText(timeOut),
-      this.getOutputError(timeOut),
-    ]);
+    return Promise.race([this.getOutputText(timeOut), this.getOutputError(timeOut)]);
   }
 
   /**
@@ -115,7 +112,7 @@ export default class NotebookCell {
   async findOutputElementHandle(timeOut?: number): Promise<ElementHandle> {
     const selector = `${this.outputSelector(this.getCellIndex())}:not(.output_error)`;
     const iframe = await this.getIFrame();
-    await iframe.waitForSelector(selector, {visible: true, timeout: timeOut});
+    await iframe.waitForSelector(selector, { visible: true, timeout: timeOut });
     const elements = await iframe.$$(selector);
     return elements[elements.length - 1];
   }
@@ -127,7 +124,7 @@ export default class NotebookCell {
   async findOutputErrorElementHandle(timeOut?: number): Promise<ElementHandle> {
     const selector = `${this.outputSelector(this.getCellIndex())}.output_error`;
     const iframe = await this.getIFrame();
-    return iframe.waitForSelector(selector, {visible: true, timeout: timeOut});
+    return iframe.waitForSelector(selector, { visible: true, timeout: timeOut });
   }
 
   private async getIFrame(): Promise<Frame> {
@@ -167,11 +164,16 @@ export default class NotebookCell {
 
   async waitForPropertyContains(cssSelector: string, propertyName: string, propertyValue: string): Promise<boolean> {
     const iframe = await this.getIFrame();
-    const jsHandle = await iframe.waitForFunction((css, prop, value) => {
-      const element = document.querySelector(css);
-      return element && element[prop].includes(value);
-    }, {}, cssSelector, propertyName, propertyValue);
+    const jsHandle = await iframe.waitForFunction(
+      (css, prop, value) => {
+        const element = document.querySelector(css);
+        return element && element[prop].includes(value);
+      },
+      {},
+      cssSelector,
+      propertyName,
+      propertyValue
+    );
     return (await jsHandle.jsonValue()) as boolean;
   }
-
 }

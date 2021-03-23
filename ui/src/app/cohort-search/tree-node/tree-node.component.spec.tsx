@@ -5,7 +5,7 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentCohortCriteriaStore, currentConceptStore, currentWorkspaceStore} from 'app/utils/navigation';
 import {CohortBuilderApi, Domain} from 'generated/fetch';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
-import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {NodeProp, TreeNode} from './tree-node.component';
 
 const treeNodeStub = {

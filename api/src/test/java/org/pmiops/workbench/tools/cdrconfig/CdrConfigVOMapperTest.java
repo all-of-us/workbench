@@ -108,7 +108,7 @@ public class CdrConfigVOMapperTest {
 
   @Test
   public void test_populateAccessTier() {
-    DbAccessTier registeredTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
+    DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     CdrVersionVO cdrVersionVO = new CdrVersionVO();
     cdrVersionVO.accessTier = registeredTier.getShortName();
@@ -123,7 +123,7 @@ public class CdrConfigVOMapperTest {
 
   @Test
   public void test_populateAccessTier_missing() {
-    DbAccessTier registeredTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
+    DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     CdrVersionVO cdrVersionVO = new CdrVersionVO();
     cdrVersionVO.accessTier = "a tier which doesn't exist";

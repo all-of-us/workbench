@@ -19,7 +19,8 @@ import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {defaultGceConfig, defaultDataprocConfig, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
-import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
+import {workspaceStubs} from 'testing/stubs/workspaces';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {BillingAccountType, BillingStatus} from 'generated/fetch';
 
 describe('RuntimePanel', () => {

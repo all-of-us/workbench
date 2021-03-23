@@ -1,16 +1,16 @@
-import {Page} from 'puppeteer';
+import { Page } from 'puppeteer';
 
 import Button from 'app/element/button';
-import {Language, LinkText, PageUrl} from 'app/text-labels';
-import WorkspaceEditPage, {FIELD as EDIT_FIELD} from 'app/page/workspace-edit-page';
+import { Language, LinkText, PageUrl } from 'app/text-labels';
+import WorkspaceEditPage, { FIELD as EDIT_FIELD } from 'app/page/workspace-edit-page';
 import RadioButton from 'app/element/radiobutton';
-import {findOrCreateWorkspace} from 'utils/test-utils';
-import {waitForDocumentTitle, waitForText, waitWhileLoading} from 'utils/waits-utils';
+import { findOrCreateWorkspace } from 'utils/test-utils';
+import { waitForDocumentTitle, waitForText, waitWhileLoading } from 'utils/waits-utils';
 import ReactSelect from 'app/element/react-select';
 import WorkspaceDataPage from './workspace-data-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
-import {config} from 'resources/workbench-config';
-import {UseFreeCredits} from './workspace-base';
+import { config } from 'resources/workbench-config';
+import { UseFreeCredits } from './workspace-base';
 import OldCdrVersionModal from 'app/modal/old-cdr-version-modal';
 import AuthenticatedPage from './authenticated-page';
 
@@ -26,7 +26,6 @@ export const FieldSelector = {
 };
 
 export default class WorkspacesPage extends AuthenticatedPage {
-
   constructor(page: Page) {
     super(page);
   }
@@ -34,20 +33,18 @@ export default class WorkspacesPage extends AuthenticatedPage {
   async isLoaded(): Promise<boolean> {
     await waitForDocumentTitle(this.page, PageTitle);
 
-    await waitWhileLoading(this.page, 120000)
-      .catch(async () => {
-        console.warn('Retry loading Workspaces page');
-        await this.page.reload({waitUntil: ['networkidle0', 'load']});
-        await waitWhileLoading(this.page);
-      });
+    await waitWhileLoading(this.page, 120000).catch(async () => {
+      console.warn('Retry loading Workspaces page');
+      await this.page.reload({ waitUntil: ['networkidle0', 'load'] });
+      await waitWhileLoading(this.page);
+    });
 
     await Promise.all([
-      this.page.waitForXPath('//a[text()="Workspaces"]', {visible: true}),
-      this.page.waitForXPath('//h3[normalize-space(text())="Workspaces"]', {visible: true})  // Texts above Filter By Select
+      this.page.waitForXPath('//a[text()="Workspaces"]', { visible: true }),
+      this.page.waitForXPath('//h3[normalize-space(text())="Workspaces"]', { visible: true }) // Texts above Filter By Select
     ]);
     return true;
   }
-
 
   /**
    * Load 'Your Workspaces' page and ensure page load is completed.
@@ -60,14 +57,14 @@ export default class WorkspacesPage extends AuthenticatedPage {
 
   // tests helpers: combined a number of steps in one function
 
- /**
-  * Perform following steps:
-  *
-  * 1: go to My Workspaces page
-  * 2: click Create New Workspace link (button)
-  * 3: wait until Edit page is loaded and ready
-  * 4: return
-  */
+  /**
+   * Perform following steps:
+   *
+   * 1: go to My Workspaces page
+   * 2: click Create New Workspace link (button)
+   * 3: wait until Edit page is loaded and ready
+   * 4: return
+   */
   async clickCreateNewWorkspace(): Promise<WorkspaceEditPage> {
     const link = await Button.findByName(this.page, FieldSelector.CreateNewWorkspaceButton.textOption);
     await link.clickAndWait();
@@ -80,11 +77,11 @@ export default class WorkspacesPage extends AuthenticatedPage {
    * Create a simple and basic new workspace end-to-end.
    */
   async createWorkspace(
-     workspaceName: string,
-     cdrVersionName: string = config.defaultCdrVersionName,
-     billingAccount: string = UseFreeCredits,
-     reviewRequest: boolean = false): Promise<string[]> {
-
+    workspaceName: string,
+    cdrVersionName: string = config.defaultCdrVersionName,
+    billingAccount: string = UseFreeCredits,
+    reviewRequest: boolean = false
+  ): Promise<string[]> {
     const editPage = await this.fillOutRequiredCreationFields(workspaceName, billingAccount, reviewRequest);
 
     // select the chosen CDR Version
@@ -103,10 +100,11 @@ export default class WorkspacesPage extends AuthenticatedPage {
     return editPage.clickCreateFinishButton(createButton);
   }
 
-  async fillOutRequiredCreationFields (
-      workspaceName: string,
-      billingAccount: string = UseFreeCredits,
-      reviewRequest: boolean = false): Promise<WorkspaceEditPage> {
+  async fillOutRequiredCreationFields(
+    workspaceName: string,
+    billingAccount: string = UseFreeCredits,
+    reviewRequest: boolean = false
+  ): Promise<WorkspaceEditPage> {
     const editPage = await this.clickCreateNewWorkspace();
     // wait for Billing Account default selected value
     await waitForText(this.page, UseFreeCredits);
@@ -141,7 +139,10 @@ export default class WorkspacesPage extends AuthenticatedPage {
     await (await increaseWellness.asCheckBox()).check();
 
     // 5. Population of interest: use default values. Using default value
-    const noRadiobutton = await RadioButton.findByName(this.page, EDIT_FIELD.POPULATION_OF_INTEREST.noRadiobutton.textOption);
+    const noRadiobutton = await RadioButton.findByName(
+      this.page,
+      EDIT_FIELD.POPULATION_OF_INTEREST.noRadiobutton.textOption
+    );
     await noRadiobutton.select();
 
     // 6. Request for Review of Research Purpose Description. Using default value
@@ -156,9 +157,13 @@ export default class WorkspacesPage extends AuthenticatedPage {
    * @param {string} notebookName Notebook name
    * @param {Language} lang Notebook language.
    */
-  async createNotebook(opts: {workspaceName: string, notebookName: string, lang?: Language}): Promise<WorkspaceAnalysisPage> {
-    const {workspaceName, notebookName, lang} = opts;
-    const workspaceCard = await findOrCreateWorkspace(this.page, {workspaceName, alwaysCreate: true});
+  async createNotebook(opts: {
+    workspaceName: string;
+    notebookName: string;
+    lang?: Language;
+  }): Promise<WorkspaceAnalysisPage> {
+    const { workspaceName, notebookName, lang } = opts;
+    const workspaceCard = await findOrCreateWorkspace(this.page, { workspaceName, alwaysCreate: true });
     await workspaceCard.clickWorkspaceName();
 
     const dataPage = new WorkspaceDataPage(this.page);
@@ -169,7 +174,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
   }
 
   async filterByAccessLevel(level: string): Promise<string> {
-    const selectMenu = new ReactSelect(this.page, {name: 'Filter by'});
+    const selectMenu = new ReactSelect(this.page, { name: 'Filter by' });
     await selectMenu.selectOption(level);
     await waitWhileLoading(this.page);
     return selectMenu.getSelectedOption();

@@ -8,7 +8,8 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {FeaturedWorkspacesConfigApiStub} from 'testing/stubs/featured-workspaces-config-api-stub';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {WorkspacesApiStub, buildWorkspaceStubs} from 'testing/stubs/workspaces-api-stub';
+import {buildWorkspaceStubs} from 'testing/stubs/workspaces';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceLibrary} from './workspace-library';
 
 // Mock the navigate function but not userProfileStore

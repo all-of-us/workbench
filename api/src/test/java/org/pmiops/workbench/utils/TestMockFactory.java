@@ -212,7 +212,7 @@ public class TestMockFactory {
     return dbWorkspace;
   }
 
-  public static DbAccessTier createDefaultAccessTier(AccessTierDao accessTierDao) {
+  public static DbAccessTier createRegisteredTierForTests(AccessTierDao accessTierDao) {
     final DbAccessTier accessTier =
         new DbAccessTier()
             .setAccessTierId(1)
@@ -237,7 +237,7 @@ public class TestMockFactory {
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
     cdrVersion.setCdrDbName("");
-    cdrVersion.setAccessTier(createDefaultAccessTier(accessTierDao));
+    cdrVersion.setAccessTier(createRegisteredTierForTests(accessTierDao));
     return cdrVersionDao.save(cdrVersion);
   }
 }

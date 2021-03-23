@@ -29,6 +29,7 @@ import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.Surveys;
+import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
 /**
@@ -583,6 +584,12 @@ public final class DbStorageEnums {
           .put(Disability.PREFER_NO_ANSWER, (short) 3)
           .build();
 
+  private static final BiMap<TierAccessStatus, Short> CLIENT_TO_STORAGE_TIER_ACCESS_STATUS =
+      ImmutableBiMap.<TierAccessStatus, Short>builder()
+          .put(TierAccessStatus.DISABLED, (short) 0)
+          .put(TierAccessStatus.ENABLED, (short) 1)
+          .build();
+
   public static Race raceFromStorage(Short race) {
     return CLIENT_TO_STORAGE_RACE.inverse().get(race);
   }
@@ -629,5 +636,13 @@ public final class DbStorageEnums {
 
   public static Disability disabilityFromStorage(Short disability) {
     return CLIENT_TO_STORAGE_DISABILITY.inverse().get(disability);
+  }
+
+  public static Short tierAccessStatusToStorage(TierAccessStatus tierAccessStatus) {
+    return CLIENT_TO_STORAGE_TIER_ACCESS_STATUS.get(tierAccessStatus);
+  }
+
+  public static TierAccessStatus tierAccessStatusFromStorage(Short tierAccessStatus) {
+    return CLIENT_TO_STORAGE_TIER_ACCESS_STATUS.inverse().get(tierAccessStatus);
   }
 }
