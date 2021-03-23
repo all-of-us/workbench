@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import {ComboChart} from 'app/components/combo-chart.component';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {CohortDefinition} from 'app/pages/data/cohort-review/cohort-definition.component';
@@ -6,7 +5,7 @@ import {ParticipantsCharts} from 'app/pages/data/cohort-review/participants-char
 import {cohortReviewStore} from 'app/services/review-state.service';
 import {cdrVersionsApi, cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
@@ -404,12 +403,3 @@ export const QueryReport = withCurrentWorkspace()(
     }
   }
 );
-
-@Component ({
-  template: '<div #root></div>'
-})
-export class QueryReportComponent extends ReactWrapperBase {
-  constructor() {
-    super(QueryReport, []);
-  }
-}
