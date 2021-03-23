@@ -1,7 +1,6 @@
 package org.pmiops.workbench.db.model;
 
 import java.sql.Timestamp;
-import java.time.Instant;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -89,10 +88,6 @@ public class DbUserAccessTier {
     return this;
   }
 
-  public DbUserAccessTier setFirstEnabled() {
-    return setFirstEnabled(Timestamp.from(Instant.now()));
-  }
-
   @Column(name = "last_updated", nullable = false)
   public Timestamp getLastUpdated() {
     return lastUpdated;
@@ -101,9 +96,5 @@ public class DbUserAccessTier {
   public DbUserAccessTier setLastUpdated(Timestamp lastUpdated) {
     this.lastUpdated = lastUpdated;
     return this;
-  }
-
-  public DbUserAccessTier setLastUpdated() {
-    return setLastUpdated(Timestamp.from(Instant.now()));
   }
 }

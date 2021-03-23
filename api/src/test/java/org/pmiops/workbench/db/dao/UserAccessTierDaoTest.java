@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.dao;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Optional;
 import org.junit.Before;
@@ -64,8 +65,8 @@ public class UserAccessTierDaoTest {
             .setUser(user)
             .setAccessTier(registeredTier)
             .setTierAccessStatus(TierAccessStatus.ENABLED)
-            .setFirstEnabled()
-            .setLastUpdated());
+            .setFirstEnabled(now())
+            .setLastUpdated(now()));
 
     Optional<DbUserAccessTier> entryMaybe =
         userAccessTierDao.getByUserAndAccessTier(user, registeredTier);
@@ -85,8 +86,8 @@ public class UserAccessTierDaoTest {
             .setUser(user)
             .setAccessTier(registeredTier)
             .setTierAccessStatus(TierAccessStatus.DISABLED)
-            .setFirstEnabled()
-            .setLastUpdated());
+            .setFirstEnabled(now())
+            .setLastUpdated(now()));
 
     Optional<DbUserAccessTier> entryMaybe =
         userAccessTierDao.getByUserAndAccessTier(user, registeredTier);
@@ -102,9 +103,13 @@ public class UserAccessTierDaoTest {
             .setUser(user)
             .setAccessTier(registeredTier)
             .setTierAccessStatus(TierAccessStatus.ENABLED)
-            .setFirstEnabled()
-            .setLastUpdated());
+            .setFirstEnabled(now())
+            .setLastUpdated(now()));
 
     assertThat(userAccessTierDao.getByUserAndAccessTier(user, controlledTier)).isEmpty();
+  }
+
+  private Timestamp now() {
+    return Timestamp.from(Instant.now());
   }
 }

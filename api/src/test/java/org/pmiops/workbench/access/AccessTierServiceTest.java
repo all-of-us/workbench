@@ -4,6 +4,9 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
 import java.sql.Timestamp;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,6 +21,7 @@ import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.TierAccessStatus;
+import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -39,6 +43,8 @@ public class AccessTierServiceTest {
   private static DbUser user;
   private static WorkbenchConfig config;
 
+  private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
+
   @Import({
     AccessTierServiceImpl.class,
   })
@@ -54,6 +60,12 @@ public class AccessTierServiceTest {
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public WorkbenchConfig config() {
       return config;
+    }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public Clock clock() {
+      return CLOCK;
     }
   }
 
@@ -231,7 +243,7 @@ public class AccessTierServiceTest {
     final Timestamp lastUpdated = uat.get().getLastUpdated();
 
     // wait a second
-    sleepMillis(1000);
+    CLOCK.increment(1000);
 
     accessTierService.addUserToRegisteredTier(user);
 
@@ -268,16 +280,31 @@ public class AccessTierServiceTest {
     // adds a DB entry for (user, registered)
     accessTierService.addUserToRegisteredTier(user);
 
-    // updates the DB entry by setting it to DISABLED
-    accessTierService.removeUserFromRegisteredTier(user);
-
     assertThat(userAccessTierDao.findAll()).hasSize(1);
 
     Optional<DbUserAccessTier> uat = userAccessTierDao.getByUserAndAccessTier(user, registeredTier);
     assertThat(uat).isPresent();
     assertThat(uat.get().getUser()).isEqualTo(user);
     assertThat(uat.get().getAccessTier()).isEqualTo(registeredTier);
+    assertThat(uat.get().getTierAccessStatusEnum()).isEqualTo(TierAccessStatus.ENABLED);
+    final Timestamp firstEnabled = uat.get().getFirstEnabled();
+    final Timestamp lastUpdated = uat.get().getLastUpdated();
+
+    // wait a second
+    CLOCK.increment(1000);
+
+    // updates the DB entry by setting it to DISABLED
+    accessTierService.removeUserFromRegisteredTier(user);
+
+    assertThat(userAccessTierDao.findAll()).hasSize(1);
+
+    uat = userAccessTierDao.getByUserAndAccessTier(user, registeredTier);
+    assertThat(uat).isPresent();
+    assertThat(uat.get().getUser()).isEqualTo(user);
+    assertThat(uat.get().getAccessTier()).isEqualTo(registeredTier);
     assertThat(uat.get().getTierAccessStatusEnum()).isEqualTo(TierAccessStatus.DISABLED);
+    assertThat(uat.get().getFirstEnabled()).isEqualTo(firstEnabled);
+    assertThat(uat.get().getLastUpdated()).isGreaterThan(lastUpdated);
   }
 
   @Test
@@ -299,7 +326,7 @@ public class AccessTierServiceTest {
     final Timestamp lastUpdated = uat.get().getLastUpdated();
 
     // wait a second
-    sleepMillis(1000);
+    CLOCK.increment(1000);
 
     accessTierService.removeUserFromRegisteredTier(user);
 
@@ -310,6 +337,63 @@ public class AccessTierServiceTest {
     uat = userAccessTierDao.getByUserAndAccessTier(user, registeredTier);
     assertThat(uat).isPresent();
     assertThat(uat.get().getLastUpdated()).isEqualTo(lastUpdated);
+  }
+
+  @Test
+  public void test_add_remove_add() {
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+
+    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+
+    // adds a DB entry for (user, registered)
+    accessTierService.addUserToRegisteredTier(user);
+
+    assertThat(userAccessTierDao.findAll()).hasSize(1);
+
+    Optional<DbUserAccessTier> uat = userAccessTierDao.getByUserAndAccessTier(user, registeredTier);
+    assertThat(uat).isPresent();
+    assertThat(uat.get().getUser()).isEqualTo(user);
+    assertThat(uat.get().getAccessTier()).isEqualTo(registeredTier);
+    assertThat(uat.get().getTierAccessStatusEnum()).isEqualTo(TierAccessStatus.ENABLED);
+    final Timestamp firstEnabled = uat.get().getFirstEnabled();
+    assertThat(uat.get().getLastUpdated()).isEqualTo(firstEnabled);
+
+    // wait a second
+    CLOCK.increment(1000);
+
+    // updates the DB entry by setting it to DISABLED
+    accessTierService.removeUserFromRegisteredTier(user);
+
+    assertThat(userAccessTierDao.findAll()).hasSize(1);
+
+    uat = userAccessTierDao.getByUserAndAccessTier(user, registeredTier);
+    assertThat(uat).isPresent();
+    assertThat(uat.get().getUser()).isEqualTo(user);
+    assertThat(uat.get().getAccessTier()).isEqualTo(registeredTier);
+    assertThat(uat.get().getTierAccessStatusEnum()).isEqualTo(TierAccessStatus.DISABLED);
+    assertThat(uat.get().getFirstEnabled()).isEqualTo(firstEnabled);
+
+    final Timestamp disabledTime = uat.get().getLastUpdated();
+    assertThat(disabledTime).isGreaterThan(firstEnabled);
+
+    // wait a second
+    CLOCK.increment(1000);
+
+    // updates the DB entry by setting it to ENABLED
+    accessTierService.addUserToRegisteredTier(user);
+
+    assertThat(userAccessTierDao.findAll()).hasSize(1);
+
+    uat = userAccessTierDao.getByUserAndAccessTier(user, registeredTier);
+    assertThat(uat).isPresent();
+    assertThat(uat.get().getUser()).isEqualTo(user);
+    assertThat(uat.get().getAccessTier()).isEqualTo(registeredTier);
+    assertThat(uat.get().getTierAccessStatusEnum()).isEqualTo(TierAccessStatus.ENABLED);
+    assertThat(uat.get().getFirstEnabled()).isEqualTo(firstEnabled);
+
+    final Timestamp reEnabledTime = uat.get().getLastUpdated();
+    assertThat(reEnabledTime).isGreaterThan(firstEnabled);
+    assertThat(reEnabledTime).isGreaterThan(disabledTime);
   }
 
   @Test
@@ -353,13 +437,5 @@ public class AccessTierServiceTest {
     assertThat(controlledMembership.getUser()).isEqualTo(user);
     assertThat(controlledMembership.getAccessTier()).isEqualTo(controlledTier);
     assertThat(controlledMembership.getTierAccessStatusEnum()).isEqualTo(TierAccessStatus.ENABLED);
-  }
-
-  private void sleepMillis(long milliseconds) {
-    try {
-      Thread.sleep(milliseconds);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
   }
 }

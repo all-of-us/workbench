@@ -1,6 +1,8 @@
 package org.pmiops.workbench.access;
 
 import com.google.common.collect.ImmutableList;
+import java.sql.Timestamp;
+import java.time.Clock;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 public class AccessTierServiceImpl implements AccessTierService {
 
   private final Provider<WorkbenchConfig> configProvider;
+  private final Clock clock;
 
   private final AccessTierDao accessTierDao;
   private final UserAccessTierDao userAccessTierDao;
@@ -28,11 +31,13 @@ public class AccessTierServiceImpl implements AccessTierService {
   @Autowired
   public AccessTierServiceImpl(
       Provider<WorkbenchConfig> configProvider,
+      Clock clock,
       AccessTierDao accessTierDao,
       UserAccessTierDao userAccessTierDao) {
     this.configProvider = configProvider;
     this.accessTierDao = accessTierDao;
     this.userAccessTierDao = userAccessTierDao;
+    this.clock = clock;
   }
 
   /**
@@ -123,7 +128,7 @@ public class AccessTierServiceImpl implements AccessTierService {
       // don't update if already ENABLED
       if (entryToUpdate.getTierAccessStatusEnum() == TierAccessStatus.DISABLED) {
         userAccessTierDao.save(
-            entryToUpdate.setTierAccessStatus(TierAccessStatus.ENABLED).setLastUpdated());
+            entryToUpdate.setTierAccessStatus(TierAccessStatus.ENABLED).setLastUpdated(now()));
       }
     } else {
       final DbUserAccessTier entryToInsert =
@@ -131,8 +136,8 @@ public class AccessTierServiceImpl implements AccessTierService {
               .setUser(user)
               .setAccessTier(accessTier)
               .setTierAccessStatus(TierAccessStatus.ENABLED)
-              .setFirstEnabled()
-              .setLastUpdated();
+              .setFirstEnabled(now())
+              .setLastUpdated(now());
       userAccessTierDao.save(entryToInsert);
     }
   }
@@ -153,7 +158,7 @@ public class AccessTierServiceImpl implements AccessTierService {
                 userAccessTierDao.save(
                     entryToSoftDelete
                         .setTierAccessStatus(TierAccessStatus.DISABLED)
-                        .setLastUpdated()));
+                        .setLastUpdated(now())));
   }
 
   /**
@@ -177,5 +182,9 @@ public class AccessTierServiceImpl implements AccessTierService {
     } else {
       return Collections.emptyList();
     }
+  }
+
+  private Timestamp now() {
+    return new Timestamp(clock.instant().toEpochMilli());
   }
 }
