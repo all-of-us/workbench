@@ -19,7 +19,7 @@ buildscript {
     OKHTTP_VERSION = '2.7.5'
     OPENCENSUS_VERSION = '0.23.0'
     SPRINGFOX_VERSION = '2.6.1'
-    SPRING_BOOT_VERSION = '1.5.22.RELEASE'
+    SPRING_BOOT_VERSION = '2.0.9.RELEASE'
     SPRING_SECURITY_VERSION = '4.2.18.RELEASE'
     SWAGGER_2_CODEGEN_VERSION = '2.2.3'
     SWAGGER_3_CODEGEN_VERSION = '3.0.21'
@@ -56,6 +56,8 @@ buildscript {
 }
 
 // TODO(jaycarlton): migrate to new plugin DSL (RW-4772)
+//apply plugin: 'org.springframework.boot:spring-boot-properties-migrator'
+apply plugin: 'io.spring.dependency-management'
 apply plugin: 'com.diffplug.gradle.spotless'
 apply plugin: 'com.google.cloud.tools.appengine-standard'  // App Engine tasks
 apply plugin: 'eclipse'
@@ -428,18 +430,18 @@ dependencies {
 
   compile "org.json:json:20160810"
 
-  compile("org.springframework.boot:spring-boot-starter-actuator:$project.ext.SPRING_BOOT_VERSION") {
-    exclude module: 'spring-boot-starter-tomcat'
+  compile("org.apache.tomcat:tomcat-jdbc:9.0.10")
+  compile("org.springframework.boot:spring-boot-starter-tomcat")
+  compile("org.springframework.boot:spring-boot-starter-jdbc")
+  compile("org.springframework.boot:spring-boot-starter-actuator") {
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
 
-  compile("org.springframework.boot:spring-boot-starter-data-jpa:$project.ext.SPRING_BOOT_VERSION") {
-    exclude module: 'spring-boot-starter-tomcat'
+  compile("org.springframework.boot:spring-boot-starter-data-jpa") {
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
 
-  compile("org.springframework.boot:spring-boot-starter-web:$project.ext.SPRING_BOOT_VERSION") {
-    exclude module: 'spring-boot-starter-tomcat'
+  compile("org.springframework.boot:spring-boot-starter-web") {
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
 
@@ -453,7 +455,7 @@ dependencies {
   // Dependencies for Swagger codegen-generated sources. This should include all dependencies required by Swagger's
   // default okhttp API codegen templates (see https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml)
   // plus any custom templates included in our repo under the SWAGGER_2_TEMPLATE_DIR.
-  generatedCompile "org.springframework.boot:spring-boot-starter-data-rest:$project.ext.SPRING_BOOT_VERSION"
+  generatedCompile "org.springframework.boot:spring-boot-starter-data-rest"
   generatedCompile "io.springfox:springfox-swagger2:$project.ext.SPRINGFOX_VERSION"
   generatedCompile "io.springfox:springfox-swagger-ui:$project.ext.SPRINGFOX_VERSION"
   generatedCompile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
@@ -491,7 +493,7 @@ dependencies {
   testCompile "com.google.appengine:appengine-tools-sdk:$project.ext.GAE_VERSION"
   testCompile 'com.google.truth:truth:0.42'
   testCompile 'com.google.truth.extensions:truth-java8-extension:1.0.1'
-  testCompile "org.springframework.boot:spring-boot-starter-test:$project.ext.SPRING_BOOT_VERSION"
+  testCompile "org.springframework.boot:spring-boot-starter-test"
   testCompile 'com.h2database:h2:1.4.194'
   testCompile 'org.liquibase:liquibase-core:3.5.3'
   testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
