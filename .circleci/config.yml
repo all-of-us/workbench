@@ -26,7 +26,7 @@ parameters:
 # -------------------------
 anchors:
   env-default: &env-default
-    JAVA_TOOL_OPTIONS: -Xmx2g -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/home/circleci/workbench/api/heapdump.bin
+    JAVA_TOOL_OPTIONS: -Xmx2g
     # See: https://support.circleci.com/hc/en-us/articles/360021812453-Common-Android-memory-issues
     GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.workers.max=2 -Dkotlin.incremental=false -Dkotlin.compiler.execution.strategy=in-process
     TERM: dumb
@@ -83,7 +83,7 @@ executors:
       # This still assumes a 4G (medium) machine. This increase is possible for unit tests as they are run
       # as a ~single-process workflow - in other cases using 3GB may starve other processes. For example,
       # this should not be used for the Local API integration test (which starts both a server, and a test process).
-      JAVA_TOOL_OPTIONS: -Xmx3g
+      JAVA_TOOL_OPTIONS: -Xmx3g -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/home/circleci/workbench/api/heapdump.bin
 
   # Default workbench environment plus MySQL database docker image
   db-executor:
