@@ -3995,6 +3995,12 @@ definitions:
         type: boolean
         default: false
         description: Whether to use enable RAS-AoU linking for login.gov when user setup account.
+      rasHost:
+        type: string
+        description: The RAS base host name.
+      rasClientId:
+        type: string
+        description: The RAS OAuth client id.
       runtimeImages:
         type: array
         items:

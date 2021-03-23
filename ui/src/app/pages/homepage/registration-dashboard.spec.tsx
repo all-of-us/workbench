@@ -31,12 +31,16 @@ describe('RegistrationDashboard', () => {
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
-      enableV3DataUserCodeOfConduct: true
+      enableV3DataUserCodeOfConduct: true,
+     enableRasLoginGovLinking: true,
     });
     props = {
       eraCommonsLinked: false,
       eraCommonsLoading: false,
       eraCommonsError: '',
+      rasLoginGovLinked: false,
+      rasLoginGovLoading: false,
+      rasLoginGovLinkError: '',
       trainingCompleted: false,
       firstVisitTraining: true,
       betaAccessGranted: false,

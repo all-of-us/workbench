@@ -3,7 +3,14 @@ import {ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy} from '@
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConfigResponse} from 'generated';
-import {CdrVersionListResponse, Cohort, ConceptSet, Criteria, ErrorResponse, Profile} from 'generated/fetch';
+import {
+  CdrVersionListResponse,
+  Cohort,
+  ConceptSet,
+  Criteria,
+  ErrorResponse,
+  Profile
+} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {useLocation} from 'react-router';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
@@ -37,19 +44,22 @@ export const setSidebarActiveIconStore = new BehaviorSubject<string>(null);
 export const conceptSetUpdating = new BehaviorSubject<boolean>(false);
 
 export const userProfileStore =
-  new BehaviorSubject<{ profile: Profile, reload: Function, updateCache: Function }>({
-    profile: {} as Profile,
-    reload: () => {},
-    updateCache: (profile) => {},
-  });
+    new BehaviorSubject<{ profile: Profile, reload: Function, updateCache: Function }>({
+      profile: {} as Profile,
+      reload: () => {
+      },
+      updateCache: (profile) => {
+      },
+    });
 export const signInStore =
-  new BehaviorSubject<{
-    signOut: Function,
-    profileImage: string,
-  }>({
-    signOut: () => {},
-    profileImage: {} as string,
-  });
+    new BehaviorSubject<{
+      signOut: Function,
+      profileImage: string,
+    }>({
+      signOut: () => {
+      },
+      profileImage: {} as string,
+    });
 
 // Use ReplaySubject over BehaviorSubject as this store does not have a legal
 // initial value and should not be accessed synchronously. The other stores
@@ -68,14 +78,24 @@ export const cdrVersionStore = new ReplaySubject<CdrVersionListResponse>(1);
  */
 export class WorkbenchRouteReuseStrategy extends RouteReuseStrategy {
   // The following methods are copied from Angular's DefaultRouteReuseStrategy.
-  shouldDetach(route: ActivatedRouteSnapshot): boolean { return false; }
-  store(route: ActivatedRouteSnapshot, detachedTree: DetachedRouteHandle): void {}
-  shouldAttach(route: ActivatedRouteSnapshot): boolean { return false; }
-  retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle|null { return null; }
+  shouldDetach(route: ActivatedRouteSnapshot): boolean {
+    return false;
+  }
+
+  store(route: ActivatedRouteSnapshot, detachedTree: DetachedRouteHandle): void {
+  }
+
+  shouldAttach(route: ActivatedRouteSnapshot): boolean {
+    return false;
+  }
+
+  retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle | null {
+    return null;
+  }
 
   shouldReuseRoute(future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean {
     return future.routeConfig === curr.routeConfig
-      && (fp.isEqual(future.params, curr.params) || curr.data.shouldReuse);
+        && (fp.isEqual(future.params, curr.params) || curr.data.shouldReuse);
   }
 }
 
@@ -102,9 +122,7 @@ export const encodeURIComponentStrict = (uri: string): string => {
 
 /** Build the RAS OAuth redirect URL. It should be AoU hostname/ras-callback. */
 export const buildRasRedirectUrl = (windowOrigin: string): string => {
-  return encodeURIComponent(uri).replace(/[!'()*]/g, (c) => {
-    return encodeURIComponent(windowOrigin + '/ras-callback');
-  });
+  return encodeURIComponentStrict(windowOrigin + '/ras-callback')
 };
 
 // if modifier keys are pressed (like shift or cmd) use the href
@@ -118,7 +136,7 @@ export const navigateAndPreventDefaultIfNoKeysPressed = (e: React.MouseEvent, ur
 
 export const navigateSignOut = (continuePath: string = '/login') => {
   window.location.assign(`https://www.google.com/accounts/Logout?continue=` +
-    `https://appengine.google.com/_ah/logout?continue=${window.location.origin}${continuePath}`);
+      `https://appengine.google.com/_ah/logout?continue=${window.location.origin}${continuePath}`);
 };
 
 /**
