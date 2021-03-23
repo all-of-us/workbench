@@ -331,7 +331,7 @@ export const SearchGroup = withCurrentWorkspace()(
     remove() {
       triggerEvent('Delete', 'Click', 'Snowman - Delete Group - Cohort Builder');
       this.hide('pending');
-      this.deleteTimeout = global.setTimeout(() => {
+      this.deleteTimeout = setTimeout(() => {
         this.removeGroup();
       }, 10000);
     }

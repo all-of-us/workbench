@@ -156,7 +156,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
     // TODO: This should use a debounce, rather than manual setTimeout()s.
     clearTimeout(this.usernameCheckTimeout);
     this.setState({usernameCheckInProgress: true, usernameConflictError: false});
-    this.usernameCheckTimeout = global.setTimeout(() => {
+    this.usernameCheckTimeout = setTimeout(() => {
       profileApi().isUsernameTaken(username)
           .then((body) => {
             this.setState({usernameCheckInProgress: false, usernameConflictError: body.isTaken});
