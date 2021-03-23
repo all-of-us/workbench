@@ -42,7 +42,7 @@ test('dropdown is displayed when results are available', async() => {
     .first().simulate('change', {target: {value: 'foo'}});
   await new Promise((accept, reject) => {
     input.update();
-    window.setTimeout(() => {
+    global.setTimeout(() => {
       input.update();
       accept(undefined);
     }, DROPDOWN_DELAY_MS);
@@ -62,7 +62,7 @@ test('selecting a result from the dropdown closes the dropdown', async() => {
     .first().simulate('change', {target: {value: 'foo'}});
   await new Promise((accept, reject) => {
     input.update();
-    window.setTimeout(() => {
+    global.setTimeout(() => {
       input.update();
       accept(undefined);
     }, DROPDOWN_DELAY_MS);
