@@ -25,7 +25,7 @@
       "./test-shim.js",
       "./test-setup.js"
     ],
-    "setupFilesAfterEnv": "./test-setup-script.js",
+    "setupFilesAfterEnv": ["./test-setup-script.js"],
     "moduleFileExtensions": [
       "ts",
       "tsx",
