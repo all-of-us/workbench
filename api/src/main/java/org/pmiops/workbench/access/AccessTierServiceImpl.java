@@ -121,7 +121,7 @@ public class AccessTierServiceImpl implements AccessTierService {
 
       // don't update if already ENABLED
       if (entryToUpdate.getTierAccessStatusEnum() == TierAccessStatus.DISABLED) {
-         userAccessTierDao.save(
+        userAccessTierDao.save(
             entryToUpdate.setTierAccessStatus(TierAccessStatus.ENABLED).setLastUpdated());
       }
     } else {
