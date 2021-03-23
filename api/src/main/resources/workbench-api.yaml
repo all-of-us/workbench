@@ -3954,10 +3954,6 @@ definitions:
         default: false
         description: Whether a user is allowed to self-bypass. Only enabled in test
           environments.
-      requireInvitationKey:
-        type: boolean
-        default: false
-        description: Whether the current environment requires an invitation key for signup.
       defaultFreeCreditsDollarLimit:
         type: number
         format: double
