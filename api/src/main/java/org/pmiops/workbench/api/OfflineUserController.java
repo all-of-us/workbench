@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -246,11 +247,11 @@ public class OfflineUserController implements OfflineUserApiDelegate {
   }
 
   private int logChange(DbUser user, Object oldValue, Object newValue, String initialText) {
-    if (!oldValue.equals(newValue)) {
+    if (!Objects.equals(oldValue, newValue)) {
       log.info(
           String.format(
               "%s changed for user %s. Old %s, new %s",
-              initialText, user.getUsername(), oldValue.toString(), newValue.toString()));
+              initialText, user.getUsername(), oldValue, newValue));
       return 1;
     }
 
