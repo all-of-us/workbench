@@ -322,6 +322,7 @@ commands:
 jobs:
   api-unit-test:
     parallelism: 4
+    resource_class: medium+
     executor: api-unit-test-executor
     steps:
       - run-api-test:
