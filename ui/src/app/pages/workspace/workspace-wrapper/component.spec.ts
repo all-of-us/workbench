@@ -20,6 +20,7 @@ import {RuntimeApi, UserApi, WorkspaceAccessLevel, WorkspacesApi} from 'generate
 
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
+import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
