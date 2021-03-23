@@ -44,6 +44,11 @@ public interface AccessTierService {
    * Remove a Registered Tier membership from a user if one exists by marking that membership as
    * DISABLED. Do nothing if no membership exists.
    *
+   * <p>Currently, this does not synchronize Terra Auth Domain group membership, but it will do so
+   * when the user_access_tier table is the source of truth for tier membership. The existing method
+   * UserServiceImpl.removeFromRegisteredTierGroupIdempotent() continues to handle group membership
+   * until then.
+   *
    * @param user the DbUser in the user-accessTier mapping we're updating
    */
   void removeUserFromRegisteredTier(DbUser user);
@@ -51,6 +56,11 @@ public interface AccessTierService {
   /**
    * Add a Registered Tier membership to a user if none exists by inserting a DB row. If such a
    * membership exists (whether enabled or not) set it to ENABLED.
+   *
+   * <p>Currently, this does not synchronize Terra Auth Domain group membership, but it will do so
+   * when the user_access_tier table is the source of truth for tier membership. The existing method
+   * UserServiceImpl.addToRegisteredTierGroupIdempotent() continues to handle group membership until
+   * then.
    *
    * @param user the DbUser in the user-accessTier mapping we're updating
    */
