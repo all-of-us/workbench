@@ -104,7 +104,7 @@ function redirectToNiH(): void {
 
 function redirectToRas(): void {
   AnalyticsTracker.Registration.ERACommons();
-  const url = serverConfigStore.getValue().ras.host + '/auth/oauth/v2/authorize?client_id=' + serverConfigStore.getValue().ras.clientId
+  const url = serverConfigStore.getValue().enableRasLoginGovLinking + '/auth/oauth/v2/authorize?client_id=' + serverConfigStore.getValue().rasClientId
       + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl(window.location.origin.toString())
       + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1';
   window.open(url, '_blank');

@@ -3,7 +3,11 @@ import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {serverConfigStore} from 'app/utils/navigation';
-import {getTwoFactorSetupUrl, RegistrationDashboard, RegistrationDashboardProps} from 'app/pages/homepage/registration-dashboard';
+import {
+  getTwoFactorSetupUrl,
+  RegistrationDashboard,
+  RegistrationDashboardProps
+} from 'app/pages/homepage/registration-dashboard';
 import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {userProfileStore} from 'app/utils/navigation';
@@ -13,11 +17,11 @@ describe('RegistrationDashboard', () => {
   let props: RegistrationDashboardProps;
 
   const component = () => {
-    return mount<RegistrationDashboard, RegistrationDashboardProps, {trainingWarningOpen: boolean}>
+    return mount<RegistrationDashboard, RegistrationDashboardProps, { trainingWarningOpen: boolean }>
     (<RegistrationDashboard {...props}/>);
   };
 
-  beforeEach(async() => {
+  beforeEach(async () => {
     registerApiClient(ProfileApi, new ProfileApiStub());
     userProfileStore.next({
       profile: await profileApi().getMe(),
@@ -32,7 +36,7 @@ describe('RegistrationDashboard', () => {
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
       enableV3DataUserCodeOfConduct: true,
-     enableRasLoginGovLinking: true,
+      enableRasLoginGovLinking: false,
     });
     props = {
       eraCommonsLinked: false,
@@ -59,7 +63,7 @@ describe('RegistrationDashboard', () => {
     props.eraCommonsError = errorMessage;
     const wrapper = component();
     expect(wrapper.find('[data-test-id="era-commons-error"]').first().text())
-      .toContain(errorMessage);
+    .toContain(errorMessage);
   });
 
   it('should sequentially enable tasks', () => {
@@ -67,17 +71,17 @@ describe('RegistrationDashboard', () => {
 
     // initially, first tile should be enabled and second tile should be disabled
     expect(wrapper.find('[data-test-id="registration-task-twoFactorAuth"]')
-      .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeFalsy();
+    .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeFalsy();
     expect(wrapper.find('[data-test-id="registration-task-eraCommons"]')
-      .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeTruthy();
+    .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeTruthy();
 
     props.twoFactorAuthCompleted = true;
     wrapper = component();
     // now, first tile should be disabled but completed and second tile should be enabled
     expect(wrapper.find('[data-test-id="registration-task-twoFactorAuth"]')
-      .find('[data-test-id="completed-button"]').length).toBeGreaterThanOrEqual(1);
+    .find('[data-test-id="completed-button"]').length).toBeGreaterThanOrEqual(1);
     expect(wrapper.find('[data-test-id="registration-task-eraCommons"]')
-      .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeFalsy();
+    .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeFalsy();
 
   });
 
@@ -120,6 +124,19 @@ describe('RegistrationDashboard', () => {
     props.trainingCompleted = true;
     props.twoFactorAuthCompleted = true;
     props.dataUserCodeOfConductCompleted = true;
+    const wrapper = component();
+    expect(wrapper.find('[data-test-id="success-message"]').length).toBe(1);
+  });
+
+  it('should display a success message when complete and enableRasLoginGovLinking is true', () => {
+    serverConfigStore.next({...serverConfigStore.getValue(), enableRasLoginGovLinking: true});
+    // When enableBetaAccess is false, we shouldn't need to have been granted beta access.
+    props.betaAccessGranted = true;
+    props.eraCommonsLinked = true;
+    props.trainingCompleted = true;
+    props.twoFactorAuthCompleted = true;
+    props.dataUserCodeOfConductCompleted = true;
+    
     const wrapper = component();
     expect(wrapper.find('[data-test-id="success-message"]').length).toBe(1);
   });
