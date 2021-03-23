@@ -16,7 +16,7 @@
     -->
     <sql>
       UPDATE workspace
-      SET google_project = namespace
+      SET google_project = workspace_namespace
       WHERE google_project IS NULL
     </sql>
   </changeSet>
