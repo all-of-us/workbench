@@ -11,6 +11,9 @@
       </column>
     </addColumn>
 
+    <!--
+    Backfill google_project to the workspace.namespace
+    -->
     <sql>
       UPDATE workspace
       SET google_project = namespace
