@@ -37,5 +37,6 @@ public class RasLinkConstants {
   static final String ACR_CLAIM_IAL_2_IDENTIFIER = "https://stsstg.nih.gov/assurance/ial/2";
 
   // The required scopes to finish RAS OAuth flow, and get enough information AoU needs.
-  static final Set<String> RAS_AUTH_CODE_SCOPES = ImmutableSet.of("ga4gh_passport_v1", "openid", "profile");
+  static final Set<String> RAS_AUTH_CODE_SCOPES =
+      ImmutableSet.of("ga4gh_passport_v1", "openid", "profile");
 }
