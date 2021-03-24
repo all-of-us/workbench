@@ -138,32 +138,21 @@ public class AccessTierServiceTest {
   @Test
   public void test_getAccessTiersForUser_registered() {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-    userAccessTierDao.save(
-        new DbUserAccessTier()
-            .setUser(user)
-            .setAccessTier(registeredTier)
-            .setTierAccessStatus(TierAccessStatus.ENABLED)
-            .setFirstEnabled(now())
-            .setLastUpdated(now()));
+    addDaoEntry(user, registeredTier, TierAccessStatus.ENABLED);
     assertThat(accessTierService.getAccessTiersForUser(user)).containsExactly(registeredTier);
   }
 
   @Test
   public void test_getAccessTiersForUser_registered_disabled() {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-    userAccessTierDao.save(
-        new DbUserAccessTier()
-            .setUser(user)
-            .setAccessTier(registeredTier)
-            .setTierAccessStatus(TierAccessStatus.DISABLED)
-            .setFirstEnabled(now())
-            .setLastUpdated(now()));
+    addDaoEntry(user, registeredTier, TierAccessStatus.DISABLED);
     assertThat(accessTierService.getAccessTiersForUser(user)).isEmpty();
   }
 
   @Test
   public void test_getAccessTiersForUser_registered_controlled() {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    addDaoEntry(user, registeredTier, TierAccessStatus.ENABLED);
 
     final DbAccessTier controlledTier =
         accessTierDao.save(
@@ -174,21 +163,7 @@ public class AccessTierServiceTest {
                 .setAuthDomainName("Controlled Tier Auth Domain")
                 .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
                 .setServicePerimeter("controlled/tier/perimeter"));
-
-    userAccessTierDao.save(
-        new DbUserAccessTier()
-            .setUser(user)
-            .setAccessTier(registeredTier)
-            .setTierAccessStatus(TierAccessStatus.ENABLED)
-            .setFirstEnabled(now())
-            .setLastUpdated(now()));
-    userAccessTierDao.save(
-        new DbUserAccessTier()
-            .setUser(user)
-            .setAccessTier(controlledTier)
-            .setTierAccessStatus(TierAccessStatus.ENABLED)
-            .setFirstEnabled(now())
-            .setLastUpdated(now()));
+    addDaoEntry(user, controlledTier, TierAccessStatus.ENABLED);
 
     assertThat(accessTierService.getAccessTiersForUser(user))
         .containsExactly(registeredTier, controlledTier);
@@ -435,6 +410,16 @@ public class AccessTierServiceTest {
     assertThat(controlledMembership.getUser()).isEqualTo(user);
     assertThat(controlledMembership.getAccessTier()).isEqualTo(controlledTier);
     assertThat(controlledMembership.getTierAccessStatusEnum()).isEqualTo(TierAccessStatus.ENABLED);
+  }
+
+  private DbUserAccessTier addDaoEntry(DbUser user, DbAccessTier tier, TierAccessStatus status) {
+    return userAccessTierDao.save(
+        new DbUserAccessTier()
+            .setUser(user)
+            .setAccessTier(tier)
+            .setTierAccessStatus(status)
+            .setFirstEnabled(now())
+            .setLastUpdated(now()));
   }
 
   private Timestamp now() {
