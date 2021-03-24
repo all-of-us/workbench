@@ -218,7 +218,7 @@ const routes: Routes = [
                               }, {
                                 path: 'participants/:pid',
                                 component: AppRouting,
-                                data: {},
+                                data: {shouldReuse: true},
                               }
                             ],
                           }
