@@ -9,6 +9,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,6 +30,7 @@ import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetPropert
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbAdminActionHistory;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
@@ -187,54 +189,28 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   private void updateDataAccessLevel(DbUser dbUser, Agent agent) {
-    final DataAccessLevel previousDataAccessLevel = dbUser.getDataAccessLevelEnum();
-    final DataAccessLevel newDataAccessLevel;
+    final List<DbAccessTier> previousAccessTiers = accessTierService.getAccessTiersForUser(dbUser);
+
+    // TODO for Controlled Tier Beta: different access module evaluation criteria
+    // For Controlled Tier Alpha, we simply evaluate whether the user is qualified for
+    // Registered Tier and set RT+CT or RT only based on the feature flag
+
+    final List<DbAccessTier> newAccessTiers;
     if (shouldUserBeRegistered(dbUser)) {
-      addToRegisteredTierGroupIdempotent(dbUser);
-      newDataAccessLevel = DataAccessLevel.REGISTERED;
-
-      // record the user as having Registered Tier membership in user_access_tier
-      // which will eventually serve as the source of truth (TODO)
-      accessTierService.addUserToRegisteredTier(dbUser);
-
-      // if this is the first time the user has completed registration, record it
-      // this starts the Free Tier Credits countdown clock
-      if (dbUser.getFirstRegistrationCompletionTime() == null) {
-        dbUser.setFirstRegistrationCompletionTime();
+      if (configProvider.get().featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers) {
+        newAccessTiers = accessTierService.getAllTiers();
+      } else {
+        newAccessTiers = Collections.singletonList(accessTierService.getRegisteredTier());
       }
     } else {
-      removeFromRegisteredTierGroupIdempotent(dbUser);
-      newDataAccessLevel = DataAccessLevel.UNREGISTERED;
-
-      // record the user as lacking Registered Tier membership in user_access_tier
-      // which will eventually serve as the source of truth (TODO)
-      accessTierService.removeUserFromRegisteredTier(dbUser);
+      newAccessTiers = Collections.emptyList();
     }
-    if (!newDataAccessLevel.equals(previousDataAccessLevel)) {
-      dbUser.setDataAccessLevelEnum(newDataAccessLevel);
-      userServiceAuditor.fireUpdateDataAccessAction(
-          dbUser, previousDataAccessLevel, newDataAccessLevel, agent);
-    }
-  }
 
-  private void removeFromRegisteredTierGroupIdempotent(DbUser dbUser) {
-    if (isUserMemberOfRegisteredTierGroup(dbUser)) {
-      this.fireCloudService.removeUserFromGroup(
-          dbUser.getUsername(), configProvider.get().firecloud.registeredDomainName);
-      log.info(String.format("Removed user %s from registered-tier group.", dbUser.getUsername()));
-    }
-  }
+    newAccessTiers.forEach(tier -> accessTierService.addUserToTier(dbUser, tier));
 
-  private boolean isUserMemberOfRegisteredTierGroup(DbUser dbUser) {
-    return this.fireCloudService.isUserMemberOfGroup(
-        dbUser.getUsername(), configProvider.get().firecloud.registeredDomainName);
-  }
-
-  private void addToRegisteredTierGroupIdempotent(DbUser user) {
-    if (!isUserMemberOfRegisteredTierGroup(user)) {
-      this.fireCloudService.addUserToGroup(
-          user.getUsername(), configProvider.get().firecloud.registeredDomainName);
-      log.info(String.format("Added user %s to registered-tier group.", user.getUsername()));
+    if (!newAccessTiers.equals(previousAccessTiers)) {
+      userServiceAuditor.fireUpdateAccessTiersAction(
+          dbUser, previousAccessTiers, newAccessTiers, agent);
     }
   }
 
