@@ -52,7 +52,6 @@ describe('HomepageComponent', () => {
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
-      enable: true,
       enableV3DataUserCodeOfConduct: true,
     });
   });
