@@ -12,6 +12,7 @@ import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {userProfileStore} from 'app/utils/navigation';
 import {profileApi} from 'app/services/swagger-fetch-clients';
+import {buildRasRedirectUrl} from "../../utils/navigation";
 
 describe('RegistrationDashboard', () => {
   let props: RegistrationDashboardProps;
@@ -168,5 +169,7 @@ describe('RegistrationDashboard', () => {
     expect(getTwoFactorSetupUrl()).toMatch(encodeURIComponent('tester@fake-research-aou.org'));
     expect(getTwoFactorSetupUrl()).toMatch(encodeURIComponent('https://myaccount.google.com/signinoptions/'));
   });
-
+  it('should generate expected RAS redirect URL', () => {
+    expect(buildRasRedirectUrl()).toMatch(encodeURIComponent('http://localhost/ras-callback'));
+  });
 });

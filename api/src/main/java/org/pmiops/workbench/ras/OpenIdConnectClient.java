@@ -63,7 +63,17 @@ public class OpenIdConnectClient {
    * href="https://openid.net/specs/openid-connect-core-1_0.html#UserInfo">OIDC UserInfo</a>
    */
   public JsonNode fetchUserInfo(String accessToken) throws IOException {
+    System.out.println("~~~~~~~~444444");
+    System.out.println("~~~~~~~~444444");
+    System.out.println("~~~~~~~~444444");
+    System.out.println("~~~~~~~~444444");
+    System.out.println("~~~~~~~~444444");
     HttpResponse response = executeGet(httpTransport, accessToken, new GenericUrl(userInfoUrl));
+    System.out.println("~~~~~~~~444444~~~~~~~~~");
+    System.out.println("~~~~~~~~444444~~~~~~~~~");
+    System.out.println("~~~~~~~~444444~~~~~");
+    System.out.println("~~~~~~~~444444~~~~~~~~~~");
+    System.out.println(response.getContentEncoding());
     return objectMapper.readTree(response.getContentEncoding());
   }
 

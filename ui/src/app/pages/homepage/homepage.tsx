@@ -1,7 +1,12 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {navigate, queryParamsStore, serverConfigStore} from 'app/utils/navigation';
+import {
+  buildRasRedirectUrl,
+  navigate,
+  queryParamsStore,
+  serverConfigStore
+} from 'app/utils/navigation';
 
 import {
   Clickable, StyledAnchorTag,
@@ -171,8 +176,9 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
     }
   }
 
-  async validateRasLoginGovLink(redirectUrl) {
+  async validateRasLoginGovLink() {
     const code = (new URL(window.location.href)).searchParams.get('code');
+    const redirectUrl = buildRasRedirectUrl();
     if (code) {
       this.setState({rasLoginGovLoading: true});
       try {
@@ -185,8 +191,11 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         }
       } catch (e) {
         this.setState({rasLoginGovLinkError: 'Error saving RAS Login.Gov linkage status.'});
+        this.setState({rasLoginGovLoading: false});
       }
     }
+    // Cleanup parameter from URL after linking.
+    window.history.pushState({}, '', '/');
   }
 
   setFirstVisit() {
@@ -288,7 +297,8 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
       betaAccessGranted, videoOpen, accessTasksLoaded, accessTasksRemaining,
       eraCommonsError, eraCommonsLinked, eraCommonsLoading, firstVisitTraining,
       trainingCompleted, quickTour, videoId, twoFactorAuthCompleted,
-      dataUserCodeOfConductCompleted, quickTourResourceOffset, userWorkspacesResponse
+      dataUserCodeOfConductCompleted, quickTourResourceOffset, userWorkspacesResponse,
+      rasLoginGovLinkError, rasLoginGovLinked, rasLoginGovLoading,
     } = this.state;
     // This calculates the limit for quickTourResources items that can be seen without scrolling. Takes the width of the parent element
     // and divides by the width of an individual resource item (276px). The default limit is 4 since the min width of the parent element
@@ -349,6 +359,9 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
                         (<RegistrationDashboard eraCommonsError={eraCommonsError}
                                                 eraCommonsLinked={eraCommonsLinked}
                                                 eraCommonsLoading={eraCommonsLoading}
+                                                rasLoginGovLinkError={rasLoginGovLinkError}
+                                                rasLoginGovLinked={rasLoginGovLinked}
+                                                rasLoginGovLoading={rasLoginGovLoading}
                                                 trainingCompleted={trainingCompleted}
                                                 firstVisitTraining={firstVisitTraining}
                                                 betaAccessGranted={betaAccessGranted}
@@ -493,5 +506,4 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
       </Modal>}
     </React.Fragment>;
   }
-
 });

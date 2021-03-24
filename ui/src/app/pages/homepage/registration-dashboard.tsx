@@ -103,9 +103,9 @@ function redirectToNiH(): void {
 }
 
 function redirectToRas(): void {
-  AnalyticsTracker.Registration.ERACommons();
-  const url = serverConfigStore.getValue().enableRasLoginGovLinking + '/auth/oauth/v2/authorize?client_id=' + serverConfigStore.getValue().rasClientId
-      + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl(window.location.origin.toString())
+  AnalyticsTracker.Registration.RasLoginGov();
+  const url = serverConfigStore.getValue().rasHost + '/auth/oauth/v2/authorize?client_id=' + serverConfigStore.getValue().rasClientId
+      + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl()
       + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1';
   window.open(url, '_blank');
 }
@@ -337,8 +337,8 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
 
   render() {
     const {bypassActionComplete, bypassInProgress, trainingWarningOpen} = this.state;
-    const {betaAccessGranted, eraCommonsError, trainingCompleted} = this.props;
-    const {enableBetaAccess, unsafeAllowSelfBypass} = serverConfigStore.getValue();
+    const {betaAccessGranted, eraCommonsError, trainingCompleted, rasLoginGovLinkError} = this.props;
+    const {enableBetaAccess, unsafeAllowSelfBypass, enableRasLoginGovLinking} = serverConfigStore.getValue();
 
     const anyBypassActionsRemaining = !(this.allTasksCompleted() && betaAccessGranted);
 
@@ -352,6 +352,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
             registrationTask);
     // Assign relative positioning so the spinner's absolute positioning anchors
     // it within the registration box.
+    // TODO(RW-6495): Decide the correct error message for login.gov linking failure.
     return <FlexColumn style={{position: 'relative'}} data-test-id='registration-dashboard'>
       {bypassInProgress && <SpinnerOverlay/>}
       <div style={styles.mainHeader}>Complete Registration</div>
@@ -429,6 +430,11 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
                                        style={{margin: '0px 1rem 1rem 0px'}}>
         <ClrIcon shape='exclamation-triangle' class='is-solid'/>
         Error Linking NIH Username: {eraCommonsError} Please try again!
+      </AlertDanger>}
+      {rasLoginGovLinkError && <AlertDanger data-test-id='ras-login-gov-error'
+                                            style={{margin: '0px 1rem 1rem 0px'}}>
+        <ClrIcon shape='exclamation-triangle' class='is-solid'/>
+        Error Linking Login.gov account: {rasLoginGovLinkError} Please try again!
       </AlertDanger>}
       {trainingWarningOpen && !trainingCompleted &&
       <AlertWarning style={styles.closeableWarning}>
