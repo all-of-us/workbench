@@ -77,7 +77,7 @@ const routes: Routes = [
         path: 'ras-callback',
         component: AppRouting,
         data: {}
-       },
+      },
       // non-migrated routes go HERE
       {
         path: '',

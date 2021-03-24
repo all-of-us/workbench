@@ -251,7 +251,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         eraCommonsLinked: !!(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile)),
         dataUserCodeOfConductCompleted: (serverConfigStore.getValue().enableDataUseAgreement ?
             (() => !!(getRegistrationTasksMap()['dataUserCodeOfConduct']
-            .completionTimestamp(profile)))() : true)
+              .completionTimestamp(profile)))() : true)
       });
       // TODO(RW-6493): Update rasCommonsLinked similar to what we are doing for eraCommons
       this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});

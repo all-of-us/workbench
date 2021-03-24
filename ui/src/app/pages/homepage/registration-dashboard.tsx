@@ -98,7 +98,7 @@ function redirectToNiH(): void {
   AnalyticsTracker.Registration.ERACommons();
   const url = serverConfigStore.getValue().shibbolethUiBaseUrl + '/login?return-url=' +
       encodeURIComponent(
-          window.location.origin.toString() + '/nih-callback?token=<token>');
+        window.location.origin.toString() + '/nih-callback?token=<token>');
   window.open(url, '_blank');
 }
 
@@ -217,8 +217,8 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
   }
 ] as RegistrationTask[]).filter(registrationTask => registrationTask.featureFlag === undefined
     || registrationTask.featureFlag) : (() => {
-  throw new Error('Cannot load registration tasks before config loaded');
-})();
+      throw new Error('Cannot load registration tasks before config loaded');
+    })();
 
 export const getRegistrationTasksMap = () => getRegistrationTasks().reduce((acc, curr) => {
   acc[curr.key] = curr;
@@ -338,7 +338,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
   render() {
     const {bypassActionComplete, bypassInProgress, trainingWarningOpen} = this.state;
     const {betaAccessGranted, eraCommonsError, trainingCompleted, rasLoginGovLinkError} = this.props;
-    const {enableBetaAccess, unsafeAllowSelfBypass, enableRasLoginGovLinking} = serverConfigStore.getValue();
+    const {enableBetaAccess, unsafeAllowSelfBypass} = serverConfigStore.getValue();
 
     const anyBypassActionsRemaining = !(this.allTasksCompleted() && betaAccessGranted);
 
@@ -346,9 +346,9 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     // for this specific task.
     const registrationTasksToRender = getRegistrationTasks().map(registrationTask =>
         registrationTask.key === 'twoFactorAuth' ? {
-              ...registrationTask,
-              onClick: () => this.setState({twoFactorAuthModalOpen: true})
-            } :
+          ...registrationTask,
+          onClick: () => this.setState({twoFactorAuthModalOpen: true})
+        } :
             registrationTask);
     // Assign relative positioning so the spinner's absolute positioning anchors
     // it within the registration box.
