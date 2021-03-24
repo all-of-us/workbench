@@ -486,8 +486,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     // Save the workspace first to allocate an ID.
     to = workspaceDao.save(to);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(to.getCdrVersion());
-    boolean cdrVersionChanged =
-        from.getCdrVersion().getCdrVersionId() != to.getCdrVersion().getCdrVersionId();
     Map<Long, Long> fromCohortIdToToCohortId = new HashMap<>();
     for (DbCohort fromCohort : from.getCohorts()) {
       fromCohortIdToToCohortId.put(
@@ -498,9 +496,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     for (DbConceptSet fromConceptSet : conceptSetService.getConceptSets(from)) {
       fromConceptSetIdToToConceptSetId.put(
           fromConceptSet.getConceptSetId(),
-          conceptSetService
-              .cloneConceptSetAndConceptIds(fromConceptSet, to, cdrVersionChanged)
-              .getConceptSetId());
+          conceptSetService.cloneConceptSetAndConceptIds(fromConceptSet, to).getConceptSetId());
     }
     for (DbDataset dataSet : dataSetService.getDataSets(from)) {
       dataSetService.cloneDataSetToWorkspace(

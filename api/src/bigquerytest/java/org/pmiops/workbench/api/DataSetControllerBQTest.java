@@ -30,12 +30,12 @@ import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
 import org.pmiops.workbench.cdr.dao.DSLinkingDao;
 import org.pmiops.workbench.cdr.model.DbDSLinking;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
@@ -46,7 +46,6 @@ import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
-import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -106,8 +105,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private ConceptBigQueryService conceptBigQueryService;
   @Autowired private ConceptSetDao conceptSetDao;
   @Autowired private DSLinkingDao dsLinkingDao;
-  @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
   @Autowired private DataSetDao dataSetDao;
+  @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
   @Autowired private DataSetMapperImpl dataSetMapper;
   @Autowired private FireCloudService fireCloudService;
   @Autowired private NotebooksService notebooksService;
@@ -121,7 +120,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   Provider<String> prefixProvider;
 
   private DataSetController controller;
-  private DataSetServiceImpl dataSetServiceImpl;
 
   private DbCdrVersion dbCdrVersion;
   private DbCohort dbCohort1;
@@ -155,7 +153,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     CohortCloningService.class,
     CohortService.class,
     CommonMappers.class,
-    ConceptService.class,
     ConceptSetMapperImpl.class,
     ConceptSetService.class,
     FireCloudServiceImpl.class,
@@ -206,7 +203,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Before
   public void setUp() {
-    dataSetServiceImpl =
+    DataSetServiceImpl dataSetServiceImpl =
         new DataSetServiceImpl(
             bigQueryService,
             cdrBigQuerySchemaConfigService,
@@ -214,9 +211,9 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             conceptBigQueryService,
             conceptSetDao,
             cohortQueryBuilder,
-            dataDictionaryEntryDao,
             dataSetDao,
             dsLinkingDao,
+            dsDataDictionaryDao,
             dataSetMapper,
             CLOCK);
     controller =
