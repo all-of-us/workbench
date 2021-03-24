@@ -1,3 +1,4 @@
+import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {Column} from 'primereact/column';
@@ -10,7 +11,7 @@ import {renderResourceCard} from 'app/components/render-resource-card';
 import {ResourceNavigation, StyledResourceType} from 'app/components/resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {userMetricsApi} from 'app/services/swagger-fetch-clients';
-import {formatWorkspaceResourceDisplayDate, reactStyles} from 'app/utils';
+import {formatWorkspaceResourceDisplayDate, reactStyles, withCdrVersions} from 'app/utils';
 import {getCdrVersion} from 'app/utils/cdr-versions';
 import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {getDisplayName, isNotebook} from 'app/utils/resources';
@@ -76,7 +77,7 @@ interface Props {
   workspaces: WorkspaceResponse[];
 }
 
-const RecentResources = (props: Props) => {
+export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
   const [loading, setLoading] = useState(true);
   const [resources, setResources] = useState<WorkspaceResourceResponse>();
   const [wsMap, setWorkspaceMap] = useState<Map<string, Workspace>>();
@@ -146,8 +147,4 @@ const RecentResources = (props: Props) => {
         <Column field='cdrVersionName' header='Dataset' style={styles.column}/>
       </DataTable></div>
   </React.Fragment> : <SpinnerOverlay/>;
-};
-
-export {
-  RecentResources
-};
+});
