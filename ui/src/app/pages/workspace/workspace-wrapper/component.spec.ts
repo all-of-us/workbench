@@ -24,11 +24,11 @@ import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
 import {WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
+import {cdrVersionStore} from 'app/utils/stores';
 import {findElements} from 'testing/react-testing-utility';
+import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {setupModals, updateAndTick} from 'testing/test-helpers';
-import {cdrVersionStore} from "../../../utils/stores";
-import {cdrVersionListResponse} from "../../../../testing/stubs/cdr-versions-api-stub";
 
 @Component({
   selector: 'app-test',
