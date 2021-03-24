@@ -15,6 +15,8 @@ require "json"
 require "optparse"
 require "ostruct"
 require "tempfile"
+require "net/http"
+require "json"
 
 TEST_PROJECT = "all-of-us-workbench-test"
 INSTANCE_NAME = "workbenchmaindb"
@@ -1997,6 +1999,11 @@ Common.register_command({
   :fn => ->(*args) { create_wgs_cohort_extraction_bp_workspace("create-wgs-cohort-extraction-bp-workspace", *args) }
 })
 
+def get_github_commit_hash(repo, branch)
+  response = Net::HTTP.get(URI("https://api.github.com/repos/#{repo}/branches/#{branch}"))
+  return JSON.parse(response)['commit']['sha']
+end
+
 def create_terra_method_snapshot(cmd_name, *args)
   ensure_docker cmd_name, args
 
@@ -2012,28 +2019,26 @@ def create_terra_method_snapshot(cmd_name, *args)
     "--all-projects [all-projects]",
     ->(opts, _) { opts.all_projects = true},
     "Create snapshot in every AoU environment. Cannot be used with --project.")
+  op.opts.source_git_repo = "broadinstitute/gatk"
   op.add_option(
     "--source-git-repo [source-git-repo]",
     ->(opts, v) { opts.source_git_repo = v},
-    "git owner/repo where the source file is located. ex. (broadinstitute/gatk)")
+    "git owner/repo where the source file is located. default: broadinstitute/gatk")
+  op.opts.source_git_path = "scripts/variantstore/wdl/ngs_cohort_extract.wdl"
   op.add_option(
     "--source-git-path [source-git-path]",
     ->(opts, v) { opts.source_git_path = v},
-    "git path where the source file is located, relative to the repo's root directory. ex. (scripts/variantstore/wdl/ngs_cohort_extract.wdl)")
+    "git path where the source file is located, relative to the repo's root directory. default: scripts/variantstore/wdl/ngs_cohort_extract.wdl")
+  op.opts.source_git_branch = "ah_var_store"
   op.add_option(
-    "--source-git-ref [source-git-ref]",
+    "--source-git-branch[source-git-branch]",
     ->(opts, v) { opts.source_git_ref = v},
-    "git commit/branch/tag where the source file is located. ex. (main)")
+    "git branch where the source file is located. default: ah_var_store")
   op.add_option(
     "--method-name [method-name]",
     ->(opts, v) { opts.method_name = v},
-    "Agora method name to create snapshot in. Method Namespace will be pulled from WorkbenchConfig.wgsCohortExtraction.extractionMethodConfigurationNamespace")
-  op.add_validator ->(opts) {
-    unless (opts.source_git_repo or opts.source_git_path or opts.source_git_ref or opts.method_name)
-      common.error "all arguments must be provided"
-      raise ArgumentError
-    end
-  }
+    "Agora method name to create snapshot in. default: WorkbenchConfig.wgsCohortExtraction.extractionMethodConfigurationName
+          Method Namespace will be pulled from WorkbenchConfig.wgsCohortExtraction.extractionMethodConfigurationNamespace")
   op.add_validator ->(opts) {
     if (!opts.project and !opts.all_projects)
       common.error "A project must be set or --all-projects must be true"
@@ -2046,16 +2051,18 @@ def create_terra_method_snapshot(cmd_name, *args)
   GcloudContextV2.validate_gcloud_auth()
   op.parse.validate
 
-  projects = op.opts.all_projects ? ENVIRONMENTS.keys - ["local"] : [op.opts.project]
+  source_file_commit_hash = get_github_commit_hash(op.opts.source_git_repo, op.opts.source_git_branch)
 
+  projects = op.opts.all_projects ? ENVIRONMENTS.keys - ["local"] : [op.opts.project]
   projects.each { |project|
+    extractionConfig = get_config(project)['wgsCohortExtraction']
     flags = ([
       ["--config-json", get_config_file(project)],
       ["--source-git-repo", op.opts.source_git_repo],
       ["--source-git-path", op.opts.source_git_path],
-      ["--source-git-ref", op.opts.source_git_ref],
-      ["--method-namespace", get_config(project)['wgsCohortExtraction']['extractionMethodConfigurationNamespace']],
-      ["--method-name", op.opts.method_name],
+      ["--source-git-ref", source_file_commit_hash],
+      ["--method-namespace", extractionConfig['extractionMethodConfigurationNamespace']],
+      ["--method-name", op.opts.method_name || extractionConfig['extractionMethodConfigurationName']],
     ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
     flags.map! { |f| "'#{f}'" }
 

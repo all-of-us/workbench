@@ -183,12 +183,10 @@ public class CreateTerraMethodSnapshot {
     Request request =
         new Request.Builder()
             .url(
-                "https://api.github.com/repos/"
-                    + sourceGitRepo
-                    + "/contents/"
-                    + sourceGitPath
-                    + "?ref="
-                    + sourceGitRef)
+                "https://api.github.com" +
+                        "/repos/" + sourceGitRepo +
+                        "/contents/" + sourceGitPath +
+                        "?ref=" + sourceGitRef)
             .addHeader("Accept", "application/vnd.github.v3.raw")
             .build();
 
