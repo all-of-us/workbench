@@ -1,13 +1,11 @@
-import {PhysicalMeasurementsCriteria} from 'app/page/criteria-search-page';
+import { PhysicalMeasurementsCriteria } from 'app/page/criteria-search-page';
 import Link from 'app/element/link';
-import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
+import CohortBuildPage, { FieldSelector } from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
-import {waitForText} from 'utils/waits-utils';
-
+import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { waitForText } from 'utils/waits-utils';
 
 describe('Cohorts', () => {
-
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
@@ -21,7 +19,6 @@ describe('Cohorts', () => {
    * Renaming Group 1 and 2 names.
    */
   test('Create, edit and delete', async () => {
-
     const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
@@ -68,9 +65,9 @@ describe('Cohorts', () => {
     console.log(`Created Cohort "${cohortName}"`);
 
     // Open Cohort details.
-    const cohortLink = await Link.findByName(page, {name: cohortName});
+    const cohortLink = await Link.findByName(page, { name: cohortName });
     await cohortLink.clickAndWait();
-    await waitForText(page, newTotalCount, {xpath: FieldSelector.TotalCount}, 60000);
+    await waitForText(page, newTotalCount, { xpath: FieldSelector.TotalCount }, 60000);
 
     // Modify Cohort: Edit Group 1 name successfully.
     const newName1 = 'Group 1: BMI';
@@ -96,7 +93,5 @@ describe('Cohorts', () => {
     // Verify dialog content text
     expect(modalContent).toContain(`Are you sure you want to delete Cohort: ${cohortName}?`);
     console.log(`Deleted Cohort "${cohortName}"`);
-
   });
-
 });

@@ -1,17 +1,16 @@
-import {Page} from 'puppeteer';
+import { Page } from 'puppeteer';
 import Container from 'app/container';
-import {ElementType, XPathOptions} from 'app/xpath-options';
-import {getPropValue} from 'utils/element-utils';
+import { ElementType, XPathOptions } from 'app/xpath-options';
+import { getPropValue } from 'utils/element-utils';
 import BaseElement from './base-element';
-import {buildXPath} from 'app/xpath-builders';
+import { buildXPath } from 'app/xpath-builders';
 
 /**
  * <select> element
  */
 export default class Select extends BaseElement {
-
   private selectedOption: string;
-   
+
   static async findByName(page: Page, xOpt: XPathOptions, container?: Container): Promise<Select> {
     xOpt.type = ElementType.Select;
     const selectXpath = buildXPath(xOpt, container);
@@ -26,7 +25,7 @@ export default class Select extends BaseElement {
   async selectOption(value: string): Promise<string> {
     const disabled = await this.isDisabled();
     if (disabled) {
-      console.warn(`Select is disabled. Cannot select option value: "${value}".`);
+      throw new Error(`Select is disabled. Cannot select option value: "${value}".`);
     }
     const selector = `${this.xpath}/option[text()="${value}"]`;
     await this.page.waitForXPath(selector);
@@ -47,11 +46,17 @@ export default class Select extends BaseElement {
   }
 
   /**
-   *
+   * Returns value of Selected option.
    */
   async getSelectedValue(): Promise<string> {
-    const selectedValue = await this.page.waitForXPath(`${this.getXpath()}/label`, {visible: true});
-    const baseElement = await BaseElement.asBaseElement(this.page, selectedValue);
-    return await baseElement.getTextContent();
+    const selectElement = await this.page.waitForXPath(this.getXpath(), { visible: true });
+    const selectedOption = await this.page.evaluate((select) => {
+      for (const option of select.options) {
+        if (option.selected) {
+          return option.value;
+        }
+      }
+    }, selectElement);
+    return selectedOption;
   }
 }

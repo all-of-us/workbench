@@ -26,7 +26,6 @@
     "projectNamePrefix": "aou-rw-preprod-",
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "retryCount": 4,
-    "bufferCapacity": 20,
     "bufferCapacityPerTier": {
       "registered": 20
     },
@@ -49,11 +48,11 @@
   },
   "wgsCohortExtraction": {
     "serviceAccount": "wgs-cohort-extraction@all-of-us-rw-preprod.iam.gserviceaccount.com",
-    "serviceAccountTerraProxyGroup": "",
-    "operationalTerraWorkspaceNamespace": "",
-    "operationalTerraWorkspaceName": "",
-    "operationalTerraWorkspaceBucket": "",
-    "extractionPetServiceAccount": "",
+    "serviceAccountTerraProxyGroup": "PROXY_110393474898566940625@firecloud.org",
+    "operationalTerraWorkspaceNamespace": "aouwgscohortextraction-preprod",
+    "operationalTerraWorkspaceName": "aouwgscohortextractionpreprod",
+    "operationalTerraWorkspaceBucket": "fc-5d8e6afe-9429-44ae-a22a-67b09705d1b4",
+    "extractionPetServiceAccount": "pet-110393474898566940625@aouwgscohortextraction-preprod.iam.gserviceaccount.com",
     "extractionMethodConfigurationNamespace": "",
     "extractionMethodConfigurationName": "",
     "extractionMethodConfigurationVersion": 1,
@@ -108,8 +107,7 @@
     "enableDataUseAgreement": true,
     "enableBetaAccess": false,
     "unsafeAllowSelfBypass": false,
-    "unsafeAllowUserCreationFromGSuiteData": false,
-    "requireInvitationKey": false
+    "unsafeAllowUserCreationFromGSuiteData": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
@@ -120,7 +118,7 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableReportingUploadCron": true,
-    "enableRasLinking": false
+    "enableRasLoginGovLinking": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-preprod",

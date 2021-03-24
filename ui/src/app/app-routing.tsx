@@ -26,10 +26,16 @@ import {AdminWorkspaceSearch} from './pages/admin/admin-workspace-search';
 import {InteractiveNotebook} from './pages/analysis/interactive-notebook';
 import {NotebookList} from './pages/analysis/notebook-list';
 import {NotebookRedirect} from './pages/analysis/notebook-redirect';
+import {CohortActions} from './pages/data/cohort/cohort-actions';
+import {ConceptHomepage} from './pages/data/concept/concept-homepage';
+import {ConceptSetActions} from './pages/data/concept/concept-set-actions';
 import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
+import {ProfilePage} from './pages/profile/profile-page';
+import {WorkspaceAbout} from './pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
+import {WorkspaceList} from './pages/workspace/workspace-list';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
 
@@ -47,6 +53,9 @@ const registrationGuard: Guard = {
 const AdminBannerPage = withRouteData(AdminBanner);
 const AdminNotebookViewPage = withRouteData(AdminNotebookView);
 const AdminReviewWorkspacePage = withRouteData(AdminReviewWorkspace);
+const CohortActionsPage = withRouteData(CohortActions);
+const ConceptHomepagePage = withRouteData(ConceptHomepage);
+const ConceptSetActionsPage = withRouteData(ConceptSetActions);
 const CookiePolicyPage = withRouteData(CookiePolicy);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
 const HomepagePage = withRouteData(Homepage); // this name is bad i am sorry
@@ -55,6 +64,7 @@ const InstitutionEditAdminPage = withRouteData(AdminInstitutionEdit);
 const InteractiveNotebookPage = withRouteData(InteractiveNotebook);
 const NotebookListPage = withRouteData(NotebookList);
 const NotebookRedirectPage = withRouteData(NotebookRedirect);
+const ProfilePagePage = withRouteData(ProfilePage); // again bad sorry
 const SessionExpiredPage = withRouteData(SessionExpired);
 const SignInAgainPage = withRouteData(SignInAgain);
 const SignInPage = withRouteData(SignIn);
@@ -62,11 +72,13 @@ const UserAdminPage = withRouteData(AdminUser);
 const UsersAdminPage = withRouteData(AdminUsers);
 const UserAuditPage = withRouteData(UserAudit);
 const UserDisabledPage = withRouteData(UserDisabled);
+const WorkspaceAboutPage = withRouteData(WorkspaceAbout);
 const WorkspaceAdminPage = withRouteData(AdminWorkspace);
 const WorkspaceAuditPage = withRouteData(WorkspaceAudit);
 const WorkspaceEditPage = withRouteData(WorkspaceEdit);
-const WorkspaceSearchAdminPage = withRouteData(AdminWorkspaceSearch);
 const WorkspaceLibraryPage = withRouteData(WorkspaceLibrary);
+const WorkspaceListPage = withRouteData(WorkspaceList);
+const WorkspaceSearchAdminPage = withRouteData(AdminWorkspaceSearch);
 
 interface RoutingProps {
   onSignIn: () => void;
@@ -180,10 +192,33 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>}
         />
         <AppRoute
+          path='/profile'
+          component={() => <ProfilePagePage routeData={{title: 'Profile'}}/>}
+        />
+        <AppRoute
+          path='/workspaces'
+          component={() => <WorkspaceListPage
+              routeData={{
+                title: 'View Workspaces',
+                breadcrumb: BreadcrumbType.Workspaces
+              }}
+          />}
+        />
+        <AppRoute
             path='/workspaces/build'
             component={() => <WorkspaceEditPage
                 routeData={{title: 'Create Workspace'}}
                 workspaceEditMode={WorkspaceEditMode.Create}
+            />}
+        />
+        <AppRoute
+            path='/workspaces/:ns/:wsid/about'
+            component={() => <WorkspaceAboutPage
+                routeData={{
+                  title: 'View Workspace Details',
+                  breadcrumb: BreadcrumbType.Workspace,
+                  helpContentKey: 'about'
+                }}
             />}
         />
         <AppRoute
@@ -238,6 +273,30 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             helpContentKey: NOTEBOOK_HELP_CONTENT,
             notebookHelpSidebarStyles: true,
             minimizeChrome: true
+          }}/>}
+        />
+        <AppRoute
+          path='/workspaces/:ns/:wsid/data/cohorts/:cid/actions'
+          component={() => <CohortActionsPage routeData={{
+            title: 'Cohort Actions',
+            breadcrumb: BreadcrumbType.Cohort,
+            helpContentKey: 'cohortBuilder'
+          }}/>}
+        />
+        <AppRoute
+          path='/workspaces/:ns/:wsid/data/concepts'
+          component={() => <ConceptHomepagePage routeData={{
+            title: 'Search Concepts',
+            breadcrumb: BreadcrumbType.SearchConcepts,
+            helpContentKey: 'conceptSets'
+          }}/>}
+        />
+        <AppRoute
+          path='/workspaces/:ns/:wsid/data/concepts/sets/:csid/actions'
+          component={() => <ConceptSetActionsPage routeData={{
+            title: 'Concept Set Actions',
+            breadcrumb: BreadcrumbType.ConceptSet,
+            helpContentKey: 'conceptSets'
           }}/>}
         />
       </ProtectedRoutes>

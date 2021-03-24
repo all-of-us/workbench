@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 
 import {
   Profile
@@ -15,7 +14,6 @@ import {WorkspaceCard} from 'app/pages/workspace/workspace-card';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {
   reactStyles,
-  ReactWrapperBase,
   withUserProfile
 } from 'app/utils';
 import {convertAPIError} from 'app/utils/errors';
@@ -130,15 +128,4 @@ export const WorkspaceList = withUserProfile()
       </FadeBox>
     </React.Fragment>;
   }
-
-
 });
-
-@Component({
-  template: '<div #root></div>'
-})
-export class WorkspaceListComponent extends ReactWrapperBase {
-  constructor() {
-    super(WorkspaceList, []);
-  }
-}

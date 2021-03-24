@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import {Button} from 'app/components/buttons';
 import {ActionCardBase} from 'app/components/card';
 import {FadeBox} from 'app/components/containers';
@@ -6,7 +5,7 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Cohort} from 'generated/fetch';
@@ -73,7 +72,7 @@ interface State {
   cohortLoading: boolean;
 }
 
-const CohortActions = withCurrentWorkspace()(
+export const CohortActions = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
     constructor(props: any) {
       super(props);
@@ -159,13 +158,3 @@ const CohortActions = withCurrentWorkspace()(
     }
   }
 );
-
-@Component({
-  template: '<div #root></div>'
-})
-export class CohortActionsComponent extends ReactWrapperBase {
-
-  constructor() {
-    super(CohortActions, []);
-  }
-}

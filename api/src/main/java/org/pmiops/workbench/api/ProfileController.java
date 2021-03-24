@@ -65,6 +65,7 @@ import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.profile.DemographicSurveyMapper;
 import org.pmiops.workbench.profile.PageVisitMapper;
 import org.pmiops.workbench.profile.ProfileService;
+import org.pmiops.workbench.ras.RasLinkService;
 import org.pmiops.workbench.shibboleth.ShibbolethService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -123,6 +124,7 @@ public class ProfileController implements ProfileApiDelegate {
   private final UserDao userDao;
   private final UserService userService;
   private final VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper;
+  private final RasLinkService rasLinkService;
 
   @Autowired
   ProfileController(
@@ -144,7 +146,8 @@ public class ProfileController implements ProfileApiDelegate {
       ShibbolethService shibbolethService,
       UserDao userDao,
       UserService userService,
-      VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
+      VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper,
+      RasLinkService rasLinkService) {
     this.actionAuditQueryService = actionAuditQueryService;
     this.captchaVerificationService = captchaVerificationService;
     this.clock = clock;
@@ -164,6 +167,7 @@ public class ProfileController implements ProfileApiDelegate {
     this.userService = userService;
     this.verifiedInstitutionalAffiliationMapper = verifiedInstitutionalAffiliationMapper;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.rasLinkService = rasLinkService;
   }
 
   private DbUser saveUserWithConflictHandling(DbUser dbUser) {
@@ -613,7 +617,8 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Profile> linkRasAccount(RasLinkRequestBody body) {
-    // TODO(RW-6364): Implement this endpoint.
-    return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    DbUser dbUser =
+        rasLinkService.linkRasLoginGovAccount(body.getAuthCode(), body.getRedirectUrl());
+    return ResponseEntity.ok(profileService.getProfile(dbUser));
   }
 }

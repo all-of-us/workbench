@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="yonghao" id="changelog-156-billing-buffer-entry-status-index">
+    <createIndex tableName="billing_project_buffer_entry" indexName="billing_project_buffer_entry_status_idx" unique="false">
+      <column name="status"/>
+    </createIndex>
+  </changeSet>
+</databaseChangeLog>

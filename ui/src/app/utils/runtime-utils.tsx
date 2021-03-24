@@ -239,7 +239,7 @@ const useRuntime = (currentWorkspaceNamespace) => {
 
 export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: AbortSignal): Promise<Runtime> => {
   if (workspaceNamespace in compoundRuntimeOpStore.get()) {
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       signal.addEventListener('abort', reject);
       const {unsubscribe} = compoundRuntimeOpStore.subscribe((v => {
         if (!(workspaceNamespace in v)) {

@@ -1,11 +1,10 @@
-import {Page} from 'puppeteer';
+import { Page } from 'puppeteer';
 import Container from 'app/container';
-import {ElementType, XPathOptions} from 'app/xpath-options';
+import { ElementType, XPathOptions } from 'app/xpath-options';
 import BaseElement from './base-element';
-import {buildXPath} from 'app/xpath-builders';
+import { buildXPath } from 'app/xpath-builders';
 
 export default class Link extends BaseElement {
-   
   static async findByName(page: Page, xOpt: XPathOptions, container?: Container): Promise<Link> {
     xOpt.type = ElementType.Link;
     const linkXpath = buildXPath(xOpt, container);
@@ -16,5 +15,4 @@ export default class Link extends BaseElement {
   constructor(page: Page, xpath?: string) {
     super(page, xpath);
   }
-
 }

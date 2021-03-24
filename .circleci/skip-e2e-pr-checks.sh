@@ -15,7 +15,7 @@ fi
 # Get the commit message. Exiting job early if the commit message contains 'skip e2e' string.
 COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")
 
-# Double comma is "Parameter Expansion". It converts string to lowercase letters
+# Double comma is "Parameter Expansion". It converts string to lowercase letters.
 if [[ "${COMMIT_MESSAGE,,}" == *"skip e2e"* ]]; then
   echo "Skip e2e text found in commit message"
   circleci-agent step halt
@@ -23,8 +23,17 @@ else
   echo "not found skip e2e text"
 fi
 
+# Exiting CI job when files matching ignore patterns are the only changed files in the last commit.
+# The grep command exits with '0' status when it's successful (match were found).
+# While it exits with status '1' when no match was found.
+git diff --name-only HEAD^ HEAD | grep -qvFf .circleci/e2e-job-ignore-patterns.txt
+STATUS=$?
+if [[ "$STATUS" -eq 1 ]]; then
+  echo "Files matching ignore patterns are the only changed files made in the last commit. Exiting job."
+  circleci-agent step halt
+fi
+
 # Exiting on PR branch when all (changed) file names matched ignore pattern.
-# The grep command exits with '0' status when it's successful (match were found). While it exits with status '1' when no match was found.
 git diff --name-only $(git merge-base origin/master ${CIRCLE_BRANCH}) | grep -qvFf .circleci/e2e-job-ignore-patterns.txt
 STATUS=$?
 if [[ "$STATUS" -eq 1 ]]; then

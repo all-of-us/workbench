@@ -1,0 +1,12 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "parent",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id",
+    "type": "INTEGER"
+  }
+]

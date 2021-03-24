@@ -1,4 +1,5 @@
-import {TitleCasePipe} from '@angular/common';
+import * as fp from 'lodash/fp';
+
 import {
   AgeType,
   CriteriaSubType,
@@ -25,10 +26,14 @@ export function nameDisplay(parameter): string {
   } else {
     let name = stripHtml(parameter.name);
     if (parameter.type === CriteriaType.ETHNICITY || parameter.type === CriteriaType.RACE) {
-      name = new TitleCasePipe().transform(name);
+      name = toTitleCase(name);
     }
     return name;
   }
+}
+
+export function toTitleCase(str: string): string {
+  return fp.startCase(fp.toLower(str));
 }
 
 export function attributeDisplay(parameter): string {

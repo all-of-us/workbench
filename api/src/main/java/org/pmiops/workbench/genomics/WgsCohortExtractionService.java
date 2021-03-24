@@ -3,13 +3,20 @@ package org.pmiops.workbench.genomics;
 import com.google.cloud.storage.Blob;
 import com.google.common.collect.ImmutableMap;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
+import java.time.Clock;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.inject.Provider;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
+import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.MethodConfigurationsApi;
@@ -34,7 +41,10 @@ public class WgsCohortExtractionService {
   private final Provider<CloudStorageClient> extractionServiceAccountCloudStorageClientProvider;
   private final Provider<SubmissionsApi> submissionApiProvider;
   private final Provider<MethodConfigurationsApi> methodConfigurationsApiProvider;
+  private final WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao;
+  private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final Clock clock;
 
   @Autowired
   public WgsCohortExtractionService(
@@ -44,14 +54,20 @@ public class WgsCohortExtractionService {
           Provider<CloudStorageClient> extractionServiceAccountCloudStorageClientProvider,
       Provider<SubmissionsApi> submissionsApiProvider,
       Provider<MethodConfigurationsApi> methodConfigurationsApiProvider,
-      Provider<WorkbenchConfig> workbenchConfigProvider) {
+      WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao,
+      Provider<DbUser> userProvider,
+      Provider<WorkbenchConfig> workbenchConfigProvider,
+      Clock clock) {
     this.cohortService = cohortService;
     this.fireCloudService = fireCloudService;
     this.submissionApiProvider = submissionsApiProvider;
     this.extractionServiceAccountCloudStorageClientProvider =
         extractionServiceAccountCloudStorageClientProvider;
     this.methodConfigurationsApiProvider = methodConfigurationsApiProvider;
+    this.wgsExtractCromwellSubmissionDao = wgsExtractCromwellSubmissionDao;
+    this.userProvider = userProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.clock = clock;
   }
 
   private Map<String, String> createRepoMethodParameter(
@@ -87,6 +103,12 @@ public class WgsCohortExtractionService {
     String extractionUuid = UUID.randomUUID().toString();
     String extractionFolder = "wgs-cohort-extractions/" + extractionUuid;
 
+    List<String> personIds = cohortService.getPersonIdsWithWholeGenome(cohortId);
+    if (personIds.isEmpty()) {
+      throw new FailedPreconditionException(
+          "provided cohort contains no participants with whole genome data");
+    }
+
     Blob personIdsFile =
         extractionServiceAccountCloudStorageClientProvider
             .get()
@@ -96,8 +118,7 @@ public class WgsCohortExtractionService {
                 // extraction SA's permissions
                 cohortExtractionConfig.operationalTerraWorkspaceBucket,
                 extractionFolder + "/person_ids.txt",
-                String.join("\n", cohortService.getPersonIds(cohortId))
-                    .getBytes(StandardCharsets.UTF_8));
+                String.join("\n", personIds).getBytes(StandardCharsets.UTF_8));
 
     FirecloudMethodConfiguration methodConfig =
         methodConfigurationsApiProvider
@@ -182,6 +203,16 @@ public class WgsCohortExtractionService {
                     .methodConfigurationNamespace(methodConfig.getNamespace())
                     .methodConfigurationName(methodConfig.getName())
                     .useCallCache(false));
+
+    // Note: if this save fails we may have an orphaned job. Will likely need a cleanup task to
+    // check for such jobs.
+    DbWgsExtractCromwellSubmission dbSubmission = new DbWgsExtractCromwellSubmission();
+    dbSubmission.setSubmissionId(submissionResponse.getSubmissionId());
+    dbSubmission.setWorkspace(workspace);
+    dbSubmission.setCreator(userProvider.get());
+    dbSubmission.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
+    dbSubmission.setSampleCount((long) personIds.size());
+    wgsExtractCromwellSubmissionDao.save(dbSubmission);
 
     methodConfigurationsApiProvider
         .get()

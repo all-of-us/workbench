@@ -8,19 +8,15 @@ import static org.pmiops.workbench.model.FilterColumns.SEXATBIRTH;
 import com.google.cloud.bigquery.FieldValue;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.TableResult;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Ordering;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
@@ -31,12 +27,12 @@ import org.pmiops.workbench.cdr.cache.MySQLStopWords;
 import org.pmiops.workbench.cdr.dao.CBCriteriaAttributeDao;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.dao.CBDataFilterDao;
+import org.pmiops.workbench.cdr.dao.CriteriaMenuDao;
 import org.pmiops.workbench.cdr.dao.DomainInfoDao;
 import org.pmiops.workbench.cdr.dao.PersonDao;
 import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.cdr.model.DbCriteriaAttribute;
-import org.pmiops.workbench.cdr.model.DbMenuOption;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.model.AgeType;
@@ -45,8 +41,7 @@ import org.pmiops.workbench.model.ConceptIdName;
 import org.pmiops.workbench.model.Criteria;
 import org.pmiops.workbench.model.CriteriaAttribute;
 import org.pmiops.workbench.model.CriteriaListWithCountResponse;
-import org.pmiops.workbench.model.CriteriaMenuOption;
-import org.pmiops.workbench.model.CriteriaMenuSubOption;
+import org.pmiops.workbench.model.CriteriaMenu;
 import org.pmiops.workbench.model.DataFilter;
 import org.pmiops.workbench.model.DemoChartInfo;
 import org.pmiops.workbench.model.Domain;
@@ -55,7 +50,6 @@ import org.pmiops.workbench.model.FilterColumns;
 import org.pmiops.workbench.model.GenderOrSexType;
 import org.pmiops.workbench.model.ParticipantDemographics;
 import org.pmiops.workbench.model.SearchRequest;
-import org.pmiops.workbench.model.StandardFlag;
 import org.pmiops.workbench.model.SurveyModule;
 import org.pmiops.workbench.model.SurveyVersion;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +70,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   private final CohortQueryBuilder cohortQueryBuilder;
   private final CBCriteriaAttributeDao cbCriteriaAttributeDao;
   private final CBCriteriaDao cbCriteriaDao;
+  private final CriteriaMenuDao criteriaMenuDao;
   private final CBDataFilterDao cbDataFilterDao;
   private final DomainInfoDao domainInfoDao;
   private final PersonDao personDao;
@@ -89,6 +84,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
       CohortQueryBuilder cohortQueryBuilder,
       CBCriteriaAttributeDao cbCriteriaAttributeDao,
       CBCriteriaDao cbCriteriaDao,
+      CriteriaMenuDao criteriaMenuDao,
       CBDataFilterDao cbDataFilterDao,
       DomainInfoDao domainInfoDao,
       PersonDao personDao,
@@ -99,6 +95,7 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     this.cohortQueryBuilder = cohortQueryBuilder;
     this.cbCriteriaAttributeDao = cbCriteriaAttributeDao;
     this.cbCriteriaDao = cbCriteriaDao;
+    this.criteriaMenuDao = criteriaMenuDao;
     this.cbDataFilterDao = cbDataFilterDao;
     this.domainInfoDao = domainInfoDao;
     this.personDao = personDao;
@@ -291,36 +288,9 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
-  public List<CriteriaMenuOption> findCriteriaMenuOptions() {
-    ListMultimap<String, Boolean> typeToStandardOptionsMap = ArrayListMultimap.create();
-    ListMultimap<String, String> domainToTypeOptionsMap = ArrayListMultimap.create();
-    List<CriteriaMenuSubOption> returnMenuSubOptions = new ArrayList<>();
-    List<CriteriaMenuOption> returnMenuOptions = new ArrayList<>();
-
-    List<DbMenuOption> options = cbCriteriaDao.findMenuOptions();
-
-    options.forEach(
-        o -> {
-          typeToStandardOptionsMap.put(o.getType(), o.getStandard());
-          domainToTypeOptionsMap.put(o.getDomain(), o.getType());
-        });
-    for (String domainKey : domainToTypeOptionsMap.keySet()) {
-      List<String> typeList =
-          domainToTypeOptionsMap.get(domainKey).stream().distinct().collect(Collectors.toList());
-      for (String typeKey : typeList) {
-        returnMenuSubOptions.add(
-            toClientMenuSubOptions(typeKey, new HashSet<>(typeToStandardOptionsMap.get(typeKey))));
-      }
-      returnMenuOptions.add(
-          toClientMenuOptions(
-              domainKey,
-              returnMenuSubOptions.stream()
-                  .sorted(Comparator.comparing(CriteriaMenuSubOption::getType))
-                  .collect(Collectors.toList())));
-      returnMenuSubOptions.clear();
-    }
-    return returnMenuOptions.stream()
-        .sorted(Comparator.comparing(CriteriaMenuOption::getDomain))
+  public List<CriteriaMenu> findCriteriaMenuByParentId(long parentId) {
+    return criteriaMenuDao.findByParentIdOrderBySortOrderAsc(parentId).stream()
+        .map(cohortBuilderMapper::dbModelToClient)
         .collect(Collectors.toList());
   }
 
@@ -523,18 +493,5 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
         .map(
             c -> new ConceptIdName().conceptId(new Long(c.getConceptId())).conceptName(c.getName()))
         .collect(Collectors.toList());
-  }
-
-  private CriteriaMenuOption toClientMenuOptions(String domain, List<CriteriaMenuSubOption> types) {
-    return new CriteriaMenuOption().domain(domain).types(types);
-  }
-
-  private CriteriaMenuSubOption toClientMenuSubOptions(String type, Set<Boolean> standards) {
-    return new CriteriaMenuSubOption()
-        .type(type)
-        .standardFlags(
-            standards.stream()
-                .map(s -> new StandardFlag().standard(s))
-                .collect(Collectors.toList()));
   }
 }

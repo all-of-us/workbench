@@ -365,7 +365,7 @@ paths:
           description: Bad request
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/link-ras-account":
+  "/v1/user/link-ras-account":
     post:
       tags:
       - profile
@@ -375,7 +375,7 @@ paths:
       operationId: linkRasAccount
       parameters:
       - in: body
-        name: authcode
+        name: rasLinkRequestBody
         description: The authorization code from RAS.
         schema:
           "$ref": "#/definitions/RasLinkRequestBody"
@@ -3090,19 +3090,26 @@ paths:
           description: CohortAnnotationDefinition deletion request accepted
           schema:
             "$ref": "#/definitions/EmptyResponse"
-  "/v1/cohortbuilder/{cdrVersionId}/criteria/menu":
+  "/v1/cohortbuilder/{cdrVersionId}/criteria/menu/{parentId}":
     parameters:
     - "$ref": "#/parameters/cdrVersionId"
     get:
       tags:
       - cohortBuilder
-      description: 'Returns criteria menu options'
-      operationId: findCriteriaMenuOptions
+      description: 'Returns criteria menu'
+      operationId: findCriteriaMenu
+      parameters:
+      - in: path
+        name: parentId
+        type: integer
+        format: int64
+        required: true
+        description: the parent id
       responses:
         200:
           description: A collection of criteria menu options
           schema:
-            "$ref": "#/definitions/CriteriaMenuOptionsListResponse"
+            "$ref": "#/definitions/CriteriaMenuListResponse"
   "/v1/cohortbuilder/{cdrVersionId}/criteria/domaininfo":
     get:
       tags:
@@ -3947,10 +3954,6 @@ definitions:
         default: false
         description: Whether a user is allowed to self-bypass. Only enabled in test
           environments.
-      requireInvitationKey:
-        type: boolean
-        default: false
-        description: Whether the current environment requires an invitation key for signup.
       defaultFreeCreditsDollarLimit:
         type: number
         format: double
@@ -3971,10 +3974,10 @@ definitions:
         type: boolean
         default: false
         description: Whether user should see a prompt if Workspace Research Purpose needs Review
-      enableRasLinking:
+      enableRasLoginGovLinking:
         type: boolean
         default: false
-        description: Whether to use enable RAS-AoU linking flow when user setup account.
+        description: Whether to use enable RAS-AoU linking for login.gov when user setup account.
       runtimeImages:
         type: array
         items:
@@ -4131,6 +4134,7 @@ definitions:
       lastModifiedTime: 1588097211621
       name: "my newest workspace"
       namespace: "aou-rw-test-11112222"
+      googleProject: "aou-rw-test-11112222"
       published: false
       researchPurpose:
         additionalNotes: null
@@ -4205,6 +4209,9 @@ definitions:
       published:
         type: boolean
         default: false
+      googleProject:
+        type: string
+        description: the google project used by the workspace for compute and storage
   WorkspaceBillingUsageResponse:
     type: object
     required:
@@ -5152,12 +5159,17 @@ definitions:
   RasLinkRequestBody:
     required:
     - authCode
+    - redirectUrl
     type: object
     properties:
       authCode:
         type: string
         description: 'the standard OAuth authorization code from RAS that we can use to exchange
         access token.'
+      redirectUrl:
+        type: string
+        description: 'The redirect url that was used when generating the authorization code.'
+        example: "https://all-of-us-workbench-test.appspot.com/ras-callback"
   AdminTableUser:
     type: object
     properties:
@@ -5412,13 +5424,9 @@ definitions:
         format: int64
         description: 'Timestamp when the user first changed from Unregistered to Registered
           data access level. May be null if the user has never done so.'
-      rasLinkLoginGovName:
+      rasLinkLoginGovUsername:
         type: string
         description: The user's identity name in login.gov.
-      rasLinkLoginGovExpireTime:
-        type: integer
-        format: int64
-        description: The user's login.gov/AoU link expiration time
       rasLinkLoginGovCompletionTime:
         type: integer
         format: int64
@@ -7164,7 +7172,7 @@ definitions:
       totalCount:
         type: integer
         format: int64
-  CriteriaMenuOptionsListResponse:
+  CriteriaMenuListResponse:
     type: object
     required:
     - items
@@ -7172,7 +7180,7 @@ definitions:
       items:
         type: array
         items:
-          "$ref": "#/definitions/CriteriaMenuOption"
+          "$ref": "#/definitions/CriteriaMenu"
   Criteria:
     type: object
     required:
@@ -7277,41 +7285,45 @@ definitions:
         description: Reveals if this criteria is standard or source.
         type: boolean
         default: false
-  CriteriaMenuOption:
+  CriteriaMenu:
     type: object
     required:
-    - domain
-    - types
+    - id
+    - parentId
+    - category
+    - domainId
+    - name
+    - group
+    - sortOrder
     properties:
-      domain:
-        description: The criteria domains that are searchable in Cohort Builder
+      id:
+        description: The unique identifier for the menu item
+        type: integer
+        format: int64
+      parentId:
+        description: The unique identifier for the menu parent
+        type: integer
+        format: int64
+      category: 
+        description: The category for this menu item(Program Data or Domains)
         type: string
-      types:
-        type: array
-        items:
-          "$ref": "#/definitions/CriteriaMenuSubOption"
-  CriteriaMenuSubOption:
-    type: object
-    required:
-    - type
-    - standardFlags
-    properties:
+      domainId:
+        description: The domain for this menu item
+        type: string
       type:
-        description: The criteria types that are searchable in Cohort Builder
+        description: The type for this menu item
         type: string
-      standardFlags:
-        type: array
-        items:
-          "$ref": "#/definitions/StandardFlag"
-  StandardFlag:
-    type: object
-    required:
-    - standard
-    properties:
-      standard:
-        description: flag that determines standard or source
+      name: 
+        description: The name
+        type: string
+      group:
+        description: Is this a parent
         type: boolean
         default: false
+      sortOrder: 
+        description: The order
+        type: integer
+        format: int64
   CriteriaAttributeListResponse:
     type: object
     required:
@@ -8785,3 +8797,9 @@ definitions:
       - RUNNING
       - FAILED
       - SUCCEEDED
+  TierAccessStatus:
+    type: string
+    description: 'Whether a user currently has access to a tier'
+    enum:
+      - DISABLED
+      - ENABLED

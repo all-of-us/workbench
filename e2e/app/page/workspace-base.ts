@@ -1,14 +1,14 @@
-import {Page} from 'puppeteer';
+import { Page } from 'puppeteer';
 import DataResourceCard from 'app/component/data-resource-card';
 import Link from 'app/element/link';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
-import {LinkText, MenuOption, ResourceCard} from 'app/text-labels';
-import {buildXPath} from 'app/xpath-builders';
-import {ElementType} from 'app/xpath-options';
-import {waitForAttributeEquality, waitWhileLoading} from 'utils/waits-utils';
+import { LinkText, MenuOption, ResourceCard } from 'app/text-labels';
+import { buildXPath } from 'app/xpath-builders';
+import { ElementType } from 'app/xpath-options';
+import { waitForAttributeEquality, waitWhileLoading } from 'utils/waits-utils';
 import SnowmanMenu from 'app/component/snowman-menu';
-import {getPropValue} from 'utils/element-utils';
+import { getPropValue } from 'utils/element-utils';
 import Modal from 'app/modal/modal';
 import AuthenticatedPage from './authenticated-page';
 import BaseElement from 'app/element/base-element';
@@ -24,11 +24,10 @@ export enum TabLabels {
   Datasets = 'Datasets',
   CohortReviews = 'Cohort Reviews',
   ConceptSets = 'Concept Sets',
-  ShowAll = 'Show All',
+  ShowAll = 'Show All'
 }
 
 export default abstract class WorkspaceBase extends AuthenticatedPage {
-
   protected constructor(page: Page) {
     super(page);
   }
@@ -37,7 +36,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * Click Data tab to open Data page.
    * @param opts
    */
-  async openDataPage(opts: {waitPageChange?: boolean} = {}): Promise<void> {
+  async openDataPage(opts: { waitPageChange?: boolean } = {}): Promise<void> {
     return this.openTab(TabLabels.Data, opts);
   }
 
@@ -45,7 +44,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * Click Analysis tab to open Analysis page.
    * @param opts
    */
-  async openAnalysisPage(opts: {waitPageChange?: boolean} = {}): Promise<void> {
+  async openAnalysisPage(opts: { waitPageChange?: boolean } = {}): Promise<void> {
     return this.openTab(TabLabels.Analysis, opts);
   }
 
@@ -53,7 +52,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * Click About tab to open About page.
    * @param opts
    */
-  async openAboutPage(opts: {waitPageChange?: boolean} = {}): Promise<void> {
+  async openAboutPage(opts: { waitPageChange?: boolean } = {}): Promise<void> {
     return this.openTab(TabLabels.About, opts);
   }
 
@@ -62,7 +61,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param opts
    */
   async openDatasetsSubtab(): Promise<void> {
-    return this.openDataPage().then(() => this.openTab(TabLabels.Datasets, {waitPageChange: false}));
+    return this.openDataPage().then(() => this.openTab(TabLabels.Datasets, { waitPageChange: false }));
   }
 
   /**
@@ -70,7 +69,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param opts
    */
   async openCohortsSubtab(): Promise<void> {
-    return this.openDataPage().then(() => this.openTab(TabLabels.Cohorts, {waitPageChange: false}));
+    return this.openDataPage().then(() => this.openTab(TabLabels.Cohorts, { waitPageChange: false }));
   }
 
   /**
@@ -78,7 +77,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param opts
    */
   async openCohortReviewsSubtab(): Promise<void> {
-    return this.openDataPage().then(() => this.openTab(TabLabels.CohortReviews, {waitPageChange: false}));
+    return this.openDataPage().then(() => this.openTab(TabLabels.CohortReviews, { waitPageChange: false }));
   }
 
   /**
@@ -86,7 +85,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param opts
    */
   async openConceptSetsSubtab(): Promise<void> {
-    return this.openDataPage().then(() => this.openTab(TabLabels.ConceptSets, {waitPageChange: false}));
+    return this.openDataPage().then(() => this.openTab(TabLabels.ConceptSets, { waitPageChange: false }));
   }
 
   /**
@@ -94,9 +93,9 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param {string} pageTabName Page tab name
    * @param opts
    */
-  async openTab(pageTabName: TabLabels, opts: {waitPageChange?: boolean} = {}): Promise<void> {
+  async openTab(pageTabName: TabLabels, opts: { waitPageChange?: boolean } = {}): Promise<void> {
     const { waitPageChange = true } = opts;
-    const selector = buildXPath({name: pageTabName, type: ElementType.Tab});
+    const selector = buildXPath({ name: pageTabName, type: ElementType.Tab });
     const tab = new Link(this.page, selector);
     const isSelected = await getPropValue<boolean>(await tab.asElementHandle(), 'ariaSelected');
     if (isSelected === true) {
@@ -112,8 +111,8 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    * @param {TabLabels} pageTabName Tab name.
    */
   async isOpen(pageTabName: TabLabels): Promise<boolean> {
-    const selector = buildXPath({name: pageTabName, type: ElementType.Tab});
-    return waitForAttributeEquality(this.page, {xpath: selector}, 'aria-selected', 'true');
+    const selector = buildXPath({ name: pageTabName, type: ElementType.Tab });
+    return waitForAttributeEquality(this.page, { xpath: selector }, 'aria-selected', 'true');
   }
 
   /**
@@ -128,7 +127,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
       throw new Error(`Failed to find ${resourceType} card "${resourceName}"`);
     }
 
-    await card.selectSnowmanMenu(MenuOption.Delete, {waitForNav: false});
+    await card.selectSnowmanMenu(MenuOption.Delete, { waitForNav: false });
 
     const modal = new Modal(this.page);
     await modal.waitForLoad();
@@ -155,7 +154,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
         throw new Error(`Case ${resourceType} handling is not defined.`);
     }
 
-    await modal.clickButton(link, {waitForClose: true});
+    await modal.clickButton(link, { waitForClose: true });
     await waitWhileLoading(this.page);
 
     console.log(`Deleted ${resourceType} "${resourceName}"`);
@@ -184,7 +183,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
         option = MenuOption.Rename;
         break;
     }
-    await card.selectSnowmanMenu(option, {waitForNav: false});
+    await card.selectSnowmanMenu(option, { waitForNav: false });
 
     const modal = new Modal(this.page);
     await modal.waitForLoad();
@@ -197,7 +196,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
 
     // Type description. Notebook rename modal does not have Description textarea.
     if (resourceType !== ResourceCard.Notebook) {
-      const descriptionTextarea = await Textarea.findByName(this.page, {containsText: 'Description:'}, modal);
+      const descriptionTextarea = await Textarea.findByName(this.page, { containsText: 'Description:' }, modal);
       await descriptionTextarea.type(`Puppeteer automation test. Rename ${resourceName}.`);
     }
 
@@ -222,7 +221,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
         throw new Error(`Case ${resourceType} handling is not defined.`);
     }
 
-    await modal.clickButton(buttonLink, {waitForClose: true});
+    await modal.clickButton(buttonLink, { waitForClose: true });
     await waitWhileLoading(this.page);
     console.log(`Renamed ${resourceType} "${resourceName}" to "${newResourceName}"`);
     return modalTextContents;
@@ -235,7 +234,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    */
   async selectWorkspaceAction(option: MenuOption, opts?: { waitForNav: false }): Promise<void> {
     const iconXpath = './/*[@data-test-id="workspace-menu-button"]';
-    await this.page.waitForXPath(iconXpath, {visible: true}).then(icon => icon.click());
+    await this.page.waitForXPath(iconXpath, { visible: true }).then((icon) => icon.click());
     const snowmanMenu = new SnowmanMenu(this.page);
     return snowmanMenu.select(option, opts);
   }
@@ -255,29 +254,29 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    */
   async dismissDeleteWorkspaceModal(clickButtonText: LinkText = LinkText.DeleteWorkspace): Promise<string[]> {
     const modal = new Modal(this.page);
-    const textBox = await modal.waitForTextbox('type DELETE to confirm')
-    await textBox.type('delete')
-    await modal.clickButton(clickButtonText, {waitForClose: true});
+    const textBox = await modal.waitForTextbox('type DELETE to confirm');
+    await textBox.type('delete');
+    await modal.clickButton(clickButtonText, { waitForClose: true });
     await waitWhileLoading(this.page);
     return undefined;
   }
 
-   /**
-    * Edit workspace via Workspace Actions snowman menu "Edit" option.
-    */
+  /**
+   * Edit workspace via Workspace Actions snowman menu "Edit" option.
+   */
   async editWorkspace(): Promise<void> {
     await this.selectWorkspaceAction(MenuOption.Edit);
   }
 
   async getCdrVersion(): Promise<string> {
     const xpath = '//*[@data-test-id="cdr-version"]';
-    const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, {visible: true}));
+    const element = BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, { visible: true }));
     return element.getTextContent();
   }
 
   async getNewCdrVersionFlag(): Promise<BaseElement> {
     const xpath = '//*[@data-test-id="new-version-flag"]';
-    return BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, {visible: true}));
+    return BaseElement.asBaseElement(this.page, await this.page.waitForXPath(xpath, { visible: true }));
   }
 
   /**

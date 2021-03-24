@@ -26,7 +26,6 @@
     "projectNamePrefix": "aou-rw-local1-",
     "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.rw_test_firecloud_view",
     "retryCount": 2,
-    "bufferCapacity": 10,
     "bufferCapacityPerTier": {
       "registered": 10,
       "controlled_test": 10
@@ -109,8 +108,7 @@
     "enableDataUseAgreement": true,
     "enableBetaAccess": false,
     "unsafeAllowSelfBypass": true,
-    "unsafeAllowUserCreationFromGSuiteData": true,
-    "requireInvitationKey": false
+    "unsafeAllowUserCreationFromGSuiteData": true
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
@@ -121,7 +119,7 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": true,
     "enableReportingUploadCron": true,
-    "enableRasLinking": false
+    "enableRasLoginGovLinking": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",

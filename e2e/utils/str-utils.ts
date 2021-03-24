@@ -1,5 +1,5 @@
 import * as fp from 'lodash/fp';
-import {Page} from 'puppeteer';
+import { Page } from 'puppeteer';
 
 const faker = require('faker/locale/en_US');
 
@@ -43,7 +43,7 @@ export const extractPageName = async (page: Page): Promise<string> => {
   // For example: "View Workspaces | [Test] All of Us Researcher Workbench" becomes "View Workspaces"
   const splitValue = fp.zipObject(['name', 'domain'], title.split(' | '));
   return splitValue.name.replace(/\s/g, '');
-}
+};
 
 /**
  * Get the Workspace namespace from page URL.

@@ -6,7 +6,8 @@ import {WorkspacesApi} from "generated/fetch";
 
 import {exampleCohortStubs} from "testing/stubs/cohorts-api-stub";
 import {ConceptSetsApiStub} from "testing/stubs/concept-sets-api-stub";
-import {workspaceDataStub, WorkspacesApiStub, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
+import {workspaceDataStub, WorkspaceStubVariables} from 'testing/stubs/workspaces';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
 describe('getTrail', () => {
   beforeEach(() => {

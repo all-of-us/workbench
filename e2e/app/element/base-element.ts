@@ -1,14 +1,12 @@
-import {ClickOptions, ElementHandle, Page, WaitForSelectorOptions} from 'puppeteer';
+import { ClickOptions, ElementHandle, Page, WaitForSelectorOptions } from 'puppeteer';
 import Container from 'app/container';
-import {getAttrValue, getPropValue} from 'utils/element-utils';
-
+import { getAttrValue, getPropValue } from 'utils/element-utils';
 
 /**
  * BaseElement represents a web element in the DOM.
  * It implements useful methods for querying and interacting with this element.
  */
 export default class BaseElement extends Container {
-
   static asBaseElement(page: Page, elementHandle: ElementHandle, xpath?: string): BaseElement {
     const baseElement = new BaseElement(page, xpath);
     baseElement.setElementHandle(elementHandle);
@@ -30,10 +28,10 @@ export default class BaseElement extends Container {
    * If there is no element matching xpath selector, null is returned.
    * @param {WaitForSelectorOptions} waitOptions
    */
-  async waitForXPath(waitOptions: WaitForSelectorOptions = {visible: true}): Promise<ElementHandle> {
+  async waitForXPath(waitOptions: WaitForSelectorOptions = { visible: true }): Promise<ElementHandle> {
     if (this.xpath === undefined && this.element !== undefined) return this.element.asElement();
     try {
-      return this.page.waitForXPath(this.xpath, waitOptions).then(elemt => this.element = elemt.asElement());
+      return this.page.waitForXPath(this.xpath, waitOptions).then((elemt) => (this.element = elemt.asElement()));
     } catch (err) {
       console.error(`waitForXpath('${this.xpath}') encountered ${err}`);
       // Debugging pause
@@ -54,10 +52,9 @@ export default class BaseElement extends Container {
    * @param {string} descendantXpath Be sure to begin xpath with a dot. e.g. ".//div".
    */
   async findDescendant(descendantXpath: string): Promise<ElementHandle[]> {
-    return this.asElementHandle()
-      .then(elemt => {
-        return elemt.$x(descendantXpath);
-      });
+    return this.asElementHandle().then((elemt) => {
+      return elemt.$x(descendantXpath);
+    });
   }
 
   /**
@@ -70,10 +67,9 @@ export default class BaseElement extends Container {
    *  return (await handle.jsonValue()).toString();
    */
   async getProperty<T>(propertyName: string): Promise<T> {
-    return this.asElementHandle()
-      .then(element => {
-        return getPropValue<T>(element, propertyName);
-      });
+    return this.asElementHandle().then((element) => {
+      return getPropValue<T>(element, propertyName);
+    });
   }
 
   /**
@@ -81,10 +77,9 @@ export default class BaseElement extends Container {
    * @param attribute name
    */
   async getAttribute(attributeName: string): Promise<string> {
-    return this.asElementHandle()
-      .then(element => {
-        return getAttrValue(this.page, element, attributeName);
-      });
+    return this.asElementHandle().then((element) => {
+      return getAttrValue(this.page, element, attributeName);
+    });
   }
 
   /**
@@ -93,10 +88,9 @@ export default class BaseElement extends Container {
    * @param attribute name
    */
   async hasAttribute(attributeName: string): Promise<boolean> {
-    return this.getAttribute(attributeName)
-      .then(value => {
-        return value !== null;
-      });
+    return this.getAttribute(attributeName).then((value) => {
+      return value !== null;
+    });
   }
 
   /**
@@ -116,12 +110,12 @@ export default class BaseElement extends Container {
    */
   async isVisible(): Promise<boolean> {
     return this.asElementHandle()
-      .then(elemt => {
+      .then((elemt) => {
         return elemt.boxModel();
       })
-      .then(box => {
+      .then((box) => {
         return box !== null;
-      })
+      });
   }
 
   /**
@@ -129,11 +123,9 @@ export default class BaseElement extends Container {
    */
   async isDisplayed(): Promise<boolean> {
     const elemt = await this.asElementHandle();
-    const isVisibleHandle = await this.page.evaluateHandle((e) =>
-    {
+    const isVisibleHandle = await this.page.evaluateHandle((e) => {
       const style = window.getComputedStyle(e);
-      return (style && style.display !== 'none' &&
-         style.visibility !== 'hidden' && style.opacity !== '0');
+      return style && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
     }, elemt);
     const jValue = await isVisibleHandle.jsonValue();
     const boxModelValue = await elemt.boxModel();
@@ -141,39 +133,40 @@ export default class BaseElement extends Container {
   }
 
   async click(options?: ClickOptions): Promise<void> {
-    return this.asElementHandle()
-      .then(async element => {
-        // Experienment: click workaround
-        // Wait for x,y to stop changing within specified time
-        const startTime = Date.now();
-        let previousX: number;
-        let previousY: number;
-        let i = 0;
-        while ((Date.now() - startTime) < (30 * 1000)) {
-          const viewport = await element.isIntersectingViewport();
-          if (viewport) {
-            const box = await element.boundingBox();
-            const x = box.x + (box.width / 2);
-            const y = box.y + (box.height / 2);
-            if (previousX !== undefined && previousY !== undefined) {
-              // tslint:disable:triple-equals
-              if (parseFloat(previousX.toFixed(7)) == parseFloat(x.toFixed(7))
-                && parseFloat(previousY.toFixed(7)) == parseFloat(y.toFixed(7))) {
-                break;
-              }
+    return this.asElementHandle().then(async (element) => {
+      // Experienment: click workaround
+      // Wait for x,y to stop changing within specified time
+      const startTime = Date.now();
+      let previousX: number;
+      let previousY: number;
+      let i = 0;
+      while (Date.now() - startTime < 30 * 1000) {
+        const viewport = await element.isIntersectingViewport();
+        if (viewport) {
+          const box = await element.boundingBox();
+          const x = box.x + box.width / 2;
+          const y = box.y + box.height / 2;
+          if (previousX !== undefined && previousY !== undefined) {
+            // tslint:disable:triple-equals
+            if (
+              parseFloat(previousX.toFixed(7)) == parseFloat(x.toFixed(7)) &&
+              parseFloat(previousY.toFixed(7)) == parseFloat(y.toFixed(7))
+            ) {
+              break;
             }
-            if (i > 0) {
-              console.warn(`Detected changing boundingBox: i=${i} prevX=${previousX} x=${x} prevY=${previousY} y=${y}`);
-            }
-            previousX = x;
-            previousY = y;
-            i++;
           }
-          await element.hover();
-          await this.page.waitForTimeout(200);
+          if (i > 0) {
+            console.warn(`Detected changing boundingBox: i=${i} prevX=${previousX} x=${x} prevY=${previousY} y=${y}`);
+          }
+          previousX = x;
+          previousY = y;
+          i++;
         }
-        return element.click(options);
-      });
+        await element.hover();
+        await this.page.waitForTimeout(200);
+      }
+      return element.click(options);
+    });
   }
 
   /**
@@ -186,13 +179,13 @@ export default class BaseElement extends Container {
 
     const clearAndType = async (txt: string): Promise<string> => {
       await this.clear();
-      await this.asElementHandle().then((handle: ElementHandle) => handle.type(txt, {delay}));
+      await this.asElementHandle().then((handle: ElementHandle) => handle.type(txt, { delay }));
       return this.getProperty<string>('value');
-    }
+    };
 
     let maxRetries = 2;
     const typeAndCheck = async () => {
-      const actualValue = (await clearAndType(textValue));
+      const actualValue = await clearAndType(textValue);
       if (actualValue === textValue) {
         return; // success
       }
@@ -207,11 +200,10 @@ export default class BaseElement extends Container {
     return this;
   }
 
-  async pressKeyboard(key: string, options?: { text?: string, delay?: number }): Promise<void> {
-    return this.asElementHandle()
-      .then(elemt => {
-        return elemt.press(key, options);
-      });
+  async pressKeyboard(key: string, options?: { text?: string; delay?: number }): Promise<void> {
+    return this.asElementHandle().then((elemt) => {
+      return elemt.press(key, options);
+    });
   }
 
   async pressReturn(): Promise<void> {
@@ -237,29 +229,29 @@ export default class BaseElement extends Container {
   }
 
   async clearTextInput(): Promise<void> {
-    return this.asElementHandle()
-      .then(element => {
-        return this.page.evaluate((elemt, textValue) => {
+    return this.asElementHandle().then((element) => {
+      return this.page.evaluate(
+        (elemt, textValue) => {
           // Refer to https://stackoverflow.com/a/46012210/440432
-          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')
+            .set;
           nativeInputValueSetter.call(elemt, textValue);
           const event = new Event('input', { bubbles: true });
           elemt.dispatchEvent(event);
-        }, element, '');
-      });
+        },
+        element,
+        ''
+      );
+    });
   }
 
   /**
    * Calling focus() and hover() together.
    */
   async focus(): Promise<void> {
-    return this.asElementHandle()
-      .then(elemt => {
-        Promise.all([
-          elemt.focus(),
-          elemt.hover(),
-        ]);
-      });
+    return this.asElementHandle().then((elemt) => {
+      Promise.all([elemt.focus(), elemt.hover()]);
+    });
   }
 
   /**
@@ -268,10 +260,12 @@ export default class BaseElement extends Container {
    * </pre>
    */
   async getTextContent(): Promise<string> {
-    return this.asElementHandle()
-      .then(elemt => {
-        return this.page.evaluate((element: HTMLElement) => (element.textContent ? element.textContent.trim() : ''), elemt,);
-      });
+    return this.asElementHandle().then((elemt) => {
+      return this.page.evaluate(
+        (element: HTMLElement) => (element.textContent ? element.textContent.trim() : ''),
+        elemt
+      );
+    });
   }
 
   /**
@@ -296,20 +290,18 @@ export default class BaseElement extends Container {
    * Determine if cursor is disabled (== " not-allowed ") by checking style 'cursor' value.
    */
   async isCursorNotAllowed(): Promise<boolean> {
-    return this.getComputedStyle('cursor')
-      .then(cursor => {
-        return cursor === 'not-allowed';
-      });
+    return this.getComputedStyle('cursor').then((cursor) => {
+      return cursor === 'not-allowed';
+    });
   }
 
   /**
    * Finds visible element's bounding box size.
    */
   async getSize(): Promise<{ width: number; height: number }> {
-    const box = await this.asElementHandle()
-      .then(elemt => {
-        return elemt.boundingBox();
-      })
+    const box = await this.asElementHandle().then((elemt) => {
+      return elemt.boundingBox();
+    });
     if (box === null) {
       // if element is not visible, returns size of (0, 0).
       return { width: 0, height: 0 };
@@ -324,19 +316,21 @@ export default class BaseElement extends Container {
 
   // try this method when click() is not working
   async clickWithEval(): Promise<void> {
-    return this.asElementHandle()
-      .then(elemt => {
-        return this.page.evaluate( elem => elem.click(), elemt );
-      });
+    return this.asElementHandle().then((elemt) => {
+      return this.page.evaluate((elem) => elem.click(), elemt);
+    });
   }
 
   /**
    * Click on element then wait for page navigation to finish.
    */
-  async clickAndWait(): Promise<void> {
+  async clickAndWait(timeout: number = 2 * 60 * 1000): Promise<void> {
     await Promise.all([
-      this.page.waitForNavigation({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'] }),
-      this.click(),
+      this.page.waitForNavigation({
+        waitUntil: ['load', 'domcontentloaded', 'networkidle0'],
+        timeout
+      }),
+      this.click({ delay: 10 })
     ]);
   }
 
@@ -345,16 +339,20 @@ export default class BaseElement extends Container {
    * @param text
    */
   async paste(text: string): Promise<void> {
-    return this.asElementHandle()
-      .then(element => {
-        return this.page.evaluate((elemt, textValue) => {
+    return this.asElementHandle().then((element) => {
+      return this.page.evaluate(
+        (elemt, textValue) => {
           // Refer to https://stackoverflow.com/a/46012210/440432
-          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value').set;
+          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')
+            .set;
           nativeInputValueSetter.call(elemt, textValue);
           const event = new Event('input', { bubbles: true });
           elemt.dispatchEvent(event);
-        }, element, text);
-      });
+        },
+        element,
+        text
+      );
+    });
   }
 
   /**
@@ -370,5 +368,4 @@ export default class BaseElement extends Container {
   async asElementHandle(): Promise<ElementHandle> {
     return this.waitForXPath();
   }
-
 }

@@ -13,14 +13,8 @@ import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
 import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
 import {TablePage} from './pages/data/cohort-review/table-page';
-import {CohortActionsComponent} from './pages/data/cohort/cohort-actions';
-import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
 import {ConceptSearchComponent} from './pages/data/concept/concept-search';
-import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
-import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SignedInComponent} from './pages/signed-in/component';
-import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
-import {WorkspaceListComponent} from './pages/workspace/workspace-list';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
 
 import {environment} from 'environments/environment';
@@ -91,6 +85,11 @@ const routes: Routes = [
             component: AppRouting,
             data: {}
           },
+          {
+            path: 'profile',
+            component: AppRouting,
+            data: {}
+          },
           // non-migrated routes go HERE
           {
             path: 'workspaces',
@@ -98,19 +97,16 @@ const routes: Routes = [
             children: [
               // legacy / duplicated routes go HERE
               {
+                path: '',
+                component: AppRouting,
+                data: {}
+              },
+              {
                 path: 'build',
                 component: AppRouting,
                 data: {}
               },
               // non-migrated routes go HERE
-              {
-                path: '',
-                component: WorkspaceListComponent,
-                data: {
-                  title: 'View Workspaces',
-                  breadcrumb: BreadcrumbType.Workspaces
-                }
-              },
               {
                 /* TODO The children under ./views need refactoring to use the data
                  * provided by the route rather than double-requesting it.
@@ -121,6 +117,11 @@ const routes: Routes = [
                 children: [
                   // legacy / duplicated routes go HERE
                   {
+                    path: 'about',
+                    component: AppRouting,
+                    data: {}
+                  },
+                  {
                     path: 'edit',
                     component: AppRouting,
                     data: {}
@@ -129,16 +130,6 @@ const routes: Routes = [
                     path: 'duplicate',
                     component: AppRouting,
                     data: {}
-                  },
-                  // non-migrated routes go HERE
-                  {
-                    path: 'about',
-                    component: WorkspaceAboutComponent,
-                    data: {
-                      title: 'View Workspace Details',
-                      breadcrumb: BreadcrumbType.Workspace,
-                      helpContentKey: 'about'
-                    }
                   },
                   {
                     path: 'notebooks',
@@ -160,6 +151,7 @@ const routes: Routes = [
                       }
                     ]
                   },
+                  // non-migrated routes go HERE
                   {
                     path: 'data',
                     children: [
@@ -194,12 +186,8 @@ const routes: Routes = [
                         children: [
                           {
                             path: ':cid/actions',
-                            component: CohortActionsComponent,
-                            data: {
-                              title: 'Cohort Actions',
-                              breadcrumb: BreadcrumbType.Cohort,
-                              helpContentKey: 'cohortBuilder'
-                            },
+                            component: AppRouting,
+                            data: {},
                           },
                           {
                             path: 'build',
@@ -261,12 +249,8 @@ const routes: Routes = [
                         path: 'concepts',
                         children: [{
                           path: '',
-                          component: ConceptHomepageComponent,
-                          data: {
-                            title: 'Search Concepts',
-                            breadcrumb: BreadcrumbType.SearchConcepts,
-                            helpContentKey: 'conceptSets'
-                          }
+                          component: AppRouting,
+                          data: {}
                         }, {
                           path: ':domain',
                           component: ConceptSearchComponent,
@@ -291,22 +275,13 @@ const routes: Routes = [
                           },
                         }, {
                           path: ':csid/actions',
-                          component: ConceptSetActionsComponent,
-                          data: {
-                            title: 'Concept Set Actions',
-                            breadcrumb: BreadcrumbType.ConceptSet,
-                            helpContentKey: 'conceptSets'
-                          },
+                          component: AppRouting,
+                          data: {},
                         }, ]
                       }
                     ]
                   }]
               }]
-          },
-          {
-            path: 'profile',
-            component: ProfilePageComponent,
-            data: {title: 'Profile'}
           }
         ]
       },

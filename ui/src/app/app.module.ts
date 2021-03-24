@@ -30,21 +30,14 @@ import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
 import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
 import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
 import {TablePage} from './pages/data/cohort-review/table-page';
-import {CohortActionsComponent} from './pages/data/cohort/cohort-actions';
-import {ConceptHomepageComponent} from './pages/data/concept/concept-homepage';
 import {ConceptSearchComponent} from './pages/data/concept/concept-search';
-import {ConceptSetActionsComponent} from './pages/data/concept/concept-set-actions';
 import {InitialErrorComponent} from './pages/initial-error/component';
-import {ProfilePageComponent} from './pages/profile/profile-page';
 import {SignedInComponent} from './pages/signed-in/component';
-import {WorkspaceAboutComponent} from './pages/workspace/workspace-about';
-import {WorkspaceListComponent} from './pages/workspace/workspace-list';
 import {WorkspaceNavBarComponent} from './pages/workspace/workspace-nav-bar';
 import {WorkspaceShareComponent} from './pages/workspace/workspace-share';
 
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
-import {IconsModule} from './icons/icons.module';
 import {FetchModule} from './services/fetch.module';
 
 import {
@@ -109,18 +102,14 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     ReactiveFormsModule,
 
     FetchModule,
-    IconsModule,
     ClarityModule,
   ],
   declarations: [
     AppComponent,
     AppRouting,
     BugReportComponent,
-    CohortActionsComponent,
     CohortPageComponent,
     CohortReviewComponent,
-    ConceptSetActionsComponent,
-    ConceptHomepageComponent,
     ConceptSearchComponent,
     ConfirmDeleteModalComponent,
     DataPageComponent,
@@ -129,15 +118,12 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     FooterComponent,
     HelpSidebarComponent,
     InitialErrorComponent,
-    ProfilePageComponent,
     QueryReportComponent,
     RoutingSpinnerComponent,
     SignedInComponent,
     NavBarComponent,
     TablePage,
     TextModalComponent,
-    WorkspaceAboutComponent,
-    WorkspaceListComponent,
     WorkspaceNavBarComponent,
     WorkspaceShareComponent,
     WorkspaceWrapperComponent,
