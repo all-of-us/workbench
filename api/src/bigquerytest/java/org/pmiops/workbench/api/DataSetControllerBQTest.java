@@ -30,6 +30,7 @@ import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
 import org.pmiops.workbench.cdr.dao.DSLinkingDao;
 import org.pmiops.workbench.cdr.model.DbDSLinking;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -46,7 +47,6 @@ import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
-import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -106,8 +106,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private ConceptBigQueryService conceptBigQueryService;
   @Autowired private ConceptSetDao conceptSetDao;
   @Autowired private DSLinkingDao dsLinkingDao;
-  @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
   @Autowired private DataSetDao dataSetDao;
+  @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
   @Autowired private DataSetMapperImpl dataSetMapper;
   @Autowired private FireCloudService fireCloudService;
   @Autowired private NotebooksService notebooksService;
@@ -214,9 +214,9 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             conceptBigQueryService,
             conceptSetDao,
             cohortQueryBuilder,
-            dataDictionaryEntryDao,
             dataSetDao,
             dsLinkingDao,
+            dsDataDictionaryDao,
             dataSetMapper,
             CLOCK);
     controller =

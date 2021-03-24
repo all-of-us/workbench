@@ -2320,7 +2320,7 @@ paths:
           description: A list of data sets containg cohort/concept Id passed.
           schema:
             "$ref": "#/definitions/DataSetListResponse"
-  "/v1/cdrVersionId/{cdrVersionId}/domain/{domain}/domainValue/{domainValue}/dataDictionaryEntry":
+  "/v1/cdrVersionId/{cdrVersionId}/domain/{domain}/domainValue/{value}/dataDictionaryEntry":
     get:
       parameters:
       - in: path
@@ -2333,7 +2333,7 @@ paths:
         required: true
         type: string
       - in: path
-        name: domainValue
+        name: value
         type: string
         required: true
       tags:
@@ -4018,12 +4018,6 @@ definitions:
   DataDictionaryEntry:
     type: object
     properties:
-      cdrVersionId:
-        type: integer
-        format: int64
-      definedTime:
-        type: integer
-        format: int64
       relevantOmopTable:
         type: string
       fieldName:
@@ -4038,9 +4032,6 @@ definitions:
         type: string
       sourcePpiModule:
         type: string
-      transformedByRegisteredTierPrivacyMethods:
-        type: boolean
-        default: false
   BillingProjectStatus:
     type: string
     description: 'Initialization status of a Firecloud billing project for use with
