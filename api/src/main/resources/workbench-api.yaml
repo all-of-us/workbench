@@ -4143,6 +4143,7 @@ definitions:
       lastModifiedTime: 1588097211621
       name: "my newest workspace"
       namespace: "aou-rw-test-11112222"
+      googleProject: "aou-rw-test-11112222"
       published: false
       researchPurpose:
         additionalNotes: null
@@ -4217,6 +4218,9 @@ definitions:
       published:
         type: boolean
         default: false
+      googleProject:
+        type: string
+        description: the google project used by the workspace for compute and storage
   WorkspaceBillingUsageResponse:
     type: object
     required:

@@ -124,6 +124,7 @@ public class DbWorkspace {
   private Short billingAccountType =
       DbStorageEnums.billingAccountTypeToStorage(BillingAccountType.FREE_TIER);
   private Short needsRPReviewPrompt;
+  private String googleProject;
 
   public DbWorkspace() {
     setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
@@ -348,6 +349,15 @@ public class DbWorkspace {
 
   public void setOtherPurposeDetails(String otherPurposeDetails) {
     this.otherPurposeDetails = otherPurposeDetails;
+  }
+
+  @Column(name = "google_project")
+  public String getGoogleProject() {
+    return googleProject;
+  }
+
+  public void setGoogleProject(String googleProject) {
+    this.googleProject = googleProject;
   }
 
   @ElementCollection(fetch = FetchType.EAGER)
