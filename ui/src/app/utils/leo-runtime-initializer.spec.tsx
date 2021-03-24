@@ -7,7 +7,7 @@ import {Runtime} from 'generated/fetch';
 import {RuntimeStatus} from 'generated/fetch';
 import {RuntimeApi} from 'generated/fetch/api';
 import SpyInstance = jest.SpyInstance;
-import expect = jest.Expect;
+import { expect } from '@jest/globals';
 import {RuntimesApi as LeoRuntimesApi} from 'notebooks-generated/fetch';
 import {defaultRuntime, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
