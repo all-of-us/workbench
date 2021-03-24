@@ -2,8 +2,10 @@ package org.pmiops.workbench.actionaudit.auditors;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.actionaudit.ActionAuditEvent;
@@ -14,8 +16,8 @@ import org.pmiops.workbench.actionaudit.AgentType;
 import org.pmiops.workbench.actionaudit.TargetType;
 import org.pmiops.workbench.actionaudit.targetproperties.AccountTargetProperty;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -43,10 +45,10 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
   }
 
   @Override
-  public void fireUpdateDataAccessAction(
+  public void fireUpdateAccessTiersAction(
       DbUser targetUser,
-      DataAccessLevel previousDataAccessLevel,
-      DataAccessLevel newDataAccessLevel,
+      List<DbAccessTier> previousAccessTiers,
+      List<DbAccessTier> newAccessTiers,
       Agent agent) {
     actionAuditService.send(
         ActionAuditEvent.builder()
@@ -57,11 +59,15 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
             .actionId(actionIdProvider.get())
             .actionType(ActionType.EDIT)
             .targetType(TargetType.ACCOUNT)
-            .targetPropertyMaybe(AccountTargetProperty.REGISTRATION_STATUS.getPropertyName())
+            .targetPropertyMaybe(AccountTargetProperty.ACCESS_TIERS.getPropertyName())
             .targetIdMaybe(targetUser.getUserId())
-            .previousValueMaybe(previousDataAccessLevel.toString())
-            .newValueMaybe(newDataAccessLevel.toString())
+            .previousValueMaybe(tiersToString(previousAccessTiers))
+            .newValueMaybe(tiersToString(newAccessTiers))
             .build());
+  }
+
+  private String tiersToString(List<DbAccessTier> tiers) {
+    return tiers.stream().map(DbAccessTier::getShortName).collect(Collectors.joining(","));
   }
 
   @Override

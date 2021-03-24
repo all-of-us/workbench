@@ -5,5 +5,6 @@ enum class AccountTargetProperty
     IS_ENABLED("is_enabled"),
     REGISTRATION_STATUS("registration_status"),
     ACKNOWLEDGED_TOS_VERSION("acknowledged_tos_version"),
-    FREE_TIER_DOLLAR_QUOTA("free_tier_dollar_quota");
+    FREE_TIER_DOLLAR_QUOTA("free_tier_dollar_quota"),
+    ACCESS_TIERS("access_tiers");
 }
