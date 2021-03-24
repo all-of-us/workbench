@@ -29,6 +29,7 @@ import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.model.TerraJob;
 import org.pmiops.workbench.model.TerraJobStatus;
+import org.pmiops.workbench.model.WgsCohortExtractionJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -89,7 +90,7 @@ public class WgsCohortExtractionService {
         .build();
   }
 
-  public TerraJob submitGenomicsCohortExtractionJob(DbWorkspace workspace, Long cohortId)
+  public WgsCohortExtractionJob submitGenomicsCohortExtractionJob(DbWorkspace workspace, Long cohortId)
       throws ApiException {
     // Currently only creates the temporary extraction tables
     // No files are being written to the user bucket
@@ -222,8 +223,7 @@ public class WgsCohortExtractionService {
             cohortExtractionConfig.extractionMethodConfigurationNamespace,
             methodConfig.getName());
 
-    return new TerraJob()
-        .submissionId(submissionResponse.getSubmissionId())
+    return new WgsCohortExtractionJob()
         .status(TerraJobStatus.RUNNING);
   }
 }
