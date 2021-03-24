@@ -1141,30 +1141,14 @@ def copy_bq_tables(cmd_name, *args)
     ->(opts, v) { opts.destination_dataset = v},
     "Destination Dataset. Required."
   )
-  op.add_option(
-    "--table-prefixes [prefix1,prefix2,...]",
-    ->(opts, v) { opts.table_prefixes = v},
-    "Comma-delimited table prefixes to filter the publish by, e.g. cb_,ds_. " +
-    "This should only be used in special situations e.g. when the auxilliary " +
-    "cb_ or ds_ tables need to be updated, or if there was an issue with the " +
-    "publish. In general, CDRs should be treated as immutable after the " +
-    "initial publish."
-  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.sa_project and opts.source_dataset and opts.destination_dataset }
   op.parse.validate
-
-  # This is a grep filter. It matches all tables, by default.
-  table_filter = ""
-  if op.opts.table_prefixes
-    prefixes = op.opts.table_prefixes.split(",")
-    table_filter = "^\\(#{prefixes.join("\\|")}\\)"
-  end
 
   source_project = "#{op.opts.source_dataset}".split(':').first
   ServiceAccountContext.new(op.opts.sa_project).run do
     common = Common.new
     common.status "Copying from '#{op.opts.source_dataset}' -> '#{op.opts.dest_dataset}'"
-    common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/copy-bq-dataset.sh #{op.opts.source_dataset} #{op.opts.destination_dataset} #{source_project} #{table_filter}}
+    common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/copy-bq-dataset.sh #{op.opts.source_dataset} #{op.opts.destination_dataset} #{source_project}}
   end
 end
 
