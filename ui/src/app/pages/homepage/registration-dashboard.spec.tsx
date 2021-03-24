@@ -128,7 +128,7 @@ describe('RegistrationDashboard', () => {
     expect(wrapper.find('[data-test-id="success-message"]').length).toBe(1);
   });
 
-  it('should display a success message when complete and enableRasLoginGovLinking is true', () => {
+  it('should have RAS link card then display a success message after linking when enableRasLoginGovLinking is true', () => {
     serverConfigStore.next({...serverConfigStore.getValue(), enableRasLoginGovLinking: true});
     // When enableBetaAccess is false, we shouldn't need to have been granted beta access.
     props.betaAccessGranted = true;
@@ -136,10 +136,20 @@ describe('RegistrationDashboard', () => {
     props.trainingCompleted = true;
     props.twoFactorAuthCompleted = true;
     props.dataUserCodeOfConductCompleted = true;
-    
-    const wrapper = component();
-    expect(wrapper.find('[data-test-id="success-message"]').length).toBe(1);
+    props.rasLoginGovLinked = false;
+
+    let wrapper = component();
+    expect(wrapper.find('[data-test-id="success-message"]').length).toBe(0);
+    expect(wrapper.find('[data-test-id="registration-task-rasLoginGov"]')
+    .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeFalsy();
+
+    // Now mark loginGov link succeed
+    props.rasLoginGovLinked = true;
+    wrapper = component();
+    expect(wrapper.find('[data-test-id="registration-task-rasLoginGov"]')
+    .find('[data-test-id="completed-button"]').length).toBeGreaterThanOrEqual(1);
   });
+
 
   it('should not show self-bypass UI when unsafeSelfBypass is false', () => {
     serverConfigStore.next({...serverConfigStore.getValue(), unsafeAllowSelfBypass: false});

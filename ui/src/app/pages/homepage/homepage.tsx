@@ -18,7 +18,10 @@ import {Scroll} from 'app/icons/scroll';
 import {QuickTourReact} from 'app/pages/homepage/quick-tour-modal';
 import {RecentResources} from 'app/pages/homepage/recent-resources';
 import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
-import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
+import {
+  getRegistrationTasksMap,
+  RegistrationDashboard
+} from 'app/pages/homepage/registration-dashboard';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {hasRegisteredAccessFetch, reactStyles, withUserProfile} from 'app/utils';
@@ -55,7 +58,12 @@ export const styles = reactStyles({
     marginLeft: '-1rem', marginRight: '-0.6rem', justifyContent: 'space-between', fontSize: '1.2em'
   },
   quickTourCardsRow: {
-    justifyContent: 'flex-start', maxHeight: '26rem', marginTop: '0.5rem', marginBottom: '1rem', marginLeft: '-1rem', paddingLeft: '1rem',
+    justifyContent: 'flex-start',
+    maxHeight: '26rem',
+    marginTop: '0.5rem',
+    marginBottom: '1rem',
+    marginLeft: '-1rem',
+    paddingLeft: '1rem',
     position: 'relative'
   },
   quickTourLabel: {
@@ -153,7 +161,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
     if (token) {
       this.setState({eraCommonsLoading: true});
       try {
-        const profileResponse = await profileApi().updateNihToken({ jwt: token });
+        const profileResponse = await profileApi().updateNihToken({jwt: token});
         if (profileResponse.eraCommonsLinkedNihUsername !== undefined) {
           this.setState({eraCommonsLinked: true});
         }
@@ -164,11 +172,14 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
   }
 
   async validateRasLoginGovLink(redirectUrl) {
-    const token = (new URL(window.location.href)).searchParams.get('code');
+    const code = (new URL(window.location.href)).searchParams.get('code');
     if (code) {
       this.setState({rasLoginGovLoading: true});
       try {
-        const profileResponse = await profileApi().linkRasAccount({ authCode: code, redirectUrl: redirectUrl});
+        const profileResponse = await profileApi().linkRasAccount({
+          authCode: code,
+          redirectUrl: redirectUrl
+        });
         if (profileResponse.rasLinkLoginGovUsername !== undefined) {
           this.setState({rasLoginGovLinked: true});
         }
@@ -180,14 +191,14 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
 
   setFirstVisit() {
     this.setState({firstVisit: true});
-    profileApi().updatePageVisits({ page: this.pageId});
+    profileApi().updatePageVisits({page: this.pageId});
   }
 
   async syncCompliance() {
     const complianceStatus = profileApi().syncComplianceTrainingStatus().then(result => {
       this.setState({
         trainingCompleted: !!(getRegistrationTasksMap()['complianceTraining']
-          .completionTimestamp(result))
+        .completionTimestamp(result))
       });
     }).catch(err => {
       this.setState({trainingCompleted: false});
@@ -230,7 +241,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
       this.setState({
         eraCommonsLinked: !!(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile)),
         dataUserCodeOfConductCompleted: (serverConfigStore.getValue().enableDataUseAgreement ?
-          (() => !!(getRegistrationTasksMap()['dataUserCodeOfConduct']
+            (() => !!(getRegistrationTasksMap()['dataUserCodeOfConduct']
             .completionTimestamp(profile)))() : true)
       });
       // TODO(RW-6493): Update rasCommonsLinked similar to what we are doing for eraCommons
@@ -258,7 +269,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
 
   async checkWorkspaces() {
     return fetchWithGlobalErrorHandler(() => workspacesApi().getWorkspaces())
-        .then(response => this.setState({ userWorkspacesResponse: response}));
+    .then(response => this.setState({userWorkspacesResponse: response}));
   }
 
   userHasWorkspaces(): boolean {
@@ -273,7 +284,8 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
 
 
   render() {
-    const {betaAccessGranted, videoOpen, accessTasksLoaded, accessTasksRemaining,
+    const {
+      betaAccessGranted, videoOpen, accessTasksLoaded, accessTasksRemaining,
       eraCommonsError, eraCommonsLinked, eraCommonsLoading, firstVisitTraining,
       trainingCompleted, quickTour, videoId, twoFactorAuthCompleted,
       dataUserCodeOfConductCompleted, quickTourResourceOffset, userWorkspacesResponse
@@ -332,80 +344,99 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
           {/* The elements inside this fadeBox will be changed as part of ongoing
           homepage redesign work*/}
           <FlexColumn style={{justifyContent: 'flex-start'}}>
-              {accessTasksLoaded ?
+            {accessTasksLoaded ?
                 (accessTasksRemaining ?
-                    (<RegistrationDashboard eraCommonsError={eraCommonsError}
-                                            eraCommonsLinked={eraCommonsLinked}
-                                            eraCommonsLoading={eraCommonsLoading}
-                                            trainingCompleted={trainingCompleted}
-                                            firstVisitTraining={firstVisitTraining}
-                                            betaAccessGranted={betaAccessGranted}
-                                            twoFactorAuthCompleted={twoFactorAuthCompleted}
-                                            dataUserCodeOfConductCompleted={dataUserCodeOfConductCompleted}/>
-                    ) : (
-                        <React.Fragment>
-                          <FlexColumn>
-                            <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
-                              <FlexRow style={{alignItems: 'center'}}>
-                                <SemiBoldHeader style={{marginTop: '0px'}}>Workspaces</SemiBoldHeader>
-                                <ClrIcon
-                                  shape='plus-circle'
-                                  size={30}
-                                  className={'is-solid'}
-                                  style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
-                                  onClick={() => {
-                                    AnalyticsTracker.Workspaces.OpenCreatePage();
-                                    navigate(['workspaces/build']);
-                                  }}
-                                />
-                              </FlexRow>
-                              <span
-                                style={{alignSelf: 'flex-end', color: colors.accent, cursor: 'pointer'}}
-                                onClick={() => navigate(['workspaces'])}
-                              >
+                        (<RegistrationDashboard eraCommonsError={eraCommonsError}
+                                                eraCommonsLinked={eraCommonsLinked}
+                                                eraCommonsLoading={eraCommonsLoading}
+                                                trainingCompleted={trainingCompleted}
+                                                firstVisitTraining={firstVisitTraining}
+                                                betaAccessGranted={betaAccessGranted}
+                                                twoFactorAuthCompleted={twoFactorAuthCompleted}
+                                                dataUserCodeOfConductCompleted={dataUserCodeOfConductCompleted}/>
+                        ) : (
+                            <React.Fragment>
+                              <FlexColumn>
+                                <FlexRow
+                                    style={{justifyContent: 'space-between', alignItems: 'center'}}>
+                                  <FlexRow style={{alignItems: 'center'}}>
+                                    <SemiBoldHeader
+                                        style={{marginTop: '0px'}}>Workspaces</SemiBoldHeader>
+                                    <ClrIcon
+                                        shape='plus-circle'
+                                        size={30}
+                                        className={'is-solid'}
+                                        style={{
+                                          color: colors.accent,
+                                          marginLeft: '1rem',
+                                          cursor: 'pointer'
+                                        }}
+                                        onClick={() => {
+                                          AnalyticsTracker.Workspaces.OpenCreatePage();
+                                          navigate(['workspaces/build']);
+                                        }}
+                                    />
+                                  </FlexRow>
+                                  <span
+                                      style={{
+                                        alignSelf: 'flex-end',
+                                        color: colors.accent,
+                                        cursor: 'pointer'
+                                      }}
+                                      onClick={() => navigate(['workspaces'])}
+                                  >
                                 See all workspaces
                               </span>
-                            </FlexRow>
-                            <RecentWorkspaces />
-                          </FlexColumn>
-                          <FlexColumn>
-                            {userWorkspacesResponse &&
+                                </FlexRow>
+                                <RecentWorkspaces/>
+                              </FlexColumn>
+                              <FlexColumn>
+                                {userWorkspacesResponse &&
 
-                              <React.Fragment>
-                                {this.userHasWorkspaces() ?
-                                <RecentResources workspaces={userWorkspacesResponse.items}/> :
+                                <React.Fragment>
+                                  {this.userHasWorkspaces() ?
+                                      <RecentResources workspaces={userWorkspacesResponse.items}/> :
 
-                                <div data-test-id='getting-started'
-                                     style={{
-                                       backgroundColor: addOpacity(colors.primary, .1).toString(),
-                                       color: colors.primary,
-                                       borderRadius: 10,
-                                       margin: '2em 0em'}}>
-                                  <div style={{margin: '1em 2em'}}>
-                                    <h2 style={{fontWeight: 600, marginTop: 0}}>Here are some tips to get you started:</h2>
-                                    <CustomBulletList>
-                                      <CustomBulletListItem bullet='→'>
-                                        Create a <StyledAnchorTag href='https://support.google.com/chrome/answer/2364824'
-                                          target='_blank'>Chrome Profile</StyledAnchorTag> with your <AoU/> Researcher
-                                        Workbench Google account. This will keep your workbench browser sessions isolated from
-                                        your other Google accounts.
-                                      </CustomBulletListItem>
-                                      <CustomBulletListItem bullet='→'>
-                                        Check out <StyledAnchorTag href='library'>Featured Workspaces</StyledAnchorTag> from
-                                        the left hand panel to browse through example workspaces.
-                                      </CustomBulletListItem>
-                                      <CustomBulletListItem bullet='→'>
-                                        Browse through our <StyledAnchorTag href={supportUrls.helpCenter}
-                                          target='_blank'>support materials</StyledAnchorTag> and forum topics.
-                                      </CustomBulletListItem>
-                                    </CustomBulletList>
-                                  </div>
-                                </div>}
-                              </React.Fragment>
-                            }
-                          </FlexColumn>
-                        </React.Fragment>
-                      )
+                                      <div data-test-id='getting-started'
+                                           style={{
+                                             backgroundColor: addOpacity(colors.primary, .1).toString(),
+                                             color: colors.primary,
+                                             borderRadius: 10,
+                                             margin: '2em 0em'
+                                           }}>
+                                        <div style={{margin: '1em 2em'}}>
+                                          <h2 style={{fontWeight: 600, marginTop: 0}}>Here are some
+                                            tips to get you started:</h2>
+                                          <CustomBulletList>
+                                            <CustomBulletListItem bullet='→'>
+                                              Create a <StyledAnchorTag
+                                                href='https://support.google.com/chrome/answer/2364824'
+                                                target='_blank'>Chrome
+                                              Profile</StyledAnchorTag> with your <AoU/> Researcher
+                                              Workbench Google account. This will keep your
+                                              workbench browser sessions isolated from
+                                              your other Google accounts.
+                                            </CustomBulletListItem>
+                                            <CustomBulletListItem bullet='→'>
+                                              Check out <StyledAnchorTag href='library'>Featured
+                                              Workspaces</StyledAnchorTag> from
+                                              the left hand panel to browse through example
+                                              workspaces.
+                                            </CustomBulletListItem>
+                                            <CustomBulletListItem bullet='→'>
+                                              Browse through our <StyledAnchorTag
+                                                href={supportUrls.helpCenter}
+                                                target='_blank'>support
+                                              materials</StyledAnchorTag> and forum topics.
+                                            </CustomBulletListItem>
+                                          </CustomBulletList>
+                                        </div>
+                                      </div>}
+                                </React.Fragment>
+                                }
+                              </FlexColumn>
+                            </React.Fragment>
+                        )
                 ) :
                 <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
           </FlexColumn>
@@ -413,7 +444,8 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         <div style={{backgroundColor: addOpacity(colors.light, .4).toString()}}>
           <FlexColumn style={{marginLeft: '3%'}}>
             <div style={styles.quickTourLabel}>Quick Tour and Videos</div>
-            <div ref={(el) => this.quickTourResourcesDiv = el} style={{display: 'flex', position: 'relative'}}>
+            <div ref={(el) => this.quickTourResourcesDiv = el}
+                 style={{display: 'flex', position: 'relative'}}>
               <FlexRow style={styles.quickTourCardsRow}>
                 {quickTourResources.slice(quickTourResourceOffset, quickTourResourceOffset + limit).map((thumbnail, i) => {
                   return <React.Fragment key={i}>
@@ -440,21 +472,24 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         </div>
       </FlexColumn>
       {quickTour &&
-      <QuickTourReact closeFunction={() => this.setState({quickTour: false})} />}
+      <QuickTourReact closeFunction={() => this.setState({quickTour: false})}/>}
       {videoOpen && <Modal width={900}>
         <div style={{display: 'flex'}}>
           <div style={{flexGrow: 1}}></div>
           <Clickable onClick={() => this.setState({videoOpen: false})}>
             <ClrIcon
-              shape='times'
-              size='24'
-              style={{color: colors.accent, marginBottom: 17}}
+                shape='times'
+                size='24'
+                style={{color: colors.accent, marginBottom: 17}}
             />
           </Clickable>
         </div>
         {/* Embed code generated by YouTube */}
-        <iframe width='852' height='480' src={`https://www.youtube.com/embed/${videoId}?rel=0&autoplay=1&modestbranding=1&iv_load_policy=3`}
-                frameBorder='0' allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture' allowFullScreen/>
+        <iframe width='852' height='480'
+                src={`https://www.youtube.com/embed/${videoId}?rel=0&autoplay=1&modestbranding=1&iv_load_policy=3`}
+                frameBorder='0'
+                allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture'
+                allowFullScreen/>
       </Modal>}
     </React.Fragment>;
   }
