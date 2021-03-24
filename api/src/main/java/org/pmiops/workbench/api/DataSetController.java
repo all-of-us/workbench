@@ -465,7 +465,7 @@ public class DataSetController implements DataSetApiDelegate {
       throw new BadRequestException("Invalid Domain");
     }
 
-    return ResponseEntity.ok(dataSetService.findDataDictionaryEntry(value, domain, cdrVersion));
+    return ResponseEntity.ok(dataSetService.findDataDictionaryEntry(value, domain));
   }
 
   @Override

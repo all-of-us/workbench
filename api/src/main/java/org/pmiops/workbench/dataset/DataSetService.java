@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -66,6 +65,5 @@ public interface DataSetService {
 
   void markDirty(ResourceType resourceType, long resourceId);
 
-  DataDictionaryEntry findDataDictionaryEntry(
-      String fieldName, String domain, DbCdrVersion cdrVersion);
+  DataDictionaryEntry findDataDictionaryEntry(String fieldName, String domain);
 }

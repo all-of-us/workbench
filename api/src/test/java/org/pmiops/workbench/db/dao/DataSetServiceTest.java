@@ -52,7 +52,6 @@ import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DataSetServiceImpl.QueryAndParameters;
 import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
-import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
@@ -497,10 +496,8 @@ public class DataSetServiceTest {
   @Test
   public void testDataDictionary() {
     createDbDsDataDictionaryEntry();
-    DbCdrVersion cdrVersion = new DbCdrVersion();
-    cdrVersion.setCdrVersionId(1l);
     DataDictionaryEntry dataDictionaryEntry =
-        dataSetServiceImpl.findDataDictionaryEntry("gender", "PERSON", cdrVersion);
+        dataSetServiceImpl.findDataDictionaryEntry("gender", "PERSON");
     assertThat(dataDictionaryEntry).isNotNull();
     assertThat(dataDictionaryEntry.getDescription()).isEqualTo("Gender testing");
   }

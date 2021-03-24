@@ -42,7 +42,6 @@ import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
-import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
@@ -998,16 +997,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
-  public DataDictionaryEntry findDataDictionaryEntry(
-      String fieldName, String domain, DbCdrVersion cdrVersion) {
+  public DataDictionaryEntry findDataDictionaryEntry(String fieldName, String domain) {
     DbDSDataDictionary dbDSDataDictionary =
         dsDataDictionaryDao.findByFieldNameAndDomain(fieldName, domain);
     if (dbDSDataDictionary == null) {
       throw new NotFoundException(
-          "No Data Dictionary Entry found for domain: "
-              + fieldName
-              + " cdr version: "
-              + cdrVersion);
+          "No Data Dictionary Entry found for field " + fieldName + "and domain: " + domain);
     }
     DataDictionaryEntry dataDictionaryEntry = dataSetMapper.dbDsModelToClient(dbDSDataDictionary);
     return dataDictionaryEntry;
