@@ -19,6 +19,5 @@
   "include": [
     "**/*.spec.tsx",
     "**/*.d.ts",
-  ],
-  "typeRoots": [ "node_modules/@types" ]
+  ]
 }
