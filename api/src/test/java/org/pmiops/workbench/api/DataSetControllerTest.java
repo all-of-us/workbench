@@ -76,7 +76,6 @@ import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.compliance.ComplianceService;
-import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
@@ -220,7 +219,6 @@ public class DataSetControllerTest {
     CohortService.class,
     CohortsController.class,
     CommonMappers.class,
-    ConceptService.class,
     ConceptSetMapperImpl.class,
     ConceptSetService.class,
     ConceptSetsController.class,

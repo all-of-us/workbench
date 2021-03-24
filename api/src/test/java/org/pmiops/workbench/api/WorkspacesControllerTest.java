@@ -68,7 +68,6 @@ import org.pmiops.workbench.billing.GoogleApisConfig;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
-import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -85,7 +84,6 @@ import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
@@ -255,10 +253,6 @@ public class WorkspacesControllerTest {
           .countValue(256L)
           .prevalence(0.4F)
           .conceptSynonyms(new ArrayList<>());
-  private static final DbConcept CONCEPT_1 =
-      new DbConcept().conceptId(CLIENT_CONCEPT_1.getConceptId());
-  private static final DbConcept CONCEPT_3 =
-      new DbConcept().conceptId(CLIENT_CONCEPT_3.getConceptId());
   private static final String BUCKET_URI =
       String.format("gs://%s/", TestMockFactory.WORKSPACE_BUCKET_NAME);
 
@@ -324,7 +318,6 @@ public class WorkspacesControllerTest {
     CohortQueryBuilder.class,
     ConceptBigQueryService.class,
     CohortService.class,
-    ConceptService.class,
     FireCloudService.class,
     MailService.class,
     MonitoringService.class,
@@ -1576,7 +1569,7 @@ public class WorkspacesControllerTest {
             Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
         .thenReturn(123);
     ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
-    conceptSetConceptId1.setConceptId(CONCEPT_1.getConceptId());
+    conceptSetConceptId1.setConceptId(CLIENT_CONCEPT_1.getConceptId());
     conceptSetConceptId1.setStandard(true);
     ConceptSet conceptSet1 =
         conceptSetsController
@@ -1589,7 +1582,7 @@ public class WorkspacesControllerTest {
                     .addAddedConceptSetConceptIdsItem(conceptSetConceptId1))
             .getBody();
     ConceptSetConceptId conceptSetConceptId2 = new ConceptSetConceptId();
-    conceptSetConceptId2.setConceptId(CONCEPT_3.getConceptId());
+    conceptSetConceptId2.setConceptId(CLIENT_CONCEPT_3.getConceptId());
     conceptSetConceptId2.setStandard(true);
     ConceptSet conceptSet2 =
         conceptSetsController
@@ -3312,7 +3305,7 @@ public class WorkspacesControllerTest {
             .getBody();
 
     ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
-    conceptSetConceptId1.setConceptId(CONCEPT_1.getConceptId());
+    conceptSetConceptId1.setConceptId(CLIENT_CONCEPT_1.getConceptId());
     conceptSetConceptId1.setStandard(true);
     ConceptSet conceptSet =
         conceptSetsController

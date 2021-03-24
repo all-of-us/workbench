@@ -36,7 +36,6 @@ import org.pmiops.workbench.cdr.model.DbDSLinking;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
@@ -121,7 +120,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   Provider<String> prefixProvider;
 
   private DataSetController controller;
-  private DataSetServiceImpl dataSetServiceImpl;
 
   private DbCdrVersion dbCdrVersion;
   private DbCohort dbCohort1;
@@ -155,7 +153,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     CohortCloningService.class,
     CohortService.class,
     CommonMappers.class,
-    ConceptService.class,
     ConceptSetMapperImpl.class,
     ConceptSetService.class,
     FireCloudServiceImpl.class,
@@ -206,7 +203,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Before
   public void setUp() {
-    dataSetServiceImpl =
+    DataSetServiceImpl dataSetServiceImpl =
         new DataSetServiceImpl(
             bigQueryService,
             cdrBigQuerySchemaConfigService,

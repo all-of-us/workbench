@@ -105,6 +105,23 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
   }
 
   @Override
+  public ConceptIds classifyConceptIds(Set<Long> conceptIds) {
+    ImmutableList.Builder<Long> standardConceptIds = ImmutableList.builder();
+    ImmutableList.Builder<Long> sourceConceptIds = ImmutableList.builder();
+    cbCriteriaDao
+        .findByConceptIdIn(conceptIds.stream().map(String::valueOf).collect(Collectors.toList()))
+        .forEach(
+            c -> {
+              if (c.getStandard()) {
+                standardConceptIds.add(Long.valueOf(c.getConceptId()));
+              } else {
+                sourceConceptIds.add(Long.valueOf(c.getConceptId()));
+              }
+            });
+    return new ConceptIds(standardConceptIds.build(), sourceConceptIds.build());
+  }
+
+  @Override
   public List<Criteria> findCriteriaByDomainIdAndConceptIds(
       String domainId, Collection<DbConceptSetConceptId> dbConceptSetConceptIds) {
     List<DbCriteria> criteriaList = new ArrayList<>();
