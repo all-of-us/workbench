@@ -122,8 +122,7 @@ public class DataSetServiceTest {
     ConceptSetService.class,
     CohortQueryBuilder.class,
     DataSetDao.class,
-    DSLinkingDao.class,
-    DSDataDictionaryDao.class,
+    DSLinkingDao.class
   })
   static class Configuration {
     @Bean
@@ -495,7 +494,7 @@ public class DataSetServiceTest {
 
   @Test
   public void testDataDictionary() {
-    mockDataDictionaryDao();
+    createDbDsDataDictionaryEntry();
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1l);
     DataDictionaryEntry dataDictionaryEntry =
@@ -550,13 +549,12 @@ public class DataSetServiceTest {
     doReturn(tableResultMock).when(mockBigQueryService).executeQuery(any());
   }
 
-  private void mockDataDictionaryDao() {
+  private void createDbDsDataDictionaryEntry() {
     DbDSDataDictionary dsDataDictionary = new DbDSDataDictionary();
     dsDataDictionary.setDomain("PERSON");
     dsDataDictionary.setFieldName("gender");
     dsDataDictionary.setDescription("Gender testing");
     dsDataDictionary.setFieldType("string");
-    when(dsDataDictionaryDao.findByFieldNameAndDomain("gender", "PERSON"))
-        .thenReturn(dsDataDictionary);
+    dsDataDictionaryDao.save(dsDataDictionary);
   }
 }
