@@ -55,8 +55,6 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
   List<DbUser> findUsersByDataAccessLevelsAndSearchString(
       @Param("dals") List<Short> dataAccessLevels, @Param("term") String term, Sort sort);
 
-  Set<DbUser> findByFirstRegistrationCompletionTimeNotNull();
-
   @Query(
       "SELECT dataAccessLevel, disabled, CASE WHEN betaAccessBypassTime IS NOT NULL THEN TRUE ELSE FALSE END AS betaIsBypassed, COUNT(userId) AS userCount "
           + "FROM DbUser "
