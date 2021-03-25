@@ -275,7 +275,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
     // check whether (1) beta access requirement is turned off for this env, or (2) the user
     // has been granted beta access.
     return this.taskCompletionList.every(v => v) &&
-        (!enableBetaAccess || betaAccessGranted);
+      (!enableBetaAccess || betaAccessGranted);
   }
 
   isEnabled(i: number): boolean {
