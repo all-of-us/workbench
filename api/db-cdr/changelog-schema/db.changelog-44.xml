@@ -7,5 +7,6 @@
     <dropTable tableName="domain"/>
     <dropTable tableName="vocabulary"/>
     <dropTable tableName="concept"/>
+    <dropTable tableName="db_domain"/>
   </changeSet>
 </databaseChangeLog>
