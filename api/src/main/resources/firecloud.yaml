@@ -831,49 +831,40 @@ paths:
         - name: namespace
           in: query
           description: Namespace of method.
-          schema:
-            type: string
+          type: string
         - name: name
           in: query
           description: Name of method.
-          schema:
-            type: string
+          type: string
         - name: snapshotId
           in: query
           description: Snapshot ID of method.
-          schema:
-            type: integer
-            format: int32
+          type: integer
+          format: int32
         - name: snapshotComment
           in: query
           description: Snapshot comment of AgoraEntity
-          schema:
-            type: string
+          type: string
         - name: synopsis
           in: query
           description: Synopsis of method.
-          schema:
-            type: string
+          type: string
         - name: documentation
           in: query
           description: Documentation of method.
-          schema:
-            type: string
+          type: string
         - name: owner
           in: query
           description: Owner of method.
-          schema:
-            type: string
+          type: string
         - name: payload
           in: query
           description: Payload of method in WDL.
-          schema:
-            type: string
+          type: string
         - name: entityType
           in: query
           description: Type of Method - Task or Workflow
-          schema:
-            type: string
+          type: string
       responses:
         200:
           description: List of methods
@@ -936,26 +927,22 @@ paths:
           in: path
           description: Method Namespace
           required: true
-          schema:
-            type: string
+          type: string
         - name: name
           in: path
           description: Method Name
           required: true
-          schema:
-            type: string
+          type: string
         - name: snapshotId
           in: path
           description: Method snapshot ID
           required: true
-          schema:
-            type: string
+          type: string
         - name: redact
           in: query
           description: Should the source method be redacted?
-          schema:
-            type: boolean
-            default: false
+          type: boolean
+          default: false
         - name: methodQuery
           in: body
           description: Method Query
