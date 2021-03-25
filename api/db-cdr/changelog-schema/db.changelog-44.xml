@@ -7,6 +7,5 @@
     <dropTable tableName="domain"/>
     <dropTable tableName="vocabulary"/>
     <dropTable tableName="concept"/>
-    <dropTable tableName="concept_synonym"/>
   </changeSet>
 </databaseChangeLog>
