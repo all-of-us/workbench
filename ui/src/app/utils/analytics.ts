@@ -18,7 +18,7 @@ declare let gtag: Function;
  * @param value An optional integer value to associate with the event.
  */
 export function triggerEvent(
-  category: string, action: string, label?: string, value?: number) {
+    category: string, action: string, label?: string, value?: number) {
   if (window['gtag']) {
     gtag('event', action, {
       'event_category': category,

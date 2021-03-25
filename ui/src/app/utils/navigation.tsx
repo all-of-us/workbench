@@ -3,18 +3,10 @@ import {ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy} from '@
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ConfigResponse} from 'generated';
-import {
-  CdrVersionListResponse,
-  Cohort,
-  ConceptSet,
-  Criteria,
-  ErrorResponse,
-  Profile
-} from 'generated/fetch';
+import {Cohort, ConceptSet, Criteria, ErrorResponse, Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {useLocation} from 'react-router';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
-import {ReplaySubject} from 'rxjs/ReplaySubject';
 
 export const NavStore = {
   navigate: undefined,
@@ -46,26 +38,17 @@ export const conceptSetUpdating = new BehaviorSubject<boolean>(false);
 export const userProfileStore =
     new BehaviorSubject<{ profile: Profile, reload: Function, updateCache: Function }>({
       profile: {} as Profile,
-      reload: () => {
-      },
-      updateCache: (profile) => {
-      },
+      reload: () => {},
+      updateCache: (profile) => {},
     });
 export const signInStore =
     new BehaviorSubject<{
       signOut: Function,
       profileImage: string,
     }>({
-      signOut: () => {
-      },
+      signOut: () => {},
       profileImage: {} as string,
     });
-
-// Use ReplaySubject over BehaviorSubject as this store does not have a legal
-// initial value and should not be accessed synchronously. The other stores
-// which meet this criteria should likely follow this same pattern, though a
-// broader redesign of these value stores is also probably in order.
-export const cdrVersionStore = new ReplaySubject<CdrVersionListResponse>(1);
 
 /**
  * Slightly stricter variant of Angular's DefaultRouteReuseStrategy. This
@@ -78,20 +61,10 @@ export const cdrVersionStore = new ReplaySubject<CdrVersionListResponse>(1);
  */
 export class WorkbenchRouteReuseStrategy extends RouteReuseStrategy {
   // The following methods are copied from Angular's DefaultRouteReuseStrategy.
-  shouldDetach(route: ActivatedRouteSnapshot): boolean {
-    return false;
-  }
-
-  store(route: ActivatedRouteSnapshot, detachedTree: DetachedRouteHandle): void {
-  }
-
-  shouldAttach(route: ActivatedRouteSnapshot): boolean {
-    return false;
-  }
-
-  retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle | null {
-    return null;
-  }
+  shouldDetach(route: ActivatedRouteSnapshot): boolean { return false; }
+  store(route: ActivatedRouteSnapshot, detachedTree: DetachedRouteHandle): void {}
+  shouldAttach(route: ActivatedRouteSnapshot): boolean { return false; }
+  retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle|null { return null; }
 
   shouldReuseRoute(future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean {
     return future.routeConfig === curr.routeConfig
