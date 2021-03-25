@@ -37,7 +37,6 @@ public class ConfigController implements ConfigApiDelegate {
             .enableDataUseAgreement(config.access.enableDataUseAgreement)
             .enableBetaAccess(config.access.enableBetaAccess)
             .unsafeAllowSelfBypass(config.access.unsafeAllowSelfBypass)
-            .requireInvitationKey(config.access.requireInvitationKey)
             .enableBillingUpgrade(config.featureFlags.enableBillingUpgrade)
             .enableV3DataUserCodeOfConduct(config.featureFlags.enableV3DataUserCodeOfConduct)
             .enableEventDateModifier(config.featureFlags.enableEventDateModifier)

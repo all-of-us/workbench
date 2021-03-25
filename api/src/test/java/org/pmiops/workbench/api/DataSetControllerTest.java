@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
@@ -36,6 +37,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -57,6 +59,8 @@ import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
+import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -72,7 +76,6 @@ import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.compliance.ComplianceService;
-import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
@@ -196,12 +199,14 @@ public class DataSetControllerTest {
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspacesController workspacesController;
 
+  @MockBean private CdrVersionService cdrVersionService;
   @MockBean private CdrBigQuerySchemaConfigService mockCdrBigQuerySchemaConfigService;
   @MockBean private BillingProjectBufferService mockBillingProjectBufferService;
   @MockBean private BigQueryService mockBigQueryService;
   @MockBean private CohortQueryBuilder mockCohortQueryBuilder;
   @MockBean private FireCloudService fireCloudService;
   @MockBean private NotebooksService mockNotebooksService;
+  @MockBean private DSDataDictionaryDao mockDSDataDictionaryDao;
 
   @Captor ArgumentCaptor<JSONObject> notebookContentsCaptor;
 
@@ -214,7 +219,6 @@ public class DataSetControllerTest {
     CohortService.class,
     CohortsController.class,
     CommonMappers.class,
-    ConceptService.class,
     ConceptSetMapperImpl.class,
     ConceptSetService.class,
     ConceptSetsController.class,
@@ -851,6 +855,17 @@ public class DataSetControllerTest {
 
     List<String> codeCells = notebookContentsToStrings(notebookContentsCaptor.getValue());
     assertThat(codeCells.size()).isEqualTo(1);
+  }
+
+  @Test
+  public void getDataDictionaryEntry() {
+    when(cdrVersionService.findByCdrVersionId(2l))
+        .thenReturn(Optional.ofNullable(new DbCdrVersion()));
+    when(mockDSDataDictionaryDao.findFirstByFieldNameAndDomain(anyString(), anyString()))
+        .thenReturn(new DbDSDataDictionary());
+
+    dataSetController.getDataDictionaryEntry(2l, "PERSON", "MockValue");
+    verify(mockDSDataDictionaryDao, times(1)).findFirstByFieldNameAndDomain("MockValue", "PERSON");
   }
 
   DataSetExportRequest setUpValidDataSetExportRequest() {

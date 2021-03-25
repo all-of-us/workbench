@@ -26,6 +26,7 @@ import javax.inject.Provider;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.dataset.DataSetService;
@@ -450,7 +451,7 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<DataDictionaryEntry> getDataDictionaryEntry(
-      Long cdrVersionId, String domain, String domainValue) {
+      Long cdrVersionId, String domain, String value) {
     DbCdrVersion cdrVersion =
         cdrVersionService
             .findByCdrVersionId(cdrVersionId)
@@ -458,12 +459,13 @@ public class DataSetController implements DataSetApiDelegate {
                 () -> {
                   throw new BadRequestException("Invalid CDR Version");
                 });
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
     if (BigQueryTableInfo.getTableName(Domain.fromValue(domain)) == null) {
       throw new BadRequestException("Invalid Domain");
     }
 
-    return ResponseEntity.ok(dataSetService.findDataDictionaryEntry(domainValue, cdrVersion));
+    return ResponseEntity.ok(dataSetService.findDataDictionaryEntry(value, domain));
   }
 
   @Override

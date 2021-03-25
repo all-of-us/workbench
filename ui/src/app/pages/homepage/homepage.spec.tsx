@@ -13,6 +13,8 @@ import {UserMetricsApiStub} from 'testing/stubs/user-metrics-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {cdrVersionStore} from "../../utils/stores";
+import {cdrVersionListResponse} from "../../../testing/stubs/cdr-versions-api-stub";
 
 
 describe('HomepageComponent', () => {
@@ -54,6 +56,7 @@ describe('HomepageComponent', () => {
       enableEraCommons: true,
       enableV3DataUserCodeOfConduct: true,
     });
+    cdrVersionStore.set(cdrVersionListResponse);
   });
 
   it('should render the homepage', () => {

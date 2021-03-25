@@ -18,13 +18,11 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.db.dao.CohortDao;
@@ -82,13 +80,11 @@ public class DataSetMapperTest {
     BigQueryService.class,
     Clock.class,
     CloudStorageClient.class,
-    ConceptDao.class,
     ConceptSetDao.class,
     ConceptBigQueryService.class,
     CohortBuilderService.class,
     CohortBuilderMapper.class,
     CohortQueryBuilder.class,
-    ConceptService.class,
     CohortDao.class,
     FireCloudService.class,
     WgsExtractCromwellSubmissionDao.class,
@@ -252,10 +248,6 @@ public class DataSetMapperTest {
 
   private void assertDbModelToClient(
       DataDictionaryEntry dataDictionaryEntry, DbDataDictionaryEntry dbDataDictionaryEntry) {
-    assertThat(dbDataDictionaryEntry.getCdrVersion().getCdrVersionId())
-        .isEqualTo(dataDictionaryEntry.getCdrVersionId());
-    assertThat(dbDataDictionaryEntry.getDefinedTime().toInstant().toEpochMilli())
-        .isEqualTo(dataDictionaryEntry.getDefinedTime());
     assertThat(dbDataDictionaryEntry.getDataProvenance())
         .isEqualTo(dataDictionaryEntry.getDataProvenance());
     assertThat(dbDataDictionaryEntry.getRelevantOmopTable())
@@ -270,7 +262,5 @@ public class DataSetMapperTest {
     assertThat(dbDataDictionaryEntry.getFieldType()).isEqualTo(dataDictionaryEntry.getFieldType());
     assertThat(dbDataDictionaryEntry.getSourcePpiModule())
         .isEqualTo(dataDictionaryEntry.getSourcePpiModule());
-    assertThat(dbDataDictionaryEntry.getTransformedByRegisteredTierPrivacyMethods())
-        .isEqualTo(dataDictionaryEntry.getTransformedByRegisteredTierPrivacyMethods());
   }
 }

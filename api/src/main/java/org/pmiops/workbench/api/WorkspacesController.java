@@ -264,6 +264,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
     dbWorkspace.setBillingMigrationStatusEnum(BillingMigrationStatus.NEW);
     dbWorkspace.setCdrVersion(cdrVersion);
+    dbWorkspace.setGoogleProject(fcWorkspace.getGoogleProject());
 
     // Ignore incoming fields pertaining to review status; clients can only request a review.
     workspaceMapper.mergeResearchPurposeIntoWorkspace(dbWorkspace, workspace.getResearchPurpose());

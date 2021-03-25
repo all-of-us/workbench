@@ -250,9 +250,6 @@ public class WorkbenchConfig {
     public boolean enableEraCommons;
     public boolean enableDataUseAgreement;
     public boolean enableBetaAccess;
-
-    // TODO(calbach): Remove after https://github.com/all-of-us/workbench/pull/4623 is released.
-    @Deprecated public boolean requireInvitationKey;
   }
 
   public static class FeatureFlagsConfig {

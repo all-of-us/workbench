@@ -17,11 +17,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
-import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
@@ -76,10 +77,11 @@ import org.springframework.transaction.annotation.Transactional;
   TestBigQueryCdrSchemaConfig.class,
   CohortQueryBuilder.class,
   CdrBigQuerySchemaConfigService.class,
+  CohortBuilderServiceImpl.class,
+  CohortBuilderMapperImpl.class,
   BigQueryService.class,
   SearchGroupItemQueryBuilder.class,
   CohortMaterializationService.class,
-  ConceptService.class,
   TestJpaConfig.class,
   CdrJpaConfig.class
 })

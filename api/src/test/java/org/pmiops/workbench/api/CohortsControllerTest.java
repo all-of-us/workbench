@@ -30,7 +30,6 @@ import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -46,7 +45,6 @@ import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.compliance.ComplianceService;
-import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -191,7 +189,6 @@ public class CohortsControllerTest {
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired CohortDao cohortDao;
   @Autowired CohortReviewDao cohortReviewDao;
-  @Autowired ConceptDao conceptDao;
   @Autowired ConceptSetDao conceptSetDao;
   @Autowired DataSetService dataSetService;
   @Autowired UserDao userDao;
@@ -205,7 +202,6 @@ public class CohortsControllerTest {
     CohortReviewServiceImpl.class,
     CohortsController.class,
     CommonMappers.class,
-    ConceptService.class,
     ConceptSetMapperImpl.class,
     ConceptSetService.class,
     ConceptSetsController.class,
