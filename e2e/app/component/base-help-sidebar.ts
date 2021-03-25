@@ -77,8 +77,6 @@ export default abstract class BaseHelpSidebar extends Container {
     await closeButton.waitUntilEnabled();
     await closeButton.click();
     await this.waitUntilClose();
-    await this.page.waitForXPath(this.deleteIconXpath, { hidden: true });
-    await this.page.waitForTimeout(1000);
     console.log(`Closed "${sidePanelTitle}" sidebar panel`);
   }
 
@@ -93,5 +91,11 @@ export default abstract class BaseHelpSidebar extends Container {
     } catch (err) {
       return false;
     }
+  }
+
+  async waitUntilClose(): Promise<void> {
+    await super.waitUntilClose();
+    await this.page.waitForXPath(this.deleteIconXpath, { hidden: true });
+    await this.page.waitForTimeout(1000);
   }
 }

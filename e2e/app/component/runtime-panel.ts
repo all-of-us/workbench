@@ -178,6 +178,7 @@ export default class RuntimePanel extends BaseHelpSidebar {
     await this.waitForStartStopIconState(StartStopIconState.None);
     await this.clickButton(LinkText.Create);
     await this.page.waitForTimeout(1000);
+    await this.waitUntilClose();
     // Runtime panel automatically close after click Create button.
     // Reopen panel in order to check icon status.
     await this.open();
@@ -196,6 +197,7 @@ export default class RuntimePanel extends BaseHelpSidebar {
     await this.clickButton(LinkText.DeleteEnvironment);
     await this.clickButton(LinkText.Delete);
     await this.page.waitForTimeout(1000);
+    await this.waitUntilClose();
     // Runtime panel automatically close after click Create button.
     // Reopen panel in order to check icon status.
     await this.open();
