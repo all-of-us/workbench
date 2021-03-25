@@ -367,8 +367,6 @@ repositories {
 
 // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
 dependencies {
-  runtime("org.springframework.boot:spring-boot-properties-migrator")
-
   annotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
 
   __swaggerCodegenV2__ "io.swagger:swagger-codegen-cli:$project.ext.SWAGGER_2_CODEGEN_VERSION"
