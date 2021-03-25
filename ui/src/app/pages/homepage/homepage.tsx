@@ -164,12 +164,12 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
   }
 
   async validateRasLoginGovLink() {
-    const code = (new URL(window.location.href)).searchParams.get('code');
+    const authCode = (new URL(window.location.href)).searchParams.get('code');
     const redirectUrl = buildRasRedirectUrl();
-    if (code) {
+    if (authCode) {
       this.setState({rasLoginGovLoading: true});
       try {
-        const profileResponse = await profileApi().linkRasAccount({ authCode: code, redirectUrl });
+        const profileResponse = await profileApi().linkRasAccount({ authCode, redirectUrl });
         if (profileResponse.rasLinkLoginGovUsername !== undefined) {
           this.setState({rasLoginGovLinked: true});
         }
