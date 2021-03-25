@@ -11,7 +11,6 @@ import * as StackTrace from 'stacktrace-js';
 
 import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
 import {ErrorReporterService} from './services/error-reporter.service';
-import {GoogleAnalyticsEventsService} from './services/google-analytics-events.service';
 import {ProfileStorageService} from './services/profile-storage.service';
 import {ServerConfigService} from './services/server-config.service';
 import {SignInService} from './services/sign-in.service';
@@ -159,7 +158,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     },
     ProfileStorageService,
     SignInService,
-    GoogleAnalyticsEventsService,
     {
       provide: WINDOW_REF,
       useValue: window
