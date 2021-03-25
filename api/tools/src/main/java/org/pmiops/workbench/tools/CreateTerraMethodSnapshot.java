@@ -136,7 +136,7 @@ public class CreateTerraMethodSnapshot {
                       methodName,
                       Integer.toString(latestSnapshotId),
                       newMethodQuery,
-                      "false");
+                      false);
         } catch (ApiException e) {
           log.warning(e.getResponseBody());
           throw e;
