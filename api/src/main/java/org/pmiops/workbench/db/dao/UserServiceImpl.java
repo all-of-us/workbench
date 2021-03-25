@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.hibernate.exception.GenericJDBCException;
+import org.javers.common.collections.Lists;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -188,6 +189,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
   }
 
+  // TODO test
+
   private void updateDataAccessLevel(DbUser dbUser, Agent agent) {
     final List<DbAccessTier> previousAccessTiers = accessTierService.getAccessTiersForUser(dbUser);
 
@@ -197,11 +200,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     final List<DbAccessTier> newAccessTiers;
     if (shouldUserBeRegistered(dbUser)) {
-      if (configProvider.get().featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers) {
-        newAccessTiers = accessTierService.getAllTiers();
-      } else {
-        newAccessTiers = Collections.singletonList(accessTierService.getRegisteredTier());
-      }
+      newAccessTiers = accessTierService.getTiersForRegisteredUsers();
     } else {
       newAccessTiers = Collections.emptyList();
     }
@@ -211,6 +210,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     if (!newAccessTiers.equals(previousAccessTiers)) {
       userServiceAuditor.fireUpdateAccessTiersAction(
           dbUser, previousAccessTiers, newAccessTiers, agent);
+
+      final List<DbAccessTier> tiersForRemoval =
+          Lists.difference(previousAccessTiers, newAccessTiers);
+      tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
     }
   }
 

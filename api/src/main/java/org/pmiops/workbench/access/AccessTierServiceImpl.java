@@ -2,6 +2,7 @@ package org.pmiops.workbench.access;
 
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,8 +20,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AccessTierServiceImpl implements AccessTierService {
-
-  // TODO remove?
   private final Provider<WorkbenchConfig> configProvider;
   private final Clock clock;
 
@@ -50,19 +49,6 @@ public class AccessTierServiceImpl implements AccessTierService {
   }
 
   /**
-   * Return the Registered Tier if it exists in the database
-   *
-   * @return a DbAccessTier representing the Registered Tier
-   * @throws ServerErrorException if there is no Registered Tier
-   */
-  @Override
-  public DbAccessTier getRegisteredTier() {
-    return accessTierDao
-        .findOneByShortName(REGISTERED_TIER_SHORT_NAME)
-        .orElseThrow(() -> new ServerErrorException("Cannot find Registered Tier in database."));
-  }
-
-  /**
    * Add memberships to all tiers for a user if they don't exist by inserting DB row(s) set to
    * ENABLED. For any memberships which exist and are DISABLED, set them to ENABLED.
    *
@@ -71,38 +57,6 @@ public class AccessTierServiceImpl implements AccessTierService {
   @Override
   public void addUserToAllTiers(DbUser user) {
     getAllTiers().forEach(tier -> addUserToTier(user, tier));
-  }
-
-  /**
-   * Add a Registered Tier membership to a user if none exists by inserting a DB row set to ENABLED.
-   * If such a membership exists and is DISABLED, set it to ENABLED.
-   *
-   * <p>Currently, this does not synchronize Terra Auth Domain group membership, but it will do so
-   * when the user_access_tier table is the source of truth for tier membership. The existing method
-   * UserServiceImpl.addToRegisteredTierGroupIdempotent() continues to handle group membership until
-   * then.
-   *
-   * @param user the DbUser in the user-accessTier mapping we're updating
-   */
-  @Override
-  public void addUserToRegisteredTier(DbUser user) {
-    addUserToTier(user, getRegisteredTier());
-  }
-
-  /**
-   * Remove a Registered Tier membership from a user if one exists and is ENABLED by marking that
-   * membership as DISABLED. Do nothing if no membership exists.
-   *
-   * <p>Currently, this does not synchronize Terra Auth Domain group membership, but it will do so
-   * when the user_access_tier table is the source of truth for tier membership. The existing method
-   * UserServiceImpl.removeFromRegisteredTierGroupIdempotent() continues to handle group membership
-   * until then.
-   *
-   * @param user the DbUser in the user-accessTier mapping we're updating
-   */
-  @Override
-  public void removeUserFromRegisteredTier(DbUser user) {
-    removeUserFromTier(user, getRegisteredTier());
   }
 
   /**
@@ -170,6 +124,31 @@ public class AccessTierServiceImpl implements AccessTierService {
         .filter(uat -> uat.getTierAccessStatusEnum() == TierAccessStatus.ENABLED)
         .map(DbUserAccessTier::getAccessTier)
         .collect(Collectors.toList());
+  }
+
+  /**
+   * Return a list of access tiers which Registered users have access to. Depending on environment,
+   * this will either be the Registered Tier or all tiers. This is a temporary measure until we
+   * implement Controlled Tier Beta access controls.
+   *
+   * <p>See https://precisionmedicineinitiative.atlassian.net/browse/RW-6237
+   *
+   * @return the list of tiers which Registered users have access to.
+   */
+  @Override
+  public List<DbAccessTier> getTiersForRegisteredUsers() {
+    // check this regardless of feature flag
+    final DbAccessTier registeredTier =
+        accessTierDao
+            .findOneByShortName(REGISTERED_TIER_SHORT_NAME)
+            .orElseThrow(
+                () -> new ServerErrorException("Cannot find Registered Tier in database."));
+
+    if (configProvider.get().featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers) {
+      return getAllTiers();
+    } else {
+      return Collections.singletonList(registeredTier);
+    }
   }
 
   private Timestamp now() {

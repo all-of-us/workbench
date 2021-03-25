@@ -18,7 +18,6 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -90,24 +89,6 @@ public class AccessTierServiceTest {
     assertThat(accessTierService.getAllTiers()).containsExactly(registeredTier, controlledTier);
   }
 
-  @Test(expected = ServerErrorException.class)
-  public void test_getRegisteredTier_empty() {
-    accessTierService.getRegisteredTier();
-  }
-
-  @Test
-  public void test_getRegisteredTier_registered() {
-    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-    assertThat(accessTierService.getRegisteredTier()).isEqualTo(registeredTier);
-  }
-
-  @Test(expected = ServerErrorException.class)
-  public void test_getRegisteredTier_missing() {
-    // wrong tier
-    TestMockFactory.createControlledTierForTests(accessTierDao);
-    accessTierService.getRegisteredTier();
-  }
-
   @Test
   public void test_getAccessTiersForUser_empty() {
     assertThat(accessTierService.getAccessTiersForUser(user)).isEmpty();
@@ -154,7 +135,7 @@ public class AccessTierServiceTest {
     // simply to show a non-Registered tier exists but we don't add the user to it
     TestMockFactory.createControlledTierForTests(accessTierDao);
 
-    accessTierService.addUserToRegisteredTier(user);
+    accessTierService.addUserToTier(user, registeredTier);
 
     Iterable<DbUserAccessTier> userAccessTiers = userAccessTierDao.findAll();
     assertThat(userAccessTiers).hasSize(1);
@@ -171,7 +152,7 @@ public class AccessTierServiceTest {
   public void test_addUserToRegisteredTier_idempotent() {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
-    accessTierService.addUserToRegisteredTier(user);
+    accessTierService.addUserToTier(user, registeredTier);
 
     assertThat(userAccessTierDao.findAll()).hasSize(1);
 
@@ -186,7 +167,7 @@ public class AccessTierServiceTest {
     // wait a second
     CLOCK.increment(1000);
 
-    accessTierService.addUserToRegisteredTier(user);
+    accessTierService.addUserToTier(user, registeredTier);
 
     // no change
 
@@ -208,7 +189,7 @@ public class AccessTierServiceTest {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     // does nothing
-    accessTierService.removeUserFromRegisteredTier(user);
+    accessTierService.removeUserFromTier(user, registeredTier);
     assertThat(userAccessTierDao.findAll()).isEmpty();
   }
 
@@ -219,7 +200,7 @@ public class AccessTierServiceTest {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     // adds a DB entry for (user, registered)
-    accessTierService.addUserToRegisteredTier(user);
+    accessTierService.addUserToTier(user, registeredTier);
 
     assertThat(userAccessTierDao.findAll()).hasSize(1);
 
@@ -235,7 +216,7 @@ public class AccessTierServiceTest {
     CLOCK.increment(1000);
 
     // updates the DB entry by setting it to DISABLED
-    accessTierService.removeUserFromRegisteredTier(user);
+    accessTierService.removeUserFromTier(user, registeredTier);
 
     assertThat(userAccessTierDao.findAll()).hasSize(1);
 
@@ -255,10 +236,10 @@ public class AccessTierServiceTest {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     // adds a DB entry for (user, registered)
-    accessTierService.addUserToRegisteredTier(user);
+    accessTierService.addUserToTier(user, registeredTier);
 
     // updates the DB entry by setting it to DISABLED
-    accessTierService.removeUserFromRegisteredTier(user);
+    accessTierService.removeUserFromTier(user, registeredTier);
 
     assertThat(userAccessTierDao.findAll()).hasSize(1);
 
@@ -269,7 +250,7 @@ public class AccessTierServiceTest {
     // wait a second
     CLOCK.increment(1000);
 
-    accessTierService.removeUserFromRegisteredTier(user);
+    accessTierService.removeUserFromTier(user, registeredTier);
 
     // no change
 
@@ -287,7 +268,7 @@ public class AccessTierServiceTest {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     // adds a DB entry for (user, registered)
-    accessTierService.addUserToRegisteredTier(user);
+    accessTierService.addUserToTier(user, registeredTier);
 
     assertThat(userAccessTierDao.findAll()).hasSize(1);
 
@@ -303,7 +284,7 @@ public class AccessTierServiceTest {
     CLOCK.increment(1000);
 
     // updates the DB entry by setting it to DISABLED
-    accessTierService.removeUserFromRegisteredTier(user);
+    accessTierService.removeUserFromTier(user, registeredTier);
 
     assertThat(userAccessTierDao.findAll()).hasSize(1);
 
@@ -321,7 +302,7 @@ public class AccessTierServiceTest {
     CLOCK.increment(1000);
 
     // updates the DB entry by setting it to ENABLED
-    accessTierService.addUserToRegisteredTier(user);
+    accessTierService.addUserToTier(user, registeredTier);
 
     assertThat(userAccessTierDao.findAll()).hasSize(1);
 
