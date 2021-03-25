@@ -17,17 +17,19 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
+import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.MethodConfigurationsApi;
 import org.pmiops.workbench.firecloud.api.SubmissionsApi;
 import org.pmiops.workbench.firecloud.model.FirecloudMethodConfiguration;
+import org.pmiops.workbench.firecloud.model.FirecloudSubmission;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionResponse;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
-import org.pmiops.workbench.model.TerraJob;
 import org.pmiops.workbench.model.TerraJobStatus;
 import org.pmiops.workbench.model.WgsCohortExtractionJob;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,7 @@ public class WgsCohortExtractionService {
   private final Provider<SubmissionsApi> submissionApiProvider;
   private final Provider<MethodConfigurationsApi> methodConfigurationsApiProvider;
   private final WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao;
+  private final WgsCohortExtractionMapper wgsCohortExtractionMapper;
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Clock clock;
@@ -56,6 +59,7 @@ public class WgsCohortExtractionService {
       Provider<SubmissionsApi> submissionsApiProvider,
       Provider<MethodConfigurationsApi> methodConfigurationsApiProvider,
       WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao,
+      WgsCohortExtractionMapper wgsCohortExtractionMapper,
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       Clock clock) {
@@ -66,6 +70,7 @@ public class WgsCohortExtractionService {
         extractionServiceAccountCloudStorageClientProvider;
     this.methodConfigurationsApiProvider = methodConfigurationsApiProvider;
     this.wgsExtractCromwellSubmissionDao = wgsExtractCromwellSubmissionDao;
+    this.wgsCohortExtractionMapper = wgsCohortExtractionMapper;
     this.userProvider = userProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.clock = clock;
@@ -88,6 +93,27 @@ public class WgsCohortExtractionService {
                 + cohortExtractionConfig.extractionMethodConfigurationVersion)
         .put("sourceRepo", "agora")
         .build();
+  }
+
+  public WgsCohortExtractionJob getWgsCohortExtractionJob(Long wgsCohortExtractionJobId) {
+    DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission = wgsExtractCromwellSubmissionDao.findOne(wgsCohortExtractionJobId);
+
+    if (dbWgsExtractCromwellSubmission == null) {
+      throw new NotFoundException();
+    }
+
+
+    FirecloudSubmission firecloudSubmission;
+    try {
+      firecloudSubmission = submissionApiProvider.get().monitorSubmission(
+              workbenchConfigProvider.get().wgsCohortExtraction.operationalTerraWorkspaceNamespace,
+              workbenchConfigProvider.get().wgsCohortExtraction.operationalTerraWorkspaceName,
+              dbWgsExtractCromwellSubmission.getSubmissionId());
+    } catch (ApiException e) {
+      throw new ServerErrorException("Could not fetch submission status from Terra", e);
+    }
+
+    return wgsCohortExtractionMapper.toApi(dbWgsExtractCromwellSubmission, firecloudSubmission);
   }
 
   public WgsCohortExtractionJob submitGenomicsCohortExtractionJob(DbWorkspace workspace, Long cohortId)

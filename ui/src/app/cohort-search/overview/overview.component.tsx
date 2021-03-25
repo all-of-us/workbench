@@ -13,7 +13,7 @@ import {TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
-import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
+import {cohortBuilderApi, cohortsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
@@ -426,6 +426,10 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
 
       if (cdrVersion.hasWgsData) {
         items.push({label: 'Start Genome Extraction Job', command: () => this.startGenomeExtractionJob()});
+        items.push({label: 'Get Genome Extraction Job', command: () => {
+          dataSetApi().getWgsCohortExtractionJob(this.props.workspace.namespace, this.props.workspace.id, 1)
+            .then(r => console.log(r));
+        }});
       }
 
       return items;

@@ -38,6 +38,7 @@ import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.genomics.WgsCohortExtractionService;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetCodeResponse;
@@ -57,6 +58,7 @@ import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.MarkDataSetRequest;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResourceType;
+import org.pmiops.workbench.model.WgsCohortExtractionJob;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -87,6 +89,7 @@ public class DataSetController implements DataSetApiDelegate {
   private final CdrVersionService cdrVersionService;
   private final FireCloudService fireCloudService;
   private final NotebooksService notebooksService;
+  private final WgsCohortExtractionService wgsCohortExtractionService;
 
   @Autowired
   DataSetController(
@@ -97,7 +100,8 @@ public class DataSetController implements DataSetApiDelegate {
       NotebooksService notebooksService,
       Provider<DbUser> userProvider,
       @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
-      WorkspaceService workspaceService) {
+      WorkspaceService workspaceService,
+      WgsCohortExtractionService wgsCohortExtractionService) {
     this.bigQueryService = bigQueryService;
     this.cdrVersionService = cdrVersionService;
     this.dataSetService = dataSetService;
@@ -106,6 +110,7 @@ public class DataSetController implements DataSetApiDelegate {
     this.userProvider = userProvider;
     this.prefixProvider = prefixProvider;
     this.workspaceService = workspaceService;
+    this.wgsCohortExtractionService = wgsCohortExtractionService;
   }
 
   @Override
@@ -484,6 +489,11 @@ public class DataSetController implements DataSetApiDelegate {
             .collect(Collectors.toList()));
 
     return ResponseEntity.ok(response);
+  }
+
+  @Override
+  public ResponseEntity<WgsCohortExtractionJob> getWgsCohortExtractionJob(String workspaceNamespace, String workspaceId, Long wgsCohortExtractionJobId) {
+    return ResponseEntity.ok(wgsCohortExtractionService.getWgsCohortExtractionJob(wgsCohortExtractionJobId));
   }
 
   // TODO(jaycarlton) create a class that knows about code cells and their properties,

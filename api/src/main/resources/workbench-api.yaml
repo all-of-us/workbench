@@ -97,13 +97,13 @@ parameters:
     format: int64
     required: true
     description: Cohort ID
-  terraJobId:
+  wgsCohortExtractionJobId:
     in: path
-    name: terraJobId
+    name: wgsCohortExtractionJobId
     type: integer
     format: int64
     required: true
-    description: Terra Job ID
+    description: WGS Cohort Extraction Job ID
   cohortReviewId:
     in: path
     name: cohortReviewId
@@ -2371,18 +2371,17 @@ paths:
           schema:
             type: boolean
             default: false
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/terraJob/wgscohortextraction/{terraJobId}":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/wgsCohortExtractionJob/{wgsCohortExtractionJobId}":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
-      - "$ref": "#/parameters/terraJobId"
-    post:
+      - "$ref": "#/parameters/wgsCohortExtractionJobId"
+    get:
       tags:
-        - cohorts
-      description: 'Initiates a Terra Cromwell job to extract genomes of the given cohort.
-       Requires WRITER access on the workspace.
-       Workspace CDR must also have access to a Wgs dataset'
-      operationId: extractCohortGenomes
+        - dataSet
+      description: 'Retrieve Job details for given ID.
+       Requires READER access on the workspace.'
+      operationId: getWgsCohortExtractionJob
       responses:
         200:
           description: The Terra Job for the extraction workflow
@@ -8817,12 +8816,13 @@ definitions:
         description: ''
   WgsCohortExtractionJob:
     properties:
-      jobId:
-        type: long
+      wgsCohortExtractionJobId:
+        type: integer
+        format: int64
         description: Workbench database Id for the job
       status:
         "$ref": '#/definitions/TerraJobStatus'
-      creationTime:  # TODO eric: return db creation time or Terra time?
+      submissionDate:  # TODO eric: return db creation time or Terra time?
         type: string
         format: date-time
         description: Timestamp in ISO-8601 # TODO eric: fill in
