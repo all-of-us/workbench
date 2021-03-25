@@ -8,7 +8,6 @@ const {useEffect, useState} = React;
 
 import {colorWithWhiteness} from 'app/styles/colors';
 import {
-  cdrVersionStore,
   currentCohortCriteriaStore,
   currentCohortSearchContextStore,
   currentCohortStore,
@@ -28,6 +27,7 @@ import {
   DataAccessLevel as FetchDataAccessLevel,
   Domain as FetchDomain,
 } from 'generated/fetch';
+import {cdrVersionStore, withStore} from './stores';
 
 export const WINDOW_REF = 'window-ref';
 
@@ -400,7 +400,7 @@ export const withRouteConfigData = () => {
 // of the CDR versions. This should only affect initial page loads, this HOC can
 // be included last (if multiple HOCs are in use) to minimize this impact.
 export const withCdrVersions = () => {
-  return connectReplaySubject(cdrVersionStore, 'cdrVersionListResponse');
+  return withStore(cdrVersionStore, 'cdrVersionListResponse');
 };
 
 // HOC that provides a 'queryParams' prop with current query params
