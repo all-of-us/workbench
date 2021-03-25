@@ -20,21 +20,11 @@ public interface WorkspaceService {
 
   String PROJECT_OWNER_ACCESS_LEVEL = "PROJECT_OWNER";
 
-  WorkspaceDao getDao();
-
   Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId);
-
-  FireCloudService getFireCloudService();
-
-  DbWorkspace get(String ns, String firecloudName);
 
   // Returns the requested workspace looked up by workspace namespace (aka billing project name).
   // Only active workspaces are searched. Returns null if no active workspace is found.
   Optional<DbWorkspace> getByNamespace(String workspaceNamespace);
-
-  List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces();
-
-  WorkspaceResponse getWorkspace(String workspaceNamespace) throws NotFoundException;
 
   WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId);
 
@@ -45,8 +35,6 @@ public interface WorkspaceService {
   DbWorkspace getRequired(String ns, String firecloudName);
 
   DbWorkspace getRequiredWithCohorts(String ns, String firecloudName);
-
-  DbWorkspace saveWithLastModified(DbWorkspace workspace);
 
   void deleteWorkspace(DbWorkspace dbWorkspace);
 
@@ -82,7 +70,7 @@ public interface WorkspaceService {
 
   WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId);
 
-  WorkspaceAccessLevel enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+  WorkspaceAccessLevel enforceWorkspaceAccessLevel(
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess);
 
   DbWorkspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(

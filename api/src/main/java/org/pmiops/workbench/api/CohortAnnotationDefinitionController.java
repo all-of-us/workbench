@@ -45,7 +45,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
       Long cohortId,
       CohortAnnotationDefinition cohortAnnotationDefinition) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     validateColumnName(cohortAnnotationDefinition.getColumnName());
@@ -62,7 +62,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
   public ResponseEntity<EmptyResponse> deleteCohortAnnotationDefinition(
       String workspaceNamespace, String workspaceId, Long cohortId, Long annotationDefinitionId) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     validateCohortExist(cohortId);
@@ -77,7 +77,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
   public ResponseEntity<CohortAnnotationDefinition> getCohortAnnotationDefinition(
       String workspaceNamespace, String workspaceId, Long cohortId, Long annotationDefinitionId) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     validateCohortExist(cohortId);
@@ -89,7 +89,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
   public ResponseEntity<CohortAnnotationDefinitionListResponse> getCohortAnnotationDefinitions(
       String workspaceNamespace, String workspaceId, Long cohortId) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     validateCohortExist(cohortId);
@@ -110,7 +110,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
     String columnName = cohortAnnotationDefinitionRequest.getColumnName();
 
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     validateColumnName(columnName);

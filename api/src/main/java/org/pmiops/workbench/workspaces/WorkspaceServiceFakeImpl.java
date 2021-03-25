@@ -19,38 +19,13 @@ import org.pmiops.workbench.model.WorkspaceResponse;
 public class WorkspaceServiceFakeImpl implements WorkspaceService {
 
   @Override
-  public WorkspaceDao getDao() {
-    return null;
-  }
-
-  @Override
   public Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId) {
     return Optional.empty();
   }
 
   @Override
-  public FireCloudService getFireCloudService() {
-    return null;
-  }
-
-  @Override
-  public DbWorkspace get(String ns, String firecloudName) {
-    return null;
-  }
-
-  @Override
   public Optional<DbWorkspace> getByNamespace(String workspaceNamespace) {
     return Optional.empty();
-  }
-
-  @Override
-  public List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces() {
-    return null;
-  }
-
-  @Override
-  public WorkspaceResponse getWorkspace(String workspaceNamespace) throws NotFoundException {
-    return null;
   }
 
   @Override
@@ -75,11 +50,6 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
 
   @Override
   public DbWorkspace getRequiredWithCohorts(String ns, String firecloudName) {
-    return null;
-  }
-
-  @Override
-  public DbWorkspace saveWithLastModified(DbWorkspace workspace) {
     return null;
   }
 
@@ -121,7 +91,7 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   }
 
   @Override
-  public WorkspaceAccessLevel enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+  public WorkspaceAccessLevel enforceWorkspaceAccessLevel(
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess) {
     return null;
   }

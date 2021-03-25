@@ -160,7 +160,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
           "Bad Request: request cohort review id must equal path parameter cohort review id.");
     }
 
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     return ResponseEntity.ok(
@@ -170,7 +170,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteCohortReview(
       String workspaceNamespace, String workspaceId, Long cohortReviewId) {
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     cohortReviewService.deleteCohortReview(cohortReviewId);
@@ -185,7 +185,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long participantId,
       Long annotationId) {
 
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     // will throw a NotFoundException if participant cohort annotation does not exist
@@ -226,7 +226,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   public ResponseEntity<CohortReviewListResponse> getCohortReviewsInWorkspace(
       String workspaceNamespace, String workspaceId) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     return ResponseEntity.ok(
@@ -263,7 +263,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   @Override
   public ResponseEntity<ParticipantCohortAnnotationListResponse> getParticipantCohortAnnotations(
       String workspaceNamespace, String workspaceId, Long cohortReviewId, Long participantId) {
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     List<ParticipantCohortAnnotation> annotations =
@@ -377,7 +377,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long cohortReviewId,
       CohortReview cohortReview) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     return ResponseEntity.ok(
@@ -393,7 +393,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long participantId,
       Long annotationId,
       ModifyParticipantCohortAnnotationRequest request) {
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     return ResponseEntity.ok(

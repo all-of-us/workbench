@@ -4,11 +4,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.logging.Logger;
+
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
 import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -19,7 +22,9 @@ import org.springframework.data.repository.query.Param;
  *
  * <p>Use of @Query is discouraged; if desired, define aliases in WorkspaceService.
  */
-public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
+public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, WorkspaceDaoCustom {
+
+  Logger log = Logger.getLogger(WorkspaceDao.class.getName());
 
   DbWorkspace findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
       String workspaceNamespace, String firecloudName, short activeStatus);
@@ -92,9 +97,17 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
       "SELECT activeStatus, COUNT(workspaceId) FROM DbWorkspace GROUP BY activeStatus ORDER BY activeStatus")
   List<ActiveStatusToCountResult> getActiveStatusToCount();
 
+  default DbWorkspace get(String ns, String firecloudName) {
+    return findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+        ns,
+        firecloudName,
+        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+  }
+
   interface ActiveStatusToCountResult {
     Short getWorkspaceActiveStatus();
 
     Long getWorkspaceCount();
   }
+
 }

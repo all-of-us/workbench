@@ -454,7 +454,7 @@ public class CohortAnnotationDefinitionControllerTest {
   }
 
   private void setupWorkspaceServiceMock() {
-    when(workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    when(workspaceService.enforceWorkspaceAccessLevel(
             NAMESPACE, NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(WorkspaceAccessLevel.OWNER);
   }

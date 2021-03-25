@@ -128,9 +128,9 @@ public class NotebooksServiceImpl implements NotebooksService {
       String toWorkspaceNamespace,
       String toWorkspaceName,
       String newNotebookName) {
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceService.enforceWorkspaceAccessLevel(
         fromWorkspaceNamespace, fromWorkspaceName, WorkspaceAccessLevel.READER);
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceService.enforceWorkspaceAccessLevel(
         toWorkspaceNamespace, toWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceService.validateActiveBilling(toWorkspaceNamespace, toWorkspaceName);
     newNotebookName = NotebooksService.withNotebookExtension(newNotebookName);

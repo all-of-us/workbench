@@ -334,7 +334,6 @@ public class RuntimeControllerTest {
     testWorkspace.setName(WORKSPACE_NAME);
     testWorkspace.setFirecloudName(WORKSPACE_ID);
     testWorkspace.setCdrVersion(cdrVersion);
-    doReturn(testWorkspace).when(mockWorkspaceService).get(WORKSPACE_NS, WORKSPACE_ID);
     doReturn(Optional.of(testWorkspace)).when(mockWorkspaceService).getByNamespace(WORKSPACE_NS);
   }
 
@@ -1198,7 +1197,7 @@ public class RuntimeControllerTest {
   public void getRuntime_validateActiveBilling_checkAccessFirst() {
     doThrow(ForbiddenException.class)
         .when(mockWorkspaceService)
-        .enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+        .enforceWorkspaceAccessLevel(
             WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
 
     assertThrows(ForbiddenException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
@@ -1219,7 +1218,7 @@ public class RuntimeControllerTest {
   public void localize_validateActiveBilling_checkAccessFirst() {
     doThrow(ForbiddenException.class)
         .when(mockWorkspaceService)
-        .enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+        .enforceWorkspaceAccessLevel(
             WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
 
     RuntimeLocalizeRequest req = new RuntimeLocalizeRequest();

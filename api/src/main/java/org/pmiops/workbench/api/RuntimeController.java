@@ -168,7 +168,7 @@ public class RuntimeController implements RuntimeApiDelegate {
   @Override
   public ResponseEntity<Runtime> getRuntime(String workspaceNamespace) {
     String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
@@ -250,7 +250,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     }
 
     String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
@@ -279,7 +279,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     }
 
     String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
@@ -294,7 +294,7 @@ public class RuntimeController implements RuntimeApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteRuntime(String workspaceNamespace) {
     String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
 
     leonardoNotebooksClient.deleteRuntime(workspaceNamespace, userProvider.get().getRuntimeName());
@@ -305,7 +305,7 @@ public class RuntimeController implements RuntimeApiDelegate {
   public ResponseEntity<RuntimeLocalizeResponse> localize(
       String workspaceNamespace, RuntimeLocalizeRequest body) {
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceService.enforceWorkspaceAccessLevel(
         dbWorkspace.getWorkspaceNamespace(),
         dbWorkspace.getFirecloudName(),
         WorkspaceAccessLevel.WRITER);

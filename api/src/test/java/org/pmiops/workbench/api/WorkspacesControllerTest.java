@@ -3180,7 +3180,7 @@ public class WorkspacesControllerTest {
         workspace.getName(),
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.OWNER);
-    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
+    DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getId());
     workspaceService.updateRecentWorkspaces(dbWorkspace, currentUser.getUserId(), NOW);
     ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity =
         workspacesController.getUserRecentWorkspaces();
@@ -3200,7 +3200,7 @@ public class WorkspacesControllerTest {
   public void cloneNotebook_validateActiveBilling() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
-    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
+    DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getId());
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 
@@ -3215,7 +3215,7 @@ public class WorkspacesControllerTest {
   public void renameNotebook_validateActiveBilling() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
-    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
+    DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getId());
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 
@@ -3232,7 +3232,7 @@ public class WorkspacesControllerTest {
   public void copyNotebook_validateActiveBilling() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
-    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
+    DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getId());
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 
