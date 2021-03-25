@@ -102,11 +102,12 @@ public class CdrVersionServiceTest {
 
   @Before
   public void setUp() {
-    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     user = new DbUser();
     user.setUsername("user");
     user = userDao.save(user);
+
+    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     defaultCdrVersion =
         makeCdrVersion(
@@ -120,15 +121,7 @@ public class CdrVersionServiceTest {
             null,
             null);
 
-    controlledTier =
-        accessTierDao.save(
-            new DbAccessTier()
-                .setAccessTierId(2)
-                .setShortName("controlled")
-                .setDisplayName("Controlled Tier")
-                .setAuthDomainName("Controlled Tier Auth Domain")
-                .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
-                .setServicePerimeter("controlled/tier/perimeter"));
+    controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
 
     controlledCdrVersion =
         makeCdrVersion(

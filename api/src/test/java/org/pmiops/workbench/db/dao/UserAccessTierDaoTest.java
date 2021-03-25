@@ -38,16 +38,7 @@ public class UserAccessTierDaoTest {
     user = userDao.save(user);
 
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-
-    controlledTier =
-        accessTierDao.save(
-            new DbAccessTier()
-                .setAccessTierId(2)
-                .setShortName("controlled")
-                .setDisplayName("Controlled Tier")
-                .setAuthDomainName("Controlled Tier Auth Domain")
-                .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
-                .setServicePerimeter("controlled/tier/perimeter"));
+    controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
   }
 
   @Test
