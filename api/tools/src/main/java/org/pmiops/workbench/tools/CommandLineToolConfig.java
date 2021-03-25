@@ -9,6 +9,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.DbConfig;
 import org.pmiops.workbench.google.StorageConfig;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -47,7 +48,7 @@ public class CommandLineToolConfig {
   @Bean
   @Lazy
   WorkbenchConfig workbenchConfig(ConfigDao configDao) {
-    DbConfig config = configDao.findOne(DbConfig.MAIN_CONFIG_ID);
+    DbConfig config = configDao.findById(DbConfig.MAIN_CONFIG_ID).orElse(null);
 
     Gson gson = new Gson();
     return gson.fromJson(config.getConfiguration(), WorkbenchConfig.class);
@@ -88,6 +89,9 @@ public class CommandLineToolConfig {
    * @param args command line args to pass to the program
    */
   public static void runCommandLine(Class<?> cliConfig, String[] args) {
-    new SpringApplicationBuilder(CommandLineToolConfig.class).child(cliConfig).web(false).run(args);
+    new SpringApplicationBuilder(CommandLineToolConfig.class)
+        .child(cliConfig)
+        .web(WebApplicationType.NONE)
+        .run(args);
   }
 }

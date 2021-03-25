@@ -17,6 +17,7 @@ import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -26,6 +27,7 @@ import org.springframework.context.annotation.Import;
  */
 @Configuration
 @Import({FireCloudServiceImpl.class, FireCloudConfig.class})
+@ComponentScan(basePackages = "org.pmiops.workbench")
 public class FetchWorkspaceDetails {
 
   private static final Logger log = Logger.getLogger(FetchWorkspaceDetails.class.getName());

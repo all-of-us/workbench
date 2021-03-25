@@ -10,12 +10,14 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.Authority;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * See api/project.rb set-authority. Adds or removes authorities (permissions) from users in the db.
  */
 @Configuration
+@ComponentScan(basePackages = "org.pmiops.workbench")
 public class SetAuthority {
 
   private static final Logger log = Logger.getLogger(SetAuthority.class.getName());

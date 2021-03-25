@@ -24,6 +24,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMember;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -229,6 +230,8 @@ public class FixDesynchronizedBillingProjectOwners {
   }
 
   public static void main(String[] args) {
-    new SpringApplicationBuilder(FixDesynchronizedBillingProjectOwners.class).web(false).run(args);
+    new SpringApplicationBuilder(FixDesynchronizedBillingProjectOwners.class)
+        .web(WebApplicationType.NONE)
+        .run(args);
   }
 }

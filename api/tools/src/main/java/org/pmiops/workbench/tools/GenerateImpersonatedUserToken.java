@@ -15,6 +15,7 @@ import org.apache.commons.cli.Options;
 import org.pmiops.workbench.auth.DelegatedUserCredentials;
 import org.pmiops.workbench.auth.ServiceAccounts;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -94,6 +95,8 @@ public class GenerateImpersonatedUserToken {
   }
 
   public static void main(String[] args) throws Exception {
-    new SpringApplicationBuilder(GenerateImpersonatedUserToken.class).web(false).run(args);
+    new SpringApplicationBuilder(GenerateImpersonatedUserToken.class)
+        .web(WebApplicationType.NONE)
+        .run(args);
   }
 }

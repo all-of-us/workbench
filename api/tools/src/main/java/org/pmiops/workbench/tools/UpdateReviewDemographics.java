@@ -22,6 +22,7 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohortReview;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -29,6 +30,7 @@ import org.springframework.context.annotation.Configuration;
  * aligns sex at birth data from cdr versions with the proper reviews cdr version.
  */
 @Configuration
+@ComponentScan(basePackages = "org.pmiops.workbench")
 public class UpdateReviewDemographics {
 
   private static final Logger logger = Logger.getLogger(UpdateReviewDemographics.class.getName());

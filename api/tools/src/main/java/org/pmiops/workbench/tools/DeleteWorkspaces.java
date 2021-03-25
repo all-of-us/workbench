@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
@@ -42,6 +43,7 @@ import org.springframework.context.annotation.Scope;
 
 @Configuration
 @Import({FireCloudServiceImpl.class, FireCloudConfig.class})
+@ComponentScan(basePackages = "org.pmiops.workbench")
 public class DeleteWorkspaces {
 
   private static final Logger log = Logger.getLogger(DeleteWorkspaces.class.getName());
