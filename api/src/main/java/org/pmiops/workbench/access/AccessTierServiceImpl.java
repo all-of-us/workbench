@@ -44,6 +44,7 @@ public class AccessTierServiceImpl implements AccessTierService {
    *
    * @return the List of all DbAccessTiers in the database
    */
+  @Override
   public List<DbAccessTier> getAllTiers() {
     return accessTierDao.findAll();
   }
@@ -54,6 +55,7 @@ public class AccessTierServiceImpl implements AccessTierService {
    * @return a DbAccessTier representing the Registered Tier
    * @throws ServerErrorException if there is no Registered Tier
    */
+  @Override
   public DbAccessTier getRegisteredTier() {
     return accessTierDao
         .findOneByShortName(REGISTERED_TIER_SHORT_NAME)
@@ -66,6 +68,7 @@ public class AccessTierServiceImpl implements AccessTierService {
    *
    * @param user the DbUser in the user-accessTier mappings we're updating
    */
+  @Override
   public void addUserToAllTiers(DbUser user) {
     getAllTiers().forEach(tier -> addUserToTier(user, tier));
   }
@@ -81,6 +84,7 @@ public class AccessTierServiceImpl implements AccessTierService {
    *
    * @param user the DbUser in the user-accessTier mapping we're updating
    */
+  @Override
   public void addUserToRegisteredTier(DbUser user) {
     addUserToTier(user, getRegisteredTier());
   }
@@ -96,6 +100,7 @@ public class AccessTierServiceImpl implements AccessTierService {
    *
    * @param user the DbUser in the user-accessTier mapping we're updating
    */
+  @Override
   public void removeUserFromRegisteredTier(DbUser user) {
     removeUserFromTier(user, getRegisteredTier());
   }
@@ -107,6 +112,7 @@ public class AccessTierServiceImpl implements AccessTierService {
    * @param user the DbUser in the user-accessTier mapping we're updating
    * @param accessTier the DbAccessTier in the user-accessTier mapping we're updating
    */
+  @Override
   public void addUserToTier(DbUser user, DbAccessTier accessTier) {
     Optional<DbUserAccessTier> existingEntryMaybe =
         userAccessTierDao.getByUserAndAccessTier(user, accessTier);
@@ -138,6 +144,7 @@ public class AccessTierServiceImpl implements AccessTierService {
    * @param user the DbUser in the user-accessTier mapping we're updating
    * @param accessTier the DbAccessTier in the user-accessTier mapping we're updating
    */
+  @Override
   public void removeUserFromTier(DbUser user, DbAccessTier accessTier) {
     userAccessTierDao
         .getByUserAndAccessTier(user, accessTier)
@@ -157,6 +164,7 @@ public class AccessTierServiceImpl implements AccessTierService {
    * @param user the user whose access we're checking
    * @return The List of DbAccessTiers the DbUser has access to in this environment
    */
+  @Override
   public List<DbAccessTier> getAccessTiersForUser(DbUser user) {
     return userAccessTierDao.getAllByUser(user).stream()
         .filter(uat -> uat.getTierAccessStatusEnum() == TierAccessStatus.ENABLED)
