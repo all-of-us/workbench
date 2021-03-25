@@ -8,7 +8,7 @@
     "dev-up": "yarn && yarn run codegen && yarn start",
     "build": "ng build",
     "test": "ng test --source-map=false",
-    "test-react": "jest",
+    "test-react": "yarn jest",
     "lint": "yarn eslint src --ext .ts,.tsx && ng lint --type-check=true",
     "e2e": "ng e2e",
     "codegen": "yarn run codegen-clean && yarn run codegen-swagger && yarn run codegen-swagger-fetch && yarn run post-codegen && yarn run notebooks-codegen-swagger-fetch",
@@ -20,31 +20,36 @@
     "coverage": "ng test --source-map=false --watch=false --code-coverage"
   },
   "jest": {
+    "preset": "ts-jest",
     "clearMocks": true,
     "setupFiles": [
       "./test-shim.js",
       "./test-setup.js"
     ],
-    "setupFilesAfterEnv": ["./test-setup-script.js"],
+    "setupFilesAfterEnv": [
+      "./test-setup-script.js"
+    ],
     "moduleFileExtensions": [
       "ts",
       "tsx",
       "js",
-      "spec.ts"
+      "spec.ts",
+      "json",
+      "node"
     ],
     "moduleDirectories": [
       "node_modules",
       "src"
     ],
     "transform": {
-      "^.+\\.(ts|tsx)$": "ts-jest"
+      "^.+\\.tsx?$": "ts-jest"
     },
     "testMatch": [
       "**/*.spec.tsx"
     ],
     "globals": {
       "ts-jest": {
-        "tsconfig": "src/tsconfig.jest.json"
+        "tsconfig": "<rootDir>/src/tsconfig.jest.json"
       }
     }
   },
@@ -145,7 +150,7 @@
     "@typescript-eslint/parser": "^4.15.2",
     "codelyzer": "^4.1.0",
     "enzyme": "^3.11.0",
-    "enzyme-adapter-react-16": "^1.15.5",
+    "enzyme-adapter-react-16": "^1.15.6",
     "eslint": "^6.8.0",
     "eslint-plugin-jest": "^24.3.2",
     "eslint-plugin-jsx-a11y": "^6.2.3",
