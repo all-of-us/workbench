@@ -861,11 +861,11 @@ public class DataSetControllerTest {
   public void getDataDictionaryEntry() {
     when(cdrVersionService.findByCdrVersionId(2l))
         .thenReturn(Optional.ofNullable(new DbCdrVersion()));
-    when(mockDSDataDictionaryDao.findByFieldNameAndDomain(anyString(), anyString()))
+    when(mockDSDataDictionaryDao.findFirstByFieldNameAndDomain(anyString(), anyString()))
         .thenReturn(new DbDSDataDictionary());
 
     dataSetController.getDataDictionaryEntry(2l, "PERSON", "MockValue");
-    verify(mockDSDataDictionaryDao, times(1)).findByFieldNameAndDomain("MockValue", "PERSON");
+    verify(mockDSDataDictionaryDao, times(1)).findFirstByFieldNameAndDomain("MockValue", "PERSON");
   }
 
   DataSetExportRequest setUpValidDataSetExportRequest() {
