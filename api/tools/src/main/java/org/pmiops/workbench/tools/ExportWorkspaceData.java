@@ -297,8 +297,6 @@ public class ExportWorkspaceData {
         Optional.ofNullable(user.getDataUseAgreementCompletionTime())
             .map(dateFormat::format)
             .orElse(""));
-    // TODO is this still in use?
-    row.setCreatorRegistrationState(user.getDataAccessLevelEnum().toString());
     row.setDegrees(
         Optional.ofNullable(user.getDegreesEnum()).orElse(ImmutableList.of()).stream()
             .map(Degree::toString)
