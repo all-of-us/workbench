@@ -50,12 +50,6 @@ export const signInStore =
     profileImage: {} as string,
   });
 
-// Use ReplaySubject over BehaviorSubject as this store does not have a legal
-// initial value and should not be accessed synchronously. The other stores
-// which meet this criteria should likely follow this same pattern, though a
-// broader redesign of these value stores is also probably in order.
-// export const cdrVersionStore = new ReplaySubject<CdrVersionListResponse>(1);
-
 /**
  * Slightly stricter variant of Angular's DefaultRouteReuseStrategy. This
  * strategy requires identical params for route reuse, in addition to route
