@@ -26,7 +26,7 @@ public class DSDataDictionaryDaoTest {
     dbDSDataDictionary_Condition =
         dsDataDictionaryDao.save(
             DbDSDataDictionary.builder()
-                .addDataProvenance("Mock Data Provance")
+                .addDataProvenance("Mock Data Provenance")
                 .addDescription("Mock description for Condition")
                 .addDomain(Domain.CONDITION.toString())
                 .addFieldName("Mock Condition Field")
@@ -35,12 +35,23 @@ public class DSDataDictionaryDaoTest {
                 .addRelevantOmopTable("omop")
                 .addSourcePpiModule("ppi")
                 .build());
+    dsDataDictionaryDao.save(
+        DbDSDataDictionary.builder()
+            .addDataProvenance("Mock Data Provenance")
+            .addDescription("Mock description for Condition")
+            .addDomain(Domain.CONDITION.toString())
+            .addFieldName("Mock Condition Field")
+            .addFieldType("Integer")
+            .addOmopCdmStandardOrCustomField("Custom")
+            .addRelevantOmopTable("omop_2")
+            .addSourcePpiModule("ppi")
+            .build());
   }
 
   @Test
   public void findByFieldNameAndDomain() {
     DbDSDataDictionary mockConditionDictionary =
-        dsDataDictionaryDao.findByFieldNameAndDomain(
+        dsDataDictionaryDao.findFirstByFieldNameAndDomain(
             "Mock Condition Field", Domain.CONDITION.toString());
     assertThat(mockConditionDictionary).isNotNull();
     assertThat(mockConditionDictionary).isEqualTo(dbDSDataDictionary_Condition);
@@ -49,7 +60,8 @@ public class DSDataDictionaryDaoTest {
   @Test
   public void findByFieldNameAndDomainDoesNotExist() {
     DbDSDataDictionary mockNotFoundDictionary =
-        dsDataDictionaryDao.findByFieldNameAndDomain("Does not exist", Domain.CONDITION.toString());
+        dsDataDictionaryDao.findFirstByFieldNameAndDomain(
+            "Does not exist", Domain.CONDITION.toString());
     assertThat(mockNotFoundDictionary).isNull();
   }
 }
