@@ -3,8 +3,7 @@ import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {serverConfigStore} from 'app/utils/navigation';
-import {getTwoFactorSetupUrl, RegistrationDashboard, RegistrationDashboardProps} from
-'app/pages/homepage/registration-dashboard';
+import {getTwoFactorSetupUrl, RegistrationDashboard, RegistrationDashboardProps} from 'app/pages/homepage/registration-dashboard';
 import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {userProfileStore} from 'app/utils/navigation';
