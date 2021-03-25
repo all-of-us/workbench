@@ -229,7 +229,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @Override
   public DataSet updateDataSet(DataSetRequest request, Long dataSetId) {
-    DbDataset dbDataSet = dataSetDao.findOne(dataSetId);
+    DbDataset dbDataSet =
+        dataSetDao
+            .findById(dataSetId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(String.format("DbDataset %s does not exist", dataSetId)));
 
     int version = Etags.toVersion(request.getEtag());
     if (dbDataSet.getVersion() != version) {
@@ -359,11 +364,13 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   public Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSetRequest) {
     DbDataset dbDataset;
     if (dataSetRequest.getDataSetId() != null) {
-      dbDataset = dataSetDao.findOne(dataSetRequest.getDataSetId());
-      // In case wrong dataSetId is passed to Api
-      if (dbDataset == null) {
-        throw new BadRequestException("Data Set Generate code Failed: Data set not found");
-      }
+      dbDataset =
+          dataSetDao
+              .findById(dataSetRequest.getDataSetId())
+              .orElseThrow(
+                  // In case wrong dataSetId is passed to Api
+                  () ->
+                      new BadRequestException("Data Set Generate code Failed: Data set not found"));
     } else {
       dbDataset = dataSetMapper.dataSetRequestToDb(dataSetRequest, null, clock);
     }
@@ -947,13 +954,26 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public List<DbConceptSet> getConceptSetsForDataset(DbDataset dataSet) {
     return conceptSetDao.findAllByConceptSetIdIn(
-        dataSetDao.findOne(dataSet.getDataSetId()).getCohortIds());
+        dataSetDao
+            .findById(dataSet.getDataSetId())
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("DbDataset %s does not exist", dataSet.getDataSetId())))
+            .getCohortIds());
   }
 
   @Transactional
   @Override
   public List<DbCohort> getCohortsForDataset(DbDataset dataSet) {
-    return cohortDao.findAllByCohortIdIn(dataSetDao.findOne(dataSet.getDataSetId()).getCohortIds());
+    return cohortDao.findAllByCohortIdIn(
+        dataSetDao
+            .findById(dataSet.getDataSetId())
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("DbDataset %s does not exist", dataSet.getDataSetId())))
+            .getCohortIds());
   }
 
   public List<DataSet> getDataSets(ResourceType resourceType, long resourceId) {
@@ -977,12 +997,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @Override
   public void deleteDataSet(Long dataSetId) {
-    dataSetDao.delete(dataSetId);
+    dataSetDao.deleteById(dataSetId);
   }
 
   @Override
   public Optional<DataSet> getDbDataSet(Long dataSetId) {
-    return Optional.of(dataSetMapper.dbModelToClient(dataSetDao.findOne(dataSetId)));
+    return Optional.of(dataSetMapper.dbModelToClient(dataSetDao.findById(dataSetId).get()));
   }
 
   @Override
@@ -990,7 +1010,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     List<DbDataset> dbDataSetList = getDbDataSets(resourceType, resourceId);
     dbDataSetList.forEach(dataSet -> dataSet.setInvalid(true));
     try {
-      dataSetDao.save(dbDataSetList);
+      dataSetDao.saveAll(dbDataSetList);
     } catch (OptimisticLockException e) {
       throw new ConflictException("Failed due to concurrent data set modification");
     }

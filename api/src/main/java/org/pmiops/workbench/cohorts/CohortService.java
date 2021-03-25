@@ -42,7 +42,7 @@ public class CohortService {
   }
 
   public List<String> getPersonIdsWithWholeGenome(Long cohortId) {
-    String cohortDefinition = cohortDao.findOne(cohortId).getCriteria();
+    String cohortDefinition = cohortDao.findById(cohortId).get().getCriteria();
 
     // AND the existing search criteria with participants having genomics data.
     final SearchRequest searchRequest = new Gson().fromJson(cohortDefinition, SearchRequest.class);
@@ -69,7 +69,7 @@ public class CohortService {
   }
 
   public List<Cohort> findAll(List<Long> cohortIds) {
-    return ((List<DbCohort>) cohortDao.findAll(cohortIds))
+    return ((List<DbCohort>) cohortDao.findAllById(cohortIds))
         .stream().map(cohortMapper::dbModelToClient).collect(Collectors.toList());
   }
 }

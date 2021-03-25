@@ -32,8 +32,9 @@ public class CohortAnnotationDefinitionDaoTest {
   @Test
   public void saveNoEnumValues() {
     assertThat(
-            cohortAnnotationDefinitionDao.findOne(
-                cohortAnnotationDefinition.getCohortAnnotationDefinitionId()))
+            cohortAnnotationDefinitionDao
+                .findById(cohortAnnotationDefinition.getCohortAnnotationDefinitionId())
+                .get())
         .isEqualTo(cohortAnnotationDefinition);
   }
 
@@ -62,8 +63,9 @@ public class CohortAnnotationDefinitionDaoTest {
     cohortAnnotationDefinitionDao.save(cohortAnnotationDefinition);
 
     DbCohortAnnotationDefinition cad =
-        cohortAnnotationDefinitionDao.findOne(
-            cohortAnnotationDefinition.getCohortAnnotationDefinitionId());
+        cohortAnnotationDefinitionDao
+            .findById(cohortAnnotationDefinition.getCohortAnnotationDefinitionId())
+            .get();
     assertThat(cohortAnnotationDefinition).isEqualTo(cad);
     assertThat(cohortAnnotationDefinition.getEnumValues()).isEqualTo(cad.getEnumValues());
   }

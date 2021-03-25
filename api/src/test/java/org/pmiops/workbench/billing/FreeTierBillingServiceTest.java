@@ -469,7 +469,7 @@ public class FreeTierBillingServiceTest {
 
     for (DbWorkspace ws : Arrays.asList(ws1, ws2)) {
       // retrieve from DB again to reflect update after cron
-      DbWorkspace dbWorkspace = workspaceDao.findOne(ws.getWorkspaceId());
+      DbWorkspace dbWorkspace = workspaceDao.findById(ws.getWorkspaceId()).get();
       assertThat(dbWorkspace.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
       assertThat(dbWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
     }
@@ -508,7 +508,7 @@ public class FreeTierBillingServiceTest {
 
     // confirm DB updates after checkFreeTierBillingUsage()
 
-    final DbWorkspace dbWorkspace1 = workspaceDao.findOne(ws1.getWorkspaceId());
+    final DbWorkspace dbWorkspace1 = workspaceDao.findById(ws1.getWorkspaceId()).get();
     assertThat(dbWorkspace1.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
     assertThat(dbWorkspace1.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
@@ -516,7 +516,7 @@ public class FreeTierBillingServiceTest {
     assertThat(usage1.getUser()).isEqualTo(user1);
     assertWithinBillingTolerance(usage1.getCost(), cost1);
 
-    final DbWorkspace dbWorkspace2 = workspaceDao.findOne(ws2.getWorkspaceId());
+    final DbWorkspace dbWorkspace2 = workspaceDao.findById(ws2.getWorkspaceId()).get();
     assertThat(dbWorkspace2.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
     assertThat(dbWorkspace2.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
@@ -576,7 +576,7 @@ public class FreeTierBillingServiceTest {
     verify(mailService, times(1)).alertUserFreeTierExpiration(eq(user));
 
     // retrieve from DB again to reflect update after cron
-    DbWorkspace dbWorkspace = workspaceDao.findOne(workspace.getWorkspaceId());
+    DbWorkspace dbWorkspace = workspaceDao.findById(workspace.getWorkspaceId()).get();
     assertThat(dbWorkspace.getBillingStatus()).isEqualTo(BillingStatus.INACTIVE);
     assertThat(dbWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 
@@ -719,7 +719,7 @@ public class FreeTierBillingServiceTest {
     assertSingleWorkspaceTestDbState(user, freeTierWorkspace, BillingStatus.INACTIVE, 100.01);
 
     final DbWorkspace retrievedWorkspace =
-        workspaceDao.findOne(userAccountWorkspace.getWorkspaceId());
+        workspaceDao.findById(userAccountWorkspace.getWorkspaceId()).get();
     assertThat(retrievedWorkspace.getBillingStatus()).isEqualTo(BillingStatus.ACTIVE);
     // TODO RW-5107
     // assertThat(retrievedWorkspace.getBillingAccountType()).isEqualTo(BillingAccountType.USER_PROVIDED);
@@ -750,7 +750,8 @@ public class FreeTierBillingServiceTest {
   private void assertSingleWorkspaceTestDbState(
       DbUser user, DbWorkspace workspaceForQuerying, BillingStatus billingStatus, double cost) {
 
-    final DbWorkspace workspace = workspaceDao.findOne(workspaceForQuerying.getWorkspaceId());
+    final DbWorkspace workspace =
+        workspaceDao.findById(workspaceForQuerying.getWorkspaceId()).get();
     assertThat(workspace.getBillingStatus()).isEqualTo(billingStatus);
     assertThat(workspace.getBillingAccountType()).isEqualTo(BillingAccountType.FREE_TIER);
 

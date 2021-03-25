@@ -200,7 +200,7 @@ public class RdrExportServiceImplTest {
     verify(mockWorkspaceService)
         .getFirecloudUserRoles(
             mockWorkspace.getWorkspaceNamespace(), mockWorkspace.getFirecloudName());
-    verify(rdrExportDao, times(1)).save(anyList());
+    verify(rdrExportDao, times(1)).saveAll(anyList());
 
     verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
   }
@@ -227,7 +227,7 @@ public class RdrExportServiceImplTest {
     verify(mockWorkspaceService)
         .getFirecloudUserRoles(
             mockWorkspace.getWorkspaceNamespace(), mockWorkspace.getFirecloudName());
-    verify(rdrExportDao, times(1)).save(anyList());
+    verify(rdrExportDao, times(1)).saveAll(anyList());
 
     rdrWorkspace
         .getWorkspaceDemographic()
@@ -275,7 +275,7 @@ public class RdrExportServiceImplTest {
     verify(mockWorkspaceService, never())
         .getFirecloudUserRoles(
             mockDeletedWorkspace.getWorkspaceNamespace(), mockDeletedWorkspace.getFirecloudName());
-    verify(rdrExportDao, times(1)).save(anyList());
+    verify(rdrExportDao, times(1)).saveAll(anyList());
 
     rdrWorkspace.setStatus(RdrWorkspace.StatusEnum.INACTIVE);
     verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));

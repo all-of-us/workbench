@@ -124,10 +124,10 @@ public class DataSetMapperTest {
 
     doReturn(Collections.singletonList(dbConceptSet))
         .when(mockConceptSetDao)
-        .findAll(dbDataset.getConceptSetIds());
+        .findAllById(dbDataset.getConceptSetIds());
     doReturn(Collections.singletonList(dbCohort))
         .when(mockCohortDao)
-        .findAll(dbDataset.getCohortIds());
+        .findAllById(dbDataset.getCohortIds());
 
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);

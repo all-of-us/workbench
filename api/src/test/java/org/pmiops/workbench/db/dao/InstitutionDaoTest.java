@@ -42,8 +42,8 @@ public class InstitutionDaoTest {
 
   @Test
   public void test_delete() {
-    institutionDao.delete(testInst.getInstitutionId());
-    DbInstitution dbInstitution = institutionDao.findOne(testInst.getInstitutionId());
+    institutionDao.deleteById(testInst.getInstitutionId());
+    DbInstitution dbInstitution = institutionDao.findById(testInst.getInstitutionId()).get();
     assertThat(dbInstitution).isNull();
     assertThat(institutionDao.findAll()).isEmpty();
   }
@@ -54,8 +54,8 @@ public class InstitutionDaoTest {
   }
 
   @Test
-  public void test_findOne() {
-    DbInstitution dbInstitution = institutionDao.findOne(testInst.getInstitutionId());
+  public void test_findById() {
+    DbInstitution dbInstitution = institutionDao.findById(testInst.getInstitutionId()).get();
     assertThat(dbInstitution).isEqualTo(testInst);
   }
 

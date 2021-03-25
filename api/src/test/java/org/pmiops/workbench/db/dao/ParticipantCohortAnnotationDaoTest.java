@@ -83,7 +83,7 @@ public class ParticipantCohortAnnotationDaoTest {
 
   @Test
   public void save() {
-    assertThat(participantCohortAnnotationDao.findOne(pca.getAnnotationId())).isEqualTo(pca);
+    assertThat(participantCohortAnnotationDao.findById(pca.getAnnotationId())).isEqualTo(pca);
   }
 
   @Test

@@ -974,7 +974,7 @@ public class WorkspacesControllerTest {
     request.setWorkspace(workspace);
     workspacesController.updateWorkspace(workspace.getNamespace(), workspace.getId(), request);
 
-    assertThat(workspaceDao.findOne(dbWorkspace.getWorkspaceId()).getBillingStatus())
+    assertThat(workspaceDao.findById(dbWorkspace.getWorkspaceId()).get().getBillingStatus())
         .isEqualTo(BillingStatus.ACTIVE);
   }
 

@@ -8,6 +8,7 @@ import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.BillingStatus;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -63,7 +64,12 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
   }
 
   default void updateBillingStatus(long workspaceId, BillingStatus status) {
-    DbWorkspace toUpdate = findOne(workspaceId);
+    DbWorkspace toUpdate =
+        findById(workspaceId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("DbWorkspace %s does not exist", workspaceId)));
     toUpdate.setBillingStatus(status);
     save(toUpdate);
   }
@@ -71,7 +77,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
   @Query("SELECT w.creator FROM DbWorkspace w WHERE w.billingStatus = (:status)")
   Set<DbUser> findAllCreatorsByBillingStatus(@Param("status") BillingStatus status);
 
-  List<DbWorkspace> findAllByActiveStatusIn(Short workspaceActiveStatusOrdinal);
+  List<DbWorkspace> findAllByActiveStatus(Short workspaceActiveStatusOrdinal);
 
   // TODO replace with AccessTier RW-6137
   // @Query(
