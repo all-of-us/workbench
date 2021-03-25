@@ -10,7 +10,6 @@ import {environment} from 'environments/environment';
 import * as StackTrace from 'stacktrace-js';
 
 import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
-import {CdrVersionStorageService} from './services/cdr-version-storage.service';
 import {ErrorReporterService} from './services/error-reporter.service';
 import {GoogleAnalyticsEventsService} from './services/google-analytics-events.service';
 import {ProfileStorageService} from './services/profile-storage.service';
@@ -158,7 +157,6 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
       deps: [ServerConfigService],
       useClass: ErrorReporterService,
     },
-    CdrVersionStorageService,
     ProfileStorageService,
     SignInService,
     GoogleAnalyticsEventsService,

@@ -1019,7 +1019,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public DataDictionaryEntry findDataDictionaryEntry(String fieldName, String domain) {
     DbDSDataDictionary dbDSDataDictionary =
-        dsDataDictionaryDao.findByFieldNameAndDomain(fieldName, domain);
+        dsDataDictionaryDao.findFirstByFieldNameAndDomain(fieldName, domain);
     if (dbDSDataDictionary == null) {
       throw new NotFoundException(
           "No Data Dictionary Entry found for field " + fieldName + "and domain: " + domain);

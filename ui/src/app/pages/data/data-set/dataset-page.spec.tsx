@@ -4,7 +4,7 @@ import * as React from 'react';
 import {Button, Clickable} from 'app/components/buttons';
 import {DataSetPage, COMPARE_DOMAINS_FOR_DISPLAY} from 'app/pages/data/data-set/dataset-page';
 import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {cdrVersionStore, currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
 import {
   CdrVersionsApi,
   CohortsApi,
@@ -19,6 +19,7 @@ import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 import {workspaceDataStub, workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
+import {cdrVersionStore} from "app/utils/stores";
 
 describe('DataSetPage', () => {
   beforeEach(() => {
@@ -31,7 +32,7 @@ describe('DataSetPage', () => {
       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
     });
     currentWorkspaceStore.next(workspaceDataStub);
-    cdrVersionStore.next(cdrVersionListResponse);
+    cdrVersionStore.set(cdrVersionListResponse);
   });
 
   it('should render', async() => {
