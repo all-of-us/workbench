@@ -224,6 +224,17 @@ public class TestMockFactory {
     return accessTierDao.save(accessTier);
   }
 
+  public static DbAccessTier createControlledTierForTests(AccessTierDao accessTierDao) {
+    return accessTierDao.save(
+        new DbAccessTier()
+            .setAccessTierId(2)
+            .setShortName("controlled")
+            .setDisplayName("Controlled Tier")
+            .setAuthDomainName("Controlled Tier Auth Domain")
+            .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
+            .setServicePerimeter("controlled/tier/perimeter"));
+  }
+
   public static DbCdrVersion createDefaultCdrVersion(
       CdrVersionDao cdrVersionDao, AccessTierDao accessTierDao) {
     return createDefaultCdrVersion(cdrVersionDao, accessTierDao, 1);

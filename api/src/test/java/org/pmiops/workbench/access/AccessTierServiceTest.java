@@ -85,16 +85,7 @@ public class AccessTierServiceTest {
   @Test
   public void test_getAllTiers_2() {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-
-    final DbAccessTier controlledTier =
-        accessTierDao.save(
-            new DbAccessTier()
-                .setAccessTierId(2)
-                .setShortName("controlled")
-                .setDisplayName("Controlled Tier")
-                .setAuthDomainName("Controlled Tier Auth Domain")
-                .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
-                .setServicePerimeter("controlled/tier/perimeter"));
+    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
 
     assertThat(accessTierService.getAllTiers()).containsExactly(registeredTier, controlledTier);
   }
@@ -112,15 +103,8 @@ public class AccessTierServiceTest {
 
   @Test(expected = ServerErrorException.class)
   public void test_getRegisteredTier_missing() {
-    final DbAccessTier controlledTier =
-        accessTierDao.save(
-            new DbAccessTier()
-                .setAccessTierId(2)
-                .setShortName("controlled")
-                .setDisplayName("Controlled Tier")
-                .setAuthDomainName("Controlled Tier Auth Domain")
-                .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
-                .setServicePerimeter("controlled/tier/perimeter"));
+    // wrong tier
+    TestMockFactory.createControlledTierForTests(accessTierDao);
     accessTierService.getRegisteredTier();
   }
 
@@ -154,15 +138,7 @@ public class AccessTierServiceTest {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
     addDaoEntry(user, registeredTier, TierAccessStatus.ENABLED);
 
-    final DbAccessTier controlledTier =
-        accessTierDao.save(
-            new DbAccessTier()
-                .setAccessTierId(2)
-                .setShortName("controlled")
-                .setDisplayName("Controlled Tier")
-                .setAuthDomainName("Controlled Tier Auth Domain")
-                .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
-                .setServicePerimeter("controlled/tier/perimeter"));
+    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
     addDaoEntry(user, controlledTier, TierAccessStatus.ENABLED);
 
     assertThat(accessTierService.getAccessTiersForUser(user))
@@ -176,15 +152,7 @@ public class AccessTierServiceTest {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     // simply to show a non-Registered tier exists but we don't add the user to it
-    final DbAccessTier controlledTier =
-        accessTierDao.save(
-            new DbAccessTier()
-                .setAccessTierId(2)
-                .setShortName("controlled")
-                .setDisplayName("Controlled Tier")
-                .setAuthDomainName("Controlled Tier Auth Domain")
-                .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
-                .setServicePerimeter("controlled/tier/perimeter"));
+    TestMockFactory.createControlledTierForTests(accessTierDao);
 
     accessTierService.addUserToRegisteredTier(user);
 
@@ -380,16 +348,7 @@ public class AccessTierServiceTest {
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-
-    final DbAccessTier controlledTier =
-        accessTierDao.save(
-            new DbAccessTier()
-                .setAccessTierId(2)
-                .setShortName("controlled")
-                .setDisplayName("Controlled Tier")
-                .setAuthDomainName("Controlled Tier Auth Domain")
-                .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
-                .setServicePerimeter("controlled/tier/perimeter"));
+    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
 
     accessTierService.addUserToAllTiers(user);
 
