@@ -1,12 +1,7 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {
-  buildRasRedirectUrl,
-  navigate,
-  queryParamsStore,
-  serverConfigStore
-} from 'app/utils/navigation';
+import {navigate, queryParamsStore, serverConfigStore} from 'app/utils/navigation';
 
 import {
   Clickable, StyledAnchorTag,
@@ -23,10 +18,7 @@ import {Scroll} from 'app/icons/scroll';
 import {QuickTourReact} from 'app/pages/homepage/quick-tour-modal';
 import {RecentResources} from 'app/pages/homepage/recent-resources';
 import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
-import {
-  getRegistrationTasksMap,
-  RegistrationDashboard
-} from 'app/pages/homepage/registration-dashboard';
+import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {hasRegisteredAccessFetch, reactStyles, withUserProfile} from 'app/utils';
@@ -63,12 +55,7 @@ export const styles = reactStyles({
     marginLeft: '-1rem', marginRight: '-0.6rem', justifyContent: 'space-between', fontSize: '1.2em'
   },
   quickTourCardsRow: {
-    justifyContent: 'flex-start',
-    maxHeight: '26rem',
-    marginTop: '0.5rem',
-    marginBottom: '1rem',
-    marginLeft: '-1rem',
-    paddingLeft: '1rem',
+    justifyContent: 'flex-start', maxHeight: '26rem', marginTop: '0.5rem', marginBottom: '1rem', marginLeft: '-1rem', paddingLeft: '1rem',
     position: 'relative'
   },
   quickTourLabel: {
@@ -166,7 +153,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
     if (token) {
       this.setState({eraCommonsLoading: true});
       try {
-        const profileResponse = await profileApi().updateNihToken({jwt: token});
+        const profileResponse = await profileApi().updateNihToken({ jwt: token });
         if (profileResponse.eraCommonsLinkedNihUsername !== undefined) {
           this.setState({eraCommonsLinked: true});
         }
@@ -200,14 +187,14 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
 
   setFirstVisit() {
     this.setState({firstVisit: true});
-    profileApi().updatePageVisits({page: this.pageId});
+    profileApi().updatePageVisits({ page: this.pageId});
   }
 
   async syncCompliance() {
     const complianceStatus = profileApi().syncComplianceTrainingStatus().then(result => {
       this.setState({
         trainingCompleted: !!(getRegistrationTasksMap()['complianceTraining']
-        .completionTimestamp(result))
+          .completionTimestamp(result))
       });
     }).catch(err => {
       this.setState({trainingCompleted: false});
@@ -250,8 +237,8 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
       this.setState({
         eraCommonsLinked: !!(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile)),
         dataUserCodeOfConductCompleted: (serverConfigStore.getValue().enableDataUseAgreement ?
-            (() => !!(getRegistrationTasksMap()['dataUserCodeOfConduct']
-              .completionTimestamp(profile)))() : true)
+          (() => !!(getRegistrationTasksMap()['dataUserCodeOfConduct']
+            .completionTimestamp(profile)))() : true)
       });
       // TODO(RW-6493): Update rasCommonsLinked similar to what we are doing for eraCommons
       this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});

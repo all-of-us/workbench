@@ -36,19 +36,19 @@ export const setSidebarActiveIconStore = new BehaviorSubject<string>(null);
 export const conceptSetUpdating = new BehaviorSubject<boolean>(false);
 
 export const userProfileStore =
-    new BehaviorSubject<{ profile: Profile, reload: Function, updateCache: Function }>({
-      profile: {} as Profile,
-      reload: () => {},
-      updateCache: (profile) => {},
-    });
+  new BehaviorSubject<{ profile: Profile, reload: Function, updateCache: Function }>({
+    profile: {} as Profile,
+    reload: () => {},
+    updateCache: (profile) => {},
+  });
 export const signInStore =
-    new BehaviorSubject<{
-      signOut: Function,
-      profileImage: string,
-    }>({
-      signOut: () => {},
-      profileImage: {} as string,
-    });
+  new BehaviorSubject<{
+    signOut: Function,
+    profileImage: string,
+  }>({
+    signOut: () => {},
+    profileImage: {} as string,
+  });
 
 /**
  * Slightly stricter variant of Angular's DefaultRouteReuseStrategy. This
@@ -68,7 +68,7 @@ export class WorkbenchRouteReuseStrategy extends RouteReuseStrategy {
 
   shouldReuseRoute(future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean {
     return future.routeConfig === curr.routeConfig
-        && (fp.isEqual(future.params, curr.params) || curr.data.shouldReuse);
+      && (fp.isEqual(future.params, curr.params) || curr.data.shouldReuse);
   }
 }
 
@@ -109,7 +109,7 @@ export const navigateAndPreventDefaultIfNoKeysPressed = (e: React.MouseEvent, ur
 
 export const navigateSignOut = (continuePath: string = '/login') => {
   window.location.assign(`https://www.google.com/accounts/Logout?continue=` +
-      `https://appengine.google.com/_ah/logout?continue=${window.location.origin}${continuePath}`);
+    `https://appengine.google.com/_ah/logout?continue=${window.location.origin}${continuePath}`);
 };
 
 /**

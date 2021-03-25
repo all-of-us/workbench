@@ -127,7 +127,7 @@ describe('RegistrationDashboard', () => {
 
   it('should have RAS link card then display a success message after linking when enableRasLoginGovLinking is true', () => {
     serverConfigStore.next({...serverConfigStore.getValue(), enableRasLoginGovLinking: true});
-    // When enableBetaAccess is false, we shouldn't need to have been granted beta access.
+    // When enableRasLoginGovLinking is true, show RAS linking card.
     props.betaAccessGranted = true;
     props.eraCommonsLinked = true;
     props.trainingCompleted = true;
