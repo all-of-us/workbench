@@ -344,12 +344,12 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @After
   public void tearDown() {
-    cohortDao.delete(dbCohort1.getCohortId());
-    cohortDao.delete(dbCohort2.getCohortId());
-    conceptSetDao.delete(dbConditionConceptSet.getConceptSetId());
-    conceptSetDao.delete(dbProcedureConceptSet.getConceptSetId());
-    workspaceDao.delete(dbWorkspace.getWorkspaceId());
-    cdrVersionDao.delete(dbCdrVersion.getCdrVersionId());
+    cohortDao.deleteById(dbCohort1.getCohortId());
+    cohortDao.deleteById(dbCohort2.getCohortId());
+    conceptSetDao.deleteById(dbConditionConceptSet.getConceptSetId());
+    conceptSetDao.deleteById(dbProcedureConceptSet.getConceptSetId());
+    workspaceDao.deleteById(dbWorkspace.getWorkspaceId());
+    cdrVersionDao.deleteById(dbCdrVersion.getCdrVersionId());
     dsLinkingDao.delete(conditionLinking1);
     dsLinkingDao.delete(conditionLinking2);
     dsLinkingDao.delete(personLinking1);

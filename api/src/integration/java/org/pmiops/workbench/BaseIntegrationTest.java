@@ -11,6 +11,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -19,6 +20,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
 @Import({IntegrationTestConfig.class})
+@ComponentScan(basePackages = "org.pmiops.workbench")
 public abstract class BaseIntegrationTest {
 
   protected static WorkbenchConfig config;

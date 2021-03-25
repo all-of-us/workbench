@@ -243,8 +243,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @After
   public void tearDown() {
-    workspaceDao.delete(workspace.getWorkspaceId());
-    cdrVersionDao.delete(cdrVersion.getCdrVersionId());
+    workspaceDao.deleteById(workspace.getWorkspaceId());
+    cdrVersionDao.deleteById(cdrVersion.getCdrVersionId());
   }
 
   private static ParticipantData expectedAllEvents1() {
