@@ -3,17 +3,26 @@ package org.pmiops.workbench.genomics;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.pmiops.workbench.cohortreview.mapper.CohortReviewMapper;
+import org.pmiops.workbench.cohorts.CohortMapper;
+import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
+import org.pmiops.workbench.dataset.mapper.DataSetMapper;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmission;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionStatus;
 import org.pmiops.workbench.model.TerraJobStatus;
 import org.pmiops.workbench.model.WgsCohortExtractionJob;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
 @Mapper(
-        config = MapStructConfig.class,
-        collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE
-)
+    config = MapStructConfig.class,
+    collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE,
+    uses = {
+        CommonMappers.class
+    })
 public interface WgsCohortExtractionMapper {
 
     @Mapping(target = "wgsCohortExtractionJobId", source = "dbSubmission.wgsExtractCromwellSubmissionId")

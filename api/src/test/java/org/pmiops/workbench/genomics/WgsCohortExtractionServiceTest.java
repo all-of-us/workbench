@@ -13,9 +13,12 @@ import com.google.cloud.storage.Blob;
 import com.google.common.collect.ImmutableList;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,13 +39,19 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.MethodConfigurationsApi;
 import org.pmiops.workbench.firecloud.api.SubmissionsApi;
 import org.pmiops.workbench.firecloud.model.FirecloudMethodConfiguration;
+import org.pmiops.workbench.firecloud.model.FirecloudSubmission;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionResponse;
+import org.pmiops.workbench.firecloud.model.FirecloudSubmissionStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudValidatedMethodConfiguration;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
+import org.pmiops.workbench.model.TerraJobStatus;
+import org.pmiops.workbench.model.WgsCohortExtractionJob;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -69,6 +78,7 @@ public class WgsCohortExtractionServiceTest {
   @Autowired WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao;
   @Autowired UserDao userDao;
   @Autowired WorkspaceDao workspaceDao;
+  @Autowired WorkspaceService workspaceService;
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired CohortService mockCohortService;
 
@@ -79,12 +89,17 @@ public class WgsCohortExtractionServiceTest {
   private static DbUser currentUser;
 
   @TestConfiguration
-  @Import({WgsCohortExtractionService.class})
+  @Import({
+      WgsCohortExtractionService.class,
+      WgsCohortExtractionMapperImpl.class,
+      CommonMappers.class
+  })
   @MockBean({
     CohortService.class,
     FireCloudService.class,
     MethodConfigurationsApi.class,
-    SubmissionsApi.class
+    SubmissionsApi.class,
+    WorkspaceService.class
   })
   static class Configuration {
     @Bean
@@ -157,6 +172,75 @@ public class WgsCohortExtractionServiceTest {
     FirecloudSubmissionResponse submissionResponse = new FirecloudSubmissionResponse();
     submissionResponse.setSubmissionId(FC_SUBMISSION_ID);
     doReturn(submissionResponse).when(submissionsApi).createSubmission(any(), any(), any());
+  }
+
+  @Test
+  public void getExtractionJob() throws ApiException {
+    final long dbId = 1L;
+    final String submissionId = UUID.randomUUID().toString();
+    final OffsetDateTime submissionDate = OffsetDateTime.now();
+
+    DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission = new DbWgsExtractCromwellSubmission();
+    dbWgsExtractCromwellSubmission.setSubmissionId(submissionId);
+    dbWgsExtractCromwellSubmission.setCreator(currentUser);
+    dbWgsExtractCromwellSubmission.setWorkspace(targetWorkspace);
+    dbWgsExtractCromwellSubmission.setWgsExtractCromwellSubmissionId(dbId);
+    wgsExtractCromwellSubmissionDao.save(dbWgsExtractCromwellSubmission);
+
+    FirecloudSubmission firecloudSubmission = new FirecloudSubmission()
+        .submissionDate(submissionDate)
+        .status(FirecloudSubmissionStatus.DONE);
+
+    doReturn(firecloudSubmission).when(submissionsApi).monitorSubmission(
+        workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
+        workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
+        submissionId);
+
+    WgsCohortExtractionJob wgsCohortExtractionJob = wgsCohortExtractionService.getWgsCohortExtractionJob(dbId);
+    assertThat(wgsCohortExtractionJob.getStatus()).isEqualTo(TerraJobStatus.SUCCEEDED);
+    assertThat(wgsCohortExtractionJob.getSubmissionDate()).isEqualTo(submissionDate.toInstant().toEpochMilli());
+  }
+
+  @Test
+  public void getExtractionJob_userHasReaderWorkspaceAccess() throws ApiException {
+
+    wgsCohortExtractionService.getWgsCohortExtractionJob(1L);
+  }
+
+  @Test
+  public void getExtractionJob_statusMapping() throws ApiException {
+    assertStatusMapping(FirecloudSubmissionStatus.DONE, TerraJobStatus.SUCCEEDED);
+    assertStatusMapping(FirecloudSubmissionStatus.ABORTED, TerraJobStatus.FAILED);
+    assertStatusMapping(FirecloudSubmissionStatus.ABORTING, TerraJobStatus.FAILED);
+    assertStatusMapping(FirecloudSubmissionStatus.ACCEPTED, TerraJobStatus.RUNNING);
+    assertStatusMapping(FirecloudSubmissionStatus.EVALUATING, TerraJobStatus.RUNNING);
+    assertStatusMapping(FirecloudSubmissionStatus.SUBMITTED, TerraJobStatus.RUNNING);
+    assertStatusMapping(FirecloudSubmissionStatus.SUBMITTING, TerraJobStatus.RUNNING);
+  }
+
+  private void assertStatusMapping(FirecloudSubmissionStatus firecloudSubmissionStatus, TerraJobStatus terraJobStatus) throws ApiException {
+    final long dbId = 1L;
+    final String submissionId = UUID.randomUUID().toString();
+
+    DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission = new DbWgsExtractCromwellSubmission();
+    dbWgsExtractCromwellSubmission.setSubmissionId(submissionId);
+    dbWgsExtractCromwellSubmission.setCreator(currentUser);
+    dbWgsExtractCromwellSubmission.setWorkspace(targetWorkspace);
+    dbWgsExtractCromwellSubmission.setWgsExtractCromwellSubmissionId(dbId);
+    wgsExtractCromwellSubmissionDao.save(dbWgsExtractCromwellSubmission);
+
+    FirecloudSubmission firecloudSubmission = new FirecloudSubmission()
+            .submissionDate(OffsetDateTime.now())
+            .status(firecloudSubmissionStatus);
+
+    doReturn(firecloudSubmission).when(submissionsApi).monitorSubmission(
+            workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
+            workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
+        submissionId
+    );
+
+    WgsCohortExtractionJob wgsCohortExtractionJob = wgsCohortExtractionService.getWgsCohortExtractionJob(dbId);
+    assertThat(wgsCohortExtractionJob.getStatus()).isEqualTo(terraJobStatus);
   }
 
   @Test

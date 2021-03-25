@@ -8823,9 +8823,9 @@ definitions:
       status:
         "$ref": '#/definitions/TerraJobStatus'
       submissionDate:  # TODO eric: return db creation time or Terra time?
-        type: string
-        format: date-time
-        description: Timestamp in ISO-8601 # TODO eric: fill in
+        type: integer
+        format: int64
+        description: Submissio Timestamp in Epoch according to Terra
   TerraJobStatus:
     type: string
     description: 'Terra job status. Indicates if the Terra Submission and Workflows are still running, succeeded, or failed.
