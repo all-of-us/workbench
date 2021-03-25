@@ -18,7 +18,7 @@ declare let gtag: Function;
  * @param value An optional integer value to associate with the event.
  */
 export function triggerEvent(
-  category: string, action: string, label?: string, value?: number) {
+    category: string, action: string, label?: string, value?: number) {
   if (window['gtag']) {
     gtag('event', action, {
       'event_category': category,
@@ -48,9 +48,9 @@ export const AnalyticsTracker = {
     OpenDuplicatePage: (suffix = '') => triggerEvent(AnalyticsCategory.WORKSPACES, 'Open Duplicate Page', getCurrentPageLabel(suffix)),
     Duplicate: () => triggerEvent(AnalyticsCategory.WORKSPACES, 'Duplicate'),
     DuplicateFeatured: (name) =>
-      triggerEvent(AnalyticsCategory.FEATURED_WORKSPACES, 'Click', `Featured Workspace - Tile - Duplicate - ${name}`),
+        triggerEvent(AnalyticsCategory.FEATURED_WORKSPACES, 'Click', `Featured Workspace - Tile - Duplicate - ${name}`),
     NavigateToFeatured: (name) =>
-      triggerEvent(AnalyticsCategory.FEATURED_WORKSPACES, 'Click', `Featured Workspace - Tile - ${name}`),
+        triggerEvent(AnalyticsCategory.FEATURED_WORKSPACES, 'Click', `Featured Workspace - Tile - ${name}`),
     OpenEditPage: (suffix = '') => triggerEvent(AnalyticsCategory.WORKSPACES, 'Open Edit Page', getCurrentPageLabel(suffix)),
     Edit: () => triggerEvent(AnalyticsCategory.WORKSPACES, 'Edit'),
     OpenShareModal: (suffix = '') => triggerEvent(AnalyticsCategory.WORKSPACES, 'Open Share Modal', getCurrentPageLabel(suffix)),
@@ -98,11 +98,11 @@ export const AnalyticsTracker = {
     TOS: () => triggerEvent('Registration', 'Click next', 'Accepted TOS'),
     InstitutionNotListed: () => triggerEvent('Registration', 'Click \'don\'t see institution\' link', 'Institution not listed'),
     InstitutionPage: () =>
-      triggerEvent('Registration', 'Clicked \'Next\' in step 1/3 in registration process', 'Institution info completed'),
+        triggerEvent('Registration', 'Clicked \'Next\' in step 1/3 in registration process', 'Institution info completed'),
     CreateAccountPage: () =>
-      triggerEvent('Registration', 'Clicked \'Next\' in step 2/3 in registration process', 'Create Account page completed'),
+        triggerEvent('Registration', 'Clicked \'Next\' in step 2/3 in registration process', 'Create Account page completed'),
     DemographicSurvey: () =>
-      triggerEvent('Registration', 'Clicked \'Next\' in step 3/3 in registration process', 'Demographic survey completed'),
+        triggerEvent('Registration', 'Clicked \'Next\' in step 3/3 in registration process', 'Demographic survey completed'),
     TwoFactorAuth: () => triggerEvent('Registration', 'Clicked on \'2FA\' button', '2FA'),
     EthicsTraining: () => triggerEvent('Registration', 'Clicked on \'Ethics training\' button', 'Training'),
     ERACommons: () => triggerEvent('Registration', 'Clicked on eRA commons button', 'eRA commons'),

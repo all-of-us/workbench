@@ -43,7 +43,7 @@ public class InstitutionDaoTest {
   @Test
   public void test_delete() {
     institutionDao.deleteById(testInst.getInstitutionId());
-    DbInstitution dbInstitution = institutionDao.findById(testInst.getInstitutionId()).get();
+    DbInstitution dbInstitution = institutionDao.findById(testInst.getInstitutionId()).orElse(null);
     assertThat(dbInstitution).isNull();
     assertThat(institutionDao.findAll()).isEmpty();
   }

@@ -694,8 +694,8 @@ public class CohortReviewControllerTest {
         participantCohortStatus1.getParticipantKey().getParticipantId(),
         annotation.getAnnotationId());
 
-    assertThat(participantCohortAnnotationDao.findById(annotation.getAnnotationId()).get())
-        .isEqualTo(null);
+    assertThat(participantCohortAnnotationDao.findById(annotation.getAnnotationId()).isPresent())
+       .isFalse();
   }
 
   @Test
