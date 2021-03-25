@@ -8,7 +8,7 @@ import {SignInService} from 'app/services/sign-in.service';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 
 import {FooterTypeEnum} from 'app/components/footer';
-import {debouncer, hasRegisteredAccessFetch} from 'app/utils';
+import {debouncer, hasRegisteredAccess} from 'app/utils';
 import Timeout = NodeJS.Timeout;
 import {setInstitutionCategoryState} from 'app/utils/analytics';
 import {navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
@@ -92,7 +92,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       this.profileLoadingSub = this.profileStorageService.profile$.subscribe((profile) => {
         this.profile = profile as unknown as FetchProfile;
         setInstitutionCategoryState(this.profile.verifiedInstitutionalAffiliation);
-        if (hasRegisteredAccessFetch(this.profile.dataAccessLevel)) {
+        if (hasRegisteredAccess(this.profile.dataAccessLevel)) {
           cdrVersionsApi().getCdrVersions().then(resp => {
             cdrVersionStore.set(resp);
           });

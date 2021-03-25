@@ -1,7 +1,6 @@
 import { BreadcrumbType } from 'app/utils/navigation';
 import {atom, Atom} from 'app/utils/subscribable';
-import {Profile} from 'generated';
-import {CdrVersion, Runtime} from 'generated/fetch';
+import {CdrVersion, Profile, Runtime} from 'generated/fetch';
 import * as React from 'react';
 
 const {useEffect, useState} = React;

@@ -1,10 +1,10 @@
 import {fakeAsync, TestBed, tick} from '@angular/core/testing';
-import {Observable} from 'rxjs/Observable';
-import {Subscriber} from 'rxjs/Subscriber';
 
-import {ServerConfigService} from './server-config.service';
+import {ServerConfigService} from 'app/services/server-config.service';
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
-import {ConfigResponse, ConfigService} from 'generated';
+import {ConfigApi, ConfigResponse} from 'generated/fetch';
 
 const testConfig: ConfigResponse = {
   gsuiteDomain: 'fake-domain',
@@ -12,32 +12,33 @@ const testConfig: ConfigResponse = {
   projectId: 'foo'
 };
 
-class ConfigServiceStub {
+class ConfigApiStub extends ConfigApi {
+  promise: Promise<ConfigResponse>;
   calls = 0;
-  obsResp: Observable<ConfigResponse>;
 
-  getConfig(config: ConfigResponse): Observable<ConfigResponse> {
+  constructor() {
+    super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
+  }
+
+  getConfig(): Promise<ConfigResponse> {
     this.calls++;
-    if (this.obsResp) {
-      return this.obsResp;
+    if (this.promise) {
+      return this.promise;
     }
-    return new Observable<ConfigResponse>(s => {
-      setTimeout(() => {
-        s.next(testConfig);
-        s.complete();
-      });
+    return new Promise<ConfigResponse>(accept => {
+      setTimeout(() => accept(testConfig));
     });
   }
 }
 
 describe('ServerConfigService', () => {
   let service: ServerConfigService;
-  let configServiceStub: ConfigServiceStub;
+  let configApiStub: ConfigApiStub;
   beforeEach(fakeAsync(() => {
-    configServiceStub = new ConfigServiceStub();
+    configApiStub = new ConfigApiStub();
+    registerApiClient(ConfigApi, configApiStub);
     TestBed.configureTestingModule({
       providers: [
-        { provide: ConfigService, useValue: configServiceStub },
         ServerConfigService
       ]
     });
@@ -55,15 +56,17 @@ describe('ServerConfigService', () => {
     };
 
     getConfigWithTick();
-    expect(configServiceStub.calls).toEqual(1);
+    expect(configApiStub.calls).toEqual(1);
     getConfigWithTick();
-    expect(configServiceStub.calls).toEqual(1);
+    expect(configApiStub.calls).toEqual(1);
   }));
 
   it('dedupes staggered multi-access', fakeAsync(() => {
-    const subs: Array<Subscriber<ConfigResponse>> = [];
-    configServiceStub.obsResp = new Observable<ConfigResponse>(s => {
-      subs.push(s);
+    let fireXhr;
+    configApiStub.promise = new Promise(accept => {
+      fireXhr = () => {
+        setTimeout(() => accept(testConfig), 0);
+      };
     });
 
     let gotBefore1, gotBefore2: ConfigResponse;
@@ -76,11 +79,7 @@ describe('ServerConfigService', () => {
     tick();
 
     // Simulate XHR firing.
-    expect(subs.length).toBe(1);
-    subs.forEach(s => {
-      s.next(testConfig);
-      s.complete();
-    });
+    fireXhr(testConfig);
     tick();
     expect(gotBefore1).toEqual(testConfig);
     expect(gotBefore2).toEqual(testConfig);
@@ -90,6 +89,6 @@ describe('ServerConfigService', () => {
       gotAfter = c;
     });
     expect(gotAfter).toEqual(testConfig);
-    expect(configServiceStub.calls).toEqual(1);
+    expect(configApiStub.calls).toEqual(1);
   }));
 });
