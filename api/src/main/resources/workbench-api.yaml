@@ -5184,9 +5184,9 @@ definitions:
         format: int64
       username:
         type: string
-      dataAccessLevel:
-        "$ref": "#/definitions/DataAccessLevel"
-        description: DEPRECATED.  Will be replaced by Access Tiers.
+      accessTierShortNames:
+        type: string
+        description: Short names of access tiers available to the user, comma-delimited if multiple.
       givenName:
         type: string
       familyName:
@@ -5278,9 +5278,9 @@ definitions:
       firstSignInTime:
         type: integer
         format: int64
-      dataAccessLevel:
-        description: DEPRECATED.  Will be replaced by Access Tiers.  Was -> what level of data access the user has
-        "$ref": "#/definitions/DataAccessLevel"
+      accessTierShortNames:
+        type: string
+        description: Short names of access tiers available to the user, comma-delimited if multiple.
       degrees:
         type: array
         items:

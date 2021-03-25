@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
@@ -84,12 +83,12 @@ public class OfflineUserController implements OfflineUserApiDelegate {
       userCount++;
       try {
         Timestamp oldTime = user.getComplianceTrainingCompletionTime();
-        List<String> oldTiers = getAccessTiers(user);
+        List<String> oldTiers = accessTierService.getAccessTierShortNamesForUser(user);
 
         DbUser updatedUser = userService.syncComplianceTrainingStatusV2(user, Agent.asSystem());
 
         Timestamp newTime = updatedUser.getComplianceTrainingCompletionTime();
-        List<String> newTiers = getAccessTiers(user);
+        List<String> newTiers = accessTierService.getAccessTierShortNamesForUser(user);
 
         completionChangeCount +=
             logCompletionChange(user, oldTime, newTime, AccessModule.COMPLIANCE_TRAINING);
@@ -129,13 +128,13 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         }
 
         Timestamp oldTime = user.getEraCommonsCompletionTime();
-        List<String> oldTiers = getAccessTiers(user);
+        List<String> oldTiers = accessTierService.getAccessTierShortNamesForUser(user);
 
         DbUser updatedUser =
             userService.syncEraCommonsStatusUsingImpersonation(user, Agent.asSystem());
 
         Timestamp newTime = updatedUser.getEraCommonsCompletionTime();
-        List<String> newTiers = getAccessTiers(user);
+        List<String> newTiers = accessTierService.getAccessTierShortNamesForUser(user);
 
         completionChangeCount +=
             logCompletionChange(user, oldTime, newTime, AccessModule.ERA_COMMONS);
@@ -174,12 +173,12 @@ public class OfflineUserController implements OfflineUserApiDelegate {
       userCount++;
       try {
         Timestamp oldTime = user.getTwoFactorAuthCompletionTime();
-        List<String> oldTiers = getAccessTiers(user);
+        List<String> oldTiers = accessTierService.getAccessTierShortNamesForUser(user);
 
         DbUser updatedUser = userService.syncTwoFactorAuthStatus(user, Agent.asSystem());
 
         Timestamp newTime = updatedUser.getTwoFactorAuthCompletionTime();
-        List<String> newTiers = getAccessTiers(user);
+        List<String> newTiers = accessTierService.getAccessTierShortNamesForUser(user);
 
         completionChangeCount +=
             logCompletionChange(user, oldTime, newTime, AccessModule.TWO_FACTOR_AUTH);
@@ -249,12 +248,6 @@ public class OfflineUserController implements OfflineUserApiDelegate {
   private int logCompletionChange(
       DbUser user, Timestamp oldTime, Timestamp newTime, AccessModule module) {
     return logChange(user, oldTime, newTime, accessModuleLogText.get(module) + " completion");
-  }
-
-  private List<String> getAccessTiers(DbUser user) {
-    return accessTierService.getAccessTiersForUser(user).stream()
-        .map(DbAccessTier::getShortName)
-        .collect(Collectors.toList());
   }
 
   private int logAccessTierChange(DbUser user, List<String> oldTiers, List<String> newTiers) {

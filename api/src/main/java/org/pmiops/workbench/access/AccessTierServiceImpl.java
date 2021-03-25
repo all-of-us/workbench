@@ -127,6 +127,19 @@ public class AccessTierServiceImpl implements AccessTierService {
   }
 
   /**
+   * Return the list of tiers a user has access to, as shortNames
+   *
+   * @param user the user whose access we're checking
+   * @return The List of shortNames of DbAccessTiers the DbUser has access to in this environment
+   */
+  @Override
+  public List<String> getAccessTierShortNamesForUser(DbUser user) {
+    return getAccessTiersForUser(user).stream()
+        .map(DbAccessTier::getShortName)
+        .collect(Collectors.toList());
+  }
+
+  /**
    * Return a list of access tiers which Registered users have access to. Depending on environment,
    * this will either be the Registered Tier or all tiers. This is a temporary measure until we
    * implement Controlled Tier Beta access controls.

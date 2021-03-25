@@ -74,7 +74,7 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>A large portion of this class is dedicated to:
  *
  * <p>(1) making it easy to consistently modify a subset of fields in a User entry, with retries (2)
- * ensuring we call a single updateDataAccessLevel method whenever a User entry is saved.
+ * ensuring we call a single updateUserAccessTiers method whenever a User entry is saved.
  */
 @Service
 public class UserServiceImpl implements UserService, GaugeDataCollector {
@@ -142,7 +142,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   /**
    * Updates a user record with a modifier function.
    *
-   * <p>Ensures that the data access level for the user reflects the state of other fields on the
+   * <p>Ensures that the data access tiers for the user reflect the state of other fields on the
    * user; handles conflicts with concurrent updates by retrying.
    */
   @Override
@@ -152,7 +152,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     int statementClosedCount = 0;
     while (true) {
       dbUser = userModifier.apply(dbUser);
-      updateDataAccessLevel(dbUser, agent);
+      updateUserAccessTiers(dbUser, agent);
       Timestamp now = new Timestamp(clock.instant().toEpochMilli());
       dbUser.setLastModifiedTime(now);
       try {
@@ -189,7 +189,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
   }
 
-  private void updateDataAccessLevel(DbUser dbUser, Agent agent) {
+  private void updateUserAccessTiers(DbUser dbUser, Agent agent) {
     final List<DbAccessTier> previousAccessTiers = accessTierService.getAccessTiersForUser(dbUser);
 
     // TODO for Controlled Tier Beta: different access module evaluation criteria

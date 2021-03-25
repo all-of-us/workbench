@@ -72,7 +72,6 @@ import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CreateAccountRequest;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.DuaType;
@@ -411,7 +410,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     verify(mockProfileAuditor).fireCreateAction(any(Profile.class));
     final DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
     assertThat(dbUser).isNotNull();
-    assertThat(dbUser.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.UNREGISTERED);
+    assertThat(accessTierService.getAccessTierShortNamesForUser(dbUser)).isEmpty();
   }
 
   @Test
@@ -525,15 +524,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountAndDbUserWithAffiliation();
 
     Profile profile = profileController.getMe().getBody();
-    assertProfile(
-        profile,
-        PRIMARY_EMAIL,
-        CONTACT_EMAIL,
-        FAMILY_NAME,
-        GIVEN_NAME,
-        DataAccessLevel.UNREGISTERED,
-        TIMESTAMP,
-        false);
+    assertProfile(profile);
     verify(mockFireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
     verify(mockProfileAuditor).fireLoginAction(dbUser);
   }
@@ -542,29 +533,13 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void testMe_userBeforeNotLoggedInSuccess() {
     createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
-    assertProfile(
-        profile,
-        PRIMARY_EMAIL,
-        CONTACT_EMAIL,
-        FAMILY_NAME,
-        GIVEN_NAME,
-        DataAccessLevel.UNREGISTERED,
-        TIMESTAMP,
-        false);
+    assertProfile(profile);
     verify(mockFireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
 
     // An additional call to getMe() should have no effect.
     fakeClock.increment(1);
     profile = profileController.getMe().getBody();
-    assertProfile(
-        profile,
-        PRIMARY_EMAIL,
-        CONTACT_EMAIL,
-        FAMILY_NAME,
-        GIVEN_NAME,
-        DataAccessLevel.UNREGISTERED,
-        TIMESTAMP,
-        false);
+    assertProfile(profile);
   }
 
   @Test(expected = BadRequestException.class)
@@ -1001,15 +976,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     profileController.updateProfile(profile);
 
     Profile updatedProfile = profileController.getMe().getBody();
-    assertProfile(
-        updatedProfile,
-        PRIMARY_EMAIL,
-        CONTACT_EMAIL,
-        FAMILY_NAME,
-        GIVEN_NAME,
-        DataAccessLevel.UNREGISTERED,
-        TIMESTAMP,
-        false);
+    assertProfile(updatedProfile);
   }
 
   @Test(expected = NotFoundException.class)
@@ -1525,41 +1492,24 @@ public class ProfileControllerTest extends BaseControllerTest {
         createVerifiedInstitutionalAffiliation(), grantAdminAuthority);
   }
 
-  private void assertProfile(
-      Profile profile,
-      String primaryEmail,
-      String contactEmail,
-      String familyName,
-      String givenName,
-      DataAccessLevel dataAccessLevel,
-      Timestamp firstSignInTime,
-      Boolean contactEmailFailure) {
+  private void assertProfile(Profile profile) {
     assertThat(profile).isNotNull();
-    assertThat(profile.getContactEmail()).isEqualTo(contactEmail);
-    assertThat(profile.getFamilyName()).isEqualTo(familyName);
-    assertThat(profile.getGivenName()).isEqualTo(givenName);
-    assertThat(profile.getDataAccessLevel()).isEqualTo(dataAccessLevel);
-    assertThat(profile.getContactEmailFailure()).isEqualTo(contactEmailFailure);
-    assertUser(primaryEmail, contactEmail, familyName, givenName, dataAccessLevel, firstSignInTime);
-  }
+    assertThat(profile.getUsername()).isEqualTo(PRIMARY_EMAIL);
+    assertThat(profile.getContactEmail()).isEqualTo(CONTACT_EMAIL);
+    assertThat(profile.getFamilyName()).isEqualTo(FAMILY_NAME);
+    assertThat(profile.getGivenName()).isEqualTo(GIVEN_NAME);
+    assertThat(profile.getAccessTierShortNames()).isEqualTo("");
+    assertThat(profile.getContactEmailFailure()).isEqualTo(false);
 
-  private void assertUser(
-      String primaryEmail,
-      String contactEmail,
-      String familyName,
-      String givenName,
-      DataAccessLevel dataAccessLevel,
-      Timestamp firstSignInTime) {
-    DbUser user = userDao.findUserByUsername(primaryEmail);
+    DbUser user = userDao.findUserByUsername(PRIMARY_EMAIL);
     assertThat(user).isNotNull();
-    assertThat(user.getContactEmail()).isEqualTo(contactEmail);
-    assertThat(user.getFamilyName()).isEqualTo(familyName);
-    assertThat(user.getGivenName()).isEqualTo(givenName);
-    assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
+    assertThat(user.getContactEmail()).isEqualTo(CONTACT_EMAIL);
+    assertThat(user.getFamilyName()).isEqualTo(FAMILY_NAME);
+    assertThat(user.getGivenName()).isEqualTo(GIVEN_NAME);
     assertThat((double) user.getFirstSignInTime().getTime())
         .isWithin(TIME_TOLERANCE_MILLIS)
-        .of(firstSignInTime.getTime());
-    assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
+        .of(ProfileControllerTest.TIMESTAMP.getTime());
+    assertThat(accessTierService.getAccessTierShortNamesForUser(user)).isEmpty();
   }
 
   private VerifiedInstitutionalAffiliation createVerifiedInstitutionalAffiliation() {
