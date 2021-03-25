@@ -55,6 +55,10 @@ public class UserDaoTest {
     List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
     assertThat(rows).hasSize(1);
     final UserCountGaugeLabelsAndValue row = rows.get(0);
+    System.out.println("~~~~~~~~~~~~~~");
+    System.out.println("~~~~~~~~~~~~~~");
+    System.out.println(row.getDataAccessLevel());
+    System.out.println(row.getBetaIsBypassed());
     assertThat(row.getDataAccessLevel()).isEqualTo(dataAccessLevelStorage);
     assertThat(row.getBetaIsBypassed()).isTrue();
     assertThat(row.getDisabled()).isFalse();
