@@ -16,10 +16,6 @@
 
     <delete tableName="domain_info"/>
     <delete tableName="survey_module"/>
-    <delete tableName="domain"/>
-    <delete tableName="vocabulary"/>
-    <delete tableName="concept"/>
-    <delete tableName="concept_synonym"/>
     <delete tableName="cb_criteria"/>
     <delete tableName="cb_criteria_attribute"/>
     <delete tableName="cb_criteria_relationship"/>
@@ -51,41 +47,6 @@
       <column name="participant_count" type="NUMERIC"/>
     </loadData>
 
-    <loadData tableName="domain" file="csv/domain.csv" encoding="UTF-8" quotchar='"'>
-      <column name="domain_id" type="STRING"/>
-      <column name="domain_name" type="STRING"/>
-      <column name="domain_concept_id" type="NUMERIC"/>
-    </loadData>
-
-    <loadData tableName="vocabulary" file="csv/vocabulary.csv" encoding="UTF-8" quotchar='"'>
-      <column name="vocabulary_id" type="STRING"/>
-      <column name="vocabulary_name" type="STRING"/>
-      <column name="vocabulary_reference" type="STRING"/>
-      <column name="vocabulary_version" type="STRING"/>
-      <column name="vocabulary_concept_id" type="NUMERIC"/>
-    </loadData>
-
-    <loadData tableName="concept" file="csv/concept.csv" encoding="UTF-8" quotchar='"'>
-      <column name="concept_id" type="NUMERIC"/>
-      <column name="concept_name" type="STRING"/>
-      <column name="domain_id" type="STRING"/>
-      <column name="vocabulary_id" type="STRING"/>
-      <column name="concept_class_id" type="STRING"/>
-      <column name="standard_concept" type="STRING"/>
-      <column name="concept_code" type="STRING"/>
-      <column name="valid_start_date" type="DATE"/>
-      <column name="valid_end_date" type="DATE"/>
-      <column name="invalid_reason" type="STRING"/>
-      <column name="count_value" type="NUMERIC"/>
-      <column name="source_count_value" type="NUMERIC"/>
-      <column name="prevalence" type="NUMERIC"/>
-    </loadData>
-
-    <loadData tableName="concept_synonym" file="csv/concept_synonym.csv" encoding="UTF-8"
-      quotchar='"'>
-      <column name="concept_id" type="NUMERIC"/>
-      <column name="concept_synonym_name" type="STRING"/>
-    </loadData>
     <loadData tableName="cb_criteria_attribute" file="csv/cb_criteria_attribute.csv"
       encoding="UTF-8" quotchar='"'>
       <column name="id" type="NUMERIC"/>
