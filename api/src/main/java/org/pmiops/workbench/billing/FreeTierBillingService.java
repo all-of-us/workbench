@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import com.google.common.math.DoubleMath;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import javax.mail.MessagingException;
+import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.Nullable;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.api.BigQueryService;
@@ -84,8 +86,8 @@ public class FreeTierBillingService {
   }
 
   /**
-   * Check whether users have incurred sufficient cost or time in their workspaces to trigger alerts
-   * due to passing thresholds or exceeding limits
+   * Check whether users have incurred sufficient cost in their workspaces to trigger alerts due to
+   * passing thresholds or exceeding limits
    */
   public void checkFreeTierBillingUsage() {
     // retrieve the costs stored in the DB from the last time this was run
@@ -102,12 +104,11 @@ public class FreeTierBillingService {
                 Collectors.groupingBy(
                     e -> e.getKey().getCreator(), Collectors.summingDouble(Entry::getValue)));
 
-    // check cost and time thresholds for the relevant users
+    // check cost thresholds for the relevant users
 
-    // collect previously-expired and currently-expired users by cost and time
+    // collect previously-expired and currently-expired users
     // for users which are expired: alert only if they were not expired previously
-    // for users which are not yet expired:
-    //    check for intermediate thresholds and alert, possibly for both cost and time
+    // for users which are not yet expired: check for intermediate thresholds and alert
 
     final Set<DbUser> previouslyExpiredUsers = getExpiredUsersFromDb();
 
@@ -127,10 +128,9 @@ public class FreeTierBillingService {
       updateFreeTierWorkspacesStatus(user, BillingStatus.INACTIVE);
     }
 
-    final Set<DbUser> usersWithNonNullRegistration =
-        userDao.findByFirstRegistrationCompletionTimeNotNull();
-    final Set<DbUser> usersToThresholdCheck =
-        Sets.difference(usersWithNonNullRegistration, expiredUsers);
+    final List<DbUser> allUsers = userDao.findUsers();
+    final Collection<DbUser> usersToThresholdCheck =
+        CollectionUtils.subtract(allUsers, expiredUsers);
 
     sendAlertsForCostThresholds(usersToThresholdCheck, previousUserCosts, userCosts);
   }
@@ -166,7 +166,7 @@ public class FreeTierBillingService {
   }
 
   private void sendAlertsForCostThresholds(
-      Set<DbUser> usersToCheck,
+      Collection<DbUser> usersToCheck,
       Map<DbUser, Double> previousUserCosts,
       Map<DbUser, Double> userCosts) {
     final List<Double> costThresholdsInDescOrder =
@@ -343,10 +343,6 @@ public class FreeTierBillingService {
     }
 
     return false;
-  }
-
-  public Map<Long, Double> getUserIdToTotalCost() {
-    return workspaceFreeTierUsageDao.getUserIdToTotalCost();
   }
 
   /**
