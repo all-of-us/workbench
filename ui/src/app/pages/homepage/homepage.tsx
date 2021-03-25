@@ -169,10 +169,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
     if (code) {
       this.setState({rasLoginGovLoading: true});
       try {
-        const profileResponse = await profileApi().linkRasAccount({
-          authCode: code,
-          redirectUrl: redirectUrl
-        });
+        const profileResponse = await profileApi().linkRasAccount({ authCode: code, redirectUrl });
         if (profileResponse.rasLinkLoginGovUsername !== undefined) {
           this.setState({rasLoginGovLinked: true});
         }
@@ -341,102 +338,83 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
           {/* The elements inside this fadeBox will be changed as part of ongoing
           homepage redesign work*/}
           <FlexColumn style={{justifyContent: 'flex-start'}}>
-            {accessTasksLoaded ?
+              {accessTasksLoaded ?
                 (accessTasksRemaining ?
-                        (<RegistrationDashboard eraCommonsError={eraCommonsError}
-                                                eraCommonsLinked={eraCommonsLinked}
-                                                eraCommonsLoading={eraCommonsLoading}
-                                                rasLoginGovLinkError={rasLoginGovLinkError}
-                                                rasLoginGovLinked={rasLoginGovLinked}
-                                                rasLoginGovLoading={rasLoginGovLoading}
-                                                trainingCompleted={trainingCompleted}
-                                                firstVisitTraining={firstVisitTraining}
-                                                betaAccessGranted={betaAccessGranted}
-                                                twoFactorAuthCompleted={twoFactorAuthCompleted}
-                                                dataUserCodeOfConductCompleted={dataUserCodeOfConductCompleted}/>
-                        ) : (
-                            <React.Fragment>
-                              <FlexColumn>
-                                <FlexRow
-                                    style={{justifyContent: 'space-between', alignItems: 'center'}}>
-                                  <FlexRow style={{alignItems: 'center'}}>
-                                    <SemiBoldHeader
-                                        style={{marginTop: '0px'}}>Workspaces</SemiBoldHeader>
-                                    <ClrIcon
-                                        shape='plus-circle'
-                                        size={30}
-                                        className={'is-solid'}
-                                        style={{
-                                          color: colors.accent,
-                                          marginLeft: '1rem',
-                                          cursor: 'pointer'
-                                        }}
-                                        onClick={() => {
-                                          AnalyticsTracker.Workspaces.OpenCreatePage();
-                                          navigate(['workspaces/build']);
-                                        }}
-                                    />
-                                  </FlexRow>
-                                  <span
-                                      style={{
-                                        alignSelf: 'flex-end',
-                                        color: colors.accent,
-                                        cursor: 'pointer'
-                                      }}
-                                      onClick={() => navigate(['workspaces'])}
-                                  >
+                    (<RegistrationDashboard eraCommonsError={eraCommonsError}
+                                            eraCommonsLinked={eraCommonsLinked}
+                                            eraCommonsLoading={eraCommonsLoading}
+                                            rasLoginGovLinkError={rasLoginGovLinkError}
+                                            rasLoginGovLinked={rasLoginGovLinked}
+                                            rasLoginGovLoading={rasLoginGovLoading}
+                                            trainingCompleted={trainingCompleted}
+                                            firstVisitTraining={firstVisitTraining}
+                                            betaAccessGranted={betaAccessGranted}
+                                            twoFactorAuthCompleted={twoFactorAuthCompleted}
+                                            dataUserCodeOfConductCompleted={dataUserCodeOfConductCompleted}/>
+                    ) : (
+                        <React.Fragment>
+                          <FlexColumn>
+                            <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
+                              <FlexRow style={{alignItems: 'center'}}>
+                                <SemiBoldHeader style={{marginTop: '0px'}}>Workspaces</SemiBoldHeader>
+                                <ClrIcon
+                                  shape='plus-circle'
+                                  size={30}
+                                  className={'is-solid'}
+                                  style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
+                                  onClick={() => {
+                                    AnalyticsTracker.Workspaces.OpenCreatePage();
+                                    navigate(['workspaces/build']);
+                                  }}
+                                />
+                              </FlexRow>
+                              <span
+                                style={{alignSelf: 'flex-end', color: colors.accent, cursor: 'pointer'}}
+                                onClick={() => navigate(['workspaces'])}
+                              >
                                 See all workspaces
                               </span>
-                                </FlexRow>
-                                <RecentWorkspaces/>
-                              </FlexColumn>
-                              <FlexColumn>
-                                {userWorkspacesResponse &&
+                            </FlexRow>
+                            <RecentWorkspaces />
+                          </FlexColumn>
+                          <FlexColumn>
+                            {userWorkspacesResponse &&
 
-                                <React.Fragment>
-                                  {this.userHasWorkspaces() ?
-                                      <RecentResources workspaces={userWorkspacesResponse.items}/> :
+                              <React.Fragment>
+                                {this.userHasWorkspaces() ?
+                                <RecentResources workspaces={userWorkspacesResponse.items}/> :
 
-                                      <div data-test-id='getting-started'
-                                           style={{
-                                             backgroundColor: addOpacity(colors.primary, .1).toString(),
-                                             color: colors.primary,
-                                             borderRadius: 10,
-                                             margin: '2em 0em'
-                                           }}>
-                                        <div style={{margin: '1em 2em'}}>
-                                          <h2 style={{fontWeight: 600, marginTop: 0}}>Here are some
-                                            tips to get you started:</h2>
-                                          <CustomBulletList>
-                                            <CustomBulletListItem bullet='→'>
-                                              Create a <StyledAnchorTag
-                                                href='https://support.google.com/chrome/answer/2364824'
-                                                target='_blank'>Chrome
-                                              Profile</StyledAnchorTag> with your <AoU/> Researcher
-                                              Workbench Google account. This will keep your
-                                              workbench browser sessions isolated from
-                                              your other Google accounts.
-                                            </CustomBulletListItem>
-                                            <CustomBulletListItem bullet='→'>
-                                              Check out <StyledAnchorTag href='library'>Featured
-                                              Workspaces</StyledAnchorTag> from
-                                              the left hand panel to browse through example
-                                              workspaces.
-                                            </CustomBulletListItem>
-                                            <CustomBulletListItem bullet='→'>
-                                              Browse through our <StyledAnchorTag
-                                                href={supportUrls.helpCenter}
-                                                target='_blank'>support
-                                              materials</StyledAnchorTag> and forum topics.
-                                            </CustomBulletListItem>
-                                          </CustomBulletList>
-                                        </div>
-                                      </div>}
-                                </React.Fragment>
-                                }
-                              </FlexColumn>
-                            </React.Fragment>
-                        )
+                                <div data-test-id='getting-started'
+                                     style={{
+                                       backgroundColor: addOpacity(colors.primary, .1).toString(),
+                                       color: colors.primary,
+                                       borderRadius: 10,
+                                       margin: '2em 0em'}}>
+                                  <div style={{margin: '1em 2em'}}>
+                                    <h2 style={{fontWeight: 600, marginTop: 0}}>Here are some tips to get you started:</h2>
+                                    <CustomBulletList>
+                                      <CustomBulletListItem bullet='→'>
+                                        Create a <StyledAnchorTag href='https://support.google.com/chrome/answer/2364824'
+                                          target='_blank'>Chrome Profile</StyledAnchorTag> with your <AoU/> Researcher
+                                        Workbench Google account. This will keep your workbench browser sessions isolated from
+                                        your other Google accounts.
+                                      </CustomBulletListItem>
+                                      <CustomBulletListItem bullet='→'>
+                                        Check out <StyledAnchorTag href='library'>Featured Workspaces</StyledAnchorTag> from
+                                        the left hand panel to browse through example workspaces.
+                                      </CustomBulletListItem>
+                                      <CustomBulletListItem bullet='→'>
+                                        Browse through our <StyledAnchorTag href={supportUrls.helpCenter}
+                                          target='_blank'>support materials</StyledAnchorTag> and forum topics.
+                                      </CustomBulletListItem>
+                                    </CustomBulletList>
+                                  </div>
+                                </div>}
+                              </React.Fragment>
+                            }
+                          </FlexColumn>
+                        </React.Fragment>
+                      )
                 ) :
                 <Spinner dark={true} style={{width: '100%', marginTop: '5rem'}}/>}
           </FlexColumn>
@@ -444,8 +422,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         <div style={{backgroundColor: addOpacity(colors.light, .4).toString()}}>
           <FlexColumn style={{marginLeft: '3%'}}>
             <div style={styles.quickTourLabel}>Quick Tour and Videos</div>
-            <div ref={(el) => this.quickTourResourcesDiv = el}
-                 style={{display: 'flex', position: 'relative'}}>
+            <div ref={(el) => this.quickTourResourcesDiv = el} style={{display: 'flex', position: 'relative'}}>
               <FlexRow style={styles.quickTourCardsRow}>
                 {quickTourResources.slice(quickTourResourceOffset, quickTourResourceOffset + limit).map((thumbnail, i) => {
                   return <React.Fragment key={i}>
@@ -472,24 +449,21 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         </div>
       </FlexColumn>
       {quickTour &&
-      <QuickTourReact closeFunction={() => this.setState({quickTour: false})}/>}
+      <QuickTourReact closeFunction={() => this.setState({quickTour: false})} />}
       {videoOpen && <Modal width={900}>
         <div style={{display: 'flex'}}>
           <div style={{flexGrow: 1}}></div>
           <Clickable onClick={() => this.setState({videoOpen: false})}>
             <ClrIcon
-                shape='times'
-                size='24'
-                style={{color: colors.accent, marginBottom: 17}}
+              shape='times'
+              size='24'
+              style={{color: colors.accent, marginBottom: 17}}
             />
           </Clickable>
         </div>
         {/* Embed code generated by YouTube */}
-        <iframe width='852' height='480'
-                src={`https://www.youtube.com/embed/${videoId}?rel=0&autoplay=1&modestbranding=1&iv_load_policy=3`}
-                frameBorder='0'
-                allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture'
-                allowFullScreen/>
+        <iframe width='852' height='480' src={`https://www.youtube.com/embed/${videoId}?rel=0&autoplay=1&modestbranding=1&iv_load_policy=3`}
+                frameBorder='0' allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture' allowFullScreen/>
       </Modal>}
     </React.Fragment>;
   }
