@@ -11,6 +11,7 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.CdrVersionListResponse;
 import org.pmiops.workbench.model.CdrVersionTier;
@@ -80,7 +81,13 @@ public class CdrVersionService {
    * @param cdrVersionId
    */
   public void setCdrVersion(Long cdrVersionId) {
-    this.setCdrVersion(cdrVersionDao.findOne(cdrVersionId));
+    this.setCdrVersion(
+        cdrVersionDao
+            .findById(cdrVersionId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("Cdr version %s does not exist", cdrVersionId))));
   }
 
   /**
@@ -92,7 +99,13 @@ public class CdrVersionService {
    * @param cdrVersionId
    */
   public DbCdrVersion findAndSetCdrVersion(Long cdrVersionId) {
-    DbCdrVersion dbCdrVersion = cdrVersionDao.findOne(cdrVersionId);
+    DbCdrVersion dbCdrVersion =
+        cdrVersionDao
+            .findById(cdrVersionId)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("Cdr version %s does not exist", cdrVersionId)));
     this.setCdrVersion(dbCdrVersion);
     return dbCdrVersion;
   }

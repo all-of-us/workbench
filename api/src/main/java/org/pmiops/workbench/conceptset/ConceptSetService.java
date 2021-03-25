@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.OptimisticLockException;
@@ -58,7 +57,8 @@ public class ConceptSetService {
   public ConceptSet copyAndSave(
       Long fromConceptSetId, String newConceptSetName, DbUser creator, Long toWorkspaceId) {
     final DbConceptSet existingConceptSet =
-        Optional.ofNullable(conceptSetDao.findOne(fromConceptSetId))
+        conceptSetDao
+            .findById(fromConceptSetId)
             .orElseThrow(
                 () ->
                     new NotFoundException(
@@ -98,7 +98,8 @@ public class ConceptSetService {
 
   public ConceptSet updateConceptSet(Long conceptSetId, ConceptSet conceptSet) {
     DbConceptSet dbConceptSet =
-        Optional.ofNullable(conceptSetDao.findOne(conceptSetId))
+        conceptSetDao
+            .findById(conceptSetId)
             .orElseThrow(
                 () ->
                     new NotFoundException(
@@ -127,7 +128,8 @@ public class ConceptSetService {
 
   public ConceptSet updateConceptSetConcepts(Long conceptSetId, UpdateConceptSetRequest request) {
     DbConceptSet dbConceptSet =
-        Optional.ofNullable(conceptSetDao.findOne(conceptSetId))
+        conceptSetDao
+            .findById(conceptSetId)
             .orElseThrow(
                 () ->
                     new NotFoundException(
@@ -178,12 +180,13 @@ public class ConceptSetService {
   }
 
   public void delete(Long conceptSetId) {
-    conceptSetDao.delete(conceptSetId);
+    conceptSetDao.deleteById(conceptSetId);
   }
 
   public ConceptSet getConceptSet(Long conceptSetId) {
     DbConceptSet dbConceptSet =
-        Optional.ofNullable(conceptSetDao.findOne(conceptSetId))
+        conceptSetDao
+            .findById(conceptSetId)
             .orElseThrow(
                 () ->
                     new NotFoundException(
@@ -193,7 +196,7 @@ public class ConceptSetService {
   }
 
   public List<ConceptSet> findAll(List<Long> conceptSetIds) {
-    return ((List<DbConceptSet>) conceptSetDao.findAll(conceptSetIds))
+    return ((List<DbConceptSet>) conceptSetDao.findAllById(conceptSetIds))
         .stream().map(conceptSetMapper::dbModelToClient).collect(Collectors.toList());
   }
 
@@ -229,7 +232,14 @@ public class ConceptSetService {
 
   private ConceptSet toHydratedConcepts(ConceptSet conceptSet) {
     Set<DbConceptSetConceptId> dbConceptSetConceptIds =
-        conceptSetDao.findOne(conceptSet.getId()).getConceptSetConceptIds();
+        conceptSetDao
+            .findById(conceptSet.getId())
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format(
+                            "ConceptSet not found for concept id: %d", conceptSet.getId())))
+            .getConceptSetConceptIds();
     List<Criteria> criteriaList =
         cohortBuilderService.findCriteriaByDomainIdAndConceptIds(
             conceptSet.getDomain().toString(), dbConceptSetConceptIds);

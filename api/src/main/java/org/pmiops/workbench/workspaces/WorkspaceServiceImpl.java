@@ -562,7 +562,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId) {
-    DbWorkspace workspace = getDao().findOne(workspaceId);
+    DbWorkspace workspace = getDao().findById(workspaceId).orElse(null);
     if (workspace == null || !workspace.isActive()) {
       return Optional.empty();
     }
@@ -811,7 +811,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public List<DbWorkspace> getAllActiveWorkspaces() {
-    return workspaceDao.findAllByActiveStatusIn(
+    return workspaceDao.findAllByActiveStatus(
         DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 }

@@ -40,7 +40,7 @@ public class StatusAlertController implements StatusAlertApiDelegate {
     // a new one.
     Iterable<DbStatusAlert> dbStatusAlertList = statusAlertDao.findAll();
     dbStatusAlertList.forEach(
-        statusAlert1 -> statusAlertDao.delete(statusAlert1.getStatusAlertId()));
+        statusAlert1 -> statusAlertDao.deleteById(statusAlert1.getStatusAlertId()));
     // If we support multiple banners at a time, the above lines can be deleted.
 
     DbStatusAlert dbStatusAlert =
