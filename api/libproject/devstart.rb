@@ -2023,17 +2023,17 @@ def create_terra_method_snapshot(cmd_name, *args)
   op.add_option(
     "--source-git-repo [source-git-repo]",
     ->(opts, v) { opts.source_git_repo = v},
-    "git owner/repo where the source file is located. default: broadinstitute/gatk")
+    "git owner/repo where the source file is located. default: #{op.opts.source_git_repo}")
   op.opts.source_git_path = "scripts/variantstore/wdl/ngs_cohort_extract.wdl"
   op.add_option(
     "--source-git-path [source-git-path]",
     ->(opts, v) { opts.source_git_path = v},
-    "git path where the source file is located, relative to the repo's root directory. default: scripts/variantstore/wdl/ngs_cohort_extract.wdl")
+    "git path where the source file is located, relative to the repo's root directory. default: #{op.opts.source_git_path}")
   op.opts.source_git_branch = "ah_var_store"
   op.add_option(
     "--source-git-branch[source-git-branch]",
     ->(opts, v) { opts.source_git_ref = v},
-    "git branch where the source file is located. default: ah_var_store")
+    "git branch where the source file is located. default: #{op.opts.source_git_branch}")
   op.add_option(
     "--method-name [method-name]",
     ->(opts, v) { opts.method_name = v},
