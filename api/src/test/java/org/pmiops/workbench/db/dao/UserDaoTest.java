@@ -141,7 +141,7 @@ public class UserDaoTest extends SpringTest {
       if (isBetaBypassed) {
         user.setBetaAccessBypassTime(NOW);
       }
-      user.setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
+      user.setDataAccessLevelEnum(dataAccessLevel);
       createAffiliation(user, institution);
       resultList.add(userDao.save(user));
     }

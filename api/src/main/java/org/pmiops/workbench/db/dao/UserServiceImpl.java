@@ -256,7 +256,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   public DbUser createServiceAccountUser(String username) {
     DbUser user = new DbUser();
-    user.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     user.setUsername(username);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
@@ -334,7 +333,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation) {
     DbUser dbUser = new DbUser();
     dbUser.setCreationNonce(Math.abs(random.nextLong()));
-    dbUser.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
     dbUser.setUsername(username);
     dbUser.setContactEmail(contactEmail);
     dbUser.setCurrentPosition(currentPosition);

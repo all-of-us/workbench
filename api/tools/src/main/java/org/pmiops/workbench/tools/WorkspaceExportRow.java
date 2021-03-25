@@ -77,17 +77,10 @@ public class WorkspaceExportRow {
   @CsvBindByPosition(position = 5)
   private String creatorFirstSignIn;
 
-  public String getCreatorRegistrationState() {
-    return creatorRegistrationState;
-  }
-
-  public void setCreatorRegistrationState(String creatorRegistrationState) {
-    this.creatorRegistrationState = creatorRegistrationState;
-  }
-
   @CsvBindByName(column = "Registration State")
   @CsvBindByPosition(position = 6)
-  private String creatorRegistrationState;
+  @Deprecated // if we revive this tool, update to use Access Tiers instead
+  private final String creatorRegistrationState = "registered";
 
   public String getTwoFactorAuthCompletionDate() {
     return twoFactorAuthCompletionDate;
