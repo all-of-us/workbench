@@ -11,18 +11,18 @@ import {
 import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {userProfileStore} from 'app/utils/navigation';
+import {buildRasRedirectUrl} from 'app/utils/navigation';
 import {profileApi} from 'app/services/swagger-fetch-clients';
-import {buildRasRedirectUrl} from "../../utils/navigation";
 
 describe('RegistrationDashboard', () => {
   let props: RegistrationDashboardProps;
 
   const component = () => {
-    return mount<RegistrationDashboard, RegistrationDashboardProps, { trainingWarningOpen: boolean }>
+    return mount<RegistrationDashboard, RegistrationDashboardProps, {trainingWarningOpen: boolean}>
     (<RegistrationDashboard {...props}/>);
   };
 
-  beforeEach(async () => {
+  beforeEach(async() => {
     registerApiClient(ProfileApi, new ProfileApiStub());
     userProfileStore.next({
       profile: await profileApi().getMe(),
@@ -64,7 +64,7 @@ describe('RegistrationDashboard', () => {
     props.eraCommonsError = errorMessage;
     const wrapper = component();
     expect(wrapper.find('[data-test-id="era-commons-error"]').first().text())
-    .toContain(errorMessage);
+      .toContain(errorMessage);
   });
 
   it('should sequentially enable tasks', () => {
@@ -72,17 +72,17 @@ describe('RegistrationDashboard', () => {
 
     // initially, first tile should be enabled and second tile should be disabled
     expect(wrapper.find('[data-test-id="registration-task-twoFactorAuth"]')
-    .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeFalsy();
+      .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeFalsy();
     expect(wrapper.find('[data-test-id="registration-task-eraCommons"]')
-    .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeTruthy();
+      .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeTruthy();
 
     props.twoFactorAuthCompleted = true;
     wrapper = component();
     // now, first tile should be disabled but completed and second tile should be enabled
     expect(wrapper.find('[data-test-id="registration-task-twoFactorAuth"]')
-    .find('[data-test-id="completed-button"]').length).toBeGreaterThanOrEqual(1);
+      .find('[data-test-id="completed-button"]').length).toBeGreaterThanOrEqual(1);
     expect(wrapper.find('[data-test-id="registration-task-eraCommons"]')
-    .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeFalsy();
+      .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeFalsy();
 
   });
 
@@ -169,6 +169,7 @@ describe('RegistrationDashboard', () => {
     expect(getTwoFactorSetupUrl()).toMatch(encodeURIComponent('tester@fake-research-aou.org'));
     expect(getTwoFactorSetupUrl()).toMatch(encodeURIComponent('https://myaccount.google.com/signinoptions/'));
   });
+
   it('should generate expected RAS redirect URL', () => {
     expect(buildRasRedirectUrl()).toMatch(encodeURIComponent('http://localhost/ras-callback'));
   });

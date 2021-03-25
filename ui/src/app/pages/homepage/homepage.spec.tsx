@@ -44,17 +44,14 @@ describe('HomepageComponent', () => {
       userProfileStore.next({profile: newProfile, reload, updateCache});
     });
 
-    userProfileStore.next({
-      profile, reload, updateCache: () => {
-      }
-    });
+    userProfileStore.next({profile, reload, updateCache: () => {}});
     serverConfigStore.next({
       enableDataUseAgreement: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
-      enableV3DataUserCodeOfConduct: true,
+      enableV3DataUserCodeOfConduct: true
     });
     cdrVersionStore.set(cdrVersionListResponse);
   });
@@ -67,7 +64,7 @@ describe('HomepageComponent', () => {
   it('should display quick tour when clicked', () => {
     // Mock offsetWidth needed for horizontal scroll for quick tour/video list
     const originalOffsetWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth');
-    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {configurable: true, value: 1000});
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', { configurable: true, value: 1000 });
     const wrapper = component();
     wrapper.find('[data-test-id="quick-tour-resource-0"]').first().simulate('click');
     expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeTruthy();
