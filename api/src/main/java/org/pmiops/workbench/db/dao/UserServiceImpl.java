@@ -189,8 +189,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
   }
 
-  // TODO test
-
   private void updateDataAccessLevel(DbUser dbUser, Agent agent) {
     final List<DbAccessTier> previousAccessTiers = accessTierService.getAccessTiersForUser(dbUser);
 

@@ -7,11 +7,13 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
@@ -34,7 +36,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.moodle.ApiException;
@@ -443,8 +444,6 @@ public class UserServiceTest {
 
     dbUser = userService.updateUserWithRetries(this::registerUser, dbUser, Agent.asUser(dbUser));
 
-    assertThat(dbUser.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.REGISTERED);
-
     assertThat(userAccessTierDao.findAll()).hasSize(1);
     Optional<DbUserAccessTier> userAccessMaybe =
         userAccessTierDao.getByUserAndAccessTier(dbUser, registeredTier);
@@ -453,13 +452,44 @@ public class UserServiceTest {
   }
 
   @Test
+  public void test_updateUserWithRetries_register_includes_others() {
+    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = true;
+
+    DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    DbAccessTier aThirdTierWhyNot =
+        accessTierDao.save(
+            new DbAccessTier()
+                .setAccessTierId(3)
+                .setShortName("three")
+                .setDisplayName("Third Tier")
+                .setAuthDomainName("Third Tier Auth Domain")
+                .setAuthDomainGroupEmail("t3-users@fake-research-aou.org")
+                .setServicePerimeter("tier/3/perimeter"));
+
+    DbUser dbUser = userDao.save(new DbUser());
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+
+    dbUser = userService.updateUserWithRetries(this::registerUser, dbUser, Agent.asUser(dbUser));
+
+    List<DbAccessTier> expectedTiers =
+        ImmutableList.of(registeredTier, controlledTier, aThirdTierWhyNot);
+
+    assertThat(userAccessTierDao.findAll()).hasSize(expectedTiers.size());
+    for (DbAccessTier tier : expectedTiers) {
+      Optional<DbUserAccessTier> userAccessMaybe =
+          userAccessTierDao.getByUserAndAccessTier(dbUser, tier);
+      assertThat(userAccessMaybe).isPresent();
+      assertThat(userAccessMaybe.get().getTierAccessStatusEnum())
+          .isEqualTo(TierAccessStatus.ENABLED);
+    }
+  }
+
+  @Test
   public void test_updateUserWithRetries_unregister() {
     DbUser dbUser = new DbUser();
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     dbUser = userService.updateUserWithRetries(this::unregisterUser, dbUser, Agent.asUser(dbUser));
-
-    assertThat(dbUser.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.UNREGISTERED);
 
     // the user has never been registered so they have no DbUserAccessTier entry
 
@@ -476,8 +506,6 @@ public class UserServiceTest {
 
     dbUser = userService.updateUserWithRetries(this::registerUser, dbUser, Agent.asUser(dbUser));
     dbUser = userService.updateUserWithRetries(this::unregisterUser, dbUser, Agent.asUser(dbUser));
-
-    assertThat(dbUser.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.UNREGISTERED);
 
     // The user received a DbUserAccessTier when they were registered.
     // They still have it after unregistering but now it is DISABLED.

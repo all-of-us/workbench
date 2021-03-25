@@ -31,6 +31,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
@@ -49,6 +50,7 @@ import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
@@ -152,6 +154,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private RasLinkService mockRasLinkService;
 
   @Autowired private AccessTierDao accessTierDao;
+  @Autowired private AccessTierService accessTierService;
   @Autowired private InstitutionService institutionService;
   @Autowired private ProfileController profileController;
   @Autowired private ProfileService profileService;
@@ -165,6 +168,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static DbUser dbUser;
 
   private int DUA_VERSION;
+  private DbAccessTier registeredTier;
 
   @Rule public final ExpectedException exception = ExpectedException.none();
 
@@ -225,7 +229,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     config.googleDirectoryService.gSuiteDomain = GSUITE_DOMAIN;
 
     // key UserService logic depends on the existence of the Registered Tier
-    TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     Profile profile = new Profile();
     profile.setContactEmail(CONTACT_EMAIL);
@@ -503,9 +507,7 @@ public class ProfileControllerTest extends BaseControllerTest {
                 .submitDataUseAgreement(previousDuaVersion, duaInitials)
                 .getStatusCode())
         .isEqualTo(HttpStatus.OK);
-
-    Profile profile = profileController.getMe().getBody();
-    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.REGISTERED);
+    assertThat(accessTierService.getAccessTiersForUser(dbUser)).contains(registeredTier);
 
     // update and enforce the required version
 
@@ -515,8 +517,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     // see also https://precisionmedicineinitiative.atlassian.net/browse/RW-2352
     profileController.syncTwoFactorAuthStatus();
 
-    profile = profileController.getMe().getBody();
-    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
+    assertThat(accessTierService.getAccessTiersForUser(dbUser)).doesNotContain(registeredTier);
   }
 
   @Test
