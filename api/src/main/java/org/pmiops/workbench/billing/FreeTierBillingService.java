@@ -107,8 +107,8 @@ public class FreeTierBillingService {
     // check cost thresholds for the relevant users
 
     // collect previously-expired and currently-expired users
-    // for users which are expired: alert only if they were not expired previously
-    // for users which are not yet expired: check for intermediate thresholds and alert
+    // for users who are expired: alert only if they were not expired previously
+    // for users who are not yet expired: check for intermediate thresholds and alert
 
     final Set<DbUser> previouslyExpiredUsers = getExpiredUsersFromDb();
 
