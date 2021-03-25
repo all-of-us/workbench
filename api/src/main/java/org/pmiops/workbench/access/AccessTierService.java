@@ -3,7 +3,6 @@ package org.pmiops.workbench.access;
 import java.util.List;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.exceptions.ServerErrorException;
 
 public interface AccessTierService {
   // TODO remove once we are no longer special-casing the Registered Tier
@@ -15,16 +14,6 @@ public interface AccessTierService {
    * @return the List of all DbAccessTiers in the database
    */
   List<DbAccessTier> getAllTiers();
-
-  /**
-   * Return the Registered Tier if it exists in the database
-   *
-   * <p>TODO remove once we are no longer special-casing the Registered Tier
-   *
-   * @return a DbAccessTier representing the Registered Tier
-   * @throws ServerErrorException if there is no Registered Tier
-   */
-  DbAccessTier getRegisteredTier();
 
   /**
    * Add memberships to all tiers for a user if they don't exist by inserting DB row(s) set to
@@ -53,36 +42,6 @@ public interface AccessTierService {
   void removeUserFromTier(DbUser user, DbAccessTier accessTier);
 
   /**
-   * Remove a Registered Tier membership from a user if one exists and is ENABLED by marking that
-   * membership as DISABLED. Do nothing if no membership exists.
-   *
-   * <p>Currently, this does not synchronize Terra Auth Domain group membership, but it will do so
-   * when the user_access_tier table is the source of truth for tier membership. The existing method
-   * UserServiceImpl.removeFromRegisteredTierGroupIdempotent() continues to handle group membership
-   * until then.
-   *
-   * <p>TODO remove once we are no longer special-casing the Registered Tier
-   *
-   * @param user the DbUser in the user-accessTier mapping we're updating
-   */
-  void removeUserFromRegisteredTier(DbUser user);
-
-  /**
-   * Add a Registered Tier membership to a user if none exists by inserting a DB row set to ENABLED.
-   * If such a membership exists and is DISABLED, set it to ENABLED.
-   *
-   * <p>Currently, this does not synchronize Terra Auth Domain group membership, but it will do so
-   * when the user_access_tier table is the source of truth for tier membership. The existing method
-   * UserServiceImpl.addToRegisteredTierGroupIdempotent() continues to handle group membership until
-   * then.
-   *
-   * <p>TODO remove once we are no longer special-casing the Registered Tier
-   *
-   * @param user the DbUser in the user-accessTier mapping we're updating
-   */
-  void addUserToRegisteredTier(DbUser user);
-
-  /**
    * Return the list of tiers a user has access to: those where a DbUserAccessTier exists with
    * status ENABLED
    *
@@ -90,4 +49,15 @@ public interface AccessTierService {
    * @return The List of DbAccessTiers the DbUser has access to in this environment
    */
   List<DbAccessTier> getAccessTiersForUser(DbUser user);
+
+  /**
+   * Return a list of access tiers which Registered users have access to. Depending on environment,
+   * this will either be the Registered Tier or all tiers. This is a temporary measure until we
+   * implement Controlled Tier Beta access controls.
+   *
+   * <p>See https://precisionmedicineinitiative.atlassian.net/browse/RW-6237
+   *
+   * @return the list of tiers which Registered users have access to.
+   */
+  List<DbAccessTier> getTiersForRegisteredUsers();
 }

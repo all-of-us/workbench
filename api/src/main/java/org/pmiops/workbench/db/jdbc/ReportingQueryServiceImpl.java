@@ -271,6 +271,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .currentPosition(rs.getString("current_position"))
                 .dataAccessLevel(dataAccessLevelFromStorage(rs.getShort("data_access_level")))
                 // TODO placeholder until we have a proper association of users to tiers
+
+                // TODO
                 .accessTierShortNames(
                     dataAccessLevelFromStorage(rs.getShort("data_access_level"))
                             == DataAccessLevel.REGISTERED
@@ -432,7 +434,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     return jdbcTemplate.queryForObject("SELECT count(*) FROM user", Integer.class);
   }
 
-  /** Converts agreegated storage enums to String value. e.g. 0. 8 -> BA, MS. */
+  /** Converts aggregated storage enums to String value. e.g. 0. 8 -> BA, MS. */
   private static String convertListEnumFromStorage(
       String stringEnums, Function<Short, String> convertDbEnum) {
     if (Strings.isNullOrEmpty(stringEnums)) {
