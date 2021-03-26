@@ -59,6 +59,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
@@ -207,10 +208,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class WorkspacesControllerTest {
-  private static final Timestamp NOW = Timestamp.from(Instant.now());
-  private static final long NOW_TIME = NOW.getTime();
-  private static final FakeClock CLOCK = new FakeClock(NOW.toInstant(), ZoneId.systemDefault());
+public class WorkspacesControllerTest extends SpringTest {
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String LOCK_EXPIRE_TIME_KEY = "lockExpiresAt";
   private static final String LAST_LOCKING_USER_KEY = "lastLockedBy";
@@ -340,11 +338,6 @@ public class WorkspacesControllerTest {
     @Scope("prototype")
     Cloudbilling serviceAccountCloudbilling() {
       return serviceAccountCloudbilling;
-    }
-
-    @Bean
-    Clock clock() {
-      return CLOCK;
     }
 
     @Bean
