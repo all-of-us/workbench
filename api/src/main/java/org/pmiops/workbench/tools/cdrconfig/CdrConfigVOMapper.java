@@ -1,5 +1,6 @@
 package org.pmiops.workbench.tools.cdrconfig;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -17,6 +18,12 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
     config = MapStructConfig.class,
     uses = {CommonMappers.class, DbStorageEnums.class, AccessTierDao.class})
 public interface CdrConfigVOMapper {
+
+  default List<DbAccessTier> makeRandomCollection() {
+    List<DbAccessTier> tiers = new ArrayList<>();
+    tiers.add(new DbAccessTier());
+    return tiers;
+  }
 
   DbAccessTier toDbTier(AccessTierVO localTier);
 

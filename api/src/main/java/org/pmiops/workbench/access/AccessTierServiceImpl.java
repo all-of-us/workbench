@@ -39,7 +39,8 @@ public class AccessTierServiceImpl implements AccessTierService {
   public List<DbAccessTier> getAccessTiersForUser(DbUser user) {
     if (user.getDataAccessLevelEnum() == DataAccessLevel.REGISTERED) {
       if (configProvider.get().featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers) {
-        return accessTierDao.findAll();
+//        return accessTierDao.findAll();
+        return Collections.emptyList();
       } else {
         return ImmutableList.of(getRegisteredTier());
       }
@@ -57,6 +58,7 @@ public class AccessTierServiceImpl implements AccessTierService {
   }
 
   public List<DbAccessTier> getAllTiers() {
-    return accessTierDao.findAll();
+//    return accessTierDao.findAll();
+    return Collections.emptyList();
   }
 }

@@ -42,7 +42,7 @@ public interface CohortBuilderMapper {
   @Mapping(target = "code", source = "conceptCode")
   @Mapping(target = "name", source = "conceptName")
   @Mapping(target = "type", source = "vocabularyId")
-  @Mapping(target = "isStandard", source = "standardConcept", qualifiedByName = "toIsStandard")
+  @Mapping(target = "isStandard", source = "standardConcept")//, qualifiedByName = "toIsStandard")
   @Mapping(target = "childCount", ignore = true)
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "parentId", ignore = true)
