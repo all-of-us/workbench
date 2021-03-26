@@ -16,10 +16,10 @@ import {initializeAnalytics} from 'app/utils/analytics';
 import {
   queryParamsStore,
   routeConfigDataStore,
-  serverConfigStore,
+  serverConfigStore as angularServerConfigStore,
   urlParamsStore
 } from 'app/utils/navigation';
-import {routeDataStore} from 'app/utils/stores';
+import {routeDataStore, serverConfigStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 
 import outdatedBrowserRework from 'outdated-browser-rework';
@@ -171,7 +171,8 @@ export class AppComponent implements OnInit {
 
   private loadConfig() {
     this.serverConfigService.getConfig().subscribe((config) => {
-      serverConfigStore.next(config);
+      angularServerConfigStore.next(config);
+      serverConfigStore.set({config: config});
     });
   }
 

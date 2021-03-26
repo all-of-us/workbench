@@ -14,10 +14,10 @@ export function setStackdriverErrorReporter(reporter: StackdriverErrorReporter) 
 /**
  * Reports an error to Stackdriver error logging, if enabled.
  */
-export function reportError(err: (Error|string)) {
+export function reportError(err: (Error|string), reporter: StackdriverErrorReporter) {
   console.error('Reporting error to Stackdriver: ', err);
-  if (stackdriverReporter) {
-    stackdriverReporter.report(err, (e) => {
+  if (reporter) {
+    reporter.report(err, (e) => {
       // Note: this does not detect non-200 responses from Stackdriver:
       // https://github.com/GoogleCloudPlatform/stackdriver-errors-js/issues/32
       if (e) {

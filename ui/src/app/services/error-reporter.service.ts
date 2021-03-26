@@ -15,10 +15,12 @@ export class ErrorReporterService extends ErrorHandler {
     if (environment.debug) {
       // This is a local dev server, we want to disable Stackdriver reporting as
       // it's not useful and likely won't work due to the origin.
+      console.log("debug");
       return;
     }
     serverConfigService.getConfig().subscribe((config: ConfigResponse) => {
       if (!config.publicApiKeyForErrorReports) {
+        console.log("wtf!");
         return;
       }
       const r = new StackdriverErrorReporter();
