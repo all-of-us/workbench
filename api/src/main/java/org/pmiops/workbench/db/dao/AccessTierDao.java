@@ -9,5 +9,6 @@ import org.springframework.data.repository.CrudRepository;
 public interface AccessTierDao extends CrudRepository<DbAccessTier, Long> {
   //List<DbAccessTier> findAll();
 
+  @Named("findOneByShortName")
   DbAccessTier findOneByShortName(String shortName);
 }
