@@ -4,7 +4,7 @@ import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 import {ServerConfigService} from 'app/services/server-config.service';
 import {setStackdriverErrorReporter} from 'app/utils/errors';
 import {environment} from 'environments/environment';
-import {ConfigResponse} from 'generated';
+import {ConfigResponse} from 'generated/fetch';
 
 @Injectable()
 export class ErrorReporterService extends ErrorHandler {

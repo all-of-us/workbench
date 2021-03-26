@@ -3,22 +3,21 @@ import {
   ActivatedRouteSnapshot, CanActivate, CanActivateChild, Router,
   RouterStateSnapshot
 } from '@angular/router';
+import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import {serverConfigStore} from 'app/utils/navigation';
-import {WorkspacesService} from 'generated';
+import {WorkspaceAccessLevel, WorkspaceResponse} from 'generated/fetch';
 import {Observable} from 'rxjs/Observable';
 
 @Injectable()
 export class WorkspaceGuard implements CanActivate, CanActivateChild {
-  constructor(
-    private workspaceService: WorkspacesService,
-    private router: Router) {}
+  constructor(private router: Router) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
     if (serverConfigStore.getValue().enableResearchReviewPrompt && route.routeConfig.path === 'data' ||
         route.routeConfig.path === 'notebooks') {
-      this.workspaceService.getWorkspace(route.params.ns, route.params.wsid).subscribe(workspace => {
-        if (workspace.accessLevel === 'OWNER'
-            && workspace.workspace.researchPurpose.needsReviewPrompt) {
+      workspacesApi().getWorkspace(route.params.ns, route.params.wsid).then((resp: WorkspaceResponse) => {
+        if (resp.accessLevel === WorkspaceAccessLevel.OWNER
+            && resp.workspace.researchPurpose.needsReviewPrompt) {
           this.router.navigate(
               ['workspaces/' + route.params.ns + '/' + route.params.wsid + '/about']);
         }
