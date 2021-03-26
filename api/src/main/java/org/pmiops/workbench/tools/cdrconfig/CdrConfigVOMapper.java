@@ -19,10 +19,30 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
     uses = {CommonMappers.class, DbStorageEnums.class, AccessTierDao.class})
 public interface CdrConfigVOMapper {
 
+  /*
+  Produces
+
+        List<DbAccessTier> list = makeRandomCollection();
+        for ( AccessTierVO accessTierVO : localTiers ) {
+            list.add( toDbTier( accessTierVO ) );
+        }
+   */
   default List<DbAccessTier> makeRandomCollection() {
     List<DbAccessTier> tiers = new ArrayList<>();
     tiers.add(new DbAccessTier());
     return tiers;
+  }
+
+  /*
+  Produces:
+
+        DbAccessTier dbAccessTier = makeRandomTier();
+
+        dbAccessTier.setAccessTierId( localTier.accessTierId );
+        dbAccessTier.setShortName( localTier.shortName );
+   */
+  default DbAccessTier makeRandomTier() {
+    return new DbAccessTier();
   }
 
   DbAccessTier toDbTier(AccessTierVO localTier);
