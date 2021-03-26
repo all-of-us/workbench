@@ -132,6 +132,8 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     this.firecloudMapper = firecloudMapper;
   }
 
+  // TODO eric: add access checks
+
   @VisibleForTesting
   public void setDistinctWorkspaceLimit(int limit) {
     distinctWorkspacelimit = limit;
