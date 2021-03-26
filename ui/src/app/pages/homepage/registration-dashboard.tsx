@@ -17,6 +17,7 @@ import {getLiveDataUseAgreementVersion} from 'app/utils/code-of-conduct';
 import {navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {AccessModule, Profile} from 'generated/fetch';
+import {buildRasRedirectUrl} from 'app/utils/navigation';
 
 const styles = reactStyles({
   mainHeader: {
