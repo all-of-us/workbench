@@ -276,10 +276,8 @@ public class WorkspaceServiceTest {
         workspace -> {
           // Need a new 'now' each time or else we won't have lastAccessDates that are different
           // from each other
-          workspaceService.updateRecentWorkspaces(
-              workspace,
-              USER_ID,
-              Timestamp.from(NOW.minusSeconds(dbWorkspaces.size() - workspace.getWorkspaceId())));
+          doReturn(NOW.minusSeconds(dbWorkspaces.size() - workspace.getWorkspaceId())).when(mockClock).instant();
+          workspaceService.updateRecentWorkspaces(workspace);
         });
     List<DbUserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(recentWorkspaces.size()).isEqualTo(WorkspaceServiceImpl.RECENT_WORKSPACE_COUNT);
@@ -302,16 +300,16 @@ public class WorkspaceServiceTest {
   @Test
   public void updateRecentWorkspaces_multipleUsers() {
     long OTHER_USER_ID = 2L;
-    workspaceService.updateRecentWorkspaces(
-        dbWorkspaces.get(0), OTHER_USER_ID, Timestamp.from(NOW));
+    currentUser.setUserId(OTHER_USER_ID);
+    workspaceService.updateRecentWorkspaces(dbWorkspaces.get(0));
+
+    currentUser.setUserId(USER_ID);
     dbWorkspaces.forEach(
         workspace -> {
           // Need a new 'now' each time or else we won't have lastAccessDates that are different
           // from each other
-          workspaceService.updateRecentWorkspaces(
-              workspace,
-              USER_ID,
-              Timestamp.from(NOW.minusSeconds(dbWorkspaces.size() - workspace.getWorkspaceId())));
+          doReturn(NOW.minusSeconds(dbWorkspaces.size() - workspace.getWorkspaceId())).when(mockClock).instant();
+          workspaceService.updateRecentWorkspaces(workspace);
         });
     List<DbUserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
 
@@ -347,15 +345,20 @@ public class WorkspaceServiceTest {
 
   @Test
   public void updateRecentWorkspaces_flipFlop() {
-    workspaceService.updateRecentWorkspaces(
-        dbWorkspaces.get(0), USER_ID, Timestamp.from(NOW.minusSeconds(4)));
-    workspaceService.updateRecentWorkspaces(
-        dbWorkspaces.get(1), USER_ID, Timestamp.from(NOW.minusSeconds(3)));
-    workspaceService.updateRecentWorkspaces(
-        dbWorkspaces.get(0), USER_ID, Timestamp.from(NOW.minusSeconds(2)));
-    workspaceService.updateRecentWorkspaces(
-        dbWorkspaces.get(1), USER_ID, Timestamp.from(NOW.minusSeconds(1)));
-    workspaceService.updateRecentWorkspaces(dbWorkspaces.get(0), USER_ID, Timestamp.from(NOW));
+    doReturn(NOW.minusSeconds(4)).when(mockClock).instant();
+    workspaceService.updateRecentWorkspaces(dbWorkspaces.get(0));
+
+    doReturn(NOW.minusSeconds(3)).when(mockClock).instant();
+    workspaceService.updateRecentWorkspaces(dbWorkspaces.get(1));
+
+    doReturn(NOW.minusSeconds(2)).when(mockClock).instant();
+    workspaceService.updateRecentWorkspaces(dbWorkspaces.get(0));
+
+    doReturn(NOW.minusSeconds(1)).when(mockClock).instant();
+    workspaceService.updateRecentWorkspaces(dbWorkspaces.get(1));
+
+    doReturn(NOW).when(mockClock).instant();
+    workspaceService.updateRecentWorkspaces(dbWorkspaces.get(0));
 
     List<DbUserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(recentWorkspaces.size()).isEqualTo(2);
@@ -376,7 +379,7 @@ public class WorkspaceServiceTest {
             "owned_namespace",
             WorkspaceAccessLevel.OWNER,
             WorkspaceActiveStatus.ACTIVE);
-    workspaceService.updateRecentWorkspaces(ownedWorkspace, USER_ID, Timestamp.from(NOW));
+    workspaceService.updateRecentWorkspaces(ownedWorkspace);
 
     DbWorkspace sharedWorkspace =
         addMockedWorkspace(
@@ -385,7 +388,7 @@ public class WorkspaceServiceTest {
             "shared_namespace",
             WorkspaceAccessLevel.NO_ACCESS,
             WorkspaceActiveStatus.ACTIVE);
-    workspaceService.updateRecentWorkspaces(sharedWorkspace, USER_ID, Timestamp.from(NOW));
+    workspaceService.updateRecentWorkspaces(sharedWorkspace);
 
     List<DbUserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
     assertThat(recentWorkspaces.size()).isEqualTo(1);

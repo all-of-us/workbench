@@ -3181,7 +3181,7 @@ public class WorkspacesControllerTest {
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.OWNER);
     DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getId());
-    workspaceService.updateRecentWorkspaces(dbWorkspace, currentUser.getUserId(), NOW);
+    workspaceService.updateRecentWorkspaces(dbWorkspace);
     ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity =
         workspacesController.getUserRecentWorkspaces();
     RecentWorkspace recentWorkspace = recentWorkspaceResponseEntity.getBody().get(0);

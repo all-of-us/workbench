@@ -179,6 +179,16 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
         .collect(Collectors.toList());
   }
 
+  private Map<String, FirecloudWorkspaceResponse> getFirecloudWorkspaces() {
+    // fields must include at least "workspace.workspaceId", otherwise
+    // the map creation will fail
+    return fireCloudService.getWorkspaces().stream()
+        .collect(
+            Collectors.toMap(
+                fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
+                fcWorkspace -> fcWorkspace));
+  }
+
   @Transactional
   @Override
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
@@ -208,16 +218,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     return workspaceResponse;
   }
 
-  private Map<String, FirecloudWorkspaceResponse> getFirecloudWorkspaces() {
-    // fields must include at least "workspace.workspaceId", otherwise
-    // the map creation will fail
-    return fireCloudService.getWorkspaces().stream()
-        .collect(
-            Collectors.toMap(
-                fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
-                fcWorkspace -> fcWorkspace));
-  }
-
   @Override
   public Map<String, FirecloudWorkspaceAccessEntry> getFirecloudWorkspaceAcls(
       String workspaceNamespace, String firecloudName) {
@@ -231,6 +231,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     return gson.fromJson(gson.toJson(aclResp.getAcl(), accessEntryType), accessEntryType);
   }
 
+  // TODO eric: move out
   @Override
   public DbWorkspace getRequired(String ns, String firecloudName) {
     DbWorkspace workspace = workspaceDao.get(ns, firecloudName);
@@ -240,12 +241,14 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     return workspace;
   }
 
+  // TODO eric: move into Dao
   @Override
   public Optional<DbWorkspace> getByNamespace(String ns) {
     return workspaceDao.findFirstByWorkspaceNamespaceAndActiveStatusOrderByLastModifiedTimeDesc(
         ns, DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 
+  // TODO eric: move out
   @Override
   @Transactional
   public DbWorkspace getRequiredWithCohorts(String ns, String firecloudName) {
@@ -286,6 +289,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     }
   }
 
+  // TODO eric: move out
   @Override
   public void validateActiveBilling(String workspaceNamespace, String workspaceId)
       throws ForbiddenException {
@@ -296,6 +300,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     }
   }
 
+  // TODO eric: make private function in workspaceController
   @Override
   public List<DbWorkspace> findForReview() {
     return workspaceDao.findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested();
@@ -318,6 +323,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     workspaceDao.saveWithLastModified(workspace);
   }
 
+  // TODO eric: move into FirecloudWorkspaceACLUpdate. Also, what does "OnUser" even imply
   @Override
   public FirecloudWorkspaceACLUpdate updateFirecloudAclsOnUser(
       WorkspaceAccessLevel updatedAccess, FirecloudWorkspaceACLUpdate currentUpdate) {
@@ -461,6 +467,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     return to;
   }
 
+  // TODO eric: workspace acl
   @Override
   public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId)
       throws IllegalArgumentException {
@@ -474,6 +481,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
             () -> new IllegalArgumentException("Unrecognized access level: " + userAccess));
   }
 
+  // TODO eric: workspace acl
   @Override
   public WorkspaceAccessLevel enforceWorkspaceAccessLevel(
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess) {
@@ -493,6 +501,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     }
   }
 
+  // TODO eric: workspace acl
   @Override
   public DbWorkspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel workspaceAccessLevel) {
@@ -506,6 +515,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     return workspace;
   }
 
+  // TODO eric: I think we can replace with Dao function that also checks for active
   @Override
   public Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId) {
     DbWorkspace workspace = workspaceDao.findOne(workspaceId);
@@ -515,6 +525,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     return Optional.of(workspace);
   }
 
+  // TODO eric: workspace ACL
   @Override
   public List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName) {
     Map<String, FirecloudWorkspaceAccessEntry> emailToRole =
@@ -540,16 +551,11 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   public DbWorkspace setPublished(
       DbWorkspace workspace, String publishedWorkspaceGroup, boolean publish) {
     ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
-    FirecloudWorkspaceACLUpdate currentUpdate = new FirecloudWorkspaceACLUpdate();
-    currentUpdate.setEmail(publishedWorkspaceGroup);
+    FirecloudWorkspaceACLUpdate currentUpdate = new FirecloudWorkspaceACLUpdate()
+        .email(publishedWorkspaceGroup);
 
-    if (publish) {
-      currentUpdate = updateFirecloudAclsOnUser(WorkspaceAccessLevel.READER, currentUpdate);
-      workspace.setPublished(true);
-    } else {
-      currentUpdate = updateFirecloudAclsOnUser(WorkspaceAccessLevel.NO_ACCESS, currentUpdate);
-      workspace.setPublished(false);
-    }
+    currentUpdate = updateFirecloudAclsOnUser(publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS, currentUpdate);
+    workspace.setPublished(publish);
 
     updateACLRequestList.add(currentUpdate);
     fireCloudService.updateWorkspaceACL(
@@ -602,7 +608,13 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-  public DbUserRecentWorkspace updateRecentWorkspaces(
+  @Transactional
+  public DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace) {
+    return updateRecentWorkspaces(
+        workspace, userProvider.get().getUserId(), new Timestamp(clock.instant().toEpochMilli()));
+  }
+
+  private DbUserRecentWorkspace updateRecentWorkspaces(
       DbWorkspace workspace, long userId, Timestamp lastAccessDate) {
     Optional<DbUserRecentWorkspace> maybeRecentWorkspace =
         userRecentWorkspaceDao.findFirstByWorkspaceIdAndUserId(workspace.getWorkspaceId(), userId);
@@ -621,13 +633,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     return matchingRecentWorkspace;
   }
 
-  @Override
-  @Transactional
-  public DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace) {
-    return updateRecentWorkspaces(
-        workspace, userProvider.get().getUserId(), new Timestamp(clock.instant().toEpochMilli()));
-  }
-
   private void handleWorkspaceLimit(long userId) {
     List<DbUserRecentWorkspace> userRecentWorkspaces =
         userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
@@ -640,9 +645,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     userRecentWorkspaceDao.deleteByUserIdAndWorkspaceIdIn(userId, idsToDelete);
   }
 
-  @Override
   /** Returns true if anything was deleted from user_recent_workspaces, false if nothing was */
-  public boolean maybeDeleteRecentWorkspace(long workspaceId) {
+  private boolean maybeDeleteRecentWorkspace(long workspaceId) {
     long userId = userProvider.get().getUserId();
     Optional<DbUserRecentWorkspace> maybeRecentWorkspace =
         userRecentWorkspaceDao.findFirstByWorkspaceIdAndUserId(workspaceId, userId);
@@ -755,9 +759,4 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
         .collect(ImmutableList.toImmutableList());
   }
 
-  @Override
-  public List<DbWorkspace> getAllActiveWorkspaces() {
-    return workspaceDao.findAllByActiveStatusIn(
-        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
-  }
 }

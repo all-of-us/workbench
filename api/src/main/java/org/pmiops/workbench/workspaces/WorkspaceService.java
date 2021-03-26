@@ -88,12 +88,6 @@ public interface WorkspaceService {
 
   List<DbUserRecentWorkspace> getRecentWorkspaces();
 
-  DbUserRecentWorkspace updateRecentWorkspaces(
-      DbWorkspace workspace, long userId, Timestamp lastAccessDate);
-
   DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace);
 
-  boolean maybeDeleteRecentWorkspace(long workspaceId);
-
-  List<DbWorkspace> getAllActiveWorkspaces();
 }

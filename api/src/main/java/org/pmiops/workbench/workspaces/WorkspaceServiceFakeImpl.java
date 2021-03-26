@@ -131,23 +131,8 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   }
 
   @Override
-  public DbUserRecentWorkspace updateRecentWorkspaces(
-      DbWorkspace workspace, long userId, Timestamp lastAccessDate) {
-    return null;
-  }
-
-  @Override
   public DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace) {
     return null;
   }
 
-  @Override
-  public boolean maybeDeleteRecentWorkspace(long workspaceId) {
-    return false;
-  }
-
-  @Override
-  public List<DbWorkspace> getAllActiveWorkspaces() {
-    return null;
-  }
 }
