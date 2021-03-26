@@ -20,6 +20,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.compliance.ComplianceService;
@@ -68,6 +69,7 @@ public class UserControllerTest {
   @Import({
     UserController.class,
     UserServiceTestConfiguration.class,
+    AccessTierServiceImpl.class,
   })
   @MockBean({
     FireCloudService.class,

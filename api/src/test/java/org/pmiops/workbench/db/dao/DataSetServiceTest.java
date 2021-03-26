@@ -39,7 +39,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
 import org.pmiops.workbench.cdr.dao.DSLinkingDao;
+import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
 import org.pmiops.workbench.cdr.model.DbDSLinking;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortService;
@@ -54,6 +56,7 @@ import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValuePair;
@@ -68,10 +71,12 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class DataSetServiceTest {
 
   private static final QueryJobConfiguration QUERY_JOB_CONFIGURATION_1 =
@@ -97,9 +102,9 @@ public class DataSetServiceTest {
   @Autowired private ConceptSetDao conceptSetDao;
   @Autowired private ConceptBigQueryService conceptBigQueryService;
   @Autowired private CohortQueryBuilder cohortQueryBuilder;
-  @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
   @Autowired private DataSetDao dataSetDao;
   @Autowired private DSLinkingDao dsLinkingDao;
+  @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
   @Autowired private DataSetMapper dataSetMapper;
 
   @MockBean private BigQueryService mockBigQueryService;
@@ -142,9 +147,9 @@ public class DataSetServiceTest {
             conceptBigQueryService,
             conceptSetDao,
             cohortQueryBuilder,
-            dataDictionaryEntryDao,
             dataSetDao,
             dsLinkingDao,
+            dsDataDictionaryDao,
             dataSetMapper,
             CLOCK);
 
@@ -488,6 +493,15 @@ public class DataSetServiceTest {
         .contains("GROUP BY PERSON_ID, DATE");
   }
 
+  @Test
+  public void testDataDictionary() {
+    createDbDsDataDictionaryEntry();
+    DataDictionaryEntry dataDictionaryEntry =
+        dataSetServiceImpl.findDataDictionaryEntry("gender", "PERSON");
+    assertThat(dataDictionaryEntry).isNotNull();
+    assertThat(dataDictionaryEntry.getDescription()).isEqualTo("Gender testing");
+  }
+
   private void mockDsLinkingTableForFitbit() {
     DbDSLinking dbDSLinkingFitbit_personId = new DbDSLinking();
     dbDSLinkingFitbit_personId.setDenormalizedName("PERSON_ID");
@@ -532,5 +546,14 @@ public class DataSetServiceTest {
         .getValues();
 
     doReturn(tableResultMock).when(mockBigQueryService).executeQuery(any());
+  }
+
+  private void createDbDsDataDictionaryEntry() {
+    DbDSDataDictionary dsDataDictionary = new DbDSDataDictionary();
+    dsDataDictionary.setDomain("PERSON");
+    dsDataDictionary.setFieldName("gender");
+    dsDataDictionary.setDescription("Gender testing");
+    dsDataDictionary.setFieldType("string");
+    dsDataDictionaryDao.save(dsDataDictionary);
   }
 }

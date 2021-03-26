@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -18,21 +19,29 @@ import javax.annotation.Nullable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.access.AccessTierServiceImpl;
+import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.testconfig.UserServiceTestConfiguration;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -51,16 +60,15 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class UserServiceTest {
 
   private static final String USERNAME = "abc@fake-research-aou.org";
-  private static final int MOODLE_ID = 1001;
 
   // An arbitrary timestamp to use as the anchor time for access module test cases.
   private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
-  @Deprecated private static final long TIMESTAMP_MSECS = START_INSTANT.toEpochMilli();
   private static final long TIMESTAMP_SECS = START_INSTANT.getEpochSecond();
   private static final FakeClock PROVIDED_CLOCK = new FakeClock(START_INSTANT);
   private static final int CLOCK_INCREMENT_MILLIS = 1000;
   private static DbUser providedDbUser;
   private static WorkbenchConfig providedWorkbenchConfig;
+  private static DbAccessTier registeredTier;
 
   @MockBean private FireCloudService mockFireCloudService;
   @MockBean private ComplianceService mockComplianceService;
@@ -70,8 +78,13 @@ public class UserServiceTest {
 
   @Autowired private UserService userService;
   @Autowired private UserDao userDao;
+  @Autowired private AccessTierDao accessTierDao;
+  @Autowired private UserAccessTierDao userAccessTierDao;
 
-  @Import(UserServiceTestConfiguration.class)
+  @Import({
+    UserServiceTestConfiguration.class,
+    AccessTierServiceImpl.class,
+  })
   @TestConfiguration
   static class Configuration {
     @Bean
@@ -101,10 +114,13 @@ public class UserServiceTest {
   public void setUp() {
     DbUser user = new DbUser();
     user.setUsername(USERNAME);
-    userDao.save(user);
+    user = userDao.save(user);
     providedDbUser = user;
 
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
+
+    // key UserService logic depends on the existence of the Registered Tier
+    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     // Since we're injecting the same static instance of this FakeClock,
     // increments and other mutations will carry across tests if we don't reset it here.
@@ -418,5 +434,87 @@ public class UserServiceTest {
     for (Authority auth : Authority.values()) {
       assertThat(userService.hasAuthority(user.getUserId(), auth)).isTrue();
     }
+  }
+
+  @Test
+  public void test_updateUserWithRetries_register() {
+    DbUser dbUser = userDao.save(new DbUser());
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+
+    dbUser = userService.updateUserWithRetries(this::registerUser, dbUser, Agent.asUser(dbUser));
+
+    assertThat(dbUser.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.REGISTERED);
+
+    assertThat(userAccessTierDao.findAll()).hasSize(1);
+    Optional<DbUserAccessTier> userAccessMaybe =
+        userAccessTierDao.getByUserAndAccessTier(dbUser, registeredTier);
+    assertThat(userAccessMaybe).isPresent();
+    assertThat(userAccessMaybe.get().getTierAccessStatusEnum()).isEqualTo(TierAccessStatus.ENABLED);
+  }
+
+  @Test
+  public void test_updateUserWithRetries_unregister() {
+    DbUser dbUser = new DbUser();
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+
+    dbUser = userService.updateUserWithRetries(this::unregisterUser, dbUser, Agent.asUser(dbUser));
+
+    assertThat(dbUser.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.UNREGISTERED);
+
+    // the user has never been registered so they have no DbUserAccessTier entry
+
+    assertThat(userAccessTierDao.findAll()).hasSize(0);
+    Optional<DbUserAccessTier> userAccessMaybe =
+        userAccessTierDao.getByUserAndAccessTier(dbUser, registeredTier);
+    assertThat(userAccessMaybe).isEmpty();
+  }
+
+  @Test
+  public void test_updateUserWithRetries_register_then_unregister() {
+    DbUser dbUser = new DbUser();
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+
+    dbUser = userService.updateUserWithRetries(this::registerUser, dbUser, Agent.asUser(dbUser));
+    dbUser = userService.updateUserWithRetries(this::unregisterUser, dbUser, Agent.asUser(dbUser));
+
+    assertThat(dbUser.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.UNREGISTERED);
+
+    // The user received a DbUserAccessTier when they were registered.
+    // They still have it after unregistering but now it is DISABLED.
+
+    assertThat(userAccessTierDao.findAll()).hasSize(1);
+    Optional<DbUserAccessTier> userAccessMaybe =
+        userAccessTierDao.getByUserAndAccessTier(dbUser, registeredTier);
+    assertThat(userAccessMaybe).isPresent();
+    assertThat(userAccessMaybe.get().getTierAccessStatusEnum())
+        .isEqualTo(TierAccessStatus.DISABLED);
+  }
+
+  private DbUser registerUser(DbUser user) {
+    // shouldUserBeRegistered logic:
+    //    return !user.getDisabled()
+    //        && complianceTrainingCompliant
+    //        && eraCommonsCompliant
+    //        && betaAccessGranted
+    //        && twoFactorAuthComplete
+    //        && dataUseAgreementCompliant
+    //        && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
+
+    Timestamp now = Timestamp.from(Instant.now());
+
+    user.setDisabled(false);
+    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
+    user.setComplianceTrainingBypassTime(now);
+    user.setEraCommonsBypassTime(now);
+    user.setBetaAccessBypassTime(now);
+    user.setTwoFactorAuthBypassTime(now);
+    user.setDataUseAgreementBypassTime(now);
+
+    return userDao.save(user);
+  }
+
+  private DbUser unregisterUser(DbUser user) {
+    user.setDisabled(true);
+    return userDao.save(user);
   }
 }

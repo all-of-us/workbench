@@ -12,10 +12,8 @@ import {
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortBuilderServiceStub, DomainStubVariables, SurveyStubVariables} from 'testing/stubs/cohort-builder-service-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
-import {
-  workspaceDataStub,
-  WorkspacesApiStub,
-} from 'testing/stubs/workspaces-api-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {Key} from 'ts-key-enum';
 
 function searchTable(searchTerm: string, wrapper) {

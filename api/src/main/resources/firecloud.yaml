@@ -1346,6 +1346,7 @@ definitions:
       - accessLevels
       - authDomainACLs
       - isLocked
+      - googleProject
     type: object
     properties:
       namespace:
@@ -1388,6 +1389,9 @@ definitions:
       isLocked:
         type: boolean
         description: Can the Workspace currently be modified?
+      googleProject:
+        type: string
+        description: the google project used by the workspace for compute and storage
 
   WorkspaceAccessLevel:
     description: 'The level of access a user or group has on a Workspace. NoAccess, Read, Write, Owner, ProjectOwner'

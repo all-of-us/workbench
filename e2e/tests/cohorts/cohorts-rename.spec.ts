@@ -1,16 +1,14 @@
 import DataResourceCard from 'app/component/data-resource-card';
 import Link from 'app/element/link';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import CohortBuildPage, {FieldSelector} from 'app/page/cohort-build-page';
+import CohortBuildPage, { FieldSelector } from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {ResourceCard} from 'app/text-labels';
-import {makeRandomName} from 'utils/str-utils';
-import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
-import {waitForNumericalString, waitForText} from 'utils/waits-utils';
-
+import { ResourceCard } from 'app/text-labels';
+import { makeRandomName } from 'utils/str-utils';
+import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { waitForNumericalString, waitForText } from 'utils/waits-utils';
 
 describe('User can create, modify, rename and delete Cohort', () => {
-
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
@@ -28,7 +26,6 @@ describe('User can create, modify, rename and delete Cohort', () => {
    * Delete Cohort.
    */
   test('Add cohort including Demographics Age', async () => {
-
     const workspaceCard = await findOrCreateWorkspace(page);
     await workspaceCard.clickWorkspaceName();
 
@@ -74,9 +71,9 @@ describe('User can create, modify, rename and delete Cohort', () => {
     console.log(`Created Cohort "${cohortName}"`);
 
     // Click cohort link. Open cohort build page.
-    const cohortLink = await Link.findByName(page, {name: cohortName});
+    const cohortLink = await Link.findByName(page, { name: cohortName });
     await cohortLink.clickAndWait();
-    await waitForText(page, totalCount, {xpath: FieldSelector.TotalCount}, 60000);
+    await waitForText(page, totalCount, { xpath: FieldSelector.TotalCount }, 60000);
 
     // Remove Exclude Group 3.
     const groupCriteriasList = await group3.deleteGroup();
@@ -107,6 +104,4 @@ describe('User can create, modify, rename and delete Cohort', () => {
     // Verify Delete successful.
     expect(await DataResourceCard.findCard(page, newCohortName, 5000)).toBeFalsy();
   });
-
-
 });

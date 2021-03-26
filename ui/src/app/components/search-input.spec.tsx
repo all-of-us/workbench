@@ -44,7 +44,7 @@ test('dropdown is displayed when results are available', async() => {
     input.update();
     setTimeout(() => {
       input.update();
-      accept();
+      accept(undefined);
     }, DROPDOWN_DELAY_MS);
   }).then(() => {
     expect(input.find('[data-test-id="search-input-drop-down"]').exists()).toBeTruthy();
@@ -64,7 +64,7 @@ test('selecting a result from the dropdown closes the dropdown', async() => {
     input.update();
     setTimeout(() => {
       input.update();
-      accept();
+      accept(undefined);
     }, DROPDOWN_DELAY_MS);
   }).then(async() => {
     const match = input.find('[data-test-id="search-input-drop-down-element-0"]');

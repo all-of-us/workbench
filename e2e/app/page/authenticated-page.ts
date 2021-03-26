@@ -1,7 +1,7 @@
-import {Page} from 'puppeteer';
-import {PageUrl} from 'app/text-labels';
+import { Page } from 'puppeteer';
+import { PageUrl } from 'app/text-labels';
 import BasePage from 'app/page/base-page';
-import {getPropValue} from 'utils/element-utils';
+import { getPropValue } from 'utils/element-utils';
 import HelpTipsSidebar from 'app/component/help-tips-sidebar';
 
 const signedInIndicator = 'app-signed-in';
@@ -11,21 +11,21 @@ const signedInIndicator = 'app-signed-in';
  * This is the base page for all AoU pages to extends from.
  */
 export default abstract class AuthenticatedPage extends BasePage {
-
   protected constructor(page: Page) {
     super(page);
   }
 
   protected async isSignedIn(): Promise<boolean> {
-    return this.page.waitForSelector(signedInIndicator, {timeout: 5 * 60 * 1000})
-      .then( (elemt) => elemt.asElement() !== null);
+    return this.page
+      .waitForSelector(signedInIndicator, { timeout: 5 * 60 * 1000 })
+      .then((elemt) => elemt.asElement() !== null);
   }
 
   /**
    * Method to be implemented by children classes.
    * Check whether current page has specified web elements.
    */
-  abstract isLoaded(): Promise<boolean>
+  abstract isLoaded(): Promise<boolean>;
 
   /**
    * Wait until current page is loaded and without spinners spinning.
@@ -45,7 +45,6 @@ export default abstract class AuthenticatedPage extends BasePage {
     await this.waitForLoad();
   }
 
-
   /**
    * Find the actual displayed User name string in sidenav dropdown.
    */
@@ -62,5 +61,4 @@ export default abstract class AuthenticatedPage extends BasePage {
       await sidebar.close();
     }
   }
-
 }

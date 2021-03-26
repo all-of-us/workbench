@@ -551,8 +551,8 @@ tasks.withType(Test) {
       html.enabled = true
     }
   }
-  // The default max heap size was reduced in Gradle 5; override.
-  maxHeapSize = "1g"
+  // As of Q1 2021, API unit tests need a larger heap due to memory retention across individual test cases.
+  maxHeapSize = "2g"
 }
 
 appengine {  // App Engine tasks configuration

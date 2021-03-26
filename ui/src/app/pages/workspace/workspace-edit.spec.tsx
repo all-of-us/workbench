@@ -3,16 +3,18 @@ import * as React from 'react';
 import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {cdrVersionStore, currentWorkspaceStore, navigate, serverConfigStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, navigate, serverConfigStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {DisseminateResearchEnum, ResearchOutcomeEnum, SpecificPopulationEnum,UserApi, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
-import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
+import {workspaceStubs} from 'testing/stubs/workspaces';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-edit';
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
+import {cdrVersionStore} from "app/utils/stores";
 
 jest.mock('app/utils/navigation', () => ({
   ...(jest.requireActual('app/utils/navigation')),
@@ -68,7 +70,7 @@ describe('WorkspaceEdit', () => {
     registerApiClient(WorkspacesApi, workspacesApi);
 
     currentWorkspaceStore.next(workspace);
-    cdrVersionStore.next(cdrVersionListResponse);
+    cdrVersionStore.set(cdrVersionListResponse);
     serverConfigStore.next({enableBillingUpgrade: true, defaultFreeCreditsDollarLimit: 100.0, gsuiteDomain: ''});
   });
 

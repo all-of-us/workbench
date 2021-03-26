@@ -1,20 +1,17 @@
-import {ElementHandle, Page} from 'puppeteer';
-import {FieldSelector} from 'app/page/cohort-build-page';
-import {waitForNumericalString, waitForText, waitWhileLoading} from 'utils/waits-utils';
+import { ElementHandle, Page } from 'puppeteer';
+import { FieldSelector } from 'app/page/cohort-build-page';
+import { waitForNumericalString, waitForText, waitWhileLoading } from 'utils/waits-utils';
 import CohortSearchPage from 'app/page/cohort-search-page';
-import CriteriaSearchPage, {FilterSign, PhysicalMeasurementsCriteria} from 'app/page/criteria-search-page';
+import CriteriaSearchPage, { FilterSign, PhysicalMeasurementsCriteria } from 'app/page/criteria-search-page';
 import TieredMenu from 'app/component/tiered-menu';
-import {LinkText, MenuOption} from 'app/text-labels';
-import {snowmanIconXpath} from 'app/component/snowman-menu';
+import { LinkText, MenuOption } from 'app/text-labels';
+import { snowmanIconXpath } from 'app/component/snowman-menu';
 import Modal from 'app/modal/modal';
 
 export default class CohortParticipantsGroup {
-
   private rootXpath: string;
 
-  constructor(private readonly page: Page) {
-
-  }
+  constructor(private readonly page: Page) {}
 
   setXpath(xpath: string): void {
     this.rootXpath = xpath;
@@ -34,8 +31,7 @@ export default class CohortParticipantsGroup {
 
   async clickSnowmanIcon(): Promise<void> {
     const iconXpath = `${this.rootXpath}${snowmanIconXpath}`;
-    await this.page.waitForXPath(iconXpath, {visible: true})
-       .then(icon => icon.click());
+    await this.page.waitForXPath(iconXpath, { visible: true }).then((icon) => icon.click());
   }
 
   /**
@@ -59,7 +55,7 @@ export default class CohortParticipantsGroup {
     const modal = new Modal(this.page);
     const textbox = await modal.waitForTextbox('New Name:');
     await textbox.type(newGroupName);
-    await modal.clickButton(LinkText.Rename, {waitForClose: true});
+    await modal.clickButton(LinkText.Rename, { waitForClose: true });
   }
 
   /**
@@ -137,7 +133,7 @@ export default class CohortParticipantsGroup {
   }
 
   private async openTieredMenu(): Promise<TieredMenu> {
-    const addCriteriaButton = await this.page.waitForXPath(this.getAddCriteriaButtonXpath(), {visible: true});
+    const addCriteriaButton = await this.page.waitForXPath(this.getAddCriteriaButtonXpath(), { visible: true });
     await addCriteriaButton.click(); // Click dropdown trigger to open menu
     const tieredMenu = new TieredMenu(this.page);
     await tieredMenu.waitUntilVisible();
@@ -148,5 +144,4 @@ export default class CohortParticipantsGroup {
     const selector = `${this.rootXpath}//*[@data-test-id="item-list"]`;
     return this.page.$x(selector);
   }
-
 }

@@ -1,5 +1,5 @@
-import {makeString} from 'utils/str-utils';
-import {FIELD} from 'app/page/workspace-edit-page';
+import { makeString } from 'utils/str-utils';
+import { FIELD } from 'app/page/workspace-edit-page';
 
 // Question #1: What is the primary purpose of your project?
 export const defaultAnswersPrimaryPurpose = [
@@ -56,10 +56,12 @@ export const defaultAnswersResearchPurposeSummary = [
   {
     id: FIELD.RESEARCH_PURPOSE_SUMMARY.scientificQuestionsIntentToStudyTextarea,
     value: makeString(100)
-  }, {
+  },
+  {
     id: FIELD.RESEARCH_PURPOSE_SUMMARY.scientificApproachesToUseTextarea,
     value: makeString(100)
-  }, {
+  },
+  {
     id: FIELD.RESEARCH_PURPOSE_SUMMARY.anticipatedFindingsFromStudyTextarea,
     value: makeString(100)
   }
