@@ -26,6 +26,7 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
+import {buildRasRedirectUrl} from 'app/utils/navigation';
 
 export const styles = reactStyles({
   bottomBanner: {
