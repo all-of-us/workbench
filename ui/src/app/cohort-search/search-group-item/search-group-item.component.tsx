@@ -217,7 +217,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
       triggerEvent('Delete', 'Click', 'Snowman - Delete Criteria - Cohort Builder');
       this.updateSearchRequest('status', 'pending', true);
       const timeout: Timeout = global.setTimeout(() => {
-        this.updateSearchRequest(null, null, false, true)
+        this.updateSearchRequest(null, null, false, true);
       }, 10000);
       this.setState({timeout});
     }
