@@ -14,7 +14,6 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.model.ArchivalStatus;
-import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -107,36 +106,6 @@ public class CdrConfigVOMapperTest {
   }
 
   @Test
-  public void test_populateAccessTier() {
-    DbAccessTier registeredTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
-
-    CdrVersionVO cdrVersionVO = new CdrVersionVO();
-    cdrVersionVO.accessTier = registeredTier.getShortName();
-
-    DbCdrVersion dbCdrVersion = new DbCdrVersion();
-    dbCdrVersion.setCdrVersionId(3);
-
-    assertThat(dbCdrVersion.getAccessTier()).isNull();
-    mapper.populateAccessTier(cdrVersionVO, dbCdrVersion, accessTierDao);
-    assertThat(dbCdrVersion.getAccessTier()).isEqualTo(registeredTier);
-  }
-
-  @Test
-  public void test_populateAccessTier_missing() {
-    DbAccessTier registeredTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
-
-    CdrVersionVO cdrVersionVO = new CdrVersionVO();
-    cdrVersionVO.accessTier = "a tier which doesn't exist";
-
-    DbCdrVersion dbCdrVersion = new DbCdrVersion();
-    dbCdrVersion.setCdrVersionId(3);
-
-    assertThat(dbCdrVersion.getAccessTier()).isNull();
-    mapper.populateAccessTier(cdrVersionVO, dbCdrVersion, accessTierDao);
-    assertThat(dbCdrVersion.getAccessTier()).isNull();
-  }
-
-  @Test
   public void test_toDbVersion() {
     DbAccessTier testTierInDb = accessTierDao.save(mapper.toDbTier(testTierJson));
 
@@ -160,7 +129,7 @@ public class CdrConfigVOMapperTest {
     expected.setHasFitbitData(testVersionJson.hasFitbitData);
     expected.setHasCopeSurveyData(testVersionJson.hasCopeSurveyData);
 
-    assertThat(mapper.toDbVersion(testVersionJson, accessTierDao)).isEqualTo(expected);
+    assertThat(mapper.toDbVersion(testVersionJson)).isEqualTo(expected);
   }
 
   @Test
@@ -170,6 +139,6 @@ public class CdrConfigVOMapperTest {
     cdrConfig.cdrVersions = new ArrayList<>();
 
     assertThat(mapper.accessTiers(cdrConfig)).isEmpty();
-    assertThat(mapper.cdrVersions(cdrConfig, accessTierDao)).isEmpty();
+    assertThat(mapper.cdrVersions(cdrConfig)).isEmpty();
   }
 }

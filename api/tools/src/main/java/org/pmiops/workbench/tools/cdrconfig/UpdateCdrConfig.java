@@ -241,7 +241,7 @@ public class UpdateCdrConfig {
       currentCdrVersions.put(cdrVersion.getCdrVersionId(), cdrVersion);
     }
 
-    List<DbCdrVersion> cdrVersions = cdrConfigMapper.cdrVersions(cdrConfig, accessTierDao);
+    List<DbCdrVersion> cdrVersions = cdrConfigMapper.cdrVersions(cdrConfig);
 
     for (DbCdrVersion cdrVersion : cdrVersions) {
       DbCdrVersion existingCdrVersion = currentCdrVersions.remove(cdrVersion.getCdrVersionId());
