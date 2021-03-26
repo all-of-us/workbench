@@ -72,6 +72,7 @@ public class WorkspaceServiceTest {
     DataSetMapperImpl.class,
     WorkspaceMapperImpl.class,
     WorkspaceServiceImpl.class,
+    WorkspaceAuthService.class
   })
   @MockBean({
     BillingProjectAuditor.class,

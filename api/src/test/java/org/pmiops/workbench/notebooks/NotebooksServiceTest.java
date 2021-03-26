@@ -27,6 +27,7 @@ import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -57,6 +58,7 @@ public class NotebooksServiceTest {
   @MockBean private FireCloudService mockFirecloudService;
   @MockBean private CloudStorageClient mockCloudStorageClient;
   @MockBean private WorkspaceService mockWorkspaceService;
+  @MockBean private WorkspaceAuthService mockWorkspaceAuthService;
 
   @Autowired private NotebooksService notebooksService;
 

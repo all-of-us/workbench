@@ -124,6 +124,7 @@ public class CohortReviewControllerTest {
   private DbCohortAnnotationDefinition booleanAnnotationDefinition;
   private DbCohortAnnotationDefinition integerAnnotationDefinition;
   private DbParticipantCohortAnnotation participantAnnotation;
+
   @Autowired private CdrVersionDao cdrVersionDao;
 
   @Autowired private CBCriteriaDao cbCriteriaDao;
@@ -209,6 +210,7 @@ public class CohortReviewControllerTest {
     FireCloudService.class,
     UserRecentResourceService.class,
     WorkspaceService.class,
+    WorkspaceAuthService.class,
     AccessTierService.class,
     CdrVersionService.class,
   })

@@ -80,6 +80,7 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -201,6 +202,7 @@ public class ConceptSetsControllerTest {
     WorkspaceMapperImpl.class,
     WorkspaceResourcesServiceImpl.class,
     WorkspaceServiceImpl.class,
+    WorkspaceAuthService.class,
     WorkspacesController.class,
     AccessTierServiceImpl.class,
   })
