@@ -84,12 +84,10 @@ describe('ProfilePageComponent', () => {
     expect(reload).toHaveBeenCalled();
   });
 
-  it('should invalidate inputs correctly', async () => {
+  it('should invalidate inputs correctly', () => {
     const wrapper = component();
-    const textInput = wrapper.find('[data-test-id="givenName"]').first();
-    textInput.simulate('change', {target: {value: ''}});
-    console.log(textInput.props());
-    expect(textInput.prop('invalid')).toBeTruthy();
+    wrapper.find(TextInput).first().simulate('change', {target: {value: ''}});
+    expect(wrapper.find(TextInput).first().prop('invalid')).toBeTruthy();
   });
 
   it('should display/update address', async() => {
@@ -97,6 +95,7 @@ describe('ProfilePageComponent', () => {
     const wrapper = component();
 
     let streetAddress1 = wrapper.find('[data-test-id="streetAddress1"]').first();
+    console.log(streetAddress1.props());
     expect(streetAddress1.prop('value')).toBe('Main street');
 
     streetAddress1.simulate('change', {target: {value: 'Broadway'}});
