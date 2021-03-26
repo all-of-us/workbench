@@ -304,7 +304,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           component={() => <DetailPagePage routeData={{
             title: 'Participant Detail',
             breadcrumb: BreadcrumbType.Participant,
-            shouldReuse: true,
             helpContentKey: 'reviewParticipantDetail'
           }}/>}
         />
