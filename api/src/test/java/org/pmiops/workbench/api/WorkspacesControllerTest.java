@@ -186,6 +186,7 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -299,6 +300,7 @@ public class WorkspacesControllerTest extends SpringTest {
     ParticipantCohortStatusMapperImpl.class,
     ReviewQueryBuilder.class,
     UserMapperImpl.class,
+    WorkspaceAuthService.class,
     WorkspaceMapperImpl.class,
     WorkspaceResourcesServiceImpl.class,
     WorkspacesController.class,

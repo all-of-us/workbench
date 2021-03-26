@@ -4,15 +4,20 @@ import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
+import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -20,9 +25,64 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.pmiops.workbench.workspaces.WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL;
+
 // TODO eric: go through each method, provide dependencies and swap out requiements
 
+@Service
 public class WorkspaceAuthService {
+
+  @Autowired WorkspaceDao workspaceDao;
+  @Autowired FireCloudService fireCloudService;
+
+  /*
+   * This function will check the workspace's billing status and throw a ForbiddenException
+   * if it is inactive.
+   *
+   * There is no hard and fast rule on what operations should require active billing but
+   * the general idea is that we should prevent operations that can either incur a non trivial
+   * amount of Google Cloud computation costs (starting a notebook runtime) or increase the
+   * monthly cost of the workspace (ex. creating GCS objects).
+   */
+  public void validateActiveBilling(String workspaceNamespace, String workspaceId)
+      throws ForbiddenException {
+    if (BillingStatus.INACTIVE.equals(
+        workspaceDao.getRequired(workspaceNamespace, workspaceId).getBillingStatus())) {
+      throw new ForbiddenException(
+          "Workspace (" + workspaceNamespace + ") is in an inactive billing state");
+    }
+  }
+
+  public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId)
+      throws IllegalArgumentException {
+    String userAccess =
+        fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getAccessLevel();
+    if (PROJECT_OWNER_ACCESS_LEVEL.equals(userAccess)) {
+      return WorkspaceAccessLevel.OWNER;
+    }
+    return Optional.ofNullable(WorkspaceAccessLevel.fromValue(userAccess))
+        .orElseThrow(
+            () -> new IllegalArgumentException("Unrecognized access level: " + userAccess));
+  }
+
+  public WorkspaceAccessLevel enforceWorkspaceAccessLevel(
+      String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess) {
+    final WorkspaceAccessLevel access;
+    try {
+      access = getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+    } catch (IllegalArgumentException e) {
+      throw new ServerErrorException(e);
+    }
+    if (requiredAccess.compareTo(access) > 0) {
+      throw new ForbiddenException(
+          String.format(
+              "You do not have sufficient permissions to access workspace %s/%s",
+              workspaceNamespace, workspaceId));
+    } else {
+      return access;
+    }
+  }
+
 //
 //  @Override
 //  public FirecloudWorkspaceACLUpdate updateFirecloudAclsOnUser(

@@ -110,6 +110,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   private final UserRecentWorkspaceDao userRecentWorkspaceDao;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
+  private final WorkspaceAuthService workspaceAuthService;
 
   @Autowired
   public WorkspaceServiceImpl(
@@ -129,7 +130,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       UserMapper userMapper,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
       WorkspaceDao workspaceDao,
-      WorkspaceMapper workspaceMapper) {
+      WorkspaceMapper workspaceMapper,
+      WorkspaceAuthService workspaceAuthService) {
     this.endUserCloudbillingProvider = endUserCloudbillingProvider;
     this.serviceAccountCloudbillingProvider = serviceAccountCloudbillingProvider;
     this.billingProjectAuditor = billingProjectAuditor;
@@ -146,6 +148,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
+    this.workspaceAuthService = workspaceAuthService;
   }
 
   @Override
@@ -241,13 +244,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     return workspace;
   }
 
-  // TODO eric: move into Dao
-  @Override
-  public Optional<DbWorkspace> getByNamespace(String ns) {
-    return workspaceDao.findFirstByWorkspaceNamespaceAndActiveStatusOrderByLastModifiedTimeDesc(
-        ns, DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
-  }
-
   // TODO eric: move out
   @Override
   @Transactional
@@ -287,23 +283,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
               "Error deleting billing project %s: %s", billingProjectName, e.getMessage());
       log.warning(msg);
     }
-  }
-
-  // TODO eric: move out
-  @Override
-  public void validateActiveBilling(String workspaceNamespace, String workspaceId)
-      throws ForbiddenException {
-    if (BillingStatus.INACTIVE.equals(
-        getRequired(workspaceNamespace, workspaceId).getBillingStatus())) {
-      throw new ForbiddenException(
-          "Workspace (" + workspaceNamespace + ") is in an inactive billing state");
-    }
-  }
-
-  // TODO eric: make private function in workspaceController
-  @Override
-  public List<DbWorkspace> findForReview() {
-    return workspaceDao.findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested();
   }
 
   @Override
@@ -469,43 +448,9 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   // TODO eric: workspace acl
   @Override
-  public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId)
-      throws IllegalArgumentException {
-    String userAccess =
-        fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getAccessLevel();
-    if (PROJECT_OWNER_ACCESS_LEVEL.equals(userAccess)) {
-      return WorkspaceAccessLevel.OWNER;
-    }
-    return Optional.ofNullable(WorkspaceAccessLevel.fromValue(userAccess))
-        .orElseThrow(
-            () -> new IllegalArgumentException("Unrecognized access level: " + userAccess));
-  }
-
-  // TODO eric: workspace acl
-  @Override
-  public WorkspaceAccessLevel enforceWorkspaceAccessLevel(
-      String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess) {
-    final WorkspaceAccessLevel access;
-    try {
-      access = getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
-    } catch (IllegalArgumentException e) {
-      throw new ServerErrorException(e);
-    }
-    if (requiredAccess.compareTo(access) > 0) {
-      throw new ForbiddenException(
-          String.format(
-              "You do not have sufficient permissions to access workspace %s/%s",
-              workspaceNamespace, workspaceId));
-    } else {
-      return access;
-    }
-  }
-
-  // TODO eric: workspace acl
-  @Override
   public DbWorkspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel workspaceAccessLevel) {
-    enforceWorkspaceAccessLevel(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, workspaceAccessLevel);
     DbWorkspace workspace = getRequired(workspaceNamespace, workspaceId);
     // Because we've already checked that the user has access to the workspace in question,
@@ -586,7 +531,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
             .filter(
                 workspace -> {
                   try {
-                    enforceWorkspaceAccessLevel(
+                    workspaceAuthService.enforceWorkspaceAccessLevel(
                         workspace.getWorkspaceNamespace(),
                         workspace.getFirecloudName(),
                         WorkspaceAccessLevel.READER);

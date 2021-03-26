@@ -42,6 +42,7 @@ import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.VocabularyListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -68,6 +69,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   private final UserRecentResourceService userRecentResourceService;
   private final Provider<DbUser> userProvider;
   private final WorkspaceService workspaceService;
+  private final WorkspaceAuthService workspaceAuthService;
   private final Clock clock;
 
   @Autowired
@@ -77,12 +79,14 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       UserRecentResourceService userRecentResourceService,
       Provider<DbUser> userProvider,
       WorkspaceService workspaceService,
+      WorkspaceAuthService workspaceAuthService,
       Clock clock) {
     this.cohortReviewService = cohortReviewService;
     this.cohortBuilderService = cohortBuilderService;
     this.userRecentResourceService = userRecentResourceService;
     this.userProvider = userProvider;
     this.workspaceService = workspaceService;
+    this.workspaceAuthService = workspaceAuthService;
     this.clock = clock;
   }
 
@@ -160,7 +164,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
           "Bad Request: request cohort review id must equal path parameter cohort review id.");
     }
 
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     return ResponseEntity.ok(
@@ -170,7 +174,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteCohortReview(
       String workspaceNamespace, String workspaceId, Long cohortReviewId) {
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     cohortReviewService.deleteCohortReview(cohortReviewId);
@@ -185,7 +189,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long participantId,
       Long annotationId) {
 
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     // will throw a NotFoundException if participant cohort annotation does not exist
@@ -226,7 +230,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   public ResponseEntity<CohortReviewListResponse> getCohortReviewsInWorkspace(
       String workspaceNamespace, String workspaceId) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     return ResponseEntity.ok(
@@ -263,7 +267,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   @Override
   public ResponseEntity<ParticipantCohortAnnotationListResponse> getParticipantCohortAnnotations(
       String workspaceNamespace, String workspaceId, Long cohortReviewId, Long participantId) {
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     List<ParticipantCohortAnnotation> annotations =
@@ -377,7 +381,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long cohortReviewId,
       CohortReview cohortReview) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     return ResponseEntity.ok(
@@ -393,7 +397,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long participantId,
       Long annotationId,
       ModifyParticipantCohortAnnotationRequest request) {
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     return ResponseEntity.ok(

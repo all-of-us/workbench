@@ -10,6 +10,7 @@ import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.data.jpa.repository.Query;
@@ -25,6 +26,28 @@ import org.springframework.data.repository.query.Param;
 public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, WorkspaceDaoCustom {
 
   Logger log = Logger.getLogger(WorkspaceDao.class.getName());
+
+  default DbWorkspace get(String ns, String firecloudName) {
+    return findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+        ns,
+        firecloudName,
+        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+  }
+
+  default DbWorkspace getRequired(String ns, String firecloudName) {
+    DbWorkspace workspace = get(ns, firecloudName);
+    if (workspace == null) {
+      throw new NotFoundException(String.format("DbWorkspace %s/%s not found.", ns, firecloudName));
+    }
+    return workspace;
+  }
+
+  // Returns the requested workspace looked up by workspace namespace (aka billing project name).
+  // Only active workspaces are searched. Returns null if no active workspace is found.
+  default Optional<DbWorkspace> getByNamespace(String ns) {
+    return findFirstByWorkspaceNamespaceAndActiveStatusOrderByLastModifiedTimeDesc(
+        ns, DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+  }
 
   DbWorkspace findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
       String workspaceNamespace, String firecloudName, short activeStatus);
@@ -96,13 +119,6 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   @Query(
       "SELECT activeStatus, COUNT(workspaceId) FROM DbWorkspace GROUP BY activeStatus ORDER BY activeStatus")
   List<ActiveStatusToCountResult> getActiveStatusToCount();
-
-  default DbWorkspace get(String ns, String firecloudName) {
-    return findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
-        ns,
-        firecloudName,
-        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
-  }
 
   interface ActiveStatusToCountResult {
     Short getWorkspaceActiveStatus();

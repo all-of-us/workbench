@@ -24,6 +24,7 @@ import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.views.EventMetric;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -74,6 +75,7 @@ public class NotebooksServiceImpl implements NotebooksService {
   private final Provider<DbUser> userProvider;
   private final UserRecentResourceService userRecentResourceService;
   private final WorkspaceService workspaceService;
+  private final WorkspaceAuthService workspaceAuthService;
   private final LogsBasedMetricService logsBasedMetricService;
 
   @Autowired
@@ -84,6 +86,7 @@ public class NotebooksServiceImpl implements NotebooksService {
       Provider<DbUser> userProvider,
       UserRecentResourceService userRecentResourceService,
       WorkspaceService workspaceService,
+      WorkspaceAuthService workspaceAuthService,
       LogsBasedMetricService logsBasedMetricService) {
     this.clock = clock;
     this.cloudStorageClient = cloudStorageClient;
@@ -91,6 +94,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     this.userProvider = userProvider;
     this.userRecentResourceService = userRecentResourceService;
     this.workspaceService = workspaceService;
+    this.workspaceAuthService = workspaceAuthService;
     this.logsBasedMetricService = logsBasedMetricService;
   }
 
@@ -128,11 +132,11 @@ public class NotebooksServiceImpl implements NotebooksService {
       String toWorkspaceNamespace,
       String toWorkspaceName,
       String newNotebookName) {
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         fromWorkspaceNamespace, fromWorkspaceName, WorkspaceAccessLevel.READER);
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         toWorkspaceNamespace, toWorkspaceName, WorkspaceAccessLevel.WRITER);
-    workspaceService.validateActiveBilling(toWorkspaceNamespace, toWorkspaceName);
+    workspaceAuthService.validateActiveBilling(toWorkspaceNamespace, toWorkspaceName);
     newNotebookName = NotebooksService.withNotebookExtension(newNotebookName);
 
     GoogleCloudLocators fromNotebookLocators =

@@ -6,6 +6,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -15,7 +16,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class DomainInfoDaoTest {
+public class DomainInfoDaoTest extends SpringTest {
 
   @Autowired private DomainInfoDao domainInfoDao;
   private DbDomainInfo domainInfoObservation;

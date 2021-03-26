@@ -84,6 +84,7 @@ import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -140,6 +141,8 @@ public class CohortReviewControllerTest {
   @Autowired private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
 
   @Autowired private WorkspaceService workspaceService;
+
+  @Autowired private WorkspaceAuthService workspaceAuthService;
 
   @Autowired private UserRecentResourceService userRecentResourceService;
 
@@ -532,7 +535,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void updateCohortReview() {
-    when(workspaceService.enforceWorkspaceAccessLevel(
+    when(workspaceAuthService.enforceWorkspaceAccessLevel(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(WorkspaceAccessLevel.WRITER);
 
@@ -559,7 +562,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void deleteCohortReview() {
-    when(workspaceService.enforceWorkspaceAccessLevel(
+    when(workspaceAuthService.enforceWorkspaceAccessLevel(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(WorkspaceAccessLevel.WRITER);
 

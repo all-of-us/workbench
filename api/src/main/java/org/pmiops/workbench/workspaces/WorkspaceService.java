@@ -18,13 +18,10 @@ import org.pmiops.workbench.model.WorkspaceResponse;
 
 public interface WorkspaceService {
 
+  // TODO eric: move this into auth
   String PROJECT_OWNER_ACCESS_LEVEL = "PROJECT_OWNER";
 
   Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId);
-
-  // Returns the requested workspace looked up by workspace namespace (aka billing project name).
-  // Only active workspaces are searched. Returns null if no active workspace is found.
-  Optional<DbWorkspace> getByNamespace(String workspaceNamespace);
 
   WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId);
 
@@ -45,20 +42,6 @@ public interface WorkspaceService {
    */
   void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName);
 
-  /*
-   * This function will check the workspace's billing status and throw a ForbiddenException
-   * if it is inactive.
-   *
-   * There is no hard and fast rule on what operations should require active billing but
-   * the general idea is that we should prevent operations that can either incur a non trivial
-   * amount of Google Cloud computation costs (starting a notebook runtime) or increase the
-   * monthly cost of the workspace (ex. creating GCS objects).
-   */
-  void validateActiveBilling(String workspaceNamespace, String workspaceId)
-      throws ForbiddenException;
-
-  List<DbWorkspace> findForReview();
-
   void setResearchPurposeApproved(String ns, String firecloudName, boolean approved);
 
   DbWorkspace updateWorkspaceAcls(
@@ -67,11 +50,6 @@ public interface WorkspaceService {
       String registeredUsersGroup);
 
   DbWorkspace saveAndCloneCohortsConceptSetsAndDataSets(DbWorkspace from, DbWorkspace to);
-
-  WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId);
-
-  WorkspaceAccessLevel enforceWorkspaceAccessLevel(
-      String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess);
 
   DbWorkspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(
       String workspaceNamespace, String workspaceId, WorkspaceAccessLevel workspaceAccessLevel);

@@ -21,6 +21,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -44,6 +45,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -71,13 +73,12 @@ public class RuntimeController implements RuntimeApiDelegate {
   private final LeonardoNotebooksClient leonardoNotebooksClient;
   private final Provider<DbUser> userProvider;
   private final WorkspaceService workspaceService;
+  private final WorkspaceAuthService workspaceAuthService;
+  private final WorkspaceDao workspaceDao;
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final UserService userService;
   private final UserRecentResourceService userRecentResourceService;
-  private final UserDao userDao;
   private final LeonardoMapper leonardoMapper;
-  private final Clock clock;
 
   @Autowired
   RuntimeController(
@@ -85,24 +86,22 @@ public class RuntimeController implements RuntimeApiDelegate {
       LeonardoNotebooksClient leonardoNotebooksClient,
       Provider<DbUser> userProvider,
       WorkspaceService workspaceService,
+      WorkspaceAuthService workspaceAuthService,
+      WorkspaceDao workspaceDao,
       FireCloudService fireCloudService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      UserService userService,
       UserRecentResourceService userRecentResourceService,
-      UserDao userDao,
-      LeonardoMapper leonardoMapper,
-      Clock clock) {
+      LeonardoMapper leonardoMapper) {
     this.leonardoRuntimeAuditor = leonardoRuntimeAuditor;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.userProvider = userProvider;
     this.workspaceService = workspaceService;
+    this.workspaceAuthService = workspaceAuthService;
+    this.workspaceDao = workspaceDao;
     this.fireCloudService = fireCloudService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.userService = userService;
     this.userRecentResourceService = userRecentResourceService;
-    this.userDao = userDao;
     this.leonardoMapper = leonardoMapper;
-    this.clock = clock;
   }
 
   private Stream<LeonardoListRuntimeResponse> filterByRuntimesInList(
@@ -160,7 +159,7 @@ public class RuntimeController implements RuntimeApiDelegate {
   }
 
   private DbWorkspace lookupWorkspace(String workspaceNamespace) throws NotFoundException {
-    return workspaceService
+    return workspaceDao
         .getByNamespace(workspaceNamespace)
         .orElseThrow(() -> new NotFoundException("Workspace not found: " + workspaceNamespace));
   }
@@ -168,9 +167,9 @@ public class RuntimeController implements RuntimeApiDelegate {
   @Override
   public ResponseEntity<Runtime> getRuntime(String workspaceNamespace) {
     String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
-    workspaceService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
+    workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
     try {
       return ResponseEntity.ok(
@@ -250,9 +249,9 @@ public class RuntimeController implements RuntimeApiDelegate {
     }
 
     String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
-    workspaceService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
+    workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
     runtime.setGoogleProject(workspaceNamespace);
     runtime.setRuntimeName(userProvider.get().getRuntimeName());
@@ -279,9 +278,9 @@ public class RuntimeController implements RuntimeApiDelegate {
     }
 
     String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
-    workspaceService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
+    workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
     runtimeRequest.getRuntime().setGoogleProject(workspaceNamespace);
     runtimeRequest.getRuntime().setRuntimeName(userProvider.get().getRuntimeName());
@@ -294,7 +293,7 @@ public class RuntimeController implements RuntimeApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteRuntime(String workspaceNamespace) {
     String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
 
     leonardoNotebooksClient.deleteRuntime(workspaceNamespace, userProvider.get().getRuntimeName());
@@ -305,11 +304,11 @@ public class RuntimeController implements RuntimeApiDelegate {
   public ResponseEntity<RuntimeLocalizeResponse> localize(
       String workspaceNamespace, RuntimeLocalizeRequest body) {
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         dbWorkspace.getWorkspaceNamespace(),
         dbWorkspace.getFirecloudName(),
         WorkspaceAccessLevel.WRITER);
-    workspaceService.validateActiveBilling(
+    workspaceAuthService.validateActiveBilling(
         dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
     final FirecloudWorkspace firecloudWorkspace;

@@ -9,6 +9,7 @@ import org.pmiops.workbench.actionaudit.targetproperties.EgressEventCommentTarge
 import org.pmiops.workbench.actionaudit.targetproperties.EgressEventTargetProperty
 import org.pmiops.workbench.actionaudit.targetproperties.TargetPropertyExtractor
 import org.pmiops.workbench.db.dao.UserDao
+import org.pmiops.workbench.db.dao.WorkspaceDao
 import org.pmiops.workbench.exceptions.BadRequestException
 import org.pmiops.workbench.model.EgressEvent
 import org.pmiops.workbench.model.EgressEventRequest
@@ -23,16 +24,17 @@ import javax.inject.Provider
 @Service
 class EgressEventAuditorImpl @Autowired
 constructor(
-    private val actionAuditService: ActionAuditService,
-    private val workspaceService: WorkspaceService,
-    private val userDao: UserDao,
-    private val clock: Clock,
-    @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
+        private val actionAuditService: ActionAuditService,
+        private val workspaceService: WorkspaceService,
+        private val workspaceDao: WorkspaceDao,
+        private val userDao: UserDao,
+        private val clock: Clock,
+        @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
 ) : EgressEventAuditor {
 
     override fun fireEgressEvent(event: EgressEvent) {
         // Load the workspace via the GCP project name
-        val dbWorkspaceMaybe = workspaceService.getByNamespace(event.projectName)
+        val dbWorkspaceMaybe = workspaceDao.getByNamespace(event.projectName)
         if (!dbWorkspaceMaybe.isPresent()) {
             // Failing to find a workspace is odd enough that we want to return a non-success
             // response at the API level. But it's also worth storing a permanent record of the

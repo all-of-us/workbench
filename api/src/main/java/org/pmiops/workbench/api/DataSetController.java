@@ -60,6 +60,7 @@ import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -70,13 +71,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class DataSetController implements DataSetApiDelegate {
 
-  private final BigQueryService bigQueryService;
-  private final DataSetService dataSetService;
-
-  private final Provider<DbUser> userProvider;
-  private final Provider<String> prefixProvider;
-  private final WorkspaceService workspaceService;
-
   // See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
   private static final long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000L;
 
@@ -85,9 +79,17 @@ public class DataSetController implements DataSetApiDelegate {
 
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
+  private final BigQueryService bigQueryService;
+  private final DataSetService dataSetService;
+
+  private final Provider<DbUser> userProvider;
+  private final Provider<String> prefixProvider;
+  private final WorkspaceService workspaceService;
+
   private final CdrVersionService cdrVersionService;
   private final FireCloudService fireCloudService;
   private final NotebooksService notebooksService;
+  private final WorkspaceAuthService workspaceAuthService;
 
   @Autowired
   DataSetController(
@@ -98,7 +100,8 @@ public class DataSetController implements DataSetApiDelegate {
       NotebooksService notebooksService,
       Provider<DbUser> userProvider,
       @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
-      WorkspaceService workspaceService) {
+      WorkspaceService workspaceService,
+      WorkspaceAuthService workspaceAuthService) {
     this.bigQueryService = bigQueryService;
     this.cdrVersionService = cdrVersionService;
     this.dataSetService = dataSetService;
@@ -107,6 +110,7 @@ public class DataSetController implements DataSetApiDelegate {
     this.userProvider = userProvider;
     this.prefixProvider = prefixProvider;
     this.workspaceService = workspaceService;
+    this.workspaceAuthService = workspaceAuthService;
   }
 
   @Override
@@ -276,7 +280,7 @@ public class DataSetController implements DataSetApiDelegate {
     DbWorkspace dbWorkspace =
         workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    workspaceService.validateActiveBilling(workspaceNamespace, workspaceId);
+    workspaceAuthService.validateActiveBilling(workspaceNamespace, workspaceId);
     // This suppresses 'may not be initialized errors. We will always init to something else before
     // used.
     JSONObject notebookFile = new JSONObject();

@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao.StatusToCountResult;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
@@ -25,7 +26,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class BillingProjectBufferEntryDaoTest {
+public class BillingProjectBufferEntryDaoTest extends SpringTest {
 
   private static final Instant TEST_TIME = Instant.parse("2000-01-01T00:00:00.00Z");
 

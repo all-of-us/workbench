@@ -87,6 +87,7 @@ import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.RandomUtils;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -118,6 +119,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceResourcesService workspaceResourcesService;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceService workspaceService;
+  private final WorkspaceAuthService workspaceAuthService;
 
   @Autowired
   public WorkspacesController(
@@ -137,7 +139,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceMapper workspaceMapper,
       WorkspaceResourcesService workspaceResourcesService,
       WorkspaceDao workspaceDao,
-      WorkspaceService workspaceService) {
+      WorkspaceService workspaceService,
+      WorkspaceAuthService workspaceAuthService) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
@@ -154,6 +157,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceMapper = workspaceMapper;
     this.workspaceResourcesService = workspaceResourcesService;
     this.workspaceService = workspaceService;
+    this.workspaceAuthService = workspaceAuthService;
     this.workspaceDao = workspaceDao;
   }
 
@@ -360,7 +364,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private Workspace updateWorkspaceImpl(
       String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request) {
     DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
     Workspace workspace = request.getWorkspace();
     FirecloudWorkspace fcWorkspace =
@@ -443,7 +447,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     validateWorkspaceApiModel(toWorkspace);
 
     // First verify the caller has read access to the source workspace.
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         fromWorkspaceNamespace, fromWorkspaceId, WorkspaceAccessLevel.READER);
 
     DbWorkspace fromWorkspace =
@@ -539,7 +543,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // This is its own method as opposed to part of the workspace response because this is gated
     // behind write+ access, and adding access based composition to the workspace response
     // would add a lot of unnecessary complexity.
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     DbWorkspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
@@ -621,10 +625,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
   public ResponseEntity<WorkspaceListResponse> getWorkspacesForReview() {
     WorkspaceListResponse response = new WorkspaceListResponse();
-    List<DbWorkspace> workspaces = workspaceService.findForReview();
+    List<DbWorkspace> workspaces = findForReview();
     response.setItems(
         workspaces.stream().map(workspaceMapper::toApiWorkspace).collect(Collectors.toList()));
     return ResponseEntity.ok(response);
+  }
+
+  private List<DbWorkspace> findForReview() {
+    return workspaceDao.findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested();
   }
 
   @Override
@@ -874,7 +882,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                   Collectors.toMap(
                       DbWorkspace::getWorkspaceId,
                       dbWorkspace ->
-                          workspaceService.getWorkspaceAccessLevel(
+                          workspaceAuthService.getWorkspaceAccessLevel(
                               dbWorkspace.getWorkspaceNamespace(),
                               dbWorkspace.getFirecloudName())));
 
@@ -904,7 +912,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     try {
       workspaceAccessLevel =
-          workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+          workspaceAuthService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
     } catch (IllegalArgumentException e) {
       throw new ServerErrorException(e);
     }
@@ -922,7 +930,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspaceId,
       WorkspaceResourcesRequest workspaceResourcesRequest) {
     WorkspaceAccessLevel workspaceAccessLevel =
-        workspaceService.enforceWorkspaceAccessLevel(
+        workspaceAuthService.enforceWorkspaceAccessLevel(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     final DbWorkspace dbWorkspace =
@@ -954,7 +962,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   public ResponseEntity<WorkspaceCreatorFreeCreditsRemainingResponse>
       getWorkspaceCreatorFreeCreditsRemaining(String workspaceNamespace, String workspaceId) {
-    workspaceService.enforceWorkspaceAccessLevel(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
     double freeCreditsRemaining =

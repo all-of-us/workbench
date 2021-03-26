@@ -43,6 +43,7 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -77,7 +78,7 @@ public class CohortAnnotationDefinitionControllerTest {
   @Mock private ParticipantCohortStatusDao participantCohortStatusDao;
   @Mock private ParticipantCohortStatusMapper participantCohortStatusMapper;
   @Mock private ReviewQueryBuilder reviewQueryBuilder;
-  @Mock private WorkspaceService workspaceService;
+  @Mock private WorkspaceAuthService workspaceAuthService;
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
@@ -109,7 +110,7 @@ public class CohortAnnotationDefinitionControllerTest {
             cohortAnnotationDefinitionDao, cohortAnnotationDefinitionMapper);
     cohortAnnotationDefinitionController =
         new CohortAnnotationDefinitionController(
-            cohortAnnotationDefinitionService, cohortReviewService, workspaceService);
+            cohortAnnotationDefinitionService, cohortReviewService, workspaceAuthService);
 
     DbWorkspace workspace = new DbWorkspace();
     workspace.setWorkspaceNamespace(NAMESPACE);
@@ -454,7 +455,7 @@ public class CohortAnnotationDefinitionControllerTest {
   }
 
   private void setupWorkspaceServiceMock() {
-    when(workspaceService.enforceWorkspaceAccessLevel(
+    when(workspaceAuthService.enforceWorkspaceAccessLevel(
             NAMESPACE, NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(WorkspaceAccessLevel.OWNER);
   }

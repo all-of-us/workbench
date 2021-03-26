@@ -24,11 +24,6 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   }
 
   @Override
-  public Optional<DbWorkspace> getByNamespace(String workspaceNamespace) {
-    return Optional.empty();
-  }
-
-  @Override
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
     return null;
   }
@@ -60,15 +55,6 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   public void updateWorkspaceBillingAccount(DbWorkspace workspace, String newBillingAccountName) {}
 
   @Override
-  public void validateActiveBilling(String workspaceNamespace, String workspaceId)
-      throws ForbiddenException {}
-
-  @Override
-  public List<DbWorkspace> findForReview() {
-    return null;
-  }
-
-  @Override
   public void setResearchPurposeApproved(String ns, String firecloudName, boolean approved) {}
 
   @Override
@@ -81,18 +67,6 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
 
   @Override
   public DbWorkspace saveAndCloneCohortsConceptSetsAndDataSets(DbWorkspace from, DbWorkspace to) {
-    return null;
-  }
-
-  @Override
-  public WorkspaceAccessLevel getWorkspaceAccessLevel(
-      String workspaceNamespace, String workspaceId) {
-    return null;
-  }
-
-  @Override
-  public WorkspaceAccessLevel enforceWorkspaceAccessLevel(
-      String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess) {
     return null;
   }
 
