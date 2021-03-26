@@ -550,7 +550,9 @@ paths:
     get:
       tags:
       - user
-      description: Returns user information matching search terms
+      description: >
+        Return a page of users matching a search term.
+        Used by autocomplete for workspace sharing.
       operationId: user
       responses:
         200:

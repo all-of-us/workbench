@@ -3,10 +3,25 @@ package org.pmiops.workbench.access;
 import java.util.List;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.model.DataAccessLevel;
 
 public interface AccessTierService {
   // TODO remove once we are no longer special-casing the Registered Tier
   String REGISTERED_TIER_SHORT_NAME = "registered";
+
+  /**
+   * Temporary kluge while we deprecate DataAccessLevel: return DataAccessLevel.REGISTERED if the
+   * user has Registered Tier membership
+   *
+   * @param access_tier_short_names a comma-separated list of shortNames associated with Access
+   *     Tiers. e.g. 'registered,controlled'
+   * @return whether a user has Registered Tier membership or not, as a DataAccessLevel
+   */
+  static DataAccessLevel dataAccessKluge(String access_tier_short_names) {
+    return access_tier_short_names.contains(AccessTierService.REGISTERED_TIER_SHORT_NAME)
+        ? DataAccessLevel.REGISTERED
+        : DataAccessLevel.UNREGISTERED;
+  }
 
   /**
    * Return all access tiers in the database

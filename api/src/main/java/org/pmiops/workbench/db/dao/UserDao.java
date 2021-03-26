@@ -46,30 +46,40 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
           + " ORDER BY NULL")
   Set<DbUser> findAllUsersWithAuthoritiesAndPageVisits();
 
-  /** Find users matching the user's name or email */
+  /** Find users matching the user's name or username */
   @Query(
-      "SELECT dbUser FROM DbUser dbUser WHERE dbUser.dataAccessLevel IN :dals "
-          + "AND ( lower(dbUser.username) LIKE lower(concat('%', :term, '%')) "
+      "SELECT dbUser FROM DbUser dbUser "
+          + "WHERE lower(dbUser.username) LIKE lower(concat('%', :term, '%')) "
           + "OR lower(dbUser.familyName) LIKE lower(concat('%', :term, '%')) "
-          + "OR lower(dbUser.givenName) LIKE lower(concat('%', :term, '%')) )")
-  List<DbUser> findUsersByDataAccessLevelsAndSearchString(
-      @Param("dals") List<Short> dataAccessLevels, @Param("term") String term, Sort sort);
+          + "OR lower(dbUser.givenName) LIKE lower(concat('%', :term, '%'))")
+  List<DbUser> findUsersBySearchString(@Param("term") String term, Sort sort);
 
   @Query(
-      "SELECT dataAccessLevel, disabled, CASE WHEN betaAccessBypassTime IS NOT NULL THEN TRUE ELSE FALSE END AS betaIsBypassed, COUNT(userId) AS userCount "
-          + "FROM DbUser "
-          + "GROUP BY dataAccessLevel, disabled, CASE WHEN betaAccessBypassTime IS NOT NULL THEN TRUE ELSE FALSE END "
-          + "ORDER BY NULL")
+      // JPQL doesn't allow join on subquery
+      nativeQuery = true,
+      value =
+          "SELECT COUNT(u.user_id) AS user_count, u.disabled, t.access_tier_short_names, "
+              + "CASE WHEN beta_access_bypass_time IS NOT NULL THEN TRUE ELSE FALSE END AS beta_is_bypassed "
+              + "FROM user u "
+              + "LEFT JOIN ("
+              + "  SELECT u.user_id, GROUP_CONCAT(DISTINCT a.short_name) AS access_tier_short_names "
+              + "  FROM user u "
+              + "  JOIN user_access_tier uat ON u.user_id = uat.user_id "
+              + "  JOIN access_tier a ON a.access_tier_id = uat.access_tier_id "
+              + "  GROUP BY u.user_id"
+              + ") as t ON t.user_id = u.user_id "
+              + "GROUP BY u.disabled, t.access_tier_short_names, "
+              + "CASE WHEN beta_access_bypass_time IS NOT NULL THEN TRUE ELSE FALSE END ")
   List<UserCountGaugeLabelsAndValue> getUserCountGaugeData();
 
   interface UserCountGaugeLabelsAndValue {
-    Short getDataAccessLevel();
+    Long getUserCount();
 
     Boolean getDisabled();
 
-    Boolean getBetaIsBypassed();
+    String getAccessTierShortNames();
 
-    Long getUserCount();
+    Boolean getBetaIsBypassed();
   }
 
   // Note: setter methods are included only where necessary for testing. See ProfileServiceTest.

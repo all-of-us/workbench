@@ -20,7 +20,6 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.hibernate.exception.GenericJDBCException;
 import org.javers.common.collections.Lists;
@@ -600,14 +599,34 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     adminActionHistoryDao.save(adminActionHistory);
   }
 
-  /** Find users matching the user's name or email */
+  /**
+   * Find users with Registered Tier access whose name or username match the supplied search terms.
+   *
+   * @param term User-supplied search term
+   * @param sort Option(s) for ordering query results
+   * @return the List of DbUsers which meet the search and access requirements
+   * @deprecated use {@link #findUsersBySearchString(org.pmiops.workbench.db.model.DbAccessTier,
+   *     java.lang.String, org.springframework.data.domain.Sort)} instead.
+   */
+  @Deprecated
   @Override
   public List<DbUser> findUsersBySearchString(String term, Sort sort) {
-    List<Short> dataAccessLevels =
-        Stream.of(DataAccessLevel.REGISTERED, DataAccessLevel.PROTECTED)
-            .map(DbStorageEnums::dataAccessLevelToStorage)
-            .collect(Collectors.toList());
-    return userDao.findUsersByDataAccessLevelsAndSearchString(dataAccessLevels, term, sort);
+    return findUsersBySearchString(accessTierService.getRegisteredTier(), term, sort);
+  }
+
+  /**
+   * Find users whose name or username match the supplied search terms and who have the appropriate
+   * access tier.
+   *
+   * @param term User-supplied search term
+   * @param sort Option(s) for ordering query results
+   * @return the List of DbUsers which meet the search and access requirements
+   */
+  @Override
+  public List<DbUser> findUsersBySearchString(DbAccessTier accessTier, String term, Sort sort) {
+    return userDao.findUsersBySearchString(term, sort).stream()
+        .filter(user -> accessTierService.getAccessTiersForUser(user).contains(accessTier))
+        .collect(Collectors.toList());
   }
 
   /** Syncs the current user's training status from Moodle. */
@@ -831,10 +850,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             row ->
                 MeasurementBundle.builder()
                     .addMeasurement(GaugeMetric.USER_COUNT, row.getUserCount())
+                    // TODO remove
                     .addTag(
                         MetricLabel.DATA_ACCESS_LEVEL,
-                        DbStorageEnums.dataAccessLevelFromStorage(row.getDataAccessLevel())
-                            .toString())
+                        AccessTierService.dataAccessKluge(row.getAccessTierShortNames()).toString())
                     .addTag(MetricLabel.USER_DISABLED, row.getDisabled().toString())
                     .addTag(MetricLabel.USER_BYPASSED_BETA, row.getBetaIsBypassed().toString())
                     .build())

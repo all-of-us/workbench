@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import org.pmiops.workbench.actionaudit.Agent;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbUser;
@@ -80,7 +81,27 @@ public interface UserService {
   void logAdminWorkspaceAction(
       long targetWorkspaceId, String targetAction, Object oldValue, Object newValue);
 
+  /**
+   * Find users with Registered Tier access whose name or username match the supplied search terms.
+   *
+   * @param term User-supplied search term
+   * @param sort Option(s) for ordering query results
+   * @return the List of DbUsers which meet the search and access requirements
+   * @deprecated use {@link #findUsersBySearchString(org.pmiops.workbench.db.model.DbAccessTier,
+   *     java.lang.String, org.springframework.data.domain.Sort)} instead.
+   */
+  @Deprecated
   List<DbUser> findUsersBySearchString(String term, Sort sort);
+
+  /**
+   * Find users whose name or username match the supplied search terms and who have the appropriate
+   * access tier.
+   *
+   * @param term User-supplied search term
+   * @param sort Option(s) for ordering query results
+   * @return the List of DbUsers which meet the search and access requirements
+   */
+  List<DbUser> findUsersBySearchString(DbAccessTier accessTier, String term, Sort sort);
 
   DbUser syncComplianceTrainingStatusV2()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException;

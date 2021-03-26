@@ -7,19 +7,22 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbInstitution;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
+import org.pmiops.workbench.model.TierAccessStatus;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -39,24 +42,32 @@ public class UserDaoTest extends SpringTest {
   private static final String STATE = "TX";
   private static final String COUNTRY = "US";
 
-  @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  private DbAccessTier registeredTier;
+
+  @Autowired private AccessTierDao accessTierDao;
   @Autowired private InstitutionDao institutionDao;
+  @Autowired private UserAccessTierDao userAccessTierDao;
+  @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+
   @Autowired private UserDao userDao;
 
+  @Before
+  public void setup() {
+    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+  }
+
   @Test
-  public void testgetUserCountGaugeData_singleValue() {
+  public void testGetUserCountGaugeData_singleValue() {
     DbUser user1 = new DbUser();
     user1.setDisabled(false);
     user1.setBetaAccessBypassTime(NOW);
-    final Short dataAccessLevelStorage =
-        DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED);
-    user1.setDataAccessLevel(dataAccessLevelStorage);
     user1 = userDao.save(user1);
+    addUserToTier(user1, registeredTier);
 
     List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
     assertThat(rows).hasSize(1);
     final UserCountGaugeLabelsAndValue row = rows.get(0);
-    assertThat(row.getDataAccessLevel()).isEqualTo(dataAccessLevelStorage);
+    assertThat(row.getAccessTierShortNames()).contains(registeredTier.getShortName());
     assertThat(row.getBetaIsBypassed()).isTrue();
     assertThat(row.getDisabled()).isFalse();
     assertThat(row.getUserCount()).isEqualTo(1L);
@@ -70,7 +81,12 @@ public class UserDaoTest extends SpringTest {
 
   @Test
   public void testGetUserCountGaugeData_multipleUsers() {
-    insertMultipleUsers();
+    final DbInstitution institution = createInstitution();
+
+    insertTestUsers(false, true, 2, institution, registeredTier);
+    insertTestUsers(false, false, 1, institution, registeredTier);
+    insertTestUsers(true, false, 5, institution, registeredTier);
+    insertTestUsers(false, true, 10, institution);
 
     final List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
     assertThat(rows).hasSize(4);
@@ -86,10 +102,8 @@ public class UserDaoTest extends SpringTest {
                 .filter(r -> !r.getBetaIsBypassed())
                 .filter(
                     r ->
-                        r.getDataAccessLevel()
-                            .equals(
-                                DbStorageEnums.dataAccessLevelToStorage(
-                                    DataAccessLevel.REGISTERED)))
+                        r.getAccessTierShortNames() != null
+                            && r.getAccessTierShortNames().contains(registeredTier.getShortName()))
                 .filter(r -> !r.getDisabled())
                 .findFirst()
                 .map(UserCountGaugeLabelsAndValue::getUserCount)
@@ -101,10 +115,8 @@ public class UserDaoTest extends SpringTest {
                 .filter(UserCountGaugeLabelsAndValue::getBetaIsBypassed)
                 .filter(
                     r ->
-                        r.getDataAccessLevel()
-                            .equals(
-                                DbStorageEnums.dataAccessLevelToStorage(
-                                    DataAccessLevel.UNREGISTERED)))
+                        r.getAccessTierShortNames() == null
+                            || !r.getAccessTierShortNames().contains(registeredTier.getShortName()))
                 .filter(r -> !r.getDisabled())
                 .findFirst()
                 .map(UserCountGaugeLabelsAndValue::getUserCount)
@@ -112,20 +124,13 @@ public class UserDaoTest extends SpringTest {
         .isEqualTo(10);
   }
 
-  public void insertMultipleUsers() {
-    final DbInstitution institution = createInstitution();
-    insertTestUsers(false, DataAccessLevel.PROTECTED, true, 2, institution);
-    insertTestUsers(false, DataAccessLevel.REGISTERED, false, 1, institution);
-    insertTestUsers(true, DataAccessLevel.PROTECTED, false, 5, institution);
-    insertTestUsers(false, DataAccessLevel.UNREGISTERED, true, 10, institution);
-  }
-
   private List<DbUser> insertTestUsers(
       boolean isDisabled,
-      DataAccessLevel dataAccessLevel,
       boolean isBetaBypassed,
       long numUsers,
-      DbInstitution institution) {
+      DbInstitution institution,
+      DbAccessTier... tiers) {
+
     ImmutableList.Builder<DbUser> resultList = ImmutableList.builder();
 
     for (int i = 0; i < numUsers; ++i) {
@@ -141,11 +146,27 @@ public class UserDaoTest extends SpringTest {
       if (isBetaBypassed) {
         user.setBetaAccessBypassTime(NOW);
       }
-      user.setDataAccessLevelEnum(dataAccessLevel);
+      user = userDao.save(user);
+
       createAffiliation(user, institution);
+      for (DbAccessTier tier : tiers) {
+        addUserToTier(user, tier);
+      }
+
       resultList.add(userDao.save(user));
     }
     return resultList.build();
+  }
+
+  private DbUserAccessTier addUserToTier(DbUser user, DbAccessTier tier) {
+    final DbUserAccessTier entryToInsert =
+        new DbUserAccessTier()
+            .setUser(user)
+            .setAccessTier(tier)
+            .setTierAccessStatus(TierAccessStatus.ENABLED)
+            .setFirstEnabled(now())
+            .setLastUpdated(now());
+    return userAccessTierDao.save(entryToInsert);
   }
 
   @NotNull
@@ -177,5 +198,9 @@ public class UserDaoTest extends SpringTest {
     institution.setOrganizationTypeEnum(OrganizationType.EDUCATIONAL_INSTITUTION);
     institution.setDuaTypeEnum(DuaType.MASTER);
     return institutionDao.save(institution);
+  }
+
+  private Timestamp now() {
+    return Timestamp.from(Instant.now());
   }
 }

@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
@@ -275,10 +274,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .currentPosition(rs.getString("current_position"))
                 // TODO remove.  until then, what we're interested in is registered vs not
                 .dataAccessLevel(
-                    rs.getString("access_tier_short_names")
-                            .contains(AccessTierService.REGISTERED_TIER_SHORT_NAME)
-                        ? DataAccessLevel.REGISTERED
-                        : DataAccessLevel.UNREGISTERED)
+                    AccessTierService.dataAccessKluge(rs.getString("access_tier_short_names")))
                 .accessTierShortNames(rs.getString("access_tier_short_names"))
                 .dataUseAgreementBypassTime(
                     offsetDateTimeUtc(rs.getTimestamp("data_use_agreement_bypass_time")))
