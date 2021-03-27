@@ -12,6 +12,7 @@ import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClientImpl;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,6 +30,7 @@ public class NotebooksIntegrationTest extends BaseIntegrationTest {
   @MockBean MonitoringService mockMonitoringService;
   @MockBean LeonardoMapper leonardoMapper;
   @MockBean WorkspaceDao workspaceDao;
+  @MockBean WorkspaceAuthService workspaceAuthService;
 
   @TestConfiguration
   // N.B. in the other integration test classes we add a @ComponentScan which scans the package
