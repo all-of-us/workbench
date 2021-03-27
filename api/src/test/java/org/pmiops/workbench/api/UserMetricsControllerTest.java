@@ -42,6 +42,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -58,6 +59,7 @@ public class UserMetricsControllerTest {
   @Mock private Provider<DbUser> mockUserProvider;
   @Mock private FireCloudService mockFireCloudService;
   @Mock private WorkspaceDao workspaceDao;
+  @Mock private WorkspaceAuthService workspaceAuthService;
 
   private UserMetricsController userMetricsController;
   private static final Instant NOW = Instant.now();
@@ -189,6 +191,7 @@ public class UserMetricsControllerTest {
             mockUserProvider,
             mockUserRecentResourceService,
             workspaceDao,
+            workspaceAuthService,
             mockFireCloudService,
             mockCloudStorageClient,
             commonMappers,
