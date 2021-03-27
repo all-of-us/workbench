@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import org.junit.Test;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
@@ -27,6 +28,7 @@ public class NotebooksIntegrationTest extends BaseIntegrationTest {
   @MockBean UserRecentResourceService mockUserRecentResourceService;
   @MockBean MonitoringService mockMonitoringService;
   @MockBean LeonardoMapper leonardoMapper;
+  @MockBean WorkspaceDao workspaceDao;
 
   @TestConfiguration
   // N.B. in the other integration test classes we add a @ComponentScan which scans the package
