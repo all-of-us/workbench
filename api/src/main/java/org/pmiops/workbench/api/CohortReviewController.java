@@ -43,7 +43,6 @@ import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.VocabularyListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -68,7 +67,6 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   private final CohortReviewService cohortReviewService;
   private final UserRecentResourceService userRecentResourceService;
   private final Provider<DbUser> userProvider;
-  private final WorkspaceService workspaceService;
   private final WorkspaceAuthService workspaceAuthService;
   private final Clock clock;
 
@@ -78,14 +76,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       CohortBuilderService cohortBuilderService,
       UserRecentResourceService userRecentResourceService,
       Provider<DbUser> userProvider,
-      WorkspaceService workspaceService,
       WorkspaceAuthService workspaceAuthService,
       Clock clock) {
     this.cohortReviewService = cohortReviewService;
     this.cohortBuilderService = cohortBuilderService;
     this.userRecentResourceService = userRecentResourceService;
     this.userProvider = userProvider;
-    this.workspaceService = workspaceService;
     this.workspaceAuthService = workspaceAuthService;
     this.clock = clock;
   }
@@ -109,7 +105,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     // this validates that the user is in the proper workspace
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     CohortReview cohortReview;
@@ -216,7 +212,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
 
     CohortReview cohortReview = cohortReviewService.findCohortReview(cohortReviewId);
     DbCohort dbCohort = cohortReviewService.findCohort(cohortReview.getCohortId());
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     return ResponseEntity.ok(
         new CohortChartDataListResponse()
@@ -254,7 +250,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
               "Bad Request: Please provide a chart limit between %d and %d.",
               MIN_LIMIT, MAX_LIMIT));
     }
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     return ResponseEntity.ok(
@@ -279,7 +275,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   @Override
   public ResponseEntity<ParticipantCohortStatus> getParticipantCohortStatus(
       String workspaceNamespace, String workspaceId, Long cohortReviewId, Long participantId) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     return ResponseEntity.ok(
@@ -297,7 +293,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long cohortId,
       Long cdrVersionId,
       PageFilterRequest request) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     CohortReview cohortReview;
@@ -335,7 +331,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long cohortReviewId,
       Long participantId,
       PageFilterRequest request) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     return ResponseEntity.ok(
         new ParticipantDataCountResponse()
@@ -351,7 +347,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long cohortReviewId,
       Long participantId,
       PageFilterRequest request) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     // this validates that the participant is in the requested review.
@@ -367,7 +363,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   @Override
   public ResponseEntity<VocabularyListResponse> getVocabularies(
       String workspaceNamespace, String workspaceId, Long cohortReviewId) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     return ResponseEntity.ok(
@@ -412,7 +408,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long cohortReviewId,
       Long participantId,
       ModifyCohortStatusRequest cohortStatusRequest) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     return ResponseEntity.ok(

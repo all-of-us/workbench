@@ -3,7 +3,6 @@ package org.pmiops.workbench.api;
 import com.google.common.collect.ImmutableList;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.Clock;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -18,9 +17,7 @@ import org.json.JSONObject;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
@@ -46,7 +43,6 @@ import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -72,7 +68,6 @@ public class RuntimeController implements RuntimeApiDelegate {
   private final LeonardoRuntimeAuditor leonardoRuntimeAuditor;
   private final LeonardoNotebooksClient leonardoNotebooksClient;
   private final Provider<DbUser> userProvider;
-  private final WorkspaceService workspaceService;
   private final WorkspaceAuthService workspaceAuthService;
   private final WorkspaceDao workspaceDao;
   private final FireCloudService fireCloudService;
@@ -85,7 +80,6 @@ public class RuntimeController implements RuntimeApiDelegate {
       LeonardoRuntimeAuditor leonardoRuntimeAuditor,
       LeonardoNotebooksClient leonardoNotebooksClient,
       Provider<DbUser> userProvider,
-      WorkspaceService workspaceService,
       WorkspaceAuthService workspaceAuthService,
       WorkspaceDao workspaceDao,
       FireCloudService fireCloudService,
@@ -95,7 +89,6 @@ public class RuntimeController implements RuntimeApiDelegate {
     this.leonardoRuntimeAuditor = leonardoRuntimeAuditor;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.userProvider = userProvider;
-    this.workspaceService = workspaceService;
     this.workspaceAuthService = workspaceAuthService;
     this.workspaceDao = workspaceDao;
     this.fireCloudService = fireCloudService;

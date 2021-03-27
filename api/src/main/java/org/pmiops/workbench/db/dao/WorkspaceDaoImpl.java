@@ -1,27 +1,22 @@
 package org.pmiops.workbench.db.dao;
 
+import java.sql.Timestamp;
+import java.time.Clock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.stereotype.Repository;
-
-import java.sql.Timestamp;
-import java.time.Clock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class WorkspaceDaoImpl implements WorkspaceDaoCustom {
 
   private static final Logger log = Logger.getLogger(WorkspaceDaoImpl.class.getName());
 
-  @Autowired
-  private Clock clock;
+  @Autowired private Clock clock;
 
-  @Lazy
-  @Autowired
-  private WorkspaceDao workspaceDao;
+  @Lazy @Autowired private WorkspaceDao workspaceDao;
 
   private DbWorkspace saveWithLastModified(DbWorkspace workspace, Timestamp ts) {
     workspace.setLastModifiedTime(ts);

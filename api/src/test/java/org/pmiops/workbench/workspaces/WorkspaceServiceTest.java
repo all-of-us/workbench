@@ -277,7 +277,9 @@ public class WorkspaceServiceTest {
         workspace -> {
           // Need a new 'now' each time or else we won't have lastAccessDates that are different
           // from each other
-          doReturn(NOW.minusSeconds(dbWorkspaces.size() - workspace.getWorkspaceId())).when(mockClock).instant();
+          doReturn(NOW.minusSeconds(dbWorkspaces.size() - workspace.getWorkspaceId()))
+              .when(mockClock)
+              .instant();
           workspaceService.updateRecentWorkspaces(workspace);
         });
     List<DbUserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();
@@ -309,7 +311,9 @@ public class WorkspaceServiceTest {
         workspace -> {
           // Need a new 'now' each time or else we won't have lastAccessDates that are different
           // from each other
-          doReturn(NOW.minusSeconds(dbWorkspaces.size() - workspace.getWorkspaceId())).when(mockClock).instant();
+          doReturn(NOW.minusSeconds(dbWorkspaces.size() - workspace.getWorkspaceId()))
+              .when(mockClock)
+              .instant();
           workspaceService.updateRecentWorkspaces(workspace);
         });
     List<DbUserRecentWorkspace> recentWorkspaces = workspaceService.getRecentWorkspaces();

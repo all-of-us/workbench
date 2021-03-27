@@ -24,12 +24,12 @@ import javax.inject.Provider
 @Service
 class EgressEventAuditorImpl @Autowired
 constructor(
-        private val actionAuditService: ActionAuditService,
-        private val workspaceService: WorkspaceService,
-        private val workspaceDao: WorkspaceDao,
-        private val userDao: UserDao,
-        private val clock: Clock,
-        @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
+    private val actionAuditService: ActionAuditService,
+    private val workspaceService: WorkspaceService,
+    private val workspaceDao: WorkspaceDao,
+    private val userDao: UserDao,
+    private val clock: Clock,
+    @Qualifier("ACTION_ID") private val actionIdProvider: Provider<String>
 ) : EgressEventAuditor {
 
     override fun fireEgressEvent(event: EgressEvent) {

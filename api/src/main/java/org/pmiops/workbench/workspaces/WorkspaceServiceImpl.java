@@ -195,7 +195,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   @Transactional
   @Override
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace = getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
     FirecloudWorkspaceResponse fcResponse;
     FirecloudWorkspace fcWorkspace;
 
@@ -207,7 +207,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
     fcWorkspace = fcResponse.getWorkspace();
 
-    if (fcResponse.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
+    if (fcResponse.getAccessLevel().equals(WorkspaceAuthService.PROJECT_OWNER_ACCESS_LEVEL)) {
       // We don't expose PROJECT_OWNER in our API; just use OWNER.
       workspaceResponse.setAccessLevel(WorkspaceAccessLevel.OWNER);
     } else {
@@ -232,31 +232,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     Type accessEntryType = new TypeToken<Map<String, FirecloudWorkspaceAccessEntry>>() {}.getType();
     Gson gson = new Gson();
     return gson.fromJson(gson.toJson(aclResp.getAcl(), accessEntryType), accessEntryType);
-  }
-
-  // TODO eric: move out
-  @Override
-  public DbWorkspace getRequired(String ns, String firecloudName) {
-    DbWorkspace workspace = workspaceDao.get(ns, firecloudName);
-    if (workspace == null) {
-      throw new NotFoundException(String.format("DbWorkspace %s/%s not found.", ns, firecloudName));
-    }
-    return workspace;
-  }
-
-  // TODO eric: move out
-  @Override
-  @Transactional
-  public DbWorkspace getRequiredWithCohorts(String ns, String firecloudName) {
-    DbWorkspace workspace =
-        workspaceDao.findByFirecloudNameAndActiveStatusWithEagerCohorts(
-            ns,
-            firecloudName,
-            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
-    if (workspace == null) {
-      throw new NotFoundException(String.format("DbWorkspace %s/%s not found.", ns, firecloudName));
-    }
-    return workspace;
   }
 
   @Override
@@ -287,7 +262,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public void setResearchPurposeApproved(String ns, String firecloudName, boolean approved) {
-    DbWorkspace workspace = getRequired(ns, firecloudName);
+    DbWorkspace workspace = workspaceDao.getRequired(ns, firecloudName);
     if (workspace.getReviewRequested() == null || !workspace.getReviewRequested()) {
       throw new BadRequestException(
           String.format("No review requested for workspace %s/%s.", ns, firecloudName));
@@ -300,30 +275,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     }
     workspace.setApproved(approved);
     workspaceDao.saveWithLastModified(workspace);
-  }
-
-  // TODO eric: move into FirecloudWorkspaceACLUpdate. Also, what does "OnUser" even imply
-  @Override
-  public FirecloudWorkspaceACLUpdate updateFirecloudAclsOnUser(
-      WorkspaceAccessLevel updatedAccess, FirecloudWorkspaceACLUpdate currentUpdate) {
-    if (updatedAccess == WorkspaceAccessLevel.OWNER) {
-      currentUpdate.setCanShare(true);
-      currentUpdate.setCanCompute(true);
-      currentUpdate.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
-    } else if (updatedAccess == WorkspaceAccessLevel.WRITER) {
-      currentUpdate.setCanShare(false);
-      currentUpdate.setCanCompute(true);
-      currentUpdate.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
-    } else if (updatedAccess == WorkspaceAccessLevel.READER) {
-      currentUpdate.setCanShare(false);
-      currentUpdate.setCanCompute(false);
-      currentUpdate.setAccessLevel(WorkspaceAccessLevel.READER.toString());
-    } else {
-      currentUpdate.setCanShare(false);
-      currentUpdate.setCanCompute(false);
-      currentUpdate.setAccessLevel(WorkspaceAccessLevel.NO_ACCESS.toString());
-    }
-    return currentUpdate;
   }
 
   @Override
@@ -344,7 +295,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       if (updatedAccess != null) {
         FirecloudWorkspaceACLUpdate currentUpdate = new FirecloudWorkspaceACLUpdate();
         currentUpdate.setEmail(currentUserEmail);
-        currentUpdate = updateFirecloudAclsOnUser(updatedAccess, currentUpdate);
+        currentUpdate =
+            WorkspaceAuthService.updateFirecloudAclsOnUser(updatedAccess, currentUpdate);
         updateACLRequestList.add(currentUpdate);
         toAdd.remove(currentUserEmail);
       } else {
@@ -355,7 +307,9 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
         if (!currentUserEmail.equals(registeredUsersGroup)) {
           FirecloudWorkspaceACLUpdate removedUser = new FirecloudWorkspaceACLUpdate();
           removedUser.setEmail(currentUserEmail);
-          removedUser = updateFirecloudAclsOnUser(WorkspaceAccessLevel.NO_ACCESS, removedUser);
+          removedUser =
+              WorkspaceAuthService.updateFirecloudAclsOnUser(
+                  WorkspaceAccessLevel.NO_ACCESS, removedUser);
           updateACLRequestList.add(removedUser);
         }
       }
@@ -365,7 +319,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     for (Entry<String, WorkspaceAccessLevel> remainingRole : toAdd.entrySet()) {
       FirecloudWorkspaceACLUpdate newUser = new FirecloudWorkspaceACLUpdate();
       newUser.setEmail(remainingRole.getKey());
-      newUser = updateFirecloudAclsOnUser(remainingRole.getValue(), newUser);
+      newUser = WorkspaceAuthService.updateFirecloudAclsOnUser(remainingRole.getValue(), newUser);
       updateACLRequestList.add(newUser);
     }
     FirecloudWorkspaceACLUpdateResponseList fireCloudResponse =
@@ -446,31 +400,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     return to;
   }
 
-  // TODO eric: workspace acl
-  @Override
-  public DbWorkspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-      String workspaceNamespace, String workspaceId, WorkspaceAccessLevel workspaceAccessLevel) {
-    workspaceAuthService.enforceWorkspaceAccessLevel(
-        workspaceNamespace, workspaceId, workspaceAccessLevel);
-    DbWorkspace workspace = getRequired(workspaceNamespace, workspaceId);
-    // Because we've already checked that the user has access to the workspace in question,
-    // we don't need to check their membership in the authorization domain for the CDR version
-    // associated with the workspace.
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(workspace.getCdrVersion());
-    return workspace;
-  }
-
-  // TODO eric: I think we can replace with Dao function that also checks for active
-  @Override
-  public Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId) {
-    DbWorkspace workspace = workspaceDao.findOne(workspaceId);
-    if (workspace == null || !workspace.isActive()) {
-      return Optional.empty();
-    }
-    return Optional.of(workspace);
-  }
-
-  // TODO eric: workspace ACL
   @Override
   public List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName) {
     Map<String, FirecloudWorkspaceAccessEntry> emailToRole =
@@ -496,10 +425,12 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   public DbWorkspace setPublished(
       DbWorkspace workspace, String publishedWorkspaceGroup, boolean publish) {
     ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
-    FirecloudWorkspaceACLUpdate currentUpdate = new FirecloudWorkspaceACLUpdate()
-        .email(publishedWorkspaceGroup);
+    FirecloudWorkspaceACLUpdate currentUpdate =
+        new FirecloudWorkspaceACLUpdate().email(publishedWorkspaceGroup);
 
-    currentUpdate = updateFirecloudAclsOnUser(publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS, currentUpdate);
+    currentUpdate =
+        WorkspaceAuthService.updateFirecloudAclsOnUser(
+            publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS, currentUpdate);
     workspace.setPublished(publish);
 
     updateACLRequestList.add(currentUpdate);
@@ -703,5 +634,4 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
                     .build())
         .collect(ImmutableList.toImmutableList());
   }
-
 }

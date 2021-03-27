@@ -1,27 +1,15 @@
 package org.pmiops.workbench.workspaces;
 
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.ForbiddenException;
-import org.pmiops.workbench.exceptions.NotFoundException;
-import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResponse;
 
 public class WorkspaceServiceFakeImpl implements WorkspaceService {
-
-  @Override
-  public Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId) {
-    return Optional.empty();
-  }
 
   @Override
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
@@ -35,16 +23,6 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
 
   @Override
   public List<WorkspaceResponse> getPublishedWorkspaces() {
-    return null;
-  }
-
-  @Override
-  public DbWorkspace getRequired(String ns, String firecloudName) {
-    return null;
-  }
-
-  @Override
-  public DbWorkspace getRequiredWithCohorts(String ns, String firecloudName) {
     return null;
   }
 
@@ -71,12 +49,6 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   }
 
   @Override
-  public DbWorkspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-      String workspaceNamespace, String workspaceId, WorkspaceAccessLevel workspaceAccessLevel) {
-    return null;
-  }
-
-  @Override
   public Map<String, FirecloudWorkspaceAccessEntry> getFirecloudWorkspaceAcls(
       String workspaceNamespace, String firecloudName) {
     return null;
@@ -84,12 +56,6 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
 
   @Override
   public List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName) {
-    return null;
-  }
-
-  @Override
-  public FirecloudWorkspaceACLUpdate updateFirecloudAclsOnUser(
-      WorkspaceAccessLevel updatedAccess, FirecloudWorkspaceACLUpdate currentUpdate) {
     return null;
   }
 
@@ -108,5 +74,4 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   public DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace) {
     return null;
   }
-
 }

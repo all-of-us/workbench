@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
-
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -42,6 +41,18 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
     return workspace;
   }
 
+  default DbWorkspace getRequiredWithCohorts(String ns, String firecloudName) {
+    DbWorkspace workspace =
+        findByFirecloudNameAndActiveStatusWithEagerCohorts(
+            ns,
+            firecloudName,
+            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+    if (workspace == null) {
+      throw new NotFoundException(String.format("DbWorkspace %s/%s not found.", ns, firecloudName));
+    }
+    return workspace;
+  }
+
   // Returns the requested workspace looked up by workspace namespace (aka billing project name).
   // Only active workspaces are searched. Returns null if no active workspace is found.
   default Optional<DbWorkspace> getByNamespace(String ns) {
@@ -69,6 +80,14 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   List<DbWorkspace> findAllByFirecloudUuidIn(Collection<String> firecloudUuids);
 
   List<DbWorkspace> findAllByWorkspaceIdIn(Collection<Long> dbIds);
+
+  default Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId) {
+    DbWorkspace workspace = findOne(workspaceId);
+    if (workspace == null || !workspace.isActive()) {
+      return Optional.empty();
+    }
+    return Optional.of(workspace);
+  }
 
   List<DbWorkspace> findAllByWorkspaceNamespace(String workspaceNamespace);
 
@@ -125,5 +144,4 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
 
     Long getWorkspaceCount();
   }
-
 }

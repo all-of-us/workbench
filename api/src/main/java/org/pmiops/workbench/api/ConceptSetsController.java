@@ -19,7 +19,7 @@ import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.UpdateConceptSetRequest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,18 +27,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ConceptSetsController implements ConceptSetsApiDelegate {
 
-  private final WorkspaceService workspaceService;
+  private final WorkspaceAuthService workspaceAuthService;
   private final ConceptSetService conceptSetService;
   private final UserRecentResourceService userRecentResourceService;
   private final Provider<DbUser> userProvider;
 
   @Autowired
   ConceptSetsController(
-      WorkspaceService workspaceService,
+      WorkspaceAuthService workspaceAuthService,
       ConceptSetService conceptSetService,
       UserRecentResourceService userRecentResourceService,
       Provider<DbUser> userProvider) {
-    this.workspaceService = workspaceService;
+    this.workspaceAuthService = workspaceAuthService;
     this.conceptSetService = conceptSetService;
     this.userRecentResourceService = userRecentResourceService;
     this.userProvider = userProvider;
@@ -50,7 +50,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     // Fail fast if request is not valid
     validateCreateConceptSetRequest(request);
     DbWorkspace workspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     ConceptSet conceptSet =
@@ -70,7 +70,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   @Override
   public ResponseEntity<ConceptSet> getConceptSet(
       String workspaceNamespace, String workspaceId, Long conceptSetId) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     return ResponseEntity.ok(conceptSetService.getConceptSet(conceptSetId));
@@ -80,7 +80,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   public ResponseEntity<ConceptSetListResponse> getConceptSetsInWorkspace(
       String workspaceNamespace, String workspaceId) {
     DbWorkspace workspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     List<ConceptSet> conceptSets =
@@ -95,7 +95,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       String workspaceNamespace, String workspaceId, Long conceptSetId, ConceptSet conceptSet) {
     // Fail fast if etag isn't provided
     validateUpdateConceptSet(conceptSet);
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     return ResponseEntity.ok(conceptSetService.updateConceptSet(conceptSetId, conceptSet));
@@ -110,7 +110,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     // Fail fast if request isn't valid
     validateUpdateConceptSetConcepts(request);
 
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     return ResponseEntity.ok(conceptSetService.updateConceptSetConcepts(conceptSetId, request));
@@ -123,10 +123,10 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
       String fromConceptSetId,
       CopyRequest copyRequest) {
     DbWorkspace fromWorkspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             fromWorkspaceNamespace, fromWorkspaceId, WorkspaceAccessLevel.READER);
     DbWorkspace toWorkspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             copyRequest.getToWorkspaceNamespace(),
             copyRequest.getToWorkspaceName(),
             WorkspaceAccessLevel.WRITER);

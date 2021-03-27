@@ -5,5 +5,4 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 public interface WorkspaceDaoCustom {
 
   DbWorkspace saveWithLastModified(DbWorkspace workspace);
-
 }

@@ -1,13 +1,12 @@
 package org.pmiops.workbench;
 
-import org.pmiops.workbench.test.FakeClock;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import org.pmiops.workbench.test.FakeClock;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 
 public class SpringTest {
 
@@ -22,5 +21,4 @@ public class SpringTest {
       return CLOCK;
     }
   }
-
 }

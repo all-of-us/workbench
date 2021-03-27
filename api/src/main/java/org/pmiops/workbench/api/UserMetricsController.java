@@ -19,8 +19,8 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbUser;
@@ -38,7 +38,6 @@ import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,12 +46,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserMetricsController implements UserMetricsApiDelegate {
 
   private static final Logger logger = Logger.getLogger(UserMetricsController.class.getName());
+
   private static final int MAX_RECENT_NOTEBOOKS = 8;
   private static final Logger log = Logger.getLogger(UserMetricsController.class.getName());
   private final Provider<DbUser> userProvider;
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserRecentResourceService userRecentResourceService;
-  private final WorkspaceService workspaceService;
+  private final WorkspaceDao workspaceDao;
   private final FireCloudService fireCloudService;
   private final CloudStorageClient cloudStorageClient;
   private final CommonMappers commonMappers;
@@ -115,17 +114,15 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   @Autowired
   UserMetricsController(
       Provider<DbUser> userProvider,
-      Provider<WorkbenchConfig> workbenchConfigProvider,
       UserRecentResourceService userRecentResourceService,
-      WorkspaceService workspaceService,
+      WorkspaceDao workspaceDao,
       FireCloudService fireCloudService,
       CloudStorageClient cloudStorageClient,
       CommonMappers commonMappers,
       FirecloudMapper firecloudMapper) {
     this.userProvider = userProvider;
-    this.workbenchConfigProvider = workbenchConfigProvider;
     this.userRecentResourceService = userRecentResourceService;
-    this.workspaceService = workspaceService;
+    this.workspaceDao = workspaceDao;
     this.fireCloudService = fireCloudService;
     this.cloudStorageClient = cloudStorageClient;
     this.commonMappers = commonMappers;
@@ -189,7 +186,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         workspaceIdList.stream()
             .map(
                 id ->
-                    workspaceService
+                    workspaceDao
                         .findActiveByWorkspaceId(id)
                         .map(
                             dbWorkspace ->
@@ -293,7 +290,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
   // Retrieves Database workspace ID
   private long getWorkspaceId(String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
     return dbWorkspace.getWorkspaceId();
   }
 

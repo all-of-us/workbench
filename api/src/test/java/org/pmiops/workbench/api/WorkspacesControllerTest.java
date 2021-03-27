@@ -34,11 +34,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -179,7 +176,6 @@ import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
-import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -572,7 +568,7 @@ public class WorkspacesControllerTest extends SpringTest {
     for (UserRole userRole : collaborators) {
       FirecloudWorkspaceACLUpdate aclUpdate =
           new FirecloudWorkspaceACLUpdate().email(userRole.getEmail());
-      aclUpdate = workspaceService.updateFirecloudAclsOnUser(userRole.getRole(), aclUpdate);
+      aclUpdate = WorkspaceAuthService.updateFirecloudAclsOnUser(userRole.getRole(), aclUpdate);
       updateACLRequestList.add(aclUpdate);
     }
     return updateACLRequestList;
