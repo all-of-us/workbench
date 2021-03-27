@@ -142,7 +142,8 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   @Override
   public ResponseEntity<WorkspaceResource> updateRecentResource(
       String workspaceNamespace, String workspaceId, RecentResourceRequest recentResourceRequest) {
-    workspaceAuthService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    workspaceAuthService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     // this is only ever used for Notebooks because we update/add to the cache for the other
     // resources in the backend
     // Because we don't store notebooks in our database the way we do other resources.
@@ -167,7 +168,8 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteRecentResource(
       String workspaceNamespace, String workspaceId, RecentResourceRequest recentResourceRequest) {
-    workspaceAuthService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    workspaceAuthService.enforceWorkspaceAccessLevel(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     long wId = getWorkspaceId(workspaceNamespace, workspaceId);
     userRecentResourceService.deleteNotebookEntry(
         wId, userProvider.get().getUserId(), recentResourceRequest.getNotebookName());
