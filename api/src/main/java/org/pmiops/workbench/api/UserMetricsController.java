@@ -34,10 +34,12 @@ import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.RecentResourceRequest;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,11 +54,12 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   private final Provider<DbUser> userProvider;
   private final UserRecentResourceService userRecentResourceService;
   private final WorkspaceDao workspaceDao;
+  private final WorkspaceAuthService workspaceAuthService;
   private final FireCloudService fireCloudService;
   private final CloudStorageClient cloudStorageClient;
   private final CommonMappers commonMappers;
   private FirecloudMapper firecloudMapper;
-  private int distinctWorkspacelimit = 5;
+  private int distinctWorkspaceLimit = 5;
 
   // TODO(jaycarlton): migrate these private functions to MapStruct
   // Converts DB model to client Model
@@ -116,6 +119,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
       Provider<DbUser> userProvider,
       UserRecentResourceService userRecentResourceService,
       WorkspaceDao workspaceDao,
+      WorkspaceAuthService workspaceAuthService,
       FireCloudService fireCloudService,
       CloudStorageClient cloudStorageClient,
       CommonMappers commonMappers,
@@ -123,22 +127,22 @@ public class UserMetricsController implements UserMetricsApiDelegate {
     this.userProvider = userProvider;
     this.userRecentResourceService = userRecentResourceService;
     this.workspaceDao = workspaceDao;
+    this.workspaceAuthService = workspaceAuthService;
     this.fireCloudService = fireCloudService;
     this.cloudStorageClient = cloudStorageClient;
     this.commonMappers = commonMappers;
     this.firecloudMapper = firecloudMapper;
   }
 
-  // TODO eric: add access checks
-
   @VisibleForTesting
   public void setDistinctWorkspaceLimit(int limit) {
-    distinctWorkspacelimit = limit;
+    distinctWorkspaceLimit = limit;
   }
 
   @Override
   public ResponseEntity<WorkspaceResource> updateRecentResource(
       String workspaceNamespace, String workspaceId, RecentResourceRequest recentResourceRequest) {
+    workspaceAuthService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     // this is only ever used for Notebooks because we update/add to the cache for the other
     // resources in the backend
     // Because we don't store notebooks in our database the way we do other resources.
@@ -163,6 +167,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteRecentResource(
       String workspaceNamespace, String workspaceId, RecentResourceRequest recentResourceRequest) {
+    workspaceAuthService.enforceWorkspaceAccessLevel(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     long wId = getWorkspaceId(workspaceNamespace, workspaceId);
     userRecentResourceService.deleteNotebookEntry(
         wId, userProvider.get().getUserId(), recentResourceRequest.getNotebookName());
@@ -179,7 +184,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
         userRecentResourceList.stream()
             .map(DbUserRecentResource::getWorkspaceId)
             .distinct()
-            .limit(distinctWorkspacelimit)
+            .limit(distinctWorkspaceLimit)
             .collect(Collectors.toList());
 
     final Map<Long, DbWorkspace> idToDbWorkspace =
