@@ -11,7 +11,6 @@ import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClientImpl;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -21,8 +20,6 @@ import org.springframework.context.annotation.Import;
 public class NotebooksIntegrationTest extends BaseIntegrationTest {
   @Autowired private LeonardoNotebooksClient leonardoNotebooksClient;
 
-  // Provide a mock bean for WorkspaceService, which LeonardoNotebooksClientImpl depends on.
-  @MockBean WorkspaceService mockWorkspaceService;
   @MockBean LogsBasedMetricService mockLogsBasedMetricService;
   // Provide mock beans for dependencies of NotebooksServiceImpl (which is loaded as a bean within
   // this test due to the @ComponentScan on the o.p.w.notebooks package.
