@@ -23,10 +23,6 @@ import {ConfirmDeleteModalComponent} from './components/confirm-delete-modal';
 import {HelpSidebarComponent} from './components/help-sidebar';
 import {RoutingSpinnerComponent} from './components/routing-spinner/component';
 import {AppComponent} from './pages/app/component';
-import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
-import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
-import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
-import {TablePage} from './pages/data/cohort-review/table-page';
 import {ConceptSearchComponent} from './pages/data/concept/concept-search';
 import {InitialErrorComponent} from './pages/initial-error/component';
 import {SignedInComponent} from './pages/signed-in/component';
@@ -68,20 +64,16 @@ import {FooterComponent} from './components/footer';
     AppRouting,
     BugReportComponent,
     CohortPageComponent,
-    CohortReviewComponent,
     ConceptSearchComponent,
     ConfirmDeleteModalComponent,
     DataPageComponent,
     DataSetPageComponent,
-    DetailPageComponent,
     FooterComponent,
     HelpSidebarComponent,
     InitialErrorComponent,
-    QueryReportComponent,
     RoutingSpinnerComponent,
     SignedInComponent,
     NavBarComponent,
-    TablePage,
     TextModalComponent,
     WorkspaceNavBarComponent,
     WorkspaceShareComponent,

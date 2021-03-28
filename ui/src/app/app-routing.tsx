@@ -26,6 +26,10 @@ import {AdminWorkspaceSearch} from './pages/admin/admin-workspace-search';
 import {InteractiveNotebook} from './pages/analysis/interactive-notebook';
 import {NotebookList} from './pages/analysis/notebook-list';
 import {NotebookRedirect} from './pages/analysis/notebook-redirect';
+import {CohortReview} from './pages/data/cohort-review/cohort-review';
+import {DetailPage} from './pages/data/cohort-review/detail-page';
+import {QueryReport} from './pages/data/cohort-review/query-report.component';
+import {ParticipantsTable} from './pages/data/cohort-review/table-page';
 import {CohortActions} from './pages/data/cohort/cohort-actions';
 import {ConceptHomepage} from './pages/data/concept/concept-homepage';
 import {ConceptSetActions} from './pages/data/concept/concept-set-actions';
@@ -54,17 +58,21 @@ const AdminBannerPage = withRouteData(AdminBanner);
 const AdminNotebookViewPage = withRouteData(AdminNotebookView);
 const AdminReviewWorkspacePage = withRouteData(AdminReviewWorkspace);
 const CohortActionsPage = withRouteData(CohortActions);
+const CohortReviewPage = withRouteData(CohortReview);
 const ConceptHomepagePage = withRouteData(ConceptHomepage);
 const ConceptSetActionsPage = withRouteData(ConceptSetActions);
 const CookiePolicyPage = withRouteData(CookiePolicy);
 const DataUserCodeOfConductPage = fp.flow(withRouteData, withFullHeight)(DataUserCodeOfConduct);
+const DetailPagePage = withRouteData(DetailPage);
 const HomepagePage = withRouteData(Homepage); // this name is bad i am sorry
 const InstitutionAdminPage = withRouteData(AdminInstitution);
 const InstitutionEditAdminPage = withRouteData(AdminInstitutionEdit);
 const InteractiveNotebookPage = withRouteData(InteractiveNotebook);
 const NotebookListPage = withRouteData(NotebookList);
 const NotebookRedirectPage = withRouteData(NotebookRedirect);
+const ParticipantsTablePage = withRouteData(ParticipantsTable);
 const ProfilePagePage = withRouteData(ProfilePage); // again bad sorry
+const QueryReportPage = withRouteData(QueryReport);
 const SessionExpiredPage = withRouteData(SessionExpired);
 const SignInAgainPage = withRouteData(SignInAgain);
 const SignInPage = withRouteData(SignIn);
@@ -281,6 +289,38 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             title: 'Cohort Actions',
             breadcrumb: BreadcrumbType.Cohort,
             helpContentKey: 'cohortBuilder'
+          }}/>}
+        />
+        <AppRoute
+          path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants'
+          component={() => <ParticipantsTablePage routeData={{
+            title: 'Review Cohort Participants',
+            breadcrumb: BreadcrumbType.Cohort,
+            helpContentKey: 'reviewParticipants'
+          }}/>}
+        />
+        <AppRoute
+          path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/participants/:pid'
+          component={() => <DetailPagePage routeData={{
+            title: 'Participant Detail',
+            breadcrumb: BreadcrumbType.Participant,
+            helpContentKey: 'reviewParticipantDetail'
+          }}/>}
+        />
+        <AppRoute
+          path='/workspaces/:ns/:wsid/data/cohorts/:cid/review/cohort-description'
+          component={() => <QueryReportPage routeData={{
+            title: 'Review Cohort Description',
+            breadcrumb: BreadcrumbType.Cohort,
+            helpContentKey: 'cohortDescription'
+          }}/>}
+        />
+        <AppRoute
+          path='/workspaces/:ns/:wsid/data/cohorts/:cid/review'
+          component={() => <CohortReviewPage routeData={{
+            title: 'Review Cohort Participants',
+            breadcrumb: BreadcrumbType.Cohort,
+            helpContentKey: 'reviewParticipants'
           }}/>}
         />
         <AppRoute
