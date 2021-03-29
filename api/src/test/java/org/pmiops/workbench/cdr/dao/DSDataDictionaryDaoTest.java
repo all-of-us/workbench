@@ -25,7 +25,7 @@ public class DSDataDictionaryDaoTest {
 
   @Before
   public void setUp() {
-    dbDSDataDictionaryCondition =
+    dbDSDataDictionaryCondition_ds =
         dsDataDictionaryDao.save(
             DbDSDataDictionary.builder()
                 .addDataProvenance("Mock Data Provenance")
@@ -34,7 +34,7 @@ public class DSDataDictionaryDaoTest {
                 .addFieldName("Mock Condition Field")
                 .addFieldType("Integer")
                 .addOmopCdmStandardOrCustomField("Custom")
-                .addRelevantOmopTable("condition")
+                .addRelevantOmopTable("ds_condition")
                 .addSourcePpiModule("ppi")
                 .build());
     dbDSDataDictionaryPerson =
@@ -49,7 +49,7 @@ public class DSDataDictionaryDaoTest {
                 .addRelevantOmopTable("ds_person")
                 .addSourcePpiModule("ppi")
                 .build());
-    dbDSDataDictionaryCondition_ds =
+    dbDSDataDictionaryCondition =
         dsDataDictionaryDao.save(
             DbDSDataDictionary.builder()
                 .addDataProvenance("Mock Data Provenance")
@@ -58,7 +58,7 @@ public class DSDataDictionaryDaoTest {
                 .addFieldName("Mock Condition Field")
                 .addFieldType("Integer")
                 .addOmopCdmStandardOrCustomField("Custom")
-                .addRelevantOmopTable("ds_condition")
+                .addRelevantOmopTable("condition")
                 .addSourcePpiModule("ppi")
                 .build());
   }
