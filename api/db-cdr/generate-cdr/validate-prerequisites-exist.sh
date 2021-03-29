@@ -51,10 +51,11 @@ if gsutil -m cp gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
   for file in ${All_FILES[@]}; do
     read -r header < $TEMP_FILE_DIR/$file
     IFS=',' read -r -a columns <<< $header
+    firstColumn=$(echo $columns | cut -d' ' -f 1)
     case $file in
       $CRITERIA_MENU|$DS_DATA_DICTIONARY)
         echo "Processing $file"
-        if [[ $columns =~ id ]];
+        if [[ $firstColumn == id ]];
         then
           echo "Removing $file header"
           # Remove the first line of file
@@ -71,9 +72,9 @@ if gsutil -m cp gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
         echo "Backing up $file"
         gsutil cp $TEMP_FILE_DIR/$file.gz gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup/"$timestamp"_"$file".gz
       ;;
-    $PREP_CRITERIA|$PREP_CRITERIA_ANCESTOR|$PREP_CLINICAL_TERMS)
+    $PREP_CRITERIA|$PREP_CRITERIA_ANCESTOR|$PREP_CLINICAL_TERMS|$PREP_CONCEPT)
       tableName=${file%.*}
-      if [[ $columns =~ id || $columns =~ ancestor_id || $columns =~ parent ]];
+      if [[ $firstColumn == id || $firstColumn == ancestor_id || $firstColumn == parent ]];
       then
         echo "Removing $file header"
         # Remove the first line of file
@@ -85,9 +86,16 @@ if gsutil -m cp gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
         gsutil cp $TEMP_FILE_DIR/$file gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/
       fi
 
-      # Backup the csv file
-      echo "Backing up $file"
-      bq extract --project_id=$BQ_PROJECT --compression GZIP --print_header=false $BQ_DATASET.$tableName gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup/"$timestamp"_"$file".gz
+      # Check to see if table exists
+      tables=$(bq ls --max_results 1000 "$BQ_PROJECT:$BQ_DATASET" | awk '{print $1}' | tail +3)
+      for table in ${tables[@]};
+      do
+        if [[ $table == $tableName ]];
+        then
+          echo "Backing up $file"
+          bq extract --project_id=$BQ_PROJECT --compression GZIP --print_header=false $BQ_DATASET.$tableName gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup/"$timestamp"_"$file".gz
+        fi
+      done
 
       # Load the csv file into table
       echo "Starting load of $file"
