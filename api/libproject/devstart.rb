@@ -527,7 +527,7 @@ def docker_clean()
   # specific to Docker, it is mounted locally for docker runs. For lack of a
   # better "dev teardown" hook, purge that file here; e.g. in case we decide to
   # invalidate a dev key or change the service account.
-  common.run_inline %W{rm -f #{ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH} #{GSUITE_ADMIN_KEY_PATH}}
+  common.run_inline %W{rm -f #{ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH}}
 
   # See https://github.com/docker/compose/issues/3447
   common.status "Cleaning complete. docker-compose 'not found' errors can be safely ignored"
