@@ -1,6 +1,7 @@
 package org.pmiops.workbench.access;
 
 import java.util.List;
+import javax.annotation.Nullable;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.model.DataAccessLevel;
@@ -17,10 +18,13 @@ public interface AccessTierService {
    *     e.g. 'registered,controlled'
    * @return whether a user has Registered Tier membership or not, as a DataAccessLevel
    */
-  static DataAccessLevel temporaryDataAccessLevelKluge(String accessTierShortNames) {
-    return accessTierShortNames.contains(AccessTierService.REGISTERED_TIER_SHORT_NAME)
-        ? DataAccessLevel.REGISTERED
-        : DataAccessLevel.UNREGISTERED;
+  static DataAccessLevel temporaryDataAccessLevelKluge(@Nullable String accessTierShortNames) {
+    if (accessTierShortNames != null
+        && accessTierShortNames.contains(AccessTierService.REGISTERED_TIER_SHORT_NAME)) {
+      return DataAccessLevel.REGISTERED;
+    } else {
+      return DataAccessLevel.UNREGISTERED;
+    }
   }
 
   /**
