@@ -417,6 +417,11 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
           <ClrIcon shape='exclamation-triangle' class='is-solid'/>
           Error Linking NIH Username: {eraCommonsError} Please try again!
       </AlertDanger>}
+      {rasLoginGovLinkError && <AlertDanger data-test-id='ras-login-gov-error'
+                                       style={{margin: '0px 1rem 1rem 0px'}}>
+        <ClrIcon shape='exclamation-triangle' class='is-solid'/>
+        Error Linking login.gov account: {rasLoginGovLinkError} Please try again!
+      </AlertDanger>}
       {trainingWarningOpen && !trainingCompleted &&
       <AlertWarning style={styles.closeableWarning}>
         <div style={{display: 'flex'}}>
