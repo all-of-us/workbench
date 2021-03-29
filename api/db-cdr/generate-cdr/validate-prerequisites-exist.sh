@@ -14,8 +14,8 @@ CRITERIA_MENU="cb_criteria_menu.csv"
 PREP_CRITERIA="prep_criteria.csv"
 PREP_CRITERIA_ANCESTOR="prep_criteria_ancestor.csv"
 PREP_CLINICAL_TERMS="prep_clinical_terms_nc.csv"
-DATA_DICTIONARY_FILE="ds_data_dictionary.csv"
-All_FILES=($CRITERIA_MENU $PREP_CRITERIA $PREP_CRITERIA_ANCESTOR $PREP_CLINICAL_TERMS $DATA_DICTIONARY_FILE)
+DS_DATA_DICTIONARY="ds_data_dictionary.csv"
+All_FILES=($CRITERIA_MENU $PREP_CRITERIA $PREP_CRITERIA_ANCESTOR $PREP_CLINICAL_TERMS $DS_DATA_DICTIONARY)
 INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4")
 
 echo 'Check if all necessary file exists'
@@ -64,7 +64,7 @@ if gsutil -m cp gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
     read -r header < $TEMP_FILE_DIR/$file
     IFS=',' read -r -a columns <<< $header
     case $file in
-      $CRITERIA_MENU)
+      $CRITERIA_MENU|$DS_DATA_DICTIONARY)
         echo "Processing $file"
         if [[ $columns =~ id ]];
         then
@@ -106,15 +106,6 @@ if gsutil -m cp gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
       schema_path=generate-cdr/bq-schemas
       bq --project_id=$BQ_PROJECT rm -f $BQ_DATASET.$tableName
       bq load --project_id=$BQ_PROJECT --source_format=CSV $BQ_DATASET.$tableName gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/$file $schema_path/$tableName.json
-      echo "Finished loading $file"
-    ;;
-    $DATA_DICTIONARY_FILE)
-      tableName=${file%.*}
-      #zip file
-      gzip $TEMP_FILE_DIR/$file
-
-      echo "Copy file to the version folder"
-      gsutil mv $TEMP_FILE_DIR/ds_data_dictionary.csv.gz gs://$BUCKET/$BQ_DATASET/$CDR_VERSION/ds_data_dictionary.csv.gz
       echo "Finished loading $file"
     ;;
 
