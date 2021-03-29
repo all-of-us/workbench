@@ -18,18 +18,6 @@ DS_DATA_DICTIONARY="ds_data_dictionary.csv"
 All_FILES=($CRITERIA_MENU $PREP_CRITERIA $PREP_CRITERIA_ANCESTOR $PREP_CLINICAL_TERMS $DS_DATA_DICTIONARY)
 INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4")
 
-echo 'Check if all necessary file exists'
-for files in ${All_FILES[@]}; do
-  dataDictionaryExist=gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/$files
-  echo 'Check file' $files
-  gsutil -q stat $dataDictionaryExist
-  status=$?
-
-  if [[ $status == 0 ]]; then
-    echo 'File exists'
-  fi
-done
-
 if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
   then
   echo "Can't run CDR build indices against "$BQ_DATASET"!"
