@@ -21,7 +21,7 @@ INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4")
 echo 'Check if all necessary file exists'
 for files in ${All_FILES[@]}; do
   dataDictionaryExist=gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/$files
-  echo 'Check file ' $files 'exist'
+  echo 'Check file' $files
   gsutil -q stat $dataDictionaryExist
   status=$?
 
@@ -37,7 +37,7 @@ if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
 fi
 
 # Purge all backup csv files except for the last 10 versions
-fileCount=$(gsutil ls gs://all-of-us-workbench-private-cloudsql/DummySR/cdr_csv_files/backup | wc -l)
+fileCount=$(gsutil ls gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup | wc -l)
 allFilesCount=${#All_FILES[@]}
 numberToDelete=$((fileCount - allFilesCount * 10))
 if [[ $numberToDelete > 0 ]];
