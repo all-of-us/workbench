@@ -15,9 +15,9 @@ import {reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDataUseAgreementVersion} from 'app/utils/code-of-conduct';
 import {navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
+import {buildRasRedirectUrl} from 'app/utils/ras';
 import {environment} from 'environments/environment';
 import {AccessModule, Profile} from 'generated/fetch';
-import {buildRasRedirectUrl} from 'app/utils/navigation';
 
 const styles = reactStyles({
   mainHeader: {
@@ -100,6 +100,7 @@ function redirectToNiH(): void {
 
 function redirectToRas(): void {
   AnalyticsTracker.Registration.RasLoginGov();
+  // The scopes are also used in backend for fetching user info.
   const url = serverConfigStore.getValue().rasHost + '/auth/oauth/v2/authorize?client_id=' + serverConfigStore.getValue().rasClientId
       + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl()
       + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1';
@@ -165,8 +166,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     loadingPropsKey: 'rasLoginGovLoading',
     title: 'Connect Your Login.Gov Account',
     featureFlag: serverConfigStore.getValue().enableRasLoginGovLinking,
-    description: 'Connect your Researcher Workbench account to your Login.Gov account. ' +
-        'There is no exchange of personal data in this step.',
+    description: 'Connect your Researcher Workbench account to your login.gov account. ',
     buttonText: 'Connect',
     completedText: 'Linked',
     completionTimestamp: (profile: Profile) => {

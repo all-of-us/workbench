@@ -7,7 +7,7 @@ import {getTwoFactorSetupUrl, RegistrationDashboard, RegistrationDashboardProps}
 import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {userProfileStore} from 'app/utils/navigation';
-import {buildRasRedirectUrl} from 'app/utils/navigation';
+import {buildRasRedirectUrl} from 'app/utils/ras';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 
 describe('RegistrationDashboard', () => {

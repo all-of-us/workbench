@@ -23,10 +23,10 @@ import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {hasRegisteredAccessFetch, reactStyles, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import {buildRasRedirectUrl} from 'app/utils/ras';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
-import {buildRasRedirectUrl} from 'app/utils/navigation';
 
 export const styles = reactStyles({
   bottomBanner: {
@@ -263,7 +263,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
 
   async checkWorkspaces() {
     return fetchWithGlobalErrorHandler(() => workspacesApi().getWorkspaces())
-    .then(response => this.setState({userWorkspacesResponse: response}));
+        .then(response => this.setState({userWorkspacesResponse: response}));
   }
 
   userHasWorkspaces(): boolean {
