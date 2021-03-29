@@ -2,13 +2,12 @@ import WorkspaceCard from 'app/component/workspace-card';
 import HomePage from 'app/page/home-page';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspacesPage from 'app/page/workspaces-page';
-import { LinkText, MenuOption, WorkspaceAccessLevel } from 'app/text-labels';
+import { WorkspaceAccessLevel } from 'app/text-labels';
 import { config } from 'resources/workbench-config';
 import { signInWithAccessToken, signInAs, signOut, findOrCreateWorkspace } from 'utils/test-utils';
 import { makeWorkspaceName } from 'utils/str-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { waitWhileLoading } from 'utils/waits-utils';
-import ShareModal from 'app/modal/share-modal';
 
 const assigns = [
   { accessRole: WorkspaceAccessLevel.Writer },
@@ -77,58 +76,7 @@ describe('Share workspace', () => {
     await aboutPage.verifyCollabInputField();
   });
 
-  /**
-   * Test:
-   * - Create a new workspace.
-   * - Share with another user with role READER.
-   * - Log in as another user.
-   * - Workspace share action should be disabled.
-   */
-  test('Workspace READER cannot share edit or delete workspace', async () => {
-    await removeCollaborators();
-
-    // Open the Share modal in "All Your Workspaces" page.
-    let workspacesPage = new WorkspacesPage(page);
-    await workspacesPage.load();
-    newWorkspaceCard = await WorkspaceCard.findCard(page, newWorkspaceName);
-    await newWorkspaceCard.selectSnowmanMenu(MenuOption.Share, { waitForNav: false });
-
-    const shareModal = new ShareModal(page);
-    await shareModal.waitUntilVisible();
-
-    await shareModal.shareWithUser(config.collaboratorUsername, WorkspaceAccessLevel.Reader);
-    await waitWhileLoading(page);
-    await signOut(page);
-
-    // To verify READER role assigned correctly, user with READER role will sign in in new Incognito page.
-    const newPage = await signInAs(config.collaboratorUsername, config.userPassword);
-
-    const homePage = new HomePage(newPage);
-    await homePage.getSeeAllWorkspacesLink().then((link) => link.click());
-
-    workspacesPage = new WorkspacesPage(newPage);
-    await workspacesPage.waitForLoad();
-
-    // Verify Workspace Access Level is READER.
-    const workspaceCard2 = await WorkspaceCard.findCard(newPage, newWorkspaceName);
-    const accessLevel = await workspaceCard2.getWorkspaceAccessLevel();
-    expect(accessLevel).toBe(WorkspaceAccessLevel.Reader);
-
-    // Share, Edit and Delete actions are not available for click.
-    await workspaceCard2.verifyWorkspaceCardMenuOptions();
-
-    // Make sure the Search input-field in Share modal is disabled.
-    await workspaceCard2.clickWorkspaceName();
-    await new WorkspaceDataPage(newPage).openAboutPage();
-    const aboutPage = new WorkspaceAboutPage(newPage);
-    await aboutPage.waitForLoad();
-    const modal2 = await aboutPage.openShareModal();
-    const searchInput = await modal2.waitForSearchBox();
-    expect(await searchInput.isDisabled()).toBe(true);
-    await modal2.clickButton(LinkText.Cancel);
-  });
-
-  test('As OWNER, user can share a workspace', async () => {
+  test('As OWNER, user can share workspace', async () => {
     await removeCollaborators();
 
     const aboutPage = new WorkspaceAboutPage(page);
