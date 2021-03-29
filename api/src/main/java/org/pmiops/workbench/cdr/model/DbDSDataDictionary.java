@@ -1,5 +1,6 @@
 package org.pmiops.workbench.cdr.model;
 
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -101,6 +102,36 @@ public class DbDSDataDictionary {
 
   public void setDomain(String domain) {
     this.domain = domain;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    DbDSDataDictionary that = (DbDSDataDictionary) o;
+    return id == that.id
+        && fieldName.equals(that.fieldName)
+        && relevantOmopTable.equals(that.relevantOmopTable)
+        && description.equals(that.description)
+        && fieldType.equals(that.fieldType)
+        && omopCdmStandardOrCustomField.equals(that.omopCdmStandardOrCustomField)
+        && dataProvenance.equals(that.dataProvenance)
+        && sourcePpiModule.equals(that.sourcePpiModule)
+        && domain.equals(that.domain);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        id,
+        fieldName,
+        relevantOmopTable,
+        description,
+        fieldType,
+        omopCdmStandardOrCustomField,
+        dataProvenance,
+        sourcePpiModule,
+        domain);
   }
 
   public static DbDSDataDictionary.Builder builder() {

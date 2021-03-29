@@ -554,6 +554,7 @@ public class DataSetServiceTest {
     dsDataDictionary.setFieldName("gender");
     dsDataDictionary.setDescription("Gender testing");
     dsDataDictionary.setFieldType("string");
+    dsDataDictionary.setRelevantOmopTable("person");
     dsDataDictionaryDao.save(dsDataDictionary);
   }
 }
