@@ -23,6 +23,7 @@ import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {hasRegisteredAccessFetch, reactStyles, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import {reactRouterUrlSearchParams} from 'app/utils/navigation';
 import {buildRasRedirectUrl} from 'app/utils/ras';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {supportUrls} from 'app/utils/zendesk';
@@ -165,7 +166,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
   }
 
   async validateRasLoginGovLink() {
-    const authCode = (new URL(window.location.href)).searchParams.get('code');
+    const authCode = reactRouterUrlSearchParams().get('code');
     const redirectUrl = buildRasRedirectUrl();
     if (authCode) {
       this.setState({rasLoginGovLoading: true});
@@ -180,7 +181,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
       }
     }
     // Cleanup parameter from URL after linking.
-    window.history.pushState({}, '', '/');
+    window.history.replaceState({}, '', '/');
   }
 
   setFirstVisit() {
