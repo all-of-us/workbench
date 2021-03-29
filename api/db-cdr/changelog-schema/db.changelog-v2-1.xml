@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+  <changeSet author="brianfreeman" id="changelog-v2-1">
+
+    <createTable tableName="cb_criteria">
+      <column name="id" type="BIGINT">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="parent_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="domain_id" type="VARCHAR(80)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="is_standard" type="BOOL">
+        <constraints nullable="true"/>
+      </column>
+      <column name="type" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="subtype" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="concept_id" type="VARCHAR(80)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="code" type="VARCHAR(80)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="name" type="VARCHAR(4000)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="value" type="VARCHAR(80)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="est_count" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="is_group" type="BOOL">
+        <constraints nullable="true"/>
+      </column>
+      <column name="is_selectable" type="BOOL">
+        <constraints nullable="true"/>
+      </column>
+      <column name="has_attribute" type="BOOL">
+        <constraints nullable="true"/>
+      </column>
+      <column name="has_hierarchy" type="BOOL">
+        <constraints nullable="true"/>
+      </column>
+      <column name="has_ancestor_data" type="BOOL">
+        <constraints nullable="true"/>
+      </column>
+      <column name="path" type="VARCHAR(500)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="synonyms" type="clob">
+        <constraints nullable="true"/>
+      </column>
+      <column name="rollup_count" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="item_count" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="full_text" type="clob">
+        <constraints nullable="true"/>
+      </column>
+      <column name="display_synonyms" type="clob">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+
+    <createIndex
+      indexName="idx_cb_criteria_domain_type_standard_concept"
+      tableName="cb_criteria"
+      unique="false">
+      <column name="domain_id"/>
+      <column name="type"/>
+      <column name="is_standard"/>
+      <column name="concept_id"/>
+    </createIndex>
+
+    <createIndex
+      indexName="idx_cb_criteria_domain_standard_code"
+      tableName="cb_criteria"
+      unique="false">
+      <column name="domain_id"/>
+      <column name="is_standard"/>
+      <column name="code"/>
+    </createIndex>
+
+    <createIndex
+      indexName="idx_cb_criteria_domain_type_parent"
+      tableName="cb_criteria"
+      unique="false">
+      <column name="domain_id"/>
+      <column name="type"/>
+      <column name="parent_id"/>
+    </createIndex>
+
+    <createIndex
+      indexName="idx_cb_criteria_domain_code"
+      tableName="cb_criteria"
+      unique="false">
+      <column name="domain_id"/>
+      <column name="code"/>
+    </createIndex>
+
+    <sql dbms="mysql">
+      ALTER TABLE cb_criteria
+      ADD FULLTEXT INDEX fulltext_path
+      (path);
+    </sql>
+
+    <sql dbms="mysql">
+      ALTER TABLE cb_criteria
+      ADD FULLTEXT INDEX cb_criteria_full_text
+      (full_text);
+    </sql>
+
+    <createTable tableName="cb_criteria_attribute">
+      <column name="id" type="BIGINT">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="concept_id" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="value_as_concept_id" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="concept_name" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="type" type="VARCHAR(255)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="est_count" type="VARCHAR(80)">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+
+    <createIndex
+      indexName="idx_cb_criteria_attribute_concept_id"
+      tableName="cb_criteria_attribute"
+      unique="false">
+      <column name="concept_id"/>
+    </createIndex>
+
+    <createTable tableName="cb_criteria_ancestor">
+      <column name="ancestor_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="descendant_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createIndex
+      indexName="idx_cb_descendant_ancestor"
+      tableName="cb_criteria_ancestor"
+      unique="false">
+      <column name="descendant_id"/>
+    </createIndex>
+
+    <createIndex
+      indexName="idx_cb_ancestor_id"
+      tableName="cb_criteria_ancestor"
+      unique="false">
+      <column name="ancestor_id"/>
+    </createIndex>
+
+    <createTable tableName="cb_criteria_relationship">
+      <column name="concept_id_1" type="INTEGER">
+        <constraints nullable="false"/>
+      </column>
+      <column name="concept_id_2" type="INTEGER">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createIndex tableName="cb_criteria_relationship" indexName="idx_cb_criteria_concept_1">
+      <column name="concept_id_1" type="bigint"></column>
+    </createIndex>
+
+    <createIndex tableName="cb_criteria_relationship" indexName="idx_cb_criteria_concept_2">
+      <column name="concept_id_2" type="bigint"></column>
+    </createIndex>
+
+    <createTable tableName="cb_survey_attribute">
+      <column name="id" type="BIGINT">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="question_concept_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="answer_concept_id" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="survey_version_concept_id" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+      <column name="item_count" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="cb_survey_version">
+      <column name="survey_version_concept_id" type="BIGINT">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="survey_concept_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="display_name" type="VARCHAR(100)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="display_order" type="BIGINT">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="cb_criteria_menu">
+      <column name="id" type="BIGINT">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="parent_id" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+      <column name="category" type="VARCHAR(100)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="domain_id" type="VARCHAR(80)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="type" type="VARCHAR(20)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="name" type="VARCHAR(100)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="is_group" type="BOOL">
+        <constraints nullable="true"/>
+      </column>
+      <column name="sort_order" type="BIGINT">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="cb_data_filter">
+      <column name="data_filter_id" type="INTEGER">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="display_name" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="name" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="cb_person">
+      <column name="person_id" type="INTEGER">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="dob" type="DATE">
+        <constraints nullable="true"/>
+      </column>
+      <column name="age_at_consent" type="INTEGER">
+        <constraints nullable="true"/>
+      </column>
+      <column name="age_at_cdr" type="INTEGER">
+        <constraints nullable="true"/>
+      </column>
+      <column name="is_deceased" type="BOOL">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="domain_info">
+      <column name="concept_id" type="INTEGER">
+        <constraints nullable="false"/>
+      </column>
+      <column name="domain" type="tinyint">
+        <constraints nullable="false"/>
+      </column>
+      <column name="domain_id" type="VARCHAR(40)">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="domain_enum" type="VARCHAR(50)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="name" type="VARCHAR(30)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="description" type="VARCHAR(4000)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="all_concept_count" defaultValue="0" type="INTEGER">
+        <constraints nullable="false"/>
+      </column>
+      <column name="standard_concept_count" defaultValue="0" type="INTEGER">
+        <constraints nullable="false"/>
+      </column>
+      <column name="participant_count" defaultValue="0" type="INTEGER">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="ds_data_dictionary">
+      <column name="id" type="BIGINT">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="field_name" type="VARCHAR(200)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="relevant_omop_table" type="VARCHAR(100)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="description" type="VARCHAR(200)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="field_type" type="VARCHAR(100)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="omop_cdm_standard_or_custom_field" type="VARCHAR(100)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="data_provenance" type="VARCHAR(100)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="source_ppi_module" type="VARCHAR(100)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="domain" type="VARCHAR(100)">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+
+    <createTable tableName="ds_linking">
+      <column name="id" type="BIGINT">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="denormalized_name" type="VARCHAR(400)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="omop_sql" type="VARCHAR(4000)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="join_value" type="VARCHAR(4000)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="domain" type="VARCHAR(80)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createIndex
+      indexName="idx_ds_linking_domain"
+      tableName="ds_linking"
+      unique="false">
+      <column name="domain"/>
+    </createIndex>
+
+    <createTable tableName="survey_module">
+      <column name="concept_id" type="INTEGER">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="name" type="VARCHAR(200)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="description" type="VARCHAR(4000)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="question_count" defaultValue="0" type="INTEGER">
+        <constraints nullable="false"/>
+      </column>
+      <column name="participant_count" defaultValue="0" type="INTEGER">
+        <constraints nullable="false"/>
+      </column>
+      <column name="order_number" type="INTEGER">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+  </changeSet>
+</databaseChangeLog>

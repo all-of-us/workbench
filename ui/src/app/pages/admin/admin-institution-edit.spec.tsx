@@ -1,8 +1,7 @@
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {serverConfigStore, urlParamsStore} from 'app/utils/navigation';
 import {mount} from 'enzyme';
-import {DuaType} from 'generated';
-import {InstitutionApi} from 'generated/fetch';
+import {DuaType, InstitutionApi} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {Dropdown} from 'primereact/dropdown';
 import * as React from 'react';

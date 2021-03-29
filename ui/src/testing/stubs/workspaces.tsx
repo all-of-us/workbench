@@ -15,7 +15,7 @@ export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_PERMISSION = WorkspaceAccessLevel.OWNER;
 }
 
-function buildWorkspaceStub(suffix): Workspace {
+export function buildWorkspaceStub(suffix = ''): Workspace {
   return {
     name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME + suffix,
     id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID + suffix,

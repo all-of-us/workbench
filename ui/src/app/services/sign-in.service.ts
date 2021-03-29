@@ -7,7 +7,7 @@ import {setLoggedInState} from 'app/utils/analytics';
 import {signInStore} from 'app/utils/navigation';
 import {authStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
-import {ConfigResponse} from 'generated';
+import {ConfigResponse} from 'generated/fetch';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 import 'rxjs/Rx';
 

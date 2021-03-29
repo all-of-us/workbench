@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
@@ -20,7 +19,7 @@ import {
 import {cohortBuilderApi, cohortReviewApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {datatableStyles} from 'app/styles/datatable';
-import {reactStyles, ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {navigate, navigateByUrl, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -665,12 +664,3 @@ export const ParticipantsTable = withCurrentWorkspace()(
     }
   }
 );
-
-@Component ({
-  template: '<div #root></div>'
-})
-export class TablePage extends ReactWrapperBase {
-  constructor() {
-    super(ParticipantsTable, []);
-  }
-}

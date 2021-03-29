@@ -21,15 +21,17 @@ import {
   urlParamsStore,
   userProfileStore
 } from 'app/utils/navigation';
-import {DataAccessLevel, Domain} from 'generated';
 import {
   ConfigResponse,
-  DataAccessLevel as FetchDataAccessLevel,
-  Domain as FetchDomain,
+  DataAccessLevel,
+  Domain,
 } from 'generated/fetch';
 import {cdrVersionStore, withStore} from './stores';
 
 export const WINDOW_REF = 'window-ref';
+
+// Local storage key to override the API base path.
+export const LOCAL_STORAGE_API_OVERRIDE_KEY = 'allOfUsApiUrlOverride';
 
 export function isBlank(toTest: String): boolean {
   if (toTest === null || toTest === undefined) {
@@ -49,14 +51,6 @@ export function hasRegisteredAccess(access: DataAccessLevel): boolean {
   return [
     DataAccessLevel.Registered,
     DataAccessLevel.Protected
-  ].includes(access);
-}
-
-// TODO: consolidate this with above when UI is fully converted
-export function hasRegisteredAccessFetch(access: FetchDataAccessLevel): boolean {
-  return [
-    FetchDataAccessLevel.Registered,
-    FetchDataAccessLevel.Protected
   ].includes(access);
 }
 
@@ -420,12 +414,6 @@ export interface ServerConfigProps {
   serverConfig: ConfigResponse;
 }
 
-// Temporary method for converting generated/models/Domain to generated/models/fetch/Domain
-export function generateDomain(domain: FetchDomain): Domain {
-  const d = fp.capitalize(FetchDomain[domain]);
-  return Domain[d];
-}
-
 export function displayDateWithoutHours(time: number): string {
   const date = new Date(time);
   // datetime formatting to slice off weekday and exact time
@@ -457,7 +445,7 @@ export function formatDomainString(domainString: string): string {
     ? Domain.PHYSICALMEASUREMENT.toString() : domainString);
 }
 
-export function formatDomain(domain: FetchDomain): string {
+export function formatDomain(domain: Domain): string {
   return formatDomainString(domain.toString());
 }
 

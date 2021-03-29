@@ -1,6 +1,6 @@
 import {AuditPageComponent} from 'app/components/admin/audit-page-component';
 import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
-import {WorkspaceAuditLogQueryResponse} from 'generated';
+import {WorkspaceAuditLogQueryResponse} from 'generated/fetch';
 import * as React from 'react';
 import {useParams} from 'react-router';
 
