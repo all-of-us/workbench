@@ -34,7 +34,6 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbAdminActionHistory;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
@@ -49,7 +48,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
@@ -605,27 +603,32 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * @param term User-supplied search term
    * @param sort Option(s) for ordering query results
    * @return the List of DbUsers which meet the search and access requirements
-   * @deprecated use {@link #findUsersBySearchString(org.pmiops.workbench.db.model.DbAccessTier,
-   *     java.lang.String, org.springframework.data.domain.Sort)} instead.
+   * @deprecated use {@link #findUsersBySearchString(java.lang.String, java.lang.String,
+   *     org.springframework.data.domain.Sort)} instead.
    */
   @Deprecated
   @Override
   public List<DbUser> findUsersBySearchString(String term, Sort sort) {
-    return findUsersBySearchString(accessTierService.getRegisteredTier(), term, sort);
+    return findUsersBySearchString(accessTierService.REGISTERED_TIER_SHORT_NAME, term, sort);
   }
 
   /**
    * Find users whose name or username match the supplied search terms and who have the appropriate
    * access tier.
    *
+   * @param accessTierShortName the shortName of the access tier to check
    * @param term User-supplied search term
    * @param sort Option(s) for ordering query results
    * @return the List of DbUsers which meet the search and access requirements
    */
   @Override
-  public List<DbUser> findUsersBySearchString(DbAccessTier accessTier, String term, Sort sort) {
+  public List<DbUser> findUsersBySearchString(String accessTierShortName, String term, Sort sort) {
     return userDao.findUsersBySearchString(term, sort).stream()
-        .filter(user -> accessTierService.getAccessTiersForUser(user).contains(accessTier))
+        .filter(
+            user ->
+                accessTierService
+                    .getAccessTierShortNamesForUser(user)
+                    .contains(accessTierShortName))
         .collect(Collectors.toList());
   }
 
@@ -850,10 +853,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             row ->
                 MeasurementBundle.builder()
                     .addMeasurement(GaugeMetric.USER_COUNT, row.getUserCount())
-                    // TODO remove
+                    // TODO remove.  until then, what we're interested in is registered vs not
                     .addTag(
                         MetricLabel.DATA_ACCESS_LEVEL,
-                        AccessTierService.dataAccessKluge(row.getAccessTierShortNames()).toString())
+                        AccessTierService.temporaryDataAccessLevelKluge(
+                                row.getAccessTierShortNames())
+                            .toString())
                     .addTag(MetricLabel.USER_DISABLED, row.getDisabled().toString())
                     .addTag(MetricLabel.USER_BYPASSED_BETA, row.getBetaIsBypassed().toString())
                     .build())

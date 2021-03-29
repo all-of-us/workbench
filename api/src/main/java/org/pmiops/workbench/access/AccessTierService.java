@@ -10,15 +10,15 @@ public interface AccessTierService {
   String REGISTERED_TIER_SHORT_NAME = "registered";
 
   /**
-   * Temporary kluge while we deprecate DataAccessLevel: return DataAccessLevel.REGISTERED if the
+   * Temporary kluge to assist in removing DataAccessLevel: return DataAccessLevel.REGISTERED if the
    * user has Registered Tier membership
    *
-   * @param access_tier_short_names a comma-separated list of shortNames associated with Access
-   *     Tiers. e.g. 'registered,controlled'
+   * @param accessTierShortNames a comma-separated list of shortNames associated with Access Tiers.
+   *     e.g. 'registered,controlled'
    * @return whether a user has Registered Tier membership or not, as a DataAccessLevel
    */
-  static DataAccessLevel dataAccessKluge(String access_tier_short_names) {
-    return access_tier_short_names.contains(AccessTierService.REGISTERED_TIER_SHORT_NAME)
+  static DataAccessLevel temporaryDataAccessLevelKluge(String accessTierShortNames) {
+    return accessTierShortNames.contains(AccessTierService.REGISTERED_TIER_SHORT_NAME)
         ? DataAccessLevel.REGISTERED
         : DataAccessLevel.UNREGISTERED;
   }

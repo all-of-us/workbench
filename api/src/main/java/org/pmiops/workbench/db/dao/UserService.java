@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import org.pmiops.workbench.actionaudit.Agent;
-import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbUser;
@@ -87,8 +86,8 @@ public interface UserService {
    * @param term User-supplied search term
    * @param sort Option(s) for ordering query results
    * @return the List of DbUsers which meet the search and access requirements
-   * @deprecated use {@link #findUsersBySearchString(org.pmiops.workbench.db.model.DbAccessTier,
-   *     java.lang.String, org.springframework.data.domain.Sort)} instead.
+   * @deprecated use {@link #findUsersBySearchString(java.lang.String, java.lang.String,
+   *     org.springframework.data.domain.Sort)} instead.
    */
   @Deprecated
   List<DbUser> findUsersBySearchString(String term, Sort sort);
@@ -97,11 +96,12 @@ public interface UserService {
    * Find users whose name or username match the supplied search terms and who have the appropriate
    * access tier.
    *
+   * @param accessTierShortName the shortName of the access tier to check
    * @param term User-supplied search term
    * @param sort Option(s) for ordering query results
    * @return the List of DbUsers which meet the search and access requirements
    */
-  List<DbUser> findUsersBySearchString(DbAccessTier accessTier, String term, Sort sort);
+  List<DbUser> findUsersBySearchString(String accessTierShortName, String term, Sort sort);
 
   DbUser syncComplianceTrainingStatusV2()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException;

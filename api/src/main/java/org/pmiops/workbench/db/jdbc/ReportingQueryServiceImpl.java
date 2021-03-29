@@ -274,7 +274,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .currentPosition(rs.getString("current_position"))
                 // TODO remove.  until then, what we're interested in is registered vs not
                 .dataAccessLevel(
-                    AccessTierService.dataAccessKluge(rs.getString("access_tier_short_names")))
+                    AccessTierService.temporaryDataAccessLevelKluge(
+                        rs.getString("access_tier_short_names")))
                 .accessTierShortNames(rs.getString("access_tier_short_names"))
                 .dataUseAgreementBypassTime(
                     offsetDateTimeUtc(rs.getTimestamp("data_use_agreement_bypass_time")))
