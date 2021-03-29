@@ -33,49 +33,52 @@ describe('Share workspace', () => {
    * - Log in as another user.
    * - Workspace share action should be disabled.
    */
-  test.each(assigns)('As %s, user cannot share, edit or delete workspace', async (assign) => {
-    await removeCollaborators();
+  test.each(assigns)(
+    'In Data page via Workspace Action menu, %s cannot share, edit or delete workspace',
+    async (assign) => {
+      await removeCollaborators();
 
-    // Share with collaborator in Workspace Data page.
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.openDataPage();
-    await dataPage.verifyWorkspaceNameOnDataPage(newWorkspaceName);
+      // Share with collaborator in Workspace Data page.
+      const dataPage = new WorkspaceDataPage(page);
+      await dataPage.openDataPage();
+      await dataPage.verifyWorkspaceNameOnDataPage(newWorkspaceName);
 
-    const shareWorkspaceModal = await dataPage.shareWorkspace();
-    await shareWorkspaceModal.shareWithUser(config.collaboratorUsername, assign.accessRole);
+      const shareWorkspaceModal = await dataPage.shareWorkspace();
+      await shareWorkspaceModal.shareWithUser(config.collaboratorUsername, assign.accessRole);
 
-    await waitWhileLoading(page);
-    await signOut(page);
+      await waitWhileLoading(page);
+      await signOut(page);
 
-    // To verify access level is assigned correctly, user with WRITER/READER/OWNER role will sign in in new Incognito page.
-    const newPage = await signInAs(config.collaboratorUsername, config.userPassword);
+      // To verify access level is assigned correctly, user with WRITER/READER/OWNER role will sign in in new Incognito page.
+      const newPage = await signInAs(config.collaboratorUsername, config.userPassword);
 
-    const homePage = new HomePage(newPage);
-    await homePage.getSeeAllWorkspacesLink().then((link) => link.click());
+      const homePage = new HomePage(newPage);
+      await homePage.getSeeAllWorkspacesLink().then((link) => link.click());
 
-    const workspacesPage1 = new WorkspacesPage(newPage);
-    await workspacesPage1.waitForLoad();
+      const workspacesPage1 = new WorkspacesPage(newPage);
+      await workspacesPage1.waitForLoad();
 
-    // Verify Workspace Access Level is WRITER/READER/OWNER.
-    const workspaceCard = await WorkspaceCard.findCard(newPage, newWorkspaceName);
-    const accessLevel = await workspaceCard.getWorkspaceAccessLevel();
-    expect(accessLevel).toBe(assign.accessRole);
+      // Verify Workspace Access Level is WRITER/READER/OWNER.
+      const workspaceCard = await WorkspaceCard.findCard(newPage, newWorkspaceName);
+      const accessLevel = await workspaceCard.getWorkspaceAccessLevel();
+      expect(accessLevel).toBe(assign.accessRole);
 
-    // Share, Edit and Delete actions are disabled for Writer & Reader and enabled for Owner.
-    await workspaceCard.verifyWorkspaceCardMenuOptions();
+      // Share, Edit and Delete actions are disabled for Writer & Reader and enabled for Owner.
+      await workspaceCard.verifyWorkspaceCardMenuOptions();
 
-    // Make sure the Search input-field in Share modal is disabled for Writer & Reader and enabled for Owner.
-    await workspaceCard.clickWorkspaceName();
-    await new WorkspaceDataPage(newPage).openAboutPage();
-    const aboutPage = new WorkspaceAboutPage(newPage);
-    await aboutPage.waitForLoad();
+      // Make sure the Search input-field in Share modal is disabled for Writer & Reader and enabled for Owner.
+      await workspaceCard.clickWorkspaceName();
+      await new WorkspaceDataPage(newPage).openAboutPage();
+      const aboutPage = new WorkspaceAboutPage(newPage);
+      await aboutPage.waitForLoad();
 
-    const accessLevel1 = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
-    expect(accessLevel1).toBe(assign.accessRole);
+      const accessLevel1 = await aboutPage.findUserInCollaboratorList(config.collaboratorUsername);
+      expect(accessLevel1).toBe(assign.accessRole);
 
-    // verify if the search input field is disabled for Writer/reader and enabled for Owner
-    await aboutPage.verifyCollabInputField();
-  });
+      // verify if the search input field is disabled for Writer/reader and enabled for Owner
+      await aboutPage.verifyCollabInputField();
+    }
+  );
 
   /**
    * Test:
@@ -84,7 +87,7 @@ describe('Share workspace', () => {
    * - Log in as another user.
    * - Workspace share action should be disabled.
    */
-  test('Workspace READER cannot share edit or delete workspace', async () => {
+  test('In All Workspaces page via Snowman menu: READER cannot share edit or delete workspace', async () => {
     await removeCollaborators();
 
     // Open the Share modal in "All Your Workspaces" page.
@@ -128,7 +131,7 @@ describe('Share workspace', () => {
     await modal2.clickButton(LinkText.Cancel);
   });
 
-  test('As OWNER, user can share a workspace', async () => {
+  test('In About page via Share modal, OWNER can share workspace', async () => {
     await removeCollaborators();
 
     const aboutPage = new WorkspaceAboutPage(page);
