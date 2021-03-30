@@ -55,7 +55,7 @@ export const LoginReactComponent: React.FunctionComponent<{
           </div>
           <StyledAnchorTag
             target='_blank'
-            href='https://www.researchallofus.org/frequently-asked-questions/#login-help'
+            href='https://www.researchallofus.org/frequently-asked-questions/#workbench-faqs'
             style={{marginTop: '0.625rem', lineHeight: '0.75rem'}}>
               Trouble Signing In?
           </StyledAnchorTag>
