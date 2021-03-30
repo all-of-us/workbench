@@ -18,8 +18,8 @@ public class WorkspaceAuthService {
 
   public static final String PROJECT_OWNER_ACCESS_LEVEL = "PROJECT_OWNER";
 
-  @Autowired WorkspaceDao workspaceDao;
-  @Autowired FireCloudService fireCloudService;
+  @Autowired private WorkspaceDao workspaceDao;
+  @Autowired private FireCloudService fireCloudService;
 
   /*
    * This function will check the workspace's billing status and throw a ForbiddenException
