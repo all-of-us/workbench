@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,6 +35,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
+import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.MethodConfigurationsApi;
@@ -49,6 +51,7 @@ import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.model.TerraJobStatus;
 import org.pmiops.workbench.model.WgsCohortExtractionJob;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceService;
@@ -201,10 +204,23 @@ public class WgsCohortExtractionServiceTest {
     assertThat(wgsCohortExtractionJob.getSubmissionDate()).isEqualTo(submissionDate.toInstant().toEpochMilli());
   }
 
-  @Test
-  public void getExtractionJob_userHasReaderWorkspaceAccess() throws ApiException {
+  @Test(expected = ForbiddenException.class)
+  public void getExtractionJob_userHasReaderWorkspaceAccess() {
+    final String submissionId = UUID.randomUUID().toString();
+    DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission = new DbWgsExtractCromwellSubmission();
+    dbWgsExtractCromwellSubmission.setSubmissionId(submissionId);
+    dbWgsExtractCromwellSubmission.setCreator(currentUser);
+    dbWgsExtractCromwellSubmission.setWorkspace(targetWorkspace);
+    wgsExtractCromwellSubmissionDao.save(dbWgsExtractCromwellSubmission);
 
-    wgsCohortExtractionService.getWgsCohortExtractionJob(1L);
+    // set "no" access
+    doThrow(ForbiddenException.class).when(workspaceService).getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        targetWorkspace.getWorkspaceNamespace(),
+        targetWorkspace.getName(),
+        WorkspaceAccessLevel.READER
+    );
+
+    wgsCohortExtractionService.getWgsCohortExtractionJob(dbWgsExtractCromwellSubmission.getWgsExtractCromwellSubmissionId());
   }
 
   @Test
