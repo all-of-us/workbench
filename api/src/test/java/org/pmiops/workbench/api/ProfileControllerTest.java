@@ -72,6 +72,7 @@ import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CreateAccountRequest;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.DuaType;
@@ -507,6 +508,8 @@ public class ProfileControllerTest extends BaseControllerTest {
                 .getStatusCode())
         .isEqualTo(HttpStatus.OK);
     assertThat(accessTierService.getAccessTiersForUser(dbUser)).contains(registeredTier);
+    Profile profile = profileController.getMe().getBody();
+    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.REGISTERED);
 
     // update and enforce the required version
 
@@ -517,6 +520,8 @@ public class ProfileControllerTest extends BaseControllerTest {
     profileController.syncTwoFactorAuthStatus();
 
     assertThat(accessTierService.getAccessTiersForUser(dbUser)).doesNotContain(registeredTier);
+    profile = profileController.getMe().getBody();
+    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
   }
 
   @Test
@@ -1499,6 +1504,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(profile.getFamilyName()).isEqualTo(FAMILY_NAME);
     assertThat(profile.getGivenName()).isEqualTo(GIVEN_NAME);
     assertThat(profile.getAccessTierShortNames()).isEqualTo("");
+    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
     assertThat(profile.getContactEmailFailure()).isEqualTo(false);
 
     DbUser user = userDao.findUserByUsername(PRIMARY_EMAIL);

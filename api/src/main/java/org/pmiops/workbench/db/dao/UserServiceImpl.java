@@ -193,12 +193,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     // For Controlled Tier Alpha, we simply evaluate whether the user is qualified for
     // Registered Tier and set RT+CT or RT only based on the feature flag
 
-    final List<DbAccessTier> newAccessTiers;
-    if (shouldUserBeRegistered(dbUser)) {
-      newAccessTiers = accessTierService.getTiersForRegisteredUsers();
-    } else {
-      newAccessTiers = Collections.emptyList();
-    }
+    final List<DbAccessTier> newAccessTiers =
+        shouldUserBeRegistered(dbUser)
+            ? accessTierService.getTiersForRegisteredUsers()
+            : Collections.emptyList();
 
     newAccessTiers.forEach(tier -> accessTierService.addUserToTier(dbUser, tier));
 

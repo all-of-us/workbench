@@ -391,11 +391,4 @@ public class CdrVersionServiceTest {
     when(fireCloudService.isUserMemberOfGroup(user.getUsername(), tier.getAuthDomainName()))
         .thenReturn(true);
   }
-
-  private void removeMembershipForTest(DbAccessTier tier) {
-    accessTierService.removeUserFromTier(user, tier);
-
-    when(fireCloudService.isUserMemberOfGroup(user.getUsername(), tier.getAuthDomainName()))
-        .thenReturn(false);
-  }
 }
