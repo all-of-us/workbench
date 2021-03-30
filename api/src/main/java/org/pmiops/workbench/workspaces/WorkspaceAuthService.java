@@ -51,7 +51,7 @@ public class WorkspaceAuthService {
     if (BillingStatus.INACTIVE.equals(
         workspaceDao.getRequired(workspaceNamespace, workspaceId).getBillingStatus())) {
       throw new ForbiddenException(
-          "Workspace (" + workspaceNamespace + ") is in an inactive billing state");
+          String.format("Workspace (%s) is in an inactive billing state", workspaceNamespace));
     }
   }
 
@@ -64,7 +64,7 @@ public class WorkspaceAuthService {
     }
     return Optional.ofNullable(WorkspaceAccessLevel.fromValue(userAccess))
         .orElseThrow(
-            () -> new IllegalArgumentException("Unrecognized access level: " + userAccess));
+            () -> new IllegalArgumentException(String.format("Unrecognized access level: %s, userAccess));
   }
 
   public WorkspaceAccessLevel enforceWorkspaceAccessLevel(
