@@ -15,7 +15,9 @@ PREP_CRITERIA="prep_criteria.csv"
 PREP_CRITERIA_ANCESTOR="prep_criteria_ancestor.csv"
 PREP_CLINICAL_TERMS="prep_clinical_terms_nc.csv"
 DS_DATA_DICTIONARY="ds_data_dictionary.csv"
-All_FILES=($CRITERIA_MENU $PREP_CRITERIA $PREP_CRITERIA_ANCESTOR $PREP_CLINICAL_TERMS $DS_DATA_DICTIONARY)
+PREP_CONCEPT="prep_concept.csv"
+PREP_CONCEPT_RELATIONSHIP="prep_concept_relationship.csv"
+All_FILES=($CRITERIA_MENU $PREP_CRITERIA $PREP_CRITERIA_ANCESTOR $PREP_CLINICAL_TERMS $DS_DATA_DICTIONARY $PREP_CONCEPT $PREP_CONCEPT_RELATIONSHIP)
 INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4")
 
 if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
@@ -72,9 +74,9 @@ if gsutil -m cp gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
         echo "Backing up $file"
         gsutil cp $TEMP_FILE_DIR/$file.gz gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup/"$timestamp"_"$file".gz
       ;;
-    $PREP_CRITERIA|$PREP_CRITERIA_ANCESTOR|$PREP_CLINICAL_TERMS|$PREP_CONCEPT)
+    $PREP_CRITERIA|$PREP_CRITERIA_ANCESTOR|$PREP_CLINICAL_TERMS|$PREP_CONCEPT|$PREP_CONCEPT_RELATIONSHIP)
       tableName=${file%.*}
-      if [[ $firstColumn == id || $firstColumn == ancestor_id || $firstColumn == parent ]];
+      if [[ $firstColumn == id || $firstColumn == ancestor_id || $firstColumn == parent || $firstColumn == concept_id || $firstColumn == concept_id_1 ]];
       then
         echo "Removing $file header"
         # Remove the first line of file
