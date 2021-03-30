@@ -106,6 +106,7 @@ export const AnalyticsTracker = {
     TwoFactorAuth: () => triggerEvent('Registration', 'Clicked on \'2FA\' button', '2FA'),
     EthicsTraining: () => triggerEvent('Registration', 'Clicked on \'Ethics training\' button', 'Training'),
     ERACommons: () => triggerEvent('Registration', 'Clicked on eRA commons button', 'eRA commons'),
+    RasLoginGov: () => triggerEvent('Registration', 'Clicked on RAS LoginGov linking button', 'RAS LoginGov'),
     EnterDUCC: () => triggerEvent('Registration', 'Clicked in DUCC button', 'Entered DUCC'),
     AcceptDUCC: () => triggerEvent('Registration', 'Clicked in DUCC button', 'Accepted DUCC'),
     TutorialVideo: () => triggerEvent('Home Page', 'Clicked on a tutorial video', 'Tutorial videos'),

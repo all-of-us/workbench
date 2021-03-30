@@ -13,7 +13,6 @@
     {
       "cdrVersionId": 1,
       "name": "All of Us Dataset v3",
-      "dataAccessLevel": 1,
       "bigqueryProject": "fc-aou-cdr-preprod",
       "bigqueryDataset": "R2019Q4R3",
       "creationTime": "2019-10-21 00:00:00Z",
@@ -25,7 +24,6 @@
     {
       "cdrVersionId": 2,
       "name": "All of Us Dataset v4",
-      "dataAccessLevel": 1,
       "bigqueryProject": "fc-aou-cdr-preprod",
       "bigqueryDataset": "R2019Q4R4",
       "creationTime": "2020-04-16 00:00:00Z",
@@ -37,7 +35,6 @@
     {
       "cdrVersionId": 3,
       "name": "[Removed] Synthetic Dataset v3",
-      "dataAccessLevel": 1,
       "archivalStatus": 1,
       "bigqueryProject": "",
       "bigqueryDataset": "",
@@ -53,7 +50,6 @@
       "cdrVersionId": 4,
       "name": "All of Us Dataset v5",
       "isDefault": true,
-      "dataAccessLevel": 1,
       "bigqueryProject": "fc-aou-cdr-preprod",
       "bigqueryDataset": "R2020Q4R2",
       "creationTime": "2020-10-20 00:00:00Z",

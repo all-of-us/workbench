@@ -37,6 +37,7 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -83,6 +84,7 @@ public class DataDictionaryTest {
     FireCloudService.class,
     NotebooksService.class,
     WorkspaceService.class,
+    WorkspaceAuthService.class,
     AccessTierService.class,
     CdrVersionMapper.class,
   })

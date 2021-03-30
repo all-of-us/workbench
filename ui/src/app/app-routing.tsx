@@ -193,6 +193,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           }} />}
       />
       <AppRoute path='/nih-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
+      <AppRoute path='/ras-callback' component={() => <HomepagePage routeData={{title: 'Homepage'}}/>} />
 
       <ProtectedRoutes guards={[registrationGuard]}>
         <AppRoute

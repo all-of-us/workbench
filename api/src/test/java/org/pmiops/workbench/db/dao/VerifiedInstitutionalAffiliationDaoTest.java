@@ -6,6 +6,7 @@ import static com.google.common.truth.Truth8.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
@@ -19,7 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class VerifiedInstitutionalAffiliationDaoTest {
+public class VerifiedInstitutionalAffiliationDaoTest extends SpringTest {
   @Autowired VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   @Autowired InstitutionDao institutionDao;
   @Autowired UserDao userDao;

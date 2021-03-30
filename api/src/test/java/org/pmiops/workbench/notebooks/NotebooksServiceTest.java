@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
@@ -27,7 +28,7 @@ import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.views.EventMetric;
 import org.pmiops.workbench.test.FakeClock;
-import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -56,13 +57,13 @@ public class NotebooksServiceTest {
 
   @MockBean private FireCloudService mockFirecloudService;
   @MockBean private CloudStorageClient mockCloudStorageClient;
-  @MockBean private WorkspaceService mockWorkspaceService;
+  @MockBean private WorkspaceDao workspaceDao;
 
   @Autowired private NotebooksService notebooksService;
 
   @TestConfiguration
   @Import({NotebooksServiceImpl.class})
-  @MockBean({UserRecentResourceService.class})
+  @MockBean({UserRecentResourceService.class, WorkspaceAuthService.class})
   static class Configuration {
 
     @Bean
@@ -169,7 +170,7 @@ public class NotebooksServiceTest {
   @Test
   public void testDeleteNotebook_firesMetric() {
     doReturn(WORKSPACE_RESPONSE).when(mockFirecloudService).getWorkspace(anyString(), anyString());
-    doReturn(WORKSPACE).when(mockWorkspaceService).getRequired(anyString(), anyString());
+    doReturn(WORKSPACE).when(workspaceDao).getRequired(anyString(), anyString());
 
     notebooksService.deleteNotebook(NAMESPACE_NAME, WORKSPACE_NAME, NOTEBOOK_NAME);
     verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_DELETE);
@@ -178,7 +179,7 @@ public class NotebooksServiceTest {
   @Test
   public void testCloneNotebook_firesMetric() {
     doReturn(WORKSPACE_RESPONSE).when(mockFirecloudService).getWorkspace(anyString(), anyString());
-    doReturn(WORKSPACE).when(mockWorkspaceService).getRequired(anyString(), anyString());
+    doReturn(WORKSPACE).when(workspaceDao).getRequired(anyString(), anyString());
 
     notebooksService.cloneNotebook(NAMESPACE_NAME, WORKSPACE_NAME, PREVIOUS_NOTEBOOK);
     verify(mockLogsBasedMetricsService).recordEvent(EventMetric.NOTEBOOK_CLONE);

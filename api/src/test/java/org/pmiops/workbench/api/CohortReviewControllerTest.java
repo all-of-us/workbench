@@ -84,6 +84,7 @@ import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -123,6 +124,7 @@ public class CohortReviewControllerTest {
   private DbCohortAnnotationDefinition booleanAnnotationDefinition;
   private DbCohortAnnotationDefinition integerAnnotationDefinition;
   private DbParticipantCohortAnnotation participantAnnotation;
+
   @Autowired private CdrVersionDao cdrVersionDao;
 
   @Autowired private CBCriteriaDao cbCriteriaDao;
@@ -140,6 +142,8 @@ public class CohortReviewControllerTest {
   @Autowired private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
 
   @Autowired private WorkspaceService workspaceService;
+
+  @Autowired private WorkspaceAuthService workspaceAuthService;
 
   @Autowired private UserRecentResourceService userRecentResourceService;
 
@@ -206,6 +210,7 @@ public class CohortReviewControllerTest {
     FireCloudService.class,
     UserRecentResourceService.class,
     WorkspaceService.class,
+    WorkspaceAuthService.class,
     AccessTierService.class,
     CdrVersionService.class,
   })
@@ -453,7 +458,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void createCohortReviewAlreadyExists() {
-    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(workspace);
 
@@ -480,7 +485,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void createCohortReview() {
-    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(workspace);
 
@@ -508,7 +513,7 @@ public class CohortReviewControllerTest {
   @Test
   public void createCohortReviewNoCohortException() {
     long cohortId = 99;
-    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(workspace);
 
@@ -532,7 +537,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void updateCohortReview() {
-    when(workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    when(workspaceAuthService.enforceWorkspaceAccessLevel(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(WorkspaceAccessLevel.WRITER);
 
@@ -559,7 +564,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void deleteCohortReview() {
-    when(workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    when(workspaceAuthService.enforceWorkspaceAccessLevel(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(WorkspaceAccessLevel.WRITER);
 
@@ -580,7 +585,7 @@ public class CohortReviewControllerTest {
   public void createParticipantCohortAnnotationNoAnnotationDefinitionFound() {
     Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
 
-    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(workspace);
 
@@ -683,7 +688,7 @@ public class CohortReviewControllerTest {
                 stringAnnotationDefinition.getCohortAnnotationDefinitionId());
     participantCohortAnnotationDao.save(annotation);
 
-    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(workspace);
 
@@ -703,7 +708,7 @@ public class CohortReviewControllerTest {
     Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
     Long annotationId = 9999L;
 
-    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(workspace);
 
@@ -730,7 +735,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void getParticipantCohortAnnotations() {
-    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.READER))
         .thenReturn(workspace);
 
@@ -752,7 +757,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void getParticipantCohortStatus() {
-    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.READER))
         .thenReturn(workspace);
 
@@ -795,7 +800,7 @@ public class CohortReviewControllerTest {
         createCohortReview(
             cohortReview, ImmutableList.of(participantCohortStatus1, participantCohortStatus2));
 
-    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.READER))
         .thenReturn(workspace);
 
@@ -818,7 +823,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void updateParticipantCohortAnnotation() {
-    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(workspace);
 
@@ -839,7 +844,7 @@ public class CohortReviewControllerTest {
   @Test
   public void updateParticipantCohortAnnotationNoAnnotationForIdException() {
     long badAnnotationId = 99;
-    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(workspace);
 
@@ -867,7 +872,7 @@ public class CohortReviewControllerTest {
 
   @Test
   public void updateParticipantCohortStatus() {
-    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(workspace);
 
@@ -887,7 +892,7 @@ public class CohortReviewControllerTest {
   /** Helper method to consolidate assertions for all the {@link AnnotationType}s. */
   private void assertCreateParticipantCohortAnnotation(
       Long participantId, Long annotationDefinitionId, ParticipantCohortAnnotation request) {
-    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(workspace);
 
@@ -917,7 +922,7 @@ public class CohortReviewControllerTest {
    */
   private void assertConflictExceptionForAnnotationType(
       Long participantId, Long cohortAnnotationDefId, String type) {
-    when(workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
         .thenReturn(workspace);
 

@@ -23,6 +23,7 @@ import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
 import {hasRegisteredAccess, reactStyles, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import {buildRasRedirectUrl} from 'app/utils/ras';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
@@ -82,6 +83,9 @@ interface State {
   eraCommonsError: string;
   eraCommonsLinked: boolean;
   eraCommonsLoading: boolean;
+  rasLoginGovLinkError: string;
+  rasLoginGovLinked: boolean;
+  rasLoginGovLoading: boolean;
   firstVisit: boolean;
   firstVisitTraining: boolean;
   quickTour: boolean;
@@ -108,6 +112,9 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
       eraCommonsError: '',
       eraCommonsLinked: undefined,
       eraCommonsLoading: false,
+      rasLoginGovLinkError: '',
+      rasLoginGovLinked: undefined,
+      rasLoginGovLoading: false,
       firstVisit: undefined,
       firstVisitTraining: true,
       quickTour: false,
@@ -123,6 +130,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
   componentDidMount() {
     this.checkWorkspaces();
     this.validateNihToken();
+    this.validateRasLoginGovLink();
     this.callProfile();
   }
 
@@ -154,6 +162,25 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         this.setState({eraCommonsError: 'Error saving NIH Authentication status.'});
       }
     }
+  }
+
+  async validateRasLoginGovLink() {
+    const authCode = (new URL(window.location.href)).searchParams.get('code');
+    const redirectUrl = buildRasRedirectUrl();
+    if (authCode) {
+      this.setState({rasLoginGovLoading: true});
+      try {
+        const profileResponse = await profileApi().linkRasAccount({ authCode, redirectUrl });
+        if (profileResponse.rasLinkLoginGovUsername !== undefined) {
+          this.setState({rasLoginGovLinked: true});
+        }
+      } catch (e) {
+        this.setState({rasLoginGovLinkError: 'Error saving RAS Login.Gov linkage status.'});
+        this.setState({rasLoginGovLoading: false});
+      }
+    }
+    // Cleanup parameter from URL after linking.
+    window.history.replaceState({}, '', '/');
   }
 
   setFirstVisit() {
@@ -211,6 +238,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
           (() => !!(getRegistrationTasksMap()['dataUserCodeOfConduct']
             .completionTimestamp(profile)))() : true)
       });
+      // TODO(RW-6493): Update rasCommonsLinked similar to what we are doing for eraCommons
       this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});
 
       const {workbenchAccessTasks} = queryParamsStore.getValue();
@@ -230,11 +258,12 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
     this.setState((state, props) => ({
       quickTour: state.firstVisit && state.accessTasksRemaining === false
     }));
+    // TODO(RW-6494): Update accessTasksRemaining from user tier status and RAS link status.
   }
 
   async checkWorkspaces() {
     return fetchWithGlobalErrorHandler(() => workspacesApi().getWorkspaces())
-        .then(response => this.setState({ userWorkspacesResponse: response}));
+        .then(response => this.setState({userWorkspacesResponse: response}));
   }
 
   userHasWorkspaces(): boolean {
@@ -249,10 +278,12 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
 
 
   render() {
-    const {betaAccessGranted, videoOpen, accessTasksLoaded, accessTasksRemaining,
+    const {
+      betaAccessGranted, videoOpen, accessTasksLoaded, accessTasksRemaining,
       eraCommonsError, eraCommonsLinked, eraCommonsLoading, firstVisitTraining,
       trainingCompleted, quickTour, videoId, twoFactorAuthCompleted,
-      dataUserCodeOfConductCompleted, quickTourResourceOffset, userWorkspacesResponse
+      dataUserCodeOfConductCompleted, quickTourResourceOffset, userWorkspacesResponse,
+      rasLoginGovLinkError, rasLoginGovLinked, rasLoginGovLoading,
     } = this.state;
     // This calculates the limit for quickTourResources items that can be seen without scrolling. Takes the width of the parent element
     // and divides by the width of an individual resource item (276px). The default limit is 4 since the min width of the parent element
@@ -313,6 +344,9 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
                     (<RegistrationDashboard eraCommonsError={eraCommonsError}
                                             eraCommonsLinked={eraCommonsLinked}
                                             eraCommonsLoading={eraCommonsLoading}
+                                            rasLoginGovLinkError={rasLoginGovLinkError}
+                                            rasLoginGovLinked={rasLoginGovLinked}
+                                            rasLoginGovLoading={rasLoginGovLoading}
                                             trainingCompleted={trainingCompleted}
                                             firstVisitTraining={firstVisitTraining}
                                             betaAccessGranted={betaAccessGranted}
@@ -434,5 +468,4 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
       </Modal>}
     </React.Fragment>;
   }
-
 });

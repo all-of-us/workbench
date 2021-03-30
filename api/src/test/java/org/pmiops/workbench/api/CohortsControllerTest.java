@@ -104,6 +104,7 @@ import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -184,6 +185,7 @@ public class CohortsControllerTest {
   @Autowired UserRecentResourceService userRecentResourceService;
   @Autowired UserService userService;
   @Autowired WorkspaceService workspaceService;
+  @Autowired WorkspaceAuthService workspaceAuthService;
 
   @Autowired AccessTierDao accessTierDao;
   @Autowired CdrVersionDao cdrVersionDao;
@@ -214,6 +216,7 @@ public class CohortsControllerTest {
     WorkspaceMapperImpl.class,
     WorkspaceResourcesServiceImpl.class,
     WorkspaceServiceImpl.class,
+    WorkspaceAuthService.class,
     WorkspacesController.class,
     AccessTierServiceImpl.class,
   })
@@ -568,7 +571,7 @@ public class CohortsControllerTest {
     when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, workspaceName)).thenReturn(fcResponse);
     stubGetWorkspaceAcl(
         WORKSPACE_NAMESPACE, workspaceName, CREATOR_EMAIL, WorkspaceAccessLevel.OWNER);
-    when(workspaceService.getWorkspaceAccessLevel(WORKSPACE_NAMESPACE, workspaceName))
+    when(workspaceAuthService.getWorkspaceAccessLevel(WORKSPACE_NAMESPACE, workspaceName))
         .thenThrow(new NotFoundException());
     MaterializeCohortRequest request = new MaterializeCohortRequest();
     request.setCohortName(cohort.getName());

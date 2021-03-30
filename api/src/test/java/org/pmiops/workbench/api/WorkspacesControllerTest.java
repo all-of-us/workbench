@@ -34,11 +34,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,6 +56,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
@@ -178,13 +176,13 @@ import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
-import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -207,10 +205,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class WorkspacesControllerTest {
-  private static final Timestamp NOW = Timestamp.from(Instant.now());
-  private static final long NOW_TIME = NOW.getTime();
-  private static final FakeClock CLOCK = new FakeClock(NOW.toInstant(), ZoneId.systemDefault());
+public class WorkspacesControllerTest extends SpringTest {
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String LOCK_EXPIRE_TIME_KEY = "lockExpiresAt";
   private static final String LAST_LOCKING_USER_KEY = "lastLockedBy";
@@ -301,6 +296,7 @@ public class WorkspacesControllerTest {
     ParticipantCohortStatusMapperImpl.class,
     ReviewQueryBuilder.class,
     UserMapperImpl.class,
+    WorkspaceAuthService.class,
     WorkspaceMapperImpl.class,
     WorkspaceResourcesServiceImpl.class,
     WorkspacesController.class,
@@ -340,11 +336,6 @@ public class WorkspacesControllerTest {
     @Scope("prototype")
     Cloudbilling serviceAccountCloudbilling() {
       return serviceAccountCloudbilling;
-    }
-
-    @Bean
-    Clock clock() {
-      return CLOCK;
     }
 
     @Bean
@@ -577,7 +568,7 @@ public class WorkspacesControllerTest {
     for (UserRole userRole : collaborators) {
       FirecloudWorkspaceACLUpdate aclUpdate =
           new FirecloudWorkspaceACLUpdate().email(userRole.getEmail());
-      aclUpdate = workspaceService.updateFirecloudAclsOnUser(userRole.getRole(), aclUpdate);
+      aclUpdate = WorkspaceAuthService.updateFirecloudAclsOnUser(userRole.getRole(), aclUpdate);
       updateACLRequestList.add(aclUpdate);
     }
     return updateACLRequestList;
@@ -3180,8 +3171,8 @@ public class WorkspacesControllerTest {
         workspace.getName(),
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.OWNER);
-    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
-    workspaceService.updateRecentWorkspaces(dbWorkspace, currentUser.getUserId(), NOW);
+    DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getId());
+    workspaceService.updateRecentWorkspaces(dbWorkspace);
     ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity =
         workspacesController.getUserRecentWorkspaces();
     RecentWorkspace recentWorkspace = recentWorkspaceResponseEntity.getBody().get(0);
@@ -3200,7 +3191,7 @@ public class WorkspacesControllerTest {
   public void cloneNotebook_validateActiveBilling() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
-    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
+    DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getId());
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 
@@ -3215,7 +3206,7 @@ public class WorkspacesControllerTest {
   public void renameNotebook_validateActiveBilling() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
-    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
+    DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getId());
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 
@@ -3232,7 +3223,7 @@ public class WorkspacesControllerTest {
   public void copyNotebook_validateActiveBilling() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
-    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
+    DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getId());
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 

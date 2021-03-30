@@ -527,7 +527,7 @@ def docker_clean()
   # specific to Docker, it is mounted locally for docker runs. For lack of a
   # better "dev teardown" hook, purge that file here; e.g. in case we decide to
   # invalidate a dev key or change the service account.
-  common.run_inline %W{rm -f #{ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH} #{GSUITE_ADMIN_KEY_PATH}}
+  common.run_inline %W{rm -f #{ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH}}
 
   # See https://github.com/docker/compose/issues/3447
   common.status "Cleaning complete. docker-compose 'not found' errors can be safely ignored"
@@ -828,6 +828,35 @@ Common.register_command({
   :invocation => "circle-build-cdr-indices",
   :description => "Build the CDR indices using CircleCi",
   :fn => ->(*args) { circle_build_cdr_indices("circle-build-cdr-indices", args) }
+})
+
+def make_prep_tables_from_csv(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.cdr_version = "!_prep_tables_!"
+  op.opts.bucket = "all-of-us-workbench-private-cloudsql"
+  op.add_option(
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/validate-prerequisites-exist.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_version} #{op.opts.bucket}}
+  end
+end
+
+Common.register_command({
+  :invocation => "make-prep-tables-from-csv",
+  :description => "Generates criteria prep tables from csv files.",
+  :fn => ->(*args) { make_prep_tables_from_csv("make-prep-tables-from-csv", *args) }
 })
 
 def make_bq_denormalized_tables(cmd_name, *args)
@@ -2126,22 +2155,6 @@ def describe_runtime(cmd_name, *args)
   op.add_validator ->(opts) { raise ArgumentError unless opts.runtime_id }
   op.parse.validate
 
-  # Infer the project from the runtime ID project ID. If for some reason, the
-  # target runtime ID does not conform to the current billing prefix (e.g. if we
-  # changed the prefix), --project can be used to override this.
-  common = Common.new
-  matching_prefix = ""
-  project_from_runtime = nil
-  ENVIRONMENTS.each_key do |env|
-    env_prefix = get_billing_project_prefix(env)
-    if op.opts.runtime_id.start_with?(env_prefix)
-      # Take the most specific prefix match, since prod is a substring of the others.
-      if matching_prefix.length < env_prefix.length
-        project_from_runtime = env
-        matching_prefix = env_prefix
-      end
-    end
-  end
   if project_from_runtime == "local"
     project_from_runtime = TEST_PROJECT
   end

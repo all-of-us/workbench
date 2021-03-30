@@ -389,10 +389,7 @@ export const withRouteConfigData = () => {
   return connectBehaviorSubject(routeConfigDataStore, 'routeConfigData');
 };
 
-// HOC that provides a 'cdrVersionListResponse' prop with the CDR version
-// information. Rendering of the connected component is blocked on initial load
-// of the CDR versions. This should only affect initial page loads, this HOC can
-// be included last (if multiple HOCs are in use) to minimize this impact.
+// HOC that provides a 'cdrVersionListResponse' prop with the CDR version information.
 export const withCdrVersions = () => {
   return withStore(cdrVersionStore, 'cdrVersionListResponse');
 };
