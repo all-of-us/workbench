@@ -15,13 +15,14 @@ import {
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, toggleIncludes} from 'app/utils';
 
-import {convertAPIError, reportError} from 'app/utils/errors';
+import {convertAPIError} from 'app/utils/errors';
 import {environment} from 'environments/environment';
 import {Disability, GenderIdentity, Profile, Race, SexAtBirth} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import * as validate from 'validate.js';
+import {withStackdriverErrorReporterContext} from "../../services/error-reporter-context";
 
 const styles = reactStyles({
   checkbox: {height: 17, width: 17, marginTop: '0.15rem'},
@@ -55,6 +56,9 @@ export interface Props extends WithProfileErrorModalProps {
   enableCaptcha: boolean;
   enablePrevious: boolean;
   showStepCount: boolean;
+  stackdriverErrorReporterContext: {
+    reportError: (e: Error|string) => void;
+  };
 }
 
 interface State {
@@ -67,7 +71,7 @@ interface State {
 const isChecked = (demographicSurvey, optionKey, value) =>
   demographicSurvey && demographicSurvey[optionKey] && demographicSurvey[optionKey].includes(value);
 
-export const DemographicSurvey = withProfileErrorModal(
+export const DemographicSurvey = fp.flow(withProfileErrorModal, withStackdriverErrorReporterContext)(
   class DemographicSurveyComponent extends React.Component<Props, State> {
     private captchaRef = React.createRef<ReCAPTCHA>();
     constructor(props: any) {
@@ -165,7 +169,7 @@ export const DemographicSurvey = withProfileErrorModal(
         const savedProfile = await this.props.saveProfile(this.state.profile, captchaToken);
         this.setState(prevState => ({profile: savedProfile || prevState.profile, loading: false}));
       } catch (error) {
-        reportError(error);
+        this.props.stackdriverErrorReporterContext.reportError(error);
         const {message} = await convertAPIError(error);
         this.props.showProfileErrorModal(message);
         if (environment.enableCaptcha && this.props.enableCaptcha) {

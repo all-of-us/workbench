@@ -1,16 +1,6 @@
 import {ErrorCode, ErrorResponse} from 'generated/fetch';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
-let stackdriverReporter: StackdriverErrorReporter;
-
-/**
- * Static global setter for Stackdriver reporting. This is meant as a temporary
- * bridge between Angular and React.
- */
-export function setStackdriverErrorReporter(reporter: StackdriverErrorReporter) {
-  stackdriverReporter = reporter;
-}
-
 /**
  * Reports an error to Stackdriver error logging, if enabled.
  */

@@ -2,6 +2,8 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
+import {StackdriverErrorReporter} from 'stackdriver-errors-js';
+
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -26,12 +28,13 @@ import {
   reactStyles,
   withUserProfile
 } from 'app/utils';
-import {convertAPIError, reportError} from 'app/utils/errors';
+import {convertAPIError} from 'app/utils/errors';
 import {serverConfigStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
+import {withStackdriverErrorReporterContext} from "../../services/error-reporter-context";
 
 
 const controlledTierBadge = '/assets/icons/controlled-tier-badge.svg';
@@ -149,6 +152,9 @@ interface ProfilePageProps extends WithProfileErrorModalProps {
     controlledTierBypassTime?: number
     controlledTierEnabled?: boolean
   };
+  stackdriverErrorReporterContext: {
+    reportError: (e: Error|string) => void;
+  };
 }
 
 interface ProfilePageState {
@@ -203,7 +209,8 @@ const getControlledTierContent = fp.flow(
 
 export const ProfilePage = fp.flow(
   withUserProfile(),
-  withProfileErrorModal
+  withProfileErrorModal,
+  withStackdriverErrorReporterContext
   )(class extends React.Component<
     ProfilePageProps,
     ProfilePageState
@@ -228,7 +235,7 @@ export const ProfilePage = fp.flow(
           institutions: details.institutions
         });
       } catch (e) {
-        reportError(e);
+        this.props.stackdriverErrorReporterContext.reportError(e);
       }
     }
 
@@ -307,7 +314,7 @@ export const ProfilePage = fp.flow(
         await reload();
         return profile;
       } catch (error) {
-        reportError(error);
+        this.props.stackdriverErrorReporterContext.reportError(error);
         const errorResponse = await convertAPIError(error);
         this.props.showProfileErrorModal(errorResponse.message);
         console.error(error);

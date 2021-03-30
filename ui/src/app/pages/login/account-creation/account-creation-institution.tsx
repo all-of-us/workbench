@@ -19,7 +19,6 @@ import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {isBlank, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {reportError} from 'app/utils/errors';
 import {
   getRoleOptions,
   MasterDuaEmailMismatchErrorMessage,
@@ -34,6 +33,7 @@ import {
   PublicInstitutionDetails,
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
+import {withStackdriverErrorReporterContext} from "../../../services/error-reporter-context";
 
 const styles = reactStyles({
   ...commonStyles,
@@ -79,6 +79,9 @@ export interface Props {
   profile: Profile;
   onComplete: (profile: Profile) => void;
   onPreviousClick: (profile: Profile) => void;
+  stackdriverErrorReporterContext: {
+    reportError: (e: Error|string) => void;
+  };
 }
 
 
@@ -91,8 +94,8 @@ interface State {
   checkEmailError: boolean;
 }
 
-export class AccountCreationInstitution extends React.Component<Props, State> {
-
+// Exported for testing.
+export class AccountCreationInstitutionClass extends React.Component<Props, State> {
   private aborter: AbortController;
 
   constructor(props: Props) {
@@ -124,7 +127,7 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
         loadingInstitutions: false,
         institutionLoadError: true
       });
-      reportError(e);
+      this.props.stackdriverErrorReporterContext.reportError(e);
     }
   }
 
@@ -463,3 +466,5 @@ export class AccountCreationInstitution extends React.Component<Props, State> {
     </div>;
   }
 }
+
+export const AccountCreationInstitution = withStackdriverErrorReporterContext(AccountCreationInstitutionClass);

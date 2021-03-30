@@ -4,7 +4,11 @@ import * as React from 'react';
 import {serverConfigStore} from 'app/utils/navigation';
 import {ConfigApi, InstitutionApi, Profile} from 'generated/fetch';
 import {createEmptyProfile} from 'app/pages/login/sign-in';
-import {AccountCreationInstitution, Props} from './account-creation-institution';
+import {
+  AccountCreationInstitution,
+  AccountCreationInstitutionClass,
+  Props
+} from './account-creation-institution';
 import {ConfigApiStub} from 'testing/stubs/config-api-stub';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
@@ -26,8 +30,8 @@ function component(): ReactWrapper {
   return mount(<AccountCreationInstitution {...props}/>);
 }
 
-function getInstance(wrapper: AnyWrapper): AccountCreationInstitution {
-  return wrapper.find(AccountCreationInstitution).instance() as AccountCreationInstitution;
+function getInstance(wrapper: AnyWrapper): AccountCreationInstitutionClass {
+  return wrapper.find(AccountCreationInstitutionClass).instance() as AccountCreationInstitutionClass;
 }
 
 function getInstitutionDropdown(wrapper: AnyWrapper): Dropdown {
@@ -67,7 +71,10 @@ beforeEach(() => {
   props = {
     profile: createEmptyProfile(),
     onComplete: (profile: Profile) => {},
-    onPreviousClick: (profile: Profile) => {}
+    onPreviousClick: (profile: Profile) => {},
+    stackdriverErrorReporterContext: {
+      reportError: (e: Error|string) => {}
+    }
   };
 
   mockGetPublicInstitutionDetails = jest.spyOn(institutionApi(), 'getPublicInstitutionDetails');

@@ -42,6 +42,7 @@ import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {WorkspaceList} from './pages/workspace/workspace-list';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
+import {StackdriverReporterProvider} from "./services/error-reporter-context";
 
 
 const signInGuard: Guard = {
@@ -95,7 +96,7 @@ interface RoutingProps {
 
 export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn}) => {
   const {authLoaded = false} = useStore(authStore);
-  return authLoaded && <AppRouter>
+  return authLoaded && <StackdriverReporterProvider><AppRouter>
     <AppRoute
         path='/cookie-policy'
         component={() => <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>}
@@ -342,7 +343,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         />
       </ProtectedRoutes>
     </ProtectedRoutes>
-  </AppRouter>;
+  </AppRouter></StackdriverReporterProvider>;
 };
 
 @AComponent({

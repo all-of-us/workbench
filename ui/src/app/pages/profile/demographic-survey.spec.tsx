@@ -27,7 +27,10 @@ beforeEach(() => {
     saveProfile: () => Promise.resolve(createEmptyProfile()),
     enableCaptcha: false,
     enablePrevious: false,
-    showStepCount: false
+    showStepCount: false,
+    stackdriverErrorReporterContext: {
+      reportError: (e: Error|string) => {}
+    }
   };
 });
 

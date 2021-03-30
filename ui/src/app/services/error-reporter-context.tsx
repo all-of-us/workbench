@@ -13,10 +13,11 @@ interface StackdriverReporterStore {
   reporter?: StackdriverErrorReporter;
 }
 
-const stackdriverReporterStore = atom<StackdriverReporterStore>({});
+// Exported for use in LeoRuntimeInitializer, should be removed after WorkspaceWrapper is converted
+export const stackdriverReporterStore = atom<StackdriverReporterStore>({});
 
 const StackdriverErrorReporterContext = createContext({
-  stackdriverErrorReporter: null
+  reportError: (err: (Error|string)) => {}
 });
 
 export const StackdriverReporterProvider = ({children}) => {
@@ -27,7 +28,6 @@ export const StackdriverReporterProvider = ({children}) => {
     if (environment.debug) {
       // This is a local dev server, we want to disable Stackdriver reporting as
       // it's not useful and likely won't work due to the origin.
-      console.log("debug");
       return;
     }
 
@@ -63,10 +63,27 @@ export const StackdriverReporterProvider = ({children}) => {
   });
 
   return <StackdriverErrorReporterContext.Provider value={{
-    stackdriverErrorReporter: stackdriverReporterStore.get().reporter
+    reportError: reportError
   }}>
     {children}
   </StackdriverErrorReporterContext.Provider>
+}
+
+/**
+ * Reports an error to Stackdriver error logging, if enabled.
+ */
+export function reportError(err: (Error|string)) {
+  debugger;
+  console.error('Reporting error to Stackdriver: ', err);
+  if (stackdriverReporterStore.get()) {
+    stackdriverReporterStore.get().reporter.report(err, (e) => {
+      // Note: this does not detect non-200 responses from Stackdriver:
+      // https://github.com/GoogleCloudPlatform/stackdriver-errors-js/issues/32
+      if (e) {
+        console.error('failed to send error report: ', e);
+      }
+    });
+  }
 }
 
 // This HOC can be used to wrap class components that need StackdriverErrorReporterContext injected.

@@ -81,11 +81,6 @@ import {FooterComponent} from './components/footer';
   ],
   providers: [
     ServerConfigService,
-    {
-      provide: ErrorHandler,
-      deps: [ServerConfigService],
-      useClass: ErrorReporterService,
-    },
     ProfileStorageService,
     SignInService,
     {

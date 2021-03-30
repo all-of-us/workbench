@@ -4,6 +4,7 @@ import {isAbortError, reportError} from 'app/utils/errors';
 import {applyPresetOverride, runtimePresets} from 'app/utils/runtime-presets';
 import {runtimeStore} from 'app/utils/stores';
 import {Runtime, RuntimeStatus} from 'generated/fetch';
+import {stackdriverReporterStore} from "../services/error-reporter-context";
 
 // We're only willing to wait 20 minutes total for a runtime to initialize. After that we return
 // a rejected promise no matter what.
@@ -137,6 +138,7 @@ export class LeoRuntimeInitializer {
   private serverErrorCount = 0;
   private initializeStartTime?: number;
   private targetRuntime?: Runtime;
+
   // The latest runtime retrieved from getRuntime. If the last getRuntime call returned a NOT_FOUND
   // response, this will be null.
   private currentRuntimeValue?: Runtime;
@@ -253,7 +255,7 @@ export class LeoRuntimeInitializer {
     if (e instanceof Response && e.status >= 500 && e.status < 600) {
       this.serverErrorCount++;
     }
-    reportError(e);
+    reportError(e, stackdriverReporterStore.get().reporter);
   }
 
   private hasTooManyServerErrors(): boolean {
@@ -331,6 +333,7 @@ export class LeoRuntimeInitializer {
     // Attempt to take the appropriate next action given the current runtime status.
     try {
       if (this.reachedResolution()) {
+        reportError("lol", stackdriverReporterStore.get().reporter);
         // We've reached the goal - resolve the Promise.
         return this.resolve(this.currentRuntime);
       } else if (this.currentRuntime === null || this.isRuntimeDeleted()) {
@@ -341,7 +344,7 @@ export class LeoRuntimeInitializer {
         // If runtime is in error state, delete it so it can be re-created at the next poll loop.
         reportError(
           `Runtime ${this.currentRuntime.googleProject}/${this.currentRuntime.runtimeName}` +
-          ` has reached an ERROR status`);
+          ` has reached an ERROR status`, stackdriverReporterStore.get().reporter);
         await this.deleteRuntime();
       }
     } catch (e) {
