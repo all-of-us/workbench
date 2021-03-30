@@ -86,11 +86,6 @@
   },
   {
     "mode": "NULLABLE",
-    "name": "synonyms",
-    "type": "STRING"
-  },
-  {
-    "mode": "NULLABLE",
     "name": "full_text",
     "type": "STRING"
   }

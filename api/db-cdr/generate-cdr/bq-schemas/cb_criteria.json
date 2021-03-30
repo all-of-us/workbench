@@ -86,11 +86,6 @@
   },
   {
     "mode": "NULLABLE",
-    "name": "synonyms",
-    "type": "STRING"
-  },
-  {
-    "mode": "NULLABLE",
     "name": "rollup_count",
     "type": "INTEGER"
   },
