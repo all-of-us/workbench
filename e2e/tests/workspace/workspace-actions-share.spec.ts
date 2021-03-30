@@ -49,7 +49,7 @@ describe('Share workspace', () => {
       await waitWhileLoading(page);
       await signOut(page);
 
-      // To verify access level is assigned correctly, user with WRITER/READER/OWNER role will sign in in new Incognito page.
+      // To verify access level is assigned correctly, user with WRITER/READER/OWNER role will sign in.
       const newPage = await signInAs(config.collaboratorUsername, config.userPassword);
 
       const homePage = new HomePage(newPage);
@@ -87,7 +87,7 @@ describe('Share workspace', () => {
    * - Log in as another user.
    * - Workspace share action should be disabled.
    */
-  test('In All Workspaces page via Snowman menu: READER cannot share edit or delete workspace', async () => {
+  test('In All Workspaces page via Snowman menu, READER cannot share edit or delete workspace', async () => {
     await removeCollaborators();
 
     // Open the Share modal in "All Your Workspaces" page.
@@ -103,7 +103,7 @@ describe('Share workspace', () => {
     await waitWhileLoading(page);
     await signOut(page);
 
-    // To verify READER role assigned correctly, user with READER role will sign in in new Incognito page.
+    // To verify READER role assigned correctly, user with READER role will sign in.
     const newPage = await signInAs(config.collaboratorUsername, config.userPassword);
 
     const homePage = new HomePage(newPage);
