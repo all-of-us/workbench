@@ -17,8 +17,6 @@ public class DbCdrVersion {
   private long cdrVersionId;
   private boolean isDefault;
   private String name;
-  @Deprecated // soon to be replaced by accessTier
-  private Short dataAccessLevel;
   private DbAccessTier accessTier;
   private short releaseNumber;
   private short archivalStatus;
@@ -194,7 +192,6 @@ public class DbCdrVersion {
         cdrVersionId,
         isDefault,
         name,
-        dataAccessLevel,
         accessTier,
         releaseNumber,
         archivalStatus,
@@ -225,7 +222,6 @@ public class DbCdrVersion {
         && archivalStatus == that.archivalStatus
         && numParticipants == that.numParticipants
         && Objects.equals(name, that.name)
-        && Objects.equals(dataAccessLevel, that.dataAccessLevel)
         && Objects.equals(accessTier, that.accessTier)
         && Objects.equals(bigqueryProject, that.bigqueryProject)
         && Objects.equals(bigqueryDataset, that.bigqueryDataset)
