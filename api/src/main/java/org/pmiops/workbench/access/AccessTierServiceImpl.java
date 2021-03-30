@@ -5,6 +5,7 @@ import java.time.Clock;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -14,6 +15,7 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.exceptions.ServerErrorException;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,16 +28,22 @@ public class AccessTierServiceImpl implements AccessTierService {
   private final AccessTierDao accessTierDao;
   private final UserAccessTierDao userAccessTierDao;
 
+  private final FireCloudService fireCloudService;
+
+  private static final Logger log = Logger.getLogger(AccessTierServiceImpl.class.getName());
+
   @Autowired
   public AccessTierServiceImpl(
       Provider<WorkbenchConfig> configProvider,
       Clock clock,
       AccessTierDao accessTierDao,
-      UserAccessTierDao userAccessTierDao) {
+      UserAccessTierDao userAccessTierDao,
+      FireCloudService fireCloudService) {
     this.configProvider = configProvider;
+    this.clock = clock;
     this.accessTierDao = accessTierDao;
     this.userAccessTierDao = userAccessTierDao;
-    this.clock = clock;
+    this.fireCloudService = fireCloudService;
   }
 
   /**
@@ -68,6 +76,8 @@ public class AccessTierServiceImpl implements AccessTierService {
    */
   @Override
   public void addUserToTier(DbUser user, DbAccessTier accessTier) {
+    addToAuthDomainIdempotent(user, accessTier);
+
     Optional<DbUserAccessTier> existingEntryMaybe =
         userAccessTierDao.getByUserAndAccessTier(user, accessTier);
 
@@ -100,6 +110,8 @@ public class AccessTierServiceImpl implements AccessTierService {
    */
   @Override
   public void removeUserFromTier(DbUser user, DbAccessTier accessTier) {
+    removeFromAuthDomainIdempotent(user, accessTier);
+
     userAccessTierDao
         .getByUserAndAccessTier(user, accessTier)
         .filter(entry -> entry.getTierAccessStatusEnum() == TierAccessStatus.ENABLED)
@@ -109,6 +121,29 @@ public class AccessTierServiceImpl implements AccessTierService {
                     entryToSoftDelete
                         .setTierAccessStatus(TierAccessStatus.DISABLED)
                         .setLastUpdated(now())));
+  }
+
+  private void addToAuthDomainIdempotent(DbUser dbUser, DbAccessTier accessTier) {
+    final String username = dbUser.getUsername();
+    final String authDomainName = accessTier.getAuthDomainName();
+    if (!fireCloudService.isUserMemberOfGroup(username, authDomainName)) {
+      fireCloudService.addUserToGroup(username, authDomainName);
+      log.info(
+          String.format(
+              "Added user %s to auth domain for tier '%s'", username, accessTier.getShortName()));
+    }
+  }
+
+  private void removeFromAuthDomainIdempotent(DbUser dbUser, DbAccessTier accessTier) {
+    final String username = dbUser.getUsername();
+    final String authDomainName = accessTier.getAuthDomainName();
+    if (fireCloudService.isUserMemberOfGroup(username, authDomainName)) {
+      fireCloudService.removeUserFromGroup(username, authDomainName);
+      log.info(
+          String.format(
+              "Removed user %s from auth domain for tier '%s'",
+              username, accessTier.getShortName()));
+    }
   }
 
   /**
