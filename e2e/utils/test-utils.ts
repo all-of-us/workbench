@@ -256,21 +256,17 @@ export async function createWorkspace(
 /**
  * Find a suitable existing workspace older than 30 minutes, or create one if workspace does not exist.
  *
- * TODO: this function does a lot of different things.  refactor and split up according to use cases.
- *
  * If the caller specifies a workspace name and it can be found, return it.
  *
  * If the workspace is not found (or no name is given), search for a workspace where the user
  * has Owner access.
  *
- * If no such workspace exists or the caller specifies alwaysCreate, create a new workspace and return it.
- *
- * Else choose one of the suitable workspaces randomly.
+ * If no such workspace exists or workspace name is not undefined, create a new workspace and return it.
+ *  Else, choose one of the suitable workspaces randomly.
  *
  * @param page
  * @param opts (all are optional)
- *  alwaysCreate - create a new workspace, regardless of whether a suitable workspace exists
- *  workspaceName - return the workspace with this name if it can be found; default behavior otherwise
+ *  workspaceName - return the workspace with this name if it can be found. Otherwise create workspace with this name.
  */
 export async function findOrCreateWorkspace(page: Page, opts: { workspaceName?: string } = {}): Promise<WorkspaceCard> {
   const { workspaceName } = opts;
@@ -299,7 +295,7 @@ export async function findOrCreateWorkspace(page: Page, opts: { workspaceName?: 
     }
   }
 
-  // Create new workspace if existing workspace is zero or alwaysCreate is true
+  // Create new workspace if existing workspace is zero or workspaceName is not undefined.
   if (olderWorkspaceCards.length === 0 || workspaceName !== undefined) {
     const name = workspaceName || makeWorkspaceName();
     const [card] = await createWorkspace(page, { workspaceName: name, openDataPage: false });
