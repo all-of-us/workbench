@@ -56,6 +56,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   shouldShowDisplayTag = environment.shouldShowDisplayTag;
   enableSignedInFooter = environment.enableFooter;
   minimizeChrome = false;
+  cdrVersionsInitialized = false;
   // True if the user tried to open the Zendesk support widget and an error
   // occurred.
   zendeskLoadError = false;
@@ -94,8 +95,15 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
         setInstitutionCategoryState(this.profile.verifiedInstitutionalAffiliation);
         if (hasRegisteredAccess(this.profile.dataAccessLevel)) {
           cdrVersionsApi().getCdrVersions().then(resp => {
+            // cdrVersionsInitialized blocks app rendering so that route
+            // components don't try to lookup CDR data before it's available.
+            // This will need to be a step in the React bootstrapping as well.
+            // See discussion on https://github.com/all-of-us/workbench/pull/4713
             cdrVersionStore.set(resp);
+            this.cdrVersionsInitialized = true;
           });
+        } else {
+          this.cdrVersionsInitialized = true;
         }
       });
     });
