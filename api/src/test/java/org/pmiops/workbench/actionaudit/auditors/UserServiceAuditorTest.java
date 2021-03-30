@@ -3,6 +3,7 @@ package org.pmiops.workbench.actionaudit.auditors;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.verify;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import java.util.Collections;
 import java.util.List;
@@ -102,9 +103,14 @@ public class UserServiceAuditorTest {
     assertThat(event.getAgentIdMaybe()).isNull();
     assertThat(event.getAgentEmailMaybe()).isNull();
     assertThat(event.getPreviousValueMaybe()).isEqualTo(registeredTier.getShortName());
-    String expected =
-        String.format("%s,%s", registeredTier.getShortName(), controlledTier.getShortName());
-    assertThat(event.getNewValueMaybe()).isEqualTo(expected);
+    List<String> expected =
+        ImmutableList.of(registeredTier.getShortName(), controlledTier.getShortName());
+    assertThat(split(event.getNewValueMaybe())).containsExactlyElementsIn(expected);
+  }
+
+  private Iterable<String> split(String input) {
+    assertThat(input).isNotNull();
+    return Splitter.on(',').split(input);
   }
 
   @Test
