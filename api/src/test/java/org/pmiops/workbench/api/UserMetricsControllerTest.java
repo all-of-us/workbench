@@ -22,8 +22,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbUser;
@@ -42,7 +42,7 @@ import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
-import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -58,14 +58,14 @@ public class UserMetricsControllerTest {
   @Mock private UserRecentResourceService mockUserRecentResourceService;
   @Mock private Provider<DbUser> mockUserProvider;
   @Mock private FireCloudService mockFireCloudService;
-  @Mock private WorkspaceService mockWorkspaceService;
+  @Mock private WorkspaceDao workspaceDao;
+  @Mock private WorkspaceAuthService workspaceAuthService;
 
   private UserMetricsController userMetricsController;
   private static final Instant NOW = Instant.now();
   @Autowired private CohortMapper cohortMapper;
   @Autowired private CommonMappers commonMappers;
   @Autowired private FirecloudMapper firecloudMapper;
-  @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
 
   private FakeClock fakeClock = new FakeClock(NOW);
 
@@ -123,7 +123,7 @@ public class UserMetricsControllerTest {
     dbUserRecentResource1.setUserId(dbUser.getUserId());
     dbUserRecentResource1.setWorkspaceId(dbWorkspace1.getWorkspaceId());
 
-    when(mockWorkspaceService.findActiveByWorkspaceId(dbUserRecentResource1.getWorkspaceId()))
+    when(workspaceDao.findActiveByWorkspaceId(dbUserRecentResource1.getWorkspaceId()))
         .thenReturn(Optional.of(dbWorkspace1));
 
     dbUserRecentResource2 = new DbUserRecentResource();
@@ -132,7 +132,7 @@ public class UserMetricsControllerTest {
     dbUserRecentResource2.setLastAccessDate(new Timestamp(fakeClock.millis() - 10000));
     dbUserRecentResource2.setUserId(dbUser.getUserId());
     dbUserRecentResource2.setWorkspaceId(dbWorkspace2.getWorkspaceId());
-    when(mockWorkspaceService.findActiveByWorkspaceId(dbUserRecentResource2.getWorkspaceId()))
+    when(workspaceDao.findActiveByWorkspaceId(dbUserRecentResource2.getWorkspaceId()))
         .thenReturn(Optional.of(dbWorkspace2));
 
     dbUserRecentResource3 = new DbUserRecentResource();
@@ -143,7 +143,7 @@ public class UserMetricsControllerTest {
     dbUserRecentResource3.setUserId(dbUser.getUserId());
     dbUserRecentResource3.setWorkspaceId(dbWorkspace2.getWorkspaceId());
 
-    when(mockWorkspaceService.findActiveByWorkspaceId(dbUserRecentResource3.getWorkspaceId()))
+    when(workspaceDao.findActiveByWorkspaceId(dbUserRecentResource3.getWorkspaceId()))
         .thenReturn(Optional.of(dbWorkspace2));
 
     fcWorkspace1 = new FirecloudWorkspace();
@@ -166,7 +166,7 @@ public class UserMetricsControllerTest {
         .thenReturn(
             Arrays.asList(dbUserRecentResource1, dbUserRecentResource2, dbUserRecentResource3));
 
-    when(mockWorkspaceService.getRequired(
+    when(workspaceDao.getRequired(
             dbWorkspace2.getWorkspaceNamespace(), dbWorkspace2.getFirecloudName()))
         .thenReturn(dbWorkspace2);
 
@@ -189,9 +189,9 @@ public class UserMetricsControllerTest {
     userMetricsController =
         new UserMetricsController(
             mockUserProvider,
-            workbenchConfigProvider,
             mockUserRecentResourceService,
-            mockWorkspaceService,
+            workspaceDao,
+            workspaceAuthService,
             mockFireCloudService,
             mockCloudStorageClient,
             commonMappers,

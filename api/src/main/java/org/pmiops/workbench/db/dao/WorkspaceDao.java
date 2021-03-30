@@ -4,11 +4,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.logging.Logger;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.BillingStatus;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -19,7 +22,42 @@ import org.springframework.data.repository.query.Param;
  *
  * <p>Use of @Query is discouraged; if desired, define aliases in WorkspaceService.
  */
-public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
+public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, WorkspaceDaoCustom {
+
+  Logger log = Logger.getLogger(WorkspaceDao.class.getName());
+
+  default DbWorkspace get(String ns, String firecloudName) {
+    return findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
+        ns,
+        firecloudName,
+        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+  }
+
+  default DbWorkspace getRequired(String ns, String firecloudName) {
+    DbWorkspace workspace = get(ns, firecloudName);
+    if (workspace == null) {
+      throw new NotFoundException(String.format("DbWorkspace %s/%s not found.", ns, firecloudName));
+    }
+    return workspace;
+  }
+
+  default DbWorkspace getRequiredWithCohorts(String ns, String firecloudName) {
+    DbWorkspace workspace =
+        findByFirecloudNameAndActiveStatusWithEagerCohorts(
+            ns,
+            firecloudName,
+            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+    if (workspace == null) {
+      throw new NotFoundException(String.format("DbWorkspace %s/%s not found.", ns, firecloudName));
+    }
+    return workspace;
+  }
+
+  default Optional<DbWorkspace> getByNamespace(String workspaceNamespace) {
+    return findFirstByWorkspaceNamespaceAndActiveStatusOrderByLastModifiedTimeDesc(
+        workspaceNamespace,
+        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+  }
 
   DbWorkspace findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
       String workspaceNamespace, String firecloudName, short activeStatus);
@@ -41,6 +79,14 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long> {
   List<DbWorkspace> findAllByFirecloudUuidIn(Collection<String> firecloudUuids);
 
   List<DbWorkspace> findAllByWorkspaceIdIn(Collection<Long> dbIds);
+
+  default Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId) {
+    DbWorkspace workspace = findOne(workspaceId);
+    if (workspace == null || !workspace.isActive()) {
+      return Optional.empty();
+    }
+    return Optional.of(workspace);
+  }
 
   List<DbWorkspace> findAllByWorkspaceNamespace(String workspaceNamespace);
 

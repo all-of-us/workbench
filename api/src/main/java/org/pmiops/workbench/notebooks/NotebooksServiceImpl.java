@@ -15,6 +15,7 @@ import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -24,7 +25,7 @@ import org.pmiops.workbench.model.FileDetail;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.monitoring.LogsBasedMetricService;
 import org.pmiops.workbench.monitoring.views.EventMetric;
-import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -73,7 +74,8 @@ public class NotebooksServiceImpl implements NotebooksService {
   private final FireCloudService fireCloudService;
   private final Provider<DbUser> userProvider;
   private final UserRecentResourceService userRecentResourceService;
-  private final WorkspaceService workspaceService;
+  private final WorkspaceDao workspaceDao;
+  private final WorkspaceAuthService workspaceAuthService;
   private final LogsBasedMetricService logsBasedMetricService;
 
   @Autowired
@@ -83,14 +85,16 @@ public class NotebooksServiceImpl implements NotebooksService {
       FireCloudService fireCloudService,
       Provider<DbUser> userProvider,
       UserRecentResourceService userRecentResourceService,
-      WorkspaceService workspaceService,
+      WorkspaceDao workspaceDao,
+      WorkspaceAuthService workspaceAuthService,
       LogsBasedMetricService logsBasedMetricService) {
     this.clock = clock;
     this.cloudStorageClient = cloudStorageClient;
     this.fireCloudService = fireCloudService;
     this.userProvider = userProvider;
     this.userRecentResourceService = userRecentResourceService;
-    this.workspaceService = workspaceService;
+    this.workspaceDao = workspaceDao;
+    this.workspaceAuthService = workspaceAuthService;
     this.logsBasedMetricService = logsBasedMetricService;
   }
 
@@ -128,11 +132,11 @@ public class NotebooksServiceImpl implements NotebooksService {
       String toWorkspaceNamespace,
       String toWorkspaceName,
       String newNotebookName) {
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         fromWorkspaceNamespace, fromWorkspaceName, WorkspaceAccessLevel.READER);
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         toWorkspaceNamespace, toWorkspaceName, WorkspaceAccessLevel.WRITER);
-    workspaceService.validateActiveBilling(toWorkspaceNamespace, toWorkspaceName);
+    workspaceAuthService.validateActiveBilling(toWorkspaceNamespace, toWorkspaceName);
     newNotebookName = NotebooksService.withNotebookExtension(newNotebookName);
 
     GoogleCloudLocators fromNotebookLocators =
@@ -153,7 +157,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     fileDetail.setLastModifiedTime(now.getTime());
     userRecentResourceService.updateNotebookEntry(
-        workspaceService.getRequired(toWorkspaceNamespace, toWorkspaceName).getWorkspaceId(),
+        workspaceDao.getRequired(toWorkspaceNamespace, toWorkspaceName).getWorkspaceId(),
         userProvider.get().getUserId(),
         newNotebookLocators.fullPath);
 
@@ -182,7 +186,7 @@ public class NotebooksServiceImpl implements NotebooksService {
         getNotebookLocators(workspaceNamespace, workspaceName, notebookName);
     cloudStorageClient.deleteBlob(notebookLocators.blobId);
     userRecentResourceService.deleteNotebookEntry(
-        workspaceService.getRequired(workspaceNamespace, workspaceName).getWorkspaceId(),
+        workspaceDao.getRequired(workspaceNamespace, workspaceName).getWorkspaceId(),
         userProvider.get().getUserId(),
         notebookLocators.fullPath);
     logsBasedMetricService.recordEvent(EventMetric.NOTEBOOK_DELETE);

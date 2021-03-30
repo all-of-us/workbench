@@ -45,8 +45,10 @@ import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -94,6 +96,7 @@ import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
 import org.pmiops.workbench.utils.mappers.LeonardoMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -202,6 +205,7 @@ public class RuntimeControllerTest {
   @MockBean UserRecentResourceService mockUserRecentResourceService;
   @MockBean UserServiceAuditor mockUserServiceAuditor;
   @MockBean WorkspaceService mockWorkspaceService;
+  @MockBean WorkspaceAuthService mockWorkspaceAuthService;
 
   @Qualifier(NotebooksConfig.USER_RUNTIMES_API)
   @MockBean
@@ -213,6 +217,8 @@ public class RuntimeControllerTest {
 
   @MockBean ProxyApi proxyApi;
 
+  @Autowired CdrVersionDao cdrVersionDao;
+  @MockBean WorkspaceDao workspaceDao;
   @Autowired UserDao userDao;
   @Autowired RuntimeController runtimeController;
   @Autowired LeonardoMapper leonardoMapper;
@@ -334,8 +340,7 @@ public class RuntimeControllerTest {
     testWorkspace.setName(WORKSPACE_NAME);
     testWorkspace.setFirecloudName(WORKSPACE_ID);
     testWorkspace.setCdrVersion(cdrVersion);
-    doReturn(testWorkspace).when(mockWorkspaceService).get(WORKSPACE_NS, WORKSPACE_ID);
-    doReturn(Optional.of(testWorkspace)).when(mockWorkspaceService).getByNamespace(WORKSPACE_NS);
+    doReturn(Optional.of(testWorkspace)).when(workspaceDao).getByNamespace(WORKSPACE_NS);
   }
 
   private FirecloudWorkspace createFcWorkspace(String ns, String name, String creator) {
@@ -351,8 +356,8 @@ public class RuntimeControllerTest {
     w.setWorkspaceNamespace(workspaceNamespace);
     w.setFirecloudName(firecloudName);
     w.setCdrVersion(cdrVersion);
-    when(mockWorkspaceService.getRequired(workspaceNamespace, firecloudName)).thenReturn(w);
-    when(mockWorkspaceService.getByNamespace(workspaceNamespace)).thenReturn(Optional.of(w));
+    when(workspaceDao.getRequired(workspaceNamespace, firecloudName)).thenReturn(w);
+    when(workspaceDao.getByNamespace(workspaceNamespace)).thenReturn(Optional.of(w));
     stubGetFcWorkspace(createFcWorkspace(workspaceNamespace, firecloudName, creator));
   }
 
@@ -1188,7 +1193,7 @@ public class RuntimeControllerTest {
   @Test
   public void getRuntime_validateActiveBilling() {
     doThrow(ForbiddenException.class)
-        .when(mockWorkspaceService)
+        .when(mockWorkspaceAuthService)
         .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
 
     assertThrows(ForbiddenException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
@@ -1197,18 +1202,17 @@ public class RuntimeControllerTest {
   @Test
   public void getRuntime_validateActiveBilling_checkAccessFirst() {
     doThrow(ForbiddenException.class)
-        .when(mockWorkspaceService)
-        .enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-            WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
+        .when(mockWorkspaceAuthService)
+        .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
 
     assertThrows(ForbiddenException.class, () -> runtimeController.getRuntime(WORKSPACE_NS));
-    verify(mockWorkspaceService, never()).validateActiveBilling(anyString(), anyString());
+    verify(mockWorkspaceAuthService, never()).validateActiveBilling(anyString(), anyString());
   }
 
   @Test
   public void localize_validateActiveBilling() {
     doThrow(ForbiddenException.class)
-        .when(mockWorkspaceService)
+        .when(mockWorkspaceAuthService)
         .validateActiveBilling(WORKSPACE_NS, WORKSPACE_ID);
 
     RuntimeLocalizeRequest req = new RuntimeLocalizeRequest();
@@ -1218,14 +1222,13 @@ public class RuntimeControllerTest {
   @Test
   public void localize_validateActiveBilling_checkAccessFirst() {
     doThrow(ForbiddenException.class)
-        .when(mockWorkspaceService)
-        .enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-            WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
+        .when(mockWorkspaceAuthService)
+        .enforceWorkspaceAccessLevel(WORKSPACE_NS, WORKSPACE_ID, WorkspaceAccessLevel.WRITER);
 
     RuntimeLocalizeRequest req = new RuntimeLocalizeRequest();
 
     assertThrows(ForbiddenException.class, () -> runtimeController.localize(WORKSPACE_NS, req));
-    verify(mockWorkspaceService, never()).validateActiveBilling(anyString(), anyString());
+    verify(mockWorkspaceAuthService, never()).validateActiveBilling(anyString(), anyString());
   }
 
   private void createUser(String email) {

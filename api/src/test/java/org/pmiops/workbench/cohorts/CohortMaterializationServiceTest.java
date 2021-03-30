@@ -15,6 +15,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
@@ -86,7 +87,7 @@ import org.springframework.transaction.annotation.Transactional;
   CdrJpaConfig.class
 })
 @MockBean({BigQuery.class})
-public class CohortMaterializationServiceTest {
+public class CohortMaterializationServiceTest extends SpringTest {
 
   private static final String DATA_SET_ID = "data_set_id";
   private static final String PROJECT_ID = "project_id";

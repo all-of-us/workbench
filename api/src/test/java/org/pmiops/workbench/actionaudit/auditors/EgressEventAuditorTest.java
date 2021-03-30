@@ -9,8 +9,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Rule;
@@ -26,6 +24,7 @@ import org.pmiops.workbench.actionaudit.AgentType;
 import org.pmiops.workbench.actionaudit.targetproperties.EgressEventCommentTargetProperty;
 import org.pmiops.workbench.actionaudit.targetproperties.EgressEventTargetProperty;
 import org.pmiops.workbench.db.dao.UserDao;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -60,6 +59,7 @@ public class EgressEventAuditorTest {
 
   @MockBean private ActionAuditService mockActionAuditService;
   @MockBean private WorkspaceService mockWorkspaceService;
+  @MockBean private WorkspaceDao workspaceDao;
   @MockBean private UserDao mockUserDao;
 
   @Captor private ArgumentCaptor<Collection<ActionAuditEvent>> eventsCaptor;
@@ -86,16 +86,10 @@ public class EgressEventAuditorTest {
     dbWorkspace.setWorkspaceId(WORKSPACE_ID);
     dbWorkspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
     dbWorkspace.setFirecloudName(WORKSPACE_FIRECLOUD_NAME);
-    when(mockWorkspaceService.getByNamespace(WORKSPACE_NAMESPACE))
-        .thenReturn(Optional.of(dbWorkspace));
+    when(workspaceDao.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(Optional.of(dbWorkspace));
     firecloudUserRoles.add(new UserRole().email(USER_EMAIL));
     when(mockWorkspaceService.getFirecloudUserRoles(WORKSPACE_NAMESPACE, WORKSPACE_FIRECLOUD_NAME))
         .thenReturn(firecloudUserRoles);
-  }
-
-  Set<String> extractValuesFromEvents(
-      Collection<ActionAuditEvent> events, Function<ActionAuditEvent, String> fn) {
-    return events.stream().map(fn).collect(Collectors.toSet());
   }
 
   @Test
@@ -151,7 +145,7 @@ public class EgressEventAuditorTest {
 
     // When the workspace lookup doesn't succeed, the event is filed w/ a system agent and an
     // empty target ID.
-    when(mockWorkspaceService.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(Optional.empty());
+    when(workspaceDao.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(Optional.empty());
     egressEventAuditor.fireEgressEvent(
         new EgressEvent().projectName(EGRESS_EVENT_PROJECT_NAME).vmPrefix(EGRESS_EVENT_VM_PREFIX));
     verify(mockActionAuditService).send(eventsCaptor.capture());
@@ -191,7 +185,7 @@ public class EgressEventAuditorTest {
   @Test
   public void testFailedParsing() {
     // When the inbound request parsing fails, an event is logged at the system agent.
-    when(mockWorkspaceService.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(null);
+    when(workspaceDao.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(null);
     egressEventAuditor.fireFailedToParseEgressEventRequest(
         new EgressEventRequest().eventsJsonArray("asdf"));
     verify(mockActionAuditService).send(eventsCaptor.capture());
@@ -213,7 +207,7 @@ public class EgressEventAuditorTest {
   @Test
   public void testBadApiKey() {
     // When the inbound request parsing fails, an event is logged at the system agent.
-    when(mockWorkspaceService.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(null);
+    when(workspaceDao.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(null);
     egressEventAuditor.fireBadApiKey("ASDF", new EgressEventRequest());
     verify(mockActionAuditService).send(eventsCaptor.capture());
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
