@@ -12,7 +12,6 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
-import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapper;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
@@ -36,11 +35,10 @@ public class ConceptSetServiceTest {
 
   @Autowired WorkspaceDao workspaceDao;
   @Autowired ConceptSetService conceptSetService;
-  @Autowired ConceptService conceptService;
   @Autowired ConceptSetMapper conceptSetMapper;
 
   @TestConfiguration
-  @Import({ConceptSetService.class, ConceptService.class, ConceptSetMapperImpl.class})
+  @Import({ConceptSetService.class, ConceptSetMapperImpl.class})
   @MockBean({
     CommonMappers.class,
     CohortBuilderMapper.class,
@@ -55,7 +53,7 @@ public class ConceptSetServiceTest {
     DbWorkspace mockDbWorkspace = mockWorkspace();
     DbConceptSet fromConceptSet = mockConceptSet();
     DbConceptSet copiedConceptSet =
-        conceptSetService.cloneConceptSetAndConceptIds(fromConceptSet, mockDbWorkspace, false);
+        conceptSetService.cloneConceptSetAndConceptIds(fromConceptSet, mockDbWorkspace);
     assertThat(copiedConceptSet).isNotNull();
     assertThat(copiedConceptSet.getConceptSetConceptIds().size()).isEqualTo(5);
     assertThat(copiedConceptSet.getWorkspaceId()).isEqualTo(mockDbWorkspace.getWorkspaceId());

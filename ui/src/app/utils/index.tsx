@@ -8,7 +8,6 @@ const {useEffect, useState} = React;
 
 import {colorWithWhiteness} from 'app/styles/colors';
 import {
-  cdrVersionStore,
   currentCohortCriteriaStore,
   currentCohortSearchContextStore,
   currentCohortStore,
@@ -22,14 +21,17 @@ import {
   urlParamsStore,
   userProfileStore
 } from 'app/utils/navigation';
-import {DataAccessLevel, Domain} from 'generated';
 import {
   ConfigResponse,
-  DataAccessLevel as FetchDataAccessLevel,
-  Domain as FetchDomain,
+  DataAccessLevel,
+  Domain,
 } from 'generated/fetch';
+import {cdrVersionStore, withStore} from './stores';
 
 export const WINDOW_REF = 'window-ref';
+
+// Local storage key to override the API base path.
+export const LOCAL_STORAGE_API_OVERRIDE_KEY = 'allOfUsApiUrlOverride';
 
 export function isBlank(toTest: String): boolean {
   if (toTest === null || toTest === undefined) {
@@ -49,14 +51,6 @@ export function hasRegisteredAccess(access: DataAccessLevel): boolean {
   return [
     DataAccessLevel.Registered,
     DataAccessLevel.Protected
-  ].includes(access);
-}
-
-// TODO: consolidate this with above when UI is fully converted
-export function hasRegisteredAccessFetch(access: FetchDataAccessLevel): boolean {
-  return [
-    FetchDataAccessLevel.Registered,
-    FetchDataAccessLevel.Protected
   ].includes(access);
 }
 
@@ -395,12 +389,9 @@ export const withRouteConfigData = () => {
   return connectBehaviorSubject(routeConfigDataStore, 'routeConfigData');
 };
 
-// HOC that provides a 'cdrVersionListResponse' prop with the CDR version
-// information. Rendering of the connected component is blocked on initial load
-// of the CDR versions. This should only affect initial page loads, this HOC can
-// be included last (if multiple HOCs are in use) to minimize this impact.
+// HOC that provides a 'cdrVersionListResponse' prop with the CDR version information.
 export const withCdrVersions = () => {
-  return connectReplaySubject(cdrVersionStore, 'cdrVersionListResponse');
+  return withStore(cdrVersionStore, 'cdrVersionListResponse');
 };
 
 // HOC that provides a 'queryParams' prop with current query params
@@ -418,12 +409,6 @@ export const withServerConfig = () => {
 };
 export interface ServerConfigProps {
   serverConfig: ConfigResponse;
-}
-
-// Temporary method for converting generated/models/Domain to generated/models/fetch/Domain
-export function generateDomain(domain: FetchDomain): Domain {
-  const d = fp.capitalize(FetchDomain[domain]);
-  return Domain[d];
 }
 
 export function displayDateWithoutHours(time: number): string {
@@ -457,7 +442,7 @@ export function formatDomainString(domainString: string): string {
     ? Domain.PHYSICALMEASUREMENT.toString() : domainString);
 }
 
-export function formatDomain(domain: FetchDomain): string {
+export function formatDomain(domain: Domain): string {
   return formatDomainString(domain.toString());
 }
 

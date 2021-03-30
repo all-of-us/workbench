@@ -14,6 +14,7 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.model.DbInstitution;
@@ -42,7 +43,8 @@ import org.springframework.test.context.junit4.SpringRunner;
   InstitutionEmailDomainMapperImpl.class,
   InstitutionEmailAddressMapperImpl.class,
 })
-public class InstitutionServiceTest {
+public class InstitutionServiceTest extends SpringTest {
+
   @Autowired private InstitutionService service;
   @Autowired private UserDao userDao;
   @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;

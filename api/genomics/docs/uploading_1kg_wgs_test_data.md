@@ -27,8 +27,8 @@ were copied into `gs://all-of-us-workbench-test-genomics/1kg_gvcfs/`
 
 - ```bq query --max_rows=1000000 --format=csv --nouse_legacy_sql 'SELECT person_id FROM `all-of-us-workbench-test.synth_r_2019q4_9.cb_person`;' | sed -e 1d > ehr_sample_names.txt```
 - ```bq query --max_rows=1000000 --format=csv --nouse_legacy_sql 'SELECT sample_name FROM `all-of-us-workbench-test.wgs_demo.metadata`' | sed -e 1d > vcf_sample_names.txt```
-- ```paste -d "," <(shuf -n $(cat vcf_sample_names.txt | wc -l) ehr_sample_names.txt) vcf_sample_names.txt > old_new_sample_names_map.csv```
-- ```cat old_new_sample_names_map.csv | awk -F',' '{print "UPDATE `all-of-us-workbench-test.wgs_demo_7.metadata` set sample_name=\""$1"\" where sample_name=\""$2"\";"}'```
+- ```paste -d "," <(shuf -n $(cat vcf_sample_names.txt | wc -l) ehr_sample_names.txt) vcf_sample_names.txt > new_old_sample_names_map.csv```
+- ```cat new_old_sample_names_map.csv | awk -F',' '{print "UPDATE `all-of-us-workbench-test.wgs_demo_7.metadata` set sample_name=\""$1"\" where sample_name=\""$2"\";"}'```
 - Run update queries in BQ console or bq CLI
 
 ### Extracting cohort

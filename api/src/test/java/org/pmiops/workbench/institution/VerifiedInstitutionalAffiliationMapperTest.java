@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
@@ -31,7 +32,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 })
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class VerifiedInstitutionalAffiliationMapperTest {
+public class VerifiedInstitutionalAffiliationMapperTest extends SpringTest {
   @Autowired VerifiedInstitutionalAffiliationMapper mapper;
 
   @Autowired InstitutionService institutionService;

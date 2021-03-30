@@ -19,6 +19,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.model.BillingAccount;
@@ -33,11 +34,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -58,6 +56,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
@@ -67,7 +66,6 @@ import org.pmiops.workbench.billing.GoogleApisConfig;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
-import org.pmiops.workbench.cdr.model.DbConcept;
 import org.pmiops.workbench.cdrselector.WorkspaceResourcesServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
@@ -84,7 +82,6 @@ import org.pmiops.workbench.cohorts.CohortFactoryImpl;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
 import org.pmiops.workbench.cohorts.CohortMaterializationService;
 import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
@@ -179,13 +176,13 @@ import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
-import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -208,10 +205,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class WorkspacesControllerTest {
-  private static final Timestamp NOW = Timestamp.from(Instant.now());
-  private static final long NOW_TIME = NOW.getTime();
-  private static final FakeClock CLOCK = new FakeClock(NOW.toInstant(), ZoneId.systemDefault());
+public class WorkspacesControllerTest extends SpringTest {
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String LOCK_EXPIRE_TIME_KEY = "lockExpiresAt";
   private static final String LAST_LOCKING_USER_KEY = "lastLockedBy";
@@ -254,10 +248,6 @@ public class WorkspacesControllerTest {
           .countValue(256L)
           .prevalence(0.4F)
           .conceptSynonyms(new ArrayList<>());
-  private static final DbConcept CONCEPT_1 =
-      new DbConcept().conceptId(CLIENT_CONCEPT_1.getConceptId());
-  private static final DbConcept CONCEPT_3 =
-      new DbConcept().conceptId(CLIENT_CONCEPT_3.getConceptId());
   private static final String BUCKET_URI =
       String.format("gs://%s/", TestMockFactory.WORKSPACE_BUCKET_NAME);
 
@@ -306,6 +296,7 @@ public class WorkspacesControllerTest {
     ParticipantCohortStatusMapperImpl.class,
     ReviewQueryBuilder.class,
     UserMapperImpl.class,
+    WorkspaceAuthService.class,
     WorkspaceMapperImpl.class,
     WorkspaceResourcesServiceImpl.class,
     WorkspacesController.class,
@@ -323,7 +314,6 @@ public class WorkspacesControllerTest {
     CohortQueryBuilder.class,
     ConceptBigQueryService.class,
     CohortService.class,
-    ConceptService.class,
     FireCloudService.class,
     MailService.class,
     MonitoringService.class,
@@ -346,11 +336,6 @@ public class WorkspacesControllerTest {
     @Scope("prototype")
     Cloudbilling serviceAccountCloudbilling() {
       return serviceAccountCloudbilling;
-    }
-
-    @Bean
-    Clock clock() {
-      return CLOCK;
     }
 
     @Bean
@@ -408,7 +393,7 @@ public class WorkspacesControllerTest {
     testMockFactory = new TestMockFactory();
     currentUser = createUser(LOGGED_IN_USER_EMAIL);
 
-    accessTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
+    accessTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 1);
     cdrVersion.setName("1");
@@ -583,7 +568,7 @@ public class WorkspacesControllerTest {
     for (UserRole userRole : collaborators) {
       FirecloudWorkspaceACLUpdate aclUpdate =
           new FirecloudWorkspaceACLUpdate().email(userRole.getEmail());
-      aclUpdate = workspaceService.updateFirecloudAclsOnUser(userRole.getRole(), aclUpdate);
+      aclUpdate = WorkspaceAuthService.updateFirecloudAclsOnUser(userRole.getRole(), aclUpdate);
       updateACLRequestList.add(aclUpdate);
     }
     return updateACLRequestList;
@@ -647,6 +632,7 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getNamespace()).isEqualTo(workspace.getNamespace());
     assertThat(workspace2.getResearchPurpose().getReviewRequested()).isTrue();
     assertThat(workspace2.getResearchPurpose().getTimeRequested()).isEqualTo(NOW_TIME);
+    assertThat(workspace2.getGoogleProject()).isEqualTo(DEFAULT_GOOGLE_PROJECT);
 
     verify(endUserCloudbillingProvider.get().projects())
         .updateBillingInfo(
@@ -1574,7 +1560,7 @@ public class WorkspacesControllerTest {
             Domain.CONDITION, ImmutableSet.of(dbConceptSetConceptId1, dbConceptSetConceptId2)))
         .thenReturn(123);
     ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
-    conceptSetConceptId1.setConceptId(CONCEPT_1.getConceptId());
+    conceptSetConceptId1.setConceptId(CLIENT_CONCEPT_1.getConceptId());
     conceptSetConceptId1.setStandard(true);
     ConceptSet conceptSet1 =
         conceptSetsController
@@ -1587,7 +1573,7 @@ public class WorkspacesControllerTest {
                     .addAddedConceptSetConceptIdsItem(conceptSetConceptId1))
             .getBody();
     ConceptSetConceptId conceptSetConceptId2 = new ConceptSetConceptId();
-    conceptSetConceptId2.setConceptId(CONCEPT_3.getConceptId());
+    conceptSetConceptId2.setConceptId(CLIENT_CONCEPT_3.getConceptId());
     conceptSetConceptId2.setStandard(true);
     ConceptSet conceptSet2 =
         conceptSetsController
@@ -3185,8 +3171,8 @@ public class WorkspacesControllerTest {
         workspace.getName(),
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.OWNER);
-    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
-    workspaceService.updateRecentWorkspaces(dbWorkspace, currentUser.getUserId(), NOW);
+    DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getId());
+    workspaceService.updateRecentWorkspaces(dbWorkspace);
     ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity =
         workspacesController.getUserRecentWorkspaces();
     RecentWorkspace recentWorkspace = recentWorkspaceResponseEntity.getBody().get(0);
@@ -3205,7 +3191,7 @@ public class WorkspacesControllerTest {
   public void cloneNotebook_validateActiveBilling() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
-    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
+    DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getId());
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 
@@ -3220,7 +3206,7 @@ public class WorkspacesControllerTest {
   public void renameNotebook_validateActiveBilling() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
-    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
+    DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getId());
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 
@@ -3237,7 +3223,7 @@ public class WorkspacesControllerTest {
   public void copyNotebook_validateActiveBilling() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
-    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
+    DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getId());
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 
@@ -3310,7 +3296,7 @@ public class WorkspacesControllerTest {
             .getBody();
 
     ConceptSetConceptId conceptSetConceptId1 = new ConceptSetConceptId();
-    conceptSetConceptId1.setConceptId(CONCEPT_1.getConceptId());
+    conceptSetConceptId1.setConceptId(CLIENT_CONCEPT_1.getConceptId());
     conceptSetConceptId1.setStandard(true);
     ConceptSet conceptSet =
         conceptSetsController

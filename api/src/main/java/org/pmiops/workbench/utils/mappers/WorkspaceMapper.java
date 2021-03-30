@@ -48,6 +48,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "creator", source = "fcWorkspace.createdBy")
   @Mapping(target = "cdrVersionId", source = "dbWorkspace.cdrVersion")
   @Mapping(target = "accessTierShortName", source = "dbWorkspace.cdrVersion.accessTier.shortName")
+  @Mapping(target = "googleProject", source = "fcWorkspace.googleProject")
   Workspace toApiWorkspace(DbWorkspace dbWorkspace, FirecloudWorkspace fcWorkspace);
 
   @Mapping(target = "cdrVersionId", source = "cdrVersion")
@@ -132,6 +133,7 @@ public interface WorkspaceMapper {
   @Mapping(target = "workspaceActiveStatusEnum", ignore = true)
   @Mapping(target = "workspaceId", ignore = true)
   @Mapping(target = "workspaceNamespace", ignore = true)
+  @Mapping(target = "googleProject", ignore = true)
   void mergeResearchPurposeIntoWorkspace(
       @MappingTarget DbWorkspace workspace, ResearchPurpose researchPurpose);
 

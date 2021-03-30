@@ -37,12 +37,13 @@ public class ConfigController implements ConfigApiDelegate {
             .enableDataUseAgreement(config.access.enableDataUseAgreement)
             .enableBetaAccess(config.access.enableBetaAccess)
             .unsafeAllowSelfBypass(config.access.unsafeAllowSelfBypass)
-            .requireInvitationKey(config.access.requireInvitationKey)
             .enableBillingUpgrade(config.featureFlags.enableBillingUpgrade)
             .enableV3DataUserCodeOfConduct(config.featureFlags.enableV3DataUserCodeOfConduct)
             .enableEventDateModifier(config.featureFlags.enableEventDateModifier)
             .enableResearchReviewPrompt(config.featureFlags.enableResearchPurposePrompt)
             .enableRasLoginGovLinking(config.featureFlags.enableRasLoginGovLinking)
+            .rasHost(config.ras.host)
+            .rasClientId(config.ras.clientId)
             .runtimeImages(
                 Stream.concat(
                         config.firecloud.runtimeImages.dataproc.stream()

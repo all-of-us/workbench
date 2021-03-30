@@ -6,7 +6,8 @@ import {Profile, ProfileApi, WorkspacesApi} from 'generated/fetch';
 import {AdminReviewWorkspace} from './admin-review-workspace';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
+import {workspaceStubs} from 'testing/stubs/workspaces';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 
 describe('AdminReviewWorkspace', () => {

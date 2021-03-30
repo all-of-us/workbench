@@ -17,6 +17,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
@@ -102,6 +103,23 @@ public class CohortBuilderServiceImpl implements CohortBuilderService {
     this.surveyModuleDao = surveyModuleDao;
     this.cohortBuilderMapper = cohortBuilderMapper;
     this.mySQLStopWordsProvider = mySQLStopWordsProvider;
+  }
+
+  @Override
+  public ConceptIds classifyConceptIds(Set<Long> conceptIds) {
+    ImmutableList.Builder<Long> standardConceptIds = ImmutableList.builder();
+    ImmutableList.Builder<Long> sourceConceptIds = ImmutableList.builder();
+    cbCriteriaDao
+        .findByConceptIdIn(conceptIds.stream().map(String::valueOf).collect(Collectors.toList()))
+        .forEach(
+            c -> {
+              if (c.getStandard()) {
+                standardConceptIds.add(Long.valueOf(c.getConceptId()));
+              } else {
+                sourceConceptIds.add(Long.valueOf(c.getConceptId()));
+              }
+            });
+    return new ConceptIds(standardConceptIds.build(), sourceConceptIds.build());
   }
 
   @Override

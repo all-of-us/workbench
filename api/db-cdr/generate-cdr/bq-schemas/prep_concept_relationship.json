@@ -1,0 +1,27 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_1",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id_2",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "relationship_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "valid_start_date",
+    "type": "DATE"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "valid_end_date",
+    "type": "DATE"
+  }
+]

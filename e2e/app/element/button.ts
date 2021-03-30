@@ -1,11 +1,10 @@
-import {Page} from 'puppeteer';
+import { Page } from 'puppeteer';
 import Container from 'app/container';
-import {ElementType, XPathOptions} from 'app/xpath-options';
+import { ElementType, XPathOptions } from 'app/xpath-options';
 import BaseElement from './base-element';
-import {buildXPath} from 'app/xpath-builders';
+import { buildXPath } from 'app/xpath-builders';
 
 export default class Button extends BaseElement {
-
   /**
    * @param {Page} page Puppeteer Page.
    * @param {XPathOptions} xOpt Convert XpathOptions to Xpath string.
@@ -30,13 +29,21 @@ export default class Button extends BaseElement {
    */
   async waitUntilEnabled(xpathSelector?: string): Promise<void> {
     const selector = xpathSelector || this.getXpath();
-    await this.page.waitForXPath(selector, {visible: true});
-    await this.page.waitForFunction(xpath => {
-      const elemt = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-      const style = window.getComputedStyle(elemt as Element);
-      const propValue = style.getPropertyValue('cursor');
-      return propValue === 'pointer';
-    }, {}, selector).catch((err) => {throw err;});
+    await this.page.waitForXPath(selector, { visible: true });
+    await this.page
+      .waitForFunction(
+        (xpath) => {
+          const elemt = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+            .singleNodeValue;
+          const style = window.getComputedStyle(elemt as Element);
+          const propValue = style.getPropertyValue('cursor');
+          return propValue === 'pointer';
+        },
+        {},
+        selector
+      )
+      .catch((err) => {
+        throw err;
+      });
   }
-
 }

@@ -6,7 +6,8 @@ import {currentWorkspaceStore} from 'app/utils/navigation';
 import {RecentResources} from 'app/pages/homepage/recent-resources';
 import {UserMetricsApi, WorkspacesApi} from 'generated/fetch';
 import {UserMetricsApiStub} from 'testing/stubs/user-metrics-api-stub';
-import {WorkspacesApiStub, workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
 describe('RecentResourcesComponent', () => {
   beforeEach(() => {

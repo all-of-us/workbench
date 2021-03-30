@@ -53,7 +53,7 @@ export class InstitutionApiStub extends InstitutionApi {
       this.institutions = this.institutions.filter(institution => {
         return institution.shortName !== shortName;
       });
-      resolve();
+      resolve(new Response());
     });
   }
 

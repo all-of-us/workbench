@@ -6,7 +6,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import colors from 'app/styles/colors';
 import { useDebounce, useToggle } from 'app/utils';
 import {downloadTextFile} from 'app/utils/audit-utils';
-import {AuditAction, AuditLogEntry} from 'generated';
+import {AuditAction, AuditLogEntry} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';

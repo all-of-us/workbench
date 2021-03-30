@@ -15,6 +15,7 @@ import {reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDataUseAgreementVersion} from 'app/utils/code-of-conduct';
 import {navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
+import {buildRasRedirectUrl} from 'app/utils/ras';
 import {environment} from 'environments/environment';
 import {AccessModule, Profile} from 'generated/fetch';
 
@@ -97,6 +98,15 @@ function redirectToNiH(): void {
   window.open(url, '_blank');
 }
 
+function redirectToRas(): void {
+  AnalyticsTracker.Registration.RasLoginGov();
+  // The scopes are also used in backend for fetching user info.
+  const url = serverConfigStore.getValue().rasHost + '/auth/oauth/v2/authorize?client_id=' + serverConfigStore.getValue().rasClientId
+      + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl()
+      + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1';
+  window.open(url, '_blank');
+}
+
 async function redirectToTraining() {
   AnalyticsTracker.Registration.EthicsTraining();
   await profileApi().updatePageVisits({page: 'moodle'});
@@ -151,6 +161,19 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     },
     onClick: redirectToNiH
   }, {
+    key: 'rasLoginGov',
+    completionPropsKey: 'rasLoginGovLinked',
+    loadingPropsKey: 'rasLoginGovLoading',
+    title: 'Connect Your Login.Gov Account',
+    featureFlag: serverConfigStore.getValue().enableRasLoginGovLinking,
+    description: 'Connect your Researcher Workbench account to your login.gov account. ',
+    buttonText: 'Connect',
+    completedText: 'Linked',
+    completionTimestamp: (profile: Profile) => {
+      return profile.rasLinkLoginGovCompletionTime || profile.rasLinkLoginGovBypassTime;
+    },
+    onClick: redirectToRas
+  }, {
     key: 'complianceTraining',
     completionPropsKey: 'trainingCompleted',
     title: <span><i>All of Us</i> Responsible Conduct of Research Training</span>,
@@ -203,6 +226,9 @@ export interface RegistrationDashboardProps {
   eraCommonsError: string;
   eraCommonsLinked: boolean;
   eraCommonsLoading: boolean;
+  rasLoginGovLinkError: string;
+  rasLoginGovLinked: boolean;
+  rasLoginGovLoading: boolean;
   trainingCompleted: boolean;
   firstVisitTraining: boolean;
   twoFactorAuthCompleted: boolean;
@@ -307,7 +333,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
 
   render() {
     const {bypassActionComplete, bypassInProgress, trainingWarningOpen} = this.state;
-    const {betaAccessGranted, eraCommonsError, trainingCompleted} = this.props;
+    const {betaAccessGranted, eraCommonsError, trainingCompleted, rasLoginGovLinkError} = this.props;
     const {enableBetaAccess, unsafeAllowSelfBypass} = serverConfigStore.getValue();
 
     const anyBypassActionsRemaining = !(this.allTasksCompleted() && betaAccessGranted);
@@ -320,6 +346,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
         registrationTask);
     // Assign relative positioning so the spinner's absolute positioning anchors
     // it within the registration box.
+    // TODO(RW-6495): Decide the correct error message for login.gov linking failure.
     return <FlexColumn style={{position: 'relative'}} data-test-id='registration-dashboard'>
       {bypassInProgress && <SpinnerOverlay />}
       <div style={styles.mainHeader}>Complete Registration</div>
@@ -389,6 +416,11 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
                                         style={{margin: '0px 1rem 1rem 0px'}}>
           <ClrIcon shape='exclamation-triangle' class='is-solid'/>
           Error Linking NIH Username: {eraCommonsError} Please try again!
+      </AlertDanger>}
+      {rasLoginGovLinkError && <AlertDanger data-test-id='ras-login-gov-error'
+                                       style={{margin: '0px 1rem 1rem 0px'}}>
+        <ClrIcon shape='exclamation-triangle' class='is-solid'/>
+        Error Linking login.gov account: {rasLoginGovLinkError} Please try again!
       </AlertDanger>}
       {trainingWarningOpen && !trainingCompleted &&
       <AlertWarning style={styles.closeableWarning}>

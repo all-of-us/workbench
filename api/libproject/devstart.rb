@@ -15,6 +15,8 @@ require "json"
 require "optparse"
 require "ostruct"
 require "tempfile"
+require "net/http"
+require "json"
 
 TEST_PROJECT = "all-of-us-workbench-test"
 INSTANCE_NAME = "workbenchmaindb"
@@ -525,7 +527,7 @@ def docker_clean()
   # specific to Docker, it is mounted locally for docker runs. For lack of a
   # better "dev teardown" hook, purge that file here; e.g. in case we decide to
   # invalidate a dev key or change the service account.
-  common.run_inline %W{rm -f #{ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH} #{GSUITE_ADMIN_KEY_PATH}}
+  common.run_inline %W{rm -f #{ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH}}
 
   # See https://github.com/docker/compose/issues/3447
   common.status "Cleaning complete. docker-compose 'not found' errors can be safely ignored"
@@ -826,6 +828,35 @@ Common.register_command({
   :invocation => "circle-build-cdr-indices",
   :description => "Build the CDR indices using CircleCi",
   :fn => ->(*args) { circle_build_cdr_indices("circle-build-cdr-indices", args) }
+})
+
+def make_prep_tables_from_csv(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.cdr_version = "!_prep_tables_!"
+  op.opts.bucket = "all-of-us-workbench-private-cloudsql"
+  op.add_option(
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/validate-prerequisites-exist.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_version} #{op.opts.bucket}}
+  end
+end
+
+Common.register_command({
+  :invocation => "make-prep-tables-from-csv",
+  :description => "Generates criteria prep tables from csv files.",
+  :fn => ->(*args) { make_prep_tables_from_csv("make-prep-tables-from-csv", *args) }
 })
 
 def make_bq_denormalized_tables(cmd_name, *args)
@@ -1141,30 +1172,14 @@ def copy_bq_tables(cmd_name, *args)
     ->(opts, v) { opts.destination_dataset = v},
     "Destination Dataset. Required."
   )
-  op.add_option(
-    "--table-prefixes [prefix1,prefix2,...]",
-    ->(opts, v) { opts.table_prefixes = v},
-    "Comma-delimited table prefixes to filter the publish by, e.g. cb_,ds_. " +
-    "This should only be used in special situations e.g. when the auxilliary " +
-    "cb_ or ds_ tables need to be updated, or if there was an issue with the " +
-    "publish. In general, CDRs should be treated as immutable after the " +
-    "initial publish."
-  )
   op.add_validator ->(opts) { raise ArgumentError unless opts.sa_project and opts.source_dataset and opts.destination_dataset }
   op.parse.validate
-
-  # This is a grep filter. It matches all tables, by default.
-  table_filter = ""
-  if op.opts.table_prefixes
-    prefixes = op.opts.table_prefixes.split(",")
-    table_filter = "^\\(#{prefixes.join("\\|")}\\)"
-  end
 
   source_project = "#{op.opts.source_dataset}".split(':').first
   ServiceAccountContext.new(op.opts.sa_project).run do
     common = Common.new
     common.status "Copying from '#{op.opts.source_dataset}' -> '#{op.opts.dest_dataset}'"
-    common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/copy-bq-dataset.sh #{op.opts.source_dataset} #{op.opts.destination_dataset} #{source_project} #{table_filter}}
+    common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/copy-bq-dataset.sh #{op.opts.source_dataset} #{op.opts.destination_dataset} #{source_project}}
   end
 end
 
@@ -1951,7 +1966,6 @@ def create_wgs_cohort_extraction_bp_workspace(cmd_name, *args)
 
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.dry_run = true
   op.add_option(
       "--billing-project-name [billing-project-name]",
       ->(opts, v) { opts.billing_project_name = v},
@@ -1996,6 +2010,88 @@ Common.register_command({
   :invocation => "create-wgs-cohort-extraction-bp-workspace",
   :description => "Create Terra billing project and workspace impersonating the Genomics Cohort Extraction SA. This will NOT show up as an AoU workspace.",
   :fn => ->(*args) { create_wgs_cohort_extraction_bp_workspace("create-wgs-cohort-extraction-bp-workspace", *args) }
+})
+
+def get_github_commit_hash(repo, branch)
+  response = Net::HTTP.get(URI("https://api.github.com/repos/#{repo}/branches/#{branch}"))
+  return JSON.parse(response)['commit']['sha']
+end
+
+def create_terra_method_snapshot(cmd_name, *args)
+  ensure_docker cmd_name, args
+
+  common = Common.new
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--project [GOOGLE_PROJECT]",
+    ->(opts, v) { opts.project = v},
+    "Google project to act on (e.g. all-of-us-workbench-test). Cannot be used with --all-projects"
+  )
+  op.opts.all_projects = false
+  op.add_option(
+    "--all-projects [all-projects]",
+    ->(opts, _) { opts.all_projects = true},
+    "Create snapshot in every AoU environment. Cannot be used with --project.")
+  op.opts.source_git_repo = "broadinstitute/gatk"
+  op.add_option(
+    "--source-git-repo [source-git-repo]",
+    ->(opts, v) { opts.source_git_repo = v},
+    "git owner/repo where the source file is located. default: #{op.opts.source_git_repo}")
+  op.opts.source_git_path = "scripts/variantstore/wdl/ngs_cohort_extract.wdl"
+  op.add_option(
+    "--source-git-path [source-git-path]",
+    ->(opts, v) { opts.source_git_path = v},
+    "git path where the source file is located, relative to the repo's root directory. default: #{op.opts.source_git_path}")
+  op.opts.source_git_branch = "ah_var_store"
+  op.add_option(
+    "--source-git-branch[source-git-branch]",
+    ->(opts, v) { opts.source_git_ref = v},
+    "git branch where the source file is located. default: #{op.opts.source_git_branch}")
+  op.add_option(
+    "--method-name [method-name]",
+    ->(opts, v) { opts.method_name = v},
+    "Agora method name to create snapshot in. default: WorkbenchConfig.wgsCohortExtraction.extractionMethodConfigurationName
+          Method Namespace will be pulled from WorkbenchConfig.wgsCohortExtraction.extractionMethodConfigurationNamespace")
+  op.add_validator ->(opts) {
+    if (!opts.project and !opts.all_projects)
+      common.error "A project must be set or --all-projects must be true"
+      raise ArgumentError
+    end
+  }
+
+  # Use GcloudContextV2 to validate gcloud auth but we need to drop the
+  # --project argument validation that's built into the constructor
+  GcloudContextV2.validate_gcloud_auth()
+  op.parse.validate
+
+  source_file_commit_hash = get_github_commit_hash(op.opts.source_git_repo, op.opts.source_git_branch)
+
+  projects = op.opts.all_projects ? ENVIRONMENTS.keys - ["local"] : [op.opts.project]
+  projects.each { |project|
+    extractionConfig = get_config(project)['wgsCohortExtraction']
+    flags = ([
+      ["--config-json", get_config_file(project)],
+      ["--source-git-repo", op.opts.source_git_repo],
+      ["--source-git-path", op.opts.source_git_path],
+      ["--source-git-ref", source_file_commit_hash],
+      ["--method-namespace", extractionConfig['extractionMethodConfigurationNamespace']],
+      ["--method-name", op.opts.method_name || extractionConfig['extractionMethodConfigurationName']],
+    ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+    flags.map! { |f| "'#{f}'" }
+
+    ServiceAccountContext.new(project).run do
+      common.run_inline %W{
+       gradle createTerraMethodSnapshot
+       -PappArgs=[#{flags.join(',')}]}
+    end
+  }
+end
+
+Common.register_command({
+  :invocation => "create-terra-method-snapshot",
+  :description => "Create Terra Method snapshot in single or all environments.
+    Method Namespace will be pulled from WorkbenchConfig.wgsCohortExtraction.extractionMethodConfigurationNamespace",
+  :fn => ->(*args) { create_terra_method_snapshot("create-terra-method-snapshot", *args) }
 })
 
 def delete_runtimes(cmd_name, *args)

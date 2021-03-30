@@ -101,7 +101,7 @@ public class CdrVersionServiceTest {
     user.setUsername("user");
     user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
 
-    registeredTier = TestMockFactory.createDefaultAccessTier(accessTierDao);
+    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
     defaultCdrVersion =
         makeCdrVersion(
             1L,

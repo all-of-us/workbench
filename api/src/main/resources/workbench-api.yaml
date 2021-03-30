@@ -2327,7 +2327,7 @@ paths:
           description: A list of data sets containg cohort/concept Id passed.
           schema:
             "$ref": "#/definitions/DataSetListResponse"
-  "/v1/cdrVersionId/{cdrVersionId}/domain/{domain}/domainValue/{domainValue}/dataDictionaryEntry":
+  "/v1/cdrVersionId/{cdrVersionId}/domain/{domain}/domainValue/{value}/dataDictionaryEntry":
     get:
       parameters:
       - in: path
@@ -2340,7 +2340,7 @@ paths:
         required: true
         type: string
       - in: path
-        name: domainValue
+        name: value
         type: string
         required: true
       tags:
@@ -3977,10 +3977,6 @@ definitions:
         default: false
         description: Whether a user is allowed to self-bypass. Only enabled in test
           environments.
-      requireInvitationKey:
-        type: boolean
-        default: false
-        description: Whether the current environment requires an invitation key for signup.
       defaultFreeCreditsDollarLimit:
         type: number
         format: double
@@ -4005,6 +4001,12 @@ definitions:
         type: boolean
         default: false
         description: Whether to use enable RAS-AoU linking for login.gov when user setup account.
+      rasHost:
+        type: string
+        description: The RAS base host name.
+      rasClientId:
+        type: string
+        description: The RAS OAuth client id.
       runtimeImages:
         type: array
         items:
@@ -4045,12 +4047,6 @@ definitions:
   DataDictionaryEntry:
     type: object
     properties:
-      cdrVersionId:
-        type: integer
-        format: int64
-      definedTime:
-        type: integer
-        format: int64
       relevantOmopTable:
         type: string
       fieldName:
@@ -4065,9 +4061,6 @@ definitions:
         type: string
       sourcePpiModule:
         type: string
-      transformedByRegisteredTierPrivacyMethods:
-        type: boolean
-        default: false
   BillingProjectStatus:
     type: string
     description: 'Initialization status of a Firecloud billing project for use with
@@ -4170,6 +4163,7 @@ definitions:
       lastModifiedTime: 1588097211621
       name: "my newest workspace"
       namespace: "aou-rw-test-11112222"
+      googleProject: "aou-rw-test-11112222"
       published: false
       researchPurpose:
         additionalNotes: null
@@ -4244,6 +4238,9 @@ definitions:
       published:
         type: boolean
         default: false
+      googleProject:
+        type: string
+        description: the google project used by the workspace for compute and storage
   WorkspaceBillingUsageResponse:
     type: object
     required:
@@ -8834,3 +8831,9 @@ definitions:
       - RUNNING
       - FAILED
       - SUCCEEDED
+  TierAccessStatus:
+    type: string
+    description: 'Whether a user currently has access to a tier'
+    enum:
+      - DISABLED
+      - ENABLED

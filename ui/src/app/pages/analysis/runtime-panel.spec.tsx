@@ -10,7 +10,7 @@ import {ConfirmDelete, RuntimePanel, Props} from 'app/pages/analysis/runtime-pan
 import {registerApiClient, runtimeApi} from 'app/services/swagger-fetch-clients';
 import {findMachineByName, ComputeType} from 'app/utils/machines';
 import {clearCompoundRuntimeOperations} from 'app/utils/stores';
-import {cdrVersionStore, serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/navigation';
 import {runtimePresets} from 'app/utils/runtime-presets';
 import {runtimeStore} from 'app/utils/stores';
 import {RuntimeConfigurationType, RuntimeStatus, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
@@ -19,8 +19,10 @@ import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {defaultGceConfig, defaultDataprocConfig, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
-import {WorkspacesApiStub, workspaceStubs} from 'testing/stubs/workspaces-api-stub';
+import {workspaceStubs} from 'testing/stubs/workspaces';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {BillingAccountType, BillingStatus} from 'generated/fetch';
+import { cdrVersionStore } from 'app/utils/stores';
 
 describe('RuntimePanel', () => {
   let props: Props;
@@ -38,7 +40,7 @@ describe('RuntimePanel', () => {
   };
 
   beforeEach(() => {
-    cdrVersionStore.next(cdrVersionListResponse);
+    cdrVersionStore.set(cdrVersionListResponse);
     serverConfigStore.next({...defaultServerConfig});
 
     runtimeApiStub = new RuntimeApiStub();

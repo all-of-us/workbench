@@ -77,7 +77,7 @@ interface Props {
   workspaces: WorkspaceResponse[];
 }
 
-const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
+export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
   const [loading, setLoading] = useState(true);
   const [resources, setResources] = useState<WorkspaceResourceResponse>();
   const [wsMap, setWorkspaceMap] = useState<Map<string, Workspace>>();
@@ -148,7 +148,3 @@ const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
       </DataTable></div>
   </React.Fragment> : <SpinnerOverlay/>;
 });
-
-export {
-  RecentResources
-};

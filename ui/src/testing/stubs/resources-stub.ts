@@ -11,7 +11,7 @@ import {
     WorkspaceResource,
 } from 'generated/fetch';
 import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
-import {WorkspaceStubVariables} from 'testing/stubs/workspace-service-stub';
+import {WorkspaceStubVariables} from 'testing/stubs/workspaces';
 
 type InputResource = FileDetail | Cohort | CohortReview | ConceptSet | DataSet;
 export function convertToResources(

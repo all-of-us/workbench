@@ -1,13 +1,12 @@
-import ConceptDomainCard, {Domain} from 'app/component/concept-domain-card';
+import ConceptDomainCard, { Domain } from 'app/component/concept-domain-card';
 import DataResourceCard from 'app/component/data-resource-card';
 import ConceptSetActionsPage from 'app/page/conceptset-actions-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
-import {waitForText} from 'utils/waits-utils';
-import {ResourceCard} from 'app/text-labels';
+import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { waitForText } from 'utils/waits-utils';
+import { ResourceCard } from 'app/text-labels';
 
 describe('Create Concept Sets from Domains', () => {
-
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
@@ -52,7 +51,7 @@ describe('Create Concept Sets from Domains', () => {
     expect(rowValues.name).toBe(conditionName);
 
     await conceptSetPage.reviewAndSaveConceptSet();
-    
+
     // Save modal window
     const conceptSetName = await conceptSetPage.saveConceptSet();
 
@@ -164,5 +163,4 @@ describe('Create Concept Sets from Domains', () => {
     await dataPage.deleteResource(conceptSet1, ResourceCard.ConceptSet);
     await dataPage.deleteResource(conceptSet2, ResourceCard.ConceptSet);
   });
-
 });

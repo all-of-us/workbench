@@ -45,9 +45,4 @@ public interface WorkspaceFreeTierUsageDao extends CrudRepository<DbWorkspaceFre
     return totalCostByUser().stream()
         .collect(Collectors.toMap(UserCostPair::getUser, UserCostPair::getCost));
   }
-
-  default Map<Long, Double> getUserIdToTotalCost() {
-    return totalCostByUser().stream()
-        .collect(Collectors.toMap(p -> p.getUser().getUserId(), UserCostPair::getCost));
-  }
 }

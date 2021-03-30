@@ -26,6 +26,7 @@ import javax.inject.Provider;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.dataset.DataSetService;
@@ -61,7 +62,7 @@ import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.WgsCohortExtractionJob;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
-import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -71,13 +72,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class DataSetController implements DataSetApiDelegate {
 
-  private final BigQueryService bigQueryService;
-  private final DataSetService dataSetService;
-
-  private final Provider<DbUser> userProvider;
-  private final Provider<String> prefixProvider;
-  private final WorkspaceService workspaceService;
-
   // See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
   private static final long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000L;
 
@@ -86,10 +80,17 @@ public class DataSetController implements DataSetApiDelegate {
 
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
+  private final BigQueryService bigQueryService;
+  private final DataSetService dataSetService;
+
+  private final Provider<DbUser> userProvider;
+  private final Provider<String> prefixProvider;
+
   private final CdrVersionService cdrVersionService;
   private final FireCloudService fireCloudService;
   private final NotebooksService notebooksService;
   private final WgsCohortExtractionService wgsCohortExtractionService;
+  private final WorkspaceAuthService workspaceAuthService;
 
   @Autowired
   DataSetController(
@@ -100,8 +101,8 @@ public class DataSetController implements DataSetApiDelegate {
       NotebooksService notebooksService,
       Provider<DbUser> userProvider,
       @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
-      WorkspaceService workspaceService,
-      WgsCohortExtractionService wgsCohortExtractionService) {
+      WgsCohortExtractionService wgsCohortExtractionService,
+      WorkspaceAuthService workspaceAuthService) {
     this.bigQueryService = bigQueryService;
     this.cdrVersionService = cdrVersionService;
     this.dataSetService = dataSetService;
@@ -109,8 +110,8 @@ public class DataSetController implements DataSetApiDelegate {
     this.notebooksService = notebooksService;
     this.userProvider = userProvider;
     this.prefixProvider = prefixProvider;
-    this.workspaceService = workspaceService;
     this.wgsCohortExtractionService = wgsCohortExtractionService;
+    this.workspaceAuthService = workspaceAuthService;
   }
 
   @Override
@@ -118,7 +119,7 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceNamespace, String workspaceFirecloudName, DataSetRequest dataSetRequest) {
     validateDataSetCreateRequest(dataSetRequest);
     final long workspaceId =
-        workspaceService
+        workspaceAuthService
             .getWorkspaceEnforceAccessLevelAndSetCdrVersion(
                 workspaceNamespace, workspaceFirecloudName, WorkspaceAccessLevel.WRITER)
             .getWorkspaceId();
@@ -155,7 +156,7 @@ public class DataSetController implements DataSetApiDelegate {
       String kernelTypeEnumString,
       DataSetRequest dataSetRequest) {
     DbWorkspace dbWorkspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     final KernelTypeEnum kernelTypeEnum = KernelTypeEnum.fromValue(kernelTypeEnumString);
 
@@ -191,7 +192,7 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataSetPreviewResponse> previewDataSetByDomain(
       String workspaceNamespace, String workspaceId, DataSetPreviewRequest dataSetPreviewRequest) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
 
@@ -278,9 +279,9 @@ public class DataSetController implements DataSetApiDelegate {
   public ResponseEntity<EmptyResponse> exportToNotebook(
       String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
     DbWorkspace dbWorkspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    workspaceService.validateActiveBilling(workspaceNamespace, workspaceId);
+    workspaceAuthService.validateActiveBilling(workspaceNamespace, workspaceId);
     // This suppresses 'may not be initialized errors. We will always init to something else before
     // used.
     JSONObject notebookFile = new JSONObject();
@@ -396,7 +397,7 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<Boolean> markDirty(
       String workspaceNamespace, String workspaceId, MarkDataSetRequest markDataSetRequest) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     dataSetService.markDirty(markDataSetRequest.getResourceType(), markDataSetRequest.getId());
     return ResponseEntity.ok(true);
@@ -405,7 +406,7 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteDataSet(
       String workspaceNamespace, String workspaceId, Long dataSetId) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     dataSetService.deleteDataSet(dataSetId);
@@ -419,7 +420,7 @@ public class DataSetController implements DataSetApiDelegate {
       throw new BadRequestException("missing required update field 'etag'");
     }
     long dataSetWorkspaceId =
-        workspaceService
+        workspaceAuthService
             .getWorkspaceEnforceAccessLevelAndSetCdrVersion(
                 workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER)
             .getWorkspaceId();
@@ -430,7 +431,7 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataSet> getDataSet(
       String workspaceNamespace, String workspaceId, Long dataSetId) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     DataSet dataSet =
@@ -446,7 +447,7 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataSetListResponse> getDataSetByResourceId(
       String workspaceNamespace, String workspaceId, ResourceType resourceType, Long id) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     return ResponseEntity.ok(
@@ -455,7 +456,7 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<DataDictionaryEntry> getDataDictionaryEntry(
-      Long cdrVersionId, String domain, String domainValue) {
+      Long cdrVersionId, String domain, String value) {
     DbCdrVersion cdrVersion =
         cdrVersionService
             .findByCdrVersionId(cdrVersionId)
@@ -463,18 +464,19 @@ public class DataSetController implements DataSetApiDelegate {
                 () -> {
                   throw new BadRequestException("Invalid CDR Version");
                 });
+    CdrVersionContext.setCdrVersionNoCheckAuthDomain(cdrVersion);
 
     if (BigQueryTableInfo.getTableName(Domain.fromValue(domain)) == null) {
       throw new BadRequestException("Invalid Domain");
     }
 
-    return ResponseEntity.ok(dataSetService.findDataDictionaryEntry(domainValue, cdrVersion));
+    return ResponseEntity.ok(dataSetService.findDataDictionaryEntry(value, domain));
   }
 
   @Override
   public ResponseEntity<DomainValuesResponse> getValuesFromDomain(
       String workspaceNamespace, String workspaceId, String domainValue) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DomainValuesResponse response = new DomainValuesResponse();
 
