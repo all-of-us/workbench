@@ -53,7 +53,7 @@ export default class Select extends BaseElement {
     const selectedOption = await this.page.evaluate((select) => {
       for (const option of select.options) {
         if (option.selected) {
-          return option.value;
+          return option.textContent;
         }
       }
     }, selectElement);
