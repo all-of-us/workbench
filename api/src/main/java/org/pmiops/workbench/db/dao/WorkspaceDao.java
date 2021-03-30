@@ -53,11 +53,10 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
     return workspace;
   }
 
-  // Returns the requested workspace looked up by workspace namespace (aka billing project name).
-  // Only active workspaces are searched. Returns null if no active workspace is found.
-  default Optional<DbWorkspace> getByNamespace(String ns) {
+  default Optional<DbWorkspace> getByNamespace(String workspaceNamespace) {
     return findFirstByWorkspaceNamespaceAndActiveStatusOrderByLastModifiedTimeDesc(
-        ns, DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+        workspaceNamespace,
+        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 
   DbWorkspace findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(

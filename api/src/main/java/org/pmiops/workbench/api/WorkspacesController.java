@@ -236,9 +236,12 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           "Could not save new workspace to database. Calling Google Cloud billing to update the failed billing project's billing account back to the free tier.",
           e);
 
+      // I don't think this is a bug but it's confusing that we're calling a function that is
+      // updating the dbWorkspace object and expecting for it to not be saved.
+      // There might be a refactoring opportunity here to separate out the Google Cloud
+      // API calls so we can call just that instead of this which does that and a little more.
       workspaceService.updateWorkspaceBillingAccount(
           dbWorkspace, workbenchConfigProvider.get().billing.freeTierBillingAccountName());
-      // TODO eric: I think there's a bug here where the new billing status is never saved
       throw e;
     }
 
