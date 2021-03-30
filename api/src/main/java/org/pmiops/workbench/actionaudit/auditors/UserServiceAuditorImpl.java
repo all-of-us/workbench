@@ -67,7 +67,7 @@ public class UserServiceAuditorImpl implements UserServiceAuditor {
   }
 
   private String tiersToString(List<DbAccessTier> tiers) {
-    return tiers.stream().sorted().map(DbAccessTier::getShortName).collect(Collectors.joining(","));
+    return tiers.stream().map(DbAccessTier::getShortName).sorted().collect(Collectors.joining(","));
   }
 
   @Override

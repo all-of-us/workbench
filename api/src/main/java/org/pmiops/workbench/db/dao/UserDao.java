@@ -54,12 +54,19 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
           + "OR lower(dbUser.givenName) LIKE lower(concat('%', :term, '%'))")
   List<DbUser> findUsersBySearchString(@Param("term") String term, Sort sort);
 
+  interface UserCountGaugeLabelsAndValue {
+    Long getUserCount();
+
+    Boolean getDisabled();
+
+    String getAccessTierShortNames();
+  }
+
   @Query(
       // JPQL doesn't allow join on subquery
       nativeQuery = true,
       value =
-          "SELECT COUNT(u.user_id) AS user_count, u.disabled, t.access_tier_short_names, "
-              + "CASE WHEN beta_access_bypass_time IS NOT NULL THEN TRUE ELSE FALSE END AS beta_is_bypassed "
+          "SELECT COUNT(u.user_id) AS user_count, u.disabled, t.access_tier_short_names "
               + "FROM user u "
               + "LEFT JOIN ("
               + "  SELECT u.user_id, GROUP_CONCAT(DISTINCT a.short_name) AS access_tier_short_names "
@@ -68,19 +75,8 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "  JOIN access_tier a ON a.access_tier_id = uat.access_tier_id "
               + "  GROUP BY u.user_id"
               + ") as t ON t.user_id = u.user_id "
-              + "GROUP BY u.disabled, t.access_tier_short_names, "
-              + "CASE WHEN beta_access_bypass_time IS NOT NULL THEN TRUE ELSE FALSE END ")
+              + "GROUP BY u.disabled, t.access_tier_short_names ")
   List<UserCountGaugeLabelsAndValue> getUserCountGaugeData();
-
-  interface UserCountGaugeLabelsAndValue {
-    Long getUserCount();
-
-    Boolean getDisabled();
-
-    String getAccessTierShortNames();
-
-    Boolean getBetaIsBypassed();
-  }
 
   // Note: setter methods are included only where necessary for testing. See ProfileServiceTest.
   interface DbAdminTableUser {

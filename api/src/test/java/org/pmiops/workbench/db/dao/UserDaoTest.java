@@ -32,10 +32,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserDaoTest extends SpringTest {
-
-  private static final Timestamp NOW = Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
-  private static final Timestamp BETA_ACCESS_REQUEST_TIME =
-      Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
   private static final String STREET_ADDRESS_1 = "101 Main St";
   private static final String STREET_ADDRESS_2 = "# 202";
   private static final String CITY = "New Braunfels";
@@ -60,7 +56,6 @@ public class UserDaoTest extends SpringTest {
   public void testGetUserCountGaugeData_singleValue() {
     DbUser user1 = new DbUser();
     user1.setDisabled(false);
-    user1.setBetaAccessBypassTime(NOW);
     user1 = userDao.save(user1);
     addUserToTier(user1, registeredTier);
 
@@ -68,7 +63,6 @@ public class UserDaoTest extends SpringTest {
     assertThat(rows).hasSize(1);
     final UserCountGaugeLabelsAndValue row = rows.get(0);
     assertThat(row.getAccessTierShortNames()).contains(registeredTier.getShortName());
-    assertThat(row.getBetaIsBypassed()).isTrue();
     assertThat(row.getDisabled()).isFalse();
     assertThat(row.getUserCount()).isEqualTo(1L);
   }
@@ -83,23 +77,18 @@ public class UserDaoTest extends SpringTest {
   public void testGetUserCountGaugeData_multipleUsers() {
     final DbInstitution institution = createInstitution();
 
-    insertTestUsers(false, true, 2, institution, registeredTier);
-    insertTestUsers(false, false, 1, institution, registeredTier);
-    insertTestUsers(true, false, 5, institution, registeredTier);
-    insertTestUsers(false, true, 10, institution);
+    insertTestUsers(false, 2, institution, registeredTier);
+    insertTestUsers(false, 1, institution, registeredTier);
+    insertTestUsers(true, 5, institution, registeredTier);
+    insertTestUsers(false, 10, institution);
 
     final List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
-    assertThat(rows).hasSize(4);
+    // registered/enabled, registered/disabled, and unregistered/enabled
+    assertThat(rows).hasSize(3);
 
+    // registered/enabled: 3
     assertThat(
             rows.stream()
-                .filter(UserCountGaugeLabelsAndValue::getBetaIsBypassed)
-                .anyMatch(UserCountGaugeLabelsAndValue::getDisabled))
-        .isFalse();
-
-    assertThat(
-            rows.stream()
-                .filter(r -> !r.getBetaIsBypassed())
                 .filter(
                     r ->
                         r.getAccessTierShortNames() != null
@@ -108,11 +97,24 @@ public class UserDaoTest extends SpringTest {
                 .findFirst()
                 .map(UserCountGaugeLabelsAndValue::getUserCount)
                 .orElse(-1L))
-        .isEqualTo(1);
+        .isEqualTo(3);
 
+    // registered/disabled: 5
     assertThat(
             rows.stream()
-                .filter(UserCountGaugeLabelsAndValue::getBetaIsBypassed)
+                .filter(
+                    r ->
+                        r.getAccessTierShortNames() != null
+                            && r.getAccessTierShortNames().contains(registeredTier.getShortName()))
+                .filter(UserCountGaugeLabelsAndValue::getDisabled)
+                .findFirst()
+                .map(UserCountGaugeLabelsAndValue::getUserCount)
+                .orElse(-1L))
+        .isEqualTo(5);
+
+    // unregistered/enabled: 10
+    assertThat(
+            rows.stream()
                 .filter(
                     r ->
                         r.getAccessTierShortNames() == null
@@ -125,11 +127,7 @@ public class UserDaoTest extends SpringTest {
   }
 
   private List<DbUser> insertTestUsers(
-      boolean isDisabled,
-      boolean isBetaBypassed,
-      long numUsers,
-      DbInstitution institution,
-      DbAccessTier... tiers) {
+      boolean isDisabled, long numUsers, DbInstitution institution, DbAccessTier... tiers) {
 
     ImmutableList.Builder<DbUser> resultList = ImmutableList.builder();
 
@@ -138,14 +136,10 @@ public class UserDaoTest extends SpringTest {
       user.setGivenName("Bar");
       user.setFamilyName("Foo");
       user.setUsername("jaycarlton@aou.biz");
-      user.setBetaAccessRequestTime(BETA_ACCESS_REQUEST_TIME);
       final DbAddress address = createAddress();
       address.setUser(user);
       user.setAddress(address); // ?
       user.setDisabled(isDisabled);
-      if (isBetaBypassed) {
-        user.setBetaAccessBypassTime(NOW);
-      }
       user = userDao.save(user);
 
       createAffiliation(user, institution);
