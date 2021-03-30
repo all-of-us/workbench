@@ -9,7 +9,6 @@ import {WorkspaceWrapperComponent} from 'app/pages/workspace/workspace-wrapper/c
 import * as StackTrace from 'stacktrace-js';
 
 import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
-import {ErrorReporterService} from './services/error-reporter.service';
 import {ProfileStorageService} from './services/profile-storage.service';
 import {ServerConfigService} from './services/server-config.service';
 import {SignInService} from './services/sign-in.service';

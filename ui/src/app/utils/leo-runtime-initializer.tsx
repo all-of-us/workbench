@@ -333,7 +333,6 @@ export class LeoRuntimeInitializer {
     // Attempt to take the appropriate next action given the current runtime status.
     try {
       if (this.reachedResolution()) {
-        reportError("lol", stackdriverReporterStore.get().reporter);
         // We've reached the goal - resolve the Promise.
         return this.resolve(this.currentRuntime);
       } else if (this.currentRuntime === null || this.isRuntimeDeleted()) {
