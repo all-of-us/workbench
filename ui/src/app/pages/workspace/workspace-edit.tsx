@@ -2,7 +2,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
-import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
 import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
@@ -65,8 +64,8 @@ import {
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 import {OverlayPanel} from 'primereact/overlaypanel';
+import {withStackdriverErrorReporterContext} from '../../services/error-reporter-context';
 import {OldCdrVersionModal} from './old-cdr-version-modal';
-import {withStackdriverErrorReporterContext} from "../../services/error-reporter-context";
 
 export const styles = reactStyles({
   categoryRow: {
@@ -258,13 +257,13 @@ export interface WorkspaceEditState {
 }
 
 export const WorkspaceEdit = fp.flow(
-    withCurrentWorkspace(),
-    withCdrVersions(),
-    withStackdriverErrorReporterContext,
-    withUserProfile()
+  withCurrentWorkspace(),
+  withCdrVersions(),
+  withStackdriverErrorReporterContext,
+  withUserProfile()
 )(
-    class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
-      constructor(props: WorkspaceEditProps) {
+  class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
+    constructor(props: WorkspaceEditProps) {
         super(props);
         this.state = {
           billingAccounts: [],
@@ -288,11 +287,11 @@ export const WorkspaceEdit = fp.flow(
         };
       }
 
-      cancel(): void {
+    cancel(): void {
         history.back();
       }
 
-      async fetchBillingAccounts() {
+    async fetchBillingAccounts() {
         const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
 
         if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
@@ -300,8 +299,8 @@ export const WorkspaceEdit = fp.flow(
           if (maybeFreeTierAccount) {
             this.setState(prevState => fp.set(
                 ['workspace', 'billingAccountName'],
-                maybeFreeTierAccount.name,
-                prevState));
+              maybeFreeTierAccount.name,
+              prevState));
           }
         } else if (this.isMode(WorkspaceEditMode.Edit)) {
           const fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.namespace);
@@ -345,7 +344,7 @@ export const WorkspaceEdit = fp.flow(
         this.setState({billingAccounts});
       }
 
-      async componentDidMount() {
+    async componentDidMount() {
         await this.fetchBillingAccounts();
       }
 
@@ -357,7 +356,7 @@ export const WorkspaceEdit = fp.flow(
        * This is where logic lives to auto-set the CDR version and
        * "reviewRequested" flag, which depend on the workspace state & edit mode.
        */
-      createInitialWorkspaceState(): Workspace {
+    createInitialWorkspaceState(): Workspace {
         // copy the props into a new object so our modifications here don't affect them
         let workspace: Workspace = {...this.props.workspace};
         if (this.isMode(WorkspaceEditMode.Create)) {
@@ -419,7 +418,7 @@ export const WorkspaceEdit = fp.flow(
         return workspace;
       }
 
-      createInitialCdrVersionsList(): Array<CdrVersion> {
+    createInitialCdrVersionsList(): Array<CdrVersion> {
         if (this.isMode(WorkspaceEditMode.Edit)) {
           // In edit mode, you cannot modify the CDR version, therefore it's fine
           // to show archived CDRs in the drop-down so that it accurately displays
@@ -430,7 +429,7 @@ export const WorkspaceEdit = fp.flow(
         }
       }
 
-      updateSelectedResearch(): boolean {
+    updateSelectedResearch(): boolean {
         if (this.isMode(WorkspaceEditMode.Create)) {
           return false;
         }
@@ -438,14 +437,14 @@ export const WorkspaceEdit = fp.flow(
         return this.researchPurposeCategoriesSelected(rp);
       }
 
-      researchPurposeCategoriesSelected(researchPurpose: ResearchPurpose) {
+    researchPurposeCategoriesSelected(researchPurpose: ResearchPurpose) {
         return researchPurpose.ancestry || researchPurpose.controlSet ||
             researchPurpose.diseaseFocusedResearch || researchPurpose.ethics ||
             researchPurpose.drugDevelopment || researchPurpose.methodsDevelopment ||
             researchPurpose.populationHealth || researchPurpose.socialBehavioral;
       }
 
-      getLiveCdrVersions(): Array<CdrVersion> {
+    getLiveCdrVersions(): Array<CdrVersion> {
         const cdrResp = this.props.cdrVersionListResponse;
         const liveCdrVersions = cdrResp.items.filter(cdr => cdr.archivalStatus === ArchivalStatus.LIVE);
         if (liveCdrVersions.length === 0) {
@@ -455,11 +454,11 @@ export const WorkspaceEdit = fp.flow(
         return liveCdrVersions;
       }
 
-      getAllCdrVersions(): Array<CdrVersion> {
+    getAllCdrVersions(): Array<CdrVersion> {
         return [...this.props.cdrVersionListResponse.items];
       }
 
-      makeDiseaseInput(): React.ReactNode {
+    makeDiseaseInput(): React.ReactNode {
         return (
             <SearchInput
                 data-test-id='diseaseOfFocus-input'
@@ -476,12 +475,12 @@ export const WorkspaceEdit = fp.flow(
         );
       }
 
-      openContactWidget() {
+    openContactWidget() {
         const {profileState: {profile: {contactEmail, familyName, givenName, username}}} = this.props;
         openZendeskWidget(givenName, familyName, username, contactEmail);
       }
 
-      renderBillingDescription() {
+    renderBillingDescription() {
         return <div>
           The <AouTitle/> provides $300 in free credits per user. Please refer to
           <StyledAnchorTag href={supportUrls.billing} target='_blank'> &nbsp;this article
@@ -492,7 +491,7 @@ export const WorkspaceEdit = fp.flow(
         </div>;
       }
 
-      onResearchPurposeChange(checked: boolean) {
+    onResearchPurposeChange(checked: boolean) {
         // If Checkbox is selected expand the research purpose categories
         if (checked) {
           this.setState({showResearchPurpose: true, selectResearchPurpose: true});
@@ -501,13 +500,13 @@ export const WorkspaceEdit = fp.flow(
         }
       }
 
-      get researchPurposeCheck(): boolean {
+    get researchPurposeCheck(): boolean {
         // If any one of the Research Purpose is selected or if the user has explicitly selected the research purpose
         return this.state.selectResearchPurpose ||
             this.researchPurposeCategoriesSelected(this.state.workspace.researchPurpose);
       }
 
-      get iconClass(): string {
+    get iconClass(): string {
         return this.state.showResearchPurpose ? 'pi pi-angle-down' : 'pi pi-angle-right';
       }
       /**
@@ -515,7 +514,7 @@ export const WorkspaceEdit = fp.flow(
        * (plus optional child elements) for each of the "primary purpose of your
        * project" options.
        */
-      makePrimaryPurposeForm(rp: ResearchPurposeItem, index: number): React.ReactNode {
+    makePrimaryPurposeForm(rp: ResearchPurposeItem, index: number): React.ReactNode {
         let children: React.ReactNode;
         if (rp.shortName === 'diseaseFocusedResearch') {
           children = this.makeDiseaseInput();
@@ -547,14 +546,14 @@ export const WorkspaceEdit = fp.flow(
         </div>;
       }
 
-      updateOtherDisseminateResearch(value) {
+    updateOtherDisseminateResearch(value) {
         this.setState(fp.set(['workspace', 'researchPurpose', 'otherDisseminateResearchFindings'], value));
       }
       /**
        * Creates a form element containing the checkbox, header, and description
        * (plus optional child elements) for each of the "Disseminate Research" options.
        */
-      makeDisseminateForm(rp, index): React.ReactNode {
+    makeDisseminateForm(rp, index): React.ReactNode {
         let children: React.ReactNode;
         if (rp.label === 'Other') {
           children = <TextArea value={this.state.workspace.researchPurpose.otherDisseminateResearchFindings}
@@ -583,7 +582,7 @@ export const WorkspaceEdit = fp.flow(
        * Creates the form element for each of the "focus on specific populations"
        * options.
        */
-      makeSpecificPopulationForm(item: SpecificPopulationItem): React.ReactNode {
+    makeSpecificPopulationForm(item: SpecificPopulationItem): React.ReactNode {
         return <div key={item.label}>
           <div style={{fontWeight: 'bold', marginBottom: '0.3rem'}}>{item.label} *</div>
           {item.subCategory.map((sub, index) =>
@@ -606,7 +605,7 @@ export const WorkspaceEdit = fp.flow(
         </div>;
       }
 
-      makeOutcomingResearchForm(item, index): React.ReactNode {
+    makeOutcomingResearchForm(item, index): React.ReactNode {
         return <div key={index} style={{...styles.categoryRow, paddingTop: '0rem'}}>
           <CheckBox
               style={styles.checkboxStyle}
@@ -622,7 +621,7 @@ export const WorkspaceEdit = fp.flow(
         </div>;
       }
 
-      renderHeader() {
+    renderHeader() {
         // use workspace name from props instead of state here
         // because it's a record of the initial value
         const {workspace, workspaceEditMode} = this.props;
@@ -636,7 +635,7 @@ export const WorkspaceEdit = fp.flow(
         }
       }
 
-      renderButtonText() {
+    renderButtonText() {
         switch (this.props.workspaceEditMode) {
           case WorkspaceEditMode.Create: return 'Create Workspace';
           case WorkspaceEditMode.Edit: return 'Update Workspace';
@@ -644,14 +643,14 @@ export const WorkspaceEdit = fp.flow(
         }
       }
 
-      get primaryPurposeIsSelected() {
+    get primaryPurposeIsSelected() {
         const rp = this.state.workspace.researchPurpose;
         return rp.ancestry || rp.commercialPurpose || rp.controlSet ||
             rp.diseaseFocusedResearch || rp.ethics || rp.drugDevelopment || rp.educational ||
             rp.methodsDevelopment || rp.otherPurpose || rp.populationHealth || rp.socialBehavioral;
       }
 
-      updatePrimaryPurpose(category, value) {
+    updatePrimaryPurpose(category, value) {
         this.updateResearchPurpose(category, value);
         if (!value && !this.researchPurposeCategoriesSelected(this.state.workspace.researchPurpose)) {
           // If all research purpose cateogries are unselected un check the Research Purpose checkbox
@@ -660,46 +659,46 @@ export const WorkspaceEdit = fp.flow(
 
       }
 
-      updateResearchPurpose(category, value) {
+    updateResearchPurpose(category, value) {
         if (category === 'population' && !value) {
           this.setState(fp.set(['workspace', 'researchPurpose', 'populationDetails'], []));
         }
         this.setState(fp.set(['workspace', 'researchPurpose', category], value));
       }
 
-      updateAttribute(attribute, populationDetails, value) {
+    updateAttribute(attribute, populationDetails, value) {
         const selectedPopulations = fp.get(['workspace', 'researchPurpose' , attribute], this.state);
         if (value) {
           if (!!selectedPopulations) {
             this.setState(fp.set(['workspace', 'researchPurpose', attribute],
-                selectedPopulations.concat([populationDetails])));
+              selectedPopulations.concat([populationDetails])));
           } else {
             this.setState(fp.set(['workspace', 'researchPurpose', attribute],
                 [populationDetails]));
           }
         } else {
           this.setState(fp.set(['workspace', 'researchPurpose', attribute],
-              selectedPopulations.filter(v => v !== populationDetails)));
+            selectedPopulations.filter(v => v !== populationDetails)));
         }
       }
 
-      updateSpecificPopulation(populationDetails, value) {
+    updateSpecificPopulation(populationDetails, value) {
         this.updateAttribute('populationDetails', populationDetails, value);
       }
 
-      specificPopulationCheckboxSelected(populationEnum: SpecificPopulationEnum): boolean {
+    specificPopulationCheckboxSelected(populationEnum: SpecificPopulationEnum): boolean {
         return fp.includes(populationEnum, this.state.workspace.researchPurpose.populationDetails);
       }
 
-      disseminateCheckboxSelected(disseminateEnum: DisseminateResearchEnum): boolean {
+    disseminateCheckboxSelected(disseminateEnum: DisseminateResearchEnum): boolean {
         return fp.includes(disseminateEnum, this.state.workspace.researchPurpose.disseminateResearchFindingList);
       }
 
-      researchOutcomeCheckboxSelected(researchOutcomeEnum: ResearchOutcomeEnum): boolean {
+    researchOutcomeCheckboxSelected(researchOutcomeEnum: ResearchOutcomeEnum): boolean {
         return fp.includes(researchOutcomeEnum, this.state.workspace.researchPurpose.researchOutcomeList);
       }
 
-      onSaveClick() {
+    onSaveClick() {
         if (this.isMode(WorkspaceEditMode.Create)) {
           AnalyticsTracker.Workspaces.Create();
         } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
@@ -711,7 +710,7 @@ export const WorkspaceEdit = fp.flow(
         this.saveWorkspace();
       }
 
-      async saveWorkspace() {
+    async saveWorkspace() {
         try {
           this.setState({loading: true});
           let workspace = this.state.workspace;
@@ -724,11 +723,11 @@ export const WorkspaceEdit = fp.flow(
                 await workspacesApi().createWorkspace(this.state.workspace);
           } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
             const cloneWorkspace = await workspacesApi().cloneWorkspace(
-                this.props.workspace.namespace, this.props.workspace.id,
-                {
-                  includeUserRoles: this.state.cloneUserRole,
-                  workspace: this.state.workspace
-                });
+              this.props.workspace.namespace, this.props.workspace.id,
+              {
+                includeUserRoles: this.state.cloneUserRole,
+                workspace: this.state.workspace
+              });
             workspace = cloneWorkspace.workspace;
           } else {
             workspace.researchPurpose.needsReviewPrompt = false;
@@ -809,18 +808,18 @@ export const WorkspaceEdit = fp.flow(
         }
       }
 
-      resetWorkspaceEditor() {
+    resetWorkspaceEditor() {
         this.setState({
           workspaceCreationError : false,
           workspaceCreationConflictError : false
         });
       }
 
-      isMode(mode) {
+    isMode(mode) {
         return this.props.workspaceEditMode === mode;
       }
 
-      buildBillingAccountOptions() {
+    buildBillingAccountOptions() {
         const {enableBillingUpgrade} = serverConfigStore.getValue();
         const options = this.state.billingAccounts.map(a => ({
           label: a.displayName,
@@ -840,7 +839,7 @@ export const WorkspaceEdit = fp.flow(
 
       // are we currently performing a CDR Version Upgrade?
       // i.e. a Duplication from a workspace with an older CDR Version to the default version
-      isCdrVersionUpgrade() {
+    isCdrVersionUpgrade() {
         const {workspace: srcWorkspace} = this.props;
         const {workspace: destWorkspace} = this.state;
         return this.isMode(WorkspaceEditMode.Duplicate) &&
@@ -852,7 +851,7 @@ export const WorkspaceEdit = fp.flow(
        * Validates the current workspace state. This is a pass-through to validate.js
        * which returns the standard error object if any validation errors occur.
        */
-      private validate(): any {
+    private validate(): any {
         const {
           populationChecked,
           workspace: {
@@ -981,7 +980,7 @@ export const WorkspaceEdit = fp.flow(
         return validate(values, constraints, {fullMessages: false});
       }
 
-      render() {
+    render() {
         const {enableBillingUpgrade} = serverConfigStore.getValue();
         const {
           workspace: {
@@ -1147,7 +1146,7 @@ export const WorkspaceEdit = fp.flow(
                       </div>
                       <div style={{marginLeft: '2rem'}}>
                         {ResearchPurposeItems.map(
-                            (rp, i) => this.makePrimaryPurposeForm(rp, i))}
+                          (rp, i) => this.makePrimaryPurposeForm(rp, i))}
                       </div></FlexColumn>}
                   </FlexColumn>
 
@@ -1194,11 +1193,11 @@ export const WorkspaceEdit = fp.flow(
               <FlexRow>
                 <FlexColumn style={styles.flexColumnBy2}>
                   {disseminateFindings.slice(0, sliceByHalfLength(disseminateFindings)).map(
-                      (rp, i) => this.makeDisseminateForm(rp, rp.shortName))}
+                    (rp, i) => this.makeDisseminateForm(rp, rp.shortName))}
                 </FlexColumn>
                 <FlexColumn style={styles.flexColumnBy2}>
                   {disseminateFindings.slice(sliceByHalfLength(disseminateFindings)).map(
-                      (rp, i) => this.makeDisseminateForm(rp, rp.shortName))}
+                    (rp, i) => this.makeDisseminateForm(rp, rp.shortName))}
                 </FlexColumn>
               </FlexRow>
             </WorkspaceEditSection>
@@ -1210,7 +1209,7 @@ export const WorkspaceEdit = fp.flow(
               <FlexRow style={{marginLeft: '1rem'}}>
                 <FlexColumn style={{flex: '1 1 0'}}>
                   {researchOutcomes.map(
-                      (rp, i) => this.makeOutcomingResearchForm(rp, i))}
+                    (rp, i) => this.makeOutcomingResearchForm(rp, i))}
                 </FlexColumn>
               </FlexRow>
             </WorkspaceEditSection>
@@ -1479,4 +1478,4 @@ export const WorkspaceEdit = fp.flow(
         </FadeBox> ;
       }
 
-    });
+  });

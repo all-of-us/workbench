@@ -22,7 +22,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import * as validate from 'validate.js';
-import {withStackdriverErrorReporterContext} from "../../services/error-reporter-context";
+import {withStackdriverErrorReporterContext} from '../../services/error-reporter-context';
 
 const styles = reactStyles({
   checkbox: {height: 17, width: 17, marginTop: '0.15rem'},

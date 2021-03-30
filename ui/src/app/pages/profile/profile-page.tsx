@@ -2,7 +2,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
-import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
@@ -34,7 +33,7 @@ import {environment} from 'environments/environment';
 import {InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
-import {withStackdriverErrorReporterContext} from "../../services/error-reporter-context";
+import {withStackdriverErrorReporterContext} from '../../services/error-reporter-context';
 
 
 const controlledTierBadge = '/assets/icons/controlled-tier-badge.svg';

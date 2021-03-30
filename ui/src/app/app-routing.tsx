@@ -40,9 +40,9 @@ import {WorkspaceAbout} from './pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {WorkspaceList} from './pages/workspace/workspace-list';
+import {StackdriverReporterProvider} from './services/error-reporter-context';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
-import {StackdriverReporterProvider} from "./services/error-reporter-context";
 
 
 const signInGuard: Guard = {

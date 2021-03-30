@@ -1,13 +1,13 @@
-import * as React from "react";
-import {createContext, useEffect, useState} from "react";
+import * as React from 'react';
+import {createContext, useEffect, useState} from 'react';
 
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
-import {atom} from "app/utils/subscribable";
-import {serverConfigStore, useStore} from "app/utils/stores";
-import {configApi} from "app/services/swagger-fetch-clients";
-import {serverConfigStore as angularServerConfigStore} from "app/utils/navigation";
-import {environment} from "environments/environment";
+import {configApi} from 'app/services/swagger-fetch-clients';
+import {serverConfigStore as angularServerConfigStore} from 'app/utils/navigation';
+import {serverConfigStore, useStore} from 'app/utils/stores';
+import {atom} from 'app/utils/subscribable';
+import {environment} from 'environments/environment';
 
 interface StackdriverReporterStore {
   reporter?: StackdriverErrorReporter;
@@ -31,11 +31,11 @@ export const StackdriverReporterProvider = ({children}) => {
       return;
     }
 
-    async function getServerConfig () {
+    async function getServerConfig() {
       if (config) {
         return;
       } else if (angularServerConfigStore.getValue()) {
-        setConfig(angularServerConfigStore.getValue())
+        setConfig(angularServerConfigStore.getValue());
       } else if (serverConfigStore.get()) {
         setConfig(serverConfigStore.get());
       } else {
@@ -56,8 +56,7 @@ export const StackdriverReporterProvider = ({children}) => {
         projectId: config.projectId,
       });
       stackdriverReporterStore.set(reporter);
-    }
-    else {
+    } else {
       console.log('wtf but in context');
     }
   });
@@ -66,8 +65,8 @@ export const StackdriverReporterProvider = ({children}) => {
     reportError: reportError
   }}>
     {children}
-  </StackdriverErrorReporterContext.Provider>
-}
+  </StackdriverErrorReporterContext.Provider>;
+};
 
 /**
  * Reports an error to Stackdriver error logging, if enabled.

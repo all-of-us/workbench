@@ -91,7 +91,6 @@ describe('RuntimeInitializer', () => {
   const runInitializerAndTimers = async(options?: Partial<LeoRuntimeInitializerOptions>, maxLoops?: number): Promise<Runtime> => {
     const runtimePromise = LeoRuntimeInitializer.initialize({
       workspaceNamespace: workspaceNamespace,
-      stackdriverErrorReporter: null,
       ...options
     });
     await runTimersUntilSettled(runtimePromise, maxLoops);
@@ -179,8 +178,7 @@ describe('RuntimeInitializer', () => {
       }; });
 
     LeoRuntimeInitializer.initialize({
-      workspaceNamespace: workspaceNamespace,
-      stackdriverErrorReporter: null,
+      workspaceNamespace: workspaceNamespace
     });
     await new Promise(setImmediate);
 
@@ -207,7 +205,6 @@ describe('RuntimeInitializer', () => {
 
     LeoRuntimeInitializer.initialize({
       workspaceNamespace: workspaceNamespace,
-      stackdriverErrorReporter: null,
     });
     await new Promise(setImmediate);
 

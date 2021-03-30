@@ -33,7 +33,7 @@ import {
   PublicInstitutionDetails,
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
-import {withStackdriverErrorReporterContext} from "../../../services/error-reporter-context";
+import {withStackdriverErrorReporterContext} from '../../../services/error-reporter-context';
 
 const styles = reactStyles({
   ...commonStyles,
