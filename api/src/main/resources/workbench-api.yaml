@@ -5189,6 +5189,9 @@ definitions:
       accessTierShortNames:
         type: string
         description: Short names of access tiers available to the user, comma-delimited if multiple.
+      dataAccessLevel:
+        "$ref": "#/definitions/DataAccessLevel"
+        description: DEPRECATED.  Will be replaced by accessTierShortNames.
       givenName:
         type: string
       familyName:
@@ -5283,6 +5286,9 @@ definitions:
       accessTierShortNames:
         type: string
         description: Short names of access tiers available to the user, comma-delimited if multiple.
+      dataAccessLevel:
+        "$ref": "#/definitions/DataAccessLevel"
+        description: DEPRECATED.  Will be replaced by accessTierShortNames.
       degrees:
         type: array
         items:

@@ -37,6 +37,7 @@ import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.AdminTableUser;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.Profile;
@@ -123,13 +124,18 @@ public class ProfileService {
     final String accessTierShortNames =
         String.join(",", accessTierService.getAccessTierShortNamesForUser(user));
 
+    // temporary - we will remove Data Access Level from the model in RW-6189
+    final DataAccessLevel dataAccessLevelKluge =
+        AccessTierService.temporaryDataAccessLevelKluge(accessTierShortNames);
+
     return profileMapper.toModel(
         user,
         verifiedInstitutionalAffiliation,
         latestTermsOfService,
         freeTierUsage,
         freeTierDollarQuota,
-        accessTierShortNames);
+        accessTierShortNames,
+        dataAccessLevelKluge);
   }
 
   public void validateAffiliation(Profile profile) {
@@ -466,7 +472,14 @@ public class ProfileService {
 
   public List<AdminTableUser> getAdminTableUsers() {
     return userDao.getAdminTableUsers().stream()
-        .map(profileMapper::adminViewToModel)
+        .map(
+            dbAdminTableUser -> {
+              // temporary - we will remove Data Access Level from the model in RW-6189
+              DataAccessLevel dataAccessLevelKluge =
+                  AccessTierService.temporaryDataAccessLevelKluge(
+                      dbAdminTableUser.getAccessTierShortNames());
+              return profileMapper.adminViewToModel(dbAdminTableUser, dataAccessLevelKluge);
+            })
         .collect(ImmutableList.toImmutableList());
   }
   /**

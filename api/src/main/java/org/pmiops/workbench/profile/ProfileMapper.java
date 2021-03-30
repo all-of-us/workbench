@@ -7,6 +7,7 @@ import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.model.AdminTableUser;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -34,9 +35,10 @@ public interface ProfileMapper {
       DbUserTermsOfService latestTermsOfService,
       Double freeTierUsage,
       Double freeTierDollarQuota,
-      String accessTierShortNames);
+      String accessTierShortNames,
+      DataAccessLevel dataAccessLevel);
 
-  AdminTableUser adminViewToModel(UserDao.DbAdminTableUser dbUser);
+  AdminTableUser adminViewToModel(UserDao.DbAdminTableUser dbUser, DataAccessLevel dataAccessLevel);
 
   // not used: TODO remove?
 
