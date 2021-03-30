@@ -10,9 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
-public class WorkspaceDaoImpl implements WorkspaceDaoCustom {
+public class WorkspaceDaoCustomImpl implements WorkspaceDaoCustom {
 
-  private static final Logger log = Logger.getLogger(WorkspaceDaoImpl.class.getName());
+  private static final Logger log = Logger.getLogger(WorkspaceDaoCustomImpl.class.getName());
 
   @Autowired private Clock clock;
 

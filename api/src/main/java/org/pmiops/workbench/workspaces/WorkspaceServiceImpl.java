@@ -13,11 +13,7 @@ import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.Cloudbilling.Projects.UpdateBillingInfo;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Sets;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -59,9 +55,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.BillingStatus;
@@ -222,19 +216,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-  public Map<String, FirecloudWorkspaceAccessEntry> getFirecloudWorkspaceAcls(
-      String workspaceNamespace, String firecloudName) {
-    FirecloudWorkspaceACL aclResp =
-        fireCloudService.getWorkspaceAclAsService(workspaceNamespace, firecloudName);
-
-    // Swagger Java codegen does not handle the WorkspaceACL model correctly; it returns a GSON map
-    // instead. Run this through a typed Gson conversion process to parse into the desired type.
-    Type accessEntryType = new TypeToken<Map<String, FirecloudWorkspaceAccessEntry>>() {}.getType();
-    Gson gson = new Gson();
-    return gson.fromJson(gson.toJson(aclResp.getAcl(), accessEntryType), accessEntryType);
-  }
-
-  @Override
   public void deleteWorkspace(DbWorkspace dbWorkspace) {
     // This deletes all Firecloud and google resources, however saves all references
     // to the workspace and its resources in the Workbench database.
@@ -278,94 +259,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-  public DbWorkspace updateWorkspaceAcls(
-      DbWorkspace workspace,
-      Map<String, WorkspaceAccessLevel> updatedAclsMap,
-      String registeredUsersGroup) {
-    // userRoleMap is a map of the new permissions for ALL users on the ws
-    Map<String, FirecloudWorkspaceAccessEntry> aclsMap =
-        getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
-
-    // Iterate through existing roles, update/remove them
-    ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
-    Map<String, WorkspaceAccessLevel> toAdd = new HashMap<>(updatedAclsMap);
-    for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : aclsMap.entrySet()) {
-      String currentUserEmail = entry.getKey();
-      WorkspaceAccessLevel updatedAccess = toAdd.get(currentUserEmail);
-      if (updatedAccess != null) {
-        FirecloudWorkspaceACLUpdate currentUpdate = new FirecloudWorkspaceACLUpdate();
-        currentUpdate.setEmail(currentUserEmail);
-        currentUpdate =
-            WorkspaceAuthService.updateFirecloudAclsOnUser(updatedAccess, currentUpdate);
-        updateACLRequestList.add(currentUpdate);
-        toAdd.remove(currentUserEmail);
-      } else {
-        // This is how to remove a user from the FireCloud ACL:
-        // Pass along an update request with NO ACCESS as the given access level.
-        // Note: do not do groups.  Unpublish will pass the specific NO_ACCESS acl
-        // TODO [jacmrob] : have all users pass NO_ACCESS explicitly? Handle filtering on frontend?
-        if (!currentUserEmail.equals(registeredUsersGroup)) {
-          FirecloudWorkspaceACLUpdate removedUser = new FirecloudWorkspaceACLUpdate();
-          removedUser.setEmail(currentUserEmail);
-          removedUser =
-              WorkspaceAuthService.updateFirecloudAclsOnUser(
-                  WorkspaceAccessLevel.NO_ACCESS, removedUser);
-          updateACLRequestList.add(removedUser);
-        }
-      }
-    }
-
-    // Iterate through remaining new roles; add them
-    for (Entry<String, WorkspaceAccessLevel> remainingRole : toAdd.entrySet()) {
-      FirecloudWorkspaceACLUpdate newUser = new FirecloudWorkspaceACLUpdate();
-      newUser.setEmail(remainingRole.getKey());
-      newUser = WorkspaceAuthService.updateFirecloudAclsOnUser(remainingRole.getValue(), newUser);
-      updateACLRequestList.add(newUser);
-    }
-    FirecloudWorkspaceACLUpdateResponseList fireCloudResponse =
-        fireCloudService.updateWorkspaceACL(
-            workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), updateACLRequestList);
-    if (fireCloudResponse.getUsersNotFound().size() != 0) {
-      String usersNotFound = "";
-      for (int i = 0; i < fireCloudResponse.getUsersNotFound().size(); i++) {
-        if (i > 0) {
-          usersNotFound += ", ";
-        }
-        usersNotFound += fireCloudResponse.getUsersNotFound().get(i).getEmail();
-      }
-      throw new BadRequestException(usersNotFound);
-    }
-
-    // Finally, keep OWNER and billing project users in lock-step. In Rawls, OWNER does not grant
-    // canCompute on the workspace / billing project, nor does it grant the ability to grant
-    // canCompute to other users. See RW-3009 for details.
-    for (String email : Sets.union(updatedAclsMap.keySet(), aclsMap.keySet())) {
-      String fromAccess =
-          aclsMap
-              .getOrDefault(email, new FirecloudWorkspaceAccessEntry().accessLevel(""))
-              .getAccessLevel();
-      WorkspaceAccessLevel toAccess =
-          updatedAclsMap.getOrDefault(email, WorkspaceAccessLevel.NO_ACCESS);
-      if (FC_OWNER_ROLE.equals(fromAccess) && WorkspaceAccessLevel.OWNER != toAccess) {
-        log.info(
-            String.format(
-                "removing user '%s' from billing project '%s'",
-                email, workspace.getWorkspaceNamespace()));
-        fireCloudService.removeOwnerFromBillingProject(
-            email, workspace.getWorkspaceNamespace(), Optional.empty());
-      } else if (!FC_OWNER_ROLE.equals(fromAccess) && WorkspaceAccessLevel.OWNER == toAccess) {
-        log.info(
-            String.format(
-                "adding user '%s' to billing project '%s'",
-                email, workspace.getWorkspaceNamespace()));
-        fireCloudService.addOwnerToBillingProject(email, workspace.getWorkspaceNamespace());
-      }
-    }
-
-    return workspaceDao.saveWithLastModified(workspace);
-  }
-
-  @Override
   @Transactional
   public DbWorkspace saveAndCloneCohortsConceptSetsAndDataSets(DbWorkspace from, DbWorkspace to) {
     // Save the workspace first to allocate an ID.
@@ -403,7 +296,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   @Override
   public List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName) {
     Map<String, FirecloudWorkspaceAccessEntry> emailToRole =
-        getFirecloudWorkspaceAcls(workspaceNamespace, firecloudName);
+        workspaceAuthService.getFirecloudWorkspaceAcls(workspaceNamespace, firecloudName);
 
     List<UserRole> userRoles = new ArrayList<>();
     for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : emailToRole.entrySet()) {

@@ -1,14 +1,25 @@
 package org.pmiops.workbench.workspaces;
 
 import java.util.List;
-import java.util.Map;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.model.UserRole;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceResponse;
 
+/*
+ * WorkspaceService is primarily an interface for coordinating the three Workspace models.
+ *   - DbWorkspace - our representation of a Workspace
+ *   - FirecloudWorkspace - Firecloud's concept of a Workspace
+ *   - WorkspaceResponse - our API representation of Workspace which is a combination of the two models above
+ *
+ * Methods that need to coordinate changes between those models are a good candidate for what
+ * should be added here. Most of these methods directly serve WorkspaceController.
+ *
+ * For example
+ *   - creating the WorkspaceResponse model by fetching DbWorkspace and FirecloudWorkspace
+ *   - deleting a workspace and making the changes to both our database and Firecloud
+ *
+ */
 public interface WorkspaceService {
 
   WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId);
@@ -28,15 +39,7 @@ public interface WorkspaceService {
 
   void setResearchPurposeApproved(String ns, String firecloudName, boolean approved);
 
-  DbWorkspace updateWorkspaceAcls(
-      DbWorkspace workspace,
-      Map<String, WorkspaceAccessLevel> userRoleMap,
-      String registeredUsersGroup);
-
   DbWorkspace saveAndCloneCohortsConceptSetsAndDataSets(DbWorkspace from, DbWorkspace to);
-
-  Map<String, FirecloudWorkspaceAccessEntry> getFirecloudWorkspaceAcls(
-      String workspaceNamespace, String firecloudName);
 
   List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName);
 

@@ -515,7 +515,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // committed to the database in an earlier call
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
       Map<String, FirecloudWorkspaceAccessEntry> fromAclsMap =
-          workspaceService.getFirecloudWorkspaceAcls(
+          workspaceAuthService.getFirecloudWorkspaceAcls(
               fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());
 
       Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
@@ -528,7 +528,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         }
       }
       dbWorkspace =
-          workspaceService.updateWorkspaceAcls(
+          workspaceAuthService.updateWorkspaceAcls(
               dbWorkspace, clonedRoles, getRegisteredUserDomainEmail());
     }
 
@@ -588,7 +588,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
     // This automatically enforces the "canShare" permission.
     dbWorkspace =
-        workspaceService.updateWorkspaceAcls(
+        workspaceAuthService.updateWorkspaceAcls(
             dbWorkspace, aclsByEmail, getRegisteredUserDomainEmail());
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
@@ -782,7 +782,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         // https://precisionmedicineinitiative.atlassian.net/browse/RW-3094
 
         Set<String> workspaceUsers =
-            workspaceService.getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName).keySet();
+            workspaceAuthService
+                .getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName)
+                .keySet();
 
         response.lastLockedBy(findHashedUser(bucketName, workspaceUsers, lastLockedByHash));
       }
