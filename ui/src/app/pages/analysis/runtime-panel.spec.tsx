@@ -10,7 +10,7 @@ import {ConfirmDelete, RuntimePanel, Props} from 'app/pages/analysis/runtime-pan
 import {registerApiClient, runtimeApi} from 'app/services/swagger-fetch-clients';
 import {findMachineByName, ComputeType} from 'app/utils/machines';
 import {clearCompoundRuntimeOperations} from 'app/utils/stores';
-import {cdrVersionStore, serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/navigation';
 import {runtimePresets} from 'app/utils/runtime-presets';
 import {runtimeStore} from 'app/utils/stores';
 import {RuntimeConfigurationType, RuntimeStatus, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
@@ -22,6 +22,7 @@ import {defaultGceConfig, defaultDataprocConfig, RuntimeApiStub} from 'testing/s
 import {workspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {BillingAccountType, BillingStatus} from 'generated/fetch';
+import { cdrVersionStore } from 'app/utils/stores';
 
 describe('RuntimePanel', () => {
   let props: Props;
@@ -39,7 +40,7 @@ describe('RuntimePanel', () => {
   };
 
   beforeEach(() => {
-    cdrVersionStore.next(cdrVersionListResponse);
+    cdrVersionStore.set(cdrVersionListResponse);
     serverConfigStore.next({...defaultServerConfig});
 
     runtimeApiStub = new RuntimeApiStub();

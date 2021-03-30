@@ -21,7 +21,7 @@ import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
 import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
-import {hasRegisteredAccessFetch, reactStyles, withUserProfile} from 'app/utils';
+import {hasRegisteredAccess, reactStyles, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
 import {supportUrls} from 'app/utils/zendesk';
@@ -214,15 +214,15 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
       this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});
 
       const {workbenchAccessTasks} = queryParamsStore.getValue();
-      const hasRegisteredAccess = hasRegisteredAccessFetch(profile.dataAccessLevel);
-      if (!hasRegisteredAccess || workbenchAccessTasks) {
+      const hasAccess = hasRegisteredAccess(profile.dataAccessLevel);
+      if (!hasAccess || workbenchAccessTasks) {
         await this.syncCompliance();
       }
       if (workbenchAccessTasks) {
         this.setState({accessTasksRemaining: true, accessTasksLoaded: true});
       } else {
         this.setState({
-          accessTasksRemaining: !hasRegisteredAccess,
+          accessTasksRemaining: !hasAccess,
           accessTasksLoaded: true
         });
       }

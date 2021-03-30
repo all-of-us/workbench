@@ -8,12 +8,13 @@ import {Authority, RuntimeApi, Profile, ProfileApi, WorkspaceAccessLevel, Worksp
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {cdrVersionStore, currentWorkspaceStore, serverConfigStore, userProfileStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, serverConfigStore, userProfileStore} from 'app/utils/navigation';
 import {userRolesStub, workspaceStubs} from 'testing/stubs/workspaces';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {CdrVersionsStubVariables, cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {SpecificPopulationItems} from './workspace-edit-text';
+import {cdrVersionStore} from "app/utils/stores";
 
 describe('WorkspaceAbout', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
@@ -50,7 +51,7 @@ describe('WorkspaceAbout', () => {
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
     });
-    cdrVersionStore.next(cdrVersionListResponse);
+    cdrVersionStore.set(cdrVersionListResponse);
   });
 
   it('should render', () => {

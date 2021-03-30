@@ -20,11 +20,12 @@ import {RuntimeApi, UserApi, WorkspaceAccessLevel, WorkspacesApi} from 'generate
 
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
-import {WorkspacesServiceStub} from 'testing/stubs/workspace-service-stub';
-import {WorkspaceStubVariables} from 'testing/stubs/workspaces';
+import {buildWorkspaceStub, WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
+import {cdrVersionStore} from 'app/utils/stores';
 import {findElements} from 'testing/react-testing-utility';
+import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {setupModals, updateAndTick} from 'testing/test-helpers';
 
@@ -46,7 +47,7 @@ describe('WorkspaceWrapperComponent', () => {
           component: WorkspaceWrapperComponent,
           data: {
             workspace: {
-              ...WorkspacesServiceStub.stubWorkspace(),
+              ...buildWorkspaceStub(),
               accessLevel: WorkspaceAccessLevel.OWNER,
             }
           },
@@ -78,6 +79,7 @@ describe('WorkspaceWrapperComponent', () => {
       });
       serverConfigStore.next({gsuiteDomain: 'fake-research-aou.org',
         enableResearchReviewPrompt: true});
+      cdrVersionStore.set(cdrVersionListResponse);
     });
   }));
 

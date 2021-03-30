@@ -8,11 +8,11 @@ import {SignInService} from 'app/services/sign-in.service';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 
 import {FooterTypeEnum} from 'app/components/footer';
-import {debouncer, hasRegisteredAccessFetch} from 'app/utils';
+import {debouncer, hasRegisteredAccess} from 'app/utils';
 import Timeout = NodeJS.Timeout;
 import {setInstitutionCategoryState} from 'app/utils/analytics';
-import {cdrVersionStore, navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
-import {compoundRuntimeOpStore, routeDataStore} from 'app/utils/stores';
+import {navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
+import {cdrVersionStore, compoundRuntimeOpStore, routeDataStore} from 'app/utils/stores';
 import {initializeZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Profile as FetchProfile} from 'generated/fetch';
@@ -92,9 +92,9 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       this.profileLoadingSub = this.profileStorageService.profile$.subscribe((profile) => {
         this.profile = profile as unknown as FetchProfile;
         setInstitutionCategoryState(this.profile.verifiedInstitutionalAffiliation);
-        if (hasRegisteredAccessFetch(this.profile.dataAccessLevel)) {
+        if (hasRegisteredAccess(this.profile.dataAccessLevel)) {
           cdrVersionsApi().getCdrVersions().then(resp => {
-            cdrVersionStore.next(resp);
+            cdrVersionStore.set(resp);
           });
         }
       });
