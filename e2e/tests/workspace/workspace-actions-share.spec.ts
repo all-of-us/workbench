@@ -22,7 +22,7 @@ let newWorkspaceCard: WorkspaceCard;
 describe('Share workspace', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
-    newWorkspaceCard = await findOrCreateWorkspace(page, { workspaceName: newWorkspaceName, alwaysCreate: true });
+    newWorkspaceCard = await findOrCreateWorkspace(page, { workspaceName: newWorkspaceName });
     await newWorkspaceCard.clickWorkspaceName();
   });
 

@@ -11,8 +11,7 @@ describe('Jupyter notebook tests in R language', () => {
   test(
     'Run code from file',
     async () => {
-      const workspaceCard = await createWorkspace(page);
-      await workspaceCard.clickWorkspaceName();
+      await createWorkspace(page);
 
       const notebookName = makeRandomName('r-notebook');
       const dataPage = new WorkspaceDataPage(page);

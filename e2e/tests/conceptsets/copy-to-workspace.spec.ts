@@ -51,11 +51,15 @@ describe('Copy Concept Set to another workspace', () => {
   test('Workspace OWNER can copy Concept Set when CDR Versions match', async () => {
     // Create a source and a destination workspace with the same CDR Version.
 
-    const destWorkspaceCard: WorkspaceCard = await createWorkspace(page, config.defaultCdrVersionName);
-    const destWorkspace = await destWorkspaceCard.getWorkspaceName();
+    const [, destWorkspace] = await createWorkspace(page, {
+      cdrVersion: config.defaultCdrVersionName,
+      openDataPage: false
+    });
 
-    const srcWorkspaceCard: WorkspaceCard = await createWorkspace(page, config.defaultCdrVersionName);
-    const srcWorkspace = await srcWorkspaceCard.getWorkspaceName();
+    const [srcWorkspaceCard, srcWorkspace] = await createWorkspace(page, {
+      cdrVersion: config.defaultCdrVersionName,
+      openDataPage: false
+    });
 
     const { dataPage, conceptSetName } = await createConceptSet(srcWorkspaceCard);
 
@@ -98,11 +102,15 @@ describe('Copy Concept Set to another workspace', () => {
   test('Workspace OWNER cannot copy Concept Set when CDR Versions mismatch', async () => {
     // Create a source and a destination workspace with differing CDR Versions.
 
-    const destWorkspaceCard: WorkspaceCard = await createWorkspace(page, config.defaultCdrVersionName);
-    const destWorkspace = await destWorkspaceCard.getWorkspaceName();
+    const [, destWorkspace] = await createWorkspace(page, {
+      cdrVersion: config.defaultCdrVersionName,
+      openDataPage: false
+    });
 
-    const srcWorkspaceCard: WorkspaceCard = await createWorkspace(page, config.altCdrVersionName);
-    await srcWorkspaceCard.getWorkspaceName();
+    const [srcWorkspaceCard] = await createWorkspace(page, {
+      cdrVersion: config.altCdrVersionName,
+      openDataPage: false
+    });
 
     const { conceptSetName } = await createConceptSet(srcWorkspaceCard);
 

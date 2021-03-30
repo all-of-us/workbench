@@ -16,6 +16,7 @@ import WorkspacesPage from 'app/page/workspaces-page';
 import Navigation, { NavLink } from 'app/component/navigation';
 import { makeWorkspaceName } from './str-utils';
 import { config } from 'resources/workbench-config';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 
 export async function signIn(page: Page, userId?: string, passwd?: string): Promise<void> {
   const loginPage = new GoogleLoginPage(page);
@@ -48,7 +49,7 @@ export async function signInAs(userId: string, passwd: string, opts: { reset?: b
 }
 
 export async function signOut(page: Page) {
-  await page.evaluate(`window.setTestAccessTokenOverride(null)`);
+  await page.evaluate('window.setTestAccessTokenOverride(null)');
 
   await Navigation.navMenu(page, NavLink.SIGN_OUT);
   await page.waitForTimeout(1000);
@@ -218,21 +219,38 @@ export async function performAction(
   }
 }
 
+/**
+ * Create new workspace in All Workspaces page. Returns Workspace card and workspace name object.
+ * @param page
+ * @param options
+ */
 export async function createWorkspace(
   page: Page,
-  cdrVersionName: string = config.defaultCdrVersionName
-): Promise<WorkspaceCard> {
+  options: { cdrVersion?: string; workspaceName?: string; openDataPage?: boolean } = {}
+): Promise<[WorkspaceCard, string]> {
+  const {
+    cdrVersion = config.defaultCdrVersionName,
+    workspaceName = makeWorkspaceName(),
+    openDataPage = true
+  } = options;
   const workspacesPage = new WorkspacesPage(page);
   await workspacesPage.load();
 
-  const name = makeWorkspaceName();
-
-  await workspacesPage.createWorkspace(name, cdrVersionName);
-  console.log(`Created workspace "${name}" with CDR Version "${cdrVersionName}"`);
+  await workspacesPage.createWorkspace(workspaceName, cdrVersion);
+  console.log(`Created workspace "${workspaceName}" with CDR Version "${cdrVersion}"`);
   await workspacesPage.load();
 
   const workspaceCard = new WorkspaceCard(page);
-  return workspaceCard.findCard(name);
+  const cardFound: WorkspaceCard = await workspaceCard.findCard(workspaceName);
+  if (cardFound === null) {
+    throw new Error(`Failed finding Workspace card name: ${workspaceName}`);
+  }
+  console.log(`Found Workspace card name: "${workspaceName}"`);
+  if (openDataPage) {
+    await cardFound.clickWorkspaceName();
+    await new WorkspaceDataPage(page).waitForLoad();
+  }
+  return [cardFound, workspaceName];
 }
 
 /**
@@ -254,55 +272,53 @@ export async function createWorkspace(
  *  alwaysCreate - create a new workspace, regardless of whether a suitable workspace exists
  *  workspaceName - return the workspace with this name if it can be found; default behavior otherwise
  */
-export async function findOrCreateWorkspace(
-  page: Page,
-  opts: { alwaysCreate?: boolean; workspaceName?: string } = {}
-): Promise<WorkspaceCard> {
-  const { alwaysCreate = false, workspaceName } = opts;
+export async function findOrCreateWorkspace(page: Page, opts: { workspaceName?: string } = {}): Promise<WorkspaceCard> {
+  const { workspaceName } = opts;
 
-  const workspacesPage = new WorkspacesPage(page);
-  await workspacesPage.load();
-
-  const workspaceCard = new WorkspaceCard(page);
   // Returns specified workspaceName Workspace card if exists.
   if (workspaceName !== undefined) {
-    const cardFound = await workspaceCard.findCard(workspaceName);
+    const cardFound = await findWorkspaceCard(page, workspaceName);
     if (cardFound != null) {
-      // Workspace card found
-      return cardFound;
+      return cardFound; // Found Workspace card matching workspace name
     }
   }
 
   // Find all workspaces with OWNER role
+  const workspacesPage = new WorkspacesPage(page);
+  await workspacesPage.load();
   const existingCards = await WorkspaceCard.findAllCards(page, WorkspaceAccessLevel.Owner);
-
   // Filter to include Workspaces older than 30 minutes
-  const halfHourMillisec = 1000 * 60 * 30;
+  const halfHourMilliSec = 1000 * 60 * 30;
   const now = Date.now();
   const olderWorkspaceCards = [];
   for (const card of existingCards) {
     const workspaceTime = Date.parse(await card.getLastChangedTime());
     const timeDiff = now - workspaceTime;
-    if (timeDiff > halfHourMillisec) {
+    if (timeDiff > halfHourMilliSec) {
       olderWorkspaceCards.push(card);
     }
   }
 
-  // Create new workspace if existing workspace is zero or alwayCreate is true
-  if (alwaysCreate || olderWorkspaceCards.length === 0) {
+  // Create new workspace if existing workspace is zero or alwaysCreate is true
+  if (olderWorkspaceCards.length === 0 || workspaceName !== undefined) {
     const name = workspaceName || makeWorkspaceName();
-    await workspacesPage.createWorkspace(name);
-    console.log(`Created workspace "${name}"`);
-    await workspacesPage.load();
-    return workspaceCard.findCard(name);
+    const [card] = await createWorkspace(page, { workspaceName: name, openDataPage: false });
+    return card;
   }
 
   // Return one random Workspace card
   const randomCard = fp.shuffle(olderWorkspaceCards).pop();
   const cardName = await randomCard.getWorkspaceName();
   const lastChangedTime = await randomCard.getLastChangedTime();
-  console.log(`Found workspace "${cardName}". Last changed on ${lastChangedTime}`);
+  console.log(`Found workspace card: "${cardName}". Last changed on ${lastChangedTime}`);
   return randomCard;
+}
+
+export async function findWorkspaceCard(page: Page, name: string): Promise<WorkspaceCard | null> {
+  const workspacesPage = new WorkspacesPage(page);
+  await workspacesPage.load();
+  const workspaceCard = new WorkspaceCard(page);
+  return workspaceCard.findCard(name);
 }
 
 export async function centerPoint(element: ElementHandle): Promise<[number, number]> {

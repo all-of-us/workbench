@@ -34,7 +34,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
   test(
     'Workspace reader copy notebook to another workspace',
     async () => {
-      const workspaceName = await createWorkspace(page).then((card) => card.clickWorkspaceName());
+      const [, workspaceName] = await createWorkspace(page);
 
       let dataPage = new WorkspaceDataPage(page);
       const notebookName = makeRandomName('py');

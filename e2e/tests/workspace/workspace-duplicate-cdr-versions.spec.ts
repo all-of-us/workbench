@@ -14,8 +14,7 @@ describe('Duplicate workspace, changing CDR versions', () => {
   });
 
   test('OWNER can duplicate workspace to an older CDR Version after consenting to restrictions', async () => {
-    const workspaceCard: WorkspaceCard = await createWorkspace(page, config.defaultCdrVersionName);
-    const originalWorkspaceName = await workspaceCard.getWorkspaceName();
+    const [workspaceCard, originalWorkspaceName] = await createWorkspace(page, { openDataPage: false });
 
     await workspaceCard.asElementHandle().hover();
     // Click on Ellipsis menu "Duplicate" option.
@@ -59,8 +58,10 @@ describe('Duplicate workspace, changing CDR versions', () => {
   });
 
   test('OWNER can duplicate workspace to a newer CDR Version via Workspace card', async () => {
-    const workspaceCard: WorkspaceCard = await createWorkspace(page, config.altCdrVersionName);
-    const originalWorkspaceName = await workspaceCard.getWorkspaceName();
+    const [workspaceCard, originalWorkspaceName] = await createWorkspace(page, {
+      cdrVersion: config.altCdrVersionName,
+      openDataPage: false
+    });
 
     await workspaceCard.asElementHandle().hover();
     // Click on Ellipsis menu "Duplicate" option.

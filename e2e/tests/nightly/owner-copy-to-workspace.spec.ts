@@ -60,7 +60,7 @@ describe('Workspace owner copy notebook tests', () => {
 });
 
 async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName: string) {
-  const destWorkspace = await createWorkspace(page, destCdrVersionName).then((card) => card.getWorkspaceName());
+  const [, destWorkspace] = await createWorkspace(page, { cdrVersion: destCdrVersionName });
 
   // Find and open source workspace Data page.
   const workspaceCard = await WorkspaceCard.findCard(page, sourceWorkspaceName);
@@ -112,6 +112,6 @@ async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName:
 }
 
 async function createCustomCdrVersionWorkspace(cdrVersion: string): Promise<string> {
-  const workspace = await createWorkspace(page, cdrVersion);
-  return workspace.getWorkspaceName();
+  const [, workspaceName] = await createWorkspace(page, { cdrVersion, openDataPage: false });
+  return workspaceName;
 }
