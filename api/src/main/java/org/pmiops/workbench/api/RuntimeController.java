@@ -1,5 +1,6 @@
 package org.pmiops.workbench.api;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,6 +28,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.Authority;
@@ -167,10 +169,16 @@ public class RuntimeController implements RuntimeApiDelegate {
     workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
     try {
-      return ResponseEntity.ok(
-          leonardoMapper.toApiRuntime(
-              leonardoNotebooksClient.getRuntime(
-                  googleProject, userProvider.get().getRuntimeName())));
+      LeonardoGetRuntimeResponse leoRuntimeResponse =
+          leonardoNotebooksClient.getRuntime(
+              googleProject, userProvider.get().getRuntimeName());
+      if (LeonardoRuntimeStatus.ERROR.equals(leoRuntimeResponse.getStatus())) {
+        log.warning(
+            String.format(
+                "Observed Leonardo runtime with unexpected error status:\n%s",
+                Joiner.on('\n').join(leoRuntimeResponse.getErrors())));
+      }
+      return ResponseEntity.ok(leonardoMapper.toApiRuntime(leoRuntimeResponse));
     } catch (NotFoundException e) {
       return ResponseEntity.ok(getOverrideFromListRuntimes(googleProject));
     }
