@@ -50,7 +50,7 @@ public class WorkspaceAuthService {
     if (BillingStatus.INACTIVE.equals(
         workspaceDao.getRequired(workspaceNamespace, workspaceId).getBillingStatus())) {
       throw new ForbiddenException(
-          "Workspace (" + workspaceNamespace + ") is in an inactive billing state");
+          String.format("Workspace (%s) is in an inactive billing state", workspaceNamespace));
     }
   }
 
