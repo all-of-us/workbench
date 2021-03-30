@@ -7,6 +7,7 @@ import {getTwoFactorSetupUrl, RegistrationDashboard, RegistrationDashboardProps}
 import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {userProfileStore} from 'app/utils/navigation';
+import {buildRasRedirectUrl} from 'app/utils/ras';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 
 describe('RegistrationDashboard', () => {
@@ -31,12 +32,16 @@ describe('RegistrationDashboard', () => {
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
-      enableV3DataUserCodeOfConduct: true
+      enableV3DataUserCodeOfConduct: true,
+      enableRasLoginGovLinking: false,
     });
     props = {
       eraCommonsLinked: false,
       eraCommonsLoading: false,
       eraCommonsError: '',
+      rasLoginGovLinked: false,
+      rasLoginGovLoading: false,
+      rasLoginGovLinkError: '',
       trainingCompleted: false,
       firstVisitTraining: true,
       betaAccessGranted: false,
@@ -120,6 +125,29 @@ describe('RegistrationDashboard', () => {
     expect(wrapper.find('[data-test-id="success-message"]').length).toBe(1);
   });
 
+  it('should have RAS link card then display a success message after linking when enableRasLoginGovLinking is true', () => {
+    serverConfigStore.next({...serverConfigStore.getValue(), enableRasLoginGovLinking: true});
+    // When enableRasLoginGovLinking is true, show RAS linking card.
+    props.betaAccessGranted = true;
+    props.eraCommonsLinked = true;
+    props.trainingCompleted = true;
+    props.twoFactorAuthCompleted = true;
+    props.dataUserCodeOfConductCompleted = true;
+    props.rasLoginGovLinked = false;
+
+    let wrapper = component();
+    expect(wrapper.find('[data-test-id="success-message"]').length).toBe(0);
+    expect(wrapper.find('[data-test-id="registration-task-rasLoginGov"]')
+    .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeFalsy();
+
+    // Now mark loginGov link succeed
+    props.rasLoginGovLinked = true;
+    wrapper = component();
+    expect(wrapper.find('[data-test-id="registration-task-rasLoginGov"]')
+    .find('[data-test-id="completed-button"]').length).toBeGreaterThanOrEqual(1);
+  });
+
+
   it('should not show self-bypass UI when unsafeSelfBypass is false', () => {
     serverConfigStore.next({...serverConfigStore.getValue(), unsafeAllowSelfBypass: false});
     const wrapper = component();
@@ -138,4 +166,7 @@ describe('RegistrationDashboard', () => {
     expect(getTwoFactorSetupUrl()).toMatch(encodeURIComponent('https://myaccount.google.com/signinoptions/'));
   });
 
+  it('should generate expected RAS redirect URL', () => {
+    expect(buildRasRedirectUrl()).toMatch(encodeURIComponent('http://localhost/ras-callback'));
+  });
 });

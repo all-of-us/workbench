@@ -13,6 +13,9 @@ import static org.pmiops.workbench.ras.RasOidcClientConfig.RAS_OIDC_CLIENT;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -100,19 +103,22 @@ public class RasLinkService {
     try {
       // Oauth dance to get id token and access token.
       TokenResponse tokenResponse =
-          rasOidcClient.codeExchange(authCode, redirectUrl, RAS_AUTH_CODE_SCOPES);
+          rasOidcClient.codeExchange(authCode, decodeUrl(redirectUrl), RAS_AUTH_CODE_SCOPES);
 
       // Validate IAL status.
       String acrClaim =
           decodedJwt(tokenResponse.get(Id_TOKEN_FIELD_NAME).toString())
               .getClaim(ACR_CLAIM)
               .asString();
+
       if (!isIal2(acrClaim)) {
+        log.warning(String.format("User does not have IAL2 enabled, acrClaim: %s", acrClaim));
         throw new ForbiddenException(
             String.format("User does not have IAL2 enabled, acrClaim: %s", acrClaim));
       }
       // Fetch user info.
       userInfoResponse = rasOidcClient.fetchUserInfo(tokenResponse.getAccessToken());
+
     } catch (IOException e) {
       log.log(Level.WARNING, "Failed to link RAS account", e);
       throw new ServerErrorException("Failed to link RAS account", e);
@@ -140,5 +146,10 @@ public class RasLinkService {
               preferredUsername, email));
     }
     return email;
+  }
+
+  /** Decode an encoded url */
+  private static String decodeUrl(String encodedUrl) throws UnsupportedEncodingException {
+    return URLDecoder.decode(encodedUrl, StandardCharsets.UTF_8.toString());
   }
 }
