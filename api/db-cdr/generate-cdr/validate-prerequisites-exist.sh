@@ -8,6 +8,7 @@ export BQ_DATASET=$2        # CDR dataset
 export CDR_VERSION=$3       # CDR version
 export BUCKET=$4            # Bucket
 
+PREP_TABLE_RUN="!_prep_tables_!"
 TEMP_FILE_DIR="csv"
 CSV_HOME_DIR="cdr_csv_files"
 CRITERIA_MENU="cb_criteria_menu.csv"
@@ -27,21 +28,24 @@ if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
 fi
 
 # Purge all backup csv files except for the last 10 versions
-fileCount=$(gsutil ls gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup | wc -l)
-allFilesCount=${#All_FILES[@]}
-numberToDelete=$((fileCount - allFilesCount * 10))
-if [[ $numberToDelete > 0 ]];
+if [[ $CDR_VERSION != $PREP_TABLE_RUN ]];
 then
-  echo "Purging backup files"
-  while IFS= read -r line; do
-    ts=$(echo $line | cut -d_ -f1)
-    if [[ ${#ts} > 0 ]];
-    then
-      echo "Removing $line"
-      gsutil rm gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup/$line
-    fi
-  # This lists all the files in the backup bucket sorted by timestamp and gets only the number to delete
-  done < <(gsutil ls gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup | rev | cut -d/ -f1 | rev | sort | head -$numberToDelete)
+  fileCount=$(gsutil ls gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup | wc -l)
+  allFilesCount=${#All_FILES[@]}
+  numberToDelete=$((fileCount - allFilesCount * 10))
+  if [[ $numberToDelete > 0 ]];
+  then
+    echo "Purging backup files"
+    while IFS= read -r line; do
+      ts=$(echo $line | cut -d_ -f1)
+      if [[ ${#ts} > 0 ]];
+      then
+        echo "Removing $line"
+        gsutil rm gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup/$line
+      fi
+    # This lists all the files in the backup bucket sorted by timestamp and gets only the number to delete
+    done < <(gsutil ls gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup | rev | cut -d/ -f1 | rev | sort | head -$numberToDelete)
+  fi
 fi
 
 rm -rf $TEMP_FILE_DIR
@@ -56,23 +60,26 @@ if gsutil -m cp gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
     firstColumn=$(echo $columns | cut -d' ' -f 1)
     case $file in
       $CRITERIA_MENU|$DS_DATA_DICTIONARY)
-        echo "Processing $file"
-        if [[ $firstColumn == id ]];
+        if [[ $CDR_VERSION != $PREP_TABLE_RUN ]];
         then
-          echo "Removing $file header"
-          # Remove the first line of file
-          sed 1d $TEMP_FILE_DIR/$file > $TEMP_FILE_DIR/temp_$file
-          # Zip the file
-          gzip -cvf $TEMP_FILE_DIR/temp_$file > $TEMP_FILE_DIR/$file.gz
-        else
-          # Zip the file
-          gzip $TEMP_FILE_DIR/$file
+          echo "Processing $file"
+          if [[ $firstColumn == id ]];
+          then
+            echo "Removing $file header"
+            # Remove the first line of file
+            sed 1d $TEMP_FILE_DIR/$file > $TEMP_FILE_DIR/temp_$file
+            # Zip the file
+            gzip -cvf $TEMP_FILE_DIR/temp_$file > $TEMP_FILE_DIR/$file.gz
+          else
+            # Zip the file
+            gzip $TEMP_FILE_DIR/$file
+          fi
+          # Copy it back to bucket
+          gsutil cp $TEMP_FILE_DIR/$file.gz gs://$BUCKET/$BQ_DATASET/$CDR_VERSION/
+          # Backup the csv file
+          echo "Backing up $file"
+          gsutil cp $TEMP_FILE_DIR/$file.gz gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup/"$timestamp"_"$file".gz
         fi
-        # Copy it back to bucket
-        gsutil cp $TEMP_FILE_DIR/$file.gz gs://$BUCKET/$BQ_DATASET/$CDR_VERSION/
-        # Backup the csv file
-        echo "Backing up $file"
-        gsutil cp $TEMP_FILE_DIR/$file.gz gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup/"$timestamp"_"$file".gz
       ;;
     $PREP_CRITERIA|$PREP_CRITERIA_ANCESTOR|$PREP_CLINICAL_TERMS|$PREP_CONCEPT|$PREP_CONCEPT_RELATIONSHIP)
       tableName=${file%.*}
@@ -88,16 +95,19 @@ if gsutil -m cp gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
         gsutil cp $TEMP_FILE_DIR/$file gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/
       fi
 
-      # Check to see if table exists
-      tables=$(bq ls --max_results 1000 "$BQ_PROJECT:$BQ_DATASET" | awk '{print $1}' | tail +3)
-      for table in ${tables[@]};
-      do
-        if [[ $table == $tableName ]];
-        then
-          echo "Backing up $file"
-          bq extract --project_id=$BQ_PROJECT --compression GZIP --print_header=false $BQ_DATASET.$tableName gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup/"$timestamp"_"$file".gz
-        fi
-      done
+      if [[ $CDR_VERSION != $PREP_TABLE_RUN ]];
+      then
+        # Check to see if table exists
+        tables=$(bq ls --max_results 1000 "$BQ_PROJECT:$BQ_DATASET" | awk '{print $1}' | tail +3)
+        for table in ${tables[@]};
+        do
+          if [[ $table == $tableName ]];
+          then
+            echo "Backing up $file"
+            bq extract --project_id=$BQ_PROJECT --compression GZIP --print_header=false $BQ_DATASET.$tableName gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup/"$timestamp"_"$file".gz
+          fi
+        done
+      fi
 
       # Load the csv file into table
       echo "Starting load of $file"
