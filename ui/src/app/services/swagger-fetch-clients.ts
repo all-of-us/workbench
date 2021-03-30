@@ -94,7 +94,6 @@ export const cohortBuilderApi = bindCtor(CohortBuilderApi);
 export const cohortReviewApi = bindCtor(CohortReviewApi);
 export const cohortsApi = bindCtor(CohortsApi);
 export const conceptSetsApi = bindCtor(ConceptSetsApi);
-export const configApi = bindCtor(ConfigApi);
 export const dataSetApi = bindCtor(DataSetApi);
 export const featuredWorkspacesConfigApi = bindCtor(FeaturedWorkspacesConfigApi);
 export const institutionApi = bindCtor(InstitutionApi);
