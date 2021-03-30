@@ -85,6 +85,7 @@ import org.pmiops.workbench.notebooks.LeonardoNotebooksClientImpl;
 import org.pmiops.workbench.notebooks.NotebooksConfig;
 import org.pmiops.workbench.notebooks.NotebooksRetryHandler;
 import org.pmiops.workbench.notebooks.api.ProxyApi;
+import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.FakeLongRandom;
@@ -1172,14 +1173,14 @@ public class RuntimeControllerTest {
     stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     RuntimeLocalizeResponse resp = runtimeController.localize(BILLING_PROJECT_ID, req).getBody();
     verify(proxyApi)
-        .welderLocalize(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), welderReqCaptor.capture());
+        .welderLocalize(eq(GOOGLE_PROJECT_ID), eq(getRuntimeName()), welderReqCaptor.capture());
 
     // Config files only.
     Localize welderReq = welderReqCaptor.getValue();
 
     assertThat(
             welderReq.getEntries().stream()
-                .map(e -> e.getLocalDestinationPath())
+                .map(LocalizationEntry::getLocalDestinationPath)
                 .collect(Collectors.toList()))
         .containsExactly(
             "workspaces_playground/myfirstworkspace/.all_of_us_config.json",

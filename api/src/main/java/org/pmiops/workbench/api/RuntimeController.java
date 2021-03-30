@@ -366,7 +366,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     // The Welder extension offers direct links to/from playground mode; write the AoU config file
     // to both locations so notebooks will work in either directory.
     String aouConfigUri = aouConfigDataUri(firecloudWorkspace, cdrVersion,
-        googleProjectId);
+        workspaceNamespace);
     localizeMap.put(editDir + "/" + AOU_CONFIG_FILENAME, aouConfigUri);
     localizeMap.put(playgroundDir + "/" + AOU_CONFIG_FILENAME, aouConfigUri);
 
