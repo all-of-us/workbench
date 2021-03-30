@@ -14,7 +14,8 @@ CRITERIA_MENU="cb_criteria_menu.csv"
 PREP_CRITERIA="prep_criteria.csv"
 PREP_CRITERIA_ANCESTOR="prep_criteria_ancestor.csv"
 PREP_CLINICAL_TERMS="prep_clinical_terms_nc.csv"
-All_FILES=($CRITERIA_MENU $PREP_CRITERIA $PREP_CRITERIA_ANCESTOR $PREP_CLINICAL_TERMS)
+DS_DATA_DICTIONARY="ds_data_dictionary.csv"
+All_FILES=($CRITERIA_MENU $PREP_CRITERIA $PREP_CRITERIA_ANCESTOR $PREP_CLINICAL_TERMS $DS_DATA_DICTIONARY)
 INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4")
 
 if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
@@ -24,7 +25,7 @@ if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
 fi
 
 # Purge all backup csv files except for the last 10 versions
-fileCount=$(gsutil ls gs://all-of-us-workbench-private-cloudsql/DummySR/cdr_csv_files/backup | wc -l)
+fileCount=$(gsutil ls gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup | wc -l)
 allFilesCount=${#All_FILES[@]}
 numberToDelete=$((fileCount - allFilesCount * 10))
 if [[ $numberToDelete > 0 ]];
@@ -51,7 +52,7 @@ if gsutil -m cp gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
     read -r header < $TEMP_FILE_DIR/$file
     IFS=',' read -r -a columns <<< $header
     case $file in
-      $CRITERIA_MENU)
+      $CRITERIA_MENU|$DS_DATA_DICTIONARY)
         echo "Processing $file"
         if [[ $columns =~ id ]];
         then
