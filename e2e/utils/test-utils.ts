@@ -238,10 +238,10 @@ export async function createWorkspace(
 
   await workspacesPage.createWorkspace(workspaceName, cdrVersion);
   console.log(`Created workspace "${workspaceName}" with CDR Version "${cdrVersion}"`);
+
   await workspacesPage.load();
 
-  const workspaceCard = new WorkspaceCard(page);
-  const cardFound: WorkspaceCard = await workspaceCard.findCard(workspaceName);
+  const cardFound = await findWorkspaceCard(page, workspaceName);
   if (cardFound === null) {
     throw new Error(`Failed finding Workspace card name: ${workspaceName}`);
   }
