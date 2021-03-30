@@ -64,7 +64,9 @@ public class WorkspaceAuthService {
     }
     return Optional.ofNullable(WorkspaceAccessLevel.fromValue(userAccess))
         .orElseThrow(
-            () -> new IllegalArgumentException(String.format("Unrecognized access level: %s, userAccess));
+            () ->
+                new IllegalArgumentException(
+                    String.format("Unrecognized access level: %s", userAccess)));
   }
 
   public WorkspaceAccessLevel enforceWorkspaceAccessLevel(
