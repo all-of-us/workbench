@@ -117,7 +117,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class RuntimeControllerTest {
 
   private static final String BILLING_PROJECT_ID = "aou-rw-1234";
-  private static final String BILLING_PROJECT_ID_2 = "aou-rw-5678";
   // a workspace's namespace is always its billing project ID
   private static final String WORKSPACE_NS = BILLING_PROJECT_ID;
   private static final String GOOGLE_PROJECT_ID = "aou-gcp-id";
@@ -349,11 +348,12 @@ public class RuntimeControllerTest {
         .bucketName(BUCKET_NAME);
   }
 
-  private void stubGetWorkspace(String workspaceNamespace, String firecloudName, String creator) {
+  private void stubGetWorkspace(String workspaceNamespace, String googleProject, String firecloudName, String creator) {
     DbWorkspace w = new DbWorkspace();
     w.setWorkspaceNamespace(workspaceNamespace);
     w.setFirecloudName(firecloudName);
     w.setCdrVersion(cdrVersion);
+    w.setGoogleProject(googleProject);
     when(mockWorkspaceService.getRequired(workspaceNamespace, firecloudName)).thenReturn(w);
     when(mockWorkspaceService.getByNamespace(workspaceNamespace)).thenReturn(Optional.of(w));
     stubGetFcWorkspace(createFcWorkspace(workspaceNamespace, firecloudName, creator));
@@ -803,7 +803,7 @@ public class RuntimeControllerTest {
   public void testCreateRuntime_customRuntimeEnabled_noRuntimes() throws ApiException {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
 
     assertThrows(
         BadRequestException.class,
@@ -814,7 +814,7 @@ public class RuntimeControllerTest {
   public void testCreateRuntime_customRuntimeEnabled_twoRuntimes() throws ApiException {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
 
     assertThrows(
         BadRequestException.class,
@@ -830,7 +830,7 @@ public class RuntimeControllerTest {
   public void testCreateRuntime_dataproc() throws ApiException {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
 
     runtimeController.createRuntime(
         BILLING_PROJECT_ID,
@@ -875,7 +875,7 @@ public class RuntimeControllerTest {
   public void testCreateRuntime_gce() throws ApiException {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
 
     runtimeController.createRuntime(
         BILLING_PROJECT_ID,
@@ -907,7 +907,7 @@ public class RuntimeControllerTest {
   public void testCreateRuntime_nullRuntime() throws ApiException {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
 
     BadRequestException e =
         assertThrows(
@@ -923,7 +923,7 @@ public class RuntimeControllerTest {
   public void testCreateRuntime_emptyRuntime() throws ApiException {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
 
     BadRequestException e =
         assertThrows(
@@ -939,7 +939,7 @@ public class RuntimeControllerTest {
   public void testCreateRuntime_defaultLabel_hail() throws ApiException {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
 
     runtimeController.createRuntime(
         BILLING_PROJECT_ID,
@@ -959,7 +959,7 @@ public class RuntimeControllerTest {
   public void testCreateRuntime_defaultLabel_generalAnalysis() throws ApiException {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
 
     runtimeController.createRuntime(
         BILLING_PROJECT_ID,
@@ -979,7 +979,7 @@ public class RuntimeControllerTest {
   public void testCreateRuntime_overrideLabel() throws ApiException {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenThrow(new NotFoundException());
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
 
     runtimeController.createRuntime(
         BILLING_PROJECT_ID,
@@ -997,7 +997,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testUpdateRuntime() throws ApiException {
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, "test");
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, "test");
 
     runtimeController.updateRuntime(
         BILLING_PROJECT_ID,
@@ -1040,7 +1040,7 @@ public class RuntimeControllerTest {
         new RuntimeLocalizeRequest()
             .notebookNames(ImmutableList.of("foo.ipynb"))
             .playgroundMode(false);
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     RuntimeLocalizeResponse resp = runtimeController.localize(BILLING_PROJECT_ID, req).getBody();
     assertThat(resp.getRuntimeLocalDirectory()).isEqualTo("workspaces/myfirstworkspace");
 
@@ -1091,7 +1091,7 @@ public class RuntimeControllerTest {
         new RuntimeLocalizeRequest()
             .notebookNames(ImmutableList.of("foo.ipynb"))
             .playgroundMode(true);
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     RuntimeLocalizeResponse resp = runtimeController.localize(BILLING_PROJECT_ID, req).getBody();
     assertThat(resp.getRuntimeLocalDirectory()).isEqualTo("workspaces_playground/myfirstworkspace");
     verify(proxyApi)
@@ -1125,11 +1125,11 @@ public class RuntimeControllerTest {
         new RuntimeLocalizeRequest()
             .notebookNames(ImmutableList.of("foo.ipynb"))
             .playgroundMode(false);
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
-    stubGetWorkspace("other-proj", "myotherworkspace", LOGGED_IN_USER_EMAIL);
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
+    stubGetWorkspace("other-proj", GOOGLE_PROJECT_ID_2, "myotherworkspace", LOGGED_IN_USER_EMAIL);
     RuntimeLocalizeResponse resp = runtimeController.localize("other-proj", req).getBody();
     verify(proxyApi)
-        .welderLocalize(eq("other-proj"), eq(getRuntimeName()), welderReqCaptor.capture());
+        .welderLocalize(eq(GOOGLE_PROJECT_ID_2), eq(getRuntimeName()), welderReqCaptor.capture());
 
     Localize welderReq = welderReqCaptor.getValue();
 
@@ -1169,7 +1169,7 @@ public class RuntimeControllerTest {
   public void testLocalize_noNotebooks() throws org.pmiops.workbench.notebooks.ApiException {
     RuntimeLocalizeRequest req = new RuntimeLocalizeRequest();
     req.setPlaygroundMode(false);
-    stubGetWorkspace(WORKSPACE_NS, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
+    stubGetWorkspace(WORKSPACE_NS, GOOGLE_PROJECT_ID, WORKSPACE_ID, LOGGED_IN_USER_EMAIL);
     RuntimeLocalizeResponse resp = runtimeController.localize(BILLING_PROJECT_ID, req).getBody();
     verify(proxyApi)
         .welderLocalize(eq(BILLING_PROJECT_ID), eq(getRuntimeName()), welderReqCaptor.capture());
