@@ -2,7 +2,6 @@ package org.pmiops.workbench.tools;
 
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvBindByPosition;
-import org.pmiops.workbench.access.AccessTierService;
 
 public class WorkspaceExportRow {
 
@@ -78,10 +77,17 @@ public class WorkspaceExportRow {
   @CsvBindByPosition(position = 5)
   private String creatorFirstSignIn;
 
+  public String getCreatorRegistrationState() {
+    return creatorRegistrationState;
+  }
+
+  public void setCreatorRegistrationState(String creatorRegistrationState) {
+    this.creatorRegistrationState = creatorRegistrationState;
+  }
+
   @CsvBindByName(column = "Registration State")
   @CsvBindByPosition(position = 6)
-  @Deprecated // if we revive this tool, update to use Access Tiers instead
-  private final String creatorRegistrationState = AccessTierService.REGISTERED_TIER_SHORT_NAME;
+  private String creatorRegistrationState;
 
   public String getTwoFactorAuthCompletionDate() {
     return twoFactorAuthCompletionDate;
