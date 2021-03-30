@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -142,7 +143,7 @@ public class WorkspaceAuthService {
         getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
 
     // Iterate through existing roles, update/remove them
-    ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
+    List<FirecloudWorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
     Map<String, WorkspaceAccessLevel> toAdd = new HashMap<>(updatedAclsMap);
     for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : aclsMap.entrySet()) {
       String currentUserEmail = entry.getKey();
@@ -197,7 +198,7 @@ public class WorkspaceAuthService {
     for (String email : Sets.union(updatedAclsMap.keySet(), aclsMap.keySet())) {
       String fromAccess =
           aclsMap
-              .getOrDefault(email, new FirecloudWorkspaceAccessEntry().accessLevel(""))
+              .getOrDefault(email, new FirecloudWorkspaceAccessEntry().accessLevel("NO ACCESS"))
               .getAccessLevel();
       WorkspaceAccessLevel toAccess =
           updatedAclsMap.getOrDefault(email, WorkspaceAccessLevel.NO_ACCESS);
