@@ -18,6 +18,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
@@ -45,6 +47,9 @@ public class AccessTierServiceTest {
 
   @Import({
     AccessTierServiceImpl.class,
+  })
+  @MockBean({
+    FireCloudService.class,
   })
   @TestConfiguration
   static class Configuration {
@@ -96,7 +101,7 @@ public class AccessTierServiceTest {
 
   @Test
   public void test_getAccessTiersForUser_unregistered() {
-    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    TestMockFactory.createRegisteredTierForTests(accessTierDao);
     assertThat(accessTierService.getAccessTiersForUser(user)).isEmpty();
   }
 
