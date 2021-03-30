@@ -33,6 +33,7 @@ import {
   toolTipTextStigmatization
 } from 'app/pages/workspace/workspace-edit-text';
 import {WorkspaceResearchSummary} from 'app/pages/workspace/workspace-research-summary';
+import {withStackdriverErrorReporterContext} from 'app/services/error-reporter-context';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
@@ -64,7 +65,6 @@ import {
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 import {OverlayPanel} from 'primereact/overlaypanel';
-import {withStackdriverErrorReporterContext} from '../../services/error-reporter-context';
 import {OldCdrVersionModal} from './old-cdr-version-modal';
 
 export const styles = reactStyles({
@@ -264,89 +264,89 @@ export const WorkspaceEdit = fp.flow(
 )(
   class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
     constructor(props: WorkspaceEditProps) {
-        super(props);
-        this.state = {
-          billingAccounts: [],
-          cdrVersionItems: this.createInitialCdrVersionsList(),
-          cloneUserRole: false,
-          loading: false,
-          populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : undefined,
-          selectResearchPurpose: this.updateSelectedResearch(),
-          showCdrVersionModal: false,
-          showConfirmationModal: false,
-          showCreateBillingAccountModal: false,
-          showResearchPurpose: this.updateSelectedResearch(),
-          showStigmatizationDetails: false,
-          showUnderservedPopulationDetails: false,
-          workspace: this.createInitialWorkspaceState(),
-          workspaceCreationConflictError: false,
-          workspaceCreationError: false,
-          workspaceCreationErrorMessage: '',
-          workspaceNewAclDelayed: false,
-          workspaceNewAclDelayedContinueFn: () => {},
-        };
-      }
+      super(props);
+      this.state = {
+        billingAccounts: [],
+        cdrVersionItems: this.createInitialCdrVersionsList(),
+        cloneUserRole: false,
+        loading: false,
+        populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : undefined,
+        selectResearchPurpose: this.updateSelectedResearch(),
+        showCdrVersionModal: false,
+        showConfirmationModal: false,
+        showCreateBillingAccountModal: false,
+        showResearchPurpose: this.updateSelectedResearch(),
+        showStigmatizationDetails: false,
+        showUnderservedPopulationDetails: false,
+        workspace: this.createInitialWorkspaceState(),
+        workspaceCreationConflictError: false,
+        workspaceCreationError: false,
+        workspaceCreationErrorMessage: '',
+        workspaceNewAclDelayed: false,
+        workspaceNewAclDelayedContinueFn: () => {},
+      };
+    }
 
     cancel(): void {
-        history.back();
-      }
+      history.back();
+    }
 
     async fetchBillingAccounts() {
-        const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
+      const billingAccounts = (await userApi().listBillingAccounts()).billingAccounts;
 
-        if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
-          const maybeFreeTierAccount = billingAccounts.find(billingAccount => billingAccount.isFreeTier);
-          if (maybeFreeTierAccount) {
-            this.setState(prevState => fp.set(
-                ['workspace', 'billingAccountName'],
-              maybeFreeTierAccount.name,
-              prevState));
-          }
-        } else if (this.isMode(WorkspaceEditMode.Edit)) {
-          const fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.namespace);
-
-          if (!billingAccounts.find(billingAccount => billingAccount.name === fetchedBillingInfo.billingAccountName)) {
-            // If the user has owner access on the workspace but does not have access to the billing account
-            // that it is attached to, keep the server's current value for billingAccountName and add a shim
-            // entry into billingAccounts so the dropdown entry is not empty.
-            //
-            // The server will not perform an updateBillingInfo call if the received billingAccountName
-            // is the same as what is currently stored.
-            //
-            // This can happen if a workspace is shared to another researcher as an owner.
-            billingAccounts.push({
-              name: this.props.workspace.billingAccountName,
-              displayName: 'User Provided Billing Account',
-              isFreeTier: false,
-              isOpen: true
-            });
-
-            if (fetchedBillingInfo.billingAccountName !== this.props.workspace.billingAccountName) {
-              // This should never happen but it means the database is out of sync with Google
-              // and does not have the correct billing account stored.
-              // We cannot send over the correct billing account info since the current user
-              // does not have permissions to set it.
-
-              this.props.stackdriverErrorReporterContext.reportError({
-                name: 'Out of date billing account name',
-                message: `Workspace ${this.props.workspace.namespace} has an out of date billing account name. ` +
-                    `Stored value is ${this.props.workspace.billingAccountName}. ` +
-                    `True value is ${fetchedBillingInfo.billingAccountName}`
-              });
-            }
-          } else {
-            // Otherwise, use this as an opportunity to sync the fetched billing account name from
-            // the source of truth, Google
-            this.setState(prevState => fp.set(
-                ['workspace', 'billingAccountName'], fetchedBillingInfo.billingAccountName, prevState));
-          }
+      if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
+        const maybeFreeTierAccount = billingAccounts.find(billingAccount => billingAccount.isFreeTier);
+        if (maybeFreeTierAccount) {
+          this.setState(prevState => fp.set(
+              ['workspace', 'billingAccountName'],
+            maybeFreeTierAccount.name,
+            prevState));
         }
-        this.setState({billingAccounts});
+      } else if (this.isMode(WorkspaceEditMode.Edit)) {
+        const fetchedBillingInfo = await getBillingAccountInfo(this.props.workspace.namespace);
+
+        if (!billingAccounts.find(billingAccount => billingAccount.name === fetchedBillingInfo.billingAccountName)) {
+          // If the user has owner access on the workspace but does not have access to the billing account
+          // that it is attached to, keep the server's current value for billingAccountName and add a shim
+          // entry into billingAccounts so the dropdown entry is not empty.
+          //
+          // The server will not perform an updateBillingInfo call if the received billingAccountName
+          // is the same as what is currently stored.
+          //
+          // This can happen if a workspace is shared to another researcher as an owner.
+          billingAccounts.push({
+            name: this.props.workspace.billingAccountName,
+            displayName: 'User Provided Billing Account',
+            isFreeTier: false,
+            isOpen: true
+          });
+
+          if (fetchedBillingInfo.billingAccountName !== this.props.workspace.billingAccountName) {
+            // This should never happen but it means the database is out of sync with Google
+            // and does not have the correct billing account stored.
+            // We cannot send over the correct billing account info since the current user
+            // does not have permissions to set it.
+
+            this.props.stackdriverErrorReporterContext.reportError({
+              name: 'Out of date billing account name',
+              message: `Workspace ${this.props.workspace.namespace} has an out of date billing account name. ` +
+                  `Stored value is ${this.props.workspace.billingAccountName}. ` +
+                  `True value is ${fetchedBillingInfo.billingAccountName}`
+            });
+          }
+        } else {
+          // Otherwise, use this as an opportunity to sync the fetched billing account name from
+          // the source of truth, Google
+          this.setState(prevState => fp.set(
+              ['workspace', 'billingAccountName'], fetchedBillingInfo.billingAccountName, prevState));
+        }
       }
+      this.setState({billingAccounts});
+    }
 
     async componentDidMount() {
-        await this.fetchBillingAccounts();
-      }
+      await this.fetchBillingAccounts();
+    }
 
       /**
        * Creates the initial workspace state object. For a CREATE mode dialog,
@@ -358,108 +358,108 @@ export const WorkspaceEdit = fp.flow(
        */
     createInitialWorkspaceState(): Workspace {
         // copy the props into a new object so our modifications here don't affect them
-        let workspace: Workspace = {...this.props.workspace};
-        if (this.isMode(WorkspaceEditMode.Create)) {
-          workspace = {
-            name: '',
-            accessTierShortName: 'registered',
-            cdrVersionId: '',
-            researchPurpose: {
-              ancestry: false,
-              anticipatedFindings: '',
-              commercialPurpose: false,
-              controlSet: false,
-              diseaseFocusedResearch: false,
-              diseaseOfFocus: '',
-              drugDevelopment: false,
-              educational: false,
-              intendedStudy: '',
-              scientificApproach: '',
-              methodsDevelopment: false,
-              otherPopulationDetails: '',
-              otherPurpose: false,
-              otherPurposeDetails: '',
-              ethics: false,
-              populationDetails: [],
-              populationHealth: false,
-              reviewRequested: undefined,
-              socialBehavioral: false,
-              reasonForAllOfUs: '',
-            }
-          };
-        }
+      let workspace: Workspace = {...this.props.workspace};
+      if (this.isMode(WorkspaceEditMode.Create)) {
+        workspace = {
+          name: '',
+          accessTierShortName: 'registered',
+          cdrVersionId: '',
+          researchPurpose: {
+            ancestry: false,
+            anticipatedFindings: '',
+            commercialPurpose: false,
+            controlSet: false,
+            diseaseFocusedResearch: false,
+            diseaseOfFocus: '',
+            drugDevelopment: false,
+            educational: false,
+            intendedStudy: '',
+            scientificApproach: '',
+            methodsDevelopment: false,
+            otherPopulationDetails: '',
+            otherPurpose: false,
+            otherPurposeDetails: '',
+            ethics: false,
+            populationDetails: [],
+            populationHealth: false,
+            reviewRequested: undefined,
+            socialBehavioral: false,
+            reasonForAllOfUs: '',
+          }
+        };
+      }
 
-        if (!fp.includes(DisseminateResearchEnum.OTHER, workspace.researchPurpose.disseminateResearchFindingList)) {
-          workspace.researchPurpose.otherDisseminateResearchFindings = '';
-        }
+      if (!fp.includes(DisseminateResearchEnum.OTHER, workspace.researchPurpose.disseminateResearchFindingList)) {
+        workspace.researchPurpose.otherDisseminateResearchFindings = '';
+      }
 
         // Replace potential nulls with empty string or empty array
-        if (workspace.researchPurpose.populationDetails == null) {
-          workspace.researchPurpose.populationDetails = [];
-        }
-        if (workspace.researchPurpose.diseaseOfFocus == null) {
-          workspace.researchPurpose.diseaseOfFocus = '';
-        }
+      if (workspace.researchPurpose.populationDetails == null) {
+        workspace.researchPurpose.populationDetails = [];
+      }
+      if (workspace.researchPurpose.diseaseOfFocus == null) {
+        workspace.researchPurpose.diseaseOfFocus = '';
+      }
 
-        if (this.isMode(WorkspaceEditMode.Duplicate)) {
+      if (this.isMode(WorkspaceEditMode.Duplicate)) {
           // This is the only field which is not automatically handled/differentiated
           // on the API level.
-          workspace.name = 'Duplicate of ' + workspace.name;
+        workspace.name = 'Duplicate of ' + workspace.name;
           // unselect to prevent unneeded re-review
-          workspace.researchPurpose.reviewRequested = undefined;
-        }
+        workspace.researchPurpose.reviewRequested = undefined;
+      }
 
         // We preselect the default CDR version when a new workspace is being
         // created (via create or duplicate)
-        if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
-          workspace.cdrVersionId = this.props.cdrVersionListResponse.defaultCdrVersionId;
-        }
-
-        return workspace;
+      if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
+        workspace.cdrVersionId = this.props.cdrVersionListResponse.defaultCdrVersionId;
       }
 
+      return workspace;
+    }
+
     createInitialCdrVersionsList(): Array<CdrVersion> {
-        if (this.isMode(WorkspaceEditMode.Edit)) {
+      if (this.isMode(WorkspaceEditMode.Edit)) {
           // In edit mode, you cannot modify the CDR version, therefore it's fine
           // to show archived CDRs in the drop-down so that it accurately displays
           // the current value.
-          return this.getAllCdrVersions();
-        } else {
-          return this.getLiveCdrVersions();
-        }
+        return this.getAllCdrVersions();
+      } else {
+        return this.getLiveCdrVersions();
       }
+    }
 
     updateSelectedResearch(): boolean {
-        if (this.isMode(WorkspaceEditMode.Create)) {
-          return false;
-        }
-        const rp = this.props.workspace.researchPurpose;
-        return this.researchPurposeCategoriesSelected(rp);
+      if (this.isMode(WorkspaceEditMode.Create)) {
+        return false;
       }
+      const rp = this.props.workspace.researchPurpose;
+      return this.researchPurposeCategoriesSelected(rp);
+    }
 
     researchPurposeCategoriesSelected(researchPurpose: ResearchPurpose) {
-        return researchPurpose.ancestry || researchPurpose.controlSet ||
+      return researchPurpose.ancestry || researchPurpose.controlSet ||
             researchPurpose.diseaseFocusedResearch || researchPurpose.ethics ||
             researchPurpose.drugDevelopment || researchPurpose.methodsDevelopment ||
             researchPurpose.populationHealth || researchPurpose.socialBehavioral;
-      }
+    }
 
     getLiveCdrVersions(): Array<CdrVersion> {
-        const cdrResp = this.props.cdrVersionListResponse;
-        const liveCdrVersions = cdrResp.items.filter(cdr => cdr.archivalStatus === ArchivalStatus.LIVE);
-        if (liveCdrVersions.length === 0) {
-          throw Error('no live CDR versions were found');
-        }
-
-        return liveCdrVersions;
+      const cdrResp = this.props.cdrVersionListResponse;
+      const liveCdrVersions = cdrResp.items.filter(cdr => cdr.archivalStatus === ArchivalStatus.LIVE);
+      if (liveCdrVersions.length === 0) {
+        throw Error('no live CDR versions were found');
       }
+
+      return liveCdrVersions;
+    }
 
     getAllCdrVersions(): Array<CdrVersion> {
-        return [...this.props.cdrVersionListResponse.items];
-      }
+      return [...this.props.cdrVersionListResponse.items];
+    }
 
     makeDiseaseInput(): React.ReactNode {
-        return (
+      return (
             <SearchInput
                 data-test-id='diseaseOfFocus-input'
                 enabled={this.state.workspace.researchPurpose.diseaseFocusedResearch}
@@ -472,16 +472,16 @@ export const WorkspaceEdit = fp.flow(
                   'researchPurpose',
                   'diseaseOfFocus'
                 ], disease))}/>
-        );
-      }
+      );
+    }
 
     openContactWidget() {
-        const {profileState: {profile: {contactEmail, familyName, givenName, username}}} = this.props;
-        openZendeskWidget(givenName, familyName, username, contactEmail);
-      }
+      const {profileState: {profile: {contactEmail, familyName, givenName, username}}} = this.props;
+      openZendeskWidget(givenName, familyName, username, contactEmail);
+    }
 
     renderBillingDescription() {
-        return <div>
+      return <div>
           The <AouTitle/> provides $300 in free credits per user. Please refer to
           <StyledAnchorTag href={supportUrls.billing} target='_blank'> &nbsp;this article
           </StyledAnchorTag> to learn more about the free credit
@@ -489,44 +489,44 @@ export const WorkspaceEdit = fp.flow(
           additional credits by <span style={styles.link} onClick={() => this.openContactWidget()}>
         contacting support</span>.
         </div>;
-      }
+    }
 
     onResearchPurposeChange(checked: boolean) {
         // If Checkbox is selected expand the research purpose categories
-        if (checked) {
-          this.setState({showResearchPurpose: true, selectResearchPurpose: true});
-        } else {
-          this.setState({selectResearchPurpose: false});
-        }
+      if (checked) {
+        this.setState({showResearchPurpose: true, selectResearchPurpose: true});
+      } else {
+        this.setState({selectResearchPurpose: false});
       }
+    }
 
     get researchPurposeCheck(): boolean {
         // If any one of the Research Purpose is selected or if the user has explicitly selected the research purpose
-        return this.state.selectResearchPurpose ||
+      return this.state.selectResearchPurpose ||
             this.researchPurposeCategoriesSelected(this.state.workspace.researchPurpose);
-      }
+    }
 
     get iconClass(): string {
-        return this.state.showResearchPurpose ? 'pi pi-angle-down' : 'pi pi-angle-right';
-      }
+      return this.state.showResearchPurpose ? 'pi pi-angle-down' : 'pi pi-angle-right';
+    }
       /**
        * Creates a form element containing the checkbox, header, and description
        * (plus optional child elements) for each of the "primary purpose of your
        * project" options.
        */
     makePrimaryPurposeForm(rp: ResearchPurposeItem, index: number): React.ReactNode {
-        let children: React.ReactNode;
-        if (rp.shortName === 'diseaseFocusedResearch') {
-          children = this.makeDiseaseInput();
-        } else if (rp.shortName === 'otherPurpose') {
-          children = <TextArea value={this.state.workspace.researchPurpose.otherPurposeDetails}
-                               onChange={v => this.updateResearchPurpose('otherPurposeDetails', v)}
-                               disabled={!this.state.workspace.researchPurpose.otherPurpose}
-                               data-test-id='otherPrimaryPurposeText'
-                               style={{marginTop: '0.5rem'}}/>;
-        }
+      let children: React.ReactNode;
+      if (rp.shortName === 'diseaseFocusedResearch') {
+        children = this.makeDiseaseInput();
+      } else if (rp.shortName === 'otherPurpose') {
+        children = <TextArea value={this.state.workspace.researchPurpose.otherPurposeDetails}
+                             onChange={v => this.updateResearchPurpose('otherPurposeDetails', v)}
+                             disabled={!this.state.workspace.researchPurpose.otherPurpose}
+                             data-test-id='otherPrimaryPurposeText'
+                             style={{marginTop: '0.5rem'}}/>;
+      }
 
-        return <div key={index} style={styles.categoryRow}>
+      return <div key={index} style={styles.categoryRow}>
           <CheckBox id={rp.uniqueId}
                     data-test-id={rp.shortName + '-checkbox'}
                     style={styles.checkboxStyle}
@@ -544,28 +544,28 @@ export const WorkspaceEdit = fp.flow(
             </div>
           </FlexColumn>
         </div>;
-      }
+    }
 
     updateOtherDisseminateResearch(value) {
-        this.setState(fp.set(['workspace', 'researchPurpose', 'otherDisseminateResearchFindings'], value));
-      }
+      this.setState(fp.set(['workspace', 'researchPurpose', 'otherDisseminateResearchFindings'], value));
+    }
       /**
        * Creates a form element containing the checkbox, header, and description
        * (plus optional child elements) for each of the "Disseminate Research" options.
        */
     makeDisseminateForm(rp, index): React.ReactNode {
-        let children: React.ReactNode;
-        if (rp.label === 'Other') {
-          children = <TextArea value={this.state.workspace.researchPurpose.otherDisseminateResearchFindings}
+      let children: React.ReactNode;
+      if (rp.label === 'Other') {
+        children = <TextArea value={this.state.workspace.researchPurpose.otherDisseminateResearchFindings}
                                onChange={v => this.updateOtherDisseminateResearch(v)}
                                placeholder={'Specify the name of the forum (journal, scientific conference, blog etc.)' +
                                ' through which you will disseminate your findings, if available.'}
                                data-test-id='otherDisseminateResearch-text'
                                disabled={!this.disseminateCheckboxSelected(DisseminateResearchEnum.OTHER)}
                                style={{marginTop: '0.5rem', width: '16rem'}}/>;
-        }
+      }
 
-        return <div key={index} style={styles.categoryRow}>
+      return <div key={index} style={styles.categoryRow}>
           <CheckBox style={styles.checkboxStyle}
                     data-test-id={index + '-checkbox'}
                     checked={this.disseminateCheckboxSelected(rp.shortName)}
@@ -577,13 +577,13 @@ export const WorkspaceEdit = fp.flow(
             {children}
           </FlexColumn>
         </div>;
-      }
+    }
       /**
        * Creates the form element for each of the "focus on specific populations"
        * options.
        */
     makeSpecificPopulationForm(item: SpecificPopulationItem): React.ReactNode {
-        return <div key={item.label}>
+      return <div key={item.label}>
           <div style={{fontWeight: 'bold', marginBottom: '0.3rem'}}>{item.label} *</div>
           {item.subCategory.map((sub, index) =>
               <FlexRow key={sub.label} style={{...styles.categoryRow, paddingTop: '0rem'}}>
@@ -603,10 +603,10 @@ export const WorkspaceEdit = fp.flow(
                 </FlexColumn>
               </FlexRow>)}
         </div>;
-      }
+    }
 
     makeOutcomingResearchForm(item, index): React.ReactNode {
-        return <div key={index} style={{...styles.categoryRow, paddingTop: '0rem'}}>
+      return <div key={index} style={{...styles.categoryRow, paddingTop: '0rem'}}>
           <CheckBox
               style={styles.checkboxStyle}
               key={item.label}
@@ -619,240 +619,239 @@ export const WorkspaceEdit = fp.flow(
             </label>
           </FlexColumn>
         </div>;
-      }
+    }
 
     renderHeader() {
         // use workspace name from props instead of state here
         // because it's a record of the initial value
-        const {workspace, workspaceEditMode} = this.props;
-        switch (workspaceEditMode) {
-          case WorkspaceEditMode.Create:
-            return 'Create a new workspace';
-          case WorkspaceEditMode.Edit:
-            return 'Edit workspace \"' + workspace.name + '\"';
-          case WorkspaceEditMode.Duplicate:
-            return 'Duplicate workspace \"' + workspace.name + '\"';
-        }
+      const {workspace, workspaceEditMode} = this.props;
+      switch (workspaceEditMode) {
+        case WorkspaceEditMode.Create:
+          return 'Create a new workspace';
+        case WorkspaceEditMode.Edit:
+          return 'Edit workspace \"' + workspace.name + '\"';
+        case WorkspaceEditMode.Duplicate:
+          return 'Duplicate workspace \"' + workspace.name + '\"';
       }
+    }
 
     renderButtonText() {
-        switch (this.props.workspaceEditMode) {
-          case WorkspaceEditMode.Create: return 'Create Workspace';
-          case WorkspaceEditMode.Edit: return 'Update Workspace';
-          case WorkspaceEditMode.Duplicate: return 'Duplicate Workspace';
-        }
+      switch (this.props.workspaceEditMode) {
+        case WorkspaceEditMode.Create: return 'Create Workspace';
+        case WorkspaceEditMode.Edit: return 'Update Workspace';
+        case WorkspaceEditMode.Duplicate: return 'Duplicate Workspace';
       }
+    }
 
     get primaryPurposeIsSelected() {
-        const rp = this.state.workspace.researchPurpose;
-        return rp.ancestry || rp.commercialPurpose || rp.controlSet ||
+      const rp = this.state.workspace.researchPurpose;
+      return rp.ancestry || rp.commercialPurpose || rp.controlSet ||
             rp.diseaseFocusedResearch || rp.ethics || rp.drugDevelopment || rp.educational ||
             rp.methodsDevelopment || rp.otherPurpose || rp.populationHealth || rp.socialBehavioral;
-      }
+    }
 
     updatePrimaryPurpose(category, value) {
-        this.updateResearchPurpose(category, value);
-        if (!value && !this.researchPurposeCategoriesSelected(this.state.workspace.researchPurpose)) {
+      this.updateResearchPurpose(category, value);
+      if (!value && !this.researchPurposeCategoriesSelected(this.state.workspace.researchPurpose)) {
           // If all research purpose cateogries are unselected un check the Research Purpose checkbox
-          this.setState({selectResearchPurpose: false});
-        }
-
+        this.setState({selectResearchPurpose: false});
       }
+
+    }
 
     updateResearchPurpose(category, value) {
-        if (category === 'population' && !value) {
-          this.setState(fp.set(['workspace', 'researchPurpose', 'populationDetails'], []));
-        }
-        this.setState(fp.set(['workspace', 'researchPurpose', category], value));
+      if (category === 'population' && !value) {
+        this.setState(fp.set(['workspace', 'researchPurpose', 'populationDetails'], []));
       }
+      this.setState(fp.set(['workspace', 'researchPurpose', category], value));
+    }
 
     updateAttribute(attribute, populationDetails, value) {
-        const selectedPopulations = fp.get(['workspace', 'researchPurpose' , attribute], this.state);
-        if (value) {
-          if (!!selectedPopulations) {
-            this.setState(fp.set(['workspace', 'researchPurpose', attribute],
-              selectedPopulations.concat([populationDetails])));
-          } else {
-            this.setState(fp.set(['workspace', 'researchPurpose', attribute],
-                [populationDetails]));
-          }
+      const selectedPopulations = fp.get(['workspace', 'researchPurpose' , attribute], this.state);
+      if (value) {
+        if (!!selectedPopulations) {
+          this.setState(fp.set(['workspace', 'researchPurpose', attribute],
+            selectedPopulations.concat([populationDetails])));
         } else {
           this.setState(fp.set(['workspace', 'researchPurpose', attribute],
-            selectedPopulations.filter(v => v !== populationDetails)));
+              [populationDetails]));
         }
+      } else {
+        this.setState(fp.set(['workspace', 'researchPurpose', attribute],
+          selectedPopulations.filter(v => v !== populationDetails)));
       }
+    }
 
     updateSpecificPopulation(populationDetails, value) {
-        this.updateAttribute('populationDetails', populationDetails, value);
-      }
+      this.updateAttribute('populationDetails', populationDetails, value);
+    }
 
     specificPopulationCheckboxSelected(populationEnum: SpecificPopulationEnum): boolean {
-        return fp.includes(populationEnum, this.state.workspace.researchPurpose.populationDetails);
-      }
+      return fp.includes(populationEnum, this.state.workspace.researchPurpose.populationDetails);
+    }
 
     disseminateCheckboxSelected(disseminateEnum: DisseminateResearchEnum): boolean {
-        return fp.includes(disseminateEnum, this.state.workspace.researchPurpose.disseminateResearchFindingList);
-      }
+      return fp.includes(disseminateEnum, this.state.workspace.researchPurpose.disseminateResearchFindingList);
+    }
 
     researchOutcomeCheckboxSelected(researchOutcomeEnum: ResearchOutcomeEnum): boolean {
-        return fp.includes(researchOutcomeEnum, this.state.workspace.researchPurpose.researchOutcomeList);
-      }
+      return fp.includes(researchOutcomeEnum, this.state.workspace.researchPurpose.researchOutcomeList);
+    }
 
     onSaveClick() {
-        if (this.isMode(WorkspaceEditMode.Create)) {
-          AnalyticsTracker.Workspaces.Create();
-        } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
-          AnalyticsTracker.Workspaces.Duplicate();
-        } else if (this.isMode(WorkspaceEditMode.Edit)) {
-          AnalyticsTracker.Workspaces.Edit();
-        }
-
-        this.saveWorkspace();
+      if (this.isMode(WorkspaceEditMode.Create)) {
+        AnalyticsTracker.Workspaces.Create();
+      } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
+        AnalyticsTracker.Workspaces.Duplicate();
+      } else if (this.isMode(WorkspaceEditMode.Edit)) {
+        AnalyticsTracker.Workspaces.Edit();
       }
+
+      this.saveWorkspace();
+    }
 
     async saveWorkspace() {
-        try {
-          this.setState({loading: true});
-          let workspace = this.state.workspace;
-          if (!this.state.populationChecked) {
-            workspace.researchPurpose.populationDetails = [];
-          }
+      try {
+        this.setState({loading: true});
+        let workspace = this.state.workspace;
+        if (!this.state.populationChecked) {
+          workspace.researchPurpose.populationDetails = [];
+        }
 
-          if (this.isMode(WorkspaceEditMode.Create)) {
-            workspace =
-                await workspacesApi().createWorkspace(this.state.workspace);
-          } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
-            const cloneWorkspace = await workspacesApi().cloneWorkspace(
-              this.props.workspace.namespace, this.props.workspace.id,
-              {
-                includeUserRoles: this.state.cloneUserRole,
-                workspace: this.state.workspace
-              });
-            workspace = cloneWorkspace.workspace;
-          } else {
-            workspace.researchPurpose.needsReviewPrompt = false;
-            workspace = await workspacesApi()
-            .updateWorkspace(this.state.workspace.namespace, this.state.workspace.id,
-                {workspace: this.state.workspace});
-            // TODO: Investigate removing this GET call, the response from Update should suffice here.
-            await workspacesApi()
-            .getWorkspace(this.state.workspace.namespace, this.state.workspace.id)
-            .then(ws => currentWorkspaceStore.next({
-              ...ws.workspace,
-              accessLevel: ws.accessLevel
-            }));
-            navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
-            return;
-          }
-
-          // Remaining logic covers newly created workspace (creates or clones). The high complexity
-          // in this case is to paper over Sam consistency issues on initial creation (see RW-2818).
-          let accessLevel = null;
-          let pollTimedOut = false;
-          setTimeout(() => pollTimedOut = true, NEW_ACL_DELAY_POLL_TIMEOUT_MS);
-          while (!pollTimedOut) {
-            ({workspace, accessLevel} = await workspacesApi().getWorkspace(workspace.namespace, workspace.id));
-            if (accessLevel === WorkspaceAccessLevel.OWNER) {
-              break;
-            }
-            await new Promise((accept) => setTimeout(accept, NEW_ACL_DELAY_POLL_INTERVAL_MS));
-          }
-
-          const navigateToWorkspace = () => navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
-          if (accessLevel !== WorkspaceAccessLevel.OWNER) {
-            this.props.stackdriverErrorReporterContext.reportError(new Error(
-                `ACLs failed to propagate for workspace ${workspace.namespace}/${workspace.id}` +
-                ` accessLevel: ${accessLevel}`));
-            // We intentionally do not preload the created workspace via nextWorkspaceWarmupStore in
-            // this situation. This forces a workspace fetch on navigation, which is desired as ACLs
-            // might have finally propagated by the time the navigate button is clicked.
-            this.setState({
-              loading: false,
-              workspaceNewAclDelayed: true,
-              workspaceNewAclDelayedContinueFn: navigateToWorkspace
+        if (this.isMode(WorkspaceEditMode.Create)) {
+          workspace = await workspacesApi().createWorkspace(this.state.workspace);
+        } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
+          const cloneWorkspace = await workspacesApi().cloneWorkspace(
+            this.props.workspace.namespace, this.props.workspace.id,
+            {
+              includeUserRoles: this.state.cloneUserRole,
+              workspace: this.state.workspace
             });
-            return;
+          workspace = cloneWorkspace.workspace;
+        } else {
+          workspace.researchPurpose.needsReviewPrompt = false;
+          workspace = await workspacesApi()
+          .updateWorkspace(this.state.workspace.namespace, this.state.workspace.id,
+              {workspace: this.state.workspace});
+          // TODO: Investigate removing this GET call, the response from Update should suffice here.
+          await workspacesApi()
+          .getWorkspace(this.state.workspace.namespace, this.state.workspace.id)
+          .then(ws => currentWorkspaceStore.next({
+            ...ws.workspace,
+            accessLevel: ws.accessLevel
+          }));
+          navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
+          return;
+        }
+
+        // Remaining logic covers newly created workspace (creates or clones). The high complexity
+        // in this case is to paper over Sam consistency issues on initial creation (see RW-2818).
+        let accessLevel = null;
+        let pollTimedOut = false;
+        setTimeout(() => pollTimedOut = true, NEW_ACL_DELAY_POLL_TIMEOUT_MS);
+        while (!pollTimedOut) {
+          ({workspace, accessLevel} = await workspacesApi().getWorkspace(workspace.namespace, workspace.id));
+          if (accessLevel === WorkspaceAccessLevel.OWNER) {
+            break;
           }
+          await new Promise((accept) => setTimeout(accept, NEW_ACL_DELAY_POLL_INTERVAL_MS));
+        }
 
-          // Preload the newly created workspace to avoid a redundant GET on the following navigate.
-          // This is also important for guarding against the ACL delay issue, as we have observed
-          // that even after confirming OWNER access, subsequent calls to GET may still yield NOACCESS.
-          nextWorkspaceWarmupStore.next({...workspace, accessLevel});
-          navigateToWorkspace();
+        const navigateToWorkspace = () => navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
+        if (accessLevel !== WorkspaceAccessLevel.OWNER) {
+          this.props.stackdriverErrorReporterContext.reportError(new Error(
+              `ACLs failed to propagate for workspace ${workspace.namespace}/${workspace.id}` +
+              ` accessLevel: ${accessLevel}`));
+          // We intentionally do not preload the created workspace via nextWorkspaceWarmupStore in
+          // this situation. This forces a workspace fetch on navigation, which is desired as ACLs
+          // might have finally propagated by the time the navigate button is clicked.
+          this.setState({
+            loading: false,
+            workspaceNewAclDelayed: true,
+            workspaceNewAclDelayedContinueFn: navigateToWorkspace
+          });
+          return;
+        }
 
-        } catch (error) {
-          console.log(error);
-          error = await error.json();
+        // Preload the newly created workspace to avoid a redundant GET on the following navigate.
+        // This is also important for guarding against the ACL delay issue, as we have observed
+        // that even after confirming OWNER access, subsequent calls to GET may still yield NOACCESS.
+        nextWorkspaceWarmupStore.next({...workspace, accessLevel});
+        navigateToWorkspace();
 
-          console.log(error);
-          this.setState({loading: false});
-          if (error.statusCode === 409) {
-            this.setState({workspaceCreationConflictError: true});
+      } catch (error) {
+        console.log(error);
+        error = await error.json();
+
+        console.log(error);
+        this.setState({loading: false});
+        if (error.statusCode === 409) {
+          this.setState({workspaceCreationConflictError: true});
+        } else {
+          let errorMsg;
+          if (error.statusCode === 429) {
+            errorMsg = 'Server is overloaded. Please try again in a few minutes.';
+          } else if (error.message.includes('billing account is closed')) {
+            errorMsg = error.message;
           } else {
-            let errorMsg;
-            if (error.statusCode === 429) {
-              errorMsg = 'Server is overloaded. Please try again in a few minutes.';
-            } else if (error.message.includes('billing account is closed')) {
-              errorMsg = error.message;
-            } else {
-              errorMsg = `Could not
-            ${this.props.workspaceEditMode === WorkspaceEditMode.Create ?
-                  ' create ' : ' update '} workspace.`;
-            }
-
-            this.setState({
-              workspaceCreationError: true,
-              workspaceCreationErrorMessage: errorMsg
-            });
+            errorMsg = `Could not
+          ${this.props.workspaceEditMode === WorkspaceEditMode.Create ?
+                ' create ' : ' update '} workspace.`;
           }
+
+          this.setState({
+            workspaceCreationError: true,
+            workspaceCreationErrorMessage: errorMsg
+          });
         }
       }
+    }
 
     resetWorkspaceEditor() {
-        this.setState({
-          workspaceCreationError : false,
-          workspaceCreationConflictError : false
+      this.setState({
+        workspaceCreationError : false,
+        workspaceCreationConflictError : false
+      });
+    }
+
+    isMode(mode) {
+      return this.props.workspaceEditMode === mode;
+    }
+
+    buildBillingAccountOptions() {
+      const {enableBillingUpgrade} = serverConfigStore.getValue();
+      const options = this.state.billingAccounts.map(a => ({
+        label: a.displayName,
+        value: a.name,
+        disabled: !a.isOpen
+      }));
+      if (enableBillingUpgrade) {
+        options.push({
+          label: 'Create a new billing account',
+          value: CREATE_BILLING_ACCOUNT_OPTION_VALUE,
+          disabled: false
         });
       }
 
-    isMode(mode) {
-        return this.props.workspaceEditMode === mode;
-      }
-
-    buildBillingAccountOptions() {
-        const {enableBillingUpgrade} = serverConfigStore.getValue();
-        const options = this.state.billingAccounts.map(a => ({
-          label: a.displayName,
-          value: a.name,
-          disabled: !a.isOpen
-        }));
-        if (enableBillingUpgrade) {
-          options.push({
-            label: 'Create a new billing account',
-            value: CREATE_BILLING_ACCOUNT_OPTION_VALUE,
-            disabled: false
-          });
-        }
-
-        return options;
-      }
+      return options;
+    }
 
       // are we currently performing a CDR Version Upgrade?
       // i.e. a Duplication from a workspace with an older CDR Version to the default version
     isCdrVersionUpgrade() {
-        const {workspace: srcWorkspace} = this.props;
-        const {workspace: destWorkspace} = this.state;
-        return this.isMode(WorkspaceEditMode.Duplicate) &&
+      const {workspace: srcWorkspace} = this.props;
+      const {workspace: destWorkspace} = this.state;
+      return this.isMode(WorkspaceEditMode.Duplicate) &&
             srcWorkspace.cdrVersionId !== destWorkspace.cdrVersionId &&
             hasDefaultCdrVersion(destWorkspace, this.props.cdrVersionListResponse);
-      }
+    }
 
       /**
        * Validates the current workspace state. This is a pass-through to validate.js
        * which returns the standard error object if any validation errors occur.
        */
     private validate(): any {
-        const {
+      const {
           populationChecked,
           workspace: {
             name,
@@ -874,115 +873,115 @@ export const WorkspaceEdit = fp.flow(
             }
           }
         } = this.state;
-        let values: object = {
-          name,
-          billingAccountName,
-          anticipatedFindings,
-          intendedStudy,
-          populationChecked,
-          reviewRequested,
-          scientificApproach,
-          researchOutcomeList,
-          disseminateResearchFindingList,
-          'primaryPurpose': this.primaryPurposeIsSelected
-        };
+      let values: object = {
+        name,
+        billingAccountName,
+        anticipatedFindings,
+        intendedStudy,
+        populationChecked,
+        reviewRequested,
+        scientificApproach,
+        researchOutcomeList,
+        disseminateResearchFindingList,
+        'primaryPurpose': this.primaryPurposeIsSelected
+      };
 
-        const lengthMessages = (prefix = '') => ({
-          tooShort: `${prefix} cannot be blank`,
-          tooLong: `${prefix} cannot exceed %{count} characters`
-        });
+      const lengthMessages = (prefix = '') => ({
+        tooShort: `${prefix} cannot be blank`,
+        tooLong: `${prefix} cannot exceed %{count} characters`
+      });
 
         // TODO: This validation spec should include error messages which get
         // surfaced directly. Currently these constraints are entirely separate
         // from the user facing error strings we render.
-        const constraints: object = {
-          name: {
-            length: { minimum: 1, maximum: 80, ...lengthMessages('Name')}
-          },
+      const constraints: object = {
+        name: {
+          length: { minimum: 1, maximum: 80, ...lengthMessages('Name')}
+        },
           // The prefix for these lengthMessages require HTML formatting
           // The prefix string is omitted here and included in the React template below
-          billingAccountName: { presence: true },
-          intendedStudy: { length: { minimum: 1, maximum: 1000, ...lengthMessages() } },
-          populationChecked: { presence: true },
-          anticipatedFindings: {length: { minimum: 1, maximum: 1000, ...lengthMessages() }},
-          reviewRequested: { presence: true },
-          scientificApproach: { length: { minimum: 1, maximum: 1000, ...lengthMessages() } },
-          researchOutcomeList: { presence: {allowEmpty: false} },
-          disseminateResearchFindingList: { presence: {allowEmpty: false} },
-          primaryPurpose: { truthiness: true }
-        };
+        billingAccountName: { presence: true },
+        intendedStudy: { length: { minimum: 1, maximum: 1000, ...lengthMessages() } },
+        populationChecked: { presence: true },
+        anticipatedFindings: {length: { minimum: 1, maximum: 1000, ...lengthMessages() }},
+        reviewRequested: { presence: true },
+        scientificApproach: { length: { minimum: 1, maximum: 1000, ...lengthMessages() } },
+        researchOutcomeList: { presence: {allowEmpty: false} },
+        disseminateResearchFindingList: { presence: {allowEmpty: false} },
+        primaryPurpose: { truthiness: true }
+      };
 
         // Conditionally include optional fields for validation.
-        if (otherPurpose) {
-          const {tooShort, tooLong} = lengthMessages('Other primary purpose');
-          values = {...values, otherPurposeDetails};
-          constraints['otherPurposeDetails'] = {
-            presence: {
-              allowEmpty: false,
-              message: tooShort
-            },
-            length: {
-              maximum: 500,
-              tooLong
-            }
-          };
-        }
-        if (populationChecked) {
-          values = {...values, populationDetails};
-          constraints['populationDetails'] = {
-            presence: true
-          };
-        }
-        if (populationDetails &&
-            populationDetails.includes(SpecificPopulationEnum.OTHER)) {
-          const {tooShort, tooLong} = lengthMessages('Other Specific Population');
-          values = {...values, otherPopulationDetails};
-          constraints['otherPopulationDetails'] = {
-            presence: {
-              allowEmpty: false,
-              message: tooShort
-            },
-            length: {
-              maximum: 100,
-              tooLong
-            }
-          };
-        }
-        if (diseaseFocusedResearch) {
-          const {tooShort, tooLong} = lengthMessages('Disease of Focus');
-          values = {...values, diseaseOfFocus};
-          constraints['diseaseOfFocus'] = {
-            presence: {
-              allowEmpty: false,
-              message: tooShort
-            },
-            length: {
-              maximum: 80,
-              tooLong
-            }
-          };
-        }
-        if (disseminateResearchFindingList &&
-            disseminateResearchFindingList.includes(DisseminateResearchEnum.OTHER)) {
-          const {tooShort, tooLong} = lengthMessages('Other methods of disseminating research findings');
-          values = {...values, otherDisseminateResearchFindings};
-          constraints['otherDisseminateResearchFindings'] = {
-            presence: {
-              allowEmpty: false,
-              message: tooShort
-            },
-            length: {
-              maximum: 100,
-              tooLong
-            }
-          };
-        }
-        return validate(values, constraints, {fullMessages: false});
+      if (otherPurpose) {
+        const {tooShort, tooLong} = lengthMessages('Other primary purpose');
+        values = {...values, otherPurposeDetails};
+        constraints['otherPurposeDetails'] = {
+          presence: {
+            allowEmpty: false,
+            message: tooShort
+          },
+          length: {
+            maximum: 500,
+            tooLong
+          }
+        };
       }
+      if (populationChecked) {
+        values = {...values, populationDetails};
+        constraints['populationDetails'] = {
+          presence: true
+        };
+      }
+      if (populationDetails &&
+            populationDetails.includes(SpecificPopulationEnum.OTHER)) {
+        const {tooShort, tooLong} = lengthMessages('Other Specific Population');
+        values = {...values, otherPopulationDetails};
+        constraints['otherPopulationDetails'] = {
+          presence: {
+            allowEmpty: false,
+            message: tooShort
+          },
+          length: {
+            maximum: 100,
+            tooLong
+          }
+        };
+      }
+      if (diseaseFocusedResearch) {
+        const {tooShort, tooLong} = lengthMessages('Disease of Focus');
+        values = {...values, diseaseOfFocus};
+        constraints['diseaseOfFocus'] = {
+          presence: {
+            allowEmpty: false,
+            message: tooShort
+          },
+          length: {
+            maximum: 80,
+            tooLong
+          }
+        };
+      }
+      if (disseminateResearchFindingList &&
+            disseminateResearchFindingList.includes(DisseminateResearchEnum.OTHER)) {
+        const {tooShort, tooLong} = lengthMessages('Other methods of disseminating research findings');
+        values = {...values, otherDisseminateResearchFindings};
+        constraints['otherDisseminateResearchFindings'] = {
+          presence: {
+            allowEmpty: false,
+            message: tooShort
+          },
+          length: {
+            maximum: 100,
+            tooLong
+          }
+        };
+      }
+      return validate(values, constraints, {fullMessages: false});
+    }
 
     render() {
-        const {enableBillingUpgrade} = serverConfigStore.getValue();
-        const {
+      const {enableBillingUpgrade} = serverConfigStore.getValue();
+      const {
           workspace: {
             billingAccountName,
             cdrVersionId,
@@ -1008,13 +1007,13 @@ export const WorkspaceEdit = fp.flow(
           workspaceCreationErrorMessage,
           workspaceNewAclDelayed
         } = this.state;
-        const {cdrVersionListResponse, profileState: {profile: {freeTierDollarQuota, freeTierUsage}}} = this.props;
-        const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
+      const {cdrVersionListResponse, profileState: {profile: {freeTierDollarQuota, freeTierUsage}}} = this.props;
+      const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
         // defined below in the OverlayPanel declaration
-        let freeTierBalancePanel: OverlayPanel;
+      let freeTierBalancePanel: OverlayPanel;
 
-        const errors = this.validate();
-        return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
+      const errors = this.validate();
+      return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
           <div style={{width: '1120px'}}>
             {loading && <SpinnerOverlay overrideStylesOverlay={styles.spinner}/>}
             {!hasDefaultCdrVersion(this.state.workspace, cdrVersionListResponse) && showCdrVersionModal &&
@@ -1476,6 +1475,6 @@ export const WorkspaceEdit = fp.flow(
             }
           </div>
         </FadeBox> ;
-      }
+    }
 
   });

@@ -17,6 +17,7 @@ import {getRegistrationTasksMap} from 'app/pages/homepage/registration-dashboard
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
 import {ProfileRegistrationStepStatus} from 'app/pages/profile/profile-registration-step-status';
+import {withStackdriverErrorReporterContext} from 'app/services/error-reporter-context';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -33,7 +34,6 @@ import {environment} from 'environments/environment';
 import {InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
-import {withStackdriverErrorReporterContext} from '../../services/error-reporter-context';
 
 
 const controlledTierBadge = '/assets/icons/controlled-tier-badge.svg';

@@ -15,6 +15,7 @@ import {
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, toggleIncludes} from 'app/utils';
 
+import {withStackdriverErrorReporterContext} from 'app/services/error-reporter-context';
 import {convertAPIError} from 'app/utils/errors';
 import {environment} from 'environments/environment';
 import {Disability, GenderIdentity, Profile, Race, SexAtBirth} from 'generated/fetch';
@@ -22,7 +23,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import * as validate from 'validate.js';
-import {withStackdriverErrorReporterContext} from '../../services/error-reporter-context';
 
 const styles = reactStyles({
   checkbox: {height: 17, width: 17, marginTop: '0.15rem'},

@@ -40,10 +40,10 @@ export const StackdriverReporterProvider = ({children}) => {
         setConfig(serverConfigStore.get());
       } else {
         // This probably won't ever be reached, as both components are set in app/pages/app.component.ts
-        const config = await configApi().getConfig();
-        angularServerConfigStore.next(config);
-        serverConfigStore.set({config: config});
-        setConfig(config);
+        const fetchedConfig = await configApi().getConfig();
+        angularServerConfigStore.next(fetchedConfig);
+        serverConfigStore.set({config: fetchedConfig});
+        setConfig(fetchedConfig);
       }
     }
 
@@ -72,7 +72,6 @@ export const StackdriverReporterProvider = ({children}) => {
  * Reports an error to Stackdriver error logging, if enabled.
  */
 export function reportError(err: (Error|string)) {
-  debugger;
   console.error('Reporting error to Stackdriver: ', err);
   if (stackdriverReporterStore.get() && stackdriverReporterStore.get().reporter) {
     stackdriverReporterStore.get().reporter.report(err, (e) => {

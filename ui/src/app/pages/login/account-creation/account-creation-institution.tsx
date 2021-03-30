@@ -15,6 +15,7 @@ import {
   commonStyles,
   WhyWillSomeInformationBePublic
 } from 'app/pages/login/account-creation/common';
+import {withStackdriverErrorReporterContext} from 'app/services/error-reporter-context';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {isBlank, reactStyles} from 'app/utils';
@@ -33,7 +34,6 @@ import {
   PublicInstitutionDetails,
 } from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
-import {withStackdriverErrorReporterContext} from '../../../services/error-reporter-context';
 
 const styles = reactStyles({
   ...commonStyles,
