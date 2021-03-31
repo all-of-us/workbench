@@ -107,6 +107,16 @@ fi
 
 rm -rf $TEMP_FILE_DIR
 
+# Validate that a cdr cutoff date exists
+echo "Validating that a CDR cutoff date exists..."
+q="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.cb_cdr_date\` where bq_dataset = '$BQ_DATASET'"
+cdrDate=$(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql "$q" | tr -dc '0-9')
+if [[ $cdrDate != 1 ]];
+then
+  echo "CDR cutoff date doesn't exist in $BQ_PROJECT.$BQ_DATASET.cb_cdr_date!"
+  exit 1
+fi
+
 # Purge all backup csv files except for the last 10 versions
 if [[ $CDR_VERSION != $PREP_TABLE_RUN ]];
 then
