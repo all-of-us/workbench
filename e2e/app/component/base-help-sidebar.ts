@@ -4,7 +4,6 @@ import { LinkText, SideBarLink } from 'app/text-labels';
 import * as fp from 'lodash/fp';
 import { Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
-import { waitWhileLoading } from 'utils/waits-utils';
 
 const enum Selectors {
   rootXpath = '//*[@id="help-sidebar"]',
@@ -77,7 +76,6 @@ export default abstract class BaseHelpSidebar extends Container {
     const closeButton = new Button(this.page, this.deleteIconXpath);
     await closeButton.waitUntilEnabled();
     await closeButton.click();
-    await waitWhileLoading(this.page);
     await this.waitUntilClose();
     console.log(`Closed "${sidePanelTitle}" sidebar panel`);
   }
@@ -98,6 +96,5 @@ export default abstract class BaseHelpSidebar extends Container {
   async waitUntilClose(): Promise<void> {
     await super.waitUntilClose();
     await this.page.waitForXPath(this.deleteIconXpath, { hidden: true });
-    await this.page.waitForTimeout(1000);
   }
 }

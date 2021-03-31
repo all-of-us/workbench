@@ -1,4 +1,5 @@
 import { Page } from 'puppeteer';
+import { waitWhileLoading } from 'utils/waits-utils';
 
 /**
  * This is the super base class.
@@ -27,10 +28,16 @@ export default class Container {
   }
 
   async waitUntilVisible(): Promise<void> {
-    await this.page.waitForXPath(this.getXpath(), { visible: true });
+    await Promise.all([
+      waitWhileLoading(this.page, 60000),
+      this.page.waitForXPath(this.getXpath(), { visible: true, timeout: 60000 })
+    ]);
   }
 
   async waitUntilClose(): Promise<void> {
-    await this.page.waitForXPath(this.getXpath(), { hidden: true });
+    await Promise.all([
+      waitWhileLoading(this.page, 60000),
+      this.page.waitForXPath(this.getXpath(), { hidden: true, timeout: 60000 })
+    ]);
   }
 }
