@@ -5187,8 +5187,10 @@ definitions:
       username:
         type: string
       accessTierShortNames:
-        type: string
-        description: Short names of access tiers available to the user, comma-delimited if multiple.
+        description: Short names of access tiers available to the user.
+        type: array
+        items:
+          type: string
       dataAccessLevel:
         "$ref": "#/definitions/DataAccessLevel"
         description: DEPRECATED.  Will be replaced by accessTierShortNames.
@@ -5284,8 +5286,10 @@ definitions:
         type: integer
         format: int64
       accessTierShortNames:
-        type: string
-        description: Short names of access tiers available to the user, comma-delimited if multiple.
+        description: Short names of access tiers available to the user.
+        type: array
+        items:
+          type: string
       dataAccessLevel:
         "$ref": "#/definitions/DataAccessLevel"
         description: DEPRECATED.  Will be replaced by accessTierShortNames.

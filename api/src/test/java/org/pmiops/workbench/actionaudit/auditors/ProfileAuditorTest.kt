@@ -88,7 +88,7 @@ class ProfileAuditorTest {
                 .apply { userId = 444 }
                 .apply { username = "slim_shady" }
                 .apply { contactEmail = USER_EMAIL }
-                .apply { accessTierShortNames = AccessTierService.REGISTERED_TIER_SHORT_NAME }
+                .apply { accessTierShortNames = listOf(AccessTierService.REGISTERED_TIER_SHORT_NAME) }
                 .apply { givenName = "Robert" }
                 .apply { familyName = "Paulson" }
                 .apply { phoneNumber = "867-5309" }

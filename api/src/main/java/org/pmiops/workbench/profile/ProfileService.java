@@ -121,12 +121,12 @@ public class ProfileService {
     final @Nullable DbUserTermsOfService latestTermsOfService =
         userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId()).orElse(null);
 
-    final String accessTierShortNames =
-        String.join(",", accessTierService.getAccessTierShortNamesForUser(user));
+    final List<String> accessTierShortNames =
+        accessTierService.getAccessTierShortNamesForUser(user);
 
     // temporary - we will remove Data Access Level from the model in RW-6189
     final DataAccessLevel dataAccessLevelKluge =
-        AccessTierService.temporaryDataAccessLevelKluge(accessTierShortNames);
+        AccessTierService.temporaryDataAccessLevelKluge(String.join(",", accessTierShortNames));
 
     return profileMapper.toModel(
         user,

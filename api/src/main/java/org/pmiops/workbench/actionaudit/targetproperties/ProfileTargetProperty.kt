@@ -8,7 +8,7 @@ enum class ProfileTargetProperty
 constructor(override val propertyName: String, override val extractor: (Profile) -> String?) : ModelBackedTargetProperty<Profile> {
     USER_NAME("user_name", Profile::getUsername),
     CONTACT_EMAIL("contact_email", Profile::getContactEmail),
-    ACCESS_TIER_SHORT_NAMES("access_tier_short_names", Profile::getAccessTierShortNames),
+    ACCESS_TIER_SHORT_NAMES("access_tier_short_names", { it.accessTierShortNames.joinToString(",") }),
     GIVEN_NAME("given_name", Profile::getGivenName),
     FAMILY_NAME("family_name", Profile::getFamilyName),
     PHONE_NUMBER("phone_number", Profile::getPhoneNumber),
