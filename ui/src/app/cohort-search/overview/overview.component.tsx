@@ -426,10 +426,6 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
 
       if (cdrVersion.hasWgsData) {
         items.push({label: 'Start Genome Extraction Job', command: () => this.startGenomeExtractionJob()});
-        items.push({label: 'Get Genome Extraction Job', command: () => {
-          dataSetApi().getWgsCohortExtractionJob(this.props.workspace.namespace, this.props.workspace.id, 1)
-            .then(r => console.log(r));
-        }});
       }
 
       return items;
