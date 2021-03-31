@@ -91,7 +91,9 @@ public class AccessTierServiceTest {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
     final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
 
-    assertThat(accessTierService.getAllTiers()).containsExactly(registeredTier, controlledTier);
+    assertThat(accessTierService.getAllTiers())
+        .containsExactly(controlledTier, registeredTier)
+        .inOrder(); // enforce a consistent ordering: alphabetical by shortName
   }
 
   @Test
@@ -128,7 +130,8 @@ public class AccessTierServiceTest {
     addDaoEntry(user, controlledTier, TierAccessStatus.ENABLED);
 
     assertThat(accessTierService.getAccessTiersForUser(user))
-        .containsExactly(registeredTier, controlledTier);
+        .containsExactly(controlledTier, registeredTier)
+        .inOrder(); // enforce a consistent ordering: alphabetical by shortName
   }
 
   @Test

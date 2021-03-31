@@ -3,6 +3,7 @@ package org.pmiops.workbench.access;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -151,13 +152,15 @@ public class AccessTierServiceImpl implements AccessTierService {
    * status ENABLED
    *
    * @param user the user whose access we're checking
-   * @return The List of DbAccessTiers the DbUser has access to in this environment
+   * @return The List of DbAccessTiers the DbUser has access to in this environment, in alphabetical
+   *     order
    */
   @Override
   public List<DbAccessTier> getAccessTiersForUser(DbUser user) {
     return userAccessTierDao.getAllByUser(user).stream()
         .filter(uat -> uat.getTierAccessStatusEnum() == TierAccessStatus.ENABLED)
         .map(DbUserAccessTier::getAccessTier)
+        .sorted(Comparator.comparing(DbAccessTier::getShortName))
         .collect(Collectors.toList());
   }
 
@@ -165,7 +168,8 @@ public class AccessTierServiceImpl implements AccessTierService {
    * Return the list of tiers a user has access to, as shortNames
    *
    * @param user the user whose access we're checking
-   * @return The List of shortNames of DbAccessTiers the DbUser has access to in this environment
+   * @return The List of shortNames of DbAccessTiers the DbUser has access to in this environment,
+   *     in alphabetical order
    */
   @Override
   public List<String> getAccessTierShortNamesForUser(DbUser user) {

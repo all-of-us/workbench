@@ -65,7 +65,8 @@ public interface AccessTierService {
    * status ENABLED
    *
    * @param user the user whose access we're checking
-   * @return The List of DbAccessTiers the DbUser has access to in this environment
+   * @return The List of DbAccessTiers the DbUser has access to in this environment, in alphabetical
+   *     order
    */
   List<DbAccessTier> getAccessTiersForUser(DbUser user);
 
@@ -73,7 +74,8 @@ public interface AccessTierService {
    * Return the list of tiers a user has access to, as shortNames
    *
    * @param user the user whose access we're checking
-   * @return The List of shortNames of DbAccessTiers the DbUser has access to in this environment
+   * @return The List of shortNames of DbAccessTiers the DbUser has access to in this environment,
+   *     in alphabetical order
    */
   List<String> getAccessTierShortNamesForUser(DbUser user);
 
