@@ -5,7 +5,6 @@ import { LinkText, SideBarLink } from 'app/text-labels';
 import Button from 'app/element/button';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import BaseHelpSidebar from './base-help-sidebar';
-import { waitWhileLoading } from 'utils/waits-utils';
 
 const defaultXpath = '//*[@id="runtime-panel"]';
 const statusIconXpath = '//*[@data-test-id="runtime-status-icon"]';
@@ -156,7 +155,6 @@ export default class RuntimePanel extends BaseHelpSidebar {
   }
 
   async open(): Promise<void> {
-    await waitWhileLoading(this.page);
     const isOpen = await this.isVisible();
     if (isOpen) {
       return;
