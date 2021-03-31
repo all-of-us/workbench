@@ -1503,7 +1503,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     assertThat(profile.getContactEmail()).isEqualTo(CONTACT_EMAIL);
     assertThat(profile.getFamilyName()).isEqualTo(FAMILY_NAME);
     assertThat(profile.getGivenName()).isEqualTo(GIVEN_NAME);
-    assertThat(profile.getAccessTierShortNames()).isEqualTo("");
+    assertThat(profile.getAccessTierShortNames()).isEmpty();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
     assertThat(profile.getContactEmailFailure()).isEqualTo(false);
 

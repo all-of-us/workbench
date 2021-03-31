@@ -62,6 +62,7 @@ public class UserDaoTest extends SpringTest {
     List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
     assertThat(rows).hasSize(1);
     final UserCountGaugeLabelsAndValue row = rows.get(0);
+    assertThat(row.getAccessTierShortNames()).isNotNull();
     assertThat(row.getAccessTierShortNames()).contains(registeredTier.getShortName());
     assertThat(row.getDisabled()).isFalse();
     assertThat(row.getUserCount()).isEqualTo(1L);

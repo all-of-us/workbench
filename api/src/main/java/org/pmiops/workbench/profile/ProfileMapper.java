@@ -1,8 +1,11 @@
 package org.pmiops.workbench.profile;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -44,7 +47,12 @@ public interface ProfileMapper {
   AdminTableUser adminViewToModel(UserDao.DbAdminTableUser dbUser, DataAccessLevel dataAccessLevel);
 
   // used by the generated impl of adminViewToModel()
-  default List<String> splitAccessTierShortNames(String commaSeparatedAccessTierShortNames) {
+  default List<String> splitAccessTierShortNames(
+      @Nullable String commaSeparatedAccessTierShortNames) {
+    if (StringUtils.isEmpty(commaSeparatedAccessTierShortNames)) {
+      return Collections.emptyList();
+    }
+
     return Arrays.stream(commaSeparatedAccessTierShortNames.split(","))
         .collect(Collectors.toList());
   }
