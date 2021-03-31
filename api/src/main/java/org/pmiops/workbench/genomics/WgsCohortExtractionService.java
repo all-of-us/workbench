@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -125,6 +126,25 @@ public class WgsCohortExtractionService {
     }
 
     return wgsCohortExtractionMapper.toApi(dbWgsExtractCromwellSubmission, firecloudSubmission);
+  }
+
+  public List<WgsCohortExtractionJob> getWgsCohortExtractionJobs(String workspaceNamespace, String workspaceId) {
+    DbWorkspace dbWorkspace = workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
+    return wgsExtractCromwellSubmissionDao.findAllByWorkspace(dbWorkspace).stream().map(dbSubmission -> {
+      try {
+        // RW-6537: Don't make a call to Terra for every submission. Submissions in a non running state will not change
+        FirecloudSubmission firecloudSubmission = submissionApiProvider.get().monitorSubmission(
+            workbenchConfigProvider.get().wgsCohortExtraction.operationalTerraWorkspaceNamespace,
+            workbenchConfigProvider.get().wgsCohortExtraction.operationalTerraWorkspaceName,
+            dbSubmission.getSubmissionId());
+
+        return wgsCohortExtractionMapper.toApi(dbSubmission, firecloudSubmission);
+      } catch (ApiException e) {
+        throw new ServerErrorException("Could not fetch submission status from Terra", e);
+      }
+    }).collect(Collectors.toList());
   }
 
   public WgsCohortExtractionJob submitGenomicsCohortExtractionJob(DbWorkspace workspace, Long cohortId)
