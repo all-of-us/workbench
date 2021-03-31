@@ -7,7 +7,7 @@ import { getPropValue } from 'utils/element-utils';
 
 const enum Selectors {
   rootXpath = '//*[@id="help-sidebar"]',
-  // "margin-right: 0px;" is used to deterimine visibility
+  // "margin-right: 0px;" is used to determine visibility
   contentXpath = '//*[@data-test-id="sidebar-content" and contains(normalize-space(@style), "margin-right: 0px;")]',
   closeIconXpath = '//*[@role="button"][./*[@alt="Close"]]'
 }
@@ -77,8 +77,6 @@ export default abstract class BaseHelpSidebar extends Container {
     await closeButton.waitUntilEnabled();
     await closeButton.click();
     await this.waitUntilClose();
-    await this.page.waitForXPath(this.deleteIconXpath, { hidden: true });
-    await this.page.waitForTimeout(1000);
     console.log(`Closed "${sidePanelTitle}" sidebar panel`);
   }
 
@@ -93,5 +91,10 @@ export default abstract class BaseHelpSidebar extends Container {
     } catch (err) {
       return false;
     }
+  }
+
+  async waitUntilClose(): Promise<void> {
+    await super.waitUntilClose();
+    await this.page.waitForXPath(this.deleteIconXpath, { hidden: true });
   }
 }
