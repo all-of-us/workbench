@@ -198,16 +198,18 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             ? accessTierService.getTiersForRegisteredUsers()
             : Collections.emptyList();
 
-    newAccessTiers.forEach(tier -> accessTierService.addUserToTier(dbUser, tier));
-
     if (!newAccessTiers.equals(previousAccessTiers)) {
       userServiceAuditor.fireUpdateAccessTiersAction(
           dbUser, previousAccessTiers, newAccessTiers, agent);
-
-      final List<DbAccessTier> tiersForRemoval =
-          Lists.difference(previousAccessTiers, newAccessTiers);
-      tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
     }
+
+    // add user to each Access Tier DB table and the tiers' Terra Auth Domains
+    newAccessTiers.forEach(tier -> accessTierService.addUserToTier(dbUser, tier));
+
+    // remove user from all other Access Tier DB tables and the tiers' Terra Auth Domains
+    final List<DbAccessTier> tiersForRemoval =
+        Lists.difference(accessTierService.getAllTiers(), newAccessTiers);
+    tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
   }
 
   private boolean shouldUserBeRegistered(DbUser user) {
@@ -844,7 +846,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-
     final List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
     return rows.stream()
         .map(
