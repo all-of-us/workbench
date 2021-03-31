@@ -12,7 +12,7 @@ require "benchmark"
 require "fileutils"
 require "io/console"
 require "json"
-require "optparse"describe_runtime
+require "optparse"
 require "ostruct"
 require "tempfile"
 require "net/http"

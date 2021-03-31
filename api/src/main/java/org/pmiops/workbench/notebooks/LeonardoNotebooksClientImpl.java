@@ -131,12 +131,12 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   }
 
   @Override
-  public void createRuntime(Runtime runtime, String workspaceFirecloudName) {
+  public void createRuntime(
+      Runtime runtime, String workspaceNamespace, String workspaceFirecloudName) {
     RuntimesApi runtimesApi = runtimesApiProvider.get();
 
     DbUser user = userProvider.get();
-    DbWorkspace workspace =
-        workspaceDao.getRequired(runtime.getGoogleProject(), workspaceFirecloudName);
+    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceFirecloudName);
     Map<String, String> customEnvironmentVariables = new HashMap<>();
     // i.e. is NEW or MIGRATED
     if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {

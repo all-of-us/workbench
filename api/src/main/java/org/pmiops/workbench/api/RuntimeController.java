@@ -161,6 +161,7 @@ public class RuntimeController implements RuntimeApiDelegate {
   public ResponseEntity<Runtime> getRuntime(String workspaceNamespace) {
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
     String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
+    String googleProject = dbWorkspace.getGoogleProject();
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
@@ -169,9 +170,9 @@ public class RuntimeController implements RuntimeApiDelegate {
       return ResponseEntity.ok(
           leonardoMapper.toApiRuntime(
               leonardoNotebooksClient.getRuntime(
-                  dbWorkspace.getGoogleProject(), userProvider.get().getRuntimeName())));
+                  googleProject, userProvider.get().getRuntimeName())));
     } catch (NotFoundException e) {
-      return ResponseEntity.ok(getOverrideFromListRuntimes(workspaceNamespace));
+      return ResponseEntity.ok(getOverrideFromListRuntimes(googleProject));
     }
   }
 
@@ -251,7 +252,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     runtime.setGoogleProject(dbWorkspace.getGoogleProject());
     runtime.setRuntimeName(userProvider.get().getRuntimeName());
 
-    leonardoNotebooksClient.createRuntime(runtime, firecloudWorkspaceName);
+    leonardoNotebooksClient.createRuntime(runtime, workspaceNamespace, firecloudWorkspaceName);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -293,7 +294,8 @@ public class RuntimeController implements RuntimeApiDelegate {
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
 
-    leonardoNotebooksClient.deleteRuntime(dbWorkspace.getGoogleProject(), userProvider.get().getRuntimeName());
+    leonardoNotebooksClient.deleteRuntime(
+        dbWorkspace.getGoogleProject(), userProvider.get().getRuntimeName());
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -357,8 +359,7 @@ public class RuntimeController implements RuntimeApiDelegate {
 
     // The Welder extension offers direct links to/from playground mode; write the AoU config file
     // to both locations so notebooks will work in either directory.
-    String aouConfigUri = aouConfigDataUri(firecloudWorkspace, cdrVersion,
-        workspaceNamespace);
+    String aouConfigUri = aouConfigDataUri(firecloudWorkspace, cdrVersion, workspaceNamespace);
     localizeMap.put(editDir + "/" + AOU_CONFIG_FILENAME, aouConfigUri);
     localizeMap.put(playgroundDir + "/" + AOU_CONFIG_FILENAME, aouConfigUri);
 
