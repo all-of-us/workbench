@@ -719,7 +719,8 @@ export const WorkspaceEdit = fp.flow(
         }
 
         if (this.isMode(WorkspaceEditMode.Create)) {
-          workspace = await workspacesApi().createWorkspace(this.state.workspace);
+          workspace =
+            await workspacesApi().createWorkspace(this.state.workspace);
         } else if (this.isMode(WorkspaceEditMode.Duplicate)) {
           const cloneWorkspace = await workspacesApi().cloneWorkspace(
             this.props.workspace.namespace, this.props.workspace.id,

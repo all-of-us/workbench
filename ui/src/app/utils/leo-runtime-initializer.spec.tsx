@@ -178,7 +178,7 @@ describe('RuntimeInitializer', () => {
       }; });
 
     LeoRuntimeInitializer.initialize({
-      workspaceNamespace: workspaceNamespace
+      workspaceNamespace: workspaceNamespace,
     });
     await new Promise(setImmediate);
 

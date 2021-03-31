@@ -13,7 +13,7 @@ interface StackdriverReporterStore {
   reporter?: StackdriverErrorReporter;
 }
 
-// Exported for use in LeoRuntimeInitializer, should be removed after WorkspaceWrapper is converted
+// TODO: Exported for use in LeoRuntimeInitializer, should be removed after WorkspaceWrapper is converted in RW-3122
 export const stackdriverReporterStore = atom<StackdriverReporterStore>({});
 
 const StackdriverErrorReporterContext = createContext({
@@ -56,8 +56,6 @@ export const StackdriverReporterProvider = ({children}) => {
         projectId: config.projectId,
       });
       stackdriverReporterStore.set(reporter);
-    } else {
-      console.log('wtf but in context');
     }
   });
 
