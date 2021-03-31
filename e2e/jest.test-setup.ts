@@ -203,7 +203,10 @@ beforeEach(async () => {
     const title = await getPageTitle();
     try {
       const args = await Promise.all(message.args().map((a) => describeJsHandle(a)));
-      console[message.type() === 'warning' ? 'warn' : message.type()](`Page console: "${title}"\n`, ...args);
+      console[message.type() === 'warning' ? 'warn' : message.type()](
+        `Page console: "${title}"\n`,
+        JSON.stringify(args, null, 2)
+      );
       console.log('');
     } catch (err) {
       console.error(`❗ "${title}"\nException occurred when getting page console message.\n${err}\n${message.text()}`);
