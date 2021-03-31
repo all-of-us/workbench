@@ -203,7 +203,7 @@ export default class RuntimePanel extends BaseHelpSidebar {
     // Reopen panel in order to check icon status.
     await this.open();
     // Runtime state transition: Stopping -> None
-    await this.waitForStartStopIconState(StartStopIconState.Stopping, 60 * 1000);
+    await this.waitForStartStopIconState(StartStopIconState.Stopping, 2 * 60 * 1000);
     await this.waitForStartStopIconState(StartStopIconState.None);
     await this.close();
     await this.waitUntilClose();
@@ -216,8 +216,9 @@ export default class RuntimePanel extends BaseHelpSidebar {
   async pauseRuntime(): Promise<void> {
     console.log('Pausing runtime');
     await this.open();
-    await this.waitForStartStopIconState(StartStopIconState.Running, 30 * 1000);
+    await this.waitForStartStopIconState(StartStopIconState.Running, 60 * 1000);
     await this.clickPauseRuntimeIcon();
+    // Runtime state transition: Stopping -> Stopped
     await this.waitForStartStopIconState(StartStopIconState.Stopping);
     await this.waitForStartStopIconState(StartStopIconState.Stopped);
     await this.close();
@@ -232,6 +233,7 @@ export default class RuntimePanel extends BaseHelpSidebar {
     console.log('Resuming runtime');
     await this.open();
     await this.clickResumeRuntimeIcon();
+    // Runtime state transition: Stopped -> Starting -> Running
     await this.waitForStartStopIconState(StartStopIconState.Stopped);
     await this.waitForStartStopIconState(StartStopIconState.Starting);
     await this.waitForStartStopIconState(StartStopIconState.Running);
