@@ -2724,8 +2724,6 @@ def deploy(cmd_name, args)
     cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
     update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
 
-    common.run_inline %W{gradle loadDataDictionary -PappArgs=#{op.opts.dry_run ? true : false}}
-
     # Keep the cloud proxy context open for the service account credentials.
     dry_flag = op.opts.dry_run ? %W{--dry-run} : []
     deploy_args = %W{
