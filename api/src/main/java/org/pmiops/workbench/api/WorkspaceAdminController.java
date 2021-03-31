@@ -31,6 +31,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
     return ResponseEntity.ok(workspaceAdminService.getCloudStorageTraffic(workspaceNamespace));
   }
 
+
   @Override
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<WorkspaceAdminView> getWorkspaceAdminView(String workspaceNamespace) {

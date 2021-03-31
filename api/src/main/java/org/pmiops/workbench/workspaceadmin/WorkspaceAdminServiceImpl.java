@@ -148,10 +148,10 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   @Override
   public CloudStorageTraffic getCloudStorageTraffic(String workspaceNamespace) {
     CloudStorageTraffic response = new CloudStorageTraffic().receivedBytes(new ArrayList<>());
-
+    String googleProject = getWorkspaceByNamespaceOrThrow(workspaceNamespace).getGoogleProject();
     for (TimeSeries timeSeries :
         cloudMonitoringService.getCloudStorageReceivedBytes(
-            workspaceNamespace, TRAILING_TIME_TO_QUERY)) {
+            googleProject, TRAILING_TIME_TO_QUERY)) {
       for (Point point : timeSeries.getPointsList()) {
         response.addReceivedBytesItem(
             new TimeSeriesPoint()
