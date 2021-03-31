@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,9 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
-import com.google.common.collect.ImmutableMap;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,11 +53,9 @@ import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.model.TerraJobStatus;
 import org.pmiops.workbench.model.WgsCohortExtractionJob;
-import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -100,10 +94,10 @@ public class WgsCohortExtractionServiceTest {
 
   @TestConfiguration
   @Import({
-      WgsCohortExtractionService.class,
-      WgsCohortExtractionMapperImpl.class,
-      CommonMappers.class,
-      WorkspaceAuthService.class
+    WgsCohortExtractionService.class,
+    WgsCohortExtractionMapperImpl.class,
+    CommonMappers.class,
+    WorkspaceAuthService.class
   })
   @MockBean({
     CohortService.class,
@@ -185,55 +179,64 @@ public class WgsCohortExtractionServiceTest {
     submissionResponse.setSubmissionId(FC_SUBMISSION_ID);
     doReturn(submissionResponse).when(submissionsApi).createSubmission(any(), any(), any());
 
-    doReturn(new FirecloudWorkspaceResponse().accessLevel("READER")).when(fireCloudService).getWorkspace(anyString(), anyString());
+    doReturn(new FirecloudWorkspaceResponse().accessLevel("READER"))
+        .when(fireCloudService)
+        .getWorkspace(anyString(), anyString());
   }
 
   @Test
   public void getExtractionJobs() throws ApiException {
     OffsetDateTime submissionDate = OffsetDateTime.now();
-    DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission = createDbWgsExtractCromwellSubmission();
+    DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
+        createDbWgsExtractCromwellSubmission();
 
     doReturn(
-        new FirecloudSubmission()
-            .status(FirecloudSubmissionStatus.DONE)
-            .submissionDate(submissionDate)
-    ).when(submissionsApi).monitorSubmission(
-        workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
-        workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
-        dbWgsExtractCromwellSubmission.getSubmissionId()
-    );
+            new FirecloudSubmission()
+                .status(FirecloudSubmissionStatus.DONE)
+                .submissionDate(submissionDate))
+        .when(submissionsApi)
+        .monitorSubmission(
+            workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
+            workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
+            dbWgsExtractCromwellSubmission.getSubmissionId());
 
-    WgsCohortExtractionJob wgsCohortExtractionJob = wgsCohortExtractionService.getWgsCohortExtractionJobs(
-        targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName())
-        .get(0);
+    WgsCohortExtractionJob wgsCohortExtractionJob =
+        wgsCohortExtractionService
+            .getWgsCohortExtractionJobs(
+                targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName())
+            .get(0);
 
     assertThat(wgsCohortExtractionJob.getStatus()).isEqualTo(TerraJobStatus.SUCCEEDED);
-    assertThat(wgsCohortExtractionJob.getSubmissionDate()).isEqualTo(submissionDate.toInstant().toEpochMilli());
+    assertThat(wgsCohortExtractionJob.getSubmissionDate())
+        .isEqualTo(submissionDate.toInstant().toEpochMilli());
   }
 
   @Test
   public void getExtractionJobs_userHasReaderWorkspaceAccess() {
     final String submissionId = UUID.randomUUID().toString();
-    DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission = new DbWgsExtractCromwellSubmission();
+    DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
+        new DbWgsExtractCromwellSubmission();
     dbWgsExtractCromwellSubmission.setSubmissionId(submissionId);
     dbWgsExtractCromwellSubmission.setCreator(currentUser);
     dbWgsExtractCromwellSubmission.setWorkspace(targetWorkspace);
     wgsExtractCromwellSubmissionDao.save(dbWgsExtractCromwellSubmission);
 
-    doReturn(new FirecloudWorkspaceResponse().accessLevel("NO ACCESS")).when(fireCloudService).getWorkspace(
-        targetWorkspace.getWorkspaceNamespace(),
-        targetWorkspace.getFirecloudName()
-    );
+    doReturn(new FirecloudWorkspaceResponse().accessLevel("NO ACCESS"))
+        .when(fireCloudService)
+        .getWorkspace(targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
 
-    assertThrows(ForbiddenException.class, () -> {
-      wgsCohortExtractionService.getWgsCohortExtractionJobs(targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
-    });
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          wgsCohortExtractionService.getWgsCohortExtractionJobs(
+              targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
+        });
 
-    doReturn(new FirecloudWorkspaceResponse().accessLevel("READER")).when(fireCloudService).getWorkspace(
-        targetWorkspace.getWorkspaceNamespace(),
-        targetWorkspace.getFirecloudName()
-    );
-    wgsCohortExtractionService.getWgsCohortExtractionJobs(targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
+    doReturn(new FirecloudWorkspaceResponse().accessLevel("READER"))
+        .when(fireCloudService)
+        .getWorkspace(targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
+    wgsCohortExtractionService.getWgsCohortExtractionJobs(
+        targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
   }
 
   @Test
@@ -241,36 +244,47 @@ public class WgsCohortExtractionServiceTest {
     Map<Long, TerraJobStatus> expectedStatuses = new HashMap<>();
 
     expectedStatuses.put(
-        createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus.DONE).getWgsExtractCromwellSubmissionId(),
+        createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus.DONE)
+            .getWgsExtractCromwellSubmissionId(),
         TerraJobStatus.SUCCEEDED);
     expectedStatuses.put(
-        createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus.ABORTED).getWgsExtractCromwellSubmissionId(),
+        createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus.ABORTED)
+            .getWgsExtractCromwellSubmissionId(),
         TerraJobStatus.FAILED);
     expectedStatuses.put(
-        createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus.ABORTING).getWgsExtractCromwellSubmissionId(),
+        createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus.ABORTING)
+            .getWgsExtractCromwellSubmissionId(),
         TerraJobStatus.FAILED);
     expectedStatuses.put(
-        createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus.ACCEPTED).getWgsExtractCromwellSubmissionId(),
+        createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus.ACCEPTED)
+            .getWgsExtractCromwellSubmissionId(),
         TerraJobStatus.RUNNING);
     expectedStatuses.put(
-        createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus.EVALUATING).getWgsExtractCromwellSubmissionId(),
+        createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus.EVALUATING)
+            .getWgsExtractCromwellSubmissionId(),
         TerraJobStatus.RUNNING);
     expectedStatuses.put(
-        createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus.SUBMITTED).getWgsExtractCromwellSubmissionId(),
+        createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus.SUBMITTED)
+            .getWgsExtractCromwellSubmissionId(),
         TerraJobStatus.RUNNING);
     expectedStatuses.put(
-        createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus.SUBMITTING).getWgsExtractCromwellSubmissionId(),
+        createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus.SUBMITTING)
+            .getWgsExtractCromwellSubmissionId(),
         TerraJobStatus.RUNNING);
 
     wgsCohortExtractionService
-        .getWgsCohortExtractionJobs(targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName())
-        .forEach(job -> {
-          assertThat(job.getStatus()).isEqualTo(expectedStatuses.get(job.getWgsCohortExtractionJobId()));
-        });
+        .getWgsCohortExtractionJobs(
+            targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName())
+        .forEach(
+            job -> {
+              assertThat(job.getStatus())
+                  .isEqualTo(expectedStatuses.get(job.getWgsCohortExtractionJobId()));
+            });
   }
 
   private DbWgsExtractCromwellSubmission createDbWgsExtractCromwellSubmission() {
-    DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission = new DbWgsExtractCromwellSubmission();
+    DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
+        new DbWgsExtractCromwellSubmission();
     dbWgsExtractCromwellSubmission.setSubmissionId(UUID.randomUUID().toString());
     dbWgsExtractCromwellSubmission.setCreator(currentUser);
     dbWgsExtractCromwellSubmission.setWorkspace(targetWorkspace);
@@ -279,17 +293,16 @@ public class WgsCohortExtractionServiceTest {
     return dbWgsExtractCromwellSubmission;
   }
 
-  private DbWgsExtractCromwellSubmission createSubmissionAndMockMonitorCall(FirecloudSubmissionStatus status) throws ApiException {
-    DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission = createDbWgsExtractCromwellSubmission();
-    doReturn(
-        new FirecloudSubmission()
-            .status(status)
-            .submissionDate(OffsetDateTime.now())
-    ).when(submissionsApi).monitorSubmission(
-        workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
-        workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
-        dbWgsExtractCromwellSubmission.getSubmissionId()
-    );
+  private DbWgsExtractCromwellSubmission createSubmissionAndMockMonitorCall(
+      FirecloudSubmissionStatus status) throws ApiException {
+    DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
+        createDbWgsExtractCromwellSubmission();
+    doReturn(new FirecloudSubmission().status(status).submissionDate(OffsetDateTime.now()))
+        .when(submissionsApi)
+        .monitorSubmission(
+            workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
+            workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
+            dbWgsExtractCromwellSubmission.getSubmissionId());
     return dbWgsExtractCromwellSubmission;
   }
 

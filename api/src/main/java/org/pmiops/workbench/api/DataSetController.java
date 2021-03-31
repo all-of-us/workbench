@@ -59,7 +59,6 @@ import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.MarkDataSetRequest;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResourceType;
-import org.pmiops.workbench.model.WgsCohortExtractionJob;
 import org.pmiops.workbench.model.WgsCohortExtractionJobListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
@@ -495,9 +494,13 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   @Override
-  public ResponseEntity<WgsCohortExtractionJobListResponse> getWgsCohortExtractionJobs(String workspaceNamespace, String workspaceId) {
-    return ResponseEntity.ok(new WgsCohortExtractionJobListResponse()
-        .jobs(wgsCohortExtractionService.getWgsCohortExtractionJobs(workspaceNamespace, workspaceId)));
+  public ResponseEntity<WgsCohortExtractionJobListResponse> getWgsCohortExtractionJobs(
+      String workspaceNamespace, String workspaceId) {
+    return ResponseEntity.ok(
+        new WgsCohortExtractionJobListResponse()
+            .jobs(
+                wgsCohortExtractionService.getWgsCohortExtractionJobs(
+                    workspaceNamespace, workspaceId)));
   }
 
   // TODO(jaycarlton) create a class that knows about code cells and their properties,

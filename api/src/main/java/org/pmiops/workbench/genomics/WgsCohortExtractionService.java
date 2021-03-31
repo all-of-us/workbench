@@ -18,7 +18,6 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
-import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -35,7 +34,6 @@ import org.pmiops.workbench.model.TerraJobStatus;
 import org.pmiops.workbench.model.WgsCohortExtractionJob;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -102,27 +100,40 @@ public class WgsCohortExtractionService {
         .build();
   }
 
-  public List<WgsCohortExtractionJob> getWgsCohortExtractionJobs(String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace = workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+  public List<WgsCohortExtractionJob> getWgsCohortExtractionJobs(
+      String workspaceNamespace, String workspaceId) {
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    return wgsExtractCromwellSubmissionDao.findAllByWorkspace(dbWorkspace).stream().map(dbSubmission -> {
-      try {
-        // RW-6537: Don't make a call to Terra for every submission. Submissions in a non running state will not change
-        FirecloudSubmission firecloudSubmission = submissionApiProvider.get().monitorSubmission(
-            workbenchConfigProvider.get().wgsCohortExtraction.operationalTerraWorkspaceNamespace,
-            workbenchConfigProvider.get().wgsCohortExtraction.operationalTerraWorkspaceName,
-            dbSubmission.getSubmissionId());
+    return wgsExtractCromwellSubmissionDao.findAllByWorkspace(dbWorkspace).stream()
+        .map(
+            dbSubmission -> {
+              try {
+                // RW-6537: Don't make a call to Terra for every submission. Submissions in a non
+                // running state will not change
+                FirecloudSubmission firecloudSubmission =
+                    submissionApiProvider
+                        .get()
+                        .monitorSubmission(
+                            workbenchConfigProvider.get()
+                                .wgsCohortExtraction
+                                .operationalTerraWorkspaceNamespace,
+                            workbenchConfigProvider.get()
+                                .wgsCohortExtraction
+                                .operationalTerraWorkspaceName,
+                            dbSubmission.getSubmissionId());
 
-        return wgsCohortExtractionMapper.toApi(dbSubmission, firecloudSubmission);
-      } catch (ApiException e) {
-        throw new ServerErrorException("Could not fetch submission status from Terra", e);
-      }
-    }).collect(Collectors.toList());
+                return wgsCohortExtractionMapper.toApi(dbSubmission, firecloudSubmission);
+              } catch (ApiException e) {
+                throw new ServerErrorException("Could not fetch submission status from Terra", e);
+              }
+            })
+        .collect(Collectors.toList());
   }
 
-  public WgsCohortExtractionJob submitGenomicsCohortExtractionJob(DbWorkspace workspace, Long cohortId)
-      throws ApiException {
+  public WgsCohortExtractionJob submitGenomicsCohortExtractionJob(
+      DbWorkspace workspace, Long cohortId) throws ApiException {
     // Currently only creates the temporary extraction tables
     // No files are being written to the user bucket
 
@@ -254,7 +265,6 @@ public class WgsCohortExtractionService {
             cohortExtractionConfig.extractionMethodConfigurationNamespace,
             methodConfig.getName());
 
-    return new WgsCohortExtractionJob()
-        .status(TerraJobStatus.RUNNING);
+    return new WgsCohortExtractionJob().status(TerraJobStatus.RUNNING);
   }
 }
