@@ -1,6 +1,7 @@
 package org.pmiops.workbench.genomics;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
@@ -54,6 +55,7 @@ import org.pmiops.workbench.model.WgsCohortExtractionJob;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -81,7 +83,7 @@ public class WgsCohortExtractionServiceTest {
   @Autowired WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao;
   @Autowired UserDao userDao;
   @Autowired WorkspaceDao workspaceDao;
-  @Autowired WorkspaceService workspaceService;
+  @Autowired WorkspaceAuthService workspaceAuthService;
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired CohortService mockCohortService;
 
@@ -95,14 +97,14 @@ public class WgsCohortExtractionServiceTest {
   @Import({
       WgsCohortExtractionService.class,
       WgsCohortExtractionMapperImpl.class,
-      CommonMappers.class
+      CommonMappers.class,
+      WorkspaceAuthService.class
   })
   @MockBean({
     CohortService.class,
     FireCloudService.class,
     MethodConfigurationsApi.class,
-    SubmissionsApi.class,
-    WorkspaceService.class
+    SubmissionsApi.class
   })
   static class Configuration {
     @Bean
@@ -167,6 +169,8 @@ public class WgsCohortExtractionServiceTest {
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
     DbWorkspace workspace = new DbWorkspace();
+    workspace.setWorkspaceNamespace("Target DbWorkspace Namespace");
+    workspace.setFirecloudName("Target DbWorkspace Firecloud Name");
     workspace.setName("Target DbWorkspace");
     workspace.setWorkspaceId(2);
     workspace.setCdrVersion(cdrVersion);
@@ -204,7 +208,7 @@ public class WgsCohortExtractionServiceTest {
     assertThat(wgsCohortExtractionJob.getSubmissionDate()).isEqualTo(submissionDate.toInstant().toEpochMilli());
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void getExtractionJob_userHasReaderWorkspaceAccess() {
     final String submissionId = UUID.randomUUID().toString();
     DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission = new DbWgsExtractCromwellSubmission();
@@ -213,13 +217,19 @@ public class WgsCohortExtractionServiceTest {
     dbWgsExtractCromwellSubmission.setWorkspace(targetWorkspace);
     wgsExtractCromwellSubmissionDao.save(dbWgsExtractCromwellSubmission);
 
-    // set "no" access
-    doThrow(ForbiddenException.class).when(workspaceService).getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    doReturn(new FirecloudWorkspaceResponse().accessLevel("NO ACCESS")).when(fireCloudService).getWorkspace(
         targetWorkspace.getWorkspaceNamespace(),
-        targetWorkspace.getName(),
-        WorkspaceAccessLevel.READER
+        targetWorkspace.getFirecloudName()
     );
 
+    assertThrows(ForbiddenException.class, () -> {
+      wgsCohortExtractionService.getWgsCohortExtractionJob(dbWgsExtractCromwellSubmission.getWgsExtractCromwellSubmissionId());
+    });
+
+    doReturn(new FirecloudWorkspaceResponse().accessLevel("READER")).when(fireCloudService).getWorkspace(
+        targetWorkspace.getWorkspaceNamespace(),
+        targetWorkspace.getFirecloudName()
+    );
     wgsCohortExtractionService.getWgsCohortExtractionJob(dbWgsExtractCromwellSubmission.getWgsExtractCromwellSubmissionId());
   }
 

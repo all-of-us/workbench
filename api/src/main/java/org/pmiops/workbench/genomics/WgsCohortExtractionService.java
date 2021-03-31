@@ -33,6 +33,7 @@ import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.model.TerraJobStatus;
 import org.pmiops.workbench.model.WgsCohortExtractionJob;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -50,7 +51,7 @@ public class WgsCohortExtractionService {
   private final WgsCohortExtractionMapper wgsCohortExtractionMapper;
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final WorkspaceService workspaceService;
+  private final WorkspaceAuthService workspaceAuthService;
   private final Clock clock;
 
   @Autowired
@@ -65,7 +66,7 @@ public class WgsCohortExtractionService {
       WgsCohortExtractionMapper wgsCohortExtractionMapper,
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      WorkspaceService workspaceService,
+      WorkspaceAuthService workspaceAuthService,
       Clock clock) {
     this.cohortService = cohortService;
     this.fireCloudService = fireCloudService;
@@ -77,7 +78,7 @@ public class WgsCohortExtractionService {
     this.wgsCohortExtractionMapper = wgsCohortExtractionMapper;
     this.userProvider = userProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.workspaceService = workspaceService;
+    this.workspaceAuthService = workspaceAuthService;
     this.clock = clock;
   }
 
@@ -107,9 +108,9 @@ public class WgsCohortExtractionService {
       throw new NotFoundException();
     }
 
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         dbWgsExtractCromwellSubmission.getWorkspace().getWorkspaceNamespace(),
-        dbWgsExtractCromwellSubmission.getWorkspace().getName(),
+        dbWgsExtractCromwellSubmission.getWorkspace().getFirecloudName(),
         WorkspaceAccessLevel.READER
     );
 
