@@ -161,9 +161,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceDao = workspaceDao;
   }
 
-  private String getRegisteredUserDomainEmail() {
+  private String getAuthDomainEmail(DbAccessTier accessTier) {
     FirecloudManagedGroupWithMembers registeredDomainGroup =
-        fireCloudService.getGroup(workbenchConfigProvider.get().firecloud.registeredDomainName);
+        fireCloudService.getGroup(accessTier.getAuthDomainName());
     return registeredDomainGroup.getGroupEmail();
   }
 
@@ -529,7 +529,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       }
       dbWorkspace =
           workspaceAuthService.updateWorkspaceAcls(
-              dbWorkspace, clonedRoles, getRegisteredUserDomainEmail());
+              dbWorkspace, clonedRoles, getAuthDomainEmail(accessTier));
     }
 
     dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
@@ -589,7 +589,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // This automatically enforces the "canShare" permission.
     dbWorkspace =
         workspaceAuthService.updateWorkspaceAcls(
-            dbWorkspace, aclsByEmail, getRegisteredUserDomainEmail());
+            dbWorkspace,
+            aclsByEmail,
+            getAuthDomainEmail(dbWorkspace.getCdrVersion().getAccessTier()));
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
@@ -852,19 +854,24 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
   public ResponseEntity<EmptyResponse> publishWorkspace(
       String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
-
-    workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), true);
-    return ResponseEntity.ok(new EmptyResponse());
+    return setPublished(workspaceNamespace, workspaceId, true);
   }
 
   @Override
   @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
   public ResponseEntity<EmptyResponse> unpublishWorkspace(
       String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
+    return setPublished(workspaceNamespace, workspaceId, false);
+  }
 
-    workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), false);
+  private ResponseEntity<EmptyResponse> setPublished(
+      String workspaceNamespace, String workspaceId, boolean publish) {
+    final DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
+    final String publishedWorkspaceGroup =
+        getAuthDomainEmail(dbWorkspace.getCdrVersion().getAccessTier());
+
+    workspaceService.setPublished(dbWorkspace, publishedWorkspaceGroup, publish);
+
     return ResponseEntity.ok(new EmptyResponse());
   }
 
