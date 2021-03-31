@@ -495,11 +495,6 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   @Override
-  public ResponseEntity<WgsCohortExtractionJob> getWgsCohortExtractionJob(String workspaceNamespace, String workspaceId, Long wgsCohortExtractionJobId) {
-    return ResponseEntity.ok(wgsCohortExtractionService.getWgsCohortExtractionJob(wgsCohortExtractionJobId));
-  }
-
-  @Override
   public ResponseEntity<WgsCohortExtractionJobListResponse> getWgsCohortExtractionJobs(String workspaceNamespace, String workspaceId) {
     return ResponseEntity.ok(new WgsCohortExtractionJobListResponse()
         .jobs(wgsCohortExtractionService.getWgsCohortExtractionJobs(workspaceNamespace, workspaceId)));

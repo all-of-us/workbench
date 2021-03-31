@@ -97,13 +97,6 @@ parameters:
     format: int64
     required: true
     description: Cohort ID
-  wgsCohortExtractionJobId:
-    in: path
-    name: wgsCohortExtractionJobId
-    type: integer
-    format: int64
-    required: true
-    description: WGS Cohort Extraction Job ID
   cohortReviewId:
     in: path
     name: cohortReviewId
@@ -2371,22 +2364,21 @@ paths:
           schema:
             type: boolean
             default: false
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/wgsCohortExtractionJob/{wgsCohortExtractionJobId}":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/wgsCohortExtractionJobs":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
-      - "$ref": "#/parameters/wgsCohortExtractionJobId"
     get:
       tags:
         - dataSet
       description: 'Retrieve Job details for given ID.
        Requires READER access on the workspace.'
-      operationId: getWgsCohortExtractionJob
+      operationId: getWgsCohortExtractionJobs
       responses:
         200:
           description: The Terra Job for the extraction workflow
           schema:
-            "$ref": "#/definitions/WgsCohortExtractionJob"
+            "$ref": "#/definitions/WgsCohortExtractionJobListResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/extractGenomes":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -8811,6 +8803,12 @@ definitions:
         type: integer
         format: int64
         description: ''
+  WgsCohortExtractionJobListResponse:
+    properties:
+      jobs:
+        type: array
+        items:
+          "$ref": "#/definitions/WgsCohortExtractionJob"
   WgsCohortExtractionJob:
     properties:
       wgsCohortExtractionJobId:
@@ -8822,7 +8820,7 @@ definitions:
       submissionDate:  # TODO eric: return db creation time or Terra time?
         type: integer
         format: int64
-        description: Submissio Timestamp in Epoch according to Terra
+        description: Submission Timestamp in Epoch according to Terra
   TerraJobStatus:
     type: string
     description: 'Terra job status. Indicates if the Terra Submission and Workflows are still running, succeeded, or failed.

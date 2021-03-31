@@ -102,32 +102,6 @@ public class WgsCohortExtractionService {
         .build();
   }
 
-  public WgsCohortExtractionJob getWgsCohortExtractionJob(Long wgsCohortExtractionJobId) {
-    DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission = wgsExtractCromwellSubmissionDao.findOne(wgsCohortExtractionJobId);
-
-    if (dbWgsExtractCromwellSubmission == null) {
-      throw new NotFoundException();
-    }
-
-    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        dbWgsExtractCromwellSubmission.getWorkspace().getWorkspaceNamespace(),
-        dbWgsExtractCromwellSubmission.getWorkspace().getFirecloudName(),
-        WorkspaceAccessLevel.READER
-    );
-
-    FirecloudSubmission firecloudSubmission;
-    try {
-      firecloudSubmission = submissionApiProvider.get().monitorSubmission(
-              workbenchConfigProvider.get().wgsCohortExtraction.operationalTerraWorkspaceNamespace,
-              workbenchConfigProvider.get().wgsCohortExtraction.operationalTerraWorkspaceName,
-              dbWgsExtractCromwellSubmission.getSubmissionId());
-    } catch (ApiException e) {
-      throw new ServerErrorException("Could not fetch submission status from Terra", e);
-    }
-
-    return wgsCohortExtractionMapper.toApi(dbWgsExtractCromwellSubmission, firecloudSubmission);
-  }
-
   public List<WgsCohortExtractionJob> getWgsCohortExtractionJobs(String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace = workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
