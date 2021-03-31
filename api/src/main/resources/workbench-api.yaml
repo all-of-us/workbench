@@ -8817,10 +8817,10 @@ definitions:
         description: Workbench database Id for the job
       status:
         "$ref": '#/definitions/TerraJobStatus'
-      submissionDate:  # TODO eric: return db creation time or Terra time?
+      submissionDate:
         type: integer
         format: int64
-        description: Submission Timestamp in Epoch according to Terra
+        description: Submission Timestamp (epoch) according to Terra
   TerraJobStatus:
     type: string
     description: 'Terra job status. Indicates if the Terra Submission and Workflows are still running, succeeded, or failed.

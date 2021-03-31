@@ -26,8 +26,6 @@ public interface WgsCohortExtractionMapper {
       DbWgsExtractCromwellSubmission dbSubmission, FirecloudSubmission firecloudSubmission);
 
   default TerraJobStatus cdrVersionId(FirecloudSubmissionStatus status) {
-    // TODO eric: not actually sure if this logic is right.
-    // check with Batch team or Terra UI
     if (status == FirecloudSubmissionStatus.DONE) {
       return TerraJobStatus.SUCCEEDED;
     } else if (status == FirecloudSubmissionStatus.ABORTED
