@@ -851,7 +851,8 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             row ->
                 MeasurementBundle.builder()
                     .addMeasurement(GaugeMetric.USER_COUNT, row.getUserCount())
-                    // TODO remove.  until then, what we're interested in is registered vs not
+                    // TODO remove in RW-6189 or RW-6137.
+                    // until then, what we're interested in is registered vs not
                     .addTag(
                         MetricLabel.DATA_ACCESS_LEVEL,
                         AccessTierService.temporaryDataAccessLevelKluge(

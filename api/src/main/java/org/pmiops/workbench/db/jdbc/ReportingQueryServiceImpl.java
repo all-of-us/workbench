@@ -272,7 +272,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .contactEmail(rs.getString("contact_email"))
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
                 .currentPosition(rs.getString("current_position"))
-                // TODO remove.  until then, what we're interested in is registered vs not
+                // TODO remove in RW-6189
+                // until then, what we're interested in is registered vs not
                 .dataAccessLevel(
                     AccessTierService.temporaryDataAccessLevelKluge(
                         rs.getString("access_tier_short_names")))
