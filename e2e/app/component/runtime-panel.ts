@@ -184,7 +184,7 @@ export default class RuntimePanel extends BaseHelpSidebar {
     await this.open();
     // Runtime state transition: Starting -> Running
     await this.waitForStartStopIconState(StartStopIconState.Starting, 10 * 60 * 1000);
-    await this.waitForStartStopIconState(StartStopIconState.Running, 60 * 1000);
+    await this.waitForStartStopIconState(StartStopIconState.Running);
     await this.close();
     await this.waitUntilClose();
     console.log('Runtime is running');
@@ -204,7 +204,7 @@ export default class RuntimePanel extends BaseHelpSidebar {
     await this.open();
     // Runtime state transition: Stopping -> None
     await this.waitForStartStopIconState(StartStopIconState.Stopping, 60 * 1000);
-    await this.waitForStartStopIconState(StartStopIconState.None, 60 * 1000);
+    await this.waitForStartStopIconState(StartStopIconState.None);
     await this.close();
     await this.waitUntilClose();
     console.log('Runtime is deleted');
