@@ -48,13 +48,15 @@ public class AccessTierServiceImpl implements AccessTierService {
   }
 
   /**
-   * Return all access tiers in the database
+   * Return all access tiers in the database, in alphabetical order by shortName
    *
    * @return the List of all DbAccessTiers in the database
    */
   @Override
   public List<DbAccessTier> getAllTiers() {
-    return accessTierDao.findAll();
+    return accessTierDao.findAll().stream()
+        .sorted(Comparator.comparing(DbAccessTier::getShortName))
+        .collect(Collectors.toList());
   }
 
   /**
@@ -153,7 +155,7 @@ public class AccessTierServiceImpl implements AccessTierService {
    *
    * @param user the user whose access we're checking
    * @return The List of DbAccessTiers the DbUser has access to in this environment, in alphabetical
-   *     order
+   *     order by shortName
    */
   @Override
   public List<DbAccessTier> getAccessTiersForUser(DbUser user) {
