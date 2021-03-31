@@ -8,7 +8,6 @@ export BQ_PROJECT=$1        # CDR project
 export BQ_DATASET=$2        # CDR dataset
 export WGV_PROJECT=$3       # whole genome variant project
 export WGV_DATASET=$4       # whole genome variant dataset
-export CDR_DATE=$5          # cdr date
 
 # Test that dependant tables exist
 test=$(bq show "$BQ_PROJECT:$BQ_DATASET.prep_concept_ancestor")
@@ -192,7 +191,7 @@ FROM
             SELECT a.person_id
                 , date(a.birth_datetime) as date_of_birth
                 , coalesce(b.observation_date, c.observation_date, d.observation_date) as date_of_consent
-                , date('$CDR_DATE') as date_of_cdr
+                , date((select cdr_date from \`$BQ_PROJECT.$BQ_DATASET.cb_cdr_date\` where bq_dataset = '$BQ_DATASET')) as date_of_cdr
             FROM \`$BQ_PROJECT.$BQ_DATASET.person\` a
             LEFT JOIN
             (

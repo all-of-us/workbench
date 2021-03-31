@@ -6,46 +6,26 @@ set -e
 export BQ_PROJECT=$1        # CDR project
 export BQ_DATASET=$2        # CDR dataset
 export CDR_VERSION=$3       # CDR version
-export BUCKET=$4            # Bucket
 
 PREP_TABLE_RUN="!_prep_tables_!"
+BUCKET="all-of-us-workbench-private-cloudsql"
 TEMP_FILE_DIR="csv"
 CSV_HOME_DIR="cdr_csv_files"
 CRITERIA_MENU="cb_criteria_menu.csv"
+DS_DATA_DICTIONARY="ds_data_dictionary.csv"
+CB_CDR_DATE="cb_cdr_date.csv"
 PREP_CRITERIA="prep_criteria.csv"
 PREP_CRITERIA_ANCESTOR="prep_criteria_ancestor.csv"
 PREP_CLINICAL_TERMS="prep_clinical_terms_nc.csv"
-DS_DATA_DICTIONARY="ds_data_dictionary.csv"
 PREP_CONCEPT="prep_concept.csv"
 PREP_CONCEPT_RELATIONSHIP="prep_concept_relationship.csv"
-All_FILES=($CRITERIA_MENU $PREP_CRITERIA $PREP_CRITERIA_ANCESTOR $PREP_CLINICAL_TERMS $DS_DATA_DICTIONARY $PREP_CONCEPT $PREP_CONCEPT_RELATIONSHIP)
+All_FILES=($CRITERIA_MENU $DS_DATA_DICTIONARY $CB_CDR_DATE $PREP_CRITERIA $PREP_CRITERIA_ANCESTOR $PREP_CLINICAL_TERMS $PREP_CONCEPT $PREP_CONCEPT_RELATIONSHIP)
 INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4")
 
 if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
   then
   echo "Can't run CDR build indices against "$BQ_DATASET"!"
   exit 1
-fi
-
-# Purge all backup csv files except for the last 10 versions
-if [[ $CDR_VERSION != $PREP_TABLE_RUN ]];
-then
-  fileCount=$(gsutil ls gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup | wc -l)
-  allFilesCount=${#All_FILES[@]}
-  numberToDelete=$((fileCount - allFilesCount * 10))
-  if [[ $numberToDelete > 0 ]];
-  then
-    echo "Purging backup files"
-    while IFS= read -r line; do
-      ts=$(echo $line | cut -d_ -f1)
-      if [[ ${#ts} > 0 ]];
-      then
-        echo "Removing $line"
-        gsutil rm gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup/$line
-      fi
-    # This lists all the files in the backup bucket sorted by timestamp and gets only the number to delete
-    done < <(gsutil ls gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup | rev | cut -d/ -f1 | rev | sort | head -$numberToDelete)
-  fi
 fi
 
 rm -rf $TEMP_FILE_DIR
@@ -81,9 +61,14 @@ if gsutil -m cp gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
           gsutil cp $TEMP_FILE_DIR/$file.gz gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup/"$timestamp"_"$file".gz
         fi
       ;;
-    $PREP_CRITERIA|$PREP_CRITERIA_ANCESTOR|$PREP_CLINICAL_TERMS|$PREP_CONCEPT|$PREP_CONCEPT_RELATIONSHIP)
+    $CB_CDR_DATE|$PREP_CRITERIA|$PREP_CRITERIA_ANCESTOR|$PREP_CLINICAL_TERMS|$PREP_CONCEPT|$PREP_CONCEPT_RELATIONSHIP)
       tableName=${file%.*}
-      if [[ $firstColumn == id || $firstColumn == ancestor_id || $firstColumn == parent || $firstColumn == concept_id || $firstColumn == concept_id_1 ]];
+      if [[ $firstColumn == id || \
+            $firstColumn == ancestor_id || \
+            $firstColumn == parent || \
+            $firstColumn == concept_id || \
+            $firstColumn == concept_id_1 || \
+            $firstColumn == bq_dataset ]];
       then
         echo "Removing $file header"
         # Remove the first line of file
@@ -116,10 +101,35 @@ if gsutil -m cp gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
       bq load --project_id=$BQ_PROJECT --source_format=CSV $BQ_DATASET.$tableName gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/$file $schema_path/$tableName.json
       echo "Finished loading $file"
     ;;
-
     esac
-
   done
 fi
 
 rm -rf $TEMP_FILE_DIR
+
+# Validate that a cdr cutoff date exists
+echo "Validating that a CDR cutoff date exists..."
+q="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.cb_cdr_date\` where bq_dataset = '$BQ_DATASET'"
+cdrDate=$(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql "$q" | tr -dc '0-9')
+if [[ $cdrDate != 1 ]];
+then
+  echo "CDR cutoff date doesn't exist in $BQ_PROJECT.$BQ_DATASET.cb_cdr_date!"
+  exit 1
+fi
+
+# Purge all backup csv files except for the last 10 versions
+if [[ $CDR_VERSION != $PREP_TABLE_RUN ]];
+then
+  fileCount=$(gsutil ls gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup | wc -l)
+  allFilesCount=${#All_FILES[@]}
+  numberToDelete=$(($((fileCount - 1)) - $((allFilesCount * 10))))
+  if [[ $numberToDelete > 0 ]];
+  then
+    echo "Purging $numberToDelete backup files"
+    while IFS= read -r line; do
+      echo "Removing $line"
+      gsutil rm gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup/$line
+    # This lists all the files in the backup bucket sorted by timestamp and gets only the number to delete
+    done < <(gsutil ls gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup | rev | cut -d/ -f1 | rev | sort | awk 'NF' | head -$numberToDelete)
+  fi
+fi
