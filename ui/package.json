@@ -7,7 +7,7 @@
     "start": "ng serve",
     "dev-up": "yarn && yarn run codegen && yarn start",
     "build": "ng build",
-    "test": "ng test --source-map=false",
+    "test": "ng test --source-map=true",
     "test-react": "yarn jest",
     "lint": "yarn eslint src --ext .ts,.tsx && ng lint --type-check=true",
     "e2e": "ng e2e",
