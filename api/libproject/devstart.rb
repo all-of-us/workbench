@@ -802,16 +802,11 @@ def circle_build_cdr_indices(cmd_name, args)
     "CDR version. Required."
   )
   op.add_option(
-    "--cdr-date [cdr-date]",
-    ->(opts, v) { opts.cdr_date = v},
-    "CDR date is Required. Please use the date from the source CDR. <YYYY-mm-dd>"
-  )
-  op.add_option(
     "--data-browser [data-browser]",
     ->(opts, v) { opts.data_browser = v},
     "Generate for data browser. Optional - Default is false"
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.bq_dataset and opts.cdr_version and opts.cdr_date }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.bq_dataset and opts.cdr_version }
   op.parse.validate
 
   env = ENVIRONMENTS[op.opts.project]
@@ -820,7 +815,7 @@ def circle_build_cdr_indices(cmd_name, args)
   content_type = "Content-Type: application/json"
   accept = "Accept: application/json"
   circle_token = "Circle-Token: "
-  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_build_cdr_indices\": true, \"cdr_source_project\": \"#{env.fetch(:source_cdr_project)}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"wgv_source_project\": \"#{env.fetch(:source_wgv_project)}\", \"wgv_source_dataset\": \"#{op.opts.wgv_dataset}\", \"cdr_sql_bucket\": \"all-of-us-workbench-private-cloudsql\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"cdr_date\": \"#{op.opts.cdr_date}\", \"data_browser\": #{op.opts.data_browser} }}"
+  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_build_cdr_indices\": true, \"cdr_source_project\": \"#{env.fetch(:source_cdr_project)}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"wgv_source_project\": \"#{env.fetch(:source_wgv_project)}\", \"wgv_source_dataset\": \"#{op.opts.wgv_dataset}\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"data_browser\": #{op.opts.data_browser} }}"
   common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/cdr-indices/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
 end
 
@@ -833,7 +828,6 @@ Common.register_command({
 def make_prep_tables_from_csv(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.cdr_version = "!_prep_tables_!"
-  op.opts.bucket = "all-of-us-workbench-private-cloudsql"
   op.add_option(
     "--bq-project [bq-project]",
     ->(opts, v) { opts.bq_project = v},
@@ -849,7 +843,7 @@ def make_prep_tables_from_csv(cmd_name, *args)
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/validate-prerequisites-exist.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_version} #{op.opts.bucket}}
+    common.run_inline %W{./generate-cdr/validate-prerequisites-exist.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_version}}
   end
 end
 
@@ -861,9 +855,6 @@ Common.register_command({
 
 def make_bq_denormalized_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-  date = Time.new
-  date = date.year.to_s + "-" + date.month.to_s + "-" + date.day.to_s
-  op.opts.cdr_date = date.to_s
   op.opts.data_browser = false
   op.add_option(
     "--bq-project [bq-project]",
@@ -881,16 +872,6 @@ def make_bq_denormalized_tables(cmd_name, *args)
     "CDR version. Required."
   )
   op.add_option(
-    "--cdr-date [cdr-date]",
-    ->(opts, v) { opts.cdr_date = v},
-    "CDR date is Required. Please use the date from the source CDR. <YYYY-mm-dd>"
-  )
-  op.add_option(
-    "--bucket [bucket]",
-    ->(opts, v) { opts.bucket = v},
-    "GCS bucket. Required."
-  )
-  op.add_option(
     "--wgv-project [wgv-project]",
     ->(opts, v) { opts.wgv_project = v},
     "Whole Genome Variant Project. Optional."
@@ -905,12 +886,12 @@ def make_bq_denormalized_tables(cmd_name, *args)
     ->(opts, v) { opts.data_browser = v},
     "Is this run for data browser. Optional - Default is false"
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.cdr_version and opts.bucket }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.cdr_version }
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.cdr_version} #{op.opts.cdr_date} #{op.opts.bucket} #{op.opts.data_browser}}
+    common.run_inline %W{./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.cdr_version} #{op.opts.data_browser}}
   end
 end
 
@@ -1002,16 +983,11 @@ def make_bq_denormalized_search_person(cmd_name, *args)
     ->(opts, v) { opts.wgv_dataset = v},
     "Whole Genome Variant Dataset. Required."
   )
-  op.add_option(
-    "--cdr-date [cdr-date]",
-    ->(opts, v) { opts.cdr_date = v},
-    "CDR date is Required. Please use the date from the source CDR. <YYYY-mm-dd>"
-  )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.cdr_date }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.cdr_date}}
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset}}
 end
 
 Common.register_command({
@@ -1127,12 +1103,7 @@ def generate_private_cdr_counts(cmd_name, *args)
     ->(opts, v) { opts.cdr_version = v},
     "CDR version. Required."
   )
-  op.add_option(
-    "--bucket [bucket]",
-    ->(opts, v) { opts.bucket = v},
-    "GCS bucket. Required."
-  )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.project and opts.cdr_version and opts.bucket }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.project and opts.cdr_version }
   op.parse.validate
   gcc = GcloudContextV2.new(op)
   op.parse.validate
@@ -1141,7 +1112,7 @@ def generate_private_cdr_counts(cmd_name, *args)
   with_cloud_proxy_and_db(gcc) do
     common = Common.new
     Dir.chdir('db-cdr') do
-      common.run_inline %W{./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.project} #{op.opts.cdr_version} #{op.opts.bucket}}
+      common.run_inline %W{./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.project} #{op.opts.cdr_version}}
     end
   end
 end
