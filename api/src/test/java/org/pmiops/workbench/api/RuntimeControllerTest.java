@@ -64,6 +64,7 @@ import org.pmiops.workbench.leonardo.ApiException;
 import org.pmiops.workbench.leonardo.LeonardoRetryHandler;
 import org.pmiops.workbench.leonardo.api.RuntimesApi;
 import org.pmiops.workbench.leonardo.model.LeonardoAuditInfo;
+import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
 import org.pmiops.workbench.leonardo.model.LeonardoCreateRuntimeRequest;
 import org.pmiops.workbench.leonardo.model.LeonardoGceConfig;
 import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
@@ -390,6 +391,28 @@ public class RuntimeControllerTest {
         .thenReturn(testLeoRuntime);
 
     assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody()).isEqualTo(testRuntime);
+  }
+
+  @Test
+  public void testGetRuntime_error() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenReturn(
+            testLeoRuntime
+                .status(LeonardoRuntimeStatus.ERROR)
+                .errors(
+                    ImmutableList.of(
+                        new LeonardoClusterError().errorCode(1).errorMessage("foo"),
+                        new LeonardoClusterError().errorCode(2).errorMessage(null))));
+
+    assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody()).isEqualTo(testRuntime);
+  }
+
+  @Test
+  public void testGetRuntime_errorNoMessages() throws ApiException {
+    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+        .thenReturn(testLeoRuntime.status(LeonardoRuntimeStatus.ERROR).errors(null));
+
+    assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody()).isEqualTo(testRuntime);
   }
 
   @Test
