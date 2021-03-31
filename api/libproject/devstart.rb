@@ -2151,17 +2151,9 @@ def describe_runtime(cmd_name, *args)
   op.add_option(
       "--project [project]",
       ->(opts, v) { opts.project = v},
-      "Optional project ID; by default will infer the project from the runtime ID")
+      "Required project ID; by default will infer the project from the runtime ID")
   op.add_validator ->(opts) { raise ArgumentError unless opts.runtime_id }
-  op.parse.validate
-
-  if project_from_runtime == "local"
-    project_from_runtime = TEST_PROJECT
-  end
-  common.warning "unable to determine project by runtime ID" unless project_from_runtime
-  unless op.opts.project
-    op.opts.project = project_from_runtime
-  end
+  op.parse.validat
 
   # Add the GcloudContext after setting up the project parameter to avoid
   # earlier validation failures.
