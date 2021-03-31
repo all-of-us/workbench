@@ -156,7 +156,7 @@ export default class RuntimePanel extends BaseHelpSidebar {
   }
 
   async open(): Promise<void> {
-    await waitWhileLoading(this.page, 2 * 60 * 1000, { waitForRuntime: true });
+    await waitWhileLoading(this.page);
     const isOpen = await this.isVisible();
     if (isOpen) {
       return;
