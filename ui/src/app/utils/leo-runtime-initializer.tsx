@@ -1,4 +1,4 @@
-import {stackdriverReporterStore} from 'app/services/error-reporter-context';
+import {stackdriverReporterStore} from 'app/contexts/error-reporter-context';
 import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {isAbortError, reportError} from 'app/utils/errors';

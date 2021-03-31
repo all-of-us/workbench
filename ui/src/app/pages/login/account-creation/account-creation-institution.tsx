@@ -10,12 +10,12 @@ import {Error as ErrorDiv, styles as inputStyles, TextInputWithLabel} from 'app/
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
+import {withStackdriverErrorReporterContext} from 'app/contexts/error-reporter-context';
 import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
 import {
   commonStyles,
   WhyWillSomeInformationBePublic
 } from 'app/pages/login/account-creation/common';
-import {withStackdriverErrorReporterContext} from 'app/services/error-reporter-context';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {isBlank, reactStyles} from 'app/utils';

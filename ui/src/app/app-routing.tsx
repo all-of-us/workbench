@@ -14,6 +14,8 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
 import {NOTEBOOK_HELP_CONTENT} from './components/help-sidebar';
+import {StackdriverReporterProvider} from './contexts/error-reporter-context';
+import {withContextProviders} from './contexts/utils';
 import { AdminBanner } from './pages/admin/admin-banner';
 import {AdminInstitution} from './pages/admin/admin-institution';
 import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
@@ -40,7 +42,6 @@ import {WorkspaceAbout} from './pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {WorkspaceList} from './pages/workspace/workspace-list';
-import {StackdriverReporterProvider} from './services/error-reporter-context';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
 
@@ -94,9 +95,9 @@ interface RoutingProps {
   signIn: () => void;
 }
 
-export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn}) => {
+export const AppRoutingComponentImpl: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn}) => {
   const {authLoaded = false} = useStore(authStore);
-  return authLoaded && <StackdriverReporterProvider><AppRouter>
+  return authLoaded && <AppRouter>
     <AppRoute
         path='/cookie-policy'
         component={() => <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>}
@@ -343,8 +344,10 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         />
       </ProtectedRoutes>
     </ProtectedRoutes>
-  </AppRouter></StackdriverReporterProvider>;
+  </AppRouter>;
 };
+
+const AppRoutingComponent = withContextProviders(StackdriverReporterProvider)(AppRoutingComponentImpl);
 
 @AComponent({
   template: '<div #root style="display: inline;"></div>'

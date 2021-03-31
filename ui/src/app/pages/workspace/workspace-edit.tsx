@@ -14,6 +14,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SearchInput} from 'app/components/search-input';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU, AouTitle} from 'app/components/text-wrappers';
+import {withStackdriverErrorReporterContext} from 'app/contexts/error-reporter-context';
 import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {
@@ -33,7 +34,6 @@ import {
   toolTipTextStigmatization
 } from 'app/pages/workspace/workspace-edit-text';
 import {WorkspaceResearchSummary} from 'app/pages/workspace/workspace-research-summary';
-import {withStackdriverErrorReporterContext} from 'app/services/error-reporter-context';
 import {userApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {

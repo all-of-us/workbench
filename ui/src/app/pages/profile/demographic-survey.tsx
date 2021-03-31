@@ -15,7 +15,7 @@ import {
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, toggleIncludes} from 'app/utils';
 
-import {withStackdriverErrorReporterContext} from 'app/services/error-reporter-context';
+import {withStackdriverErrorReporterContext} from 'app/contexts/error-reporter-context';
 import {convertAPIError} from 'app/utils/errors';
 import {environment} from 'environments/environment';
 import {Disability, GenderIdentity, Profile, Race, SexAtBirth} from 'generated/fetch';
