@@ -23,10 +23,10 @@ enum CssSelector {
 }
 
 enum Xpath {
-  fileMenuDropdown = '//a[text()="File"]',
-  downloadMenuDropdown = '//a[text()="Download as"]',
-  downloadIpynbButton = '//*[@id="download_script"]/a',
-  downloadMarkdownButton = '//*[@id="download_markdown"]/a'
+  fileMenuDropdown = './/a[text()="File"]',
+  downloadMenuDropdown = './/a[text()="Download as"]',
+  downloadIpynbButton = './/*[@id="download_script"]/a',
+  downloadMarkdownButton = './/*[@id="download_markdown"]/a'
 }
 
 export enum Mode {
@@ -94,9 +94,11 @@ export default class NotebookPage extends AuthenticatedPage {
   private async downloadAs(formatXpath: string): Promise<NotebookDownloadModal> {
     const frame = await this.getIFrame();
 
-    await (await frame.waitForXPath(Xpath.fileMenuDropdown, { visible: true })).click();
-    await (await frame.waitForXPath(Xpath.downloadMenuDropdown, { visible: true })).hover();
-    await (await frame.waitForXPath(formatXpath, { visible: true })).click();
+    await frame.waitForXPath(Xpath.fileMenuDropdown, { visible: true }).then((element) => element.click());
+    await frame.waitForXPath(Xpath.downloadMenuDropdown, { visible: true }).then((element) => element.hover());
+    const menuOption = await frame.waitForXPath(formatXpath, { visible: true });
+    await menuOption.hover();
+    await menuOption.click();
 
     const modal = new NotebookDownloadModal(this.page, frame);
     return await modal.waitForLoad();
