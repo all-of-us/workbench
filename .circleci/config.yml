@@ -627,26 +627,7 @@ workflows:
           requires:
             - ui-unit-test
       # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only
-      - puppeteer-env-setup
-      - puppeteer-test:
-          <<: *filter-pr-branch
-          env_name: "local"
-          parallel_num: 4
-          optional_steps:
-            - halt-puppeteer-check
-          requires:
-            - puppeteer-env-setup
-      # On master branch merges, run Puppeteer tests after ui and api deployed to "test" env successfully
-      - puppeteer-test:
-          parallel_num: 4
-          env_name: "test"
-          <<: *filter-master-branch
-          requires:
-            - puppeteer-env-setup
-            - api-deploy-to-test
-            - ui-deploy-to-test
-          post-steps:
-            - gcs-load-test-results
+      
 
   deploy-staging:
     jobs:
