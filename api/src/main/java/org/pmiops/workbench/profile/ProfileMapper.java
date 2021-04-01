@@ -51,9 +51,9 @@ public interface ProfileMapper {
       @Nullable String commaSeparatedAccessTierShortNames) {
     if (StringUtils.isEmpty(commaSeparatedAccessTierShortNames)) {
       return Collections.emptyList();
+    } else {
+      return Arrays.stream(commaSeparatedAccessTierShortNames.split(","))
+          .collect(Collectors.toList());
     }
-
-    return Arrays.stream(commaSeparatedAccessTierShortNames.split(","))
-        .collect(Collectors.toList());
   }
 }
