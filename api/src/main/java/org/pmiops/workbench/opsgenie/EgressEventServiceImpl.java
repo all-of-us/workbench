@@ -18,7 +18,9 @@ import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.Institution;
@@ -43,6 +45,7 @@ public class EgressEventServiceImpl implements EgressEventService {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserService userService;
   private final WorkspaceAdminService workspaceAdminService;
+  private final WorkspaceDao workspaceDao;
 
   @Autowired
   public EgressEventServiceImpl(
@@ -52,7 +55,8 @@ public class EgressEventServiceImpl implements EgressEventService {
       Provider<AlertApi> alertApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserService userService,
-      WorkspaceAdminService workspaceAdminService) {
+      WorkspaceAdminService workspaceAdminService,
+      WorkspaceDao workspaceDao) {
     this.clock = clock;
     this.egressEventAuditor = egressEventAuditor;
     this.institutionService = institutionService;
@@ -60,6 +64,7 @@ public class EgressEventServiceImpl implements EgressEventService {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userService = userService;
     this.workspaceAdminService = workspaceAdminService;
+    this.workspaceDao = workspaceDao;
   }
 
   @Override
@@ -68,6 +73,8 @@ public class EgressEventServiceImpl implements EgressEventService {
         String.format(
             "Received an egress event from project %s (%.2fMiB, VM prefix %s)",
             event.getProjectName(), event.getEgressMib(), event.getVmPrefix()));
+    String namespace = workspaceDao.getByGoogleProject(event.getProjectName()).orElseThrow(() -> new NotFoundException(String.format("Workspace not found by given Google Project Id: %s", event.getProjectName()))).getWorkspaceNamespace();
+    event.setWorkspaceNamespace(namespace);
     this.egressEventAuditor.fireEgressEvent(event);
     this.createEgressEventAlert(event);
   }
@@ -143,7 +150,9 @@ public class EgressEventServiceImpl implements EgressEventService {
             "Workspace \"%s\", Age = %d Days\n",
             workspace.getName(), getAgeInDays(Instant.ofEpochMilli(workspace.getCreationTime())))
         + String.format(
-            "GCP Billing Project/Firecloud Namespace: %s\n", egressEvent.getProjectName())
+            "Terra Billing Project/Firecloud Namespace: %s\n", egressEvent.getProjectName())
+        + String.format(
+        "Google Project Id: %s\n", egressEvent.getProjectName())
         + String.format("Notebook server VM prefix: %s\n", egressEvent.getVmPrefix())
         + String.format("MySQL workspace_id: %d\n", adminWorkspace.getWorkspaceDatabaseId())
         + String.format(

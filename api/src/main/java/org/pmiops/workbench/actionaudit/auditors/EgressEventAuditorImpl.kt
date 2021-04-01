@@ -1,10 +1,6 @@
 package org.pmiops.workbench.actionaudit.auditors
 
-import org.pmiops.workbench.actionaudit.ActionAuditEvent
-import org.pmiops.workbench.actionaudit.ActionAuditService
-import org.pmiops.workbench.actionaudit.ActionType
-import org.pmiops.workbench.actionaudit.AgentType
-import org.pmiops.workbench.actionaudit.TargetType
+import org.pmiops.workbench.actionaudit.*
 import org.pmiops.workbench.actionaudit.targetproperties.EgressEventCommentTargetProperty
 import org.pmiops.workbench.actionaudit.targetproperties.EgressEventTargetProperty
 import org.pmiops.workbench.actionaudit.targetproperties.TargetPropertyExtractor
@@ -34,7 +30,7 @@ constructor(
 
     override fun fireEgressEvent(event: EgressEvent) {
         // Load the workspace via the GCP project name
-        val dbWorkspaceMaybe = workspaceDao.getByNamespace(event.projectName)
+        val dbWorkspaceMaybe = workspaceDao.getByNamespace(event.workspaceNamespace)
         if (!dbWorkspaceMaybe.isPresent()) {
             // Failing to find a workspace is odd enough that we want to return a non-success
             // response at the API level. But it's also worth storing a permanent record of the
