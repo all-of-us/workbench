@@ -73,7 +73,16 @@ public class EgressEventServiceImpl implements EgressEventService {
         String.format(
             "Received an egress event from project %s (%.2fMiB, VM prefix %s)",
             event.getProjectName(), event.getEgressMib(), event.getVmPrefix()));
-    String namespace = workspaceDao.getByGoogleProject(event.getProjectName()).orElseThrow(() -> new NotFoundException(String.format("Workspace not found by given Google Project Id: %s", event.getProjectName()))).getWorkspaceNamespace();
+    String namespace =
+        workspaceDao
+            .getByGoogleProject(event.getProjectName())
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format(
+                            "Workspace not found by given Google Project Id: %s",
+                            event.getProjectName())))
+            .getWorkspaceNamespace();
     event.setWorkspaceNamespace(namespace);
     this.egressEventAuditor.fireEgressEvent(event);
     this.createEgressEventAlert(event);
@@ -151,8 +160,7 @@ public class EgressEventServiceImpl implements EgressEventService {
             workspace.getName(), getAgeInDays(Instant.ofEpochMilli(workspace.getCreationTime())))
         + String.format(
             "Terra Billing Project/Firecloud Namespace: %s\n", egressEvent.getProjectName())
-        + String.format(
-        "Google Project Id: %s\n", egressEvent.getProjectName())
+        + String.format("Google Project Id: %s\n", egressEvent.getProjectName())
         + String.format("Notebook server VM prefix: %s\n", egressEvent.getVmPrefix())
         + String.format("MySQL workspace_id: %d\n", adminWorkspace.getWorkspaceDatabaseId())
         + String.format(

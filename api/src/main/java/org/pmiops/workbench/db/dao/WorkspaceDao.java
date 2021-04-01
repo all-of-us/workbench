@@ -61,8 +61,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
 
   default Optional<DbWorkspace> getByGoogleProject(String googleProject) {
     return findFirstByGoogleProjectAndActiveStatusOrderByLastModifiedTimeDesc(
-        googleProject,
-        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+        googleProject, DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 
   DbWorkspace findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
