@@ -420,8 +420,8 @@ jobs:
     executor: workbench-executor
     steps:
       - checkout-code
-      - halt-test-check:
-          dir_names: "ui"
+      # - halt-test-check:
+      #    dir_names: "ui"
       - run:
           name: Download Swagger CLI
           working_directory: ~/workbench
@@ -627,7 +627,7 @@ workflows:
           requires:
             - ui-unit-test
       # Deploy local UI server connected to "test" API server. Run Puppeteer tests for PR commits only
-      
+
 
   deploy-staging:
     jobs:
