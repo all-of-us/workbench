@@ -101,6 +101,7 @@ public class FireCloudServiceImpl implements FireCloudService {
           "workspace.workspaceId",
           "workspace.name",
           "workspace.namespace",
+          "workspace.googleProject",
           "workspace.bucketName",
           "workspace.createdBy");
 
