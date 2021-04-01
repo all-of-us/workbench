@@ -25,6 +25,7 @@ import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -125,6 +126,128 @@ public class UserDaoTest extends SpringTest {
                 .map(UserCountGaugeLabelsAndValue::getUserCount)
                 .orElse(-1L))
         .isEqualTo(10);
+  }
+
+  @Test
+  public void test_findUsersBySearchStringAndTier_empty() {
+    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    assertThat(userDao.findUsersBySearchStringAndTier("any", ascendingByUsername, "any")).isEmpty();
+  }
+
+  @Test
+  public void test_findUsersBySearchStringAndTier_givenName() {
+    DbUser user = new DbUser();
+    user.setGivenName("Alice");
+    user = userDao.save(user);
+    addUserToTier(user, registeredTier);
+
+    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    List<DbUser> result =
+        userDao.findUsersBySearchStringAndTier(
+            "A", ascendingByUsername, registeredTier.getShortName());
+    assertThat(result).containsExactly(user);
+
+    result =
+        userDao.findUsersBySearchStringAndTier(
+            "lice", ascendingByUsername, registeredTier.getShortName());
+    assertThat(result).containsExactly(user);
+  }
+
+  @Test
+  public void test_findUsersBySearchStringAndTier_familyName() {
+    DbUser user = new DbUser();
+    user.setFamilyName("Lee");
+    user = userDao.save(user);
+    addUserToTier(user, registeredTier);
+
+    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    List<DbUser> result =
+        userDao.findUsersBySearchStringAndTier(
+            "Le", ascendingByUsername, registeredTier.getShortName());
+    assertThat(result).containsExactly(user);
+
+    result =
+        userDao.findUsersBySearchStringAndTier(
+            "ee", ascendingByUsername, registeredTier.getShortName());
+    assertThat(result).containsExactly(user);
+  }
+
+  @Test
+  public void test_findUsersBySearchStringAndTier_username() {
+    DbUser user = new DbUser();
+    user.setUsername("scienceGuy");
+    user = userDao.save(user);
+    addUserToTier(user, registeredTier);
+
+    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    List<DbUser> result =
+        userDao.findUsersBySearchStringAndTier(
+            "sci", ascendingByUsername, registeredTier.getShortName());
+    assertThat(result).containsExactly(user);
+
+    result =
+        userDao.findUsersBySearchStringAndTier(
+            "Guy", ascendingByUsername, registeredTier.getShortName());
+    assertThat(result).containsExactly(user);
+  }
+
+  @Test
+  public void test_findUsersBySearchStringAndTier_wrongTier() {
+    DbUser user = new DbUser();
+    user.setGivenName("Alice");
+    user = userDao.save(user);
+    addUserToTier(user, registeredTier);
+
+    // this also won't match
+    TestMockFactory.createControlledTierForTests(accessTierDao);
+
+    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    List<DbUser> result =
+        userDao.findUsersBySearchStringAndTier("A", ascendingByUsername, "wrong-tier");
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void test_findUsersBySearchStringAndTier_multi() {
+    DbUser alice = new DbUser();
+    alice.setGivenName("Alice");
+    alice.setFamilyName("Funk");
+    alice.setFamilyName("afunk123");
+    alice = userDao.save(alice);
+    addUserToTier(alice, registeredTier);
+
+    DbUser bob = new DbUser();
+    bob.setGivenName("Bob");
+    bob.setFamilyName("O'Brien");
+    bob.setUsername("bobo1");
+    bob = userDao.save(bob);
+    addUserToTier(bob, registeredTier);
+
+    DbUser taylor = new DbUser();
+    taylor.setGivenName("Taylor");
+    taylor.setFamilyName("Nakamura");
+    taylor.setUsername("captain");
+    taylor = userDao.save(taylor);
+    addUserToTier(taylor, registeredTier);
+
+    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+
+    // 'a' matches 'afunk123' and all of Taylor's fields
+    List<DbUser> result =
+        userDao.findUsersBySearchStringAndTier(
+            "a", ascendingByUsername, registeredTier.getShortName());
+    assertThat(result).containsExactly(alice, taylor).inOrder();
+
+    // 'I' matches 'Alice', `O'Brien`, and 'captain' because it's case-insensitive
+    result =
+        userDao.findUsersBySearchStringAndTier(
+            "I", ascendingByUsername, registeredTier.getShortName());
+    assertThat(result).containsExactly(alice, bob, taylor).inOrder();
+
+    result =
+        userDao.findUsersBySearchStringAndTier(
+            "q", ascendingByUsername, registeredTier.getShortName());
+    assertThat(result).isEmpty();
   }
 
   private List<DbUser> insertTestUsers(
