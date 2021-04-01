@@ -95,9 +95,10 @@ interface RoutingProps {
   signIn: () => void;
 }
 
-const AppRoutingComponentImpl: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn}) => {
-  const {authLoaded = false} = useStore(authStore);
-  return authLoaded && <AppRouter>
+const AppRoutingComponent: React.FunctionComponent<RoutingProps> = withContextProviders(StackdriverReporterProvider)(
+  ({onSignIn, signIn}) => {
+    const {authLoaded = false} = useStore(authStore);
+    return authLoaded && <AppRouter>
     <AppRoute
         path='/cookie-policy'
         component={() => <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>}
@@ -345,9 +346,7 @@ const AppRoutingComponentImpl: React.FunctionComponent<RoutingProps> = ({onSignI
       </ProtectedRoutes>
     </ProtectedRoutes>
   </AppRouter>;
-};
-
-const AppRoutingComponent = withContextProviders(StackdriverReporterProvider)(AppRoutingComponentImpl);
+  });
 
 @AComponent({
   template: '<div #root style="display: inline;"></div>'
