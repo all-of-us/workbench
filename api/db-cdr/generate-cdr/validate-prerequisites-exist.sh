@@ -13,13 +13,21 @@ TEMP_FILE_DIR="csv"
 CSV_HOME_DIR="cdr_csv_files"
 CRITERIA_MENU="cb_criteria_menu.csv"
 DS_DATA_DICTIONARY="ds_data_dictionary.csv"
+CB_SURVEY_VERSION="cb_survey_version.csv"
 PREP_CDR_DATE="prep_cdr_date.csv"
 PREP_CRITERIA="prep_criteria.csv"
 PREP_CRITERIA_ANCESTOR="prep_criteria_ancestor.csv"
 PREP_CLINICAL_TERMS="prep_clinical_terms_nc.csv"
 PREP_CONCEPT="prep_concept.csv"
 PREP_CONCEPT_RELATIONSHIP="prep_concept_relationship.csv"
-All_FILES=($CRITERIA_MENU $DS_DATA_DICTIONARY $PREP_CDR_DATE $PREP_CRITERIA $PREP_CRITERIA_ANCESTOR $PREP_CLINICAL_TERMS $PREP_CONCEPT $PREP_CONCEPT_RELATIONSHIP)
+All_FILES=($CRITERIA_MENU
+           $DS_DATA_DICTIONARY
+           $PREP_CDR_DATE
+           $PREP_CRITERIA
+           $PREP_CRITERIA_ANCESTOR
+           $PREP_CLINICAL_TERMS
+           $PREP_CONCEPT
+           $PREP_CONCEPT_RELATIONSHIP)
 INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4")
 
 if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
