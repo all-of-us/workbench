@@ -63,6 +63,26 @@ public class WorkspaceDaoTest {
     }
   }
 
+  @Test
+  public void testWorkspaceVersionLocking() {
+    DbWorkspace ws = new DbWorkspace();
+    ws.setVersion(1);
+    ws = workspaceDao.save(ws);
+
+    // Version incremented to 2.
+    ws.setName("foo");
+    ws = workspaceDao.save(ws);
+
+    try {
+      ws.setName("bar");
+      ws.setVersion(1);
+      workspaceDao.save(ws);
+      fail("expected optimistic lock exception on stale version update");
+    } catch (ObjectOptimisticLockingFailureException e) {
+      // expected
+    }
+  }
+
   private DbWorkspace createWorkspace() {
     DbWorkspace workspace = new DbWorkspace();
     workspace.setVersion(1);
