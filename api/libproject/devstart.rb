@@ -2122,33 +2122,8 @@ def describe_runtime(cmd_name, *args)
   op.add_option(
       "--project [project]",
       ->(opts, v) { opts.project = v},
-      "Optional project ID; by default will infer the project from the runtime ID")
+      "Required project ID")
   op.add_validator ->(opts) { raise ArgumentError unless opts.runtime_id }
-  op.parse.validate
-
-  # Infer the project from the runtime ID project ID. If for some reason, the
-  # target runtime ID does not conform to the current billing prefix (e.g. if we
-  # changed the prefix), --project can be used to override this.
-  common = Common.new
-  matching_prefix = ""
-  project_from_runtime = nil
-  ENVIRONMENTS.each_key do |env|
-    env_prefix = get_billing_project_prefix(env)
-    if op.opts.runtime_id.start_with?(env_prefix)
-      # Take the most specific prefix match, since prod is a substring of the others.
-      if matching_prefix.length < env_prefix.length
-        project_from_runtime = env
-        matching_prefix = env_prefix
-      end
-    end
-  end
-  if project_from_runtime == "local"
-    project_from_runtime = TEST_PROJECT
-  end
-  common.warning "unable to determine project by runtime ID" unless project_from_runtime
-  unless op.opts.project
-    op.opts.project = project_from_runtime
-  end
 
   # Add the GcloudContext after setting up the project parameter to avoid
   # earlier validation failures.
