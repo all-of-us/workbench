@@ -52,12 +52,10 @@ describe('Copy Concept Set to another workspace', () => {
     // Create a source and a destination workspace with the same CDR Version.
 
     const [, destWorkspace] = await createWorkspace(page, {
-      cdrVersion: config.defaultCdrVersionName,
       openDataPage: false
     });
 
     const [srcWorkspaceCard, srcWorkspace] = await createWorkspace(page, {
-      cdrVersion: config.defaultCdrVersionName,
       openDataPage: false
     });
 
@@ -103,7 +101,6 @@ describe('Copy Concept Set to another workspace', () => {
     // Create a source and a destination workspace with differing CDR Versions.
 
     const [, destWorkspace] = await createWorkspace(page, {
-      cdrVersion: config.defaultCdrVersionName,
       openDataPage: false
     });
 
