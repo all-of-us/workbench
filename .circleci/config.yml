@@ -438,7 +438,7 @@ jobs:
       - run:
           name: Run React jest tests
           working_directory: ~/workbench/ui
-          command: yarn test-react --forceExit --maxWorkers=50%
+          command: yarn test-react --forceExit --maxWorkers=25%
       - run:
           name: Build UI with strict compilation
           working_directory: ~/workbench/ui
