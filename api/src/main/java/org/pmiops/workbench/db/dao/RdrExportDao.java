@@ -15,7 +15,7 @@ public interface RdrExportDao extends CrudRepository<DbRdrExport, Long> {
           + "rdr_export rdr on w.workspace_id = rdr.entity_id and rdr.entity_type = 2 where "
           + "w.last_modified_time > rdr.last_export_date or rdr.entity_id IS NULL";
   static final String UNCHANGED_WORKSPACE_IDS_QUERY =
-      "select entity_id from rdr_export where entity_id not in ("
+      "select entity_id from rdr_export where entity_type = 2 and entity_id not in ("
           + WORKSPACE_IDS_TO_EXPORT_QUERY
           + ")";
 
@@ -30,9 +30,6 @@ public interface RdrExportDao extends CrudRepository<DbRdrExport, Long> {
   @Query(nativeQuery = true, value = WORKSPACE_IDS_TO_EXPORT_QUERY)
   List<BigInteger> findDbWorkspaceIdsToExport();
 
-  // We only want to backfill the workspaces that have not changed. The changed workspaces will be
-  // handled
-  // by the nightly cron job. This way changed workspaces won't slip past the manual review
   @Query(value = UNCHANGED_WORKSPACE_IDS_QUERY, nativeQuery = true)
   List<BigInteger> findAllUnchangedDbWorkspaceIds();
 

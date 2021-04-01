@@ -73,6 +73,8 @@ public class BackfillWorkspacesToRdr {
       Integer limit = ((Number) opts.getParsedOptionValue("limit")).intValue();
       boolean dryRun = opts.hasOption(dryRunOpt.getLongOpt());
 
+      // Only backfill the workspaces that have not changed. The changed workspaces will be handled
+      // by the nightly cron job. This way changed workspaces won't slip past the manual review
       List<BigInteger> nativeWorkspaceListToExport =
           limit != null
               ? rdrExportDao.findTopUnchangedDbWorkspaceIds(limit)
