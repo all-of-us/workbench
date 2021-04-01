@@ -86,8 +86,7 @@ public interface UserService {
    * @param term User-supplied search term
    * @param sort Option(s) for ordering query results
    * @return the List of DbUsers which meet the search and access requirements
-   * @deprecated use {@link #findUsersBySearchString(java.lang.String, java.lang.String,
-   *     org.springframework.data.domain.Sort)} instead.
+   * @deprecated use {@link #findUsersBySearchString(String, Sort, String)} instead.
    */
   @Deprecated
   List<DbUser> findUsersBySearchString(String term, Sort sort);
@@ -96,12 +95,12 @@ public interface UserService {
    * Find users whose name or username match the supplied search terms and who have the appropriate
    * access tier.
    *
-   * @param accessTierShortName the shortName of the access tier to check
    * @param term User-supplied search term
    * @param sort Option(s) for ordering query results
+   * @param accessTierShortName the shortName of the access tier to check
    * @return the List of DbUsers which meet the search and access requirements
    */
-  List<DbUser> findUsersBySearchString(String accessTierShortName, String term, Sort sort);
+  List<DbUser> findUsersBySearchString(String term, Sort sort, String accessTierShortName);
 
   DbUser syncComplianceTrainingStatusV2()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException;

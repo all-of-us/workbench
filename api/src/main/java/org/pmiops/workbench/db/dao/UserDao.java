@@ -46,13 +46,17 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
           + " ORDER BY NULL")
   Set<DbUser> findAllUsersWithAuthoritiesAndPageVisits();
 
-  /** Find users matching the user's name or username */
+  // Find users matching the requested access tier and a (name or username) search term.
   @Query(
       "SELECT dbUser FROM DbUser dbUser "
-          + "WHERE lower(dbUser.username) LIKE lower(concat('%', :term, '%')) "
-          + "OR lower(dbUser.familyName) LIKE lower(concat('%', :term, '%')) "
-          + "OR lower(dbUser.givenName) LIKE lower(concat('%', :term, '%'))")
-  List<DbUser> findUsersBySearchString(@Param("term") String term, Sort sort);
+          + "JOIN DbUserAccessTier uat ON uat.user.userId = dbUser.userId "
+          + "JOIN DbAccessTier tier ON uat.accessTier.accessTierId = tier.accessTierId "
+          + "WHERE tier.shortName = :shortName AND "
+          + "  (lower(dbUser.username) LIKE lower(concat('%', :term, '%')) "
+          + "  OR lower(dbUser.familyName) LIKE lower(concat('%', :term, '%')) "
+          + "  OR lower(dbUser.givenName) LIKE lower(concat('%', :term, '%')))")
+  List<DbUser> findUsersBySearchStringAndTier(
+      @Param("term") String term, Sort sort, @Param("shortName") String accessTierShortName);
 
   interface UserCountGaugeLabelsAndValue {
     Long getUserCount();

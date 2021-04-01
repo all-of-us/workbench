@@ -19,7 +19,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.hibernate.exception.GenericJDBCException;
 import org.javers.common.collections.Lists;
@@ -603,33 +602,26 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
    * @param term User-supplied search term
    * @param sort Option(s) for ordering query results
    * @return the List of DbUsers which meet the search and access requirements
-   * @deprecated use {@link #findUsersBySearchString(java.lang.String, java.lang.String,
-   *     org.springframework.data.domain.Sort)} instead.
+   * @deprecated use {@link UserService#findUsersBySearchString(String, Sort, String)} instead.
    */
   @Deprecated
   @Override
   public List<DbUser> findUsersBySearchString(String term, Sort sort) {
-    return findUsersBySearchString(accessTierService.REGISTERED_TIER_SHORT_NAME, term, sort);
+    return findUsersBySearchString(term, sort, accessTierService.REGISTERED_TIER_SHORT_NAME);
   }
 
   /**
    * Find users whose name or username match the supplied search terms and who have the appropriate
    * access tier.
    *
-   * @param accessTierShortName the shortName of the access tier to check
    * @param term User-supplied search term
    * @param sort Option(s) for ordering query results
+   * @param accessTierShortName the shortName of the access tier to check
    * @return the List of DbUsers which meet the search and access requirements
    */
   @Override
-  public List<DbUser> findUsersBySearchString(String accessTierShortName, String term, Sort sort) {
-    return userDao.findUsersBySearchString(term, sort).stream()
-        .filter(
-            user ->
-                accessTierService
-                    .getAccessTierShortNamesForUser(user)
-                    .contains(accessTierShortName))
-        .collect(Collectors.toList());
+  public List<DbUser> findUsersBySearchString(String term, Sort sort, String accessTierShortName) {
+    return userDao.findUsersBySearchStringAndTier(term, sort, accessTierShortName);
   }
 
   /** Syncs the current user's training status from Moodle. */
