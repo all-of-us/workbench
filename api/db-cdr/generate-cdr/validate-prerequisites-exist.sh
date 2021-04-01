@@ -13,13 +13,13 @@ TEMP_FILE_DIR="csv"
 CSV_HOME_DIR="cdr_csv_files"
 CRITERIA_MENU="cb_criteria_menu.csv"
 DS_DATA_DICTIONARY="ds_data_dictionary.csv"
-CB_CDR_DATE="cb_cdr_date.csv"
+PREP_CDR_DATE="prep_cdr_date.csv"
 PREP_CRITERIA="prep_criteria.csv"
 PREP_CRITERIA_ANCESTOR="prep_criteria_ancestor.csv"
 PREP_CLINICAL_TERMS="prep_clinical_terms_nc.csv"
 PREP_CONCEPT="prep_concept.csv"
 PREP_CONCEPT_RELATIONSHIP="prep_concept_relationship.csv"
-All_FILES=($CRITERIA_MENU $DS_DATA_DICTIONARY $CB_CDR_DATE $PREP_CRITERIA $PREP_CRITERIA_ANCESTOR $PREP_CLINICAL_TERMS $PREP_CONCEPT $PREP_CONCEPT_RELATIONSHIP)
+All_FILES=($CRITERIA_MENU $DS_DATA_DICTIONARY $PREP_CDR_DATE $PREP_CRITERIA $PREP_CRITERIA_ANCESTOR $PREP_CLINICAL_TERMS $PREP_CONCEPT $PREP_CONCEPT_RELATIONSHIP)
 INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4")
 
 if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
@@ -61,7 +61,7 @@ if gsutil -m cp gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
           gsutil cp $TEMP_FILE_DIR/$file.gz gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup/"$timestamp"_"$file".gz
         fi
       ;;
-    $CB_CDR_DATE|$PREP_CRITERIA|$PREP_CRITERIA_ANCESTOR|$PREP_CLINICAL_TERMS|$PREP_CONCEPT|$PREP_CONCEPT_RELATIONSHIP)
+    $PREP_CDR_DATE|$PREP_CRITERIA|$PREP_CRITERIA_ANCESTOR|$PREP_CLINICAL_TERMS|$PREP_CONCEPT|$PREP_CONCEPT_RELATIONSHIP)
       tableName=${file%.*}
       if [[ $firstColumn == id || \
             $firstColumn == ancestor_id || \
@@ -109,11 +109,11 @@ rm -rf $TEMP_FILE_DIR
 
 # Validate that a cdr cutoff date exists
 echo "Validating that a CDR cutoff date exists..."
-q="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.cb_cdr_date\` where bq_dataset = '$BQ_DATASET'"
+q="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.prep_cdr_date\` where bq_dataset = '$BQ_DATASET'"
 cdrDate=$(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql "$q" | tr -dc '0-9')
 if [[ $cdrDate != 1 ]];
 then
-  echo "CDR cutoff date doesn't exist in $BQ_PROJECT.$BQ_DATASET.cb_cdr_date!"
+  echo "CDR cutoff date doesn't exist in $BQ_PROJECT.$BQ_DATASET.prep_cdr_date!"
   exit 1
 fi
 
