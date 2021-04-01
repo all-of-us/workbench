@@ -447,8 +447,8 @@ const PresetSelector = ({
     }} />;
 };
 
-const StartStopRuntimeButton = ({workspaceNamespace}) => {
-  const [status, setRuntimeStatus] = useRuntimeStatus(workspaceNamespace);
+const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
+  const [status, setRuntimeStatus] = useRuntimeStatus(workspaceNamespace, googleProject);
 
   const rotateStyle = {animation: 'rotation 2s infinite linear'};
   const {altText, iconShape = null, styleOverrides = {}, onClick = null } = switchCase(status,
@@ -682,7 +682,7 @@ const CreatePanel = ({creatorFreeCreditsRemaining, profile, setPanelContent, wor
 
   return <div data-test-id='runtime-create-panel' style={styles.controlSection}>
     <FlexRow style={styles.costPredictorWrapper}>
-      <StartStopRuntimeButton workspaceNamespace={workspace.namespace}/>
+      <StartStopRuntimeButton workspaceNamespace={workspace.namespace} googleProject={workspace.googleProject}/>
       <CostInfo runtimeChanged={false}
                 runtimeConfig={runtimeConfig}
                 currentUser={profile.username}
@@ -799,7 +799,7 @@ export const RuntimePanel = fp.flow(
   withCurrentWorkspace(),
   withUserProfile()
 )(({cdrVersionListResponse, workspace, profileState, onClose = () => {}}) => {
-  const {namespace, id, cdrVersionId} = workspace;
+  const {namespace, id, cdrVersionId, googleProject} = workspace;
 
   const {profile} = profileState;
 
@@ -814,7 +814,7 @@ export const RuntimePanel = fp.flow(
   // Prioritize the "pendingRuntime", if any. When an update is pending, we want
   // to render the target runtime details, which  may not match the current runtime.
   const {dataprocConfig = null, gceConfig = {diskSize: defaultDiskSize}} = pendingRuntime || currentRuntime || {} as Partial<Runtime>;
-  const [status, setRuntimeStatus] = useRuntimeStatus(namespace);
+  const [status, setRuntimeStatus] = useRuntimeStatus(namespace, googleProject);
   const diskSize = dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.diskSize;
   const machineName = dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
   const initialMasterMachine = findMachineByName(machineName) || defaultMachineType;
@@ -1084,7 +1084,7 @@ export const RuntimePanel = fp.flow(
       [PanelContent.Customize, () => <Fragment>
             <div style={styles.controlSection}>
               <FlexRow style={styles.costPredictorWrapper}>
-                <StartStopRuntimeButton workspaceNamespace={workspace.namespace}/>
+                <StartStopRuntimeButton workspaceNamespace={workspace.namespace} googleProject={workspace.googleProject}/>
                 <CostInfo runtimeChanged={runtimeChanged}
                   runtimeConfig={newRuntimeConfig}
                   currentUser={profile.username}

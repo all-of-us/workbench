@@ -159,7 +159,9 @@ public class RuntimeController implements RuntimeApiDelegate {
 
   @Override
   public ResponseEntity<Runtime> getRuntime(String workspaceNamespace) {
-    String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
+    DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
+    String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
+    String googleProject = dbWorkspace.getGoogleProject();
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
@@ -168,15 +170,15 @@ public class RuntimeController implements RuntimeApiDelegate {
       return ResponseEntity.ok(
           leonardoMapper.toApiRuntime(
               leonardoNotebooksClient.getRuntime(
-                  workspaceNamespace, userProvider.get().getRuntimeName())));
+                  googleProject, userProvider.get().getRuntimeName())));
     } catch (NotFoundException e) {
-      return ResponseEntity.ok(getOverrideFromListRuntimes(workspaceNamespace));
+      return ResponseEntity.ok(getOverrideFromListRuntimes(googleProject));
     }
   }
 
-  private Runtime getOverrideFromListRuntimes(String workspaceNamespace) {
+  private Runtime getOverrideFromListRuntimes(String googleProject) {
     Optional<LeonardoListRuntimeResponse> mostRecentRuntimeMaybe =
-        leonardoNotebooksClient.listRuntimesByProject(workspaceNamespace, true).stream()
+        leonardoNotebooksClient.listRuntimesByProject(googleProject, true).stream()
             .sorted(
                 (a, b) -> {
                   String aCreatedDate, bCreatedDate;
@@ -241,15 +243,16 @@ public class RuntimeController implements RuntimeApiDelegate {
       throw new BadRequestException("Only one of GceConfig or DataprocConfig must be provided");
     }
 
-    String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
+    DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
+    String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
-    runtime.setGoogleProject(workspaceNamespace);
+    runtime.setGoogleProject(dbWorkspace.getGoogleProject());
     runtime.setRuntimeName(userProvider.get().getRuntimeName());
 
-    leonardoNotebooksClient.createRuntime(runtime, firecloudWorkspaceName);
+    leonardoNotebooksClient.createRuntime(runtime, workspaceNamespace, firecloudWorkspaceName);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -270,12 +273,13 @@ public class RuntimeController implements RuntimeApiDelegate {
       throw new BadRequestException("Only one of GceConfig or DataprocConfig must be provided");
     }
 
-    String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
+    DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
+    String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
     workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
-    runtimeRequest.getRuntime().setGoogleProject(workspaceNamespace);
+    runtimeRequest.getRuntime().setGoogleProject(dbWorkspace.getGoogleProject());
     runtimeRequest.getRuntime().setRuntimeName(userProvider.get().getRuntimeName());
 
     leonardoNotebooksClient.updateRuntime(runtimeRequest.getRuntime());
@@ -285,11 +289,13 @@ public class RuntimeController implements RuntimeApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> deleteRuntime(String workspaceNamespace) {
-    String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
+    DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
+    String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
     workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
 
-    leonardoNotebooksClient.deleteRuntime(workspaceNamespace, userProvider.get().getRuntimeName());
+    leonardoNotebooksClient.deleteRuntime(
+        dbWorkspace.getGoogleProject(), userProvider.get().getRuntimeName());
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -334,12 +340,13 @@ public class RuntimeController implements RuntimeApiDelegate {
                     gcsNotebooksDir + "/" + notebookName));
 
     String workspacePath = dbWorkspace.getFirecloudName();
+    String googleProjectId = dbWorkspace.getGoogleProject();
     String editDir = "workspaces/" + workspacePath;
     String playgroundDir = "workspaces_playground/" + workspacePath;
     String targetDir = body.getPlaygroundMode() ? playgroundDir : editDir;
 
     leonardoNotebooksClient.createStorageLink(
-        workspaceNamespace,
+        googleProjectId,
         userProvider.get().getRuntimeName(),
         new StorageLink()
             .cloudStorageDirectory(gcsNotebooksDir)
@@ -366,7 +373,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     }
     log.info(localizeMap.toString());
     leonardoNotebooksClient.localize(
-        workspaceNamespace, userProvider.get().getRuntimeName(), localizeMap);
+        googleProjectId, userProvider.get().getRuntimeName(), localizeMap);
 
     // This is the Jupyer-server-root-relative path, the style used by the Jupyter REST API.
     return ResponseEntity.ok(new RuntimeLocalizeResponse().runtimeLocalDirectory(targetDir));

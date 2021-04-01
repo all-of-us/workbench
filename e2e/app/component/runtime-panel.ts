@@ -199,8 +199,6 @@ export default class RuntimePanel extends BaseHelpSidebar {
     // Runtime panel automatically close after click Create button.
     // Reopen panel in order to check icon status.
     await this.open();
-    // Runtime state transition: Stopping -> None
-    await this.waitForStartStopIconState(StartStopIconState.Stopping, 2 * 60 * 1000);
     await this.waitForStartStopIconState(StartStopIconState.None);
     await this.close();
     console.log('Runtime is deleted');

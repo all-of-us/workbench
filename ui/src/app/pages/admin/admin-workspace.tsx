@@ -355,7 +355,8 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
           <h3>Basic Information</h3>
           <div className='basic-info' style={{marginTop: '1rem'}}>
             <WorkspaceInfoField labelText='Workspace Name'>{workspace.name}</WorkspaceInfoField>
-            <WorkspaceInfoField labelText='Google Project Id'>{workspace.namespace}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Workspace Namespace'>{workspace.namespace}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Google Project Id'>{workspace.googleProject}</WorkspaceInfoField>
             <WorkspaceInfoField labelText='Billing Status'>{workspace.billingStatus}</WorkspaceInfoField>
             <WorkspaceInfoField labelText='Billing Account Type'>{workspace.billingAccountType}</WorkspaceInfoField>
             <WorkspaceInfoField labelText='Creation Time'>{new Date(workspace.creationTime).toDateString()}</WorkspaceInfoField>
