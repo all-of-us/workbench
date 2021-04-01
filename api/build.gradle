@@ -768,16 +768,6 @@ task updateReviewDemographics(type: JavaExec) {
     }
 }
 
-// This can be run directly or via the deploy command.
-task loadDataDictionary(type: JavaExec) {
-  classpath sourceSets.__tools__.runtimeClasspath
-  main = "org.pmiops.workbench.tools.LoadDataDictionary"
-  systemProperties = commandLineSpringProperties
-  if (project.hasProperty("appArgs")) {
-    args Eval.me(appArgs)
-  }
-}
-
 // See project.rb command: create-wgs-cohort-extraction-bp-workspace
 task createWgsCohortExtractionBillingProjectWorkspace(type: JavaExec) {
   classpath sourceSets.__tools__.runtimeClasspath

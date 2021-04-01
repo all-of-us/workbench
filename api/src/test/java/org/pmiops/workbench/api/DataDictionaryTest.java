@@ -26,7 +26,6 @@ import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
-import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
@@ -55,7 +54,6 @@ public class DataDictionaryTest {
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
-  @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
   @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
   @Autowired private DataSetController dataSetController;
 
