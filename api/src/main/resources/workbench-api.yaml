@@ -2364,6 +2364,21 @@ paths:
           schema:
             type: boolean
             default: false
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/wgsCohortExtractionJobs":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+    get:
+      tags:
+        - dataSet
+      description: 'Retrieve Job details for given ID.
+       Requires READER access on the workspace.'
+      operationId: getWgsCohortExtractionJobs
+      responses:
+        200:
+          description: The Terra Job for the extraction workflow
+          schema:
+            "$ref": "#/definitions/WgsCohortExtractionJobListResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/extractGenomes":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
@@ -2380,7 +2395,7 @@ paths:
         200:
           description: The Terra Job for the extraction workflow
           schema:
-            "$ref": "#/definitions/TerraJob"
+            "$ref": "#/definitions/WgsCohortExtractionJob"
   "/v1/{workspaceNamespace}/{workspaceId}/data-set/exportToNotebook":
     post:
       tags:
@@ -7310,7 +7325,7 @@ definitions:
         description: The unique identifier for the menu parent
         type: integer
         format: int64
-      category: 
+      category:
         description: The category for this menu item(Program Data or Domains)
         type: string
       domainId:
@@ -7319,14 +7334,14 @@ definitions:
       type:
         description: The type for this menu item
         type: string
-      name: 
+      name:
         description: The name
         type: string
       group:
         description: Is this a parent
         type: boolean
         default: false
-      sortOrder: 
+      sortOrder:
         description: The order
         type: integer
         format: int64
@@ -8788,13 +8803,24 @@ definitions:
         type: integer
         format: int64
         description: ''
-  TerraJob:
+  WgsCohortExtractionJobListResponse:
     properties:
-      submissionId:
-        type: string
-        description: Terra SubmissionRequest unique identifier (matches Submission.submissionId in Terra)
+      jobs:
+        type: array
+        items:
+          "$ref": "#/definitions/WgsCohortExtractionJob"
+  WgsCohortExtractionJob:
+    properties:
+      wgsCohortExtractionJobId:
+        type: integer
+        format: int64
+        description: Workbench database Id for the job
       status:
         "$ref": '#/definitions/TerraJobStatus'
+      submissionDate:
+        type: integer
+        format: int64
+        description: Submission Timestamp (epoch) according to Terra
   TerraJobStatus:
     type: string
     description: 'Terra job status. Indicates if the Terra Submission and Workflows are still running, succeeded, or failed.

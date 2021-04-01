@@ -9,26 +9,32 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig;
 import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.api.MethodConfigurationsApi;
 import org.pmiops.workbench.firecloud.api.SubmissionsApi;
 import org.pmiops.workbench.firecloud.model.FirecloudMethodConfiguration;
+import org.pmiops.workbench.firecloud.model.FirecloudSubmission;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionResponse;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
-import org.pmiops.workbench.model.TerraJob;
 import org.pmiops.workbench.model.TerraJobStatus;
+import org.pmiops.workbench.model.WgsCohortExtractionJob;
+import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -42,8 +48,10 @@ public class WgsCohortExtractionService {
   private final Provider<SubmissionsApi> submissionApiProvider;
   private final Provider<MethodConfigurationsApi> methodConfigurationsApiProvider;
   private final WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao;
+  private final WgsCohortExtractionMapper wgsCohortExtractionMapper;
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
+  private final WorkspaceAuthService workspaceAuthService;
   private final Clock clock;
 
   @Autowired
@@ -55,8 +63,10 @@ public class WgsCohortExtractionService {
       Provider<SubmissionsApi> submissionsApiProvider,
       Provider<MethodConfigurationsApi> methodConfigurationsApiProvider,
       WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao,
+      WgsCohortExtractionMapper wgsCohortExtractionMapper,
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
+      WorkspaceAuthService workspaceAuthService,
       Clock clock) {
     this.cohortService = cohortService;
     this.fireCloudService = fireCloudService;
@@ -65,13 +75,15 @@ public class WgsCohortExtractionService {
         extractionServiceAccountCloudStorageClientProvider;
     this.methodConfigurationsApiProvider = methodConfigurationsApiProvider;
     this.wgsExtractCromwellSubmissionDao = wgsExtractCromwellSubmissionDao;
+    this.wgsCohortExtractionMapper = wgsCohortExtractionMapper;
     this.userProvider = userProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
+    this.workspaceAuthService = workspaceAuthService;
     this.clock = clock;
   }
 
   private Map<String, String> createRepoMethodParameter(
-      WorkbenchConfig.WgsCohortExtractionConfig cohortExtractionConfig) {
+      WgsCohortExtractionConfig cohortExtractionConfig) {
     return new ImmutableMap.Builder<String, String>()
         .put("methodName", cohortExtractionConfig.extractionMethodConfigurationName)
         .put(
@@ -89,12 +101,42 @@ public class WgsCohortExtractionService {
         .build();
   }
 
-  public TerraJob submitGenomicsCohortExtractionJob(DbWorkspace workspace, Long cohortId)
-      throws ApiException {
+  public List<WgsCohortExtractionJob> getWgsCohortExtractionJobs(
+      String workspaceNamespace, String workspaceId) {
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
+    return wgsExtractCromwellSubmissionDao.findAllByWorkspace(dbWorkspace).stream()
+        .map(
+            dbSubmission -> {
+              try {
+                // RW-6537: Don't make a call to Terra for every submission. Submissions in a non
+                // running state will not change
+                WgsCohortExtractionConfig cohortExtractionConfig =
+                    workbenchConfigProvider.get().wgsCohortExtraction;
+                FirecloudSubmission firecloudSubmission =
+                    submissionApiProvider
+                        .get()
+                        .getSubmission(
+                            cohortExtractionConfig.operationalTerraWorkspaceNamespace,
+                            cohortExtractionConfig.operationalTerraWorkspaceName,
+                            dbSubmission.getSubmissionId());
+
+                return wgsCohortExtractionMapper.toApi(dbSubmission, firecloudSubmission);
+              } catch (ApiException e) {
+                throw new ServerErrorException("Could not fetch submission status from Terra", e);
+              }
+            })
+        .collect(Collectors.toList());
+  }
+
+  public WgsCohortExtractionJob submitGenomicsCohortExtractionJob(
+      DbWorkspace workspace, Long cohortId) throws ApiException {
     // Currently only creates the temporary extraction tables
     // No files are being written to the user bucket
 
-    WorkbenchConfig.WgsCohortExtractionConfig cohortExtractionConfig =
+    WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;
 
     FirecloudWorkspace fcUserWorkspace =
@@ -222,8 +264,6 @@ public class WgsCohortExtractionService {
             cohortExtractionConfig.extractionMethodConfigurationNamespace,
             methodConfig.getName());
 
-    return new TerraJob()
-        .submissionId(submissionResponse.getSubmissionId())
-        .status(TerraJobStatus.RUNNING);
+    return new WgsCohortExtractionJob().status(TerraJobStatus.RUNNING);
   }
 }

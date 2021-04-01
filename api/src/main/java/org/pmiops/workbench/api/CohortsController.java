@@ -48,7 +48,7 @@ import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TableQuery;
-import org.pmiops.workbench.model.TerraJob;
+import org.pmiops.workbench.model.WgsCohortExtractionJob;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -445,7 +445,7 @@ public class CohortsController implements CohortsApiDelegate {
   }
 
   @Override
-  public ResponseEntity<TerraJob> extractCohortGenomes(
+  public ResponseEntity<WgsCohortExtractionJob> extractCohortGenomes(
       String workspaceNamespace, String workspaceId, Long cohortId) {
     DbWorkspace workspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
