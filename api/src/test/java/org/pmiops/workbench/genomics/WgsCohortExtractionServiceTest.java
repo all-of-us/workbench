@@ -195,7 +195,7 @@ public class WgsCohortExtractionServiceTest {
                 .status(FirecloudSubmissionStatus.DONE)
                 .submissionDate(submissionDate))
         .when(submissionsApi)
-        .monitorSubmission(
+        .getSubmission(
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
             dbWgsExtractCromwellSubmission.getSubmissionId());
@@ -299,7 +299,7 @@ public class WgsCohortExtractionServiceTest {
         createDbWgsExtractCromwellSubmission();
     doReturn(new FirecloudSubmission().status(status).submissionDate(OffsetDateTime.now()))
         .when(submissionsApi)
-        .monitorSubmission(
+        .getSubmission(
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
             dbWgsExtractCromwellSubmission.getSubmissionId());

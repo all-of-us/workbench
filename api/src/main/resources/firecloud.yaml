@@ -1081,7 +1081,7 @@ paths:
         - submissions
       summary: |
         Monitor submission status
-      operationId: monitorSubmission
+      operationId: getSubmission
       parameters:
         - name: workspaceNamespace
           in: path

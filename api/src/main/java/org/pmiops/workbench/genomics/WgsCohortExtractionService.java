@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig;
 import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
@@ -82,7 +83,7 @@ public class WgsCohortExtractionService {
   }
 
   private Map<String, String> createRepoMethodParameter(
-      WorkbenchConfig.WgsCohortExtractionConfig cohortExtractionConfig) {
+      WgsCohortExtractionConfig cohortExtractionConfig) {
     return new ImmutableMap.Builder<String, String>()
         .put("methodName", cohortExtractionConfig.extractionMethodConfigurationName)
         .put(
@@ -112,16 +113,14 @@ public class WgsCohortExtractionService {
               try {
                 // RW-6537: Don't make a call to Terra for every submission. Submissions in a non
                 // running state will not change
+                WgsCohortExtractionConfig cohortExtractionConfig =
+                    workbenchConfigProvider.get().wgsCohortExtraction;
                 FirecloudSubmission firecloudSubmission =
                     submissionApiProvider
                         .get()
-                        .monitorSubmission(
-                            workbenchConfigProvider.get()
-                                .wgsCohortExtraction
-                                .operationalTerraWorkspaceNamespace,
-                            workbenchConfigProvider.get()
-                                .wgsCohortExtraction
-                                .operationalTerraWorkspaceName,
+                        .getSubmission(
+                            cohortExtractionConfig.operationalTerraWorkspaceNamespace,
+                            cohortExtractionConfig.operationalTerraWorkspaceName,
                             dbSubmission.getSubmissionId());
 
                 return wgsCohortExtractionMapper.toApi(dbSubmission, firecloudSubmission);
@@ -137,7 +136,7 @@ public class WgsCohortExtractionService {
     // Currently only creates the temporary extraction tables
     // No files are being written to the user bucket
 
-    WorkbenchConfig.WgsCohortExtractionConfig cohortExtractionConfig =
+    WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;
 
     FirecloudWorkspace fcUserWorkspace =
