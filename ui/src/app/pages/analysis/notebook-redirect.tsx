@@ -302,7 +302,7 @@ export const NotebookRedirect = fp.flow(
 
       // Only kick off the initialization process once the runtime is loaded.
       if (this.state.progress === Progress.Unknown && runtime !== undefined) {
-        this.initializeRuntimeStatusChecking(workspace.googleProject);
+        this.initializeRuntimeStatusChecking(workspace.namespace);
       }
 
       // If we're already loaded (viewing the notebooks iframe), and the
@@ -397,7 +397,7 @@ export const NotebookRedirect = fp.flow(
     private async localizeNotebooks(notebookNames: Array<string>) {
       const {workspace} = this.props;
       const resp = await this.runtimeRetry(() => runtimeApi().localize(
-        workspace.googleProject, {
+        workspace.namespace, {
           notebookNames, playgroundMode: this.isPlaygroundMode()
         },
         {signal: this.pollAborter.signal}));

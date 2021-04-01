@@ -257,7 +257,7 @@ export const maybeInitializeRuntime = async(workspaceNamespace: string, signal: 
 // useRuntimeStatus hook can be used to change the status of the runtime
 // This setter returns a promise which resolves when any proximal fetch has completed,
 // but does not wait for any polling, which may continue asynchronously.
-export const useRuntimeStatus = (currentWorkspaceNamespace, googleProject): [
+export const useRuntimeStatus = (currentWorkspaceNamespace, currentGoogleProject): [
   RuntimeStatus | undefined, (statusRequest: RuntimeStatusRequest) => Promise<void>]  => {
   const [runtimeStatus, setRuntimeStatus] = useState<RuntimeStatusRequest>();
   const {runtime} = useStore(runtimeStore);
@@ -299,10 +299,10 @@ export const useRuntimeStatus = (currentWorkspaceNamespace, googleProject): [
         return runtimeApi().deleteRuntime(currentWorkspaceNamespace);
       }],
       [RuntimeStatusRequest.Start, () => {
-        return leoRuntimesApi().startRuntime(googleProject, runtime.runtimeName);
+        return leoRuntimesApi().startRuntime(currentGoogleProject, runtime.runtimeName);
       }],
       [RuntimeStatusRequest.Stop, () => {
-        return leoRuntimesApi().stopRuntime(googleProject, runtime.runtimeName);
+        return leoRuntimesApi().stopRuntime(currentGoogleProject, runtime.runtimeName);
       }]
     );
     setRuntimeStatus(req);
