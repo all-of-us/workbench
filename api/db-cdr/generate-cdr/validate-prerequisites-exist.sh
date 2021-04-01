@@ -22,6 +22,7 @@ PREP_CONCEPT="prep_concept.csv"
 PREP_CONCEPT_RELATIONSHIP="prep_concept_relationship.csv"
 All_FILES=($CRITERIA_MENU
            $DS_DATA_DICTIONARY
+           $CB_SURVEY_VERSION
            $PREP_CDR_DATE
            $PREP_CRITERIA
            $PREP_CRITERIA_ANCESTOR
@@ -69,14 +70,21 @@ if gsutil -m cp gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
           gsutil cp $TEMP_FILE_DIR/$file.gz gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup/"$timestamp"_"$file".gz
         fi
       ;;
-    $PREP_CDR_DATE|$PREP_CRITERIA|$PREP_CRITERIA_ANCESTOR|$PREP_CLINICAL_TERMS|$PREP_CONCEPT|$PREP_CONCEPT_RELATIONSHIP)
+    $CB_SURVEY_VERSION | \
+    $PREP_CDR_DATE | \
+    $PREP_CRITERIA | \
+    $PREP_CRITERIA_ANCESTOR | \
+    $PREP_CLINICAL_TERMS | \
+    $PREP_CONCEPT | \
+    $PREP_CONCEPT_RELATIONSHIP)
       tableName=${file%.*}
       if [[ $firstColumn == id || \
             $firstColumn == ancestor_id || \
             $firstColumn == parent || \
             $firstColumn == concept_id || \
             $firstColumn == concept_id_1 || \
-            $firstColumn == bq_dataset ]];
+            $firstColumn == bq_dataset || \
+            $firstColumn == survey_version_concept_id ]];
       then
         echo "Removing $file header"
         # Remove the first line of file
@@ -97,7 +105,8 @@ if gsutil -m cp gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
           if [[ $table == $tableName ]];
           then
             echo "Backing up $file"
-            bq extract --project_id=$BQ_PROJECT --compression GZIP --print_header=false $BQ_DATASET.$tableName gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup/"$timestamp"_"$file".gz
+            bq extract --project_id=$BQ_PROJECT --compression GZIP --print_header=false \
+            $BQ_DATASET.$tableName gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup/"$timestamp"_"$file".gz
           fi
         done
       fi
@@ -106,7 +115,8 @@ if gsutil -m cp gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
       echo "Starting load of $file"
       schema_path=generate-cdr/bq-schemas
       bq --project_id=$BQ_PROJECT rm -f $BQ_DATASET.$tableName
-      bq load --project_id=$BQ_PROJECT --source_format=CSV $BQ_DATASET.$tableName gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/$file $schema_path/$tableName.json
+      bq load --project_id=$BQ_PROJECT --source_format=CSV $BQ_DATASET.$tableName \
+      gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/$file $schema_path/$tableName.json
       echo "Finished loading $file"
     ;;
     esac
@@ -122,6 +132,18 @@ cdrDate=$(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql "$q" | tr
 if [[ $cdrDate != 1 ]];
 then
   echo "CDR cutoff date doesn't exist in $BQ_PROJECT.$BQ_DATASET.prep_cdr_date!"
+  exit 1
+fi
+
+# Validate that all survey version exist
+echo "Validating that all survey versions exist..."
+q="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\`
+where survey_version_concept_id not in
+( select distinct survey_version_concept_id from \`$BQ_PROJECT.$BQ_DATASET.observation_ext\`)"
+surveyVersionCount=$(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql "$q" | tr -dc '0-9')
+if [[ $surveyVersionCount != 0 ]];
+then
+  echo "Missing survey version in $BQ_PROJECT.$BQ_DATASET.cb_survey_version!"
   exit 1
 fi
 
