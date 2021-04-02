@@ -19,7 +19,7 @@ import {cdrVersionListResponse} from "../../../testing/stubs/cdr-versions-api-st
 
 describe('HomepageComponent', () => {
 
-  const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
+  const profile = ProfileStubVariables.PROFILE_STUB;
   let profileApi: ProfileApiStub;
 
   const component = () => {
@@ -91,7 +91,7 @@ describe('HomepageComponent', () => {
   it('should show access tasks dashboard if the user is not registered', async () => {
     const newProfile = {
       ...profile,
-      dataAccessLevel: DataAccessLevel.Unregistered
+      accessTierShortNames: [],   // unregistered
     };
     serverConfigStore.next({...serverConfigStore.getValue()});
     userProfileStore.next({profile: newProfile, reload, updateCache});
@@ -106,7 +106,7 @@ describe('HomepageComponent', () => {
       dataUseAgreementBypassTime: null,
       dataUseAgreementCompletionTime: 1000,
       dataUseAgreementSignedVersion: 2, // Old version
-      dataAccessLevel: DataAccessLevel.Unregistered
+      accessTierShortNames: [],   // unregistered
     };
     serverConfigStore.next({...serverConfigStore.getValue()});
     userProfileStore.next({profile: newProfile, reload, updateCache});
@@ -123,7 +123,7 @@ describe('HomepageComponent', () => {
       dataUseAgreementBypassTime: null,
       dataUseAgreementCompletionTime: 1000,
       dataUseAgreementSignedVersion: 3, // Live version
-      dataAccessLevel: DataAccessLevel.Unregistered
+      accessTierShortNames: [],   // unregistered
     };
     serverConfigStore.next({...serverConfigStore.getValue()});
     userProfileStore.next({profile: newProfile, reload, updateCache});
@@ -137,7 +137,7 @@ describe('HomepageComponent', () => {
   it('should not display the quick tour if registration dashboard is open', async () => {
     const newProfile = {
       ...profile,
-      dataAccessLevel: DataAccessLevel.Unregistered
+      accessTierShortNames: [],   // unregistered
     };
     serverConfigStore.next({...serverConfigStore.getValue()});
     userProfileStore.next({profile: newProfile, reload, updateCache});
