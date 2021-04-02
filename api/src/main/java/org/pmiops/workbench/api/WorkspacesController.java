@@ -47,7 +47,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -842,20 +841,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
   public ResponseEntity<EmptyResponse> publishWorkspace(
       String workspaceNamespace, String workspaceId) {
-    return setPublished(workspaceNamespace, workspaceId, true);
+    workspaceService.setPublished(workspaceNamespace, workspaceId, true);
+    return ResponseEntity.ok(new EmptyResponse());
   }
 
   @Override
   @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
   public ResponseEntity<EmptyResponse> unpublishWorkspace(
       String workspaceNamespace, String workspaceId) {
-    return setPublished(workspaceNamespace, workspaceId, false);
-  }
-
-  private ResponseEntity<EmptyResponse> setPublished(
-      String workspaceNamespace, String workspaceId, boolean publish) {
-    final DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
-    workspaceService.setPublished(dbWorkspace, publish);
+    workspaceService.setPublished(workspaceNamespace, workspaceId, false);
     return ResponseEntity.ok(new EmptyResponse());
   }
 

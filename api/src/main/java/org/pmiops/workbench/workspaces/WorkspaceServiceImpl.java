@@ -318,24 +318,27 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-  public DbWorkspace setPublished(DbWorkspace workspace, boolean publish) {
+  public DbWorkspace setPublished(
+      String workspaceNamespace, String firecloudName, boolean publish) {
+    final DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, firecloudName);
+
     final WorkspaceAccessLevel accessLevel =
         publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
 
     final String publishedWorkspaceGroup =
-        getAuthDomainEmail(workspace.getCdrVersion().getAccessTier());
+        getAuthDomainEmail(dbWorkspace.getCdrVersion().getAccessTier());
 
     final FirecloudWorkspaceACLUpdate currentUpdate =
         WorkspaceAuthService.updateFirecloudAclsOnUser(
             accessLevel, new FirecloudWorkspaceACLUpdate().email(publishedWorkspaceGroup));
 
     fireCloudService.updateWorkspaceACL(
-        workspace.getWorkspaceNamespace(),
-        workspace.getFirecloudName(),
+        dbWorkspace.getWorkspaceNamespace(),
+        dbWorkspace.getFirecloudName(),
         Collections.singletonList(currentUpdate));
 
-    workspace.setPublished(publish);
-    return workspaceDao.saveWithLastModified(workspace);
+    dbWorkspace.setPublished(publish);
+    return workspaceDao.saveWithLastModified(dbWorkspace);
   }
 
   private String getAuthDomainEmail(DbAccessTier accessTier) {
