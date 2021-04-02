@@ -23,5 +23,4 @@ describe('Login tests:', () => {
     const loginPage = new GoogleLoginPage(page);
     expect(await loginPage.loginButton()).toBeTruthy();
   });
-
 });
