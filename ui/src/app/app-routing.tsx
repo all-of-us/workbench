@@ -93,7 +93,7 @@ interface RoutingProps {
   signIn: () => void;
 }
 
-const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn}) => {
+export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn}) => {
   const {authLoaded = false} = useStore(authStore);
   return authLoaded && <AppRouter>
     <AppRoute
