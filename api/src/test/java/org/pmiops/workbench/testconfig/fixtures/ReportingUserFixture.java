@@ -14,7 +14,6 @@ import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.Education;
@@ -61,8 +60,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
   public static final String USER__CURRENT_POSITION = "foo_7";
   public static final String USER__ACCESS_TIER_SHORT_NAMES =
       AccessTierService.REGISTERED_TIER_SHORT_NAME;
-  public static final DataAccessLevel USER__DATA_ACCESS_LEVEL =
-      AccessTierService.temporaryDataAccessLevelKluge(USER__ACCESS_TIER_SHORT_NAMES);
   public static final Timestamp USER__DATA_USE_AGREEMENT_BYPASS_TIME =
       Timestamp.from(Instant.parse("2015-05-14T00:00:00.00Z"));
   public static final Timestamp USER__DATA_USE_AGREEMENT_COMPLETION_TIME =
@@ -128,7 +125,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     assertThat(user.getContactEmail()).isEqualTo(USER__CONTACT_EMAIL);
     assertTimeApprox(user.getCreationTime(), USER__CREATION_TIME);
     assertThat(user.getCurrentPosition()).isEqualTo(USER__CURRENT_POSITION);
-    assertThat(user.getDataAccessLevel()).isEqualTo(USER__DATA_ACCESS_LEVEL); // manual adjustment
     assertThat(user.getAccessTierShortNames()).isEqualTo(USER__ACCESS_TIER_SHORT_NAMES);
     assertTimeApprox(user.getDataUseAgreementBypassTime(), USER__DATA_USE_AGREEMENT_BYPASS_TIME);
     assertTimeApprox(
