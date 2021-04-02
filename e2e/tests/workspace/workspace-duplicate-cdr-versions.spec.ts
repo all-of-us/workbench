@@ -1,4 +1,4 @@
-import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { createWorkspace, findWorkspaceCard, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceCard from 'app/component/workspace-card';
 import { config } from 'resources/workbench-config';
 import { MenuOption } from 'app/text-labels';
@@ -14,7 +14,8 @@ describe('Duplicate workspace, changing CDR versions', () => {
   });
 
   test('OWNER can duplicate workspace to an older CDR Version after consenting to restrictions', async () => {
-    const [workspaceCard, originalWorkspaceName] = await createWorkspace(page, { openDataPage: false });
+    const originalWorkspaceName = await createWorkspace(page);
+    const workspaceCard = await findWorkspaceCard(page, originalWorkspaceName);
 
     await workspaceCard.asElementHandle().hover();
     // Click on Ellipsis menu "Duplicate" option.
@@ -58,10 +59,8 @@ describe('Duplicate workspace, changing CDR versions', () => {
   });
 
   test('OWNER can duplicate workspace to a newer CDR Version via Workspace card', async () => {
-    const [workspaceCard, originalWorkspaceName] = await createWorkspace(page, {
-      cdrVersion: config.altCdrVersionName,
-      openDataPage: false
-    });
+    const originalWorkspaceName = await createWorkspace(page, { cdrVersion: config.altCdrVersionName });
+    const workspaceCard = await findWorkspaceCard(page, originalWorkspaceName);
 
     await workspaceCard.asElementHandle().hover();
     // Click on Ellipsis menu "Duplicate" option.

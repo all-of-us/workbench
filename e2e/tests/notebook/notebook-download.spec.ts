@@ -47,8 +47,7 @@ describe('Jupyter notebook download test', () => {
   test(
     'download notebook with policy warnings',
     async () => {
-      const workspaceCard = await findOrCreateWorkspace(page);
-      await workspaceCard.clickWorkspaceName();
+      await findOrCreateWorkspace(page);
 
       const dataPage = new WorkspaceDataPage(page);
       const notebookName = makeRandomName('py');

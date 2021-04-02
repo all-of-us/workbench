@@ -19,8 +19,7 @@ describe('Cohorts', () => {
    * Renaming Group 1 and 2 names.
    */
   test('Create, edit and delete', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+    await findOrCreateWorkspace(page);
 
     // Wait for the Data page.
     const dataPage = new WorkspaceDataPage(page);

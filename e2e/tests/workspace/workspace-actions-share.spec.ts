@@ -4,7 +4,7 @@ import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspacesPage from 'app/page/workspaces-page';
 import { LinkText, MenuOption, WorkspaceAccessLevel } from 'app/text-labels';
 import { config } from 'resources/workbench-config';
-import { signInWithAccessToken, signInAs, signOut, findOrCreateWorkspace } from 'utils/test-utils';
+import { signInWithAccessToken, signInAs, signOut, findOrCreateWorkspaceCard } from 'utils/test-utils';
 import { makeWorkspaceName } from 'utils/str-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { waitWhileLoading } from 'utils/waits-utils';
@@ -22,7 +22,7 @@ let newWorkspaceCard: WorkspaceCard;
 describe('Share workspace', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
-    newWorkspaceCard = await findOrCreateWorkspace(page, { workspaceName: newWorkspaceName });
+    newWorkspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName: newWorkspaceName });
     await newWorkspaceCard.clickWorkspaceName();
   });
 

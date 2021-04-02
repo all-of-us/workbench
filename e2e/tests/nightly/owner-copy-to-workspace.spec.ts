@@ -2,7 +2,7 @@ import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { LinkText, ResourceCard } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
-import { createWorkspace, findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { createWorkspace, findWorkspaceCard, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import WorkspaceCard from 'app/component/workspace-card';
 import Modal from 'app/modal/modal';
@@ -60,7 +60,7 @@ describe('Workspace owner copy notebook tests', () => {
 });
 
 async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName: string) {
-  const [, destWorkspace] = await createWorkspace(page, { cdrVersion: destCdrVersionName });
+  const destWorkspace = await createWorkspace(page, { cdrVersion: destCdrVersionName });
 
   // Find and open source workspace Data page.
   const workspaceCard = await WorkspaceCard.findCard(page, sourceWorkspaceName);
@@ -95,7 +95,7 @@ async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName:
 
   // Perform actions in copied notebook.
   // Open destination Workspace
-  await findOrCreateWorkspace(page, { workspaceName: destWorkspace }).then((card) => card.clickWorkspaceName());
+  await findWorkspaceCard(page, destWorkspace);
 
   // Verify copy-to notebook exists in destination Workspace
   await dataPage.openAnalysisPage();
@@ -112,6 +112,6 @@ async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName:
 }
 
 async function createCustomCdrVersionWorkspace(cdrVersion: string): Promise<string> {
-  const [, workspaceName] = await createWorkspace(page, { cdrVersion, openDataPage: false });
+  const workspaceName = await createWorkspace(page, { cdrVersion });
   return workspaceName;
 }

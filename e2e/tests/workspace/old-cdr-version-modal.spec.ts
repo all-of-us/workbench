@@ -1,4 +1,4 @@
-import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspaceCard, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import { MenuOption } from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
@@ -33,7 +33,7 @@ describe('OldCdrVersion Modal restrictions', () => {
   });
 
   test('OWNER cannot duplicate workspace to an older CDR Version without consenting to restrictions', async () => {
-    const [workspaceCard] = await createWorkspace(page, { openDataPage: false });
+    const workspaceCard = await findOrCreateWorkspaceCard(page);
 
     await workspaceCard.asElementHandle().hover();
     // Click on Ellipsis menu "Duplicate" option.

@@ -26,8 +26,7 @@ describe('User can create, modify, rename and delete Cohort', () => {
    * Delete Cohort.
    */
   test('Add cohort including Demographics Age', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+    await findOrCreateWorkspace(page);
 
     const dataPage = new WorkspaceDataPage(page);
     // Click Add Cohorts button in Data page.

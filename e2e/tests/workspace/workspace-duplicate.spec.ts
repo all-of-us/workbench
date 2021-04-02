@@ -1,4 +1,4 @@
-import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, findOrCreateWorkspaceCard, signInWithAccessToken } from 'utils/test-utils';
 import { MenuOption } from 'app/text-labels';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import Navigation, { NavLink } from 'app/component/navigation';
@@ -19,7 +19,7 @@ describe('Duplicate workspace', () => {
    * - Delete duplicate workspace.
    */
   test('OWNER can duplicate workspace via Workspace card', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page);
+    const workspaceCard = await findOrCreateWorkspaceCard(page);
 
     await workspaceCard.asElementHandle().hover();
     // Click on Ellipsis menu "Duplicate" option.
@@ -52,8 +52,7 @@ describe('Duplicate workspace', () => {
   });
 
   test('OWNER can duplicate workspace via Workspace action menu', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+    await findOrCreateWorkspace(page);
 
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.selectWorkspaceAction(MenuOption.Duplicate);

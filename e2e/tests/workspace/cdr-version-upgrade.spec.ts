@@ -12,7 +12,7 @@ describe('Workspace CDR Version Upgrade modal', () => {
   });
 
   test('Clicking Cancel and Upgrade buttons', async () => {
-    const [, workspaceName] = await createWorkspace(page, { cdrVersion: config.altCdrVersionName });
+    const workspaceName = await createWorkspace(page, { cdrVersion: config.altCdrVersionName });
 
     const workspacePage: WorkspaceBase = new WorkspaceDataPage(page);
     const cdrVersion = await workspacePage.getCdrVersion();
