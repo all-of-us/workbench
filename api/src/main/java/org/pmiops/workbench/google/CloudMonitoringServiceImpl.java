@@ -43,10 +43,10 @@ public class CloudMonitoringServiceImpl implements CloudMonitoringService {
 
   @Override
   public Iterable<TimeSeries> getCloudStorageReceivedBytes(
-      String workspaceNamespace, Duration trailingTimeToQuery) {
+      String googleProject, Duration trailingTimeToQuery) {
     ListTimeSeriesRequest request =
         ListTimeSeriesRequest.newBuilder()
-            .setName(ProjectName.of(workspaceNamespace).toString())
+            .setName(ProjectName.of(googleProject).toString())
             .setFilter("metric.type = \"storage.googleapis.com/network/received_bytes_count\"")
             .setAggregation(getAggregation())
             .setInterval(getTimeInterval(trailingTimeToQuery))
