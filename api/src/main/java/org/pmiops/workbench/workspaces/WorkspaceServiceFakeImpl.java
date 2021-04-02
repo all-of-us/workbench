@@ -43,8 +43,7 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
   }
 
   @Override
-  public DbWorkspace setPublished(
-      DbWorkspace workspace, String publishedWorkspaceGroup, boolean publish) {
+  public DbWorkspace setPublished(DbWorkspace workspace, boolean publish) {
     return null;
   }
 

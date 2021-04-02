@@ -161,12 +161,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceDao = workspaceDao;
   }
 
-  private String getAuthDomainEmail(DbAccessTier accessTier) {
-    FirecloudManagedGroupWithMembers registeredDomainGroup =
-        fireCloudService.getGroup(accessTier.getAuthDomainName());
-    return registeredDomainGroup.getGroupEmail();
-  }
-
   private DbCdrVersion getLiveCdrVersionId(String cdrVersionId) {
     if (Strings.isNullOrEmpty(cdrVersionId)) {
       throw new BadRequestException("missing cdrVersionId");
@@ -527,9 +521,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           clonedRoles.put(entry.getKey(), WorkspaceAccessLevel.OWNER);
         }
       }
-      dbWorkspace =
-          workspaceAuthService.updateWorkspaceAcls(
-              dbWorkspace, clonedRoles, getAuthDomainEmail(accessTier));
+      dbWorkspace = workspaceAuthService.updateWorkspaceAcls(dbWorkspace, clonedRoles);
     }
 
     dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
@@ -587,11 +579,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     final ImmutableMap<String, WorkspaceAccessLevel> aclsByEmail = shareRolesMapBuilder.build();
 
     // This automatically enforces the "canShare" permission.
-    dbWorkspace =
-        workspaceAuthService.updateWorkspaceAcls(
-            dbWorkspace,
-            aclsByEmail,
-            getAuthDomainEmail(dbWorkspace.getCdrVersion().getAccessTier()));
+    dbWorkspace = workspaceAuthService.updateWorkspaceAcls(dbWorkspace, aclsByEmail);
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
@@ -867,11 +855,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private ResponseEntity<EmptyResponse> setPublished(
       String workspaceNamespace, String workspaceId, boolean publish) {
     final DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
-    final String publishedWorkspaceGroup =
-        getAuthDomainEmail(dbWorkspace.getCdrVersion().getAccessTier());
-
-    workspaceService.setPublished(dbWorkspace, publishedWorkspaceGroup, publish);
-
+    workspaceService.setPublished(dbWorkspace, publish);
     return ResponseEntity.ok(new EmptyResponse());
   }
 

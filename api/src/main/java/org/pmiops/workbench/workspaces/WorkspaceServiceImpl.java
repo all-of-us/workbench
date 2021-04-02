@@ -18,6 +18,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +43,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao.ActiveStatusToCountResult;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -54,6 +56,7 @@ import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
@@ -315,22 +318,30 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-  public DbWorkspace setPublished(
-      DbWorkspace workspace, String publishedWorkspaceGroup, boolean publish) {
-    ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
-    FirecloudWorkspaceACLUpdate currentUpdate =
-        new FirecloudWorkspaceACLUpdate().email(publishedWorkspaceGroup);
+  public DbWorkspace setPublished(DbWorkspace workspace, boolean publish) {
+    final WorkspaceAccessLevel accessLevel =
+        publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
 
-    currentUpdate =
+    final String publishedWorkspaceGroup =
+        getAuthDomainEmail(workspace.getCdrVersion().getAccessTier());
+
+    final FirecloudWorkspaceACLUpdate currentUpdate =
         WorkspaceAuthService.updateFirecloudAclsOnUser(
-            publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS, currentUpdate);
-    workspace.setPublished(publish);
+            accessLevel, new FirecloudWorkspaceACLUpdate().email(publishedWorkspaceGroup));
 
-    updateACLRequestList.add(currentUpdate);
     fireCloudService.updateWorkspaceACL(
-        workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), updateACLRequestList);
+        workspace.getWorkspaceNamespace(),
+        workspace.getFirecloudName(),
+        Collections.singletonList(currentUpdate));
 
+    workspace.setPublished(publish);
     return workspaceDao.saveWithLastModified(workspace);
+  }
+
+  private String getAuthDomainEmail(DbAccessTier accessTier) {
+    FirecloudManagedGroupWithMembers registeredDomainGroup =
+        fireCloudService.getGroup(accessTier.getAuthDomainName());
+    return registeredDomainGroup.getGroupEmail();
   }
 
   @Override

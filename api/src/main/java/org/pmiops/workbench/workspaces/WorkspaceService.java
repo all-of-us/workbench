@@ -43,7 +43,7 @@ public interface WorkspaceService {
 
   List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName);
 
-  DbWorkspace setPublished(DbWorkspace workspace, String publishedWorkspaceGroup, boolean publish);
+  DbWorkspace setPublished(DbWorkspace workspace, boolean publish);
 
   List<DbUserRecentWorkspace> getRecentWorkspaces();
 

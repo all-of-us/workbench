@@ -12,11 +12,13 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
@@ -137,9 +139,7 @@ public class WorkspaceAuthService {
   }
 
   public DbWorkspace updateWorkspaceAcls(
-      DbWorkspace workspace,
-      Map<String, WorkspaceAccessLevel> updatedAclsMap,
-      String registeredUsersGroup) {
+      DbWorkspace workspace, Map<String, WorkspaceAccessLevel> updatedAclsMap) {
     // userRoleMap is a map of the new permissions for ALL users on the ws
     Map<String, FirecloudWorkspaceAccessEntry> aclsMap =
         getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
@@ -162,6 +162,8 @@ public class WorkspaceAuthService {
         // Pass along an update request with NO ACCESS as the given access level.
         // Note: do not do groups.  Unpublish will pass the specific NO_ACCESS acl
         // TODO [jacmrob] : have all users pass NO_ACCESS explicitly? Handle filtering on frontend?
+        final String registeredUsersGroup =
+            getAuthDomainEmail(workspace.getCdrVersion().getAccessTier());
         if (!currentUserEmail.equals(registeredUsersGroup)) {
           FirecloudWorkspaceACLUpdate removedUser = new FirecloudWorkspaceACLUpdate();
           removedUser.setEmail(currentUserEmail);
@@ -221,5 +223,11 @@ public class WorkspaceAuthService {
     }
 
     return workspaceDao.saveWithLastModified(workspace);
+  }
+
+  private String getAuthDomainEmail(DbAccessTier accessTier) {
+    FirecloudManagedGroupWithMembers registeredDomainGroup =
+        fireCloudService.getGroup(accessTier.getAuthDomainName());
+    return registeredDomainGroup.getGroupEmail();
   }
 }
