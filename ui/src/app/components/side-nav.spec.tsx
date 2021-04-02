@@ -3,8 +3,6 @@ import * as React from 'react';
 
 import {SideNav, SideNavItem, SideNavProps} from './side-nav';
 import {ProfileStubVariables} from "../../testing/stubs/profile-api-stub";
-import {DataAccessLevel} from "../../generated/fetch";
-
 
 describe('SideNav', () => {
   const props: SideNavProps = {

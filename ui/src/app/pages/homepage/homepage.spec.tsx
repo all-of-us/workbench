@@ -2,7 +2,7 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {DataAccessLevel, Profile, ProfileApi} from 'generated/fetch';
+import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {serverConfigStore, userProfileStore} from 'app/utils/navigation';
 
