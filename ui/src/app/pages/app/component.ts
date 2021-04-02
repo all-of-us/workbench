@@ -18,6 +18,7 @@ import {initializeAnalytics} from 'app/utils/analytics';
 import {
   queryParamsStore,
   routeConfigDataStore,
+  serverConfigStore,
   urlParamsStore
 } from 'app/utils/navigation';
 import {routeDataStore, stackdriverErrorReporterStore} from 'app/utils/stores';
@@ -172,7 +173,7 @@ export class AppComponent implements OnInit {
 
   private loadConfigAndErrorReporter() {
     this.serverConfigService.getConfig().subscribe((config) => {
-      angularServerConfigStore.next(config);
+      serverConfigStore.next(config);
 
       const reporter = new StackdriverErrorReporter();
       reporter.start({
