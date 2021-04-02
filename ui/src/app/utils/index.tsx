@@ -23,7 +23,6 @@ import {
 } from 'app/utils/navigation';
 import {
   ConfigResponse,
-  DataAccessLevel,
   Domain,
 } from 'generated/fetch';
 import {cdrVersionStore, withStore} from './stores';
@@ -42,16 +41,16 @@ export function isBlank(toTest: String): boolean {
   }
 }
 
+export const REGISTERED_TIER_SHORT_NAME = 'registered';
 /**
  * Determine whether the given access level is >= registered. This is the
  * minimum required level to do most things in the Workbench app (outside of
  * local/test development).
+ *
+ * TODO: make separate evaluations by tier
  */
-export function hasRegisteredAccess(access: DataAccessLevel): boolean {
-  return [
-    DataAccessLevel.Registered,
-    DataAccessLevel.Protected
-  ].includes(access);
+export function hasRegisteredAccess(accessTierShortNames: Array<string>): boolean {
+  return !!accessTierShortNames && accessTierShortNames.includes(REGISTERED_TIER_SHORT_NAME);
 }
 
 

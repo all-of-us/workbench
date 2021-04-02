@@ -50,7 +50,7 @@ const signInGuard: Guard = {
 };
 
 const registrationGuard: Guard = {
-  allowed: (): boolean => hasRegisteredAccess(profileStore.get().profile.dataAccessLevel),
+  allowed: (): boolean => hasRegisteredAccess(profileStore.get().profile.accessTierShortNames),
   redirectPath: '/'
 };
 

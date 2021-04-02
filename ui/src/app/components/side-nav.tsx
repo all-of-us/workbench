@@ -272,7 +272,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           onToggleSideNav={() => this.props.onToggleSideNav()}
           href='/profile'
           active={this.props.profileActive}
-          disabled={!hasRegisteredAccess(profile.dataAccessLevel)}
+          disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
         />
       }
       {
@@ -295,7 +295,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         onToggleSideNav={() => this.props.onToggleSideNav()}
         href={'/workspaces'}
         active={this.props.workspacesActive}
-        disabled={!hasRegisteredAccess(profile.dataAccessLevel)}
+        disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
       />
       <SideNavItem
         icon='star'
@@ -303,14 +303,14 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         onToggleSideNav={() => this.props.onToggleSideNav()}
         href={'/library'}
         active={this.props.libraryActive}
-        disabled={!hasRegisteredAccess(profile.dataAccessLevel)}
+        disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
       />
       <SideNavItem
         icon='help'
         content={'User Support Hub'}
         onToggleSideNav={() => this.props.onToggleSideNav()}
         parentOnClick={() => this.redirectToZendesk()}
-        disabled={!hasRegisteredAccess(profile.dataAccessLevel)}
+        disabled={!hasRegisteredAccess(profile.accessTierShortNames)}
       />
       <SideNavItem
         icon='envelope'

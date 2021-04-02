@@ -93,7 +93,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       this.profileLoadingSub = this.profileStorageService.profile$.subscribe((profile) => {
         this.profile = profile as unknown as FetchProfile;
         setInstitutionCategoryState(this.profile.verifiedInstitutionalAffiliation);
-        if (hasRegisteredAccess(this.profile.dataAccessLevel)) {
+        if (hasRegisteredAccess(this.profile.accessTierShortNames)) {
           cdrVersionsApi().getCdrVersions().then(resp => {
             // cdrVersionsInitialized blocks app rendering so that route
             // components don't try to lookup CDR data before it's available.

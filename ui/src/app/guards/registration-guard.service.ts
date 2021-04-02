@@ -19,7 +19,7 @@ export class RegistrationGuard implements CanActivate, CanActivateChild {
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
     return this.profileStorageService.profile$.flatMap((profile) => {
-      if (hasRegisteredAccess(profile.dataAccessLevel)) {
+      if (hasRegisteredAccess(profile.accessTierShortNames)) {
         return Observable.from([true]);
       } else {
         this.router.navigate(['/']);

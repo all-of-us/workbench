@@ -242,7 +242,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
       this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});
 
       const {workbenchAccessTasks} = queryParamsStore.getValue();
-      const hasAccess = hasRegisteredAccess(profile.dataAccessLevel);
+      const hasAccess = hasRegisteredAccess(profile.accessTierShortNames);
       if (!hasAccess || workbenchAccessTasks) {
         await this.syncCompliance();
       }

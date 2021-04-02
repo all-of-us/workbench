@@ -3,13 +3,13 @@ import {
   AccessModule,
   AdminTableUser,
   CreateAccountRequest,
-  DataAccessLevel,
   InstitutionalRole,
   NihToken,
   Profile,
   ProfileApi,
 } from 'generated/fetch';
 
+import {REGISTERED_TIER_SHORT_NAME} from 'app/utils';
 import {EmptyResponse} from 'generated/fetch/api';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
@@ -17,7 +17,7 @@ export class ProfileStubVariables {
   static PROFILE_STUB = <Profile>{
     username: 'tester@fake-research-aou.org',
     contactEmail: 'tester@mactesterson.edu><script>alert("hello");</script>',
-    dataAccessLevel: DataAccessLevel.Registered,
+    accessTierShortNames: [REGISTERED_TIER_SHORT_NAME],
     givenName: 'Tester!@#$%^&*()><script>alert("hello");</script>',
     familyName: 'MacTesterson!@#$%^&*()><script>alert("hello");</script>',
     phoneNumber: '999-999-9999',
