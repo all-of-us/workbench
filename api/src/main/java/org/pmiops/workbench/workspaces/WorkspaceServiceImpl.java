@@ -43,7 +43,6 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao.ActiveStatusToCountResult;
-import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -325,12 +324,12 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     final WorkspaceAccessLevel accessLevel =
         publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
 
-    final String publishedWorkspaceGroup =
-        getAuthDomainEmail(dbWorkspace.getCdrVersion().getAccessTier());
+    final FirecloudManagedGroupWithMembers authDomainGroup =
+        fireCloudService.getGroup(dbWorkspace.getCdrVersion().getAccessTier().getAuthDomainName());
 
     final FirecloudWorkspaceACLUpdate currentUpdate =
         WorkspaceAuthService.updateFirecloudAclsOnUser(
-            accessLevel, new FirecloudWorkspaceACLUpdate().email(publishedWorkspaceGroup));
+            accessLevel, new FirecloudWorkspaceACLUpdate().email(authDomainGroup.getGroupEmail()));
 
     fireCloudService.updateWorkspaceACL(
         dbWorkspace.getWorkspaceNamespace(),
@@ -339,12 +338,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
     dbWorkspace.setPublished(publish);
     return workspaceDao.saveWithLastModified(dbWorkspace);
-  }
-
-  private String getAuthDomainEmail(DbAccessTier accessTier) {
-    FirecloudManagedGroupWithMembers registeredDomainGroup =
-        fireCloudService.getGroup(accessTier.getAuthDomainName());
-    return registeredDomainGroup.getGroupEmail();
   }
 
   @Override

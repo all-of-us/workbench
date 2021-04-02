@@ -12,7 +12,6 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -162,9 +161,10 @@ public class WorkspaceAuthService {
         // Pass along an update request with NO ACCESS as the given access level.
         // Note: do not do groups.  Unpublish will pass the specific NO_ACCESS acl
         // TODO [jacmrob] : have all users pass NO_ACCESS explicitly? Handle filtering on frontend?
-        final String registeredUsersGroup =
-            getAuthDomainEmail(workspace.getCdrVersion().getAccessTier());
-        if (!currentUserEmail.equals(registeredUsersGroup)) {
+        FirecloudManagedGroupWithMembers authDomainGroup =
+            fireCloudService.getGroup(
+                workspace.getCdrVersion().getAccessTier().getAuthDomainName());
+        if (!currentUserEmail.equals(authDomainGroup.getGroupEmail())) {
           FirecloudWorkspaceACLUpdate removedUser = new FirecloudWorkspaceACLUpdate();
           removedUser.setEmail(currentUserEmail);
           removedUser =
@@ -223,11 +223,5 @@ public class WorkspaceAuthService {
     }
 
     return workspaceDao.saveWithLastModified(workspace);
-  }
-
-  private String getAuthDomainEmail(DbAccessTier accessTier) {
-    FirecloudManagedGroupWithMembers registeredDomainGroup =
-        fireCloudService.getGroup(accessTier.getAuthDomainName());
-    return registeredDomainGroup.getGroupEmail();
   }
 }
