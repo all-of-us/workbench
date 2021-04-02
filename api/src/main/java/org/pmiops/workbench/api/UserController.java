@@ -102,7 +102,6 @@ public class UserController implements UserApiDelegate {
     // See discussion on RW-2894. This may not be strictly necessary, especially if researchers
     // details will be published publicly, but it prevents arbitrary unregistered users from seeing
     // limited researcher profile details.
-
     WorkbenchConfig config = configProvider.get();
     if (!fireCloudService.isUserMemberOfGroup(
         userProvider.get().getUsername(), config.firecloud.registeredDomainName)) {
