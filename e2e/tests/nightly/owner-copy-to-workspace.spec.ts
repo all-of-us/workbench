@@ -4,7 +4,6 @@ import { LinkText, ResourceCard } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
 import { createWorkspace, findWorkspaceCard, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
-import WorkspaceCard from 'app/component/workspace-card';
 import Modal from 'app/modal/modal';
 
 // re-run one more time if test has failed
@@ -63,7 +62,7 @@ async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName:
   const destWorkspace = await createWorkspace(page, { cdrVersion: destCdrVersionName });
 
   // Find and open source workspace Data page.
-  const workspaceCard = await WorkspaceCard.findCard(page, sourceWorkspaceName);
+  const workspaceCard = await findWorkspaceCard(page, sourceWorkspaceName);
   await workspaceCard.clickWorkspaceName();
 
   // Create notebook in source workspace.
