@@ -6028,7 +6028,7 @@ definitions:
           the user ID, e.g. all-of-us-260.
         type: string
       workspace_namespace:
-        description: 'Worksapce namesapce(Terra Billing Project ID), after Terra project per
+        description: 'Workspace namespace(Terra Billing Project ID), after Terra project per
         workspace migratioon(PPW), it is not equal to google project any more. Always present.'
         type: string
   ArrayOfLong:

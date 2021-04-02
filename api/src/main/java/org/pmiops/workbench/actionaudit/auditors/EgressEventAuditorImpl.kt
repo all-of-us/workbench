@@ -67,7 +67,7 @@ constructor(
         } else {
             // If the VM prefix doesn't match a user on the workspace, we'll still log an
             // event in the target workspace, but with nulled-out user info.
-            logger.warning(String.format("Could not find a user for VM prefix %s in project %s", event.vmPrefix, event.workspaceNamespace))
+            logger.warning(String.format("Could not find a user for VM prefix %s in namespace %s", event.vmPrefix, event.workspaceNamespace))
         }
 
         val actionId = actionIdProvider.get()

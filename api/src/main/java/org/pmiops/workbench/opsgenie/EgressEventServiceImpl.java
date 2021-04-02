@@ -83,8 +83,8 @@ public class EgressEventServiceImpl implements EgressEventService {
     event.setWorkspaceNamespace(workspaceNamespace);
     logger.warning(
         String.format(
-            "Received an egress event from workspace namespace %s (%.2fMiB, VM prefix %s)",
-            workspaceNamespace, event.getEgressMib(), event.getVmPrefix()));
+            "Received an egress event from workspace namespace %s, googleProject %s (%.2fMiB, VM prefix %s)",
+            workspaceNamespace, event.getProjectName(), event.getEgressMib(), event.getVmPrefix()));
     this.egressEventAuditor.fireEgressEvent(event);
     this.createEgressEventAlert(event);
   }
@@ -100,8 +100,8 @@ public class EgressEventServiceImpl implements EgressEventService {
       final SuccessResponse response = createAlert(createAlertRequest);
       logger.info(
           String.format(
-              "Successfully created or updated Opsgenie alert for high-egress event on project %s (Opsgenie request ID %s)",
-              egressEvent.getWorkspaceNamespace(), response.getRequestId()));
+              "Successfully created or updated Opsgenie alert for high-egress event on project %s, namespace %s (Opsgenie request ID %s)",
+              egressEvent.getProjectName(), egressEvent.getWorkspaceNamespace(), response.getRequestId()));
     } catch (ApiException e) {
       logger.severe(
           String.format(
