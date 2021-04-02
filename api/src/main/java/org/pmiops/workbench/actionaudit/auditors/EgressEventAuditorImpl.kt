@@ -1,6 +1,10 @@
 package org.pmiops.workbench.actionaudit.auditors
 
-import org.pmiops.workbench.actionaudit.*
+import org.pmiops.workbench.actionaudit.ActionAuditEvent
+import org.pmiops.workbench.actionaudit.ActionAuditService
+import org.pmiops.workbench.actionaudit.ActionType
+import org.pmiops.workbench.actionaudit.AgentType
+import org.pmiops.workbench.actionaudit.TargetType
 import org.pmiops.workbench.actionaudit.targetproperties.EgressEventCommentTargetProperty
 import org.pmiops.workbench.actionaudit.targetproperties.EgressEventTargetProperty
 import org.pmiops.workbench.actionaudit.targetproperties.TargetPropertyExtractor
@@ -38,7 +42,7 @@ constructor(
             fireFailedToFindWorkspace(event)
             throw BadRequestException(String.format(
                     "The workspace '%s' referred to by the given event is no longer active or never existed.",
-                    event.projectName))
+                    event.workspaceNamespace))
         }
         val dbWorkspace = dbWorkspaceMaybe.get()
 
@@ -63,7 +67,7 @@ constructor(
         } else {
             // If the VM prefix doesn't match a user on the workspace, we'll still log an
             // event in the target workspace, but with nulled-out user info.
-            logger.warning(String.format("Could not find a user for VM prefix %s in project %s", event.vmPrefix, event.projectName))
+            logger.warning(String.format("Could not find a user for VM prefix %s in project %s", event.vmPrefix, event.workspaceNamespace))
         }
 
         val actionId = actionIdProvider.get()

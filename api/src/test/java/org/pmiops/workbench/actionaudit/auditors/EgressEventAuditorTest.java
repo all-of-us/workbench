@@ -45,9 +45,10 @@ public class EgressEventAuditorTest {
   private static final String USER_EMAIL = "user@researchallofus.org";
   private static final long WORKSPACE_ID = 1L;
   private static final String WORKSPACE_NAMESPACE = "aou-rw-test-c7dec260";
+  private static final String GOOGLE_PROJECT = "gcp-project-id";
   private static final String WORKSPACE_FIRECLOUD_NAME = "mytestworkspacename";
 
-  private static final String EGRESS_EVENT_PROJECT_NAME = WORKSPACE_NAMESPACE;
+  private static final String EGRESS_EVENT_PROJECT_NAME = GOOGLE_PROJECT;
   private static final String EGRESS_EVENT_VM_PREFIX = "all-of-us-" + USER_ID;
 
   // Pre-built data objects for test.
@@ -84,6 +85,7 @@ public class EgressEventAuditorTest {
 
     dbWorkspace = new DbWorkspace();
     dbWorkspace.setWorkspaceId(WORKSPACE_ID);
+    dbWorkspace.setGoogleProject(GOOGLE_PROJECT);
     dbWorkspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
     dbWorkspace.setFirecloudName(WORKSPACE_FIRECLOUD_NAME);
     when(workspaceDao.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(Optional.of(dbWorkspace));
@@ -97,6 +99,7 @@ public class EgressEventAuditorTest {
     egressEventAuditor.fireEgressEvent(
         new EgressEvent()
             .projectName(EGRESS_EVENT_PROJECT_NAME)
+            .workspaceNamespace(WORKSPACE_NAMESPACE)
             .vmPrefix(EGRESS_EVENT_VM_PREFIX)
             .timeWindowStart(0l)
             .egressMib(12.3)
@@ -147,7 +150,7 @@ public class EgressEventAuditorTest {
     // empty target ID.
     when(workspaceDao.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(Optional.empty());
     egressEventAuditor.fireEgressEvent(
-        new EgressEvent().projectName(EGRESS_EVENT_PROJECT_NAME).vmPrefix(EGRESS_EVENT_VM_PREFIX));
+        new EgressEvent().projectName(EGRESS_EVENT_PROJECT_NAME).vmPrefix(EGRESS_EVENT_VM_PREFIX).workspaceNamespace(WORKSPACE_NAMESPACE));
     verify(mockActionAuditService).send(eventsCaptor.capture());
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 

@@ -20,8 +20,6 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,8 +65,10 @@ public class WorkspaceDaoTest {
   @Test
   public void testGetWorkspaceByGoogleProject() {
     DbWorkspace dbWorkspace = createWorkspace();
-    assertThat(workspaceDao.getByGoogleProject(GOOGLE_PROJECT).get().getName()).isEqualTo(dbWorkspace.getName());
-    assertThat(workspaceDao.getByGoogleProject(GOOGLE_PROJECT).get().getGoogleProject()).isEqualTo(dbWorkspace.getGoogleProject());
+    assertThat(workspaceDao.getByGoogleProject(GOOGLE_PROJECT).get().getName())
+        .isEqualTo(dbWorkspace.getName());
+    assertThat(workspaceDao.getByGoogleProject(GOOGLE_PROJECT).get().getGoogleProject())
+        .isEqualTo(dbWorkspace.getGoogleProject());
   }
 
   private DbWorkspace createWorkspace() {

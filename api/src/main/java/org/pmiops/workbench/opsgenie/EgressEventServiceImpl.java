@@ -69,10 +69,6 @@ public class EgressEventServiceImpl implements EgressEventService {
 
   @Override
   public void handleEvent(EgressEvent event) {
-    logger.warning(
-        String.format(
-            "Received an egress event from project %s (%.2fMiB, VM prefix %s)",
-            event.getProjectName(), event.getEgressMib(), event.getVmPrefix()));
     // Lookup workspace by googleProject name, and set the workspaceNamespace in EgressEvent.
     String workspaceNamespace =
         workspaceDao
@@ -85,6 +81,10 @@ public class EgressEventServiceImpl implements EgressEventService {
                             event.getProjectName())))
             .getWorkspaceNamespace();
     event.setWorkspaceNamespace(workspaceNamespace);
+    logger.warning(
+        String.format(
+            "Received an egress event from workspace namespace %s (%.2fMiB, VM prefix %s)",
+            workspaceNamespace, event.getEgressMib(), event.getVmPrefix()));
     this.egressEventAuditor.fireEgressEvent(event);
     this.createEgressEventAlert(event);
   }
@@ -101,19 +101,20 @@ public class EgressEventServiceImpl implements EgressEventService {
       logger.info(
           String.format(
               "Successfully created or updated Opsgenie alert for high-egress event on project %s (Opsgenie request ID %s)",
-              egressEvent.getProjectName(), response.getRequestId()));
+              egressEvent.getWorkspaceNamespace(), response.getRequestId()));
     } catch (ApiException e) {
       logger.severe(
           String.format(
               "Error creating Opsgenie alert for egress event on project %s: %s",
-              egressEvent.getProjectName(), e.getMessage()));
+              egressEvent.getWorkspaceNamespace(), e.getMessage()));
       e.printStackTrace();
     }
   }
 
   private CreateAlertRequest egressEventToOpsGenieAlert(EgressEvent egressEvent) {
     final CreateAlertRequest request = new CreateAlertRequest();
-    request.setMessage(String.format("High-egress event (%s)", egressEvent.getProjectName()));
+    request.setMessage(
+        String.format("High-egress event (%s)", egressEvent.getWorkspaceNamespace()));
     request.setDescription(getDescription(egressEvent));
 
     // Add a note with some more specific details about the alerting criteria and threshold. Notes
@@ -130,14 +131,14 @@ public class EgressEventServiceImpl implements EgressEventService {
 
     // Set the alias, which is Opsgenie's string key for alert de-duplication. See
     // https://docs.opsgenie.com/docs/alert-deduplication
-    request.setAlias(egressEvent.getProjectName() + " | " + egressEvent.getVmPrefix());
+    request.setAlias(egressEvent.getWorkspaceNamespace() + " | " + egressEvent.getVmPrefix());
     return request;
   }
 
   @NotNull
   private String getDescription(EgressEvent egressEvent) {
     final WorkspaceAdminView adminWorkspace =
-        workspaceAdminService.getWorkspaceAdminView(egressEvent.getProjectName());
+        workspaceAdminService.getWorkspaceAdminView(egressEvent.getWorkspaceNamespace());
     final Workspace workspace = adminWorkspace.getWorkspace();
     final String creatorDetails =
         userService
@@ -179,7 +180,7 @@ public class EgressEventServiceImpl implements EgressEventService {
         + String.format("Collaborators: \n%s\n", collaboratorDetails)
         + String.format(
             "Workspace Admin Console (Prod Admin User): %s/admin/workspaces/%s/\n",
-            workbenchConfigProvider.get().server.uiBaseUrl, egressEvent.getProjectName())
+            workbenchConfigProvider.get().server.uiBaseUrl, egressEvent.getWorkspaceNamespace())
         + "Playbook Entry: https://broad.io/aou-high-egress-event";
   }
 
