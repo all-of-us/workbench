@@ -404,7 +404,8 @@ public class RuntimeControllerTest {
                         new LeonardoClusterError().errorCode(1).errorMessage("foo"),
                         new LeonardoClusterError().errorCode(2).errorMessage(null))));
 
-    assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody()).isEqualTo(testRuntime);
+    assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody())
+        .isEqualTo(testRuntime.status(RuntimeStatus.ERROR));
   }
 
   @Test
@@ -412,7 +413,8 @@ public class RuntimeControllerTest {
     when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime.status(LeonardoRuntimeStatus.ERROR).errors(null));
 
-    assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody()).isEqualTo(testRuntime);
+    assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody())
+        .isEqualTo(testRuntime.status(RuntimeStatus.ERROR));
   }
 
   @Test
