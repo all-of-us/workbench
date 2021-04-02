@@ -26,6 +26,7 @@
     <delete tableName="cb_survey_attribute"/>
     <delete tableName="cb_survey_version"/>
     <delete tableName="cb_criteria_menu"/>
+    <delete tableName="ds_data_dictionary"/>
 
     <loadData tableName="domain_info" file="csv/domain_info.csv" encoding="UTF-8" quotchar='"'>
       <column name="concept_id" type="NUMERIC"/>
