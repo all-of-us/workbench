@@ -27,6 +27,7 @@ import org.mockito.Captor;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.EgressEvent;
@@ -68,6 +69,7 @@ public class EgressEventServiceTest {
   @MockBean private InstitutionService mockInstitutionService;
   @MockBean private UserService mockUserService;
   @MockBean private WorkspaceAdminService mockWorkspaceAdminService;
+  @MockBean private WorkspaceDao workspaceDao;
 
   @Captor private ArgumentCaptor<CreateAlertRequest> alertRequestCaptor;
 
