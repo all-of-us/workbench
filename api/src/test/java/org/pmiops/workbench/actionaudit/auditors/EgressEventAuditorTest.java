@@ -150,7 +150,10 @@ public class EgressEventAuditorTest {
     // empty target ID.
     when(workspaceDao.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(Optional.empty());
     egressEventAuditor.fireEgressEvent(
-        new EgressEvent().projectName(EGRESS_EVENT_PROJECT_NAME).vmPrefix(EGRESS_EVENT_VM_PREFIX).workspaceNamespace(WORKSPACE_NAMESPACE));
+        new EgressEvent()
+            .projectName(EGRESS_EVENT_PROJECT_NAME)
+            .vmPrefix(EGRESS_EVENT_VM_PREFIX)
+            .workspaceNamespace(WORKSPACE_NAMESPACE));
     verify(mockActionAuditService).send(eventsCaptor.capture());
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 
