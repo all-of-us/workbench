@@ -20,8 +20,7 @@ describe('Create dataset and export to notebook at same time', () => {
    * Delete Cohort, Dataset, and Notebook.
    */
   test('Jupyter Notebook for R programming language can be created', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page);
-    const workspaceName = await workspaceCard.clickWorkspaceName();
+    const workspaceName = await findOrCreateWorkspace(page);
 
     // Click Add Datasets button
     const dataPage = new WorkspaceDataPage(page);

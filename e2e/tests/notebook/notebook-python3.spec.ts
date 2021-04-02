@@ -22,8 +22,7 @@ describe('Jupyter notebook tests in Python language', () => {
   test(
     'Run code from file',
     async () => {
-      const workspaceCard = await findOrCreateWorkspace(page);
-      await workspaceCard.clickWorkspaceName();
+      await findOrCreateWorkspace(page);
 
       const dataPage = new WorkspaceDataPage(page);
       const notebookName = makeRandomName('py');

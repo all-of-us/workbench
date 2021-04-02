@@ -18,8 +18,7 @@ describe('Dataset test', () => {
    * - Delete dataset.
    */
   test('Can create and rename Dataset', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+    await findOrCreateWorkspace(page);
 
     // Click Add Datasets button
     const dataPage = new WorkspaceDataPage(page);

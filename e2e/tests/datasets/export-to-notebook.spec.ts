@@ -18,7 +18,7 @@ describe('Export to notebook from dataset', () => {
    * - Export dataset to notebook thru snowman menu.
    */
   test('Create Jupyter notebook for Python programming language from existing dataset', async () => {
-    await createWorkspace(page).then((card) => card.clickWorkspaceName());
+    await createWorkspace(page);
 
     // Click Add Datasets button.
     const dataPage = new WorkspaceDataPage(page);

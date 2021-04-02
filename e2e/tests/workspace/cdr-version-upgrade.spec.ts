@@ -1,4 +1,3 @@
-import WorkspaceCard from 'app/component/workspace-card';
 import { Page } from 'puppeteer';
 import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
@@ -13,8 +12,7 @@ describe('Workspace CDR Version Upgrade modal', () => {
   });
 
   test('Clicking Cancel and Upgrade buttons', async () => {
-    const workspaceCard: WorkspaceCard = await createWorkspace(page, config.altCdrVersionName);
-    const workspaceName = await workspaceCard.clickWorkspaceName();
+    const workspaceName = await createWorkspace(page, { cdrVersion: config.altCdrVersionName });
 
     const workspacePage: WorkspaceBase = new WorkspaceDataPage(page);
     const cdrVersion = await workspacePage.getCdrVersion();

@@ -17,8 +17,7 @@ describe('Cohorts UI tests', () => {
    * Confirm Discard Changes.
    */
   test('Discard Changes', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+    await findOrCreateWorkspace(page);
 
     // Wait for the Data page.
     const dataPage = new WorkspaceDataPage(page);
