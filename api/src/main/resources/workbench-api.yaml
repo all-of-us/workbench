@@ -550,7 +550,9 @@ paths:
     get:
       tags:
       - user
-      description: Returns user information matching search terms
+      description: >
+        Return a page of users matching a search term.
+        Used by autocomplete for workspace sharing.
       operationId: user
       responses:
         200:
@@ -5199,9 +5201,14 @@ definitions:
         format: int64
       username:
         type: string
+      accessTierShortNames:
+        description: Short names of access tiers available to the user.
+        type: array
+        items:
+          type: string
       dataAccessLevel:
         "$ref": "#/definitions/DataAccessLevel"
-        description: DEPRECATED.  Will be replaced by Access Tiers.
+        description: DEPRECATED.  Will be replaced by accessTierShortNames.
       givenName:
         type: string
       familyName:
@@ -5293,9 +5300,14 @@ definitions:
       firstSignInTime:
         type: integer
         format: int64
+      accessTierShortNames:
+        description: Short names of access tiers available to the user.
+        type: array
+        items:
+          type: string
       dataAccessLevel:
-        description: DEPRECATED.  Will be replaced by Access Tiers.  Was -> what level of data access the user has
         "$ref": "#/definitions/DataAccessLevel"
+        description: DEPRECATED.  Will be replaced by accessTierShortNames.
       degrees:
         type: array
         items:

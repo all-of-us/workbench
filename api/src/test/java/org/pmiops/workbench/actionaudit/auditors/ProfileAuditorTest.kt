@@ -8,13 +8,13 @@ import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.pmiops.workbench.access.AccessTierService
 import org.pmiops.workbench.actionaudit.ActionAuditEvent
 import org.pmiops.workbench.actionaudit.ActionAuditService
 import org.pmiops.workbench.actionaudit.ActionType
 import org.pmiops.workbench.actionaudit.AgentType
 import org.pmiops.workbench.actionaudit.TargetType
 import org.pmiops.workbench.db.model.DbUser
-import org.pmiops.workbench.model.DataAccessLevel
 import org.pmiops.workbench.model.DemographicSurvey
 import org.pmiops.workbench.model.Disability
 import org.pmiops.workbench.model.Education
@@ -88,7 +88,7 @@ class ProfileAuditorTest {
                 .apply { userId = 444 }
                 .apply { username = "slim_shady" }
                 .apply { contactEmail = USER_EMAIL }
-                .apply { dataAccessLevel = DataAccessLevel.REGISTERED }
+                .apply { accessTierShortNames = listOf(AccessTierService.REGISTERED_TIER_SHORT_NAME) }
                 .apply { givenName = "Robert" }
                 .apply { familyName = "Paulson" }
                 .apply { phoneNumber = "867-5309" }

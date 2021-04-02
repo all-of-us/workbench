@@ -18,8 +18,7 @@ import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
-import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
@@ -27,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
@@ -47,6 +47,9 @@ public class AccessTierServiceTest {
 
   @Import({
     AccessTierServiceImpl.class,
+  })
+  @MockBean({
+    FireCloudService.class,
   })
   @TestConfiguration
   static class Configuration {
@@ -86,114 +89,49 @@ public class AccessTierServiceTest {
   @Test
   public void test_getAllTiers_2() {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
 
-    final DbAccessTier controlledTier =
-        accessTierDao.save(
-            new DbAccessTier()
-                .setAccessTierId(2)
-                .setShortName("controlled")
-                .setDisplayName("Controlled Tier")
-                .setAuthDomainName("Controlled Tier Auth Domain")
-                .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
-                .setServicePerimeter("controlled/tier/perimeter"));
-
-    assertThat(accessTierService.getAllTiers()).containsExactly(registeredTier, controlledTier);
+    assertThat(accessTierService.getAllTiers())
+        .containsExactly(controlledTier, registeredTier)
+        .inOrder(); // enforce a consistent ordering: alphabetical by shortName
   }
 
   @Test
-  public void test_getAccessTier_empty() {
-    assertThat(accessTierService.getAccessTier("n/a")).isEmpty();
+  public void test_getAccessTiersForUser_empty() {
+    assertThat(accessTierService.getAccessTiersForUser(user)).isEmpty();
   }
 
   @Test
-  public void test_getAccessTier_registered() {
-    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-    assertThat(accessTierService.getAccessTier(registeredTier.getShortName()))
-        .hasValue(registeredTier);
-  }
-
-  @Test
-  public void test_getAccessTier_missing() {
-    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-    assertThat(accessTierService.getAccessTier("some other tier")).isEmpty();
-  }
-
-  @Test
-  public void test_getAccessTier_multi() {
-    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-
-    final DbAccessTier controlledTier =
-        accessTierDao.save(
-            new DbAccessTier()
-                .setAccessTierId(2)
-                .setShortName("controlled")
-                .setDisplayName("Controlled Tier")
-                .setAuthDomainName("Controlled Tier Auth Domain")
-                .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
-                .setServicePerimeter("controlled/tier/perimeter"));
-
-    assertThat(accessTierService.getAccessTier(registeredTier.getShortName()))
-        .hasValue(registeredTier);
-    assertThat(accessTierService.getAccessTier(controlledTier.getShortName()))
-        .hasValue(controlledTier);
-  }
-
-  @Test(expected = ServerErrorException.class)
-  public void test_getRegisteredTier_empty() {
-    accessTierService.getRegisteredTier();
-  }
-
-  @Test
-  public void test_getRegisteredTier_registered() {
-    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-    assertThat(accessTierService.getRegisteredTier()).isEqualTo(registeredTier);
-  }
-
-  @Test(expected = ServerErrorException.class)
-  public void test_getRegisteredTier_missing() {
-    final DbAccessTier controlledTier =
-        accessTierDao.save(
-            new DbAccessTier()
-                .setAccessTierId(2)
-                .setShortName("controlled")
-                .setDisplayName("Controlled Tier")
-                .setAuthDomainName("Controlled Tier Auth Domain")
-                .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
-                .setServicePerimeter("controlled/tier/perimeter"));
-    accessTierService.getRegisteredTier();
-  }
-
-  // we expect to see the Registered Tier in the DB
-  // but we have not defined it for this test
-
-  @Test(expected = ServerErrorException.class)
-  public void test_getAccessTiersForUser_registered_empty() {
-    user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
-    accessTierService.getAccessTiersForUser(user);
-  }
-
-  @Test
-  public void test_getAccessTiersForUser_unregistered_empty() {
-    user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
+  public void test_getAccessTiersForUser_unregistered() {
+    TestMockFactory.createRegisteredTierForTests(accessTierDao);
     assertThat(accessTierService.getAccessTiersForUser(user)).isEmpty();
   }
 
   @Test
   public void test_getAccessTiersForUser_registered() {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-    user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
+    addDaoEntry(user, registeredTier, TierAccessStatus.ENABLED);
     assertThat(accessTierService.getAccessTiersForUser(user)).containsExactly(registeredTier);
   }
 
   @Test
-  public void test_getAccessTiersForUser_unregistered() {
+  public void test_getAccessTiersForUser_registered_disabled() {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    addDaoEntry(user, registeredTier, TierAccessStatus.DISABLED);
     assertThat(accessTierService.getAccessTiersForUser(user)).isEmpty();
   }
 
-  @Test(expected = ServerErrorException.class)
-  public void test_addUserToRegisteredTier_missing() {
-    accessTierService.addUserToRegisteredTier(user);
+  @Test
+  public void test_getAccessTiersForUser_registered_controlled() {
+    final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    addDaoEntry(user, registeredTier, TierAccessStatus.ENABLED);
+
+    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    addDaoEntry(user, controlledTier, TierAccessStatus.ENABLED);
+
+    assertThat(accessTierService.getAccessTiersForUser(user))
+        .containsExactly(controlledTier, registeredTier)
+        .inOrder(); // enforce a consistent ordering: alphabetical by shortName
   }
 
   @Test
@@ -203,17 +141,9 @@ public class AccessTierServiceTest {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     // simply to show a non-Registered tier exists but we don't add the user to it
-    final DbAccessTier controlledTier =
-        accessTierDao.save(
-            new DbAccessTier()
-                .setAccessTierId(2)
-                .setShortName("controlled")
-                .setDisplayName("Controlled Tier")
-                .setAuthDomainName("Controlled Tier Auth Domain")
-                .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
-                .setServicePerimeter("controlled/tier/perimeter"));
+    TestMockFactory.createControlledTierForTests(accessTierDao);
 
-    accessTierService.addUserToRegisteredTier(user);
+    accessTierService.addUserToTier(user, registeredTier);
 
     Iterable<DbUserAccessTier> userAccessTiers = userAccessTierDao.findAll();
     assertThat(userAccessTiers).hasSize(1);
@@ -230,7 +160,7 @@ public class AccessTierServiceTest {
   public void test_addUserToRegisteredTier_idempotent() {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
-    accessTierService.addUserToRegisteredTier(user);
+    accessTierService.addUserToTier(user, registeredTier);
 
     assertThat(userAccessTierDao.findAll()).hasSize(1);
 
@@ -245,7 +175,7 @@ public class AccessTierServiceTest {
     // wait a second
     CLOCK.increment(1000);
 
-    accessTierService.addUserToRegisteredTier(user);
+    accessTierService.addUserToTier(user, registeredTier);
 
     // no change
 
@@ -267,7 +197,7 @@ public class AccessTierServiceTest {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     // does nothing
-    accessTierService.removeUserFromRegisteredTier(user);
+    accessTierService.removeUserFromTier(user, registeredTier);
     assertThat(userAccessTierDao.findAll()).isEmpty();
   }
 
@@ -278,7 +208,7 @@ public class AccessTierServiceTest {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     // adds a DB entry for (user, registered)
-    accessTierService.addUserToRegisteredTier(user);
+    accessTierService.addUserToTier(user, registeredTier);
 
     assertThat(userAccessTierDao.findAll()).hasSize(1);
 
@@ -294,7 +224,7 @@ public class AccessTierServiceTest {
     CLOCK.increment(1000);
 
     // updates the DB entry by setting it to DISABLED
-    accessTierService.removeUserFromRegisteredTier(user);
+    accessTierService.removeUserFromTier(user, registeredTier);
 
     assertThat(userAccessTierDao.findAll()).hasSize(1);
 
@@ -314,10 +244,10 @@ public class AccessTierServiceTest {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     // adds a DB entry for (user, registered)
-    accessTierService.addUserToRegisteredTier(user);
+    accessTierService.addUserToTier(user, registeredTier);
 
     // updates the DB entry by setting it to DISABLED
-    accessTierService.removeUserFromRegisteredTier(user);
+    accessTierService.removeUserFromTier(user, registeredTier);
 
     assertThat(userAccessTierDao.findAll()).hasSize(1);
 
@@ -328,7 +258,7 @@ public class AccessTierServiceTest {
     // wait a second
     CLOCK.increment(1000);
 
-    accessTierService.removeUserFromRegisteredTier(user);
+    accessTierService.removeUserFromTier(user, registeredTier);
 
     // no change
 
@@ -346,7 +276,7 @@ public class AccessTierServiceTest {
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     // adds a DB entry for (user, registered)
-    accessTierService.addUserToRegisteredTier(user);
+    accessTierService.addUserToTier(user, registeredTier);
 
     assertThat(userAccessTierDao.findAll()).hasSize(1);
 
@@ -362,7 +292,7 @@ public class AccessTierServiceTest {
     CLOCK.increment(1000);
 
     // updates the DB entry by setting it to DISABLED
-    accessTierService.removeUserFromRegisteredTier(user);
+    accessTierService.removeUserFromTier(user, registeredTier);
 
     assertThat(userAccessTierDao.findAll()).hasSize(1);
 
@@ -380,7 +310,7 @@ public class AccessTierServiceTest {
     CLOCK.increment(1000);
 
     // updates the DB entry by setting it to ENABLED
-    accessTierService.addUserToRegisteredTier(user);
+    accessTierService.addUserToTier(user, registeredTier);
 
     assertThat(userAccessTierDao.findAll()).hasSize(1);
 
@@ -407,16 +337,7 @@ public class AccessTierServiceTest {
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
     final DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-
-    final DbAccessTier controlledTier =
-        accessTierDao.save(
-            new DbAccessTier()
-                .setAccessTierId(2)
-                .setShortName("controlled")
-                .setDisplayName("Controlled Tier")
-                .setAuthDomainName("Controlled Tier Auth Domain")
-                .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
-                .setServicePerimeter("controlled/tier/perimeter"));
+    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
 
     accessTierService.addUserToAllTiers(user);
 
@@ -437,5 +358,19 @@ public class AccessTierServiceTest {
     assertThat(controlledMembership.getUser()).isEqualTo(user);
     assertThat(controlledMembership.getAccessTier()).isEqualTo(controlledTier);
     assertThat(controlledMembership.getTierAccessStatusEnum()).isEqualTo(TierAccessStatus.ENABLED);
+  }
+
+  private DbUserAccessTier addDaoEntry(DbUser user, DbAccessTier tier, TierAccessStatus status) {
+    return userAccessTierDao.save(
+        new DbUserAccessTier()
+            .setUser(user)
+            .setAccessTier(tier)
+            .setTierAccessStatus(status)
+            .setFirstEnabled(now())
+            .setLastUpdated(now()));
+  }
+
+  private Timestamp now() {
+    return Timestamp.from(Instant.now());
   }
 }

@@ -2,7 +2,6 @@ package org.pmiops.workbench.db.jdbc;
 
 import static org.pmiops.workbench.db.model.DbStorageEnums.billingAccountTypeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.billingStatusFromStorage;
-import static org.pmiops.workbench.db.model.DbStorageEnums.dataAccessLevelFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.degreeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.disabilityFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.educationFromStorage;
@@ -23,7 +22,6 @@ import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
@@ -185,7 +183,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  u.contact_email,\n"
                 + "  u.creation_time,\n"
                 + "  u.current_position,\n"
-                + "  u.data_access_level,\n"
                 + "  u.data_use_agreement_bypass_time,\n"
                 + "  u.data_use_agreement_completion_time,\n"
                 + "  u.data_use_agreement_signed_version,\n"
@@ -222,8 +219,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  dm.lgbtq_identity,\n"
                 + "  dm.gender_identity,\n"
                 + "  dm.race,\n"
-                + "  dm.sex_at_birth\n"
-                + "  \n"
+                + "  dm.sex_at_birth,\n"
+                + "  t.access_tier_short_names\n"
                 + "FROM user u"
                 + "  LEFT OUTER JOIN address AS a ON u.user_id = a.user_id\n"
                 + "  LEFT OUTER JOIN user_verified_institutional_affiliation AS via on u.user_id = via.user_id\n"
@@ -250,8 +247,14 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "             ON demo.demographic_survey_id = ds.demographic_survey_id\n"
                 + "         LEFT OUTER JOIN user_degree AS ud on demo.user_id = ud.user_id "
                 + "         GROUP BY demo.user_id "
-                + "  ) AS dm "
-                + "  on u.user_id = dm.user_id"
+                + "  ) AS dm on u.user_id = dm.user_id"
+                + "  LEFT OUTER JOIN ("
+                + "    SELECT u.user_id, GROUP_CONCAT(DISTINCT a.short_name) AS access_tier_short_names "
+                + "    FROM user u "
+                + "      JOIN user_access_tier uat ON u.user_id = uat.user_id "
+                + "      JOIN access_tier a ON a.access_tier_id = uat.access_tier_id "
+                + "      GROUP BY u.user_id"
+                + "  ) as t ON t.user_id = u.user_id "
                 + "  ORDER BY u.user_id"
                 + "  LIMIT %d\n"
                 + "  OFFSET %d",
@@ -269,13 +272,12 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .contactEmail(rs.getString("contact_email"))
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
                 .currentPosition(rs.getString("current_position"))
-                .dataAccessLevel(dataAccessLevelFromStorage(rs.getShort("data_access_level")))
-                // TODO placeholder until we have a proper association of users to tiers
-                .accessTierShortNames(
-                    dataAccessLevelFromStorage(rs.getShort("data_access_level"))
-                            == DataAccessLevel.REGISTERED
-                        ? AccessTierService.REGISTERED_TIER_SHORT_NAME
-                        : "none")
+                // TODO remove in RW-6189
+                // until then, what we're interested in is registered vs not
+                .dataAccessLevel(
+                    AccessTierService.temporaryDataAccessLevelKluge(
+                        rs.getString("access_tier_short_names")))
+                .accessTierShortNames(rs.getString("access_tier_short_names"))
                 .dataUseAgreementBypassTime(
                     offsetDateTimeUtc(rs.getTimestamp("data_use_agreement_bypass_time")))
                 .dataUseAgreementCompletionTime(
@@ -432,7 +434,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     return jdbcTemplate.queryForObject("SELECT count(*) FROM user", Integer.class);
   }
 
-  /** Converts agreegated storage enums to String value. e.g. 0. 8 -> BA, MS. */
+  /** Converts aggregated storage enums to String value. e.g. 0. 8 -> BA, MS. */
   private static String convertListEnumFromStorage(
       String stringEnums, Function<Short, String> convertDbEnum) {
     if (Strings.isNullOrEmpty(stringEnums)) {
