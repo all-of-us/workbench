@@ -14,8 +14,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
 import {NOTEBOOK_HELP_CONTENT} from './components/help-sidebar';
-import {StackdriverReporterProvider} from './contexts/error-reporter-context';
-import {withContextProviders} from './contexts/utils';
 import { AdminBanner } from './pages/admin/admin-banner';
 import {AdminInstitution} from './pages/admin/admin-institution';
 import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
@@ -95,10 +93,9 @@ interface RoutingProps {
   signIn: () => void;
 }
 
-const AppRoutingComponent: React.FunctionComponent<RoutingProps> = withContextProviders(StackdriverReporterProvider)(
-  ({onSignIn, signIn}) => {
-    const {authLoaded = false} = useStore(authStore);
-    return authLoaded && <AppRouter>
+const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSignIn, signIn}) => {
+  const {authLoaded = false} = useStore(authStore);
+  return authLoaded && <AppRouter>
     <AppRoute
         path='/cookie-policy'
         component={() => <CookiePolicyPage routeData={{title: 'Cookie Policy'}}/>}
@@ -346,7 +343,7 @@ const AppRoutingComponent: React.FunctionComponent<RoutingProps> = withContextPr
       </ProtectedRoutes>
     </ProtectedRoutes>
   </AppRouter>;
-  });
+};
 
 @AComponent({
   template: '<div #root style="display: inline;"></div>'

@@ -72,9 +72,7 @@ beforeEach(() => {
     profile: createEmptyProfile(),
     onComplete: (profile: Profile) => {},
     onPreviousClick: (profile: Profile) => {},
-    stackdriverErrorReporterContext: {
-      reportError: (e: Error|string) => {}
-    }
+    stackdriverErrorReporter: {reporter: null}
   };
 
   mockGetPublicInstitutionDetails = jest.spyOn(institutionApi(), 'getPublicInstitutionDetails');

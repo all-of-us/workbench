@@ -13,7 +13,6 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal, WithProfileErrorModalProps} from 'app/components/with-error-modal';
-import {withStackdriverErrorReporterContext} from 'app/contexts/error-reporter-context';
 import {getRegistrationTasksMap} from 'app/pages/homepage/registration-dashboard';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
 import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
@@ -28,8 +27,13 @@ import {
   reactStyles,
   withUserProfile
 } from 'app/utils';
-import {convertAPIError} from 'app/utils/errors';
+import {convertAPIError, reportError} from 'app/utils/errors';
 import {serverConfigStore} from 'app/utils/navigation';
+import {
+  stackdriverErrorReporterStore,
+  StackdriverErrorReporterStore,
+  withStore
+} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
@@ -151,9 +155,7 @@ interface ProfilePageProps extends WithProfileErrorModalProps {
     controlledTierBypassTime?: number
     controlledTierEnabled?: boolean
   };
-  stackdriverErrorReporterContext: {
-    reportError: (e: Error|string) => void;
-  };
+  stackdriverErrorReporter: StackdriverErrorReporterStore;
 }
 
 interface ProfilePageState {
@@ -209,7 +211,7 @@ const getControlledTierContent = fp.flow(
 export const ProfilePage = fp.flow(
   withUserProfile(),
   withProfileErrorModal,
-  withStackdriverErrorReporterContext
+  withStore(stackdriverErrorReporterStore, 'stackdriverErrorReporter')
   )(class extends React.Component<
     ProfilePageProps,
     ProfilePageState
@@ -234,7 +236,7 @@ export const ProfilePage = fp.flow(
           institutions: details.institutions
         });
       } catch (e) {
-        this.props.stackdriverErrorReporterContext.reportError(e);
+        reportError(e, this.props.stackdriverErrorReporter.reporter);
       }
     }
 
@@ -313,7 +315,7 @@ export const ProfilePage = fp.flow(
         await reload();
         return profile;
       } catch (error) {
-        this.props.stackdriverErrorReporterContext.reportError(error);
+        reportError(error, this.props.stackdriverErrorReporter.reporter);
         const errorResponse = await convertAPIError(error);
         this.props.showProfileErrorModal(errorResponse.message);
         console.error(error);

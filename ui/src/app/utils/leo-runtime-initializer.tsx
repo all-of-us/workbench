@@ -1,9 +1,8 @@
-import {stackdriverReporterStore} from 'app/contexts/error-reporter-context';
 import {leoRuntimesApi} from 'app/services/notebooks-swagger-fetch-clients';
 import {runtimeApi} from 'app/services/swagger-fetch-clients';
 import {isAbortError, reportError} from 'app/utils/errors';
 import {applyPresetOverride, runtimePresets} from 'app/utils/runtime-presets';
-import {runtimeStore} from 'app/utils/stores';
+import {runtimeStore, stackdriverErrorReporterStore} from 'app/utils/stores';
 import {Runtime, RuntimeStatus} from 'generated/fetch';
 
 // We're only willing to wait 20 minutes total for a runtime to initialize. After that we return
@@ -255,7 +254,7 @@ export class LeoRuntimeInitializer {
     if (e instanceof Response && e.status >= 500 && e.status < 600) {
       this.serverErrorCount++;
     }
-    reportError(e, stackdriverReporterStore.get().reporter);
+    reportError(e, stackdriverErrorReporterStore.get().reporter);
   }
 
   private hasTooManyServerErrors(): boolean {
@@ -343,7 +342,7 @@ export class LeoRuntimeInitializer {
         // If runtime is in error state, delete it so it can be re-created at the next poll loop.
         reportError(
           `Runtime ${this.currentRuntime.googleProject}/${this.currentRuntime.runtimeName}` +
-          ` has reached an ERROR status`, stackdriverReporterStore.get().reporter);
+          ` has reached an ERROR status`, stackdriverErrorReporterStore.get().reporter);
         await this.deleteRuntime();
       }
     } catch (e) {

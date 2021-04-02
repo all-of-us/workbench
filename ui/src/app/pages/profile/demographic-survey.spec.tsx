@@ -28,9 +28,7 @@ beforeEach(() => {
     enableCaptcha: false,
     enablePrevious: false,
     showStepCount: false,
-    stackdriverErrorReporterContext: {
-      reportError: (e: Error|string) => {}
-    }
+    stackdriverErrorReporter: {reporter: null}
   };
 });
 

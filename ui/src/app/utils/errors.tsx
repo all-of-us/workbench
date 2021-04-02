@@ -4,7 +4,6 @@ import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 /**
  * Reports an error to Stackdriver error logging, if enabled.
  *
- * TODO: Remove as part of RW-3122
  */
 export function reportError(err: (Error|string), reporter: StackdriverErrorReporter) {
   console.error('Reporting error to Stackdriver: ', err);

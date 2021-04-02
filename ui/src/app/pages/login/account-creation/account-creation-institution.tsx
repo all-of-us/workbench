@@ -10,7 +10,6 @@ import {Error as ErrorDiv, styles as inputStyles, TextInputWithLabel} from 'app/
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {withStackdriverErrorReporterContext} from 'app/contexts/error-reporter-context';
 import {PubliclyDisplayed} from 'app/icons/publicly-displayed-icon';
 import {
   commonStyles,
@@ -20,12 +19,18 @@ import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {isBlank, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import {reportError} from 'app/utils/errors';
 import {
   getRoleOptions,
   MasterDuaEmailMismatchErrorMessage,
   RestrictedDuaEmailMismatchErrorMessage,
   validateEmail
 } from 'app/utils/institutions';
+import {
+  stackdriverErrorReporterStore,
+  StackdriverErrorReporterStore,
+  withStore
+} from 'app/utils/stores';
 import {
   CheckEmailResponse,
   DuaType,
@@ -79,9 +84,7 @@ export interface Props {
   profile: Profile;
   onComplete: (profile: Profile) => void;
   onPreviousClick: (profile: Profile) => void;
-  stackdriverErrorReporterContext: {
-    reportError: (e: Error|string) => void;
-  };
+  stackdriverErrorReporter: StackdriverErrorReporterStore;
 }
 
 
@@ -127,7 +130,7 @@ export class AccountCreationInstitutionClass extends React.Component<Props, Stat
         loadingInstitutions: false,
         institutionLoadError: true
       });
-      this.props.stackdriverErrorReporterContext.reportError(e);
+      reportError(e, this.props.stackdriverErrorReporter.reporter);
     }
   }
 
@@ -467,4 +470,7 @@ export class AccountCreationInstitutionClass extends React.Component<Props, Stat
   }
 }
 
-export const AccountCreationInstitution = withStackdriverErrorReporterContext(AccountCreationInstitutionClass);
+export const AccountCreationInstitution = withStore(
+  stackdriverErrorReporterStore,
+  'stackdriverErrorReporter'
+)(AccountCreationInstitutionClass);

@@ -14,7 +14,6 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SearchInput} from 'app/components/search-input';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {AoU, AouTitle} from 'app/components/text-wrappers';
-import {withStackdriverErrorReporterContext} from 'app/contexts/error-reporter-context';
 import {CreateBillingAccountModal} from 'app/pages/workspace/create-billing-account-modal';
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {
@@ -46,7 +45,13 @@ import {
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getCdrVersion, hasDefaultCdrVersion} from 'app/utils/cdr-versions';
+import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigStore} from 'app/utils/navigation';
+import {
+  StackdriverErrorReporterStore,
+  stackdriverErrorReporterStore,
+  withStore
+} from 'app/utils/stores';
 import {getBillingAccountInfo} from 'app/utils/workbench-gapi-client';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
@@ -230,9 +235,7 @@ export interface WorkspaceEditProps {
     profile: Profile;
   };
   workspaceEditMode: WorkspaceEditMode;
-  stackdriverErrorReporterContext: {
-    reportError: (e: (Error|String)) => void;
-  };
+  stackdriverErrorReporter: StackdriverErrorReporterStore;
 }
 
 export interface WorkspaceEditState {
@@ -259,7 +262,7 @@ export interface WorkspaceEditState {
 export const WorkspaceEdit = fp.flow(
   withCurrentWorkspace(),
   withCdrVersions(),
-  withStackdriverErrorReporterContext,
+  withStore(stackdriverErrorReporterStore, 'stackdriverErrorReporter'),
   withUserProfile()
 )(
   class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
@@ -327,12 +330,12 @@ export const WorkspaceEdit = fp.flow(
             // We cannot send over the correct billing account info since the current user
             // does not have permissions to set it.
 
-            this.props.stackdriverErrorReporterContext.reportError({
+            reportError({
               name: 'Out of date billing account name',
               message: `Workspace ${this.props.workspace.namespace} has an out of date billing account name. ` +
                   `Stored value is ${this.props.workspace.billingAccountName}. ` +
                   `True value is ${fetchedBillingInfo.billingAccountName}`
-            });
+            }, this.props.stackdriverErrorReporter.reporter);
           }
         } else {
           // Otherwise, use this as an opportunity to sync the fetched billing account name from
@@ -760,9 +763,9 @@ export const WorkspaceEdit = fp.flow(
 
         const navigateToWorkspace = () => navigate(['workspaces', workspace.namespace, workspace.id, 'data']);
         if (accessLevel !== WorkspaceAccessLevel.OWNER) {
-          this.props.stackdriverErrorReporterContext.reportError(new Error(
+          reportError(new Error(
               `ACLs failed to propagate for workspace ${workspace.namespace}/${workspace.id}` +
-              ` accessLevel: ${accessLevel}`));
+              ` accessLevel: ${accessLevel}`), this.props.stackdriverErrorReporter.reporter);
           // We intentionally do not preload the created workspace via nextWorkspaceWarmupStore in
           // this situation. This forces a workspace fetch on navigation, which is desired as ACLs
           // might have finally propagated by the time the navigate button is clicked.
