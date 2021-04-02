@@ -256,6 +256,7 @@ export async function findOrCreateWorkspace(page: Page, opts: { workspaceName?: 
   if (workspaceName !== undefined) {
     const cardFound = await findWorkspaceCard(page, workspaceName);
     if (cardFound != null) {
+      await cardFound.clickWorkspaceName();
       return workspaceName; // Found Workspace card matching workspace name
     } else {
       return await createWorkspace(page, { workspaceName });
