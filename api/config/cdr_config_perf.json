@@ -41,11 +41,11 @@
       "isDefault": true,
       "name": "Synthetic Dataset v3",
       "bigqueryProject": "all-of-us-ehr-dev",
-      "bigqueryDataset": "SR2019q4r3",
+      "bigqueryDataset": "test_R2019q4r3",
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_12",
+      "cdrDbName": "synth_r_2019q4_14",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
