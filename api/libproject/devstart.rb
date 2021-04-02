@@ -1868,6 +1868,51 @@ Common.register_command({
     :fn => ->(*args) {delete_workspace_rdr_export(DELETE_WORKSPACE_RDR_EXPORT, *args)}
 })
 
+def backfill_workspaces_to_rdr(cmd_name, *args)
+  common = Common.new
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = true
+
+  op.add_typed_option(
+    "--dry_run=[dry_run]",
+    TrueClass,
+    ->(opts, v) { opts.dry_run = v},
+    "When true, print the number of workspaces that will be exported, will not export")
+  op.add_typed_option(
+    "--limit=[LIMIT]",
+    String,
+    ->(opts, v) { opts.limit = v},
+    "The number of workspaces exported will not to exceed this limit.")
+ 
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+  
+  context = GcloudContextV2.new(op)
+  op.parse.validate
+  context.validate()
+
+  hasLimit = op.opts.limit ? "--limit=#{op.opts.limit}" : nil
+  isDryRun = op.opts.dry_run ? "--dry-run" : nil
+  flags = [hasLimit, isDryRun].map{ |v| v && "'#{v}'" }.select{ |v| !v.nil? }
+  gradleCommand = %W{
+    gradle backfillWorkspacesToRdr
+   -PappArgs=[#{flags.join(',')}]}
+
+  with_optional_cloud_proxy_and_db(context) do
+    common.run_inline gradleCommand
+  end
+end
+
+BACKFILL_WORKSPACES_TO_RDR = "backfill-workspaces-to-rdr";
+
+Common.register_command({
+    :invocation => BACKFILL_WORKSPACES_TO_RDR,
+    :description => "Backfill workspaces from workspace table, exporting them to the rdr.\n",
+    :fn => ->(*args) {backfill_workspaces_to_rdr(BACKFILL_WORKSPACES_TO_RDR, *args)}
+})
+
 def authority_options(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.remove = false
