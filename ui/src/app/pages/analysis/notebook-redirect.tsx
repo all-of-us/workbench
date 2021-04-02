@@ -355,7 +355,7 @@ export const NotebookRedirect = fp.flow(
       this.incrementProgress(Progress.Redirecting);
 
       // give it a second to "redirect"
-      this.redirectTimer = setTimeout(() => this.incrementProgress(Progress.Loaded), redirectMillis);
+      this.redirectTimer = global.setTimeout(() => this.incrementProgress(Progress.Loaded), redirectMillis);
     }
 
     private async getNotebookPathAndLocalize(runtime: Runtime) {

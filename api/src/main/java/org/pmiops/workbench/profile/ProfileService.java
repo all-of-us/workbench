@@ -16,6 +16,7 @@ import org.javers.core.diff.Change;
 import org.javers.core.diff.Diff;
 import org.javers.core.diff.changetype.NewObject;
 import org.javers.core.diff.changetype.PropertyChange;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.db.dao.InstitutionDao;
@@ -36,6 +37,7 @@ import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.AdminTableUser;
 import org.pmiops.workbench.model.Authority;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.Profile;
@@ -48,6 +50,7 @@ public class ProfileService {
 
   private static final Logger log = Logger.getLogger(ProfileService.class.getName());
 
+  private final AccessTierService accessTierService;
   private final AddressMapper addressMapper;
   private final Clock clock;
   private final DemographicSurveyMapper demographicSurveyMapper;
@@ -66,6 +69,7 @@ public class ProfileService {
 
   @Autowired
   public ProfileService(
+      AccessTierService accessTierService,
       AddressMapper addressMapper,
       Clock clock,
       DemographicSurveyMapper demographicSurveyMapper,
@@ -81,6 +85,7 @@ public class ProfileService {
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
+    this.accessTierService = accessTierService;
     this.addressMapper = addressMapper;
     this.clock = clock;
     this.demographicSurveyMapper = demographicSurveyMapper;
@@ -115,12 +120,22 @@ public class ProfileService {
 
     final @Nullable DbUserTermsOfService latestTermsOfService =
         userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId()).orElse(null);
+
+    final List<String> accessTierShortNames =
+        accessTierService.getAccessTierShortNamesForUser(user);
+
+    // temporary - we will remove Data Access Level from the model in RW-6189
+    final DataAccessLevel dataAccessLevelKluge =
+        AccessTierService.temporaryDataAccessLevelKluge(String.join(",", accessTierShortNames));
+
     return profileMapper.toModel(
         user,
         verifiedInstitutionalAffiliation,
         latestTermsOfService,
         freeTierUsage,
-        freeTierDollarQuota);
+        freeTierDollarQuota,
+        accessTierShortNames,
+        dataAccessLevelKluge);
   }
 
   public void validateAffiliation(Profile profile) {
@@ -457,7 +472,14 @@ public class ProfileService {
 
   public List<AdminTableUser> getAdminTableUsers() {
     return userDao.getAdminTableUsers().stream()
-        .map(dbUser -> profileMapper.adminViewToModel(dbUser))
+        .map(
+            dbAdminTableUser -> {
+              // temporary - we will remove Data Access Level from the model in RW-6189
+              DataAccessLevel dataAccessLevelKluge =
+                  AccessTierService.temporaryDataAccessLevelKluge(
+                      dbAdminTableUser.getAccessTierShortNames());
+              return profileMapper.adminViewToModel(dbAdminTableUser, dataAccessLevelKluge);
+            })
         .collect(ImmutableList.toImmutableList());
   }
   /**

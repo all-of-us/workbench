@@ -17,10 +17,12 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
@@ -30,7 +32,6 @@ import org.pmiops.workbench.model.CdrVersion;
 import org.pmiops.workbench.model.CdrVersionListResponse;
 import org.pmiops.workbench.model.CdrVersionTier;
 import org.pmiops.workbench.model.CdrVersionTiersResponse;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -54,10 +55,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class CdrVersionServiceTest {
 
   @Autowired private AccessTierDao accessTierDao;
+  @Autowired private AccessTierService accessTierService;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private CdrVersionMapper cdrVersionMapper;
   @Autowired private CdrVersionService cdrVersionService;
   @Autowired private FireCloudService fireCloudService;
+  @Autowired private UserDao userDao;
 
   private static DbUser user;
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
@@ -76,7 +79,9 @@ public class CdrVersionServiceTest {
     CdrVersionService.class,
     CdrVersionMapperImpl.class,
   })
-  @MockBean({FireCloudService.class})
+  @MockBean({
+    FireCloudService.class,
+  })
   static class Configuration {
     @Bean
     @Scope("prototype")
@@ -97,11 +102,13 @@ public class CdrVersionServiceTest {
 
   @Before
   public void setUp() {
+
     user = new DbUser();
     user.setUsername("user");
-    user.setDataAccessLevelEnum(DataAccessLevel.REGISTERED);
+    user = userDao.save(user);
 
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+
     defaultCdrVersion =
         makeCdrVersion(
             1L,
@@ -114,15 +121,7 @@ public class CdrVersionServiceTest {
             null,
             null);
 
-    controlledTier =
-        accessTierDao.save(
-            new DbAccessTier()
-                .setAccessTierId(2)
-                .setShortName("controlled")
-                .setDisplayName("Controlled Tier")
-                .setAuthDomainName("Controlled Tier Auth Domain")
-                .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
-                .setServicePerimeter("controlled/tier/perimeter"));
+    controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
 
     controlledCdrVersion =
         makeCdrVersion(
@@ -139,75 +138,99 @@ public class CdrVersionServiceTest {
 
   @Test
   public void testSetCdrVersionDefault() {
-    when(fireCloudService.isUserMemberOfGroup(
-            user.getUsername(), registeredTier.getAuthDomainName()))
-        .thenReturn(true);
+    addMembershipForTest(registeredTier);
     cdrVersionService.setCdrVersion(defaultCdrVersion);
     assertThat(CdrVersionContext.getCdrVersion()).isEqualTo(defaultCdrVersion);
   }
 
   @Test
   public void testSetCdrVersionDefaultId() {
-    when(fireCloudService.isUserMemberOfGroup(
-            user.getUsername(), registeredTier.getAuthDomainName()))
-        .thenReturn(true);
+    addMembershipForTest(registeredTier);
     cdrVersionService.setCdrVersion(defaultCdrVersion.getCdrVersionId());
     assertThat(CdrVersionContext.getCdrVersion()).isEqualTo(defaultCdrVersion);
   }
 
+  @Test(expected = ForbiddenException.class)
+  public void testSetCdrVersionDefaultForbiddenNotInTier() {
+    cdrVersionService.setCdrVersion(defaultCdrVersion);
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void testSetCdrVersionDefaultIdForbiddenNotInTier() {
+    cdrVersionService.setCdrVersion(defaultCdrVersion.getCdrVersionId());
+  }
+
+  // these tests fail because the user is in the right tier according to the AoU DB
+  // but the user is not in the right auth domain according to Terra
+
+  @Test(expected = ForbiddenException.class)
+  public void testSetCdrVersionDefaultForbiddenNotInGroup() {
+    accessTierService.addUserToTier(user, registeredTier);
+
+    when(fireCloudService.isUserMemberOfGroup(
+            user.getUsername(), registeredTier.getAuthDomainName()))
+        .thenReturn(false);
+
+    cdrVersionService.setCdrVersion(defaultCdrVersion);
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void testSetCdrVersionDefaultIdForbiddenNotInGroup() {
+    accessTierService.addUserToTier(user, registeredTier);
+
+    when(fireCloudService.isUserMemberOfGroup(
+            user.getUsername(), registeredTier.getAuthDomainName()))
+        .thenReturn(false);
+
+    cdrVersionService.setCdrVersion(defaultCdrVersion.getCdrVersionId());
+  }
+
   @Test
   public void testSetCdrVersionControlled() {
-    when(fireCloudService.isUserMemberOfGroup(
-            user.getUsername(), controlledTier.getAuthDomainName()))
-        .thenReturn(true);
-    config.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = true;
+    addMembershipForTest(controlledTier);
     cdrVersionService.setCdrVersion(controlledCdrVersion);
     assertThat(CdrVersionContext.getCdrVersion()).isEqualTo(controlledCdrVersion);
   }
 
   @Test
   public void testSetCdrVersionControlledId() {
-    when(fireCloudService.isUserMemberOfGroup(
-            user.getUsername(), controlledTier.getAuthDomainName()))
-        .thenReturn(true);
-    config.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = true;
+    addMembershipForTest(controlledTier);
     cdrVersionService.setCdrVersion(controlledCdrVersion.getCdrVersionId());
     assertThat(CdrVersionContext.getCdrVersion()).isEqualTo(controlledCdrVersion);
   }
 
   @Test(expected = ForbiddenException.class)
   public void testSetCdrVersionControlledForbiddenNotInTier() {
-    when(fireCloudService.isUserMemberOfGroup(
-            user.getUsername(), controlledTier.getAuthDomainName()))
-        .thenReturn(true);
-    config.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
     cdrVersionService.setCdrVersion(controlledCdrVersion);
   }
 
   @Test(expected = ForbiddenException.class)
   public void testSetCdrVersionControlledIdForbiddenNotInTier() {
-    when(fireCloudService.isUserMemberOfGroup(
-            user.getUsername(), controlledTier.getAuthDomainName()))
-        .thenReturn(true);
-    config.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
     cdrVersionService.setCdrVersion(controlledCdrVersion.getCdrVersionId());
   }
 
+  // these tests fail because the user is in the right tier according to the AoU DB
+  // but the user is not in the right auth domain according to Terra
+
   @Test(expected = ForbiddenException.class)
   public void testSetCdrVersionControlledForbiddenNotInGroup() {
+    accessTierService.addUserToTier(user, controlledTier);
+
     when(fireCloudService.isUserMemberOfGroup(
             user.getUsername(), controlledTier.getAuthDomainName()))
         .thenReturn(false);
-    config.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = true;
+
     cdrVersionService.setCdrVersion(controlledCdrVersion);
   }
 
   @Test(expected = ForbiddenException.class)
   public void testSetCdrVersionControlledIdForbiddenNotInGroup() {
+    accessTierService.addUserToTier(user, controlledTier);
+
     when(fireCloudService.isUserMemberOfGroup(
             user.getUsername(), controlledTier.getAuthDomainName()))
         .thenReturn(false);
-    config.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = true;
+
     cdrVersionService.setCdrVersion(controlledCdrVersion.getCdrVersionId());
   }
 
@@ -215,22 +238,9 @@ public class CdrVersionServiceTest {
 
   @Test
   public void testGetCdrVersionsRegisteredOnly() {
-    config.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
-
+    addMembershipForTest(registeredTier);
     CdrVersionListResponse response = cdrVersionService.getCdrVersions();
-    assertDefaultCdrOnly(response);
-  }
 
-  @Test
-  public void testGetCdrVersionsRegisteredAllTiers() {
-    // this flag does not affect the deprecated version, so the result is the same
-    config.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = true;
-
-    CdrVersionListResponse response = cdrVersionService.getCdrVersions();
-    assertDefaultCdrOnly(response);
-  }
-
-  private void assertDefaultCdrOnly(CdrVersionListResponse response) {
     List<CdrVersion> expected =
         ImmutableList.of(cdrVersionMapper.dbModelToClient(defaultCdrVersion));
     assertThat(response.getItems()).containsExactlyElementsIn(expected);
@@ -241,7 +251,6 @@ public class CdrVersionServiceTest {
 
   @Test(expected = ForbiddenException.class)
   public void testGetCdrVersionsUnregistered() {
-    user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
     cdrVersionService.getCdrVersions();
   }
 
@@ -249,14 +258,15 @@ public class CdrVersionServiceTest {
 
   @Test
   public void testGetCdrVersionsByTierRegisteredOnly() {
-    config.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = false;
+    addMembershipForTest(registeredTier);
     CdrVersionTiersResponse response = cdrVersionService.getCdrVersionsByTier();
     assertResponseMultiTier(response, ImmutableList.of("registered"), defaultCdrVersion);
   }
 
   @Test
   public void testGetCdrVersionsByTierAllTiers() {
-    config.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = true;
+    addMembershipForTest(registeredTier);
+    addMembershipForTest(controlledTier);
     CdrVersionTiersResponse response = cdrVersionService.getCdrVersionsByTier();
     assertResponseMultiTier(
         response,
@@ -267,7 +277,6 @@ public class CdrVersionServiceTest {
 
   @Test(expected = ForbiddenException.class)
   public void testGetCdrVersionsByTierUnregistered() {
-    user.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
     cdrVersionService.getCdrVersionsByTier();
   }
 
@@ -312,6 +321,7 @@ public class CdrVersionServiceTest {
   }
 
   private void testGetCdrVersionsHasDataType(Predicate<CdrVersion> hasType) {
+    addMembershipForTest(registeredTier);
     final List<CdrVersion> cdrVersions =
         parseRegisteredTier(cdrVersionService.getCdrVersionsByTier());
     // hasFitBitData, hasCopeSurveyData, hasMicroarrayData, and hasWgsData are false by default
@@ -373,5 +383,12 @@ public class CdrVersionServiceTest {
     cdrVersion.setHasFitbitData(hasFitbit);
     cdrVersion.setHasCopeSurveyData(hasCopeSurveyData);
     return cdrVersionDao.save(cdrVersion);
+  }
+
+  private void addMembershipForTest(DbAccessTier tier) {
+    accessTierService.addUserToTier(user, tier);
+
+    when(fireCloudService.isUserMemberOfGroup(user.getUsername(), tier.getAuthDomainName()))
+        .thenReturn(true);
   }
 }

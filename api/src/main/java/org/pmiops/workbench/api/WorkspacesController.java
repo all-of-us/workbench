@@ -47,7 +47,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -159,12 +158,6 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceService = workspaceService;
     this.workspaceAuthService = workspaceAuthService;
     this.workspaceDao = workspaceDao;
-  }
-
-  private String getRegisteredUserDomainEmail() {
-    FirecloudManagedGroupWithMembers registeredDomainGroup =
-        fireCloudService.getGroup(workbenchConfigProvider.get().firecloud.registeredDomainName);
-    return registeredDomainGroup.getGroupEmail();
   }
 
   private DbCdrVersion getLiveCdrVersionId(String cdrVersionId) {
@@ -527,9 +520,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           clonedRoles.put(entry.getKey(), WorkspaceAccessLevel.OWNER);
         }
       }
-      dbWorkspace =
-          workspaceAuthService.updateWorkspaceAcls(
-              dbWorkspace, clonedRoles, getRegisteredUserDomainEmail());
+      dbWorkspace = workspaceAuthService.updateWorkspaceAcls(dbWorkspace, clonedRoles);
     }
 
     dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
@@ -587,9 +578,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     final ImmutableMap<String, WorkspaceAccessLevel> aclsByEmail = shareRolesMapBuilder.build();
 
     // This automatically enforces the "canShare" permission.
-    dbWorkspace =
-        workspaceAuthService.updateWorkspaceAcls(
-            dbWorkspace, aclsByEmail, getRegisteredUserDomainEmail());
+    dbWorkspace = workspaceAuthService.updateWorkspaceAcls(dbWorkspace, aclsByEmail);
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
@@ -852,9 +841,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
   public ResponseEntity<EmptyResponse> publishWorkspace(
       String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
-
-    workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), true);
+    workspaceService.setPublished(workspaceNamespace, workspaceId, true);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -862,9 +849,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
   public ResponseEntity<EmptyResponse> unpublishWorkspace(
       String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
-
-    workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), false);
+    workspaceService.setPublished(workspaceNamespace, workspaceId, false);
     return ResponseEntity.ok(new EmptyResponse());
   }
 

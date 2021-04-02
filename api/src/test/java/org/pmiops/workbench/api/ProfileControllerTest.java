@@ -31,6 +31,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
@@ -49,6 +50,7 @@ import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.UserServiceImpl;
 import org.pmiops.workbench.db.dao.UserTermsOfServiceDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
@@ -152,6 +154,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   @MockBean private RasLinkService mockRasLinkService;
 
   @Autowired private AccessTierDao accessTierDao;
+  @Autowired private AccessTierService accessTierService;
   @Autowired private InstitutionService institutionService;
   @Autowired private ProfileController profileController;
   @Autowired private ProfileService profileService;
@@ -165,6 +168,7 @@ public class ProfileControllerTest extends BaseControllerTest {
   private static DbUser dbUser;
 
   private int DUA_VERSION;
+  private DbAccessTier registeredTier;
 
   @Rule public final ExpectedException exception = ExpectedException.none();
 
@@ -225,7 +229,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     config.googleDirectoryService.gSuiteDomain = GSUITE_DOMAIN;
 
     // key UserService logic depends on the existence of the Registered Tier
-    TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
 
     Profile profile = new Profile();
     profile.setContactEmail(CONTACT_EMAIL);
@@ -407,7 +411,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     verify(mockProfileAuditor).fireCreateAction(any(Profile.class));
     final DbUser dbUser = userDao.findUserByUsername(PRIMARY_EMAIL);
     assertThat(dbUser).isNotNull();
-    assertThat(dbUser.getDataAccessLevelEnum()).isEqualTo(DataAccessLevel.UNREGISTERED);
+    assertThat(accessTierService.getAccessTierShortNamesForUser(dbUser)).isEmpty();
   }
 
   @Test
@@ -503,7 +507,7 @@ public class ProfileControllerTest extends BaseControllerTest {
                 .submitDataUseAgreement(previousDuaVersion, duaInitials)
                 .getStatusCode())
         .isEqualTo(HttpStatus.OK);
-
+    assertThat(accessTierService.getAccessTiersForUser(dbUser)).contains(registeredTier);
     Profile profile = profileController.getMe().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.REGISTERED);
 
@@ -515,6 +519,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     // see also https://precisionmedicineinitiative.atlassian.net/browse/RW-2352
     profileController.syncTwoFactorAuthStatus();
 
+    assertThat(accessTierService.getAccessTiersForUser(dbUser)).doesNotContain(registeredTier);
     profile = profileController.getMe().getBody();
     assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
   }
@@ -524,15 +529,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     createAccountAndDbUserWithAffiliation();
 
     Profile profile = profileController.getMe().getBody();
-    assertProfile(
-        profile,
-        PRIMARY_EMAIL,
-        CONTACT_EMAIL,
-        FAMILY_NAME,
-        GIVEN_NAME,
-        DataAccessLevel.UNREGISTERED,
-        TIMESTAMP,
-        false);
+    assertProfile(profile);
     verify(mockFireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
     verify(mockProfileAuditor).fireLoginAction(dbUser);
   }
@@ -541,29 +538,13 @@ public class ProfileControllerTest extends BaseControllerTest {
   public void testMe_userBeforeNotLoggedInSuccess() {
     createAccountAndDbUserWithAffiliation();
     Profile profile = profileController.getMe().getBody();
-    assertProfile(
-        profile,
-        PRIMARY_EMAIL,
-        CONTACT_EMAIL,
-        FAMILY_NAME,
-        GIVEN_NAME,
-        DataAccessLevel.UNREGISTERED,
-        TIMESTAMP,
-        false);
+    assertProfile(profile);
     verify(mockFireCloudService).registerUser(CONTACT_EMAIL, GIVEN_NAME, FAMILY_NAME);
 
     // An additional call to getMe() should have no effect.
     fakeClock.increment(1);
     profile = profileController.getMe().getBody();
-    assertProfile(
-        profile,
-        PRIMARY_EMAIL,
-        CONTACT_EMAIL,
-        FAMILY_NAME,
-        GIVEN_NAME,
-        DataAccessLevel.UNREGISTERED,
-        TIMESTAMP,
-        false);
+    assertProfile(profile);
   }
 
   @Test(expected = BadRequestException.class)
@@ -1000,15 +981,7 @@ public class ProfileControllerTest extends BaseControllerTest {
     profileController.updateProfile(profile);
 
     Profile updatedProfile = profileController.getMe().getBody();
-    assertProfile(
-        updatedProfile,
-        PRIMARY_EMAIL,
-        CONTACT_EMAIL,
-        FAMILY_NAME,
-        GIVEN_NAME,
-        DataAccessLevel.UNREGISTERED,
-        TIMESTAMP,
-        false);
+    assertProfile(updatedProfile);
   }
 
   @Test(expected = NotFoundException.class)
@@ -1524,41 +1497,25 @@ public class ProfileControllerTest extends BaseControllerTest {
         createVerifiedInstitutionalAffiliation(), grantAdminAuthority);
   }
 
-  private void assertProfile(
-      Profile profile,
-      String primaryEmail,
-      String contactEmail,
-      String familyName,
-      String givenName,
-      DataAccessLevel dataAccessLevel,
-      Timestamp firstSignInTime,
-      Boolean contactEmailFailure) {
+  private void assertProfile(Profile profile) {
     assertThat(profile).isNotNull();
-    assertThat(profile.getContactEmail()).isEqualTo(contactEmail);
-    assertThat(profile.getFamilyName()).isEqualTo(familyName);
-    assertThat(profile.getGivenName()).isEqualTo(givenName);
-    assertThat(profile.getDataAccessLevel()).isEqualTo(dataAccessLevel);
-    assertThat(profile.getContactEmailFailure()).isEqualTo(contactEmailFailure);
-    assertUser(primaryEmail, contactEmail, familyName, givenName, dataAccessLevel, firstSignInTime);
-  }
+    assertThat(profile.getUsername()).isEqualTo(PRIMARY_EMAIL);
+    assertThat(profile.getContactEmail()).isEqualTo(CONTACT_EMAIL);
+    assertThat(profile.getFamilyName()).isEqualTo(FAMILY_NAME);
+    assertThat(profile.getGivenName()).isEqualTo(GIVEN_NAME);
+    assertThat(profile.getAccessTierShortNames()).isEmpty();
+    assertThat(profile.getDataAccessLevel()).isEqualTo(DataAccessLevel.UNREGISTERED);
+    assertThat(profile.getContactEmailFailure()).isEqualTo(false);
 
-  private void assertUser(
-      String primaryEmail,
-      String contactEmail,
-      String familyName,
-      String givenName,
-      DataAccessLevel dataAccessLevel,
-      Timestamp firstSignInTime) {
-    DbUser user = userDao.findUserByUsername(primaryEmail);
+    DbUser user = userDao.findUserByUsername(PRIMARY_EMAIL);
     assertThat(user).isNotNull();
-    assertThat(user.getContactEmail()).isEqualTo(contactEmail);
-    assertThat(user.getFamilyName()).isEqualTo(familyName);
-    assertThat(user.getGivenName()).isEqualTo(givenName);
-    assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
+    assertThat(user.getContactEmail()).isEqualTo(CONTACT_EMAIL);
+    assertThat(user.getFamilyName()).isEqualTo(FAMILY_NAME);
+    assertThat(user.getGivenName()).isEqualTo(GIVEN_NAME);
     assertThat((double) user.getFirstSignInTime().getTime())
         .isWithin(TIME_TOLERANCE_MILLIS)
-        .of(firstSignInTime.getTime());
-    assertThat(user.getDataAccessLevelEnum()).isEqualTo(dataAccessLevel);
+        .of(ProfileControllerTest.TIMESTAMP.getTime());
+    assertThat(accessTierService.getAccessTierShortNamesForUser(user)).isEmpty();
   }
 
   private VerifiedInstitutionalAffiliation createVerifiedInstitutionalAffiliation() {

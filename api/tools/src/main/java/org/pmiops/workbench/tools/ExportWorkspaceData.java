@@ -23,6 +23,7 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.appengine.AppEngineMetadataSpringConfiguration;
 import org.pmiops.workbench.audit.ActionAuditSpringConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -142,6 +143,7 @@ public class ExportWorkspaceData {
   private UserDao userDao;
   private WorkspacesApi workspacesApi;
   private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  private AccessTierService accessTierService;
   private SimpleDateFormat dateFormat;
 
   @Bean
@@ -155,7 +157,8 @@ public class ExportWorkspaceData {
       WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao,
       UserDao userDao,
       WorkspacesApi workspacesApi,
-      VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao) {
+      VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
+      AccessTierService accessTierService) {
     this.workspaceDao = workspaceDao;
     this.cohortDao = cohortDao;
     this.conceptSetDao = conceptSetDao;
@@ -165,6 +168,8 @@ public class ExportWorkspaceData {
     this.userDao = userDao;
     this.workspacesApi = workspacesApi;
     this.verifiedInstitutionalAffiliationDao = verifiedInstitutionalAffiliationDao;
+    this.accessTierService = accessTierService;
+
     this.dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
     // Just pick a consistent Time Zone. Most of the reporting is handled in Central Time, so we
     // just use that here.
@@ -297,7 +302,12 @@ public class ExportWorkspaceData {
         Optional.ofNullable(user.getDataUseAgreementCompletionTime())
             .map(dateFormat::format)
             .orElse(""));
-    row.setCreatorRegistrationState(user.getDataAccessLevelEnum().toString());
+    // TODO if we revive this tool:
+    // update to use Access Tiers instead of Data Access Level
+    row.setCreatorRegistrationState(
+        AccessTierService.temporaryDataAccessLevelKluge(
+                String.join(",", accessTierService.getAccessTierShortNamesForUser(user)))
+            .toString());
     row.setDegrees(
         Optional.ofNullable(user.getDegreesEnum()).orElse(ImmutableList.of()).stream()
             .map(Degree::toString)

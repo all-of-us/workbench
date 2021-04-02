@@ -3,6 +3,10 @@ package org.pmiops.workbench.actionaudit.auditors;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.verify;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
+import java.util.Collections;
+import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -14,15 +18,19 @@ import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.AgentType;
 import org.pmiops.workbench.actionaudit.TargetType;
 import org.pmiops.workbench.actionaudit.targetproperties.AccountTargetProperty;
+import org.pmiops.workbench.db.dao.AccessTierDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
+@DataJpaTest
 public class UserServiceAuditorTest {
   @TestConfiguration
   @Import({UserServiceAuditorImpl.class, ActionAuditTestConfig.class})
@@ -34,6 +42,8 @@ public class UserServiceAuditorTest {
   @Autowired UserServiceAuditor userServiceAuditor;
   @Autowired ActionAuditService mockActionAuditService;
 
+  @Autowired AccessTierDao accessTierDao;
+
   private static DbUser createUser() {
     final DbUser user = new DbUser();
     user.setUserId(3L);
@@ -42,28 +52,65 @@ public class UserServiceAuditorTest {
   }
 
   @Test
-  public void testFireUpdateDataAccessAction_userAgent() {
+  public void testFireUpdateAccessTiersAction_userAgent_register() {
+    DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    List<DbAccessTier> newTiers = Collections.singletonList(registeredTier);
+
     DbUser user = createUser();
-    userServiceAuditor.fireUpdateDataAccessAction(
-        user, DataAccessLevel.REGISTERED, DataAccessLevel.UNREGISTERED, Agent.asUser(user));
+    userServiceAuditor.fireUpdateAccessTiersAction(
+        user, Collections.emptyList(), newTiers, Agent.asUser(user));
     verify(mockActionAuditService).send(eventArg.capture());
 
     ActionAuditEvent event = eventArg.getValue();
     assertThat(event.getAgentType()).isEqualTo(AgentType.USER);
     assertThat(event.getAgentIdMaybe()).isEqualTo(user.getUserId());
     assertThat(event.getAgentEmailMaybe()).isEqualTo(user.getUsername());
+    assertThat(event.getPreviousValueMaybe()).isEmpty();
+    assertThat(event.getNewValueMaybe()).isEqualTo(registeredTier.getShortName());
   }
 
   @Test
-  public void testFireUpdateDataAccessAction_systemAgent() {
-    userServiceAuditor.fireUpdateDataAccessAction(
-        createUser(), DataAccessLevel.REGISTERED, DataAccessLevel.UNREGISTERED, Agent.asSystem());
+  public void testFireUpdateAccessTiersAction_userAgent_unregister() {
+    DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    List<DbAccessTier> oldTiers = Collections.singletonList(registeredTier);
+
+    DbUser user = createUser();
+    userServiceAuditor.fireUpdateAccessTiersAction(
+        user, oldTiers, Collections.emptyList(), Agent.asUser(user));
+    verify(mockActionAuditService).send(eventArg.capture());
+
+    ActionAuditEvent event = eventArg.getValue();
+    assertThat(event.getAgentType()).isEqualTo(AgentType.USER);
+    assertThat(event.getAgentIdMaybe()).isEqualTo(user.getUserId());
+    assertThat(event.getAgentEmailMaybe()).isEqualTo(user.getUsername());
+    assertThat(event.getPreviousValueMaybe()).isEqualTo(registeredTier.getShortName());
+    assertThat(event.getNewValueMaybe()).isEmpty();
+  }
+
+  @Test
+  public void testFireUpdateAccessTiersAction_systemAgent_addControlled() {
+    DbAccessTier registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+    DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+    List<DbAccessTier> oldTiers = Collections.singletonList(registeredTier);
+    List<DbAccessTier> newTiers = ImmutableList.of(registeredTier, controlledTier);
+
+    userServiceAuditor.fireUpdateAccessTiersAction(
+        createUser(), oldTiers, newTiers, Agent.asSystem());
     verify(mockActionAuditService).send(eventArg.capture());
 
     ActionAuditEvent event = eventArg.getValue();
     assertThat(event.getAgentType()).isEqualTo(AgentType.SYSTEM);
     assertThat(event.getAgentIdMaybe()).isNull();
     assertThat(event.getAgentEmailMaybe()).isNull();
+    assertThat(event.getPreviousValueMaybe()).isEqualTo(registeredTier.getShortName());
+    List<String> expected =
+        ImmutableList.of(registeredTier.getShortName(), controlledTier.getShortName());
+    assertThat(split(event.getNewValueMaybe())).containsExactlyElementsIn(expected);
+  }
+
+  private Iterable<String> split(String input) {
+    assertThat(input).isNotNull();
+    return Splitter.on(',').split(input);
   }
 
   @Test

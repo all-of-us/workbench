@@ -191,7 +191,7 @@ FROM
             SELECT a.person_id
                 , date(a.birth_datetime) as date_of_birth
                 , coalesce(b.observation_date, c.observation_date, d.observation_date) as date_of_consent
-                , date((select cdr_date from \`$BQ_PROJECT.$BQ_DATASET.cb_cdr_date\` where bq_dataset = '$BQ_DATASET')) as date_of_cdr
+                , date((select cdr_date from \`$BQ_PROJECT.$BQ_DATASET.prep_cdr_date\` where bq_dataset = '$BQ_DATASET')) as date_of_cdr
             FROM \`$BQ_PROJECT.$BQ_DATASET.person\` a
             LEFT JOIN
             (

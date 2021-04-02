@@ -19,6 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.CommonConfig;
@@ -92,12 +93,10 @@ public class ProfileServiceTest {
 
   private static final Profile VALID_PROFILE = createValidProfile();
 
-  @MockBean private FreeTierBillingService mockFreeTierBillingService;
   @MockBean private InstitutionDao mockInstitutionDao;
   @MockBean private InstitutionService mockInstitutionService;
   @MockBean private UserService mockUserService;
   @MockBean private UserTermsOfServiceDao mockUserTermsOfServiceDao;
-  @MockBean private VerifiedInstitutionalAffiliationDao mockVerifiedInstitutionalAffiliationDao;
 
   @MockBean
   private VerifiedInstitutionalAffiliationMapper mockVerifiedInstitutionalAffiliationMapper;
@@ -122,6 +121,7 @@ public class ProfileServiceTest {
     VerifiedInstitutionalAffiliationMapperImpl.class
   })
   @MockBean({
+    AccessTierService.class,
     FreeTierBillingService.class,
     ProfileAuditor.class,
     VerifiedInstitutionalAffiliationDao.class,

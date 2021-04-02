@@ -433,7 +433,10 @@ export const ProfilePage = fp.flow(
 
       const makeProfileInput = ({title, valueKey, isLong = false, ...props}) => {
         let errorText = profile && errors && errors[valueKey];
-        if (valueKey && Array.isArray(valueKey) && valueKey.length > 1) {
+        if (valueKey && !Array.isArray(valueKey)) {
+          valueKey = [valueKey];
+        }
+        if (valueKey && valueKey.length > 1) {
           errorText = profile && errors && errors[valueKey[1]];
         }
         const inputProps = {

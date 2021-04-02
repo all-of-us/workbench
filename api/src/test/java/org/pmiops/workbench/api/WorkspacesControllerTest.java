@@ -1340,14 +1340,7 @@ public class WorkspacesControllerTest extends SpringTest {
     Workspace originalWorkspace = createWorkspace();
     originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
 
-    DbAccessTier altAccessTier =
-        new DbAccessTier()
-            .setAccessTierId(2)
-            .setShortName("controlled")
-            .setDisplayName("Controlled Tier")
-            .setAuthDomainName("a different one")
-            .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
-            .setServicePerimeter("controlled/tier/perimeter");
+    DbAccessTier altAccessTier = TestMockFactory.createControlledTierForTests(accessTierDao);
     altAccessTier = accessTierDao.save(altAccessTier);
 
     DbCdrVersion altCdrVersion = new DbCdrVersion();

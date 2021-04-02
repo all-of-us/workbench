@@ -44,7 +44,7 @@ public class WorkspaceServiceFakeImpl implements WorkspaceService {
 
   @Override
   public DbWorkspace setPublished(
-      DbWorkspace workspace, String publishedWorkspaceGroup, boolean publish) {
+      String workspaceNamespace, String firecloudName, boolean publish) {
     return null;
   }
 

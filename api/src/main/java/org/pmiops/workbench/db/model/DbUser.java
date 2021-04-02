@@ -25,7 +25,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 
@@ -44,7 +43,6 @@ public class DbUser {
   private String username;
   // The email address that can be used to contact the user.
   private String contactEmail;
-  private Short dataAccessLevel;
   private String givenName;
   private String familyName;
   private String phoneNumber;
@@ -63,11 +61,14 @@ public class DbUser {
   private boolean disabled;
   private Short emailVerificationStatus;
   private Set<DbPageVisit> pageVisits = new HashSet<>();
-
   private String aboutYou;
   private String areaOfResearch;
   private Integer billingProjectRetries;
   private Integer moodleId;
+  private Timestamp creationTime;
+  private Timestamp lastModifiedTime;
+  private DbDemographicSurvey demographicSurvey;
+  private DbAddress address;
 
   // Access module fields go here. See http://broad.io/aou-access-modules for docs.
   private String eraCommonsLinkedNihUsername;
@@ -91,11 +92,7 @@ public class DbUser {
   private Timestamp idVerificationCompletionTime;
   private Timestamp idVerificationBypassTime;
   private Timestamp twoFactorAuthCompletionTime;
-  private Timestamp creationTime;
-  private Timestamp lastModifiedTime;
   private Timestamp twoFactorAuthBypassTime;
-  private DbDemographicSurvey demographicSurvey;
-  private DbAddress address;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -155,24 +152,6 @@ public class DbUser {
 
   public void setContactEmail(String contactEmail) {
     this.contactEmail = contactEmail;
-  }
-
-  @Column(name = "data_access_level")
-  public Short getDataAccessLevel() {
-    return dataAccessLevel;
-  }
-
-  public void setDataAccessLevel(Short dataAccessLevel) {
-    this.dataAccessLevel = dataAccessLevel;
-  }
-
-  @Transient
-  public DataAccessLevel getDataAccessLevelEnum() {
-    return DbStorageEnums.dataAccessLevelFromStorage(getDataAccessLevel());
-  }
-
-  public void setDataAccessLevelEnum(DataAccessLevel dataAccessLevel) {
-    setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
   }
 
   @Column(name = "given_name")

@@ -25,15 +25,18 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.AdminActionHistoryDao;
+import org.pmiops.workbench.db.dao.UserAccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
-import org.pmiops.workbench.db.model.DbStorageEnums;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.BillingAccount;
-import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.model.User;
 import org.pmiops.workbench.model.UserResponse;
 import org.pmiops.workbench.model.WorkbenchListBillingAccountsResponse;
@@ -110,13 +113,18 @@ public class UserControllerTest {
   }
 
   @Autowired UserController userController;
-  @Autowired UserDao userDao;
-  @Autowired FireCloudService fireCloudService;
 
+  @Autowired AccessTierDao accessTierDao;
+  @Autowired FireCloudService fireCloudService;
   @Autowired FreeTierBillingService mockFreeTierBillingService;
+  @Autowired UserAccessTierDao userAccessTierDao;
+  @Autowired UserDao userDao;
+
+  DbAccessTier registeredTier;
 
   @Before
   public void setUp() {
+    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
     saveFamily();
   }
 
@@ -477,14 +485,12 @@ public class UserControllerTest {
     user.setGivenName(givenName);
     user.setFamilyName(familyName);
     user.setFirstSignInTime(new Timestamp(CLOCK.instant().toEpochMilli()));
-    if (registered) {
-      user.setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
-    } else {
-      user.setDataAccessLevel(
-          DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.UNREGISTERED));
-    }
     incrementedUserId++;
-    userDao.save(user);
+    user = userDao.save(user);
+
+    if (registered) {
+      addUserToTier(user, registeredTier);
+    }
   }
 
   private void saveUserNotInFirecloud(
@@ -494,13 +500,21 @@ public class UserControllerTest {
     user.setUserId(incrementedUserId);
     user.setGivenName(givenName);
     user.setFamilyName(familyName);
-    if (registered) {
-      user.setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED));
-    } else {
-      user.setDataAccessLevel(
-          DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.UNREGISTERED));
-    }
     incrementedUserId++;
-    userDao.save(user);
+    user = userDao.save(user);
+
+    if (registered) {
+      addUserToTier(user, registeredTier);
+    }
+  }
+
+  private DbUserAccessTier addUserToTier(DbUser user, DbAccessTier tier) {
+    return userAccessTierDao.save(
+        new DbUserAccessTier()
+            .setUser(user)
+            .setAccessTier(tier)
+            .setTierAccessStatus(TierAccessStatus.ENABLED)
+            .setFirstEnabled(Timestamp.from(Instant.now()))
+            .setLastUpdated(Timestamp.from(Instant.now())));
   }
 }
