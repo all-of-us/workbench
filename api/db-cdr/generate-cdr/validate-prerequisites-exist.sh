@@ -84,6 +84,7 @@ fi
 rm -rf $TEMP_FILE_DIR
 mkdir $TEMP_FILE_DIR
 
+# Process the prep tables only
 if [[ $CDR_VERSION == $PREP_TABLE_RUN ]];
 then
 
@@ -107,6 +108,7 @@ then
 
 else
 
+  # Process all tables with full validation
   if gsutil -m cp gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
   then
     timestamp=$(date +%s)
