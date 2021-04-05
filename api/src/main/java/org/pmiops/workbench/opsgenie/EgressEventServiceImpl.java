@@ -101,7 +101,9 @@ public class EgressEventServiceImpl implements EgressEventService {
       logger.info(
           String.format(
               "Successfully created or updated Opsgenie alert for high-egress event on project %s, namespace %s (Opsgenie request ID %s)",
-              egressEvent.getProjectName(), egressEvent.getWorkspaceNamespace(), response.getRequestId()));
+              egressEvent.getProjectName(),
+              egressEvent.getWorkspaceNamespace(),
+              response.getRequestId()));
     } catch (ApiException e) {
       logger.severe(
           String.format(
