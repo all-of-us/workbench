@@ -2618,13 +2618,13 @@ def get_leo_api_url(project)
   return get_fc_config(project)["leoBaseUrl"]
 end
 
-def get_access_tier_config(project, tier)
+def get_access_tier_config(project, tier_short_name)
   tiers = get_cdr_config(project)["accessTiers"]
-  myTier = tiers.find { |aTier| aTier['shortName'] == tier }
-  unless myTier
-    raise("Could not find access tier '#{tier}' in cdr_config for project #{project}")
+  tier = tiers.find { |tier| tier['shortName'] == tier_short_name }
+  unless tier
+    raise("Could not find access tier '#{tier_short_name}' in cdr_config for project #{project}")
   end
-  return myTier
+  return tier
 end
 
 def get_auth_domain_name(project, tier)
