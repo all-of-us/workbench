@@ -125,31 +125,32 @@ fi
 
 rm -rf $TEMP_FILE_DIR
 
-# Validate that a cdr cutoff date exists
-echo "Validating that a CDR cutoff date exists..."
-q="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.prep_cdr_date\` where bq_dataset = '$BQ_DATASET'"
-cdrDate=$(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql "$q" | tr -dc '0-9')
-if [[ $cdrDate != 1 ]];
-then
-  echo "CDR cutoff date doesn't exist in $BQ_PROJECT.$BQ_DATASET.prep_cdr_date!"
-  exit 1
-fi
-
-# Validate that all survey version exist
-echo "Validating that all survey versions exist..."
-q="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\`
-where survey_version_concept_id not in
-( select distinct survey_version_concept_id from \`$BQ_PROJECT.$BQ_DATASET.observation_ext\`)"
-surveyVersionCount=$(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql "$q" | tr -dc '0-9')
-if [[ $surveyVersionCount != 0 ]];
-then
-  echo "Missing survey version in $BQ_PROJECT.$BQ_DATASET.cb_survey_version!"
-  exit 1
-fi
-
-# Purge all backup csv files except for the last 10 versions
 if [[ $CDR_VERSION != $PREP_TABLE_RUN ]];
 then
+
+  # Validate that a cdr cutoff date exists
+  echo "Validating that a CDR cutoff date exists..."
+  q="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.prep_cdr_date\` where bq_dataset = '$BQ_DATASET'"
+  cdrDate=$(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql "$q" | tr -dc '0-9')
+  if [[ $cdrDate != 1 ]];
+  then
+    echo "CDR cutoff date doesn't exist in $BQ_PROJECT.$BQ_DATASET.prep_cdr_date!"
+    exit 1
+  fi
+
+  # Validate that all survey version exist
+  echo "Validating that all survey versions exist..."
+  q="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.cb_survey_version\`
+  where survey_version_concept_id not in
+  ( select distinct survey_version_concept_id from \`$BQ_PROJECT.$BQ_DATASET.observation_ext\`)"
+  surveyVersionCount=$(bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql "$q" | tr -dc '0-9')
+  if [[ $surveyVersionCount != 0 ]];
+  then
+    echo "Missing survey version in $BQ_PROJECT.$BQ_DATASET.cb_survey_version!"
+    exit 1
+  fi
+
+  # Purge all backup csv files except for the last 10 versions
   fileCount=$(gsutil ls gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup | wc -l)
   allFilesCount=${#All_FILES[@]}
   numberToDelete=$(($((fileCount - 1)) - $((allFilesCount * 10))))
@@ -162,4 +163,5 @@ then
     # This lists all the files in the backup bucket sorted by timestamp and gets only the number to delete
     done < <(gsutil ls gs://$BUCKET/$BQ_DATASET/$CSV_HOME_DIR/backup | rev | cut -d/ -f1 | rev | sort | awk 'NF' | head -$numberToDelete)
   fi
+
 fi
