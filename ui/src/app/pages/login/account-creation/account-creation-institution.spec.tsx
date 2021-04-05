@@ -6,7 +6,6 @@ import {ConfigApi, InstitutionApi, Profile} from 'generated/fetch';
 import {createEmptyProfile} from 'app/pages/login/sign-in';
 import {
   AccountCreationInstitution,
-  AccountCreationInstitutionClass,
   Props
 } from './account-creation-institution';
 import {ConfigApiStub} from 'testing/stubs/config-api-stub';
@@ -30,8 +29,8 @@ function component(): ReactWrapper {
   return mount(<AccountCreationInstitution {...props}/>);
 }
 
-function getInstance(wrapper: AnyWrapper): AccountCreationInstitutionClass {
-  return wrapper.find(AccountCreationInstitutionClass).instance() as AccountCreationInstitutionClass;
+function getInstance(wrapper: AnyWrapper): AccountCreationInstitution {
+  return wrapper.find(AccountCreationInstitution).instance() as AccountCreationInstitution;
 }
 
 function getInstitutionDropdown(wrapper: AnyWrapper): Dropdown {
@@ -71,8 +70,7 @@ beforeEach(() => {
   props = {
     profile: createEmptyProfile(),
     onComplete: (profile: Profile) => {},
-    onPreviousClick: (profile: Profile) => {},
-    stackdriverErrorReporter: {reporter: null}
+    onPreviousClick: (profile: Profile) => {}
   };
 
   mockGetPublicInstitutionDetails = jest.spyOn(institutionApi(), 'getPublicInstitutionDetails');

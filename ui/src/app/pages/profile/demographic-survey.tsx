@@ -16,11 +16,6 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, toggleIncludes} from 'app/utils';
 
 import {convertAPIError, reportError} from 'app/utils/errors';
-import {
-  StackdriverErrorReporterStore,
-  stackdriverErrorReporterStore,
-  withStore
-} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {Disability, GenderIdentity, Profile, Race, SexAtBirth} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -60,7 +55,6 @@ export interface Props extends WithProfileErrorModalProps {
   enableCaptcha: boolean;
   enablePrevious: boolean;
   showStepCount: boolean;
-  stackdriverErrorReporter: StackdriverErrorReporterStore;
 }
 
 interface State {
@@ -73,7 +67,7 @@ interface State {
 const isChecked = (demographicSurvey, optionKey, value) =>
   demographicSurvey && demographicSurvey[optionKey] && demographicSurvey[optionKey].includes(value);
 
-export const DemographicSurvey = fp.flow(withProfileErrorModal, withStore(stackdriverErrorReporterStore, 'stackdriverErrorReporter'))(
+export const DemographicSurvey = fp.flow(withProfileErrorModal)(
   class DemographicSurveyComponent extends React.Component<Props, State> {
     private captchaRef = React.createRef<ReCAPTCHA>();
     constructor(props: any) {
@@ -171,7 +165,7 @@ export const DemographicSurvey = fp.flow(withProfileErrorModal, withStore(stackd
         const savedProfile = await this.props.saveProfile(this.state.profile, captchaToken);
         this.setState(prevState => ({profile: savedProfile || prevState.profile, loading: false}));
       } catch (error) {
-        reportError(error, this.props.stackdriverErrorReporter.reporter);
+        reportError(error);
         const {message} = await convertAPIError(error);
         this.props.showProfileErrorModal(message);
         if (environment.enableCaptcha && this.props.enableCaptcha) {

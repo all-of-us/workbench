@@ -1,14 +1,15 @@
 import {ErrorCode, ErrorResponse} from 'generated/fetch';
-import {StackdriverErrorReporter} from 'stackdriver-errors-js';
+import {stackdriverErrorReporterStore} from './stores';
 
 /**
  * Reports an error to Stackdriver error logging, if enabled.
  *
  */
-export function reportError(err: (Error|string), reporter: StackdriverErrorReporter) {
+export function reportError(err: (Error|string)) {
   console.error('Reporting error to Stackdriver: ', err);
-  if (reporter) {
-    reporter.report(err, (e) => {
+  const reporterStore = stackdriverErrorReporterStore.get();
+  if (reporterStore && reporterStore.reporter) {
+    reporterStore.reporter.report(err, (e) => {
       // Note: this does not detect non-200 responses from Stackdriver:
       // https://github.com/GoogleCloudPlatform/stackdriver-errors-js/issues/32
       if (e) {

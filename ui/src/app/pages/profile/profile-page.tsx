@@ -28,11 +28,6 @@ import {
 } from 'app/utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {serverConfigStore} from 'app/utils/navigation';
-import {
-  stackdriverErrorReporterStore,
-  StackdriverErrorReporterStore,
-  withStore
-} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
@@ -154,7 +149,6 @@ interface ProfilePageProps extends WithProfileErrorModalProps {
     controlledTierBypassTime?: number
     controlledTierEnabled?: boolean
   };
-  stackdriverErrorReporter: StackdriverErrorReporterStore;
 }
 
 interface ProfilePageState {
@@ -209,8 +203,7 @@ const getControlledTierContent = fp.flow(
 
 export const ProfilePage = fp.flow(
   withUserProfile(),
-  withProfileErrorModal,
-  withStore(stackdriverErrorReporterStore, 'stackdriverErrorReporter')
+  withProfileErrorModal
   )(class extends React.Component<
     ProfilePageProps,
     ProfilePageState
@@ -235,7 +228,7 @@ export const ProfilePage = fp.flow(
           institutions: details.institutions
         });
       } catch (e) {
-        reportError(e, this.props.stackdriverErrorReporter.reporter);
+        reportError(e);
       }
     }
 
@@ -314,7 +307,7 @@ export const ProfilePage = fp.flow(
         await reload();
         return profile;
       } catch (error) {
-        reportError(error, this.props.stackdriverErrorReporter.reporter);
+        reportError(error);
         const errorResponse = await convertAPIError(error);
         this.props.showProfileErrorModal(errorResponse.message);
         console.error(error);

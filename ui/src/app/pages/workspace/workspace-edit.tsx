@@ -47,11 +47,6 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {getCdrVersion, hasDefaultCdrVersion} from 'app/utils/cdr-versions';
 import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigStore} from 'app/utils/navigation';
-import {
-  StackdriverErrorReporterStore,
-  stackdriverErrorReporterStore,
-  withStore
-} from 'app/utils/stores';
 import {getBillingAccountInfo} from 'app/utils/workbench-gapi-client';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
@@ -235,7 +230,6 @@ export interface WorkspaceEditProps {
     profile: Profile;
   };
   workspaceEditMode: WorkspaceEditMode;
-  stackdriverErrorReporter: StackdriverErrorReporterStore;
 }
 
 export interface WorkspaceEditState {
@@ -262,7 +256,6 @@ export interface WorkspaceEditState {
 export const WorkspaceEdit = fp.flow(
   withCurrentWorkspace(),
   withCdrVersions(),
-  withStore(stackdriverErrorReporterStore, 'stackdriverErrorReporter'),
   withUserProfile()
 )(
   class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
@@ -335,7 +328,7 @@ export const WorkspaceEdit = fp.flow(
               message: `Workspace ${this.props.workspace.namespace} has an out of date billing account name. ` +
                   `Stored value is ${this.props.workspace.billingAccountName}. ` +
                   `True value is ${fetchedBillingInfo.billingAccountName}`
-            }, this.props.stackdriverErrorReporter.reporter);
+            });
           }
         } else {
           // Otherwise, use this as an opportunity to sync the fetched billing account name from
@@ -765,7 +758,7 @@ export const WorkspaceEdit = fp.flow(
         if (accessLevel !== WorkspaceAccessLevel.OWNER) {
           reportError(new Error(
               `ACLs failed to propagate for workspace ${workspace.namespace}/${workspace.id}` +
-              ` accessLevel: ${accessLevel}`), this.props.stackdriverErrorReporter.reporter);
+              ` accessLevel: ${accessLevel}`));
           // We intentionally do not preload the created workspace via nextWorkspaceWarmupStore in
           // this situation. This forces a workspace fetch on navigation, which is desired as ACLs
           // might have finally propagated by the time the navigate button is clicked.

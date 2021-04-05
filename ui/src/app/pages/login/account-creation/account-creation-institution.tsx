@@ -27,11 +27,6 @@ import {
   validateEmail
 } from 'app/utils/institutions';
 import {
-  stackdriverErrorReporterStore,
-  StackdriverErrorReporterStore,
-  withStore
-} from 'app/utils/stores';
-import {
   CheckEmailResponse,
   DuaType,
   InstitutionalRole,
@@ -84,7 +79,6 @@ export interface Props {
   profile: Profile;
   onComplete: (profile: Profile) => void;
   onPreviousClick: (profile: Profile) => void;
-  stackdriverErrorReporter: StackdriverErrorReporterStore;
 }
 
 
@@ -97,8 +91,7 @@ interface State {
   checkEmailError: boolean;
 }
 
-// Exported for testing.
-export class AccountCreationInstitutionClass extends React.Component<Props, State> {
+export class AccountCreationInstitution extends React.Component<Props, State> {
   private aborter: AbortController;
 
   constructor(props: Props) {
@@ -130,7 +123,7 @@ export class AccountCreationInstitutionClass extends React.Component<Props, Stat
         loadingInstitutions: false,
         institutionLoadError: true
       });
-      reportError(e, this.props.stackdriverErrorReporter.reporter);
+      reportError(e);
     }
   }
 
@@ -469,8 +462,3 @@ export class AccountCreationInstitutionClass extends React.Component<Props, Stat
     </div>;
   }
 }
-
-export const AccountCreationInstitution = withStore(
-  stackdriverErrorReporterStore,
-  'stackdriverErrorReporter'
-)(AccountCreationInstitutionClass);
