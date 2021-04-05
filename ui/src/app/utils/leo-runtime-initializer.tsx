@@ -137,7 +137,6 @@ export class LeoRuntimeInitializer {
   private serverErrorCount = 0;
   private initializeStartTime?: number;
   private targetRuntime?: Runtime;
-
   // The latest runtime retrieved from getRuntime. If the last getRuntime call returned a NOT_FOUND
   // response, this will be null.
   private currentRuntimeValue?: Runtime;

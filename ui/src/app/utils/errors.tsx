@@ -3,7 +3,6 @@ import {stackdriverErrorReporterStore} from './stores';
 
 /**
  * Reports an error to Stackdriver error logging, if enabled.
- *
  */
 export function reportError(err: (Error|string)) {
   console.error('Reporting error to Stackdriver: ', err);

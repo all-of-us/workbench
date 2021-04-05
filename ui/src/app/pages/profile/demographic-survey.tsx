@@ -67,7 +67,7 @@ interface State {
 const isChecked = (demographicSurvey, optionKey, value) =>
   demographicSurvey && demographicSurvey[optionKey] && demographicSurvey[optionKey].includes(value);
 
-export const DemographicSurvey = fp.flow(withProfileErrorModal)(
+export const DemographicSurvey = withProfileErrorModal(
   class DemographicSurveyComponent extends React.Component<Props, State> {
     private captchaRef = React.createRef<ReCAPTCHA>();
     constructor(props: any) {

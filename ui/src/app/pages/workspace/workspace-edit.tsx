@@ -2,7 +2,6 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as validate from 'validate.js';
 
-
 import {Button, Clickable, Link, StyledAnchorTag} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
@@ -253,11 +252,7 @@ export interface WorkspaceEditState {
   workspaceNewAclDelayedContinueFn: Function;
 }
 
-export const WorkspaceEdit = fp.flow(
-  withCurrentWorkspace(),
-  withCdrVersions(),
-  withUserProfile()
-)(
+export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), withUserProfile())(
   class WorkspaceEditCmp extends React.Component<WorkspaceEditProps, WorkspaceEditState> {
     constructor(props: WorkspaceEditProps) {
       super(props);

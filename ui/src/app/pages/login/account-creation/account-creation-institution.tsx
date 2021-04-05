@@ -92,6 +92,7 @@ interface State {
 }
 
 export class AccountCreationInstitution extends React.Component<Props, State> {
+
   private aborter: AbortController;
 
   constructor(props: Props) {
