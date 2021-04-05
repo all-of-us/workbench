@@ -18,99 +18,23 @@ import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
 import {ProfileRegistrationStepStatus} from 'app/pages/profile/profile-registration-step-status';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
+import colors from 'app/styles/colors';
 import {
   displayDateWithoutHours,
   formatFreeCreditsUSD,
   lensOnProps,
-  reactStyles,
   withUserProfile
 } from 'app/utils';
+import {styles} from 'app/pages/profile/profile-styles'
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {serverConfigStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
+import {DataAccessPanel} from 'app/pages/profile/data-access-panel'
+import {ControlledTierBadge} from 'app/components/icons'
 
-
-const controlledTierBadge = '/assets/icons/controlled-tier-badge.svg';
-
-const styles = reactStyles({
-  h1: {
-    color: colors.primary,
-    fontSize: 20,
-    fontWeight: 500,
-    lineHeight: '24px'
-  },
-  inputLabel: {
-    color: colors.primary,
-    fontSize: 14,
-    fontWeight: 600,
-    lineHeight: '22px',
-    marginBottom: 6
-  },
-  inputStyle: {
-    width: 300,
-    height: 40,
-    fontSize: 14,
-    marginRight: 20
-  },
-  longInputContainerStyle: {
-    width: 420,
-    resize: 'both'
-  },
-  longInputHeightStyle: {
-    height: 175,
-  },
-  box: {
-    backgroundColor: colors.white,
-    borderRadius: 8,
-    padding: 21
-  },
-  title: {
-    color: colors.primary,
-    fontSize: 16,
-    fontWeight: 500,
-    width: '40%',
-    display: 'inline',
-    alignItems: 'flexEnd'
-  },
-  uneditableProfileElement: {
-    paddingLeft: '0.5rem',
-    marginRight: 20,
-    marginBottom: 20,
-    height: '1.5rem',
-    color: colors.primary
-  },
-  fadebox: {
-    margin: '1rem 0 0 3%',
-    width: '95%',
-    padding: '0 0.1rem'
-  },
-  verticalLine: {
-    marginTop: '0.3rem', marginInlineStart: '0rem', width: '64%'
-  },
-  researchPurposeInfo: {
-    fontWeight: 100,
-    width: '80%',
-    marginTop: '0.5rem',
-    marginBottom: '0.3rem'
-  },
-  freeCreditsBox: {
-    borderRadius: '0.4rem',
-    height: '3rem',
-    marginTop: '0.7rem',
-    marginBottom: '1.4rem',
-    color: colors.primary,
-    backgroundColor: colorWithWhiteness(colors.disabled, 0.7)
-  },
-  updateSurveyButton: {
-    textTransform: 'none',
-    padding: 0,
-    height: 'auto'
-  }
-});
 
 // validators for validate.js
 const required = {presence: {allowEmpty: false}};
@@ -388,7 +312,7 @@ export const ProfilePage = fp.flow(
         },
         // TODO: when the controlled tier data is available fetch it from the profile
         controlledTierProfile: {
-          controlledTierEnabled = false, controlledTierBypassTime = null, controlledTierCompletionTime = null
+          controlledTierEnabled = true, controlledTierBypassTime = null, controlledTierCompletionTime = null
         } = {}
       } = this.props;
       const {currentProfile, updating, showDemographicSurveyModal} = this.state;
@@ -477,7 +401,7 @@ export const ProfilePage = fp.flow(
         <FlexRow style={{justifyContent: 'spaceBetween'}}>
           <div>
             <div style={styles.title}>Public displayed Information</div>
-            <hr style={styles.verticalLine}/>
+            <hr style={{...styles.verticalLine, width: '64%'}}/>
             <FlexRow style={{marginTop: '1rem'}}>
               {makeProfileInput({
                 title: 'First Name',
@@ -604,7 +528,7 @@ export const ProfilePage = fp.flow(
           <div style={{width: '20rem', marginRight: '4rem'}}>
             <div style={styles.title}>Free credits balance
             </div>
-            <hr style={{...styles.verticalLine, width: '15.7rem'}}/>
+            <hr style={{...styles.verticalLine}}/>
             {profile && <FlexRow style={styles.freeCreditsBox}>
                 <FlexColumn style={{marginLeft: '0.8rem'}}>
                     <div style={{marginTop: '0.4rem'}}><i>All of Us</i> free credits used:</div>
@@ -615,10 +539,11 @@ export const ProfilePage = fp.flow(
                   <div style={{fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
                 </FlexColumn>
             </FlexRow>}
+            <DataAccessPanel/>
             <div style={styles.title}>
               Requirements for <AoU/> Workbench access
             </div>
-            <hr style={{...styles.verticalLine, width: '15.8rem'}}/>
+            <hr style={{...styles.verticalLine}}/>
             <div style={{display: 'grid', gap: '10px', gridAutoRows: '225px', gridTemplateColumns: '220px 220px'}}>
               {controlledTierEnabled && <ProfileRegistrationStepStatus
                 title={<span><i>All of Us</i> Controlled Tier Data Training</span>}
@@ -632,7 +557,7 @@ export const ProfilePage = fp.flow(
                 >
                 <div>
                   {!(controlledTierCompletionTime || controlledTierBypassTime) && <div>To be completed</div>}
-                  <img style={{height: 25, width: 24}} src={controlledTierBadge}/>
+                  <ControlledTierBadge/>
                 </div>
               </ProfileRegistrationStepStatus>}
               <ProfileRegistrationStepStatus
@@ -680,7 +605,7 @@ export const ProfilePage = fp.flow(
             <div style={{marginTop: '1rem', marginLeft: '1rem'}}>
 
               <div style={styles.title}>Optional Demographics Survey</div>
-              <hr style={{...styles.verticalLine, width: '15.8rem'}}/>
+              <hr style={{...styles.verticalLine}}/>
               <div style={{color: colors.primary, fontSize: '14px'}}>
                 <div>Survey Completed</div>
                 {/*If a user has created an account, they have, by definition, completed the demographic survey*/}
