@@ -4,10 +4,7 @@ import * as React from 'react';
 import {serverConfigStore} from 'app/utils/navigation';
 import {ConfigApi, InstitutionApi, Profile} from 'generated/fetch';
 import {createEmptyProfile} from 'app/pages/login/sign-in';
-import {
-  AccountCreationInstitution,
-  Props
-} from './account-creation-institution';
+import {AccountCreationInstitution, Props} from './account-creation-institution';
 import {ConfigApiStub} from 'testing/stubs/config-api-stub';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
