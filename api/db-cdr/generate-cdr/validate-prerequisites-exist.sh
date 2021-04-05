@@ -33,6 +33,8 @@ ALL_FILES=("${NON_PREP_FILES[@]}" "${PREP_FILES[@]}")
 INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4")
 
 function removeHeaderIfExist() {
+  local file=$1
+  local firstColumn=$2
   if [[ $firstColumn == id || \
         $firstColumn == ancestor_id || \
         $firstColumn == parent || \
@@ -53,6 +55,8 @@ function removeHeaderIfExist() {
 }
 
 function loadCSVFile() {
+  local file=$1
+  local tableName=$2
   # Load the csv file into table
   echo "Starting load of $file"
   schema_path=generate-cdr/bq-schemas
@@ -93,10 +97,8 @@ then
     for file in ${PREP_FILES[@]}; do
       read -r header < $TEMP_FILE_DIR/$file
       IFS=',' read -r -a columns <<< $header
-      firstColumn=$(echo $columns | cut -d' ' -f 1)
-      tableName=${file%.*}
-      removeHeaderIfExist
-      loadCSVFile
+      removeHeaderIfExist file $(echo $columns | cut -d' ' -f 1)
+      loadCSVFile $file ${file%.*}
     done
   fi
 
@@ -143,10 +145,10 @@ else
       $PREP_CLINICAL_TERMS | \
       $PREP_CONCEPT | \
       $PREP_CONCEPT_RELATIONSHIP)
-        tableName=${file%.*}
-        removeHeaderIfExist
+        removeHeaderIfExist file firstColumn
 
         # Check to see if table exists
+        tableName=${file%.*}
         tables=$(bq ls --max_results 1000 "$BQ_PROJECT:$BQ_DATASET" | awk '{print $1}' | tail +3)
         for table in ${tables[@]};
         do
@@ -158,7 +160,7 @@ else
           fi
         done
 
-        loadCSVFile
+        loadCSVFile $file $tableName
       ;;
       esac
     done
