@@ -125,9 +125,6 @@ fi
 
 rm -rf $TEMP_FILE_DIR
 
-if [[ $CDR_VERSION != $PREP_TABLE_RUN ]];
-then
-
   # Validate that a cdr cutoff date exists
   echo "Validating that a CDR cutoff date exists..."
   q="select count(*) as count from \`$BQ_PROJECT.$BQ_DATASET.prep_cdr_date\` where bq_dataset = '$BQ_DATASET'"
@@ -137,6 +134,9 @@ then
     echo "CDR cutoff date doesn't exist in $BQ_PROJECT.$BQ_DATASET.prep_cdr_date!"
     exit 1
   fi
+
+if [[ $CDR_VERSION != $PREP_TABLE_RUN ]];
+then
 
   # Validate that all survey version exist
   echo "Validating that all survey versions exist..."
