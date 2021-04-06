@@ -395,7 +395,7 @@ public class RuntimeControllerTest {
 
   @Test
   public void testGetRuntime_error() throws ApiException {
-    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(
             testLeoRuntime
                 .status(LeonardoRuntimeStatus.ERROR)
@@ -404,16 +404,16 @@ public class RuntimeControllerTest {
                         new LeonardoClusterError().errorCode(1).errorMessage("foo"),
                         new LeonardoClusterError().errorCode(2).errorMessage(null))));
 
-    assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody())
+    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
         .isEqualTo(testRuntime.status(RuntimeStatus.ERROR));
   }
 
   @Test
   public void testGetRuntime_errorNoMessages() throws ApiException {
-    when(userRuntimesApi.getRuntime(BILLING_PROJECT_ID, getRuntimeName()))
+    when(userRuntimesApi.getRuntime(GOOGLE_PROJECT_ID, getRuntimeName()))
         .thenReturn(testLeoRuntime.status(LeonardoRuntimeStatus.ERROR).errors(null));
 
-    assertThat(runtimeController.getRuntime(BILLING_PROJECT_ID).getBody())
+    assertThat(runtimeController.getRuntime(WORKSPACE_NS).getBody())
         .isEqualTo(testRuntime.status(RuntimeStatus.ERROR));
   }
 
