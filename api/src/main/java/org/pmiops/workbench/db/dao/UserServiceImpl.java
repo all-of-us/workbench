@@ -852,6 +852,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
                                 row.getAccessTierShortNames())
                             .toString())
                     .addTag(MetricLabel.USER_DISABLED, row.getDisabled().toString())
+                    .addTag(MetricLabel.ACCESS_TIER, row.getAccessTierShortNames())
                     .build())
         .collect(ImmutableList.toImmutableList());
   }

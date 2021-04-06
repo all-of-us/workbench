@@ -531,6 +531,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
                     // RW-6137: Replace with AccessTier
                     .addTag(MetricLabel.DATA_ACCESS_LEVEL, DataAccessLevel.REGISTERED.toString())
                     .addMeasurement(GaugeMetric.WORKSPACE_COUNT, row.getWorkspaceCount())
+                    .addTag(MetricLabel.ACCESS_TIER, row.getAccessTierShortName())
                     .build())
         .collect(ImmutableList.toImmutableList());
   }
