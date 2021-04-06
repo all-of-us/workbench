@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao.StatusToCountResult;
+import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao.StatusPerTierCount;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
@@ -73,19 +73,19 @@ public class BillingProjectBufferEntryDaoTest {
 
   @Test
   public void testComputeProjectCountByStatus() {
-    final List<StatusToCountResult> rows =
+    final List<StatusPerTierCount> rows =
         billingProjectBufferEntryDao.computeProjectCountByStatus();
     assertThat(rows).hasSize(STATUS_TO_COUNT_INPUT.size());
     assertThat(
             rows.stream()
-                .map(StatusToCountResult::getStatusEnum)
+                .map(StatusPerTierCount::getStatusEnum)
                 .collect(ImmutableSet.toImmutableSet()))
         .hasSize(STATUS_TO_COUNT_INPUT.size());
 
     assertThat(
             rows.stream()
                 .filter(r -> r.getStatusEnum().equals(BufferEntryStatus.AVAILABLE))
-                .map(StatusToCountResult::getNumProjects)
+                .map(StatusPerTierCount::getNumProjects)
                 .findFirst()
                 .orElse(-1L))
         .isEqualTo(AVAILABLE_COUNT);
