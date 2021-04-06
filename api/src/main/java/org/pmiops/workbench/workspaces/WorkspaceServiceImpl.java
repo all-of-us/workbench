@@ -13,15 +13,12 @@ import com.google.api.services.cloudbilling.Cloudbilling;
 import com.google.api.services.cloudbilling.Cloudbilling.Projects.UpdateBillingInfo;
 import com.google.api.services.cloudbilling.model.ProjectBillingInfo;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Sets;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -54,15 +51,13 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.BillingStatus;
@@ -79,7 +74,6 @@ import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -112,6 +106,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   private final UserRecentWorkspaceDao userRecentWorkspaceDao;
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
+  private final WorkspaceAuthService workspaceAuthService;
 
   @Autowired
   public WorkspaceServiceImpl(
@@ -131,7 +126,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       UserMapper userMapper,
       UserRecentWorkspaceDao userRecentWorkspaceDao,
       WorkspaceDao workspaceDao,
-      WorkspaceMapper workspaceMapper) {
+      WorkspaceMapper workspaceMapper,
+      WorkspaceAuthService workspaceAuthService) {
     this.endUserCloudbillingProvider = endUserCloudbillingProvider;
     this.serviceAccountCloudbillingProvider = serviceAccountCloudbillingProvider;
     this.billingProjectAuditor = billingProjectAuditor;
@@ -148,28 +144,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
-  }
-
-  /**
-   * Clients wishing to use the auto-generated methods from the DAO interface may directly access it
-   * here.
-   */
-  @Override
-  public WorkspaceDao getDao() {
-    return workspaceDao;
-  }
-
-  @Override
-  public FireCloudService getFireCloudService() {
-    return fireCloudService;
-  }
-
-  @Override
-  public DbWorkspace get(String ns, String firecloudName) {
-    return workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
-        ns,
-        firecloudName,
-        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+    this.workspaceAuthService = workspaceAuthService;
   }
 
   @Override
@@ -190,8 +165,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
         .collect(Collectors.toList());
   }
 
-  @Override
-  public List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces() {
+  private List<WorkspaceResponse> getWorkspacesAndPublicWorkspaces() {
     Map<String, FirecloudWorkspaceResponse> fcWorkspacesByUuid = getFirecloudWorkspaces();
     List<DbWorkspace> dbWorkspaces =
         workspaceDao.findAllByFirecloudUuidIn(fcWorkspacesByUuid.keySet());
@@ -204,23 +178,20 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
         .collect(Collectors.toList());
   }
 
-  @Transactional
-  @Override
-  public WorkspaceResponse getWorkspace(String workspaceNamespace) throws NotFoundException {
-    DbWorkspace dbWorkspace =
-        getByNamespace(workspaceNamespace)
-            .orElseThrow(() -> new NotFoundException("Workspace not found: " + workspaceNamespace));
-    return getWorkspaceImpl(dbWorkspace);
+  private Map<String, FirecloudWorkspaceResponse> getFirecloudWorkspaces() {
+    // fields must include at least "workspace.workspaceId", otherwise
+    // the map creation will fail
+    return fireCloudService.getWorkspaces().stream()
+        .collect(
+            Collectors.toMap(
+                fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
+                fcWorkspace -> fcWorkspace));
   }
 
   @Transactional
   @Override
   public WorkspaceResponse getWorkspace(String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace = getRequired(workspaceNamespace, workspaceId);
-    return getWorkspaceImpl(dbWorkspace);
-  }
-
-  private WorkspaceResponse getWorkspaceImpl(DbWorkspace dbWorkspace) {
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
     FirecloudWorkspaceResponse fcResponse;
     FirecloudWorkspace fcWorkspace;
 
@@ -232,7 +203,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
             dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
     fcWorkspace = fcResponse.getWorkspace();
 
-    if (fcResponse.getAccessLevel().equals(WorkspaceService.PROJECT_OWNER_ACCESS_LEVEL)) {
+    if (fcResponse.getAccessLevel().equals(WorkspaceAuthService.PROJECT_OWNER_ACCESS_LEVEL)) {
       // We don't expose PROJECT_OWNER in our API; just use OWNER.
       workspaceResponse.setAccessLevel(WorkspaceAccessLevel.OWNER);
     } else {
@@ -246,58 +217,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     return workspaceResponse;
   }
 
-  private Map<String, FirecloudWorkspaceResponse> getFirecloudWorkspaces() {
-    // fields must include at least "workspace.workspaceId", otherwise
-    // the map creation will fail
-    return fireCloudService.getWorkspaces().stream()
-        .collect(
-            Collectors.toMap(
-                fcWorkspace -> fcWorkspace.getWorkspace().getWorkspaceId(),
-                fcWorkspace -> fcWorkspace));
-  }
-
-  @Override
-  public Map<String, FirecloudWorkspaceAccessEntry> getFirecloudWorkspaceAcls(
-      String workspaceNamespace, String firecloudName) {
-    FirecloudWorkspaceACL aclResp =
-        fireCloudService.getWorkspaceAclAsService(workspaceNamespace, firecloudName);
-
-    // Swagger Java codegen does not handle the WorkspaceACL model correctly; it returns a GSON map
-    // instead. Run this through a typed Gson conversion process to parse into the desired type.
-    Type accessEntryType = new TypeToken<Map<String, FirecloudWorkspaceAccessEntry>>() {}.getType();
-    Gson gson = new Gson();
-    return gson.fromJson(gson.toJson(aclResp.getAcl(), accessEntryType), accessEntryType);
-  }
-
-  @Override
-  public DbWorkspace getRequired(String ns, String firecloudName) {
-    DbWorkspace workspace = get(ns, firecloudName);
-    if (workspace == null) {
-      throw new NotFoundException(String.format("DbWorkspace %s/%s not found.", ns, firecloudName));
-    }
-    return workspace;
-  }
-
-  @Override
-  public Optional<DbWorkspace> getByNamespace(String ns) {
-    return workspaceDao.findFirstByWorkspaceNamespaceAndActiveStatusOrderByLastModifiedTimeDesc(
-        ns, DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
-  }
-
-  @Override
-  @Transactional
-  public DbWorkspace getRequiredWithCohorts(String ns, String firecloudName) {
-    DbWorkspace workspace =
-        workspaceDao.findByFirecloudNameAndActiveStatusWithEagerCohorts(
-            ns,
-            firecloudName,
-            DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
-    if (workspace == null) {
-      throw new NotFoundException(String.format("DbWorkspace %s/%s not found.", ns, firecloudName));
-    }
-    return workspace;
-  }
-
   @Override
   public void deleteWorkspace(DbWorkspace dbWorkspace) {
     // This deletes all Firecloud and google resources, however saves all references
@@ -309,7 +228,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     fireCloudService.deleteWorkspace(
         dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
-    dbWorkspace = saveWithLastModified(dbWorkspace);
+    dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
     maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
 
     String billingProjectName = dbWorkspace.getWorkspaceNamespace();
@@ -325,38 +244,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-  public void validateActiveBilling(String workspaceNamespace, String workspaceId)
-      throws ForbiddenException {
-    if (BillingStatus.INACTIVE.equals(
-        getRequired(workspaceNamespace, workspaceId).getBillingStatus())) {
-      throw new ForbiddenException(
-          "Workspace (" + workspaceNamespace + ") is in an inactive billing state");
-    }
-  }
-
-  @Override
-  public DbWorkspace saveWithLastModified(DbWorkspace workspace) {
-    return saveWithLastModified(workspace, new Timestamp(clock.instant().toEpochMilli()));
-  }
-
-  private DbWorkspace saveWithLastModified(DbWorkspace workspace, Timestamp ts) {
-    workspace.setLastModifiedTime(ts);
-    try {
-      return workspaceDao.save(workspace);
-    } catch (ObjectOptimisticLockingFailureException e) {
-      log.log(Level.WARNING, "version conflict for workspace update", e);
-      throw new ConflictException("Failed due to concurrent workspace modification");
-    }
-  }
-
-  @Override
-  public List<DbWorkspace> findForReview() {
-    return workspaceDao.findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested();
-  }
-
-  @Override
   public void setResearchPurposeApproved(String ns, String firecloudName, boolean approved) {
-    DbWorkspace workspace = getRequired(ns, firecloudName);
+    DbWorkspace workspace = workspaceDao.getRequired(ns, firecloudName);
     if (workspace.getReviewRequested() == null || !workspace.getReviewRequested()) {
       throw new BadRequestException(
           String.format("No review requested for workspace %s/%s.", ns, firecloudName));
@@ -367,117 +256,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
               "DbWorkspace %s/%s already %s.",
               ns, firecloudName, workspace.getApproved() ? "approved" : "rejected"));
     }
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     workspace.setApproved(approved);
-    saveWithLastModified(workspace, now);
-  }
-
-  @Override
-  public FirecloudWorkspaceACLUpdate updateFirecloudAclsOnUser(
-      WorkspaceAccessLevel updatedAccess, FirecloudWorkspaceACLUpdate currentUpdate) {
-    if (updatedAccess == WorkspaceAccessLevel.OWNER) {
-      currentUpdate.setCanShare(true);
-      currentUpdate.setCanCompute(true);
-      currentUpdate.setAccessLevel(WorkspaceAccessLevel.OWNER.toString());
-    } else if (updatedAccess == WorkspaceAccessLevel.WRITER) {
-      currentUpdate.setCanShare(false);
-      currentUpdate.setCanCompute(true);
-      currentUpdate.setAccessLevel(WorkspaceAccessLevel.WRITER.toString());
-    } else if (updatedAccess == WorkspaceAccessLevel.READER) {
-      currentUpdate.setCanShare(false);
-      currentUpdate.setCanCompute(false);
-      currentUpdate.setAccessLevel(WorkspaceAccessLevel.READER.toString());
-    } else {
-      currentUpdate.setCanShare(false);
-      currentUpdate.setCanCompute(false);
-      currentUpdate.setAccessLevel(WorkspaceAccessLevel.NO_ACCESS.toString());
-    }
-    return currentUpdate;
-  }
-
-  @Override
-  public DbWorkspace updateWorkspaceAcls(
-      DbWorkspace workspace,
-      Map<String, WorkspaceAccessLevel> updatedAclsMap,
-      String registeredUsersGroup) {
-    // userRoleMap is a map of the new permissions for ALL users on the ws
-    Map<String, FirecloudWorkspaceAccessEntry> aclsMap =
-        getFirecloudWorkspaceAcls(workspace.getWorkspaceNamespace(), workspace.getFirecloudName());
-
-    // Iterate through existing roles, update/remove them
-    ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
-    Map<String, WorkspaceAccessLevel> toAdd = new HashMap<>(updatedAclsMap);
-    for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : aclsMap.entrySet()) {
-      String currentUserEmail = entry.getKey();
-      WorkspaceAccessLevel updatedAccess = toAdd.get(currentUserEmail);
-      if (updatedAccess != null) {
-        FirecloudWorkspaceACLUpdate currentUpdate = new FirecloudWorkspaceACLUpdate();
-        currentUpdate.setEmail(currentUserEmail);
-        currentUpdate = updateFirecloudAclsOnUser(updatedAccess, currentUpdate);
-        updateACLRequestList.add(currentUpdate);
-        toAdd.remove(currentUserEmail);
-      } else {
-        // This is how to remove a user from the FireCloud ACL:
-        // Pass along an update request with NO ACCESS as the given access level.
-        // Note: do not do groups.  Unpublish will pass the specific NO_ACCESS acl
-        // TODO [jacmrob] : have all users pass NO_ACCESS explicitly? Handle filtering on frontend?
-        if (!currentUserEmail.equals(registeredUsersGroup)) {
-          FirecloudWorkspaceACLUpdate removedUser = new FirecloudWorkspaceACLUpdate();
-          removedUser.setEmail(currentUserEmail);
-          removedUser = updateFirecloudAclsOnUser(WorkspaceAccessLevel.NO_ACCESS, removedUser);
-          updateACLRequestList.add(removedUser);
-        }
-      }
-    }
-
-    // Iterate through remaining new roles; add them
-    for (Entry<String, WorkspaceAccessLevel> remainingRole : toAdd.entrySet()) {
-      FirecloudWorkspaceACLUpdate newUser = new FirecloudWorkspaceACLUpdate();
-      newUser.setEmail(remainingRole.getKey());
-      newUser = updateFirecloudAclsOnUser(remainingRole.getValue(), newUser);
-      updateACLRequestList.add(newUser);
-    }
-    FirecloudWorkspaceACLUpdateResponseList fireCloudResponse =
-        fireCloudService.updateWorkspaceACL(
-            workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), updateACLRequestList);
-    if (fireCloudResponse.getUsersNotFound().size() != 0) {
-      String usersNotFound = "";
-      for (int i = 0; i < fireCloudResponse.getUsersNotFound().size(); i++) {
-        if (i > 0) {
-          usersNotFound += ", ";
-        }
-        usersNotFound += fireCloudResponse.getUsersNotFound().get(i).getEmail();
-      }
-      throw new BadRequestException(usersNotFound);
-    }
-
-    // Finally, keep OWNER and billing project users in lock-step. In Rawls, OWNER does not grant
-    // canCompute on the workspace / billing project, nor does it grant the ability to grant
-    // canCompute to other users. See RW-3009 for details.
-    for (String email : Sets.union(updatedAclsMap.keySet(), aclsMap.keySet())) {
-      String fromAccess =
-          aclsMap
-              .getOrDefault(email, new FirecloudWorkspaceAccessEntry().accessLevel(""))
-              .getAccessLevel();
-      WorkspaceAccessLevel toAccess =
-          updatedAclsMap.getOrDefault(email, WorkspaceAccessLevel.NO_ACCESS);
-      if (FC_OWNER_ROLE.equals(fromAccess) && WorkspaceAccessLevel.OWNER != toAccess) {
-        log.info(
-            String.format(
-                "removing user '%s' from billing project '%s'",
-                email, workspace.getWorkspaceNamespace()));
-        fireCloudService.removeOwnerFromBillingProject(
-            email, workspace.getWorkspaceNamespace(), Optional.empty());
-      } else if (!FC_OWNER_ROLE.equals(fromAccess) && WorkspaceAccessLevel.OWNER == toAccess) {
-        log.info(
-            String.format(
-                "adding user '%s' to billing project '%s'",
-                email, workspace.getWorkspaceNamespace()));
-        fireCloudService.addOwnerToBillingProject(email, workspace.getWorkspaceNamespace());
-      }
-    }
-
-    return this.saveWithLastModified(workspace);
+    workspaceDao.saveWithLastModified(workspace);
   }
 
   @Override
@@ -486,8 +266,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     // Save the workspace first to allocate an ID.
     to = workspaceDao.save(to);
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(to.getCdrVersion());
-    boolean cdrVersionChanged =
-        from.getCdrVersion().getCdrVersionId() != to.getCdrVersion().getCdrVersionId();
     Map<Long, Long> fromCohortIdToToCohortId = new HashMap<>();
     for (DbCohort fromCohort : from.getCohorts()) {
       fromCohortIdToToCohortId.put(
@@ -498,9 +276,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     for (DbConceptSet fromConceptSet : conceptSetService.getConceptSets(from)) {
       fromConceptSetIdToToConceptSetId.put(
           fromConceptSet.getConceptSetId(),
-          conceptSetService
-              .cloneConceptSetAndConceptIds(fromConceptSet, to, cdrVersionChanged)
-              .getConceptSetId());
+          conceptSetService.cloneConceptSetAndConceptIds(fromConceptSet, to).getConceptSetId());
     }
     for (DbDataset dataSet : dataSetService.getDataSets(from)) {
       dataSetService.cloneDataSetToWorkspace(
@@ -520,63 +296,9 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-  public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId)
-      throws IllegalArgumentException {
-    String userAccess =
-        fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getAccessLevel();
-    if (PROJECT_OWNER_ACCESS_LEVEL.equals(userAccess)) {
-      return WorkspaceAccessLevel.OWNER;
-    }
-    return Optional.ofNullable(WorkspaceAccessLevel.fromValue(userAccess))
-        .orElseThrow(
-            () -> new IllegalArgumentException("Unrecognized access level: " + userAccess));
-  }
-
-  @Override
-  public WorkspaceAccessLevel enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-      String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess) {
-    final WorkspaceAccessLevel access;
-    try {
-      access = getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
-    } catch (IllegalArgumentException e) {
-      throw new ServerErrorException(e);
-    }
-    if (requiredAccess.compareTo(access) > 0) {
-      throw new ForbiddenException(
-          String.format(
-              "You do not have sufficient permissions to access workspace %s/%s",
-              workspaceNamespace, workspaceId));
-    } else {
-      return access;
-    }
-  }
-
-  @Override
-  public DbWorkspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-      String workspaceNamespace, String workspaceId, WorkspaceAccessLevel workspaceAccessLevel) {
-    enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-        workspaceNamespace, workspaceId, workspaceAccessLevel);
-    DbWorkspace workspace = getRequired(workspaceNamespace, workspaceId);
-    // Because we've already checked that the user has access to the workspace in question,
-    // we don't need to check their membership in the authorization domain for the CDR version
-    // associated with the workspace.
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(workspace.getCdrVersion());
-    return workspace;
-  }
-
-  @Override
-  public Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId) {
-    DbWorkspace workspace = getDao().findOne(workspaceId);
-    if (workspace == null || !workspace.isActive()) {
-      return Optional.empty();
-    }
-    return Optional.of(workspace);
-  }
-
-  @Override
   public List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName) {
     Map<String, FirecloudWorkspaceAccessEntry> emailToRole =
-        getFirecloudWorkspaceAcls(workspaceNamespace, firecloudName);
+        workspaceAuthService.getFirecloudWorkspaceAcls(workspaceNamespace, firecloudName);
 
     List<UserRole> userRoles = new ArrayList<>();
     for (Map.Entry<String, FirecloudWorkspaceAccessEntry> entry : emailToRole.entrySet()) {
@@ -596,24 +318,26 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public DbWorkspace setPublished(
-      DbWorkspace workspace, String publishedWorkspaceGroup, boolean publish) {
-    ArrayList<FirecloudWorkspaceACLUpdate> updateACLRequestList = new ArrayList<>();
-    FirecloudWorkspaceACLUpdate currentUpdate = new FirecloudWorkspaceACLUpdate();
-    currentUpdate.setEmail(publishedWorkspaceGroup);
+      String workspaceNamespace, String firecloudName, boolean publish) {
+    final DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, firecloudName);
 
-    if (publish) {
-      currentUpdate = updateFirecloudAclsOnUser(WorkspaceAccessLevel.READER, currentUpdate);
-      workspace.setPublished(true);
-    } else {
-      currentUpdate = updateFirecloudAclsOnUser(WorkspaceAccessLevel.NO_ACCESS, currentUpdate);
-      workspace.setPublished(false);
-    }
+    final WorkspaceAccessLevel accessLevel =
+        publish ? WorkspaceAccessLevel.READER : WorkspaceAccessLevel.NO_ACCESS;
 
-    updateACLRequestList.add(currentUpdate);
+    final FirecloudManagedGroupWithMembers authDomainGroup =
+        fireCloudService.getGroup(dbWorkspace.getCdrVersion().getAccessTier().getAuthDomainName());
+
+    final FirecloudWorkspaceACLUpdate currentUpdate =
+        WorkspaceAuthService.updateFirecloudAclsOnUser(
+            accessLevel, new FirecloudWorkspaceACLUpdate().email(authDomainGroup.getGroupEmail()));
+
     fireCloudService.updateWorkspaceACL(
-        workspace.getWorkspaceNamespace(), workspace.getFirecloudName(), updateACLRequestList);
+        dbWorkspace.getWorkspaceNamespace(),
+        dbWorkspace.getFirecloudName(),
+        Collections.singletonList(currentUpdate));
 
-    return this.saveWithLastModified(workspace);
+    dbWorkspace.setPublished(publish);
+    return workspaceDao.saveWithLastModified(dbWorkspace);
   }
 
   @Override
@@ -638,7 +362,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
             .filter(
                 workspace -> {
                   try {
-                    enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+                    workspaceAuthService.enforceWorkspaceAccessLevel(
                         workspace.getWorkspaceNamespace(),
                         workspace.getFirecloudName(),
                         WorkspaceAccessLevel.READER);
@@ -660,7 +384,13 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-  public DbUserRecentWorkspace updateRecentWorkspaces(
+  @Transactional
+  public DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace) {
+    return updateRecentWorkspaces(
+        workspace, userProvider.get().getUserId(), new Timestamp(clock.instant().toEpochMilli()));
+  }
+
+  private DbUserRecentWorkspace updateRecentWorkspaces(
       DbWorkspace workspace, long userId, Timestamp lastAccessDate) {
     Optional<DbUserRecentWorkspace> maybeRecentWorkspace =
         userRecentWorkspaceDao.findFirstByWorkspaceIdAndUserId(workspace.getWorkspaceId(), userId);
@@ -679,13 +409,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     return matchingRecentWorkspace;
   }
 
-  @Override
-  @Transactional
-  public DbUserRecentWorkspace updateRecentWorkspaces(DbWorkspace workspace) {
-    return updateRecentWorkspaces(
-        workspace, userProvider.get().getUserId(), new Timestamp(clock.instant().toEpochMilli()));
-  }
-
   private void handleWorkspaceLimit(long userId) {
     List<DbUserRecentWorkspace> userRecentWorkspaces =
         userRecentWorkspaceDao.findByUserIdOrderByLastAccessDateDesc(userId);
@@ -698,9 +421,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     userRecentWorkspaceDao.deleteByUserIdAndWorkspaceIdIn(userId, idsToDelete);
   }
 
-  @Override
   /** Returns true if anything was deleted from user_recent_workspaces, false if nothing was */
-  public boolean maybeDeleteRecentWorkspace(long workspaceId) {
+  private boolean maybeDeleteRecentWorkspace(long workspaceId) {
     long userId = userProvider.get().getUserId();
     Optional<DbUserRecentWorkspace> maybeRecentWorkspace =
         userRecentWorkspaceDao.findFirstByWorkspaceIdAndUserId(workspaceId, userId);
@@ -811,11 +533,5 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
                     .addMeasurement(GaugeMetric.WORKSPACE_COUNT, row.getWorkspaceCount())
                     .build())
         .collect(ImmutableList.toImmutableList());
-  }
-
-  @Override
-  public List<DbWorkspace> getAllActiveWorkspaces() {
-    return workspaceDao.findAllByActiveStatusIn(
-        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 }

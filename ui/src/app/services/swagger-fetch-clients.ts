@@ -20,6 +20,8 @@
  * });
  */
 
+import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from 'app/utils';
+import {environment} from 'environments/environment';
 import {
   AuthDomainApi,
   BaseAPI,  // internal
@@ -29,10 +31,10 @@ import {
   CohortReviewApi,
   CohortsApi,
   ConceptSetsApi,
+  ConfigApi,
   Configuration as FetchConfiguration,
   DataSetApi,
   FeaturedWorkspacesConfigApi,
-  FetchAPI,
   InstitutionApi, // internal
   ProfileApi,
   RuntimeApi,
@@ -43,6 +45,9 @@ import {
   WorkspaceAdminApi,
   WorkspacesApi,
 } from 'generated/fetch';
+
+import * as portableFetch from 'portable-fetch';
+
 
 let frozen = false;
 function checkFrozen() {
@@ -82,6 +87,7 @@ function bindCtor<T extends BaseAPI>(ctor: new() => T): () => T {
 // getters for the API clients, e.g.: runtimeApi().listRuntimes();
 export const authDomainApi = bindCtor(AuthDomainApi);
 export const cdrVersionsApi = bindCtor(CdrVersionsApi);
+export const configApi = bindCtor(ConfigApi);
 export const runtimeApi = bindCtor(RuntimeApi);
 export const cohortAnnotationDefinitionApi = bindCtor(CohortAnnotationDefinitionApi);
 export const cohortBuilderApi = bindCtor(CohortBuilderApi);
@@ -99,11 +105,33 @@ export const userMetricsApi = bindCtor(UserMetricsApi);
 export const workspaceAdminApi = bindCtor(WorkspaceAdminApi);
 export const workspacesApi = bindCtor(WorkspacesApi);
 
+export const getApiBaseUrl = () => {
+  if (cookiesEnabled()) {
+    return localStorage.getItem(LOCAL_STORAGE_API_OVERRIDE_KEY) || environment.allOfUsApiUrl;
+  } else {
+    return environment.allOfUsApiUrl;
+  }
+};
+
+// ConfigApi gets special treatment, since it's needed to bootstrap all of the
+// other API services: these require an access token, which in turn requires the
+// oauth client id, which is currently returned by the Config API.
+registerApiClient(ConfigApi, new class extends ConfigApi {
+  constructor() {
+    super();
+    this.configuration = new FetchConfiguration({
+      basePath: getApiBaseUrl()
+    });
+    this.basePath = getApiBaseUrl();
+    this.fetch = portableFetch;
+  }
+});
+
 /**
  * Binds standard API clients. To be called at most once for production use,
  * e.g. during app initialization.
  */
-export function bindApiClients(conf: FetchConfiguration, f: FetchAPI) {
+export function bindApiClients(conf: FetchConfiguration) {
   for (const ctor of apiCtors) {
     // We use an anonymous subclass here because Swagger's typescript-fetch
     // codegen creates API client subclasses which lack a public interface for
@@ -114,7 +142,7 @@ export function bindApiClients(conf: FetchConfiguration, f: FetchAPI) {
         super();
         this.configuration = conf;
         this.basePath = conf.basePath;
-        this.fetch = f;
+        this.fetch = portableFetch;
       }
     }());
   }

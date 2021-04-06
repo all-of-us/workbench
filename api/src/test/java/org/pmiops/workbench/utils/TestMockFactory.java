@@ -43,6 +43,7 @@ public class TestMockFactory {
   public static final String WORKSPACE_BILLING_ACCOUNT_NAME = "billingAccounts/00000-AAAAA-BBBBB";
   private static final String WORKSPACE_FIRECLOUD_NAME =
       "gonewiththewind"; // should match workspace name w/o spaces
+  public static final String DEFAULT_GOOGLE_PROJECT = "aou-rw-test-123";
 
   public Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
     List<DisseminateResearchEnum> disseminateResearchEnumsList = new ArrayList<>();
@@ -61,6 +62,7 @@ public class TestMockFactory {
         .googleBucketName(WORKSPACE_BUCKET_NAME)
         .billingAccountName(WORKSPACE_BILLING_ACCOUNT_NAME)
         .billingAccountType(BillingAccountType.FREE_TIER)
+        .googleProject(DEFAULT_GOOGLE_PROJECT)
         .creationTime(1588097211621L)
         .creator("jay@unit-test-research-aou.org")
         .creationTime(Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli())
@@ -99,7 +101,8 @@ public class TestMockFactory {
         .workspaceId(ns)
         .name(name)
         .createdBy(creator)
-        .bucketName(WORKSPACE_BUCKET_NAME);
+        .bucketName(WORKSPACE_BUCKET_NAME)
+        .googleProject(DEFAULT_GOOGLE_PROJECT);
   }
 
   public LeonardoListRuntimeResponse createLeonardoListRuntimesResponse() {
@@ -206,10 +209,11 @@ public class TestMockFactory {
     dbWorkspace.setReasonForAllOfUs(researchPurpose.getReasonForAllOfUs());
     dbWorkspace.setIntendedStudy(researchPurpose.getIntendedStudy());
     dbWorkspace.setAnticipatedFindings(researchPurpose.getAnticipatedFindings());
+    dbWorkspace.setGoogleProject(workspace.getGoogleProject());
     return dbWorkspace;
   }
 
-  public static DbAccessTier createDefaultAccessTier(AccessTierDao accessTierDao) {
+  public static DbAccessTier createRegisteredTierForTests(AccessTierDao accessTierDao) {
     final DbAccessTier accessTier =
         new DbAccessTier()
             .setAccessTierId(1)
@@ -219,6 +223,17 @@ public class TestMockFactory {
             .setAuthDomainGroupEmail("rt-users@fake-research-aou.org")
             .setServicePerimeter("registered/tier/perimeter");
     return accessTierDao.save(accessTier);
+  }
+
+  public static DbAccessTier createControlledTierForTests(AccessTierDao accessTierDao) {
+    return accessTierDao.save(
+        new DbAccessTier()
+            .setAccessTierId(2)
+            .setShortName("controlled")
+            .setDisplayName("Controlled Tier")
+            .setAuthDomainName("Controlled Tier Auth Domain")
+            .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
+            .setServicePerimeter("controlled/tier/perimeter"));
   }
 
   public static DbCdrVersion createDefaultCdrVersion(
@@ -234,7 +249,7 @@ public class TestMockFactory {
     // set the db name to be empty since test cases currently
     // run in the workbench schema only.
     cdrVersion.setCdrDbName("");
-    cdrVersion.setAccessTier(createDefaultAccessTier(accessTierDao));
+    cdrVersion.setAccessTier(createRegisteredTierForTests(accessTierDao));
     return cdrVersionDao.save(cdrVersion);
   }
 }

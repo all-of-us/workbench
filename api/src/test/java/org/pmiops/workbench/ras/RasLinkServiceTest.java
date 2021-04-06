@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.compliance.ComplianceService;
@@ -103,6 +104,7 @@ public class RasLinkServiceTest {
     UserServiceAuditor.class,
     FreeTierBillingService.class,
     HttpTransport.class,
+    AccessTierService.class,
   })
   static class Configuration {
     @Bean

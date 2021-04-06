@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {from} from 'rxjs/observable/from';
@@ -8,7 +7,7 @@ import {DetailHeader} from 'app/pages/data/cohort-review/detail-header.component
 import {DetailTabs} from 'app/pages/data/cohort-review/detail-tabs.component';
 import {cohortReviewStore, getVocabOptions, participantStore, vocabOptions} from 'app/services/review-state.service';
 import {cohortReviewApi} from 'app/services/swagger-fetch-clients';
-import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {withCurrentWorkspace} from 'app/utils';
 import {urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {ParticipantCohortStatus, SortOrder} from 'generated/fetch';
@@ -78,12 +77,3 @@ export const DetailPage = withCurrentWorkspace()(
     }
   }
 );
-
-@Component ({
-  template: '<div #root></div>',
-})
-export class DetailPageComponent extends ReactWrapperBase {
-  constructor() {
-    super(DetailPage, []);
-  }
-}

@@ -9,13 +9,11 @@ export BQ_DATASET=$2        # CDR dataset
 export WGV_PROJECT=$3       # whole genome variant project
 export WGV_DATASET=$4       # whole genome variant dataset
 export CDR_VERSION=$5       # CDR version
-export CDR_DATE=$6          # cdr date
-export BUCKET=$7            # bucket
 export DATA_BROWSER=$8      # data browser flag
 
 echo ""
 echo 'Validating that all prerequisites exist'
-if ./generate-cdr/validate-prerequisites-exist.sh $BQ_PROJECT $BQ_DATASET $CDR_VERSION $BUCKET
+if ./generate-cdr/validate-prerequisites-exist.sh $BQ_PROJECT $BQ_DATASET $CDR_VERSION
 then
     echo "Validation is complete"
 else
@@ -48,7 +46,7 @@ then
 
   echo ""
   echo 'Making denormalized search person table'
-  if ./generate-cdr/make-bq-denormalized-search-person.sh $BQ_PROJECT $BQ_DATASET $WGV_PROJECT $WGV_DATASET $CDR_DATE
+  if ./generate-cdr/make-bq-denormalized-search-person.sh $BQ_PROJECT $BQ_DATASET $WGV_PROJECT $WGV_DATASET
   then
       echo "Making denormalized search person table complete"
   else

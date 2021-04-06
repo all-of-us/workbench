@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
@@ -30,7 +31,6 @@ import org.pmiops.workbench.notebooks.model.LocalizationEntry;
 import org.pmiops.workbench.notebooks.model.Localize;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
-import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -52,7 +52,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   private final NotebooksRetryHandler notebooksRetryHandler;
   private final LeonardoMapper leonardoMapper;
   private final LeonardoRetryHandler leonardoRetryHandler;
-  private final WorkspaceService workspaceService;
+  private final WorkspaceDao workspaceDao;
 
   @Autowired
   public LeonardoNotebooksClientImpl(
@@ -66,7 +66,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
       NotebooksRetryHandler notebooksRetryHandler,
       LeonardoMapper leonardoMapper,
       LeonardoRetryHandler leonardoRetryHandler,
-      WorkspaceService workspaceService) {
+      WorkspaceDao workspaceDao) {
     this.runtimesApiProvider = runtimesApiProvider;
     this.serviceRuntimesApiProvider = serviceRuntimesApiProvider;
     this.proxyApiProvider = proxyApiProvider;
@@ -76,7 +76,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     this.notebooksRetryHandler = notebooksRetryHandler;
     this.leonardoMapper = leonardoMapper;
     this.leonardoRetryHandler = leonardoRetryHandler;
-    this.workspaceService = workspaceService;
+    this.workspaceDao = workspaceDao;
   }
 
   private LeonardoCreateRuntimeRequest buildCreateRuntimeRequest(
@@ -131,12 +131,12 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
   }
 
   @Override
-  public void createRuntime(Runtime runtime, String workspaceFirecloudName) {
+  public void createRuntime(
+      Runtime runtime, String workspaceNamespace, String workspaceFirecloudName) {
     RuntimesApi runtimesApi = runtimesApiProvider.get();
 
     DbUser user = userProvider.get();
-    DbWorkspace workspace =
-        workspaceService.getRequired(runtime.getGoogleProject(), workspaceFirecloudName);
+    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceFirecloudName);
     Map<String, String> customEnvironmentVariables = new HashMap<>();
     // i.e. is NEW or MIGRATED
     if (!workspace.getBillingMigrationStatusEnum().equals(BillingMigrationStatus.OLD)) {

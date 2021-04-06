@@ -9,10 +9,6 @@ import {SignInGuard} from './guards/sign-in-guard.service';
 import {DataPageComponent} from 'app/pages/data/data-page';
 import {DataSetPageComponent} from 'app/pages/data/data-set/dataset-page';
 import {CohortPageComponent} from './cohort-search/cohort-page/cohort-page.component';
-import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
-import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
-import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
-import {TablePage} from './pages/data/cohort-review/table-page';
 import {ConceptSearchComponent} from './pages/data/concept/concept-search';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';
@@ -70,6 +66,11 @@ const routes: Routes = [
       },
       {
         path: 'nih-callback',
+        component: AppRouting,
+        data: {}
+      },
+      {
+        path: 'ras-callback',
         component: AppRouting,
         data: {}
       },
@@ -209,37 +210,20 @@ const routes: Routes = [
                             children: [
                               {
                                 path: '',
-                                component: CohortReviewComponent,
-                                data: {
-                                  title: 'Review Cohort Participants',
-                                  breadcrumb: BreadcrumbType.Cohort,
-                                  helpContentKey: 'reviewParticipants'
-                                }
+                                component: AppRouting,
+                                data: {},
                               }, {
                                 path: 'participants',
-                                component: TablePage,
-                                data: {
-                                  title: 'Review Cohort Participants',
-                                  breadcrumb: BreadcrumbType.Cohort,
-                                  helpContentKey: 'reviewParticipants'
-                                }
+                                component: AppRouting,
+                                data: {},
                               }, {
                                 path: 'cohort-description',
-                                component: QueryReportComponent,
-                                data: {
-                                  title: 'Review Cohort Description',
-                                  breadcrumb: BreadcrumbType.Cohort,
-                                  helpContentKey: 'cohortDescription'
-                                }
+                                component: AppRouting,
+                                data: {},
                               }, {
                                 path: 'participants/:pid',
-                                component: DetailPageComponent,
-                                data: {
-                                  title: 'Participant Detail',
-                                  breadcrumb: BreadcrumbType.Participant,
-                                  shouldReuse: true,
-                                  helpContentKey: 'reviewParticipantDetail'
-                                }
+                                component: AppRouting,
+                                data: {},
                               }
                             ],
                           }

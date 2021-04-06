@@ -1,14 +1,15 @@
-import {CopyRequest, UpdateConceptSetRequest} from 'generated';
 import {
-  ConceptSet,
-  ConceptSetListResponse,
+  ConceptSet, ConceptSetListResponse, ConceptSetsApi,
+  CopyRequest,
+  CreateConceptSetRequest,
   Criteria,
   CriteriaType,
   Domain,
-  Surveys
+  EmptyResponse,
+  Surveys,
+  UpdateConceptSetRequest
 } from 'generated/fetch';
 
-import {ConceptSetsApi, CreateConceptSetRequest, EmptyResponse} from 'generated/fetch/api';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
 export class ConceptStubVariables {

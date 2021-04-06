@@ -6,6 +6,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
 import org.pmiops.workbench.db.model.DbParticipantCohortAnnotation;
@@ -18,7 +19,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ParticipantCohortAnnotationDaoTest {
+public class ParticipantCohortAnnotationDaoTest extends SpringTest {
 
   private static long COHORT_ID = 1;
   @Autowired private ParticipantCohortAnnotationDao participantCohortAnnotationDao;

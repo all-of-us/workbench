@@ -1,7 +1,7 @@
 import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {hasRegisteredAccessFetch, reactStyles} from 'app/utils';
+import {hasRegisteredAccess, reactStyles} from 'app/utils';
 import {AuthorityGuardedAction, hasAuthorityForAction} from 'app/utils/authorities';
 import {navigate, navigateSignOut, signInStore} from 'app/utils/navigation';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
@@ -272,7 +272,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
           onToggleSideNav={() => this.props.onToggleSideNav()}
           href='/profile'
           active={this.props.profileActive}
-          disabled={!hasRegisteredAccessFetch(profile.dataAccessLevel)}
+          disabled={!hasRegisteredAccess(profile.dataAccessLevel)}
         />
       }
       {
@@ -295,7 +295,7 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         onToggleSideNav={() => this.props.onToggleSideNav()}
         href={'/workspaces'}
         active={this.props.workspacesActive}
-        disabled={!hasRegisteredAccessFetch(profile.dataAccessLevel)}
+        disabled={!hasRegisteredAccess(profile.dataAccessLevel)}
       />
       <SideNavItem
         icon='star'
@@ -303,14 +303,14 @@ export class SideNav extends React.Component<SideNavProps, SideNavState> {
         onToggleSideNav={() => this.props.onToggleSideNav()}
         href={'/library'}
         active={this.props.libraryActive}
-        disabled={!hasRegisteredAccessFetch(profile.dataAccessLevel)}
+        disabled={!hasRegisteredAccess(profile.dataAccessLevel)}
       />
       <SideNavItem
         icon='help'
         content={'User Support Hub'}
         onToggleSideNav={() => this.props.onToggleSideNav()}
         parentOnClick={() => this.redirectToZendesk()}
-        disabled={!hasRegisteredAccessFetch(profile.dataAccessLevel)}
+        disabled={!hasRegisteredAccess(profile.dataAccessLevel)}
       />
       <SideNavItem
         icon='envelope'

@@ -1,22 +1,23 @@
 import NotebookDownloadModal from 'app/modal/notebook-download-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {makeRandomName} from 'utils/str-utils';
-import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
-import {getPropValue} from 'utils/element-utils';
-import {waitForFn} from 'utils/waits-utils';
+import { makeRandomName } from 'utils/str-utils';
+import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { getPropValue } from 'utils/element-utils';
+import { waitForFn } from 'utils/waits-utils';
 
 describe('Jupyter notebook download test', () => {
-
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
 
   const testDownloadModal = async (modal: NotebookDownloadModal): Promise<void> => {
     const checkDownloadDisabledState = async (wantDisabled: boolean) => {
-      expect(await waitForFn(async () => {
-        const downloadBtn = await modal.getDownloadButton();
-        return wantDisabled === !!(await getPropValue<boolean>(downloadBtn, 'disabled'));
-      })).toBe(true);
+      expect(
+        await waitForFn(async () => {
+          const downloadBtn = await modal.getDownloadButton();
+          return wantDisabled === !!(await getPropValue<boolean>(downloadBtn, 'disabled'));
+        })
+      ).toBe(true);
     };
 
     await checkDownloadDisabledState(true);
@@ -32,7 +33,7 @@ describe('Jupyter notebook download test', () => {
     // Ideally we'd verify that the file was downloaded. Unfortunately this
     // seems to be non-trivial in Puppeteer: https://github.com/puppeteer/puppeteer/issues/299
     await modal.waitUntilClose();
-  }
+  };
 
   /**
    * Test:
@@ -43,31 +44,32 @@ describe('Jupyter notebook download test', () => {
    *   - Download notebook.
    *   - Verify policy warnings modal interactions.
    */
-  test('download notebook with policy warnings', async () => {
+  test(
+    'download notebook with policy warnings',
+    async () => {
+      await findOrCreateWorkspace(page);
 
-    const workspaceCard = await findOrCreateWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+      const dataPage = new WorkspaceDataPage(page);
+      const notebookName = makeRandomName('py');
+      const notebook = await dataPage.createNotebook(notebookName);
 
-    const dataPage = new WorkspaceDataPage(page);
-    const notebookName = makeRandomName('py');
-    const notebook = await dataPage.createNotebook(notebookName);
+      // Run some Python code so the notebook has content.
+      await notebook.runCodeCell(1, { code: 'print("download test!")' });
 
-    // Run some Python code so the notebook has content.
-    await notebook.runCodeCell(1, {code: 'print("download test!")'});
+      // Save and download.
+      await notebook.save();
 
-    // Save and download.
-    await notebook.save();
+      console.log('downloading as ipynb');
+      await testDownloadModal(await notebook.downloadAsIpynb());
 
-    console.log('downloading as ipynb');
-    await testDownloadModal(await notebook.downloadAsIpynb());
+      console.log('downloading as Markdown');
+      await testDownloadModal(await notebook.downloadAsMarkdown());
 
-    console.log('downloading as Markdown');
-    await testDownloadModal(await notebook.downloadAsMarkdown());
+      // Ideally we would validate the download URLs or download content here.
+      // As of 9/25/20 I was unable to find a clear mechanism for accessing this.
 
-    // Ideally we would validate the download URLs or download content here.
-    // As of 9/25/20 I was unable to find a clear mechanism for accessing this.
-
-    await notebook.deleteNotebook(notebookName);
-  }, 30 * 60 * 1000);
-
-})
+      await notebook.deleteNotebook(notebookName);
+    },
+    30 * 60 * 1000
+  );
+});

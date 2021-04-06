@@ -1,0 +1,47 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "concept_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_name",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "domain_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "vocabulary_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_class_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "standard_concept",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "concept_code",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "valid_start_date",
+    "type": "DATE"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "valid_end_date",
+    "type": "DATE"
+  }
+]

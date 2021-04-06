@@ -1,4 +1,4 @@
-import {ConfigResponse} from 'generated';
+import {ConfigResponse} from 'generated/fetch';
 
 /**
  * Returns the currently live DUA version. This version should be displayed when

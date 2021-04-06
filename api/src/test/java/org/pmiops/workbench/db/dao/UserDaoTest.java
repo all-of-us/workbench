@@ -7,56 +7,64 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbInstitution;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.DuaType;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.OrganizationType;
+import org.pmiops.workbench.model.TierAccessStatus;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class UserDaoTest {
-
-  private static final Timestamp NOW = Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
-  private static final Timestamp BETA_ACCESS_REQUEST_TIME =
-      Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
+public class UserDaoTest extends SpringTest {
   private static final String STREET_ADDRESS_1 = "101 Main St";
   private static final String STREET_ADDRESS_2 = "# 202";
   private static final String CITY = "New Braunfels";
   private static final String STATE = "TX";
   private static final String COUNTRY = "US";
 
-  @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+  private DbAccessTier registeredTier;
+
+  @Autowired private AccessTierDao accessTierDao;
   @Autowired private InstitutionDao institutionDao;
+  @Autowired private UserAccessTierDao userAccessTierDao;
+  @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+
   @Autowired private UserDao userDao;
 
+  @Before
+  public void setup() {
+    registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
+  }
+
   @Test
-  public void testgetUserCountGaugeData_singleValue() {
+  public void testGetUserCountGaugeData_singleValue() {
     DbUser user1 = new DbUser();
     user1.setDisabled(false);
-    user1.setBetaAccessBypassTime(NOW);
-    final Short dataAccessLevelStorage =
-        DbStorageEnums.dataAccessLevelToStorage(DataAccessLevel.REGISTERED);
-    user1.setDataAccessLevel(dataAccessLevelStorage);
     user1 = userDao.save(user1);
+    addUserToTier(user1, registeredTier);
 
     List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
     assertThat(rows).hasSize(1);
     final UserCountGaugeLabelsAndValue row = rows.get(0);
-    assertThat(row.getDataAccessLevel()).isEqualTo(dataAccessLevelStorage);
-    assertThat(row.getBetaIsBypassed()).isTrue();
+    assertThat(row.getAccessTierShortNames()).isNotNull();
+    assertThat(row.getAccessTierShortNames()).contains(registeredTier.getShortName());
     assertThat(row.getDisabled()).isFalse();
     assertThat(row.getUserCount()).isEqualTo(1L);
   }
@@ -69,41 +77,50 @@ public class UserDaoTest {
 
   @Test
   public void testGetUserCountGaugeData_multipleUsers() {
-    insertMultipleUsers();
+    final DbInstitution institution = createInstitution();
+
+    insertTestUsers(false, 2, institution, registeredTier);
+    insertTestUsers(false, 1, institution, registeredTier);
+    insertTestUsers(true, 5, institution, registeredTier);
+    insertTestUsers(false, 10, institution);
 
     final List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
-    assertThat(rows).hasSize(4);
+    // registered/enabled, registered/disabled, and unregistered/enabled
+    assertThat(rows).hasSize(3);
 
+    // registered/enabled: 3
     assertThat(
             rows.stream()
-                .filter(UserCountGaugeLabelsAndValue::getBetaIsBypassed)
-                .anyMatch(UserCountGaugeLabelsAndValue::getDisabled))
-        .isFalse();
-
-    assertThat(
-            rows.stream()
-                .filter(r -> !r.getBetaIsBypassed())
                 .filter(
                     r ->
-                        r.getDataAccessLevel()
-                            .equals(
-                                DbStorageEnums.dataAccessLevelToStorage(
-                                    DataAccessLevel.REGISTERED)))
+                        r.getAccessTierShortNames() != null
+                            && r.getAccessTierShortNames().contains(registeredTier.getShortName()))
                 .filter(r -> !r.getDisabled())
                 .findFirst()
                 .map(UserCountGaugeLabelsAndValue::getUserCount)
                 .orElse(-1L))
-        .isEqualTo(1);
+        .isEqualTo(3);
 
+    // registered/disabled: 5
     assertThat(
             rows.stream()
-                .filter(UserCountGaugeLabelsAndValue::getBetaIsBypassed)
                 .filter(
                     r ->
-                        r.getDataAccessLevel()
-                            .equals(
-                                DbStorageEnums.dataAccessLevelToStorage(
-                                    DataAccessLevel.UNREGISTERED)))
+                        r.getAccessTierShortNames() != null
+                            && r.getAccessTierShortNames().contains(registeredTier.getShortName()))
+                .filter(UserCountGaugeLabelsAndValue::getDisabled)
+                .findFirst()
+                .map(UserCountGaugeLabelsAndValue::getUserCount)
+                .orElse(-1L))
+        .isEqualTo(5);
+
+    // unregistered/enabled: 10
+    assertThat(
+            rows.stream()
+                .filter(
+                    r ->
+                        r.getAccessTierShortNames() == null
+                            || !r.getAccessTierShortNames().contains(registeredTier.getShortName()))
                 .filter(r -> !r.getDisabled())
                 .findFirst()
                 .map(UserCountGaugeLabelsAndValue::getUserCount)
@@ -111,20 +128,131 @@ public class UserDaoTest {
         .isEqualTo(10);
   }
 
-  public void insertMultipleUsers() {
-    final DbInstitution institution = createInstitution();
-    insertTestUsers(false, DataAccessLevel.PROTECTED, true, 2, institution);
-    insertTestUsers(false, DataAccessLevel.REGISTERED, false, 1, institution);
-    insertTestUsers(true, DataAccessLevel.PROTECTED, false, 5, institution);
-    insertTestUsers(false, DataAccessLevel.UNREGISTERED, true, 10, institution);
+  @Test
+  public void test_findUsersBySearchStringAndTier_empty() {
+    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    assertThat(userDao.findUsersBySearchStringAndTier("any", ascendingByUsername, "any")).isEmpty();
+  }
+
+  @Test
+  public void test_findUsersBySearchStringAndTier_givenName() {
+    DbUser user = new DbUser();
+    user.setGivenName("Alice");
+    user = userDao.save(user);
+    addUserToTier(user, registeredTier);
+
+    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    List<DbUser> result =
+        userDao.findUsersBySearchStringAndTier(
+            "A", ascendingByUsername, registeredTier.getShortName());
+    assertThat(result).containsExactly(user);
+
+    result =
+        userDao.findUsersBySearchStringAndTier(
+            "lice", ascendingByUsername, registeredTier.getShortName());
+    assertThat(result).containsExactly(user);
+  }
+
+  @Test
+  public void test_findUsersBySearchStringAndTier_familyName() {
+    DbUser user = new DbUser();
+    user.setFamilyName("Lee");
+    user = userDao.save(user);
+    addUserToTier(user, registeredTier);
+
+    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    List<DbUser> result =
+        userDao.findUsersBySearchStringAndTier(
+            "Le", ascendingByUsername, registeredTier.getShortName());
+    assertThat(result).containsExactly(user);
+
+    result =
+        userDao.findUsersBySearchStringAndTier(
+            "ee", ascendingByUsername, registeredTier.getShortName());
+    assertThat(result).containsExactly(user);
+  }
+
+  @Test
+  public void test_findUsersBySearchStringAndTier_username() {
+    DbUser user = new DbUser();
+    user.setUsername("scienceGuy");
+    user = userDao.save(user);
+    addUserToTier(user, registeredTier);
+
+    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    List<DbUser> result =
+        userDao.findUsersBySearchStringAndTier(
+            "sci", ascendingByUsername, registeredTier.getShortName());
+    assertThat(result).containsExactly(user);
+
+    result =
+        userDao.findUsersBySearchStringAndTier(
+            "Guy", ascendingByUsername, registeredTier.getShortName());
+    assertThat(result).containsExactly(user);
+  }
+
+  @Test
+  public void test_findUsersBySearchStringAndTier_wrongTier() {
+    DbUser user = new DbUser();
+    user.setGivenName("Alice");
+    user = userDao.save(user);
+    addUserToTier(user, registeredTier);
+
+    // this also won't match
+    TestMockFactory.createControlledTierForTests(accessTierDao);
+
+    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    List<DbUser> result =
+        userDao.findUsersBySearchStringAndTier("A", ascendingByUsername, "wrong-tier");
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void test_findUsersBySearchStringAndTier_multi() {
+    DbUser alice = new DbUser();
+    alice.setGivenName("Alice");
+    alice.setFamilyName("Funk");
+    alice.setFamilyName("afunk123");
+    alice = userDao.save(alice);
+    addUserToTier(alice, registeredTier);
+
+    DbUser bob = new DbUser();
+    bob.setGivenName("Bob");
+    bob.setFamilyName("O'Brien");
+    bob.setUsername("bobo1");
+    bob = userDao.save(bob);
+    addUserToTier(bob, registeredTier);
+
+    DbUser taylor = new DbUser();
+    taylor.setGivenName("Taylor");
+    taylor.setFamilyName("Nakamura");
+    taylor.setUsername("captain");
+    taylor = userDao.save(taylor);
+    addUserToTier(taylor, registeredTier);
+
+    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+
+    // 'a' matches 'afunk123' and all of Taylor's fields
+    List<DbUser> result =
+        userDao.findUsersBySearchStringAndTier(
+            "a", ascendingByUsername, registeredTier.getShortName());
+    assertThat(result).containsExactly(alice, taylor).inOrder();
+
+    // 'I' matches 'Alice', `O'Brien`, and 'captain' because it's case-insensitive
+    result =
+        userDao.findUsersBySearchStringAndTier(
+            "I", ascendingByUsername, registeredTier.getShortName());
+    assertThat(result).containsExactly(alice, bob, taylor).inOrder();
+
+    result =
+        userDao.findUsersBySearchStringAndTier(
+            "q", ascendingByUsername, registeredTier.getShortName());
+    assertThat(result).isEmpty();
   }
 
   private List<DbUser> insertTestUsers(
-      boolean isDisabled,
-      DataAccessLevel dataAccessLevel,
-      boolean isBetaBypassed,
-      long numUsers,
-      DbInstitution institution) {
+      boolean isDisabled, long numUsers, DbInstitution institution, DbAccessTier... tiers) {
+
     ImmutableList.Builder<DbUser> resultList = ImmutableList.builder();
 
     for (int i = 0; i < numUsers; ++i) {
@@ -132,19 +260,31 @@ public class UserDaoTest {
       user.setGivenName("Bar");
       user.setFamilyName("Foo");
       user.setUsername("jaycarlton@aou.biz");
-      user.setBetaAccessRequestTime(BETA_ACCESS_REQUEST_TIME);
       final DbAddress address = createAddress();
       address.setUser(user);
       user.setAddress(address); // ?
       user.setDisabled(isDisabled);
-      if (isBetaBypassed) {
-        user.setBetaAccessBypassTime(NOW);
-      }
-      user.setDataAccessLevel(DbStorageEnums.dataAccessLevelToStorage(dataAccessLevel));
+      user = userDao.save(user);
+
       createAffiliation(user, institution);
+      for (DbAccessTier tier : tiers) {
+        addUserToTier(user, tier);
+      }
+
       resultList.add(userDao.save(user));
     }
     return resultList.build();
+  }
+
+  private DbUserAccessTier addUserToTier(DbUser user, DbAccessTier tier) {
+    final DbUserAccessTier entryToInsert =
+        new DbUserAccessTier()
+            .setUser(user)
+            .setAccessTier(tier)
+            .setTierAccessStatus(TierAccessStatus.ENABLED)
+            .setFirstEnabled(now())
+            .setLastUpdated(now());
+    return userAccessTierDao.save(entryToInsert);
   }
 
   @NotNull
@@ -176,5 +316,9 @@ public class UserDaoTest {
     institution.setOrganizationTypeEnum(OrganizationType.EDUCATIONAL_INSTITUTION);
     institution.setDuaTypeEnum(DuaType.MASTER);
     return institutionDao.save(institution);
+  }
+
+  private Timestamp now() {
+    return Timestamp.from(Instant.now());
   }
 }

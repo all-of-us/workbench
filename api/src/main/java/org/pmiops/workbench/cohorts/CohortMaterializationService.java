@@ -23,12 +23,12 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.pmiops.workbench.cdr.CdrVersionContext;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService.ConceptIds;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
 import org.pmiops.workbench.cohortbuilder.TableQueryAndConfig;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
-import org.pmiops.workbench.concept.ConceptService;
-import org.pmiops.workbench.concept.ConceptService.ConceptIds;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.ColumnConfig;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfig.TableConfig;
@@ -108,7 +108,7 @@ public class CohortMaterializationService {
   private final AnnotationQueryBuilder annotationQueryBuilder;
   private final ParticipantCohortStatusDao participantCohortStatusDao;
   private final CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
-  private final ConceptService conceptService;
+  private final CohortBuilderService cohortBuilderService;
   private Provider<WorkbenchConfig> configProvider;
 
   @Autowired
@@ -117,13 +117,13 @@ public class CohortMaterializationService {
       AnnotationQueryBuilder annotationQueryBuilder,
       ParticipantCohortStatusDao participantCohortStatusDao,
       CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService,
-      ConceptService conceptService,
+      CohortBuilderService cohortBuilderService,
       Provider<WorkbenchConfig> configProvider) {
     this.fieldSetQueryBuilder = fieldSetQueryBuilder;
     this.annotationQueryBuilder = annotationQueryBuilder;
     this.participantCohortStatusDao = participantCohortStatusDao;
     this.cdrBigQuerySchemaConfigService = cdrBigQuerySchemaConfigService;
-    this.conceptService = conceptService;
+    this.cohortBuilderService = cohortBuilderService;
     this.configProvider = configProvider;
   }
 
@@ -231,7 +231,7 @@ public class CohortMaterializationService {
       TableQuery tableQuery, Set<Long> conceptIds, TableConfig tableConfig) {
     ConceptColumns conceptColumns =
         cdrBigQuerySchemaConfigService.getConceptColumns(tableConfig, tableQuery.getTableName());
-    ConceptIds classifiedConceptIds = conceptService.classifyConceptIds(conceptIds);
+    ConceptIds classifiedConceptIds = cohortBuilderService.classifyConceptIds(conceptIds);
 
     if (classifiedConceptIds.getSourceConceptIds().isEmpty()
         && classifiedConceptIds.getStandardConceptIds().isEmpty()) {

@@ -14,6 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
 import org.pmiops.workbench.cdr.model.DbCriteria;
 import org.pmiops.workbench.model.AttrName;
@@ -41,7 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class ElasticFiltersTest {
+public class ElasticFiltersTest extends SpringTest {
 
   private static final ImmutableList<String> NO_DATA_FILTERS = ImmutableList.of();
   @Autowired private CBCriteriaDao cbCriteriaDao;

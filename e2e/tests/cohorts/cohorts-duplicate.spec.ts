@@ -1,18 +1,16 @@
 import ReviewCriteriaSidebar from 'app/component/review-criteria-sidebar';
-import {FilterSign} from 'app/page/criteria-search-page';
+import { FilterSign } from 'app/page/criteria-search-page';
 import DataResourceCard from 'app/component/data-resource-card';
 import ClrIconLink from 'app/element/clr-icon-link';
-import {MenuOption, ResourceCard} from 'app/text-labels';
+import { MenuOption, ResourceCard } from 'app/text-labels';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
-import {waitForText, waitWhileLoading} from 'utils/waits-utils';
+import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import {Ethnicity} from 'app/page/cohort-search-page';
-
+import { Ethnicity } from 'app/page/cohort-search-page';
 
 describe('Cohorts', () => {
-
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
@@ -29,9 +27,7 @@ describe('Cohorts', () => {
    * Delete cohort via delete/trash icon on cohort build page
    */
   test('Create, duplicate and delete', async () => {
-
-    const workspaceCard = await findOrCreateWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+    await findOrCreateWorkspace(page);
 
     // Wait for the Data page.
     const dataPage = new WorkspaceDataPage(page);
@@ -63,7 +59,11 @@ describe('Cohorts', () => {
 
     // Add the condition in first row. We don't know what the condition name is, so we get the cell value first.
     const nameValue = await search2ResultsTable.getCellValue(1, 1);
-    const addIcon = await ClrIconLink.findByName(page, {containsText: nameValue, iconShape: 'plus-circle'}, search2ResultsTable);
+    const addIcon = await ClrIconLink.findByName(
+      page,
+      { containsText: nameValue, iconShape: 'plus-circle' },
+      search2ResultsTable
+    );
     await addIcon.click();
 
     // Click Finish & Review button to open selection list and add modifier
@@ -97,9 +97,9 @@ describe('Cohorts', () => {
     await page.goto(workspaceDataUrl);
     await dataPage.waitForLoad();
     let cohortCard = await DataResourceCard.findCard(page, `${cohortName}`);
-  
+
     // Edit cohort using Ellipsis menu
-    await cohortCard.selectSnowmanMenu(MenuOption.Edit, {waitForNav: false});
+    await cohortCard.selectSnowmanMenu(MenuOption.Edit, { waitForNav: false });
     await cohortBuildPage.waitForLoad();
     await waitWhileLoading(page);
 
@@ -109,10 +109,10 @@ describe('Cohorts', () => {
     await ethnicityLookUp.addEthnicity([Ethnicity.HispanicOrLatino]);
 
     // Open selection list and click Save Criteria button
-   await ethnicityLookUp.reviewAndSaveCriteria();
+    await ethnicityLookUp.reviewAndSaveCriteria();
 
-   // select SAVE option from the SAVE COHORT button drop-down menu
-   await cohortBuildPage.saveChanges();
+    // select SAVE option from the SAVE COHORT button drop-down menu
+    await cohortBuildPage.saveChanges();
 
     // Should land on Cohorts Actions page
     const cohortActionsPage = new CohortActionsPage(page);
@@ -124,11 +124,11 @@ describe('Cohorts', () => {
 
     // Duplicate cohort using Ellipsis menu.
     cohortCard = await DataResourceCard.findCard(page, `${cohortName}`);
-    await cohortCard.selectSnowmanMenu(MenuOption.Duplicate, {waitForNav: false});
+    await cohortCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: false });
     await waitWhileLoading(page);
 
     const duplCohortName = `Duplicate of ${cohortName}`;
-    console.log(`Duplicated Cohort "${cohortName}": "${duplCohortName}"`)
+    console.log(`Duplicated Cohort "${cohortName}": "${duplCohortName}"`);
     // Delete duplicated cohort.
     const modalTextContent = await dataPage.deleteResource(duplCohortName, ResourceCard.Cohort);
     expect(modalTextContent).toContain(`Are you sure you want to delete Cohort: ${duplCohortName}?`);
@@ -139,7 +139,7 @@ describe('Cohorts', () => {
     // find the original new cohortCard
     cohortCard = await DataResourceCard.findCard(page, `${cohortName}`);
     // Cohort can be opened from resource card link.
-     await cohortCard.clickResourceName();
+    await cohortCard.clickResourceName();
     // Wait for page ready
     await cohortBuildPage.waitForLoad();
     await waitWhileLoading(page);
@@ -156,5 +156,4 @@ describe('Cohorts', () => {
     // verify that the cohort card does not exist on the subcohort tab
     expect(await DataResourceCard.findCard(page, `${cohortName}`, 5000)).toBeFalsy();
   });
-
 });

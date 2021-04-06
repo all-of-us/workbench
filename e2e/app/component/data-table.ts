@@ -1,27 +1,25 @@
-import {Page} from 'puppeteer';
+import { Page } from 'puppeteer';
 import Container from 'app/container';
-import {getPropValue} from 'utils/element-utils';
+import { getPropValue } from 'utils/element-utils';
 import Table from './table';
-
 
 const defaultXpath = '//*[contains(concat(normalize-space(@class), " "), "p-datatable ")]';
 
 export default class DataTable extends Table {
-
   constructor(page: Page, xpath: string = defaultXpath, container?: Container) {
     super(page, xpath, container);
   }
 
   getHeaderTable(): Table {
-    return new Table(this.page, `${this.getXpath()}//table[@class="p-datatable-scrollable-header-table"]`)
+    return new Table(this.page, `${this.getXpath()}//table[@class="p-datatable-scrollable-header-table"]`);
   }
 
   getBodyTable(): Table {
-    return new Table(this.page, `${this.getXpath()}//table[@class="p-datatable-scrollable-body-table"]`)
+    return new Table(this.page, `${this.getXpath()}//table[@class="p-datatable-scrollable-body-table"]`);
   }
 
   getFooterTable(): Table {
-    return new Table(this.page, `${this.getXpath()}//table[@class="p-datatable-scrollable-footer-table"]`)
+    return new Table(this.page, `${this.getXpath()}//table[@class="p-datatable-scrollable-footer-table"]`);
   }
 
   /**
@@ -37,7 +35,7 @@ export default class DataTable extends Table {
     const selector = `${this.getPaginatorXpath()}/*[@class="p-paginator-current"]`;
     let textContent;
     try {
-      const elemt = await this.page.waitForXPath(selector, {visible: true});
+      const elemt = await this.page.waitForXPath(selector, { visible: true });
       textContent = await getPropValue<string>(elemt, 'textContent');
     } catch (e) {
       return [0, 0, 0];
@@ -49,8 +47,6 @@ export default class DataTable extends Table {
   }
 
   private getPaginatorXpath(): string {
-    return `${this.getXpath()}/*[contains(concat(normalize-space(@class), " "), "p-paginator ")]`
+    return `${this.getXpath()}/*[contains(concat(normalize-space(@class), " "), "p-paginator ")]`;
   }
-
-
 }

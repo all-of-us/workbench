@@ -6,8 +6,9 @@ import {CohortBuilderApi, Domain, ModifierType, WorkspacesApi} from 'generated/f
 import * as React from 'react';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
-import {WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
-import {workspaceDataStub, WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
+import {WorkspaceStubVariables} from 'testing/stubs/workspaces';
+import {workspaceDataStub} from 'testing/stubs/workspaces';
+import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {ModifierPage} from './modifier-page.component';
 
 

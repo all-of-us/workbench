@@ -1,9 +1,9 @@
-import RuntimePanel, {ComputeType} from 'app/component/runtime-panel';
-import {config} from 'resources/workbench-config';
-import {createWorkspace, signInWithAccessToken} from 'utils/test-utils';
+import RuntimePanel, { ComputeType } from 'app/component/runtime-panel';
+import { config } from 'resources/workbench-config';
+import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
-import {makeRandomName} from 'utils/str-utils';
-import {ResourceCard} from 'app/text-labels';
+import { makeRandomName } from 'utils/str-utils';
+import { ResourceCard } from 'app/text-labels';
 
 // This one is going to take a long time
 jest.setTimeout(60 * 30 * 1000);
@@ -11,14 +11,12 @@ jest.setTimeout(60 * 30 * 1000);
 jest.retryTimes(1);
 
 describe('Updating runtime compute type', () => {
-
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
 
-  test('Switch from GCE to dataproc', async() => {
-
-    await createWorkspace(page, config.altCdrVersionName).then(card => card.clickWorkspaceName());
+  test('Switch from GCE to dataproc', async () => {
+    await createWorkspace(page, { cdrVersion: config.altCdrVersionName });
 
     // Open the runtime panel
     const runtimePanel = new RuntimePanel(page);
@@ -34,16 +32,16 @@ describe('Updating runtime compute type', () => {
     const notebook = await dataPage.createNotebook(notebookName);
 
     // Run some Python commands to validate the VM configuration
-    const cpusOutputText = await notebook.runCodeCell(1, {codeFile: 'resources/python-code/count-cpus.py'});
+    const cpusOutputText = await notebook.runCodeCell(1, { codeFile: 'resources/python-code/count-cpus.py' });
     // Default CPU count is 4
     expect(parseInt(cpusOutputText, 10)).toBe(4);
     // This gets the amount of memory available to Python in bytes
-    const memoryOutputText = await notebook.runCodeCell(2, {codeFile: 'resources/python-code/count-memory.py'});
+    const memoryOutputText = await notebook.runCodeCell(2, { codeFile: 'resources/python-code/count-memory.py' });
     // Default memory is 15 gibibytes, we'll check that it is between 14 billion and 16 billion bytes
     expect(parseInt(memoryOutputText, 10)).toBeGreaterThanOrEqual(14 * 1000 * 1000 * 1000);
     expect(parseInt(memoryOutputText, 10)).toBeLessThanOrEqual(16 * 1000 * 1000 * 1000);
     // This gets the disk space in bytes
-    const diskOutputText = await notebook.runCodeCell(3, {codeFile: 'resources/python-code/count-disk-space.py'});
+    const diskOutputText = await notebook.runCodeCell(3, { codeFile: 'resources/python-code/count-disk-space.py' });
     // Default disk is 50 gibibytes, we'll check that it is between 45 and 55 billion bytes
     expect(parseInt(diskOutputText, 10)).toBeGreaterThanOrEqual(45 * 1000 * 1000 * 1000);
     expect(parseInt(diskOutputText, 10)).toBeLessThanOrEqual(55 * 1000 * 1000 * 1000);
@@ -73,9 +71,9 @@ describe('Updating runtime compute type', () => {
     await notebookPreviewPage.openEditMode(notebookName);
 
     // Run notebook to validate runtime settings
-    const workersOutputText = await notebook.runCodeCell(4, {codeFile: 'resources/python-code/count-workers.py'});
+    const workersOutputText = await notebook.runCodeCell(4, { codeFile: 'resources/python-code/count-workers.py' });
     // Spark config always seems to start at this and then scale if you need additional threads.
-    expect(workersOutputText).toBe('\'2\'');
+    expect(workersOutputText).toBe("'2'");
     await notebook.save();
 
     // Delete runtime
@@ -92,6 +90,6 @@ describe('Updating runtime compute type', () => {
     // Delete notebook
     const workspaceAnalysisPage = await notebookPreviewPage.goAnalysisPage();
     await workspaceAnalysisPage.deleteResource(notebookName, ResourceCard.Notebook);
+    await workspaceAnalysisPage.deleteWorkspace();
   });
-
 });

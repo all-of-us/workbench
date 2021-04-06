@@ -2,12 +2,11 @@ package org.pmiops.workbench.cdr.dao;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.common.collect.ImmutableList;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.cdr.model.DbConcept;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.model.DbDomainInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -17,42 +16,15 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class DomainInfoDaoTest {
+public class DomainInfoDaoTest extends SpringTest {
 
   @Autowired private DomainInfoDao domainInfoDao;
-  @Autowired private ConceptDao conceptDao;
   private DbDomainInfo domainInfoObservation;
   private DbDomainInfo domainInfoCondition;
   private DbDomainInfo domainInfoPM;
 
   @Before
   public void setUp() {
-    conceptDao.save(
-        new DbConcept()
-            .conceptId(1L)
-            .domainId("Observation")
-            .count(10L)
-            .sourceCountValue(22L)
-            .standardConcept("S")
-            .conceptName("name"));
-    conceptDao.save(
-        new DbConcept()
-            .conceptId(2L)
-            .domainId("Condition")
-            .count(100L)
-            .sourceCountValue(122L)
-            .standardConcept("S")
-            .conceptName("name"));
-    conceptDao.save(
-        new DbConcept()
-            .conceptId(3L)
-            .domainId("Measurement")
-            .count(200L)
-            .sourceCountValue(127L)
-            .standardConcept("")
-            .vocabularyId("PPI")
-            .conceptClassId("Clinical Observation")
-            .conceptName("name"));
     domainInfoObservation =
         domainInfoDao.save(
             new DbDomainInfo()
@@ -95,33 +67,5 @@ public class DomainInfoDaoTest {
     assertThat(domainInfoCondition).isEqualTo(infos.get(0));
     assertThat(domainInfoObservation).isEqualTo(infos.get(1));
     assertThat(domainInfoPM).isEqualTo(infos.get(2));
-  }
-
-  @Test
-  public void findStandardConceptCounts() {
-    List<DbDomainInfo> infos = domainInfoDao.findConceptCounts("name", ImmutableList.of("S", "C"));
-    assertThat(infos.size()).isEqualTo(2);
-    assertThat(domainInfoCondition.standardConceptCount(1).allConceptCount(1))
-        .isEqualTo(infos.get(0));
-    assertThat(domainInfoObservation.standardConceptCount(1).allConceptCount(1))
-        .isEqualTo(infos.get(1));
-  }
-
-  @Test
-  public void findAllMatchConceptCounts() {
-    List<DbDomainInfo> infos =
-        domainInfoDao.findConceptCounts("name", ImmutableList.of("S", "C", ""));
-    assertThat(infos.size()).isEqualTo(2);
-    assertThat(domainInfoCondition.standardConceptCount(1).allConceptCount(1))
-        .isEqualTo(infos.get(0));
-    assertThat(domainInfoObservation.standardConceptCount(1).allConceptCount(1))
-        .isEqualTo(infos.get(1));
-  }
-
-  @Test
-  public void findPhysicalMeasurementConceptCounts() {
-    DbDomainInfo info =
-        domainInfoDao.findPhysicalMeasurementConceptCounts("name", ImmutableList.of("S", "C", ""));
-    assertThat(domainInfoPM.allConceptCount(1).standardConceptCount(1)).isEqualTo(info);
   }
 }

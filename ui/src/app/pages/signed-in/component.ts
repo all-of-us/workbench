@@ -8,11 +8,11 @@ import {SignInService} from 'app/services/sign-in.service';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 
 import {FooterTypeEnum} from 'app/components/footer';
-import {debouncer, hasRegisteredAccessFetch} from 'app/utils';
+import {debouncer, hasRegisteredAccess} from 'app/utils';
 import Timeout = NodeJS.Timeout;
 import {setInstitutionCategoryState} from 'app/utils/analytics';
-import {cdrVersionStore, navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
-import {compoundRuntimeOpStore, routeDataStore} from 'app/utils/stores';
+import {navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
+import {cdrVersionStore, compoundRuntimeOpStore, routeDataStore} from 'app/utils/stores';
 import {initializeZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Profile as FetchProfile} from 'generated/fetch';
@@ -56,6 +56,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   shouldShowDisplayTag = environment.shouldShowDisplayTag;
   enableSignedInFooter = environment.enableFooter;
   minimizeChrome = false;
+  cdrVersionsInitialized = false;
   // True if the user tried to open the Zendesk support widget and an error
   // occurred.
   zendeskLoadError = false;
@@ -92,10 +93,17 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       this.profileLoadingSub = this.profileStorageService.profile$.subscribe((profile) => {
         this.profile = profile as unknown as FetchProfile;
         setInstitutionCategoryState(this.profile.verifiedInstitutionalAffiliation);
-        if (hasRegisteredAccessFetch(this.profile.dataAccessLevel)) {
+        if (hasRegisteredAccess(this.profile.dataAccessLevel)) {
           cdrVersionsApi().getCdrVersions().then(resp => {
-            cdrVersionStore.next(resp);
+            // cdrVersionsInitialized blocks app rendering so that route
+            // components don't try to lookup CDR data before it's available.
+            // This will need to be a step in the React bootstrapping as well.
+            // See discussion on https://github.com/all-of-us/workbench/pull/4713
+            cdrVersionStore.set(resp);
+            this.cdrVersionsInitialized = true;
           });
+        } else {
+          this.cdrVersionsInitialized = true;
         }
       });
     });

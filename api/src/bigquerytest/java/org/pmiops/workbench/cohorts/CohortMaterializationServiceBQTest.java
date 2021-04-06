@@ -24,15 +24,15 @@ import org.mockito.Mock;
 import org.pmiops.workbench.api.BigQueryBaseTest;
 import org.pmiops.workbench.api.BigQueryTestService;
 import org.pmiops.workbench.cdr.CdrVersionContext;
-import org.pmiops.workbench.cdr.dao.ConceptDao;
-import org.pmiops.workbench.cdr.dao.DomainInfoDao;
-import org.pmiops.workbench.cdr.dao.SurveyModuleDao;
-import org.pmiops.workbench.cdr.model.DbConcept;
+import org.pmiops.workbench.cdr.dao.CBCriteriaDao;
+import org.pmiops.workbench.cdr.model.DbCriteria;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
+import org.pmiops.workbench.cohortbuilder.CohortBuilderServiceImpl;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.FieldSetQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.SearchGroupItemQueryBuilder;
+import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapperImpl;
 import org.pmiops.workbench.cohortreview.AnnotationQueryBuilder;
-import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -69,10 +69,11 @@ import org.springframework.context.annotation.Import;
 @Import({
   BigQueryTestService.class,
   CohortQueryBuilder.class,
-  CohortQueryBuilder.class,
   FieldSetQueryBuilder.class,
   TestJpaConfig.class,
   TestBigQueryCdrSchemaConfig.class,
+  CohortBuilderServiceImpl.class,
+  CohortBuilderMapperImpl.class,
   AnnotationQueryBuilder.class,
   CdrBigQuerySchemaConfigService.class,
   SearchGroupItemQueryBuilder.class
@@ -95,11 +96,9 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   @Autowired private CohortReviewDao cohortReviewDao;
 
-  @Autowired private ConceptDao conceptDao;
+  @Autowired private CBCriteriaDao cbCriteriaDao;
 
-  @Autowired private DomainInfoDao domainInfoDao;
-
-  @Autowired private SurveyModuleDao surveyModuleDao;
+  @Autowired private CohortBuilderService cohortBuilderService;
 
   @Autowired private ParticipantCohortStatusDao participantCohortStatusDao;
 
@@ -163,15 +162,13 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
     participantCohortStatusDao.save(
         makeStatus(cohortReview.getCohortReviewId(), 2L, CohortStatus.EXCLUDED));
 
-    ConceptService conceptService = new ConceptService(conceptDao);
-
     this.cohortMaterializationService =
         new CohortMaterializationService(
             fieldSetQueryBuilder,
             annotationQueryBuilder,
             participantCohortStatusDao,
             cdrBigQuerySchemaConfigService,
-            conceptService,
+            cohortBuilderService,
             configProvider);
   }
 
@@ -1500,7 +1497,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   @Test
   public void testMaterializeCohortConceptSetNoMatchingConcepts() {
-    conceptDao.save(new DbConcept().conceptId(2L).standardConcept(STANDARD_CONCEPT_CODE));
+    cbCriteriaDao.save(DbCriteria.builder().addConceptId("2").addStandard(true).build());
 
     TableQuery tableQuery = new TableQuery();
     tableQuery.setTableName("condition_occurrence");
@@ -1517,7 +1514,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   @Test
   public void testMaterializeCohortConceptSetOneStandardConcept() {
-    conceptDao.save(new DbConcept().conceptId(192819L).standardConcept(STANDARD_CONCEPT_CODE));
+    cbCriteriaDao.save(DbCriteria.builder().addConceptId("192819").addStandard(true).build());
 
     TableQuery tableQuery =
         new TableQuery()
@@ -1538,7 +1535,8 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   @Test
   public void testMaterializeCohortConceptSetOneStandardConceptMismatch() {
-    conceptDao.save(new DbConcept().conceptId(44829697L).standardConcept(STANDARD_CONCEPT_CODE));
+    cbCriteriaDao.deleteAll();
+    cbCriteriaDao.save(DbCriteria.builder().addConceptId("44829697").addStandard(true).build());
     final MaterializeCohortResponse response = materializeCohort();
     assertResults(response);
     assertThat(response.getNextPageToken()).isNull();
@@ -1546,7 +1544,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   @Test
   public void testMaterializeCohortConceptSetOneSourceConcept() {
-    conceptDao.save(new DbConcept().conceptId(44829697L));
+    cbCriteriaDao.save(DbCriteria.builder().addConceptId("44829697").addStandard(false).build());
     MaterializeCohortResponse response = materializeCohort();
     assertConditionOccurrenceIds(response, 12751439L, 12751440L);
     assertThat(response.getNextPageToken()).isNull();
@@ -1568,9 +1566,7 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   @Test
   public void testMaterializeCohortConceptSetOneSourceConceptMismatch() {
-    DbConcept concept = new DbConcept();
-    concept.setConceptId(192819L);
-    conceptDao.save(concept);
+    cbCriteriaDao.save(DbCriteria.builder().addConceptId("192819").addStandard(false).build());
     TableQuery tableQuery = new TableQuery();
     tableQuery.setTableName("condition_occurrence");
     tableQuery.setColumns(ImmutableList.of("condition_occurrence_id"));
@@ -1589,11 +1585,11 @@ public class CohortMaterializationServiceBQTest extends BigQueryBaseTest {
 
   @Test
   public void testMaterializeCohortConceptSetLotsOfConceptsPaging() {
-    conceptDao.save(new DbConcept().conceptId(1L));
-    conceptDao.save(new DbConcept().conceptId(6L).standardConcept(STANDARD_CONCEPT_CODE));
-    conceptDao.save(new DbConcept().conceptId(7L).standardConcept(STANDARD_CONCEPT_CODE));
-    conceptDao.save(new DbConcept().conceptId(192819L).standardConcept(STANDARD_CONCEPT_CODE));
-    conceptDao.save(new DbConcept().conceptId(44829697L));
+    cbCriteriaDao.save(DbCriteria.builder().addConceptId("1").addStandard(false).build());
+    cbCriteriaDao.save(DbCriteria.builder().addConceptId("6").addStandard(true).build());
+    cbCriteriaDao.save(DbCriteria.builder().addConceptId("7").addStandard(true).build());
+    cbCriteriaDao.save(DbCriteria.builder().addConceptId("192819").addStandard(true).build());
+    cbCriteriaDao.save(DbCriteria.builder().addConceptId("44829697").addStandard(false).build());
     TableQuery tableQuery = new TableQuery();
     tableQuery.setTableName("condition_occurrence");
     tableQuery.setColumns(ImmutableList.of("condition_occurrence_id"));

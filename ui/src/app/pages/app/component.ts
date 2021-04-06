@@ -9,9 +9,11 @@ import {
 } from '@angular/router';
 import {buildPageTitleForEnvironment} from 'app/utils/title';
 
+import {StackdriverErrorReporter} from 'stackdriver-errors-js';
+
 
 import {ServerConfigService} from 'app/services/server-config.service';
-import {cookiesEnabled} from 'app/utils';
+import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from 'app/utils';
 import {initializeAnalytics} from 'app/utils/analytics';
 import {
   queryParamsStore,
@@ -19,12 +21,10 @@ import {
   serverConfigStore,
   urlParamsStore
 } from 'app/utils/navigation';
-import {routeDataStore} from 'app/utils/stores';
+import {routeDataStore, stackdriverErrorReporterStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 
 import outdatedBrowserRework from 'outdated-browser-rework';
-
-export const overriddenUrlKey = 'allOfUsApiUrlOverride';
 
 @Component({
   selector: 'app-aou',
@@ -47,23 +47,23 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.checkBrowserSupport();
-    this.loadConfig();
+    this.loadConfigAndErrorReporter();
 
     this.cookiesEnabled = cookiesEnabled();
     // Local storage breaks if cookies are not enabled
     if (this.cookiesEnabled) {
       try {
-        this.overriddenUrl = localStorage.getItem(overriddenUrlKey);
+        this.overriddenUrl = localStorage.getItem(LOCAL_STORAGE_API_OVERRIDE_KEY);
         window['setAllOfUsApiUrl'] = (url: string) => {
           if (url) {
             if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
               throw new Error('URL should be of the form "http[s]://host.example.com[:port]"');
             }
             this.overriddenUrl = url;
-            localStorage.setItem(overriddenUrlKey, url);
+            localStorage.setItem(LOCAL_STORAGE_API_OVERRIDE_KEY, url);
           } else {
             this.overriddenUrl = null;
-            localStorage.removeItem(overriddenUrlKey);
+            localStorage.removeItem(LOCAL_STORAGE_API_OVERRIDE_KEY);
           }
           window.location.reload();
         };
@@ -171,9 +171,16 @@ export class AppComponent implements OnInit {
     });
   }
 
-  private loadConfig() {
+  private loadConfigAndErrorReporter() {
     this.serverConfigService.getConfig().subscribe((config) => {
       serverConfigStore.next(config);
+
+      const reporter = new StackdriverErrorReporter();
+      reporter.start({
+        key: config.publicApiKeyForErrorReports,
+        projectId: config.projectId,
+      });
+      stackdriverErrorReporterStore.set(reporter);
     });
   }
 

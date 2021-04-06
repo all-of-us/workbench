@@ -19,6 +19,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
@@ -39,7 +41,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class OfflineUserControllerTest {
+public class OfflineUserControllerTest extends SpringTest {
   @Autowired private CloudResourceManagerService cloudResourceManagerService;
   @Autowired private UserService userService;
   @Autowired private OfflineUserController offlineUserController;
@@ -50,7 +52,11 @@ public class OfflineUserControllerTest {
 
   @TestConfiguration
   @Import({OfflineUserController.class})
-  @MockBean({CloudResourceManagerService.class, UserService.class})
+  @MockBean({
+    AccessTierService.class,
+    CloudResourceManagerService.class,
+    UserService.class,
+  })
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

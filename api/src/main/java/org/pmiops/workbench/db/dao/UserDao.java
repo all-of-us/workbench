@@ -46,33 +46,42 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
           + " ORDER BY NULL")
   Set<DbUser> findAllUsersWithAuthoritiesAndPageVisits();
 
-  /** Find users matching the user's name or email */
+  // Find users matching the requested access tier and a (name or username) search term.
   @Query(
-      "SELECT dbUser FROM DbUser dbUser WHERE dbUser.dataAccessLevel IN :dals "
-          + "AND ( lower(dbUser.username) LIKE lower(concat('%', :term, '%')) "
-          + "OR lower(dbUser.familyName) LIKE lower(concat('%', :term, '%')) "
-          + "OR lower(dbUser.givenName) LIKE lower(concat('%', :term, '%')) )")
-  List<DbUser> findUsersByDataAccessLevelsAndSearchString(
-      @Param("dals") List<Short> dataAccessLevels, @Param("term") String term, Sort sort);
-
-  Set<DbUser> findByFirstRegistrationCompletionTimeNotNull();
-
-  @Query(
-      "SELECT dataAccessLevel, disabled, CASE WHEN betaAccessBypassTime IS NOT NULL THEN TRUE ELSE FALSE END AS betaIsBypassed, COUNT(userId) AS userCount "
-          + "FROM DbUser "
-          + "GROUP BY dataAccessLevel, disabled, CASE WHEN betaAccessBypassTime IS NOT NULL THEN TRUE ELSE FALSE END "
-          + "ORDER BY NULL")
-  List<UserCountGaugeLabelsAndValue> getUserCountGaugeData();
+      "SELECT dbUser FROM DbUser dbUser "
+          + "JOIN DbUserAccessTier uat ON uat.user.userId = dbUser.userId "
+          + "JOIN DbAccessTier tier ON uat.accessTier.accessTierId = tier.accessTierId "
+          + "WHERE tier.shortName = :shortName AND "
+          + "  (lower(dbUser.username) LIKE lower(concat('%', :term, '%')) "
+          + "  OR lower(dbUser.familyName) LIKE lower(concat('%', :term, '%')) "
+          + "  OR lower(dbUser.givenName) LIKE lower(concat('%', :term, '%')))")
+  List<DbUser> findUsersBySearchStringAndTier(
+      @Param("term") String term, Sort sort, @Param("shortName") String accessTierShortName);
 
   interface UserCountGaugeLabelsAndValue {
-    Short getDataAccessLevel();
+    Long getUserCount();
 
     Boolean getDisabled();
 
-    Boolean getBetaIsBypassed();
-
-    Long getUserCount();
+    String getAccessTierShortNames();
   }
+
+  @Query(
+      // JPQL doesn't allow join on subquery
+      nativeQuery = true,
+      value =
+          "SELECT COUNT(u.user_id) AS user_count, u.disabled, t.access_tier_short_names "
+              + "FROM user u "
+              + "LEFT JOIN ("
+              + "  SELECT u.user_id, "
+              + "  GROUP_CONCAT(DISTINCT a.short_name ORDER BY a.short_name) AS access_tier_short_names "
+              + "  FROM user u "
+              + "  JOIN user_access_tier uat ON u.user_id = uat.user_id "
+              + "  JOIN access_tier a ON a.access_tier_id = uat.access_tier_id "
+              + "  GROUP BY u.user_id"
+              + ") as t ON t.user_id = u.user_id "
+              + "GROUP BY u.disabled, t.access_tier_short_names ")
+  List<UserCountGaugeLabelsAndValue> getUserCountGaugeData();
 
   // Note: setter methods are included only where necessary for testing. See ProfileServiceTest.
   interface DbAdminTableUser {
@@ -81,8 +90,6 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
     void setUserId(Long userId);
 
     String getUsername();
-
-    Short getDataAccessLevel();
 
     Boolean getDisabled();
 
@@ -131,21 +138,35 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
     Timestamp getTwoFactorAuthBypassTime();
 
     Timestamp getTwoFactorAuthCompletionTime();
+
+    String getAccessTierShortNames();
   }
 
   @Query(
-      "SELECT u.userId, u.username, u.dataAccessLevel, u.disabled, u.givenName, u.familyName, "
-          + "u.contactEmail, i.displayName AS institutionName, "
-          + "u.firstRegistrationCompletionTime, u.creationTime, u.firstSignInTime, "
-          + "u.dataUseAgreementBypassTime, u.dataUseAgreementCompletionTime, "
-          + "u.complianceTrainingBypassTime, u.complianceTrainingCompletionTime, "
-          + "u.betaAccessBypassTime, "
-          + "u.emailVerificationBypassTime, u.emailVerificationCompletionTime, "
-          + "u.eraCommonsBypassTime, u.eraCommonsCompletionTime, "
-          + "u.idVerificationBypassTime, u.idVerificationCompletionTime, "
-          + "u.twoFactorAuthBypassTime, u.twoFactorAuthCompletionTime "
-          + "FROM DbUser u "
-          + "LEFT JOIN DbVerifiedInstitutionalAffiliation AS a ON u.userId = a.user.userId "
-          + "LEFT JOIN DbInstitution AS i ON i.institutionId = a.institution.institutionId")
+      // JPQL doesn't allow join on subquery
+      nativeQuery = true,
+      value =
+          "SELECT u.user_id, u.email AS username, u.disabled, u.given_name, u.family_name, "
+              + "u.contact_email, i.display_name AS institution_name, "
+              + "u.first_registration_completion_time, u.creation_time, u.first_sign_in_time, "
+              + "u.data_use_agreement_bypass_time, u.data_use_agreement_completion_time, "
+              + "u.compliance_training_bypass_time, u.compliance_training_completion_time, "
+              + "u.beta_access_bypass_time, "
+              + "u.email_verification_bypass_time, u.email_verification_completion_time, "
+              + "u.era_commons_bypass_time, u.era_commons_completion_time, "
+              + "u.id_verification_bypass_time, u.id_verification_completion_time, "
+              + "u.two_factor_auth_bypass_time, u.two_factor_auth_completion_time, "
+              + "t.access_tier_short_names "
+              + "FROM user u "
+              + "LEFT JOIN user_verified_institutional_affiliation AS uvia ON u.user_id = uvia.user_id "
+              + "LEFT JOIN institution AS i ON i.institution_id = uvia.institution_id "
+              + "LEFT JOIN ("
+              + "  SELECT u.user_id, "
+              + "  GROUP_CONCAT(DISTINCT a.short_name ORDER BY a.short_name) AS access_tier_short_names "
+              + "  FROM user u "
+              + "  JOIN user_access_tier uat ON u.user_id = uat.user_id "
+              + "  JOIN access_tier a ON a.access_tier_id = uat.access_tier_id "
+              + "  GROUP BY u.user_id"
+              + ") as t ON t.user_id = u.user_id")
   List<DbAdminTableUser> getAdminTableUsers();
 }

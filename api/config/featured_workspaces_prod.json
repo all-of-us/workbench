@@ -85,6 +85,12 @@
       "namespace": "aou-rw-f24ea988",
       "id": "allofusdescriptivestatisticsdemo",
       "category": "DEMO_PROJECTS"
+    },
+    {
+      "name": "Demo - Systemic Disease and Glaucoma",
+      "namespace": "aou-rw-a5a507b6",
+      "id": "demosystemicdiseaseandglaucoma",
+      "category": "DEMO_PROJECTS"
     }
   ]
 }

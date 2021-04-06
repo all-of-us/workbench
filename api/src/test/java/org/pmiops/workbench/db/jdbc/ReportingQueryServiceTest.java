@@ -8,6 +8,8 @@ import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -17,26 +19,29 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.InstitutionDao;
+import org.pmiops.workbench.db.dao.UserAccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.VerifiedInstitutionalAffiliationDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.db.model.DbVerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
 import org.pmiops.workbench.model.ReportingUser;
 import org.pmiops.workbench.model.ReportingWorkspace;
+import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
 import org.pmiops.workbench.testconfig.ReportingTestUtils;
 import org.pmiops.workbench.testconfig.fixtures.ReportingTestFixture;
@@ -58,7 +63,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ReportingQueryServiceTest {
+public class ReportingQueryServiceTest extends SpringTest {
 
   public static final int BATCH_SIZE = 2;
   @Autowired private ReportingQueryService reportingQueryService;
@@ -69,8 +74,10 @@ public class ReportingQueryServiceTest {
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private CohortDao cohortDao;
   @Autowired private DataSetDao dataSetDao;
-  @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
   @Autowired private InstitutionDao institutionDao;
+  @Autowired private UserAccessTierDao userAccessTierDao;
+  @Autowired private VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao;
+
   @Autowired private EntityManager entityManager;
 
   @Autowired
@@ -79,7 +86,6 @@ public class ReportingQueryServiceTest {
 
   @Autowired private UserDao userDao;
   @Autowired private WorkspaceDao workspaceDao;
-  @Autowired private WorkspaceFreeTierUsageDao workspaceFreeTierUsageDao;
 
   @Import({ReportingQueryServiceImpl.class, ReportingUserFixture.class, ReportingTestConfig.class})
   @TestConfiguration
@@ -95,7 +101,8 @@ public class ReportingQueryServiceTest {
   @Test
   public void testGetReportingDatasetCohorts() {
     final DbUser user1 = createDbUserWithInstitute();
-    final DbCdrVersion cdrVersion1 = createCdrVersionWithAccessTier();
+    final DbAccessTier accessTier1 = createAccessTier();
+    final DbCdrVersion cdrVersion1 = createCdrVersion(accessTier1);
     final DbWorkspace workspace1 = createDbWorkspace(user1, cdrVersion1);
     final DbCohort cohort1 = createCohort(user1, workspace1);
     final DbDataset dataset1 = createDataset(workspace1, cohort1);
@@ -138,16 +145,18 @@ public class ReportingQueryServiceTest {
   }
 
   @Transactional
-  public DbCdrVersion createCdrVersionWithAccessTier() {
-    DbAccessTier accessTier =
+  public DbAccessTier createAccessTier() {
+    return accessTierDao.save(
         new DbAccessTier()
             .setShortName(WORKSPACE__ACCESS_TIER_SHORT_NAME)
             .setDisplayName("A Longer Name")
             .setAuthDomainName("auth-domain")
             .setAuthDomainGroupEmail("auth-domain@email.com")
-            .setServicePerimeter("service/perimeter");
-    accessTier = accessTierDao.save(accessTier);
+            .setServicePerimeter("service/perimeter"));
+  }
 
+  @Transactional
+  public DbCdrVersion createCdrVersion(DbAccessTier accessTier) {
     DbCdrVersion cdrVersion1 = new DbCdrVersion();
     cdrVersion1.setName("foo");
     cdrVersion1.setAccessTier(accessTier);
@@ -192,7 +201,8 @@ public class ReportingQueryServiceTest {
   @Test
   public void testWorkspaceIterator_oneEntry() {
     final DbUser user = createDbUserWithInstitute();
-    final DbCdrVersion cdrVersion = createCdrVersionWithAccessTier();
+    final DbAccessTier accessTier = createAccessTier();
+    final DbCdrVersion cdrVersion = createCdrVersion(accessTier);
     final DbWorkspace workspace = createDbWorkspace(user, cdrVersion);
 
     final Iterator<List<ReportingWorkspace>> iterator =
@@ -203,6 +213,17 @@ public class ReportingQueryServiceTest {
     assertThat(firstBatch).hasSize(1);
     assertThat(firstBatch.get(0).getName()).isEqualTo(workspace.getName());
     assertThat(iterator.hasNext()).isFalse();
+  }
+
+  @Transactional
+  public DbUserAccessTier addUserToTier(DbUser user, DbAccessTier tier) {
+    return userAccessTierDao.save(
+        new DbUserAccessTier()
+            .setUser(user)
+            .setAccessTier(tier)
+            .setTierAccessStatus(TierAccessStatus.ENABLED)
+            .setFirstEnabled(Timestamp.from(Instant.now()))
+            .setLastUpdated(Timestamp.from(Instant.now())));
   }
 
   @Test
@@ -299,7 +320,6 @@ public class ReportingQueryServiceTest {
     final List<List<ReportingUser>> stream =
         reportingQueryService.getUserStream().collect(Collectors.toList());
     assertThat(stream.size()).isEqualTo(1);
-    ReportingUser reportingUser = stream.stream().findFirst().get().get(0);
     userFixture.assertDTOFieldsMatchConstants(stream.stream().findFirst().get().get(0));
   }
 
@@ -320,7 +340,8 @@ public class ReportingQueryServiceTest {
 
   private void createWorkspaces(int count) {
     final DbUser user = createDbUserWithInstitute();
-    final DbCdrVersion cdrVersion = createCdrVersionWithAccessTier();
+    final DbAccessTier accessTier = createAccessTier();
+    final DbCdrVersion cdrVersion = createCdrVersion(accessTier);
     for (int i = 0; i < count; ++i) {
       createDbWorkspace(user, cdrVersion);
     }
@@ -328,8 +349,10 @@ public class ReportingQueryServiceTest {
   }
 
   private void createUsers(int count) {
+    final DbAccessTier accessTier = createAccessTier();
     for (int i = 0; i < count; ++i) {
-      createDbUserWithInstitute();
+      final DbUser user = createDbUserWithInstitute();
+      addUserToTier(user, accessTier);
     }
     entityManager.flush();
   }

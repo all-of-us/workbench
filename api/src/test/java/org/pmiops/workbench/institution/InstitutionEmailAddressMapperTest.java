@@ -11,6 +11,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbInstitution;
 import org.pmiops.workbench.db.model.DbInstitutionEmailAddress;
 import org.pmiops.workbench.model.Institution;
@@ -24,7 +25,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @Import(InstitutionEmailAddressMapperImpl.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class InstitutionEmailAddressMapperTest {
+public class InstitutionEmailAddressMapperTest extends SpringTest {
   @Autowired InstitutionEmailAddressMapper mapper;
 
   @Test

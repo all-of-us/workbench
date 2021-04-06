@@ -1,15 +1,15 @@
-import {Page} from 'puppeteer';
+import { Page } from 'puppeteer';
 import Container from 'app/container';
-import {buildXPath} from 'app/xpath-builders';
-import {ElementType, XPathOptions} from 'app/xpath-options';
-import {getPropValue} from 'utils/element-utils';
+import { buildXPath } from 'app/xpath-builders';
+import { ElementType, XPathOptions } from 'app/xpath-options';
+import { getPropValue } from 'utils/element-utils';
 import BaseMenu from './base-menu';
 
-const defaultMenuXpath = '//*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown ")]' +
-   '[.//*[contains(concat(" ", normalize-space(@class), " "), " p-input-overlay-visible ")]]';
+const defaultMenuXpath =
+  '//*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown ")]' +
+  '[.//*[contains(concat(" ", normalize-space(@class), " "), " p-input-overlay-visible ")]]';
 
 export default class SelectMenu extends BaseMenu {
-
   static async findByName(page: Page, xOpt: XPathOptions = {}, container?: Container): Promise<SelectMenu> {
     xOpt.type = ElementType.Dropdown;
     const menuXpath = buildXPath(xOpt, container);
@@ -17,7 +17,7 @@ export default class SelectMenu extends BaseMenu {
     return selectMenu;
   }
 
-  constructor(page: Page, xpath: string  = defaultMenuXpath) {
+  constructor(page: Page, xpath: string = defaultMenuXpath) {
     super(page, xpath);
   }
 
@@ -79,5 +79,4 @@ export default class SelectMenu extends BaseMenu {
   getMenuItemXpath(menuItemText: string): string {
     return `//*[@role="option" and normalize-space()="${menuItemText}"]`;
   }
-
 }

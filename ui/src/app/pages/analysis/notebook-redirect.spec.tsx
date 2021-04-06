@@ -16,7 +16,7 @@ import {JupyterApiStub} from 'testing/stubs/jupyter-api-stub';
 import {ProxyApiStub} from 'testing/stubs/proxy-api-stub';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces-api-stub';
+import {workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
 
 import {NotebookRedirect, Progress, ProgressCardState, progressStrings} from './notebook-redirect';
 
@@ -223,7 +223,10 @@ describe('NotebookRedirect', () => {
     await waitForFakeTimersAndUpdate(wrapper);
 
     // Wait for the "redirecting" timer to elapse, rendering the iframe.
-    act(() => jest.advanceTimersByTime(2000));
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
     await waitForFakeTimersAndUpdate(wrapper);
 
     expect(wrapper.find(Iframe).exists()).toBeTruthy();

@@ -56,7 +56,7 @@
     "extractionPetServiceAccount": "pet-118217329794842274136@aou-wgs-cohort-extraction.iam.gserviceaccount.com",
     "extractionMethodConfigurationNamespace": "aouwgscohortextraction",
     "extractionMethodConfigurationName": "HelloWorld",
-    "extractionMethodConfigurationVersion": 34,
+    "extractionMethodConfigurationVersion": 54,
     "extractionCohortsDataset": "fc-aou-cdr-synth-test.wgs_extraction_cohorts",
     "extractionDestinationDataset": "fc-aou-cdr-synth-test.wgs_extracted_cohorts",
     "extractionTempTablesDataset": "fc-aou-cdr-synth-test.wgs_extraction_temp_tables"
@@ -108,8 +108,7 @@
     "enableDataUseAgreement": true,
     "enableBetaAccess": false,
     "unsafeAllowSelfBypass": true,
-    "unsafeAllowUserCreationFromGSuiteData": true,
-    "requireInvitationKey": false
+    "unsafeAllowUserCreationFromGSuiteData": true
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,

@@ -2,15 +2,14 @@ import Link from 'app/element/link';
 import WorkspaceAnalysisPage from 'app/page/workspace-analysis-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
-import {makeRandomName} from 'utils/str-utils';
-import {findOrCreateWorkspace, signInWithAccessToken} from 'utils/test-utils';
-import {waitForText, waitWhileLoading} from 'utils/waits-utils';
+import { makeRandomName } from 'utils/str-utils';
+import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import {Ethnicity} from 'app/page/cohort-search-page';
-import {Language, LinkText, ResourceCard} from 'app/text-labels';
+import { Ethnicity } from 'app/page/cohort-search-page';
+import { Language, LinkText, ResourceCard } from 'app/text-labels';
 
 describe('Create dataset and export to notebook at same time', () => {
-
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
@@ -21,8 +20,7 @@ describe('Create dataset and export to notebook at same time', () => {
    * Delete Cohort, Dataset, and Notebook.
    */
   test('Jupyter Notebook for R programming language can be created', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page);
-    const workspaceName = await workspaceCard.clickWorkspaceName();
+    const workspaceName = await findOrCreateWorkspace(page);
 
     // Click Add Datasets button
     const dataPage = new WorkspaceDataPage(page);
@@ -72,7 +70,7 @@ describe('Create dataset and export to notebook at same time', () => {
     expect(code).toContain('library(bigrquery)');
 
     // Navigate to Workpace Data page.
-    const notebooksLink = await Link.findByName(page, {name: workspaceName});
+    const notebooksLink = await Link.findByName(page, { name: workspaceName });
     await notebooksLink.clickAndWait();
     await dataPage.waitForLoad();
 
@@ -95,8 +93,5 @@ describe('Create dataset and export to notebook at same time', () => {
 
     const cohortDeleteDialogText = await dataPage.deleteResource(newCohortName, ResourceCard.Cohort);
     expect(cohortDeleteDialogText).toContain(`Are you sure you want to delete Cohort: ${newCohortName}?`);
-
   });
-
-
 });

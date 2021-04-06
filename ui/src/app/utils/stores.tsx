@@ -1,8 +1,8 @@
 import { BreadcrumbType } from 'app/utils/navigation';
 import {atom, Atom} from 'app/utils/subscribable';
-import {Profile} from 'generated';
-import {Runtime} from 'generated/fetch';
+import {CdrVersion, Profile, Runtime} from 'generated/fetch';
 import * as React from 'react';
+import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
 const {useEffect, useState} = React;
 
@@ -25,6 +25,13 @@ interface AuthStore {
 
 export const authStore = atom<AuthStore>({authLoaded: false, isSignedIn: false});
 
+interface CdrVersionStore {
+  items?: Array<CdrVersion>;
+  defaultCdrVersionId: string;
+}
+
+export const cdrVersionStore = atom<CdrVersionStore>({items: [], defaultCdrVersionId: '-1'});
+
 interface ProfileStore {
   profile?: Profile;
 }
@@ -39,6 +46,12 @@ export interface CompoundRuntimeOperation {
 export interface CompoundRuntimeOpStore {
   [workspaceNamespace: string]: CompoundRuntimeOperation;
 }
+
+export interface StackdriverErrorReporterStore {
+  reporter?: StackdriverErrorReporter;
+}
+
+export const stackdriverErrorReporterStore = atom<StackdriverErrorReporterStore>({});
 
 // Store tracking any compound Runtime operations per workspace. Currently, this
 // only pertains to applying a runtime configuration update via full recreate

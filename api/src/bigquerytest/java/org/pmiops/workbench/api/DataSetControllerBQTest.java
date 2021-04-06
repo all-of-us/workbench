@@ -30,12 +30,12 @@ import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.cdr.CdrVersionService;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cdr.dao.DSDataDictionaryDao;
 import org.pmiops.workbench.cdr.dao.DSLinkingDao;
 import org.pmiops.workbench.cdr.model.DbDSLinking;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortService;
-import org.pmiops.workbench.concept.ConceptService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
@@ -46,7 +46,6 @@ import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
-import org.pmiops.workbench.db.dao.DataDictionaryEntryDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -59,6 +58,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.genomics.WgsCohortExtractionService;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
@@ -78,8 +78,7 @@ import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
-import org.pmiops.workbench.workspaces.WorkspaceService;
-import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -106,22 +105,22 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private ConceptBigQueryService conceptBigQueryService;
   @Autowired private ConceptSetDao conceptSetDao;
   @Autowired private DSLinkingDao dsLinkingDao;
-  @Autowired private DataDictionaryEntryDao dataDictionaryEntryDao;
   @Autowired private DataSetDao dataSetDao;
+  @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
   @Autowired private DataSetMapperImpl dataSetMapper;
   @Autowired private FireCloudService fireCloudService;
   @Autowired private NotebooksService notebooksService;
   @Autowired private Provider<DbUser> userProvider;
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
   @Autowired private WorkspaceDao workspaceDao;
-  @Autowired private WorkspaceService workspaceService;
+  @Autowired private WorkspaceAuthService workspaceAuthService;
+  @Autowired private WgsCohortExtractionService wgsCohortExtractionService;
 
   @Autowired
   @Qualifier(DatasetConfig.DATASET_PREFIX_CODE)
   Provider<String> prefixProvider;
 
   private DataSetController controller;
-  private DataSetServiceImpl dataSetServiceImpl;
 
   private DbCdrVersion dbCdrVersion;
   private DbCohort dbCohort1;
@@ -148,14 +147,13 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     DataSetMapperImpl.class,
     DataSetServiceImpl.class,
     TestBigQueryCdrSchemaConfig.class,
-    WorkspaceServiceImpl.class
+    WorkspaceAuthService.class
   })
   @MockBean({
     BillingProjectAuditor.class,
     CohortCloningService.class,
     CohortService.class,
     CommonMappers.class,
-    ConceptService.class,
     ConceptSetMapperImpl.class,
     ConceptSetService.class,
     FireCloudServiceImpl.class,
@@ -166,6 +164,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     WorkspaceMapperImpl.class,
     AccessTierService.class,
     CdrVersionService.class,
+    WgsCohortExtractionService.class
   })
   static class Configuration {
     @Bean
@@ -206,7 +205,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Before
   public void setUp() {
-    dataSetServiceImpl =
+    DataSetServiceImpl dataSetServiceImpl =
         new DataSetServiceImpl(
             bigQueryService,
             cdrBigQuerySchemaConfigService,
@@ -214,9 +213,9 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             conceptBigQueryService,
             conceptSetDao,
             cohortQueryBuilder,
-            dataDictionaryEntryDao,
             dataSetDao,
             dsLinkingDao,
+            dsDataDictionaryDao,
             dataSetMapper,
             CLOCK);
     controller =
@@ -229,7 +228,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 notebooksService,
                 userProvider,
                 prefixProvider,
-                workspaceService));
+                wgsCohortExtractionService,
+                workspaceAuthService));
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());

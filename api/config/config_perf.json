@@ -56,7 +56,7 @@
     "operationalTerraWorkspaceName": "aouwgscohortextractionperf",
     "operationalTerraWorkspaceBucket": "fc-71462dce-ffcf-4d66-9075-7fce9b8daf4b",
     "extractionPetServiceAccount": "pet-111879944971009838720@aouwgscohortextraction-perf.iam.gserviceaccount.com",
-    "extractionMethodConfigurationNamespace": "",
+    "extractionMethodConfigurationNamespace": "aouwgscohortextraction-perf",
     "extractionMethodConfigurationName": "",
     "extractionMethodConfigurationVersion": 1,
     "extractionCohortsDataset": "",
@@ -110,8 +110,7 @@
     "enableDataUseAgreement": true,
     "enableBetaAccess": false,
     "unsafeAllowSelfBypass": true,
-    "unsafeAllowUserCreationFromGSuiteData": false,
-    "requireInvitationKey": false
+    "unsafeAllowUserCreationFromGSuiteData": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,

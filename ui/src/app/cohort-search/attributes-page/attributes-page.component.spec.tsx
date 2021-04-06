@@ -14,7 +14,7 @@ import {
   RootSurveyStubVariables,
   SurveyQuestionStubVariables
 } from 'testing/stubs/cohort-builder-service-stub'
-import {workspaceDataStub} from 'testing/stubs/workspaces-api-stub';
+import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {AttributesPage, Props} from './attributes-page.component';
 
 type AnyWrapper = (ShallowWrapper|ReactWrapper);

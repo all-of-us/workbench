@@ -1,5 +1,11 @@
 package org.pmiops.workbench.profile;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.dao.UserDao;
@@ -7,6 +13,7 @@ import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.model.AdminTableUser;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -33,29 +40,20 @@ public interface ProfileMapper {
       VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation,
       DbUserTermsOfService latestTermsOfService,
       Double freeTierUsage,
-      Double freeTierDollarQuota);
+      Double freeTierDollarQuota,
+      List<String> accessTierShortNames,
+      DataAccessLevel dataAccessLevel);
 
-  AdminTableUser adminViewToModel(UserDao.DbAdminTableUser dbUser);
+  AdminTableUser adminViewToModel(UserDao.DbAdminTableUser dbUser, DataAccessLevel dataAccessLevel);
 
-  @Mapping(target = "authoritiesEnum", ignore = true) // derived property
-  @Mapping(target = "billingProjectRetries", ignore = true) // I don't think we actually use this
-  @Mapping(
-      target = "complianceTrainingExpirationTime",
-      ignore = true) // handled by UserService.syncComplianceTraining[V1|V2]
-  @Mapping(target = "creationTime", ignore = true) // handled by ProfileController.createProfile
-  @Mapping(target = "dataAccessLevelEnum", ignore = true) // derived property
-  @Mapping(target = "degreesEnum", ignore = true) // derived property
-  @Mapping(target = "emailVerificationStatusEnum", ignore = true) // derived property
-  @Mapping(target = "freeTierCreditsLimitDaysOverride", ignore = true) // unused
-  @Mapping(
-      target = "freeTierCreditsLimitDollarsOverride",
-      ignore = true) // handled by FreeTierBillingService.getUserFreeTierDollarLimit
-  @Mapping(target = "idVerificationIsValid", ignore = true) // I don't think we actually use this
-  @Mapping(target = "lastFreeTierCreditsTimeCheck", ignore = true) // used only by cron
-  @Mapping(target = "lastModifiedTime", ignore = true) // handled by ProfileController.updateProfile
-  @Mapping(
-      target = "moodleId",
-      ignore = true) // handled by UserService.syncComplianceTraining[V1|V2]
-  @Mapping(target = "version", ignore = true)
-  DbUser profileToDbUser(Profile profile);
+  // used by the generated impl of adminViewToModel()
+  default List<String> splitAccessTierShortNames(
+      @Nullable String commaSeparatedAccessTierShortNames) {
+    if (StringUtils.isEmpty(commaSeparatedAccessTierShortNames)) {
+      return Collections.emptyList();
+    } else {
+      return Arrays.stream(commaSeparatedAccessTierShortNames.split(","))
+          .collect(Collectors.toList());
+    }
+  }
 }

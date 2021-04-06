@@ -9,10 +9,12 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.stream.Collectors;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.Education;
@@ -57,7 +59,10 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
   public static final Timestamp USER__CREATION_TIME =
       Timestamp.from(Instant.parse("2015-05-11T00:00:00.00Z"));
   public static final String USER__CURRENT_POSITION = "foo_7";
-  public static final Short USER__DATA_ACCESS_LEVEL = 1;
+  public static final String USER__ACCESS_TIER_SHORT_NAMES =
+      AccessTierService.REGISTERED_TIER_SHORT_NAME;
+  public static final DataAccessLevel USER__DATA_ACCESS_LEVEL =
+      AccessTierService.temporaryDataAccessLevelKluge(USER__ACCESS_TIER_SHORT_NAMES);
   public static final Timestamp USER__DATA_USE_AGREEMENT_BYPASS_TIME =
       Timestamp.from(Instant.parse("2015-05-14T00:00:00.00Z"));
   public static final Timestamp USER__DATA_USE_AGREEMENT_COMPLETION_TIME =
@@ -98,7 +103,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
   public static final InstitutionalRole USER__INSTITUTIONAL_ROLE_ENUM =
       InstitutionalRole.UNDERGRADUATE;
   public static final String USER__INSTITUTIONAL_ROLE_OTHER_TEXT = "foo_2";
-  public static final String USER__ACCESS_TIER_SHORT_NAMES = "registered";
 
   // Those enums are manually added
   public static Ethnicity USER__ETHNICITY = Ethnicity.PREFER_NO_ANSWER;
@@ -124,10 +128,7 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     assertThat(user.getContactEmail()).isEqualTo(USER__CONTACT_EMAIL);
     assertTimeApprox(user.getCreationTime(), USER__CREATION_TIME);
     assertThat(user.getCurrentPosition()).isEqualTo(USER__CURRENT_POSITION);
-    assertThat(user.getDataAccessLevel())
-        .isEqualTo(
-            DbStorageEnums.dataAccessLevelFromStorage(
-                USER__DATA_ACCESS_LEVEL)); // manual adjustment
+    assertThat(user.getDataAccessLevel()).isEqualTo(USER__DATA_ACCESS_LEVEL); // manual adjustment
     assertThat(user.getAccessTierShortNames()).isEqualTo(USER__ACCESS_TIER_SHORT_NAMES);
     assertTimeApprox(user.getDataUseAgreementBypassTime(), USER__DATA_USE_AGREEMENT_BYPASS_TIME);
     assertTimeApprox(
@@ -179,7 +180,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     user.setContactEmail(USER__CONTACT_EMAIL);
     user.setCreationTime(USER__CREATION_TIME);
     user.setCurrentPosition(USER__CURRENT_POSITION);
-    user.setDataAccessLevel(USER__DATA_ACCESS_LEVEL);
     user.setDataUseAgreementBypassTime(USER__DATA_USE_AGREEMENT_BYPASS_TIME);
     user.setDataUseAgreementCompletionTime(USER__DATA_USE_AGREEMENT_COMPLETION_TIME);
     user.setDataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION);
@@ -218,7 +218,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
         .contactEmail(USER__CONTACT_EMAIL)
         .creationTime(offsetDateTimeUtc(USER__CREATION_TIME))
         .currentPosition(USER__CURRENT_POSITION)
-        .dataAccessLevel(DbStorageEnums.dataAccessLevelFromStorage(USER__DATA_ACCESS_LEVEL))
         .dataUseAgreementBypassTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_BYPASS_TIME))
         .dataUseAgreementCompletionTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_COMPLETION_TIME))
         .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION)

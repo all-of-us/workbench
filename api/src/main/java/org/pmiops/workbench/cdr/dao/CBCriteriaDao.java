@@ -287,17 +287,6 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select count(*) from concept c "
-              + "where (c.count_value > 0 or c.source_count_value > 0) "
-              + "and match(c.concept_name, c.concept_code, c.vocabulary_id, c.synonyms) against(:term in boolean mode) "
-              + "and c.vocabulary_id = 'PPI' "
-              + "and c.concept_class_id = 'Clinical Observation' "
-              + "and c.standard_concept IN ('')",
-      nativeQuery = true)
-  Long findPhysicalMeasurementCount(@Param("term") String term);
-
-  @Query(
-      value =
           "select count from cb_criteria c "
               + "join(select substring_index(path,'.',1) as survey_version_concept_id, count(*) as count "
               + "       from cb_criteria "
@@ -331,4 +320,6 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(value = "SELECT * FROM INFORMATION_SCHEMA.INNODB_FT_DEFAULT_STOPWORD", nativeQuery = true)
   List<String> findMySQLStopWords();
+
+  List<DbCriteria> findByConceptIdIn(List<String> conceptIds);
 }

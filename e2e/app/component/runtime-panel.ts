@@ -1,7 +1,7 @@
-import {Page} from 'puppeteer';
+import { Page } from 'puppeteer';
 import SelectMenu from 'app/component/select-menu';
 import PrimereactInputNumber from 'app/element/primereact-input-number';
-import {LinkText, SideBarLink} from 'app/text-labels';
+import { LinkText, SideBarLink } from 'app/text-labels';
 import Button from 'app/element/button';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import BaseHelpSidebar from './base-help-sidebar';
@@ -29,29 +29,28 @@ export enum RuntimePreset {
 }
 
 export default class RuntimePanel extends BaseHelpSidebar {
-
   constructor(page: Page, xpath: string = defaultXpath) {
     super(page);
     super.setXpath(`${super.getXpath()}${xpath}`);
   }
 
   async pickCpus(cpus: number): Promise<void> {
-    const cpusDropdown = await SelectMenu.findByName(this.page, {id: 'runtime-cpu'}, this);
+    const cpusDropdown = await SelectMenu.findByName(this.page, { id: 'runtime-cpu' }, this);
     return await cpusDropdown.select(cpus.toString());
   }
 
   async getCpus(): Promise<string> {
-    const cpusDropdown = await SelectMenu.findByName(this.page, {id: 'runtime-cpu'}, this);
+    const cpusDropdown = await SelectMenu.findByName(this.page, { id: 'runtime-cpu' }, this);
     return await cpusDropdown.getSelectedValue();
   }
 
   async pickRamGbs(ramGbs: number): Promise<void> {
-    const ramDropdown = await SelectMenu.findByName(this.page, {id: 'runtime-ram'}, this);
+    const ramDropdown = await SelectMenu.findByName(this.page, { id: 'runtime-ram' }, this);
     return await ramDropdown.select(ramGbs.toString());
   }
 
   async getRamGbs(): Promise<string> {
-    const ramDropdown = await SelectMenu.findByName(this.page, {id: 'runtime-ram'}, this);
+    const ramDropdown = await SelectMenu.findByName(this.page, { id: 'runtime-ram' }, this);
     return await ramDropdown.getSelectedValue();
   }
 
@@ -66,7 +65,7 @@ export default class RuntimePanel extends BaseHelpSidebar {
   }
 
   async pickComputeType(computeType: ComputeType): Promise<void> {
-    const computeTypeDropdown = await SelectMenu.findByName(this.page, {id: 'runtime-compute'}, this);
+    const computeTypeDropdown = await SelectMenu.findByName(this.page, { id: 'runtime-compute' }, this);
     return await computeTypeDropdown.select(computeType);
   }
 
@@ -91,22 +90,22 @@ export default class RuntimePanel extends BaseHelpSidebar {
   }
 
   async pickWorkerCpus(workerCpus: number): Promise<void> {
-    const workerCpusDropdown = await SelectMenu.findByName(this.page, {id: 'worker-cpu'}, this);
+    const workerCpusDropdown = await SelectMenu.findByName(this.page, { id: 'worker-cpu' }, this);
     return await workerCpusDropdown.select(workerCpus.toString());
   }
 
   async getWorkerCpus(): Promise<string> {
-    const workerCpusDropdown = await SelectMenu.findByName(this.page, {id: 'worker-cpu'}, this);
+    const workerCpusDropdown = await SelectMenu.findByName(this.page, { id: 'worker-cpu' }, this);
     return await workerCpusDropdown.getSelectedValue();
   }
 
   async pickWorkerRamGbs(workerRamGbs: number): Promise<void> {
-    const workerRamDropdown = await SelectMenu.findByName(this.page, {id: 'worker-ram'}, this);
+    const workerRamDropdown = await SelectMenu.findByName(this.page, { id: 'worker-ram' }, this);
     return await workerRamDropdown.select(workerRamGbs.toString());
   }
 
   async getWorkerRamGbs(): Promise<string> {
-    const workerRamDropdown = await SelectMenu.findByName(this.page, {id: 'worker-ram'}, this);
+    const workerRamDropdown = await SelectMenu.findByName(this.page, { id: 'worker-ram' }, this);
     return await workerRamDropdown.getSelectedValue();
   }
 
@@ -121,13 +120,13 @@ export default class RuntimePanel extends BaseHelpSidebar {
   }
 
   async pickRuntimePreset(runtimePreset: RuntimePreset): Promise<void> {
-    const runtimePresetMenu = await SelectMenu.findByName(this.page, {id: 'runtime-presets-menu'}, this);
+    const runtimePresetMenu = await SelectMenu.findByName(this.page, { id: 'runtime-presets-menu' }, this);
     return await runtimePresetMenu.select(runtimePreset);
   }
 
   buildStatusIconSrc = (startStopIconState: StartStopIconState): string => {
     return `/assets/icons/compute-${startStopIconState}.svg`;
-  }
+  };
 
   /**
    * Wait up to 20 minutes before timing out here. We expect runtime changes to be quite slow.
@@ -135,9 +134,12 @@ export default class RuntimePanel extends BaseHelpSidebar {
    * @param startStopIconState
    * @param timeout
    */
-  async waitForStartStopIconState(startStopIconState: StartStopIconState, timeout: number = (20 * 60 * 1000)): Promise<void> {
+  async waitForStartStopIconState(
+    startStopIconState: StartStopIconState,
+    timeout: number = 20 * 60 * 1000
+  ): Promise<void> {
     const xpath = `${this.getXpath()}${statusIconXpath}[@src="${this.buildStatusIconSrc(startStopIconState)}"]`;
-    await this.page.waitForXPath(xpath, {visible: true, timeout});
+    await this.page.waitForXPath(xpath, { visible: true, timeout });
   }
 
   async clickPauseRuntimeIcon(): Promise<void> {
@@ -159,11 +161,10 @@ export default class RuntimePanel extends BaseHelpSidebar {
     }
     await this.clickIcon(SideBarLink.ComputeConfiguration);
     await this.waitUntilVisible();
-    await this.page.waitForTimeout(1000);
-    // Wait for visible text
-    await this.page.waitForXPath(`${this.getXpath()}//h3`, {visible: true});
+    // Wait for visible texts
+    await this.page.waitForXPath(`${this.getXpath()}//h3`, { visible: true });
     // Wait for visible button
-    await this.page.waitForXPath(`${this.getXpath()}//*[@role="button" and @aria-label]`, {visible: true});
+    await this.page.waitForXPath(`${this.getXpath()}//*[@role="button" and @aria-label]`, { visible: true });
     console.log(`Opened "${await this.getTitle()}" runtime sidebar`);
   }
 
@@ -171,14 +172,15 @@ export default class RuntimePanel extends BaseHelpSidebar {
    * Create runtime and wait until running.
    */
   async createRuntime(): Promise<void> {
-    console.log(`Creating runtime`);
+    console.log('Creating runtime');
     await this.open();
     await this.waitForStartStopIconState(StartStopIconState.None);
     await this.clickButton(LinkText.Create);
-    await this.page.waitForTimeout(1000);
+    await this.waitUntilClose();
     // Runtime panel automatically close after click Create button.
     // Reopen panel in order to check icon status.
     await this.open();
+    // Runtime state transition: Starting -> Running
     await this.waitForStartStopIconState(StartStopIconState.Starting, 10 * 60 * 1000);
     await this.waitForStartStopIconState(StartStopIconState.Running);
     await this.close();
@@ -189,15 +191,14 @@ export default class RuntimePanel extends BaseHelpSidebar {
    * Delete runtime.
    */
   async deleteRuntime(): Promise<void> {
-    console.log(`Deleting runtime`);
+    console.log('Deleting runtime');
     await this.open();
     await this.clickButton(LinkText.DeleteEnvironment);
     await this.clickButton(LinkText.Delete);
-    await this.page.waitForTimeout(1000);
+    await this.waitUntilClose();
     // Runtime panel automatically close after click Create button.
     // Reopen panel in order to check icon status.
     await this.open();
-    await this.waitForStartStopIconState(StartStopIconState.Stopping, 60 * 1000);
     await this.waitForStartStopIconState(StartStopIconState.None);
     await this.close();
     console.log('Runtime is deleted');
@@ -207,28 +208,30 @@ export default class RuntimePanel extends BaseHelpSidebar {
    * Pause runtime.
    */
   async pauseRuntime(): Promise<void> {
-    console.log(`Pausing runtime`);
+    console.log('Pausing runtime');
     await this.open();
-    await this.waitForStartStopIconState(StartStopIconState.Running, 30 * 1000);
+    await this.waitForStartStopIconState(StartStopIconState.Running, 60 * 1000);
     await this.clickPauseRuntimeIcon();
+    // Runtime state transition: Stopping -> Stopped
     await this.waitForStartStopIconState(StartStopIconState.Stopping);
     await this.waitForStartStopIconState(StartStopIconState.Stopped);
     await this.close();
-    console.log(`Runtime is paused`);
+    console.log('Runtime is paused');
   }
 
   /**
    * Resume runtime.
    */
   async resumeRuntime(): Promise<void> {
-    console.log(`Resuming runtime`);
+    console.log('Resuming runtime');
     await this.open();
     await this.clickResumeRuntimeIcon();
+    // Runtime state transition: Stopped -> Starting -> Running
     await this.waitForStartStopIconState(StartStopIconState.Stopped);
     await this.waitForStartStopIconState(StartStopIconState.Starting);
     await this.waitForStartStopIconState(StartStopIconState.Running);
     await this.close();
-    console.log(`Runtime is resumed`);
+    console.log('Runtime is resumed');
   }
 
   async applyChanges(): Promise<NotebookPreviewPage> {
@@ -249,5 +252,4 @@ export default class RuntimePanel extends BaseHelpSidebar {
 
     return notebookPreviewPage;
   }
-
 }
