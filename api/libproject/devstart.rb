@@ -145,7 +145,7 @@ def ensure_docker(cmd_name, args=nil)
   args = (args or [])
   unless Workbench.in_docker?
     ensure_docker_sync()
-    exec(*(%W{docker-compose run --service-ports --rm scripts ./project.rb #{cmd_name}} + args))
+    exec(*(%W{docker-compose run --rm scripts ./project.rb #{cmd_name}} + args))
   end
 end
 
