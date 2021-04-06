@@ -30,7 +30,7 @@ PREP_FILES=($PREP_CDR_DATE
            $PREP_CONCEPT
            $PREP_CONCEPT_RELATIONSHIP)
 ALL_FILES=("${NON_PREP_FILES[@]}" "${PREP_FILES[@]}")
-DEPENDANT_TABLES=("activity_summary"
+DEPENDENT_TABLES=("activity_summary"
             "concept"
             "concept_ancestor"
             "concept_relationship"
@@ -112,7 +112,7 @@ if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
   exit 1
 fi
 
-for table in ${DEPENDANT_TABLES[@]}; do
+for table in ${DEPENDENT_TABLES[@]}; do
   echo "Validating that $table exists!"
   tableInfo=$(bq show "$BQ_PROJECT:$BQ_DATASET.$table")
   echo $tableInfo
