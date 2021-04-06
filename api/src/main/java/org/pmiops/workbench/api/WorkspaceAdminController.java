@@ -7,6 +7,8 @@ import org.pmiops.workbench.model.AccessReason;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
+import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
@@ -71,5 +73,13 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
   public ResponseEntity<List<FileDetail>> listFiles(String workspaceNamespace) {
     return ResponseEntity.ok(workspaceAdminService.listFiles(workspaceNamespace));
+  }
+
+  @Override
+  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  public ResponseEntity<List<ListRuntimeResponse>> deleteRuntimesInWorkspace(
+      String workspaceNamespace, ListRuntimeDeleteRequest runtimesToDelete) {
+    return ResponseEntity.ok(
+        workspaceAdminService.deleteRuntimesInWorkspace(workspaceNamespace, runtimesToDelete));
   }
 }

@@ -10,7 +10,7 @@ import {Error as ErrorDiv, TextArea} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {runtimeApi, workspaceAdminApi} from 'app/services/swagger-fetch-clients';
+import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
@@ -316,7 +316,7 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
   }
 
   private async deleteRuntime() {
-    await runtimeApi().deleteRuntimesInProject(
+    await workspaceAdminApi().deleteRuntimesInWorkspace(
       this.props.urlParams.workspaceNamespace,
       {runtimesToDelete: [this.state.runtimeToDelete.runtimeName]});
     this.setState({runtimeToDelete: null});

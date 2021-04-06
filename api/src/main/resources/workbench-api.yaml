@@ -630,6 +630,40 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/admin/security/workspaces/{workspaceNamespace}/delete-runtimes":
+    post:
+      summary: Delete specified (or all if no specified list) runtimes in given workspace namespace.
+      description: 'An admin gated endpoint that deletes given runtimes in a given
+        workspaace.'
+      operationId: deleteRuntimesInWorkspace
+      tags:
+        - workspaceAdmin
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          description: The workspace's workspace namespace.
+            the runtimes
+          required: true
+          type: string
+        - in: body
+          name: runtimesToDelete
+          description: A list of names of runtimes to delete. To delete all runtimes,
+            use an empty object, without providing a list property at all (e.g., {})
+            An empty list will delete no runtimes.
+          required: true
+          schema:
+            "$ref": "#/definitions/ListRuntimeDeleteRequest"
+      responses:
+        200:
+          description: Runtimes deleted
+          schema:
+            type: array
+            items:
+              "$ref": "#/definitions/ListRuntimeResponse"
+        500:
+          description: Internal Error
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
   "/v1/runtimes/{workspaceNamespace}":
     get:
       summary: Get the user's workspace runtime.
