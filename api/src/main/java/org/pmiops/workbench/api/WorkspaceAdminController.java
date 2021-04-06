@@ -76,7 +76,7 @@ public class WorkspaceAdminController implements WorkspaceAdminApiDelegate {
   }
 
   @Override
-  @AuthorityRequired({Authority.RESEARCHER_DATA_VIEW})
+  @AuthorityRequired(Authority.SECURITY_ADMIN)
   public ResponseEntity<List<ListRuntimeResponse>> deleteRuntimesInWorkspace(
       String workspaceNamespace, ListRuntimeDeleteRequest runtimesToDelete) {
     return ResponseEntity.ok(

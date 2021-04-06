@@ -244,12 +244,12 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     runtimesInProjectAffected.stream()
         .filter(runtime -> !acceptableStates.contains(runtime.getStatus()))
         .forEach(
-            clusterInBadState ->
+            runtimeInBadState ->
                 log.log(
                     Level.SEVERE,
                     String.format(
                         "Runtime %s/%s is not in a deleting state",
-                        clusterInBadState.getGoogleProject(), clusterInBadState.getRuntimeName())));
+                        runtimeInBadState.getGoogleProject(), runtimeInBadState.getRuntimeName())));
     leonardoRuntimeAuditor.fireDeleteRuntimesInProject(
         googleProject,
         runtimesToDelete.stream()
@@ -348,9 +348,9 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   }
 
   private static Stream<LeonardoListRuntimeResponse> filterByRuntimesInList(
-      Stream<LeonardoListRuntimeResponse> clustersToFilter, List<String> runtimeNames) {
-    // Null means keep all clusters.
-    return clustersToFilter.filter(
-        cluster -> runtimeNames == null || runtimeNames.contains(cluster.getRuntimeName()));
+      Stream<LeonardoListRuntimeResponse> runtimesToFilter, List<String> runtimeNames) {
+    // Null means keep all runtimes.
+    return runtimesToFilter.filter(
+        runtime -> runtimeNames == null || runtimeNames.contains(runtime.getRuntimeName()));
   }
 }
