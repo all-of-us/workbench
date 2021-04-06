@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.db.dao.UserDao.DbAdminTableUser;
 import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
@@ -65,6 +66,21 @@ public class UserDaoTest extends SpringTest {
     final UserCountGaugeLabelsAndValue row = rows.get(0);
     assertThat(row.getAccessTierShortNames()).isNotNull();
     assertThat(row.getAccessTierShortNames()).contains(registeredTier.getShortName());
+    assertThat(row.getDisabled()).isFalse();
+    assertThat(row.getUserCount()).isEqualTo(1L);
+  }
+
+  @Test
+  public void testGetUserCountGaugeData_disabledTier() {
+    DbUser user1 = new DbUser();
+    user1.setDisabled(false);
+    user1 = userDao.save(user1);
+    addUserToTier(user1, registeredTier, TierAccessStatus.DISABLED);
+
+    List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
+    assertThat(rows).hasSize(1);
+    final UserCountGaugeLabelsAndValue row = rows.get(0);
+    assertThat(row.getAccessTierShortNames()).isNull();
     assertThat(row.getDisabled()).isFalse();
     assertThat(row.getUserCount()).isEqualTo(1L);
   }
@@ -126,6 +142,20 @@ public class UserDaoTest extends SpringTest {
                 .map(UserCountGaugeLabelsAndValue::getUserCount)
                 .orElse(-1L))
         .isEqualTo(10);
+  }
+
+  @Test
+  public void test_getAdminTableUsers_disabledTier() {
+    DbUser user1 = new DbUser();
+    user1.setDisabled(false);
+    user1 = userDao.save(user1);
+    addUserToTier(user1, registeredTier, TierAccessStatus.DISABLED);
+
+    List<DbAdminTableUser> rows = userDao.getAdminTableUsers();
+    assertThat(rows).hasSize(1);
+    final DbAdminTableUser row = rows.get(0);
+    assertThat(row.getAccessTierShortNames()).isNull();
+    assertThat(row.getDisabled()).isFalse();
   }
 
   @Test
@@ -276,15 +306,19 @@ public class UserDaoTest extends SpringTest {
     return resultList.build();
   }
 
-  private DbUserAccessTier addUserToTier(DbUser user, DbAccessTier tier) {
+  private DbUserAccessTier addUserToTier(DbUser user, DbAccessTier tier, TierAccessStatus status) {
     final DbUserAccessTier entryToInsert =
         new DbUserAccessTier()
             .setUser(user)
             .setAccessTier(tier)
-            .setTierAccessStatus(TierAccessStatus.ENABLED)
+            .setTierAccessStatus(status)
             .setFirstEnabled(now())
             .setLastUpdated(now());
     return userAccessTierDao.save(entryToInsert);
+  }
+
+  private DbUserAccessTier addUserToTier(DbUser user, DbAccessTier tier) {
+    return addUserToTier(user, tier, TierAccessStatus.ENABLED);
   }
 
   @NotNull
