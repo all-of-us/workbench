@@ -12,26 +12,6 @@ export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
 export DATA_BROWSER=$3      # data browser flag
 
-# Test that dependant tables exist
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.cb_search_all_events")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept_ancestor")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept_relationship")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept_synonym")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.condition_occurrence")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.death")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.drug_exposure")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.measurement")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.person")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.prep_criteria")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.prep_criteria_ancestor")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.prep_clinical_terms_nc")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.procedure_occurrence")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.relationship")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.visit_occurrence")
-echo "$test"
-
 ################################################
 # CREATE TABLES
 ################################################

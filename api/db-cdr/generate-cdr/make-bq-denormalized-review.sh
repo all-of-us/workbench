@@ -7,19 +7,6 @@ set -ex
 export BQ_PROJECT=$1  # project
 export BQ_DATASET=$2  # dataset
 
-# Test that dependant tables exist
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.prep_concept_ancestor")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.cb_criteria")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.condition_occurrence")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.procedure_occurrence")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.drug_exposure")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.measurement")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.visit_occurrence")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.person")
-echo "$test"
-
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
 

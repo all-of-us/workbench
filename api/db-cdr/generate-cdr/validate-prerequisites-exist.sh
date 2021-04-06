@@ -30,6 +30,33 @@ PREP_FILES=($PREP_CDR_DATE
            $PREP_CONCEPT
            $PREP_CONCEPT_RELATIONSHIP)
 ALL_FILES=("${NON_PREP_FILES[@]}" "${PREP_FILES[@]}")
+DEPENDANT_TABLES=("activity_summary"
+            "concept"
+            "concept_ancestor"
+            "concept_relationship"
+            "concept_synonym"
+            "condition_occurrence"
+            "condition_occurrence_ext"
+            "death"
+            "device_exposure"
+            "device_exposure_ext"
+            "domain"
+            "drug_exposure"
+            "drug_exposure_ext"
+            "heart_rate_minute_level"
+            "heart_rate_summary"
+            "measurement"
+            "measurement_ext"
+            "observation"
+            "observation_ext"
+            "person"
+            "procedure_occurrence"
+            "procedure_occurrence_ext"
+            "relationship"
+            "steps_intraday"
+            "visit_occurrence"
+            "visit_occurrence_ext"
+            "vocabulary")
 INCOMPATIBLE_DATASETS=("R2019Q4R3" "R2019Q4R4")
 
 function removeHeaderIfExist() {
@@ -84,6 +111,12 @@ if [[ ${INCOMPATIBLE_DATASETS[@]} =~ $BQ_DATASET ]];
   echo "Can't run CDR build indices against "$BQ_DATASET"!"
   exit 1
 fi
+
+for table in ${DEPENDANT_TABLES[@]}; do
+  echo "Validating that $table exists!"
+  tableInfo=$(bq show "$BQ_PROJECT:$BQ_DATASET.$table")
+  echo $tableInfo
+done
 
 rm -rf $TEMP_FILE_DIR
 mkdir $TEMP_FILE_DIR
