@@ -171,8 +171,7 @@ public class RuntimeController implements RuntimeApiDelegate {
 
     try {
       LeonardoGetRuntimeResponse leoRuntimeResponse =
-          leonardoNotebooksClient.getRuntime(
-              googleProject, userProvider.get().getRuntimeName());
+          leonardoNotebooksClient.getRuntime(googleProject, userProvider.get().getRuntimeName());
       if (LeonardoRuntimeStatus.ERROR.equals(leoRuntimeResponse.getStatus())) {
         log.warning(
             String.format(
