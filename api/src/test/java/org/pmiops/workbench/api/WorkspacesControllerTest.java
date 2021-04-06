@@ -636,7 +636,7 @@ public class WorkspacesControllerTest extends SpringTest {
 
     verify(endUserCloudbillingProvider.get().projects())
         .updateBillingInfo(
-            "projects/" + workspace.getNamespace(),
+            "projects/" + workspace.getGoogleProject(),
             new ProjectBillingInfo()
                 .setBillingAccountName(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME));
     assertThat(workspace2.getBillingAccountName())
@@ -796,7 +796,7 @@ public class WorkspacesControllerTest extends SpringTest {
         ArgumentCaptor.forClass(ProjectBillingInfo.class);
     verify(endUserCloudbillingProvider.get().projects(), times(2))
         .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
-    assertThat("projects/" + ws.getNamespace()).isEqualTo(projectCaptor.getAllValues().get(1));
+    assertThat("projects/" + ws.getGoogleProject()).isEqualTo(projectCaptor.getAllValues().get(1));
     assertThat(new ProjectBillingInfo().setBillingAccountName("update-billing-account"))
         .isEqualTo(billingCaptor.getAllValues().get(1));
 
@@ -991,7 +991,7 @@ public class WorkspacesControllerTest extends SpringTest {
           ArgumentCaptor.forClass(ProjectBillingInfo.class);
       verify(endUserCloudbillingProvider.get().projects(), times(3))
           .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
-      assertThat("projects/" + workspace.getNamespace())
+      assertThat("projects/" + workspace.getGoogleProject())
           .isEqualTo(projectCaptor.getAllValues().get(2));
       assertThat(new ProjectBillingInfo().setBillingAccountName(originalBillingAccountName))
           .isEqualTo(billingCaptor.getAllValues().get(2));
@@ -1231,7 +1231,7 @@ public class WorkspacesControllerTest extends SpringTest {
         ArgumentCaptor.forClass(ProjectBillingInfo.class);
     verify(endUserCloudbillingProvider.get().projects(), times(2))
         .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
-    assertThat("projects/" + clonedWorkspace.getNamespace())
+    assertThat("projects/" + clonedWorkspace.getGoogleProject())
         .isEqualTo(projectCaptor.getAllValues().get(1));
     assertThat(new ProjectBillingInfo().setBillingAccountName(newBillingAccountName))
         .isEqualTo(billingCaptor.getAllValues().get(1));

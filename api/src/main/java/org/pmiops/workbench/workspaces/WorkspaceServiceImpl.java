@@ -480,7 +480,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
           cloudbilling
               .projects()
               .updateBillingInfo(
-                  "projects/" + workspace.getWorkspaceNamespace(),
+                  "projects/" + workspace.getGoogleProject(),
                   new ProjectBillingInfo().setBillingAccountName(newBillingAccountName));
     } catch (IOException e) {
       throw new ServerErrorException("Could not create Google Cloud updateBillingInfo request", e);
