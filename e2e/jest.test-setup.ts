@@ -19,6 +19,102 @@ beforeEach(async () => {
   await page.setViewport({ width: 1300, height: 0 });
   page.setDefaultNavigationTimeout(60000); // Puppeteer default timeout is 30 seconds.
   await page.setRequestInterception(true);
+
+  /**
+   * Emitted when a page issues a request. The request object is read-only.
+   * In order to intercept and mutate requests, see page.setRequestInterceptionEnabled.
+   */
+  page.on('request', (request: Request) => {
+    if (isWorkbenchRequest(request)) {
+      const requestBody = getRequestData(request);
+      const body = requestBody.length === 0 ? '' : `\n${requestBody}`;
+      logger.log('info', 'Request issued: %s %s %s', request.method(), request.url(), body);
+    }
+    try {
+      request.continue();
+      // tslint:disable-next-line:no-empty
+    } catch (e) {}
+  });
+
+  /** Emitted when a request fails. */
+  page.on('requestfinished', async (request: Request) => {
+    let method;
+    let url;
+    let status;
+    try {
+      if (canLogResponse(request)) {
+        // Save data for log in catch block when exception is thrown.
+        method = request.method();
+        const resp = request.response();
+        url = resp.url();
+        status = resp.status();
+
+        if (isApiFailure(request)) {
+          await logError(request);
+        } else {
+          let text = `Request finished: ${status} ${method} ${url}`;
+          if (!shouldSkipApiResponseBody(request)) {
+            text = `${text}\n${await transformResponseBody(request)}`;
+          }
+          logger.log('info', text);
+        }
+      }
+    } catch (err) {
+      // Try find out what the request was
+      logger.log('error', '%s %s %s\n%s', status, method, url, err);
+    }
+    try {
+      await request.continue();
+    } catch (e) {
+      // Ignored
+    }
+  });
+
+  /**
+   * Emitted when JavaScript within the page calls one of console API methods, e.g. console.log.
+   * Also emitted if the page throws an error or a warning.
+   */
+  page.on('console', async (message: ConsoleMessage) => {
+    if (!message.args().length) return;
+    const title = await getPageTitle();
+    try {
+      const args = await Promise.all(message.args().map((a) => describeJsHandle(a)));
+      const msgType = message.type() === 'warning' ? 'warn' : message.type();
+      logger.info(`Page Console: "${title}"`);
+      console[msgType](...args);
+    } catch (err) {
+      console.error(`❗ "${title}"\nException occurred when getting page console message.\n${err}\n${message.text()}`);
+    }
+  });
+
+  /** Emitted when the page crashes. */
+  page.on('error', async (error: Error) => {
+    const title = await getPageTitle();
+    try {
+      logger.error('PAGE ERROR: "$title}"');
+      console.error(JSON.stringify(error, null, 2));
+      console.error(`${error.message}\n${error.stack}`);
+    } catch (err) {
+      console.error(`❗ "${title}"\nException occurred when getting page error.\n${err}`);
+    }
+  });
+
+  /** Emitted when an uncaught exception happens within the page. */
+  page.on('pageerror', async (error: Error) => {
+    const title = await getPageTitle();
+    try {
+      logger.error('PAGEERROR: "$title}"');
+      console.error(JSON.stringify(error, null, 2));
+      console.error(`${error.message}\n${error.stack}`);
+      console.log('');
+    } catch (err) {
+      console.error(`❗ "${title}"\nPage exception occurred when getting pageerror.\n${err}`);
+    }
+  });
+});
+
+afterEach(async () => {
+  await page.setRequestInterception(false);
 });
 
 const getPageTitle = async () => {
@@ -144,96 +240,6 @@ const getRequestData = fp.flow(getRequestPostData, stringifyData);
 const canLogResponse = fp.flow(isWorkbenchRequest, notRedirectRequest);
 
 // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/puppeteer/index.d.ts
-
-/**
- * Emitted when a page issues a request. The request object is read-only.
- * In order to intercept and mutate requests, see page.setRequestInterceptionEnabled.
- */
-page.on('request', (request: Request) => {
-  if (isWorkbenchRequest(request)) {
-    const requestBody = getRequestData(request);
-    const body = requestBody.length === 0 ? '' : `\n${requestBody}`;
-    logger.log('info', 'Request issued: %s %s %s', request.method(), request.url(), body);
-  }
-  try {
-    request.continue();
-    // tslint:disable-next-line:no-empty
-  } catch (e) {}
-});
-
-/** Emitted when a request fails. */
-page.on('requestfinished', async (request: Request) => {
-  let method;
-  let url;
-  let status;
-  try {
-    if (canLogResponse(request)) {
-      // Save data for log in catch block when exception is thrown.
-      method = request.method();
-      const resp = request.response();
-      url = resp.url();
-      status = resp.status();
-
-      if (isApiFailure(request)) {
-        await logError(request);
-      } else {
-        let text = `Request finished: ${status} ${method} ${url}`;
-        if (!shouldSkipApiResponseBody(request)) {
-          text = `${text}\n${await transformResponseBody(request)}`;
-        }
-        logger.log('info', text);
-      }
-    }
-  } catch (err) {
-    // Try find out what the request was
-    logger.log('error', '%s %s %s\n%s', status, method, url, err);
-  }
-  try {
-    await request.continue();
-  } catch (e) {
-    // Ignored
-  }
-});
-
-/**
- * Emitted when JavaScript within the page calls one of console API methods, e.g. console.log.
- * Also emitted if the page throws an error or a warning.
- */
-page.on('console', async (message: ConsoleMessage) => {
-  if (!message.args().length) return;
-  const title = await getPageTitle();
-  try {
-    const args = await Promise.all(message.args().map((a) => describeJsHandle(a)));
-    const msgType = message.type() === 'warning' ? 'warn' : message.type();
-    console[msgType](`Page console: "${title}"`);
-    console[msgType](...args);
-    console.log('');
-  } catch (err) {
-    console.error(`❗ "${title}"\nException occurred when getting page console message.\n${err}\n${message.text()}`);
-  }
-});
-
-/** Emitted when the page crashes. */
-page.on('error', async (error: Error) => {
-  const title = await getPageTitle();
-  try {
-    console.error(`PAGE ERROR: "${title}"\n${error.toString()}\n${error.message}\n${error.stack}`);
-    console.log('');
-  } catch (err) {
-    console.error(`❗ "${title}"\nException occurred when getting page error.\n${err}`);
-  }
-});
-
-/** Emitted when an uncaught exception happens within the page. */
-page.on('pageerror', async (error: Error) => {
-  const title = await getPageTitle();
-  try {
-    console.error(`PAGEERROR: "${title}"\n${error.toString()}\n${error.message}\n${error.stack}`);
-    console.log('');
-  } catch (err) {
-    console.error(`❗ "${title}"\nPage exception occurred when getting pageerror.\n${err}`);
-  }
-});
 
 afterEach(async () => {
   await page.setRequestInterception(false);

@@ -322,6 +322,8 @@ export async function findOrCreateWorkspaceCard(
   if (cardFound !== null) {
     console.log(`Found Workspace card name: "${workspaceName}"`);
     return cardFound;
+  } else {
+    console.log(`Not found workspace card name: ${workspaceName}`);
   }
 
   await createWorkspace(page, { workspaceName, cdrVersion });

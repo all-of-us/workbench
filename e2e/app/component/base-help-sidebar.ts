@@ -15,7 +15,7 @@ const enum Selectors {
 export default abstract class BaseHelpSidebar extends Container {
   deleteIconXpath: string;
 
-  protected constructor(page: Page, xpath: string = `${Selectors.rootXpath}${Selectors.contentXpath}`) {
+  protected constructor(page: Page, xpath = `${Selectors.rootXpath}${Selectors.contentXpath}`) {
     super(page, xpath);
     this.deleteIconXpath = `${Selectors.rootXpath}${Selectors.contentXpath}${Selectors.closeIconXpath}`;
   }
@@ -94,7 +94,18 @@ export default abstract class BaseHelpSidebar extends Container {
   }
 
   async waitUntilClose(): Promise<void> {
-    await super.waitUntilClose();
-    await this.page.waitForXPath(this.deleteIconXpath, { visible: false });
+    await Promise.all([
+      super.waitUntilClose(),
+      this.page.waitForXPath(this.deleteIconXpath, { hidden: true }),
+      this.page.waitForFunction(
+        (selector) => {
+          const node = document.evaluate(selector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+            .singleNodeValue;
+          return node === null;
+        },
+        { polling: 'mutation' },
+        this.deleteIconXpath
+      )
+    ]);
   }
 }

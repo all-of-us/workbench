@@ -12,7 +12,7 @@ describe('Editing workspace via workspace card snowman menu', () => {
 
   // Reuse same Workspace for all tests in this file to reduce test playback time.
   // Workspace to be created in first test. If first test fails, next test will create it.
-  let workspaceName: string;
+  const workspaceName: string = 'aoutest-83581617325092';
 
   /**
    * Test:
