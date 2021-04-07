@@ -715,7 +715,7 @@ public class DataSetControllerTest {
   }
 
   @Test
-  public void testGetValuesFromWholeGeneomeDomain() {
+  public void testGetValuesFromWholeGenomeDomain() {
     List<DomainValue> domainValues =
         dataSetController
             .getValuesFromDomain(
