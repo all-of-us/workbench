@@ -73,8 +73,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
   public static final Timestamp USER__ERA_COMMONS_COMPLETION_TIME =
       Timestamp.from(Instant.parse("2015-05-20T00:00:00.00Z"));
   public static final String USER__FAMILY_NAME = "foo_16";
-  public static final Timestamp USER__FIRST_REGISTRATION_COMPLETION_TIME =
-      Timestamp.from(Instant.parse("2015-05-22T00:00:00.00Z"));
   public static final Timestamp USER__FIRST_SIGN_IN_TIME =
       Timestamp.from(Instant.parse("2015-05-23T00:00:00.00Z"));
   public static final Short USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE = 19;
@@ -137,8 +135,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     assertTimeApprox(user.getEraCommonsBypassTime(), USER__ERA_COMMONS_BYPASS_TIME);
     assertTimeApprox(user.getEraCommonsCompletionTime(), USER__ERA_COMMONS_COMPLETION_TIME);
     assertThat(user.getFamilyName()).isEqualTo(USER__FAMILY_NAME);
-    assertTimeApprox(
-        user.getFirstRegistrationCompletionTime(), USER__FIRST_REGISTRATION_COMPLETION_TIME);
     assertTimeApprox(user.getFirstSignInTime(), USER__FIRST_SIGN_IN_TIME);
     assertThat(user.getFreeTierCreditsLimitDaysOverride())
         .isEqualTo(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE);
@@ -184,7 +180,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     user.setEraCommonsBypassTime(USER__ERA_COMMONS_BYPASS_TIME);
     user.setEraCommonsCompletionTime(USER__ERA_COMMONS_COMPLETION_TIME);
     user.setFamilyName(USER__FAMILY_NAME);
-    user.setFirstRegistrationCompletionTime(USER__FIRST_REGISTRATION_COMPLETION_TIME);
     user.setFirstSignInTime(USER__FIRST_SIGN_IN_TIME);
     user.setFreeTierCreditsLimitDaysOverride(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE);
     user.setFreeTierCreditsLimitDollarsOverride(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE);
@@ -223,8 +218,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
         .eraCommonsBypassTime(offsetDateTimeUtc(USER__ERA_COMMONS_BYPASS_TIME))
         .eraCommonsCompletionTime(offsetDateTimeUtc(USER__ERA_COMMONS_COMPLETION_TIME))
         .familyName(USER__FAMILY_NAME)
-        .firstRegistrationCompletionTime(
-            offsetDateTimeUtc(USER__FIRST_REGISTRATION_COMPLETION_TIME))
         .firstSignInTime(offsetDateTimeUtc(USER__FIRST_SIGN_IN_TIME))
         .freeTierCreditsLimitDaysOverride(
             USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE.intValue()) // manual adjustment
