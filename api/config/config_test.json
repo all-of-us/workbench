@@ -28,7 +28,7 @@
     "retryCount": 2,
     "bufferCapacityPerTier": {
       "registered": 300,
-      "controlled_test": 100
+      "controlled": 100
     },
     "bufferRefillProjectsPerTask": 1,
     "bufferStatusChecksPerTask": 10,
