@@ -8,18 +8,6 @@ export BQ_PROJECT=$1        # project
 export BQ_DATASET=$2        # dataset
 export DATA_BROWSER=$3      # data browser flag
 
-# Test that dependant tables exist
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.person")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.condition_occurrence")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.procedure_occurrence")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.drug_exposure")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation_ext")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.measurement")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.visit_occurrence")
-echo "$test"
-
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
 
