@@ -323,7 +323,7 @@ export async function findOrCreateWorkspaceCard(
     console.log(`Found Workspace card name: "${workspaceName}"`);
     return cardFound;
   } else {
-    console.log(`Not found workspace card name: ${workspaceName}`);
+    console.log(`Not finding workspace card name: ${workspaceName}`);
   }
 
   await createWorkspace(page, { workspaceName, cdrVersion });
