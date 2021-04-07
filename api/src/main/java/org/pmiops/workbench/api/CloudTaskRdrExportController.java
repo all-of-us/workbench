@@ -44,12 +44,12 @@ public class CloudTaskRdrExportController implements CloudTaskRdrExportApiDelega
    * @return
    */
   @Override
-  public ResponseEntity<Void> exportWorkspaceData(ArrayOfLong workspaceIds) {
+  public ResponseEntity<Void> exportWorkspaceData(ArrayOfLong workspaceIds, Boolean backfill) {
     if (workspaceIds == null || ((ArrayList) workspaceIds).isEmpty()) {
       log.severe(" call to export Workspace Data had no Ids");
       return ResponseEntity.noContent().build();
     }
-    rdrExportService.exportWorkspaces(workspaceIds);
+    rdrExportService.exportWorkspaces(workspaceIds, backfill);
     return ResponseEntity.noContent().build();
   }
 }

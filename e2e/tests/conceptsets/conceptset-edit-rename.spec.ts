@@ -21,7 +21,7 @@ describe('Editing and rename Concept Set', () => {
    * - Delete Concept Set.
    */
   test('Workspace OWNER can edit Concept Set', async () => {
-    const workspaceName = await createWorkspace(page).then((card) => card.clickWorkspaceName());
+    const workspaceName = await createWorkspace(page);
 
     const dataPage = new WorkspaceDataPage(page);
     let { conceptSearchPage, criteriaSearch } = await dataPage.openConceptSetSearch(Domain.Procedures);

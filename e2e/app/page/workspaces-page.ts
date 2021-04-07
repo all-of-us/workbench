@@ -97,7 +97,9 @@ export default class WorkspacesPage extends AuthenticatedPage {
     // click CREATE WORKSPACE button
     const createButton = await editPage.getCreateWorkspaceButton();
     await createButton.waitUntilEnabled();
-    return editPage.clickCreateFinishButton(createButton);
+    const modalContent = await editPage.clickCreateFinishButton(createButton);
+    console.log(`Created workspace "${workspaceName}" with CDR Version "${cdrVersionName}"`);
+    return modalContent;
   }
 
   async fillOutRequiredCreationFields(
@@ -163,8 +165,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
     lang?: Language;
   }): Promise<WorkspaceAnalysisPage> {
     const { workspaceName, notebookName, lang } = opts;
-    const workspaceCard = await findOrCreateWorkspace(this.page, { workspaceName, alwaysCreate: true });
-    await workspaceCard.clickWorkspaceName();
+    await findOrCreateWorkspace(this.page, { workspaceName });
 
     const dataPage = new WorkspaceDataPage(this.page);
     const notebookPage = await dataPage.createNotebook(notebookName, lang); // Python 3 is the default

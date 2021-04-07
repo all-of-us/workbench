@@ -78,6 +78,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "  FROM user u "
               + "  JOIN user_access_tier uat ON u.user_id = uat.user_id "
               + "  JOIN access_tier a ON a.access_tier_id = uat.access_tier_id "
+              + "  WHERE uat.access_status = 1 " // ENABLED
               + "  GROUP BY u.user_id"
               + ") as t ON t.user_id = u.user_id "
               + "GROUP BY u.disabled, t.access_tier_short_names ")
@@ -166,6 +167,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "  FROM user u "
               + "  JOIN user_access_tier uat ON u.user_id = uat.user_id "
               + "  JOIN access_tier a ON a.access_tier_id = uat.access_tier_id "
+              + "  WHERE uat.access_status = 1 " // ENABLED
               + "  GROUP BY u.user_id"
               + ") as t ON t.user_id = u.user_id")
   List<DbAdminTableUser> getAdminTableUsers();

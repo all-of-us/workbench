@@ -11,7 +11,7 @@ describe('Updating runtime status', () => {
   });
 
   test('Create, pause, resume, delete', async () => {
-    await createWorkspace(page, config.altCdrVersionName).then((card) => card.clickWorkspaceName());
+    await createWorkspace(page, { cdrVersion: config.altCdrVersionName });
 
     const runtimePanel = new RuntimePanel(page);
 

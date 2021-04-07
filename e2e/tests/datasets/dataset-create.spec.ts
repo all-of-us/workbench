@@ -22,8 +22,7 @@ describe('Dataset test', () => {
    * - Delete Dataset.
    */
   test('Create Dataset from user-defined Cohorts', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+    await findOrCreateWorkspace(page);
 
     // Click Add Cohorts button
     const dataPage = new WorkspaceDataPage(page);

@@ -1,4 +1,4 @@
-import {ErrorHandler, NgModule} from '@angular/core';
+import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {HttpModule} from '@angular/http';
 import {BrowserModule} from '@angular/platform-browser';
@@ -9,7 +9,6 @@ import {WorkspaceWrapperComponent} from 'app/pages/workspace/workspace-wrapper/c
 import * as StackTrace from 'stacktrace-js';
 
 import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
-import {ErrorReporterService} from './services/error-reporter.service';
 import {ProfileStorageService} from './services/profile-storage.service';
 import {ServerConfigService} from './services/server-config.service';
 import {SignInService} from './services/sign-in.service';
@@ -81,11 +80,6 @@ import {FooterComponent} from './components/footer';
   ],
   providers: [
     ServerConfigService,
-    {
-      provide: ErrorHandler,
-      deps: [ServerConfigService],
-      useClass: ErrorReporterService,
-    },
     ProfileStorageService,
     SignInService,
     {

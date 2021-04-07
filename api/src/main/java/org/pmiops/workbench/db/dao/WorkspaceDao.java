@@ -143,7 +143,8 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   //    }
 
   @Query(
-      "SELECT activeStatus, COUNT(workspaceId) FROM DbWorkspace GROUP BY activeStatus ORDER BY activeStatus")
+      "SELECT activeStatus, COUNT(workspaceId) FROM DbWorkspace GROUP BY activeStatus ORDER BY"
+          + " activeStatus")
   List<ActiveStatusToCountResult> getActiveStatusToCount();
 
   interface ActiveStatusToCountResult {

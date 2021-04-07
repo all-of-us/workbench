@@ -6,5 +6,5 @@ import java.time.Duration;
 public interface CloudMonitoringService {
 
   Iterable<TimeSeries> getCloudStorageReceivedBytes(
-      String workspaceNamespace, Duration trailingTimeToQuery);
+      String googleProject, Duration trailingTimeToQuery);
 }

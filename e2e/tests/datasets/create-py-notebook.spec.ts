@@ -16,8 +16,7 @@ describe('Create dataset and export to notebook at same time', () => {
    * Finally delete Dataset.
    */
   test('Jupyter Notebook for Python programming language can be created', async () => {
-    const workspaceCard = await createWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+    await createWorkspace(page);
 
     // Click Add Datasets button.
     const dataPage = new WorkspaceDataPage(page);

@@ -2,9 +2,8 @@ import DataResourceCard from 'app/component/data-resource-card';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { LinkText, ResourceCard } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
-import { createWorkspace, findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { createWorkspace, findWorkspaceCard, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
-import WorkspaceCard from 'app/component/workspace-card';
 import Modal from 'app/modal/modal';
 
 // re-run one more time if test has failed
@@ -60,10 +59,10 @@ describe('Workspace owner copy notebook tests', () => {
 });
 
 async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName: string) {
-  const destWorkspace = await createWorkspace(page, destCdrVersionName).then((card) => card.getWorkspaceName());
+  const destWorkspace = await createWorkspace(page, { cdrVersion: destCdrVersionName });
 
   // Find and open source workspace Data page.
-  const workspaceCard = await WorkspaceCard.findCard(page, sourceWorkspaceName);
+  const workspaceCard = await findWorkspaceCard(page, sourceWorkspaceName);
   await workspaceCard.clickWorkspaceName();
 
   // Create notebook in source workspace.
@@ -95,7 +94,7 @@ async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName:
 
   // Perform actions in copied notebook.
   // Open destination Workspace
-  await findOrCreateWorkspace(page, { workspaceName: destWorkspace }).then((card) => card.clickWorkspaceName());
+  await findWorkspaceCard(page, destWorkspace).then( (card) => card.clickWorkspaceName());
 
   // Verify copy-to notebook exists in destination Workspace
   await dataPage.openAnalysisPage();
@@ -112,6 +111,6 @@ async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName:
 }
 
 async function createCustomCdrVersionWorkspace(cdrVersion: string): Promise<string> {
-  const workspace = await createWorkspace(page, cdrVersion);
-  return workspace.getWorkspaceName();
+  const workspaceName = await createWorkspace(page, { cdrVersion });
+  return workspaceName;
 }

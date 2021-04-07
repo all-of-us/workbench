@@ -62,6 +62,7 @@ public class TestMockFactory {
         .googleBucketName(WORKSPACE_BUCKET_NAME)
         .billingAccountName(WORKSPACE_BILLING_ACCOUNT_NAME)
         .billingAccountType(BillingAccountType.FREE_TIER)
+        .googleProject(DEFAULT_GOOGLE_PROJECT)
         .creationTime(1588097211621L)
         .creator("jay@unit-test-research-aou.org")
         .creationTime(Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli())

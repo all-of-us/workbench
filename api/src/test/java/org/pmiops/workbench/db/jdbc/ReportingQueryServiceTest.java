@@ -1,6 +1,7 @@
 package org.pmiops.workbench.db.jdbc;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static org.pmiops.workbench.testconfig.ReportingTestUtils.WORKSPACE__ACCESS_TIER_SHORT_NAME;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTIONAL_ROLE_ENUM;
 import static org.pmiops.workbench.testconfig.fixtures.ReportingUserFixture.USER__INSTITUTIONAL_ROLE_OTHER_TEXT;
@@ -12,6 +13,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
@@ -226,6 +228,16 @@ public class ReportingQueryServiceTest extends SpringTest {
             .setLastUpdated(Timestamp.from(Instant.now())));
   }
 
+  @Transactional
+  public DbUserAccessTier removeUserFromExistingTier(DbUser user, DbAccessTier tier) {
+    Optional<DbUserAccessTier> userAccessTierMaybe =
+        userAccessTierDao.getByUserAndAccessTier(user, tier);
+    assertThat(userAccessTierMaybe).isPresent();
+
+    return userAccessTierDao.save(
+        userAccessTierMaybe.get().setTierAccessStatus(TierAccessStatus.DISABLED));
+  }
+
   @Test
   public void testWorkspaceIterator_noEntries() {
     final Iterator<List<ReportingWorkspace>> iterator =
@@ -321,6 +333,22 @@ public class ReportingQueryServiceTest extends SpringTest {
         reportingQueryService.getUserStream().collect(Collectors.toList());
     assertThat(stream.size()).isEqualTo(1);
     userFixture.assertDTOFieldsMatchConstants(stream.stream().findFirst().get().get(0));
+  }
+
+  @Test
+  public void testQueryUser_disabledTier() {
+    final DbAccessTier accessTier = createAccessTier();
+    final DbUser user = createDbUserWithInstitute();
+    addUserToTier(user, accessTier);
+    removeUserFromExistingTier(user, accessTier);
+    entityManager.flush();
+
+    final List<List<ReportingUser>> stream =
+        reportingQueryService.getUserStream().collect(Collectors.toList());
+    assertThat(stream.size()).isEqualTo(1);
+
+    ReportingUser reportingUser = stream.stream().findFirst().get().get(0);
+    assertThat(reportingUser.getAccessTierShortNames()).isNull();
   }
 
   @Test

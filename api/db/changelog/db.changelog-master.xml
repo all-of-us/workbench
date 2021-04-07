@@ -168,6 +168,7 @@
   <include file="changelog/db.changelog-156-billing-buffer-entry-status-index.xml"/>
   <include file="changelog/db.changelog-157-add-user-access-tier.xml"/>
   <include file="changelog/db.changelog-158-workspace-add-google-project.xml"/>
+  <include file="changelog/db.changelog-159-delete-data-dictionary-entry-table.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`

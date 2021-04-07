@@ -9,6 +9,8 @@ import {
 } from '@angular/router';
 import {buildPageTitleForEnvironment} from 'app/utils/title';
 
+import {StackdriverErrorReporter} from 'stackdriver-errors-js';
+
 
 import {ServerConfigService} from 'app/services/server-config.service';
 import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from 'app/utils';
@@ -19,7 +21,7 @@ import {
   serverConfigStore,
   urlParamsStore
 } from 'app/utils/navigation';
-import {routeDataStore} from 'app/utils/stores';
+import {routeDataStore, stackdriverErrorReporterStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 
 import outdatedBrowserRework from 'outdated-browser-rework';
@@ -45,7 +47,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.checkBrowserSupport();
-    this.loadConfig();
+    this.loadConfigAndErrorReporter();
 
     this.cookiesEnabled = cookiesEnabled();
     // Local storage breaks if cookies are not enabled
@@ -169,9 +171,16 @@ export class AppComponent implements OnInit {
     });
   }
 
-  private loadConfig() {
+  private loadConfigAndErrorReporter() {
     this.serverConfigService.getConfig().subscribe((config) => {
       serverConfigStore.next(config);
+
+      const reporter = new StackdriverErrorReporter();
+      reporter.start({
+        key: config.publicApiKeyForErrorReports,
+        projectId: config.projectId,
+      });
+      stackdriverErrorReporterStore.set(reporter);
     });
   }
 

@@ -2,6 +2,7 @@ package org.pmiops.workbench.workspaceadmin;
 
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobInfo;
+import com.google.common.collect.ImmutableList;
 import com.google.monitoring.v3.Point;
 import com.google.monitoring.v3.TimeSeries;
 import com.google.protobuf.util.Timestamps;
@@ -12,11 +13,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.pmiops.workbench.actionaudit.ActionAuditQueryService;
 import org.pmiops.workbench.actionaudit.auditors.AdminAuditor;
+import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
@@ -29,12 +34,15 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.google.CloudMonitoringService;
 import org.pmiops.workbench.google.CloudStorageClient;
+import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
+import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.AccessReason;
 import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.AdminWorkspaceResources;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
 import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.TimeSeriesPoint;
 import org.pmiops.workbench.model.UserRole;
@@ -52,6 +60,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
+  private static final Logger log = Logger.getLogger(WorkspaceAdminServiceImpl.class.getName());
   private static final Duration TRAILING_TIME_TO_QUERY = Duration.ofHours(6);
 
   private final ActionAuditQueryService actionAuditQueryService;
@@ -70,6 +79,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   private final WorkspaceDao workspaceDao;
   private final WorkspaceMapper workspaceMapper;
   private final WorkspaceService workspaceService;
+  private final LeonardoRuntimeAuditor leonardoRuntimeAuditor;
 
   @Autowired
   public WorkspaceAdminServiceImpl(
@@ -88,7 +98,8 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
       UserService userService,
       WorkspaceDao workspaceDao,
       WorkspaceMapper workspaceMapper,
-      WorkspaceService workspaceService) {
+      WorkspaceService workspaceService,
+      LeonardoRuntimeAuditor leonardoRuntimeAuditor) {
     this.actionAuditQueryService = actionAuditQueryService;
     this.adminAuditor = adminAuditor;
     this.cloudStorageClient = cloudStorageClient;
@@ -105,6 +116,7 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
     this.workspaceDao = workspaceDao;
     this.workspaceMapper = workspaceMapper;
     this.workspaceService = workspaceService;
+    this.leonardoRuntimeAuditor = leonardoRuntimeAuditor;
   }
 
   @Override
@@ -148,10 +160,10 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
   @Override
   public CloudStorageTraffic getCloudStorageTraffic(String workspaceNamespace) {
     CloudStorageTraffic response = new CloudStorageTraffic().receivedBytes(new ArrayList<>());
-
+    String googleProject = getWorkspaceByNamespaceOrThrow(workspaceNamespace).getGoogleProject();
     for (TimeSeries timeSeries :
         cloudMonitoringService.getCloudStorageReceivedBytes(
-            workspaceNamespace, TRAILING_TIME_TO_QUERY)) {
+            googleProject, TRAILING_TIME_TO_QUERY)) {
       for (Point point : timeSeries.getPointsList()) {
         response.addReceivedBytesItem(
             new TimeSeriesPoint()
@@ -205,14 +217,55 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
         .resources(adminWorkspaceResources);
   }
 
+  @Override
+  public List<ListRuntimeResponse> deleteRuntimesInWorkspace(
+      String workspaceNamespace, ListRuntimeDeleteRequest req) {
+    final String googleProject =
+        getWorkspaceByNamespaceOrThrow(workspaceNamespace).getGoogleProject();
+    List<LeonardoListRuntimeResponse> runtimesToDelete =
+        filterByRuntimesInList(
+                leonardoNotebooksClient.listRuntimesByProjectAsService(googleProject).stream(),
+                req.getRuntimesToDelete())
+            .collect(Collectors.toList());
+    runtimesToDelete.forEach(
+        runtime ->
+            leonardoNotebooksClient.deleteRuntimeAsService(
+                runtime.getGoogleProject(), runtime.getRuntimeName()));
+    List<LeonardoListRuntimeResponse> runtimesInProjectAffected =
+        filterByRuntimesInList(
+                leonardoNotebooksClient.listRuntimesByProjectAsService(googleProject).stream(),
+                req.getRuntimesToDelete())
+            .collect(Collectors.toList());
+    // DELETED is an acceptable status from an implementation standpoint, but we will never
+    // receive runtimes with that status from Leo. We don't want to because we reuse runtime
+    // names and thus could have >1 deleted runtimes with the same name in the project.
+    List<LeonardoRuntimeStatus> acceptableStates =
+        ImmutableList.of(LeonardoRuntimeStatus.DELETING, LeonardoRuntimeStatus.ERROR);
+    runtimesInProjectAffected.stream()
+        .filter(runtime -> !acceptableStates.contains(runtime.getStatus()))
+        .forEach(
+            runtimeInBadState ->
+                log.log(
+                    Level.SEVERE,
+                    String.format(
+                        "Runtime %s/%s is not in a deleting state",
+                        runtimeInBadState.getGoogleProject(), runtimeInBadState.getRuntimeName())));
+    leonardoRuntimeAuditor.fireDeleteRuntimesInProject(
+        googleProject,
+        runtimesToDelete.stream()
+            .map(LeonardoListRuntimeResponse::getRuntimeName)
+            .collect(Collectors.toList()));
+    return runtimesInProjectAffected.stream()
+        .map(leonardoMapper::toApiListRuntimeResponse)
+        .collect(Collectors.toList());
+  }
+
   private DbWorkspace getWorkspaceByNamespaceOrThrow(String workspaceNamespace) {
-    final DbWorkspace dbWorkspace =
-        getFirstWorkspaceByNamespace(workspaceNamespace)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("No workspace found for namespace %s", workspaceNamespace)));
-    return dbWorkspace;
+    return getFirstWorkspaceByNamespace(workspaceNamespace)
+        .orElseThrow(
+            () ->
+                new NotFoundException(
+                    String.format("No workspace found for namespace %s", workspaceNamespace)));
   }
 
   @Override
@@ -292,5 +345,12 @@ public class WorkspaceAdminServiceImpl implements WorkspaceAdminService {
                 // conversion
                 .role(userRole.getRole())
                 .userModel(userMapper.toApiUser(userRole, null)));
+  }
+
+  private static Stream<LeonardoListRuntimeResponse> filterByRuntimesInList(
+      Stream<LeonardoListRuntimeResponse> runtimesToFilter, List<String> runtimeNames) {
+    // Null means keep all runtimes.
+    return runtimesToFilter.filter(
+        runtime -> runtimeNames == null || runtimeNames.contains(runtime.getRuntimeName()));
   }
 }

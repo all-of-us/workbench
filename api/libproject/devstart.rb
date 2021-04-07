@@ -67,7 +67,7 @@ ENVIRONMENTS = {
     :config_json => "config_staging.json",
     :cdr_config_json => "cdr_config_staging.json",
     :featured_workspaces_json => "featured_workspaces_staging.json",
-    :gae_vars => make_gae_vars,
+    :gae_vars => make_gae_vars(0, 4),
     :source_cdr_project => "all-of-us-ehr-dev",
     :source_wgv_project => "all-of-us-workbench-test"
   },
@@ -1329,11 +1329,16 @@ def create_auth_domain(cmd_name, args)
     "Workbench Project (environment) for creating the authorization domain"
   )
   op.add_option(
+    "--tier [tier]",
+    ->(opts, v) { opts.tier = v},
+    "Access tier for creating the authorization domain"
+  )
+  op.add_option(
     "--user [user]",
     ->(opts, v) { opts.user = v},
     "A Workbench user you control with DEVELOPER Authority in the environment"
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.user}
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.user and opts.tier }
   op.parse.validate
 
   common = Common.new
@@ -1344,14 +1349,14 @@ def create_auth_domain(cmd_name, args)
   content_type = "Content-type: application/json"
   api_base_url = get_server_config(op.opts.project)["apiBaseUrl"]
 
-  domain_name = get_auth_domain(op.opts.project)
+  domain_name = get_auth_domain_name(op.opts.project, op.opts.tier)
   common.run_inline %W{curl -X POST -H #{header} -H #{content_type} -d {}
      #{api_base_url}/v1/auth-domain/#{domain_name}}
 end
 
 Common.register_command({
   :invocation => "create-auth-domain",
-  :description => "Creates an authorization domain in Firecloud for registered users",
+  :description => "Creates an authorization domain in Terra for users of the supplied tier",
     :fn => ->(*args) { create_auth_domain("create-auth-domain", args) }
 })
 
@@ -1866,6 +1871,51 @@ Common.register_command({
     :invocation => DELETE_WORKSPACE_RDR_EXPORT,
     :description => "Delete workspace information from rdr_Export table, making it eligible for next Export job run.\n",
     :fn => ->(*args) {delete_workspace_rdr_export(DELETE_WORKSPACE_RDR_EXPORT, *args)}
+})
+
+def backfill_workspaces_to_rdr(cmd_name, *args)
+  common = Common.new
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = true
+
+  op.add_typed_option(
+    "--dry_run=[dry_run]",
+    TrueClass,
+    ->(opts, v) { opts.dry_run = v},
+    "When true, print the number of workspaces that will be exported, will not export")
+  op.add_typed_option(
+    "--limit=[LIMIT]",
+    String,
+    ->(opts, v) { opts.limit = v},
+    "The number of workspaces exported will not to exceed this limit.")
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+
+  context = GcloudContextV2.new(op)
+  op.parse.validate
+  context.validate()
+
+  hasLimit = op.opts.limit ? "--limit=#{op.opts.limit}" : nil
+  isDryRun = op.opts.dry_run ? "--dry-run" : nil
+  flags = [hasLimit, isDryRun].map{ |v| v && "'#{v}'" }.select{ |v| !v.nil? }
+  gradleCommand = %W{
+    gradle backfillWorkspacesToRdr
+   -PappArgs=[#{flags.join(',')}]}
+
+  with_optional_cloud_proxy_and_db(context) do
+    common.run_inline gradleCommand
+  end
+end
+
+BACKFILL_WORKSPACES_TO_RDR = "backfill-workspaces-to-rdr";
+
+Common.register_command({
+    :invocation => BACKFILL_WORKSPACES_TO_RDR,
+    :description => "Backfill workspaces from workspace table, exporting them to the rdr.\n",
+    :fn => ->(*args) {backfill_workspaces_to_rdr(BACKFILL_WORKSPACES_TO_RDR, *args)}
 })
 
 def authority_options(cmd_name, args)
@@ -2539,6 +2589,15 @@ def get_config(project)
   return JSON.parse(File.read(get_config_file(project)))
 end
 
+def get_cdr_config_file(project)
+  cdr_config_json = must_get_env_value(project, :cdr_config_json)
+  return "config/#{cdr_config_json}"
+end
+
+def get_cdr_config(project)
+  return JSON.parse(File.read(get_cdr_config_file(project)))
+end
+
 def get_fc_config(project)
   return get_config(project)["firecloud"]
 end
@@ -2559,8 +2618,17 @@ def get_leo_api_url(project)
   return get_fc_config(project)["leoBaseUrl"]
 end
 
-def get_auth_domain(project)
-  return get_fc_config(project)["registeredDomainName"]
+def get_access_tier_config(project, tier_short_name)
+  tiers = get_cdr_config(project)["accessTiers"]
+  tier = tiers.find { |tier| tier['shortName'] == tier_short_name }
+  unless tier
+    raise("Could not find access tier '#{tier_short_name}' in cdr_config for project #{project}")
+  end
+  return tier
+end
+
+def get_auth_domain_name(project, tier)
+  return get_access_tier_config(project, tier)["authDomainName"]
 end
 
 def get_firecloud_base_url(project)

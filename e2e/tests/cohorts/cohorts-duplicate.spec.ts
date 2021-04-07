@@ -27,8 +27,7 @@ describe('Cohorts', () => {
    * Delete cohort via delete/trash icon on cohort build page
    */
   test('Create, duplicate and delete', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+    await findOrCreateWorkspace(page);
 
     // Wait for the Data page.
     const dataPage = new WorkspaceDataPage(page);
