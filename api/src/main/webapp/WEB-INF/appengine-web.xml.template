@@ -49,5 +49,6 @@
     <min-idle-instances>automatic</min-idle-instances>
     <min-pending-latency>automatic</min-pending-latency>
     <max-pending-latency>10s</max-pending-latency>
+    <max-concurrent-requests>5</max-concurrent-requests>
   </automatic-scaling>
 </appengine-web-app>
