@@ -393,7 +393,8 @@ enum PrepackagedConceptSet {
   FITIBITHEARTRATESUMMARY = 'Fitbit Heart Rate Summary',
   FITBITACTIVITY = 'Fitbit Activity Summary',
   FITBITHEARTRATELEVEL = 'Fitbit Heart Rate Level',
-  FITBITINTRADAYSTEPS = 'Fitbit Intra Day Steps'
+  FITBITINTRADAYSTEPS = 'Fitbit Intra Day Steps',
+  WHOLEGENOME = 'All whole genome variant data'
 }
 
 const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
@@ -403,6 +404,7 @@ const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
 
 const PREPACKAGED_WITH_FITBIT_DOMAINS = {
   ...PREPACKAGED_SURVEY_PERSON_DOMAIN,
+  [PrepackagedConceptSet.WHOLEGENOME]: Domain.WHOLEGENOMEVARIANT,
   [PrepackagedConceptSet.FITIBITHEARTRATESUMMARY]: Domain.FITBITHEARTRATESUMMARY,
   [PrepackagedConceptSet.FITBITACTIVITY]: Domain.FITBITACTIVITY,
   [PrepackagedConceptSet.FITBITHEARTRATELEVEL]: Domain.FITBITHEARTRATELEVEL,
@@ -624,6 +626,22 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       const setsById = new Map(this.state.conceptSetList.map(cs => [cs.id, cs] as [any, any]));
       return ids.map(id => setsById.get(id));
     }
+
+    getPrePackagedList() {
+      let prepackagedList = Object.keys(PrepackagedConceptSet);
+      if (!getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasFitbitData) {
+        // TO DO Fix spelling mistake in prepackageSet
+        prepackagedList = prepackagedList
+            .filter(prepack => !fp.startsWith('FITBIT', prepack));
+        prepackagedList = prepackagedList
+            .filter(prepack => !fp.startsWith('FITIBIT', prepack));
+      }
+      if (!getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasWgsData) {
+        prepackagedList = prepackagedList.filter(prepack => prepack !== 'WHOLEGENOME');
+      }
+      return prepackagedList;
+    }
+
 
     selectPrePackagedConceptSet(prepackaged: PrepackagedConceptSet, selected: boolean) {
       this.setState(({selectedConceptSetIds, selectedPrepackagedConceptSets}) => {
@@ -852,6 +870,14 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     }
 
     async getPreviewByDomain(domain: Domain) {
+      if (domain === Domain.WHOLEGENOMEVARIANT) {
+        this.setState(state => ({previewList: state.previewList.set(domain, {
+          isLoading: false,
+          errorText: null,
+          values: []
+        })}));
+        return;
+      }
       const {namespace, id} = this.props.workspace;
       const domainRequest: DataSetPreviewRequest = {
         domain: domain,
@@ -1057,31 +1083,18 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                style={{paddingRight: '1rem'}}>
                       {plusLink('concept-sets-link', conceptSetsPath, !this.canWrite)}
                     </BoxHeader>
-                  <div style={{height: '9rem', overflowY: 'auto'}}>
+                  <div style={{height: '9rem', overflowY: 'auto'}} data-test-id='prePackage-concept-set'>
                     <Subheader>Prepackaged Concept Sets</Subheader>
-                    {/*If cdr does not have FITBIT data just show Survey and demographic optons*/}
-                    {!getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasFitbitData &&
-                    Object.keys(PrepackagedConceptSet)
-                        .filter(conceptSet => conceptSet === 'SURVEYS' || conceptSet === 'PERSON')
+                    {this.getPrePackagedList()
                         .map((prepackaged: PrepackagedConceptSet) => {
                           const p = PrepackagedConceptSet[prepackaged];
-                          return <ImmutableListItem name={p}
-                                                    key={prepackaged}
-                                                    checked={selectedPrepackagedConceptSets.has(p)}
-                                                    onChange={() => this.selectPrePackagedConceptSet(
-                                                      p, !selectedPrepackagedConceptSets.has(p))
-                                                    }/>;
+                          return <ImmutableListItem name={p}  data-test-id='prePackage-concept-set-item'
+                                                key={prepackaged}
+                                                checked={selectedPrepackagedConceptSets.has(p)}
+                                                onChange={() => this.selectPrePackagedConceptSet(
+                                                  p, !selectedPrepackagedConceptSets.has(p))
+                                                }/>;
                         })}
-                    {getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasFitbitData
-                    && Object.keys(PrepackagedConceptSet).map((prepackaged: PrepackagedConceptSet) => {
-                      const p = PrepackagedConceptSet[prepackaged];
-                      return <ImmutableListItem name={p}
-                                         key={prepackaged}
-                                         checked={selectedPrepackagedConceptSets.has(p)}
-                                         onChange={() => this.selectPrePackagedConceptSet(
-                                           p, !selectedPrepackagedConceptSets.has(p))
-                                         }/>;
-                    })}
                     <Subheader>Workspace Concept Sets</Subheader>
                     {!loadingResources && this.state.conceptSetList.map(conceptSet =>
                         <ImmutableListItem key={conceptSet.id} name={conceptSet.name}

@@ -18,6 +18,8 @@ export const cdrVersionListResponse: CdrVersionListResponse = {
       accessTierShortName: CdrVersionsStubVariables.DEFAULT_ACCESS_TIER_SHORT_NAME,
       archivalStatus: ArchivalStatus.LIVE,
       hasMicroarrayData: true,
+      hasFitbitData: true,
+      hasWgsData: true,
       creationTime: 0
     },
     {
@@ -26,6 +28,8 @@ export const cdrVersionListResponse: CdrVersionListResponse = {
       accessTierShortName: CdrVersionsStubVariables.DEFAULT_ACCESS_TIER_SHORT_NAME,
       archivalStatus: ArchivalStatus.LIVE,
       hasMicroarrayData: false,
+      hasFitbitData: true,
+      hasWgsData: false,
       creationTime: 0
     },
   ]

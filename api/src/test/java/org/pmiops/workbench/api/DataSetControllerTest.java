@@ -715,6 +715,18 @@ public class DataSetControllerTest {
   }
 
   @Test
+  public void testGetValuesFromWholeGeneomeDomain() {
+    List<DomainValue> domainValues =
+        dataSetController
+            .getValuesFromDomain(
+                workspace.getNamespace(), WORKSPACE_NAME, Domain.WHOLE_GENOME_VARIANT.toString())
+            .getBody()
+            .getItems();
+    assertThat(domainValues)
+        .containsExactly(new DomainValue().value(DataSetController.WHOLE_GENOME_VALUE));
+  }
+
+  @Test
   public void exportToNotebook_microarrayCodegen_cdrCheck() {
     DbCdrVersion cdrVersion =
         cdrVersionDao.findByCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
