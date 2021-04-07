@@ -190,7 +190,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  u.era_commons_bypass_time,\n"
                 + "  u.era_commons_completion_time,\n"
                 + "  u.family_name,\n"
-                + "  u.first_registration_completion_time,\n"
+                // temporary solution to RW-6566
+                + "  uat.first_enabled AS first_registration_completion_time,\n"
                 + "  u.first_sign_in_time,\n"
                 + "  u.free_tier_credits_limit_days_override,\n"
                 + "  u.free_tier_credits_limit_dollars_override,\n"
@@ -255,6 +256,14 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "      WHERE uat.access_status = 1 " // ENABLED
                 + "      GROUP BY u.user_id"
                 + "  ) as t ON t.user_id = u.user_id "
+                // temporary solution to RW-6566: retrieve first_enabled from user_access_tier
+                // for 'registered' entries as a substitute for first_registration_completion_time
+                + "  LEFT OUTER JOIN ( "
+                + "    SELECT uat.user_id, uat.first_enabled FROM user_access_tier uat "
+                + "    JOIN access_tier at ON at.access_tier_id = uat.access_tier_id "
+                + "    WHERE uat.access_status = 1 AND at.short_name = 'registered' "
+                + "  ) uat ON u.user_id = uat.user_id "
+                // end temporary solution for RW-6566
                 + "  ORDER BY u.user_id"
                 + "  LIMIT %d\n"
                 + "  OFFSET %d",

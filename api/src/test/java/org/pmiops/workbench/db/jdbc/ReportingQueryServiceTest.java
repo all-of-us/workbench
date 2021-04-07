@@ -352,6 +352,36 @@ public class ReportingQueryServiceTest extends SpringTest {
   }
 
   @Test
+  public void testQueryUser_multiTier() {
+    final DbAccessTier accessTier = createAccessTier();
+    final DbAccessTier tier2 =
+        accessTierDao.save(
+            new DbAccessTier()
+                .setAccessTierId(accessTier.getAccessTierId() + 1)
+                .setShortName("tier2")
+                .setDisplayName("Tier Two")
+                .setAuthDomainName("t2-auth-domain")
+                .setAuthDomainGroupEmail("t2-auth-domain@email.com")
+                .setServicePerimeter("t2/service/perimeter"));
+
+    final DbUser user = createDbUserWithInstitute();
+    addUserToTier(user, accessTier);
+    addUserToTier(user, tier2);
+
+    entityManager.flush();
+
+    final List<List<ReportingUser>> stream =
+        reportingQueryService.getUserStream().collect(Collectors.toList());
+
+    // regression test against one row per user/tier pair (i.e. we don't want 2 here)
+    assertThat(stream.size()).isEqualTo(1);
+
+    ReportingUser reportingUser = stream.stream().findFirst().get().get(0);
+    assertThat(reportingUser.getAccessTierShortNames()).contains(accessTier.getShortName());
+    assertThat(reportingUser.getAccessTierShortNames()).contains(tier2.getShortName());
+  }
+
+  @Test
   public void testUserStream_twoAndAHalfBatches() {
     createUsers(5);
 
