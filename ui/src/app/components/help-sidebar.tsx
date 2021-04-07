@@ -16,7 +16,6 @@ import {faCircle} from '@fortawesome/free-solid-svg-icons/faCircle';
 import {faSyncAlt} from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import {SelectionList} from 'app/cohort-search/selection-list/selection-list.component';
 import {FlexRow} from 'app/components/flex';
-import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {PopupTrigger} from 'app/components/popups';
 import {RuntimePanel} from 'app/pages/analysis/runtime-panel';
@@ -25,7 +24,6 @@ import {ConceptListPage} from 'app/pages/data/concept/concept-list';
 import {participantStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
-  highlightSearchTerm,
   reactStyles,
   ReactWrapperBase,
   withCurrentCohortCriteria,
@@ -51,6 +49,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 
+import {HelpTips} from 'app/components/help-tips';
 import {Criteria, ParticipantCohortStatus, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 
@@ -59,7 +58,6 @@ const proIcons = {
   runtime: '/assets/icons/thunderstorm-solid.svg',
   times: '/assets/icons/times-light.svg'
 };
-const sidebarContent = require('assets/json/help-sidebar.json');
 
 const styles = reactStyles({
   sidebarContainer: {
@@ -139,30 +137,9 @@ const styles = reactStyles({
     fontWeight: 600,
     color: colors.primary
   },
-  contentTitle: {
-    marginTop: '0.25rem',
-    fontSize: '14px',
-    fontWeight: 600,
-    color: colors.primary
-  },
   contentItem: {
     marginTop: 0,
     color: colors.primary
-  },
-  textSearch: {
-    width: '100%',
-    borderRadius: '4px',
-    backgroundColor: colorWithWhiteness(colors.primary, .95),
-    marginTop: '5px',
-    color: colors.primary,
-  },
-  textInput: {
-    width: '85%',
-    height: '1.5rem',
-    padding: '0 0 0 5px',
-    border: 0,
-    backgroundColor: 'transparent',
-    outline: 'none',
   },
   footer: {
     position: 'absolute',
@@ -314,8 +291,9 @@ const icons = (
     'concept',
     helpIconName(helpContentKey),
     'dataDictionary',
-    'annotations'
+    'annotations',
   ];
+
   if (WorkspacePermissionsUtil.canWrite(workspaceAccessLevel)) {
     keys.push('runtime');
   }
@@ -380,14 +358,6 @@ export const HelpSidebar = fp.flow(
       };
     }
 
-    debounceInput = fp.debounce(300, (input: string) => {
-      if (input.length < 3) {
-        this.setState({filteredContent: undefined});
-      } else {
-        this.searchHelpTips(input.trim().toLowerCase());
-      }
-    });
-
     async componentDidMount() {
       this.subscription = participantStore.subscribe(participant => this.setState({participant}));
       this.subscription.add(setSidebarActiveIconStore.subscribe(activeIcon => {
@@ -417,37 +387,6 @@ export const HelpSidebar = fp.flow(
       this.subscription.unsubscribe();
     }
 
-    searchHelpTips(input: string) {
-      this.analyticsEvent('Search');
-      // For each object, we check the title first. If it matches, we return the entire content array.
-      // If the title doesn't match, we check each element of the content array for matches
-      const filteredContent = fp.values(JSON.parse(JSON.stringify(sidebarContent))).reduce((acc, section) => {
-        const inputMatch = (text: string) => text.toLowerCase().includes(input);
-        const content = section.reduce((ac, item) => {
-          if (!inputMatch(item.title)) {
-            item.content = item.content.reduce((a, ic) => {
-              if (typeof ic === 'string') {
-                if (inputMatch(ic)) {
-                  a.push(ic);
-                }
-              } else if (inputMatch(ic.title)) {
-                a.push(ic);
-              } else {
-                ic.content = ic.content.filter(inputMatch);
-                if (ic.content.length) {
-                  a.push(ic);
-                }
-              }
-              return a;
-            }, []);
-          }
-          return item.content.length ? [...ac, item] : ac;
-        }, []);
-        return [...acc, ...content];
-      }, []);
-      this.setState({filteredContent});
-    }
-
     onIconClick(icon: any) {
       const {setSidebarState, sidebarOpen} = this.props;
       const {activeIcon} = this.state;
@@ -462,20 +401,10 @@ export const HelpSidebar = fp.flow(
       }
     }
 
-    onInputChange(value: string) {
-      this.setState({searchTerm: value});
-      this.debounceInput(value);
-    }
-
     openContactWidget() {
       const {profileState: {profile: {contactEmail, familyName, givenName, username}}} = this.props;
       this.analyticsEvent('ContactUs');
       openZendeskWidget(givenName, familyName, username, contactEmail);
-    }
-
-    highlightMatches(content: string) {
-      const {searchTerm} = this.state;
-      return highlightSearchTerm(searchTerm, content, colors.success);
     }
 
     analyticsEvent(type: string, label?: string) {
@@ -666,8 +595,7 @@ export const HelpSidebar = fp.flow(
 
     render() {
       const {concept, criteria, helpContentKey, notebookStyles, setSidebarState, workspace} = this.props;
-      const {activeIcon, filteredContent, participant, searchTerm, tooltipId} = this.state;
-      const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[helpContentKey];
+      const {activeIcon, participant, tooltipId} = this.state;
 
       const contentStyle = (tab: string) => ({
         height: 'calc(100% - 1rem)',
@@ -714,37 +642,20 @@ export const HelpSidebar = fp.flow(
                      alt='Close'/>
               </Clickable>
             </FlexRow>}
-            {activeIcon === helpIconName(helpContentKey) && <div style={contentStyle(helpIconName(helpContentKey))}>
+            {activeIcon === 'help' && <div style={contentStyle('help')}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>
-                {helpContentKey === NOTEBOOK_HELP_CONTENT ? 'Workspace storage' : 'Help Tips'}
+                Help Tips
               </h3>
-              {helpContentKey !== NOTEBOOK_HELP_CONTENT &&
-                <div style={styles.textSearch}>
-                  <ClrIcon style={{color: colors.primary, margin: '0 0.25rem'}} shape='search' size={16} />
-                  <input
-                    type='text'
-                    style={styles.textInput}
-                    value={searchTerm}
-                    onChange={(e) => this.onInputChange(e.target.value)}
-                    placeholder={'Search'} />
-                </div>
-              }
-              {!!displayContent && displayContent.length > 0
-                ? displayContent.map((section, s) => <div key={s}>
-                    <h3 style={styles.sectionTitle} data-test-id={`section-title-${s}`}>{this.highlightMatches(section.title)}</h3>
-                    {section.content.map((content, c) => {
-                      return typeof content === 'string'
-                          ? <p key={c} style={styles.contentItem}>{this.highlightMatches(content)}</p>
-                          : <div key={c}>
-                            <h4 style={styles.contentTitle}>{this.highlightMatches(content.title)}</h4>
-                            {content.content.map((item, i) =>
-                                <p key={i} style={styles.contentItem}>{this.highlightMatches(item)}</p>
-                            )}
-                          </div>;
-                    })}
-                  </div>)
-                : <div style={{marginTop: '0.5rem'}}><em>No results found</em></div>
-              }
+              <HelpTips allowSearch={true}
+                        onSearch={() => this.analyticsEvent('Search')}
+                        contentKey={helpContentKey}/>
+            </div>}
+            {activeIcon === 'notebooksHelp' && <div style={contentStyle('notebooksHelp')}>
+              <h3 style={{...styles.sectionTitle, marginTop: 0}}>
+                Workspace storage
+              </h3>
+              <HelpTips allowSearch={false}
+                        contentKey={helpContentKey}/>
             </div>}
             {activeIcon === 'runtime' && <div style={contentStyle('runtime')}>
               {<RuntimePanel onClose={() => this.props.setSidebarState(false)}/>}
