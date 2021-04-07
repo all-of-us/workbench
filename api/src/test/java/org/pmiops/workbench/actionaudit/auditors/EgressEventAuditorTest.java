@@ -88,7 +88,7 @@ public class EgressEventAuditorTest {
     dbWorkspace.setGoogleProject(GOOGLE_PROJECT);
     dbWorkspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
     dbWorkspace.setFirecloudName(WORKSPACE_FIRECLOUD_NAME);
-    when(workspaceDao.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(Optional.of(dbWorkspace));
+    when(workspaceDao.getByGoogleProject(GOOGLE_PROJECT)).thenReturn(Optional.of(dbWorkspace));
     firecloudUserRoles.add(new UserRole().email(USER_EMAIL));
     when(mockWorkspaceService.getFirecloudUserRoles(WORKSPACE_NAMESPACE, WORKSPACE_FIRECLOUD_NAME))
         .thenReturn(firecloudUserRoles);
@@ -99,7 +99,6 @@ public class EgressEventAuditorTest {
     egressEventAuditor.fireEgressEvent(
         new EgressEvent()
             .projectName(EGRESS_EVENT_PROJECT_NAME)
-            .workspaceNamespace(WORKSPACE_NAMESPACE)
             .vmPrefix(EGRESS_EVENT_VM_PREFIX)
             .timeWindowStart(0l)
             .egressMib(12.3)
@@ -148,12 +147,9 @@ public class EgressEventAuditorTest {
 
     // When the workspace lookup doesn't succeed, the event is filed w/ a system agent and an
     // empty target ID.
-    when(workspaceDao.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(Optional.empty());
+    when(workspaceDao.getByGoogleProject(GOOGLE_PROJECT)).thenReturn(Optional.empty());
     egressEventAuditor.fireEgressEvent(
-        new EgressEvent()
-            .projectName(EGRESS_EVENT_PROJECT_NAME)
-            .vmPrefix(EGRESS_EVENT_VM_PREFIX)
-            .workspaceNamespace(WORKSPACE_NAMESPACE));
+        new EgressEvent().projectName(EGRESS_EVENT_PROJECT_NAME).vmPrefix(EGRESS_EVENT_VM_PREFIX));
     verify(mockActionAuditService).send(eventsCaptor.capture());
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();
 
@@ -191,7 +187,7 @@ public class EgressEventAuditorTest {
   @Test
   public void testFailedParsing() {
     // When the inbound request parsing fails, an event is logged at the system agent.
-    when(workspaceDao.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(null);
+    when(workspaceDao.getByGoogleProject(GOOGLE_PROJECT)).thenReturn(null);
     egressEventAuditor.fireFailedToParseEgressEventRequest(
         new EgressEventRequest().eventsJsonArray("asdf"));
     verify(mockActionAuditService).send(eventsCaptor.capture());
@@ -213,7 +209,7 @@ public class EgressEventAuditorTest {
   @Test
   public void testBadApiKey() {
     // When the inbound request parsing fails, an event is logged at the system agent.
-    when(workspaceDao.getByNamespace(WORKSPACE_NAMESPACE)).thenReturn(null);
+    when(workspaceDao.getByGoogleProject(GOOGLE_PROJECT)).thenReturn(null);
     egressEventAuditor.fireBadApiKey("ASDF", new EgressEventRequest());
     verify(mockActionAuditService).send(eventsCaptor.capture());
     Collection<ActionAuditEvent> events = eventsCaptor.getValue();

@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.opsgenie.EgressEventServiceImpl.NOT_FOUND_WORKSPACE_NAMESPACE;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
 import com.google.common.collect.ImmutableList;
@@ -204,6 +205,31 @@ public class EgressEventServiceTest {
             Pattern.compile(
                 "user_id:\\s+111,\\s+Institution:\\s+not\\s+found,\\s+Account\\s+Age:\\s+651\\s+days"));
     assertThat(request.getAlias()).isEqualTo(WORKSPACE_NAMEPACE + " | all-of-us-111");
+  }
+
+  @Test
+  public void testCreateEgressEventAlert_workspaceNotFound() throws ApiException {
+    doReturn(Optional.empty()).when(workspaceDao).getByGoogleProject(DEFAULT_GOOGLE_PROJECT);
+    when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
+
+    egressEventService.handleEvent(EGRESS_EVENT_1);
+    verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
+    verify(egressEventAuditor).fireEgressEvent(EGRESS_EVENT_1);
+
+    final CreateAlertRequest request = alertRequestCaptor.getValue();
+    assertThat(request.getDescription())
+        .contains("Terra Billing Project/Firecloud Namespace: " + NOT_FOUND_WORKSPACE_NAMESPACE);
+    assertThat(request.getDescription()).contains("Google Project Id: " + DEFAULT_GOOGLE_PROJECT);
+    assertThat(request.getDescription())
+        .contains(
+            "https://workbench.researchallofus.org/admin/workspaces/"
+                + NOT_FOUND_WORKSPACE_NAMESPACE
+                + "/");
+    assertThat(request.getDescription())
+        .containsMatch(
+            Pattern.compile(
+                "user_id:\\s+111,\\s+Institution:\\s+Verily\\s+Life\\s+Sciences,\\s+Account\\s+Age:\\s+651\\s+days"));
+    assertThat(request.getAlias()).isEqualTo(NOT_FOUND_WORKSPACE_NAMESPACE + " | all-of-us-111");
   }
 
   // I thought about adding this to a mapper, but it's such a backwards, test-only conversion,

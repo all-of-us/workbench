@@ -6065,10 +6065,6 @@ definitions:
         description: Prefix of the research VM(s) that generated egress, including
           the user ID, e.g. all-of-us-260.
         type: string
-      workspace_namespace:
-        description: 'Workspace namespace(Terra Billing Project ID), after Terra project per
-        workspace migratioon(PPW), it is not equal to google project any more. Always present.'
-        type: string
   ArrayOfLong:
     type: array
     items:
