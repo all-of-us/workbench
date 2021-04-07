@@ -10,7 +10,6 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.BillingAccountType;
 import org.pmiops.workbench.model.BillingStatus;
 import org.pmiops.workbench.model.CohortStatus;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.Disability;
 import org.pmiops.workbench.model.DisseminateResearchEnum;
@@ -190,22 +189,6 @@ public final class DbStorageEnums {
 
   public static Short cohortStatusToStorage(CohortStatus s) {
     return CLIENT_TO_STORAGE_COHORT_STATUS.get(s);
-  }
-
-  // DataAccessLevel
-  private static final BiMap<DataAccessLevel, Short> CLIENT_TO_STORAGE_DATA_ACCESS_LEVEL =
-      ImmutableBiMap.<DataAccessLevel, Short>builder()
-          .put(DataAccessLevel.UNREGISTERED, (short) 0)
-          .put(DataAccessLevel.REGISTERED, (short) 1)
-          .put(DataAccessLevel.PROTECTED, (short) 2)
-          .build();
-
-  public static DataAccessLevel dataAccessLevelFromStorage(Short level) {
-    return CLIENT_TO_STORAGE_DATA_ACCESS_LEVEL.inverse().get(level);
-  }
-
-  public static Short dataAccessLevelToStorage(DataAccessLevel level) {
-    return CLIENT_TO_STORAGE_DATA_ACCESS_LEVEL.get(level);
   }
 
   // Degree
