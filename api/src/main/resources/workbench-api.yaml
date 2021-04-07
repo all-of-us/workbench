@@ -4881,7 +4881,7 @@ definitions:
     - FITBIT_HEART_RATE_LEVEL
     - FITBIT_ACTIVITY
     - FITBIT_INTRADAY_STEPS
-    - GENOME
+    - WHOLE_GENOME
     - BOTH
   DataSetExportRequest:
     type: object

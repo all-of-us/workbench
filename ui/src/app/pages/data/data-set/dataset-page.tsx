@@ -828,7 +828,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
               re.add(PrepackagedConceptSet.FITBITACTIVITY);
               break;
             }
-            case PrePackagedConceptSetEnum.GENOME: {
+            case PrePackagedConceptSetEnum.WHOLEGENOME: {
               re.add(PrepackagedConceptSet.WHOLEGENOME);
               break;
             }
@@ -866,7 +866,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
             selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.FITBITHEARTRATELEVEL);
             break;
           case PrepackagedConceptSet.WHOLEGENOME:
-            selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.GENOME);
+            selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.WHOLEGENOME);
             break;
 
         }
