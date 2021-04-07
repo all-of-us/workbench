@@ -1,0 +1,98 @@
+<!-- Copied from the swagger-ui static file -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Swagger UI</title>
+    <link rel="stylesheet" type="text/css" href="/webjars/swagger-ui-dist/swagger-ui.css" >
+    <link rel="icon" type="image/png" href="/webjars/swagger-ui-dist/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/webjars/swagger-ui-dist/favicon-16x16.png" sizes="16x16" />
+    <style>
+      html
+      {
+        box-sizing: border-box;
+        overflow: -moz-scrollbars-vertical;
+        overflow-y: scroll;
+      }
+
+      *,
+      *:before,
+      *:after
+      {
+        box-sizing: inherit;
+      }
+
+      body
+      {
+        margin:0;
+        background: #fafafa;
+      }
+
+      /* make the schema display full-width */
+      .swagger-ui .model-example .model-box {
+        display: block;
+      }
+
+      /* these take a lot of vertical space by default */
+      .swagger-ui div.info {
+        margin: 25px 0;
+      }
+
+      .swagger-ui .opblock .renderedMarkdown p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.2;
+      }
+
+      /* everything's application/json, and links aren't useful */
+      .swagger-ui section.response-controls, .swagger-ui td.response-col_links {
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="swagger-ui"></div>
+
+    <script src="/webjars/swagger-ui-dist/swagger-ui-bundle.js"> </script>
+    <script src="/webjars/swagger-ui-dist/swagger-ui-standalone-preset.js"> </script>
+    <script>
+      const cleanupPlugin = function(system) {
+        return {
+          components: {
+            // we don't need to load different specs here...
+            Topbar: () => null,
+            // since everything's application/json, the content-type dropdown just takes up space
+            contentType: ({ value, contentTypes }) => {
+              return system.React.createElement('div', null, value || contentTypes.first())
+            }
+          }
+        }
+      }
+
+      window.onload = function() {
+        // Begin Swagger UI call region
+        const ui = SwaggerUIBundle({
+          url: 'service_openapi.yaml',
+          dom_id: '#swagger-ui',
+          deepLinking: true,
+          presets: [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIStandalonePreset
+          ],
+          plugins: [
+            SwaggerUIBundle.plugins.DownloadUrl,
+            cleanupPlugin
+          ],
+          layout: 'StandaloneLayout',
+          defaultModelsExpandDepth: -1, // hide the huge list of schemas under the routes
+          defaultModelRendering: 'model', // schema has the descriptions, unlike the example value
+          defaultModelExpandDepth: 2, // affects the schema shown for a request or response
+        })
+        // End Swagger UI call region
+
+        window.ui = ui
+      }
+    </script>
+  </body>
+</html>
