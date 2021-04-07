@@ -403,14 +403,15 @@ const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
 };
 
 const PREPACKAGED_WITH_FITBIT_DOMAINS = {
-  ...PREPACKAGED_SURVEY_PERSON_DOMAIN,
-  [PrepackagedConceptSet.WHOLEGENOME]: Domain.WHOLEGENOMEVARIANT,
   [PrepackagedConceptSet.FITIBITHEARTRATESUMMARY]: Domain.FITBITHEARTRATESUMMARY,
   [PrepackagedConceptSet.FITBITACTIVITY]: Domain.FITBITACTIVITY,
   [PrepackagedConceptSet.FITBITHEARTRATELEVEL]: Domain.FITBITHEARTRATELEVEL,
   [PrepackagedConceptSet.FITBITINTRADAYSTEPS]: Domain.FITBITINTRADAYSTEPS,
 };
 
+const PREPACKAGED_WITH_WHOLE_GENOME = {
+  [PrepackagedConceptSet.WHOLEGENOME]: Domain.WHOLEGENOMEVARIANT
+};
 let PREPACKAGED_DOMAINS = PREPACKAGED_SURVEY_PERSON_DOMAIN;
 
 interface DataSetPreviewInfo {
@@ -487,7 +488,17 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       const {namespace, id} = this.props.workspace;
       const resourcesPromise = this.loadResources();
       if (getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasFitbitData) {
-        PREPACKAGED_DOMAINS = PREPACKAGED_WITH_FITBIT_DOMAINS;
+        PREPACKAGED_DOMAINS =   {
+          ...PREPACKAGED_SURVEY_PERSON_DOMAIN,
+          ...PREPACKAGED_WITH_FITBIT_DOMAINS
+        };
+      }
+      if (getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasWgsData) {
+        PREPACKAGED_DOMAINS = {
+          ...PREPACKAGED_DOMAINS,
+          ...PREPACKAGED_WITH_WHOLE_GENOME
+        };
+
       }
       if (!this.editing) {
         return;
@@ -817,6 +828,10 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
               re.add(PrepackagedConceptSet.FITBITACTIVITY);
               break;
             }
+            case PrePackagedConceptSetEnum.GENOME: {
+              re.add(PrepackagedConceptSet.WHOLEGENOME);
+              break;
+            }
             case PrePackagedConceptSetEnum.NONE:
             default:
               break;
@@ -850,6 +865,10 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
           case PrepackagedConceptSet.FITBITHEARTRATELEVEL:
             selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.FITBITHEARTRATELEVEL);
             break;
+          case PrepackagedConceptSet.WHOLEGENOME:
+            selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.GENOME);
+            break;
+
         }
       });
       return selectedPrePackagedConceptSDetEnum;
