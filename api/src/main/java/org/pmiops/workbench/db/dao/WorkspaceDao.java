@@ -135,16 +135,17 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   //    }
 
   @Query(
-      "SELECT activeStatus, accessTierShortName, COUNT(workspaceId) "
-          + "FROM DbWorkspace "
-          + "GROUP BY activeStatus, accessTierShortName "
-          + "ORDER BY activeStatus, accessTierShortName")
+      "SELECT activeStatus, shortName, COUNT(workspaceId) FROM DbWorkspace workspace "
+          + "JOIN DbCdrVersion version ON workspace.cdrVersion.cdrVersionId = version.cdrVersionId "
+          + "JOIN DbAccessTier tier ON version.accessTier.accessTierId = tier.accessTierId "
+          + "GROUP BY activeStatus, shortName "
+          + "ORDER BY activeStatus, shortName")
   List<ActiveStatusToCountResult> getActiveStatusToCount();
 
   interface ActiveStatusToCountResult {
-    Short getWorkspaceActiveStatus();
+    Short getActiveStatus();
 
-    String getAccessTierShortName();
+    String getShortName();
 
     Long getWorkspaceCount();
   }

@@ -523,7 +523,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
                     .addTag(
                         MetricLabel.WORKSPACE_ACTIVE_STATUS,
                         DbStorageEnums.workspaceActiveStatusFromStorage(
-                                row.getWorkspaceActiveStatus())
+                                row.getActiveStatus())
                             .toString())
 
                     // tmp record all workspaces as Registered Tier.
@@ -531,7 +531,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
                     // RW-6137: Replace with AccessTier
                     .addTag(MetricLabel.DATA_ACCESS_LEVEL, DataAccessLevel.REGISTERED.toString())
                     .addMeasurement(GaugeMetric.WORKSPACE_COUNT, row.getWorkspaceCount())
-                    .addTag(MetricLabel.ACCESS_TIER, row.getAccessTierShortName())
+                    .addTag(MetricLabel.ACCESS_TIER, row.getShortName())
                     .build())
         .collect(ImmutableList.toImmutableList());
   }
