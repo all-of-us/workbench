@@ -5,9 +5,10 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { getPropValue } from 'utils/element-utils';
 import CardBase from './card-base';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
+import { waitWhileLoading } from 'utils/waits-utils';
 
 const WorkspaceCardSelector = {
-  cardRootXpath: '//*[child::*[@data-test-id="workspace-card"]]', // finds 'workspace-card' parent container node
+  cardRootXpath: './/*[child::*[@data-test-id="workspace-card"]]', // finds 'workspace-card' parent container node
   cardNameXpath: '@data-test-id="workspace-card-name"',
   accessLevelXpath: './/*[@data-test-id="workspace-access-level"]',
   dateTimeXpath: './/*[@data-test-id="workspace-card"]/div[3]'
@@ -39,6 +40,7 @@ export default class WorkspaceCard extends CardBase {
    */
   static async findAllCards(page: Page, accessLevel?: WorkspaceAccessLevel): Promise<WorkspaceCard[]> {
     try {
+      await waitWhileLoading(page);
       await page.waitForXPath(WorkspaceCardSelector.cardRootXpath, { visible: true, timeout: 1000 });
     } catch (e) {
       return [];
@@ -108,8 +110,8 @@ export default class WorkspaceCard extends CardBase {
   }
 
   async getWorkspaceName(): Promise<string> {
-    const workspaceNameElemt = await this.cardElement.$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
-    return getPropValue<string>(workspaceNameElemt[0], 'innerText');
+    const workspaceNameElement = await this.cardElement.$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
+    return getPropValue<string>(workspaceNameElement[0], 'innerText');
   }
 
   /**

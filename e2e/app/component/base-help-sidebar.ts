@@ -95,6 +95,6 @@ export default abstract class BaseHelpSidebar extends Container {
 
   async waitUntilClose(): Promise<void> {
     await super.waitUntilClose();
-    await this.page.waitForXPath(this.deleteIconXpath, { hidden: true });
+    await this.page.waitForXPath(this.deleteIconXpath, { visible: false });
   }
 }

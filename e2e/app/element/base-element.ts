@@ -139,7 +139,6 @@ export default class BaseElement extends Container {
       const startTime = Date.now();
       let previousX: number;
       let previousY: number;
-      let i = 0;
       while (Date.now() - startTime < 30 * 1000) {
         const viewport = await element.isIntersectingViewport();
         if (viewport) {
@@ -155,12 +154,8 @@ export default class BaseElement extends Container {
               break;
             }
           }
-          if (i > 0) {
-            console.warn(`Detected changing boundingBox: i=${i} prevX=${previousX} x=${x} prevY=${previousY} y=${y}`);
-          }
           previousX = x;
           previousY = y;
-          i++;
         }
         await element.hover();
         await this.page.waitForTimeout(200);
