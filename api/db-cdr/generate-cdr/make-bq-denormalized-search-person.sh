@@ -9,28 +9,6 @@ export BQ_DATASET=$2        # CDR dataset
 export WGV_PROJECT=$3       # whole genome variant project
 export WGV_DATASET=$4       # whole genome variant dataset
 
-# Test that dependant tables exist
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.prep_concept_ancestor")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.person")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.cb_criteria")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.condition_occurrence")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.procedure_occurrence")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.device_exposure")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.drug_exposure")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.measurement")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.visit_occurrence")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.condition_occurrence_ext")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.procedure_occurrence_ext")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.device_exposure_ext")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.drug_exposure_ext")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation_ext")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.measurement_ext")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.visit_occurrence_ext")
-test=$(bq show "$WGV_PROJECT:$WGV_DATASET.metadata")
-echo "$test"
-
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
 

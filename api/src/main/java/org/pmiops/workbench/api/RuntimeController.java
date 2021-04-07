@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
@@ -27,6 +28,8 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
+import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.Authority;
@@ -167,13 +170,27 @@ public class RuntimeController implements RuntimeApiDelegate {
     workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
     try {
-      return ResponseEntity.ok(
-          leonardoMapper.toApiRuntime(
-              leonardoNotebooksClient.getRuntime(
-                  googleProject, userProvider.get().getRuntimeName())));
+      LeonardoGetRuntimeResponse leoRuntimeResponse =
+          leonardoNotebooksClient.getRuntime(googleProject, userProvider.get().getRuntimeName());
+      if (LeonardoRuntimeStatus.ERROR.equals(leoRuntimeResponse.getStatus())) {
+        log.warning(
+            String.format(
+                "Observed Leonardo runtime with unexpected error status:\n%s",
+                formatRuntimeErrors(leoRuntimeResponse.getErrors())));
+      }
+      return ResponseEntity.ok(leonardoMapper.toApiRuntime(leoRuntimeResponse));
     } catch (NotFoundException e) {
       return ResponseEntity.ok(getOverrideFromListRuntimes(googleProject));
     }
+  }
+
+  private String formatRuntimeErrors(@Nullable List<LeonardoClusterError> errors) {
+    if (errors == null || errors.isEmpty()) {
+      return "no error messages";
+    }
+    return errors.stream()
+        .map(err -> String.format("error %d: %s", err.getErrorCode(), err.getErrorMessage()))
+        .collect(Collectors.joining("\n"));
   }
 
   private Runtime getOverrideFromListRuntimes(String googleProject) {

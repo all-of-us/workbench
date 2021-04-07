@@ -9,6 +9,8 @@ import org.pmiops.workbench.model.AdminWorkspaceCloudStorageCounts;
 import org.pmiops.workbench.model.AdminWorkspaceObjectsCounts;
 import org.pmiops.workbench.model.CloudStorageTraffic;
 import org.pmiops.workbench.model.FileDetail;
+import org.pmiops.workbench.model.ListRuntimeDeleteRequest;
+import org.pmiops.workbench.model.ListRuntimeResponse;
 import org.pmiops.workbench.model.WorkspaceAdminView;
 import org.pmiops.workbench.model.WorkspaceAuditLogQueryResponse;
 
@@ -34,4 +36,7 @@ public interface WorkspaceAdminService {
       String workspaceNamespace, String notebookName, AccessReason accessReason);
 
   List<FileDetail> listFiles(String workspaceNamespace);
+
+  List<ListRuntimeResponse> deleteRuntimesInWorkspace(
+      String workspaceNamespace, ListRuntimeDeleteRequest req);
 }

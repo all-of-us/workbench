@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
@@ -253,6 +252,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "    FROM user u "
                 + "      JOIN user_access_tier uat ON u.user_id = uat.user_id "
                 + "      JOIN access_tier a ON a.access_tier_id = uat.access_tier_id "
+                + "      WHERE uat.access_status = 1 " // ENABLED
                 + "      GROUP BY u.user_id"
                 + "  ) as t ON t.user_id = u.user_id "
                 + "  ORDER BY u.user_id"
@@ -272,11 +272,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .contactEmail(rs.getString("contact_email"))
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
                 .currentPosition(rs.getString("current_position"))
-                // TODO remove in RW-6189
-                // until then, what we're interested in is registered vs not
-                .dataAccessLevel(
-                    AccessTierService.temporaryDataAccessLevelKluge(
-                        rs.getString("access_tier_short_names")))
                 .accessTierShortNames(rs.getString("access_tier_short_names"))
                 .dataUseAgreementBypassTime(
                     offsetDateTimeUtc(rs.getTimestamp("data_use_agreement_bypass_time")))

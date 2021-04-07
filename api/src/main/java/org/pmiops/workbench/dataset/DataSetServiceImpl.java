@@ -622,7 +622,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   private boolean supportsConceptSets(Domain domain) {
-    return DOMAIN_NO_CONCEPT_SET.stream().anyMatch(d -> domain != d);
+    return DOMAIN_NO_CONCEPT_SET.stream().filter(d -> domain.equals(d)).count() == 0;
   }
 
   // Gather all the concept IDs from the ConceptSets provided, taking account of
