@@ -303,8 +303,6 @@ export const ProfilePage = fp.flow(
       }
     }
 
-
-
     render() {
       const {
         profileState: {
@@ -539,7 +537,7 @@ export const ProfilePage = fp.flow(
                   <div style={{fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
                 </FlexColumn>
             </FlexRow>}
-            <DataAccessPanel/>
+            {controlledTierEnabled && <DataAccessPanel/>}
             <div style={styles.title}>
               Requirements for <AoU/> Workbench access
             </div>

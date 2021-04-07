@@ -630,3 +630,15 @@ export const useId = () => {
   const [id] = useState(() => fp.uniqueId('element-'));
   return id;
 };
+
+const nothing = {}
+
+export const cond = function<T>(...args: [boolean, () => T][]) {
+  for (const arg of args) {
+    const [predicate, value] = arg
+    const result = predicate ? value() : nothing
+    if (result !== nothing) {
+      return result
+    }
+  }
+}
