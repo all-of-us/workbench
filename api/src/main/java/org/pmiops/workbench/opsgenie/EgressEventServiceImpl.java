@@ -108,13 +108,13 @@ public class EgressEventServiceImpl implements EgressEventService {
       final SuccessResponse response = createAlert(createAlertRequest);
       logger.info(
           String.format(
-              "Successfully created or updated Opsgenie alert for high-egress event on project %s, namespace %s (Opsgenie request ID %s)",
+              "Successfully created or updated Opsgenie alert for high-egress event on Google project %s, namespace %s (Opsgenie request ID %s)",
               egressEvent.getProjectName(), workspaceNamespace, response.getRequestId()));
     } catch (ApiException e) {
       logger.severe(
           String.format(
-              "Error creating Opsgenie alert for egress event on project %s: %s",
-              workspaceNamespace, e.getMessage()));
+              "Error creating Opsgenie alert for egress event on Google project %s, namespace %s : %s",
+              egressEvent.getProjectName(), workspaceNamespace, e.getMessage()));
       e.printStackTrace();
     }
   }
