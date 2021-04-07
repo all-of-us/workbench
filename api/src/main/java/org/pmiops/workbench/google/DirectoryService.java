@@ -1,6 +1,7 @@
 package org.pmiops.workbench.google;
 
 import com.google.api.services.directory.model.User;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -22,6 +23,8 @@ public interface DirectoryService {
 
   /** Returns a user via username lookup. Returns null if no user was found. */
   User getUser(String username);
+
+  Map<String, Boolean> getAllTwoFactorAuthStatuses();
 
   /** Looks up a user by username and returns their stored contact email address, if available. */
   Optional<String> getContactEmail(String username);

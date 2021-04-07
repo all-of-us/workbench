@@ -4,9 +4,11 @@ import com.google.api.services.oauth2.model.Userinfoplus;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import javax.annotation.Nullable;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
@@ -115,7 +117,8 @@ public interface UserService {
 
   void syncTwoFactorAuthStatus();
 
-  DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent);
+  DbUser syncTwoFactorAuthStatus(
+      DbUser targetUser, Agent agent, @Nullable Map<String, Boolean> twoFactorAuthEnabledLookup);
 
   int getCurrentDuccVersion();
 

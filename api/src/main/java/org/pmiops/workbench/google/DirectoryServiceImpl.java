@@ -17,8 +17,10 @@ import com.google.api.services.directory.model.Users;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.OAuth2Credentials;
 import com.google.cloud.iam.credentials.v1.IamCredentialsClient;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -160,6 +162,38 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
     } catch (IOException e) {
       throw ExceptionUtils.convertGoogleIOException(e);
     }
+  }
+
+  @Override
+  public Map<String, Boolean> getAllTwoFactorAuthStatuses() {
+    final String domain = gSuiteDomain();
+    Map<String, Boolean> statuses = Maps.newHashMap();
+    Users response = null;
+    int pageCount = 0;
+    do {
+      final String pageToken =
+          Optional.ofNullable(response).map(r -> r.getNextPageToken()).orElse(null);
+      try {
+        response =
+            retryHandler.runAndThrowChecked(
+                (context) ->
+                    getGoogleDirectoryService()
+                        .users()
+                        .list()
+                        .setProjection("basic")
+                        .setDomain(domain)
+                        .setPageToken(pageToken)
+                        .execute());
+      } catch (IOException e) {
+        throw ExceptionUtils.convertGoogleIOException(e);
+      }
+      for (User u : response.getUsers()) {
+        statuses.put(u.getPrimaryEmail(), u.getIsEnrolledIn2Sv());
+      }
+      pageCount++;
+    } while (!Strings.isNullOrEmpty(response.getNextPageToken()));
+    log.info(String.format("processed %d pages from gsuite", pageCount));
+    return statuses;
   }
 
   @Override

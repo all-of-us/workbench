@@ -19,6 +19,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.google.CloudResourceManagerService;
+import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.AccessModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,6 +40,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
   private final AccessTierService accessTierService;
   private final CloudResourceManagerService cloudResourceManagerService;
   private final UserService userService;
+  private final DirectoryService directoryService;
   private final Map<AccessModule, String> accessModuleLogText =
       ImmutableMap.of(
           AccessModule.COMPLIANCE_TRAINING, "Compliance training",
@@ -49,10 +51,12 @@ public class OfflineUserController implements OfflineUserApiDelegate {
   public OfflineUserController(
       AccessTierService accessTierService,
       CloudResourceManagerService cloudResourceManagerService,
-      UserService userService) {
+      UserService userService,
+      DirectoryService directoryService) {
     this.accessTierService = accessTierService;
     this.cloudResourceManagerService = cloudResourceManagerService;
     this.userService = userService;
+    this.directoryService = directoryService;
   }
 
   /**
@@ -169,13 +173,15 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     int completionChangeCount = 0;
     int accessLevelChangeCount = 0;
 
+    Map<String, Boolean> twoFactorAuthStatuses = directoryService.getAllTwoFactorAuthStatuses();
     for (DbUser user : userService.getAllUsersExcludingDisabled()) {
       userCount++;
       try {
         Timestamp oldTime = user.getTwoFactorAuthCompletionTime();
         List<String> oldTiers = accessTierService.getAccessTierShortNamesForUser(user);
 
-        DbUser updatedUser = userService.syncTwoFactorAuthStatus(user, Agent.asSystem());
+        DbUser updatedUser =
+            userService.syncTwoFactorAuthStatus(user, Agent.asSystem(), twoFactorAuthStatuses);
 
         Timestamp newTime = updatedUser.getTwoFactorAuthCompletionTime();
         List<String> newTiers = accessTierService.getAccessTierShortNamesForUser(user);
