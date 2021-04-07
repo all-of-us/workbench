@@ -306,7 +306,7 @@ export const ProfilePage = fp.flow(
     render() {
       const {
         profileState: {
-          profile,
+          profile
         },
         // TODO: when the controlled tier data is available fetch it from the profile
         controlledTierProfile: {
@@ -328,6 +328,7 @@ export const ProfilePage = fp.flow(
         }
     } = currentProfile;
 
+    console.log(profile)
       const urlError = professionalUrl
       ? validate({website: professionalUrl}, {website: {url: {message: '^Professional URL %{value} is not a valid URL'}}})
       : undefined;
@@ -537,7 +538,7 @@ export const ProfilePage = fp.flow(
                   <div style={{fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
                 </FlexColumn>
             </FlexRow>}
-            {controlledTierEnabled && <DataAccessPanel/>}
+            {controlledTierEnabled && <DataAccessPanel tiers={profile.accessTierShortNames}/>}
             <div style={styles.title}>
               Requirements for <AoU/> Workbench access
             </div>
