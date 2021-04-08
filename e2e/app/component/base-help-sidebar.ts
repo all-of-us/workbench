@@ -4,6 +4,7 @@ import { LinkText, SideBarLink } from 'app/text-labels';
 import * as fp from 'lodash/fp';
 import { Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
+import { logger } from 'libs/logger';
 
 const enum Selectors {
   rootXpath = '//*[@id="help-sidebar"]',
@@ -15,7 +16,7 @@ const enum Selectors {
 export default abstract class BaseHelpSidebar extends Container {
   deleteIconXpath: string;
 
-  protected constructor(page: Page, xpath: string = `${Selectors.rootXpath}${Selectors.contentXpath}`) {
+  protected constructor(page: Page, xpath = `${Selectors.rootXpath}${Selectors.contentXpath}`) {
     super(page, xpath);
     this.deleteIconXpath = `${Selectors.rootXpath}${Selectors.contentXpath}${Selectors.closeIconXpath}`;
   }
@@ -77,7 +78,7 @@ export default abstract class BaseHelpSidebar extends Container {
     await closeButton.waitUntilEnabled();
     await closeButton.click();
     await this.waitUntilClose();
-    console.log(`Closed "${sidePanelTitle}" sidebar panel`);
+    logger.info(`Closed "${sidePanelTitle}" sidebar panel`);
   }
 
   async isVisible(): Promise<boolean> {
@@ -94,7 +95,18 @@ export default abstract class BaseHelpSidebar extends Container {
   }
 
   async waitUntilClose(): Promise<void> {
-    await super.waitUntilClose();
-    await this.page.waitForXPath(this.deleteIconXpath, { hidden: true });
+    await Promise.all([
+      super.waitUntilClose(),
+      this.page.waitForXPath(this.deleteIconXpath, { hidden: true }),
+      this.page.waitForFunction(
+        (selector) => {
+          const node = document.evaluate(selector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+            .singleNodeValue;
+          return node === null;
+        },
+        { polling: 'mutation' },
+        this.deleteIconXpath
+      )
+    ]);
   }
 }

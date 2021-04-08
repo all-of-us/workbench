@@ -6,6 +6,7 @@ import { buildXPath } from 'app/xpath-builders';
 import { ElementType } from 'app/xpath-options';
 import { waitForNumericalString } from 'utils/waits-utils';
 import BaseHelpSidebar from './base-help-sidebar';
+import { logger } from 'libs/logger';
 
 enum SectionSelectors {
   AttributesForm = '//*[@id="attributes-form"]',
@@ -26,7 +27,7 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
   async waitUntilVisible(): Promise<void> {
     await super.waitUntilVisible();
     const title = await this.getTitle();
-    console.log(`"${title}" sidebar is opened`);
+    logger.info(`"${title}" sidebar is opened`);
   }
 
   async getPhysicalMeasurementParticipantResult(filterSign: FilterSign, filterValue: number): Promise<string> {
@@ -83,7 +84,6 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
     }
     await this.clickButton(LinkText.ApplyModifiers);
     await this.waitUntilSectionVisible(SectionSelectors.SelectionList);
-    console.debug(`Age Modifier: ${filterSign} ${filterValue}  => number of participants: ${participantResult}`);
     return participantResult;
   }
 

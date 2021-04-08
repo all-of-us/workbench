@@ -1,14 +1,15 @@
-import { Page } from 'puppeteer';
+import {Page} from 'puppeteer';
 import ClrIconLink from 'app/element/clr-icon-link';
-import { getPropValue } from 'utils/element-utils';
+import {getPropValue} from 'utils/element-utils';
 import ReactSelect from 'app/element/react-select';
-import { waitWhileLoading } from 'utils/waits-utils';
+import {waitWhileLoading} from 'utils/waits-utils';
 import Button from 'app/element/button';
-import { LinkText, SideBarLink } from 'app/text-labels';
+import {LinkText, SideBarLink} from 'app/text-labels';
 import Textarea from 'app/element/textarea';
 import EditDeleteAnnotationsModal from 'app/modal/edit-delete-annotations-modal';
 import AnnotationFieldModal from 'app/modal/annotation-field-modal';
 import BaseHelpSidebar from './base-help-sidebar';
+import {logger} from 'libs/logger';
 
 export enum ReviewStatus {
   Excluded = 'Excluded',
@@ -33,7 +34,7 @@ export default class AnnotationsSidebar extends BaseHelpSidebar {
     await this.page.waitForXPath(`${this.getXpath()}//h3`, { visible: true });
     // Wait for visible button
     await this.page.waitForXPath(`${this.getXpath()}//*[@role="button"]`, { visible: true });
-    console.log(`Opened "${await this.getTitle()}" Participant & Annotations sidebar`);
+    logger.info(`Opened "${await this.getTitle()}" Participant & Annotations sidebar`);
   }
 
   async getParticipantID(): Promise<string> {
@@ -69,8 +70,7 @@ export default class AnnotationsSidebar extends BaseHelpSidebar {
   // get the annotations name displaying on the sidebar panel
   async getAnnotationsName(annotationFieldName: string): Promise<string> {
     const selector = this.getFieldNameSelector(annotationFieldName);
-    const annotationfieldLabel = await this.extractFieldNameText(selector);
-    return annotationfieldLabel;
+    return await this.extractFieldNameText(selector);
   }
 
   // click on the Annotations EDIT button to edit the annotations field name
@@ -100,8 +100,8 @@ export default class AnnotationsSidebar extends BaseHelpSidebar {
   }
 
   private async extractParticipantDetails(selector: string): Promise<string> {
-    const elemt = await this.page.waitForXPath(selector, { visible: true });
-    const textContent = await getPropValue<string>(elemt, 'textContent');
+    const element = await this.page.waitForXPath(selector, { visible: true });
+    const textContent = await getPropValue<string>(element, 'textContent');
     // const regex = new RegExp(/\d{1,3}(,?\d{3})*/); // Match numbers with comma
     const regex = new RegExp(/\d+/);
     return regex.exec(textContent)[0];
@@ -114,8 +114,8 @@ export default class AnnotationsSidebar extends BaseHelpSidebar {
 
   // extract only the annotation field name
   private async extractFieldNameText(selector: string): Promise<string> {
-    const elemt = await this.page.waitForXPath(selector, { visible: true });
-    const textContent = await getPropValue<string>(elemt, 'textContent');
+    const element = await this.page.waitForXPath(selector, { visible: true });
+    const textContent = await getPropValue<string>(element, 'textContent');
     const regex = new RegExp(/(aoutest)-\d+/);
     return regex.exec(`${textContent}`)[0];
   }

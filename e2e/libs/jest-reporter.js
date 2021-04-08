@@ -7,15 +7,20 @@ module.exports = class JestReporter {
     if (globalConfig.verbose === true) {
       throw Error("Verbose must be false or Console messages won't be available.");
     }
-    this._globalConfig = globalConfig;
     this._options = options;
     this.logDir = this._options.outputdir || 'logs/jest';
     this.summaryFile = this._options.filename || 'test-results-summary.json';
   }
 
+  timeNow() {
+    return new Date().toLocaleString('en-US', {
+      timeZone: 'America/New_York',
+      hour12: false
+    });
+  }
+
   onTestStart(test) {
-    const time = new Date().toLocaleTimeString();
-    console.info(`Running ${path.parse(test.path).name} at ${time}`);
+    console.info(`Running ${path.parse(test.path).name} at ${this.timeNow()}`);
   }
 
   onTestResult(_testRunConfig, testResult, _runResults) {

@@ -1,6 +1,7 @@
 import { Page } from 'puppeteer';
 import { LinkText } from 'app/text-labels';
 import BaseHelpSidebar from './base-help-sidebar';
+import { logger } from 'libs/logger';
 
 export default class ReviewConceptSetSidebar extends BaseHelpSidebar {
   constructor(page: Page) {
@@ -15,7 +16,7 @@ export default class ReviewConceptSetSidebar extends BaseHelpSidebar {
   async waitUntilVisible(): Promise<void> {
     await super.waitUntilVisible();
     const title = await this.getTitle();
-    console.log(`"${title}" sidebar is opened`);
+    logger.info(`"${title}" sidebar is opened`);
   }
 
   async clickSaveConceptSetButton(): Promise<void> {

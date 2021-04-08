@@ -3,7 +3,8 @@ import { config } from 'resources/workbench-config';
 export enum PageUrl {
   Home = config.uiBaseUrl,
   Workspaces = config.uiBaseUrl + config.workspacesUrlPath,
-  Admin = config.uiBaseUrl + config.adminUrlPath
+  Admin = config.uiBaseUrl + config.adminUrlPath,
+  Profile = config.uiBaseUrl + config.profileUrlPath
 }
 
 export enum WorkspaceAccessLevel {

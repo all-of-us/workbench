@@ -16,8 +16,10 @@ import WorkspacesPage from 'app/page/workspaces-page';
 import Navigation, { NavLink } from 'app/component/navigation';
 import { makeWorkspaceName } from './str-utils';
 import { config } from 'resources/workbench-config';
+import { logger } from 'libs/logger';
 
 export async function signIn(page: Page, userId?: string, passwd?: string): Promise<void> {
+  logger.info(`Sign in with Google to Workbench application`);
   const loginPage = new GoogleLoginPage(page);
   await loginPage.login(userId, passwd);
   // This element exists in DOM after user has logged in. But it could takes a while.
@@ -56,6 +58,7 @@ export async function signOut(page: Page) {
 
 export async function signInWithAccessToken(page: Page, tokenFilename = config.userAccessTokenFilename): Promise<void> {
   const token = fs.readFileSync(tokenFilename, 'ascii');
+  logger.info(`Sign in with access token to Workbench application`);
   const homePage = new HomePage(page);
   await homePage.gotoUrl(PageUrl.Home.toString());
 
@@ -286,7 +289,7 @@ export async function findOrCreateWorkspace(page: Page, opts: { workspaceName?: 
   const randomCard = fp.shuffle(olderWorkspaceCards).pop();
   const cardName = await randomCard.getWorkspaceName();
   const lastChangedTime = await randomCard.getLastChangedTime();
-  console.log(`Found workspace card: "${cardName}". Last changed on ${lastChangedTime}`);
+  logger.info(`Found workspace card: "${cardName}". Last changed on ${lastChangedTime}`);
   await randomCard.clickWorkspaceName();
   return cardName;
 }
@@ -317,8 +320,10 @@ export async function findOrCreateWorkspaceCard(
 
   let cardFound = await findWorkspaceCard(page, workspaceName);
   if (cardFound !== null) {
-    console.log(`Found Workspace card name: "${workspaceName}"`);
+    logger.info(`Found Workspace card name: "${workspaceName}"`);
     return cardFound;
+  } else {
+    logger.info(`Not finding workspace card name: ${workspaceName}`);
   }
 
   await createWorkspace(page, { workspaceName, cdrVersion });
@@ -327,7 +332,7 @@ export async function findOrCreateWorkspaceCard(
   if (cardFound === null) {
     throw new Error(`Failed finding Workspace card name: ${workspaceName}`);
   }
-  console.log(`Found Workspace card name: "${workspaceName}"`);
+  logger.info(`Found Workspace card name: "${workspaceName}"`);
   return cardFound;
 }
 

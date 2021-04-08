@@ -8,6 +8,7 @@ import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
 import { Language, LinkText } from 'app/text-labels';
 import Modal from './modal';
+import { logger } from 'libs/logger';
 
 const modalTitleXpath =
   '//*[contains(normalize-space(),"Save Dataset") or contains(normalize-space(),"Update Dataset")]';
@@ -51,7 +52,6 @@ export default class DatasetSaveModal extends Modal {
       // Export to notebook
       const notebookNameTextbox = new Textbox(this.page, `${this.getXpath()}//*[@data-test-id="notebook-name-input"]`);
       await notebookNameTextbox.type(notebookName);
-      console.log(`Notebook language: ` + lang);
       const radioBtn = await RadioButton.findByName(this.page, { name: lang, ancestorLevel: 0 }, this);
       await radioBtn.select();
     } else {
@@ -68,12 +68,12 @@ export default class DatasetSaveModal extends Modal {
     await waitWhileLoading(this.page);
 
     if (isUpdate) {
-      console.log(`Updated Dataset "${newDatasetName}"`);
+      logger.info(`Updated Dataset "${newDatasetName}"`);
     } else {
-      console.log(`Created Dataset "${newDatasetName}"`);
+      logger.info(`Created Dataset "${newDatasetName}"`);
     }
     if (exportToNotebook) {
-      console.log(`Created Notebook "${notebookName}"`);
+      logger.info(`Created Notebook "${notebookName}"`);
     }
     return newDatasetName;
   }

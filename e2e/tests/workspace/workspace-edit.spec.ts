@@ -22,7 +22,7 @@ describe('Editing workspace via workspace card snowman menu', () => {
    * - Verify Workspace Information in ABOUT tab.
    */
   test('User as OWNER can edit workspace', async () => {
-    const workspaceCard = await findOrCreateWorkspaceCard(page);
+    const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName });
     await workspaceCard.selectSnowmanMenu(MenuOption.Edit, { waitForNav: true });
 
     const workspaceEditPage = new WorkspaceEditPage(page);
@@ -74,9 +74,6 @@ describe('Editing workspace via workspace card snowman menu', () => {
     expect(todayWeekday).toBe(lastUpdatedWeekday);
     expect(todayYear).toBe(lastUpdatedYear);
     expect(todayDay).toBe(lastUpdatedDay);
-
-    // Delete workspace
-    await dataPage.deleteWorkspace();
   });
   /**
    * Test:
@@ -147,5 +144,8 @@ describe('Editing workspace via workspace card snowman menu', () => {
     expect(todayWeekday).toBe(lastUpdatedWeekday);
     expect(todayYear).toBe(lastUpdatedYear);
     expect(todayDay).toBe(lastUpdatedDay);
+
+    // Delete workspace
+    await dataPage.deleteWorkspace();
   });
 });

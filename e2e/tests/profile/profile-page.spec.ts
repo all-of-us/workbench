@@ -8,10 +8,19 @@ describe('Profile', () => {
   // initialized in beforeEach()
   let profilePage: ProfilePage;
 
+  beforeEach(async () => {
+    await signInWithAccessToken(page);
+    await navigation.navMenu(page, NavLink.PROFILE);
+    profilePage = new ProfilePage(page);
+    await profilePage.waitForLoad();
+    // Verify "Save Profile" button is disabled first time page is opened.
+    await waitForSaveButton(false);
+  });
+
   async function waitForSaveButton(isActive: boolean): Promise<Button> {
     const button = await profilePage.getSaveProfileButton();
     const isCursorEnabled = !(await button.isCursorNotAllowed());
-    expect(isCursorEnabled).toBe(isActive);
+    expect(isCursorEnabled).toBe<boolean>(isActive);
     return button;
   }
 
@@ -25,16 +34,6 @@ describe('Profile', () => {
   async function isMissingErrorPresent(fieldText: string): Promise<boolean> {
     return isDivWithTextPresent(`${fieldText} can't be blank`);
   }
-
-  beforeEach(async () => {
-    await signInWithAccessToken(page);
-    await navigation.navMenu(page, NavLink.PROFILE);
-    profilePage = new ProfilePage(page);
-    await profilePage.waitForLoad();
-
-    // Verify "Save Profile" button is disabled first time page is opened.
-    await waitForSaveButton(false);
-  });
 
   test('Edit single field of existing user profile', async () => {
     const testText = makeString(50);

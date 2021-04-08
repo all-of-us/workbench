@@ -4,6 +4,7 @@ import Textbox from 'app/element/textbox';
 import ClrIcon from 'app/element/clr-icon-link';
 import { waitForText } from 'utils/waits-utils';
 import Modal from './modal';
+import { logger } from 'libs/logger';
 
 const modalText = 'share this workspace';
 
@@ -31,7 +32,7 @@ export default class ShareModal extends Modal {
     await ownerOpt.click();
 
     await this.clickButton(LinkText.Save, { waitForClose: true });
-    console.log(`Shared workspace to ${username} with role ${level}`);
+    logger.info(`Shared workspace to ${username} with role ${level}`);
   }
 
   async removeUser(username: string): Promise<void> {
