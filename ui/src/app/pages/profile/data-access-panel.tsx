@@ -32,11 +32,6 @@ const ControlledTierSection = ({ hasInstitutionalAgreement = false, isInControll
 
 
     {Utils.cond<React.ReactElement>(
-      [!hasInstitutionalAgreement, () => <React.Fragment>
-        <div style={{gridArea:'ctPrimary', color: colors.primary}}>{needsAgreementText}</div>
-        <StyledAnchorTag style={{gridArea:'ctSecondary', textDecoration: 'underline'}} href="">Learn More</StyledAnchorTag>
-      </React.Fragment>
-      ],
       [hasInstitutionalAgreement && userRevoked, () => <React.Fragment>
           <div style={{gridArea: 'ctPrimary', fontWeight: 500, color: colors.primary}}>Access to controlled tier data is revoked.</div>
           <div style={{gridArea: 'ctSecondary', fontWeight: 500, color: colors.primary}}>
@@ -45,9 +40,13 @@ const ControlledTierSection = ({ hasInstitutionalAgreement = false, isInControll
         </React.Fragment>],
       [hasInstitutionalAgreement && isInControlledTier, () => <CheckCircle style={{gridArea: 'ctAvailable'}}color={colors.success} size={23}/>],
       [hasInstitutionalAgreement, () => <React.Fragment>
-        <div style={{gridArea:'ctPrimary', fontWeight: 500, color: colors.primary}}>You must complete the Controlled Tier Data Training.</div>
-        <StyledAnchorTag style={{gridArea:'ctSecondary', textDecoration: 'underline'}} href="">Get Started</StyledAnchorTag>
-      </React.Fragment>],
+          <div style={{gridArea:'ctPrimary', fontWeight: 500, color: colors.primary}}>You must complete the Controlled Tier Data Training.</div>
+          <StyledAnchorTag style={{gridArea:'ctSecondary', textDecoration: 'underline'}} href="">Get Started</StyledAnchorTag>
+        </React.Fragment>],
+      () => <React.Fragment>
+          <div style={{gridArea:'ctPrimary', color: colors.primary}}>{needsAgreementText}</div>
+          <StyledAnchorTag style={{gridArea:'ctSecondary', textDecoration: 'underline'}} href="">Learn More</StyledAnchorTag>
+        </React.Fragment>
     )}
   </div>
 }

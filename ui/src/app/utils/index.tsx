@@ -633,10 +633,15 @@ export const useId = () => {
 
 const nothing = {}
 
-export const cond = function<T>(...args: [boolean, () => T][]) {
+// maybe - takes a function and a value. If the value is not defined returns "nothing"
+// Feel free to export this when a proper use case arises
+// Example usage: fp.flow(getData, maybe(doSomethingIfIhaveData), maybe(doAnotherThingIfThereIsAResult))(getData())
+const maybe = fp.curry((fn, value) => value !== nothing && value ? fn(value) : nothing)
+
+// cond - useful for representing conditionals as an expression
+export const cond = function<T>(...args: ([boolean, () => T] | (() => T))[]) {
   for (const arg of args) {
-    const [predicate, value] = arg
-    const result = predicate ? value() : nothing
+    const result = Array.isArray(arg) ? maybe(...fp.reverse(arg)) : arg()
     if (result !== nothing) {
       return result
     }
