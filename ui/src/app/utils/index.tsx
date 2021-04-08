@@ -640,6 +640,12 @@ const nothing = {};
 const maybe = fp.curry((fn, value) => value !== nothing && value ? fn(value) : nothing);
 
 // cond - useful for representing conditionals as an expression
+// Operates like fp.cond, but a bit more concise - no need for array of arrays and allows for a clear default case
+// Example usage: cond(
+//  [v === 1, () => v + 2],
+//  [v === 2, () => v * 2],
+//  () => 5 // Default case
+// )
 export const cond = <T extends unknown>(...args: ([boolean, () => T] | (() => T))[]) => {
   for (const arg of args) {
     const result = Array.isArray(arg) ? maybe(...fp.reverse(arg)) : arg();

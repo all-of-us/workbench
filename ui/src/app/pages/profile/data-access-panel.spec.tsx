@@ -40,13 +40,13 @@ describe('Data Access Panel', () => {
     expect(wrapper.find(CheckCircle).length).toBe(2);
   });
 
-  it('Should show success status when the user is in the registered tier and "get stated" for the controlled tier', async() => {
+  it('Should show success status when the user is in the registered tier and "get started" for the controlled tier', async() => {
     const wrapper = component({hasInstitutionalAgreement: true, tiers: ['registered']});
     expect(wrapper.find(CheckCircle).length).toBe(1);
     expect(TestHelpers.findNodesByExactText(wrapper, "Get Started").length).toBe(1)
   });
 
-  it('Should not show success status when the user is in not the registered tier and "get stated" for the controlled tier', async() => {
+  it('Should not show success status when the user is in not the registered tier and "get started" for the controlled tier', async() => {
     const wrapper = component({hasInstitutionalAgreement: true, tiers: []});
     expect(wrapper.find(CheckCircle).length).toBe(0);
     expect(TestHelpers.findNodesContainingText(wrapper, 'Please complete data access').length).toBe(1);
