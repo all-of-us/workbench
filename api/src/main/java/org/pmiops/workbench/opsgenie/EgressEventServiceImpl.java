@@ -51,7 +51,7 @@ public class EgressEventServiceImpl implements EgressEventService {
   // Workspace namespace placeholder in Egress alert when workspace namespace is missing.
   // It may happens when workspace is deleted from db, or we are not able to retrieve workspace
   // by google project id.
-  @VisibleForTesting static final String NOT_FOUND_WORKSPACE_NAMESPACE = "NOT FOUND";
+  @VisibleForTesting static final String NOT_FOUND_WORKSPACE_NAMESPACE = "NOT_FOUND";
 
   @Autowired
   public EgressEventServiceImpl(
