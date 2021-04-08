@@ -182,6 +182,7 @@ export default class BaseElement extends Container {
     const typeAndCheck = async () => {
       const actualValue = await clearAndType(textValue);
       if (actualValue === textValue) {
+        await this.pressTab();
         return; // success
       }
       if (maxRetries <= 0) {
