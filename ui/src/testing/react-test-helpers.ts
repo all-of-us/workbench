@@ -26,5 +26,5 @@ export const findNodesByExactText = fp.curry((wrapper: ReactWrapper, text) => wr
 }));
 
 export const findNodesContainingText = fp.curry((wrapper: ReactWrapper, text) => wrapper.findWhere(node => {
-  return (node.name() === null && node.text().includes(text));
+  return (node.name() === null && fp.includes(text, node.text()));
 }));
