@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
@@ -127,9 +126,6 @@ public class RasLinkService {
 
   /** Validates user has IAL2 setup. See class javadoc Step2 for more details. */
   static boolean isIal2(String acrClaim) {
-    System.out.println("~~~~111111");
-    System.out.println(acrClaim);
-    System.out.println(ACR_CLAIM_IAL_2_IDENTIFIER);
     return acrClaim.contains(ACR_CLAIM_IAL_2_IDENTIFIER);
   }
 

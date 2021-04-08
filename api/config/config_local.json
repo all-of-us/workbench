@@ -27,8 +27,8 @@
     "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.rw_test_firecloud_view",
     "retryCount": 2,
     "bufferCapacityPerTier": {
-      "registered": 10,
-      "controlled_test": 10
+      "registered": 0,
+      "controlled_test": 0
     },
     "bufferRefillProjectsPerTask": 1,
     "bufferStatusChecksPerTask": 10,

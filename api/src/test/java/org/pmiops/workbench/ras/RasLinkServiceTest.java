@@ -57,11 +57,12 @@ public class RasLinkServiceTest {
   private static final String AUTH_CODE = "code";
   private static final String REDIRECT_URL = "url";
   private static final String ACCESS_TOKEN = "access_token_1";
-  private static final String LOGIN_GOV_USERNAME = "foo@gmail.com";
+  private static final String LOGIN_GOV_USERNAME = "foo@Login.Gov.com";
+  private static final String ERA_COMMONS_USERNAME = "user2@eraCommons.com";
   private static final String USER_INFO_JSON_LOGIN_GOV =
-      "{\"preferred_username\":\"user1@Login.Gov.com\", \"email\":\"" + LOGIN_GOV_USERNAME + "\"}";
+      "{\"preferred_username\":\"" + LOGIN_GOV_USERNAME + "\",\"email\":\"foo@gmail.com\"}";
   private static final String USER_INFO_JSON_ERA =
-      "{\"preferred_username\":\"user2@eraCommons.com\", \"email\":\"" + LOGIN_GOV_USERNAME + "\"}";
+      "{\"preferred_username\":\"" + ERA_COMMONS_USERNAME + "\",\"email\":\"foo2@gmail.com\"}";
   private static final String ID_TOKEN_JWT_IAL_1 =
       JWT.create()
           .withClaim(

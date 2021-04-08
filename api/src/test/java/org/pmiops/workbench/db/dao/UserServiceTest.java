@@ -401,7 +401,8 @@ public class UserServiceTest {
             nullableTimestampToOptionalInstant(twoFactorBypassTime));
     assertThat(dbUser.getTwoFactorAuthBypassTime()).isEqualTo(twoFactorBypassTime);
 
-    final Timestamp rasLinkLoginGovBypassTime = Timestamp.from(Instant.parse("2004-01-01T00:00:00.00Z"));
+    final Timestamp rasLinkLoginGovBypassTime =
+        Timestamp.from(Instant.parse("2004-01-01T00:00:00.00Z"));
     userService.setRasLinkLoginGovBypassTime(dbUser.getUserId(), null, rasLinkLoginGovBypassTime);
     verify(mockUserServiceAuditAdapter)
         .fireAdministrativeBypassTime(

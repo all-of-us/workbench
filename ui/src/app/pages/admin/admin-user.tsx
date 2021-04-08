@@ -411,6 +411,7 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
       updatedProfile,
       verifiedInstitutionOptions
     } = this.state;
+    const {enableRasLoginGovLinking} = serverConfigStore.getValue();
     const errors = validate({
       'verifiedInstitutionalAffiliation': this.validateVerifiedInstitutionalAffiliation(),
       'institutionShortName': this.validateInstitutionShortname(),
@@ -639,13 +640,13 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
                     onToggle={() => {}}
                     dataTestId={'dataUseAgreementBypassToggle'}
                 />
-                <ToggleWithLabelAndToggledText
+                {enableRasLoginGovLinking && <ToggleWithLabelAndToggledText
                     label={'RAS Login.gov Link'}
                     initialValue={!!updatedProfile.rasLinkLoginGovBypassTime}
                     disabled={true}
                     onToggle={() => {}}
                     dataTestId={'rasLinkLoginGovBypassToggle'}
-                />
+                />}
               </FlexRow>
             </div>
           </FlexColumn>
