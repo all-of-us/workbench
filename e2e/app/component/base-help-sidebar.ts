@@ -4,6 +4,7 @@ import { LinkText, SideBarLink } from 'app/text-labels';
 import * as fp from 'lodash/fp';
 import { Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
+import { logger } from 'libs/logger';
 
 const enum Selectors {
   rootXpath = '//*[@id="help-sidebar"]',
@@ -77,7 +78,7 @@ export default abstract class BaseHelpSidebar extends Container {
     await closeButton.waitUntilEnabled();
     await closeButton.click();
     await this.waitUntilClose();
-    console.log(`Closed "${sidePanelTitle}" sidebar panel`);
+    logger.info(`Closed "${sidePanelTitle}" sidebar panel`);
   }
 
   async isVisible(): Promise<boolean> {

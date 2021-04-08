@@ -92,8 +92,7 @@ beforeEach(async () => {
     const title = await getPageTitle();
     try {
       logger.error('PAGE ERROR: "$title}"');
-      console.error(JSON.stringify(error, null, 2));
-      console.error(`${error.message}\n${error.stack}`);
+      logger.error(JSON.stringify(error, null, 2));
     } catch (err) {
       console.error(`❗ "${title}"\nException occurred when getting page error.\n${err}`);
     }
@@ -104,9 +103,7 @@ beforeEach(async () => {
     const title = await getPageTitle();
     try {
       logger.error('PAGEERROR: "$title}"');
-      console.error(JSON.stringify(error, null, 2));
-      console.error(`${error.message}\n${error.stack}`);
-      console.log('');
+      logger.error(JSON.stringify(error, null, 2));
     } catch (err) {
       console.error(`❗ "${title}"\nPage exception occurred when getting pageerror.\n${err}`);
     }

@@ -13,6 +13,7 @@ import Modal from 'app/modal/modal';
 import AuthenticatedPage from './authenticated-page';
 import BaseElement from 'app/element/base-element';
 import ShareModal from 'app/modal/share-modal';
+import { logger } from 'libs/logger';
 
 export const UseFreeCredits = 'Use All of Us free credits';
 
@@ -157,7 +158,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     await modal.clickButton(link, { waitForClose: true });
     await waitWhileLoading(this.page);
 
-    console.log(`Deleted ${resourceType} "${resourceName}"`);
+    logger.info(`Deleted ${resourceType} "${resourceName}"`);
     return modalTextContent;
   }
 
@@ -223,7 +224,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
 
     await modal.clickButton(buttonLink, { waitForClose: true });
     await waitWhileLoading(this.page);
-    console.log(`Renamed ${resourceType} "${resourceName}" to "${newResourceName}"`);
+    logger.info(`Renamed ${resourceType} "${resourceName}" to "${newResourceName}"`);
     return modalTextContents;
   }
 
@@ -236,7 +237,8 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     const iconXpath = './/*[@data-test-id="workspace-menu-button"]';
     await this.page.waitForXPath(iconXpath, { visible: true }).then((icon) => icon.click());
     const snowmanMenu = new SnowmanMenu(this.page);
-    return snowmanMenu.select(option, opts);
+    await snowmanMenu.select(option, opts);
+    logger.info(`Selected Workspace Action menu option: ${option}`);
   }
 
   /**
@@ -245,7 +247,9 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
   async deleteWorkspace(): Promise<string[]> {
     await this.selectWorkspaceAction(MenuOption.Delete, { waitForNav: false });
     // Handle Delete Confirmation modal
-    return this.dismissDeleteWorkspaceModal();
+    const modalText = await this.dismissDeleteWorkspaceModal();
+    logger.info('Deleted workspace');
+    return modalText;
   }
 
   /**

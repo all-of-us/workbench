@@ -1,5 +1,4 @@
 import { Page } from 'puppeteer';
-
 import Button from 'app/element/button';
 import { Language, LinkText, PageUrl } from 'app/text-labels';
 import WorkspaceEditPage, { FIELD as EDIT_FIELD } from 'app/page/workspace-edit-page';
@@ -13,8 +12,9 @@ import { config } from 'resources/workbench-config';
 import { UseFreeCredits } from './workspace-base';
 import OldCdrVersionModal from 'app/modal/old-cdr-version-modal';
 import AuthenticatedPage from './authenticated-page';
-
+import { logger } from 'libs/logger';
 const faker = require('faker/locale/en_US');
+
 export const PageTitle = 'View Workspace';
 
 export const FieldSelector = {
@@ -34,7 +34,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
     await waitForDocumentTitle(this.page, PageTitle);
 
     await waitWhileLoading(this.page, 120000).catch(async () => {
-      console.warn('Retry loading Workspaces page');
+      logger.warn('Retry loading Workspaces page');
       await this.page.reload({ waitUntil: ['networkidle0', 'load'] });
       await waitWhileLoading(this.page);
     });
@@ -98,7 +98,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
     const createButton = await editPage.getCreateWorkspaceButton();
     await createButton.waitUntilEnabled();
     const modalContent = await editPage.clickCreateFinishButton(createButton);
-    console.log(`Created workspace "${workspaceName}" with CDR Version "${cdrVersionName}"`);
+    logger.info(`Created workspace "${workspaceName}" with CDR Version "${cdrVersionName}"`);
     return modalContent;
   }
 

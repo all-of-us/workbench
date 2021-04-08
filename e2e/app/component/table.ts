@@ -95,7 +95,6 @@ export default class Table extends Container {
     const columnIndexXpath = `count(${this.theadXpath}[contains(normalize-space(text()), "${columName}")]/preceding-sibling::*)`;
     const handle = await this.page.waitForXPath(columnIndexXpath, { visible: true });
     const value = await handle.jsonValue();
-    console.log('getColumnIndex: ' + value);
     return Number(value.toString());
   }
 

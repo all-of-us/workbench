@@ -289,7 +289,7 @@ export async function findOrCreateWorkspace(page: Page, opts: { workspaceName?: 
   const randomCard = fp.shuffle(olderWorkspaceCards).pop();
   const cardName = await randomCard.getWorkspaceName();
   const lastChangedTime = await randomCard.getLastChangedTime();
-  console.log(`Found workspace card: "${cardName}". Last changed on ${lastChangedTime}`);
+  logger.info(`Found workspace card: "${cardName}". Last changed on ${lastChangedTime}`);
   await randomCard.clickWorkspaceName();
   return cardName;
 }
@@ -320,10 +320,10 @@ export async function findOrCreateWorkspaceCard(
 
   let cardFound = await findWorkspaceCard(page, workspaceName);
   if (cardFound !== null) {
-    console.log(`Found Workspace card name: "${workspaceName}"`);
+    logger.info(`Found Workspace card name: "${workspaceName}"`);
     return cardFound;
   } else {
-    console.log(`Not finding workspace card name: ${workspaceName}`);
+    logger.info(`Not finding workspace card name: ${workspaceName}`);
   }
 
   await createWorkspace(page, { workspaceName, cdrVersion });
@@ -332,7 +332,7 @@ export async function findOrCreateWorkspaceCard(
   if (cardFound === null) {
     throw new Error(`Failed finding Workspace card name: ${workspaceName}`);
   }
-  console.log(`Found Workspace card name: "${workspaceName}"`);
+  logger.info(`Found Workspace card name: "${workspaceName}"`);
   return cardFound;
 }
 

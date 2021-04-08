@@ -5,6 +5,7 @@ import { LinkText, SideBarLink } from 'app/text-labels';
 import Button from 'app/element/button';
 import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import BaseHelpSidebar from './base-help-sidebar';
+import { logger } from 'libs/logger';
 
 const defaultXpath = '//*[@id="runtime-panel"]';
 const statusIconXpath = '//*[@data-test-id="runtime-status-icon"]';
@@ -165,14 +166,14 @@ export default class RuntimePanel extends BaseHelpSidebar {
     await this.page.waitForXPath(`${this.getXpath()}//h3`, { visible: true });
     // Wait for visible button
     await this.page.waitForXPath(`${this.getXpath()}//*[@role="button" and @aria-label]`, { visible: true });
-    console.log(`Opened "${await this.getTitle()}" runtime sidebar`);
+    logger.info(`Opened "${await this.getTitle()}" runtime sidebar`);
   }
 
   /**
    * Create runtime and wait until running.
    */
   async createRuntime(): Promise<void> {
-    console.log('Creating runtime');
+    logger.info('Creating runtime');
     await this.open();
     await this.waitForStartStopIconState(StartStopIconState.None);
     await this.clickButton(LinkText.Create);
@@ -184,14 +185,14 @@ export default class RuntimePanel extends BaseHelpSidebar {
     await this.waitForStartStopIconState(StartStopIconState.Starting, 10 * 60 * 1000);
     await this.waitForStartStopIconState(StartStopIconState.Running);
     await this.close();
-    console.log('Runtime is running');
+    logger.info('Runtime is running');
   }
 
   /**
    * Delete runtime.
    */
   async deleteRuntime(): Promise<void> {
-    console.log('Deleting runtime');
+    logger.info('Deleting runtime');
     await this.open();
     await this.clickButton(LinkText.DeleteEnvironment);
     await this.clickButton(LinkText.Delete);
@@ -201,14 +202,14 @@ export default class RuntimePanel extends BaseHelpSidebar {
     await this.open();
     await this.waitForStartStopIconState(StartStopIconState.None);
     await this.close();
-    console.log('Runtime is deleted');
+    logger.info('Runtime is deleted');
   }
 
   /**
    * Pause runtime.
    */
   async pauseRuntime(): Promise<void> {
-    console.log('Pausing runtime');
+    logger.info('Pausing runtime');
     await this.open();
     await this.waitForStartStopIconState(StartStopIconState.Running, 60 * 1000);
     await this.clickPauseRuntimeIcon();
@@ -216,14 +217,14 @@ export default class RuntimePanel extends BaseHelpSidebar {
     await this.waitForStartStopIconState(StartStopIconState.Stopping);
     await this.waitForStartStopIconState(StartStopIconState.Stopped);
     await this.close();
-    console.log('Runtime is paused');
+    logger.info('Runtime is paused');
   }
 
   /**
    * Resume runtime.
    */
   async resumeRuntime(): Promise<void> {
-    console.log('Resuming runtime');
+    logger.info('Resuming runtime');
     await this.open();
     await this.clickResumeRuntimeIcon();
     // Runtime state transition: Stopped -> Starting -> Running
@@ -231,7 +232,7 @@ export default class RuntimePanel extends BaseHelpSidebar {
     await this.waitForStartStopIconState(StartStopIconState.Starting);
     await this.waitForStartStopIconState(StartStopIconState.Running);
     await this.close();
-    console.log('Runtime is resumed');
+    logger.info('Runtime is resumed');
   }
 
   async applyChanges(): Promise<NotebookPreviewPage> {
