@@ -21,6 +21,10 @@ export const styles = reactStyles({
     fontSize: 14,
     marginRight: 20
   },
+  dataAccessText: {
+    fontWeight: 500,
+    color: colors.primary
+  },
   longInputContainerStyle: {
     width: 420,
     resize: 'both'

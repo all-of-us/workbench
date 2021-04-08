@@ -5,14 +5,24 @@ import {StyledAnchorTag} from 'app/components/buttons';
 import {styles} from 'app/pages/profile/profile-styles'
 import {CheckCircle, ControlledTierBadge} from 'app/components/icons'
 import colors from 'app/styles/colors';
+import { style } from '@angular/core/src/animation/dsl';
 
 const needsAgreementText = 'Contains expanded participant data, including genomics. Before you can access controlled tier data, ' + 
   'your institution will need to sign an amended agreement with the All of Us Data and Research Center.'
 
 const RegisteredTierSection = ({isInRegisteredTier = false}) => {
-  return <div style={{display: 'flex'}}>
-    <div style={{...styles.inputLabel, marginRight: '0.5rem'}}>Registered tier</div>
-    {isInRegisteredTier && <CheckCircle color={colors.success} size={23}/>} 
+  return <div style={{
+      marginBottom: '1rem',
+      display: 'grid',
+      gridTemplateColumns: 'fit-content(10rem) 1fr',
+      gridTemplateAreas: `"regPrimary regAvailable"
+                          "regSecondary regSecondary"`
+    }}>
+    <div style={{...styles.inputLabel, gridArea: 'regPrimary', marginRight: '0.5rem'}}>Registered tier</div>
+    {isInRegisteredTier 
+      ? <CheckCircle style={{gridArea: 'regAvailable'}} color={colors.success} size={23}/> 
+      : <div style={{ ...styles.dataAccessText, gridArea: 'regSecondary'}}>Please complete data access requirements below to gain access to registered tier data.</div>
+    } 
   </div>
 }
 
@@ -22,7 +32,7 @@ const ControlledTierSection = ({ hasInstitutionalAgreement = false, isInControll
       display: 'grid', 
       columnGap: '0.25rem',
       width: 459,
-      gridTemplateColumns: '1rem 4.5rem auto',
+      gridTemplateColumns: 'fit-content(2rem) fit-content(10rem) 1fr',
       gridTemplateAreas: `"ctBadge ctLabel ctAvailable"
                           ". ctPrimary ctPrimary"
                           ". ctSecondary ctSecondary"`
@@ -33,14 +43,14 @@ const ControlledTierSection = ({ hasInstitutionalAgreement = false, isInControll
 
     {Utils.cond<React.ReactElement>(
       [hasInstitutionalAgreement && userRevoked, () => <React.Fragment>
-          <div style={{gridArea: 'ctPrimary', fontWeight: 500, color: colors.primary}}>Access to controlled tier data is revoked.</div>
-          <div style={{gridArea: 'ctSecondary', fontWeight: 500, color: colors.primary}}>
+          <div style={{ ...styles.dataAccessText, gridArea: 'ctPrimary'}}>Access to controlled tier data is revoked.</div>
+          <div style={{ ...styles.dataAccessText, gridArea: 'ctSecondary'}}>
             To gain access <StyledAnchorTag style={{textDecoration: 'underline'}} href="">contact admin.</StyledAnchorTag>
           </div>
         </React.Fragment>],
       [hasInstitutionalAgreement && isInControlledTier, () => <CheckCircle style={{gridArea: 'ctAvailable'}}color={colors.success} size={23}/>],
       [hasInstitutionalAgreement, () => <React.Fragment>
-          <div style={{gridArea:'ctPrimary', fontWeight: 500, color: colors.primary}}>You must complete the Controlled Tier Data Training.</div>
+          <div style={{ ...styles.dataAccessText, gridArea:'ctPrimary'}}>You must complete the Controlled Tier Data Training.</div>
           <StyledAnchorTag style={{gridArea:'ctSecondary', textDecoration: 'underline'}} href="">Get Started</StyledAnchorTag>
         </React.Fragment>],
       () => <React.Fragment>
