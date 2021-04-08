@@ -81,7 +81,7 @@ beforeEach(async () => {
       const args = await Promise.all(message.args().map((a) => describeJsHandle(a)));
       const msgType = message.type() === 'warning' ? 'warn' : message.type();
       logger.info(`Page Console: "${title}"`);
-      console[msgType](...args);
+      console[msgType](args);
     } catch (err) {
       console.error(`❗ "${title}"\nException occurred when getting page console message.\n${err}\n${message.text()}`);
     }

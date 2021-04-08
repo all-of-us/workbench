@@ -375,3 +375,21 @@ export function isValidDate(date: string) {
   }
   return d.toISOString().slice(0, 10) === date;
 }
+
+export function delay(t) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, t);
+  });
+}
+
+export async function retry(fn, interval = 250, retries = 30) {
+  try {
+    return await fn();
+  } catch (err) {
+    if (retries == 0) {
+      throw err;
+    }
+    await delay(interval);
+    return retry(fn, Math.min(60000, interval * 2), retries - 1);
+  }
+}

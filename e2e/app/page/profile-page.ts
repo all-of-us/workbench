@@ -4,6 +4,7 @@ import AuthenticatedPage from 'app/page/authenticated-page';
 import { waitForDocumentTitle, waitForUrl, waitWhileLoading } from 'utils/waits-utils';
 import Button from 'app/element/button';
 import Textarea from 'app/element/textarea';
+import {PageUrl} from '../text-labels';
 
 export const PageTitle = 'Profile';
 
@@ -38,6 +39,15 @@ export const MissingErrorAlias = {
 export default class ProfilePage extends AuthenticatedPage {
   constructor(page: Page) {
     super(page);
+  }
+
+  /**
+   * Load 'Profile' page and ensure page load is completed.
+   */
+  async load(): Promise<this> {
+    await this.loadPageUrl(PageUrl.Profile);
+    await waitWhileLoading(this.page);
+    return this;
   }
 
   async isLoaded(): Promise<boolean> {
