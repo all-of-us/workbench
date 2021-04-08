@@ -79,4 +79,5 @@ const Icon = ({ shape, size, style, color, ...props }) => {
 }
 
 export const CheckCircle = props => <Icon shape={faCheckCircle} {...props}/>
-export const ControlledTierBadge = ({size = 25, ...props}) => <img style={{height: size, width: size}} src={'/assets/icons/controlled-tier-badge.svg'} {...props}/>
+export const ControlledTierBadge = ({size = 25, ...props}) =>
+  <img style={{height: size, width: size}} src={'/assets/icons/controlled-tier-badge.svg'} {...props}/>
