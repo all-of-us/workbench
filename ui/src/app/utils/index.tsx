@@ -634,8 +634,9 @@ export const useId = () => {
 const nothing = {};
 
 // maybe - takes a function and a value. If the value is not defined returns "nothing"
+// When this was written is was not used outside this file, so it was not exported
 // Feel free to export this when a proper use case arises
-// Example usage: fp.flow(getData, maybe(doSomethingIfIhaveData), maybe(doAnotherThingIfThereIsAResult))(getData())
+// Example usage: fp.flow(maybe(doSomethingIfIhaveData), maybe(doAnotherThingIfThereIsAResult))(getData())
 const maybe = fp.curry((fn, value) => value !== nothing && value ? fn(value) : nothing);
 
 // cond - useful for representing conditionals as an expression

@@ -40,24 +40,26 @@ const ControlledTierSection = ({ hasInstitutionalAgreement = false, isInControll
   }}>
     <ControlledTierBadge style={{gridArea: 'ctBadge'}}/>
     <div style={{...styles.inputLabel, gridArea: 'ctLabel'}}>Controlled tier</div>
-
-
     {Utils.cond<React.ReactElement>(
+      // TODO: Remove update href and remove _blank target from Anchor tags
       [hasInstitutionalAgreement && userRevoked, () => <React.Fragment>
           <div style={{ ...styles.dataAccessText, gridArea: 'ctPrimary'}}>Access to controlled tier data is revoked.</div>
           <div style={{ ...styles.dataAccessText, gridArea: 'ctSecondary'}}>
-            To gain access <StyledAnchorTag style={{textDecoration: 'underline'}} href='profile'>contact admin.</StyledAnchorTag>
+            To gain access <StyledAnchorTag style={{textDecoration: 'underline'}} 
+              href='about:blank' target='_blank'>contact admin.</StyledAnchorTag>
           </div>
         </React.Fragment>],
       [hasInstitutionalAgreement && isInControlledTier,
         () => <CheckCircle style={{gridArea: 'ctAvailable'}}color={colors.success} size={23}/>],
       [hasInstitutionalAgreement, () => <React.Fragment>
           <div style={{ ...styles.dataAccessText, gridArea: 'ctPrimary'}}>You must complete the Controlled Tier Data Training.</div>
-          <StyledAnchorTag style={{gridArea: 'ctSecondary', textDecoration: 'underline'}} href='profile'>Get Started</StyledAnchorTag>
+          <StyledAnchorTag style={{gridArea: 'ctSecondary', textDecoration: 'underline'}} 
+            href='about:blank' target='_blank'>Get Started</StyledAnchorTag>
         </React.Fragment>],
       () => <React.Fragment>
           <div style={{gridArea: 'ctPrimary', color: colors.primary}}>{needsAgreementText}</div>
-          <StyledAnchorTag style={{gridArea: 'ctSecondary', textDecoration: 'underline'}} href='profile'>Learn More</StyledAnchorTag>
+          <StyledAnchorTag style={{gridArea: 'ctSecondary', textDecoration: 'underline'}} 
+            href='about:blank' target='_blank'>Learn More</StyledAnchorTag>
         </React.Fragment>
     )}
   </div>;
