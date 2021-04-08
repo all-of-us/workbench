@@ -1,5 +1,3 @@
-import { timeNow } from 'utils/test-utils';
-
 const fs = require('fs-extra');
 const path = require('path');
 const winston = require('winston');
@@ -14,8 +12,15 @@ module.exports = class JestReporter {
     this.summaryFile = this._options.filename || 'test-results-summary.json';
   }
 
+  timeNow() {
+    return new Date().toLocaleString('en-US', {
+      timeZone: 'America/New_York',
+      hour12: false
+    });
+  }
+
   onTestStart(test) {
-    console.info(`Running ${path.parse(test.path).name} at ${timeNow()}`);
+    console.info(`Running ${path.parse(test.path).name} at ${this.timeNow()}`);
   }
 
   onTestResult(_testRunConfig, testResult, _runResults) {

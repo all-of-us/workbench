@@ -375,10 +375,3 @@ export function isValidDate(date: string) {
   }
   return d.toISOString().slice(0, 10) === date;
 }
-
-export const timeNow = () => {
-  return new Date().toLocaleString('en-US', {
-    timeZone: 'America/New_York',
-    hour12: false
-  });
-};
