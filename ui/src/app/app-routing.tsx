@@ -71,7 +71,7 @@ const AdminBannerPage = withRouteData(AdminBanner);
 const AdminNotebookViewPage = withRouteData(AdminNotebookView);
 const AdminReviewWorkspacePage = withRouteData(AdminReviewWorkspace);
 const CohortActionsPage = withRouteData(CohortActions);
-const CohortPagePage = fp.flow(withRouteData, withRouterPrompt)(CohortPage);
+const CohortPagePage = withRouteData(CohortPage);
 const CohortReviewPage = withRouteData(CohortReview);
 const ConceptHomepagePage = withRouteData(ConceptHomepage);
 const ConceptSetActionsPage = withRouteData(ConceptSetActions);
@@ -389,8 +389,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
                 title: 'Build Cohort Criteria',
                 breadcrumb: BreadcrumbType.CohortAdd,
                 pageKey: 'cohortBuilder'
-              }}
-              routeHistory={routeHistory}/>}
+              }}/>}
           />
         </ProtectedRoutes>
       </ProtectedRoutes>

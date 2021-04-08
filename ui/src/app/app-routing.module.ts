@@ -6,7 +6,6 @@ import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
 import {RegistrationGuard} from './guards/registration-guard.service';
 import {SignInGuard} from './guards/sign-in-guard.service';
 
-import {CohortPageComponent} from './cohort-search/cohort-page/cohort-page.component';
 import {ConceptSearchComponent} from './pages/data/concept/concept-search';
 import {SignedInComponent} from './pages/signed-in/component';
 import {WorkspaceWrapperComponent} from './pages/workspace/workspace-wrapper/component';

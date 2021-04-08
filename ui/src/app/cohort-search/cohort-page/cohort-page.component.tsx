@@ -1,5 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {withRouter} from 'react-router';
 
 import {CohortSearch} from 'app/cohort-search/cohort-search/cohort-search.component';
 import {ListOverview} from 'app/cohort-search/overview/overview.component';
@@ -52,7 +53,7 @@ function colStyle(percentage: string) {
 
 interface Props {
   cohortContext: any;
-  routeHistory: any;
+  history: any;
   setPrompt: Function;
   workspace: WorkspaceData;
 }
@@ -64,15 +65,15 @@ interface State {
   updateCount: number;
   cohort: Cohort;
   cohortError: boolean;
-  minHeight: string;
-  modalPromise: Promise<boolean> | null;
   modalOpen: boolean;
   updateGroupListsCount: number;
   cohortChanged: boolean;
   searchContext: any;
+  unsavedSelections: boolean;
+  updatingCohort: boolean;
 }
 
-export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearchContext()) (
+export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearchContext(), withRouter) (
   class extends React.Component<Props, State> {
     private subscription;
     resolve: Function;
@@ -87,24 +88,22 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
         updateCount: 0,
         cohort: undefined,
         cohortError: false,
-        minHeight: '10rem',
-        modalPromise:  null,
         modalOpen: false,
         updateGroupListsCount: 0,
         cohortChanged: false,
-        searchContext: undefined
+        searchContext: undefined,
+        unsavedSelections: false,
+        updatingCohort: false
       };
       this.showWarningModal = this.showWarningModal.bind(this);
     }
 
     componentDidMount() {
-      const {routeHistory, workspace: {id}} = this.props;
-      console.log(routeHistory);
+      const {workspace: {id}} = this.props;
       this.subscription = queryParamsStore.subscribe(params => this.initCohort(params.cohortId));
       this.subscription.add(searchRequestStore.subscribe(searchRequest => {
         const {cohort} = this.state;
         const cohortChanged = !!cohort && cohort.criteria !== JSON.stringify(mapRequest(searchRequest));
-        // this.props.setPrompt(cohortChanged);
         this.setState({
           criteria: searchRequest,
           overview: searchRequest.includes.length > 0 || searchRequest.excludes.length > 0,
@@ -118,34 +117,22 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
         };
         localStorage.setItem(LOCAL_STORAGE_KEY_COHORT_SEARCH_REQUEST, JSON.stringify(localStorageCohort));
       }));
-      // this.props.setShowWarningModal(this.showWarningModal);
-      this.unblock = this.props.routeHistory.block((nextLocation) => {
-        if (this.state.cohortChanged) {
-          console.log('blocked');
-        } else {
-          this.unblock();
-          nextLocation.retry();
-        }
-        // return !this.state.cohortChanged;
+      this.unblock = this.props.history.block(async() => {
+        const {cohortChanged, unsavedSelections, updatingCohort} = this.state;
+        // If there are unsaved changes and we're not updating, show unsaved changes modal
+        return !(cohortChanged || unsavedSelections) || updatingCohort || this.showWarningModal();
       });
     }
 
     componentDidUpdate(prevProps: Readonly<Props>) {
       if (prevProps.cohortContext && !this.props.cohortContext) {
-        // this.props.setUnsavedSelections(false);
+        // User exited CohortSearch
+        this.setState({unsavedSelections: false});
       }
     }
 
     componentWillUnmount() {
-      const unblock = this.props.routeHistory.block((nextLocation) => {
-        if (this.state.cohortChanged) {
-          console.log('blocked');
-        } else {
-          unblock();
-          nextLocation.retry();
-        }
-        // return !this.state.cohortChanged;
-      });
+      this.unblock();
       this.subscription.unsubscribe();
       idsInUse.next(new Set());
       currentCohortStore.next(undefined);
@@ -259,11 +246,11 @@ export const CohortPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSearc
                       cohortChanged={cohortChanged}
                       searchRequest={criteria}
                       updateCount={updateCount}
-                      updating={() => {/*this.props.setUpdatingCohort(true)*/}}/>}
+                      updating={() => this.setState({updatingCohort: true})}/>}
                 </div>
                 {loading && <SpinnerOverlay/>}
               </FlexRowWrap>
-              {this.showCohortSearch && <CohortSearch setUnsavedChanges={(unsaved) => {/*this.props.setUnsavedSelections(unsaved)*/}}/>}
+              {this.showCohortSearch && <CohortSearch setUnsavedChanges={(unsaved) => this.setState({unsavedSelections: unsaved})}/>}
             </React.Fragment>
           }
         </div>
