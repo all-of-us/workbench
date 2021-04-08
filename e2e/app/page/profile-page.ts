@@ -4,7 +4,7 @@ import AuthenticatedPage from 'app/page/authenticated-page';
 import { waitForDocumentTitle, waitForUrl, waitWhileLoading } from 'utils/waits-utils';
 import Button from 'app/element/button';
 import Textarea from 'app/element/textarea';
-import {PageUrl} from '../text-labels';
+import { PageUrl } from 'app/text-labels';
 
 export const PageTitle = 'Profile';
 
