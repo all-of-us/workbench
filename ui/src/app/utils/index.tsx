@@ -177,7 +177,7 @@ export function cookiesEnabled(): boolean {
   }
 }
 
-export type ReactStyles<T> = {
+type ReactStyles<T> = {
   readonly [P in keyof T]: React.CSSProperties;
 };
 
