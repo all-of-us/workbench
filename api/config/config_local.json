@@ -119,7 +119,7 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": true,
     "enableReportingUploadCron": true,
-    "enableRasLoginGovLinking": false
+    "enableRasLoginGovLinking": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",

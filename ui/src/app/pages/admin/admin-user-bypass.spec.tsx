@@ -19,6 +19,7 @@ describe('AdminUserBypassSpec', () => {
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
+      enableRasLoginGovLinking: true,
     });
     props = {
       user: ProfileStubVariables.ADMIN_TABLE_USER_STUB

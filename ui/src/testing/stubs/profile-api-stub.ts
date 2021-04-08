@@ -31,6 +31,7 @@ export class ProfileStubVariables {
     complianceTrainingBypassTime: null,
     eraCommonsCompletionTime: null,
     eraCommonsBypassTime: null,
+    rasLinkLoginGovBypassTime: null,
     authorities: [],
     freeTierUsage: 1.23,
     freeTierDollarQuota: 34.56,
@@ -115,6 +116,9 @@ export class ProfileApiStub extends ProfileApi {
           break;
         case AccessModule.ERACOMMONS:
           this.profile.eraCommonsBypassTime = valueToSet;
+          break;
+        case AccessModule.RASLINKLOGINGOV:
+          this.profile.rasLinkLoginGovBypassTime = valueToSet;
           break;
       }
       resolve({});

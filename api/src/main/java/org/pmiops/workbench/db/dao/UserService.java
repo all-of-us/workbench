@@ -67,6 +67,9 @@ public interface UserService {
   void setTwoFactorAuthBypassTime(
       Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
 
+  void setRasLinkLoginGovBypassTime(
+      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
+
   DbUser setDisabledStatus(Long userId, boolean disabled);
 
   List<DbUser> getAllUsers();

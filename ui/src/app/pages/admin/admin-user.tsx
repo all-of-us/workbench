@@ -639,6 +639,13 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
                     onToggle={() => {}}
                     dataTestId={'dataUseAgreementBypassToggle'}
                 />
+                <ToggleWithLabelAndToggledText
+                    label={'RAS Login.gov Link'}
+                    initialValue={!!updatedProfile.rasLinkLoginGovBypassTime}
+                    disabled={true}
+                    onToggle={() => {}}
+                    dataTestId={'rasLinkLoginGovBypassToggle'}
+                />
               </FlexRow>
             </div>
           </FlexColumn>

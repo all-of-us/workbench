@@ -6,5 +6,6 @@ constructor(override val propertyName: String) : SimpleTargetProperty {
     COMPLIANCE_TRAINING_BYPASS_TIME("compliance_training_time"),
     BETA_ACCESS_BYPASS_TIME("beta_access_bypass_time"),
     ERA_COMMONS_BYPASS_TIME("era_commons_bypass_time"),
-    TWO_FACTOR_AUTH_BYPASS_TIME("two_factor_auth_bypass_time")
+    TWO_FACTOR_AUTH_BYPASS_TIME("two_factor_auth_bypass_time"),
+    RAS_LINK_LOGIN_GOV("two_factor_auth_bypass_time")
 }

@@ -183,6 +183,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
       contactEmail: user.contactEmail,
       dataUseAgreement: this.accessModuleCellContents(user, 'dataUseAgreement'),
       eraCommons: this.accessModuleCellContents(user, 'eraCommons'),
+      rasLinkLoginGov: this.accessModuleCellContents(user, 'rasLinkLoginGov'),
       firstRegistrationCompletionTime: this.formattedTimestampOrEmptyString(user.firstRegistrationCompletionTime),
       firstRegistrationCompletionTimestamp: user.firstRegistrationCompletionTime,
       firstSignInTime: this.formattedTimestampOrEmptyString(user.firstSignInTime),
@@ -305,6 +306,12 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
                   bodyStyle={{...styles.colStyle, textAlign: 'center'}}
                   excludeGlobalFilter={true}
                   header='DUCC'
+                  headerStyle={{...styles.colStyle, width: '80px'}}
+          />
+          <Column field='rasLinkLoginGov'
+                  bodyStyle={{...styles.colStyle, textAlign: 'center'}}
+                  excludeGlobalFilter={true}
+                  header='RAS Login.gov Link'
                   headerStyle={{...styles.colStyle, width: '80px'}}
           />
           <Column field='bypass'
