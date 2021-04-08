@@ -68,6 +68,7 @@ apply plugin: 'org.owasp.dependencycheck'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'war'
 
+
 // Artifact configurations derived from base configs. Configuration names
 // are concatenated by the Java plugin.
 // https://docs.gradle.org/current/userguide/java_plugin.html#java_source_set_configurations
