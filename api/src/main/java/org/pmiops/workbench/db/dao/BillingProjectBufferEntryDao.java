@@ -61,8 +61,8 @@ public interface BillingProjectBufferEntryDao
 
   @Query(
       value =
-          "select status, accessTier, count(billing_project_buffer_entry_id) as numpNrojects\n"
-              + "    from DbBillingProjectBufferEntry \n"
+          "select status, accessTier, count(entry.id) as numpNrojects\n"
+              + "    from DbBillingProjectBufferEntry entry \n"
               + "group by status, accessTier\n"
               + "order by status, accessTier")
   List<StatusPerTierCount> computeProjectCountByStatus();
