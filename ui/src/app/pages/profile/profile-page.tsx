@@ -310,7 +310,7 @@ export const ProfilePage = fp.flow(
         },
         // TODO: when the controlled tier data is available fetch it from the profile
         controlledTierProfile: {
-          controlledTierEnabled = true, controlledTierBypassTime = null, controlledTierCompletionTime = null
+          controlledTierEnabled = false, controlledTierBypassTime = null, controlledTierCompletionTime = null
         } = {}
       } = this.props;
       const {currentProfile, updating, showDemographicSurveyModal} = this.state;
