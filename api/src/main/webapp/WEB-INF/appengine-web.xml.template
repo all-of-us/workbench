@@ -45,8 +45,7 @@
   <automatic-scaling>
     <min-idle-instances>${GAE_MIN_IDLE_INSTANCES}</min-idle-instances>
     <max-instances>${GAE_MAX_INSTANCES}</max-instances>
-    <max-idle-instances>1</max-idle-instances>
-    <min-pending-latency>automatic</min-pending-latency>
+    <min-pending-latency>6s</min-pending-latency>
     <max-pending-latency>10s</max-pending-latency>
   </automatic-scaling>
 </appengine-web-app>
