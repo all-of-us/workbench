@@ -1,3 +1,5 @@
+import { timeNow } from 'utils/test-utils';
+
 const fs = require('fs-extra');
 const path = require('path');
 const winston = require('winston');
@@ -7,15 +9,13 @@ module.exports = class JestReporter {
     if (globalConfig.verbose === true) {
       throw Error("Verbose must be false or Console messages won't be available.");
     }
-    this._globalConfig = globalConfig;
     this._options = options;
     this.logDir = this._options.outputdir || 'logs/jest';
     this.summaryFile = this._options.filename || 'test-results-summary.json';
   }
 
   onTestStart(test) {
-    const time = new Date().toLocaleTimeString();
-    console.info(`Running ${path.parse(test.path).name} at ${time}`);
+    console.info(`Running ${path.parse(test.path).name} at ${timeNow()}`);
   }
 
   onTestResult(_testRunConfig, testResult, _runResults) {
