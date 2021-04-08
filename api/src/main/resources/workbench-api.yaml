@@ -5284,10 +5284,13 @@ definitions:
       eraCommonsBypassTime:
         type: integer
         format: int64
+      eraCommonsCompletionTime:
+        type: integer
+        format: int64
       rasLinkLoginGovBypassTime:
         type: integer
         format: int64
-      eraCommonsCompletionTime:
+      rasLinkLoginGovCompletionTime:
         type: integer
         format: int64
       complianceTrainingBypassTime:

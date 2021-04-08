@@ -127,7 +127,10 @@ public class RasLinkService {
 
   /** Validates user has IAL2 setup. See class javadoc Step2 for more details. */
   static boolean isIal2(String acrClaim) {
-    return Arrays.asList(acrClaim.split(" ")).contains(ACR_CLAIM_IAL_2_IDENTIFIER);
+    System.out.println("~~~~111111");
+    System.out.println(acrClaim);
+    System.out.println(ACR_CLAIM_IAL_2_IDENTIFIER);
+    return acrClaim.contains(ACR_CLAIM_IAL_2_IDENTIFIER);
   }
 
   /**
