@@ -328,7 +328,6 @@ export const ProfilePage = fp.flow(
         }
     } = currentProfile;
 
-      console.log(profile);
       const urlError = professionalUrl
       ? validate({website: professionalUrl}, {website: {url: {message: '^Professional URL %{value} is not a valid URL'}}})
       : undefined;
