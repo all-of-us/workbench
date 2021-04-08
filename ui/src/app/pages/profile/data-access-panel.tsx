@@ -5,7 +5,6 @@ import {StyledAnchorTag} from 'app/components/buttons';
 import {styles} from 'app/pages/profile/profile-styles'
 import {CheckCircle, ControlledTierBadge} from 'app/components/icons'
 import colors from 'app/styles/colors';
-import { style } from '@angular/core/src/animation/dsl';
 
 const needsAgreementText = 'Contains expanded participant data, including genomics. Before you can access controlled tier data, ' + 
   'your institution will need to sign an amended agreement with the All of Us Data and Research Center.'
