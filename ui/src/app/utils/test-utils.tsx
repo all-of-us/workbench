@@ -1,5 +1,5 @@
-import * as fp from 'lodash/fp';
 import {ReactWrapper} from 'enzyme';
+import * as fp from 'lodash/fp';
 
 
 export const findNodesByExactText = fp.curry((wrapper: ReactWrapper, text) => wrapper.findWhere(node => {

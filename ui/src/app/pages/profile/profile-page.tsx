@@ -5,6 +5,7 @@ import * as validate from 'validate.js';
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
+import {ControlledTierBadge} from 'app/components/icons';
 import {TextAreaWithLengthValidationMessage, TextInput, ValidationError} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {Modal} from 'app/components/modals';
@@ -14,8 +15,10 @@ import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal, WithProfileErrorModalProps} from 'app/components/with-error-modal';
 import {getRegistrationTasksMap} from 'app/pages/homepage/registration-dashboard';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
+import {DataAccessPanel} from 'app/pages/profile/data-access-panel';
 import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
 import {ProfileRegistrationStepStatus} from 'app/pages/profile/profile-registration-step-status';
+import {styles} from 'app/pages/profile/profile-styles';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
@@ -25,15 +28,12 @@ import {
   lensOnProps,
   withUserProfile
 } from 'app/utils';
-import {styles} from 'app/pages/profile/profile-styles'
 import {convertAPIError, reportError} from 'app/utils/errors';
 import {serverConfigStore} from 'app/utils/navigation';
 import {environment} from 'environments/environment';
 import {InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
-import {DataAccessPanel} from 'app/pages/profile/data-access-panel'
-import {ControlledTierBadge} from 'app/components/icons'
 
 
 // validators for validate.js
@@ -328,7 +328,7 @@ export const ProfilePage = fp.flow(
         }
     } = currentProfile;
 
-    console.log(profile)
+      console.log(profile);
       const urlError = professionalUrl
       ? validate({website: professionalUrl}, {website: {url: {message: '^Professional URL %{value} is not a valid URL'}}})
       : undefined;
