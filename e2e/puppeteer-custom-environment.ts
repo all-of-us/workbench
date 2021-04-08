@@ -1,3 +1,4 @@
+import { logger } from 'libs/logger';
 const PuppeteerEnvironment = require('jest-environment-puppeteer');
 const fs = require('fs-extra');
 require('jest-circus');
@@ -53,7 +54,7 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
 
   async takeScreenshot(filePath) {
     await this.global.page.screenshot({ path: filePath, fullPage: true });
-    console.info(`Saved screenshot: ${filePath}`);
+    logger.info(`Saved screenshot: ${filePath}`);
   }
 
   async savePageToFile(htmlFile) {
@@ -61,10 +62,10 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
     return new Promise((resolve, reject) => {
       fs.writeFile(htmlFile, htmlContent, 'utf8', (error) => {
         if (error) {
-          console.error(`Failed to save html file. ` + error);
+          logger.error(`Failed to save html file. ` + error);
           reject(false);
         } else {
-          console.info('Saved html file: ' + htmlFile);
+          logger.info('Saved html file: ' + htmlFile);
           resolve(true);
         }
       });
