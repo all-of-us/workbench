@@ -1,5 +1,6 @@
 import {ReactWrapper} from 'enzyme';
 import {act} from 'react-dom/test-utils';
+import * as fp from 'lodash/fp';
 
 // This file is necessary because angular imports complain if there
 // is no zone, regardless of whether the imports are used.
@@ -19,3 +20,11 @@ export async function waitForFakeTimersAndUpdate(wrapper: ReactWrapper) {
   });
   await waitOneTickAndUpdate(wrapper);
 }
+
+export const findNodesByExactText = fp.curry((wrapper: ReactWrapper, text) => wrapper.findWhere(node => {
+  return (node.name() === null && node.text() === text);
+}));
+
+export const findNodesContainingText = fp.curry((wrapper: ReactWrapper, text) => wrapper.findWhere(node => {
+  return (node.name() === null && node.text().includes(text));
+}));
