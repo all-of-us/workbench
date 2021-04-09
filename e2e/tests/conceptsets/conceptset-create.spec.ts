@@ -55,7 +55,7 @@ describe('Create Concept Sets from Domains', () => {
     const conceptSetName = await conceptSetPage.saveConceptSet();
 
     // Verify Concept Set created successfully.
-    const successMessage = `Concept Set Saved Successfully`;
+    const successMessage = 'Concept Set Saved Successfully';
     const isSuccess = await waitForText(page, successMessage);
     expect(isSuccess).toBe(true);
 

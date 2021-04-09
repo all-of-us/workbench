@@ -129,7 +129,7 @@ export default class GoogleLoginPage {
       return;
     }
     // Retry load Login page.
-    console.warn(`Retry loading Login page`);
+    console.warn('Retry loading Login page');
     await this.page.goto(url, { waitUntil: ['networkidle0', 'domcontentloaded', 'load'], timeout: 30 * 1000 });
   }
 

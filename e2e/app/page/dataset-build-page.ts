@@ -76,7 +76,7 @@ export default class DatasetBuildPage extends AuthenticatedPage {
    * Check or uncheck the Select All checkbox.
    * @param {boolean} selectAll
    */
-  async selectAllValues(selectAll: boolean = true): Promise<void> {
+  async selectAllValues(selectAll = true): Promise<void> {
     const xpath = buildXPath({ containsText: LabelAlias.SelectValues, ancestorLevel: 3, type: ElementType.Checkbox });
     const selectAllCheckbox = new Checkbox(this.page, xpath);
     selectAll ? await selectAllCheckbox.check() : await selectAllCheckbox.unCheck();

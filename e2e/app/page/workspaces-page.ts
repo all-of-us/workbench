@@ -80,7 +80,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
     workspaceName: string,
     cdrVersionName: string = config.defaultCdrVersionName,
     billingAccount: string = UseFreeCredits,
-    reviewRequest: boolean = false
+    reviewRequest = false
   ): Promise<string[]> {
     const editPage = await this.fillOutRequiredCreationFields(workspaceName, billingAccount, reviewRequest);
 
@@ -105,7 +105,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
   async fillOutRequiredCreationFields(
     workspaceName: string,
     billingAccount: string = UseFreeCredits,
-    reviewRequest: boolean = false
+    reviewRequest = false
   ): Promise<WorkspaceEditPage> {
     const editPage = await this.clickCreateNewWorkspace();
     // wait for Billing Account default selected value

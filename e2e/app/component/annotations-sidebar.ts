@@ -1,15 +1,15 @@
-import {Page} from 'puppeteer';
+import { Page } from 'puppeteer';
 import ClrIconLink from 'app/element/clr-icon-link';
-import {getPropValue} from 'utils/element-utils';
+import { getPropValue } from 'utils/element-utils';
 import ReactSelect from 'app/element/react-select';
-import {waitWhileLoading} from 'utils/waits-utils';
+import { waitWhileLoading } from 'utils/waits-utils';
 import Button from 'app/element/button';
-import {LinkText, SideBarLink} from 'app/text-labels';
+import { LinkText, SideBarLink } from 'app/text-labels';
 import Textarea from 'app/element/textarea';
 import EditDeleteAnnotationsModal from 'app/modal/edit-delete-annotations-modal';
 import AnnotationFieldModal from 'app/modal/annotation-field-modal';
 import BaseHelpSidebar from './base-help-sidebar';
-import {logger} from 'libs/logger';
+import { logger } from 'libs/logger';
 
 export enum ReviewStatus {
   Excluded = 'Excluded',

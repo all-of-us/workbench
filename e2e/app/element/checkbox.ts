@@ -26,7 +26,7 @@ export default class Checkbox extends BaseElement {
   /**
    * Click (check) checkbox element.
    */
-  async check(maxAttempts: number = 2): Promise<void> {
+  async check(maxAttempts = 2): Promise<void> {
     const click = async () => {
       await this.clickWithEval();
       await this.page.waitForTimeout(500);

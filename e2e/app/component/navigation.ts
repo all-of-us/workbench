@@ -81,7 +81,7 @@ export default class Navigation {
    */
   static async openNavMenu(page: Page): Promise<void> {
     const isOpen = await Navigation.sideNavIsOpen(page);
-    if (!isOpen!) {
+    if (!isOpen) {
       // click bars icon to open dropdown
       const selector = buildXPath({ type: ElementType.Icon, iconShape: 'bars' });
       const barsIcon = await page.waitForXPath(selector, { visible: true });

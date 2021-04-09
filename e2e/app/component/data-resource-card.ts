@@ -24,7 +24,7 @@ export default class DataResourceCard extends CardBase {
    * @param {Page} page
    * @throws TimeoutError if fails to find Card.
    */
-  static async findAllCards(page: Page, timeOut: number = 2000): Promise<DataResourceCard[]> {
+  static async findAllCards(page: Page, timeOut = 2000): Promise<DataResourceCard[]> {
     await waitWhileLoading(page);
     try {
       await page.waitForXPath(DataResourceCardSelector.cardRootXpath, { visible: true, timeout: timeOut });
@@ -45,7 +45,7 @@ export default class DataResourceCard extends CardBase {
     return fp.shuffle(cards)[0];
   }
 
-  static async findCard(page: Page, resourceName: string, timeOut: number = 60000): Promise<DataResourceCard | null> {
+  static async findCard(page: Page, resourceName: string, timeOut = 60000): Promise<DataResourceCard | null> {
     const selector = `.//*[${DataResourceCardSelector.cardNameXpath} and normalize-space(text())="${resourceName}"]`;
     try {
       await page.waitForXPath(selector, { visible: true, timeout: timeOut });

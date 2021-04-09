@@ -32,7 +32,7 @@ export default class CohortReviewPage extends AuthenticatedPage {
    * @param {number} rowIndex
    * @return {string} Participant text that was clicked on.
    */
-  async clickParticipantLink(rowIndex: number = 1, colIndex: number = 1): Promise<string> {
+  async clickParticipantLink(rowIndex = 1, colIndex = 1): Promise<string> {
     const dataTable = this.getDataTable();
     const bodyTable = dataTable.getBodyTable();
     const cell = await bodyTable.getCell(rowIndex, colIndex);
@@ -46,7 +46,7 @@ export default class CohortReviewPage extends AuthenticatedPage {
    * @param {number} rowIndex
    * @return {string} Participant text that was clicked on.
    */
-  async getParticipantLinkId(rowIndex: number = 1, colIndex: number = 1): Promise<string> {
+  async getParticipantLinkId(rowIndex = 1, colIndex = 1): Promise<string> {
     const dataTable = this.getDataTable();
     const bodyTable = dataTable.getBodyTable();
     const cell = await bodyTable.getCell(rowIndex, colIndex);

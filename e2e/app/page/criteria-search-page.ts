@@ -155,11 +155,11 @@ export default class CriteriaSearchPage extends AuthenticatedPage {
   }
 
   getResultsTable(): Table {
-    return new Table(this.page, `//table[@data-test-id="list-search-results-table"]`);
+    return new Table(this.page, '//table[@data-test-id="list-search-results-table"]');
   }
 
   async resultsTableSelectRow(
-    rowIndex: number = 1,
+    rowIndex = 1,
     selectionColumnIndex = 1
   ): Promise<{ name: string; code: string; vocabulary: string; rollUpCount: string }> {
     const resultsTable = this.getResultsTable();

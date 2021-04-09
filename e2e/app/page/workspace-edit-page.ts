@@ -381,7 +381,7 @@ export default class WorkspaceEditPage extends WorkspaceBase {
    * Assumption: Checked checkbox means to expand the section, hidden questions will become visible.
    * @param {boolean} yesOrNo: True means to check checkbox. False means to uncheck.
    */
-  async expandResearchPurposeGroup(yesOrNo: boolean = true) {
+  async expandResearchPurposeGroup(yesOrNo = true) {
     // expand Disease purpose section if needed
     const researchPurpose = this.question1_researchPurpose();
     const researchPurposeCheckbox = await researchPurpose.asCheckBox();
@@ -407,7 +407,7 @@ export default class WorkspaceEditPage extends WorkspaceBase {
    *  Enter value in 'Disease-focused research' textbox
    * @param {string} diseaseName
    */
-  async fillOutDiseaseFocusedResearch(diseaseName: string = 'diabetic cataract') {
+  async fillOutDiseaseFocusedResearch(diseaseName = 'diabetic cataract') {
     const diseaseNameComponent = this.question1_diseaseFocusedResearch();
     await (await diseaseNameComponent.asCheckBox()).check();
     await (await diseaseNameComponent.asTextBox()).type(diseaseName);

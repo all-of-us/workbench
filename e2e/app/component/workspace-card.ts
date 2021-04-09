@@ -157,7 +157,7 @@ export default class WorkspaceCard extends CardBase {
    * Click workspace name link in Workspace Card.
    * @param {boolean} waitForDataPage Waiting for Data page load and ready after click on Workspace name link.
    */
-  async clickWorkspaceName(waitForDataPage: boolean = true): Promise<string> {
+  async clickWorkspaceName(waitForDataPage = true): Promise<string> {
     const [elemt] = await this.asElementHandle().$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
     const name = await getPropValue<string>(elemt, 'textContent');
     await Promise.all([

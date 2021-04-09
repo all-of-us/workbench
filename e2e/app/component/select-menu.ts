@@ -52,7 +52,7 @@ export default class SelectMenu extends BaseMenu {
    * Open Select dropdown.
    * @param {number} maxAttempts Default is 2.
    */
-  private async open(maxAttempts: number = 2): Promise<void> {
+  private async open(maxAttempts = 2): Promise<void> {
     const click = async () => {
       await this.toggle();
       const opened = await this.isOpen();

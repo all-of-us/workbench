@@ -46,7 +46,7 @@ export default class ConceptSetPage extends AuthenticatedPage {
   }
 
   async getConceptSetName(): Promise<string> {
-    const xpath = `//*[@data-test-id="concept-set-title"]`;
+    const xpath = '//*[@data-test-id="concept-set-title"]';
     const title = await this.page.waitForXPath(xpath, { visible: true });
     return getPropValue<string>(title, 'innerText');
   }

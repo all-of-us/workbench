@@ -36,7 +36,7 @@ export default class DatasetSaveModal extends Modal {
    */
   async saveDataset(
     notebookOpts: { exportToNotebook?: boolean; notebookName?: string; lang?: Language } = {},
-    isUpdate: boolean = false
+    isUpdate = false
   ): Promise<string> {
     const { exportToNotebook = false, notebookName, lang = Language.Python } = notebookOpts;
     const newDatasetName = makeRandomName();

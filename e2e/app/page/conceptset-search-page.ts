@@ -58,7 +58,7 @@ export default class ConceptSetSearchPage extends AuthenticatedPage {
    *  The Code, Vocabulary and Participant Count values in same table row.
    */
   async dataTableSelectRow(
-    rowIndex: number = 1,
+    rowIndex = 1,
     selctionColumnIndex = 1
   ): Promise<{ name: string; code: string; vocabulary: string; participantCount: string }> {
     const dataTable = this.getDataTable();

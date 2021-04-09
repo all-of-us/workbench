@@ -37,7 +37,7 @@ export default class ConceptSetSaveModal extends Modal {
    */
   async fillOutSaveModal(
     saveOption: SaveOption = SaveOption.CreateNewSet,
-    existingConceptSetName: string = '0'
+    existingConceptSetName = '0'
   ): Promise<string> {
     const createNewSetRadioButton = await RadioButton.findByName(this.page, { name: saveOption }, this);
     await createNewSetRadioButton.select();

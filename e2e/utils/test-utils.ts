@@ -19,7 +19,7 @@ import { config } from 'resources/workbench-config';
 import { logger } from 'libs/logger';
 
 export async function signIn(page: Page, userId?: string, passwd?: string): Promise<void> {
-  logger.info(`Sign in with Google to Workbench application`);
+  logger.info('Sign in with Google to Workbench application');
   const loginPage = new GoogleLoginPage(page);
   await loginPage.login(userId, passwd);
   // This element exists in DOM after user has logged in. But it could takes a while.
@@ -58,7 +58,7 @@ export async function signOut(page: Page) {
 
 export async function signInWithAccessToken(page: Page, tokenFilename = config.userAccessTokenFilename): Promise<void> {
   const token = fs.readFileSync(tokenFilename, 'ascii');
-  logger.info(`Sign in with access token to Workbench application`);
+  logger.info('Sign in with access token to Workbench application');
   const homePage = new HomePage(page);
   await homePage.gotoUrl(PageUrl.Home.toString());
 

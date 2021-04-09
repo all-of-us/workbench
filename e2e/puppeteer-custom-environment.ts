@@ -3,8 +3,8 @@ const fs = require('fs-extra');
 require('jest-circus');
 
 class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
-  screenshotDir = `logs/screenshot`;
-  htmlDir = `logs/html`;
+  screenshotDir = 'logs/screenshot';
+  htmlDir = 'logs/html';
 
   async setup() {
     await super.setup();
@@ -61,7 +61,7 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
     return new Promise((resolve, reject) => {
       fs.writeFile(htmlFile, htmlContent, 'utf8', (error) => {
         if (error) {
-          console.error(`Failed to save html file. ` + error);
+          console.error('Failed to save html file. ' + error);
           reject(false);
         } else {
           console.info('Saved html file: ' + htmlFile);

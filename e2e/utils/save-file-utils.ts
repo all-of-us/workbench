@@ -17,7 +17,7 @@ export async function savePageToFile(page: Page, fileName?: string): Promise<boo
   return new Promise((resolve, reject) => {
     writeFile(htmlFile, htmlContent, 'utf8', (error) => {
       if (error) {
-        logger.error(`Failed to save file. ` + error);
+        logger.error('Failed to save file. ' + error);
         reject(false);
       } else {
         logger.info('Saved file ' + htmlFile);

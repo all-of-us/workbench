@@ -16,7 +16,7 @@ export function buildXPath(xOpts: XPathOptions, container?: Container): string {
   // optional function parameters check
   if (type === 'icon') {
     if (iconShape === undefined) {
-      throw new Error(`Incorrect XPathOptions configuration for Icon: set "iconShape" value.`);
+      throw new Error('Incorrect XPathOptions configuration for Icon: set "iconShape" value.');
     }
   }
 

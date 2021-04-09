@@ -22,7 +22,7 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
 
   async findUserInCollaboratorList(username: string): Promise<WorkspaceAccessLevel> {
     // At least one collab should eventually render, i.e. the current user.
-    const collabXPath = `//*[starts-with(@data-test-id,"workspaceUser-")]`;
+    const collabXPath = '//*[starts-with(@data-test-id,"workspaceUser-")]';
     await this.page.waitForXPath(collabXPath, { visible: true });
 
     // Fetch all of the collabs so we can string match and parse text content.
