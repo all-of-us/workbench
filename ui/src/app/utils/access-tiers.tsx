@@ -1,3 +1,5 @@
+import * as fp from 'lodash/fp';
+
 export enum AccessTierShortNames {
     Registered = 'registered',
     Controlled = 'controlled',
@@ -10,5 +12,5 @@ export enum AccessTierShortNames {
  * TODO: make separate evaluations by tier
  */
 export function hasRegisteredAccess(accessTierShortNames: Array<string>): boolean {
-  return !!accessTierShortNames && accessTierShortNames.includes(AccessTierShortNames.Registered);
+  return fp.includes(AccessTierShortNames.Registered, accessTierShortNames);
 }
