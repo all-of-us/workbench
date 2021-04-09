@@ -176,16 +176,16 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     Map<String, Boolean> twoFactorAuthStatuses = directoryService.getAllTwoFactorAuthStatuses();
     for (DbUser user : userService.getAllUsersExcludingDisabled()) {
       userCount++;
+      if (!twoFactorAuthStatuses.containsKey(user.getUsername())) {
+        log.warning(
+            String.format("user %s does not exist in gsuite, skipping", user.getUsername()));
+        errorCount++;
+        continue;
+      }
       try {
+
         Timestamp oldTime = user.getTwoFactorAuthCompletionTime();
         List<String> oldTiers = accessTierService.getAccessTierShortNamesForUser(user);
-
-        if (!twoFactorAuthStatuses.containsKey(user.getUsername())) {
-          log.warning(
-              String.format("user %s does not exist in gsuite, skipping", user.getUsername()));
-          errorCount++;
-          continue;
-        }
         DbUser updatedUser =
             userService.syncTwoFactorAuthStatus(
                 user, Agent.asSystem(), twoFactorAuthStatuses.get(user.getUsername()));
