@@ -9,7 +9,7 @@ import {
   ProfileApi,
 } from 'generated/fetch';
 
-import {REGISTERED_TIER_SHORT_NAME} from 'app/utils';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {EmptyResponse} from 'generated/fetch/api';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
@@ -17,7 +17,7 @@ export class ProfileStubVariables {
   static PROFILE_STUB = <Profile>{
     username: 'tester@fake-research-aou.org',
     contactEmail: 'tester@mactesterson.edu><script>alert("hello");</script>',
-    accessTierShortNames: [REGISTERED_TIER_SHORT_NAME],
+    accessTierShortNames: [AccessTierShortNames.Registered],
     givenName: 'Tester!@#$%^&*()><script>alert("hello");</script>',
     familyName: 'MacTesterson!@#$%^&*()><script>alert("hello");</script>',
     phoneNumber: '999-999-9999',

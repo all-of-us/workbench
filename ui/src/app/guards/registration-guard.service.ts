@@ -8,8 +8,7 @@ import {
 import {Observable} from 'rxjs/Observable';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
-import {hasRegisteredAccess} from 'app/utils';
-
+import {hasRegisteredAccess} from 'app/utils/access-tiers';
 
 @Injectable()
 export class RegistrationGuard implements CanActivate, CanActivateChild {

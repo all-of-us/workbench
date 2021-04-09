@@ -8,7 +8,7 @@ import {SignInService} from 'app/services/sign-in.service';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 
 import {FooterTypeEnum} from 'app/components/footer';
-import {debouncer, hasRegisteredAccess} from 'app/utils';
+import {debouncer} from 'app/utils';
 import Timeout = NodeJS.Timeout;
 import {setInstitutionCategoryState} from 'app/utils/analytics';
 import {navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
@@ -16,6 +16,7 @@ import {cdrVersionStore, compoundRuntimeOpStore, routeDataStore} from 'app/utils
 import {initializeZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Profile as FetchProfile} from 'generated/fetch';
+import {hasRegisteredAccess} from 'app/utils/access-tiers';
 
 /*
  * The user's last known active timestamp is stored in localStorage with the key of

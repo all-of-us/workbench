@@ -1,11 +1,4 @@
 import {ElementRef, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
-import {ReplaySubject} from 'rxjs/ReplaySubject';
-const {useEffect, useState} = React;
-
 import {colorWithWhiteness} from 'app/styles/colors';
 import {
   currentCohortCriteriaStore,
@@ -21,11 +14,15 @@ import {
   urlParamsStore,
   userProfileStore
 } from 'app/utils/navigation';
-import {
-  ConfigResponse,
-  Domain,
-} from 'generated/fetch';
+import {ConfigResponse, Domain, } from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import {ReplaySubject} from 'rxjs/ReplaySubject';
 import {cdrVersionStore, withStore} from './stores';
+
+const {useEffect, useState} = React;
 
 export const WINDOW_REF = 'window-ref';
 
@@ -39,18 +36,6 @@ export function isBlank(toTest: String): boolean {
     toTest = toTest.trim();
     return toTest === '';
   }
-}
-
-export const REGISTERED_TIER_SHORT_NAME = 'registered';
-/**
- * Determine whether the given access level is >= registered. This is the
- * minimum required level to do most things in the Workbench app (outside of
- * local/test development).
- *
- * TODO: make separate evaluations by tier
- */
-export function hasRegisteredAccess(accessTierShortNames: Array<string>): boolean {
-  return !!accessTierShortNames && accessTierShortNames.includes(REGISTERED_TIER_SHORT_NAME);
 }
 
 

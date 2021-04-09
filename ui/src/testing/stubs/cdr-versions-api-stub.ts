@@ -1,4 +1,4 @@
-import {REGISTERED_TIER_SHORT_NAME} from 'app/utils';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {ArchivalStatus, CdrVersion, CdrVersionListResponse, CdrVersionsApi} from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
@@ -15,7 +15,7 @@ export const cdrVersionListResponse: CdrVersionListResponse = {
     {
       name: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION,
       cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
-      accessTierShortName: REGISTERED_TIER_SHORT_NAME,
+      accessTierShortName: AccessTierShortNames.Registered,
       archivalStatus: ArchivalStatus.LIVE,
       hasMicroarrayData: true,
       creationTime: 0
@@ -23,7 +23,7 @@ export const cdrVersionListResponse: CdrVersionListResponse = {
     {
       name: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION,
       cdrVersionId: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION_ID,
-      accessTierShortName: REGISTERED_TIER_SHORT_NAME,
+      accessTierShortName: AccessTierShortNames.Registered,
       archivalStatus: ArchivalStatus.LIVE,
       hasMicroarrayData: false,
       creationTime: 0

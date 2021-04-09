@@ -1,4 +1,4 @@
-import {REGISTERED_TIER_SHORT_NAME} from 'app/utils';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {
   RecentWorkspace,
   RecentWorkspaceResponse,
@@ -21,7 +21,7 @@ export function buildWorkspaceStub(suffix = ''): Workspace {
     id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID + suffix,
     namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS + suffix,
     cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID + suffix,
-    accessTierShortName: REGISTERED_TIER_SHORT_NAME,
+    accessTierShortName: AccessTierShortNames.Registered,
     creationTime: new Date().getTime(),
     lastModifiedTime: new Date().getTime(),
     researchPurpose: {
