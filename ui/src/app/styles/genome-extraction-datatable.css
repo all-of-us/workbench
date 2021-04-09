@@ -1,0 +1,10 @@
+#extraction-data-table-container th {
+    background-color: white;
+    border: 0px;
+    border-bottom: '1px solid grey';
+}
+
+#extraction-data-table-container td {
+    border: 0px;
+    border-bottom: '1px solid grey';
+}

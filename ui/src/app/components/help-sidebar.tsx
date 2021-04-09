@@ -7,8 +7,11 @@ import {
   faInbox,
   faInfoCircle
 } from '@fortawesome/free-solid-svg-icons';
+import {faDna} from '@fortawesome/free-solid-svg-icons/faDna';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
+import {Column} from 'primereact/column';
+import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -275,6 +278,17 @@ const iconConfigs = {
     contentPadding: '1.25rem',
     contentWidthRem: '30',
     hideSidebarFooter: true
+  },
+  'genomesExtractionHistory': {
+    disabled: false,
+    faIcon: faDna,
+    label: '', // TODO eric: where is this used?
+    page: null,
+    style: {height: '22px', width: '22px', marginTop: '0.25rem'},
+    tooltip: 'Genomes Extraction History',
+    contentPadding: '1.25rem',
+    contentWidthRem: '30',
+    hideSidebarFooter: true
   }
 };
 
@@ -291,12 +305,15 @@ const icons = (
     'concept',
     helpIconName(helpContentKey),
     'dataDictionary',
-    'annotations',
+    'annotations'
   ];
 
   if (WorkspacePermissionsUtil.canWrite(workspaceAccessLevel)) {
     keys.push('runtime');
   }
+
+  keys.push('genomesExtractionHistory');
+
   return keys.map(k => ({...iconConfigs[k], id: k}));
 };
 
@@ -597,6 +614,11 @@ export const HelpSidebar = fp.flow(
       const {concept, criteria, helpContentKey, notebookStyles, setSidebarState, workspace} = this.props;
       const {activeIcon, participant, tooltipId} = this.state;
 
+      const tableData = [{
+        name: 'eric',
+        job: 'engineer',
+        age: 26
+      }];
       const contentStyle = (tab: string) => ({
         height: 'calc(100% - 1rem)',
         overflow: 'auto',
@@ -672,6 +694,16 @@ export const HelpSidebar = fp.flow(
               <div style={{padding: '0.25rem 0.25rem 0rem'}}>
                 {!!currentConceptStore.getValue() && <ConceptListPage/>}
               </div>
+            </div>}
+            {activeIcon === 'genomesExtractionHistory' && <div>
+                <div>Hi</div>
+                <div id='extraction-data-table-container'>
+                  <DataTable value={tableData}>
+                      <Column field='name' header='Name'/>
+                      <Column field='age' header='Age'/>
+                      <Column field='job' header='Job'/>
+                  </DataTable>
+                </div>
             </div>}
             {(iconConfigs[activeIcon] || {}).hideSidebarFooter || <div style={styles.footer}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
