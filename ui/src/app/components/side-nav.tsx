@@ -2,12 +2,12 @@ import {Clickable} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
+import {hasRegisteredAccess} from 'app/utils/access-tiers';
 import {AuthorityGuardedAction, hasAuthorityForAction} from 'app/utils/authorities';
 import {navigate, navigateSignOut, signInStore} from 'app/utils/navigation';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
-import {hasRegisteredAccess} from 'app/utils/access-tiers';
 
 const styles = reactStyles({
   flex: {
