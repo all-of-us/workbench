@@ -59,6 +59,11 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
         DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 
+  default Optional<DbWorkspace> getByGoogleProject(String googleProject) {
+    return findFirstByGoogleProjectAndActiveStatusOrderByLastModifiedTimeDesc(
+        googleProject, DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+  }
+
   DbWorkspace findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
       String workspaceNamespace, String firecloudName, short activeStatus);
 
@@ -95,6 +100,9 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
 
   Optional<DbWorkspace> findFirstByWorkspaceNamespaceAndActiveStatusOrderByLastModifiedTimeDesc(
       String workspaceNamespace, short activeStatus);
+
+  Optional<DbWorkspace> findFirstByGoogleProjectAndActiveStatusOrderByLastModifiedTimeDesc(
+      String googleProject, short activeStatus);
 
   List<DbWorkspace> findAllByBillingMigrationStatus(Short billingMigrationStatus);
 

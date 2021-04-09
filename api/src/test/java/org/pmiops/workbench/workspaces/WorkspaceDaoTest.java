@@ -1,5 +1,6 @@
 package org.pmiops.workbench.workspaces;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.springframework.test.util.AssertionErrors.fail;
 
 import java.time.Clock;
@@ -19,19 +20,17 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class WorkspaceDaoTest {
   private static final String WORKSPACE_1_NAME = "Foo";
   private static final String WORKSPACE_NAMESPACE = "aou-1";
+  private static final String GOOGLE_PROJECT = "gcp-proj-1";
 
   @Autowired WorkspaceDao workspaceDao;
 
@@ -63,11 +62,21 @@ public class WorkspaceDaoTest {
     }
   }
 
+  @Test
+  public void testGetWorkspaceByGoogleProject() {
+    DbWorkspace dbWorkspace = createWorkspace();
+    assertThat(workspaceDao.getByGoogleProject(GOOGLE_PROJECT).get().getName())
+        .isEqualTo(dbWorkspace.getName());
+    assertThat(workspaceDao.getByGoogleProject(GOOGLE_PROJECT).get().getGoogleProject())
+        .isEqualTo(dbWorkspace.getGoogleProject());
+  }
+
   private DbWorkspace createWorkspace() {
     DbWorkspace workspace = new DbWorkspace();
     workspace.setVersion(1);
     workspace.setName(WORKSPACE_1_NAME);
     workspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
+    workspace.setGoogleProject(GOOGLE_PROJECT);
     workspace = workspaceDao.save(workspace);
     return workspace;
   }
