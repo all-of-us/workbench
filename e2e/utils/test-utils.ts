@@ -51,7 +51,7 @@ export async function signInAs(userId: string, passwd: string, opts: { reset?: b
 }
 
 export async function signOut(page: Page): Promise<void> {
-  await page.evaluate(() => 'window.setTestAccessTokenOverride(null)');
+  await page.evaluate('window.setTestAccessTokenOverride(null)');
 
   await Navigation.navMenu(page, NavLink.SIGN_OUT);
   await page.waitForTimeout(1000);
@@ -64,7 +64,7 @@ export async function signInWithAccessToken(page: Page, tokenFilename = config.u
   await homePage.gotoUrl(PageUrl.Home.toString());
 
   // See sign-in.service.ts.
-  await page.evaluate(() => `window.setTestAccessTokenOverride('${token}')`);
+  await page.evaluate(`window.setTestAccessTokenOverride('${token}')`);
 
   await homePage.gotoUrl(PageUrl.Home.toString());
   await homePage.waitForLoad();
@@ -178,12 +178,13 @@ export async function performAction(
         .type(value, { delay: 0 })
         .then((textbox) => textbox.pressTab());
       break;
-    case 'textarea': {
-      const textareaElement = Textarea.findByName(page, identifier.textOption);
-      await textareaElement.paste(value);
-      await textareaElement.pressTab();
+    case 'textarea':
+      {
+        const textareaElement = Textarea.findByName(page, identifier.textOption);
+        await textareaElement.paste(value);
+        await textareaElement.pressTab();
+      }
       break;
-    }
     default:
       throw new Error('identifier not recognized.');
   }

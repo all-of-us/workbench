@@ -1,5 +1,3 @@
-import { Event, State } from 'jest-circus';
-
 const PuppeteerEnvironment = require('jest-environment-puppeteer');
 const fs = require('fs-extra');
 require('jest-circus');
@@ -28,7 +26,7 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
 
   // jest-circus: https://github.com/facebook/jest/blob/master/packages/jest-circus/README.md#overview
   // Take a screenshot right after failure
-  async handleTestEvent(event: Event, state: State) {
+  async handleTestEvent(event, state) {
     switch (event.name) {
       case 'test_fn_failure':
       case 'hook_failure': {
@@ -54,12 +52,12 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
     }
   }
 
-  async takeScreenshot(filePath: string): Promise<void> {
+  async takeScreenshot(filePath) {
     await this.global.page.screenshot({ path: filePath, fullPage: true });
     console.info(`Saved screenshot: ${filePath}`);
   }
 
-  async savePageToFile(htmlFile: string): Promise<boolean> {
+  async savePageToFile(htmlFile) {
     const htmlContent = await this.global.page.content();
     return new Promise((resolve, reject) => {
       fs.writeFile(htmlFile, htmlContent, 'utf8', (error) => {
