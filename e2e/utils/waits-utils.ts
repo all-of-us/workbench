@@ -319,7 +319,7 @@ export async function waitForText(
       );
       return (await jsHandle.jsonValue()) as boolean;
     } catch (err) {
-      console.error(`Wait for element matching CSS=${selector.css} contains "${textSubstr}" text failed.`);
+      console.error(`Failed finding element. CSS=${selector.css} contains "${textSubstr}".`);
       throw new Error(err);
     }
   }
@@ -339,7 +339,7 @@ export async function waitForText(
       );
       return (await jsHandle.jsonValue()) as boolean;
     } catch (err) {
-      console.error(`Wait for element matching Xpath=${selector.xpath} contains "${textSubstr}" text failed.`);
+      console.error(`Failed finding element. Xpath=${selector.xpath} contains "${textSubstr}".`);
       throw new Error(err);
     }
   }

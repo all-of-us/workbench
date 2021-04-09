@@ -29,24 +29,25 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
   async handleTestEvent(event, state) {
     switch (event.name) {
       case 'test_fn_failure':
-      case 'hook_failure': {
-        const runningTest = state.currentlyRunningTest;
-        let testName;
-        if (runningTest != null) {
-          testName = runningTest.parent.name.replace(/\W/g, '-');
-        } else {
-          testName = event.test.name.replace(/\W/g, '-');
-        }
+      case 'hook_failure':
+        {
+          const runningTest = state.currentlyRunningTest.name;
+          let testName;
+          if (runningTest != null) {
+            testName = runningTest.replace(/\W/g, '-');
+          } else {
+            testName = event.test.name.replace(/\W/g, '-');
+          }
 
-        await fs.ensureDir(this.screenshotDir);
-        await fs.ensureDir(this.htmlDir);
-        const timestamp = this.localDateTimeString();
-        const screenshotFile = `${this.screenshotDir}/${testName}_${timestamp}.png`;
-        await this.takeScreenshot(screenshotFile);
-        const htmlFile = `${this.htmlDir}/${testName}_${timestamp}.html`;
-        await this.savePageToFile(htmlFile);
+          await fs.ensureDir(this.screenshotDir);
+          await fs.ensureDir(this.htmlDir);
+          const timestamp = this.localDateTimeString();
+          const screenshotFile = `${this.screenshotDir}/${testName}_${timestamp}.png`;
+          await this.takeScreenshot(screenshotFile);
+          const htmlFile = `${this.htmlDir}/${testName}_${timestamp}.html`;
+          await this.savePageToFile(htmlFile);
+        }
         break;
-      }
       default:
         break;
     }

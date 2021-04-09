@@ -104,11 +104,9 @@ describe('Workspace reader Jupyter notebook action tests', () => {
       const modal = new Modal(newPage);
       await modal.waitForLoad();
       const textContent = await modal.getTextContent();
-      expect(textContent).toContain('Copy to Workspace');
-      const expectedFullMsg =
-        `Successfully copied ${notebookName}  to ${collaboratorWorkspaceName} .` +
-        'Do you want to view the copied Notebook?';
-      expect(textContent).toContain(expectedFullMsg);
+      const expectedMsg = `Successfully copied ${notebookName}`;
+      expect(textContent.some((text) => text.includes('Copy to Workspace'))).toBe(true);
+      expect(textContent.some((text) => text.includes(expectedMsg))).toBe(true);
 
       // Dismiss modal. Open Copied notebook.
       await modal.clickButton(LinkText.GoToCopiedNotebook, { waitForClose: true });

@@ -53,9 +53,11 @@ module.exports = class JestReporter {
 
     // Read jest console messages and save to a log file.
     // Get all console logs.
-    testResult.console.forEach((log) => {
-      fileLogger.info(log.message);
-    });
+    if (testResult.console) {
+      testResult.console.forEach((log) => {
+        fileLogger.info(log.message);
+      });
+    }
 
     // Get failure messages.
     testResult.testResults.forEach((result) => {
