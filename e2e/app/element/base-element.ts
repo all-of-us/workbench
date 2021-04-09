@@ -34,6 +34,7 @@ export default class BaseElement extends Container {
       return this.page.waitForXPath(this.xpath, waitOptions).then((elemt) => (this.element = elemt.asElement()));
     } catch (err) {
       console.error(`waitForXpath('${this.xpath}') failed`);
+      console.error(err);
       // Debugging pause
       // await jestPuppeteer.debug();
       throw new Error(err);

@@ -1,5 +1,6 @@
 const PuppeteerEnvironment = require('jest-environment-puppeteer');
 const fs = require('fs-extra');
+
 require('jest-circus');
 
 class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
@@ -38,7 +39,6 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
           } else {
             testName = event.test.name.replace(/\W/g, '-');
           }
-
           await fs.ensureDir(this.screenshotDir);
           await fs.ensureDir(this.htmlDir);
           const timestamp = this.localDateTimeString();

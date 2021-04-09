@@ -1,4 +1,5 @@
 import { Page } from 'puppeteer';
+import { logger } from 'libs/logger';
 
 export const waitForFn = async (fn: () => any, interval = 2000, timeout = 10000): Promise<boolean> => {
   const start = Date.now();
@@ -28,7 +29,8 @@ export async function waitForUrl(page: Page, urlSubstr: string): Promise<boolean
     );
     return (await jsHandle.jsonValue()) as boolean;
   } catch (err) {
-    console.error(`waitForUrl contains "${urlSubstr}" failed.`);
+    logger.error(`waitForUrl() failed: not contains "${urlSubstr}"`);
+    logger.error(err);
     throw new Error(err);
   }
 }
@@ -50,7 +52,8 @@ export async function waitForDocumentTitle(page: Page, titleSubstr: string): Pro
     );
     return (await jsHandle.jsonValue()) as boolean;
   } catch (err) {
-    console.error(`waitForDocumentTitle failed: Title is ${await page.title()}. Not contains "${titleSubstr}"`);
+    logger.error(`waitForDocumentTitle() failed: page title is ${await page.title()}. Not contains "${titleSubstr}"`);
+    logger.error(err);
     throw new Error(err);
   }
 }
@@ -71,7 +74,7 @@ export async function waitForPropertyEquality(
       (xpath, prop, value) => {
         const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
           .singleNodeValue;
-        return element[prop] === value;
+        return element[prop as string] === value;
       },
       {},
       xpathSelector,
@@ -81,9 +84,10 @@ export async function waitForPropertyEquality(
     await jsHandle.jsonValue();
     return true;
   } catch (err) {
-    console.error(
-      `Wait for element matching XPath="${xpathSelector}" property:${propertyName} value:${propertyValue} failed.`
+    logger.error(
+      `waitForPropertyEquality() failed: xpath="${xpathSelector}" property:${propertyName} value:${propertyValue}`
     );
+    logger.error(err);
     throw new Error(err);
   }
 }
@@ -109,8 +113,9 @@ export async function waitForNumericalString(page: Page, xpath: string, timeout?
       xpath
     )
     .catch((err) => {
-      console.error(err.message);
-      throw new Error(`waitForNumericalString() failed: xpath="${xpath}"`);
+      logger.error(`waitForNumericalString() failed: xpath="${xpath}"`);
+      logger.error(err);
+      throw new Error(err);
     });
 
   return (await numbers.jsonValue()).toString();
@@ -126,7 +131,7 @@ export async function waitForPropertyNotExists(
       (xpath, prop) => {
         const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
           .singleNodeValue;
-        return !element[prop];
+        return !element[prop as string];
       },
       {},
       xpathSelector,
@@ -134,7 +139,8 @@ export async function waitForPropertyNotExists(
     );
     return true;
   } catch (err) {
-    console.error(`Failed waiting element (XPath="${xpathSelector}") property: ${propertyName} not exists.`);
+    logger.error(`waitForPropertyNotExists() failed: xpath="${xpathSelector}" property: ${propertyName}`);
+    logger.error(err);
     throw new Error(err);
   }
 }
@@ -145,7 +151,7 @@ export async function waitForPropertyExists(page: Page, xpathSelector: string, p
       (xpath, prop) => {
         const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
           .singleNodeValue;
-        return element[prop] !== null;
+        return element[prop as string] !== null;
       },
       {},
       xpathSelector,
@@ -153,7 +159,8 @@ export async function waitForPropertyExists(page: Page, xpathSelector: string, p
     );
     return true;
   } catch (err) {
-    console.error(`Failed waiting element (XPath="${xpathSelector}") property: ${propertyName} exists.`);
+    logger.error(`waitForPropertyExists() failed: xpath="${xpathSelector}" property: ${propertyName}`);
+    logger.error(err);
     throw new Error(err);
   }
 }
@@ -182,7 +189,8 @@ export async function waitForVisible(page: Page, cssSelector: string): Promise<b
     await jsHandle.jsonValue();
     return true;
   } catch (err) {
-    console.error(`waitForVisible failed: CSS="${cssSelector}" failed.`);
+    logger.error(`waitForVisible() failed: css="${cssSelector}"`);
+    logger.error(err);
     throw new Error(err);
   }
 }
@@ -205,7 +213,8 @@ export async function waitForHidden(page: Page, cssSelector: string): Promise<bo
     );
     return (await jsHandle.jsonValue()) as boolean;
   } catch (err) {
-    console.error(`waitForHidden failed: CSS="${cssSelector}" failed.`);
+    logger.error(`waitForHidden() failed: css="${cssSelector}"`);
+    logger.error(err);
     throw new Error(err);
   }
 }
@@ -230,7 +239,10 @@ export async function waitForAttributeEquality(
         (css, attributeName, attributeValue) => {
           const element = document.querySelector(css);
           if (element != null) {
-            return element.attributes[attributeName] && element.attributes[attributeName].value === attributeValue;
+            return (
+              element.attributes[attributeName as string] &&
+              element.attributes[attributeName as string].value === attributeValue
+            );
           }
           return false;
         },
@@ -241,7 +253,8 @@ export async function waitForAttributeEquality(
       );
       return (await jsHandle.jsonValue()) as boolean;
     } catch (err) {
-      console.error(`Failed find element matching CSS=${selector.css} attribute=${attribute} value=${value}.`);
+      logger.error(`waitForAttributeEquality() failed: css=${selector.css} attribute=${attribute} value=${value}`);
+      logger.error(err);
       throw new Error(err);
     }
   }
@@ -252,7 +265,9 @@ export async function waitForAttributeEquality(
           const element: any = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
             .singleNodeValue;
           return (
-            element && element.attributes[attributeName] && element.attributes[attributeName].value === attributeValue
+            element &&
+            element.attributes[attributeName as string] &&
+            element.attributes[attributeName as string].value === attributeValue
           );
         },
         { timeout: timeout || 30000 },
@@ -262,7 +277,8 @@ export async function waitForAttributeEquality(
       );
       return (await jsHandle.jsonValue()) as boolean;
     } catch (err) {
-      console.error(`Failed find element matching Xpath=${selector.xpath} attribute=${attribute} value=${value}.`);
+      logger.error(`waitForAttributeEquality() failed: xpath=${selector.xpath} attribute=${attribute} value=${value}`);
+      logger.error(err);
       throw new Error(err);
     }
   }
@@ -286,7 +302,8 @@ export async function waitForNumberElements(page: Page, cssSelector: string, exp
     );
     return (await jsHandle.jsonValue()) as boolean;
   } catch (err) {
-    console.error(`Wait for elements matching CSS="${cssSelector}" count=${expectedCount} failed.`);
+    logger.error(`waitForNumberElements() failed: css="${cssSelector}" count=${expectedCount}`);
+    logger.error(err);
     throw new Error(err);
   }
 }
@@ -319,7 +336,8 @@ export async function waitForText(
       );
       return (await jsHandle.jsonValue()) as boolean;
     } catch (err) {
-      console.error(`Failed finding element. CSS=${selector.css} contains "${textSubstr}".`);
+      logger.error(`waitForText() failed: css=${selector.css} contains "${textSubstr}"`);
+      logger.error(err);
       throw new Error(err);
     }
   }
@@ -339,11 +357,12 @@ export async function waitForText(
       );
       return (await jsHandle.jsonValue()) as boolean;
     } catch (err) {
-      console.error(`Failed finding element. Xpath=${selector.xpath} contains "${textSubstr}".`);
+      logger.error(`waitForText() failed: xpath=${selector.xpath} contains "${textSubstr}"`);
+      logger.error(err);
       throw new Error(err);
     }
   }
-  throw new Error('xpath or css is required');
+  throw new Error('waitForText(): xpath or css is required');
 }
 
 /**
@@ -378,8 +397,9 @@ export async function waitWhileLoading(
       spinElementsSelector
     )
     .catch((err) => {
-      console.error(err.message);
-      throw new Error(`waitWhileLoading() failed: spinner xpath="${spinElementsSelector}"`);
+      logger.error(`waitWhileLoading() failed: spinner xpath="${spinElementsSelector}"`);
+      logger.error(err);
+      throw new Error(err);
     });
 
   await page.waitForTimeout(500);
@@ -389,9 +409,9 @@ export async function waitUntilEnabled(page: Page, cssSelector: string): Promise
   const jsHandle = await page
     .waitForFunction(
       (xpathSelector) => {
-        const elemt = document.evaluate(xpathSelector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+        const element = document.evaluate(xpathSelector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
           .singleNodeValue;
-        const style = window.getComputedStyle(elemt as Element);
+        const style = window.getComputedStyle(element as Element);
         const propValue = style.getPropertyValue('cursor');
         return propValue === 'pointer';
       },
@@ -399,8 +419,9 @@ export async function waitUntilEnabled(page: Page, cssSelector: string): Promise
       cssSelector
     )
     .catch((err) => {
-      console.error(err.message);
-      throw new Error(`waitUntilEnabled() failed: spinner css="${cssSelector}"`);
+      logger.error(`waitUntilEnabled() failed: spinner css="${cssSelector}"`);
+      logger.error(err);
+      throw new Error(err);
     });
   return (await jsHandle.jsonValue()) as boolean;
 }
