@@ -18,7 +18,7 @@ describe('Helper functions', () => {
     expect(r3).toBe('default');
   });
 
-  it('(maybe) Should return nothing when the value is not set', async() => {
+  it('(maybe) Should return nothing when the value is not set and execute the function when it is', async() => {
     const setFirstName = data => ({...data, firstName: 'first'});
     const setLastName = data => ({...data, lastName: 'last'});
     
