@@ -28,7 +28,7 @@ export default class ConceptDomainCard extends Container {
   }
 
   async clickSelectConceptButton(): Promise<CriteriaSearchPage> {
-    const selectConceptButton = await this.getSelectConceptButton();
+    const selectConceptButton = this.getSelectConceptButton();
     await selectConceptButton.waitUntilEnabled();
     await selectConceptButton.click();
     const criteriaSearch = new CriteriaSearchPage(this.page);
@@ -63,7 +63,7 @@ export default class ConceptDomainCard extends Container {
     return regex.exec(textContent)[0];
   }
 
-  private async getSelectConceptButton(): Promise<Button> {
+  private getSelectConceptButton(): Button {
     return Button.findByName(this.page, { name: 'Select Concepts' }, this);
   }
 }

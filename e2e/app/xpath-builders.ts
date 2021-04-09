@@ -1,7 +1,7 @@
 import Container from 'app/container';
 import { ElementType, XPathOptions } from 'app/xpath-options';
 
-export function iframeXpath(label: string) {
+export function iframeXpath(label: string): string {
   return `//body[@id='body']//*[contains(@aria-label, '${label}')]//iframe`;
 }
 
@@ -52,8 +52,10 @@ export function buildXPath(xOpts: XPathOptions, container?: Container): string {
       selector = `(${containerXpath}//button | ${containerXpath}//*[@role="button"])${str}`;
       break;
     case ElementType.Icon: // clickable icon
-      const tag = iconShape === undefined ? '*' : `clr-icon[@shape="${iconShape}"]`;
-      selector = `${textExpr}//${tag}[*[@role="img"]]`;
+      {
+        const tag = iconShape === undefined ? '*' : `clr-icon[@shape="${iconShape}"]`;
+        selector = `${textExpr}//${tag}[*[@role="img"]]`;
+      }
       break;
     case ElementType.Number:
     case ElementType.Checkbox:
@@ -75,16 +77,9 @@ export function buildXPath(xOpts: XPathOptions, container?: Container): string {
       selector = `//*[(@aria-selected | @tabindex) and @role="button" and text()="${name}"]`;
       break;
     default:
-      console.debug(`Implement unhandled type: ${type}. 
-      XPathOptions configuration: 
-        "type": ${type}, 
-        "name": ${name}, 
-        "containsText": ${containsText}, 
-        "normalizeSpace: ${normalizeSpace}, 
-        "ancestorLevel": ${ancestorLevel}, 
-        "iconShape": ${iconShape}`);
+      console.error(`Implement unhandled type: ${type}`);
       throw new Error(`Implement unhandled type: ${type}`);
   }
 
-  return (this.xpath = selector);
+  return selector;
 }

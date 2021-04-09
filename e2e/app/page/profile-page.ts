@@ -59,47 +59,47 @@ export default class ProfilePage extends AuthenticatedPage {
     return true;
   }
 
-  async getFirstNameInput(): Promise<Textbox> {
+  getFirstNameInput(): Textbox {
     return Textbox.findByName(this.page, { dataTestId: DataTestIdAlias.FirstName });
   }
 
-  async getLastNameInput(): Promise<Textbox> {
+  getLastNameInput(): Textbox {
     return Textbox.findByName(this.page, { dataTestId: DataTestIdAlias.LastName });
   }
 
-  async getProfessionalUrlInput(): Promise<Textbox> {
+  getProfessionalUrlInput(): Textbox {
     return Textbox.findByName(this.page, { dataTestId: DataTestIdAlias.ProfessionalUrl });
   }
 
-  async getResearchBackgroundTextarea(): Promise<Textarea> {
+  getResearchBackgroundTextarea(): Textarea {
     return Textarea.findByName(this.page, { normalizeSpace: LabelAlias.ResearchBackground });
   }
 
-  async getAddress1Input(): Promise<Textbox> {
+  getAddress1Input(): Textbox {
     return Textbox.findByName(this.page, { dataTestId: DataTestIdAlias.Address1 });
   }
 
-  async getAddress2Input(): Promise<Textbox> {
+  getAddress2Input(): Textbox {
     return Textbox.findByName(this.page, { dataTestId: DataTestIdAlias.Address2 });
   }
 
-  async getCityInput(): Promise<Textbox> {
+  getCityInput(): Textbox {
     return Textbox.findByName(this.page, { dataTestId: DataTestIdAlias.City });
   }
 
-  async getStateInput(): Promise<Textbox> {
+  getStateInput(): Textbox {
     return Textbox.findByName(this.page, { dataTestId: DataTestIdAlias.State });
   }
 
-  async getZipCodeInput(): Promise<Textbox> {
+  getZipCodeInput(): Textbox {
     return Textbox.findByName(this.page, { dataTestId: DataTestIdAlias.Zip });
   }
 
-  async getCountryInput(): Promise<Textbox> {
+  getCountryInput(): Textbox {
     return Textbox.findByName(this.page, { dataTestId: DataTestIdAlias.Country });
   }
 
-  async getSaveProfileButton(): Promise<Button> {
+  getSaveProfileButton(): Button {
     return Button.findByName(this.page, { name: LabelAlias.SaveProfile });
   }
 }

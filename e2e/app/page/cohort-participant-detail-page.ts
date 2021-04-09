@@ -36,7 +36,7 @@ export default class CohortParticipantDetailPage extends AuthenticatedPage {
 
   // get the back to review set button
   async getBackToReviewSetButton(): Promise<CohortReviewPage> {
-    const button = await Button.findByName(this.page, { name: LinkText.BackToReviewSet });
+    const button = Button.findByName(this.page, { name: LinkText.BackToReviewSet });
     await button.click();
     const cohortReviewPage = new CohortReviewPage(this.page);
     await cohortReviewPage.waitForLoad();

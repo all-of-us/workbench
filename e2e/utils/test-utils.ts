@@ -50,7 +50,7 @@ export async function signInAs(userId: string, passwd: string, opts: { reset?: b
   return newPage;
 }
 
-export async function signOut(page: Page) {
+export async function signOut(page: Page): Promise<void> {
   await page.evaluate(() => 'window.setTestAccessTokenOverride(null)');
 
   await Navigation.navMenu(page, NavLink.SIGN_OUT);
@@ -97,48 +97,16 @@ export async function waitWhileLoading(page: Page, timeOut?: number): Promise<vo
   );
 }
 
-export async function click(page: Page, opts: { xpath?: string; css?: string }) {
-  const { xpath, css } = opts;
-  if (xpath) {
-    return page.evaluate((selector) => {
-      const node: any = document.evaluate(selector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-        .singleNodeValue;
-      document.evaluate(selector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-      node.click();
-    }, xpath);
-  }
-
-  if (css) {
-    return page.evaluate((selector) => {
-      const node: any = document.querySelector(selector);
-      node.click();
-    }, css);
-  }
-}
-
 /**
  * Is there a element located by CSS selector?
  * @param page Puppeteer.Page
  * @param selector CSS selector
  */
-export async function exists(page: Page, selector: string) {
+export async function exists(page: Page, selector: string): Promise<boolean> {
   return !!(await page.$(`${selector}`));
 }
 
-export async function clickRecaptcha(page: Page) {
-  const css = '[id="recaptcha-anchor"][role="checkbox"]';
-  await page.frames().find(async (frame) => {
-    for (const childFrame of frame.childFrames()) {
-      const recaptcha = await childFrame.$$(css);
-      if (recaptcha.length > 0) {
-        await recaptcha[0].click();
-        return;
-      }
-    }
-  });
-}
-
-export async function newUserRegistrationSelfBypass(page: Page) {
+export async function newUserRegistrationSelfBypass(page: Page): Promise<void> {
   const selfBypassXpath = '//*[@data-test-id="self-bypass"]';
   await Promise.race([
     page.waitForXPath(selfBypassXpath, { visible: true, timeout: 60000 }),
@@ -174,7 +142,7 @@ export async function newUserRegistrationSelfBypass(page: Page) {
 export async function performActions(
   page: Page,
   fields: { id: { textOption: XPathOptions; affiliated?: ElementType }; value?: string; selected?: boolean }[]
-) {
+): Promise<void> {
   for (const field of fields) {
     await performAction(page, field.id, field.value, field.selected);
   }
@@ -192,15 +160,13 @@ export async function performAction(
   identifier: { textOption: XPathOptions; affiliated?: ElementType },
   value?: string,
   selected?: boolean
-) {
+): Promise<void> {
   switch (identifier.textOption.type.toLowerCase()) {
     case 'radio':
-      const radioELement = await RadioButton.findByName(page, identifier.textOption);
-      await radioELement.select();
+      await RadioButton.findByName(page, identifier.textOption).select();
       break;
     case 'checkbox':
-      const checkboxElement = await Checkbox.findByName(page, identifier.textOption);
-      await checkboxElement.toggle(selected);
+      await Checkbox.findByName(page, identifier.textOption).toggle(selected);
       if (value) {
         // For Checkbox and its required Textarea or Textbox. Set value in Textbox or Textarea if Checkbox is checked.
         identifier.textOption.type = identifier.affiliated;
@@ -208,17 +174,18 @@ export async function performAction(
       }
       break;
     case 'text':
-      const textboxElement = await Textbox.findByName(page, identifier.textOption);
-      await textboxElement.type(value, { delay: 0 });
-      await textboxElement.pressTab();
+      await Textbox.findByName(page, identifier.textOption)
+        .type(value, { delay: 0 })
+        .then((textbox) => textbox.pressTab());
       break;
-    case 'textarea':
-      const textareaElement = await Textarea.findByName(page, identifier.textOption);
+    case 'textarea': {
+      const textareaElement = Textarea.findByName(page, identifier.textOption);
       await textareaElement.paste(value);
       await textareaElement.pressTab();
       break;
+    }
     default:
-      throw new Error(`${identifier} is not recognized.`);
+      throw new Error('identifier not recognized.');
   }
 }
 
@@ -287,7 +254,7 @@ export async function findOrCreateWorkspace(page: Page, opts: { workspaceName?: 
   }
 
   // Return one random Workspace card
-  const randomCard = fp.shuffle(olderWorkspaceCards).pop();
+  const randomCard: WorkspaceCard = fp.shuffle(olderWorkspaceCards).pop();
   const cardName = await randomCard.getWorkspaceName();
   const lastChangedTime = await randomCard.getLastChangedTime();
   logger.info(`Found workspace card: "${cardName}". Last changed on ${lastChangedTime}`);
@@ -345,7 +312,7 @@ export async function centerPoint(element: ElementHandle): Promise<[number, numb
   return [cx, cy];
 }
 
-export async function dragDrop(page: Page, element: ElementHandle, destinationPoint: { x; y }) {
+export async function dragDrop(page: Page, element: ElementHandle, destinationPoint: { x; y }): Promise<void> {
   const [x0, y0] = await centerPoint(element);
   const { x, y } = destinationPoint;
   const mouse = page.mouse;

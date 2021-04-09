@@ -9,6 +9,7 @@ export default class ReviewConceptSetSidebar extends BaseHelpSidebar {
   }
 
   // Not implemented because it's not triggered to open by sidebar tab.
+  // eslint-disable-next-line @typescript-eslint/require-await
   async open(): Promise<void> {
     throw new Error('Do not use. Method not to be implemented.');
   }

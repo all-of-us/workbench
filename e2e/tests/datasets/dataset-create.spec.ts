@@ -26,7 +26,7 @@ describe('Dataset test', () => {
 
     // Click Add Cohorts button
     const dataPage = new WorkspaceDataPage(page);
-    const addCohortsButton = await dataPage.getAddCohortsButton();
+    const addCohortsButton = dataPage.getAddCohortsButton();
     await addCohortsButton.clickAndWait();
 
     // Build new Cohort
@@ -39,7 +39,7 @@ describe('Dataset test', () => {
     const searchResultsTable = await searchPage.searchCriteria('hydroxychloroquine');
     // Add a drug in Result table first row. Drug name ignored.
     const nameValue = await searchResultsTable.getCellValue(1, 1);
-    const addIcon = await ClrIconLink.findByName(
+    const addIcon = ClrIconLink.findByName(
       page,
       { containsText: nameValue, iconShape: 'plus-circle' },
       searchResultsTable

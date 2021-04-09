@@ -23,7 +23,7 @@ export default class CohortReviewPage extends AuthenticatedPage {
     return new DataTable(this.page);
   }
 
-  async getBackToCohortButton(): Promise<Button> {
+  getBackToCohortButton(): Button {
     return Button.findByName(this.page, { name: LinkText.BackToCohort });
   }
 

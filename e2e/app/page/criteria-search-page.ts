@@ -68,11 +68,11 @@ export default class CriteriaSearchPage extends AuthenticatedPage {
     return true;
   }
 
-  async waitForPhysicalMeasurementCriteriaLink(criteriaType: PhysicalMeasurementsCriteria): Promise<ClrIconLink> {
+  waitForPhysicalMeasurementCriteriaLink(criteriaType: PhysicalMeasurementsCriteria): ClrIconLink {
     return ClrIconLink.findByName(this.page, { name: criteriaType, iconShape: 'slider', ancestorLevel: 2 });
   }
 
-  async waitForVisitsCriteriaLink(criteriaType: Visits): Promise<ClrIconLink> {
+  waitForVisitsCriteriaLink(criteriaType: Visits): ClrIconLink {
     return ClrIconLink.findByName(this.page, { startsWith: criteriaType, iconShape: 'plus-circle', ancestorLevel: 1 });
   }
 
@@ -88,7 +88,7 @@ export default class CriteriaSearchPage extends AuthenticatedPage {
     filterValue: number
   ): Promise<string> {
     await waitWhileLoading(this.page);
-    const link = await this.waitForPhysicalMeasurementCriteriaLink(criteriaName);
+    const link = this.waitForPhysicalMeasurementCriteriaLink(criteriaName);
     await link.click();
 
     // Delay to make sure correct sidebar content is showing
@@ -115,7 +115,7 @@ export default class CriteriaSearchPage extends AuthenticatedPage {
 
   async searchCriteria(searchWord: string): Promise<Table> {
     const resultsTable = this.getConditionSearchResultsTable();
-    const searchFilterTextbox = await Textbox.findByName(this.page, { containsText: 'by code or description' });
+    const searchFilterTextbox = Textbox.findByName(this.page, { containsText: 'by code or description' });
     await searchFilterTextbox.type(searchWord);
     await searchFilterTextbox.pressReturn();
     await waitWhileLoading(this.page);
@@ -123,7 +123,7 @@ export default class CriteriaSearchPage extends AuthenticatedPage {
   }
 
   async addAgeModifier(filterSign: FilterSign, filterValue: number): Promise<string> {
-    const selectMenu = await SelectMenu.findByName(this.page, { name: 'Age At Event', ancestorLevel: 2 });
+    const selectMenu = SelectMenu.findByName(this.page, { name: 'Age At Event', ancestorLevel: 2 });
     await selectMenu.select(filterSign);
     const numberField = await this.page.waitForXPath(`${this.containerXpath}//input[@type="number"]`, {
       visible: true
@@ -136,12 +136,12 @@ export default class CriteriaSearchPage extends AuthenticatedPage {
     await numberField.press('Tab', { delay: 200 });
 
     let participantResult;
-    await Button.findByName(this.page, { name: LinkText.Calculate }).then((button) => button.click());
+    await Button.findByName(this.page, { name: LinkText.Calculate }).click();
     try {
       participantResult = await this.waitForParticipantResult();
     } catch (e) {
       // Retry one more time.
-      await Button.findByName(this.page, { name: LinkText.Calculate }).then((button) => button.click());
+      await Button.findByName(this.page, { name: LinkText.Calculate }).click();
       participantResult = await this.waitForParticipantResult();
     }
     console.debug(`Age Modifier: ${filterSign} ${filterValue}  => number of participants: ${participantResult}`);
@@ -150,7 +150,7 @@ export default class CriteriaSearchPage extends AuthenticatedPage {
 
   async addVisits(visits: Visits[]): Promise<void> {
     for (const visit of visits) {
-      await this.waitForVisitsCriteriaLink(visit).then((link) => link.click());
+      await this.waitForVisitsCriteriaLink(visit).click();
     }
   }
 
@@ -190,7 +190,7 @@ export default class CriteriaSearchPage extends AuthenticatedPage {
 
   // Click Finish and Review button in sidebar
   async clickFinishAndReviewButton(): Promise<void> {
-    const finishAndReviewButton = await Button.findByName(this.page, { name: LinkText.FinishAndReview });
+    const finishAndReviewButton = Button.findByName(this.page, { name: LinkText.FinishAndReview });
     await finishAndReviewButton.waitUntilEnabled();
     await finishAndReviewButton.click();
   }

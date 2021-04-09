@@ -10,7 +10,7 @@ const defaultMenuXpath =
   '[.//*[contains(concat(" ", normalize-space(@class), " "), " p-input-overlay-visible ")]]';
 
 export default class SelectMenu extends BaseMenu {
-  static async findByName(page: Page, xOpt: XPathOptions = {}, container?: Container): Promise<SelectMenu> {
+  static findByName(page: Page, xOpt: XPathOptions = {}, container?: Container): SelectMenu {
     xOpt.type = ElementType.Dropdown;
     const menuXpath = buildXPath(xOpt, container);
     const selectMenu = new SelectMenu(page, menuXpath);

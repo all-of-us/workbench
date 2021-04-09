@@ -66,7 +66,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
    * 4: return
    */
   async clickCreateNewWorkspace(): Promise<WorkspaceEditPage> {
-    const link = await Button.findByName(this.page, FieldSelector.CreateNewWorkspaceButton.textOption);
+    const link = Button.findByName(this.page, FieldSelector.CreateNewWorkspaceButton.textOption);
     await link.clickAndWait();
     const workspaceEdit = new WorkspaceEditPage(this.page);
     await workspaceEdit.waitForLoad();
@@ -95,7 +95,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
     }
 
     // click CREATE WORKSPACE button
-    const createButton = await editPage.getCreateWorkspaceButton();
+    const createButton = editPage.getCreateWorkspaceButton();
     await createButton.waitUntilEnabled();
     const modalContent = await editPage.clickCreateFinishButton(createButton);
     logger.info(`Created workspace "${workspaceName}" with CDR Version "${cdrVersionName}"`);
@@ -111,8 +111,8 @@ export default class WorkspacesPage extends AuthenticatedPage {
     // wait for Billing Account default selected value
     await waitForText(this.page, UseFreeCredits);
 
-    await (await editPage.getWorkspaceNameTextbox()).type(workspaceName);
-    await (await editPage.getWorkspaceNameTextbox()).pressTab();
+    await editPage.getWorkspaceNameTextbox().type(workspaceName);
+    await editPage.getWorkspaceNameTextbox().pressTab();
 
     // select Billing Account
     await editPage.selectBillingAccount(billingAccount);
@@ -120,31 +120,28 @@ export default class WorkspacesPage extends AuthenticatedPage {
     // 1. What is the primary purpose of your project?
     // check Educational Purpose checkbox
     const educationPurpose = editPage.question1_educationalPurpose();
-    await (await educationPurpose.asCheckBox()).check();
+    await educationPurpose.asCheckBox().check();
 
     // 2. Please provide a summary of your research purpose by responding to the questions below.
     const scientificQuestions = editPage.question2_scientificQuestionsIntendToStudy();
-    await (await scientificQuestions.asTextArea()).paste(faker.lorem.paragraph());
+    await scientificQuestions.asTextArea().paste(faker.lorem.paragraph());
 
     const scientificApproaches = editPage.question2_scientificApproaches();
-    await (await scientificApproaches.asTextArea()).paste(faker.lorem.paragraph());
+    await scientificApproaches.asTextArea().paste(faker.lorem.paragraph());
 
     const anticipatedFindings = editPage.question2_anticipatedFindings();
-    await (await anticipatedFindings.asTextArea()).paste(faker.lorem.paragraph());
+    await anticipatedFindings.asTextArea().paste(faker.lorem.paragraph());
 
     // 3. The All of Us Research Program encourages researchers to disseminate ....
     const publicationInJournal = editPage.publicationInJournal();
-    await (await publicationInJournal.asCheckBox()).check();
+    await publicationInJournal.asCheckBox().check();
 
     // 4. The All of Us Research Program would like to understand how ....
     const increaseWellness = editPage.increaseWellnessResilience();
-    await (await increaseWellness.asCheckBox()).check();
+    await increaseWellness.asCheckBox().check();
 
     // 5. Population of interest: use default values. Using default value
-    const noRadiobutton = await RadioButton.findByName(
-      this.page,
-      EDIT_FIELD.POPULATION_OF_INTEREST.noRadiobutton.textOption
-    );
+    const noRadiobutton = RadioButton.findByName(this.page, EDIT_FIELD.POPULATION_OF_INTEREST.noRadiobutton.textOption);
     await noRadiobutton.select();
 
     // 6. Request for Review of Research Purpose Description. Using default value

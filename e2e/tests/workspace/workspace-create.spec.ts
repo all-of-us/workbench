@@ -43,7 +43,7 @@ describe('Creating new workspaces', () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
 
-    const createNewWorkspaceButton = await Button.findByName(page, FieldSelector.CreateNewWorkspaceButton.textOption);
+    const createNewWorkspaceButton = Button.findByName(page, FieldSelector.CreateNewWorkspaceButton.textOption);
     await createNewWorkspaceButton.clickAndWait();
 
     const workspaceEditPage = new WorkspaceEditPage(page);
@@ -77,7 +77,7 @@ describe('Creating new workspaces', () => {
     // -- No Review Required
     await performActions(page, testData.defaultAnswersRequestForReview);
 
-    const finishButton = await workspaceEditPage.getCreateWorkspaceButton();
+    const finishButton = workspaceEditPage.getCreateWorkspaceButton();
     await finishButton.waitUntilEnabled();
     await workspaceEditPage.clickCreateFinishButton(finishButton);
 

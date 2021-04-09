@@ -30,7 +30,7 @@ export default class DatasetBuildPage extends AuthenticatedPage {
   }
 
   async clickAddCohortsButton(): Promise<CohortBuildPage> {
-    const addCohortButton = await ClrIconLink.findByName(this.page, {
+    const addCohortButton = ClrIconLink.findByName(this.page, {
       name: LabelAlias.SelectCohorts,
       ancestorLevel: 3,
       iconShape: 'plus-circle'
@@ -61,7 +61,7 @@ export default class DatasetBuildPage extends AuthenticatedPage {
    * Click Add Concept Sets button, opened the Concept Sets page.
    */
   async clickAddConceptSetsButton(): Promise<ConceptSetSearchPage> {
-    const addConceptSetsButton = await ClrIconLink.findByName(this.page, {
+    const addConceptSetsButton = ClrIconLink.findByName(this.page, {
       name: LabelAlias.SelectConceptSets,
       ancestorLevel: 3,
       iconShape: 'plus-circle'
@@ -97,7 +97,7 @@ export default class DatasetBuildPage extends AuthenticatedPage {
    * @returns Instance of DatasetSaveModal.
    */
   async clickSaveAndAnalyzeButton(): Promise<DatasetSaveModal> {
-    const saveButton = await Button.findByName(this.page, { name: 'Save and Analyze' });
+    const saveButton = Button.findByName(this.page, { name: 'Save and Analyze' });
     await saveButton.waitUntilEnabled();
     await saveButton.click();
     await waitWhileLoading(this.page);
@@ -107,13 +107,13 @@ export default class DatasetBuildPage extends AuthenticatedPage {
   }
 
   async clickAnalyzeButton(): Promise<void> {
-    const saveButton = await Button.findByName(this.page, { containsText: 'Analyze' });
+    const saveButton = Button.findByName(this.page, { containsText: 'Analyze' });
     await saveButton.waitUntilEnabled();
     await saveButton.click();
   }
 
   async getPreviewTable(): Promise<Table> {
-    const previewButton = await Button.findByName(this.page, { name: 'View Preview Table' });
+    const previewButton = Button.findByName(this.page, { name: 'View Preview Table' });
     await previewButton.click();
     await waitWhileLoading(this.page);
     return new Table(this.page, '//table[@class="p-datatable-scrollable-body-table"]');

@@ -65,7 +65,7 @@ export default class ConceptSetPage extends AuthenticatedPage {
       const descInput = new Textbox(this.page, descInputXpath);
       await descInput.paste(newDescription);
     }
-    const saveButton = await Button.findByName(this.page, { name: 'Save', ancestorLevel: 0 });
+    const saveButton = Button.findByName(this.page, { name: 'Save', ancestorLevel: 0 });
     await saveButton.click();
     await this.getEditButton().then((butn) => butn.waitUntilEnabled());
   }

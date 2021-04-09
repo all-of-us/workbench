@@ -50,7 +50,7 @@ export default class WorkspaceCard extends CardBase {
       new WorkspaceCard(page).asCard(card)
     );
 
-    const filtered = [];
+    const filtered: WorkspaceCard[] = [];
     if (accessLevel !== undefined) {
       for (const card of workspaceCards) {
         const cardAccessLevel = await card.getWorkspaceAccessLevel();

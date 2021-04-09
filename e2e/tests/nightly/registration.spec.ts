@@ -16,26 +16,26 @@ describe('User registration tests:', () => {
 
     // Step 1: Terms of Service.
     await createAccountPage.acceptTermsOfUseAgreement();
-    let nextButton = await createAccountPage.getNextButton();
+    let nextButton = createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();
     await nextButton.click();
 
     // Step 2: Enter institution affiliation details
     await createAccountPage.fillOutInstitution();
-    nextButton = await createAccountPage.getNextButton();
+    nextButton = createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();
     await nextButton.clickWithEval();
 
     // Step 3: Enter user information
     const userId = await createAccountPage.fillOutUserInformation();
-    nextButton = await createAccountPage.getNextButton();
+    nextButton = createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();
     await nextButton.click();
 
     // Step 4: Enter demographic survey (All Survey Fields are optional)
     await createAccountPage.fillOutDemographicSurvey();
 
-    const submitButton = await createAccountPage.getSubmitButton();
+    const submitButton = createAccountPage.getSubmitButton();
     await submitButton.waitUntilEnabled();
     await submitButton.click();
 

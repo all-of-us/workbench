@@ -22,7 +22,7 @@ describe('Cohorts UI tests', () => {
     // Wait for the Data page.
     const dataPage = new WorkspaceDataPage(page);
 
-    const addCohortsButton = await dataPage.getAddCohortsButton();
+    const addCohortsButton = dataPage.getAddCohortsButton();
     await addCohortsButton.clickAndWait();
 
     // In Build Cohort Criteria page
@@ -41,15 +41,15 @@ describe('Cohorts UI tests', () => {
     await page.waitForXPath(chartPointsSelector, { visible: true });
 
     // Copy button is disabled
-    const copyButton = await cohortPage.getCopyButton();
+    const copyButton = cohortPage.getCopyButton();
     expect(await copyButton.isDisabled()).toBe(true);
 
     // Trash (Delete) button is disabled
-    const trashButton = await cohortPage.getDeleteButton();
+    const trashButton = cohortPage.getDeleteButton();
     expect(await trashButton.isDisabled()).toBe(true);
 
     // Export button is disabled
-    const exportButton = await cohortPage.getExportButton();
+    const exportButton = cohortPage.getExportButton();
     expect(await exportButton.isDisabled()).toBe(true);
 
     await dataPage.openAboutPage({ waitPageChange: false });

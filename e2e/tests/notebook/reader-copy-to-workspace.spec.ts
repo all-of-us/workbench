@@ -103,7 +103,6 @@ describe('Workspace reader Jupyter notebook action tests', () => {
       // Verify Copy Success modal.
       const modal = new Modal(newPage);
       await modal.waitForLoad();
-      await modal.waitForButton(LinkText.GoToCopiedNotebook);
       const textContent = await modal.getTextContent();
       expect(textContent).toContain('Copy to Workspace');
       const expectedFullMsg =
@@ -116,7 +115,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
 
       // Verify current workspace is collaborator Workspace.
       await newAnalysisPage.waitForLoad();
-      const workspaceLink = await Link.findByName(newPage, { name: collaboratorWorkspaceName });
+      const workspaceLink = Link.findByName(newPage, { name: collaboratorWorkspaceName });
       const linkDisplayed = await workspaceLink.isDisplayed();
       expect(linkDisplayed).toBe(true);
 

@@ -49,7 +49,7 @@ export default class Checkbox extends BaseElement {
   /**
    * Click on checkbox element for unchecked
    */
-  async unCheck() {
+  async unCheck(): Promise<void> {
     const is = await this.isChecked();
     if (is) {
       await this.focus();

@@ -35,7 +35,7 @@ export async function waitUntilChanged(page: Page, element: ElementHandle): Prom
   return page.waitForFunction((elemt) => !elemt.ownerDocument.contains(elemt), { polling: 'raf' }, element);
 }
 
-export async function matchText(page: Page, cssSelector, subString): Promise<boolean> {
+export async function matchText(page: Page, cssSelector: string, subString: string): Promise<boolean> {
   const texts = await page.$$eval(cssSelector, (elements) => elements.map((el) => el.textContent));
   let found = false;
   for (const txt of texts) {

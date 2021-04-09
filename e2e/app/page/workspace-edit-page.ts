@@ -268,14 +268,18 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     await Promise.all([waitForDocumentTitle(this.page, PageTitle), waitWhileLoading(this.page)]);
     const selectXpath = buildXPath(FIELD.billingAccountSelect.textOption);
     const select = new Select(this.page, selectXpath);
-    await Promise.all([this.getWorkspaceNameTextbox(), select.asElementHandle(), this.getCreateWorkspaceButton()]);
+    await Promise.all([
+      this.getWorkspaceNameTextbox().asElementHandle(),
+      select.asElementHandle(),
+      this.getCreateWorkspaceButton().asElementHandle()
+    ]);
     return true;
   }
 
   /**
    * Find the CDR Version Select element.
    */
-  async getCdrVersionSelect(): Promise<Select> {
+  getCdrVersionSelect(): Select {
     return Select.findByName(this.page, FIELD.cdrVersionSelect.textOption);
   }
 
@@ -285,30 +289,30 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     return element.getTextContent();
   }
 
-  async getBillingAccountSelect(): Promise<Select> {
+  getBillingAccountSelect(): Select {
     return Select.findByName(this.page, FIELD.billingAccountSelect.textOption);
   }
 
-  async getCreateWorkspaceButton(): Promise<Button> {
+  getCreateWorkspaceButton(): Button {
     return Button.findByName(this.page, FIELD.createWorkspaceButton.textOption);
   }
 
-  async getDuplicateWorkspaceButton(): Promise<Button> {
+  getDuplicateWorkspaceButton(): Button {
     // Cannot use Button.forLabel because it finds two elements on Duplicate workspace page.
     // Don't change. use this xpath to find the button "DUPLICATE WORKSPACE".
     return new Button(this.page, '//*[text()="Duplicate Workspace" and @role="button"]');
   }
 
-  async getUpdateWorkspaceButton(): Promise<Button> {
+  getUpdateWorkspaceButton(): Button {
     return new Button(this.page, '//*[text()="Update Workspace" and @role="button"]');
   }
 
-  async getCancelButton(): Promise<Button> {
+  getCancelButton(): Button {
     return Button.findByName(this.page, FIELD.cancelWorkspaceButton.textOption);
   }
 
-  async getWorkspaceNameTextbox(): Promise<Textbox> {
-    return await Textbox.findByName(this.page, FIELD.workspaceNameTextbox.textOption);
+  getWorkspaceNameTextbox(): Textbox {
+    return Textbox.findByName(this.page, FIELD.workspaceNameTextbox.textOption);
   }
 
   question1_researchPurpose(): WebComponent {
@@ -317,10 +321,6 @@ export default class WorkspaceEditPage extends WorkspaceBase {
 
   question1_educationalPurpose(): WebComponent {
     return new WebComponent(this.page, FIELD.PRIMARY_PURPOSE.educationPurposeCheckbox.textOption);
-  }
-
-  question1_forProfitPurpose(): WebComponent {
-    return new WebComponent(this.page, FIELD.PRIMARY_PURPOSE.forProfitPurposeCheckbox.textOption);
   }
 
   question1_otherPurpose(): WebComponent {
@@ -364,7 +364,7 @@ export default class WorkspaceEditPage extends WorkspaceBase {
    * @param {string} value
    */
   async selectCdrVersion(value: string = config.defaultCdrVersionName): Promise<string> {
-    const select = await this.getCdrVersionSelect();
+    const select = this.getCdrVersionSelect();
     return select.selectOption(value);
   }
 
@@ -372,8 +372,8 @@ export default class WorkspaceEditPage extends WorkspaceBase {
    * Select Billing Account
    * @param {string} billingAccount
    */
-  async selectBillingAccount(billingAccount: string = UseFreeCredits) {
-    const billingAccountSelect = await this.getBillingAccountSelect();
+  async selectBillingAccount(billingAccount: string = UseFreeCredits): Promise<void> {
+    const billingAccountSelect = this.getBillingAccountSelect();
     await billingAccountSelect.selectOption(billingAccount);
   }
 
@@ -381,10 +381,10 @@ export default class WorkspaceEditPage extends WorkspaceBase {
    * Assumption: Checked checkbox means to expand the section, hidden questions will become visible.
    * @param {boolean} yesOrNo: True means to check checkbox. False means to uncheck.
    */
-  async expandResearchPurposeGroup(yesOrNo = true) {
+  async expandResearchPurposeGroup(yesOrNo = true): Promise<void> {
     // expand Disease purpose section if needed
     const researchPurpose = this.question1_researchPurpose();
-    const researchPurposeCheckbox = await researchPurpose.asCheckBox();
+    const researchPurposeCheckbox = researchPurpose.asCheckBox();
     const is = await researchPurposeCheckbox.isChecked();
     if (yesOrNo !== is) {
       // click checkbox expands or collapses the section, reveal hidden questions contained inside.
@@ -398,8 +398,8 @@ export default class WorkspaceEditPage extends WorkspaceBase {
    */
   async fillOutWorkspaceName(): Promise<string> {
     const newWorkspaceName = makeWorkspaceName();
-    await (await this.getWorkspaceNameTextbox()).type(newWorkspaceName);
-    await (await this.getWorkspaceNameTextbox()).pressTab();
+    await this.getWorkspaceNameTextbox().type(newWorkspaceName);
+    await this.getWorkspaceNameTextbox().pressTab();
     return newWorkspaceName;
   }
 
@@ -407,39 +407,39 @@ export default class WorkspaceEditPage extends WorkspaceBase {
    *  Enter value in 'Disease-focused research' textbox
    * @param {string} diseaseName
    */
-  async fillOutDiseaseFocusedResearch(diseaseName = 'diabetic cataract') {
+  async fillOutDiseaseFocusedResearch(diseaseName = 'diabetic cataract'): Promise<void> {
     const diseaseNameComponent = this.question1_diseaseFocusedResearch();
-    await (await diseaseNameComponent.asCheckBox()).check();
-    await (await diseaseNameComponent.asTextBox()).type(diseaseName);
-    await (await diseaseNameComponent.asTextBox()).pressTab();
+    await diseaseNameComponent.asCheckBox().check();
+    await diseaseNameComponent.asTextBox().type(diseaseName);
+    await diseaseNameComponent.asTextBox().pressTab();
   }
 
   /**
    * Enter value in Other Purpose textarea
    * @param {string} value
    */
-  async fillOutOtherPurpose(value?: string) {
+  async fillOutOtherPurpose(value?: string): Promise<void> {
     if (value === undefined) {
       value = faker.lorem.paragraph();
     }
     // check Other-Purpose checkbox
     const otherPurpose = this.question1_otherPurpose();
-    await (await otherPurpose.asCheckBox()).check(); // enables textarea
-    await (await otherPurpose.asTextArea()).type(value);
+    await otherPurpose.asCheckBox().check(); // enables textarea
+    await otherPurpose.asTextArea().type(value);
   }
 
   /**
    * Question 6. Request for Review of Research Purpose Description
    * @param selected: True means select "Yes, Request Review" radiobutton. False means select "No, Request Review" radiobutton.
    */
-  async requestForReviewRadiobutton(selected: boolean) {
+  async requestForReviewRadiobutton(selected: boolean): Promise<void> {
     let radioComponent;
     if (selected) {
       radioComponent = new WebComponent(this.page, FIELD.REQUEST_FOR_REVIEW.yesRequestReviewRadiobutton.textOption);
     } else {
       radioComponent = new WebComponent(this.page, FIELD.REQUEST_FOR_REVIEW.noRequestReviewRadiobutton.textOption);
     }
-    await (await radioComponent.asRadioButton()).select();
+    await radioComponent.asRadioButton().select();
   }
 
   /**
@@ -458,8 +458,8 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     return modalTextContent;
   }
 
-  async clickShareWithCollaboratorsCheckbox() {
-    const elemt = await Checkbox.findByName(this.page, FIELD.shareWithCollaboratorsCheckbox.textOption);
-    await elemt.check();
+  async clickShareWithCollaboratorsCheckbox(): Promise<void> {
+    const element = Checkbox.findByName(this.page, FIELD.shareWithCollaboratorsCheckbox.textOption);
+    await element.check();
   }
 }

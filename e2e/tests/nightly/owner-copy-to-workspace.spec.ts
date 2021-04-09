@@ -81,7 +81,6 @@ async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName:
   // Verify Copy Success modal.
   const modal = new Modal(page);
   await modal.waitForLoad();
-  await modal.waitForButton(LinkText.GoToCopiedNotebook);
   const textContent = await modal.getTextContent();
   const successMsg =
     `Successfully copied ${sourceNotebookName}  to ${destWorkspace} . ` + 'Do you want to view the copied Notebook?';

@@ -23,7 +23,7 @@ describe('Duplicate workspace, changing CDR versions', () => {
 
     // Fill out Workspace Name should be just enough for successful duplication
     const workspaceEditPage = new WorkspaceEditPage(page);
-    await (await workspaceEditPage.getWorkspaceNameTextbox()).clear();
+    await workspaceEditPage.getWorkspaceNameTextbox().clear();
     const duplicateWorkspaceName = await workspaceEditPage.fillOutWorkspaceName();
 
     // change CDR Version
@@ -33,7 +33,7 @@ describe('Duplicate workspace, changing CDR versions', () => {
     const modal = new OldCdrVersionModal(page);
     await modal.consentToOldCdrRestrictions();
 
-    const finishButton = await workspaceEditPage.getDuplicateWorkspaceButton();
+    const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
     await workspaceEditPage.requestForReviewRadiobutton(false);
     await finishButton.waitUntilEnabled();
     await workspaceEditPage.clickCreateFinishButton(finishButton);
@@ -68,7 +68,7 @@ describe('Duplicate workspace, changing CDR versions', () => {
 
     // Fill out Workspace Name should be just enough for successful duplication
     const workspaceEditPage = new WorkspaceEditPage(page);
-    await (await workspaceEditPage.getWorkspaceNameTextbox()).clear();
+    await workspaceEditPage.getWorkspaceNameTextbox().clear();
     const duplicateWorkspaceName = await workspaceEditPage.fillOutWorkspaceName();
 
     // change CDR Version
@@ -78,7 +78,7 @@ describe('Duplicate workspace, changing CDR versions', () => {
     expect(upgradeMessage).toContain(originalWorkspaceName);
     expect(upgradeMessage).toContain(`${config.altCdrVersionName} to ${config.defaultCdrVersionName}.`);
 
-    const finishButton = await workspaceEditPage.getDuplicateWorkspaceButton();
+    const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
     await workspaceEditPage.requestForReviewRadiobutton(false);
     await finishButton.waitUntilEnabled();
     await workspaceEditPage.clickCreateFinishButton(finishButton);

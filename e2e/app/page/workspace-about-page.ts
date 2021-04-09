@@ -43,7 +43,7 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
   }
 
   async openShareModal(): Promise<ShareModal> {
-    const share = await Button.findByName(this.page, { containsText: 'Share' });
+    const share = Button.findByName(this.page, { containsText: 'Share' });
     await share.click();
     const modal = new ShareModal(this.page);
     await modal.waitUntilVisible();
@@ -81,7 +81,7 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
   async verifyCollabInputField(): Promise<void> {
     const accessLevel = await this.findUserInCollaboratorList(config.collaboratorUsername);
     const modal = await this.openShareModal();
-    const searchInput = await modal.waitForSearchBox();
+    const searchInput = modal.waitForSearchBox();
     if (accessLevel !== WorkspaceAccessLevel.Owner) {
       expect(await searchInput.isDisabled()).toBe(true);
     } else if (accessLevel === WorkspaceAccessLevel.Owner) {

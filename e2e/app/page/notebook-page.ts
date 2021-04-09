@@ -40,7 +40,7 @@ export enum KernelStatus {
 }
 
 export default class NotebookPage extends AuthenticatedPage {
-  constructor(page: Page, private readonly documentTitle) {
+  constructor(page: Page, private readonly documentTitle: string) {
     super(page);
   }
 
@@ -155,7 +155,7 @@ export default class NotebookPage extends AuthenticatedPage {
    * @param {number} cellIndex Code Cell index. (first index is 1)
    * @param {CellType} cellType: Code or Markdown cell. Default value is Code cell.
    */
-  async findCell(cellIndex: number, cellType: CellType = CellType.Code): Promise<NotebookCell> {
+  findCell(cellIndex: number, cellType: CellType = CellType.Code): NotebookCell {
     const cell = new NotebookCell(this.page, cellType, cellIndex);
     return cell;
   }
@@ -184,7 +184,7 @@ export default class NotebookPage extends AuthenticatedPage {
     cellIndex: number,
     opts: { code?: string; codeFile?: string; timeOut?: number; markdownWorkaround?: boolean } = {}
   ): Promise<string> {
-    const cell = cellIndex === -1 ? await this.findLastCell() : await this.findCell(cellIndex);
+    const cell = cellIndex === -1 ? await this.findLastCell() : this.findCell(cellIndex);
     const inputCell = await cell.focus();
 
     const { code, codeFile, timeOut = 2 * 60 * 1000, markdownWorkaround = false } = opts;
@@ -201,7 +201,7 @@ export default class NotebookPage extends AuthenticatedPage {
     // Workaround: Type code in Markdown cell, then change to Code cell to run.
     if (markdownWorkaround) {
       await this.changeToMarkdownCell();
-      const markdownCell = await this.findCell(cellIndex, CellType.Markdown);
+      const markdownCell = this.findCell(cellIndex, CellType.Markdown);
       const markdownCellInput = await markdownCell.focus();
       await markdownCellInput.type(codeToRun);
       await this.changeToCodeCell();
@@ -225,7 +225,7 @@ export default class NotebookPage extends AuthenticatedPage {
    * @param {CellType} cellType: Markdown or Code. Default value is Code cell.
    */
   async getCellInputOutput(cellIndex: number, cellType: CellType = CellType.Code): Promise<[string, string]> {
-    const cell = await this.findCell(cellIndex, cellType);
+    const cell = this.findCell(cellIndex, cellType);
     const code = await cell.getInputText();
     const output = await cell.waitForOutput(1000);
     return [code, output];
