@@ -21,7 +21,7 @@ describe('Helper functions', () => {
   it('(maybe) Should return nothing when the value is not set and execute the function when it is', async() => {
     const setFirstName = data => ({...data, firstName: 'first'});
     const setLastName = data => ({...data, lastName: 'last'});
-    
+
     const r1 = Utils.maybe(setFirstName, null);
     expect(r1).toEqual(Utils.nothing);
 

@@ -647,7 +647,7 @@ export const maybe = fp.curry((fn, value) => value !== nothing && value ? fn(val
 export const cond = <T extends unknown>(...args: ([boolean, () => T] | (() => T))[]) => {
   for (const arg of args) {
     // If the arg is an array, conditionally execute (maybe). If not an array, then this is the default case.
-    const result = Array.isArray(arg) ? maybe(...fp.reverse(arg)) : arg(); 
+    const result = Array.isArray(arg) ? maybe(...fp.reverse(arg)) : arg();
     if (result !== nothing) {
       return result;
     }
