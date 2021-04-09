@@ -48,9 +48,10 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
 
     console.log(`${headingText}. ${progressText}`);
 
-    // Wait for existances of important messages.
+    // Wait for existences of important messages.
     const warningTexts =
-      'You are prohibited from taking screenshots or attempting in any way to remove participant-level data from the workbench.';
+      'You are prohibited from taking screenshots or attempting in any way to remove participant-level data' +
+      ' from the workbench.';
     const warningTextsXpath = `//*[contains(normalize-space(text()), "${warningTexts}")]`;
 
     const authenticateTexts = 'Authenticating with the notebook server';

@@ -37,7 +37,7 @@ export default class AnnotationFieldModal extends Modal {
     return selectMenu.getSelectedOption();
   }
 
-  async getAnnotationFieldNameTextBox(): Promise<Textbox> {
+  getAnnotationFieldNameTextBox(): Textbox {
     return new Textbox(
       this.page,
       `${this.getXpath()}//*[contains(text(), "Name")]/ancestor::node()[1]/input[@type="text"]`

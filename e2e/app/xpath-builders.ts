@@ -31,7 +31,9 @@ export function buildXPath(xOpts: XPathOptions, container?: Container): string {
   } else if (name !== undefined) {
     str = `[text()="${name}" or @aria-label="${name}" or @placeholder="${name}" or @value="${name}"]`;
   } else if (containsText !== undefined) {
-    str = `[contains(text(), "${containsText}") or contains(@aria-label, "${containsText}") or contains(@placeholder, "${containsText}")]`;
+    str =
+      `[contains(text(), "${containsText}") or contains(@aria-label, "${containsText}") or ` +
+      `contains(@placeholder, "${containsText}")]`;
   } else if (normalizeSpace !== undefined) {
     str = `[contains(normalize-space(), "${normalizeSpace}")]`;
   } else if (startsWith !== undefined) {

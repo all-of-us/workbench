@@ -83,7 +83,10 @@ export default class CohortSearchPage extends AuthenticatedPage {
   // Experimental
   async drageAgeSlider(): Promise<void> {
     const getXpath = (classValue: string) => {
-      return `${this.containerXpath}//*[text()="Age Range"]/ancestor::node()[1]//*[contains(@class,"${classValue}") and @role="slider"]`;
+      return (
+        `${this.containerXpath}//*[text()="Age Range"]/ancestor::node()[1]` +
+        `//*[contains(@class,"${classValue}") and @role="slider"]`
+      );
     };
 
     const lowerNumberInputHandle = await this.page.waitForXPath(getXpath('noUi-handle-lower'), { visible: true });

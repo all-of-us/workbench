@@ -59,7 +59,8 @@ describe('User registration tests:', () => {
     expect(textsArray).toContain(`${userId}@fake-research-aou.org`);
 
     const note =
-      "Please note: For full access to the Research Workbench data and tools, you'll be required to complete the necessary registration steps.";
+      'Please note: For full access to the Research Workbench data and tools, ' +
+      "you'll be required to complete the necessary registration steps.";
     expect(textsArray).toContain(note);
   });
 });

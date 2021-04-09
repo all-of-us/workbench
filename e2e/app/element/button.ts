@@ -11,7 +11,7 @@ export default class Button extends BaseElement {
    * @param {Container} container Parent node if one exists. Normally, it is a Dialog or Modal window.
    * @param {WaitForSelectorOptions} waitOptions.
    */
-  static async findByName(page: Page, xOpt: XPathOptions, container?: Container): Promise<Button> {
+  static findByName(page: Page, xOpt: XPathOptions, container?: Container): Button {
     xOpt.type = ElementType.Button;
     const butnXpath = buildXPath(xOpt, container);
     const button = new Button(page, butnXpath);

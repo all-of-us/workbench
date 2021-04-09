@@ -177,7 +177,10 @@ export default class WorkspaceCard extends CardBase {
   }
 
   private workspaceNameLinkSelector(workspaceName: string): string {
-    return `//*[@role='button'][./*[${WorkspaceCardSelector.cardNameXpath} and normalize-space(text())="${workspaceName}"]]`;
+    return (
+      `//*[@role='button'][./*[${WorkspaceCardSelector.cardNameXpath}` +
+      ` and normalize-space(text())="${workspaceName}"]]`
+    );
   }
 
   // if the snowman menu options for WRITER & READER are disabled except duplicate option and all options are enabled for OWNER.

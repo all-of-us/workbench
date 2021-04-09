@@ -18,7 +18,8 @@ const domainCardSelector = {
 
 export default class ConceptDomainCard extends Container {
   static findDomainCard(page: Page, domain: Domain): ConceptDomainCard {
-    const selector = `${domainCardSelector.cardXpath}[child::*[@tabindex="0" and @role="button" and text()="${domain}"]]`;
+    const selector =
+      `${domainCardSelector.cardXpath}` + `[child::*[@tabindex="0" and @role="button" and text()="${domain}"]]`;
     return new ConceptDomainCard(page, selector);
   }
 

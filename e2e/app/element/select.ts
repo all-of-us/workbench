@@ -11,7 +11,7 @@ import { buildXPath } from 'app/xpath-builders';
 export default class Select extends BaseElement {
   private selectedOption: string;
 
-  static async findByName(page: Page, xOpt: XPathOptions, container?: Container): Promise<Select> {
+  static findByName(page: Page, xOpt: XPathOptions, container?: Container): Select {
     xOpt.type = ElementType.Select;
     const selectXpath = buildXPath(xOpt, container);
     const select = new Select(page, selectXpath);

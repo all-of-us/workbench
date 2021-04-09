@@ -83,7 +83,8 @@ async function copyNotebookTest(sourceWorkspaceName: string, destCdrVersionName:
   await modal.waitForLoad();
   await modal.waitForButton(LinkText.GoToCopiedNotebook);
   const textContent = await modal.getTextContent();
-  const successMsg = `Successfully copied ${sourceNotebookName}  to ${destWorkspace} . Do you want to view the copied Notebook?`;
+  const successMsg =
+    `Successfully copied ${sourceNotebookName}  to ${destWorkspace} . ` + 'Do you want to view the copied Notebook?';
   expect(textContent).toContain(successMsg);
   // Dismiss modal.
   await modal.clickButton(LinkText.StayHere, { waitForClose: true });

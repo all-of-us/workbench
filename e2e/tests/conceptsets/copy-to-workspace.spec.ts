@@ -83,7 +83,8 @@ describe('Copy Concept Set to another workspace', () => {
     expect(exists).toBe(true);
 
     console.log(
-      `Copied Concept Set "${conceptSetName} from workspace "${srcWorkspace}" to Concept Set "${conceptSetCopyName}" in another workspace "${destWorkspace}"`
+      `Copied Concept Set "${conceptSetName} from workspace "${srcWorkspace}" ` +
+        `to Concept Set "${conceptSetCopyName}" in another workspace "${destWorkspace}"`
     );
 
     // Delete Concept Set in destWorkspace.

@@ -109,7 +109,10 @@ export default class AnnotationsSidebar extends BaseHelpSidebar {
 
   // get the xpath of the respective annotation field label
   private getFieldNameSelector(fieldName: string): string {
-    return `${this.getXpath()}//*[contains(normalize-space(text()), "Annotations")]/following::div[contains(normalize-space(), "${fieldName}")]`;
+    return (
+      `${this.getXpath()}//*[contains(normalize-space(text()), "Annotations")]` +
+      `/following::div[contains(normalize-space(), "${fieldName}")]`
+    );
   }
 
   // extract only the annotation field name

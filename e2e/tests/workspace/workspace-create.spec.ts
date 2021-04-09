@@ -24,7 +24,8 @@ describe('Creating new workspaces', () => {
     // Pick out few sentenses to verify
     expect(modalTextContent).toContain('Create Workspace');
     expect(modalTextContent).toContain(
-      'Primary purpose of your project (Question 1)Summary of research purpose (Question 2)Population of interest (Question 5)'
+      'Primary purpose of your project (Question 1)' +
+        'Summary of research purpose (Question 2)Population of interest (Question 5)'
     );
     expect(modalTextContent).toContain('You can also make changes to your answers after you create your workspace.');
 

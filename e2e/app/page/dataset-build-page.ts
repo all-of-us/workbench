@@ -120,6 +120,9 @@ export default class DatasetBuildPage extends AuthenticatedPage {
   }
 
   private getCheckboxXpath(labelName: string, valueName: string): string {
-    return `//label[contains(normalize-space(), "${labelName}")]/ancestor::node()[3]//input[@type="checkbox" and @value="${valueName}"]`;
+    return (
+      `//label[contains(normalize-space(), "${labelName}")]/ancestor::node()[3]` +
+      `//input[@type="checkbox" and @value="${valueName}"]`
+    );
   }
 }
