@@ -630,3 +630,26 @@ export const useId = () => {
   const [id] = useState(() => fp.uniqueId('element-'));
   return id;
 };
+
+export const nothing = {};
+
+// maybe - takes a function and a value. If the value is not defined returns "nothing"
+// Example usage: fp.flow(maybe(doSomethingIfIhaveData), maybe(doAnotherThingIfThereIsAResult))(getData())
+export const maybe = fp.curry((fn, value) => value !== nothing && value ? fn(value) : nothing);
+
+// cond - useful for representing conditionals as an expression
+// Operates like fp.cond, but a bit more concise - no need for array of arrays and allows for a clear default case
+// Example usage: cond<numer | string>(
+//  [v === 1, () => v + 2],
+//  [v === 2, () => v * 2],
+//  () => 'default' // Default case
+// )
+export const cond = <T extends unknown>(...args: ([boolean, () => T] | (() => T))[]) => {
+  for (const arg of args) {
+    // If the arg is an array, conditionally execute (maybe). If not an array, then this is the default case.
+    const result = Array.isArray(arg) ? maybe(...fp.reverse(arg)) : arg();
+    if (result !== nothing) {
+      return result;
+    }
+  }
+};
