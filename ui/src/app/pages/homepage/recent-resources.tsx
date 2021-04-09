@@ -22,7 +22,6 @@ import {
   WorkspaceResourceResponse,
   WorkspaceResponse
 } from 'generated/fetch';
-import {datatableStyles} from '../../styles/datatable';
 
 const styles = reactStyles({
   column: {
@@ -124,7 +123,6 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
           menu: renderResourceMenu(r),
           resourceType: <ResourceNavigation resource={r}><StyledResourceType resource={r}/></ResourceNavigation>,
           resourceName: <ResourceNavigation resource={r} style={styles.navigation}>{getDisplayName(r)}</ResourceNavigation>,
-          resourceName: getDisplayName(r),
           workspaceName: <WorkspaceNavigation workspace={getWorkspace(r)} resource={r} style={styles.navigation}/>,
           formattedLastModified: formatWorkspaceResourceDisplayDate(r.modifiedTime),
           cdrVersionName: getCdrVersionName(r),
@@ -134,32 +132,8 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
   }, [resources, wsMap]);
 
   return (resources && wsMap && !loading) ? <React.Fragment>
-    <style>{`
-      .pi-sort-amount-up-alt:before {
-        color:#000;
-    content: '\\f35a'; /* You should use \\ and not /*/
-    font-family: "Font Awesome 5 Free"; /* This is the correct font-family*/
-    font-style: normal;
-    font-weight: normal;
-    font-size:40px;
-      }
-
-      .pi-sort-amount-down:before {
-   color:#000;
-    content: 'hello';
-    font-family: "Font Awesome 5 Free"; /* This is the correct font-family*/
-    font-style: normal;
-    font-weight: normal;
-    font-size:40px;
-    font-weight:900;
-      }
-
-      `}
-    </style>
     <SmallHeader>Recently Accessed Items</SmallHeader>
       <div data-test-id='recent-resources-table'><DataTable
-          style={{border: 0}}
-          tableStyle={{border: 0}}
           value={tableData}
           scrollable={true}
           paginator={true}
@@ -167,7 +141,7 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
           currentPageReportTemplate='Showing {totalRecords} most recent items'>
         <Column field='menu' style={styles.menu}/>
         <Column field='resourceType' header='Item type' style={styles.typeColumn}/>
-        <Column field='resourceName' header='Name' style={styles.column} sortable/>
+        <Column field='resourceName' header='Name' style={styles.column}/>
         <Column field='workspaceName' header='Workspace name' style={styles.column}/>
         <Column field='formattedLastModified' header='Last changed' style={styles.column}/>
         <Column field='cdrVersionName' header='Dataset' style={styles.column}/>
