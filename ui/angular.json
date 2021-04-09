@@ -29,6 +29,7 @@
               "node_modules/primereact/resources/themes/nova-light/theme.css",
               "node_modules/react-calendar/dist/Calendar.css",
               "node_modules/outdated-browser-rework/dist/style.css",
+              "node_modules/@fortawesome/fontawesome-free/css/all.css",
               "src/styles.css"
             ],
             "scripts": [
