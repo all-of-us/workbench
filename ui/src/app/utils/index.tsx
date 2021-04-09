@@ -631,20 +631,18 @@ export const useId = () => {
   return id;
 };
 
-const nothing = {};
+export const nothing = {};
 
 // maybe - takes a function and a value. If the value is not defined returns "nothing"
-// When this was written is was not used outside this file, so it was not exported
-// Feel free to export this when a proper use case arises
 // Example usage: fp.flow(maybe(doSomethingIfIhaveData), maybe(doAnotherThingIfThereIsAResult))(getData())
-const maybe = fp.curry((fn, value) => value !== nothing && value ? fn(value) : nothing);
+export const maybe = fp.curry((fn, value) => value !== nothing && value ? fn(value) : nothing);
 
 // cond - useful for representing conditionals as an expression
 // Operates like fp.cond, but a bit more concise - no need for array of arrays and allows for a clear default case
-// Example usage: cond(
+// Example usage: cond<numer | string>(
 //  [v === 1, () => v + 2],
 //  [v === 2, () => v * 2],
-//  () => 5 // Default case
+//  () => 'default' // Default case
 // )
 export const cond = <T extends unknown>(...args: ([boolean, () => T] | (() => T))[]) => {
   for (const arg of args) {
