@@ -50,7 +50,7 @@ export async function signInAs(userId: string, passwd: string, opts: { reset?: b
 }
 
 export async function signOut(page: Page) {
-  await page.evaluate('window.setTestAccessTokenOverride(null)');
+  await page.evaluate(() => 'window.setTestAccessTokenOverride(null)');
 
   await Navigation.navMenu(page, NavLink.SIGN_OUT);
   await page.waitForTimeout(1000);
@@ -63,7 +63,7 @@ export async function signInWithAccessToken(page: Page, tokenFilename = config.u
   await homePage.gotoUrl(PageUrl.Home.toString());
 
   // See sign-in.service.ts.
-  await page.evaluate(`window.setTestAccessTokenOverride('${token}')`);
+  await page.evaluate(() => `window.setTestAccessTokenOverride('${token}')`);
 
   await homePage.gotoUrl(PageUrl.Home.toString());
   await homePage.waitForLoad();
