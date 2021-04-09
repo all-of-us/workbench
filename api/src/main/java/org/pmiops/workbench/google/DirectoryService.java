@@ -24,6 +24,10 @@ public interface DirectoryService {
   /** Returns a user via username lookup. Returns null if no user was found. */
   User getUser(String username);
 
+  /**
+   * Returns a mapping of researcher username (e.g. foo@researchallofus.org) to that user's 2FA
+   * enablement status in Gsuite.
+   */
   Map<String, Boolean> getAllTwoFactorAuthStatuses();
 
   /** Looks up a user by username and returns their stored contact email address, if available. */

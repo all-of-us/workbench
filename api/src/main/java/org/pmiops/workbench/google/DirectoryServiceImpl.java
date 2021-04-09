@@ -169,7 +169,6 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
     final String domain = gSuiteDomain();
     Map<String, Boolean> statuses = Maps.newHashMap();
     Users response = null;
-    int pageCount = 0;
     do {
       final String pageToken =
           Optional.ofNullable(response).map(r -> r.getNextPageToken()).orElse(null);
@@ -190,9 +189,7 @@ public class DirectoryServiceImpl implements DirectoryService, GaugeDataCollecto
       for (User u : response.getUsers()) {
         statuses.put(u.getPrimaryEmail(), u.getIsEnrolledIn2Sv());
       }
-      pageCount++;
     } while (!Strings.isNullOrEmpty(response.getNextPageToken()));
-    log.info(String.format("processed %d pages from gsuite", pageCount));
     return statuses;
   }
 

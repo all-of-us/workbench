@@ -4,11 +4,9 @@ import com.google.api.services.oauth2.model.Userinfoplus;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import javax.annotation.Nullable;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
@@ -115,10 +113,30 @@ public interface UserService {
   DbUser syncEraCommonsStatusUsingImpersonation(DbUser user, Agent agent)
       throws IOException, org.pmiops.workbench.firecloud.ApiException;
 
+  /**
+   * Synchronize the 2FA enablement status of the currently signed-in user between the Workbench
+   * database and the gsuite directory API. This may affect the user's enabled access tiers. This
+   * can only be called within the context of a user-authenticated API request.
+   */
   void syncTwoFactorAuthStatus();
 
-  DbUser syncTwoFactorAuthStatus(
-      DbUser targetUser, Agent agent, @Nullable Map<String, Boolean> twoFactorAuthEnabledLookup);
+  /**
+   * Synchronize the 2FA enablement status of the target user between the Workbench database and the
+   * gsuite directory API, acting as the provided agent type. This may affect the user's enabled
+   * access tiers. This can be called administratively, or from an offline cron.
+   */
+  DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent);
+
+  /**
+   * Synchronize the 2FA enablement status of the target user between the Workbench database and the
+   * provided 2FA status, acting as the provided agent type. This may affect the user's enabled
+   * access tiers. This can be called administratively, or from an offline cron.
+   *
+   * <p>This method is provided to allow for optimization to the lookup of the enrolled 2FA status,
+   * enables batch 2FA synchronization to be implemented without repeated calls to Gsuite. The
+   * source value for isEnrolledIn2FA should always be Gsuite.
+   */
+  DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent, boolean isEnrolledIn2FA);
 
   int getCurrentDuccVersion();
 
