@@ -183,7 +183,6 @@ public class OfflineUserController implements OfflineUserApiDelegate {
         continue;
       }
       try {
-
         Timestamp oldTime = user.getTwoFactorAuthCompletionTime();
         List<String> oldTiers = accessTierService.getAccessTierShortNamesForUser(user);
         DbUser updatedUser =
