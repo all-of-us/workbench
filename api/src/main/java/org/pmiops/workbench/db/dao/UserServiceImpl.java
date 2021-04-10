@@ -811,9 +811,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     syncTwoFactorAuthStatus(user, Agent.asUser(user));
   }
 
-  /** */
   @Override
   public DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent) {
+    return syncTwoFactorAuthStatus(
+        targetUser, agent, directoryService.getUser(targetUser.getUsername()).getIsEnrolledIn2Sv());
+  }
+
+  @Override
+  public DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent, boolean isEnrolledIn2FA) {
     if (isServiceAccount(targetUser)) {
       // Skip sync for service account user rows.
       return targetUser;
@@ -821,8 +826,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     return updateUserWithRetries(
         user -> {
-          boolean isEnrolledIn2FA =
-              directoryService.getUser(user.getUsername()).getIsEnrolledIn2Sv();
           if (isEnrolledIn2FA) {
             if (user.getTwoFactorAuthCompletionTime() == null) {
               user.setTwoFactorAuthCompletionTime(new Timestamp(clock.instant().toEpochMilli()));

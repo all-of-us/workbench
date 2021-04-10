@@ -113,9 +113,30 @@ public interface UserService {
   DbUser syncEraCommonsStatusUsingImpersonation(DbUser user, Agent agent)
       throws IOException, org.pmiops.workbench.firecloud.ApiException;
 
+  /**
+   * Synchronize the 2FA enablement status of the currently signed-in user between the Workbench
+   * database and the gsuite directory API. This may affect the user's enabled access tiers. This
+   * can only be called within the context of a user-authenticated API request.
+   */
   void syncTwoFactorAuthStatus();
 
+  /**
+   * Synchronize the 2FA enablement status of the target user between the Workbench database and the
+   * gsuite directory API, acting as the provided agent type. This may affect the user's enabled
+   * access tiers. This can be called administratively, or from an offline cron.
+   */
   DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent);
+
+  /**
+   * Synchronize the 2FA enablement status of the target user between the Workbench database and the
+   * provided 2FA status, acting as the provided agent type. This may affect the user's enabled
+   * access tiers. This can be called administratively, or from an offline cron.
+   *
+   * <p>This method is provided to allow for optimization to the lookup of the enrolled 2FA status,
+   * enables batch 2FA synchronization to be implemented without repeated calls to Gsuite. The
+   * source value for isEnrolledIn2FA should always be Gsuite.
+   */
+  DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent, boolean isEnrolledIn2FA);
 
   int getCurrentDuccVersion();
 
