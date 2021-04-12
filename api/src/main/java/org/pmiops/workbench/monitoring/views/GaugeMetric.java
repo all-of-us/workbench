@@ -12,7 +12,7 @@ public enum GaugeMetric implements Metric {
   BILLING_BUFFER_PROJECT_COUNT(
       "billing_buffer_project_count",
       "Number of projects in the billing buffer for each status",
-      ImmutableList.of(MetricLabel.BUFFER_ENTRY_STATUS)),
+      ImmutableList.of(MetricLabel.BUFFER_ENTRY_STATUS, MetricLabel.ACCESS_TIER_SHORT_NAMES)),
   COHORT_COUNT("cohort_count_2", "Count of all cohorts in existence"),
   COHORT_REVIEW_COUNT("cohort_review_count_2", "Total number of cohort reviews in existence"),
   DATASET_COUNT(
@@ -27,13 +27,12 @@ public enum GaugeMetric implements Metric {
       "user_count_2",
       "total number of users",
       ImmutableList.of(
-          MetricLabel.USER_BYPASSED_BETA,
           MetricLabel.USER_DISABLED,
-          MetricLabel.DATA_ACCESS_LEVEL)),
+          MetricLabel.ACCESS_TIER_SHORT_NAMES)),
   WORKSPACE_COUNT(
       "workspace_count_3",
       "Count of all workspaces",
-      ImmutableList.of(MetricLabel.WORKSPACE_ACTIVE_STATUS, MetricLabel.DATA_ACCESS_LEVEL),
+      ImmutableList.of(MetricLabel.WORKSPACE_ACTIVE_STATUS, MetricLabel.ACCESS_TIER_SHORT_NAMES),
       UnitOfMeasure.COUNT,
       MeasureLong.class);
 

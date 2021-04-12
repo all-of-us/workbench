@@ -519,7 +519,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
                     .addMeasurement(GaugeMetric.WORKSPACE_COUNT, row.getWorkspaceCount())
                     .addTag(
                         MetricLabel.WORKSPACE_ACTIVE_STATUS, row.getActiveStatusEnum().toString())
-                    .addTag(MetricLabel.ACCESS_TIER_SHORT_NAME, row.getTier().getShortName())
+                    .addTag(MetricLabel.ACCESS_TIER_SHORT_NAMES, row.getTier().getShortName())
                     .build())
         .collect(ImmutableList.toImmutableList());
   }

@@ -856,7 +856,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
                 MeasurementBundle.builder()
                     .addMeasurement(GaugeMetric.USER_COUNT, row.getUserCount())
                     .addTag(MetricLabel.USER_DISABLED, row.getDisabled().toString())
-                    .addTag(MetricLabel.ACCESS_TIER_SHORT_NAME, row.getAccessTierShortNames())
+                    .addTag(MetricLabel.ACCESS_TIER_SHORT_NAMES, row.getAccessTierShortNames())
                     .build())
         .collect(ImmutableList.toImmutableList());
   }
