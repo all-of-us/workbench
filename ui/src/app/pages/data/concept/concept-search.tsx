@@ -4,12 +4,11 @@ import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 import * as validate from 'validate.js';
 
-import {Button, Clickable, MenuItem} from 'app/components/buttons';
+import {Button, Clickable, MenuItem, SnowmanButton} from 'app/components/buttons';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FadeBox} from 'app/components/containers';
 import {CopyModal} from 'app/components/copy-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {SnowmanIcon} from 'app/components/icons';
 import {TextAreaWithLengthValidationMessage, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
@@ -93,9 +92,7 @@ const ConceptSetMenu: React.FunctionComponent<ConceptSetMenuProps> = ({canDelete
         </MenuItem>
       </TooltipTrigger>
     </React.Fragment>}>
-    <Clickable  data-test-id='workspace-menu'>
-      <SnowmanIcon/>
-    </Clickable>
+    <SnowmanButton  data-test-id='workspace-menu'/>
   </PopupTrigger>;
 
 function sortAndStringify(concepts) {

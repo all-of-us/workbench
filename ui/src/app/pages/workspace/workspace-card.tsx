@@ -65,7 +65,6 @@ interface WorkspaceCardMenuProps {
 }
 
 const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
-  disabled,
   workspace,
   accessLevel,
   onShare,
@@ -125,7 +124,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
       </React.Fragment>
     }
   >
-    <SnowmanButton/>
+    <SnowmanButton data-test-id='workspace-card-menu'/>
   </PopupTrigger>;
 };
 

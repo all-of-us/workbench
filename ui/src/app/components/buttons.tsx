@@ -1,5 +1,6 @@
 import {styles as cardStyles} from 'app/components/card';
 import {ClrIcon} from 'app/components/icons';
+import {SnowmanIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {IconComponent} from 'app/icons/icon';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -8,7 +9,6 @@ import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as Interactive from 'react-interactive';
-import {SnowmanIcon} from 'app/components/icons';
 
 
 export const styles = reactStyles({
@@ -204,6 +204,7 @@ const computeStyle = ({style = {}, hover = {}, disabledStyle = {}}, {disabled}) 
 
 export const Clickable = ({as = 'div', disabled = false, onClick = null, propagateDataTestId = false, ...props}) => {
   // `fp.omit` used to prevent propagation of test IDs to the rendered child component.
+  console.log();
   const childProps = propagateDataTestId ? props : fp.omit(['data-test-id'], props);
   return <Interactive
     as={as} {...childProps}
@@ -256,14 +257,13 @@ export const IconButton = ({icon, style = {}, tooltip = '', disabled = false, ..
 };
 
 export const SnowmanButton = ({disabled = false, ...props}) => {
-  return <Clickable disabled={disabled} {...props}>
+  return <Clickable disabled={disabled} {...props} propagateDataTestId={true}>
     <SnowmanIcon
       style={{marginLeft: '0px'}}
       disabled={disabled}
     />
-  </Clickable>
-}
-
+  </Clickable>;
+};
 const cardButtonBase = {
   style: {
     alignItems: 'flex-start', alignContent: 'left', fontWeight: 500,
