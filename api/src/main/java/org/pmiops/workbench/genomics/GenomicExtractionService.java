@@ -274,4 +274,14 @@ public class GenomicExtractionService {
 
     return new GenomicExtractionJob().status(TerraJobStatus.RUNNING);
   }
+
+  public void abortExtract(DbWorkspace workspace, String wgsCohortExtractionId) throws ApiException {
+    submissionApiProvider
+        .get()
+        .abortSubmission(
+            workspace.getWorkspaceNamespace(),
+            workspace.getFirecloudName(),
+            wgsCohortExtractionId
+        );
+  }
 }

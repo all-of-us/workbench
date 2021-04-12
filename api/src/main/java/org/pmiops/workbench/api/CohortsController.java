@@ -439,6 +439,47 @@ public class CohortsController implements CohortsApiDelegate {
     return ResponseEntity.ok(cohortMaterializationService.getAnnotations(cohortReview, request));
   }
 
+  @Override
+  public ResponseEntity<WgsCohortExtractionJob> extractCohortGenomes(
+      String workspaceNamespace, String workspaceId, Long cohortId) {
+    DbWorkspace workspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    if (workspace.getCdrVersion().getWgsBigqueryDataset() == null) {
+      throw new BadRequestException("Workspace CDR does not have access to WGS data");
+    }
+
+    try {
+      return ResponseEntity.ok(
+          wgsCohortExtractionService.submitGenomicsCohortExtractionJob(workspace, cohortId));
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+      // Given that there are no input arguments ATM, any API exceptions are due to programming or
+      // Firecloud errors
+      throw new ServerErrorException(e);
+    }
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> abortExtract(
+      String workspaceNamespace,
+      String workspaceId,
+      String wgsCohortExtractionJobId
+  ) {
+    DbWorkspace workspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    if (workspace.getCdrVersion().getWgsBigqueryDataset() == null) {
+      throw new BadRequestException("Workspace CDR does not have access to WGS data");
+    }
+
+    try {
+      wgsCohortExtractionService.abortExtract(workspace, wgsCohortExtractionJobId);
+      return ResponseEntity.ok(new EmptyResponse());
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+      throw new ServerErrorException(e);
+    }
+  }
+
   private DbCohort getDbCohort(String workspaceNamespace, String workspaceId, Long cohortId) {
     DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
 
