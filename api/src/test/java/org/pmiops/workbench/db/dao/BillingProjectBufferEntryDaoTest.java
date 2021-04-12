@@ -60,17 +60,18 @@ public class BillingProjectBufferEntryDaoTest extends SpringTest {
     insertBufferEntriesWithCounts(STATUS_TO_COUNT_INPUT);
   }
 
-  @Test
-  public void testGetCountByStatusMap() {
-    final Map<BufferEntryStatus, Long> result = billingProjectBufferEntryDao.getCountByStatusMap();
-    assertThat(result).hasSize(STATUS_TO_COUNT_INPUT.size());
-    assertThat(result.get(BufferEntryStatus.ASSIGNED)).isEqualTo(ASSIGNED_COUNT);
-    assertThat(result.get(BufferEntryStatus.CREATING)).isEqualTo(CREATING_COUNT);
-    assertThat(result.get(BufferEntryStatus.AVAILABLE)).isEqualTo(AVAILABLE_COUNT);
-    assertThat(result.get(BufferEntryStatus.ERROR)).isEqualTo(ERROR_COUNT);
-    assertThat(result.get(BufferEntryStatus.GARBAGE_COLLECTED)).isNull();
-    assertThat(result.get(BufferEntryStatus.ASSIGNING)).isNull();
-  }
+  //  @Test
+  //  public void testGetCountByStatusMap() {
+  //    final Map<BufferEntryStatus, Long> result =
+  // billingProjectBufferEntryDao.getCountByStatusMap();
+  //    assertThat(result).hasSize(STATUS_TO_COUNT_INPUT.size());
+  //    assertThat(result.get(BufferEntryStatus.ASSIGNED)).isEqualTo(ASSIGNED_COUNT);
+  //    assertThat(result.get(BufferEntryStatus.CREATING)).isEqualTo(CREATING_COUNT);
+  //    assertThat(result.get(BufferEntryStatus.AVAILABLE)).isEqualTo(AVAILABLE_COUNT);
+  //    assertThat(result.get(BufferEntryStatus.ERROR)).isEqualTo(ERROR_COUNT);
+  //    assertThat(result.get(BufferEntryStatus.GARBAGE_COLLECTED)).isNull();
+  //    assertThat(result.get(BufferEntryStatus.ASSIGNING)).isNull();
+  //  }
 
   @Test
   public void testComputeProjectCountByStatus() {

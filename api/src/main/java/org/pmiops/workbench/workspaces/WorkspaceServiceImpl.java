@@ -522,8 +522,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
                 MeasurementBundle.builder()
                     .addTag(
                         MetricLabel.WORKSPACE_ACTIVE_STATUS,
-                        DbStorageEnums.workspaceActiveStatusFromStorage(
-                                row.getActiveStatus())
+                        DbStorageEnums.workspaceActiveStatusFromStorage(row.getActiveStatus())
                             .toString())
 
                     // tmp record all workspaces as Registered Tier.

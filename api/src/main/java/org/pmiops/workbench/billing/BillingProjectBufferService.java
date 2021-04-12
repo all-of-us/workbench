@@ -90,15 +90,15 @@ public class BillingProjectBufferService implements GaugeDataCollector {
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    final List<StatusPerTierCount> statusPerTierCounts = billingProjectBufferEntryDao.computeProjectCountByStatus();
+    final List<StatusPerTierCount> statusPerTierCounts =
+        billingProjectBufferEntryDao.computeProjectCountByStatus();
 
     return statusPerTierCounts.stream()
         .map(
             status ->
                 MeasurementBundle.builder()
                     .addMeasurement(
-                        GaugeMetric.BILLING_BUFFER_PROJECT_COUNT,
-                        status.getNumProjects())
+                        GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, status.getNumProjects())
                     .addTag(MetricLabel.BUFFER_ENTRY_STATUS, String.valueOf(status.getStatus()))
                     .addTag(MetricLabel.ACCESS_TIER, status.getAccessTierShortName())
                     .build())
