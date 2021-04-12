@@ -19,10 +19,10 @@ export default class ShareModal extends Modal {
   }
 
   async shareWithUser(username: string, level: WorkspaceAccessLevel): Promise<void> {
-    const searchBox = await this.waitForSearchBox();
+    const searchBox = this.waitForSearchBox();
     await searchBox.type(username);
 
-    const addCollab = await this.waitForAddCollaboratorIcon();
+    const addCollab = this.waitForAddCollaboratorIcon();
     await addCollab.click();
 
     const roleInput = await this.waitForRoleSelectorForUser(username);
@@ -56,11 +56,11 @@ export default class ShareModal extends Modal {
     );
   }
 
-  async waitForSearchBox(): Promise<Textbox> {
+  waitForSearchBox(): Textbox {
     return Textbox.findByName(this.page, { name: 'Find Collaborators' }, this);
   }
 
-  async waitForAddCollaboratorIcon(): Promise<ClrIcon> {
+  waitForAddCollaboratorIcon(): ClrIcon {
     return ClrIcon.findByName(this.page, { iconShape: 'plus-circle' }, this);
   }
 

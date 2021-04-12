@@ -29,7 +29,7 @@ export default class Navigation {
    * @param {Page} page
    * @param {NavLink} destinationApp
    */
-  static async navMenu(page: Page, destinationApp: NavLink) {
+  static async navMenu(page: Page, destinationApp: NavLink): Promise<void> {
     const findMenuItem = async (): Promise<ElementHandle | null> => {
       await Navigation.openNavMenu(page);
       const angleIconXpath = buildXPath({ type: ElementType.Icon, iconShape: 'angle' });
@@ -62,13 +62,13 @@ export default class Navigation {
     // find target sidenav link. If not found, return null.
     const link = await findMenuItem();
     if (!link) {
-      return null;
+      throw new Error(`Failed finding menuitem ${destinationApp}`);
     }
     if (destinationApp === NavLink.CONTACT_US) {
       await link.click();
     } else {
       // click and wait for page navigation
-      return Promise.all([
+      await Promise.all([
         page.waitForNavigation({ waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 90000 }),
         link.click()
       ]);
@@ -81,7 +81,7 @@ export default class Navigation {
    */
   static async openNavMenu(page: Page): Promise<void> {
     const isOpen = await Navigation.sideNavIsOpen(page);
-    if (!isOpen!) {
+    if (!isOpen) {
       // click bars icon to open dropdown
       const selector = buildXPath({ type: ElementType.Icon, iconShape: 'bars' });
       const barsIcon = await page.waitForXPath(selector, { visible: true });

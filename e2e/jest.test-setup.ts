@@ -3,7 +3,8 @@ import * as fp from 'lodash/fp';
 import { ConsoleMessage, JSHandle, Request } from 'puppeteer';
 
 const userAgent =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko)' +
+  ' Chrome/80.0.3987.149 Safari/537.36';
 
 /**
  * Set up page common properties:
@@ -80,8 +81,8 @@ beforeEach(async () => {
     try {
       const args = await Promise.all(message.args().map((a) => describeJsHandle(a)));
       const msgType = message.type() === 'warning' ? 'warn' : message.type();
-      logger.info(`Page Console: "${title}"`);
-      console[msgType](args);
+      logger.info(`Page Console ${msgType.toUpperCase()}: "${title}"`);
+      console.log(args);
     } catch (err) {
       console.error(`❗ "${title}"\nException occurred when getting page console message.\n${err}\n${message.text()}`);
     }

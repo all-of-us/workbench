@@ -36,22 +36,22 @@ export default class RuntimePanel extends BaseHelpSidebar {
   }
 
   async pickCpus(cpus: number): Promise<void> {
-    const cpusDropdown = await SelectMenu.findByName(this.page, { id: 'runtime-cpu' }, this);
+    const cpusDropdown = SelectMenu.findByName(this.page, { id: 'runtime-cpu' }, this);
     return await cpusDropdown.select(cpus.toString());
   }
 
   async getCpus(): Promise<string> {
-    const cpusDropdown = await SelectMenu.findByName(this.page, { id: 'runtime-cpu' }, this);
+    const cpusDropdown = SelectMenu.findByName(this.page, { id: 'runtime-cpu' }, this);
     return await cpusDropdown.getSelectedValue();
   }
 
   async pickRamGbs(ramGbs: number): Promise<void> {
-    const ramDropdown = await SelectMenu.findByName(this.page, { id: 'runtime-ram' }, this);
+    const ramDropdown = SelectMenu.findByName(this.page, { id: 'runtime-ram' }, this);
     return await ramDropdown.select(ramGbs.toString());
   }
 
   async getRamGbs(): Promise<string> {
-    const ramDropdown = await SelectMenu.findByName(this.page, { id: 'runtime-ram' }, this);
+    const ramDropdown = SelectMenu.findByName(this.page, { id: 'runtime-ram' }, this);
     return await ramDropdown.getSelectedValue();
   }
 
@@ -66,7 +66,7 @@ export default class RuntimePanel extends BaseHelpSidebar {
   }
 
   async pickComputeType(computeType: ComputeType): Promise<void> {
-    const computeTypeDropdown = await SelectMenu.findByName(this.page, { id: 'runtime-compute' }, this);
+    const computeTypeDropdown = SelectMenu.findByName(this.page, { id: 'runtime-compute' }, this);
     return await computeTypeDropdown.select(computeType);
   }
 
@@ -91,22 +91,22 @@ export default class RuntimePanel extends BaseHelpSidebar {
   }
 
   async pickWorkerCpus(workerCpus: number): Promise<void> {
-    const workerCpusDropdown = await SelectMenu.findByName(this.page, { id: 'worker-cpu' }, this);
+    const workerCpusDropdown = SelectMenu.findByName(this.page, { id: 'worker-cpu' }, this);
     return await workerCpusDropdown.select(workerCpus.toString());
   }
 
   async getWorkerCpus(): Promise<string> {
-    const workerCpusDropdown = await SelectMenu.findByName(this.page, { id: 'worker-cpu' }, this);
+    const workerCpusDropdown = SelectMenu.findByName(this.page, { id: 'worker-cpu' }, this);
     return await workerCpusDropdown.getSelectedValue();
   }
 
   async pickWorkerRamGbs(workerRamGbs: number): Promise<void> {
-    const workerRamDropdown = await SelectMenu.findByName(this.page, { id: 'worker-ram' }, this);
+    const workerRamDropdown = SelectMenu.findByName(this.page, { id: 'worker-ram' }, this);
     return await workerRamDropdown.select(workerRamGbs.toString());
   }
 
   async getWorkerRamGbs(): Promise<string> {
-    const workerRamDropdown = await SelectMenu.findByName(this.page, { id: 'worker-ram' }, this);
+    const workerRamDropdown = SelectMenu.findByName(this.page, { id: 'worker-ram' }, this);
     return await workerRamDropdown.getSelectedValue();
   }
 
@@ -121,7 +121,7 @@ export default class RuntimePanel extends BaseHelpSidebar {
   }
 
   async pickRuntimePreset(runtimePreset: RuntimePreset): Promise<void> {
-    const runtimePresetMenu = await SelectMenu.findByName(this.page, { id: 'runtime-presets-menu' }, this);
+    const runtimePresetMenu = SelectMenu.findByName(this.page, { id: 'runtime-presets-menu' }, this);
     return await runtimePresetMenu.select(runtimePreset);
   }
 

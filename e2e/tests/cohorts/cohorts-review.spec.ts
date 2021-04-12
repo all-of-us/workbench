@@ -41,7 +41,7 @@ describe('Cohort review tests', () => {
     await cohortCard.selectSnowmanMenu(MenuOption.Review, { waitForNav: true });
     const modal = new CohortReviewModal(page);
     await modal.waitForLoad();
-    await modal.fillInNumberOfPartcipants(reviewSetNumberOfParticipants);
+    await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants);
     await modal.clickButton(LinkText.CreateSet);
     console.log(`Created Review Set with ${reviewSetNumberOfParticipants} participants.`);
 
@@ -151,7 +151,7 @@ describe('Cohort review tests', () => {
 
     // verify that the text area is also displaying fr prior participant
     await annotationsSidebar.open();
-    const annotationsTextArea = await annotationsSidebar.getAnnotationsTextArea();
+    const annotationsTextArea = annotationsSidebar.getAnnotationsTextArea();
     expect(await annotationsTextArea.asElementHandle()).toBeTruthy();
 
     // click on the plus-icon next to annotations
@@ -194,7 +194,7 @@ describe('Cohort review tests', () => {
     console.log(`${reviewParticipantid2}: ${statusValue2}`);
 
     // return to cohort review page
-    await cohortReviewPage.getBackToCohortButton().then((btn) => btn.clickAndWait());
+    await cohortReviewPage.getBackToCohortButton().clickAndWait();
 
     // Land on Cohort Build page
     const cohortBuildPage = new CohortBuildPage(page);

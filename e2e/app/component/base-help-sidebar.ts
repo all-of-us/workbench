@@ -58,7 +58,7 @@ export default abstract class BaseHelpSidebar extends Container {
    */
   async clickButton(buttonLabel: LinkText, waitOptions: { waitForClose?: boolean } = {}): Promise<void> {
     const { waitForClose = false } = waitOptions;
-    const button = await Button.findByName(this.page, { normalizeSpace: buttonLabel }, this);
+    const button = Button.findByName(this.page, { normalizeSpace: buttonLabel }, this);
     await button.waitUntilEnabled();
     await Promise.all(
       fp.flow(
@@ -107,6 +107,10 @@ export default abstract class BaseHelpSidebar extends Container {
         { polling: 'mutation' },
         this.deleteIconXpath
       )
-    ]);
+    ]).catch((err) => {
+      logger.error('waitUntilClose() failed');
+      logger.error(err);
+      throw new Error(err);
+    });
   }
 }

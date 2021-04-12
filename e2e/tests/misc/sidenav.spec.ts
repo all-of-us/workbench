@@ -21,11 +21,11 @@ describe('Sidebar Navigation', () => {
     // check user name in dropdown matches names on Profile page
     const fname = await profilePage
       .getFirstNameInput()
-      .then((elm) => elm.getValue())
+      .getValue()
       .then((s) => s.trim());
     const lname = await profilePage
       .getLastNameInput()
-      .then((elm) => elm.getValue())
+      .getValue()
       .then((s) => s.trim());
     await Navigation.openNavMenu(page);
     const displayedUsername = await homePage.getUsername();

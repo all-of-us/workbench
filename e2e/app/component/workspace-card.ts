@@ -50,7 +50,7 @@ export default class WorkspaceCard extends CardBase {
       new WorkspaceCard(page).asCard(card)
     );
 
-    const filtered = [];
+    const filtered: WorkspaceCard[] = [];
     if (accessLevel !== undefined) {
       for (const card of workspaceCards) {
         const cardAccessLevel = await card.getWorkspaceAccessLevel();
@@ -157,7 +157,7 @@ export default class WorkspaceCard extends CardBase {
    * Click workspace name link in Workspace Card.
    * @param {boolean} waitForDataPage Waiting for Data page load and ready after click on Workspace name link.
    */
-  async clickWorkspaceName(waitForDataPage: boolean = true): Promise<string> {
+  async clickWorkspaceName(waitForDataPage = true): Promise<string> {
     const [elemt] = await this.asElementHandle().$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
     const name = await getPropValue<string>(elemt, 'textContent');
     await Promise.all([
@@ -177,7 +177,10 @@ export default class WorkspaceCard extends CardBase {
   }
 
   private workspaceNameLinkSelector(workspaceName: string): string {
-    return `//*[@role='button'][./*[${WorkspaceCardSelector.cardNameXpath} and normalize-space(text())="${workspaceName}"]]`;
+    return (
+      `//*[@role='button'][./*[${WorkspaceCardSelector.cardNameXpath}` +
+      ` and normalize-space(text())="${workspaceName}"]]`
+    );
   }
 
   // if the snowman menu options for WRITER & READER are disabled except duplicate option and all options are enabled for OWNER.

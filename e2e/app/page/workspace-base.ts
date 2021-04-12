@@ -197,7 +197,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
 
     // Type description. Notebook rename modal does not have Description textarea.
     if (resourceType !== ResourceCard.Notebook) {
-      const descriptionTextarea = await Textarea.findByName(this.page, { containsText: 'Description:' }, modal);
+      const descriptionTextarea = Textarea.findByName(this.page, { containsText: 'Description:' }, modal);
       await descriptionTextarea.type(`Puppeteer automation test. Rename ${resourceName}.`);
     }
 
@@ -258,7 +258,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    */
   async dismissDeleteWorkspaceModal(clickButtonText: LinkText = LinkText.DeleteWorkspace): Promise<string[]> {
     const modal = new Modal(this.page);
-    const textBox = await modal.waitForTextbox('type DELETE to confirm');
+    const textBox = modal.waitForTextbox('type DELETE to confirm');
     await textBox.type('delete');
     await modal.clickButton(clickButtonText, { waitForClose: true });
     await waitWhileLoading(this.page);

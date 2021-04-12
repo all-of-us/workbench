@@ -53,15 +53,16 @@ module.exports = class JestReporter {
 
     // Read jest console messages and save to a log file.
     // Get all console logs.
-    if (testResult.console && testResult.console.length > 0) {
+    if (testResult.console) {
       testResult.console.forEach((log) => {
         fileLogger.info(log.message);
       });
     }
 
     // Get failure messages.
+    fileLogger.info(`\n\nTests Summary`);
     testResult.testResults.forEach((result) => {
-      fileLogger.info('----------------------------------------');
+      fileLogger.info('----------------------------------------------');
       fileLogger.log('info', 'test name: %s', result.title);
       fileLogger.log('info', 'status: %s', result.status);
       // Get failure message.
@@ -69,6 +70,7 @@ module.exports = class JestReporter {
         const failure = result.failureMessages;
         fileLogger.log('info', 'failure: %s', failure);
       }
+      fileLogger.info();
     });
     console.log(`Save test log: ${testLogName}`);
   }

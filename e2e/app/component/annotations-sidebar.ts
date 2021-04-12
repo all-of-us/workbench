@@ -1,15 +1,15 @@
-import {Page} from 'puppeteer';
+import { Page } from 'puppeteer';
 import ClrIconLink from 'app/element/clr-icon-link';
-import {getPropValue} from 'utils/element-utils';
+import { getPropValue } from 'utils/element-utils';
 import ReactSelect from 'app/element/react-select';
-import {waitWhileLoading} from 'utils/waits-utils';
+import { waitWhileLoading } from 'utils/waits-utils';
 import Button from 'app/element/button';
-import {LinkText, SideBarLink} from 'app/text-labels';
+import { LinkText, SideBarLink } from 'app/text-labels';
 import Textarea from 'app/element/textarea';
 import EditDeleteAnnotationsModal from 'app/modal/edit-delete-annotations-modal';
 import AnnotationFieldModal from 'app/modal/annotation-field-modal';
 import BaseHelpSidebar from './base-help-sidebar';
-import {logger} from 'libs/logger';
+import { logger } from 'libs/logger';
 
 export enum ReviewStatus {
   Excluded = 'Excluded',
@@ -56,11 +56,7 @@ export default class AnnotationsSidebar extends BaseHelpSidebar {
 
   // click the plus button located next to Annotations on the sidebar panel
   async clickAnnotationsButton(): Promise<AnnotationFieldModal> {
-    const link = await ClrIconLink.findByName(
-      this.page,
-      { containsText: 'Annotations', iconShape: 'plus-circle' },
-      this
-    );
+    const link = ClrIconLink.findByName(this.page, { containsText: 'Annotations', iconShape: 'plus-circle' }, this);
     await link.click();
     const annotationFieldModal = new AnnotationFieldModal(this.page);
     await annotationFieldModal.waitForLoad();
@@ -75,7 +71,7 @@ export default class AnnotationsSidebar extends BaseHelpSidebar {
 
   // click on the Annotations EDIT button to edit the annotations field name
   async getAnnotationsEditModal(): Promise<EditDeleteAnnotationsModal> {
-    const button = await Button.findByName(this.page, { name: LinkText.Edit }, this);
+    const button = Button.findByName(this.page, { name: LinkText.Edit }, this);
     await button.click();
     const modal = new EditDeleteAnnotationsModal(this.page);
     await modal.waitForLoad();
@@ -83,16 +79,17 @@ export default class AnnotationsSidebar extends BaseHelpSidebar {
   }
 
   // text area
-  async getAnnotationsTextArea(): Promise<Textarea> {
+  getAnnotationsTextArea(): Textarea {
     const selector = `${this.getXpath()}//*[contains(normalize-space(text()), "Annotations")]/following::textarea`;
     const annotationTextArea = new Textarea(this.page, selector);
     return annotationTextArea;
   }
 
   // look for the field name
-  async findFieldName(annotationFieldName: string): Promise<string | null> {
+  async findFieldName(annotationFieldName: string): Promise<string> {
     try {
-      this.getFieldNameSelector(annotationFieldName);
+      const xpath = this.getFieldNameSelector(annotationFieldName);
+      await this.page.waitForXPath(xpath, { visible: true });
     } catch (err) {
       // no field.
       return null;
@@ -109,7 +106,10 @@ export default class AnnotationsSidebar extends BaseHelpSidebar {
 
   // get the xpath of the respective annotation field label
   private getFieldNameSelector(fieldName: string): string {
-    return `${this.getXpath()}//*[contains(normalize-space(text()), "Annotations")]/following::div[contains(normalize-space(), "${fieldName}")]`;
+    return (
+      `${this.getXpath()}//*[contains(normalize-space(text()), "Annotations")]` +
+      `/following::div[contains(normalize-space(), "${fieldName}")]`
+    );
   }
 
   // extract only the annotation field name

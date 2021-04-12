@@ -40,7 +40,6 @@ module.exports = {
     slowMo: slowMotion, // slow down creation of browser to free up heap memory. https://github.com/puppeteer/puppeteer/issues/4684#issuecomment-511255786
     defaultViewport: null,
     ignoreDefaultArgs: true,
-    dumpio: true,
     args: SWITCHES // Chrome switches to pass to the browser instance
   },
   browser: 'chromium',

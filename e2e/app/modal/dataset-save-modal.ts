@@ -36,23 +36,23 @@ export default class DatasetSaveModal extends Modal {
    */
   async saveDataset(
     notebookOpts: { exportToNotebook?: boolean; notebookName?: string; lang?: Language } = {},
-    isUpdate: boolean = false
+    isUpdate = false
   ): Promise<string> {
     const { exportToNotebook = false, notebookName, lang = Language.Python } = notebookOpts;
     const newDatasetName = makeRandomName();
 
-    const nameTextbox = await this.waitForTextbox('Dataset Name');
+    const nameTextbox = this.waitForTextbox('Dataset Name');
     await nameTextbox.clearTextInput();
     await nameTextbox.type(newDatasetName);
 
     // Export to Notebook checkbox is checked by default
-    const exportCheckbox = await this.waitForCheckbox('Export to notebook');
+    const exportCheckbox = this.waitForCheckbox('Export to notebook');
 
     if (exportToNotebook) {
       // Export to notebook
       const notebookNameTextbox = new Textbox(this.page, `${this.getXpath()}//*[@data-test-id="notebook-name-input"]`);
       await notebookNameTextbox.type(notebookName);
-      const radioBtn = await RadioButton.findByName(this.page, { name: lang, ancestorLevel: 0 }, this);
+      const radioBtn = RadioButton.findByName(this.page, { name: lang, ancestorLevel: 0 }, this);
       await radioBtn.select();
     } else {
       // Not export to notebook
@@ -83,7 +83,7 @@ export default class DatasetSaveModal extends Modal {
    */
   async previewCode(): Promise<string> {
     // Click 'See Code Preview' button.
-    const previewButton = await Button.findByName(this.page, { name: LinkText.SeeCodePreview }, this);
+    const previewButton = Button.findByName(this.page, { name: LinkText.SeeCodePreview }, this);
     await previewButton.click();
     await waitUntilChanged(this.page, await previewButton.asElementHandle());
 

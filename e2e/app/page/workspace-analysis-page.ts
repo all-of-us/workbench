@@ -30,7 +30,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
    * @param {Language} language Notebook language.
    */
   async createNotebook(notebookName: string, language: Language): Promise<NotebookPage> {
-    const link = await this.createNewNotebookLink();
+    const link = this.createNewNotebookLink();
     await link.click();
     const modal = new NewNotebookModal(this.page);
     await modal.waitForLoad();
@@ -48,9 +48,10 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
 
     console.log(`${headingText}. ${progressText}`);
 
-    // Wait for existances of important messages.
+    // Wait for existences of important messages.
     const warningTexts =
-      'You are prohibited from taking screenshots or attempting in any way to remove participant-level data from the workbench.';
+      'You are prohibited from taking screenshots or attempting in any way to remove participant-level data' +
+      ' from the workbench.';
     const warningTextsXpath = `//*[contains(normalize-space(text()), "${warningTexts}")]`;
 
     const authenticateTexts = 'Authenticating with the notebook server';
@@ -77,7 +78,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     return notebook;
   }
 
-  async createNewNotebookLink(): Promise<Link> {
+  createNewNotebookLink(): Link {
     return Link.findByName(this.page, { normalizeSpace: LinkText.CreateNewNotebook });
   }
 
@@ -109,7 +110,7 @@ export default class WorkspaceAnalysisPage extends WorkspaceBase {
     const notebookCard = await resourceCard.findCard(notebookName, ResourceCard.Notebook);
     await notebookCard.selectSnowmanMenu(MenuOption.CopyToAnotherWorkspace, { waitForNav: false });
     // Fill out modal fields.
-    const copyModal = await new CopyToWorkspaceModal(this.page);
+    const copyModal = new CopyToWorkspaceModal(this.page);
     await copyModal.waitForLoad();
     await copyModal.copyToAnotherWorkspace(destinationWorkspace, destinationNotebookName);
   }

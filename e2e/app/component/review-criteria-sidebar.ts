@@ -20,6 +20,7 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
   }
 
   // Not implemented because it's not triggered to open by sidebar tab.
+  // eslint-disable-next-line @typescript-eslint/require-await
   async open(): Promise<void> {
     throw new Error('Do not use. Method not to be implemented.');
   }
@@ -33,7 +34,7 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
   async getPhysicalMeasurementParticipantResult(filterSign: FilterSign, filterValue: number): Promise<string> {
     await this.waitUntilSectionVisible(SectionSelectors.AttributesForm);
 
-    const selectMenu = await SelectMenu.findByName(this.page, { ancestorLevel: 0 }, this);
+    const selectMenu = SelectMenu.findByName(this.page, { ancestorLevel: 0 }, this);
     await selectMenu.select(filterSign);
 
     const numberField = await this.page.waitForXPath(`${this.xpath}//input[@type="number"]`, { visible: true });
@@ -63,7 +64,7 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
     await this.clickButton(LinkText.ApplyModifiers);
     await this.waitUntilSectionVisible(SectionSelectors.ModifiersForm);
 
-    const selectMenu = await SelectMenu.findByName(this.page, { name: 'Age At Event', ancestorLevel: 1 }, this);
+    const selectMenu = SelectMenu.findByName(this.page, { name: 'Age At Event', ancestorLevel: 1 }, this);
     await selectMenu.select(filterSign);
     const numberField = await this.page.waitForXPath(`${this.xpath}//input[@type="number"]`, { visible: true });
     // Issue with Puppeteer type() function: typing value in this textbox doesn't always trigger change event. workaround is needed.
@@ -73,7 +74,7 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
     await this.page.keyboard.type(String(filterValue));
     await numberField.press('Tab', { delay: 200 });
 
-    let participantResult;
+    let participantResult: string;
     await this.clickButton(LinkText.Calculate);
     try {
       participantResult = await this.waitForParticipantResult();
