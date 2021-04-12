@@ -8,6 +8,8 @@ import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as Interactive from 'react-interactive';
+import {SnowmanIcon} from 'app/components/icons';
+
 
 export const styles = reactStyles({
   baseNew: {
@@ -74,6 +76,12 @@ export const styles = reactStyles({
      * choppy transition. This constant will need to be increased or made dynamic
      * if we decide to use longer expanded messages. */
     maxWidth: '200px'
+  },
+
+  snowmanIcon: {
+    marginLeft: -9,
+    width: '21px',
+    height: '21px'
   }
 });
 
@@ -246,6 +254,15 @@ export const IconButton = ({icon, style = {}, tooltip = '', disabled = false, ..
     </Clickable>
   </TooltipTrigger>;
 };
+
+export const SnowmanButton = ({disabled = false, ...props}) => {
+  return <Clickable disabled={disabled} {...props}>
+    <SnowmanIcon
+      style={{marginLeft: '0px'}}
+      disabled={disabled}
+    />
+  </Clickable>
+}
 
 const cardButtonBase = {
   style: {

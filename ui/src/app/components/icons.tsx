@@ -37,26 +37,15 @@ export const ClrIcon = ({className = '', ...props}) => {
   return React.createElement('clr-icon', {class: className, ...fp.omit(['data-test-id'], props)});
 };
 
-export const SnowmanIcon = ({style= {}, ...props}) => {
-  if (props.disabled === true) {
-    return <ClrIcon shape='ellipsis-vertical' {...props}
-                    style={{
-                      ...styles.snowmanIcon,
-                      color: colors.disabled,
-                      cursor: 'auto',
-                      ...style
-                    }}/>;
-  } else {
-    return <ClrIcon shape='ellipsis-vertical' {...props}
-                    style={{
-                      ...styles.snowmanIcon,
-                      color: colors.accent,
-                      cursor: 'pointer',
-                      ...style
-                    }} />;
-  }
+export const SnowmanIcon = ({style= {}, disabled = false, ...props}) => {
+  return <ClrIcon shape='ellipsis-vertical' {...props}
+                  style={{
+                    ...styles.snowmanIcon,
+                    color: disabled ? colors.disabled : colors.accent,
+                    cursor: disabled ? 'auto' : 'pointer',
+                    ...style
+                  }}/>;
 };
-
 
 export const InfoIcon = ({style = {}, ...props}) =>
   <ClrIcon shape='info-standard' {...props} class='is-solid'
