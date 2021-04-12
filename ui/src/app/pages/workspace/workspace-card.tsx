@@ -145,7 +145,6 @@ interface WorkspaceCardState {
   // The list of user roles associated with this workspace. Lazily populated
   // only when the workspace share dialog is opened.
   userRoles?: UserRole[];
-  workspaceDeletionError: boolean;
 }
 
 interface WorkspaceCardProps {
@@ -167,8 +166,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
       loadingData: false,
       sharing: false,
       showResearchPurposeReviewModal: false,
-      userRoles: null,
-      workspaceDeletionError: false
+      userRoles: null
     };
   }
 
@@ -182,7 +180,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
       this.setState({loadingData: false});
       await this.props.reload();
     } catch (e) {
-      this.setState({workspaceDeletionError: true, loadingData: false});
+      this.setState({bugReportOpen: true, bugReportError: 'Could not delete workspace', loadingData: false});
     }
   }
 
@@ -213,13 +211,6 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
     this.reloadData();
   }
 
-  submitWorkspaceDeletionError(): void {
-    this.setState({
-      bugReportOpen: true,
-      bugReportError: 'Could not delete workspace.',
-      workspaceDeletionError: false});
-  }
-
   // Reloads data by calling the callback from the owning component. This
   // currently causes the workspace-list to reload the entire list of recentWorkspaces.
   async reloadData() {
@@ -247,7 +238,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
   render() {
     const {userEmail, workspace, accessLevel} = this.props;
     const {bugReportError, bugReportOpen, confirmDeleting, loadingData,
-      sharing, showResearchPurposeReviewModal, userRoles, workspaceDeletionError} = this.state;
+      sharing, showResearchPurposeReviewModal, userRoles} = this.state;
 
     return <React.Fragment>
       <WorkspaceCardBase>
@@ -311,17 +302,6 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
           </FlexColumn>
         </FlexRow>
       </WorkspaceCardBase>
-      {workspaceDeletionError && <Modal>
-        <ModalTitle>Error: Could not delete workspace '{workspace.name}'</ModalTitle>
-        <ModalBody style={{display: 'flex', flexDirection: 'row'}}>
-          Please{' '}
-          <Link onClick={() => this.submitWorkspaceDeletionError()}>submit a bug report.</Link>
-        </ModalBody>
-        <ModalFooter>
-          <Button type='secondary'
-                  onClick={() => this.setState({workspaceDeletionError: false})}>Close</Button>
-        </ModalFooter>
-      </Modal>}
       {confirmDeleting &&
       <ConfirmDeleteModal data-test-id='confirm-delete-modal'
                           resourceType={ResourceType.WORKSPACE}
