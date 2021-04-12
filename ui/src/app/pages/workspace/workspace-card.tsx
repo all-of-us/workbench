@@ -3,7 +3,7 @@ import * as React from 'react';
 import {ResourceType, UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 
 import {BugReportModal} from 'app/components/bug-report';
-import {Button, Clickable, Link, MenuItem} from 'app/components/buttons';
+import {Button, Clickable, MenuItem} from 'app/components/buttons';
 import {WorkspaceCardBase} from 'app/components/card';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
