@@ -125,32 +125,16 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   @Query("SELECT w.creator FROM DbWorkspace w WHERE w.billingStatus = (:status)")
   Set<DbUser> findAllCreatorsByBillingStatus(@Param("status") BillingStatus status);
 
-  List<DbWorkspace> findAllByActiveStatusIn(Short workspaceActiveStatusOrdinal);
-
-  // TODO replace with AccessTier RW-6137
-  // @Query(
-  //      "SELECT activeStatus, dataAccessLevel, COUNT(workspaceId) FROM DbWorkspace "
-  //          + "GROUP BY activeStatus, dataAccessLevel ORDER BY activeStatus, dataAccessLevel")
-  //  List<ActiveStatusAndDataAccessLevelToCountResult> getActiveStatusAndDataAccessLevelToCount();
-
-  // TODO replace with AccessTier RW-6137
-  //  interface ActiveStatusAndDataAccessLevelToCountResult {
-  //      Short getWorkspaceActiveStatus();
-  //
-  //      Short getDataAccessLevel();
-  //
-  //      Long getWorkspaceCount();
-  //    }
-
   @Query(
-      "SELECT workspace.activeStatus, tier.shortName, COUNT(workspaceId) FROM DbWorkspace workspace "
+      "SELECT workspace.activeStatus, tier.shortName, COUNT(workspace.workspaceId) as workspaceCount "
+          + "FROM DbWorkspace workspace "
           + "JOIN DbCdrVersion version ON workspace.cdrVersion.cdrVersionId = version.cdrVersionId "
           + "JOIN DbAccessTier tier ON version.accessTier.accessTierId = tier.accessTierId "
           + "GROUP BY workspace.activeStatus, tier.shortName "
           + "ORDER BY workspace.activeStatus, tier.shortName")
-  List<ActiveStatusToCountResult> getActiveStatusToCount();
+  List<WorkspaceCountByActiveStatusAndTier> getWorkspaceCountGaugeData();
 
-  interface ActiveStatusToCountResult {
+  interface WorkspaceCountByActiveStatusAndTier {
     Short getActiveStatus();
 
     String getShortName();

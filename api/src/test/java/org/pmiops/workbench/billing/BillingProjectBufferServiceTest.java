@@ -51,6 +51,7 @@ import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
+import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao.ProjectCountByStatusAndTier;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
@@ -592,19 +593,14 @@ public class BillingProjectBufferServiceTest {
       }
     }
 
+    List<ProjectCountByStatusAndTier> projectCounts =
+        billingProjectBufferEntryDao.getBillingBufferGaugeData();
+
     // Sanity check: there shouldn't be any AVAILABLE projects.
-    assertThat(
-            billingProjectBufferEntryDao.computeProjectCountByStatus().stream()
-                .filter(pc -> pc.getStatusEnum() == BufferEntryStatus.AVAILABLE)
-                .count())
-        .isEqualTo(0L);
+    assertThat(filterByStatus(projectCounts, BufferEntryStatus.AVAILABLE)).isEmpty();
 
     // Sanity check: there should be non-zero CREATING projects.
-    assertThat(
-            billingProjectBufferEntryDao.computeProjectCountByStatus().stream()
-                .filter(pc -> pc.getStatusEnum() == BufferEntryStatus.CREATING)
-                .count())
-        .isGreaterThan(0L);
+    assertThat(filterByStatus(projectCounts, BufferEntryStatus.CREATING)).isNotEmpty();
 
     // Simulate a Terra system recovery.
     //
@@ -628,13 +624,14 @@ public class BillingProjectBufferServiceTest {
     while (true) {
       tick.run();
 
-      Long availableCount =
-          billingProjectBufferEntryDao.computeProjectCountByStatus().stream()
-              .filter(pc -> pc.getStatusEnum() == BufferEntryStatus.AVAILABLE)
-              .count();
+      int availableCount =
+          filterByStatus(
+                  billingProjectBufferEntryDao.getBillingBufferGaugeData(),
+                  BufferEntryStatus.AVAILABLE)
+              .size();
 
       // Recovery is defined as "time to first project available"
-      if (availableCount != null && availableCount >= 1) {
+      if (availableCount >= 1) {
         workbenchRecoveryTime = CLOCK.instant();
         break;
       }
@@ -650,6 +647,13 @@ public class BillingProjectBufferServiceTest {
         Duration.between(terraRecoveryTime, workbenchRecoveryTime).toMinutes();
     log.info(String.format("Workbench recovered in %s minutes", workbenchRecoveryMinutes));
     assertThat(workbenchRecoveryMinutes).isLessThan(30l);
+  }
+
+  private List<ProjectCountByStatusAndTier> filterByStatus(
+      List<ProjectCountByStatusAndTier> projectCounts, BufferEntryStatus status) {
+    return projectCounts.stream()
+        .filter(c -> c.getStatusEnum().equals(status))
+        .collect(Collectors.toList());
   }
 
   @Test
@@ -948,10 +952,20 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void testGetStatus() {
-    final long numberAvailable =
+    long numberAvailable =
         billingProjectBufferEntryDao.countByStatus(
             DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.AVAILABLE));
-    final BillingProjectBufferStatus bufferStatus = billingProjectBufferService.getStatus();
+    assertThat(numberAvailable).isEqualTo(0);
+    BillingProjectBufferStatus bufferStatus = billingProjectBufferService.getStatus();
+    assertThat(bufferStatus.getBufferSize()).isEqualTo(numberAvailable);
+
+    makeEntry(BufferEntryStatus.AVAILABLE, CLOCK.instant(), registeredTier);
+
+    numberAvailable =
+        billingProjectBufferEntryDao.countByStatus(
+            DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.AVAILABLE));
+    assertThat(numberAvailable).isEqualTo(1);
+    bufferStatus = billingProjectBufferService.getStatus();
     assertThat(bufferStatus.getBufferSize()).isEqualTo(numberAvailable);
   }
 
@@ -966,20 +980,6 @@ public class BillingProjectBufferServiceTest {
     assertThat(entryStatusBundle.isPresent()).isTrue();
     assertThat(entryStatusBundle.get().getTags()).isNotEmpty();
   }
-
-  //  @Test
-  //  public void testGetProjectCountByStatus() {
-  //    DbBillingProjectBufferEntry creatingEntry1 = makeSimpleEntry(BufferEntryStatus.CREATING);
-  //    DbBillingProjectBufferEntry creatingEntry2 = makeSimpleEntry(BufferEntryStatus.CREATING);
-  //    DbBillingProjectBufferEntry errorEntry1 = makeSimpleEntry(BufferEntryStatus.ERROR);
-  //    final Map<BufferEntryStatus, Long> statusToCount =
-  //        billingProjectBufferEntryDao.getCountByStatusMap();
-  //
-  //    assertThat(statusToCount.getOrDefault(BufferEntryStatus.ASSIGNING, 0L)).isEqualTo(0);
-  //    assertThat(statusToCount.getOrDefault(BufferEntryStatus.ERROR, 0L)).isEqualTo(1);
-  //    assertThat(statusToCount.getOrDefault(BufferEntryStatus.CREATING, 0L)).isEqualTo(2);
-  //    assertThat(statusToCount).hasSize(2);
-  //  }
 
   @Test
   public void testFindEntriesWithExpiredGracePeriod() {
@@ -1039,15 +1039,16 @@ public class BillingProjectBufferServiceTest {
   }
 
   private DbBillingProjectBufferEntry makeEntry(BufferEntryStatus status, Instant lastUpdatedTime) {
+    return makeEntry(status, lastUpdatedTime, registeredTier);
+  }
+
+  private DbBillingProjectBufferEntry makeEntry(
+      BufferEntryStatus status, Instant lastUpdatedTime, DbAccessTier accessTier) {
     final DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
     entry.setStatusEnum(status, () -> Timestamp.from(lastUpdatedTime));
     entry.setLastSyncRequestTime(Timestamp.from(lastUpdatedTime));
-    entry.setAccessTier(registeredTier);
+    entry.setAccessTier(accessTier);
     return billingProjectBufferEntryDao.save(entry);
-  }
-
-  private DbBillingProjectBufferEntry makeSimpleEntry(BufferEntryStatus bufferEntryStatus) {
-    return makeEntry(bufferEntryStatus, CLOCK.instant());
   }
 
   private Timestamp getCurrentTimestamp() {

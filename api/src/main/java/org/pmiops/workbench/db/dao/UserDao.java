@@ -58,7 +58,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
   List<DbUser> findUsersBySearchStringAndTier(
       @Param("term") String term, Sort sort, @Param("shortName") String accessTierShortName);
 
-  interface UserCountGaugeLabelsAndValue {
+  interface UserCountByDisabledAndAccessTiers {
     Long getUserCount();
 
     Boolean getDisabled();
@@ -82,7 +82,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "  GROUP BY u.user_id"
               + ") as t ON t.user_id = u.user_id "
               + "GROUP BY u.disabled, t.access_tier_short_names ")
-  List<UserCountGaugeLabelsAndValue> getUserCountGaugeData();
+  List<UserCountByDisabledAndAccessTiers> getUserCountGaugeData();
 
   // Note: setter methods are included only where necessary for testing. See ProfileServiceTest.
   interface DbAdminTableUser {

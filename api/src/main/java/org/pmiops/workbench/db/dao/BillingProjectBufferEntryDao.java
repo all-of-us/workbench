@@ -59,13 +59,25 @@ public interface BillingProjectBufferEntryDao
 
   Long countByStatus(short status);
 
+  interface ProjectCountByStatusAndTier {
+    long getNumProjects();
+
+    short getStatus();
+
+    DbAccessTier getAccessTier();
+
+    default BufferEntryStatus getStatusEnum() {
+      return DbStorageEnums.billingProjectBufferEntryStatusFromStorage(getStatus());
+    }
+  }
+
   @Query(
       value =
-          "select status, accessTier, count(entry.id) as numpNrojects\n"
-              + "    from DbBillingProjectBufferEntry entry \n"
-              + "group by status, accessTier\n"
-              + "order by status, accessTier")
-  List<StatusPerTierCount> computeProjectCountByStatus();
+          "select count(entry.id) as numProjects, entry.status, entry.accessTier \n"
+              + "from DbBillingProjectBufferEntry entry \n"
+              + "group by entry.status, entry.accessTier\n"
+              + "order by entry.status, entry.accessTier")
+  List<ProjectCountByStatusAndTier> getBillingBufferGaugeData();
 
   @Query(value = "SELECT GET_LOCK('" + ASSIGNING_LOCK + "', 1)", nativeQuery = true)
   int acquireAssigningLock();
@@ -94,17 +106,4 @@ public interface BillingProjectBufferEntryDao
       @Param("billingStatus") short billingStatus,
       @Param("workspaceStatus") short workspaceStatus,
       @Param("migrationStatus") short migrationStatus);
-
-  interface StatusPerTierCount {
-
-    short getStatus();
-
-    long getNumProjects();
-
-    String getAccessTierShortName();
-
-    default BufferEntryStatus getStatusEnum() {
-      return DbStorageEnums.billingProjectBufferEntryStatusFromStorage(getStatus());
-    }
-  }
 }

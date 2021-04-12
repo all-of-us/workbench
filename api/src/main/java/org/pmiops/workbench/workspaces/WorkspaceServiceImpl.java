@@ -42,7 +42,7 @@ import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao.ActiveStatusToCountResult;
+import org.pmiops.workbench.db.dao.WorkspaceDao.WorkspaceCountByActiveStatusAndTier;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
@@ -61,7 +61,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -515,21 +514,17 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    final List<ActiveStatusToCountResult> rows = workspaceDao.getActiveStatusToCount();
+    final List<WorkspaceCountByActiveStatusAndTier> rows =
+        workspaceDao.getWorkspaceCountGaugeData();
     return rows.stream()
         .map(
             row ->
                 MeasurementBundle.builder()
+                    .addMeasurement(GaugeMetric.WORKSPACE_COUNT, row.getWorkspaceCount())
                     .addTag(
                         MetricLabel.WORKSPACE_ACTIVE_STATUS,
                         DbStorageEnums.workspaceActiveStatusFromStorage(row.getActiveStatus())
                             .toString())
-
-                    // tmp record all workspaces as Registered Tier.
-                    // This is mostly true in test/local and fully true in higher environments.
-                    // RW-6137: Replace with AccessTier
-                    .addTag(MetricLabel.DATA_ACCESS_LEVEL, DataAccessLevel.REGISTERED.toString())
-                    .addMeasurement(GaugeMetric.WORKSPACE_COUNT, row.getWorkspaceCount())
                     .addTag(MetricLabel.ACCESS_TIER, row.getShortName())
                     .build())
         .collect(ImmutableList.toImmutableList());

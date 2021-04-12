@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
-import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao.StatusPerTierCount;
+import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao.ProjectCountByStatusAndTier;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
@@ -90,17 +90,17 @@ public class BillingProjectBufferService implements GaugeDataCollector {
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    final List<StatusPerTierCount> statusPerTierCounts =
-        billingProjectBufferEntryDao.computeProjectCountByStatus();
+    final List<ProjectCountByStatusAndTier> projectCountByStatusAndTier =
+        billingProjectBufferEntryDao.getBillingBufferGaugeData();
 
-    return statusPerTierCounts.stream()
+    return projectCountByStatusAndTier.stream()
         .map(
-            status ->
+            projects ->
                 MeasurementBundle.builder()
                     .addMeasurement(
-                        GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, status.getNumProjects())
-                    .addTag(MetricLabel.BUFFER_ENTRY_STATUS, String.valueOf(status.getStatus()))
-                    .addTag(MetricLabel.ACCESS_TIER, status.getAccessTierShortName())
+                        GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, projects.getNumProjects())
+                    .addTag(MetricLabel.BUFFER_ENTRY_STATUS, String.valueOf(projects.getStatus()))
+                    .addTag(MetricLabel.ACCESS_TIER, projects.getAccessTier().getShortName())
                     .build())
         .collect(Collectors.toList());
   }
