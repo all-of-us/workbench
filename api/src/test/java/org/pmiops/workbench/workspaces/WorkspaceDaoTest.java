@@ -13,7 +13,6 @@ import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao.WorkspaceCountByActiveStatusAndTier;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
@@ -98,9 +97,9 @@ public class WorkspaceDaoTest {
 
     WorkspaceCountByActiveStatusAndTier count = gaugeData.get(0);
     assertThat(count.getWorkspaceCount()).isEqualTo(1);
-    assertThat(count.getShortName()).isEqualTo(AccessTierService.REGISTERED_TIER_SHORT_NAME);
-    assertThat(count.getActiveStatus())
-        .isEqualTo(DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+    assertThat(count.getTier().getShortName())
+        .isEqualTo(AccessTierService.REGISTERED_TIER_SHORT_NAME);
+    assertThat(count.getActiveStatusEnum()).isEqualTo(WorkspaceActiveStatus.ACTIVE);
   }
 
   private DbWorkspace createWorkspace() {

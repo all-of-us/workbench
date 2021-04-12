@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -126,19 +127,23 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   Set<DbUser> findAllCreatorsByBillingStatus(@Param("status") BillingStatus status);
 
   @Query(
-      "SELECT workspace.activeStatus, tier.shortName, COUNT(workspace.workspaceId) as workspaceCount "
+      "SELECT COUNT(workspace.workspaceId) as workspaceCount, workspace.activeStatus, tier "
           + "FROM DbWorkspace workspace "
           + "JOIN DbCdrVersion version ON workspace.cdrVersion.cdrVersionId = version.cdrVersionId "
           + "JOIN DbAccessTier tier ON version.accessTier.accessTierId = tier.accessTierId "
-          + "GROUP BY workspace.activeStatus, tier.shortName "
-          + "ORDER BY workspace.activeStatus, tier.shortName")
+          + "GROUP BY workspace.activeStatus, tier "
+          + "ORDER BY workspace.activeStatus, tier")
   List<WorkspaceCountByActiveStatusAndTier> getWorkspaceCountGaugeData();
 
   interface WorkspaceCountByActiveStatusAndTier {
+    Long getWorkspaceCount();
+
     Short getActiveStatus();
 
-    String getShortName();
+    DbAccessTier getTier();
 
-    Long getWorkspaceCount();
+    default WorkspaceActiveStatus getActiveStatusEnum() {
+      return DbStorageEnums.workspaceActiveStatusFromStorage(getActiveStatus());
+    }
   }
 }

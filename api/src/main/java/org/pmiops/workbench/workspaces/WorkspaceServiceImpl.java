@@ -46,7 +46,6 @@ import org.pmiops.workbench.db.dao.WorkspaceDao.WorkspaceCountByActiveStatusAndT
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -522,10 +521,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
                 MeasurementBundle.builder()
                     .addMeasurement(GaugeMetric.WORKSPACE_COUNT, row.getWorkspaceCount())
                     .addTag(
-                        MetricLabel.WORKSPACE_ACTIVE_STATUS,
-                        DbStorageEnums.workspaceActiveStatusFromStorage(row.getActiveStatus())
-                            .toString())
-                    .addTag(MetricLabel.ACCESS_TIER, row.getShortName())
+                        MetricLabel.WORKSPACE_ACTIVE_STATUS, row.getActiveStatusEnum().toString())
+                    .addTag(MetricLabel.ACCESS_TIER, row.getTier().getShortName())
                     .build())
         .collect(ImmutableList.toImmutableList());
   }
