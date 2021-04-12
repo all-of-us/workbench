@@ -3,7 +3,6 @@ package org.pmiops.workbench.db.dao;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -14,7 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
-import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao.StatusPerTierCount;
+import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao.ProjectCountByStatusAndTier;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
@@ -30,12 +29,12 @@ public class BillingProjectBufferEntryDaoTest extends SpringTest {
 
   private static final Instant TEST_TIME = Instant.parse("2000-01-01T00:00:00.00Z");
 
-  private static final long ASSIGNED_COUNT = 1;
-  private static final long AVAILABLE_COUNT = 2;
-  private static final long ERROR_COUNT = 3;
-  private static final long CREATING_COUNT = 4;
+  private static final int ASSIGNED_COUNT = 1;
+  private static final int AVAILABLE_COUNT = 2;
+  private static final int ERROR_COUNT = 3;
+  private static final int CREATING_COUNT = 4;
 
-  private static final ImmutableMap<BufferEntryStatus, Long> STATUS_TO_COUNT_INPUT =
+  private static final ImmutableMap<BufferEntryStatus, Integer> STATUS_TO_COUNT_INPUT =
       ImmutableMap.of(
           BufferEntryStatus.ASSIGNED, ASSIGNED_COUNT,
           BufferEntryStatus.AVAILABLE, AVAILABLE_COUNT,
@@ -61,35 +60,54 @@ public class BillingProjectBufferEntryDaoTest extends SpringTest {
   }
 
   @Test
-  public void testGetCountByStatusMap() {
-    final Map<BufferEntryStatus, Long> result = billingProjectBufferEntryDao.getCountByStatusMap();
-    assertThat(result).hasSize(STATUS_TO_COUNT_INPUT.size());
-    assertThat(result.get(BufferEntryStatus.ASSIGNED)).isEqualTo(ASSIGNED_COUNT);
-    assertThat(result.get(BufferEntryStatus.CREATING)).isEqualTo(CREATING_COUNT);
-    assertThat(result.get(BufferEntryStatus.AVAILABLE)).isEqualTo(AVAILABLE_COUNT);
-    assertThat(result.get(BufferEntryStatus.ERROR)).isEqualTo(ERROR_COUNT);
-    assertThat(result.get(BufferEntryStatus.GARBAGE_COLLECTED)).isNull();
-    assertThat(result.get(BufferEntryStatus.ASSIGNING)).isNull();
+  public void testBillingBufferGaugeData() {
+    DbAccessTier tier2 =
+        accessTierDao.save(
+            new DbAccessTier()
+                .setAccessTierId(2)
+                .setShortName("two")
+                .setAuthDomainGroupEmail("t2@test.org")
+                .setAuthDomainName("t2-ad")
+                .setDisplayName("Number Two")
+                .setServicePerimeter("t2/perim"));
+
+    // duplicate what's already in the buffer for testAccessTier
+    insertBufferEntriesWithCounts(STATUS_TO_COUNT_INPUT, tier2);
+
+    final List<ProjectCountByStatusAndTier> counts =
+        billingProjectBufferEntryDao.getBillingBufferGaugeData();
+    assertThat(counts).hasSize(STATUS_TO_COUNT_INPUT.size() * 2);
+
+    for (DbAccessTier tier : new DbAccessTier[] {testAccessTier, tier2}) {
+      assertThat(filterByStatusAndTier(counts, BufferEntryStatus.GARBAGE_COLLECTED, tier))
+          .isEmpty();
+      assertThat(filterByStatusAndTier(counts, BufferEntryStatus.ASSIGNING, tier)).isEmpty();
+
+      assertThat(getOne(counts, BufferEntryStatus.ASSIGNED, tier).getNumProjects())
+          .isEqualTo(ASSIGNED_COUNT);
+      assertThat(getOne(counts, BufferEntryStatus.CREATING, tier).getNumProjects())
+          .isEqualTo(CREATING_COUNT);
+      assertThat(getOne(counts, BufferEntryStatus.AVAILABLE, tier).getNumProjects())
+          .isEqualTo(AVAILABLE_COUNT);
+      assertThat(getOne(counts, BufferEntryStatus.ERROR, tier).getNumProjects())
+          .isEqualTo(ERROR_COUNT);
+    }
   }
 
-  @Test
-  public void testComputeProjectCountByStatus() {
-    final List<StatusPerTierCount> rows =
-        billingProjectBufferEntryDao.computeProjectCountByStatus();
-    assertThat(rows).hasSize(STATUS_TO_COUNT_INPUT.size());
-    assertThat(
-            rows.stream()
-                .map(StatusPerTierCount::getStatusEnum)
-                .collect(ImmutableSet.toImmutableSet()))
-        .hasSize(STATUS_TO_COUNT_INPUT.size());
+  private List<ProjectCountByStatusAndTier> filterByStatusAndTier(
+      List<ProjectCountByStatusAndTier> counts, BufferEntryStatus status, DbAccessTier accessTier) {
+    return counts.stream()
+        .filter(c -> c.getStatusEnum().equals(status))
+        .filter(c -> c.getAccessTier().equals(accessTier))
+        .collect(Collectors.toList());
+  }
 
-    assertThat(
-            rows.stream()
-                .filter(r -> r.getStatusEnum().equals(BufferEntryStatus.AVAILABLE))
-                .map(StatusPerTierCount::getNumProjects)
-                .findFirst()
-                .orElse(-1L))
-        .isEqualTo(AVAILABLE_COUNT);
+  private ProjectCountByStatusAndTier getOne(
+      List<ProjectCountByStatusAndTier> counts, BufferEntryStatus status, DbAccessTier accessTier) {
+    List<ProjectCountByStatusAndTier> filteredCounts =
+        filterByStatusAndTier(counts, status, accessTier);
+    assertThat(filteredCounts).hasSize(1);
+    return filteredCounts.get(0);
   }
 
   @Test
@@ -164,11 +182,16 @@ public class BillingProjectBufferEntryDaoTest extends SpringTest {
     assertThat(queriedTimestamps).containsExactlyElementsIn(expectedTimestamps);
   }
 
-  private void insertBufferEntriesWithCounts(Map<BufferEntryStatus, Long> statusToCount) {
+  private void insertBufferEntriesWithCounts(Map<BufferEntryStatus, Integer> statusToCount) {
+    insertBufferEntriesWithCounts(statusToCount, testAccessTier);
+  }
+
+  private void insertBufferEntriesWithCounts(
+      Map<BufferEntryStatus, Integer> statusToCount, DbAccessTier accessTier) {
     statusToCount.forEach(
         (status, count) -> {
           for (int i = 0; i < count; ++i) {
-            insertBufferEntry(status, TEST_TIME, testAccessTier);
+            insertBufferEntry(status, TEST_TIME, accessTier);
           }
         });
   }

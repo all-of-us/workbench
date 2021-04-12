@@ -22,13 +22,10 @@ import java.time.Period;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -52,6 +49,7 @@ import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
+import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao.ProjectCountByStatusAndTier;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
@@ -64,9 +62,7 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
-import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.MonitoringService;
-import org.pmiops.workbench.monitoring.views.GaugeMetric;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -593,12 +589,14 @@ public class BillingProjectBufferServiceTest {
       }
     }
 
+    List<ProjectCountByStatusAndTier> projectCounts =
+        billingProjectBufferEntryDao.getBillingBufferGaugeData();
+
     // Sanity check: there shouldn't be any AVAILABLE projects.
-    assertThat(billingProjectBufferEntryDao.getCountByStatusMap().get(BufferEntryStatus.AVAILABLE))
-        .isEqualTo(null);
+    assertThat(filterByStatus(projectCounts, BufferEntryStatus.AVAILABLE)).isEmpty();
+
     // Sanity check: there should be non-zero CREATING projects.
-    assertThat(billingProjectBufferEntryDao.getCountByStatusMap().get(BufferEntryStatus.CREATING))
-        .isGreaterThan(0L);
+    assertThat(filterByStatus(projectCounts, BufferEntryStatus.CREATING)).isNotEmpty();
 
     // Simulate a Terra system recovery.
     //
@@ -622,10 +620,14 @@ public class BillingProjectBufferServiceTest {
     while (true) {
       tick.run();
 
-      Long availableCount =
-          billingProjectBufferEntryDao.getCountByStatusMap().get(BufferEntryStatus.AVAILABLE);
+      int availableCount =
+          filterByStatus(
+                  billingProjectBufferEntryDao.getBillingBufferGaugeData(),
+                  BufferEntryStatus.AVAILABLE)
+              .size();
+
       // Recovery is defined as "time to first project available"
-      if (availableCount != null && availableCount >= 1) {
+      if (availableCount >= 1) {
         workbenchRecoveryTime = CLOCK.instant();
         break;
       }
@@ -641,6 +643,13 @@ public class BillingProjectBufferServiceTest {
         Duration.between(terraRecoveryTime, workbenchRecoveryTime).toMinutes();
     log.info(String.format("Workbench recovered in %s minutes", workbenchRecoveryMinutes));
     assertThat(workbenchRecoveryMinutes).isLessThan(30l);
+  }
+
+  private List<ProjectCountByStatusAndTier> filterByStatus(
+      List<ProjectCountByStatusAndTier> projectCounts, BufferEntryStatus status) {
+    return projectCounts.stream()
+        .filter(c -> c.getStatusEnum().equals(status))
+        .collect(Collectors.toList());
   }
 
   @Test
@@ -939,38 +948,37 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void testGetStatus() {
-    final long numberAvailable =
+    long numberAvailable =
         billingProjectBufferEntryDao.countByStatus(
             DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.AVAILABLE));
-    final BillingProjectBufferStatus bufferStatus = billingProjectBufferService.getStatus();
+    assertThat(numberAvailable).isEqualTo(0);
+    BillingProjectBufferStatus bufferStatus = billingProjectBufferService.getStatus();
+    assertThat(bufferStatus.getBufferSize()).isEqualTo(numberAvailable);
+
+    makeEntry(BufferEntryStatus.AVAILABLE, CLOCK.instant(), registeredTier);
+
+    numberAvailable =
+        billingProjectBufferEntryDao.countByStatus(
+            DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.AVAILABLE));
+    assertThat(numberAvailable).isEqualTo(1);
+    bufferStatus = billingProjectBufferService.getStatus();
     assertThat(bufferStatus.getBufferSize()).isEqualTo(numberAvailable);
   }
 
-  @Test
-  public void testGetGaugeData() {
-    final Collection<MeasurementBundle> bundles = billingProjectBufferService.getGaugeData();
-    assertThat(bundles.size()).isGreaterThan(0);
-    Optional<MeasurementBundle> entryStatusBundle =
-        bundles.stream()
-            .filter(b -> b.getMeasurements().containsKey(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT))
-            .findFirst();
-    assertThat(entryStatusBundle.isPresent()).isTrue();
-    assertThat(entryStatusBundle.get().getTags()).isNotEmpty();
-  }
+  // TODO assumes that every status gets an entry, even if it's 0
 
-  @Test
-  public void testGetProjectCountByStatus() {
-    DbBillingProjectBufferEntry creatingEntry1 = makeSimpleEntry(BufferEntryStatus.CREATING);
-    DbBillingProjectBufferEntry creatingEntry2 = makeSimpleEntry(BufferEntryStatus.CREATING);
-    DbBillingProjectBufferEntry errorEntry1 = makeSimpleEntry(BufferEntryStatus.ERROR);
-    final Map<BufferEntryStatus, Long> statusToCount =
-        billingProjectBufferEntryDao.getCountByStatusMap();
-
-    assertThat(statusToCount.getOrDefault(BufferEntryStatus.ASSIGNING, 0L)).isEqualTo(0);
-    assertThat(statusToCount.getOrDefault(BufferEntryStatus.ERROR, 0L)).isEqualTo(1);
-    assertThat(statusToCount.getOrDefault(BufferEntryStatus.CREATING, 0L)).isEqualTo(2);
-    assertThat(statusToCount).hasSize(2);
-  }
+  //  @Test
+  //  public void testGetGaugeData() {
+  //    final Collection<MeasurementBundle> bundles = billingProjectBufferService.getGaugeData();
+  //    assertThat(bundles.size()).isGreaterThan(0);
+  //    Optional<MeasurementBundle> entryStatusBundle =
+  //        bundles.stream()
+  //            .filter(b ->
+  // b.getMeasurements().containsKey(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT))
+  //            .findFirst();
+  //    assertThat(entryStatusBundle.isPresent()).isTrue();
+  //    assertThat(entryStatusBundle.get().getTags()).isNotEmpty();
+  //  }
 
   @Test
   public void testFindEntriesWithExpiredGracePeriod() {
@@ -1030,15 +1038,16 @@ public class BillingProjectBufferServiceTest {
   }
 
   private DbBillingProjectBufferEntry makeEntry(BufferEntryStatus status, Instant lastUpdatedTime) {
+    return makeEntry(status, lastUpdatedTime, registeredTier);
+  }
+
+  private DbBillingProjectBufferEntry makeEntry(
+      BufferEntryStatus status, Instant lastUpdatedTime, DbAccessTier accessTier) {
     final DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
     entry.setStatusEnum(status, () -> Timestamp.from(lastUpdatedTime));
     entry.setLastSyncRequestTime(Timestamp.from(lastUpdatedTime));
-    entry.setAccessTier(registeredTier);
+    entry.setAccessTier(accessTier);
     return billingProjectBufferEntryDao.save(entry);
-  }
-
-  private DbBillingProjectBufferEntry makeSimpleEntry(BufferEntryStatus bufferEntryStatus) {
-    return makeEntry(bufferEntryStatus, CLOCK.instant());
   }
 
   private Timestamp getCurrentTimestamp() {

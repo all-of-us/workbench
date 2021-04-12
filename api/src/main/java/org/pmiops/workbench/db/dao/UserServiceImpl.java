@@ -28,7 +28,6 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbAdminActionHistory;
@@ -851,21 +850,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    final List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
-    return rows.stream()
+    return userDao.getUserCountGaugeData().stream()
         .map(
             row ->
                 MeasurementBundle.builder()
                     .addMeasurement(GaugeMetric.USER_COUNT, row.getUserCount())
-                    // TODO remove in RW-6189 or RW-6137.
-                    // until then, what we're interested in is registered vs not
-                    .addTag(
-                        MetricLabel.DATA_ACCESS_LEVEL,
-                        AccessTierService.temporaryDataAccessLevelKluge(
-                                row.getAccessTierShortNames())
-                            .toString())
                     .addTag(MetricLabel.USER_DISABLED, row.getDisabled().toString())
-                    .addTag(MetricLabel.ACCESS_TIER, row.getAccessTierShortNames())
+                    .addTag(MetricLabel.ACCESS_TIER_SHORT_NAMES, row.getAccessTierShortNames())
                     .build())
         .collect(ImmutableList.toImmutableList());
   }
