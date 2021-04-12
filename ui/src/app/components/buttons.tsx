@@ -251,10 +251,7 @@ export const IconButton = ({icon, style = {}, tooltip = '', disabled = false, ..
 
 export const SnowmanButton = ({disabled = false, style = {}, ...props}) => {
   return <Clickable disabled={disabled} {...props} propagateDataTestId={true}>
-    <SnowmanIcon
-      style={style}
-      disabled={disabled}
-    />
+    <SnowmanIcon style={style} disabled={disabled}/>
   </Clickable>;
 };
 

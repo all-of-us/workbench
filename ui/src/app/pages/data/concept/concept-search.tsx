@@ -92,7 +92,7 @@ const ConceptSetMenu: React.FunctionComponent<ConceptSetMenuProps> = ({canDelete
         </MenuItem>
       </TooltipTrigger>
     </React.Fragment>}>
-    <SnowmanButton  data-test-id='workspace-menu'/>
+    <SnowmanButton data-test-id='workspace-menu'/>
   </PopupTrigger>;
 
 function sortAndStringify(concepts) {
