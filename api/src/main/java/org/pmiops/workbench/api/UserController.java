@@ -18,6 +18,7 @@ import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
@@ -88,9 +89,7 @@ public class UserController implements UserApiDelegate {
   @Override
   public ResponseEntity<UserResponse> user(
       String term, String pageToken, Integer pageSize, String sortOrder) {
-    UserResponse response = new UserResponse();
-    response.setUsers(Collections.emptyList());
-    response.setNextPageToken("");
+    UserResponse response = initializeUserResponse();
 
     if (null == term || term.isEmpty()) {
       return ResponseEntity.ok(response);
@@ -125,6 +124,89 @@ public class UserController implements UserApiDelegate {
             .filter(user -> user.getFirstSignInTime() != null)
             .collect(Collectors.toList());
 
+    return processSearchResults(term, pageSize, response, paginationToken, users);
+  }
+
+  /**
+   * Return a page of users matching a search term and an access tier. Used by autocomplete for
+   * workspace sharing.
+   *
+   * @param accessTierShortName the shortName of the access tier to search in; the calling user must
+   *     also be a member of this tier
+   * @param term a search term to match against the user's name and username fields (case
+   *     insensitive)
+   * @param pageToken Pagination token retrieved from a previous call to user; used for retrieving
+   *     additional pages of results.
+   * @param pageSize Maximum number of results to return in a response. Defaults to 10.
+   * @param sortOrder 'asc' or 'desc', defaulting to 'asc'
+   * @return A list of users matching the provided search query and a nextPageToken if applicable.
+   */
+  @Override
+  public ResponseEntity<UserResponse> userSearch(
+      String accessTierShortName,
+      String term,
+      String pageToken,
+      Integer pageSize,
+      String sortOrder) {
+    UserResponse response = initializeUserResponse();
+
+    if (null == term || term.isEmpty()) {
+      return ResponseEntity.ok(response);
+    }
+
+    PaginationToken paginationToken;
+    try {
+      paginationToken = getPaginationTokenFromPageToken(pageToken);
+    } catch (IllegalArgumentException | BadRequestException e) {
+      return ResponseEntity.badRequest().body(response);
+    }
+
+    // See discussion on RW-2894. This may not be strictly necessary, especially if researchers
+    // details will be published publicly, but it prevents arbitrary unregistered users from seeing
+    // limited researcher profile details.
+
+    DbAccessTier searchTier =
+        accessTierService.getAccessTiersForUser(userProvider.get()).stream()
+            .filter(tier -> tier.getShortName().equals(accessTierShortName))
+            .findFirst()
+            .orElseThrow(
+                () ->
+                    new ForbiddenException(
+                        "Requester does not have access to tier " + accessTierShortName));
+
+    String authorizationDomain = searchTier.getAuthDomainName();
+    if (!fireCloudService.isUserMemberOfGroup(
+        userProvider.get().getUsername(), authorizationDomain)) {
+      throw new ForbiddenException("Requester is not a member of " + authorizationDomain);
+    }
+
+    Sort.Direction direction =
+        Sort.Direction.fromOptionalString(sortOrder).orElse(Sort.Direction.ASC);
+    Sort sort = Sort.by(new Sort.Order(direction, DEFAULT_SORT_FIELD));
+
+    // What we are really looking for here are users who have a FC account.
+    // This should exist if they have signed in at least once
+    List<DbUser> users =
+        userService.findUsersBySearchString(term, sort, accessTierShortName).stream()
+            .filter(user -> user.getFirstSignInTime() != null)
+            .collect(Collectors.toList());
+
+    return processSearchResults(term, pageSize, response, paginationToken, users);
+  }
+
+  private UserResponse initializeUserResponse() {
+    UserResponse response = new UserResponse();
+    response.setUsers(Collections.emptyList());
+    response.setNextPageToken("");
+    return response;
+  }
+
+  private ResponseEntity<UserResponse> processSearchResults(
+      String term,
+      Integer pageSize,
+      UserResponse response,
+      PaginationToken paginationToken,
+      List<DbUser> users) {
     List<List<DbUser>> pagedUsers =
         Lists.partition(users, Optional.ofNullable(pageSize).orElse(DEFAULT_PAGE_SIZE));
 
