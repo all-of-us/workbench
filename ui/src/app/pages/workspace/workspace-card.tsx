@@ -128,7 +128,6 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
   </PopupTrigger>;
 };
 
-// data-test-id='workspace-card-menu
 interface WorkspaceCardState {
   bugReportError: string;
   bugReportOpen: boolean;
