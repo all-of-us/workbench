@@ -124,7 +124,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
       </React.Fragment>
     }
   >
-    <SnowmanButton data-test-id='workspace-card-menu'/>
+    <SnowmanButton style={{marginLeft: 0}} data-test-id='workspace-card-menu'/>
   </PopupTrigger>;
 };
 

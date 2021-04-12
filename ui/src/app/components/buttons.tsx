@@ -76,12 +76,6 @@ export const styles = reactStyles({
      * choppy transition. This constant will need to be increased or made dynamic
      * if we decide to use longer expanded messages. */
     maxWidth: '200px'
-  },
-
-  snowmanIcon: {
-    marginLeft: -9,
-    width: '21px',
-    height: '21px'
   }
 });
 
@@ -256,14 +250,15 @@ export const IconButton = ({icon, style = {}, tooltip = '', disabled = false, ..
   </TooltipTrigger>;
 };
 
-export const SnowmanButton = ({disabled = false, ...props}) => {
+export const SnowmanButton = ({disabled = false, style = {}, ...props}) => {
   return <Clickable disabled={disabled} {...props} propagateDataTestId={true}>
     <SnowmanIcon
-      style={{marginLeft: '0px'}}
+      style={style}
       disabled={disabled}
     />
   </Clickable>;
 };
+
 const cardButtonBase = {
   style: {
     alignItems: 'flex-start', alignContent: 'left', fontWeight: 500,
