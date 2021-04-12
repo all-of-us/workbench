@@ -1,10 +1,8 @@
 package org.pmiops.workbench.db.dao;
 
-import com.google.common.collect.ImmutableMap;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
@@ -61,20 +59,13 @@ public interface BillingProjectBufferEntryDao
 
   Long countByStatus(short status);
 
-  default Map<BufferEntryStatus, Long> getCountByStatusMap() {
-    return computeProjectCountByStatus().stream()
-        .collect(
-            ImmutableMap.toImmutableMap(
-                StatusToCountResult::getStatusEnum, StatusToCountResult::getNumProjects));
-  }
-
   @Query(
       value =
-          "select status, count(billing_project_buffer_entry_id) as numpNrojects\n"
-              + "    from DbBillingProjectBufferEntry \n"
-              + "group by status\n"
-              + "order by status")
-  List<StatusToCountResult> computeProjectCountByStatus();
+          "select status, accessTier, count(entry.id) as numpNrojects\n"
+              + "    from DbBillingProjectBufferEntry entry \n"
+              + "group by status, accessTier\n"
+              + "order by status, accessTier")
+  List<StatusPerTierCount> computeProjectCountByStatus();
 
   @Query(value = "SELECT GET_LOCK('" + ASSIGNING_LOCK + "', 1)", nativeQuery = true)
   int acquireAssigningLock();
@@ -104,10 +95,13 @@ public interface BillingProjectBufferEntryDao
       @Param("workspaceStatus") short workspaceStatus,
       @Param("migrationStatus") short migrationStatus);
 
-  interface StatusToCountResult {
+  interface StatusPerTierCount {
+
     short getStatus();
 
     long getNumProjects();
+
+    String getAccessTierShortName();
 
     default BufferEntryStatus getStatusEnum() {
       return DbStorageEnums.billingProjectBufferEntryStatusFromStorage(getStatus());
