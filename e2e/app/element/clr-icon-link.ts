@@ -22,7 +22,7 @@ export default class ClrIconLink extends BaseElement {
    */
   async isDisabled(): Promise<boolean> {
     const selector = `${this.xpath}/ancestor::node()[1]`;
-    const elemt = await this.page.waitForXPath(selector, { visible: true });
-    return ClrIconLink.asBaseElement(this.page, elemt).isCursorNotAllowed();
+    const element = await this.page.waitForXPath(selector, { visible: true });
+    return ClrIconLink.asBaseElement(this.page, element).isCursorNotAllowed();
   }
 }

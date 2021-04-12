@@ -107,6 +107,10 @@ export default abstract class BaseHelpSidebar extends Container {
         { polling: 'mutation' },
         this.deleteIconXpath
       )
-    ]);
+    ]).catch((err) => {
+      logger.error('waitUntilClose() failed');
+      logger.error(err);
+      throw new Error(err);
+    });
   }
 }

@@ -3,6 +3,7 @@ import Container from 'app/container';
 import { ElementType, XPathOptions } from 'app/xpath-options';
 import BaseElement from './base-element';
 import { buildXPath } from 'app/xpath-builders';
+import { logger } from 'libs/logger';
 
 export default class Button extends BaseElement {
   /**
@@ -43,7 +44,9 @@ export default class Button extends BaseElement {
         selector
       )
       .catch((err) => {
-        throw err;
+        logger.error(`waitUntilEnabled() failed: xpath=${selector}`);
+        logger.error(err);
+        throw new Error(err);
       });
   }
 }

@@ -1,6 +1,7 @@
 import { ClickOptions, ElementHandle, Page, WaitForSelectorOptions } from 'puppeteer';
 import Container from 'app/container';
 import { getAttrValue, getPropValue } from 'utils/element-utils';
+import { logger } from 'libs/logger';
 
 /**
  * BaseElement represents a web element in the DOM.
@@ -33,8 +34,8 @@ export default class BaseElement extends Container {
     try {
       return this.page.waitForXPath(this.xpath, waitOptions).then((elemt) => (this.element = elemt.asElement()));
     } catch (err) {
-      console.error(`waitForXpath('${this.xpath}') failed`);
-      console.error(err);
+      logger.error(`waitForXpath('${this.xpath}') failed`);
+      logger.error(err);
       // Debugging pause
       // await jestPuppeteer.debug();
       throw new Error(err);

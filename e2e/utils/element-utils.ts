@@ -1,4 +1,5 @@
 import { ElementHandle, JSHandle, Page } from 'puppeteer';
+import { logger } from '../libs/logger';
 
 /**
  * Gets the attribute value.
@@ -32,7 +33,13 @@ export async function getPropValue<T>(element: ElementHandle, property: string):
  * @param {ElementHandle} element Element.
  */
 export async function waitUntilChanged(page: Page, element: ElementHandle): Promise<JSHandle> {
-  return page.waitForFunction((elemt) => !elemt.ownerDocument.contains(elemt), { polling: 'raf' }, element);
+  return page
+    .waitForFunction((elemt) => !elemt.ownerDocument.contains(elemt), { polling: 'raf' }, element)
+    .catch((err) => {
+      logger.error('waitUntilChanged() failed');
+      logger.error(err);
+      throw new Error(err);
+    });
 }
 
 export async function matchText(page: Page, cssSelector: string, subString: string): Promise<boolean> {

@@ -1,15 +1,13 @@
 import Checkbox from 'app/element/checkbox';
-import Link from 'app/element/link';
 import RadioButton from 'app/element/radiobutton';
 import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
 import GoogleLoginPage from 'app/page/google-login';
-import HomePage, { LabelAlias } from 'app/page/home-page';
+import HomePage from 'app/page/home-page';
 import { ElementType, XPathOptions } from 'app/xpath-options';
 import * as fs from 'fs';
 import * as fp from 'lodash/fp';
 import { ElementHandle, Page } from 'puppeteer';
-import { waitForText } from 'utils/waits-utils';
 import WorkspaceCard from 'app/component/workspace-card';
 import { PageUrl, WorkspaceAccessLevel } from 'app/text-labels';
 import WorkspacesPage from 'app/page/workspaces-page';
@@ -23,7 +21,13 @@ export async function signIn(page: Page, userId?: string, passwd?: string): Prom
   const loginPage = new GoogleLoginPage(page);
   await loginPage.login(userId, passwd);
   // This element exists in DOM after user has logged in. But it could takes a while.
-  await page.waitForFunction(() => !!document.querySelector('app-signed-in'), { timeout: 30000 });
+  await page
+    .waitForFunction(() => !!document.querySelector('app-signed-in'), { timeout: 30000 })
+    .catch((err) => {
+      logger.error('signIn() failed while waiting for "app-signed-in" element');
+      logger.error(err);
+      throw new Error(err);
+    });
   const homePage = new HomePage(page);
   await homePage.waitForLoad();
 }
@@ -71,68 +75,12 @@ export async function signInWithAccessToken(page: Page, tokenFilename = config.u
 }
 
 /**
- * <pre>
- * Wait while the page is loading (spinner is spinning and visible). Waiting stops when spinner stops spinning or when timed out.
- * It usually indicates the page is ready for user interaction.
- * </pre>
- */
-export async function waitWhileLoading(page: Page, timeOut?: number): Promise<void> {
-  const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
-  const spinElementsSelector = '[style*="running spin"], .spinner:empty, [style*="running rotation"]';
-
-  await Promise.race([
-    // To prevent checking on blank page, wait for elements exist in DOM.
-    page.waitForSelector(notBlankPageSelector),
-    page.waitForSelector(spinElementsSelector)
-  ]);
-
-  // Wait for spinners stop and gone.
-  await page.waitForFunction(
-    (css) => {
-      const elements = document.querySelectorAll(css);
-      return elements && elements.length === 0;
-    },
-    { polling: 'mutation', timeout: timeOut },
-    spinElementsSelector
-  );
-}
-
-/**
  * Is there a element located by CSS selector?
  * @param page Puppeteer.Page
  * @param selector CSS selector
  */
 export async function exists(page: Page, selector: string): Promise<boolean> {
   return !!(await page.$(`${selector}`));
-}
-
-export async function newUserRegistrationSelfBypass(page: Page): Promise<void> {
-  const selfBypassXpath = '//*[@data-test-id="self-bypass"]';
-  await Promise.race([
-    page.waitForXPath(selfBypassXpath, { visible: true, timeout: 60000 }),
-    Link.findByName(page, { name: LabelAlias.SeeAllWorkspaces })
-  ]);
-
-  // check to see if it is the Self-Bypass link
-  const bypassLink = await page.$x(selfBypassXpath);
-  if (bypassLink.length === 0) {
-    return;
-  }
-
-  // Click Self-Bypass button to continue
-  const selfBypass = await page.waitForXPath(`${selfBypassXpath}//div[@role="button"]`, { visible: true });
-  await selfBypass.click();
-  try {
-    await waitWhileLoading(page);
-  } catch (timeouterr) {
-    // wait more if 60 seconds wait time wasn't enough.
-    await waitWhileLoading(page);
-  }
-  await waitForText(page, 'Bypass action is complete. Reload the page to continue.', {
-    css: '[data-test-id="self-bypass"]'
-  });
-  await page.reload({ waitUntil: ['networkidle0', 'domcontentloaded'] });
-  await waitWhileLoading(page);
 }
 
 /**
