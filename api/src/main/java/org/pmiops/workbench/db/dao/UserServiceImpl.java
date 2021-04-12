@@ -234,7 +234,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         user.getBetaAccessBypassTime() != null || !configProvider.get().access.enableBetaAccess;
     boolean twoFactorAuthComplete =
         user.getTwoFactorAuthCompletionTime() != null || user.getTwoFactorAuthBypassTime() != null;
-
     // TODO: can take out other checks once we're entirely moved over to the 'module' columns
     return !user.getDisabled()
         && complianceTrainingCompliant
@@ -499,6 +498,17 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         newBypassTime,
         DbUser::setTwoFactorAuthBypassTime,
         BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME);
+  }
+
+  @Override
+  public void setRasLinkLoginGovBypassTime(
+      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime) {
+    setBypassTimeWithRetries(
+        userId,
+        previousBypassTime,
+        newBypassTime,
+        DbUser::setRasLinkLoginGovBypassTime,
+        BypassTimeTargetProperty.RAS_LINK_LOGIN_GOV);
   }
 
   /**
@@ -913,6 +923,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       case TWO_FACTOR_AUTH:
         previousBypassTime = user.getTwoFactorAuthBypassTime();
         setTwoFactorAuthBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
+        break;
+      case RAS_LINK_LOGIN_GOV:
+        previousBypassTime = user.getRasLinkLoginGovBypassTime();
+        setRasLinkLoginGovBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
         break;
       default:
         throw new BadRequestException(

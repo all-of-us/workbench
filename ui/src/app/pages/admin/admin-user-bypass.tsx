@@ -50,6 +50,7 @@ const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
     ...(user.dataUseAgreementBypassTime ? [AccessModule.DATAUSEAGREEMENT] : []),
     ...(user.eraCommonsBypassTime ? [AccessModule.ERACOMMONS] : []),
     ...(user.twoFactorAuthBypassTime ? [AccessModule.TWOFACTORAUTH] : []),
+    ...(user.rasLinkLoginGovBypassTime ? [AccessModule.RASLINKLOGINGOV] : []),
   ];
 };
 
@@ -125,7 +126,8 @@ export class AdminUserBypass extends React.Component<Props, State> {
     const {enableBetaAccess,
       enableComplianceTraining,
       enableEraCommons,
-      enableDataUseAgreement} = serverConfigStore.getValue();
+      enableDataUseAgreement,
+      enableRasLoginGovLinking} = serverConfigStore.getValue();
     return <PopupTrigger
         ref={this.popupRef}
         side='bottom'
@@ -167,6 +169,12 @@ export class AdminUserBypass extends React.Component<Props, State> {
                   data-test-id='data-use-agreement-toggle'
                   onToggle={() => {this.setState({selectedModules:
                     fp.xor(selectedModules, [AccessModule.DATAUSEAGREEMENT])}); }}
+          />}
+          {enableRasLoginGovLinking && <Toggle name='RAS Login.gov Link'
+                                       checked={selectedModules.includes(AccessModule.RASLINKLOGINGOV)}
+                                       data-test-id='ras-link-login-gov-toggle'
+                                       onToggle={() => {this.setState({selectedModules:
+                                             fp.xor(selectedModules, [AccessModule.RASLINKLOGINGOV])}); }}
           />}
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
             <IconButton icon='times'

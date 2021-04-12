@@ -318,7 +318,8 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
       AccessModule.ERACOMMONS,
       AccessModule.TWOFACTORAUTH,
       AccessModule.DATAUSEAGREEMENT,
-      AccessModule.BETAACCESS
+      AccessModule.BETAACCESS,
+      AccessModule.RASLINKLOGINGOV,
     ];
 
     for (const module of modules) {

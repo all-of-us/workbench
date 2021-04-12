@@ -140,6 +140,10 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
 
     Timestamp getTwoFactorAuthCompletionTime();
 
+    Timestamp getRasLinkLoginGovBypassTime();
+
+    Timestamp getRasLinkLoginGovCompletionTime();
+
     String getAccessTierShortNames();
   }
 
@@ -157,6 +161,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "u.era_commons_bypass_time, u.era_commons_completion_time, "
               + "u.id_verification_bypass_time, u.id_verification_completion_time, "
               + "u.two_factor_auth_bypass_time, u.two_factor_auth_completion_time, "
+              + "u.ras_link_login_gov_bypass_time, u.ras_link_login_gov_completion_time, "
               + "t.access_tier_short_names "
               + "FROM user u "
               + "LEFT JOIN user_verified_institutional_affiliation AS uvia ON u.user_id = uvia.user_id "
