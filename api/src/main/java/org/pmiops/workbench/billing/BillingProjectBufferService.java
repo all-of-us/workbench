@@ -21,7 +21,6 @@ import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
-import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao.ProjectCountByStatusAndTier;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
@@ -90,17 +89,15 @@ public class BillingProjectBufferService implements GaugeDataCollector {
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    final List<ProjectCountByStatusAndTier> projectCountByStatusAndTier =
-        billingProjectBufferEntryDao.getBillingBufferGaugeData();
-
-    return projectCountByStatusAndTier.stream()
+    return billingProjectBufferEntryDao.getBillingBufferGaugeData().stream()
         .map(
             projects ->
                 MeasurementBundle.builder()
                     .addMeasurement(
                         GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, projects.getNumProjects())
                     .addTag(MetricLabel.BUFFER_ENTRY_STATUS, projects.getStatusEnum().toString())
-                    .addTag(MetricLabel.ACCESS_TIER, projects.getAccessTier().getShortName())
+                    .addTag(
+                        MetricLabel.ACCESS_TIER_SHORT_NAME, projects.getAccessTier().getShortName())
                     .build())
         .collect(Collectors.toList());
   }

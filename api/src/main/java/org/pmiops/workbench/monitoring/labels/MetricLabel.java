@@ -12,7 +12,7 @@ import org.pmiops.workbench.utils.Enums;
  * Some CamelCase labels have been grandfathered in.
  */
 public enum MetricLabel implements MetricLabelBase {
-  ACCESS_TIER("AccessTier"),
+  ACCESS_TIER_SHORT_NAME("access_tier_short_name"),
   BUFFER_ENTRY_STATUS("BufferEntryStatus", Enums.getValueStrings(BufferEntryStatus.class)),
   CRON_JOB_NAME("cron_job_name"),
   CRON_JOB_SUCCEEDED("cron_job_completion_status", Booleans.VALUE_STRINGS),
