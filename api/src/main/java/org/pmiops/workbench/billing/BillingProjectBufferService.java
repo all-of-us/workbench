@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -21,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
+import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao.ProjectCountByStatusAndTier;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
@@ -89,7 +91,45 @@ public class BillingProjectBufferService implements GaugeDataCollector {
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    return billingProjectBufferEntryDao.getBillingBufferGaugeData().stream()
+    // experiment: do we need to count values for all categories?
+
+    List<ProjectCountByStatusAndTier> data =
+        billingProjectBufferEntryDao.getBillingBufferGaugeData();
+
+    System.out.println("data len = " + data.size());
+
+    List<ProjectCountByStatusAndTier> data2 = new ArrayList<>();
+    for (BufferEntryStatus x : BufferEntryStatus.values()) {
+      for (DbAccessTier y : accessTierService.getAllTiers()) {
+        ProjectCountByStatusAndTier entry =
+            data.stream()
+                .filter(z -> z.getStatusEnum().equals(x) && z.getAccessTier().equals(y))
+                .findAny()
+                .orElse(
+                    new ProjectCountByStatusAndTier() {
+                      @Override
+                      public long getNumProjects() {
+                        return 0;
+                      }
+
+                      @Override
+                      public short getStatus() {
+                        return DbStorageEnums.billingProjectBufferEntryStatusToStorage(x);
+                      }
+
+                      @Override
+                      public DbAccessTier getAccessTier() {
+                        return y;
+                      }
+                    });
+
+        data2.add(entry);
+      }
+    }
+
+    System.out.println("data2 len = " + data2.size());
+
+    return data2.stream()
         .map(
             projects ->
                 MeasurementBundle.builder()
