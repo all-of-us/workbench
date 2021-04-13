@@ -97,7 +97,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
                         GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, projects.getNumProjects())
                     .addTag(MetricLabel.BUFFER_ENTRY_STATUS, projects.getStatusEnum().toString())
                     .addTag(
-                        MetricLabel.ACCESS_TIER_SHORT_NAMES, projects.getAccessTier().getShortName())
+                        MetricLabel.ACCESS_TIER_SHORT_NAME, projects.getAccessTier().getShortName())
                     .build())
         .collect(Collectors.toList());
   }
