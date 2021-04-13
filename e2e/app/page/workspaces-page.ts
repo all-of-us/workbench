@@ -4,7 +4,7 @@ import { Language, LinkText, PageUrl } from 'app/text-labels';
 import WorkspaceEditPage, { FIELD as EDIT_FIELD } from 'app/page/workspace-edit-page';
 import RadioButton from 'app/element/radiobutton';
 import { findOrCreateWorkspace } from 'utils/test-utils';
-import { waitForDocumentTitle, waitForText, waitWhileLoading } from 'utils/waits-utils';
+import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import ReactSelect from 'app/element/react-select';
 import WorkspaceDataPage from './workspace-data-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
@@ -108,8 +108,9 @@ export default class WorkspacesPage extends AuthenticatedPage {
     reviewRequest = false
   ): Promise<WorkspaceEditPage> {
     const editPage = await this.clickCreateNewWorkspace();
-    // wait for Billing Account default selected value
-    await waitForText(this.page, UseFreeCredits);
+    // wait for Billing Account default selected value to appear
+    const selectBilling = editPage.getBillingAccountSelect();
+    await selectBilling.waitForSelectedValue(UseFreeCredits);
 
     await editPage.getWorkspaceNameTextbox().type(workspaceName);
     await editPage.getWorkspaceNameTextbox().pressTab();

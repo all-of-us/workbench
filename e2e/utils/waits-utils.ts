@@ -326,9 +326,9 @@ export async function waitForText(
       await page.waitForSelector(selector.css, { visible: true, timeout });
       const jsHandle = await page.waitForFunction(
         (css, expText) => {
-          const element = document.querySelector(css);
           const regExp = new RegExp(expText);
-          return element != null && regExp.test(element.textContent);
+          const element = document.querySelector(css);
+          return element && regExp.test(element.textContent);
         },
         { timeout },
         selector.css,
@@ -346,10 +346,10 @@ export async function waitForText(
       await page.waitForXPath(selector.xpath, { visible: true, timeout });
       const jsHandle = await page.waitForFunction(
         (xpath, expText) => {
+          const regExp = new RegExp(expText);
           const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
             .singleNodeValue;
-          const regExp = new RegExp(expText);
-          return element != null && regExp.test(element.textContent);
+          return element && regExp.test(element.textContent);
         },
         { timeout },
         selector.xpath,
