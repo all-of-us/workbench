@@ -1558,47 +1558,50 @@ FROM
     ) a
 LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.gender_concept_id = b.concept_id"
 
-echo "DEMOGRAPHICS - Sex at Birth"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-    (
-          id
-        , parent_id
-        , domain_id
-        , is_standard
-        , type
-        , concept_id
-        , name
-        , rollup_count
-        , item_count
-        , est_count
-        , is_group
-        , is_selectable
-        , has_attribute
-        , has_hierarchy
-    )
-SELECT
-    ROW_NUMBER() OVER(ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
-    , 0
-    , 'PERSON'
-    , 1
-    , 'SEX'
-    , concept_id
-    , CASE WHEN b.concept_id = 0 THEN 'Unknown' ELSE b.concept_name END as name
-    , 0
-    , a.cnt
-    , a.cnt
-    , 0
-    , 1
-    , 0
-    , 0
-FROM
-    (
-        SELECT sex_at_birth_concept_id, COUNT(DISTINCT person_id) cnt
-        FROM \`$BQ_PROJECT.$BQ_DATASET.person\`
-        GROUP BY 1
-    ) a
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.sex_at_birth_concept_id = b.concept_id"
+if [ "$DATA_BROWSER" == false ]
+then
+  echo "DEMOGRAPHICS - Sex at Birth"
+  bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+  "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+      (
+            id
+          , parent_id
+          , domain_id
+          , is_standard
+          , type
+          , concept_id
+          , name
+          , rollup_count
+          , item_count
+          , est_count
+          , is_group
+          , is_selectable
+          , has_attribute
+          , has_hierarchy
+      )
+  SELECT
+      ROW_NUMBER() OVER(ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
+      , 0
+      , 'PERSON'
+      , 1
+      , 'SEX'
+      , concept_id
+      , CASE WHEN b.concept_id = 0 THEN 'Unknown' ELSE b.concept_name END as name
+      , 0
+      , a.cnt
+      , a.cnt
+      , 0
+      , 1
+      , 0
+      , 0
+  FROM
+      (
+          SELECT sex_at_birth_concept_id, COUNT(DISTINCT person_id) cnt
+          FROM \`$BQ_PROJECT.$BQ_DATASET.person\`
+          GROUP BY 1
+      ) a
+  LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.sex_at_birth_concept_id = b.concept_id"
+fi
 
 echo "DEMOGRAPHICS - Race"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
