@@ -1,6 +1,5 @@
 import * as React from 'react';
-import {Clickable, MenuItem} from './buttons';
-import {SnowmanIcon} from './icons';
+import {MenuItem, SnowmanButton} from './buttons';
 import {PopupTrigger, TooltipTrigger} from './popups';
 
 interface Action {
@@ -33,9 +32,7 @@ const ResourceActionsMenu = (props: { actions: Action[] }) => {
             </React.Fragment>
         }
     >
-        <Clickable data-test-id='resource-menu'>
-            <SnowmanIcon disabled={false}/>
-        </Clickable>
+        <SnowmanButton data-test-id='resource-menu'/>
     </PopupTrigger>;
 };
 export {

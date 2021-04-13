@@ -1,5 +1,6 @@
 import {styles as cardStyles} from 'app/components/card';
 import {ClrIcon} from 'app/components/icons';
+import {SnowmanIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {IconComponent} from 'app/icons/icon';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
@@ -8,6 +9,7 @@ import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as Interactive from 'react-interactive';
+
 
 export const styles = reactStyles({
   baseNew: {
@@ -245,6 +247,12 @@ export const IconButton = ({icon, style = {}, tooltip = '', disabled = false, ..
       <IconComponent icon={icon} disabled={disabled} style={style}/>
     </Clickable>
   </TooltipTrigger>;
+};
+
+export const SnowmanButton = ({disabled = false, style = {}, ...props}) => {
+  return <Clickable disabled={disabled} {...props} propagateDataTestId={true}>
+    <SnowmanIcon style={style} disabled={disabled}/>
+  </Clickable>;
 };
 
 const cardButtonBase = {

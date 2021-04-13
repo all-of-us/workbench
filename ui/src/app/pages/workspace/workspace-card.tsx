@@ -3,11 +3,11 @@ import * as React from 'react';
 import {ResourceType, UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 
 import {BugReportModal} from 'app/components/bug-report';
-import {Button, Clickable, MenuItem} from 'app/components/buttons';
+import {Button, Clickable, MenuItem, SnowmanButton} from 'app/components/buttons';
 import {WorkspaceCardBase} from 'app/components/card';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {ClrIcon, SnowmanIcon} from 'app/components/icons';
+import {ClrIcon} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -65,7 +65,6 @@ interface WorkspaceCardMenuProps {
 }
 
 const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
-  disabled,
   workspace,
   accessLevel,
   onShare,
@@ -125,12 +124,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
       </React.Fragment>
     }
   >
-    <Clickable disabled={disabled} data-test-id='workspace-card-menu'>
-      <SnowmanIcon
-        style={{marginLeft: '0px'}}
-        disabled={disabled}
-      />
-    </Clickable>
+    <SnowmanButton style={{marginLeft: 0}} data-test-id='workspace-card-menu'/>
   </PopupTrigger>;
 };
 
