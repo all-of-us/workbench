@@ -15,7 +15,7 @@ import {Subscription} from 'rxjs/Subscription';
 import {faCircle} from '@fortawesome/free-solid-svg-icons/faCircle';
 import {faSyncAlt} from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import {SelectionList} from 'app/cohort-search/selection-list/selection-list.component';
-import {FlexRow} from 'app/components/flex';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {TooltipTrigger} from 'app/components/popups';
 import {PopupTrigger} from 'app/components/popups';
 import {RuntimePanel} from 'app/pages/analysis/runtime-panel';
@@ -142,8 +142,6 @@ const styles = reactStyles({
     color: colors.primary
   },
   footer: {
-    position: 'absolute',
-    bottom: 0,
     padding: '1.25rem 0.75rem',
     background: colorWithWhiteness(colors.primary, .8),
   },
@@ -270,9 +268,9 @@ const iconConfigs = {
     faIcon: null,
     label: 'Cloud Icon',
     page: null,
-    style: {height: '22px', width: '22px', marginTop: '0.25rem'},
+    style: {height: '22px', width: '22px'},
     tooltip: 'Compute Configuration',
-    contentPadding: '1.25rem',
+    contentPadding: '0 1.25rem',
     contentWidthRem: '30',
     hideSidebarFooter: true
   }
@@ -593,6 +591,76 @@ export const HelpSidebar = fp.flow(
       return '14';
     }
 
+    renderSidebarContentHeader(activeIcon) {
+      const header = (activeIcon === 'help' &&
+          <h3 style={{...styles.sectionTitle, marginTop: 0, lineHeight: 1.75}}>
+              Help Tips
+          </h3>
+      ) || (activeIcon === 'runtime' &&
+          <div>
+              <h3 style={{...styles.sectionTitle, marginTop: 0, lineHeight: 1.75}}>Cloud analysis environment</h3>
+              <div style={{padding: '0.5rem 1rem'}}>
+                  Your analysis environment consists of an application and compute resources.
+                  Your cloud environment is unique to this workspace and not shared with other users.
+              </div>
+          </div>
+      ) || (activeIcon === 'notebooksHelp' &&
+          <h3 style={{...styles.sectionTitle, marginTop: 0}}>
+              Workspace storage
+          </h3>
+      ) || (activeIcon === 'annotations' &&
+          <div style={{fontSize: 18, color: colors.primary}}> Participant {this.state.participant.participantId}</div>
+      ) || (activeIcon === 'concepts' &&
+          <h3 style={styles.sectionTitle}>Selected Concepts</h3>
+      );
+
+      return <React.Fragment>
+        {!(activeIcon === 'criteria' || activeIcon === 'concept') && <FlexRow style={{justifyContent: 'space-between', padding: '0.5rem', paddingBottom: '0.25rem'}}>
+          {header}
+
+          <Clickable onClick={() => this.props.setSidebarState(false)}>
+            <img src={proIcons.times}
+                 style={{height: '27px', width: '17px'}}
+                 alt='Close'/>
+          </Clickable>
+        </FlexRow>}
+      </React.Fragment>;
+    }
+
+    renderSidebarContentBody(activeIcon) {
+      const contentStyle = (tab: string) => ({
+        padding: iconConfigs[tab].contentPadding || '0 0.5rem 5.5rem'
+      });
+
+      return <React.Fragment>
+        {activeIcon === 'help' && <div style={contentStyle('help')}>
+            <HelpTips allowSearch={true}
+                      onSearch={() => this.analyticsEvent('Search')}
+                      contentKey={this.props.helpContentKey}/>
+        </div>}
+        {activeIcon === 'notebooksHelp' && <div style={contentStyle('notebooksHelp')}>
+            <HelpTips allowSearch={false}
+                      contentKey={this.props.helpContentKey}/>
+        </div>}
+        {activeIcon === 'runtime' && <div style={contentStyle('runtime')}>
+          {<RuntimePanel onClose={() => this.props.setSidebarState(false)}/>}
+        </div>}
+        {activeIcon === 'annotations' && <div style={contentStyle('annotations')}>
+          {this.state.participant && <SidebarContent />}
+        </div>}
+        {activeIcon === 'criteria' && <div style={contentStyle('criteria')}>
+            <div style={{height: '100%', padding: '0.25rem 0.25rem 0rem'}}>
+              {!!currentCohortSearchContextStore.getValue() && <SelectionList back={() => this.props.setSidebarState(false)} selections={[]}/>}
+            </div>
+        </div>}
+        {activeIcon === 'concept' && <div style={contentStyle('concept')}>
+            <div style={{padding: '0.25rem 0.25rem 0rem'}}>
+              {!!currentConceptStore.getValue() && <ConceptListPage/>}
+            </div>
+        </div>}
+      </React.Fragment>;
+    }
+
     render() {
       const {concept, criteria, helpContentKey, notebookStyles, setSidebarState, workspace} = this.props;
       const {activeIcon, participant, tooltipId} = this.state;
@@ -634,53 +702,23 @@ export const HelpSidebar = fp.flow(
         </div>
         <div style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
           <div style={this.sidebarStyle} data-test-id='sidebar-content'>
-            {!(activeIcon === 'criteria' || activeIcon === 'concept') && <FlexRow style={styles.navIcons}>
-              <Clickable style={{marginRight: '1rem'}}
-                         onClick={() => setSidebarState(false)}>
-                <img src={proIcons.times}
-                     style={{height: '27px', width: '17px'}}
-                     alt='Close'/>
-              </Clickable>
-            </FlexRow>}
-            {activeIcon === 'help' && <div style={contentStyle('help')}>
-              <h3 style={{...styles.sectionTitle, marginTop: 0}}>
-                Help Tips
-              </h3>
-              <HelpTips allowSearch={true}
-                        onSearch={() => this.analyticsEvent('Search')}
-                        contentKey={helpContentKey}/>
-            </div>}
-            {activeIcon === 'notebooksHelp' && <div style={contentStyle('notebooksHelp')}>
-              <h3 style={{...styles.sectionTitle, marginTop: 0}}>
-                Workspace storage
-              </h3>
-              <HelpTips allowSearch={false}
-                        contentKey={helpContentKey}/>
-            </div>}
-            {activeIcon === 'runtime' && <div style={contentStyle('runtime')}>
-              {<RuntimePanel onClose={() => this.props.setSidebarState(false)}/>}
-            </div>}
-            {activeIcon === 'annotations' && <div style={contentStyle('annotations')}>
-              {participant && <SidebarContent />}
-            </div>}
-            {activeIcon === 'criteria' && <div style={contentStyle('criteria')}>
-              <div style={{height: '100%', padding: '0.25rem 0.25rem 0rem'}}>
-                {!!currentCohortSearchContextStore.getValue() && <SelectionList back={() => setSidebarState(false)} selections={[]}/>}
+
+            <FlexColumn style={{height: '100%'}}>
+              {this.renderSidebarContentHeader(activeIcon)}
+              <div style={{flex: 1}}>
+                {this.renderSidebarContentBody(activeIcon)}
               </div>
-            </div>}
-            {activeIcon === 'concept' && <div style={contentStyle('concept')}>
-              <div style={{padding: '0.25rem 0.25rem 0rem'}}>
-                {!!currentConceptStore.getValue() && <ConceptListPage/>}
-              </div>
-            </div>}
-            {(iconConfigs[activeIcon] || {}).hideSidebarFooter || <div style={styles.footer}>
-              <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
-              <p style={styles.contentItem}>
-                Visit our <StyledAnchorTag href={supportUrls.helpCenter}
-                                           target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
-                </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
-              </p>
-            </div>}
+
+              {(iconConfigs[activeIcon] || {}).hideSidebarFooter || <div style={{...styles.footer, alignSelf: 'flex-end'}}>
+                  <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
+                  <p style={styles.contentItem}>
+                      Visit our <StyledAnchorTag href={supportUrls.helpCenter}
+                                                 target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
+                  </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
+                  </p>
+              </div>}
+            </FlexColumn>
+
           </div>
         </div>
       </div>;
