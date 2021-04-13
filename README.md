@@ -529,4 +529,5 @@ implementation in this [document](api/docs/action-audit.md).
 ### Workbench Reporting Dataset
 To support analytics, we have a reporting pipeline that exports data to a BigQuery dataset. See the [wiki](https://github.com/all-of-us/workbench/wiki/Workbench-Reporting-Dataset-(WRD)) for details.
 
-
+### Monitoring, Alerts, and Dashboards
+The API server periodically records various metrics, powering Stackdriver dashboards and alerts.  See the [wiki](https://github.com/all-of-us/workbench/wiki/Monitoring,-Alerts,-and-Dashboards) for details.
