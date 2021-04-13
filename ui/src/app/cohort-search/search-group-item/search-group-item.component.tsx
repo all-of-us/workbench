@@ -295,7 +295,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
 
     get itemName() {
       const {item: {name, searchParameters, type}} = this.props;
-      if (type === Domain.FITBIT.toString() || type === Domain.WHOLEGENOMEVARIANT.toString()) {
+      if (type === Domain.FITBIT.toString()) {
         return !!name ? name : searchParameters[0].name;
       } else {
         const codeDisplay = searchParameters.length > 1 ? 'Codes' : 'Code';
@@ -308,7 +308,7 @@ export const SearchGroupItem = withCurrentWorkspace()(
       const {item: {count, modifiers, name, searchParameters, status, type}} = this.props;
       const {error, loading, paramListOpen, renaming} = this.state;
       const showCount = !loading && status !== 'hidden' && count !== undefined;
-      const hideEdit = type === Domain.FITBIT.toString() || type === Domain.WHOLEGENOMEVARIANT.toString() ||
+      const hideEdit = type === Domain.FITBIT.toString() ||
         (searchParameters[0] && searchParameters[0].type === CriteriaType.DECEASED.toString());
       const actionItems = [
         {label: 'Edit criteria name', command: () => this.setState({renaming: true})},

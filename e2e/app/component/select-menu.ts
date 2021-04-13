@@ -10,7 +10,7 @@ const defaultMenuXpath =
   '[.//*[contains(concat(" ", normalize-space(@class), " "), " p-input-overlay-visible ")]]';
 
 export default class SelectMenu extends BaseMenu {
-  static findByName(page: Page, xOpt: XPathOptions = {}, container?: Container): SelectMenu {
+  static async findByName(page: Page, xOpt: XPathOptions = {}, container?: Container): Promise<SelectMenu> {
     xOpt.type = ElementType.Dropdown;
     const menuXpath = buildXPath(xOpt, container);
     const selectMenu = new SelectMenu(page, menuXpath);
@@ -52,7 +52,7 @@ export default class SelectMenu extends BaseMenu {
    * Open Select dropdown.
    * @param {number} maxAttempts Default is 2.
    */
-  private async open(maxAttempts = 2): Promise<void> {
+  private async open(maxAttempts: number = 2): Promise<void> {
     const click = async () => {
       await this.toggle();
       const opened = await this.isOpen();

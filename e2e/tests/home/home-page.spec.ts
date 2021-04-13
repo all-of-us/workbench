@@ -46,7 +46,7 @@ describe('Home page ui tests', () => {
 
 async function checkCreateNewWorkspaceLink(): Promise<void> {
   const homePage = new HomePage(page);
-  const plusIcon = homePage.getCreateNewWorkspaceLink();
+  const plusIcon = await homePage.getCreateNewWorkspaceLink();
   expect(plusIcon).toBeTruthy();
   const classname = await plusIcon.getProperty<string>('className');
   expect(classname).toBe('is-solid');

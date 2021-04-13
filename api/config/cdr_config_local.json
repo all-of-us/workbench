@@ -10,7 +10,7 @@
     },
     {
       "accessTierId": 2,
-      "shortName": "controlled",
+      "shortName": "controlled_test",
       "displayName": "Fake Controlled Tier For Test/Local",
       "servicePerimeter": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test_2",
       "authDomainName": "all-of-us-test-prototype-3",
@@ -93,7 +93,7 @@
       "elasticIndexBaseName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
-      "accessTier": "controlled"
+      "accessTier": "controlled_test"
     },
     {
       "cdrVersionId": 6,

@@ -102,9 +102,6 @@ export function domainToTitle(domain: any): string {
     case Domain.FITBIT:
       domain = 'Fitbit';
       break;
-    case Domain.WHOLEGENOMEVARIANT:
-      domain = 'Whole Genome Variant';
-      break;
   }
   return domain;
 }

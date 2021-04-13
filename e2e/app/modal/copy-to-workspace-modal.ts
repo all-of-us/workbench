@@ -16,11 +16,11 @@ export default class CopyToWorkspaceModal extends Modal {
     return true;
   }
 
-  getDestinationTextbox(): Textbox {
+  async getDestinationTextbox(): Promise<Textbox> {
     return Textbox.findByName(this.page, { containsText: 'Destination' }, this);
   }
 
-  getNameTextbox(): Textbox {
+  async getNameTextbox(): Promise<Textbox> {
     return new Textbox(
       this.page,
       `${this.getXpath()}//*[contains(text(), "Name")]/ancestor::node()[1]/input[@type="text"]`
@@ -34,7 +34,7 @@ export default class CopyToWorkspaceModal extends Modal {
    */
   async beginCopyToAnotherWorkspace(workspaceName: string, newName?: string): Promise<void> {
     // Click dropdown trigger.
-    const destinationInput = this.getDestinationTextbox();
+    const destinationInput = await this.getDestinationTextbox();
     await destinationInput.click();
 
     // Select Workspace in dropdown
@@ -43,7 +43,7 @@ export default class CopyToWorkspaceModal extends Modal {
 
     // Type new name.
     if (newName !== undefined) {
-      const nameInput = this.getNameTextbox();
+      const nameInput = await this.getNameTextbox();
       await nameInput.type(newName);
     }
   }

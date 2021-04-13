@@ -6,7 +6,6 @@ import { buildXPath } from 'app/xpath-builders';
 import { ElementType } from 'app/xpath-options';
 import { waitForNumericalString } from 'utils/waits-utils';
 import BaseHelpSidebar from './base-help-sidebar';
-import { logger } from 'libs/logger';
 
 enum SectionSelectors {
   AttributesForm = '//*[@id="attributes-form"]',
@@ -20,7 +19,6 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
   }
 
   // Not implemented because it's not triggered to open by sidebar tab.
-  // eslint-disable-next-line @typescript-eslint/require-await
   async open(): Promise<void> {
     throw new Error('Do not use. Method not to be implemented.');
   }
@@ -28,13 +26,13 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
   async waitUntilVisible(): Promise<void> {
     await super.waitUntilVisible();
     const title = await this.getTitle();
-    logger.info(`"${title}" sidebar is opened`);
+    console.log(`"${title}" sidebar is opened`);
   }
 
   async getPhysicalMeasurementParticipantResult(filterSign: FilterSign, filterValue: number): Promise<string> {
     await this.waitUntilSectionVisible(SectionSelectors.AttributesForm);
 
-    const selectMenu = SelectMenu.findByName(this.page, { ancestorLevel: 0 }, this);
+    const selectMenu = await SelectMenu.findByName(this.page, { ancestorLevel: 0 }, this);
     await selectMenu.select(filterSign);
 
     const numberField = await this.page.waitForXPath(`${this.xpath}//input[@type="number"]`, { visible: true });
@@ -64,7 +62,7 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
     await this.clickButton(LinkText.ApplyModifiers);
     await this.waitUntilSectionVisible(SectionSelectors.ModifiersForm);
 
-    const selectMenu = SelectMenu.findByName(this.page, { name: 'Age At Event', ancestorLevel: 1 }, this);
+    const selectMenu = await SelectMenu.findByName(this.page, { name: 'Age At Event', ancestorLevel: 1 }, this);
     await selectMenu.select(filterSign);
     const numberField = await this.page.waitForXPath(`${this.xpath}//input[@type="number"]`, { visible: true });
     // Issue with Puppeteer type() function: typing value in this textbox doesn't always trigger change event. workaround is needed.
@@ -74,7 +72,7 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
     await this.page.keyboard.type(String(filterValue));
     await numberField.press('Tab', { delay: 200 });
 
-    let participantResult: string;
+    let participantResult;
     await this.clickButton(LinkText.Calculate);
     try {
       participantResult = await this.waitForParticipantResult();
@@ -85,6 +83,7 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
     }
     await this.clickButton(LinkText.ApplyModifiers);
     await this.waitUntilSectionVisible(SectionSelectors.SelectionList);
+    console.debug(`Age Modifier: ${filterSign} ${filterValue}  => number of participants: ${participantResult}`);
     return participantResult;
   }
 

@@ -8,7 +8,7 @@ import { buildXPath } from 'app/xpath-builders';
  * An input element.
  */
 export default class Textbox extends BaseElement {
-  static findByName(page: Page, xOpt: XPathOptions, container?: Container): Textbox {
+  static async findByName(page: Page, xOpt: XPathOptions, container?: Container): Promise<Textbox> {
     xOpt.type = ElementType.Textbox;
     const textboxXpath = buildXPath(xOpt, container);
     const textbox = new Textbox(page, textboxXpath);

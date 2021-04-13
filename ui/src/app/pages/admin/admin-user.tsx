@@ -513,14 +513,9 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
                 containerStyle={styles.textInputContainer}
             />
             <TextInputWithLabel
-                labelText={'Access tiers'}
-                placeholder={
-                  fp.flow(
-                    fp.map(fp.capitalize),
-                    fp.join(', '))
-                  (updatedProfile.accessTierShortNames)
-                }
-                inputId={'accessTiers'}
+                labelText={'Registration state'}
+                placeholder={fp.capitalize(updatedProfile.dataAccessLevel.toString())}
+                inputId={'registrationState'}
                 disabled={true}
                 inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
                 containerStyle={styles.textInputContainer}

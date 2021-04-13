@@ -5,7 +5,7 @@ import BaseElement from './base-element';
 import { buildXPath } from 'app/xpath-builders';
 
 export default class InputNumber extends BaseElement {
-  static findByName(page: Page, xOpt: XPathOptions, container?: Container): InputNumber {
+  static async findByName(page: Page, xOpt: XPathOptions, container?: Container): Promise<InputNumber> {
     xOpt.type = ElementType.Number;
     const xpath = buildXPath(xOpt, container);
     const input = new InputNumber(page, xpath);

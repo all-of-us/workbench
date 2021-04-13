@@ -8,7 +8,8 @@ import {
 import {Observable} from 'rxjs/Observable';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
-import {hasRegisteredAccess} from 'app/utils/access-tiers';
+import {hasRegisteredAccess} from 'app/utils';
+
 
 @Injectable()
 export class RegistrationGuard implements CanActivate, CanActivateChild {
@@ -18,7 +19,7 @@ export class RegistrationGuard implements CanActivate, CanActivateChild {
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
     return this.profileStorageService.profile$.flatMap((profile) => {
-      if (hasRegisteredAccess(profile.accessTierShortNames)) {
+      if (hasRegisteredAccess(profile.dataAccessLevel)) {
         return Observable.from([true]);
       } else {
         this.router.navigate(['/']);

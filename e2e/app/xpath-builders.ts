@@ -1,7 +1,7 @@
 import Container from 'app/container';
 import { ElementType, XPathOptions } from 'app/xpath-options';
 
-export function iframeXpath(label: string): string {
+export function iframeXpath(label: string) {
   return `//body[@id='body']//*[contains(@aria-label, '${label}')]//iframe`;
 }
 
@@ -16,7 +16,7 @@ export function buildXPath(xOpts: XPathOptions, container?: Container): string {
   // optional function parameters check
   if (type === 'icon') {
     if (iconShape === undefined) {
-      throw new Error('Incorrect XPathOptions configuration for Icon: set "iconShape" value.');
+      throw new Error(`Incorrect XPathOptions configuration for Icon: set "iconShape" value.`);
     }
   }
 
@@ -31,9 +31,7 @@ export function buildXPath(xOpts: XPathOptions, container?: Container): string {
   } else if (name !== undefined) {
     str = `[text()="${name}" or @aria-label="${name}" or @placeholder="${name}" or @value="${name}"]`;
   } else if (containsText !== undefined) {
-    str =
-      `[contains(text(), "${containsText}") or contains(@aria-label, "${containsText}") or ` +
-      `contains(@placeholder, "${containsText}")]`;
+    str = `[contains(text(), "${containsText}") or contains(@aria-label, "${containsText}") or contains(@placeholder, "${containsText}")]`;
   } else if (normalizeSpace !== undefined) {
     str = `[contains(normalize-space(), "${normalizeSpace}")]`;
   } else if (startsWith !== undefined) {
@@ -52,10 +50,8 @@ export function buildXPath(xOpts: XPathOptions, container?: Container): string {
       selector = `(${containerXpath}//button | ${containerXpath}//*[@role="button"])${str}`;
       break;
     case ElementType.Icon: // clickable icon
-      {
-        const tag = iconShape === undefined ? '*' : `clr-icon[@shape="${iconShape}"]`;
-        selector = `${textExpr}//${tag}[*[@role="img"]]`;
-      }
+      const tag = iconShape === undefined ? '*' : `clr-icon[@shape="${iconShape}"]`;
+      selector = `${textExpr}//${tag}[*[@role="img"]]`;
       break;
     case ElementType.Number:
     case ElementType.Checkbox:
@@ -77,9 +73,16 @@ export function buildXPath(xOpts: XPathOptions, container?: Container): string {
       selector = `//*[(@aria-selected | @tabindex) and @role="button" and text()="${name}"]`;
       break;
     default:
-      console.error(`Implement unhandled type: ${type}`);
+      console.debug(`Implement unhandled type: ${type}. 
+      XPathOptions configuration: 
+        "type": ${type}, 
+        "name": ${name}, 
+        "containsText": ${containsText}, 
+        "normalizeSpace: ${normalizeSpace}, 
+        "ancestorLevel": ${ancestorLevel}, 
+        "iconShape": ${iconShape}`);
       throw new Error(`Implement unhandled type: ${type}`);
   }
 
-  return selector;
+  return (this.xpath = selector);
 }

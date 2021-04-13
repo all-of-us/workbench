@@ -149,14 +149,6 @@ def ensure_docker(cmd_name, args=nil)
   end
 end
 
-def ensure_docker_with_ports(cmd_name, args=nil)
-  args = (args or [])
-  unless Workbench.in_docker?
-    ensure_docker_sync()
-    exec(*(%W{docker-compose run --service-ports --rm ports-scripts ./project.rb #{cmd_name}} + args))
-  end
-end
-
 def init_new_cdr_db(args)
   Common.new.run_inline %W{docker-compose run --rm cdr-scripts generate-cdr/init-new-cdr-db.sh} + args
 end
@@ -179,22 +171,19 @@ def ensure_docker_api(cmd_name, args)
   exit 1
 end
 
-def gcs_vars_path(project)
-  return "gs://#{project}-credentials/vars.env"
-end
-
 def read_db_vars(gcc)
   Workbench.assert_in_docker
+  vars_path = "gs://#{gcc.project}-credentials/vars.env"
   vars = Workbench.read_vars(Common.new.capture_stdout(%W{
-    gsutil cat #{gcs_vars_path(gcc.project)}
+    gsutil cat #{vars_path}
   }))
   if vars.empty?
-    Common.new.error "Failed to read #{gcs_vars_path(gcc.project)}"
+    Common.new.error "Failed to read #{vars_path}"
     exit 1
   end
   # Note: CDR project and target project may be the same.
   cdr_project = get_cdr_sql_project(gcc.project)
-  cdr_vars_path = gcs_vars_path(cdr_project)
+  cdr_vars_path = "gs://#{cdr_project}-credentials/vars.env"
   cdr_vars = Workbench.read_vars(Common.new.capture_stdout(%W{
     gsutil cat #{cdr_vars_path}
   }))
@@ -2390,7 +2379,7 @@ Common.register_command({
 })
 
 def connect_to_cloud_db(cmd_name, *args)
-  ensure_docker_with_ports cmd_name, args
+  ensure_docker cmd_name, args
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
@@ -2399,7 +2388,6 @@ def connect_to_cloud_db(cmd_name, *args)
     "Optional database user to connect as, defaults to 'dev-readonly'. " +
     "To perform mutations use 'workbench'. Avoid using 'root' unless " +
     "absolutely necessary.")
-
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
@@ -2427,13 +2415,11 @@ def connect_to_cloud_db(cmd_name, *args)
       common.status "Database session will be read-only; use --db-user to change this"
       common.status ""
     end
-    common.status "Fetch credentials from #{gcs_vars_path(gcc.project)} to connect through a different SQL tool"
     common.run_inline %W{
       mysql --host=127.0.0.1 --port=3307 --user=#{op.opts.db_user}
       --database=#{env["DB_NAME"]} --password=#{db_password}},
       db_password
   end
-
 end
 
 Common.register_command({

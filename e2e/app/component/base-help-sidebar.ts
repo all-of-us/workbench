@@ -4,7 +4,6 @@ import { LinkText, SideBarLink } from 'app/text-labels';
 import * as fp from 'lodash/fp';
 import { Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
-import { logger } from 'libs/logger';
 
 const enum Selectors {
   rootXpath = '//*[@id="help-sidebar"]',
@@ -16,7 +15,7 @@ const enum Selectors {
 export default abstract class BaseHelpSidebar extends Container {
   deleteIconXpath: string;
 
-  protected constructor(page: Page, xpath = `${Selectors.rootXpath}${Selectors.contentXpath}`) {
+  protected constructor(page: Page, xpath: string = `${Selectors.rootXpath}${Selectors.contentXpath}`) {
     super(page, xpath);
     this.deleteIconXpath = `${Selectors.rootXpath}${Selectors.contentXpath}${Selectors.closeIconXpath}`;
   }
@@ -58,7 +57,7 @@ export default abstract class BaseHelpSidebar extends Container {
    */
   async clickButton(buttonLabel: LinkText, waitOptions: { waitForClose?: boolean } = {}): Promise<void> {
     const { waitForClose = false } = waitOptions;
-    const button = Button.findByName(this.page, { normalizeSpace: buttonLabel }, this);
+    const button = await Button.findByName(this.page, { normalizeSpace: buttonLabel }, this);
     await button.waitUntilEnabled();
     await Promise.all(
       fp.flow(
@@ -78,7 +77,7 @@ export default abstract class BaseHelpSidebar extends Container {
     await closeButton.waitUntilEnabled();
     await closeButton.click();
     await this.waitUntilClose();
-    logger.info(`Closed "${sidePanelTitle}" sidebar panel`);
+    console.log(`Closed "${sidePanelTitle}" sidebar panel`);
   }
 
   async isVisible(): Promise<boolean> {
@@ -95,22 +94,7 @@ export default abstract class BaseHelpSidebar extends Container {
   }
 
   async waitUntilClose(): Promise<void> {
-    await Promise.all([
-      super.waitUntilClose(),
-      this.page.waitForXPath(this.deleteIconXpath, { hidden: true }),
-      this.page.waitForFunction(
-        (selector) => {
-          const node = document.evaluate(selector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-            .singleNodeValue;
-          return node === null;
-        },
-        { polling: 'mutation' },
-        this.deleteIconXpath
-      )
-    ]).catch((err) => {
-      logger.error('waitUntilClose() failed');
-      logger.error(err);
-      throw new Error(err);
-    });
+    await super.waitUntilClose();
+    await this.page.waitForXPath(this.deleteIconXpath, { hidden: true });
   }
 }

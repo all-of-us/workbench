@@ -66,7 +66,7 @@ export default abstract class BaseMenu extends Container {
   protected async getMenuItemTexts(selector: string): Promise<string[]> {
     await this.page.waitForXPath(selector, { visible: true });
     const menuItemLinks = await this.page.$x(selector);
-    const actionTextsArray: string[] = [];
+    const actionTextsArray = [];
     for (const element of menuItemLinks) {
       actionTextsArray.push(await getPropValue<string>(element, 'textContent'));
     }

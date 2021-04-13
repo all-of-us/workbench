@@ -1,6 +1,5 @@
 package org.pmiops.workbench.opsgenie;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.ifountain.opsgenie.client.swagger.ApiException;
 import com.ifountain.opsgenie.client.swagger.api.AlertApi;
@@ -19,9 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.Institution;
@@ -46,12 +43,6 @@ public class EgressEventServiceImpl implements EgressEventService {
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final UserService userService;
   private final WorkspaceAdminService workspaceAdminService;
-  private final WorkspaceDao workspaceDao;
-
-  // Workspace namespace placeholder in Egress alert when workspace namespace is missing.
-  // It may happens when workspace is deleted from db, or we are not able to retrieve workspace
-  // by google project id.
-  @VisibleForTesting static final String NOT_FOUND_WORKSPACE_NAMESPACE = "NOT_FOUND";
 
   @Autowired
   public EgressEventServiceImpl(
@@ -61,8 +52,7 @@ public class EgressEventServiceImpl implements EgressEventService {
       Provider<AlertApi> alertApiProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       UserService userService,
-      WorkspaceAdminService workspaceAdminService,
-      WorkspaceDao workspaceDao) {
+      WorkspaceAdminService workspaceAdminService) {
     this.clock = clock;
     this.egressEventAuditor = egressEventAuditor;
     this.institutionService = institutionService;
@@ -70,30 +60,16 @@ public class EgressEventServiceImpl implements EgressEventService {
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.userService = userService;
     this.workspaceAdminService = workspaceAdminService;
-    this.workspaceDao = workspaceDao;
   }
 
   @Override
   public void handleEvent(EgressEvent event) {
-    // Lookup workspace by googleProject name, and set the workspaceNamespace in EgressEvent.
-    Optional<DbWorkspace> dbWorkspaceMaybe =
-        workspaceDao.getByGoogleProject(event.getProjectName());
-    String workspaceNamespace;
-    if (!dbWorkspaceMaybe.isPresent()) {
-      logger.warning(
-          String.format(
-              "Workspace not found by given Google Project Id: %s", event.getProjectName()));
-      workspaceNamespace = NOT_FOUND_WORKSPACE_NAMESPACE;
-    } else {
-      workspaceNamespace = dbWorkspaceMaybe.get().getWorkspaceNamespace();
-    }
-
     logger.warning(
         String.format(
-            "Received an egress event from workspace namespace %s, googleProject %s (%.2fMiB, VM prefix %s)",
-            workspaceNamespace, event.getProjectName(), event.getEgressMib(), event.getVmPrefix()));
+            "Received an egress event from project %s (%.2fMiB, VM prefix %s)",
+            event.getProjectName(), event.getEgressMib(), event.getVmPrefix()));
     this.egressEventAuditor.fireEgressEvent(event);
-    this.createEgressEventAlert(event, workspaceNamespace);
+    this.createEgressEventAlert(event);
   }
 
   // Create (or potentially update) an OpsGenie alert for an egress event.
@@ -101,29 +77,27 @@ public class EgressEventServiceImpl implements EgressEventService {
     return this.alertApiProvider.get().createAlert(createAlertRequest);
   }
 
-  private void createEgressEventAlert(EgressEvent egressEvent, String workspaceNamespace) {
-    final CreateAlertRequest createAlertRequest =
-        egressEventToOpsGenieAlert(egressEvent, workspaceNamespace);
+  private void createEgressEventAlert(EgressEvent egressEvent) {
+    final CreateAlertRequest createAlertRequest = egressEventToOpsGenieAlert(egressEvent);
     try {
       final SuccessResponse response = createAlert(createAlertRequest);
       logger.info(
           String.format(
-              "Successfully created or updated Opsgenie alert for high-egress event on Google project %s, namespace %s (Opsgenie request ID %s)",
-              egressEvent.getProjectName(), workspaceNamespace, response.getRequestId()));
+              "Successfully created or updated Opsgenie alert for high-egress event on project %s (Opsgenie request ID %s)",
+              egressEvent.getProjectName(), response.getRequestId()));
     } catch (ApiException e) {
       logger.severe(
           String.format(
-              "Error creating Opsgenie alert for egress event on Google project %s, namespace %s : %s",
-              egressEvent.getProjectName(), workspaceNamespace, e.getMessage()));
+              "Error creating Opsgenie alert for egress event on project %s: %s",
+              egressEvent.getProjectName(), e.getMessage()));
       e.printStackTrace();
     }
   }
 
-  private CreateAlertRequest egressEventToOpsGenieAlert(
-      EgressEvent egressEvent, String workspaceNamespace) {
+  private CreateAlertRequest egressEventToOpsGenieAlert(EgressEvent egressEvent) {
     final CreateAlertRequest request = new CreateAlertRequest();
-    request.setMessage(String.format("High-egress event (%s)", workspaceNamespace));
-    request.setDescription(getDescription(egressEvent, workspaceNamespace));
+    request.setMessage(String.format("High-egress event (%s)", egressEvent.getProjectName()));
+    request.setDescription(getDescription(egressEvent));
 
     // Add a note with some more specific details about the alerting criteria and threshold. Notes
     // are appended to an existing Opsgenie ticket if this request is de-duplicated against an
@@ -139,14 +113,14 @@ public class EgressEventServiceImpl implements EgressEventService {
 
     // Set the alias, which is Opsgenie's string key for alert de-duplication. See
     // https://docs.opsgenie.com/docs/alert-deduplication
-    request.setAlias(workspaceNamespace + " | " + egressEvent.getVmPrefix());
+    request.setAlias(egressEvent.getProjectName() + " | " + egressEvent.getVmPrefix());
     return request;
   }
 
   @NotNull
-  private String getDescription(EgressEvent egressEvent, String workspaceNamespace) {
+  private String getDescription(EgressEvent egressEvent) {
     final WorkspaceAdminView adminWorkspace =
-        workspaceAdminService.getWorkspaceAdminView(workspaceNamespace);
+        workspaceAdminService.getWorkspaceAdminView(egressEvent.getProjectName());
     final Workspace workspace = adminWorkspace.getWorkspace();
     final String creatorDetails =
         userService
@@ -168,8 +142,8 @@ public class EgressEventServiceImpl implements EgressEventService {
     return String.format(
             "Workspace \"%s\", Age = %d Days\n",
             workspace.getName(), getAgeInDays(Instant.ofEpochMilli(workspace.getCreationTime())))
-        + String.format("Terra Billing Project/Firecloud Namespace: %s\n", workspaceNamespace)
-        + String.format("Google Project Id: %s\n", egressEvent.getProjectName())
+        + String.format(
+            "GCP Billing Project/Firecloud Namespace: %s\n", egressEvent.getProjectName())
         + String.format("Notebook server VM prefix: %s\n", egressEvent.getVmPrefix())
         + String.format("MySQL workspace_id: %d\n", adminWorkspace.getWorkspaceDatabaseId())
         + String.format(
@@ -187,7 +161,7 @@ public class EgressEventServiceImpl implements EgressEventService {
         + String.format("Collaborators: \n%s\n", collaboratorDetails)
         + String.format(
             "Workspace Admin Console (Prod Admin User): %s/admin/workspaces/%s/\n",
-            workbenchConfigProvider.get().server.uiBaseUrl, workspaceNamespace)
+            workbenchConfigProvider.get().server.uiBaseUrl, egressEvent.getProjectName())
         + "Playbook Entry: https://broad.io/aou-high-egress-event";
   }
 

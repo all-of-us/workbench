@@ -29,12 +29,12 @@ export default class ConceptSetSearchPage extends AuthenticatedPage {
     return modal.fillOutSaveModal(saveOption, existingConceptSetName);
   }
 
-  getAddToSetButton(): Button {
+  async getAddToSetButton(): Promise<Button> {
     return new Button(this.page, '//*[@data-test-id="sliding-button"]');
   }
 
   async clickAddToSetButton(): Promise<string> {
-    const addButton = this.getAddToSetButton();
+    const addButton = await this.getAddToSetButton();
     const textContent = addButton.getTextContent();
     await addButton.click();
     await waitWhileLoading(this.page);
@@ -58,7 +58,7 @@ export default class ConceptSetSearchPage extends AuthenticatedPage {
    *  The Code, Vocabulary and Participant Count values in same table row.
    */
   async dataTableSelectRow(
-    rowIndex = 1,
+    rowIndex: number = 1,
     selctionColumnIndex = 1
   ): Promise<{ name: string; code: string; vocabulary: string; participantCount: string }> {
     const dataTable = this.getDataTable();
@@ -108,7 +108,7 @@ export default class ConceptSetSearchPage extends AuthenticatedPage {
   }
 
   async reviewAndSaveConceptSet(): Promise<void> {
-    const finishAndReviewButton = Button.findByName(this.page, { name: LinkText.FinishAndReview });
+    const finishAndReviewButton = await Button.findByName(this.page, { name: LinkText.FinishAndReview });
     await finishAndReviewButton.waitUntilEnabled();
     await finishAndReviewButton.click();
 

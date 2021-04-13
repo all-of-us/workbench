@@ -53,7 +53,7 @@ describe('Share workspace', () => {
       const newPage = await signInAs(config.collaboratorUsername, config.userPassword);
 
       const homePage = new HomePage(newPage);
-      await homePage.getSeeAllWorkspacesLink().click();
+      await homePage.getSeeAllWorkspacesLink().then((link) => link.click());
 
       const workspacesPage1 = new WorkspacesPage(newPage);
       await workspacesPage1.waitForLoad();
@@ -107,7 +107,7 @@ describe('Share workspace', () => {
     const newPage = await signInAs(config.collaboratorUsername, config.userPassword);
 
     const homePage = new HomePage(newPage);
-    await homePage.getSeeAllWorkspacesLink().click();
+    await homePage.getSeeAllWorkspacesLink().then((link) => link.click());
 
     workspacesPage = new WorkspacesPage(newPage);
     await workspacesPage.waitForLoad();
@@ -126,7 +126,7 @@ describe('Share workspace', () => {
     const aboutPage = new WorkspaceAboutPage(newPage);
     await aboutPage.waitForLoad();
     const modal2 = await aboutPage.openShareModal();
-    const searchInput = modal2.waitForSearchBox();
+    const searchInput = await modal2.waitForSearchBox();
     expect(await searchInput.isDisabled()).toBe(true);
     await modal2.clickButton(LinkText.Cancel);
   });

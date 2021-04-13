@@ -5,7 +5,7 @@ import BaseElement from './base-element';
 import { buildXPath } from 'app/xpath-builders';
 
 export default class Link extends BaseElement {
-  static findByName(page: Page, xOpt: XPathOptions, container?: Container): Link {
+  static async findByName(page: Page, xOpt: XPathOptions, container?: Container): Promise<Link> {
     xOpt.type = ElementType.Link;
     const linkXpath = buildXPath(xOpt, container);
     const link = new Link(page, linkXpath);

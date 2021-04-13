@@ -1,6 +1,5 @@
 import {ReactWrapper} from 'enzyme';
 import {act} from 'react-dom/test-utils';
-import * as fp from 'lodash/fp';
 
 // This file is necessary because angular imports complain if there
 // is no zone, regardless of whether the imports are used.
@@ -20,14 +19,3 @@ export async function waitForFakeTimersAndUpdate(wrapper: ReactWrapper) {
   });
   await waitOneTickAndUpdate(wrapper);
 }
-
-// We only want to check against the actual text node
-// Capturing other nodes in this search will return the parent nodes as well as the text,
-// The "nodes" that exclusively have text do not have a node name and return null
-export const findNodesByExactText = fp.curry((wrapper: ReactWrapper, text) => wrapper.findWhere(node => {
-  return (node.name() === null && node.text() === text);
-}));
-
-export const findNodesContainingText = fp.curry((wrapper: ReactWrapper, text) => wrapper.findWhere(node => {
-  return (node.name() === null && fp.includes(text, node.text()));
-}));

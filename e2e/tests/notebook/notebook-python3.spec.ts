@@ -43,7 +43,7 @@ describe('Jupyter notebook tests in Python language', () => {
       await notebook.runCodeCell(3, { codeFile: 'resources/python-code/simple-pyplot.py' });
 
       // Verify plot is the output.
-      const cell = notebook.findCell(3);
+      const cell = await notebook.findCell(3);
       const cellOutputElement = await cell.findOutputElementHandle();
       const [imgElement] = await cellOutputElement.$x('./img[@src]');
       expect(imgElement).toBeTruthy(); // plot format is a img.

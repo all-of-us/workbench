@@ -8,7 +8,6 @@ import Textarea from 'app/element/textarea';
 import Textbox from 'app/element/textbox';
 import { Language, LinkText } from 'app/text-labels';
 import Modal from './modal';
-import { logger } from 'libs/logger';
 
 const modalTitleXpath =
   '//*[contains(normalize-space(),"Save Dataset") or contains(normalize-space(),"Update Dataset")]';
@@ -36,23 +35,24 @@ export default class DatasetSaveModal extends Modal {
    */
   async saveDataset(
     notebookOpts: { exportToNotebook?: boolean; notebookName?: string; lang?: Language } = {},
-    isUpdate = false
+    isUpdate: boolean = false
   ): Promise<string> {
     const { exportToNotebook = false, notebookName, lang = Language.Python } = notebookOpts;
     const newDatasetName = makeRandomName();
 
-    const nameTextbox = this.waitForTextbox('Dataset Name');
+    const nameTextbox = await this.waitForTextbox('Dataset Name');
     await nameTextbox.clearTextInput();
     await nameTextbox.type(newDatasetName);
 
     // Export to Notebook checkbox is checked by default
-    const exportCheckbox = this.waitForCheckbox('Export to notebook');
+    const exportCheckbox = await this.waitForCheckbox('Export to notebook');
 
     if (exportToNotebook) {
       // Export to notebook
       const notebookNameTextbox = new Textbox(this.page, `${this.getXpath()}//*[@data-test-id="notebook-name-input"]`);
       await notebookNameTextbox.type(notebookName);
-      const radioBtn = RadioButton.findByName(this.page, { name: lang, ancestorLevel: 0 }, this);
+      console.log(`Notebook language: ` + lang);
+      const radioBtn = await RadioButton.findByName(this.page, { name: lang, ancestorLevel: 0 }, this);
       await radioBtn.select();
     } else {
       // Not export to notebook
@@ -68,12 +68,12 @@ export default class DatasetSaveModal extends Modal {
     await waitWhileLoading(this.page);
 
     if (isUpdate) {
-      logger.info(`Updated Dataset "${newDatasetName}"`);
+      console.log(`Updated Dataset "${newDatasetName}"`);
     } else {
-      logger.info(`Created Dataset "${newDatasetName}"`);
+      console.log(`Created Dataset "${newDatasetName}"`);
     }
     if (exportToNotebook) {
-      logger.info(`Created Notebook "${notebookName}"`);
+      console.log(`Created Notebook "${notebookName}"`);
     }
     return newDatasetName;
   }
@@ -83,7 +83,7 @@ export default class DatasetSaveModal extends Modal {
    */
   async previewCode(): Promise<string> {
     // Click 'See Code Preview' button.
-    const previewButton = Button.findByName(this.page, { name: LinkText.SeeCodePreview }, this);
+    const previewButton = await Button.findByName(this.page, { name: LinkText.SeeCodePreview }, this);
     await previewButton.click();
     await waitUntilChanged(this.page, await previewButton.asElementHandle());
 

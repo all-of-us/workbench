@@ -71,6 +71,9 @@ public class SumoLogicControllerTest {
     event.setTimeWindowDuration(Duration.ofSeconds(300).getSeconds());
     event.setTimeWindowStart(Instant.now().toEpochMilli());
 
+    System.out.println("~~~~~~~~~~~");
+    System.out.println(objectMapper.writeValueAsString(Collections.singletonList(event)));
+
     request = new EgressEventRequest();
     request.setEventsJsonArray(objectMapper.writeValueAsString(Collections.singletonList(event)));
 

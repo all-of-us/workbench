@@ -2,7 +2,7 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {ProfileApi} from 'generated/fetch';
+import {DataAccessLevel, Profile, ProfileApi} from 'generated/fetch';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {serverConfigStore, userProfileStore} from 'app/utils/navigation';
 
@@ -19,7 +19,7 @@ import {cdrVersionListResponse} from "../../../testing/stubs/cdr-versions-api-st
 
 describe('HomepageComponent', () => {
 
-  const profile = ProfileStubVariables.PROFILE_STUB;
+  const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
   let profileApi: ProfileApiStub;
 
   const component = () => {
@@ -91,7 +91,7 @@ describe('HomepageComponent', () => {
   it('should show access tasks dashboard if the user is not registered', async () => {
     const newProfile = {
       ...profile,
-      accessTierShortNames: [],   // unregistered
+      dataAccessLevel: DataAccessLevel.Unregistered
     };
     serverConfigStore.next({...serverConfigStore.getValue()});
     userProfileStore.next({profile: newProfile, reload, updateCache});
@@ -106,7 +106,7 @@ describe('HomepageComponent', () => {
       dataUseAgreementBypassTime: null,
       dataUseAgreementCompletionTime: 1000,
       dataUseAgreementSignedVersion: 2, // Old version
-      accessTierShortNames: [],   // unregistered
+      dataAccessLevel: DataAccessLevel.Unregistered
     };
     serverConfigStore.next({...serverConfigStore.getValue()});
     userProfileStore.next({profile: newProfile, reload, updateCache});
@@ -123,7 +123,7 @@ describe('HomepageComponent', () => {
       dataUseAgreementBypassTime: null,
       dataUseAgreementCompletionTime: 1000,
       dataUseAgreementSignedVersion: 3, // Live version
-      accessTierShortNames: [],   // unregistered
+      dataAccessLevel: DataAccessLevel.Unregistered
     };
     serverConfigStore.next({...serverConfigStore.getValue()});
     userProfileStore.next({profile: newProfile, reload, updateCache});
@@ -137,7 +137,7 @@ describe('HomepageComponent', () => {
   it('should not display the quick tour if registration dashboard is open', async () => {
     const newProfile = {
       ...profile,
-      accessTierShortNames: [],   // unregistered
+      dataAccessLevel: DataAccessLevel.Unregistered
     };
     serverConfigStore.next({...serverConfigStore.getValue()});
     userProfileStore.next({profile: newProfile, reload, updateCache});

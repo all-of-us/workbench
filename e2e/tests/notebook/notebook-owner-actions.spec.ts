@@ -27,18 +27,18 @@ describe('Workspace owner Jupyter notebook action tests', () => {
       const notebookCard = await DataResourceCard.findCard(page, notebookName);
       expect(notebookCard).toBeTruthy();
 
-      await workspaceAnalysisPage.createNewNotebookLink().click();
+      await workspaceAnalysisPage.createNewNotebookLink().then((link) => link.click());
 
       const modal = new NewNotebookModal(page);
       await modal.waitForLoad();
 
-      await modal.name().type(notebookName);
+      await modal.name().then((textbox) => textbox.type(notebookName));
 
       const errorTextXpath = `${modal.getXpath()}//*[text()="Name already exists"]`;
       const errorExists = await page.waitForXPath(errorTextXpath, { visible: true });
       expect(errorExists.asElement()).not.toBeNull();
 
-      const createButton = modal.createNotebookButton();
+      const createButton = await modal.createNotebookButton();
       const disabledButton = await createButton.isCursorNotAllowed();
       expect(disabledButton).toBe(true);
 

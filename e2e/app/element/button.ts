@@ -3,7 +3,6 @@ import Container from 'app/container';
 import { ElementType, XPathOptions } from 'app/xpath-options';
 import BaseElement from './base-element';
 import { buildXPath } from 'app/xpath-builders';
-import { logger } from 'libs/logger';
 
 export default class Button extends BaseElement {
   /**
@@ -12,7 +11,7 @@ export default class Button extends BaseElement {
    * @param {Container} container Parent node if one exists. Normally, it is a Dialog or Modal window.
    * @param {WaitForSelectorOptions} waitOptions.
    */
-  static findByName(page: Page, xOpt: XPathOptions, container?: Container): Button {
+  static async findByName(page: Page, xOpt: XPathOptions, container?: Container): Promise<Button> {
     xOpt.type = ElementType.Button;
     const butnXpath = buildXPath(xOpt, container);
     const button = new Button(page, butnXpath);
@@ -44,9 +43,7 @@ export default class Button extends BaseElement {
         selector
       )
       .catch((err) => {
-        logger.error(`waitUntilEnabled() failed: xpath=${selector}`);
-        logger.error(err);
-        throw new Error(err);
+        throw err;
       });
   }
 }

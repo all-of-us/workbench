@@ -170,12 +170,12 @@ export class AdminUserBypass extends React.Component<Props, State> {
                   onToggle={() => {this.setState({selectedModules:
                     fp.xor(selectedModules, [AccessModule.DATAUSEAGREEMENT])}); }}
           />}
-          {enableRasLoginGovLinking && <Toggle name='RAS Login.gov Link'
+          <Toggle name='RAS Login.gov Link'
                                        checked={selectedModules.includes(AccessModule.RASLINKLOGINGOV)}
                                        data-test-id='ras-link-login-gov-toggle'
                                        onToggle={() => {this.setState({selectedModules:
                                              fp.xor(selectedModules, [AccessModule.RASLINKLOGINGOV])}); }}
-          />}
+          />
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
             <IconButton icon='times'
                         onClick={() => this.cancel()}

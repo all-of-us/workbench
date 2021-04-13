@@ -1,4 +1,11 @@
 import {ElementRef, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import {ReplaySubject} from 'rxjs/ReplaySubject';
+const {useEffect, useState} = React;
+
 import {colorWithWhiteness} from 'app/styles/colors';
 import {
   currentCohortCriteriaStore,
@@ -14,15 +21,12 @@ import {
   urlParamsStore,
   userProfileStore
 } from 'app/utils/navigation';
-import {ConfigResponse, Domain, } from 'generated/fetch';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
-import {ReplaySubject} from 'rxjs/ReplaySubject';
+import {
+  ConfigResponse,
+  DataAccessLevel,
+  Domain,
+} from 'generated/fetch';
 import {cdrVersionStore, withStore} from './stores';
-
-const {useEffect, useState} = React;
 
 export const WINDOW_REF = 'window-ref';
 
@@ -36,6 +40,18 @@ export function isBlank(toTest: String): boolean {
     toTest = toTest.trim();
     return toTest === '';
   }
+}
+
+/**
+ * Determine whether the given access level is >= registered. This is the
+ * minimum required level to do most things in the Workbench app (outside of
+ * local/test development).
+ */
+export function hasRegisteredAccess(access: DataAccessLevel): boolean {
+  return [
+    DataAccessLevel.Registered,
+    DataAccessLevel.Protected
+  ].includes(access);
 }
 
 
@@ -613,27 +629,4 @@ export const lensOnProps = fp.curry((setters: string[], getters: string[], obj: 
 export const useId = () => {
   const [id] = useState(() => fp.uniqueId('element-'));
   return id;
-};
-
-export const nothing = {};
-
-// maybe - takes a function and a value. If the value is not defined returns "nothing"
-// Example usage: fp.flow(maybe(doSomethingIfIhaveData), maybe(doAnotherThingIfThereIsAResult))(getData())
-export const maybe = fp.curry((fn, value) => value !== nothing && value ? fn(value) : nothing);
-
-// cond - useful for representing conditionals as an expression
-// Operates like fp.cond, but a bit more concise - no need for array of arrays and allows for a clear default case
-// Example usage: cond<numer | string>(
-//  [v === 1, () => v + 2],
-//  [v === 2, () => v * 2],
-//  () => 'default' // Default case
-// )
-export const cond = <T extends unknown>(...args: ([boolean, () => T] | (() => T))[]) => {
-  for (const arg of args) {
-    // If the arg is an array, conditionally execute (maybe). If not an array, then this is the default case.
-    const result = Array.isArray(arg) ? maybe(...fp.reverse(arg)) : arg();
-    if (result !== nothing) {
-      return result;
-    }
-  }
 };

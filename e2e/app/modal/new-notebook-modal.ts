@@ -29,13 +29,13 @@ export default class NewNotebookModal extends Modal {
    * @param {Language} language Notebook language.
    */
   async fillInModal(notebookName: string, language: Language): Promise<void> {
-    await this.name().type(notebookName);
+    await this.name().then((textbox) => textbox.type(notebookName));
     const radio = language === Language.Python ? this.getPythonRadioButton() : this.getRRadioButton();
     await radio.select();
     return this.clickButton(LinkText.CreateNotebook, { waitForClose: true, waitForNav: true });
   }
 
-  name(): Textbox {
+  async name(): Promise<Textbox> {
     return Textbox.findByName(this.page, { name: 'Name:' }, this);
   }
 
@@ -49,7 +49,7 @@ export default class NewNotebookModal extends Modal {
     return new RadioButton(this.page, selector);
   }
 
-  createNotebookButton(): Button {
+  async createNotebookButton(): Promise<Button> {
     return Button.findByName(this.page, { name: LinkText.CreateNotebook }, this);
   }
 
@@ -57,7 +57,7 @@ export default class NewNotebookModal extends Modal {
    * Click 'See Code Preview' button. Returns code contents.
    */
   async previewCode(): Promise<string> {
-    const previewButton = Button.findByName(this.page, { name: LinkText.SeeCodePreview }, this);
+    const previewButton = await Button.findByName(this.page, { name: LinkText.SeeCodePreview }, this);
     const element = await previewButton.asElementHandle();
     await previewButton.click();
     await waitUntilChanged(this.page, element);

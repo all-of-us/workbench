@@ -46,7 +46,7 @@ export default class ConceptSetPage extends AuthenticatedPage {
   }
 
   async getConceptSetName(): Promise<string> {
-    const xpath = '//*[@data-test-id="concept-set-title"]';
+    const xpath = `//*[@data-test-id="concept-set-title"]`;
     const title = await this.page.waitForXPath(xpath, { visible: true });
     return getPropValue<string>(title, 'innerText');
   }
@@ -65,7 +65,7 @@ export default class ConceptSetPage extends AuthenticatedPage {
       const descInput = new Textbox(this.page, descInputXpath);
       await descInput.paste(newDescription);
     }
-    const saveButton = Button.findByName(this.page, { name: 'Save', ancestorLevel: 0 });
+    const saveButton = await Button.findByName(this.page, { name: 'Save', ancestorLevel: 0 });
     await saveButton.click();
     await this.getEditButton().then((butn) => butn.waitUntilEnabled());
   }

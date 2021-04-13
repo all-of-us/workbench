@@ -15,28 +15,28 @@ export default class CohortActionsPage extends AuthenticatedPage {
   async isLoaded(): Promise<boolean> {
     await Promise.all([waitForDocumentTitle(this.page, PageTitle), waitWhileLoading(this.page)]);
     await Promise.all([
-      this.getCreateAnotherCohortButton().asElementHandle(),
-      this.getCreateReviewSetsButton().asElementHandle(),
-      this.getCreateDatasetButton().asElementHandle()
+      this.getCreateAnotherCohortButton().then((elemt) => elemt.asElementHandle()),
+      this.getCreateReviewSetsButton().then((elemt) => elemt.asElementHandle()),
+      this.getCreateDatasetButton().then((elemt) => elemt.asElementHandle())
     ]);
     return true;
   }
 
   async clickCreateDatasetButton(): Promise<DatasetBuildPage> {
-    const button = this.getCreateDatasetButton();
+    const button = await this.getCreateDatasetButton();
     await button.clickAndWait();
     return new DatasetBuildPage(this.page).waitForLoad();
   }
 
-  getCreateAnotherCohortButton(): Button {
+  async getCreateAnotherCohortButton(): Promise<Button> {
     return Button.findByName(this.page, { name: LinkText.CreateAnotherCohort });
   }
 
-  getCreateReviewSetsButton(): Button {
+  async getCreateReviewSetsButton(): Promise<Button> {
     return Button.findByName(this.page, { name: LinkText.CreateReviewSets });
   }
 
-  getCreateDatasetButton(): Button {
+  async getCreateDatasetButton(): Promise<Button> {
     return Button.findByName(this.page, { name: LinkText.CreateDataset });
   }
 }

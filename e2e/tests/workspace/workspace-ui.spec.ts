@@ -63,11 +63,11 @@ describe('Workspace ui tests', () => {
     // Click Create New Workspace link on the Workspaces page
     const editPage = await workspaces.clickCreateNewWorkspace();
 
-    await editPage.getWorkspaceNameTextbox().type('I-love-my-new-workspace');
-    await editPage.getWorkspaceNameTextbox().pressTab();
+    await (await editPage.getWorkspaceNameTextbox()).type('I-love-my-new-workspace');
+    await (await editPage.getWorkspaceNameTextbox()).pressTab();
 
     // No Confirm to Cancel confirmation dialog
-    const cancelButton = editPage.getCancelButton();
+    const cancelButton = await editPage.getCancelButton();
     await cancelButton.clickAndWait();
 
     await workspaces.waitForLoad();

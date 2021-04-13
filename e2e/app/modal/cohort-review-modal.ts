@@ -15,8 +15,8 @@ export default class CohortReviewModal extends Modal {
     return true;
   }
 
-  async fillInNumberOfParticipants(numOfparticipants: number): Promise<void> {
-    const input = InputNumber.findByName(this.page, { name: 'NUMBER OF PARTICIPANTS' }, this);
+  async fillInNumberOfPartcipants(numOfparticipants: number): Promise<void> {
+    const input = await InputNumber.findByName(this.page, { name: 'NUMBER OF PARTICIPANTS' }, this);
     await input.type(numOfparticipants.toString());
   }
 }

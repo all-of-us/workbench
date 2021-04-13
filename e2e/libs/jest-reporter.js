@@ -7,20 +7,15 @@ module.exports = class JestReporter {
     if (globalConfig.verbose === true) {
       throw Error("Verbose must be false or Console messages won't be available.");
     }
+    this._globalConfig = globalConfig;
     this._options = options;
     this.logDir = this._options.outputdir || 'logs/jest';
     this.summaryFile = this._options.filename || 'test-results-summary.json';
   }
 
-  timeNow() {
-    return new Date().toLocaleString('en-US', {
-      timeZone: 'America/New_York',
-      hour12: false
-    });
-  }
-
   onTestStart(test) {
-    console.info(`Running ${path.parse(test.path).name} at ${this.timeNow()}`);
+    const time = new Date().toLocaleTimeString();
+    console.info(`Running ${path.parse(test.path).name} at ${time}`);
   }
 
   onTestResult(_testRunConfig, testResult, _runResults) {
@@ -53,16 +48,15 @@ module.exports = class JestReporter {
 
     // Read jest console messages and save to a log file.
     // Get all console logs.
-    if (testResult.console) {
+    if (testResult.console && testResult.console.length > 0) {
       testResult.console.forEach((log) => {
         fileLogger.info(log.message);
       });
     }
 
     // Get failure messages.
-    fileLogger.info(`\n\nTests Summary`);
     testResult.testResults.forEach((result) => {
-      fileLogger.info('----------------------------------------------');
+      fileLogger.info('----------------------------------------');
       fileLogger.log('info', 'test name: %s', result.title);
       fileLogger.log('info', 'status: %s', result.status);
       // Get failure message.
@@ -70,7 +64,6 @@ module.exports = class JestReporter {
         const failure = result.failureMessages;
         fileLogger.log('info', 'failure: %s', failure);
       }
-      fileLogger.info();
     });
     console.log(`Save test log: ${testLogName}`);
   }

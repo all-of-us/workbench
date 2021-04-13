@@ -8,12 +8,11 @@ import { makeRandomName } from 'utils/str-utils';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import CohortActionsPage from './cohort-actions-page';
 import CohortBuildPage from './cohort-build-page';
-import CriteriaSearchPage, { Visits } from './criteria-search-page';
+import { Visits } from './criteria-search-page';
 import DatasetBuildPage from './dataset-build-page';
 import NotebookPage from './notebook-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
 import WorkspaceBase from './workspace-base';
-import ConceptSetSearchPage from './conceptset-search-page';
 
 const PageTitle = 'Data Page';
 
@@ -35,17 +34,17 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     ]);
   }
 
-  getAddDatasetButton(): ClrIconLink {
+  async getAddDatasetButton(): Promise<ClrIconLink> {
     return ClrIconLink.findByName(this.page, { name: 'Datasets', iconShape: 'plus-circle' });
   }
 
-  getAddCohortsButton(): ClrIconLink {
+  async getAddCohortsButton(): Promise<ClrIconLink> {
     return ClrIconLink.findByName(this.page, { name: 'Cohorts', iconShape: 'plus-circle' });
   }
 
   // Click Add Datasets button.
   async clickAddDatasetButton(): Promise<DatasetBuildPage> {
-    const addDatasetButton = this.getAddDatasetButton();
+    const addDatasetButton = await this.getAddDatasetButton();
     await addDatasetButton.clickAndWait();
     await waitWhileLoading(this.page);
 
@@ -83,7 +82,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
    * @param {string} cohortName New Cohort name.
    */
   async createCohort(cohortName?: string): Promise<DataResourceCard> {
-    await this.getAddCohortsButton().clickAndWait();
+    await this.getAddCohortsButton().then((butn) => butn.clickAndWait());
     // Land on Build Cohort page.
     const cohortBuildPage = new CohortBuildPage(this.page);
     await cohortBuildPage.waitForLoad();
@@ -108,9 +107,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
    * Click Domain card.
    * @param {Domain} domain
    */
-  async openConceptSetSearch(
-    domain: Domain
-  ): Promise<{ conceptSearchPage: ConceptSetSearchPage; criteriaSearch: CriteriaSearchPage }> {
+  async openConceptSetSearch(domain: Domain): Promise<any> {
     // Click Add Datasets button.
     const datasetBuildPage = await this.clickAddDatasetButton();
 
@@ -118,7 +115,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     const conceptSearchPage = await datasetBuildPage.clickAddConceptSetsButton();
 
     // Add Concept Set in domain.
-    const procedures = ConceptDomainCard.findDomainCard(this.page, domain);
+    const procedures = await ConceptDomainCard.findDomainCard(this.page, domain);
     const criteriaSearch = await procedures.clickSelectConceptButton();
 
     return { conceptSearchPage, criteriaSearch };

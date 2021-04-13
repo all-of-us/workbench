@@ -22,7 +22,7 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
 
   async findUserInCollaboratorList(username: string): Promise<WorkspaceAccessLevel> {
     // At least one collab should eventually render, i.e. the current user.
-    const collabXPath = '//*[starts-with(@data-test-id,"workspaceUser-")]';
+    const collabXPath = `//*[starts-with(@data-test-id,"workspaceUser-")]`;
     await this.page.waitForXPath(collabXPath, { visible: true });
 
     // Fetch all of the collabs so we can string match and parse text content.
@@ -43,7 +43,7 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
   }
 
   async openShareModal(): Promise<ShareModal> {
-    const share = Button.findByName(this.page, { containsText: 'Share' });
+    const share = await Button.findByName(this.page, { containsText: 'Share' });
     await share.click();
     const modal = new ShareModal(this.page);
     await modal.waitUntilVisible();
@@ -81,7 +81,7 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
   async verifyCollabInputField(): Promise<void> {
     const accessLevel = await this.findUserInCollaboratorList(config.collaboratorUsername);
     const modal = await this.openShareModal();
-    const searchInput = modal.waitForSearchBox();
+    const searchInput = await modal.waitForSearchBox();
     if (accessLevel !== WorkspaceAccessLevel.Owner) {
       expect(await searchInput.isDisabled()).toBe(true);
     } else if (accessLevel === WorkspaceAccessLevel.Owner) {

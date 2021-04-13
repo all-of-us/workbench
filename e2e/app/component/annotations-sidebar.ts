@@ -9,7 +9,6 @@ import Textarea from 'app/element/textarea';
 import EditDeleteAnnotationsModal from 'app/modal/edit-delete-annotations-modal';
 import AnnotationFieldModal from 'app/modal/annotation-field-modal';
 import BaseHelpSidebar from './base-help-sidebar';
-import { logger } from 'libs/logger';
 
 export enum ReviewStatus {
   Excluded = 'Excluded',
@@ -34,7 +33,7 @@ export default class AnnotationsSidebar extends BaseHelpSidebar {
     await this.page.waitForXPath(`${this.getXpath()}//h3`, { visible: true });
     // Wait for visible button
     await this.page.waitForXPath(`${this.getXpath()}//*[@role="button"]`, { visible: true });
-    logger.info(`Opened "${await this.getTitle()}" Participant & Annotations sidebar`);
+    console.log(`Opened "${await this.getTitle()}" Participant & Annotations sidebar`);
   }
 
   async getParticipantID(): Promise<string> {
@@ -56,7 +55,11 @@ export default class AnnotationsSidebar extends BaseHelpSidebar {
 
   // click the plus button located next to Annotations on the sidebar panel
   async clickAnnotationsButton(): Promise<AnnotationFieldModal> {
-    const link = ClrIconLink.findByName(this.page, { containsText: 'Annotations', iconShape: 'plus-circle' }, this);
+    const link = await ClrIconLink.findByName(
+      this.page,
+      { containsText: 'Annotations', iconShape: 'plus-circle' },
+      this
+    );
     await link.click();
     const annotationFieldModal = new AnnotationFieldModal(this.page);
     await annotationFieldModal.waitForLoad();
@@ -66,12 +69,13 @@ export default class AnnotationsSidebar extends BaseHelpSidebar {
   // get the annotations name displaying on the sidebar panel
   async getAnnotationsName(annotationFieldName: string): Promise<string> {
     const selector = this.getFieldNameSelector(annotationFieldName);
-    return await this.extractFieldNameText(selector);
+    const annotationfieldLabel = await this.extractFieldNameText(selector);
+    return annotationfieldLabel;
   }
 
   // click on the Annotations EDIT button to edit the annotations field name
   async getAnnotationsEditModal(): Promise<EditDeleteAnnotationsModal> {
-    const button = Button.findByName(this.page, { name: LinkText.Edit }, this);
+    const button = await Button.findByName(this.page, { name: LinkText.Edit }, this);
     await button.click();
     const modal = new EditDeleteAnnotationsModal(this.page);
     await modal.waitForLoad();
@@ -79,17 +83,16 @@ export default class AnnotationsSidebar extends BaseHelpSidebar {
   }
 
   // text area
-  getAnnotationsTextArea(): Textarea {
+  async getAnnotationsTextArea(): Promise<Textarea> {
     const selector = `${this.getXpath()}//*[contains(normalize-space(text()), "Annotations")]/following::textarea`;
     const annotationTextArea = new Textarea(this.page, selector);
     return annotationTextArea;
   }
 
   // look for the field name
-  async findFieldName(annotationFieldName: string): Promise<string> {
+  async findFieldName(annotationFieldName: string): Promise<string | null> {
     try {
-      const xpath = this.getFieldNameSelector(annotationFieldName);
-      await this.page.waitForXPath(xpath, { visible: true });
+      this.getFieldNameSelector(annotationFieldName);
     } catch (err) {
       // no field.
       return null;
@@ -97,8 +100,8 @@ export default class AnnotationsSidebar extends BaseHelpSidebar {
   }
 
   private async extractParticipantDetails(selector: string): Promise<string> {
-    const element = await this.page.waitForXPath(selector, { visible: true });
-    const textContent = await getPropValue<string>(element, 'textContent');
+    const elemt = await this.page.waitForXPath(selector, { visible: true });
+    const textContent = await getPropValue<string>(elemt, 'textContent');
     // const regex = new RegExp(/\d{1,3}(,?\d{3})*/); // Match numbers with comma
     const regex = new RegExp(/\d+/);
     return regex.exec(textContent)[0];
@@ -106,16 +109,13 @@ export default class AnnotationsSidebar extends BaseHelpSidebar {
 
   // get the xpath of the respective annotation field label
   private getFieldNameSelector(fieldName: string): string {
-    return (
-      `${this.getXpath()}//*[contains(normalize-space(text()), "Annotations")]` +
-      `/following::div[contains(normalize-space(), "${fieldName}")]`
-    );
+    return `${this.getXpath()}//*[contains(normalize-space(text()), "Annotations")]/following::div[contains(normalize-space(), "${fieldName}")]`;
   }
 
   // extract only the annotation field name
   private async extractFieldNameText(selector: string): Promise<string> {
-    const element = await this.page.waitForXPath(selector, { visible: true });
-    const textContent = await getPropValue<string>(element, 'textContent');
+    const elemt = await this.page.waitForXPath(selector, { visible: true });
+    const textContent = await getPropValue<string>(elemt, 'textContent');
     const regex = new RegExp(/(aoutest)-\d+/);
     return regex.exec(`${textContent}`)[0];
   }

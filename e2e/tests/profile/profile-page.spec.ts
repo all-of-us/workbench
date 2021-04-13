@@ -8,19 +8,10 @@ describe('Profile', () => {
   // initialized in beforeEach()
   let profilePage: ProfilePage;
 
-  beforeEach(async () => {
-    await signInWithAccessToken(page);
-    await navigation.navMenu(page, NavLink.PROFILE);
-    profilePage = new ProfilePage(page);
-    await profilePage.waitForLoad();
-    // Verify "Save Profile" button is disabled first time page is opened.
-    await waitForSaveButton(false);
-  });
-
   async function waitForSaveButton(isActive: boolean): Promise<Button> {
-    const button = profilePage.getSaveProfileButton();
+    const button = await profilePage.getSaveProfileButton();
     const isCursorEnabled = !(await button.isCursorNotAllowed());
-    expect(isCursorEnabled).toBe<boolean>(isActive);
+    expect(isCursorEnabled).toBe(isActive);
     return button;
   }
 
@@ -35,11 +26,21 @@ describe('Profile', () => {
     return isDivWithTextPresent(`${fieldText} can't be blank`);
   }
 
+  beforeEach(async () => {
+    await signInWithAccessToken(page);
+    await navigation.navMenu(page, NavLink.PROFILE);
+    profilePage = new ProfilePage(page);
+    await profilePage.waitForLoad();
+
+    // Verify "Save Profile" button is disabled first time page is opened.
+    await waitForSaveButton(false);
+  });
+
   test('Edit single field of existing user profile', async () => {
     const testText = makeString(50);
 
     // Type in Research Background textarea
-    const researchBackground = profilePage.getResearchBackgroundTextarea();
+    const researchBackground = await profilePage.getResearchBackgroundTextarea();
     await researchBackground.paste(testText);
 
     // profile update should enable Save button
@@ -62,16 +63,16 @@ describe('Profile', () => {
     const testTextZip = makeString(10);
     const testTextCountry = makeString(10);
 
-    const firstName = profilePage.getFirstNameInput();
-    const lastName = profilePage.getLastNameInput();
-    const url = profilePage.getProfessionalUrlInput();
-    const researchBackground = profilePage.getResearchBackgroundTextarea();
-    const address1 = profilePage.getAddress1Input();
-    const address2 = profilePage.getAddress2Input();
-    const city = profilePage.getCityInput();
-    const state = profilePage.getStateInput();
-    const zip = profilePage.getZipCodeInput();
-    const country = profilePage.getCountryInput();
+    const firstName = await profilePage.getFirstNameInput();
+    const lastName = await profilePage.getLastNameInput();
+    const url = await profilePage.getProfessionalUrlInput();
+    const researchBackground = await profilePage.getResearchBackgroundTextarea();
+    const address1 = await profilePage.getAddress1Input();
+    const address2 = await profilePage.getAddress2Input();
+    const city = await profilePage.getCityInput();
+    const state = await profilePage.getStateInput();
+    const zip = await profilePage.getZipCodeInput();
+    const country = await profilePage.getCountryInput();
 
     await firstName.type(testTextFirstName);
     await lastName.type(testTextLastName);
@@ -102,7 +103,7 @@ describe('Profile', () => {
   });
 
   test('A missing required field disables the save button', async () => {
-    const researchBackground = profilePage.getResearchBackgroundTextarea();
+    const researchBackground = await profilePage.getResearchBackgroundTextarea();
 
     // make a change, causing the Save button to activate
     await researchBackground.paste(makeString(10));
@@ -120,14 +121,14 @@ describe('Profile', () => {
   });
 
   test('Each missing required field individually disables the save button', async () => {
-    const firstName = profilePage.getFirstNameInput();
-    const lastName = profilePage.getLastNameInput();
-    const researchBackground = profilePage.getResearchBackgroundTextarea();
-    const address1 = profilePage.getAddress1Input();
-    const city = profilePage.getCityInput();
-    const state = profilePage.getStateInput();
-    const zip = profilePage.getZipCodeInput();
-    const country = profilePage.getCountryInput();
+    const firstName = await profilePage.getFirstNameInput();
+    const lastName = await profilePage.getLastNameInput();
+    const researchBackground = await profilePage.getResearchBackgroundTextarea();
+    const address1 = await profilePage.getAddress1Input();
+    const city = await profilePage.getCityInput();
+    const state = await profilePage.getStateInput();
+    const zip = await profilePage.getZipCodeInput();
+    const country = await profilePage.getCountryInput();
 
     // note: Professional URL and Address2 are optional fields
 
@@ -165,7 +166,7 @@ describe('Profile', () => {
   });
 
   test('Typing an invalid URL disables the save button', async () => {
-    const url = profilePage.getProfessionalUrlInput();
+    const url = await profilePage.getProfessionalUrlInput();
     const validUrl = makeUrl(10);
     const invalidUrls = ['hello', 'hello.com', 'http://', 'https://broad    institute.org', '*http://google.com/'];
 

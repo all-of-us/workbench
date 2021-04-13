@@ -21,7 +21,7 @@ export default class HomePage extends AuthenticatedPage {
     await waitForDocumentTitle(this.page, PageTitle);
     await waitWhileLoading(this.page);
     // Look for "See All Workspaces" link.
-    await this.getSeeAllWorkspacesLink().asElementHandle();
+    await this.getSeeAllWorkspacesLink().then((element) => element.asElementHandle());
     // Look for either a workspace card or the "Create your first workspace" msg.
     await Promise.race([
       this.page.waitForXPath('//*[@data-test-id="workspace-card"]', { visible: true }),
@@ -40,7 +40,7 @@ export default class HomePage extends AuthenticatedPage {
     return true;
   }
 
-  getCreateNewWorkspaceLink(): ClrIconLink {
+  async getCreateNewWorkspaceLink(): Promise<ClrIconLink> {
     return ClrIconLink.findByName(this.page, { name: LabelAlias.CreateNewWorkspace, iconShape: 'plus-circle' });
   }
 
@@ -52,7 +52,7 @@ export default class HomePage extends AuthenticatedPage {
     return this;
   }
 
-  getSeeAllWorkspacesLink(): Link {
+  async getSeeAllWorkspacesLink(): Promise<Link> {
     return Link.findByName(this.page, { name: LabelAlias.SeeAllWorkspaces });
   }
 }

@@ -22,7 +22,7 @@ describe('Cohorts UI tests', () => {
     // Wait for the Data page.
     const dataPage = new WorkspaceDataPage(page);
 
-    const addCohortsButton = dataPage.getAddCohortsButton();
+    const addCohortsButton = await dataPage.getAddCohortsButton();
     await addCohortsButton.clickAndWait();
 
     // In Build Cohort Criteria page
@@ -41,15 +41,15 @@ describe('Cohorts UI tests', () => {
     await page.waitForXPath(chartPointsSelector, { visible: true });
 
     // Copy button is disabled
-    const copyButton = cohortPage.getCopyButton();
+    const copyButton = await cohortPage.getCopyButton();
     expect(await copyButton.isDisabled()).toBe(true);
 
     // Trash (Delete) button is disabled
-    const trashButton = cohortPage.getDeleteButton();
+    const trashButton = await cohortPage.getDeleteButton();
     expect(await trashButton.isDisabled()).toBe(true);
 
     // Export button is disabled
-    const exportButton = cohortPage.getExportButton();
+    const exportButton = await cohortPage.getExportButton();
     expect(await exportButton.isDisabled()).toBe(true);
 
     await dataPage.openAboutPage({ waitPageChange: false });
@@ -59,8 +59,7 @@ describe('Cohorts UI tests', () => {
     // Verify dialog content text
     expect(modalTextContent).toContain('Warning!');
     const warningText =
-      'Your cohort has not been saved. If you’d like to save your cohort criteria,' +
-      ' please click CANCEL and click CREATE COHORT to save your criteria.';
+      'Your cohort has not been saved. If you’d like to save your cohort criteria, please click CANCEL and click CREATE COHORT to save your criteria.';
     expect(modalTextContent).toContain(warningText);
 
     // Check ABOUT tab is open

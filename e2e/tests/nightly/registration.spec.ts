@@ -16,26 +16,26 @@ describe('User registration tests:', () => {
 
     // Step 1: Terms of Service.
     await createAccountPage.acceptTermsOfUseAgreement();
-    let nextButton = createAccountPage.getNextButton();
+    let nextButton = await createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();
     await nextButton.click();
 
     // Step 2: Enter institution affiliation details
     await createAccountPage.fillOutInstitution();
-    nextButton = createAccountPage.getNextButton();
+    nextButton = await createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();
     await nextButton.clickWithEval();
 
     // Step 3: Enter user information
     const userId = await createAccountPage.fillOutUserInformation();
-    nextButton = createAccountPage.getNextButton();
+    nextButton = await createAccountPage.getNextButton();
     await nextButton.waitUntilEnabled();
     await nextButton.click();
 
     // Step 4: Enter demographic survey (All Survey Fields are optional)
     await createAccountPage.fillOutDemographicSurvey();
 
-    const submitButton = createAccountPage.getSubmitButton();
+    const submitButton = await createAccountPage.getSubmitButton();
     await submitButton.waitUntilEnabled();
     await submitButton.click();
 
@@ -59,8 +59,7 @@ describe('User registration tests:', () => {
     expect(textsArray).toContain(`${userId}@fake-research-aou.org`);
 
     const note =
-      'Please note: For full access to the Research Workbench data and tools, ' +
-      "you'll be required to complete the necessary registration steps.";
+      "Please note: For full access to the Research Workbench data and tools, you'll be required to complete the necessary registration steps.";
     expect(textsArray).toContain(note);
   });
 });

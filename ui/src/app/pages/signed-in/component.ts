@@ -8,8 +8,7 @@ import {SignInService} from 'app/services/sign-in.service';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 
 import {FooterTypeEnum} from 'app/components/footer';
-import {debouncer} from 'app/utils';
-import {hasRegisteredAccess} from 'app/utils/access-tiers';
+import {debouncer, hasRegisteredAccess} from 'app/utils';
 import Timeout = NodeJS.Timeout;
 import {setInstitutionCategoryState} from 'app/utils/analytics';
 import {navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
@@ -94,7 +93,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       this.profileLoadingSub = this.profileStorageService.profile$.subscribe((profile) => {
         this.profile = profile as unknown as FetchProfile;
         setInstitutionCategoryState(this.profile.verifiedInstitutionalAffiliation);
-        if (hasRegisteredAccess(this.profile.accessTierShortNames)) {
+        if (hasRegisteredAccess(this.profile.dataAccessLevel)) {
           cdrVersionsApi().getCdrVersions().then(resp => {
             // cdrVersionsInitialized blocks app rendering so that route
             // components don't try to lookup CDR data before it's available.

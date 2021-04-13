@@ -45,7 +45,7 @@ export default abstract class BasePage {
    * @param txt
    */
   async containsText(txt: string): Promise<boolean> {
-    const indx = (await this.page.content()).indexOf(txt);
+    const indx = await (await this.page.content()).indexOf(txt);
     return indx !== -1;
   }
 }

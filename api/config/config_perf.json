@@ -114,7 +114,7 @@
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
-    "unsafeAllowAccessToAllTiersForRegisteredUsers": true,
+    "unsafeAllowAccessToAllTiersForRegisteredUsers": false,
     "enableRdrExport": true,
     "enableBillingUpgrade": true,
     "enableV3DataUserCodeOfConduct": true,

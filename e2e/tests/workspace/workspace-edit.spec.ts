@@ -22,19 +22,19 @@ describe('Editing workspace via workspace card snowman menu', () => {
    * - Verify Workspace Information in ABOUT tab.
    */
   test('User as OWNER can edit workspace', async () => {
-    const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName });
+    const workspaceCard = await findOrCreateWorkspaceCard(page);
     await workspaceCard.selectSnowmanMenu(MenuOption.Edit, { waitForNav: true });
 
     const workspaceEditPage = new WorkspaceEditPage(page);
 
     // CDR Version Select is readonly. Get selected value.
-    const cdrVersionSelect = workspaceEditPage.getCdrVersionSelect();
+    const cdrVersionSelect = await workspaceEditPage.getCdrVersionSelect();
     const selectedValue = await cdrVersionSelect.getSelectedValue();
 
     // Change question #2 answer
     await performActions(page, testData.defaultAnswersResearchPurposeSummary);
 
-    const updateButton = workspaceEditPage.getUpdateWorkspaceButton();
+    const updateButton = await workspaceEditPage.getUpdateWorkspaceButton();
     await updateButton.waitUntilEnabled();
     await workspaceEditPage.clickCreateFinishButton(updateButton);
 
@@ -74,6 +74,9 @@ describe('Editing workspace via workspace card snowman menu', () => {
     expect(todayWeekday).toBe(lastUpdatedWeekday);
     expect(todayYear).toBe(lastUpdatedYear);
     expect(todayDay).toBe(lastUpdatedDay);
+
+    // Delete workspace
+    await dataPage.deleteWorkspace();
   });
   /**
    * Test:
@@ -101,13 +104,13 @@ describe('Editing workspace via workspace card snowman menu', () => {
     const workspaceEditPage = new WorkspaceEditPage(page);
 
     // CDR Version Select is readonly. Get selected value.
-    const cdrVersionSelect = workspaceEditPage.getCdrVersionSelect();
+    const cdrVersionSelect = await workspaceEditPage.getCdrVersionSelect();
     const selectedValue = await cdrVersionSelect.getSelectedValue();
 
     // Change question #2 answer
     await performActions(page, testData.defaultAnswersResearchPurposeSummary);
 
-    const updateButton = workspaceEditPage.getUpdateWorkspaceButton();
+    const updateButton = await workspaceEditPage.getUpdateWorkspaceButton();
     await updateButton.waitUntilEnabled();
     await workspaceEditPage.clickCreateFinishButton(updateButton);
 
@@ -144,8 +147,5 @@ describe('Editing workspace via workspace card snowman menu', () => {
     expect(todayWeekday).toBe(lastUpdatedWeekday);
     expect(todayYear).toBe(lastUpdatedYear);
     expect(todayDay).toBe(lastUpdatedDay);
-
-    // Delete workspace
-    await dataPage.deleteWorkspace();
   });
 });

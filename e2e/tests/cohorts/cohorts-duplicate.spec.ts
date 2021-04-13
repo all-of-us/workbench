@@ -36,7 +36,7 @@ describe('Cohorts', () => {
     const workspaceDataUrl = page.url();
 
     // Click Add Cohorts button
-    const addCohortsButton = dataPage.getAddCohortsButton();
+    const addCohortsButton = await dataPage.getAddCohortsButton();
     await addCohortsButton.clickAndWait();
 
     // Create new Cohort
@@ -59,7 +59,7 @@ describe('Cohorts', () => {
 
     // Add the condition in first row. We don't know what the condition name is, so we get the cell value first.
     const nameValue = await search2ResultsTable.getCellValue(1, 1);
-    const addIcon = ClrIconLink.findByName(
+    const addIcon = await ClrIconLink.findByName(
       page,
       { containsText: nameValue, iconShape: 'plus-circle' },
       search2ResultsTable
@@ -80,13 +80,13 @@ describe('Cohorts', () => {
     const group1Count = await group1.getGroupCount();
     const group1CountInt = Number(group1Count.replace(/,/g, ''));
     expect(group1CountInt).toBeGreaterThan(1);
-    console.log(`Group 1: ${group1CountInt}`);
+    console.log('Group 1: ' + group1CountInt);
 
     // Check Total Count.
     const totalCount = await cohortBuildPage.getTotalCount();
     const totalCountInt = Number(totalCount.replace(/,/g, ''));
     expect(totalCountInt).toBe(group1CountInt);
-    console.log(`Total Count: ${totalCountInt}`);
+    console.log('Total Count: ' + totalCountInt);
 
     // Save new cohort - click Create Cohort button
     const cohortName = await cohortBuildPage.saveCohortAs();

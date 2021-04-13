@@ -20,7 +20,7 @@ describe('OldCdrVersion Modal restrictions', () => {
     // select an old CDR Version
     await editPage.selectCdrVersion(config.altCdrVersionName);
 
-    const createButton = editPage.getCreateWorkspaceButton();
+    const createButton = await editPage.getCreateWorkspaceButton();
     expect(await createButton.isCursorNotAllowed()).toBe(true);
 
     // fill out the modal checkboxes
@@ -41,13 +41,13 @@ describe('OldCdrVersion Modal restrictions', () => {
 
     // Fill out Workspace Name should be just enough for successful duplication
     const workspaceEditPage = new WorkspaceEditPage(page);
-    await workspaceEditPage.getWorkspaceNameTextbox().clear();
+    await (await workspaceEditPage.getWorkspaceNameTextbox()).clear();
     await workspaceEditPage.fillOutWorkspaceName();
 
     // change CDR Version
     await workspaceEditPage.selectCdrVersion(config.altCdrVersionName);
 
-    const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
+    const finishButton = await workspaceEditPage.getDuplicateWorkspaceButton();
     expect(await finishButton.isCursorNotAllowed()).toBe(true);
   });
 });

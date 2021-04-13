@@ -4,7 +4,6 @@ import Textbox from 'app/element/textbox';
 import ClrIcon from 'app/element/clr-icon-link';
 import { waitForText } from 'utils/waits-utils';
 import Modal from './modal';
-import { logger } from 'libs/logger';
 
 const modalText = 'share this workspace';
 
@@ -19,10 +18,10 @@ export default class ShareModal extends Modal {
   }
 
   async shareWithUser(username: string, level: WorkspaceAccessLevel): Promise<void> {
-    const searchBox = this.waitForSearchBox();
+    const searchBox = await this.waitForSearchBox();
     await searchBox.type(username);
 
-    const addCollab = this.waitForAddCollaboratorIcon();
+    const addCollab = await this.waitForAddCollaboratorIcon();
     await addCollab.click();
 
     const roleInput = await this.waitForRoleSelectorForUser(username);
@@ -32,7 +31,7 @@ export default class ShareModal extends Modal {
     await ownerOpt.click();
 
     await this.clickButton(LinkText.Save, { waitForClose: true });
-    logger.info(`Shared workspace to ${username} with role ${level}`);
+    console.log(`Shared workspace to ${username} with role ${level}`);
   }
 
   async removeUser(username: string): Promise<void> {
@@ -56,11 +55,11 @@ export default class ShareModal extends Modal {
     );
   }
 
-  waitForSearchBox(): Textbox {
+  async waitForSearchBox(): Promise<Textbox> {
     return Textbox.findByName(this.page, { name: 'Find Collaborators' }, this);
   }
 
-  waitForAddCollaboratorIcon(): ClrIcon {
+  async waitForAddCollaboratorIcon(): Promise<ClrIcon> {
     return ClrIcon.findByName(this.page, { iconShape: 'plus-circle' }, this);
   }
 

@@ -37,9 +37,9 @@ export default class ConceptSetSaveModal extends Modal {
    */
   async fillOutSaveModal(
     saveOption: SaveOption = SaveOption.CreateNewSet,
-    existingConceptSetName = '0'
+    existingConceptSetName: string = '0'
   ): Promise<string> {
-    const createNewSetRadioButton = RadioButton.findByName(this.page, { name: saveOption }, this);
+    const createNewSetRadioButton = await RadioButton.findByName(this.page, { name: saveOption }, this);
     await createNewSetRadioButton.select();
 
     let conceptName: string;
@@ -47,11 +47,11 @@ export default class ConceptSetSaveModal extends Modal {
     if (saveOption === SaveOption.CreateNewSet) {
       // Generate a random name as new Concept name.
       conceptName = makeRandomName();
-      const nameTextbox = Textbox.findByName(this.page, { name: 'Name' }, this);
+      const nameTextbox = await Textbox.findByName(this.page, { name: 'Name' }, this);
       await nameTextbox.type(conceptName);
 
       // Type in Description
-      const descriptionTextarea = Textarea.findByName(this.page, { containsText: 'Description' }, this);
+      const descriptionTextarea = await Textarea.findByName(this.page, { containsText: 'Description' }, this);
       await descriptionTextarea.type(faker.lorem.words());
     } else {
       const [selectedValue] = await this.page.select('[data-test-id="add-to-existing"] select', existingConceptSetName);

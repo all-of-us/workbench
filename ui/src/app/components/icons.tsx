@@ -1,5 +1,3 @@
-import {faCheckCircle} from '@fortawesome/free-solid-svg-icons';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -73,11 +71,3 @@ export const ValidationIcon = props => {
                     style={{...styles.dangerIcon, ...props.style}}/>;
   }
 };
-
-const Icon = ({ shape, size, style, color, ...props }) => {
-  return <FontAwesomeIcon icon={shape} style={{height: size, width: size, color, ...style}} {...props}/>;
-};
-
-export const CheckCircle = props => <Icon shape={faCheckCircle} {...props}/>;
-export const ControlledTierBadge = ({size = 25, ...props}) =>
-  <img style={{height: size, width: size}} src={'/assets/icons/controlled-tier-badge.svg'} {...props}/>;

@@ -34,14 +34,14 @@ constructor(
 
     override fun fireEgressEvent(event: EgressEvent) {
         // Load the workspace via the GCP project name
-        val dbWorkspaceMaybe = workspaceDao.getByGoogleProject(event.projectName)
+        val dbWorkspaceMaybe = workspaceDao.getByNamespace(event.projectName)
         if (!dbWorkspaceMaybe.isPresent()) {
             // Failing to find a workspace is odd enough that we want to return a non-success
             // response at the API level. But it's also worth storing a permanent record of the
             // high-egress event by logging it without a workspace target.
             fireFailedToFindWorkspace(event)
             throw BadRequestException(String.format(
-                    "The workspace (Google Project Id '%s') referred to by the given event is no longer active or never existed.",
+                    "The workspace '%s' referred to by the given event is no longer active or never existed.",
                     event.projectName))
         }
         val dbWorkspace = dbWorkspaceMaybe.get()
@@ -67,7 +67,7 @@ constructor(
         } else {
             // If the VM prefix doesn't match a user on the workspace, we'll still log an
             // event in the target workspace, but with nulled-out user info.
-            logger.warning(String.format("Could not find a user for VM prefix %s in namespace %s", event.vmPrefix, dbWorkspace.workspaceNamespace))
+            logger.warning(String.format("Could not find a user for VM prefix %s in project %s", event.vmPrefix, event.projectName))
         }
 
         val actionId = actionIdProvider.get()

@@ -6,8 +6,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.pmiops.workbench.opsgenie.EgressEventServiceImpl.NOT_FOUND_WORKSPACE_NAMESPACE;
-import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
 import com.google.common.collect.ImmutableList;
 import com.ifountain.opsgenie.client.swagger.ApiException;
@@ -29,9 +27,7 @@ import org.mockito.Captor;
 import org.pmiops.workbench.actionaudit.auditors.EgressEventAuditor;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
-import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.model.EgressEvent;
 import org.pmiops.workbench.model.Institution;
@@ -57,11 +53,10 @@ public class EgressEventServiceTest {
 
   private static final Instant NOW = Instant.parse("2020-06-11T01:30:00.02Z");
   private static final String INSTITUTION_2_NAME = "Auburn University";
-  private static final String WORKSPACE_NAMEPACE = "aou-namespace";
   private static WorkbenchConfig workbenchConfig;
   private static final EgressEvent EGRESS_EVENT_1 =
       new EgressEvent()
-          .projectName(DEFAULT_GOOGLE_PROJECT)
+          .projectName("aou-rw-test-c7dec260")
           .vmPrefix("all-of-us-111")
           .egressMib(120.7)
           .egressMibThreshold(100.0)
@@ -73,7 +68,6 @@ public class EgressEventServiceTest {
   @MockBean private InstitutionService mockInstitutionService;
   @MockBean private UserService mockUserService;
   @MockBean private WorkspaceAdminService mockWorkspaceAdminService;
-  @MockBean private WorkspaceDao workspaceDao;
 
   @Captor private ArgumentCaptor<CreateAlertRequest> alertRequestCaptor;
 
@@ -132,12 +126,9 @@ public class EgressEventServiceTest {
   public void setUp() {
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.server.uiBaseUrl = "https://workbench.researchallofus.org";
-    DbWorkspace dbWorkspace = new DbWorkspace();
-    dbWorkspace.setWorkspaceNamespace(WORKSPACE_NAMEPACE);
-    dbWorkspace.setGoogleProject(DEFAULT_GOOGLE_PROJECT);
     final Workspace workspace =
         TEST_MOCK_FACTORY
-            .createWorkspace(WORKSPACE_NAMEPACE, "The Whole #!")
+            .createWorkspace("aou-rw-33116581", "The Whole #!")
             .creator(USER_1.getUserName());
     final WorkspaceAdminView workspaceAdminView =
         new WorkspaceAdminView()
@@ -158,9 +149,6 @@ public class EgressEventServiceTest {
     final Institution institution2 = new Institution().displayName(INSTITUTION_2_NAME);
 
     doReturn(Optional.of(institution2)).when(mockInstitutionService).getByUser(DB_USER_2);
-    doReturn(Optional.of(dbWorkspace))
-        .when(workspaceDao)
-        .getByGoogleProject(DEFAULT_GOOGLE_PROJECT);
   }
 
   @Test
@@ -173,16 +161,14 @@ public class EgressEventServiceTest {
 
     final CreateAlertRequest request = alertRequestCaptor.getValue();
     assertThat(request.getDescription())
-        .contains("Terra Billing Project/Firecloud Namespace: " + WORKSPACE_NAMEPACE);
-    assertThat(request.getDescription()).contains("Google Project Id: " + DEFAULT_GOOGLE_PROJECT);
+        .contains("GCP Billing Project/Firecloud Namespace: aou-rw-test-c7dec260");
     assertThat(request.getDescription())
-        .contains(
-            "https://workbench.researchallofus.org/admin/workspaces/" + WORKSPACE_NAMEPACE + "/");
+        .contains("https://workbench.researchallofus.org/admin/workspaces/aou-rw-test-c7dec260/");
     assertThat(request.getDescription())
         .containsMatch(
             Pattern.compile(
                 "user_id:\\s+111,\\s+Institution:\\s+Verily\\s+Life\\s+Sciences,\\s+Account\\s+Age:\\s+651\\s+days"));
-    assertThat(request.getAlias()).isEqualTo(WORKSPACE_NAMEPACE + " | all-of-us-111");
+    assertThat(request.getAlias()).isEqualTo("aou-rw-test-c7dec260 | all-of-us-111");
   }
 
   @Test
@@ -195,41 +181,14 @@ public class EgressEventServiceTest {
 
     final CreateAlertRequest request = alertRequestCaptor.getValue();
     assertThat(request.getDescription())
-        .contains("Terra Billing Project/Firecloud Namespace: " + WORKSPACE_NAMEPACE);
-    assertThat(request.getDescription()).contains("Google Project Id: " + DEFAULT_GOOGLE_PROJECT);
+        .contains("GCP Billing Project/Firecloud Namespace: aou-rw-test-c7dec260");
     assertThat(request.getDescription())
-        .contains(
-            "https://workbench.researchallofus.org/admin/workspaces/" + WORKSPACE_NAMEPACE + "/");
+        .contains("https://workbench.researchallofus.org/admin/workspaces/aou-rw-test-c7dec260/");
     assertThat(request.getDescription())
         .containsMatch(
             Pattern.compile(
                 "user_id:\\s+111,\\s+Institution:\\s+not\\s+found,\\s+Account\\s+Age:\\s+651\\s+days"));
-    assertThat(request.getAlias()).isEqualTo(WORKSPACE_NAMEPACE + " | all-of-us-111");
-  }
-
-  @Test
-  public void testCreateEgressEventAlert_workspaceNotFound() throws ApiException {
-    doReturn(Optional.empty()).when(workspaceDao).getByGoogleProject(DEFAULT_GOOGLE_PROJECT);
-    when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
-
-    egressEventService.handleEvent(EGRESS_EVENT_1);
-    verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
-    verify(egressEventAuditor).fireEgressEvent(EGRESS_EVENT_1);
-
-    final CreateAlertRequest request = alertRequestCaptor.getValue();
-    assertThat(request.getDescription())
-        .contains("Terra Billing Project/Firecloud Namespace: " + NOT_FOUND_WORKSPACE_NAMESPACE);
-    assertThat(request.getDescription()).contains("Google Project Id: " + DEFAULT_GOOGLE_PROJECT);
-    assertThat(request.getDescription())
-        .contains(
-            "https://workbench.researchallofus.org/admin/workspaces/"
-                + NOT_FOUND_WORKSPACE_NAMESPACE
-                + "/");
-    assertThat(request.getDescription())
-        .containsMatch(
-            Pattern.compile(
-                "user_id:\\s+111,\\s+Institution:\\s+Verily\\s+Life\\s+Sciences,\\s+Account\\s+Age:\\s+651\\s+days"));
-    assertThat(request.getAlias()).isEqualTo(NOT_FOUND_WORKSPACE_NAMESPACE + " | all-of-us-111");
+    assertThat(request.getAlias()).isEqualTo("aou-rw-test-c7dec260 | all-of-us-111");
   }
 
   // I thought about adding this to a mapper, but it's such a backwards, test-only conversion,

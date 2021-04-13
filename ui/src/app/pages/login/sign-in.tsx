@@ -130,7 +130,6 @@ export const createEmptyProfile = (): Profile => {
     // profile creation, this field is populated with the full email address.
     username: '',
     dataAccessLevel: DataAccessLevel.Unregistered,
-    accessTierShortNames: [],
     givenName: '',
     familyName: '',
     contactEmail: '',

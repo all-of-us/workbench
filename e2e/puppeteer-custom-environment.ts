@@ -1,11 +1,10 @@
 const PuppeteerEnvironment = require('jest-environment-puppeteer');
 const fs = require('fs-extra');
-
 require('jest-circus');
 
 class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
-  screenshotDir = 'logs/screenshot';
-  htmlDir = 'logs/html';
+  screenshotDir = `logs/screenshot`;
+  htmlDir = `logs/html`;
 
   async setup() {
     await super.setup();
@@ -31,22 +30,21 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
     switch (event.name) {
       case 'test_fn_failure':
       case 'hook_failure':
-        {
-          const runningTest = state.currentlyRunningTest.name;
-          let testName;
-          if (runningTest != null) {
-            testName = runningTest.replace(/\W/g, '-');
-          } else {
-            testName = event.test.name.replace(/\W/g, '-');
-          }
-          await fs.ensureDir(this.screenshotDir);
-          await fs.ensureDir(this.htmlDir);
-          const timestamp = this.localDateTimeString();
-          const screenshotFile = `${this.screenshotDir}/${testName}_${timestamp}.png`;
-          await this.takeScreenshot(screenshotFile);
-          const htmlFile = `${this.htmlDir}/${testName}_${timestamp}.html`;
-          await this.savePageToFile(htmlFile);
+        const runningTest = state.currentlyRunningTest;
+        let testName;
+        if (runningTest != null) {
+          testName = runningTest.parent.name.replace(/\W/g, '-');
+        } else {
+          testName = event.test.name.replace(/\W/g, '-');
         }
+
+        await fs.ensureDir(this.screenshotDir);
+        await fs.ensureDir(this.htmlDir);
+        const timestamp = this.localDateTimeString();
+        const screenshotFile = `${this.screenshotDir}/${testName}_${timestamp}.png`;
+        await this.takeScreenshot(screenshotFile);
+        const htmlFile = `${this.htmlDir}/${testName}_${timestamp}.html`;
+        await this.savePageToFile(htmlFile);
         break;
       default:
         break;
@@ -63,7 +61,7 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
     return new Promise((resolve, reject) => {
       fs.writeFile(htmlFile, htmlContent, 'utf8', (error) => {
         if (error) {
-          console.error('Failed to save html file. ' + error);
+          console.error(`Failed to save html file. ` + error);
           reject(false);
         } else {
           console.info('Saved html file: ' + htmlFile);

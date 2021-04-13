@@ -37,7 +37,7 @@ export default class AnnotationFieldModal extends Modal {
     return selectMenu.getSelectedOption();
   }
 
-  getAnnotationFieldNameTextBox(): Textbox {
+  async getAnnotationFieldNameTextBox(): Promise<Textbox> {
     return new Textbox(
       this.page,
       `${this.getXpath()}//*[contains(text(), "Name")]/ancestor::node()[1]/input[@type="text"]`
@@ -49,7 +49,7 @@ export default class AnnotationFieldModal extends Modal {
    */
   async beginCreateNewAnnotationName(newName?: string): Promise<void> {
     // Type new name.
-    const nameInput = this.getAnnotationFieldNameTextBox();
+    const nameInput = await this.getAnnotationFieldNameTextBox();
     await nameInput.type(newName);
   }
 
@@ -65,7 +65,7 @@ export default class AnnotationFieldModal extends Modal {
   }
 
   // click cancel button of the anootation field modal
-  cancelAnnotationButton(): Button {
+  async cancelAnnotationButton(): Promise<Button> {
     return Button.findByName(this.page, { name: LinkText.Cancel });
   }
 }

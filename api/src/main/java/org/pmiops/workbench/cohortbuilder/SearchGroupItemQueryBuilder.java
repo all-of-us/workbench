@@ -12,6 +12,7 @@ import static org.pmiops.workbench.cohortbuilder.util.ValidationPredicates.opera
 import static org.pmiops.workbench.cohortbuilder.util.ValidationPredicates.operatorNull;
 import static org.pmiops.workbench.cohortbuilder.util.ValidationPredicates.temporalGroupNull;
 
+import com.google.api.client.util.Sets;
 import com.google.cloud.bigquery.QueryParameterValue;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
@@ -59,14 +60,6 @@ public final class SearchGroupItemQueryBuilder {
           CriteriaType.ETHNICITY, "ethnicity_concept_id");
   private static final ImmutableList<Domain> SOURCE_STANDARD_DOMAINS =
       ImmutableList.of(Domain.CONDITION, Domain.PROCEDURE);
-  private static final ImmutableMap<Domain, String> HAS_DATA_DOMAINS =
-      ImmutableMap.of(
-          Domain.FITBIT,
-          "has_fitbit",
-          Domain.WHOLE_GENOME_VARIANT,
-          "has_whole_genome_variant",
-          Domain.PHYSICAL_MEASUREMENT,
-          "has_physical_measurement_data");
 
   // sql parts to help construct BigQuery sql statements
   private static final String OR = " or ";
@@ -179,8 +172,15 @@ public final class SearchGroupItemQueryBuilder {
           + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere %s %s %s\n";
   private static final String AGE_DEC_SQL = "and not " + DEC_SQL;
   private static final String DEMO_IN_SQL = "%s in unnest(%s)\n";
-  private static final String HAS_DATA_SQL =
-      "select person_id\n" + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere %s = 1\n";
+  private static final String HAS_FITBIT_SQL =
+      "select person_id\n"
+          + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere has_fitbit = 1\n";
+  private static final String HAS_PM_DATA_SQL =
+      "select person_id\n"
+          + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere has_physical_measurement_data = 1\n";
+  private static final String WHOLE_GENOME_VARIANT_SQL =
+      "select person_id\n"
+          + "from `${projectId}.${dataSetId}.cb_search_person` p\nwhere has_whole_genome_variant = 1\n";
   private static final String CB_SEARCH_ALL_EVENTS_WHERE =
       "select person_id from `${projectId}.${dataSetId}.cb_search_all_events`\nwhere ";
   private static final String PERSON_ID_IN = "person_id in (";
@@ -217,8 +217,14 @@ public final class SearchGroupItemQueryBuilder {
     if (Domain.PERSON.equals(domain)) {
       return buildDemoSql(queryParams, searchGroupItem);
     }
-    if (hasDataDomains(searchGroupItem)) {
-      return String.format(HAS_DATA_SQL, HAS_DATA_DOMAINS.get(domain));
+    if (Domain.FITBIT.equals(domain)) {
+      return HAS_FITBIT_SQL;
+    }
+    if (Domain.WHOLE_GENOME_VARIANT.equals(domain)) {
+      return WHOLE_GENOME_VARIANT_SQL;
+    }
+    if (hasPhysicalMeasurementData(searchGroupItem)) {
+      return HAS_PM_DATA_SQL;
     }
     // Otherwise build sql against flat denormalized search table
     for (SearchParameter param : searchGroupItem.getSearchParameters()) {
@@ -232,7 +238,6 @@ public final class SearchGroupItemQueryBuilder {
         queryParts.add(processAttributeSql(queryParams, param));
       }
     }
-    assert domain != null;
     addParamValueAndFormat(
         domain.toString(), queryParams, standardSearchParameters, queryParts, STANDARD);
     addParamValueAndFormat(
@@ -438,7 +443,8 @@ public final class SearchGroupItemQueryBuilder {
 
   private static String processAttributeSql(
       Map<String, QueryParameterValue> queryParams, SearchParameter parameter) {
-    parameter.getAttributes().forEach(SearchGroupItemQueryBuilder::validateAttribute);
+    parameter.getAttributes().forEach(attr -> validateAttribute(attr));
+    String numsParam;
     String catsParam;
     String versionParam;
     List<Long> conceptIds =
@@ -544,6 +550,23 @@ public final class SearchGroupItemQueryBuilder {
       valueExpression = operandsParam1;
     }
     return valueExpression;
+  }
+
+  /** Collect all child nodes per specified search parameters. */
+  private static Set<Long> childConceptIds(
+      Map<SearchParameter, Set<Long>> criteriaLookup, List<SearchParameter> params) {
+    Set<Long> out = Sets.newHashSet();
+    for (SearchParameter param : params) {
+      if (param.getGroup() || param.getAncestorData()) {
+        out.addAll(criteriaLookup.get(param));
+      }
+      if (param.getConceptId() != null) {
+        // not all SearchParameter have a concept id, so attributes/modifiers
+        // are used to find matches in those scenarios.
+        out.add(param.getConceptId());
+      }
+    }
+    return out;
   }
 
   /** Helper method to build modifier sql if needed. */
@@ -765,16 +788,13 @@ public final class SearchGroupItemQueryBuilder {
         });
   }
 
-  private static boolean hasDataDomains(SearchGroupItem searchGroupItem) {
-    Domain domain = Domain.fromValue(searchGroupItem.getType());
-    return Domain.FITBIT.equals(domain)
-        || Domain.WHOLE_GENOME_VARIANT.equals(domain)
-        || (searchGroupItem.getSearchParameters().size() == 1
-            && searchGroupItem.getSearchParameters().stream()
-                .allMatch(
-                    sp ->
-                        Domain.PHYSICAL_MEASUREMENT.toString().equals(sp.getDomain())
-                            && sp.getConceptId() == null
-                            && sp.getAttributes().isEmpty()));
+  private static boolean hasPhysicalMeasurementData(SearchGroupItem searchGroupItem) {
+    return searchGroupItem.getSearchParameters().size() == 1
+        && searchGroupItem.getSearchParameters().stream()
+            .allMatch(
+                sp ->
+                    Domain.PHYSICAL_MEASUREMENT.toString().equals(sp.getDomain())
+                        && sp.getConceptId() == null
+                        && sp.getAttributes().isEmpty());
   }
 }

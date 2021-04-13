@@ -12,7 +12,7 @@ export default class Container {
     return this.xpath === undefined ? '' : this.xpath;
   }
 
-  setXpath(xpath: string): void {
+  setXpath(xpath: string) {
     this.xpath = xpath;
   }
 

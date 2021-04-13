@@ -21,8 +21,7 @@ import {RecentWorkspaces} from 'app/pages/homepage/recent-workspaces';
 import {getRegistrationTasksMap, RegistrationDashboard} from 'app/pages/homepage/registration-dashboard';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
-import {reactStyles, withUserProfile} from 'app/utils';
-import {hasRegisteredAccess} from 'app/utils/access-tiers';
+import {hasRegisteredAccess, reactStyles, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {buildRasRedirectUrl} from 'app/utils/ras';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
@@ -243,7 +242,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
       this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});
 
       const {workbenchAccessTasks} = queryParamsStore.getValue();
-      const hasAccess = hasRegisteredAccess(profile.accessTierShortNames);
+      const hasAccess = hasRegisteredAccess(profile.dataAccessLevel);
       if (!hasAccess || workbenchAccessTasks) {
         await this.syncCompliance();
       }

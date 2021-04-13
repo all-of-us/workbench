@@ -33,17 +33,17 @@ export default class DataTable extends Table {
 
   async getNumRecords(): Promise<number[]> {
     const selector = `${this.getPaginatorXpath()}/*[@class="p-paginator-current"]`;
-    let textContent: string;
+    let textContent;
     try {
-      const element = await this.page.waitForXPath(selector, { visible: true });
-      textContent = await getPropValue<string>(element, 'textContent');
+      const elemt = await this.page.waitForXPath(selector, { visible: true });
+      textContent = await getPropValue<string>(elemt, 'textContent');
     } catch (e) {
       return [0, 0, 0];
     }
 
     // parse for total records. expected string format is "76 - 100 of 100 records".
     const [start, end, total] = textContent.match(/\d+/g);
-    return [Number(start), Number(end), Number(total)];
+    return [start, end, total];
   }
 
   private getPaginatorXpath(): string {

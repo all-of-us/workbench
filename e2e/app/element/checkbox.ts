@@ -5,7 +5,7 @@ import BaseElement from './base-element';
 import { buildXPath } from 'app/xpath-builders';
 
 export default class Checkbox extends BaseElement {
-  static findByName(page: Page, xOpt: XPathOptions, container?: Container): Checkbox {
+  static async findByName(page: Page, xOpt: XPathOptions, container?: Container): Promise<Checkbox> {
     xOpt.type = ElementType.Checkbox;
     const checkboxXpath = buildXPath(xOpt, container);
     const checkbox = new Checkbox(page, checkboxXpath);
@@ -26,7 +26,7 @@ export default class Checkbox extends BaseElement {
   /**
    * Click (check) checkbox element.
    */
-  async check(maxAttempts = 2): Promise<void> {
+  async check(maxAttempts: number = 2): Promise<void> {
     const click = async () => {
       await this.clickWithEval();
       await this.page.waitForTimeout(500);
@@ -49,7 +49,7 @@ export default class Checkbox extends BaseElement {
   /**
    * Click on checkbox element for unchecked
    */
-  async unCheck(): Promise<void> {
+  async unCheck() {
     const is = await this.isChecked();
     if (is) {
       await this.focus();

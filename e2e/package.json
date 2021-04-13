@@ -23,7 +23,7 @@
     "test-nightly": "cross-env WORKBENCH_ENV=test TEST_MODE=nightly-integration yarn _test --maxWorkers=2",
     "test-nightly-local-devup": "cross-env TEST_MODE=nightly-integration yarn jest --maxWorkers=1",
     "test-nightly-local-devup:debug": "cross-env TEST_MODE=nightly-integration PUPPETEER_HEADLESS=false DEBUG=true yarn jest --maxWorkers=1",
-    "build": "tsc -p tsconfig.json",
+    "compile": "tsc -p tsconfig.json",
     "lint": "eslint . --ext .js,.ts",
     "lint:fix": "yarn lint --fix",
     "format": "prettier --config .prettierrc.js --write --ignore-unknown \"**/*.{ts,js}\""

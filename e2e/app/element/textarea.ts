@@ -5,7 +5,7 @@ import BaseElement from './base-element';
 import { buildXPath } from 'app/xpath-builders';
 
 export default class Textarea extends BaseElement {
-  static findByName(page: Page, xOpt: XPathOptions, container?: Container): Textarea {
+  static async findByName(page: Page, xOpt: XPathOptions, container?: Container): Promise<Textarea> {
     xOpt.type = ElementType.Textarea;
     const textareaXpath = buildXPath(xOpt, container);
     const textarea = new Textarea(page, textareaXpath);

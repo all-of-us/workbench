@@ -37,7 +37,7 @@ export default class NotebookCell {
    * Set focus to (select) a notebook cell input. Retry up to 3 times if focus fails.
    * @returns ElementHandle to code input if exists.
    */
-  async focus(maxAttempts = 3): Promise<ElementHandle> {
+  async focus(maxAttempts: number = 3): Promise<ElementHandle> {
     const clickInCell = async (iframe: Frame): Promise<ElementHandle> => {
       const selector = this.cellSelector(this.getCellIndex());
       const cell = await iframe.waitForSelector(`${selector} .CodeMirror-code`, { visible: true });

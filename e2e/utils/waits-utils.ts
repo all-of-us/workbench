@@ -1,5 +1,4 @@
 import { Page } from 'puppeteer';
-import { logger } from 'libs/logger';
 
 export const waitForFn = async (fn: () => any, interval = 2000, timeout = 10000): Promise<boolean> => {
   const start = Date.now();
@@ -28,10 +27,9 @@ export async function waitForUrl(page: Page, urlSubstr: string): Promise<boolean
       urlSubstr
     );
     return (await jsHandle.jsonValue()) as boolean;
-  } catch (err) {
-    logger.error(`waitForUrl() failed: not contains "${urlSubstr}"`);
-    logger.error(err);
-    throw new Error(err);
+  } catch (e) {
+    console.error(`waitForUrl contains "${urlSubstr}" failed. ${e}`);
+    throw e;
   }
 }
 
@@ -51,10 +49,9 @@ export async function waitForDocumentTitle(page: Page, titleSubstr: string): Pro
       titleSubstr
     );
     return (await jsHandle.jsonValue()) as boolean;
-  } catch (err) {
-    logger.error(`waitForDocumentTitle() failed: page title is ${await page.title()}. Not contains "${titleSubstr}"`);
-    logger.error(err);
-    throw new Error(err);
+  } catch (e) {
+    console.error(`waitForDocumentTitle contains "${titleSubstr}" failed. ${e}`);
+    throw e;
   }
 }
 
@@ -74,7 +71,7 @@ export async function waitForPropertyEquality(
       (xpath, prop, value) => {
         const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
           .singleNodeValue;
-        return element[prop as string] === value;
+        return element[prop] === value;
       },
       {},
       xpathSelector,
@@ -83,40 +80,33 @@ export async function waitForPropertyEquality(
     );
     await jsHandle.jsonValue();
     return true;
-  } catch (err) {
-    logger.error(
-      `waitForPropertyEquality() failed: xpath="${xpathSelector}" property:${propertyName} value:${propertyValue}`
+  } catch (e) {
+    console.error(
+      `Wait for element matching XPath="${xpathSelector}" property:${propertyName} value:${propertyValue} failed. ${e}`
     );
-    logger.error(err);
-    throw new Error(err);
+    throw e;
   }
 }
 
 export async function waitForNumericalString(page: Page, xpath: string, timeout?: number): Promise<string> {
   await page.waitForXPath(xpath, { visible: true, timeout });
-  const numbers = await page
-    .waitForFunction(
-      (xpathSelector) => {
-        const node = document.evaluate(xpathSelector, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-          .singleNodeValue;
-        if (node !== null) {
-          const txt = node.textContent.trim();
-          const re = new RegExp(/\d{1,3}(,?\d{3})*/);
-          if (re.test(txt)) {
-            // Match only numbers with comma
-            return re.exec(txt)[0];
-          }
+  const numbers = await page.waitForFunction(
+    (xpathSelector) => {
+      const node = document.evaluate(xpathSelector, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+        .singleNodeValue;
+      if (node !== null) {
+        const txt = node.textContent.trim();
+        const re = new RegExp(/\d{1,3}(,?\d{3})*/);
+        if (re.test(txt)) {
+          // Match only numbers with comma
+          return re.exec(txt)[0];
         }
-        return false;
-      },
-      { timeout },
-      xpath
-    )
-    .catch((err) => {
-      logger.error(`waitForNumericalString() failed: xpath="${xpath}"`);
-      logger.error(err);
-      throw new Error(err);
-    });
+      }
+      return false;
+    },
+    { timeout },
+    xpath
+  );
 
   return (await numbers.jsonValue()).toString();
 }
@@ -131,17 +121,16 @@ export async function waitForPropertyNotExists(
       (xpath, prop) => {
         const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
           .singleNodeValue;
-        return !element[prop as string];
+        return !element[prop];
       },
       {},
       xpathSelector,
       propertyName
     );
     return true;
-  } catch (err) {
-    logger.error(`waitForPropertyNotExists() failed: xpath="${xpathSelector}" property: ${propertyName}`);
-    logger.error(err);
-    throw new Error(err);
+  } catch (e) {
+    console.error(`Failed waiting element (XPath="${xpathSelector}") property: ${propertyName} not exists. ${e}`);
+    throw e;
   }
 }
 
@@ -151,7 +140,7 @@ export async function waitForPropertyExists(page: Page, xpathSelector: string, p
       (xpath, prop) => {
         const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
           .singleNodeValue;
-        return element[prop as string] !== null;
+        return element[prop] !== null;
       },
       {},
       xpathSelector,
@@ -159,9 +148,8 @@ export async function waitForPropertyExists(page: Page, xpathSelector: string, p
     );
     return true;
   } catch (err) {
-    logger.error(`waitForPropertyExists() failed: xpath="${xpathSelector}" property: ${propertyName}`);
-    logger.error(err);
-    throw new Error(err);
+    console.error(`Failed waiting element (XPath="${xpathSelector}") property: ${propertyName} exists. ${err}`);
+    throw err;
   }
 }
 
@@ -188,10 +176,9 @@ export async function waitForVisible(page: Page, cssSelector: string): Promise<b
     );
     await jsHandle.jsonValue();
     return true;
-  } catch (err) {
-    logger.error(`waitForVisible() failed: css="${cssSelector}"`);
-    logger.error(err);
-    throw new Error(err);
+  } catch (e) {
+    console.error(`waitForVisible CSS="${cssSelector}" failed. ${e}`);
+    throw e;
   }
 }
 
@@ -212,10 +199,9 @@ export async function waitForHidden(page: Page, cssSelector: string): Promise<bo
       cssSelector
     );
     return (await jsHandle.jsonValue()) as boolean;
-  } catch (err) {
-    logger.error(`waitForHidden() failed: css="${cssSelector}"`);
-    logger.error(err);
-    throw new Error(err);
+  } catch (e) {
+    console.error(`waitForHidden CSS="${cssSelector}" failed. ${e}`);
+    throw e;
   }
 }
 
@@ -239,10 +225,7 @@ export async function waitForAttributeEquality(
         (css, attributeName, attributeValue) => {
           const element = document.querySelector(css);
           if (element != null) {
-            return (
-              element.attributes[attributeName as string] &&
-              element.attributes[attributeName as string].value === attributeValue
-            );
+            return element.attributes[attributeName] && element.attributes[attributeName].value === attributeValue;
           }
           return false;
         },
@@ -252,10 +235,9 @@ export async function waitForAttributeEquality(
         value
       );
       return (await jsHandle.jsonValue()) as boolean;
-    } catch (err) {
-      logger.error(`waitForAttributeEquality() failed: css=${selector.css} attribute=${attribute} value=${value}`);
-      logger.error(err);
-      throw new Error(err);
+    } catch (e) {
+      console.error(`Find element matching CSS=${selector.css} attribute=${attribute} value=${value}. ${e}`);
+      throw new Error(e);
     }
   }
   if (selector.xpath !== undefined) {
@@ -265,9 +247,7 @@ export async function waitForAttributeEquality(
           const element: any = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
             .singleNodeValue;
           return (
-            element &&
-            element.attributes[attributeName as string] &&
-            element.attributes[attributeName as string].value === attributeValue
+            element && element.attributes[attributeName] && element.attributes[attributeName].value === attributeValue
           );
         },
         { timeout: timeout || 30000 },
@@ -276,10 +256,9 @@ export async function waitForAttributeEquality(
         value
       );
       return (await jsHandle.jsonValue()) as boolean;
-    } catch (err) {
-      logger.error(`waitForAttributeEquality() failed: xpath=${selector.xpath} attribute=${attribute} value=${value}`);
-      logger.error(err);
-      throw new Error(err);
+    } catch (e) {
+      console.error(`Find element matching Xpath=${selector.xpath} attribute=${attribute} value=${value}. ${e}`);
+      throw new Error(e);
     }
   }
   throw new Error('Required selector: {xpath or css} is missing');
@@ -301,10 +280,9 @@ export async function waitForNumberElements(page: Page, cssSelector: string, exp
       expectedCount
     );
     return (await jsHandle.jsonValue()) as boolean;
-  } catch (err) {
-    logger.error(`waitForNumberElements() failed: css="${cssSelector}" count=${expectedCount}`);
-    logger.error(err);
-    throw new Error(err);
+  } catch (e) {
+    console.error(`Wait for elements matching CSS="${cssSelector}" count=${expectedCount} failed. ${e}`);
+    throw e;
   }
 }
 
@@ -335,10 +313,9 @@ export async function waitForText(
         textSubstr
       );
       return (await jsHandle.jsonValue()) as boolean;
-    } catch (err) {
-      logger.error(`waitForText() failed: css=${selector.css} contains "${textSubstr}"`);
-      logger.error(err);
-      throw new Error(err);
+    } catch (e) {
+      console.error(`Wait for element matching CSS=${selector.css} contains "${textSubstr}" text failed. ${e}`);
+      throw e;
     }
   }
   if (selector.xpath !== undefined) {
@@ -356,13 +333,12 @@ export async function waitForText(
         textSubstr
       );
       return (await jsHandle.jsonValue()) as boolean;
-    } catch (err) {
-      logger.error(`waitForText() failed: xpath=${selector.xpath} contains "${textSubstr}"`);
-      logger.error(err);
-      throw new Error(err);
+    } catch (e) {
+      console.error(`Wait for element matching Xpath=${selector.xpath} contains "${textSubstr}" text failed. ${e}`);
+      throw e;
     }
   }
-  throw new Error('waitForText(): xpath or css is required');
+  throw new Error('xpath or css is required');
 }
 
 /**
@@ -397,31 +373,24 @@ export async function waitWhileLoading(
       spinElementsSelector
     )
     .catch((err) => {
-      logger.error(`waitWhileLoading() failed: spinner xpath="${spinElementsSelector}"`);
-      logger.error(err);
-      throw new Error(err);
+      console.error(err.message);
+      throw new Error(`waitWhileLoading() timed out: spinner xpath="${spinElementsSelector}"`);
     });
 
   await page.waitForTimeout(500);
 }
 
 export async function waitUntilEnabled(page: Page, cssSelector: string): Promise<boolean> {
-  const jsHandle = await page
-    .waitForFunction(
-      (xpathSelector) => {
-        const element = document.evaluate(xpathSelector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-          .singleNodeValue;
-        const style = window.getComputedStyle(element as Element);
-        const propValue = style.getPropertyValue('cursor');
-        return propValue === 'pointer';
-      },
-      {},
-      cssSelector
-    )
-    .catch((err) => {
-      logger.error(`waitUntilEnabled() failed: spinner css="${cssSelector}"`);
-      logger.error(err);
-      throw new Error(err);
-    });
+  const jsHandle = await page.waitForFunction(
+    (xpathSelector) => {
+      const elemt = document.evaluate(xpathSelector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+        .singleNodeValue;
+      const style = window.getComputedStyle(elemt as Element);
+      const propValue = style.getPropertyValue('cursor');
+      return propValue === 'pointer';
+    },
+    {},
+    cssSelector
+  );
   return (await jsHandle.jsonValue()) as boolean;
 }

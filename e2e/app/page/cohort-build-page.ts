@@ -33,7 +33,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
    * Save Cohort changes.
    */
   async saveChanges(): Promise<void> {
-    const createCohortButton = Button.findByName(this.page, { normalizeSpace: LinkText.SaveCohort });
+    const createCohortButton = await Button.findByName(this.page, { normalizeSpace: LinkText.SaveCohort });
     await createCohortButton.waitUntilEnabled();
     await createCohortButton.click(); // Click dropdown trigger to open menu
     const menu = new TieredMenu(this.page);
@@ -54,10 +54,10 @@ export default class CohortBuildPage extends AuthenticatedPage {
 
     const modal = new Modal(this.page);
     await modal.waitForLoad();
-    const nameTextbox = modal.waitForTextbox('COHORT NAME');
+    const nameTextbox = await modal.waitForTextbox('COHORT NAME');
     await nameTextbox.type(cohortName);
 
-    const descriptionTextarea = modal.waitForTextarea('DESCRIPTION');
+    const descriptionTextarea = await modal.waitForTextarea('DESCRIPTION');
     await descriptionTextarea.type(description);
 
     await modal.clickButton(LinkText.Save, { waitForClose: true, timeout: 2 * 60 * 1000 });
@@ -67,7 +67,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
   }
 
   async deleteCohort(): Promise<string[]> {
-    await this.getDeleteButton().click();
+    await this.getDeleteButton().then((b) => b.click());
     return this.deleteConfirmationDialog();
   }
 
@@ -120,21 +120,21 @@ export default class CohortBuildPage extends AuthenticatedPage {
    * Find DELETE (trash icon) button in Cohort Build page.
    * @return {ClrIconLink}
    */
-  getDeleteButton(): ClrIconLink {
+  async getDeleteButton(): Promise<ClrIconLink> {
     return ClrIconLink.findByName(this.page, { iconShape: 'trash' });
   }
 
   /**
    * Find EXPORT button in Cohort Build page.
    */
-  getExportButton(): ClrIconLink {
+  async getExportButton(): Promise<ClrIconLink> {
     return ClrIconLink.findByName(this.page, { iconShape: 'export' });
   }
 
   /**
    * Find COPY button in Cohort Build page.
    */
-  getCopyButton(): ClrIconLink {
+  async getCopyButton(): Promise<ClrIconLink> {
     return ClrIconLink.findByName(this.page, { iconShape: 'copy' });
   }
 
