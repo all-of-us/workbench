@@ -1,10 +1,38 @@
 #extraction-data-table-container th {
     background-color: white;
     border: 0px;
-    border-bottom: '1px solid grey';
+    padding-left: 0;
 }
 
 #extraction-data-table-container td {
+    background-color: white;
     border: 0px;
-    border-bottom: '1px solid grey';
+    font-size: 12px;
+    color: #262262;
+    padding-left: 0;
+}
+
+#extraction-data-table-container {
+    width: calc(100% - 30px);
+    height: 100%;
+    margin: auto;
+    overflow: hidden;
+    background-color: white;
+    border-radius: 6px;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+#extraction-data-table-container th span {
+    font-size: 10px;
+    font-weight: normal;
+    float: left;
+    text-transform: uppercase;
+    color: #262262;
+}
+
+#extraction-data-table-container tr {
+    border-bottom: 1px solid rgba(151,151,151,0.5);
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
 }

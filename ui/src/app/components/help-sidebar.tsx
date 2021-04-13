@@ -615,9 +615,17 @@ export const HelpSidebar = fp.flow(
       const {activeIcon, participant, tooltipId} = this.state;
 
       const tableData = [{
-        name: 'eric',
-        job: 'engineer',
-        age: 26
+        datasetName: 'Name of a dataset',
+        status: 'X',
+        dateStarted: 'Today at 7:12 am',
+        cost: '',
+        duration: ''
+      }, {
+        datasetName: 'This_is_another_dataset',
+        status: '<>',
+        dateStarted: 'Apr 4, 2021 at 8:15 am',
+        cost: '$0.08',
+        duration: '14 min'
       }];
       const contentStyle = (tab: string) => ({
         height: 'calc(100% - 1rem)',
@@ -695,16 +703,17 @@ export const HelpSidebar = fp.flow(
                 {!!currentConceptStore.getValue() && <ConceptListPage/>}
               </div>
             </div>}
-            {activeIcon === 'genomesExtractionHistory' && <div>
-                <div>Hi</div>
+            {activeIcon === 'genomesExtractionHistory' &&
                 <div id='extraction-data-table-container'>
-                  <DataTable value={tableData}>
-                      <Column field='name' header='Name'/>
-                      <Column field='age' header='Age'/>
-                      <Column field='job' header='Job'/>
+                  <DataTable value={tableData} autoLayout>
+                      <Column field='datasetName' header='Dataset Name'/>
+                      <Column field='status' header='Status'/>
+                      <Column field='dateStarted' header='Date Started'/>
+                      <Column field='cost' header='Cost'/>
+                      <Column field='duration' header='Duration'/>
                   </DataTable>
                 </div>
-            </div>}
+            }
             {(iconConfigs[activeIcon] || {}).hideSidebarFooter || <div style={styles.footer}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
               <p style={styles.contentItem}>
