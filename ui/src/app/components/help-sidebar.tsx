@@ -704,14 +704,16 @@ export const HelpSidebar = fp.flow(
               </div>
             </div>}
             {activeIcon === 'genomesExtractionHistory' &&
-                <div id='extraction-data-table-container'>
-                  <DataTable value={tableData} autoLayout>
-                      <Column field='datasetName' header='Dataset Name'/>
-                      <Column field='status' header='Status'/>
-                      <Column field='dateStarted' header='Date Started'/>
-                      <Column field='cost' header='Cost'/>
-                      <Column field='duration' header='Duration'/>
-                  </DataTable>
+                <div>
+                    <div id='extraction-data-table-container'>
+                        <DataTable value={tableData} autoLayout>
+                            <Column field='datasetName' header='Dataset Name'/>
+                            <Column field='status' header='Status'/>
+                            <Column field='dateStarted' header='Date Started'/>
+                            <Column field='cost' header='Cost'/>
+                            <Column field='duration' header='Duration'/>
+                        </DataTable>
+                    </div>
                 </div>
             }
             {(iconConfigs[activeIcon] || {}).hideSidebarFooter || <div style={styles.footer}>
