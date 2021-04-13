@@ -229,7 +229,8 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
         dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
-    maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
+    userRecentWorkspaceDao.deleteByUserIdAndWorkspaceIdIn(
+        userProvider.get().getUserId(), Collections.singletonList(dbWorkspace.getWorkspaceId()));
 
     String billingProjectName = dbWorkspace.getWorkspaceNamespace();
     try {
@@ -419,19 +420,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
       userRecentWorkspaces.remove(userRecentWorkspaces.size() - 1);
     }
     userRecentWorkspaceDao.deleteByUserIdAndWorkspaceIdIn(userId, idsToDelete);
-  }
-
-  /** Returns true if anything was deleted from user_recent_workspaces, false if nothing was */
-  private boolean maybeDeleteRecentWorkspace(long workspaceId) {
-    long userId = userProvider.get().getUserId();
-    Optional<DbUserRecentWorkspace> maybeRecentWorkspace =
-        userRecentWorkspaceDao.findFirstByWorkspaceIdAndUserId(workspaceId, userId);
-    if (maybeRecentWorkspace.isPresent()) {
-      userRecentWorkspaceDao.delete(maybeRecentWorkspace.get());
-      return true;
-    } else {
-      return false;
-    }
   }
 
   // this is necessary because the grant ownership call in create/clone
