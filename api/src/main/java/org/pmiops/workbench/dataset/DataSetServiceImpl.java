@@ -93,7 +93,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           Domain.PROCEDURE,
           Domain.PHYSICAL_MEASUREMENT_CSS);
 
-  private static final ImmutableList<Domain> DOMAIN_NO_CONCEPT_SET =
+  private static final ImmutableList<Domain> DOMAIN_WITHOUT_CONCEPT_SETS =
       ImmutableList.of(
           Domain.PERSON,
           Domain.FITBIT_ACTIVITY,
@@ -622,7 +622,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   private boolean supportsConceptSets(Domain domain) {
-    return DOMAIN_NO_CONCEPT_SET.stream().filter(d -> domain.equals(d)).count() == 0;
+    return DOMAIN_WITHOUT_CONCEPT_SETS.stream().filter(d -> domain.equals(d)).count() == 0;
   }
 
   // Gather all the concept IDs from the ConceptSets provided, taking account of

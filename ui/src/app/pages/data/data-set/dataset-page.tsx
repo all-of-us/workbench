@@ -390,7 +390,7 @@ const BoxHeader = ({step = '', header =  '', subHeader = '', style = {}, ...prop
 enum PrepackagedConceptSet {
   PERSON = 'Demographics',
   SURVEYS = 'All Surveys',
-  FITIBITHEARTRATESUMMARY = 'Fitbit Heart Rate Summary',
+  FITBITHEARTRATESUMMARY = 'Fitbit Heart Rate Summary',
   FITBITACTIVITY = 'Fitbit Activity Summary',
   FITBITHEARTRATELEVEL = 'Fitbit Heart Rate Level',
   FITBITINTRADAYSTEPS = 'Fitbit Intra Day Steps',
@@ -403,7 +403,7 @@ const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
 };
 
 const PREPACKAGED_WITH_FITBIT_DOMAINS = {
-  [PrepackagedConceptSet.FITIBITHEARTRATESUMMARY]: Domain.FITBITHEARTRATESUMMARY,
+  [PrepackagedConceptSet.FITBITHEARTRATESUMMARY]: Domain.FITBITHEARTRATESUMMARY,
   [PrepackagedConceptSet.FITBITACTIVITY]: Domain.FITBITACTIVITY,
   [PrepackagedConceptSet.FITBITHEARTRATELEVEL]: Domain.FITBITHEARTRATELEVEL,
   [PrepackagedConceptSet.FITBITINTRADAYSTEPS]: Domain.FITBITINTRADAYSTEPS,
@@ -641,12 +641,9 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     getPrePackagedList() {
       let prepackagedList = Object.keys(PrepackagedConceptSet);
       if (!getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasFitbitData) {
-        // TO DO Fix spelling mistake in prepackageSet
         prepackagedList = prepackagedList
             .filter(prepack => !fp.startsWith('FITBIT', prepack));
-        prepackagedList = prepackagedList
-            .filter(prepack => !fp.startsWith('FITIBIT', prepack));
-      }
+       }
       if (!getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasWgsData) {
         prepackagedList = prepackagedList.filter(prepack => prepack !== 'WHOLEGENOME');
       }
@@ -813,7 +810,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
               break;
             }
             case PrePackagedConceptSetEnum.FITBITHEARTRATESUMMARY: {
-              re.add(PrepackagedConceptSet.FITIBITHEARTRATESUMMARY);
+              re.add(PrepackagedConceptSet.FITBITHEARTRATESUMMARY);
               break;
             }
             case PrePackagedConceptSetEnum.FITBITHEARTRATELEVEL: {
@@ -859,7 +856,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
           case PrepackagedConceptSet.FITBITINTRADAYSTEPS:
             selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.FITBITINTRADAYSTEPS);
             break;
-          case PrepackagedConceptSet.FITIBITHEARTRATESUMMARY:
+          case PrepackagedConceptSet.FITBITHEARTRATESUMMARY:
             selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.FITBITHEARTRATESUMMARY);
             break;
           case PrepackagedConceptSet.FITBITHEARTRATELEVEL:
