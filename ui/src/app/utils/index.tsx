@@ -422,8 +422,10 @@ export function formatWorkspaceResourceDisplayDate(time: string): string {
 }
 
 export function formatDomainString(domainString: string): string {
-  return fp.capitalize(domainString === Domain.PHYSICALMEASUREMENTCSS.toString()
-    ? Domain.PHYSICALMEASUREMENT.toString() : domainString);
+  return domainString === Domain.PHYSICALMEASUREMENTCSS.toString()
+      ? fp.capitalize(Domain.PHYSICALMEASUREMENT.toString())
+      : domainString === Domain.WHOLEGENOMEVARIANT.toString()
+          ? 'VCF Files' : fp.capitalize(domainString);
 }
 
 export function formatDomain(domain: Domain): string {

@@ -347,6 +347,31 @@ describe('DataSetPage', () => {
 
     expect(wrapper.find('[data-test-id="cohort-list-item"]').first().props().checked).toBeTruthy();
     expect(wrapper.find('[data-test-id="all-participant"]').props().checked).toBeFalsy();
+  });
+
+  it('should display Pre packaged concept set as per CDR data', async () => {
+    let wrapper = mount(<DataSetPage/>);
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(7);
+
+    cdrVersionListResponse.items[0].hasWgsData = false;
+    wrapper = mount(<DataSetPage/>);
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(6);
+
+
+    cdrVersionListResponse.items[0].hasFitbitData = false;
+    cdrVersionListResponse.items[0].hasWgsData = true;
+    wrapper = mount(<DataSetPage/>);
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(3);
+
+
+    cdrVersionListResponse.items[0].hasFitbitData = false;
+    cdrVersionListResponse.items[0].hasWgsData = false;
+    wrapper = mount(<DataSetPage/>);
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(2);
 
   });
 });
