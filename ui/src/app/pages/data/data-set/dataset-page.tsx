@@ -643,7 +643,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       if (!getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasFitbitData) {
         prepackagedList = prepackagedList
             .filter(prepack => !fp.startsWith('FITBIT', prepack));
-       }
+      }
       if (!getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasWgsData) {
         prepackagedList = prepackagedList.filter(prepack => prepack !== 'WHOLEGENOME');
       }
