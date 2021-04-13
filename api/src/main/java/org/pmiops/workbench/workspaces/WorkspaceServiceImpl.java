@@ -217,6 +217,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     return workspaceResponse;
   }
 
+  @Transactional
   @Override
   public void deleteWorkspace(DbWorkspace dbWorkspace) {
     // This deletes all Firecloud and google resources, however saves all references
