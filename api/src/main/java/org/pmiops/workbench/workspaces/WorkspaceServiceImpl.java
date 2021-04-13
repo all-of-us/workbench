@@ -85,7 +85,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   protected static final int RECENT_WORKSPACE_COUNT = 4;
   private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
-  private static final String FC_OWNER_ROLE = "OWNER";
 
   private final BillingProjectAuditor billingProjectAuditor;
   private final Clock clock;
