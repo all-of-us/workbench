@@ -276,6 +276,12 @@ public class GenomicExtractionService {
   }
 
   public void abortExtract(DbWorkspace workspace, String wgsCohortExtractionId) throws ApiException {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspace.getWorkspaceNamespace(),
+        workspace.getFirecloudName(),
+        WorkspaceAccessLevel.WRITER
+    );
+
     submissionApiProvider
         .get()
         .abortSubmission(
