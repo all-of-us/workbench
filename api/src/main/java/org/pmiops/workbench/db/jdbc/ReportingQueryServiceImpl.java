@@ -380,6 +380,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  rp_social_behavioral,\n"
                 + "  rp_time_requested,\n"
                 + "  workspace_id,\n"
+                + "  workspace_namespace,\n"
                 + "  a.short_name AS access_tier_short_name\n"
                 + "FROM workspace w\n"
                 + "  JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
@@ -425,7 +426,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .rpScientificApproach(rs.getString("rp_scientific_approach"))
                 .rpSocialBehavioral(rs.getBoolean("rp_social_behavioral"))
                 .rpTimeRequested(offsetDateTimeUtc(rs.getTimestamp("rp_time_requested")))
-                .workspaceId(rs.getLong("workspace_id")));
+                .workspaceId(rs.getLong("workspace_id"))
+                .workspaceNamespace(rs.getString("workspace_namespace")));
   }
 
   @Override
