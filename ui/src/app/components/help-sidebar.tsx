@@ -585,9 +585,9 @@ export const HelpSidebar = fp.flow(
 
     sidebarContent(activeIcon): {
       headerPadding?: string;
-      header?: () => JSX.Element;
+      renderHeader?: () => JSX.Element;
       bodyWidthRem?: string;
-      body: () => JSX.Element;
+      renderBody: () => JSX.Element;
       showFooter: boolean;
     } {
       const defaultContentPadding = '0 0.5rem 5.5rem';
@@ -596,12 +596,12 @@ export const HelpSidebar = fp.flow(
         case 'help':
           return {
             headerPadding: '0.5rem',
-            header: () => {
+            renderHeader: () => {
               return <h3 style={{...styles.sectionTitle, marginTop: 0, lineHeight: 1.75}}>
                 Help Tips
               </h3>;
             },
-            body: () => {
+            renderBody: () => {
               return <div style={{padding: defaultContentPadding}}>
                 <HelpTips allowSearch={true}
                           onSearch={() => this.analyticsEvent('Search')}
@@ -613,7 +613,7 @@ export const HelpSidebar = fp.flow(
         case 'runtime':
           return {
             headerPadding: '0.75rem',
-            header: () => {
+            renderHeader: () => {
               return <div>
                 <h3 style={{...styles.sectionTitle, marginTop: 0, lineHeight: 1.75}}>Cloud analysis environment</h3>
                 <div style={{padding: '0.5rem 1rem'}}>
@@ -623,7 +623,7 @@ export const HelpSidebar = fp.flow(
               </div>;
             },
             bodyWidthRem: '30',
-            body: () => {
+            renderBody: () => {
               return <div style={{padding: '0 1.25rem'}}>
                 {<RuntimePanel onClose={() => this.props.setSidebarState(false)}/>}
               </div>;
@@ -633,12 +633,12 @@ export const HelpSidebar = fp.flow(
         case 'notebooksHelp':
           return {
             headerPadding: '0.5rem',
-            header: () => {
+            renderHeader: () => {
               return <h3 style={{...styles.sectionTitle, marginTop: 0}}>
                 Workspace storage
               </h3>;
             },
-            body: () => {
+            renderBody: () => {
               return <div style={{padding: defaultContentPadding}}>
                 <HelpTips allowSearch={false}
                           contentKey={this.props.helpContentKey}/>
@@ -649,10 +649,10 @@ export const HelpSidebar = fp.flow(
         case 'annotations':
           return {
             headerPadding: '0.5rem 0.5rem 0 0.5rem',
-            header: () => {
+            renderHeader: () => {
               return <div style={{fontSize: 18, color: colors.primary}}> Participant {this.state.participant.participantId}</div>;
             },
-            body: () => {
+            renderBody: () => {
               return <div style={{padding: defaultContentPadding}}>
                 {this.state.participant && <SidebarContent />}
               </div>;
@@ -663,11 +663,11 @@ export const HelpSidebar = fp.flow(
         case 'concept':
           return {
             headerPadding: '0.75rem',
-            header: () => {
+            renderHeader: () => {
               return <h3 style={{...styles.sectionTitle, marginTop: 0}}>Selected Concepts</h3>;
             },
             bodyWidthRem: '20',
-            body: () => {
+            renderBody: () => {
               return <div style={{padding: '0.5rem 0.5rem 0'}}>
                 <div style={{padding: '0.25rem 0.25rem 0rem'}}>
                   {!!currentConceptStore.getValue() && <ConceptListPage/>}
@@ -679,7 +679,7 @@ export const HelpSidebar = fp.flow(
         case 'criteria':
           return {
             bodyWidthRem: '20',
-            body: () => {
+            renderBody: () => {
               return <div style={{padding: '0.5rem 0.5rem 0', height: '100%'}}>
                 <div style={{height: '100%', padding: '0.25rem 0.25rem 0rem'}}>
                   {!!currentCohortSearchContextStore.getValue() &&
@@ -732,8 +732,8 @@ export const HelpSidebar = fp.flow(
 
             {sidebarContent && <div style={{height: '100%', overflow: 'auto'}}>
               <FlexColumn style={{height: '100%'}}>
-                {sidebarContent.header && <FlexRow style={{justifyContent: 'space-between', padding: sidebarContent.headerPadding}}>
-                  {sidebarContent.header()}
+                {sidebarContent.renderHeader && <FlexRow style={{justifyContent: 'space-between', padding: sidebarContent.headerPadding}}>
+                  {sidebarContent.renderHeader()}
 
                     <Clickable onClick={() => this.props.setSidebarState(false)}>
                         <img src={proIcons.times}
@@ -743,7 +743,7 @@ export const HelpSidebar = fp.flow(
                 </FlexRow>}
 
                   <div style={{flex: 1}}>
-                    {sidebarContent && sidebarContent.body()}
+                    {sidebarContent && sidebarContent.renderBody()}
                   </div>
               </FlexColumn>
 
