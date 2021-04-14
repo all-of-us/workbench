@@ -68,7 +68,6 @@ describe('WorkspaceWrapperComponent', () => {
         {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
       ]
     }).compileComponents().then(() => {
-      registerApiClient(ConfigApi, new ConfigApiStub());
       registerApiClient(WorkspacesApi, new WorkspacesApiStub());
       registerApiClient(RuntimeApi, new RuntimeApiStub());
       registerApiClient(UserApi, new UserApiStub());

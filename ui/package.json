@@ -15,7 +15,7 @@
     "codegen-clean": "rm -rf src/generated src/notebooks-generated",
     "codegen-swagger": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-fetch --input-spec ../api/src/main/resources/workbench-api.yaml --output src/generated/fetch",
     "notebooks-codegen-swagger": "java -jar ../aou-utils/swagger-codegen-cli.jar generate --lang typescript-fetch --input-spec ../api/src/main/resources/notebooks.yaml --output src/notebooks-generated/fetch",
-    "coverage": "ng test --source-map=false --watch=false --code-coverage"
+    "coverage": "ng test --source-map=true --watch=false --code-coverage"
   },
   "jest": {
     "preset": "ts-jest",
