@@ -8,7 +8,6 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -90,17 +89,15 @@ public class BillingProjectBufferService implements GaugeDataCollector {
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    final ImmutableMap<BufferEntryStatus, Long> entryStatusToCount =
-        ImmutableMap.copyOf(billingProjectBufferEntryDao.getCountByStatusMap());
-
-    return Arrays.stream(BufferEntryStatus.values())
+    return billingProjectBufferEntryDao.getBillingBufferGaugeData().stream()
         .map(
-            status ->
+            projects ->
                 MeasurementBundle.builder()
                     .addMeasurement(
-                        GaugeMetric.BILLING_BUFFER_PROJECT_COUNT,
-                        entryStatusToCount.getOrDefault(status, 0L))
-                    .addTag(MetricLabel.BUFFER_ENTRY_STATUS, status.toString())
+                        GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, projects.getNumProjects())
+                    .addTag(MetricLabel.BUFFER_ENTRY_STATUS, projects.getStatusEnum().toString())
+                    .addTag(
+                        MetricLabel.ACCESS_TIER_SHORT_NAME, projects.getAccessTier().getShortName())
                     .build())
         .collect(Collectors.toList());
   }
