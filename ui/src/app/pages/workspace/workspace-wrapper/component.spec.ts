@@ -16,7 +16,7 @@ import {WorkspaceNavBarComponent} from 'app/pages/workspace/workspace-nav-bar';
 import {WorkspaceShareComponent} from 'app/pages/workspace/workspace-share';
 import {WorkspaceWrapperComponent} from 'app/pages/workspace/workspace-wrapper/component';
 
-import {ConfigApi, RuntimeApi, UserApi, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
+import {RuntimeApi, UserApi, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
