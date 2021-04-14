@@ -1,7 +1,13 @@
+#extraction-data-table-container th.p-sortable-column.p-highlight:hover:first-child span:hover:first-child {
+    text-decoration: underline;
+}
+
 #extraction-data-table-container th {
     background-color: white;
     border: 0px;
     padding-left: 0;
+    padding-top: .3rem;
+    padding-bottom: .1rem;
 }
 
 #extraction-data-table-container td {
@@ -9,12 +15,14 @@
     border: 0px;
     font-size: 12px;
     color: #262262;
+    padding: 0.3rem 0;
     padding-left: 0;
+    padding-right: 1rem;
 }
 
 #extraction-data-table-container {
     width: calc(100% - 30px);
-    height: 100%;
+    height: 80%;
     margin: auto;
     overflow: hidden;
     background-color: white;
@@ -24,8 +32,8 @@
 }
 
 #extraction-data-table-container th span {
-    font-size: 10px;
-    font-weight: normal;
+    font-size: .4rem;
+    font-weight: 500;
     float: left;
     text-transform: uppercase;
     color: #262262;
@@ -35,4 +43,34 @@
     border-bottom: 1px solid rgba(151,151,151,0.5);
     -webkit-background-clip: padding-box;
     background-clip: padding-box;
+}
+
+#extraction-data-table-container .pi-sort-amount-up-alt:before {
+    color: #216FB4;
+    content: '\1F815';
+    font-size: 18px;
+    line-height: 1.2;
+    margin-left: .1rem;
+}
+
+#extraction-data-table-container .pi-sort-amount-down:before {
+    color: #216FB4;
+    content: "\1F817";
+    font-size: 18px;
+    line-height: 1.2;
+    margin-left: .1rem;
+}
+
+#extraction-data-table-container .p-sortable-column.p-highlight span {
+    color: #216FB4;
+}
+
+#extraction-data-table-container th.p-sortable-column:hover span:first-child {
+    color: #216FB4;
+    text-decoration: underline;
+    text-underline-position: under;
+}
+
+#extraction-data-table-container td:last-child {
+    padding-right: 0;
 }

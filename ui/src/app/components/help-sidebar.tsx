@@ -1,8 +1,8 @@
 import {Component, Input} from '@angular/core';
 import {faEdit} from '@fortawesome/free-regular-svg-icons';
 import {
-  faBook,
-  faEllipsisV,
+  faBook, faCheckCircle, faEllipsisH,
+  faEllipsisV, faExclamationTriangle,
   faFolderOpen,
   faInbox,
   faInfoCircle
@@ -616,17 +616,31 @@ export const HelpSidebar = fp.flow(
 
       const tableData = [{
         datasetName: 'Name of a dataset',
-        status: 'X',
+        status: 0,
+        statusJsx:  <FontAwesomeIcon icon={faSyncAlt} style={{color: colors.success, fontSize: '.7rem', marginLeft: '.4rem', display: 'block', animationName: 'spin', animationDuration: '5000ms', animationIterationCount: 'infinite', animationTimingFunction: 'linear'}}/>,
         dateStarted: 'Today at 7:12 am',
         cost: '',
-        duration: ''
+        duration: '',
+        menu:  <FontAwesomeIcon icon={faEllipsisV} style={{color: colors.secondary, fontSize: '.7rem', marginLeft: 0, paddingRight: 0, display: 'block'}}/>,
       }, {
-        datasetName: 'This_is_another_dataset',
-        status: '<>',
+        datasetName: 'This_is_another_datasetssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss',
+        status: 1,
+        statusJsx: <FontAwesomeIcon icon={faExclamationTriangle} style={{color: colors.danger, fontSize: '.7rem', marginLeft: '.4rem', display: 'block'}}/>,
         dateStarted: 'Apr 4, 2021 at 8:15 am',
         cost: '$0.08',
-        duration: '14 min'
-      }];
+        duration: '14 min',
+        menu:  <FontAwesomeIcon icon={faEllipsisV} style={{color: colors.secondary, fontSize: '.7rem', marginLeft: 0, paddingRight: 0, display: 'block'}}/>,
+      }, {
+          datasetName: 'Anotha one!',
+        status: 2,
+        statusJsx: <FontAwesomeIcon icon={faCheckCircle} style={{color: colors.success, fontSize: '.7rem', marginLeft: '.4rem', display: 'block'}}/>,
+          dateStarted: 'Apr 1, 2021 at 8:15 am',
+          cost: '$100.08',
+          duration: '10h, 32min',
+        menu:  <FontAwesomeIcon icon={faEllipsisV} style={{color: colors.secondary, fontSize: '.7rem', marginLeft: 0, paddingRight: 0, display: 'block'}}/>,
+        },
+      ];
+
       const contentStyle = (tab: string) => ({
         height: 'calc(100% - 1rem)',
         overflow: 'auto',
@@ -704,17 +718,16 @@ export const HelpSidebar = fp.flow(
               </div>
             </div>}
             {activeIcon === 'genomesExtractionHistory' &&
-                <div>
-                    <div id='extraction-data-table-container'>
+                    <div id='extraction-data-table-container' style={{marginTop: '2rem'}}>
                         <DataTable value={tableData} autoLayout>
-                            <Column field='datasetName' header='Dataset Name'/>
-                            <Column field='status' header='Status'/>
-                            <Column field='dateStarted' header='Date Started'/>
-                            <Column field='cost' header='Cost'/>
-                            <Column field='duration' header='Duration'/>
+                            <Column field='datasetName' header='Dataset Name' sortable style={{maxWidth: '8rem', textOverflow: 'ellipsis', overflow: 'hidden'}}/>
+                            <Column field='statusJsx' header='Status' sortable sortField='status'/>
+                            <Column field='dateStarted' header='Date Started' sortable/>
+                            <Column field='cost' header='Cost' sortable/>
+                            <Column field='duration' header='Duration' sortable/>
+                            <Column field='menu' header=''/>
                         </DataTable>
                     </div>
-                </div>
             }
             {(iconConfigs[activeIcon] || {}).hideSidebarFooter || <div style={styles.footer}>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
