@@ -47,12 +47,7 @@ describe('SignedInComponent', () => {
       ],
       providers: [
         {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
-        {
-          provide: ServerConfigService,
-          useValue: new ServerConfigServiceStub({
-            gsuiteDomain: 'fake-research-aou.org'
-          })
-        },
+z
         {provide: SignInService, useValue: new SignInServiceStub()},
       ]
     }).compileComponents().then(() => {

@@ -2,14 +2,14 @@
  * OAuth2 via GAPI sign-in.
  */
 import {Injectable, NgZone} from '@angular/core';
-import {ServerConfigService} from 'app/services/server-config.service';
 import {setLoggedInState} from 'app/utils/analytics';
 import {signInStore} from 'app/utils/navigation';
-import {authStore} from 'app/utils/stores';
+import {authStore, serverConfigStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {ConfigResponse} from 'generated/fetch';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 import 'rxjs/Rx';
+import {configApi} from "./swagger-fetch-clients";
 
 
 declare const gapi: any;
@@ -32,36 +32,16 @@ export class SignInService {
   public clientId = environment.clientId;
   private testAccessTokenOverride: string;
 
-  constructor(private zone: NgZone,
-    serverConfigService: ServerConfigService) {
+  constructor(private zone: NgZone) {
     this.zone = zone;
 
-    serverConfigService.getConfig().subscribe((config) => {
-      // Enable test access token override via global function. Intended to support
-      // Puppeteer testing flows. This is handled in the server config callback
-      // for signin timing consistency. Normally we cannot sign in until we've
-      // loaded the oauth client ID from the config service.
-      if (environment.allowTestAccessTokenOverride) {
-        window.setTestAccessTokenOverride = (token: string) => {
-          if (token) {
-            window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
-          } else {
-            window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
-          }
-        };
-        this.testAccessTokenOverride = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
-        if (this.testAccessTokenOverride) {
-          // The client has already configured an access token override. Skip the normal oauth flow.
-          authStore.set({...authStore.get(), authLoaded: true, isSignedIn: true});
-          this.zone.run(() => {
-            this.isSignedIn.next(true);
-          });
-          return;
-        }
-      }
-
-      this.makeAuth2(config);
-    });
+    if (serverConfigStore.get().config) {
+      this.serverConfigStoreCallback(serverConfigStore.get().config);
+    } else {
+      serverConfigStore.subscribe((configStore) => {
+        this.serverConfigStoreCallback(configStore.config);
+      });
+    }
   }
 
   public signIn(): void {
@@ -74,6 +54,33 @@ export class SignInService {
 
   public signOut(): void {
     gapi.auth2.getAuthInstance().signOut();
+  }
+
+  private serverConfigStoreCallback(config: ConfigResponse) {
+    // Enable test access token override via global function. Intended to support
+    // Puppeteer testing flows. This is handled in the server config callback
+    // for signin timing consistency. Normally we cannot sign in until we've
+    // loaded the oauth client ID from the config service.
+    if (environment.allowTestAccessTokenOverride) {
+      window.setTestAccessTokenOverride = (token: string) => {
+        if (token) {
+          window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
+        } else {
+          window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+        }
+      };
+      this.testAccessTokenOverride = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+      if (this.testAccessTokenOverride) {
+        // The client has already configured an access token override. Skip the normal oauth flow.
+        authStore.set({...authStore.get(), authLoaded: true, isSignedIn: true});
+        this.zone.run(() => {
+          this.isSignedIn.next(true);
+        });
+        return;
+      }
+    }
+
+    this.makeAuth2(config);
   }
 
   private makeAuth2(config: ConfigResponse): Promise<any> {

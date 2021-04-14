@@ -10,7 +10,6 @@ import {
   globalErrorStore,
   queryParamsStore,
   routeConfigDataStore,
-  serverConfigStore,
   urlParamsStore,
   userProfileStore
 } from 'app/utils/navigation';
@@ -20,7 +19,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
-import {cdrVersionStore, withStore} from './stores';
+import {cdrVersionStore, serverConfigStore, withStore} from './stores';
 
 const {useEffect, useState} = React;
 
@@ -383,13 +382,9 @@ export const withQueryParams = () => {
   return connectBehaviorSubject(queryParamsStore, 'queryParams');
 };
 
-// A HOC that provides a 'serverConfig' prop,
-// For similar reasons to the withCdrVersions store above, we want the serverConfig HOC to not
-// render child components until the store has a non-empty value.
-// See discussion on https://github.com/all-of-us/workbench/pull/2603/ for details on the type of
-// bugs that motivated this approach.
+// A HOC that provides a 'serverConfig' prop
 export const withServerConfig = () => {
-  return connectBehaviorSubject(serverConfigStore, 'serverConfig', /* preventRenderUntilValuePresent */ true);
+  return withStore(serverConfigStore, 'serverConfig');
 };
 export interface ServerConfigProps {
   serverConfig: ConfigResponse;

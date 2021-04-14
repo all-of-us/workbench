@@ -10,7 +10,6 @@ import * as StackTrace from 'stacktrace-js';
 
 import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
 import {ProfileStorageService} from './services/profile-storage.service';
-import {ServerConfigService} from './services/server-config.service';
 import {SignInService} from './services/sign-in.service';
 import {WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
@@ -79,7 +78,6 @@ import {FooterComponent} from './components/footer';
     WorkspaceWrapperComponent,
   ],
   providers: [
-    ServerConfigService,
     ProfileStorageService,
     SignInService,
     {
