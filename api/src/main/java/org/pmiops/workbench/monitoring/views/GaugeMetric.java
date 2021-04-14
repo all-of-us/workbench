@@ -9,6 +9,11 @@ import java.util.List;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
 
 public enum GaugeMetric implements Metric {
+  // When updating a metric, please make sure to:
+  // 1. bump the version number in its name (e.g. billing_buffer_project_count_3)
+  // 2. update workbench-terraform-modules with the new name
+  // See https://github.com/all-of-us/workbench/wiki/Monitoring,-Alerts,-and-Dashboards for details.
+
   BILLING_BUFFER_PROJECT_COUNT(
       "billing_buffer_project_count_3",
       "Number of projects in the billing buffer for each status/tier pair",
