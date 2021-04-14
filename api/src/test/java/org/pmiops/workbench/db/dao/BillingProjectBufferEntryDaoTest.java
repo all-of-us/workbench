@@ -83,14 +83,10 @@ public class BillingProjectBufferEntryDaoTest extends SpringTest {
           .isEmpty();
       assertThat(filterByStatusAndTier(counts, BufferEntryStatus.ASSIGNING, tier)).isEmpty();
 
-      assertThat(getOne(counts, BufferEntryStatus.ASSIGNED, tier).getNumProjects())
-          .isEqualTo(ASSIGNED_COUNT);
-      assertThat(getOne(counts, BufferEntryStatus.CREATING, tier).getNumProjects())
-          .isEqualTo(CREATING_COUNT);
-      assertThat(getOne(counts, BufferEntryStatus.AVAILABLE, tier).getNumProjects())
-          .isEqualTo(AVAILABLE_COUNT);
-      assertThat(getOne(counts, BufferEntryStatus.ERROR, tier).getNumProjects())
-          .isEqualTo(ERROR_COUNT);
+      assertThat(count(counts, BufferEntryStatus.ASSIGNED, tier)).isEqualTo(ASSIGNED_COUNT);
+      assertThat(count(counts, BufferEntryStatus.CREATING, tier)).isEqualTo(CREATING_COUNT);
+      assertThat(count(counts, BufferEntryStatus.AVAILABLE, tier)).isEqualTo(AVAILABLE_COUNT);
+      assertThat(count(counts, BufferEntryStatus.ERROR, tier)).isEqualTo(ERROR_COUNT);
     }
   }
 
@@ -102,12 +98,12 @@ public class BillingProjectBufferEntryDaoTest extends SpringTest {
         .collect(Collectors.toList());
   }
 
-  private ProjectCountByStatusAndTier getOne(
+  private long count(
       List<ProjectCountByStatusAndTier> counts, BufferEntryStatus status, DbAccessTier accessTier) {
     List<ProjectCountByStatusAndTier> filteredCounts =
         filterByStatusAndTier(counts, status, accessTier);
     assertThat(filteredCounts).hasSize(1);
-    return filteredCounts.get(0);
+    return filteredCounts.get(0).getNumProjects();
   }
 
   @Test

@@ -965,21 +965,6 @@ public class BillingProjectBufferServiceTest {
     assertThat(bufferStatus.getBufferSize()).isEqualTo(numberAvailable);
   }
 
-  // TODO assumes that every status gets an entry, even if it's 0
-
-  //  @Test
-  //  public void testGetGaugeData() {
-  //    final Collection<MeasurementBundle> bundles = billingProjectBufferService.getGaugeData();
-  //    assertThat(bundles.size()).isGreaterThan(0);
-  //    Optional<MeasurementBundle> entryStatusBundle =
-  //        bundles.stream()
-  //            .filter(b ->
-  // b.getMeasurements().containsKey(GaugeMetric.BILLING_BUFFER_PROJECT_COUNT))
-  //            .findFirst();
-  //    assertThat(entryStatusBundle.isPresent()).isTrue();
-  //    assertThat(entryStatusBundle.get().getTags()).isNotEmpty();
-  //  }
-
   @Test
   public void testFindEntriesWithExpiredGracePeriod() {
 
