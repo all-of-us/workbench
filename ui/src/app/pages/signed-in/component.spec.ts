@@ -56,7 +56,6 @@ describe('SignedInComponent', () => {
   }));
 
   beforeEach(() => {
-    registerApiClient(ConfigApi, new ConfigApiStub());
     registerApiClient(CdrVersionsApi, new CdrVersionsApiStub());
     registerApiClient(StatusAlertApi, new StatusAlertApiStub());
   });
