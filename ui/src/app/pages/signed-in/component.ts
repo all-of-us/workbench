@@ -104,8 +104,9 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
       // config store, only that it's populated.
       this.serverConfigStoreCallback();
     } else {
-      serverConfigStore.subscribe(() => {
+      const {unsubscribe} = serverConfigStore.subscribe(() => {
         this.serverConfigStoreCallback();
+        unsubscribe();
       });
     }
 

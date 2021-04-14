@@ -37,8 +37,9 @@ export class SignInService {
     if (serverConfigStore.get().config) {
       this.serverConfigStoreCallback(serverConfigStore.get().config);
     } else {
-      serverConfigStore.subscribe((configStore) => {
+      const {unsubscribe} = serverConfigStore.subscribe((configStore) => {
         this.serverConfigStoreCallback(configStore.config);
+        unsubscribe();
       });
     }
   }
