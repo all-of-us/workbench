@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.springframework.data.repository.CrudRepository;
 
 public interface UserRecentWorkspaceDao extends CrudRepository<DbUserRecentWorkspace, Long> {
@@ -12,4 +13,6 @@ public interface UserRecentWorkspaceDao extends CrudRepository<DbUserRecentWorks
   Optional<DbUserRecentWorkspace> findFirstByWorkspaceIdAndUserId(long workspaceId, long userId);
 
   void deleteByUserIdAndWorkspaceIdIn(long userId, Collection<Long> ids);
+
+  void deleteByWorkspaceId(long workspaceId);
 }
