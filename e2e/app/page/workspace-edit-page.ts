@@ -269,6 +269,7 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     const selectXpath = buildXPath(FIELD.billingAccountSelect.textOption);
     const select = new Select(this.page, selectXpath);
     await Promise.all([this.getWorkspaceNameTextbox().waitForXPath(), select.waitForXPath()]);
+    // Build Workspace page is used for Duplicate and Create.
     await Promise.race([
       this.getCreateWorkspaceButton().waitForXPath(),
       this.getDuplicateWorkspaceButton().waitForXPath()

@@ -86,42 +86,4 @@ describe('Creating new workspaces', () => {
     const dataPage1 = new WorkspaceDataPage(page);
     await dataPage1.verifyWorkspaceNameOnDataPage(newWorkspaceName);
   });
-
-  test('Cannot create workspace when missing required fields', async () => {
-    const workspacesPage = new WorkspacesPage(page);
-    await workspacesPage.load();
-
-    const createNewWorkspaceButton = Button.findByName(page, FieldSelector.CreateNewWorkspaceButton.textOption);
-    await createNewWorkspaceButton.clickAndWait();
-
-    const workspaceEditPage = new WorkspaceEditPage(page);
-
-    // fill out new workspace name
-    await workspaceEditPage.fillOutWorkspaceName();
-
-    // select the default CDR Version
-    await workspaceEditPage.selectCdrVersion();
-
-    // select Billing Account
-    await workspaceEditPage.selectBillingAccount(UseFreeCredits);
-
-    // don't fill out question #1 - What is the primary purpose of your project?
-
-    // fill out question #2 - Please provide a summary of your research purpose by responding to the questions.
-    await performActions(page, testData.defaultAnswersResearchPurposeSummary);
-
-    // fill out question #3 - The All of Us Research Program encourages researchers to disseminate their research findings...
-    await performActions(page, testData.defaultAnswersDisseminateResearchFindings);
-
-    // fill out question #4 - select all of the statements below that describe the outcomes you anticipate from your research.
-    await performActions(page, testData.defaultAnswersAnticipatedOutcomesFromResearch);
-
-    // fill out question #5 - Population interest
-    await performActions(page, testData.defaultAnswersPopulationOfInterest);
-
-    // don't fill out question #6 - Request for Review of Research Purpose Description
-
-    const finishButton = workspaceEditPage.getCreateWorkspaceButton();
-    expect(await finishButton.isCursorNotAllowed()).toBe(true);
-  });
 });
