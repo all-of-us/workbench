@@ -82,7 +82,6 @@ const styles = reactStyles({
     top: 0,
     right: '45px',
     height: '100%',
-    overflow: 'auto',
     background: colorWithWhiteness(colors.primary, .87),
     transition: 'margin-right 0.5s ease-out',
     boxShadow: `-10px 0px 10px -8px ${colorWithWhiteness(colors.dark, .5)}`,
@@ -142,6 +141,8 @@ const styles = reactStyles({
     color: colors.primary
   },
   footer: {
+    position: 'absolute',
+    bottom: 0,
     padding: '1.25rem 0.75rem',
     background: colorWithWhiteness(colors.primary, .8),
   },
@@ -680,7 +681,7 @@ export const HelpSidebar = fp.flow(
           return {
             bodyWidthRem: '20',
             body: () => {
-              return <div style={{padding: '0.5rem 0.5rem 0'}}>
+              return <div style={{padding: '0.5rem 0.5rem 0', height: '100%'}}>
                 <div style={{height: '100%', padding: '0.25rem 0.25rem 0rem'}}>
                   {!!currentCohortSearchContextStore.getValue() &&
                     <SelectionList back={() => this.props.setSidebarState(false)} selections={[]}/>}
@@ -730,22 +731,24 @@ export const HelpSidebar = fp.flow(
         <div style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
           <div style={this.sidebarStyle} data-test-id='sidebar-content'>
 
-            {sidebarContent && <FlexColumn style={{height: '100%'}}>
-              {sidebarContent.header && <FlexRow style={{justifyContent: 'space-between', padding: sidebarContent.headerPadding}}>
-                {sidebarContent.header()}
+            {sidebarContent && <div style={{height: '100%', overflow: 'auto'}}>
+              <FlexColumn style={{height: '100%'}}>
+                {sidebarContent.header && <FlexRow style={{justifyContent: 'space-between', padding: sidebarContent.headerPadding}}>
+                  {sidebarContent.header()}
 
-                  <Clickable onClick={() => this.props.setSidebarState(false)}>
-                      <img src={proIcons.times}
-                           style={{height: '27px', width: '17px'}}
-                           alt='Close'/>
-                  </Clickable>
-              </FlexRow>}
+                    <Clickable onClick={() => this.props.setSidebarState(false)}>
+                        <img src={proIcons.times}
+                             style={{height: '27px', width: '17px'}}
+                             alt='Close'/>
+                    </Clickable>
+                </FlexRow>}
 
-                <div style={{flex: 1}}>
-                  {sidebarContent && sidebarContent.body()}
-                </div>
+                  <div style={{flex: 1}}>
+                    {sidebarContent && sidebarContent.body()}
+                  </div>
+              </FlexColumn>
 
-              {sidebarContent.showFooter && <div style={{...styles.footer, alignSelf: 'flex-end'}}>
+              {sidebarContent.showFooter && <div style={{...styles.footer}}>
                   <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
                   <p style={styles.contentItem}>
                       Visit our <StyledAnchorTag href={supportUrls.helpCenter}
@@ -753,7 +756,8 @@ export const HelpSidebar = fp.flow(
                   </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
                   </p>
               </div>}
-            </FlexColumn>}
+            </div>}
+
           </div>
         </div>
       </div>;
