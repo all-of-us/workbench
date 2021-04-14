@@ -4,9 +4,9 @@ import {
   RouterStateSnapshot
 } from '@angular/router';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
+import {serverConfigStore} from 'app/utils/stores';
 import {WorkspaceAccessLevel, WorkspaceResponse} from 'generated/fetch';
 import {Observable} from 'rxjs/Observable';
-import {serverConfigStore} from "app/utils/stores";
 
 @Injectable()
 export class WorkspaceGuard implements CanActivate, CanActivateChild {

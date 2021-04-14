@@ -15,11 +15,11 @@ import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
-import {serverConfigStore} from 'app/utils/stores';
 import {
   getSelectedPopulations,
   getSelectedResearchPurposeItems
 } from 'app/utils/research-purpose';
+import {serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 

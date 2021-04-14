@@ -8,9 +8,9 @@ import {
 } from 'testing/test-helpers';
 
 import {InitialErrorComponent} from 'app/pages/initial-error/component';
-import {registerApiClient} from "app/services/swagger-fetch-clients";
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import { ConfigApi } from 'generated/fetch';
-import {ConfigApiStub} from "testing/stubs/config-api-stub";
+import {ConfigApiStub} from 'testing/stubs/config-api-stub';
 
 describe('InitialErrorComponent', () => {
   let fixture: ComponentFixture<InitialErrorComponent>;

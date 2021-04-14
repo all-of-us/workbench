@@ -4,7 +4,7 @@ import {Subscription} from 'rxjs/Subscription';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
-import {cdrVersionsApi, configApi} from 'app/services/swagger-fetch-clients';
+import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 
 import {FooterTypeEnum} from 'app/components/footer';
 import {debouncer} from 'app/utils';
@@ -20,7 +20,7 @@ import {
 } from 'app/utils/stores';
 import {initializeZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
-import {ConfigResponse, Profile as FetchProfile} from 'generated/fetch';
+import {Profile as FetchProfile} from 'generated/fetch';
 
 /*
  * The user's last known active timestamp is stored in localStorage with the key of
@@ -106,7 +106,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     } else {
       serverConfigStore.subscribe(() => {
         this.serverConfigStoreCallback();
-      })
+      });
     }
 
     this.signOutNavigateSub = this.signInService.isSignedIn$.subscribe(signedIn => {

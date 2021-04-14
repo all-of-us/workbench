@@ -8,8 +8,8 @@ import {
 } from 'testing/test-helpers';
 
 import {RoutingSpinnerComponent} from 'app/components/routing-spinner/component';
-import {registerApiClient} from "app/services/swagger-fetch-clients";
-import {ConfigApi} from "generated/fetch";
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {ConfigApi} from 'generated/fetch';
 import {ConfigApiStub} from 'testing/stubs/config-api-stub';
 
 describe('RoutingSpinnerComponent', () => {

@@ -1,8 +1,8 @@
 import {Button} from 'app/components/buttons';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
 import {withCurrentWorkspace, withUserProfile} from 'app/utils';
-import {serverConfigStore} from 'app/utils/stores';
 import {navigate} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget} from 'app/utils/zendesk';
 import {Profile} from 'generated/fetch';

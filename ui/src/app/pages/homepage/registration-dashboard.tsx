@@ -15,8 +15,8 @@ import {reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDataUseAgreementVersion} from 'app/utils/code-of-conduct';
 import {navigate, userProfileStore} from 'app/utils/navigation';
-import {serverConfigStore} from 'app/utils/stores';
 import {buildRasRedirectUrl} from 'app/utils/ras';
+import {serverConfigStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {AccessModule, Profile} from 'generated/fetch';
 

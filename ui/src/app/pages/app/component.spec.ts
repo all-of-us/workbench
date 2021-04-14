@@ -7,8 +7,8 @@ import {ClarityModule} from '@clr/angular';
 import {AppComponent} from 'app/pages/app/component';
 import {SignInService} from 'app/services/sign-in.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ConfigApiStub} from 'testing/stubs/config-api-stub';
+import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 
 import {ConfigApi, ProfileApi} from 'generated/fetch';
 

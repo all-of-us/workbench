@@ -21,8 +21,8 @@ import {
 import {routeDataStore, serverConfigStore, stackdriverErrorReporterStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 
+import {configApi} from 'app/services/swagger-fetch-clients';
 import outdatedBrowserRework from 'outdated-browser-rework';
-import {configApi} from "../../services/swagger-fetch-clients";
 
 @Component({
   selector: 'app-aou',

@@ -9,7 +9,6 @@ import {environment} from 'environments/environment';
 import {ConfigResponse} from 'generated/fetch';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 import 'rxjs/Rx';
-import {configApi} from "./swagger-fetch-clients";
 
 
 declare const gapi: any;
