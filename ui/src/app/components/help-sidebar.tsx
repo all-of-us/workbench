@@ -301,7 +301,6 @@ const analyticsLabels = {
   reviewParticipantDetail: 'Review Individual',
 };
 
-
 interface Props {
   deleteFunction: Function;
   helpContentKey: string;

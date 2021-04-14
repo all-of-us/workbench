@@ -39,7 +39,6 @@ export default class AnnotationsSidebar extends BaseHelpSidebar {
 
   async getParticipantID(): Promise<string> {
     const selector = `${this.getXpath()}//div[1][contains(text(),"Participant")]`;
-    console.log(selector);
     const pID = await this.extractParticipantDetails(selector);
     return pID;
   }
