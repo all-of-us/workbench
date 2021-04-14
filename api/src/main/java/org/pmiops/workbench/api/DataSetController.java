@@ -509,8 +509,8 @@ public class DataSetController implements DataSetApiDelegate {
       return ResponseEntity.ok(
           wgsCohortExtractionService.submitGenomicsCohortExtractionJob(workspace, dataSetId));
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      // Given that there are no input arguments ATM, any API exceptions are due to programming or
-      // Firecloud errors
+      // Our usage of Terra is an internal implementation detail to the client. Any error returned
+      // from Firecloud is either a bug within our Cromwell integration or a backend failure.
       throw new ServerErrorException(e);
     }
   }

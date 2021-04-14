@@ -202,7 +202,7 @@ public class DataSetControllerTest {
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspacesController workspacesController;
 
-  @MockBean private CdrVersionService cdrVersionService;
+  @MockBean private CdrVersionService mockCdrVersionService;
   @MockBean private CdrBigQuerySchemaConfigService mockCdrBigQuerySchemaConfigService;
   @MockBean private BillingProjectBufferService mockBillingProjectBufferService;
   @MockBean private BigQueryService mockBigQueryService;
@@ -210,6 +210,7 @@ public class DataSetControllerTest {
   @MockBean private FireCloudService fireCloudService;
   @MockBean private NotebooksService mockNotebooksService;
   @MockBean private DSDataDictionaryDao mockDSDataDictionaryDao;
+  @MockBean private WgsCohortExtractionService mockWgsCohortExtractionService;
 
   @Captor ArgumentCaptor<JSONObject> notebookContentsCaptor;
 
@@ -233,24 +234,21 @@ public class DataSetControllerTest {
     TestBigQueryCdrSchemaConfig.class,
     UserMapperImpl.class,
     UserServiceTestConfiguration.class,
+    WorkspaceAuthService.class,
     WorkspaceMapperImpl.class,
     WorkspaceResourcesServiceImpl.class,
     WorkspaceServiceImpl.class,
-    WorkspaceAuthService.class,
     WorkspacesController.class,
     AccessTierServiceImpl.class,
   })
   @MockBean({
     BigQueryService.class,
     BillingProjectAuditor.class,
-    CdrBigQuerySchemaConfigService.class,
-    CdrVersionService.class,
     CloudStorageClient.class,
     CohortBuilderMapper.class,
     CohortBuilderService.class,
     CohortCloningService.class,
     CohortMaterializationService.class,
-    CohortQueryBuilder.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
     DirectoryService.class,
@@ -260,8 +258,7 @@ public class DataSetControllerTest {
     ReviewQueryBuilder.class,
     UserRecentResourceService.class,
     UserServiceAuditor.class,
-    WorkspaceAuditor.class,
-    WgsCohortExtractionService.class
+    WorkspaceAuditor.class
   })
   static class Configuration {
 
@@ -863,7 +860,7 @@ public class DataSetControllerTest {
 
   @Test
   public void getDataDictionaryEntry() {
-    when(cdrVersionService.findByCdrVersionId(2l))
+    when(mockCdrVersionService.findByCdrVersionId(2l))
         .thenReturn(Optional.ofNullable(new DbCdrVersion()));
     when(mockDSDataDictionaryDao.findFirstByFieldNameAndDomain(anyString(), anyString()))
         .thenReturn(new DbDSDataDictionary());
@@ -947,6 +944,8 @@ public class DataSetControllerTest {
 
     dataSetController.extractCohortGenomes(
         workspace.getNamespace(), workspace.getName(), dataSet.getId());
+    verify(mockWgsCohortExtractionService, times(1))
+        .submitGenomicsCohortExtractionJob(any(), eq(dataSet.getId()));
   }
 
   DataSetRequest buildValidDataSetRequest() {
