@@ -14,7 +14,7 @@ import NotebookPage from './notebook-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
 import WorkspaceBase from './workspace-base';
 import ConceptSetSearchPage from './conceptset-search-page';
-import { SaveOption } from '../modal/conceptset-save-modal';
+import { SaveOption } from 'app/modal/conceptset-save-modal';
 
 const PageTitle = 'Data Page';
 
