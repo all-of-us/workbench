@@ -945,7 +945,7 @@ public class DataSetControllerTest {
     dataSetController.extractCohortGenomes(
         workspace.getNamespace(), workspace.getName(), dataSet.getId());
     verify(mockWgsCohortExtractionService, times(1))
-        .submitGenomicsCohortExtractionJob(any(), eq(dataSet.getId()));
+        .submitGenomicsCohortExtractionJob(any(), any());
   }
 
   DataSetRequest buildValidDataSetRequest() {

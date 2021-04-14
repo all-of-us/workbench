@@ -61,11 +61,13 @@ public interface DataSetService {
 
   void deleteDataSet(Long dataSetId);
 
-  Optional<DataSet> getDbDataSet(Long dataSetId);
+  Optional<DataSet> getDataSet(Long dataSetId);
+
+  Optional<DbDataset> getDbDataSet(Long dataSetId);
 
   void markDirty(ResourceType resourceType, long resourceId);
 
   DataDictionaryEntry findDataDictionaryEntry(String fieldName, String domain);
 
-  List<String> getPersonIdsWithWholeGenome(Long cohortId);
+  List<String> getPersonIdsWithWholeGenome(DbDataset dataSet);
 }

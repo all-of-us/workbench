@@ -32,6 +32,7 @@ import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
@@ -438,7 +439,7 @@ public class DataSetController implements DataSetApiDelegate {
 
     DataSet dataSet =
         dataSetService
-            .getDbDataSet(dataSetId)
+            .getDataSet(dataSetId)
             .<BadRequestException>orElseThrow(
                 () -> {
                   throw new NotFoundException("No DataSet found for dataSetId: " + dataSetId);
@@ -505,9 +506,16 @@ public class DataSetController implements DataSetApiDelegate {
       throw new BadRequestException("Workspace CDR does not have access to WGS data");
     }
 
+    DbDataset dataSet =
+        dataSetService
+            .getDbDataSet(dataSetId)
+            .<BadRequestException>orElseThrow(
+                () -> {
+                  throw new NotFoundException("No DataSet found for dataSetId: " + dataSetId);
+                });
     try {
       return ResponseEntity.ok(
-          wgsCohortExtractionService.submitGenomicsCohortExtractionJob(workspace, dataSetId));
+          wgsCohortExtractionService.submitGenomicsCohortExtractionJob(workspace, dataSet));
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       // Our usage of Terra is an internal implementation detail to the client. Any error returned
       // from Firecloud is either a bug within our Cromwell integration or a backend failure.

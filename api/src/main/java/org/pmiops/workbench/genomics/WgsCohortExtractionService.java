@@ -15,6 +15,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
+import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -132,10 +133,7 @@ public class WgsCohortExtractionService {
   }
 
   public WgsCohortExtractionJob submitGenomicsCohortExtractionJob(
-      DbWorkspace workspace, Long dataSetId) throws ApiException {
-    // Currently only creates the temporary extraction tables
-    // No files are being written to the user bucket
-
+      DbWorkspace workspace, DbDataset dataSet) throws ApiException {
     WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;
 
@@ -145,7 +143,7 @@ public class WgsCohortExtractionService {
     String extractionUuid = UUID.randomUUID().toString();
     String extractionFolder = "wgs-cohort-extractions/" + extractionUuid;
 
-    List<String> personIds = dataSetService.getPersonIdsWithWholeGenome(dataSetId);
+    List<String> personIds = dataSetService.getPersonIdsWithWholeGenome(dataSet);
     if (personIds.isEmpty()) {
       throw new FailedPreconditionException(
           "provided cohort contains no participants with whole genome data");
@@ -251,6 +249,7 @@ public class WgsCohortExtractionService {
     DbWgsExtractCromwellSubmission dbSubmission = new DbWgsExtractCromwellSubmission();
     dbSubmission.setSubmissionId(submissionResponse.getSubmissionId());
     dbSubmission.setWorkspace(workspace);
+    dbSubmission.setDataset(dataSet);
     dbSubmission.setCreator(userProvider.get());
     dbSubmission.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
     dbSubmission.setSampleCount((long) personIds.size());

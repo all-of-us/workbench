@@ -986,8 +986,13 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
-  public Optional<DataSet> getDbDataSet(Long dataSetId) {
-    return Optional.of(dataSetMapper.dbModelToClient(dataSetDao.findOne(dataSetId)));
+  public Optional<DataSet> getDataSet(Long dataSetId) {
+    return getDbDataSet(dataSetId).map(dataSetMapper::dbModelToClient);
+  }
+
+  @Override
+  public Optional<DbDataset> getDbDataSet(Long dataSetId) {
+    return Optional.ofNullable(dataSetDao.findOne(dataSetId));
   }
 
   @Override
@@ -1062,14 +1067,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
-  public List<String> getPersonIdsWithWholeGenome(Long dataSetId) {
-    DbDataset dbDataset = dataSetDao.findOne(dataSetId);
-    if (dbDataset == null) {
-      throw new NotFoundException(String.format("Not found: dataset %d", dataSetId));
-    }
-
+  public List<String> getPersonIdsWithWholeGenome(DbDataset dataSet) {
     List<ParticipantCriteria> participantCriteriaList =
-        this.cohortDao.findAllByCohortIdIn(dbDataset.getCohortIds()).stream()
+        this.cohortDao.findAllByCohortIdIn(dataSet.getCohortIds()).stream()
             .map(
                 cohort -> {
                   final SearchRequest searchRequest =
