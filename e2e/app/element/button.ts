@@ -28,7 +28,7 @@ export default class Button extends BaseElement {
    * @param {string} xpathSelector (Optional) Button Xpath selector.
    * @throws Timeout exception if button is not enabled after waiting.
    */
-  async waitUntilEnabled(xpathSelector?: string): Promise<boolean> {
+  async waitUntilEnabled(xpathSelector?: string): Promise<void> {
     const selector = xpathSelector || this.getXpath();
     await this.page.waitForXPath(selector, { visible: true });
     await this.page
@@ -48,6 +48,5 @@ export default class Button extends BaseElement {
         logger.error(err);
         throw new Error(err);
       });
-    return true;
   }
 }

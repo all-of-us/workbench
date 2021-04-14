@@ -25,20 +25,41 @@ describe('Editing and rename Concept Set', () => {
     const workspaceName = await createWorkspace(page, { workspaceName: workspace });
 
     const dataPage = new WorkspaceDataPage(page);
-    await dataPage.openConceptSetSearch(Domain.Procedures);
+    let { conceptSearchPage, criteriaSearch } = await dataPage.openConceptSetSearch(Domain.Procedures);
 
-    // Create new Concept Set
-    const conceptSetName = await dataPage.createDefaultProcedures('Radiologic examination');
+    // Search by Procedure name.
+    let procedureName = 'Radiologic examination';
+    await criteriaSearch.searchCriteria(procedureName);
+
+    // Select first two rows.
+    const row1 = await criteriaSearch.resultsTableSelectRow(1, 1);
+    const row2 = await criteriaSearch.resultsTableSelectRow(2, 1);
+
+    console.log('Selected Procedures table row 1: ', row1);
+    console.log('Selected Procedures table row 2: ', row2);
+
+    // Verify Code are numberical values
+    expect(Number.isNaN(parseInt(row1.code, 10))).toBe(false);
+    expect(Number.isNaN(parseInt(row2.code, 10))).toBe(false);
+
+    // Verify Participant Count are numberical values
+    expect(Number.isNaN(parseInt(row1.rollUpCount.replace(/,/g, ''), 10))).toBe(false);
+    expect(Number.isNaN(parseInt(row2.rollUpCount.replace(/,/g, ''), 10))).toBe(false);
+
+    await conceptSearchPage.reviewAndSaveConceptSet();
+
+    // Save new Concept Set.
+    const conceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
 
     // Add another Concept in Procedures domain.
     const conceptSetActionsPage = new ConceptSetActionsPage(page);
-    const conceptSearchPage = await conceptSetActionsPage.openConceptSearch();
+    conceptSearchPage = await conceptSetActionsPage.openConceptSearch();
 
     const procedures = ConceptDomainCard.findDomainCard(page, Domain.Procedures);
-    const criteriaSearch = await procedures.clickSelectConceptButton();
+    criteriaSearch = await procedures.clickSelectConceptButton();
 
     // Search in Procedures domain
-    const procedureName = 'Screening procedure';
+    procedureName = 'Screening procedure';
     await criteriaSearch.searchCriteria(procedureName);
     // Select first row. Its name cell should match the search words.
     const row = await criteriaSearch.resultsTableSelectRow();
