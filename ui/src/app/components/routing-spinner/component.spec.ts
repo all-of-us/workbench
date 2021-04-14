@@ -9,8 +9,6 @@ import {
 
 import {RoutingSpinnerComponent} from 'app/components/routing-spinner/component';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {ConfigApi} from 'generated/fetch';
-import {ConfigApiStub} from 'testing/stubs/config-api-stub';
 
 describe('RoutingSpinnerComponent', () => {
   let fixture: ComponentFixture<RoutingSpinnerComponent>;
@@ -27,8 +25,6 @@ describe('RoutingSpinnerComponent', () => {
       fixture = TestBed.createComponent(RoutingSpinnerComponent);
       tick();
     });
-
-    registerApiClient(ConfigApi, new ConfigApiStub());
   }));
 
   it('should render', fakeAsync(() => {
