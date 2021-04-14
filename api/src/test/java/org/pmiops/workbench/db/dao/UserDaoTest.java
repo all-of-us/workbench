@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.UserDao.DbAdminTableUser;
-import org.pmiops.workbench.db.dao.UserDao.UserCountByDisabledAndAccessTiers;
+import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbInstitution;
@@ -61,9 +61,9 @@ public class UserDaoTest extends SpringTest {
     user1 = userDao.save(user1);
     addUserToTier(user1, registeredTier);
 
-    List<UserCountByDisabledAndAccessTiers> rows = userDao.getUserCountGaugeData();
+    List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
     assertThat(rows).hasSize(1);
-    final UserCountByDisabledAndAccessTiers row = rows.get(0);
+    final UserCountGaugeLabelsAndValue row = rows.get(0);
     assertThat(row.getAccessTierShortNames()).isNotNull();
     assertThat(row.getAccessTierShortNames()).contains(registeredTier.getShortName());
     assertThat(row.getDisabled()).isFalse();
@@ -77,9 +77,9 @@ public class UserDaoTest extends SpringTest {
     user1 = userDao.save(user1);
     addUserToTier(user1, registeredTier, TierAccessStatus.DISABLED);
 
-    List<UserCountByDisabledAndAccessTiers> rows = userDao.getUserCountGaugeData();
+    List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
     assertThat(rows).hasSize(1);
-    final UserCountByDisabledAndAccessTiers row = rows.get(0);
+    final UserCountGaugeLabelsAndValue row = rows.get(0);
     assertThat(row.getAccessTierShortNames()).isNull();
     assertThat(row.getDisabled()).isFalse();
     assertThat(row.getUserCount()).isEqualTo(1L);
@@ -87,7 +87,7 @@ public class UserDaoTest extends SpringTest {
 
   @Test
   public void testGetUserCountGaugeData_noUsers() {
-    List<UserCountByDisabledAndAccessTiers> rows = userDao.getUserCountGaugeData();
+    List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
     assertThat(rows).isEmpty();
   }
 
@@ -100,7 +100,7 @@ public class UserDaoTest extends SpringTest {
     insertTestUsers(true, 5, institution, registeredTier);
     insertTestUsers(false, 10, institution);
 
-    final List<UserCountByDisabledAndAccessTiers> rows = userDao.getUserCountGaugeData();
+    final List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
     // registered/enabled, registered/disabled, and unregistered/enabled
     assertThat(rows).hasSize(3);
 
@@ -113,7 +113,7 @@ public class UserDaoTest extends SpringTest {
                             && r.getAccessTierShortNames().contains(registeredTier.getShortName()))
                 .filter(r -> !r.getDisabled())
                 .findFirst()
-                .map(UserCountByDisabledAndAccessTiers::getUserCount)
+                .map(UserCountGaugeLabelsAndValue::getUserCount)
                 .orElse(-1L))
         .isEqualTo(3);
 
@@ -124,9 +124,9 @@ public class UserDaoTest extends SpringTest {
                     r ->
                         r.getAccessTierShortNames() != null
                             && r.getAccessTierShortNames().contains(registeredTier.getShortName()))
-                .filter(UserCountByDisabledAndAccessTiers::getDisabled)
+                .filter(UserCountGaugeLabelsAndValue::getDisabled)
                 .findFirst()
-                .map(UserCountByDisabledAndAccessTiers::getUserCount)
+                .map(UserCountGaugeLabelsAndValue::getUserCount)
                 .orElse(-1L))
         .isEqualTo(5);
 
@@ -139,7 +139,7 @@ public class UserDaoTest extends SpringTest {
                             || !r.getAccessTierShortNames().contains(registeredTier.getShortName()))
                 .filter(r -> !r.getDisabled())
                 .findFirst()
-                .map(UserCountByDisabledAndAccessTiers::getUserCount)
+                .map(UserCountGaugeLabelsAndValue::getUserCount)
                 .orElse(-1L))
         .isEqualTo(10);
   }

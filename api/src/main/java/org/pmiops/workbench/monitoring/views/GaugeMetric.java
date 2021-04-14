@@ -10,7 +10,7 @@ import org.pmiops.workbench.monitoring.labels.MetricLabel;
 
 public enum GaugeMetric implements Metric {
   BILLING_BUFFER_PROJECT_COUNT(
-      "billing_buffer_project_count",
+      "billing_buffer_project_count_3",
       "Number of projects in the billing buffer for each status/tier pair",
       ImmutableList.of(MetricLabel.BUFFER_ENTRY_STATUS, MetricLabel.ACCESS_TIER_SHORT_NAME)),
   COHORT_COUNT("cohort_count_2", "Count of all cohorts in existence"),
@@ -26,11 +26,14 @@ public enum GaugeMetric implements Metric {
   USER_COUNT(
       "user_count_2",
       "total number of users",
-      ImmutableList.of(MetricLabel.USER_DISABLED, MetricLabel.ACCESS_TIER_SHORT_NAMES)),
+      ImmutableList.of(
+          MetricLabel.USER_BYPASSED_BETA,
+          MetricLabel.USER_DISABLED,
+          MetricLabel.DATA_ACCESS_LEVEL)),
   WORKSPACE_COUNT(
       "workspace_count_3",
-      "Count of all active workspaces per tier",
-      ImmutableList.of(MetricLabel.WORKSPACE_ACTIVE_STATUS, MetricLabel.ACCESS_TIER_SHORT_NAME),
+      "Count of all workspaces",
+      ImmutableList.of(MetricLabel.WORKSPACE_ACTIVE_STATUS, MetricLabel.DATA_ACCESS_LEVEL),
       UnitOfMeasure.COUNT,
       MeasureLong.class);
 
