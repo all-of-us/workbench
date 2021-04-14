@@ -1,7 +1,8 @@
 import {Button} from 'app/components/buttons';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
 import {withCurrentWorkspace, withUserProfile} from 'app/utils';
-import {navigate, serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
+import {navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget} from 'app/utils/zendesk';
 import {Profile} from 'generated/fetch';
@@ -20,7 +21,7 @@ export const InvalidBillingBanner = fp.flow(
   withCurrentWorkspace(),
   withUserProfile(),
 )((props: Props) => {
-  const {enableBillingUpgrade} = serverConfigStore.getValue();
+  const {enableBillingUpgrade} = serverConfigStore.get().config;
   const userAction = enableBillingUpgrade ?
     'Please provide a valid billing account or contact support to extend free credits.' :
     'Please contact support to extend free credits.';

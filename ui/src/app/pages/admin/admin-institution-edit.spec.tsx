@@ -1,5 +1,6 @@
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {serverConfigStore, urlParamsStore} from 'app/utils/navigation';
+import {urlParamsStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {mount} from 'enzyme';
 import {DuaType, InstitutionApi} from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -17,7 +18,7 @@ describe('AdminInstitutionEditSpec', () => {
   };
 
   beforeEach(() => {
-    serverConfigStore.next(defaultServerConfig);
+    serverConfigStore.set({config: defaultServerConfig});
 
     registerApiClient(InstitutionApi, new InstitutionApiStub());
   });

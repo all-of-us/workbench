@@ -9,7 +9,7 @@ import {AccountCreationSuccess} from 'app/pages/login/account-creation/account-c
 import {AccountCreationSurvey} from 'app/pages/login/account-creation/account-creation-survey';
 import {AccountCreationTos} from 'app/pages/login/account-creation/account-creation-tos';
 import LoginReactComponent from 'app/pages/login/login';
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {createEmptyProfile, SignInProps, SignIn} from './sign-in';
 
 describe('SignInReact', () => {
@@ -35,7 +35,7 @@ describe('SignInReact', () => {
       windowSize: {width: 1700, height: 0},
       serverConfig: defaultConfig
     };
-    serverConfigStore.next(defaultConfig);
+    serverConfigStore.set({config: defaultConfig});
   });
 
   it('should display login background image and directive by default', () => {

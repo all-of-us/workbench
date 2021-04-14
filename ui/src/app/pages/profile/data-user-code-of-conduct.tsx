@@ -15,7 +15,8 @@ import colors from 'app/styles/colors';
 import {reactStyles, withUserProfile} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDataUseAgreementVersion} from 'app/utils/code-of-conduct';
-import {navigate, serverConfigStore} from 'app/utils/navigation';
+import {navigate} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
 import {validate} from 'validate.js';
@@ -93,7 +94,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
 
     submitDataUserCodeOfConduct(initials) {
       this.setState({submitting: true});
-      const dataUseAgreementVersion = getLiveDataUseAgreementVersion(serverConfigStore.getValue());
+      const dataUseAgreementVersion = getLiveDataUseAgreementVersion(serverConfigStore.get().config);
       profileApi().submitDataUseAgreement(dataUseAgreementVersion, initials).then((profile) => {
         this.props.profileState.updateCache(profile);
         navigate(['/']);
@@ -130,7 +131,7 @@ export const DataUserCodeOfConduct = withUserProfile()(
           equality: {attribute: 'initialMonitoring'}
         }
       });
-      if (serverConfigStore.getValue().enableV3DataUserCodeOfConduct) {
+      if (serverConfigStore.get().config.enableV3DataUserCodeOfConduct) {
         return <FlexColumn style={styles.dataUserCodeOfConductPage}>
           {
             page === DataUserCodeOfConductPage.CONTENT && <React.Fragment>

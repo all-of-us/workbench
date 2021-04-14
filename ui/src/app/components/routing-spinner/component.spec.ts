@@ -3,15 +3,14 @@ import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
 
-import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
-
 import {
   updateAndTick
 } from 'testing/test-helpers';
 
-import {ServerConfigService} from 'app/services/server-config.service';
-
 import {RoutingSpinnerComponent} from 'app/components/routing-spinner/component';
+import {registerApiClient} from "app/services/swagger-fetch-clients";
+import {ConfigApi} from "generated/fetch";
+import {ConfigApiStub} from 'testing/stubs/config-api-stub';
 
 describe('RoutingSpinnerComponent', () => {
   let fixture: ComponentFixture<RoutingSpinnerComponent>;
@@ -23,19 +22,13 @@ describe('RoutingSpinnerComponent', () => {
       ],
       declarations: [
         RoutingSpinnerComponent,
-      ],
-      providers: [
-        {
-          provide: ServerConfigService,
-          useValue: new ServerConfigServiceStub({
-            gsuiteDomain: 'fake-research-aou.org'
-          })
-        },
       ]
     }).compileComponents().then(() => {
       fixture = TestBed.createComponent(RoutingSpinnerComponent);
       tick();
     });
+
+    registerApiClient(ConfigApi, new ConfigApiStub());
   }));
 
   it('should render', fakeAsync(() => {

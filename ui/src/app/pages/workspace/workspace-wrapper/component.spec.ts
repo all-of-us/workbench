@@ -7,7 +7,7 @@ import {ClarityModule} from '@clr/angular';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {registerApiClient, workspacesApi} from 'app/services/swagger-fetch-clients';
-import {serverConfigStore, urlParamsStore} from 'app/utils/navigation';
+import {urlParamsStore} from 'app/utils/navigation';
 
 import {BugReportComponent} from 'app/components/bug-report';
 import {ConfirmDeleteModalComponent} from 'app/components/confirm-delete-modal';
@@ -16,16 +16,17 @@ import {WorkspaceNavBarComponent} from 'app/pages/workspace/workspace-nav-bar';
 import {WorkspaceShareComponent} from 'app/pages/workspace/workspace-share';
 import {WorkspaceWrapperComponent} from 'app/pages/workspace/workspace-wrapper/component';
 
-import {RuntimeApi, UserApi, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
+import {ConfigApi, RuntimeApi, UserApi, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
 import {buildWorkspaceStub, WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
-import {cdrVersionStore} from 'app/utils/stores';
+import {cdrVersionStore, serverConfigStore} from 'app/utils/stores';
 import {findElements} from 'testing/react-testing-utility';
 import {cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
+import {ConfigApiStub} from 'testing/stubs/config-api-stub';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {setupModals, updateAndTick} from 'testing/test-helpers';
 
@@ -67,6 +68,7 @@ describe('WorkspaceWrapperComponent', () => {
         {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
       ]
     }).compileComponents().then(() => {
+      registerApiClient(ConfigApi, new ConfigApiStub());
       registerApiClient(WorkspacesApi, new WorkspacesApiStub());
       registerApiClient(RuntimeApi, new RuntimeApiStub());
       registerApiClient(UserApi, new UserApiStub());
@@ -77,8 +79,10 @@ describe('WorkspaceWrapperComponent', () => {
         ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
         wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
       });
-      serverConfigStore.next({gsuiteDomain: 'fake-research-aou.org',
-        enableResearchReviewPrompt: true});
+      serverConfigStore.set({config: {
+          gsuiteDomain: 'fake-research-aou.org',
+          enableResearchReviewPrompt: true
+        }});
       cdrVersionStore.set(cdrVersionTiersResponse);
     });
   }));
