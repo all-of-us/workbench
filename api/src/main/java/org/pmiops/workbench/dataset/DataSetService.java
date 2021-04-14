@@ -66,4 +66,6 @@ public interface DataSetService {
   void markDirty(ResourceType resourceType, long resourceId);
 
   DataDictionaryEntry findDataDictionaryEntry(String fieldName, String domain);
+
+  List<String> getPersonIdsWithWholeGenome(Long cohortId);
 }

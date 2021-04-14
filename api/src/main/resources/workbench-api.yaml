@@ -2415,14 +2415,14 @@ paths:
           description: The Terra Job for the extraction workflow
           schema:
             "$ref": "#/definitions/WgsCohortExtractionJobListResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/extractGenomes":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/datasets/{datasetId}/extractGenomes":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
-      - "$ref": "#/parameters/cohortId"
+      - "$ref": "#/parameters/dataSetId"
     post:
       tags:
-        - cohorts
+        - dataSet
       description: 'Initiates a Terra Cromwell job to extract genomes of the given cohort.
         Requires WRITER access on the workspace.
         Workspace CDR must also have access to a Wgs dataset'

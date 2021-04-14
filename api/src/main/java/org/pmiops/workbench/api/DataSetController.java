@@ -37,6 +37,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.genomics.WgsCohortExtractionService;
@@ -59,6 +60,7 @@ import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.MarkDataSetRequest;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResourceType;
+import org.pmiops.workbench.model.WgsCohortExtractionJob;
 import org.pmiops.workbench.model.WgsCohortExtractionJobListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
@@ -491,6 +493,26 @@ public class DataSetController implements DataSetApiDelegate {
             .collect(Collectors.toList()));
 
     return ResponseEntity.ok(response);
+  }
+
+  @Override
+  public ResponseEntity<WgsCohortExtractionJob> extractCohortGenomes(
+      String workspaceNamespace, String workspaceId, Long dataSetId) {
+    DbWorkspace workspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    if (workspace.getCdrVersion().getWgsBigqueryDataset() == null) {
+      throw new BadRequestException("Workspace CDR does not have access to WGS data");
+    }
+
+    try {
+      return ResponseEntity.ok(
+          wgsCohortExtractionService.submitGenomicsCohortExtractionJob(workspace, dataSetId));
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+      // Given that there are no input arguments ATM, any API exceptions are due to programming or
+      // Firecloud errors
+      throw new ServerErrorException(e);
+    }
   }
 
   @Override

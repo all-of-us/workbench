@@ -111,6 +111,7 @@ import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
+import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetExportRequest.GenomicsAnalysisToolEnum;
 import org.pmiops.workbench.model.DataSetExportRequest.GenomicsDataTypeEnum;
@@ -190,6 +191,7 @@ public class DataSetControllerTest {
 
   private static DbUser currentUser;
   private Workspace workspace;
+  private DbCdrVersion cdrVersion;
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
@@ -325,7 +327,7 @@ public class DataSetControllerTest {
     user = userDao.save(user);
     currentUser = user;
 
-    DbCdrVersion cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
+    cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
     cdrVersion.setMicroarrayBigqueryDataset("microarray");
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
@@ -870,12 +872,93 @@ public class DataSetControllerTest {
     verify(mockDSDataDictionaryDao, times(1)).findFirstByFieldNameAndDomain("MockValue", "PERSON");
   }
 
+  @Test
+  public void testWgsCohortExtraction_permissions() {
+    cdrVersion.setWgsBigqueryDataset("wgs");
+    cdrVersionDao.save(cdrVersion);
+
+    DataSet dataSet =
+        dataSetController
+            .createDataSet(
+                workspace.getNamespace(), workspace.getName(), buildValidDataSetRequest())
+            .getBody();
+
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("NO ACCESS"));
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          dataSetController.extractCohortGenomes(
+              workspace.getNamespace(), workspace.getName(), dataSet.getId());
+        });
+
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("READER"));
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          dataSetController.extractCohortGenomes(
+              workspace.getNamespace(), workspace.getName(), dataSet.getId());
+        });
+
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("WRITER"));
+    dataSetController.extractCohortGenomes(
+        workspace.getNamespace(), workspace.getName(), dataSet.getId());
+
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("OWNER"));
+    dataSetController.extractCohortGenomes(
+        workspace.getNamespace(), workspace.getName(), dataSet.getId());
+
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("PROJECT_OWNER"));
+    dataSetController.extractCohortGenomes(
+        workspace.getNamespace(), workspace.getName(), dataSet.getId());
+  }
+
+  @Test
+  public void testWgsCohortExtraction_notFound() {
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          dataSetController.extractCohortGenomes(
+              workspace.getNamespace(), workspace.getName(), 404L);
+        });
+  }
+
+  @Test
+  public void testWgsCohortExtraction_validCdr() throws Exception {
+    DataSet dataSet =
+        dataSetController
+            .createDataSet(
+                workspace.getNamespace(), workspace.getName(), buildValidDataSetRequest())
+            .getBody();
+
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          dataSetController.extractCohortGenomes(
+              workspace.getNamespace(), workspace.getName(), dataSet.getId());
+        });
+
+    cdrVersion.setWgsBigqueryDataset("wgs");
+    cdrVersionDao.save(cdrVersion);
+
+    dataSetController.extractCohortGenomes(
+        workspace.getNamespace(), workspace.getName(), dataSet.getId());
+  }
+
+  DataSetRequest buildValidDataSetRequest() {
+    return buildEmptyDataSetRequest()
+        .name("blah")
+        .addCohortIdsItem(COHORT_ONE_ID)
+        .addConceptSetIdsItem(CONCEPT_SET_ONE_ID)
+        .domainValuePairs(mockDomainValuePair());
+  }
+
   DataSetExportRequest setUpValidDataSetExportRequest() {
-    DataSetRequest dataSet = buildEmptyDataSetRequest().name("blah");
-    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
-    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-    List<DomainValuePair> domainValuePairs = mockDomainValuePair();
-    dataSet.setDomainValuePairs(domainValuePairs);
+    DataSetRequest dataSet = buildValidDataSetRequest();
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");

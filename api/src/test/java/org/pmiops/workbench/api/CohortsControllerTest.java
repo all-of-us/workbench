@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.TestCase.fail;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
@@ -63,7 +62,6 @@ import org.pmiops.workbench.db.model.DbCohortReview;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
-import org.pmiops.workbench.exceptions.ForbiddenException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -71,7 +69,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.genomics.WgsCohortExtractionService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Cohort;
@@ -244,7 +241,6 @@ public class CohortsControllerTest {
     ReviewQueryBuilder.class,
     UserRecentResourceService.class,
     UserServiceAuditor.class,
-    WgsCohortExtractionService.class,
     WorkspaceAuditor.class,
   })
   static class Configuration {
@@ -863,66 +859,5 @@ public class CohortsControllerTest {
                 .materializeCohort(workspace.getNamespace(), WORKSPACE_NAME, request)
                 .getBody())
         .isEqualTo(response);
-  }
-
-  @Test
-  public void testWgsCohortExtraction_permissions() {
-    DbCdrVersion cdrVersion = new DbCdrVersion();
-    cdrVersion.setCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
-    cdrVersion.setName(CDR_VERSION_NAME);
-    cdrVersion.setWgsBigqueryDataset("wgs");
-    cdrVersionDao.save(cdrVersion);
-
-    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
-        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("NO ACCESS"));
-    assertThrows(
-        ForbiddenException.class,
-        () -> {
-          cohortsController.extractCohortGenomes(
-              workspace.getNamespace(), workspace.getName(), createDefaultCohort().getId());
-        });
-
-    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
-        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("READER"));
-    assertThrows(
-        ForbiddenException.class,
-        () -> {
-          cohortsController.extractCohortGenomes(
-              workspace.getNamespace(), workspace.getName(), createDefaultCohort().getId());
-        });
-
-    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
-        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("WRITER"));
-    cohortsController.extractCohortGenomes(
-        workspace.getNamespace(), workspace.getName(), createDefaultCohort().getId());
-
-    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
-        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("OWNER"));
-    cohortsController.extractCohortGenomes(
-        workspace.getNamespace(), workspace.getName(), createDefaultCohort().getId());
-
-    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
-        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("PROJECT_OWNER"));
-    cohortsController.extractCohortGenomes(
-        workspace.getNamespace(), workspace.getName(), createDefaultCohort().getId());
-  }
-
-  @Test
-  public void testWgsCohortExtraction_validCdr() {
-    assertThrows(
-        BadRequestException.class,
-        () -> {
-          cohortsController.extractCohortGenomes(
-              workspace.getNamespace(), workspace.getName(), createDefaultCohort().getId());
-        });
-
-    DbCdrVersion cdrVersion = new DbCdrVersion();
-    cdrVersion.setCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
-    cdrVersion.setName(CDR_VERSION_NAME);
-    cdrVersion.setWgsBigqueryDataset("wgs");
-    cdrVersionDao.save(cdrVersion);
-
-    cohortsController.extractCohortGenomes(
-        workspace.getNamespace(), workspace.getName(), createDefaultCohort().getId());
   }
 }

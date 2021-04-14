@@ -48,7 +48,6 @@ import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TableQuery;
-import org.pmiops.workbench.model.WgsCohortExtractionJob;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +69,6 @@ public class CohortsController implements CohortsApiDelegate {
   private final CohortFactory cohortFactory;
   private final CohortMapper cohortMapper;
   private final CohortReviewDao cohortReviewDao;
-  private final WgsCohortExtractionService wgsCohortExtractionService;
   private final ConceptSetDao conceptSetDao;
   private final CohortMaterializationService cohortMaterializationService;
   private Provider<DbUser> userProvider;
@@ -101,7 +99,6 @@ public class CohortsController implements CohortsApiDelegate {
     this.cohortFactory = cohortFactory;
     this.cohortMapper = cohortMapper;
     this.cohortReviewDao = cohortReviewDao;
-    this.wgsCohortExtractionService = wgsCohortExtractionService;
     this.conceptSetDao = conceptSetDao;
     this.cohortMaterializationService = cohortMaterializationService;
     this.userProvider = userProvider;
@@ -442,26 +439,6 @@ public class CohortsController implements CohortsApiDelegate {
           new CohortAnnotationsResponse().columns(request.getAnnotationQuery().getColumns()));
     }
     return ResponseEntity.ok(cohortMaterializationService.getAnnotations(cohortReview, request));
-  }
-
-  @Override
-  public ResponseEntity<WgsCohortExtractionJob> extractCohortGenomes(
-      String workspaceNamespace, String workspaceId, Long cohortId) {
-    DbWorkspace workspace =
-        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    if (workspace.getCdrVersion().getWgsBigqueryDataset() == null) {
-      throw new BadRequestException("Workspace CDR does not have access to WGS data");
-    }
-
-    try {
-      return ResponseEntity.ok(
-          wgsCohortExtractionService.submitGenomicsCohortExtractionJob(workspace, cohortId));
-    } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      // Given that there are no input arguments ATM, any API exceptions are due to programming or
-      // Firecloud errors
-      throw new ServerErrorException(e);
-    }
   }
 
   private DbCohort getDbCohort(String workspaceNamespace, String workspaceId, Long cohortId) {

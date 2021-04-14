@@ -11,9 +11,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig;
+import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
@@ -42,7 +42,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class WgsCohortExtractionService {
 
-  private final CohortService cohortService;
+  private final DataSetService dataSetService;
   private final FireCloudService fireCloudService;
   private final Provider<CloudStorageClient> extractionServiceAccountCloudStorageClientProvider;
   private final Provider<SubmissionsApi> submissionApiProvider;
@@ -56,7 +56,7 @@ public class WgsCohortExtractionService {
 
   @Autowired
   public WgsCohortExtractionService(
-      CohortService cohortService,
+      DataSetService dataSetService,
       FireCloudService fireCloudService,
       @Qualifier(StorageConfig.WGS_EXTRACTION_STORAGE_CLIENT)
           Provider<CloudStorageClient> extractionServiceAccountCloudStorageClientProvider,
@@ -68,7 +68,7 @@ public class WgsCohortExtractionService {
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceAuthService workspaceAuthService,
       Clock clock) {
-    this.cohortService = cohortService;
+    this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
     this.submissionApiProvider = submissionsApiProvider;
     this.extractionServiceAccountCloudStorageClientProvider =
@@ -132,7 +132,7 @@ public class WgsCohortExtractionService {
   }
 
   public WgsCohortExtractionJob submitGenomicsCohortExtractionJob(
-      DbWorkspace workspace, Long cohortId) throws ApiException {
+      DbWorkspace workspace, Long dataSetId) throws ApiException {
     // Currently only creates the temporary extraction tables
     // No files are being written to the user bucket
 
@@ -145,7 +145,7 @@ public class WgsCohortExtractionService {
     String extractionUuid = UUID.randomUUID().toString();
     String extractionFolder = "wgs-cohort-extractions/" + extractionUuid;
 
-    List<String> personIds = cohortService.getPersonIdsWithWholeGenome(cohortId);
+    List<String> personIds = dataSetService.getPersonIdsWithWholeGenome(dataSetId);
     if (personIds.isEmpty()) {
       throw new FailedPreconditionException(
           "provided cohort contains no participants with whole genome data");

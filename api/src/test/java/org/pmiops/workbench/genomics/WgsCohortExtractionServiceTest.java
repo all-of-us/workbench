@@ -26,8 +26,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
@@ -84,7 +84,7 @@ public class WgsCohortExtractionServiceTest {
   @Autowired WorkspaceDao workspaceDao;
   @Autowired WorkspaceAuthService workspaceAuthService;
   @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired CohortService mockCohortService;
+  @Autowired DataSetService mockDataSetService;
 
   private DbWorkspace targetWorkspace;
 
@@ -100,7 +100,7 @@ public class WgsCohortExtractionServiceTest {
     WorkspaceAuthService.class
   })
   @MockBean({
-    CohortService.class,
+    DataSetService.class,
     FireCloudService.class,
     MethodConfigurationsApi.class,
     SubmissionsApi.class
@@ -308,7 +308,7 @@ public class WgsCohortExtractionServiceTest {
 
   @Test
   public void submitExtractionJob() throws ApiException {
-    when(mockCohortService.getPersonIdsWithWholeGenome(any()))
+    when(mockDataSetService.getPersonIdsWithWholeGenome(any()))
         .thenReturn(ImmutableList.of("1", "2", "3"));
     wgsCohortExtractionService.submitGenomicsCohortExtractionJob(targetWorkspace, 1l);
 
@@ -326,7 +326,7 @@ public class WgsCohortExtractionServiceTest {
 
   @Test
   public void submitExtractionJob_outputVcfsInCorrectBucket() throws ApiException {
-    when(mockCohortService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of("1"));
+    when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of("1"));
     wgsCohortExtractionService.submitGenomicsCohortExtractionJob(targetWorkspace, 1l);
 
     ArgumentCaptor<FirecloudMethodConfiguration> argument =
@@ -341,7 +341,7 @@ public class WgsCohortExtractionServiceTest {
 
   @Test(expected = FailedPreconditionException.class)
   public void submitExtractionJob_noWgsData() throws ApiException {
-    when(mockCohortService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of());
+    when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of());
     wgsCohortExtractionService.submitGenomicsCohortExtractionJob(targetWorkspace, 1l);
   }
 
