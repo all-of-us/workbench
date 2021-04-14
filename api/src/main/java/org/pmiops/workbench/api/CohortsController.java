@@ -35,7 +35,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.genomics.WgsCohortExtractionService;
 import org.pmiops.workbench.model.CdrQuery;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortAnnotationsRequest;
@@ -85,7 +84,6 @@ public class CohortsController implements CohortsApiDelegate {
       CohortFactory cohortFactory,
       CohortMapper cohortMapper,
       CohortReviewDao cohortReviewDao,
-      WgsCohortExtractionService wgsCohortExtractionService,
       ConceptSetDao conceptSetDao,
       CohortMaterializationService cohortMaterializationService,
       Provider<DbUser> userProvider,

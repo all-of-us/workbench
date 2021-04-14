@@ -270,10 +270,6 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
         .findDemoChartInfo(+cdrVersionId, genderOrSexType.toString(), ageType.toString(), request, {signal: this.aborter.signal});
     }
 
-    startGenomeExtractionJob() {
-      cohortsApi().extractCohortGenomes(this.props.workspace.namespace, this.props.workspace.id, this.props.cohort.id);
-    }
-
     get hasActiveItems() {
       const {searchRequest} = this.props;
       return ['includes', 'excludes'].some(role => {
@@ -416,19 +412,10 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
     }
 
     get saveItems() {
-      const items = [
+      return [
         {label: 'Save', command: () => this.saveCohort(), disabled: !this.props.cohortChanged},
         {label: 'Save as', command: () => this.openSaveModal()},
       ];
-
-      const cdrVersion = fp.find(c => c.cdrVersionId === this.props.workspace.cdrVersionId,
-        this.props.cdrVersionListResponse.items);
-
-      if (cdrVersion.hasWgsData) {
-        items.push({label: 'Start Genome Extraction Job', command: () => this.startGenomeExtractionJob()});
-      }
-
-      return items;
     }
 
     get disableActionIcons() {
