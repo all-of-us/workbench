@@ -16,7 +16,7 @@ import { makeWorkspaceName } from 'utils/str-utils';
 
 const faker = require('faker/locale/en_US');
 
-export const PageTitle = 'Create Workspace';
+export const PageTitle = 'Create|Duplicate Workspace';
 
 export const LabelAlias = {
   SELECT_BILLING: 'Select account', // select billing account
@@ -268,11 +268,10 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     await Promise.all([waitForDocumentTitle(this.page, PageTitle), waitWhileLoading(this.page)]);
     const selectXpath = buildXPath(FIELD.billingAccountSelect.textOption);
     const select = new Select(this.page, selectXpath);
-    // Wait for Workspace name text-field, Billing Account Select and Create Workspace button
-    await Promise.all([
-      this.getWorkspaceNameTextbox().asElementHandle(),
-      select.asElementHandle(),
-      this.getCreateWorkspaceButton().asElementHandle()
+    await Promise.all([this.getWorkspaceNameTextbox().waitForXPath(), select.waitForXPath()]);
+    await Promise.race([
+      this.getCreateWorkspaceButton().waitForXPath(),
+      this.getDuplicateWorkspaceButton().waitForXPath()
     ]);
     return true;
   }

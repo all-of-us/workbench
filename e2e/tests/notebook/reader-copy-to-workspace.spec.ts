@@ -7,7 +7,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { MenuOption, Language, LinkText, ResourceCard, WorkspaceAccessLevel } from 'app/text-labels';
 import { config } from 'resources/workbench-config';
 import { makeRandomName } from 'utils/str-utils';
-import { createWorkspace, signInWithAccessToken, signInAs, signOut } from 'utils/test-utils';
+import { signInWithAccessToken, signInAs, signOut, findOrCreateWorkspace } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Modal from 'app/modal/modal';
@@ -19,6 +19,9 @@ describe('Workspace reader Jupyter notebook action tests', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
+
+  const workspace = 'e2eReaderCopyNotebookTest';
+  const collaboratorWorkspace = 'e2eReaderCopyNotebookTestCollaborator';
 
   /**
    * Test: Workspace reader can copy notebook to another Workspace then gain Edit right to the clone notebook.
@@ -34,7 +37,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
   test(
     'Workspace reader copy notebook to another workspace',
     async () => {
-      const workspaceName = await createWorkspace(page);
+      await findOrCreateWorkspace(page, { workspaceName: workspace });
 
       let dataPage = new WorkspaceDataPage(page);
       const notebookName = makeRandomName('py');
@@ -52,7 +55,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
       await page.waitForTimeout(10000);
       const workspacesPage = new WorkspacesPage(page);
       await workspacesPage.load();
-      await WorkspaceCard.findCard(page, workspaceName).then((card) => card.clickWorkspaceName());
+      await WorkspaceCard.findCard(page, workspace).then((card) => card.clickWorkspaceName());
 
       dataPage = new WorkspaceDataPage(page);
       await dataPage.openAboutPage();
@@ -71,11 +74,11 @@ describe('Workspace reader Jupyter notebook action tests', () => {
       const newPage = await signInAs(config.collaboratorUsername, config.userPassword);
 
       // Create a new Workspace. This is the copy-to workspace.
-      const collaboratorWorkspaceName = await createWorkspace(newPage);
+      await findOrCreateWorkspace(newPage, { workspaceName: collaboratorWorkspace });
 
       // Verify shared Workspace Access Level is READER.
       await new WorkspacesPage(newPage).load();
-      const workspaceCard = await WorkspaceCard.findCard(newPage, workspaceName);
+      const workspaceCard = await WorkspaceCard.findCard(newPage, workspace);
       const accessLevel = await workspaceCard.getWorkspaceAccessLevel();
       expect(accessLevel).toBe(WorkspaceAccessLevel.Reader);
 
@@ -98,7 +101,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
       // Copy notebook to another Workspace and give notebook a new name.
       const newAnalysisPage = new WorkspaceAnalysisPage(newPage);
       const copiedNotebookName = `copy-of-${notebookName}`;
-      await newAnalysisPage.copyNotebookToWorkspace(notebookName, collaboratorWorkspaceName, copiedNotebookName);
+      await newAnalysisPage.copyNotebookToWorkspace(notebookName, collaboratorWorkspace, copiedNotebookName);
 
       // Verify Copy Success modal.
       const modal = new Modal(newPage);
@@ -113,7 +116,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
 
       // Verify current workspace is collaborator Workspace.
       await newAnalysisPage.waitForLoad();
-      const workspaceLink = Link.findByName(newPage, { name: collaboratorWorkspaceName });
+      const workspaceLink = Link.findByName(newPage, { name: collaboratorWorkspace });
       const linkDisplayed = await workspaceLink.isDisplayed();
       expect(linkDisplayed).toBe(true);
 
@@ -130,7 +133,6 @@ describe('Workspace reader Jupyter notebook action tests', () => {
       await notebookCard.clickSnowmanIcon(); // close menu
 
       await newAnalysisPage.deleteResource(copiedNotebookName, ResourceCard.Notebook);
-      await newAnalysisPage.deleteWorkspace();
     },
     30 * 60 * 1000
   );

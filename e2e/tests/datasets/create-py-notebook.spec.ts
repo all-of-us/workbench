@@ -3,7 +3,7 @@ import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { LinkText, ResourceCard } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
-import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
 
 describe('Create dataset and export to notebook at same time', () => {
@@ -11,12 +11,14 @@ describe('Create dataset and export to notebook at same time', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspace = 'e2eDataSetsCreatePyNotebookTest';
+
   /**
    * Create new Dataset, export to notebook in Python language
    * Finally delete Dataset.
    */
   test('Jupyter Notebook for Python programming language can be created', async () => {
-    await createWorkspace(page);
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Click Add Datasets button.
     const dataPage = new WorkspaceDataPage(page);
@@ -45,7 +47,7 @@ describe('Create dataset and export to notebook at same time', () => {
     expect(code).toContain('import pandas');
     expect(code).toContain('import os');
 
-    // Navigate to Workpace Notebooks page.
+    // Navigate to Workspace Notebooks page.
     const analysisPage = await notebookPreviewPage.goAnalysisPage();
 
     // Verify new notebook exists.
@@ -65,8 +67,5 @@ describe('Create dataset and export to notebook at same time', () => {
     // Delete Dataset.
     await dataPage.openDatasetsSubtab();
     await dataPage.deleteResource(newDatasetName, ResourceCard.Dataset);
-
-    // Delete workspace
-    await dataPage.deleteWorkspace();
   });
 });

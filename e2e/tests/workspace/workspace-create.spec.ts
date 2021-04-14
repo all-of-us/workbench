@@ -7,13 +7,14 @@ import { makeWorkspaceName } from 'utils/str-utils';
 import { UseFreeCredits } from 'app/page/workspace-base';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { config } from 'resources/workbench-config';
+import WorkspaceCard from 'app/component/workspace-card';
 
 describe('Creating new workspaces', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
 
-  test('Create workspace - NO request for review', async () => {
+  test('Create workspace', async () => {
     const newWorkspaceName = makeWorkspaceName();
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
@@ -21,7 +22,7 @@ describe('Creating new workspaces', () => {
     // create workspace with "No Review Requested" radiobutton selected
     const modalTextContent = await workspacesPage.createWorkspace(newWorkspaceName);
 
-    // Pick out few sentenses to verify
+    // Pick out few sentences to verify
     expect(modalTextContent).toContain('Create Workspace');
     expect(modalTextContent).toContain(
       'Primary purpose of your project (Question 1)' +
@@ -37,9 +38,10 @@ describe('Creating new workspaces', () => {
 
     // cleanup
     await dataPage.deleteWorkspace();
+    expect(await WorkspaceCard.findCard(page, newWorkspaceName)).toBeFalsy();
   });
 
-  test('User can create a workspace using all inputs', async () => {
+  test('Create workspace using all inputs', async () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
 
@@ -85,14 +87,41 @@ describe('Creating new workspaces', () => {
     await dataPage1.verifyWorkspaceNameOnDataPage(newWorkspaceName);
   });
 
-  // // helper function to check visible workspace link on Data page
-  // async function verifyWorkspaceLinkOnDataPage(workspaceName: string): Promise<WorkspaceDataPage> {
-  //   const dataPage = new WorkspaceDataPage(page);
-  //   await dataPage.waitForLoad();
+  test('Cannot create workspace when missing required fields', async () => {
+    const workspacesPage = new WorkspacesPage(page);
+    await workspacesPage.load();
 
-  //   const workspaceLink = new Link(page, `//a[text()='${workspaceName}']`);
-  //   await workspaceLink.waitForXPath({visible: true});
-  //   expect(await workspaceLink.isVisible()).toBe(true);
-  //   return dataPage;
-  // }
+    const createNewWorkspaceButton = Button.findByName(page, FieldSelector.CreateNewWorkspaceButton.textOption);
+    await createNewWorkspaceButton.clickAndWait();
+
+    const workspaceEditPage = new WorkspaceEditPage(page);
+
+    // fill out new workspace name
+    await workspaceEditPage.fillOutWorkspaceName();
+
+    // select the default CDR Version
+    await workspaceEditPage.selectCdrVersion();
+
+    // select Billing Account
+    await workspaceEditPage.selectBillingAccount(UseFreeCredits);
+
+    // don't fill out question #1 - What is the primary purpose of your project?
+
+    // fill out question #2 - Please provide a summary of your research purpose by responding to the questions.
+    await performActions(page, testData.defaultAnswersResearchPurposeSummary);
+
+    // fill out question #3 - The All of Us Research Program encourages researchers to disseminate their research findings...
+    await performActions(page, testData.defaultAnswersDisseminateResearchFindings);
+
+    // fill out question #4 - select all of the statements below that describe the outcomes you anticipate from your research.
+    await performActions(page, testData.defaultAnswersAnticipatedOutcomesFromResearch);
+
+    // fill out question #5 - Population interest
+    await performActions(page, testData.defaultAnswersPopulationOfInterest);
+
+    // don't fill out question #6 - Request for Review of Research Purpose Description
+
+    const finishButton = workspaceEditPage.getCreateWorkspaceButton();
+    expect(await finishButton.isCursorNotAllowed()).toBe(true);
+  });
 });

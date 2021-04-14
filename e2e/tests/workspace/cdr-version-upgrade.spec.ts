@@ -1,5 +1,5 @@
 import { Page } from 'puppeteer';
-import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import WorkspaceBase from 'app/page/workspace-base';
@@ -11,8 +11,10 @@ describe('Workspace CDR Version Upgrade modal', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspace = 'e2eUpgradeWorkspaceCDRVersionTest';
+
   test('Clicking Cancel and Upgrade buttons', async () => {
-    const workspaceName = await createWorkspace(page, { cdrVersion: config.altCdrVersionName });
+    await findOrCreateWorkspace(page, { cdrVersion: config.altCdrVersionName, workspaceName: workspace });
 
     const workspacePage: WorkspaceBase = new WorkspaceDataPage(page);
     const cdrVersion = await workspacePage.getCdrVersion();
@@ -34,14 +36,11 @@ describe('Workspace CDR Version Upgrade modal', () => {
 
     const duplicationPage = new WorkspaceEditPage(page);
     const upgradeMessage = await duplicationPage.getCdrVersionUpgradeMessage();
-    expect(upgradeMessage).toContain(workspaceName);
+    expect(upgradeMessage).toContain(workspace);
     expect(upgradeMessage).toContain(`${config.altCdrVersionName} to ${config.defaultCdrVersionName}.`);
 
     const editCancelButton = duplicationPage.getCancelButton();
     await editCancelButton.clickAndWait();
-
-    // cleanup
-    await workspacePage.deleteWorkspace();
   });
 });
 

@@ -1,4 +1,4 @@
-import { createWorkspace, isValidDate, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, isValidDate, signInWithAccessToken } from 'utils/test-utils';
 import { MenuOption, LinkText, ResourceCard } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
@@ -19,6 +19,8 @@ describe('Cohort review tests', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspace = 'e2eCohortsReviewTest';
+
   /**
    * Test:
    * Find an existing workspace or create a new workspace if none exists.
@@ -32,7 +34,7 @@ describe('Cohort review tests', () => {
   test('Create Cohort and a Review Set for 100 participants', async () => {
     const reviewSetNumberOfParticipants = 100;
 
-    await createWorkspace(page);
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     const dataPage = new WorkspaceDataPage(page);
     const cohortCard = await dataPage.createCohort();
@@ -89,8 +91,8 @@ describe('Cohort review tests', () => {
     const annotationsSidebar = new AnnotationsSidebar(page);
     await annotationsSidebar.open();
 
-    const reviewParticipantid1 = await annotationsSidebar.getParticipantID();
-    expect(participantId).toEqual(reviewParticipantid1);
+    const reviewParticipantId1 = await annotationsSidebar.getParticipantID();
+    expect(participantId).toEqual(reviewParticipantId1);
 
     // select review status from dropdown option
     const participantStatus1 = await annotationsSidebar.selectReviewStatus(ReviewStatus.Excluded);
@@ -112,16 +114,16 @@ describe('Cohort review tests', () => {
     await participantDetailPage.waitForLoad();
 
     // get the participant ID on the detail page
-    const detailPageParticipantid = await participantDetailPage.getParticipantIDnum();
+    const detailPageParticipantId = await participantDetailPage.getParticipantIDnum();
 
     // click on the pen icon to open the sidebar
     await annotationsSidebar.open();
 
     // get the participant ID on the sidebar content
-    const reviewParticipantid2 = await annotationsSidebar.getParticipantID();
-    console.log(`reviewParticipantid2: ${reviewParticipantid2}`);
+    const reviewParticipantId2 = await annotationsSidebar.getParticipantID();
+    console.log(`reviewParticipantid2: ${reviewParticipantId2}`);
     // validate that the participant ID on detail page and the sidebar content match
-    expect(detailPageParticipantid).toEqual(reviewParticipantid2);
+    expect(detailPageParticipantId).toEqual(reviewParticipantId2);
 
     // select a review status
     const participantStatus2 = await annotationsSidebar.selectReviewStatus(ReviewStatus.Included);
@@ -185,13 +187,13 @@ describe('Cohort review tests', () => {
     const statusCell1 = await participantsTable.getCell(2, 8);
     const statusValue1 = await getPropValue<string>(statusCell1, 'textContent');
     expect(statusValue1).toEqual(participantStatus1);
-    console.log(`${reviewParticipantid1}: ${statusValue1}`);
+    console.log(`${reviewParticipantId1}: ${statusValue1}`);
 
     // Get the status of participant2
     const statusCell2 = await participantsTable.getCell(3, 8);
     const statusValue2 = await getPropValue<string>(statusCell2, 'textContent');
     expect(statusValue2).toEqual(participantStatus2);
-    console.log(`${reviewParticipantid2}: ${statusValue2}`);
+    console.log(`${reviewParticipantId2}: ${statusValue2}`);
 
     // return to cohort review page
     await cohortReviewPage.getBackToCohortButton().clickAndWait();
@@ -218,8 +220,5 @@ describe('Cohort review tests', () => {
 
     // Verify Delete Cohort Review successful.
     expect(await DataResourceCard.findCard(page, newCohortReviewName, 5000)).toBeFalsy();
-
-    // Delete workspace
-    await dataPage.deleteWorkspace();
   });
 });

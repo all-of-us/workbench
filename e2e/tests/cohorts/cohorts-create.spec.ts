@@ -10,6 +10,8 @@ describe('Cohorts', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspace = 'e2eCreateCohortsTest';
+
   /**
    * Test:
    * Find an existing workspace or create a new workspace if none exists.
@@ -19,7 +21,7 @@ describe('Cohorts', () => {
    * Renaming Group 1 and 2 names.
    */
   test('Create, edit and delete', async () => {
-    await findOrCreateWorkspace(page);
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Wait for the Data page.
     const dataPage = new WorkspaceDataPage(page);

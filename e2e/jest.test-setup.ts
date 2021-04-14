@@ -25,16 +25,17 @@ beforeEach(async () => {
    * Emitted when a page issues a request. The request object is read-only.
    * In order to intercept and mutate requests, see page.setRequestInterceptionEnabled.
    */
-  page.on('request', (request: Request) => {
+  page.on('request', async (request: Request) => {
     if (isWorkbenchRequest(request)) {
       const requestBody = getRequestData(request);
       const body = requestBody.length === 0 ? '' : `\n${requestBody}`;
       logger.log('info', 'Request issued: %s %s %s', request.method(), request.url(), body);
     }
     try {
-      request.continue();
-      // tslint:disable-next-line:no-empty
-    } catch (e) {}
+      await request.continue();
+    } catch (e) {
+      // Ignored
+    }
   });
 
   /** Emitted when a request fails. */

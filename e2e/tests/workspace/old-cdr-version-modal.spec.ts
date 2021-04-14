@@ -32,11 +32,11 @@ describe('OldCdrVersion Modal restrictions', () => {
     await editPage.clickCreateFinishButton(createButton);
   });
 
-  test('OWNER cannot duplicate workspace to an older CDR Version without consenting to restrictions', async () => {
-    const workspaceCard = await findOrCreateWorkspaceCard(page);
+  const workspace = 'e2eWorkspaceCDRTest';
 
+  test('OWNER cannot duplicate workspace to an older CDR Version without consenting to restrictions', async () => {
+    const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName: workspace });
     await workspaceCard.asElementHandle().hover();
-    // Click on Ellipsis menu "Duplicate" option.
     await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
 
     // Fill out Workspace Name should be just enough for successful duplication

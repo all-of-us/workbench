@@ -169,18 +169,21 @@ export async function createWorkspace(
  * @param opts (all are optional)
  *  workspaceName - return the workspace with this name if it can be found. Otherwise create workspace with this name.
  */
-export async function findOrCreateWorkspace(page: Page, opts: { workspaceName?: string } = {}): Promise<string> {
-  const { workspaceName } = opts;
-
+export async function findOrCreateWorkspace(
+  page: Page,
+  opts: { cdrVersion?: string; workspaceName?: string } = {}
+): Promise<string> {
+  const { cdrVersion = config.defaultCdrVersionName, workspaceName } = opts;
   // Returns specified workspaceName Workspace card if exists.
   if (workspaceName !== undefined) {
     const cardFound = await findWorkspaceCard(page, workspaceName);
     if (cardFound != null) {
+      logger.info(`Found workspace card name: ${workspaceName}`);
+      // TODO workspace CDR version is not verified
       await cardFound.clickWorkspaceName();
       return workspaceName; // Found Workspace card matching workspace name
-    } else {
-      return await createWorkspace(page, { workspaceName });
     }
+    return await createWorkspace(page, { workspaceName, cdrVersion });
   }
 
   // Find a suitable workspace among existing workspaces with OWNER role and older than 30 minutes.
@@ -237,6 +240,7 @@ export async function findOrCreateWorkspaceCard(
 
   let cardFound = await findWorkspaceCard(page, workspaceName);
   if (cardFound !== null) {
+    // TODO workspaces CDR version is not verified
     logger.info(`Found Workspace card name: "${workspaceName}"`);
     return cardFound;
   } else {

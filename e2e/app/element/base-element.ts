@@ -31,15 +31,17 @@ export default class BaseElement extends Container {
    */
   async waitForXPath(waitOptions: WaitForSelectorOptions = { visible: true }): Promise<ElementHandle> {
     if (this.xpath === undefined && this.element !== undefined) return this.element.asElement();
-    try {
-      return this.page.waitForXPath(this.xpath, waitOptions).then((elemt) => (this.element = elemt.asElement()));
-    } catch (err) {
-      logger.error(`waitForXpath('${this.xpath}') failed`);
-      logger.error(err);
-      // Debugging pause
-      // await jestPuppeteer.debug();
-      throw new Error(err);
-    }
+    return this.page
+      .waitForXPath(this.xpath, waitOptions)
+      .then((elemt) => (this.element = elemt.asElement()))
+      .catch((err) => {
+        logger.error(`waitForXpath() failed. xpath=${this.xpath}`);
+        logger.error(err);
+        logger.error(err.stack);
+        // Debugging pause
+        // await jestPuppeteer.debug();
+        throw new Error(err);
+      });
   }
 
   /**
@@ -136,8 +138,7 @@ export default class BaseElement extends Container {
 
   async click(options?: ClickOptions): Promise<void> {
     return this.asElementHandle().then(async (element) => {
-      // Experienment: click workaround
-      // Wait for x,y to stop changing within specified time
+      // click workaround: Wait for x,y to stop changing within specified time
       const startTime = Date.now();
       let previousX: number;
       let previousY: number;
@@ -288,7 +289,7 @@ export default class BaseElement extends Container {
    */
   async isCursorNotAllowed(): Promise<boolean> {
     return this.getComputedStyle('cursor').then((cursor) => {
-      return cursor === 'not-allowed';
+      return cursor && cursor === 'not-allowed';
     });
   }
 
@@ -327,7 +328,12 @@ export default class BaseElement extends Container {
         timeout
       }),
       this.click({ delay: 10 })
-    ]);
+    ]).catch((err) => {
+      logger.error('clickAndWait() failed.');
+      logger.error(err);
+      logger.error(err.stack);
+      throw new Error(err);
+    });
   }
 
   /**
