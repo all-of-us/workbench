@@ -680,7 +680,8 @@ workflows:
             - api-deps-check
             - api-integration-test
             - ui-unit-test
-      - puppeteer-env-setup
+      - puppeteer-env-setup:
+          <<: *filter-release-tags
       - puppeteer-test:
           <<: *filter-release-tags
           parallel_num: 2
