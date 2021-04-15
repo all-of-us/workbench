@@ -91,8 +91,8 @@ describe('Cohort review tests', () => {
     const annotationsSidebar = new AnnotationsSidebar(page);
     await annotationsSidebar.open();
 
-    const reviewParticipantId1 = await annotationsSidebar.getParticipantID();
-    expect(participantId).toEqual(reviewParticipantId1);
+    const reviewParticipantid1 = await annotationsSidebar.getParticipantID();
+    expect(participantId).toEqual(reviewParticipantid1);
 
     // select review status from dropdown option
     const participantStatus1 = await annotationsSidebar.selectReviewStatus(ReviewStatus.Excluded);
@@ -114,16 +114,16 @@ describe('Cohort review tests', () => {
     await participantDetailPage.waitForLoad();
 
     // get the participant ID on the detail page
-    const detailPageParticipantId = await participantDetailPage.getParticipantIDnum();
+    const detailPageParticipantid = await participantDetailPage.getParticipantIDnum();
 
     // click on the pen icon to open the sidebar
     await annotationsSidebar.open();
 
     // get the participant ID on the sidebar content
-    const reviewParticipantId2 = await annotationsSidebar.getParticipantID();
-    console.log(`reviewParticipantid2: ${reviewParticipantId2}`);
+    const reviewParticipantid2 = await annotationsSidebar.getParticipantID();
+    console.log(`reviewParticipantid2: ${reviewParticipantid2}`);
     // validate that the participant ID on detail page and the sidebar content match
-    expect(detailPageParticipantId).toEqual(reviewParticipantId2);
+    expect(detailPageParticipantid).toEqual(reviewParticipantid2);
 
     // select a review status
     const participantStatus2 = await annotationsSidebar.selectReviewStatus(ReviewStatus.Included);
@@ -187,13 +187,13 @@ describe('Cohort review tests', () => {
     const statusCell1 = await participantsTable.getCell(2, 8);
     const statusValue1 = await getPropValue<string>(statusCell1, 'textContent');
     expect(statusValue1).toEqual(participantStatus1);
-    console.log(`${reviewParticipantId1}: ${statusValue1}`);
+    console.log(`${reviewParticipantid1}: ${statusValue1}`);
 
     // Get the status of participant2
     const statusCell2 = await participantsTable.getCell(3, 8);
     const statusValue2 = await getPropValue<string>(statusCell2, 'textContent');
     expect(statusValue2).toEqual(participantStatus2);
-    console.log(`${reviewParticipantId2}: ${statusValue2}`);
+    console.log(`${reviewParticipantid2}: ${statusValue2}`);
 
     // return to cohort review page
     await cohortReviewPage.getBackToCohortButton().clickAndWait();
