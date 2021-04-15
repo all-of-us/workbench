@@ -923,20 +923,46 @@ public class BillingProjectBufferServiceTest {
 
   @Test
   public void testGetStatus() {
+    DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+
     assertThat(
             billingProjectBufferService.getStatus().getAvailablePerTier().stream()
                 .allMatch(tier -> tier.getBufferSize() == 0))
         .isTrue();
 
     makeEntry(BufferEntryStatus.AVAILABLE, registeredTier);
+    makeEntry(BufferEntryStatus.AVAILABLE, registeredTier);
+    makeEntry(BufferEntryStatus.AVAILABLE, registeredTier);
+
+    makeEntry(BufferEntryStatus.AVAILABLE, controlledTier);
+    makeEntry(BufferEntryStatus.AVAILABLE, controlledTier);
+
+    // these are not counted
+
+    makeEntry(BufferEntryStatus.ERROR, registeredTier);
+    makeEntry(BufferEntryStatus.ASSIGNED, controlledTier);
+    makeEntry(BufferEntryStatus.ASSIGNING, registeredTier);
+    makeEntry(BufferEntryStatus.CREATING, controlledTier);
+    makeEntry(BufferEntryStatus.GARBAGE_COLLECTED, registeredTier);
+    makeEntry(BufferEntryStatus.GARBAGE_COLLECTED, controlledTier);
 
     BillingProjectBufferStatus status = billingProjectBufferService.getStatus();
+    List<AvailableBufferPerTier> perTier = status.getAvailablePerTier();
+    assertThat(perTier).hasSize(2);
+
     Optional<Long> registeredTierBufferSize =
-        status.getAvailablePerTier().stream()
+        perTier.stream()
             .filter(tier -> tier.getAccessTierShortName().equals(registeredTier.getShortName()))
             .map(AvailableBufferPerTier::getBufferSize)
             .findAny();
-    assertThat(registeredTierBufferSize).hasValue(1);
+    assertThat(registeredTierBufferSize).hasValue(3);
+
+    Optional<Long> controlledTierBufferSize =
+        perTier.stream()
+            .filter(tier -> tier.getAccessTierShortName().equals(controlledTier.getShortName()))
+            .map(AvailableBufferPerTier::getBufferSize)
+            .findAny();
+    assertThat(controlledTierBufferSize).hasValue(2);
   }
 
   @Test
