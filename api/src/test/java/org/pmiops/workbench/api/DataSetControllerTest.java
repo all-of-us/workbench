@@ -945,7 +945,7 @@ public class DataSetControllerTest {
 
     dataSetController.extractGenomicData(
         workspace.getNamespace(), workspace.getName(), dataSet.getId());
-    verify(mockGenomicExtractionService, times(1)).submitGenomicsCohortExtractionJob(any(), any());
+    verify(mockGenomicExtractionService, times(1)).submitGenomicExtractionJob(any(), any());
   }
 
   DataSetRequest buildValidDataSetRequest() {

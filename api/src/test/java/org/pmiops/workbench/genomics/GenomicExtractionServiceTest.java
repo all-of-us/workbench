@@ -313,12 +313,12 @@ public class GenomicExtractionServiceTest {
   public void submitExtractionJob() throws ApiException {
     when(mockDataSetService.getPersonIdsWithWholeGenome(any()))
         .thenReturn(ImmutableList.of("1", "2", "3"));
-    genomicExtractionService.submitGenomicsCohortExtractionJob(targetWorkspace, createDataset());
+    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, createDataset());
 
     verify(cloudStorageClient)
         .writeFile(
             eq(workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceBucket),
-            matches("wgs-cohort-extractions\\/.*\\/person_ids.txt"),
+            matches("genomic-extractions\\/.*\\/person_ids.txt"),
             any());
     List<DbWgsExtractCromwellSubmission> dbSubmissions =
         ImmutableList.copyOf(wgsExtractCromwellSubmissionDao.findAll());
@@ -330,7 +330,7 @@ public class GenomicExtractionServiceTest {
   @Test
   public void submitExtractionJob_outputVcfsInCorrectBucket() throws ApiException {
     when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of("1"));
-    genomicExtractionService.submitGenomicsCohortExtractionJob(targetWorkspace, createDataset());
+    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, createDataset());
 
     ArgumentCaptor<FirecloudMethodConfiguration> argument =
         ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
@@ -339,13 +339,13 @@ public class GenomicExtractionServiceTest {
     String actualOutputDir = argument.getValue().getInputs().get("WgsCohortExtract.output_gcs_dir");
 
     assertThat(actualOutputDir)
-        .matches("\"gs:\\/\\/user-bucket\\/wgs-cohort-extractions\\/.*\\/vcfs\\/\"");
+        .matches("\"gs:\\/\\/user-bucket\\/genomic-extractions\\/.*\\/vcfs\\/\"");
   }
 
   @Test(expected = FailedPreconditionException.class)
   public void submitExtractionJob_noWgsData() throws ApiException {
     when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of());
-    genomicExtractionService.submitGenomicsCohortExtractionJob(targetWorkspace, createDataset());
+    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, createDataset());
   }
 
   private DbDataset createDataset() {

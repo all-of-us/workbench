@@ -132,8 +132,8 @@ public class GenomicExtractionService {
         .collect(Collectors.toList());
   }
 
-  public GenomicExtractionJob submitGenomicsCohortExtractionJob(
-      DbWorkspace workspace, DbDataset dataSet) throws ApiException {
+  public GenomicExtractionJob submitGenomicExtractionJob(DbWorkspace workspace, DbDataset dataSet)
+      throws ApiException {
     WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;
 
@@ -141,7 +141,7 @@ public class GenomicExtractionService {
         fireCloudService.getWorkspace(workspace).get().getWorkspace();
 
     String extractionUuid = UUID.randomUUID().toString();
-    String extractionFolder = "wgs-cohort-extractions/" + extractionUuid;
+    String extractionFolder = "genomic-extractions/" + extractionUuid;
 
     List<String> personIds = dataSetService.getPersonIdsWithWholeGenome(dataSet);
     if (personIds.isEmpty()) {
