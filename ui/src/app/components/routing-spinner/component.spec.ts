@@ -8,7 +8,6 @@ import {
 } from 'testing/test-helpers';
 
 import {RoutingSpinnerComponent} from 'app/components/routing-spinner/component';
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
 
 describe('RoutingSpinnerComponent', () => {
   let fixture: ComponentFixture<RoutingSpinnerComponent>;
