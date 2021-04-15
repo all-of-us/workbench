@@ -2400,7 +2400,7 @@ paths:
           schema:
             type: boolean
             default: false
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/wgsCohortExtractionJobs":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/genomicExtractionJobs":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
@@ -2409,29 +2409,29 @@ paths:
         - dataSet
       description: 'Retrieve Job details for given ID.
        Requires READER access on the workspace.'
-      operationId: getWgsCohortExtractionJobs
+      operationId: getGenomicExtractionJobs
       responses:
         200:
           description: The Terra Job for the extraction workflow
           schema:
-            "$ref": "#/definitions/WgsCohortExtractionJobListResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/extractGenomes":
+            "$ref": "#/definitions/GenomicExtractionJobListResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/datasets/{datasetId}/extractGenomicData":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
-      - "$ref": "#/parameters/cohortId"
+      - "$ref": "#/parameters/dataSetId"
     post:
       tags:
-        - cohorts
-      description: 'Initiates a Terra Cromwell job to extract genomes of the given cohort.
+        - dataSet
+      description: 'Initiates a Terra Cromwell job to extract genomes of the given dataset.
         Requires WRITER access on the workspace.
-        Workspace CDR must also have access to a Wgs dataset'
-      operationId: extractCohortGenomes
+        Workspace CDR must also have an associated WGS dataset'
+      operationId: extractGenomicData
       responses:
         200:
           description: The Terra Job for the extraction workflow
           schema:
-            "$ref": "#/definitions/WgsCohortExtractionJob"
+            "$ref": "#/definitions/GenomicExtractionJob"
   "/v1/{workspaceNamespace}/{workspaceId}/data-set/exportToNotebook":
     post:
       tags:
@@ -8855,15 +8855,15 @@ definitions:
         type: integer
         format: int64
         description: ''
-  WgsCohortExtractionJobListResponse:
+  GenomicExtractionJobListResponse:
     properties:
       jobs:
         type: array
         items:
-          "$ref": "#/definitions/WgsCohortExtractionJob"
-  WgsCohortExtractionJob:
+          "$ref": "#/definitions/GenomicExtractionJob"
+  GenomicExtractionJob:
     properties:
-      wgsCohortExtractionJobId:
+      genomicExtractionJobId:
         type: integer
         format: int64
         description: Workbench database Id for the job

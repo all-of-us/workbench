@@ -30,7 +30,7 @@ import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.genomics.WgsCohortExtractionService;
+import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.notebooks.NotebooksService;
@@ -86,7 +86,7 @@ public class DataDictionaryTest {
     WorkspaceAuthService.class,
     AccessTierService.class,
     CdrVersionMapper.class,
-    WgsCohortExtractionService.class
+    GenomicExtractionService.class
   })
   static class Configuration {
     @Bean
