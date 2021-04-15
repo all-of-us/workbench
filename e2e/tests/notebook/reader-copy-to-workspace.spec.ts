@@ -63,6 +63,8 @@ describe('Workspace reader Jupyter notebook action tests', () => {
 
       const aboutPage = new WorkspaceAboutPage(page);
       await aboutPage.waitForLoad();
+      await aboutPage.removeCollab();
+      await waitWhileLoading(page);
 
       // Share Workspace to collaborator as READER.
       const shareModal = await aboutPage.openShareModal();
