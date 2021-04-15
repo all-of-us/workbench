@@ -38,8 +38,8 @@ export class SignInService {
       this.serverConfigStoreCallback(serverConfigStore.get().config);
     } else {
       const {unsubscribe} = serverConfigStore.subscribe((configStore) => {
-        this.serverConfigStoreCallback(configStore.config);
         unsubscribe();
+        this.serverConfigStoreCallback(configStore.config);
       });
     }
   }
