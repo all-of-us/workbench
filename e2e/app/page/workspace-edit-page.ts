@@ -268,6 +268,7 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     await Promise.all([waitForDocumentTitle(this.page, PageTitle), waitWhileLoading(this.page)]);
     const selectXpath = buildXPath(FIELD.billingAccountSelect.textOption);
     const select = new Select(this.page, selectXpath);
+    // Wait for Workspace name text-field, Billing Account Select and Create Workspace button
     await Promise.all([
       this.getWorkspaceNameTextbox().asElementHandle(),
       select.asElementHandle(),

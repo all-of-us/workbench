@@ -59,4 +59,30 @@ export default class Select extends BaseElement {
     }, selectElement);
     return selectedOption;
   }
+
+  /**
+   * Wait until value of Selected option equals to expected option.
+   */
+  async waitForSelectedValue(expectedOption: string, timeout = 30000): Promise<void> {
+    const selectElement = await this.page.waitForXPath(this.getXpath(), { visible: true });
+    await this.page
+      .waitForFunction(
+        (select, text) => {
+          for (const option of select.options) {
+            if (option.selected) {
+              console.log(option.textContent);
+              return option.textContent === text;
+            }
+          }
+        },
+        { timeout },
+        selectElement,
+        expectedOption
+      )
+      .catch((err) => {
+        console.error(`waitForSelectedValue() failed. Expected selected option is ${expectedOption}`);
+        console.error(err);
+        throw new Error(err);
+      });
+  }
 }
