@@ -38,7 +38,7 @@ ENVIRONMENTS = {
   },
   "all-of-us-rw-perf" => {
     :config_json => "config_perf.json",
-    :publisher_account => "circle-deploy-account@all-of-us-workbench-perf.iam.gserviceaccount.com",
+    :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
     :accessTiers => {
       "registered" => {
         :source_cdr_project => "all-of-us-ehr-dev",
