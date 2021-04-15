@@ -63,6 +63,7 @@ import org.pmiops.workbench.monitoring.MonitoringSpringConfiguration;
 import org.pmiops.workbench.monitoring.StackdriverStatsExporterService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceFakeImpl;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -86,6 +87,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
   MonitoringServiceImpl.class,
   MonitoringSpringConfiguration.class,
   NotebooksServiceImpl.class,
+  WorkspaceAuthService.class,
   StackdriverStatsExporterService.class,
   UserRecentResourceServiceImpl.class
 })
