@@ -53,8 +53,8 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
+import org.pmiops.workbench.model.GenomicExtractionJob;
 import org.pmiops.workbench.model.TerraJobStatus;
-import org.pmiops.workbench.model.WgsCohortExtractionJob;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -72,12 +72,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class WgsCohortExtractionServiceTest {
+public class GenomicExtractionServiceTest {
 
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
   private static final String FC_SUBMISSION_ID = "123";
 
-  @Autowired WgsCohortExtractionService wgsCohortExtractionService;
+  @Autowired GenomicExtractionService genomicExtractionService;
   @Autowired FireCloudService fireCloudService;
   @Autowired MethodConfigurationsApi methodConfigurationsApi;
   @Autowired SubmissionsApi submissionsApi;
@@ -97,8 +97,8 @@ public class WgsCohortExtractionServiceTest {
 
   @TestConfiguration
   @Import({
-    WgsCohortExtractionService.class,
-    WgsCohortExtractionMapperImpl.class,
+    GenomicExtractionService.class,
+    GenomicExtractionMapperImpl.class,
     CommonMappers.class,
     WorkspaceAuthService.class
   })
@@ -203,9 +203,9 @@ public class WgsCohortExtractionServiceTest {
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
             dbWgsExtractCromwellSubmission.getSubmissionId());
 
-    WgsCohortExtractionJob wgsCohortExtractionJob =
-        wgsCohortExtractionService
-            .getWgsCohortExtractionJobs(
+    GenomicExtractionJob wgsCohortExtractionJob =
+        genomicExtractionService
+            .getGenomicExtractionJobs(
                 targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName())
             .get(0);
 
@@ -231,14 +231,14 @@ public class WgsCohortExtractionServiceTest {
     assertThrows(
         ForbiddenException.class,
         () -> {
-          wgsCohortExtractionService.getWgsCohortExtractionJobs(
+          genomicExtractionService.getGenomicExtractionJobs(
               targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
         });
 
     doReturn(new FirecloudWorkspaceResponse().accessLevel("READER"))
         .when(fireCloudService)
         .getWorkspace(targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
-    wgsCohortExtractionService.getWgsCohortExtractionJobs(
+    genomicExtractionService.getGenomicExtractionJobs(
         targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
   }
 
@@ -275,13 +275,13 @@ public class WgsCohortExtractionServiceTest {
             .getWgsExtractCromwellSubmissionId(),
         TerraJobStatus.RUNNING);
 
-    wgsCohortExtractionService
-        .getWgsCohortExtractionJobs(
+    genomicExtractionService
+        .getGenomicExtractionJobs(
             targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName())
         .forEach(
             job -> {
               assertThat(job.getStatus())
-                  .isEqualTo(expectedStatuses.get(job.getWgsCohortExtractionJobId()));
+                  .isEqualTo(expectedStatuses.get(job.getGenomicExtractionJobId()));
             });
   }
 
@@ -313,7 +313,7 @@ public class WgsCohortExtractionServiceTest {
   public void submitExtractionJob() throws ApiException {
     when(mockDataSetService.getPersonIdsWithWholeGenome(any()))
         .thenReturn(ImmutableList.of("1", "2", "3"));
-    wgsCohortExtractionService.submitGenomicsCohortExtractionJob(targetWorkspace, createDataset());
+    genomicExtractionService.submitGenomicsCohortExtractionJob(targetWorkspace, createDataset());
 
     verify(cloudStorageClient)
         .writeFile(
@@ -330,7 +330,7 @@ public class WgsCohortExtractionServiceTest {
   @Test
   public void submitExtractionJob_outputVcfsInCorrectBucket() throws ApiException {
     when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of("1"));
-    wgsCohortExtractionService.submitGenomicsCohortExtractionJob(targetWorkspace, createDataset());
+    genomicExtractionService.submitGenomicsCohortExtractionJob(targetWorkspace, createDataset());
 
     ArgumentCaptor<FirecloudMethodConfiguration> argument =
         ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
@@ -345,7 +345,7 @@ public class WgsCohortExtractionServiceTest {
   @Test(expected = FailedPreconditionException.class)
   public void submitExtractionJob_noWgsData() throws ApiException {
     when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of());
-    wgsCohortExtractionService.submitGenomicsCohortExtractionJob(targetWorkspace, createDataset());
+    genomicExtractionService.submitGenomicsCohortExtractionJob(targetWorkspace, createDataset());
   }
 
   private DbDataset createDataset() {

@@ -41,7 +41,7 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.genomics.WgsCohortExtractionService;
+import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetCodeResponse;
@@ -57,12 +57,12 @@ import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuesResponse;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.GenomicExtractionJob;
+import org.pmiops.workbench.model.GenomicExtractionJobListResponse;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.MarkDataSetRequest;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResourceType;
-import org.pmiops.workbench.model.WgsCohortExtractionJob;
-import org.pmiops.workbench.model.WgsCohortExtractionJobListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -92,7 +92,7 @@ public class DataSetController implements DataSetApiDelegate {
   private final CdrVersionService cdrVersionService;
   private final FireCloudService fireCloudService;
   private final NotebooksService notebooksService;
-  private final WgsCohortExtractionService wgsCohortExtractionService;
+  private final GenomicExtractionService genomicExtractionService;
   private final WorkspaceAuthService workspaceAuthService;
 
   @Autowired
@@ -104,7 +104,7 @@ public class DataSetController implements DataSetApiDelegate {
       NotebooksService notebooksService,
       Provider<DbUser> userProvider,
       @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
-      WgsCohortExtractionService wgsCohortExtractionService,
+      GenomicExtractionService genomicExtractionService,
       WorkspaceAuthService workspaceAuthService) {
     this.bigQueryService = bigQueryService;
     this.cdrVersionService = cdrVersionService;
@@ -113,7 +113,7 @@ public class DataSetController implements DataSetApiDelegate {
     this.notebooksService = notebooksService;
     this.userProvider = userProvider;
     this.prefixProvider = prefixProvider;
-    this.wgsCohortExtractionService = wgsCohortExtractionService;
+    this.genomicExtractionService = genomicExtractionService;
     this.workspaceAuthService = workspaceAuthService;
   }
 
@@ -497,7 +497,7 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   @Override
-  public ResponseEntity<WgsCohortExtractionJob> extractCohortGenomes(
+  public ResponseEntity<GenomicExtractionJob> extractGenomicData(
       String workspaceNamespace, String workspaceId, Long dataSetId) {
     DbWorkspace workspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
@@ -515,7 +515,7 @@ public class DataSetController implements DataSetApiDelegate {
                 });
     try {
       return ResponseEntity.ok(
-          wgsCohortExtractionService.submitGenomicsCohortExtractionJob(workspace, dataSet));
+          genomicExtractionService.submitGenomicsCohortExtractionJob(workspace, dataSet));
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       // Our usage of Terra is an internal implementation detail to the client. Any error returned
       // from Firecloud is either a bug within our Cromwell integration or a backend failure.
@@ -524,12 +524,12 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   @Override
-  public ResponseEntity<WgsCohortExtractionJobListResponse> getWgsCohortExtractionJobs(
+  public ResponseEntity<GenomicExtractionJobListResponse> getGenomicExtractionJobs(
       String workspaceNamespace, String workspaceId) {
     return ResponseEntity.ok(
-        new WgsCohortExtractionJobListResponse()
+        new GenomicExtractionJobListResponse()
             .jobs(
-                wgsCohortExtractionService.getWgsCohortExtractionJobs(
+                genomicExtractionService.getGenomicExtractionJobs(
                     workspaceNamespace, workspaceId)));
   }
 

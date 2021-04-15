@@ -123,7 +123,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.genomics.WgsCohortExtractionService;
+import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AnnotationType;
@@ -319,7 +319,7 @@ public class WorkspacesControllerTest extends SpringTest {
     MonitoringService.class,
     UserRecentResourceService.class,
     UserService.class,
-    WgsCohortExtractionService.class,
+    GenomicExtractionService.class,
     WorkspaceAuditor.class,
     AccessTierService.class,
     CdrVersionService.class,

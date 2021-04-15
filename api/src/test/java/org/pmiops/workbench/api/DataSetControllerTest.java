@@ -102,7 +102,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.genomics.WgsCohortExtractionService;
+import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.BillingStatus;
@@ -210,7 +210,7 @@ public class DataSetControllerTest {
   @MockBean private FireCloudService fireCloudService;
   @MockBean private NotebooksService mockNotebooksService;
   @MockBean private DSDataDictionaryDao mockDSDataDictionaryDao;
-  @MockBean private WgsCohortExtractionService mockWgsCohortExtractionService;
+  @MockBean private GenomicExtractionService mockGenomicExtractionService;
 
   @Captor ArgumentCaptor<JSONObject> notebookContentsCaptor;
 
@@ -885,7 +885,7 @@ public class DataSetControllerTest {
     assertThrows(
         ForbiddenException.class,
         () -> {
-          dataSetController.extractCohortGenomes(
+          dataSetController.extractGenomicData(
               workspace.getNamespace(), workspace.getName(), dataSet.getId());
         });
 
@@ -894,23 +894,23 @@ public class DataSetControllerTest {
     assertThrows(
         ForbiddenException.class,
         () -> {
-          dataSetController.extractCohortGenomes(
+          dataSetController.extractGenomicData(
               workspace.getNamespace(), workspace.getName(), dataSet.getId());
         });
 
     when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
         .thenReturn(new FirecloudWorkspaceResponse().accessLevel("WRITER"));
-    dataSetController.extractCohortGenomes(
+    dataSetController.extractGenomicData(
         workspace.getNamespace(), workspace.getName(), dataSet.getId());
 
     when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
         .thenReturn(new FirecloudWorkspaceResponse().accessLevel("OWNER"));
-    dataSetController.extractCohortGenomes(
+    dataSetController.extractGenomicData(
         workspace.getNamespace(), workspace.getName(), dataSet.getId());
 
     when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
         .thenReturn(new FirecloudWorkspaceResponse().accessLevel("PROJECT_OWNER"));
-    dataSetController.extractCohortGenomes(
+    dataSetController.extractGenomicData(
         workspace.getNamespace(), workspace.getName(), dataSet.getId());
   }
 
@@ -919,8 +919,7 @@ public class DataSetControllerTest {
     assertThrows(
         BadRequestException.class,
         () -> {
-          dataSetController.extractCohortGenomes(
-              workspace.getNamespace(), workspace.getName(), 404L);
+          dataSetController.extractGenomicData(workspace.getNamespace(), workspace.getName(), 404L);
         });
   }
 
@@ -935,17 +934,16 @@ public class DataSetControllerTest {
     assertThrows(
         BadRequestException.class,
         () -> {
-          dataSetController.extractCohortGenomes(
+          dataSetController.extractGenomicData(
               workspace.getNamespace(), workspace.getName(), dataSet.getId());
         });
 
     cdrVersion.setWgsBigqueryDataset("wgs");
     cdrVersionDao.save(cdrVersion);
 
-    dataSetController.extractCohortGenomes(
+    dataSetController.extractGenomicData(
         workspace.getNamespace(), workspace.getName(), dataSet.getId());
-    verify(mockWgsCohortExtractionService, times(1))
-        .submitGenomicsCohortExtractionJob(any(), any());
+    verify(mockGenomicExtractionService, times(1)).submitGenomicsCohortExtractionJob(any(), any());
   }
 
   DataSetRequest buildValidDataSetRequest() {

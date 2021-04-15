@@ -32,8 +32,8 @@ import org.pmiops.workbench.firecloud.model.FirecloudSubmissionResponse;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
+import org.pmiops.workbench.model.GenomicExtractionJob;
 import org.pmiops.workbench.model.TerraJobStatus;
-import org.pmiops.workbench.model.WgsCohortExtractionJob;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class WgsCohortExtractionService {
+public class GenomicExtractionService {
 
   private final DataSetService dataSetService;
   private final FireCloudService fireCloudService;
@@ -49,14 +49,14 @@ public class WgsCohortExtractionService {
   private final Provider<SubmissionsApi> submissionApiProvider;
   private final Provider<MethodConfigurationsApi> methodConfigurationsApiProvider;
   private final WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao;
-  private final WgsCohortExtractionMapper wgsCohortExtractionMapper;
+  private final GenomicExtractionMapper genomicExtractionMapper;
   private final Provider<DbUser> userProvider;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final WorkspaceAuthService workspaceAuthService;
   private final Clock clock;
 
   @Autowired
-  public WgsCohortExtractionService(
+  public GenomicExtractionService(
       DataSetService dataSetService,
       FireCloudService fireCloudService,
       @Qualifier(StorageConfig.WGS_EXTRACTION_STORAGE_CLIENT)
@@ -64,7 +64,7 @@ public class WgsCohortExtractionService {
       Provider<SubmissionsApi> submissionsApiProvider,
       Provider<MethodConfigurationsApi> methodConfigurationsApiProvider,
       WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao,
-      WgsCohortExtractionMapper wgsCohortExtractionMapper,
+      GenomicExtractionMapper genomicExtractionMapper,
       Provider<DbUser> userProvider,
       Provider<WorkbenchConfig> workbenchConfigProvider,
       WorkspaceAuthService workspaceAuthService,
@@ -76,7 +76,7 @@ public class WgsCohortExtractionService {
         extractionServiceAccountCloudStorageClientProvider;
     this.methodConfigurationsApiProvider = methodConfigurationsApiProvider;
     this.wgsExtractCromwellSubmissionDao = wgsExtractCromwellSubmissionDao;
-    this.wgsCohortExtractionMapper = wgsCohortExtractionMapper;
+    this.genomicExtractionMapper = genomicExtractionMapper;
     this.userProvider = userProvider;
     this.workbenchConfigProvider = workbenchConfigProvider;
     this.workspaceAuthService = workspaceAuthService;
@@ -102,7 +102,7 @@ public class WgsCohortExtractionService {
         .build();
   }
 
-  public List<WgsCohortExtractionJob> getWgsCohortExtractionJobs(
+  public List<GenomicExtractionJob> getGenomicExtractionJobs(
       String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
@@ -124,7 +124,7 @@ public class WgsCohortExtractionService {
                             cohortExtractionConfig.operationalTerraWorkspaceName,
                             dbSubmission.getSubmissionId());
 
-                return wgsCohortExtractionMapper.toApi(dbSubmission, firecloudSubmission);
+                return genomicExtractionMapper.toApi(dbSubmission, firecloudSubmission);
               } catch (ApiException e) {
                 throw new ServerErrorException("Could not fetch submission status from Terra", e);
               }
@@ -132,7 +132,7 @@ public class WgsCohortExtractionService {
         .collect(Collectors.toList());
   }
 
-  public WgsCohortExtractionJob submitGenomicsCohortExtractionJob(
+  public GenomicExtractionJob submitGenomicsCohortExtractionJob(
       DbWorkspace workspace, DbDataset dataSet) throws ApiException {
     WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;
@@ -263,6 +263,6 @@ public class WgsCohortExtractionService {
             cohortExtractionConfig.extractionMethodConfigurationNamespace,
             methodConfig.getName());
 
-    return new WgsCohortExtractionJob().status(TerraJobStatus.RUNNING);
+    return new GenomicExtractionJob().status(TerraJobStatus.RUNNING);
   }
 }
