@@ -2,7 +2,6 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -760,24 +759,6 @@ public class WorkspacesControllerTest extends SpringTest {
     } catch (NotFoundException e) {
       // expected
     }
-  }
-
-  @Transactional
-  @Test
-  public void testDeleteWorkspace_recentWorkspace() {
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-
-    workspacesController.updateRecentWorkspaces(workspace.getNamespace(), workspace.getName());
-    long workspaceId =
-        workspaceDao.get(workspace.getNamespace(), workspace.getName()).getWorkspaceId();
-
-    workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
-
-    assertFalse(
-        userRecentWorkspaceDao
-            .findFirstByWorkspaceIdAndUserId(workspaceId, currentUser.getUserId())
-            .isPresent());
   }
 
   @Test
