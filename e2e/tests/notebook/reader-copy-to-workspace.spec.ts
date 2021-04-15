@@ -11,6 +11,7 @@ import { signInWithAccessToken, signInAs, signOut, findOrCreateWorkspace } from 
 import { waitWhileLoading } from 'utils/waits-utils';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Modal from 'app/modal/modal';
+import HomePage from '../../app/page/home-page';
 
 // Retry one more when fails
 jest.retryTimes(1);
@@ -71,10 +72,14 @@ describe('Workspace reader Jupyter notebook action tests', () => {
       await shareModal.shareWithUser(config.collaboratorUsername, WorkspaceAccessLevel.Reader);
       await waitWhileLoading(page);
       await signOut(page);
-      (await browser.pages()).map((p) => p.close());
+      const allPages = await browser.pages();
+      for (const p of allPages) {
+        await p.close();
+      }
 
       // Sign in as collaborator in new Incognito page.
       const newPage = await signInAs(config.collaboratorUsername, config.userPassword);
+      await new HomePage(newPage).load();
 
       // Create a new Workspace. This is the copy-to workspace.
       await findOrCreateWorkspace(newPage, { workspaceName: collaboratorWorkspace });
