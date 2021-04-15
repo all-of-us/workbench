@@ -68,7 +68,8 @@ describe('Duplicate workspace', () => {
     await workspaceEditPage.clickShareWithCollaboratorsCheckbox();
 
     await workspaceEditPage.requestForReviewRadiobutton(false);
-    expect(await finishButton.waitUntilEnabled()).toBe(true);
+    await finishButton.waitUntilEnabled();
+    expect(await finishButton.isCursorNotAllowed()).toBe(false);
     // Click Finish button to clone workspace is not needed.
   });
 });

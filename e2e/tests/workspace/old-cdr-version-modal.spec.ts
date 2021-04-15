@@ -32,7 +32,7 @@ describe('OldCdrVersion Modal restrictions', () => {
     await editPage.clickCreateFinishButton(createButton);
   });
 
-  const workspace = 'e2eWorkspaceCDRTest';
+  const workspace = 'e2eCloneWorkspaceCDRConsentTest';
 
   test('OWNER cannot duplicate workspace to an older CDR Version without consenting to restrictions', async () => {
     const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName: workspace });

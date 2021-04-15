@@ -41,6 +41,7 @@ describe('Workspace CDR Version Upgrade modal', () => {
 
     const editCancelButton = duplicationPage.getCancelButton();
     await editCancelButton.clickAndWait();
+    expect(await workspacePage.isLoaded()).toBe(true);
   });
 });
 
