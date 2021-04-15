@@ -87,6 +87,8 @@ describe('Workspace reader Jupyter notebook action tests', () => {
       // Verify notebook actions list.
       await workspaceCard.clickWorkspaceName();
       await new WorkspaceDataPage(newPage).openAnalysisPage();
+      const analysisPage = new WorkspaceAnalysisPage(newPage);
+      await analysisPage.waitForLoad();
 
       // Notebook actions Rename, Duplicate and Delete are disabled.
       const dataResourceCard = new DataResourceCard(newPage);
