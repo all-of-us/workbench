@@ -12,7 +12,6 @@ describe('Editing and rename Concept Set', () => {
     await signInWithAccessToken(page);
   });
 
-  const workspace = 'e2eEditConceptSetsTest';
   /**
    * Test:
    * - Create new workspace.
@@ -22,7 +21,7 @@ describe('Editing and rename Concept Set', () => {
    * - Delete Concept Set.
    */
   test('Workspace OWNER can edit Concept Set', async () => {
-    const workspaceName = await createWorkspace(page, { workspaceName: workspace });
+    const workspaceName = await createWorkspace(page);
 
     const dataPage = new WorkspaceDataPage(page);
     let { conceptSearchPage, criteriaSearch } = await dataPage.openConceptSetSearch(Domain.Procedures);
@@ -55,15 +54,17 @@ describe('Editing and rename Concept Set', () => {
     const conceptSetActionsPage = new ConceptSetActionsPage(page);
     conceptSearchPage = await conceptSetActionsPage.openConceptSearch();
 
-    const procedures = ConceptDomainCard.findDomainCard(page, Domain.Procedures);
+    const procedures = await ConceptDomainCard.findDomainCard(page, Domain.Procedures);
     criteriaSearch = await procedures.clickSelectConceptButton();
 
     // Search in Procedures domain
     procedureName = 'Screening procedure';
     await criteriaSearch.searchCriteria(procedureName);
+
     // Select first row. Its name cell should match the search words.
     const row = await criteriaSearch.resultsTableSelectRow();
     expect(row.name).toBe(procedureName);
+
     await conceptSearchPage.reviewAndSaveConceptSet();
 
     // Save to Existing Set: Only one Concept set and it is the new Concept Set created earlier in same workspace.
