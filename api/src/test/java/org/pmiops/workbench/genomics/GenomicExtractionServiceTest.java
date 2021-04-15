@@ -111,7 +111,7 @@ public class GenomicExtractionServiceTest {
   static class Configuration {
     @Bean
     @Scope("prototype")
-    @Qualifier(StorageConfig.WGS_EXTRACTION_STORAGE_CLIENT)
+    @Qualifier(StorageConfig.GENOMIC_EXTRACTION_STORAGE_CLIENT)
     CloudStorageClient cloudStorageClient() {
       return cloudStorageClient;
     }

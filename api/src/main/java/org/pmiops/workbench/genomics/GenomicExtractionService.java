@@ -59,7 +59,7 @@ public class GenomicExtractionService {
   public GenomicExtractionService(
       DataSetService dataSetService,
       FireCloudService fireCloudService,
-      @Qualifier(StorageConfig.WGS_EXTRACTION_STORAGE_CLIENT)
+      @Qualifier(StorageConfig.GENOMIC_EXTRACTION_STORAGE_CLIENT)
           Provider<CloudStorageClient> extractionServiceAccountCloudStorageClientProvider,
       Provider<SubmissionsApi> submissionsApiProvider,
       Provider<MethodConfigurationsApi> methodConfigurationsApiProvider,
