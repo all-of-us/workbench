@@ -24,12 +24,12 @@ import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
+import org.pmiops.workbench.model.AvailableBufferPerTier;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
@@ -326,9 +326,16 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   }
 
   public BillingProjectBufferStatus getStatus() {
-    final long bufferSize =
-        billingProjectBufferEntryDao.countByStatus(
-            DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.AVAILABLE));
-    return new BillingProjectBufferStatus().bufferSize(bufferSize);
+    return new BillingProjectBufferStatus()
+        .availablePerTier(
+            accessTierService.getAllTiers().stream()
+                .map(
+                    tier ->
+                        new AvailableBufferPerTier()
+                            .accessTierShortName(tier.getShortName())
+                            .bufferSize(
+                                billingProjectBufferEntryDao.countByStatusAndAccessTier(
+                                    BufferEntryStatus.AVAILABLE, tier)))
+                .collect(Collectors.toList()));
   }
 }
