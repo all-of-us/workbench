@@ -2,6 +2,7 @@ package org.pmiops.workbench.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -97,6 +98,7 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
+import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
@@ -360,6 +362,7 @@ public class WorkspacesControllerTest extends SpringTest {
   @Autowired BigQueryService bigQueryService;
   @SpyBean @Autowired WorkspaceDao workspaceDao;
   @Autowired UserDao userDao;
+  @Autowired UserRecentWorkspaceDao userRecentWorkspaceDao;
   @Autowired AccessTierDao accessTierDao;
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired CohortDao cohortDao;
@@ -757,6 +760,24 @@ public class WorkspacesControllerTest extends SpringTest {
     } catch (NotFoundException e) {
       // expected
     }
+  }
+
+  @Transactional
+  @Test
+  public void testDeleteWorkspace_recentWorkspace() {
+    Workspace workspace = createWorkspace();
+    workspace = workspacesController.createWorkspace(workspace).getBody();
+
+    workspacesController.updateRecentWorkspaces(workspace.getNamespace(), workspace.getName());
+    long workspaceId =
+        workspaceDao.get(workspace.getNamespace(), workspace.getName()).getWorkspaceId();
+
+    workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
+
+    assertFalse(
+        userRecentWorkspaceDao
+            .findFirstByWorkspaceIdAndUserId(workspaceId, currentUser.getUserId())
+            .isPresent());
   }
 
   @Test
