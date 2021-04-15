@@ -587,106 +587,83 @@ export const HelpSidebar = fp.flow(
       headerPadding?: string;
       renderHeader?: () => JSX.Element;
       bodyWidthRem?: string;
+      bodyPadding?: string;
       renderBody: () => JSX.Element;
       showFooter: boolean;
     } {
-      const defaultContentPadding = '0 0.5rem 5.5rem';
-
       switch (activeIcon) {
         case 'help':
           return {
             headerPadding: '0.5rem',
-            renderHeader: () => {
-              return <h3 style={{...styles.sectionTitle, marginTop: 0, lineHeight: 1.75}}>
+            renderHeader: () =>
+              <h3 style={{...styles.sectionTitle, marginTop: 0, lineHeight: 1.75}}>
                 Help Tips
-              </h3>;
-            },
-            renderBody: () => {
-              return <div style={{padding: defaultContentPadding}}>
-                <HelpTips allowSearch={true}
-                          onSearch={() => this.analyticsEvent('Search')}
-                          contentKey={this.props.helpContentKey}/>
-              </div>;
-            },
+              </h3>,
+            renderBody: () =>
+              <HelpTips allowSearch={true}
+                        onSearch={() => this.analyticsEvent('Search')}
+                        contentKey={this.props.helpContentKey}/>,
             showFooter: true
           };
         case 'runtime':
           return {
             headerPadding: '0.75rem',
-            renderHeader: () => {
-              return <div>
+            renderHeader: () =>
+              <div>
                 <h3 style={{...styles.sectionTitle, marginTop: 0, lineHeight: 1.75}}>Cloud analysis environment</h3>
                 <div style={{padding: '0.5rem 1rem'}}>
                   Your analysis environment consists of an application and compute resources.
                   Your cloud environment is unique to this workspace and not shared with other users.
                 </div>
-              </div>;
-            },
+              </div>,
             bodyWidthRem: '30',
-            renderBody: () => {
-              return <div style={{padding: '0 1.25rem'}}>
-                {<RuntimePanel onClose={() => this.props.setSidebarState(false)}/>}
-              </div>;
-            },
+            bodyPadding: '0 1.25rem',
+            renderBody: () =>
+              <RuntimePanel onClose={() => this.props.setSidebarState(false)}/>,
             showFooter: false
           };
         case 'notebooksHelp':
           return {
             headerPadding: '0.5rem',
-            renderHeader: () => {
-              return <h3 style={{...styles.sectionTitle, marginTop: 0}}>
+            renderHeader: () =>
+              <h3 style={{...styles.sectionTitle, marginTop: 0}}>
                 Workspace storage
-              </h3>;
-            },
-            renderBody: () => {
-              return <div style={{padding: defaultContentPadding}}>
-                <HelpTips allowSearch={false}
-                          contentKey={this.props.helpContentKey}/>
-              </div>;
-            },
+              </h3>,
+            renderBody: () =>
+              <HelpTips allowSearch={false}
+                        contentKey={this.props.helpContentKey}/>,
             showFooter: true
           };
         case 'annotations':
           return {
             headerPadding: '0.5rem 0.5rem 0 0.5rem',
-            renderHeader: () => {
-              return <div style={{fontSize: 18, color: colors.primary}}> Participant {this.state.participant.participantId}</div>;
-            },
-            renderBody: () => {
-              return <div style={{padding: defaultContentPadding}}>
-                {this.state.participant && <SidebarContent />}
-              </div>;
-            },
+            renderHeader: () =>
+              <div style={{fontSize: 18, color: colors.primary}}>
+                Participant {this.state.participant.participantId}
+              </div>,
+            renderBody: () => this.state.participant &&
+                <SidebarContent/>,
             showFooter: true
-
           };
         case 'concept':
           return {
             headerPadding: '0.75rem',
-            renderHeader: () => {
-              return <h3 style={{...styles.sectionTitle, marginTop: 0}}>Selected Concepts</h3>;
-            },
+            renderHeader: () =>
+              <h3 style={{...styles.sectionTitle, marginTop: 0}}>
+                Selected Concepts
+              </h3>,
             bodyWidthRem: '20',
-            renderBody: () => {
-              return <div style={{padding: '0.5rem 0.5rem 0'}}>
-                <div style={{padding: '0.25rem 0.25rem 0rem'}}>
-                  {!!currentConceptStore.getValue() && <ConceptListPage/>}
-                </div>
-              </div>;
-            },
+            bodyPadding: '0.75rem 0.75rem 0',
+            renderBody: () => !!currentConceptStore.getValue() &&
+                <ConceptListPage/>,
             showFooter: false
           };
         case 'criteria':
           return {
             bodyWidthRem: '20',
-            renderBody: () => {
-              return <div style={{padding: '0.5rem 0.5rem 0', height: '100%'}}>
-                <div style={{height: '100%', padding: '0.25rem 0.25rem 0rem'}}>
-                  {!!currentCohortSearchContextStore.getValue() &&
-                    <SelectionList back={() => this.props.setSidebarState(false)} selections={[]}/>}
-                </div>
-              </div>;
-            },
+            bodyPadding: '0.75rem 0.75rem 0',
+            renderBody: () => !!currentCohortSearchContextStore.getValue() &&
+                <SelectionList back={() => this.props.setSidebarState(false)} selections={[]}/>,
             showFooter: false
           };
       }
@@ -730,33 +707,38 @@ export const HelpSidebar = fp.flow(
         <div style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
           <div style={this.sidebarStyle} data-test-id='sidebar-content'>
 
-            {sidebarContent && <div style={{height: '100%', overflow: 'auto'}}>
-              <FlexColumn style={{height: '100%'}}>
-                {sidebarContent.renderHeader && <FlexRow style={{justifyContent: 'space-between', padding: sidebarContent.headerPadding}}>
-                  {sidebarContent.renderHeader()}
+            {sidebarContent &&
+              <div style={{height: '100%', overflow: 'auto'}}>
+                <FlexColumn style={{height: '100%'}}>
+                  {sidebarContent.renderHeader &&
+                    <FlexRow style={{justifyContent: 'space-between', padding: sidebarContent.headerPadding}}>
+                      {sidebarContent.renderHeader()}
 
-                    <Clickable onClick={() => this.props.setSidebarState(false)}>
-                        <img src={proIcons.times}
-                             style={{height: '27px', width: '17px'}}
-                             alt='Close'/>
-                    </Clickable>
-                </FlexRow>}
+                      <Clickable onClick={() => this.props.setSidebarState(false)}>
+                          <img src={proIcons.times}
+                               style={{height: '27px', width: '17px'}}
+                               alt='Close'/>
+                      </Clickable>
+                    </FlexRow>
+                  }
 
-                  <div style={{flex: 1}}>
-                    {sidebarContent && sidebarContent.renderBody()}
+                  <div style={{flex: 1, padding: sidebarContent.bodyPadding || '0 0.5rem 5.5rem', height: '100%'}}>
+                    {sidebarContent.renderBody()}
                   </div>
-              </FlexColumn>
+                </FlexColumn>
 
-              {sidebarContent.showFooter && <div style={{...styles.footer}}>
-                  <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
-                  <p style={styles.contentItem}>
-                      Visit our <StyledAnchorTag href={supportUrls.helpCenter}
-                                                 target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
-                  </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
-                  </p>
-              </div>}
-            </div>}
-
+                {sidebarContent.showFooter &&
+                  <div style={{...styles.footer}}>
+                    <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
+                    <p style={styles.contentItem}>
+                        Visit our <StyledAnchorTag href={supportUrls.helpCenter}
+                                                   target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
+                    </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
+                    </p>
+                  </div>
+                }
+              </div>
+            }
           </div>
         </div>
       </div>;
