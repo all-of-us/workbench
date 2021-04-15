@@ -63,7 +63,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteConceptSet(
       String workspaceNamespace, String workspaceId, Long conceptSetId) {
-    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     conceptSetService.delete(conceptSetId);
     return ResponseEntity.ok(new EmptyResponse());
