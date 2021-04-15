@@ -509,7 +509,7 @@ public class DataSetController implements DataSetApiDelegate {
     DbDataset dataSet =
         dataSetService
             .getDbDataSet(dataSetId)
-            .<BadRequestException>orElseThrow(
+            .<NotFoundException>orElseThrow(
                 () -> {
                   throw new NotFoundException("No DataSet found for dataSetId: " + dataSetId);
                 });

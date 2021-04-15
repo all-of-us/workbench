@@ -1068,17 +1068,26 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @Override
   public List<String> getPersonIdsWithWholeGenome(DbDataset dataSet) {
-    List<ParticipantCriteria> participantCriteriaList =
-        this.cohortDao.findAllByCohortIdIn(dataSet.getCohortIds()).stream()
-            .map(
-                cohort -> {
-                  final SearchRequest searchRequest =
-                      new Gson().fromJson(cohort.getCriteria(), SearchRequest.class);
-                  // AND the existing search criteria with participants having genomics data.
-                  searchRequest.addIncludesItem(createHasWgsSearchGroup());
-                  return new ParticipantCriteria(searchRequest);
-                })
-            .collect(Collectors.toList());
+    List<ParticipantCriteria> participantCriteriaList;
+    if (Boolean.TRUE.equals(dataSet.getIncludesAllParticipants())) {
+      // Select all participants with WGS data.
+      participantCriteriaList =
+          ImmutableList.of(
+              new ParticipantCriteria(
+                  new SearchRequest().addIncludesItem(createHasWgsSearchGroup())));
+    } else {
+      participantCriteriaList =
+          this.cohortDao.findAllByCohortIdIn(dataSet.getCohortIds()).stream()
+              .map(
+                  cohort -> {
+                    final SearchRequest searchRequest =
+                        new Gson().fromJson(cohort.getCriteria(), SearchRequest.class);
+                    // AND the existing search criteria with participants having genomics data.
+                    searchRequest.addIncludesItem(createHasWgsSearchGroup());
+                    return new ParticipantCriteria(searchRequest);
+                  })
+              .collect(Collectors.toList());
+    }
 
     final QueryJobConfiguration participantIdQuery =
         cohortQueryBuilder.buildUnionedParticipantIdQuery(participantCriteriaList);
