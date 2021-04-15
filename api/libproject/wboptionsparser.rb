@@ -47,7 +47,7 @@ class WbOptionsParser
       begin
         fn.call(@opts)
       rescue ArgumentError => e
-        puts e.message unless e.message.nil?
+        STDERR.puts e.message unless e.message.nil?
         STDERR.puts @parser.help
         exit 1
       end
