@@ -71,6 +71,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
       await shareModal.shareWithUser(config.collaboratorUsername, WorkspaceAccessLevel.Reader);
       await waitWhileLoading(page);
       await signOut(page);
+      (await browser.pages()).map((p) => p.close());
 
       // Sign in as collaborator in new Incognito page.
       const newPage = await signInAs(config.collaboratorUsername, config.userPassword);
