@@ -72,7 +72,7 @@ executors:
     docker:
       - image: << pipeline.parameters.workbench-image >>
     working_directory: ~/workbench
-  
+
   # Variant of the default executor with a higher heap size. This is currently needed as Junit4 does not
   # release test memory across unit test runs, and certain combinations of tests will trigger OOM errors
   # due to garbage collection timeout. This should be reassessed after upgrading to Junit 5. See RW-6460.
@@ -631,7 +631,7 @@ workflows:
       - puppeteer-test:
           <<: *filter-pr-branch
           env_name: "local"
-          parallel_num: 4
+          parallel_num: 1
           optional_steps:
             - halt-puppeteer-check
           requires:
