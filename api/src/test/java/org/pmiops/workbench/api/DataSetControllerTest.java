@@ -870,7 +870,7 @@ public class DataSetControllerTest {
   }
 
   @Test
-  public void testWgsCohortExtraction_permissions() {
+  public void testGenomicDataExtraction_permissions() {
     cdrVersion.setWgsBigqueryDataset("wgs");
     cdrVersionDao.save(cdrVersion);
 
@@ -915,7 +915,7 @@ public class DataSetControllerTest {
   }
 
   @Test
-  public void testWgsCohortExtraction_notFound() {
+  public void testGenomicDataExtraction_notFound() {
     assertThrows(
         BadRequestException.class,
         () -> {
@@ -924,13 +924,15 @@ public class DataSetControllerTest {
   }
 
   @Test
-  public void testWgsCohortExtraction_validCdr() throws Exception {
+  public void testGenomicDataExtraction_validCdr() throws Exception {
+    cdrVersion.setWgsBigqueryDataset(null);
+    cdrVersionDao.save(cdrVersion);
+
     DataSet dataSet =
         dataSetController
             .createDataSet(
                 workspace.getNamespace(), workspace.getName(), buildValidDataSetRequest())
             .getBody();
-
     assertThrows(
         BadRequestException.class,
         () -> {
