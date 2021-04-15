@@ -762,24 +762,6 @@ public class WorkspacesControllerTest extends SpringTest {
     }
   }
 
-  @Transactional
-  @Test
-  public void testDeleteWorkspace_recentWorkspace() {
-    Workspace workspace = createWorkspace();
-    workspace = workspacesController.createWorkspace(workspace).getBody();
-
-    workspacesController.updateRecentWorkspaces(workspace.getNamespace(), workspace.getName());
-    long workspaceId =
-        workspaceDao.get(workspace.getNamespace(), workspace.getName()).getWorkspaceId();
-
-    workspacesController.deleteWorkspace(workspace.getNamespace(), workspace.getName());
-
-    assertFalse(
-        userRecentWorkspaceDao
-            .findFirstByWorkspaceIdAndUserId(workspaceId, currentUser.getUserId())
-            .isPresent());
-  }
-
   @Test
   public void testApproveWorkspace() {
     Workspace ws = createWorkspace();
