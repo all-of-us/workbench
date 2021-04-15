@@ -19,7 +19,6 @@ describe('AdminInstitutionSpec', () => {
   beforeEach(() => {
     serverConfigStore.set({config: defaultServerConfig});
 
-    registerApiClient(ConfigApi, new ConfigApiStub());
     registerApiClient(InstitutionApi, new InstitutionApiStub());
   });
 

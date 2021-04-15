@@ -44,7 +44,8 @@ export class AppComponent implements OnInit {
 
   async ngOnInit() {
     this.checkBrowserSupport();
-    await this.loadConfigAndErrorReporter();
+    await this.loadConfig();
+    this.loadErrorReporter();
 
     this.cookiesEnabled = cookiesEnabled();
     // Local storage breaks if cookies are not enabled
@@ -168,11 +169,14 @@ export class AppComponent implements OnInit {
     });
   }
 
-  private async loadConfigAndErrorReporter() {
+  private async loadConfig() {
     const config = await configApi().getConfig();
     serverConfigStore.set({config: config});
+  }
 
+  private loadErrorReporter() {
     const reporter = new StackdriverErrorReporter();
+    const {config} = serverConfigStore.get();
     reporter.start({
       key: config.publicApiKeyForErrorReports,
       projectId: config.projectId,
