@@ -24,6 +24,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.appengine.AppEngineMetadataSpringConfiguration;
 import org.pmiops.workbench.audit.ActionAuditSpringConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -81,7 +82,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 /** A tool that will generate a CSV export of our workspace data */
 @Configuration
 @Import({
-  AccessTierService.class,
+  AccessTierServiceImpl.class,
   ActionAuditSpringConfiguration.class,
   AppEngineMetadataSpringConfiguration.class,
   LogsBasedMetricServiceImpl.class,
