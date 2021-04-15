@@ -7,14 +7,13 @@ import { makeWorkspaceName } from 'utils/str-utils';
 import { UseFreeCredits } from 'app/page/workspace-base';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { config } from 'resources/workbench-config';
-import WorkspaceCard from 'app/component/workspace-card';
 
 describe('Creating new workspaces', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
 
-  test('Create workspace', async () => {
+  test('Create workspace - NO request for review', async () => {
     const newWorkspaceName = makeWorkspaceName();
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
@@ -22,7 +21,7 @@ describe('Creating new workspaces', () => {
     // create workspace with "No Review Requested" radiobutton selected
     const modalTextContent = await workspacesPage.createWorkspace(newWorkspaceName);
 
-    // Pick out few sentences to verify
+    // Pick out few sentenses to verify
     expect(modalTextContent).toContain('Create Workspace');
     expect(modalTextContent).toContain(
       'Primary purpose of your project (Question 1)' +
@@ -38,10 +37,9 @@ describe('Creating new workspaces', () => {
 
     // cleanup
     await dataPage.deleteWorkspace();
-    expect(await WorkspaceCard.findCard(page, newWorkspaceName)).toBeFalsy();
   });
 
-  test('Create workspace using all inputs', async () => {
+  test('User can create a workspace using all inputs', async () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
 
@@ -86,4 +84,15 @@ describe('Creating new workspaces', () => {
     const dataPage1 = new WorkspaceDataPage(page);
     await dataPage1.verifyWorkspaceNameOnDataPage(newWorkspaceName);
   });
+
+  // // helper function to check visible workspace link on Data page
+  // async function verifyWorkspaceLinkOnDataPage(workspaceName: string): Promise<WorkspaceDataPage> {
+  //   const dataPage = new WorkspaceDataPage(page);
+  //   await dataPage.waitForLoad();
+
+  //   const workspaceLink = new Link(page, `//a[text()='${workspaceName}']`);
+  //   await workspaceLink.waitForXPath({visible: true});
+  //   expect(await workspaceLink.isVisible()).toBe(true);
+  //   return dataPage;
+  // }
 });
