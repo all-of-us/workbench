@@ -81,6 +81,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 /** A tool that will generate a CSV export of our workspace data */
 @Configuration
 @Import({
+  AccessTierService.class,
   ActionAuditSpringConfiguration.class,
   AppEngineMetadataSpringConfiguration.class,
   LogsBasedMetricServiceImpl.class,
