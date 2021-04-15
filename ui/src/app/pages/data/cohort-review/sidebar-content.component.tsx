@@ -363,7 +363,6 @@ export const SidebarContent = fp.flow(
       accessLevel === WorkspaceAccessLevel.READER;
     const annotationsExist = annotationDefinitions && annotationDefinitions.length > 0;
     return <React.Fragment>
-      <div style={styles.header}>Participant {participantId}</div>
       <div><span style={{fontWeight: 'bold'}}>DOB:</span> {birthDate}</div>
       <div><span style={{fontWeight: 'bold'}}>Gender:</span> {gender}</div>
       <div><span style={{fontWeight: 'bold'}}>Race:</span> {race}</div>

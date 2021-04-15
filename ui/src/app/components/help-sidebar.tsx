@@ -15,7 +15,7 @@ import {Subscription} from 'rxjs/Subscription';
 import {faCircle} from '@fortawesome/free-solid-svg-icons/faCircle';
 import {faSyncAlt} from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import {SelectionList} from 'app/cohort-search/selection-list/selection-list.component';
-import {FlexRow} from 'app/components/flex';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {TooltipTrigger} from 'app/components/popups';
 import {PopupTrigger} from 'app/components/popups';
 import {RuntimePanel} from 'app/pages/analysis/runtime-panel';
@@ -82,7 +82,6 @@ const styles = reactStyles({
     top: 0,
     right: '45px',
     height: '100%',
-    overflow: 'auto',
     background: colorWithWhiteness(colors.primary, .87),
     transition: 'margin-right 0.5s ease-out',
     boxShadow: `-10px 0px 10px -8px ${colorWithWhiteness(colors.dark, .5)}`,
@@ -218,9 +217,6 @@ const iconConfigs = {
     page: 'criteria',
     style: {fontSize: '21px'},
     tooltip: 'Selected Criteria',
-    contentPadding: '0.5rem 0.5rem 0',
-    contentWidthRem: '20',
-    hideSidebarFooter: true
   },
   'concept': {
     disabled: false,
@@ -229,9 +225,6 @@ const iconConfigs = {
     page: 'concept',
     style: {fontSize: '21px'},
     tooltip: 'Selected Concepts',
-    contentPadding: '0.5rem 0.5rem 0',
-    contentWidthRem: '20',
-    hideSidebarFooter: true
   },
   'help': {
     disabled: false,
@@ -270,11 +263,8 @@ const iconConfigs = {
     faIcon: null,
     label: 'Cloud Icon',
     page: null,
-    style: {height: '22px', width: '22px', marginTop: '0.25rem'},
+    style: {height: '22px', width: '22px'},
     tooltip: 'Compute Configuration',
-    contentPadding: '1.25rem',
-    contentWidthRem: '30',
-    hideSidebarFooter: true
   }
 };
 
@@ -587,21 +577,103 @@ export const HelpSidebar = fp.flow(
     }
 
     get sidebarWidth() {
-      if (this.state.activeIcon && iconConfigs[this.state.activeIcon].contentWidthRem) {
-        return iconConfigs[this.state.activeIcon].contentWidthRem;
+      if (this.state.activeIcon && this.sidebarContent(this.state.activeIcon).bodyWidthRem) {
+        return this.sidebarContent(this.state.activeIcon).bodyWidthRem;
       }
       return '14';
     }
 
-    render() {
-      const {concept, criteria, helpContentKey, notebookStyles, setSidebarState, workspace} = this.props;
-      const {activeIcon, participant, tooltipId} = this.state;
+    sidebarContent(activeIcon): {
+      headerPadding?: string;
+      renderHeader?: () => JSX.Element;
+      bodyWidthRem?: string;
+      bodyPadding?: string;
+      renderBody: () => JSX.Element;
+      showFooter: boolean;
+    } {
+      switch (activeIcon) {
+        case 'help':
+          return {
+            headerPadding: '0.5rem',
+            renderHeader: () =>
+              <h3 style={{...styles.sectionTitle, marginTop: 0, lineHeight: 1.75}}>
+                Help Tips
+              </h3>,
+            renderBody: () =>
+              <HelpTips allowSearch={true}
+                        onSearch={() => this.analyticsEvent('Search')}
+                        contentKey={this.props.helpContentKey}/>,
+            showFooter: true
+          };
+        case 'runtime':
+          return {
+            headerPadding: '0.75rem',
+            renderHeader: () =>
+              <div>
+                <h3 style={{...styles.sectionTitle, marginTop: 0, lineHeight: 1.75}}>Cloud analysis environment</h3>
+                <div style={{padding: '0.5rem 1rem'}}>
+                  Your analysis environment consists of an application and compute resources.
+                  Your cloud environment is unique to this workspace and not shared with other users.
+                </div>
+              </div>,
+            bodyWidthRem: '30',
+            bodyPadding: '0 1.25rem',
+            renderBody: () =>
+              <RuntimePanel onClose={() => this.props.setSidebarState(false)}/>,
+            showFooter: false
+          };
+        case 'notebooksHelp':
+          return {
+            headerPadding: '0.5rem',
+            renderHeader: () =>
+              <h3 style={{...styles.sectionTitle, marginTop: 0}}>
+                Workspace storage
+              </h3>,
+            renderBody: () =>
+              <HelpTips allowSearch={false}
+                        contentKey={this.props.helpContentKey}/>,
+            showFooter: true
+          };
+        case 'annotations':
+          return {
+            headerPadding: '0.5rem 0.5rem 0 0.5rem',
+            renderHeader: () =>
+              <div style={{fontSize: 18, color: colors.primary}}>
+                Participant {this.state.participant.participantId}
+              </div>,
+            renderBody: () => this.state.participant &&
+                <SidebarContent/>,
+            showFooter: true
+          };
+        case 'concept':
+          return {
+            headerPadding: '0.75rem',
+            renderHeader: () =>
+              <h3 style={{...styles.sectionTitle, marginTop: 0}}>
+                Selected Concepts
+              </h3>,
+            bodyWidthRem: '20',
+            bodyPadding: '0.75rem 0.75rem 0',
+            renderBody: () => !!currentConceptStore.getValue() &&
+                <ConceptListPage/>,
+            showFooter: false
+          };
+        case 'criteria':
+          return {
+            bodyWidthRem: '20',
+            bodyPadding: '0.75rem 0.75rem 0',
+            renderBody: () => !!currentCohortSearchContextStore.getValue() &&
+                <SelectionList back={() => this.props.setSidebarState(false)} selections={[]}/>,
+            showFooter: false
+          };
+      }
+    }
 
-      const contentStyle = (tab: string) => ({
-        height: 'calc(100% - 1rem)',
-        overflow: 'auto',
-        padding: iconConfigs[tab].contentPadding || '0.5rem 0.5rem 5.5rem'
-      });
+    render() {
+      const {concept, criteria, helpContentKey, notebookStyles, workspace} = this.props;
+      const {activeIcon, tooltipId} = this.state;
+      const sidebarContent = this.sidebarContent(activeIcon);
+
       return <div id='help-sidebar'>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
           {!(criteria || concept)  && this.renderWorkspaceMenu()}
@@ -634,53 +706,39 @@ export const HelpSidebar = fp.flow(
         </div>
         <div style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
           <div style={this.sidebarStyle} data-test-id='sidebar-content'>
-            {!(activeIcon === 'criteria' || activeIcon === 'concept') && <FlexRow style={styles.navIcons}>
-              <Clickable style={{marginRight: '1rem'}}
-                         onClick={() => setSidebarState(false)}>
-                <img src={proIcons.times}
-                     style={{height: '27px', width: '17px'}}
-                     alt='Close'/>
-              </Clickable>
-            </FlexRow>}
-            {activeIcon === 'help' && <div style={contentStyle('help')}>
-              <h3 style={{...styles.sectionTitle, marginTop: 0}}>
-                Help Tips
-              </h3>
-              <HelpTips allowSearch={true}
-                        onSearch={() => this.analyticsEvent('Search')}
-                        contentKey={helpContentKey}/>
-            </div>}
-            {activeIcon === 'notebooksHelp' && <div style={contentStyle('notebooksHelp')}>
-              <h3 style={{...styles.sectionTitle, marginTop: 0}}>
-                Workspace storage
-              </h3>
-              <HelpTips allowSearch={false}
-                        contentKey={helpContentKey}/>
-            </div>}
-            {activeIcon === 'runtime' && <div style={contentStyle('runtime')}>
-              {<RuntimePanel onClose={() => this.props.setSidebarState(false)}/>}
-            </div>}
-            {activeIcon === 'annotations' && <div style={contentStyle('annotations')}>
-              {participant && <SidebarContent />}
-            </div>}
-            {activeIcon === 'criteria' && <div style={contentStyle('criteria')}>
-              <div style={{height: '100%', padding: '0.25rem 0.25rem 0rem'}}>
-                {!!currentCohortSearchContextStore.getValue() && <SelectionList back={() => setSidebarState(false)} selections={[]}/>}
+
+            {sidebarContent &&
+              <div style={{height: '100%', overflow: 'auto'}}>
+                <FlexColumn style={{height: '100%'}}>
+                  {sidebarContent.renderHeader &&
+                    <FlexRow style={{justifyContent: 'space-between', padding: sidebarContent.headerPadding}}>
+                      {sidebarContent.renderHeader()}
+
+                      <Clickable onClick={() => this.props.setSidebarState(false)}>
+                          <img src={proIcons.times}
+                               style={{height: '27px', width: '17px'}}
+                               alt='Close'/>
+                      </Clickable>
+                    </FlexRow>
+                  }
+
+                  <div style={{flex: 1, padding: sidebarContent.bodyPadding || '0 0.5rem 5.5rem', height: '100%'}}>
+                    {sidebarContent.renderBody()}
+                  </div>
+                </FlexColumn>
+
+                {sidebarContent.showFooter &&
+                  <div style={{...styles.footer}}>
+                    <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
+                    <p style={styles.contentItem}>
+                        Visit our <StyledAnchorTag href={supportUrls.helpCenter}
+                                                   target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
+                    </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
+                    </p>
+                  </div>
+                }
               </div>
-            </div>}
-            {activeIcon === 'concept' && <div style={contentStyle('concept')}>
-              <div style={{padding: '0.25rem 0.25rem 0rem'}}>
-                {!!currentConceptStore.getValue() && <ConceptListPage/>}
-              </div>
-            </div>}
-            {(iconConfigs[activeIcon] || {}).hideSidebarFooter || <div style={styles.footer}>
-              <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
-              <p style={styles.contentItem}>
-                Visit our <StyledAnchorTag href={supportUrls.helpCenter}
-                                           target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
-                </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
-              </p>
-            </div>}
+            }
           </div>
         </div>
       </div>;
