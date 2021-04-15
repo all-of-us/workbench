@@ -2,6 +2,7 @@ import { Domain } from 'app/component/concept-domain-card';
 import DataResourceCard from 'app/component/data-resource-card';
 import ConceptSetActionsPage from 'app/page/conceptset-actions-page';
 import ConceptSetPage from 'app/page/conceptset-page';
+import { SaveOption } from 'app/modal/conceptset-save-modal';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { LinkText, ResourceCard } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
@@ -9,22 +10,24 @@ import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 
 async function findOrCreateConceptSet(): Promise<{ conceptSetName: string }> {
-  let conceptSetName: string;
-
   // Open Concept Sets tab.
   const dataPage = new WorkspaceDataPage(page);
-
-  // Search for existing ConceptSet instead create new
-  const existingConceptSetName = await dataPage.findConceptSetsCard();
-  if (existingConceptSetName !== null) {
-    conceptSetName = await existingConceptSetName.getResourceName();
-    await existingConceptSetName.clickResourceName();
-    return { conceptSetName };
-  }
+  await dataPage.openConceptSetsSubtab();
 
   // Create new Concept Set
-  await dataPage.openConceptSetSearch(Domain.Procedures);
-  conceptSetName = await dataPage.createDefaultProcedures('Radiologic examination');
+  const { conceptSearchPage, criteriaSearch } = await dataPage.openConceptSetSearch(Domain.Procedures);
+
+  // Search by Procedure name.
+  const procedureName = 'Radiologic examination';
+  await criteriaSearch.searchCriteria(procedureName);
+
+  // Select first two rows.
+  await criteriaSearch.resultsTableSelectRow(1, 1);
+  await criteriaSearch.resultsTableSelectRow(2, 1);
+
+  await conceptSearchPage.reviewAndSaveConceptSet();
+
+  const conceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
 
   // Click on link to open Concept Set page.
   const conceptSetActionPage = new ConceptSetActionsPage(page);

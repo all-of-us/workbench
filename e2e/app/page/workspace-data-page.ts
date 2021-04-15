@@ -14,7 +14,6 @@ import NotebookPage from './notebook-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
 import WorkspaceBase from './workspace-base';
 import ConceptSetSearchPage from './conceptset-search-page';
-import { SaveOption } from 'app/modal/conceptset-save-modal';
 
 const PageTitle = 'Data Page';
 
@@ -79,17 +78,6 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     }
   }
 
-  async findConceptSetsCard(conceptSetsName?: string): Promise<DataResourceCard> {
-    await this.openConceptSetsSubtab();
-    if (conceptSetsName === undefined) {
-      // if Concept Sets name isn't specified, find any existing Concept Sets.
-      return new DataResourceCard(this.page).findAnyCard(ResourceCard.ConceptSet);
-    } else {
-      // find Concept Set that match specified name.
-      return new DataResourceCard(this.page).findCard(conceptSetsName, ResourceCard.ConceptSet);
-    }
-  }
-
   /**
    * Create a simple Cohort from Out-Patient Visit criteria.
    * @param {string} cohortName New Cohort name.
@@ -134,15 +122,6 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     const criteriaSearch = await procedures.clickSelectConceptButton();
 
     return { conceptSearchPage, criteriaSearch };
-  }
-
-  async createDefaultProcedures(procedureName = 'Radiologic examination'): Promise<string> {
-    const criteriaSearch = new CriteriaSearchPage(this.page);
-    await criteriaSearch.searchCriteria(procedureName);
-    await criteriaSearch.resultsTableSelectRow(1, 1);
-    const conceptSetSearchPage = new ConceptSetSearchPage(this.page);
-    await conceptSetSearchPage.reviewAndSaveConceptSet();
-    return conceptSetSearchPage.saveConceptSet(SaveOption.CreateNewSet);
   }
 
   /**
