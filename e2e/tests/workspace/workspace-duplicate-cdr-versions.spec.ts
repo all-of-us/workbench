@@ -1,4 +1,4 @@
-import { createWorkspace, findWorkspaceCard, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspaceCard, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceCard from 'app/component/workspace-card';
 import { config } from 'resources/workbench-config';
 import { MenuOption } from 'app/text-labels';
@@ -13,12 +13,11 @@ describe('Duplicate workspace, changing CDR versions', () => {
     await signInWithAccessToken(page);
   });
 
-  test('OWNER can duplicate workspace to an older CDR Version after consenting to restrictions', async () => {
-    const originalWorkspaceName = await createWorkspace(page);
-    const workspaceCard = await findWorkspaceCard(page, originalWorkspaceName);
+  const originalWorkspaceName1 = 'e2eCloneWorkspaceWithOldCDRVersion1';
 
+  test('OWNER can duplicate workspace to an older CDR Version after consenting to restrictions', async () => {
+    const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName: originalWorkspaceName1 });
     await workspaceCard.asElementHandle().hover();
-    // Click on Ellipsis menu "Duplicate" option.
     await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
 
     // Fill out Workspace Name should be just enough for successful duplication
@@ -52,18 +51,16 @@ describe('Duplicate workspace, changing CDR versions', () => {
 
     // Verify Delete action was successful.
     expect(await WorkspaceCard.findCard(page, duplicateWorkspaceName)).toBeFalsy();
-
-    // Delete original workspace via Workspace card
-    await WorkspaceCard.deleteWorkspace(page, originalWorkspaceName);
-    expect(await WorkspaceCard.findCard(page, originalWorkspaceName)).toBeFalsy();
   });
 
-  test('OWNER can duplicate workspace to a newer CDR Version via Workspace card', async () => {
-    const originalWorkspaceName = await createWorkspace(page, { cdrVersion: config.altCdrVersionName });
-    const workspaceCard = await findWorkspaceCard(page, originalWorkspaceName);
+  const originalWorkspaceName2 = 'e2eCloneWorkspaceWithOldCDRVersion2';
 
+  test('OWNER can duplicate workspace to a newer CDR Version via Workspace card', async () => {
+    const workspaceCard = await findOrCreateWorkspaceCard(page, {
+      workspaceName: originalWorkspaceName2,
+      cdrVersion: config.altCdrVersionName
+    });
     await workspaceCard.asElementHandle().hover();
-    // Click on Ellipsis menu "Duplicate" option.
     await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
 
     // Fill out Workspace Name should be just enough for successful duplication
@@ -75,7 +72,7 @@ describe('Duplicate workspace, changing CDR versions', () => {
     await workspaceEditPage.selectCdrVersion(config.defaultCdrVersionName);
 
     const upgradeMessage = await workspaceEditPage.getCdrVersionUpgradeMessage();
-    expect(upgradeMessage).toContain(originalWorkspaceName);
+    expect(upgradeMessage).toContain(originalWorkspaceName2);
     expect(upgradeMessage).toContain(`${config.altCdrVersionName} to ${config.defaultCdrVersionName}.`);
 
     const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
@@ -97,9 +94,5 @@ describe('Duplicate workspace, changing CDR versions', () => {
 
     // Verify Delete action was successful.
     expect(await WorkspaceCard.findCard(page, duplicateWorkspaceName)).toBeFalsy();
-
-    // Delete original workspace via Workspace card
-    await WorkspaceCard.deleteWorkspace(page, originalWorkspaceName);
-    expect(await WorkspaceCard.findCard(page, originalWorkspaceName)).toBeFalsy();
   });
 });

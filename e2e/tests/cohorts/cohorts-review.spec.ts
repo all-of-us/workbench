@@ -1,4 +1,4 @@
-import { createWorkspace, isValidDate, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, isValidDate, signInWithAccessToken } from 'utils/test-utils';
 import { MenuOption, LinkText, ResourceCard } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
@@ -19,6 +19,8 @@ describe('Cohort review tests', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspace = 'e2eCohortsReviewTest';
+
   /**
    * Test:
    * Find an existing workspace or create a new workspace if none exists.
@@ -32,7 +34,7 @@ describe('Cohort review tests', () => {
   test('Create Cohort and a Review Set for 100 participants', async () => {
     const reviewSetNumberOfParticipants = 100;
 
-    await createWorkspace(page);
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     const dataPage = new WorkspaceDataPage(page);
     const cohortCard = await dataPage.createCohort();
@@ -218,8 +220,5 @@ describe('Cohort review tests', () => {
 
     // Verify Delete Cohort Review successful.
     expect(await DataResourceCard.findCard(page, newCohortReviewName, 5000)).toBeFalsy();
-
-    // Delete workspace
-    await dataPage.deleteWorkspace();
   });
 });

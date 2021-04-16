@@ -13,6 +13,7 @@ describe('User can create, modify, rename and delete Cohort', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspace = 'e2eCohortsRenameTest';
   /**
    * Test:
    * Find an existing workspace or create a new workspace if none exists.
@@ -26,7 +27,7 @@ describe('User can create, modify, rename and delete Cohort', () => {
    * Delete Cohort.
    */
   test('Add cohort including Demographics Age', async () => {
-    await findOrCreateWorkspace(page);
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     const dataPage = new WorkspaceDataPage(page);
     // Click Add Cohorts button in Data page.

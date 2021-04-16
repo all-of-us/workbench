@@ -10,6 +10,7 @@ describe('Cohorts UI tests', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspace = 'e2eCohortsUITest';
   /**
    * Test:
    * Add criteria in Group 1: Physical Measurements criteria => Weight (>= 190kg).
@@ -17,7 +18,7 @@ describe('Cohorts UI tests', () => {
    * Confirm Discard Changes.
    */
   test('Discard Changes', async () => {
-    await findOrCreateWorkspace(page);
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Wait for the Data page.
     const dataPage = new WorkspaceDataPage(page);

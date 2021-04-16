@@ -9,6 +9,8 @@ describe('Dataset test', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspace = 'e2eRenameDataSetsTest';
+
   /**
    * Test:
    * - Find an existing workspace. Create a new workspace if none exists.
@@ -18,7 +20,7 @@ describe('Dataset test', () => {
    * - Delete dataset.
    */
   test('Can create and rename Dataset', async () => {
-    await findOrCreateWorkspace(page);
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Click Add Datasets button
     const dataPage = new WorkspaceDataPage(page);

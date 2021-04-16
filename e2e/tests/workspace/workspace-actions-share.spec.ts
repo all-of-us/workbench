@@ -5,7 +5,6 @@ import WorkspacesPage from 'app/page/workspaces-page';
 import { LinkText, MenuOption, WorkspaceAccessLevel } from 'app/text-labels';
 import { config } from 'resources/workbench-config';
 import { signInWithAccessToken, signInAs, signOut, findOrCreateWorkspaceCard } from 'utils/test-utils';
-import { makeWorkspaceName } from 'utils/str-utils';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { waitWhileLoading } from 'utils/waits-utils';
 import ShareModal from 'app/modal/share-modal';
@@ -16,7 +15,7 @@ const assigns = [
   { accessRole: WorkspaceAccessLevel.Owner }
 ];
 
-const newWorkspaceName: string = makeWorkspaceName();
+const newWorkspaceName = 'e2eWorkspaceActionTest';
 let newWorkspaceCard: WorkspaceCard;
 
 describe('Share workspace', () => {

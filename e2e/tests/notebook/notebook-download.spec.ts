@@ -35,6 +35,8 @@ describe('Jupyter notebook download test', () => {
     await modal.waitUntilClose();
   };
 
+  const workspace = 'e2eDownloadNotebookTest';
+
   /**
    * Test:
    * - Find an existing workspace.
@@ -47,7 +49,7 @@ describe('Jupyter notebook download test', () => {
   test(
     'download notebook with policy warnings',
     async () => {
-      await findOrCreateWorkspace(page);
+      await findOrCreateWorkspace(page, { workspaceName: workspace });
 
       const dataPage = new WorkspaceDataPage(page);
       const notebookName = makeRandomName('py');
