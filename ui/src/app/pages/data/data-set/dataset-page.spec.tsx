@@ -32,7 +32,7 @@ describe('DataSetPage', () => {
       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
     });
     currentWorkspaceStore.next(workspaceDataStub);
-    cdrVersionStore.set(cdrVersionListResponse);
+    cdrVersionStore.set(cdrVersionTiersResponse);
   });
 
   it('should render', async() => {

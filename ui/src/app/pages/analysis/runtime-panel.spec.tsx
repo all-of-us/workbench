@@ -40,7 +40,7 @@ describe('RuntimePanel', () => {
   };
 
   beforeEach(() => {
-    cdrVersionStore.set(cdrVersionListResponse);
+    cdrVersionStore.set(cdrVersionTiersResponse);
     serverConfigStore.next({...defaultServerConfig});
 
     runtimeApiStub = new RuntimeApiStub();

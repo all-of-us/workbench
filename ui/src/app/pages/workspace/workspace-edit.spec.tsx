@@ -70,7 +70,7 @@ describe('WorkspaceEdit', () => {
     registerApiClient(WorkspacesApi, workspacesApi);
 
     currentWorkspaceStore.next(workspace);
-    cdrVersionStore.set(cdrVersionListResponse);
+    cdrVersionStore.set(cdrVersionTiersResponse);
     serverConfigStore.next({enableBillingUpgrade: true, defaultFreeCreditsDollarLimit: 100.0, gsuiteDomain: ''});
   });
 

@@ -79,7 +79,7 @@ describe('WorkspaceWrapperComponent', () => {
       });
       serverConfigStore.next({gsuiteDomain: 'fake-research-aou.org',
         enableResearchReviewPrompt: true});
-      cdrVersionStore.set(cdrVersionListResponse);
+      cdrVersionStore.set(cdrVersionTiersResponse);
     });
   }));
 

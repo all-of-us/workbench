@@ -1,10 +1,13 @@
 import * as React from "react";
 
-import {Workspace, CdrVersion, CdrVersionListResponse} from 'generated/fetch';
+import {Workspace} from 'generated/fetch';
 import {WorkspaceStubVariables} from 'testing/stubs/workspaces';
-import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
-import {getCdrVersion, getDefaultCdrVersion, hasDefaultCdrVersion} from "./cdr-versions";
+import {cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
+import {getCdrVersion, hasDefaultCdrVersion, getDefaultCdrVersionForTier} from "./cdr-versions";
+import {AccessTierShortNames} from "./access-tiers";
 
+const registeredCdrVersionTier = cdrVersionTiersResponse.tiers[0];
+const controlledCdrVersionTier = cdrVersionTiersResponse.tiers[1];
 
 const stubWorkspace: Workspace = {
     name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
@@ -12,36 +15,76 @@ const stubWorkspace: Workspace = {
     namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS
 };
 
-const defaultCdrVersion = cdrVersionListResponse.items[0];
-const altCdrVersion = cdrVersionListResponse.items[1];
+const defaultCdrVersion = registeredCdrVersionTier.versions[0];
+const altCdrVersion = registeredCdrVersionTier.versions[1];
+const controlledCdrVersion = controlledCdrVersionTier.versions[0];
 
-const testWorkspace: Workspace = {...stubWorkspace, cdrVersionId: defaultCdrVersion.cdrVersionId};
-const testWorkspaceMissing: Workspace = {...stubWorkspace};
+const testWorkspace: Workspace = {
+    ...stubWorkspace,
+    cdrVersionId: defaultCdrVersion.cdrVersionId,
+    accessTierShortName: AccessTierShortNames.Registered
+};
+const testWorkspaceMissingVersion: Workspace = {
+    ...stubWorkspace,
+    accessTierShortName: AccessTierShortNames.Registered
+};
+const testWorkspaceMissingTier: Workspace = {
+    ...stubWorkspace,
+    cdrVersionId: defaultCdrVersion.cdrVersionId
+};
+const ctWorkspace: Workspace = {
+    ...stubWorkspace,
+    cdrVersionId: controlledCdrVersion.cdrVersionId,
+    accessTierShortName: AccessTierShortNames.Controlled
+};
 
 describe('cdr-versions', () => {
-    it('should correctly get the CDR Version structure for a workspace', async () => {
-        expect(getCdrVersion(testWorkspace, cdrVersionListResponse)).toBe(defaultCdrVersion);
+    it('should correctly get the CDR Version for a workspace', async () => {
+        expect(getCdrVersion(testWorkspace, cdrVersionTiersResponse)).toBe(defaultCdrVersion);
+    });
+
+    it('should correctly get the CDR Version for a CT workspace', async () => {
+        expect(getCdrVersion(ctWorkspace, cdrVersionTiersResponse)).toBe(controlledCdrVersion);
     });
 
     it('should return undefined for a workspace with an invalid CDR Version ID', async () => {
-        expect(getCdrVersion(testWorkspaceMissing, cdrVersionListResponse)).toBe(undefined);
+        expect(getCdrVersion(testWorkspaceMissingVersion, cdrVersionTiersResponse)).toBeUndefined();
     });
 
-    it('should correctly get the default CDR Version structure', async () => {
-        expect(getDefaultCdrVersion(cdrVersionListResponse)).toBe(defaultCdrVersion);
+    it('should return undefined for a workspace with an invalid access tier', async () => {
+        expect(getCdrVersion(testWorkspaceMissingTier, cdrVersionTiersResponse)).toBeUndefined();
     });
 
-    it('should correctly get an alternate default CDR Version structure', async () => {
-        const altDefaultResponse = {...cdrVersionListResponse, defaultCdrVersionId: altCdrVersion.cdrVersionId}
-        expect(getDefaultCdrVersion(altDefaultResponse)).toBe(altCdrVersion);
+    it('should correctly get the default CDR Version for the registered tier', async () => {
+        expect(getDefaultCdrVersionForTier(testWorkspace, cdrVersionTiersResponse)).toBe(defaultCdrVersion);
     });
 
-    it('should detect when a Workspace has the default CDR Version structure', async () => {
-        expect(hasDefaultCdrVersion(testWorkspace, cdrVersionListResponse)).toBeTruthy();
+    it('should correctly get the default CDR Version for the controlled tier', async () => {
+        expect(getDefaultCdrVersionForTier(ctWorkspace, cdrVersionTiersResponse)).toBe(controlledCdrVersion);
     });
 
-    it('should detect when a Workspace does not have the default CDR Version structure', async () => {
+    it('should return undefined when the tier is invalid', async () => {
+        expect(getDefaultCdrVersionForTier(testWorkspaceMissingTier, cdrVersionTiersResponse)).toBeUndefined();
+    });
+
+    it('should detect when a Workspace has the default CDR Version for its tier', async () => {
+        expect(hasDefaultCdrVersion(testWorkspace, cdrVersionTiersResponse)).toBeTruthy();
+    });
+
+    it('should detect when a CT Workspace has the default CDR Version for its tier', async () => {
+        expect(hasDefaultCdrVersion(ctWorkspace, cdrVersionTiersResponse)).toBeTruthy();
+    });
+
+    it('should detect when a Workspace does not have the default CDR Version', async () => {
         const altWorkspace = {...testWorkspace, cdrVersionId: altCdrVersion.cdrVersionId}
-        expect(hasDefaultCdrVersion(altWorkspace, cdrVersionListResponse)).toBeFalsy();
+        expect(hasDefaultCdrVersion(altWorkspace, cdrVersionTiersResponse)).toBeFalsy();
+    });
+
+    it('should return false when a Workspace does not have a valid CDR Version', async () => {
+        expect(hasDefaultCdrVersion(testWorkspaceMissingVersion, cdrVersionTiersResponse)).toBeFalsy();
+    });
+
+    it('should return false when a Workspace does not have a valid tier', async () => {
+        expect(hasDefaultCdrVersion(testWorkspaceMissingTier, cdrVersionTiersResponse)).toBeFalsy();
     });
 });

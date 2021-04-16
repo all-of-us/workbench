@@ -53,7 +53,7 @@ describe('HomepageComponent', () => {
       enableEraCommons: true,
       enableV3DataUserCodeOfConduct: true
     });
-    cdrVersionStore.set(cdrVersionListResponse);
+    cdrVersionStore.set(cdrVersionTiersResponse);
   });
 
   it('should render the homepage', () => {

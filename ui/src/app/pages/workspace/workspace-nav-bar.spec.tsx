@@ -23,7 +23,7 @@ describe('WorkspaceNavBarComponent', () => {
     urlParamsStore.next({ns: workspaceDataStub.namespace, wsid: workspaceDataStub.id});
     serverConfigStore.next({
       gsuiteDomain: 'fake-research-aou.org', enableResearchReviewPrompt: true});
-    cdrVersionStore.set(cdrVersionListResponse);
+    cdrVersionStore.set(cdrVersionTiersResponse);
   });
 
   it('should render', () => {

@@ -51,7 +51,7 @@ describe('WorkspaceAbout', () => {
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
     });
-    cdrVersionStore.set(cdrVersionListResponse);
+    cdrVersionStore.set(cdrVersionTiersResponse);
   });
 
   it('should render', () => {

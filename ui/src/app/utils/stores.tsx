@@ -1,6 +1,6 @@
 import { BreadcrumbType } from 'app/utils/navigation';
 import {atom, Atom} from 'app/utils/subscribable';
-import {CdrVersion, Profile, Runtime} from 'generated/fetch';
+import {CdrVersionTiersResponse, Profile, Runtime} from 'generated/fetch';
 import * as React from 'react';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
@@ -25,12 +25,7 @@ interface AuthStore {
 
 export const authStore = atom<AuthStore>({authLoaded: false, isSignedIn: false});
 
-interface CdrVersionStore {
-  items?: Array<CdrVersion>;
-  defaultCdrVersionId: string;
-}
-
-export const cdrVersionStore = atom<CdrVersionStore>({items: [], defaultCdrVersionId: '-1'});
+export const cdrVersionStore = atom<CdrVersionTiersResponse>({tiers: []});
 
 interface ProfileStore {
   profile?: Profile;
