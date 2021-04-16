@@ -8867,7 +8867,7 @@ definitions:
         type: integer
         format: int64
         description: Workbench database Id for the job
-      dataSetName:
+      datasetName:
         type: string
       cost:
         type: number

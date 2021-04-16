@@ -257,7 +257,10 @@ export const summarizeErrors = errors => {
 
 export const connectBehaviorSubject = <T extends {}>(
   subject: BehaviorSubject<T>, name: string, preventRenderUntilDataIsPresent: boolean = false) => {
-  return (WrappedComponent) => {
+  const MyContext = React.createContext(null);
+
+  return [(WrappedComponent) => {
+
     class Wrapper extends React.Component<any, {value: T}> {
       static displayName = 'connectBehaviorSubject()';
       private subscription;
@@ -284,12 +287,14 @@ export const connectBehaviorSubject = <T extends {}>(
         if (preventRenderUntilDataIsPresent && value == null) {
           return null;
         }
-        return <WrappedComponent {...{[name]: value}} {...this.props}/>;
+        return <MyContext.Provider value={value}>
+          <WrappedComponent {...{[name]: value}} {...this.props}/>
+        </MyContext.Provider>;
       }
     }
 
     return Wrapper;
-  };
+  }, MyContext];
 };
 
 export const connectReplaySubject = <T extends {}>(subject: ReplaySubject<T>, name: string) => {
@@ -325,44 +330,54 @@ export const connectReplaySubject = <T extends {}>(subject: ReplaySubject<T>, na
 
 // HOC that provides a 'workspace' prop with current WorkspaceData
 export const withCurrentWorkspace = () => {
-  return connectBehaviorSubject(currentWorkspaceStore, 'workspace');
+  return connectBehaviorSubject(currentWorkspaceStore, 'workspace')[0];
+};
+
+export const withCurrentWorkspaceContext = () => {
+  const [wrapper, context] = connectBehaviorSubject(currentWorkspaceStore, 'workspace');
+  return [wrapper, context];
 };
 
 // HOC that provides a 'cohort' prop with current Cohort
 export const withCurrentCohort = () => {
-  return connectBehaviorSubject(currentCohortStore, 'cohort');
+  return connectBehaviorSubject(currentCohortStore, 'cohort')[0];
 };
 
 // HOC that provides a 'criteria' prop with current Cohort
 export const withCurrentCohortCriteria = () => {
-  return connectBehaviorSubject(currentCohortCriteriaStore, 'criteria');
+  return connectBehaviorSubject(currentCohortCriteriaStore, 'criteria')[0];
 };
 
 export const withCurrentConcept = () => {
-  return connectBehaviorSubject(currentConceptStore, 'concept');
+  return connectBehaviorSubject(currentConceptStore, 'concept')[0];
 };
 
 export const withCurrentCohortSearchContext = () => {
-  return connectBehaviorSubject(currentCohortSearchContextStore, 'cohortContext');
+  return connectBehaviorSubject(currentCohortSearchContextStore, 'cohortContext')[0];
 };
 
 // HOC that provides a 'conceptSet' prop with current ConceptSet
 export const withCurrentConceptSet = () => {
-  return connectBehaviorSubject(currentConceptSetStore, 'conceptSet');
+  return connectBehaviorSubject(currentConceptSetStore, 'conceptSet')[0];
 };
 
 export const withGlobalError = () => {
-  return connectBehaviorSubject(globalErrorStore, 'globalError');
+  return connectBehaviorSubject(globalErrorStore, 'globalError')[0];
 };
 
 // HOC that provides a 'profileState' prop with current profile and a reload function
 export const withUserProfile = () => {
-  return connectBehaviorSubject(userProfileStore, 'profileState');
+  return connectBehaviorSubject(userProfileStore, 'profileState')[0];
+};
+
+export const withUserProfileContext = () => {
+  const [wrapper, context] = connectBehaviorSubject(userProfileStore, 'profileState');
+  return [wrapper, context];
 };
 
 // HOC that provides a 'urlParams' prop with the current url params object
 export const withUrlParams = () => {
-  return connectBehaviorSubject(urlParamsStore, 'urlParams');
+  return connectBehaviorSubject(urlParamsStore, 'urlParams')[0];
 };
 export interface UrlParamsProps {
   urlParams: { [key: string]: any; };
@@ -370,7 +385,7 @@ export interface UrlParamsProps {
 
 // HOC that provides a 'routeConfigData' prop with current route's data object
 export const withRouteConfigData = () => {
-  return connectBehaviorSubject(routeConfigDataStore, 'routeConfigData');
+  return connectBehaviorSubject(routeConfigDataStore, 'routeConfigData')[0];
 };
 
 // HOC that provides a 'cdrVersionListResponse' prop with the CDR version information.
@@ -380,7 +395,7 @@ export const withCdrVersions = () => {
 
 // HOC that provides a 'queryParams' prop with current query params
 export const withQueryParams = () => {
-  return connectBehaviorSubject(queryParamsStore, 'queryParams');
+  return connectBehaviorSubject(queryParamsStore, 'queryParams')[0];
 };
 
 // A HOC that provides a 'serverConfig' prop,
@@ -389,7 +404,7 @@ export const withQueryParams = () => {
 // See discussion on https://github.com/all-of-us/workbench/pull/2603/ for details on the type of
 // bugs that motivated this approach.
 export const withServerConfig = () => {
-  return connectBehaviorSubject(serverConfigStore, 'serverConfig', /* preventRenderUntilValuePresent */ true);
+  return connectBehaviorSubject(serverConfigStore, 'serverConfig', /* preventRenderUntilValuePresent */ true)[0];
 };
 export interface ServerConfigProps {
   serverConfig: ConfigResponse;

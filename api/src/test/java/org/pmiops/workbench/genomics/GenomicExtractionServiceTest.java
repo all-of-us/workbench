@@ -223,7 +223,7 @@ public class GenomicExtractionServiceTest {
     assertThat(wgsCohortExtractionJob.getCost()).isEqualTo(new BigDecimal("2.05"));
     assertThat(wgsCohortExtractionJob.getCompletionTime())
         .isEqualTo(completionTimestamp.toInstant().toEpochMilli());
-    assertThat(wgsCohortExtractionJob.getDataSetName()).isEqualTo(dataset.getName());
+    assertThat(wgsCohortExtractionJob.getDatasetName()).isEqualTo(dataset.getName());
     assertThat(wgsCohortExtractionJob.getStatus()).isEqualTo(TerraJobStatus.SUCCEEDED);
     assertThat(wgsCohortExtractionJob.getSubmissionDate())
         .isEqualTo(submissionDate.toInstant().toEpochMilli());

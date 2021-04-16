@@ -23,7 +23,7 @@ public interface GenomicExtractionMapper {
   @Mapping(
       target = "genomicExtractionJobId",
       source = "dbSubmission.wgsExtractCromwellSubmissionId")
-  @Mapping(target = "dataSetName", source = "dbSubmission.dataset.name")
+  @Mapping(target = "datasetName", source = "dbSubmission.dataset.name")
   @Mapping(target = "status", source = "firecloudSubmission.status")
   @Mapping(target = "submissionDate", source = "firecloudSubmission.submissionDate")
   GenomicExtractionJob toApi(

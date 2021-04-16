@@ -57,6 +57,7 @@ import {HelpTips} from 'app/components/help-tips';
 import {Criteria, ParticipantCohortStatus, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {cohortsApi, dataSetApi} from '../services/swagger-fetch-clients';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
+import {GenomicsExtractionTable} from './genomics-extraction-table';
 
 const proIcons = {
   arrowLeft: '/assets/icons/arrow-left-regular.svg',
@@ -690,49 +691,7 @@ export const HelpSidebar = fp.flow(
                 Genomic Extractions
               </h3>,
             bodyWidthRem: '30',
-            renderBody: () => {
-              const tableData = [{
-                datasetName: 'Name of a dataset',
-                status: 0,
-                statusJsx:  <FontAwesomeIcon icon={faSyncAlt} style={{color: colors.success, fontSize: '.7rem', marginLeft: '.4rem', display: 'block', animationName: 'spin', animationDuration: '5000ms', animationIterationCount: 'infinite', animationTimingFunction: 'linear'}}/>,
-                dateStarted: 'Today at 7:12 am',
-                cost: '',
-                duration: '',
-                menu:  <FontAwesomeIcon icon={faEllipsisV} style={{color: colors.accent, fontSize: '.7rem', marginLeft: 0, paddingRight: 0, display: 'block'}}/>,
-              }, {
-                datasetName: 'This_is_another_datasetssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss',
-                status: 1,
-                statusJsx: <FontAwesomeIcon icon={faExclamationTriangle} style={{color: colors.danger, fontSize: '.7rem', marginLeft: '.4rem', display: 'block'}}/>,
-                dateStarted: 'Apr 4, 2021 at 8:15 am',
-                cost: '$0.08',
-                duration: '14 min',
-                menu:  <FontAwesomeIcon icon={faEllipsisV} style={{color: colors.accent, fontSize: '.7rem', marginLeft: 0, paddingRight: 0, display: 'block'}}/>,
-              }, {
-                datasetName: 'Anotha one!',
-                status: 2,
-                statusJsx: <FontAwesomeIcon icon={faCheckCircle} style={{color: colors.success, fontSize: '.7rem', marginLeft: '.4rem', display: 'block'}}/>,
-                dateStarted: 'Apr 1, 2021 at 8:15 am',
-                cost: '$100.08',
-                duration: '10h, 32min',
-                menu:  <FontAwesomeIcon icon={faEllipsisV} style={{color: colors.accent, fontSize: '.7rem', marginLeft: 0, paddingRight: 0, display: 'block'}}/>,
-              }];
-
-              dataSetApi().getGenomicExtractionJobs(this.props.workspace.namespace, this.props.workspace.id)
-                .then(jobs => {
-                  console.log(jobs);
-                });
-
-              return <div id='extraction-data-table-container'>
-                <DataTable value={tableData} autoLayout sortField='dateStarted' sortOrder={-1}>
-                  <Column field='datasetName' header='Dataset Name' sortable style={{maxWidth: '8rem', textOverflow: 'ellipsis', overflow: 'hidden'}}/>
-                  <Column field='statusJsx' header='Status' sortable sortField='status'/>
-                  <Column field='dateStarted' header='Date Started' sortable/>
-                  <Column field='cost' header='Cost' sortable/>
-                  <Column field='duration' header='Duration' sortable/>
-                  <Column field='menu' header=''/>
-                </DataTable>
-              </div>;
-            },
+            renderBody: () => <GenomicsExtractionTable />,
             showFooter: false
       }
       }
