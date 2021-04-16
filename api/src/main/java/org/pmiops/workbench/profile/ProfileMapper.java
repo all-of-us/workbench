@@ -42,7 +42,7 @@ public interface ProfileMapper {
       Double freeTierDollarQuota,
       List<String> accessTierShortNames);
 
-  AdminTableUser adminViewToModel(DbAdminTableUser dbUser);
+  List<AdminTableUser> adminViewToModel(List<DbAdminTableUser> adminTableUsers);
 
   // used by the generated impl of adminViewToModel()
   default List<String> splitAccessTierShortNames(

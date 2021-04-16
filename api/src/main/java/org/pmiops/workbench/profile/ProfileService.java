@@ -1,7 +1,6 @@
 package org.pmiops.workbench.profile;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
@@ -465,10 +464,9 @@ public class ProfileService {
   }
 
   public List<AdminTableUser> getAdminTableUsers() {
-    return userDao.getAdminTableUsers().stream()
-        .map(profileMapper::adminViewToModel)
-        .collect(ImmutableList.toImmutableList());
+    return profileMapper.adminViewToModel(userDao.getAdminTableUsers());
   }
+
   /**
    * Updates the user metadata referenced by the fields of AccountPropertyUpdate.
    *
