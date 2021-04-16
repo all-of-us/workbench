@@ -10,6 +10,7 @@ import {
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import {Subscription} from 'rxjs/Subscription';
 
 import {faCircle} from '@fortawesome/free-solid-svg-icons/faCircle';
@@ -65,7 +66,6 @@ const styles = reactStyles({
     top: '60px',
     right: 0,
     height: 'calc(100% - 60px)',
-    transition: 'width 0.5s ease-out',
     overflow: 'hidden',
     color: colors.primary,
     zIndex: -1,
@@ -83,11 +83,10 @@ const styles = reactStyles({
     right: '45px',
     height: '100%',
     background: colorWithWhiteness(colors.primary, .87),
-    transition: 'margin-right 0.5s ease-out',
     boxShadow: `-10px 0px 10px -8px ${colorWithWhiteness(colors.dark, .5)}`,
   },
   sidebarOpen: {
-    marginRight: 0,
+    //marginRight: 0//,
   },
   iconContainer: {
     position: 'absolute',
@@ -108,7 +107,6 @@ const styles = reactStyles({
     borderBottom: `1px solid ${colorWithWhiteness(colors.primary, 0.4)}`,
     cursor: 'pointer',
     textAlign: 'center',
-    transition: 'background 0.2s linear',
     verticalAlign: 'middle'
   },
   runtimeStatusIcon: {
@@ -339,7 +337,7 @@ export const HelpSidebar = fp.flow(
       super(props);
       this.state = {
         // TODO(RW-5607): Remember which icon was active.
-        activeIcon: props.sidebarOpen ? helpIconName(props.helpContentKey) : undefined,
+        activeIcon: props.sidebarOpen ? helpIconName(props.helpContentKey) : 'closed',
         filteredContent: undefined,
         participant: undefined,
         searchTerm: '',
@@ -352,6 +350,7 @@ export const HelpSidebar = fp.flow(
       this.subscription = participantStore.subscribe(participant => this.setState({participant}));
       this.subscription.add(setSidebarActiveIconStore.subscribe(activeIcon => {
         if (activeIcon !== null) {
+          console.log('setting activeIcon to ' + activeIcon);
           this.setState({activeIcon});
           this.props.setSidebarState(!!activeIcon);
         }
@@ -364,7 +363,7 @@ export const HelpSidebar = fp.flow(
         setTimeout(() => {
           // check if the sidebar has been opened again before resetting activeIcon
           if (!this.props.sidebarOpen) {
-            this.setState({activeIcon: undefined});
+            this.setState({activeIcon: 'closed'});
           }
         }, 300);
       }
@@ -380,14 +379,19 @@ export const HelpSidebar = fp.flow(
     onIconClick(icon: any) {
       const {setSidebarState, sidebarOpen} = this.props;
       const {activeIcon} = this.state;
+      console.log(activeIcon);
       const {id, label} = icon;
       const newSidebarOpen = !(id === activeIcon && sidebarOpen);
+      console.log(id);
       if (newSidebarOpen) {
+        console.log('setting true');
         this.setState({activeIcon: id});
         setSidebarState(true);
         this.analyticsEvent('OpenSidebar', `Sidebar - ${label}`);
       } else {
+        console.log('setting false');
         setSidebarState(false);
+        this.setState({activeIcon: 'closed'});
       }
     }
 
@@ -395,7 +399,7 @@ export const HelpSidebar = fp.flow(
       const {profileState: {profile: {contactEmail, familyName, givenName, username}}} = this.props;
       this.analyticsEvent('ContactUs');
       openZendeskWidget(givenName, familyName, username, contactEmail);
-    }
+    activeIcon: 'closed'}
 
     analyticsEvent(type: string, label?: string) {
       const {helpContentKey} = this.props;
@@ -415,13 +419,13 @@ export const HelpSidebar = fp.flow(
         if (activeIcon) {
           return {...sidebarContainerStyle, ...styles.notebookOverrides, ...styles.sidebarContainerActive};
         } else {
-          return {...sidebarContainerStyle, ...styles.notebookOverrides};
+          return {...sidebarContainerStyle, ...styles.notebookOverrides, ...styles.sidebarContainerActive};
         }
       } else {
         if (activeIcon) {
           return {...sidebarContainerStyle, ...styles.sidebarContainerActive};
         } else {
-          return sidebarContainerStyle;
+          return {...sidebarContainerStyle, ...styles.sidebarContainerActive};
         }
       }
     }
@@ -570,7 +574,8 @@ export const HelpSidebar = fp.flow(
     get sidebarStyle() {
       const sidebarStyle = {
         ...styles.sidebar,
-        marginRight: `calc(-${this.sidebarWidth}rem - 40px)`,
+        //marginRight: `calc(-${this.sidebarWidth}rem - 40px)`,
+        marginRight: 0,
         width: `${this.sidebarWidth}.5rem`,
       };
       return this.props.sidebarOpen ? {...sidebarStyle, ...styles.sidebarOpen} : sidebarStyle;
@@ -592,6 +597,12 @@ export const HelpSidebar = fp.flow(
       showFooter: boolean;
     } {
       switch (activeIcon) {
+        case 'closed':
+          return {
+            bodyWidthRem: '100rem',
+            renderBody: () => <div></div>,
+            showFooter: false
+          };
         case 'help':
           return {
             headerPadding: '0.5rem',
@@ -674,6 +685,8 @@ export const HelpSidebar = fp.flow(
       const {activeIcon, tooltipId} = this.state;
       const sidebarContent = this.sidebarContent(activeIcon);
 
+      console.log(activeIcon);
+
       return <div id='help-sidebar'>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
           {!(criteria || concept)  && this.renderWorkspaceMenu()}
@@ -704,43 +717,64 @@ export const HelpSidebar = fp.flow(
             )
           }
         </div>
-        <div style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
-          <div style={this.sidebarStyle} data-test-id='sidebar-content'>
+        <SwitchTransition mode='out-in'>
+          <CSSTransition
+            key={activeIcon}
+            classNames='sidebar-fade'
+            addEndListener={(node, done) => {
+              node.addEventListener('transitionend', done, false);
+            }}
+          >
 
-            {sidebarContent &&
-              <div style={{height: '100%', overflow: 'auto'}}>
-                <FlexColumn style={{height: '100%'}}>
-                  {sidebarContent.renderHeader &&
-                    <FlexRow style={{justifyContent: 'space-between', padding: sidebarContent.headerPadding}}>
-                      {sidebarContent.renderHeader()}
+        <div className={`sidebar-${activeIcon}`} style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
+          <div className='sidebar-content' style={this.sidebarStyle} data-test-id='sidebar-content'>
 
-                      <Clickable onClick={() => this.props.setSidebarState(false)}>
-                          <img src={proIcons.times}
-                               style={{height: '27px', width: '17px'}}
-                               alt='Close'/>
-                      </Clickable>
-                    </FlexRow>
+                <div>
+                <div style={{height: '100%', overflow: 'auto'}}>
+                  {sidebarContent && <React.Fragment>
+
+                    <FlexColumn style={{height: '100%'}}>
+                      {sidebarContent.renderHeader &&
+                      <FlexRow style={{justifyContent: 'space-between', padding: sidebarContent.headerPadding}}>
+                        {sidebarContent.renderHeader()}
+
+                          <Clickable onClick={() => this.setState({activeIcon: 'closed'})}>
+                              <img src={proIcons.times}
+                                   style={{height: '27px', width: '17px'}}
+                                   alt='Close'/>
+                          </Clickable>
+                      </FlexRow>
+                      }
+
+                        <div style={{flex: 1, padding: sidebarContent.bodyPadding || '0 0.5rem 5.5rem', height: '100%'}}>
+                          {sidebarContent.renderBody()}
+                        </div>
+                    </FlexColumn>
+
+                  {sidebarContent.showFooter &&
+                  <div style={{...styles.footer}}>
+                      <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
+                      <p style={styles.contentItem}>
+                          Visit our <StyledAnchorTag href={supportUrls.helpCenter}
+                                                     target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
+                      </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
+                      </p>
+                  </div>
                   }
 
-                  <div style={{flex: 1, padding: sidebarContent.bodyPadding || '0 0.5rem 5.5rem', height: '100%'}}>
-                    {sidebarContent.renderBody()}
-                  </div>
-                </FlexColumn>
+                  </React.Fragment>
+                    }
+                </div>
+                </div>
 
-                {sidebarContent.showFooter &&
-                  <div style={{...styles.footer}}>
-                    <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
-                    <p style={styles.contentItem}>
-                        Visit our <StyledAnchorTag href={supportUrls.helpCenter}
-                                                   target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
-                    </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
-                    </p>
-                  </div>
-                }
-              </div>
-            }
+
+
           </div>
         </div>
+
+
+          </CSSTransition>
+        </SwitchTransition>
       </div>;
     }
   }
