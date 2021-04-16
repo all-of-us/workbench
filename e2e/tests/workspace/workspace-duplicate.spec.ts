@@ -11,6 +11,8 @@ describe('Duplicate workspace', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspace = 'e2eCloneWorkspaceTest';
+
   /**
    * Test:
    * - Find an existing workspace. Create a new workspace if none exists.
@@ -19,10 +21,8 @@ describe('Duplicate workspace', () => {
    * - Delete duplicate workspace.
    */
   test('OWNER can duplicate workspace via Workspace card', async () => {
-    const workspaceCard = await findOrCreateWorkspaceCard(page);
-
+    const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName: workspace });
     await workspaceCard.asElementHandle().hover();
-    // Click on Ellipsis menu "Duplicate" option.
     await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
 
     // Fill out Workspace Name should be just enough for successful duplication
@@ -46,35 +46,30 @@ describe('Duplicate workspace', () => {
     await workspacesPage.waitForLoad();
 
     await WorkspaceCard.deleteWorkspace(page, duplicateWorkspaceName);
-
-    // Verify Delete action was successful.
     expect(await WorkspaceCard.findCard(page, duplicateWorkspaceName)).toBeFalsy();
   });
 
-  test('OWNER can duplicate workspace via Workspace action menu', async () => {
-    await findOrCreateWorkspace(page);
+  test('OWNER can access workspace duplicate page via Workspace action menu', async () => {
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.selectWorkspaceAction(MenuOption.Duplicate);
 
     const workspaceEditPage = new WorkspaceEditPage(page);
+    await workspaceEditPage.waitForLoad();
+
+    const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
+    expect(await finishButton.isCursorNotAllowed()).toBe(true);
 
     // Fill out Workspace Name
     await workspaceEditPage.getWorkspaceNameTextbox().clear();
-    const duplicateWorkspaceName = await workspaceEditPage.fillOutWorkspaceName();
+    await workspaceEditPage.fillOutWorkspaceName();
     // select "Share workspace with same set of collaborators radiobutton
     await workspaceEditPage.clickShareWithCollaboratorsCheckbox();
 
-    const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
     await workspaceEditPage.requestForReviewRadiobutton(false);
     await finishButton.waitUntilEnabled();
-    await workspaceEditPage.clickCreateFinishButton(finishButton);
-
-    // Duplicate workspace Data page is loaded.
-    await dataPage.waitForLoad();
-    expect(page.url()).toContain(duplicateWorkspaceName.replace(/-/g, '')); // Remove dash from workspace name
-
-    // Delete duplicate workspace via Workspace action dropdown menu.
-    await dataPage.deleteWorkspace();
+    expect(await finishButton.isCursorNotAllowed()).toBe(false);
+    // Click Finish button to clone workspace is not needed.
   });
 });

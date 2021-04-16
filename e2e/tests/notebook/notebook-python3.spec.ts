@@ -10,6 +10,8 @@ describe('Jupyter notebook tests in Python language', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspace = 'e2ePy3NotebookTest';
+
   /**
    * Test:
    * - Find an existing workspace.
@@ -22,7 +24,7 @@ describe('Jupyter notebook tests in Python language', () => {
   test(
     'Run code from file',
     async () => {
-      await findOrCreateWorkspace(page);
+      await findOrCreateWorkspace(page, { workspaceName: workspace });
 
       const dataPage = new WorkspaceDataPage(page);
       const notebookName = makeRandomName('py');

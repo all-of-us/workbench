@@ -58,7 +58,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.genomics.WgsCohortExtractionService;
+import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
@@ -114,7 +114,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspaceAuthService workspaceAuthService;
-  @Autowired private WgsCohortExtractionService wgsCohortExtractionService;
+  @Autowired private GenomicExtractionService genomicExtractionService;
 
   @Autowired
   @Qualifier(DatasetConfig.DATASET_PREFIX_CODE)
@@ -164,7 +164,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     WorkspaceMapperImpl.class,
     AccessTierService.class,
     CdrVersionService.class,
-    WgsCohortExtractionService.class
+    GenomicExtractionService.class
   })
   static class Configuration {
     @Bean
@@ -228,7 +228,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 notebooksService,
                 userProvider,
                 prefixProvider,
-                wgsCohortExtractionService,
+                genomicExtractionService,
                 workspaceAuthService));
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();

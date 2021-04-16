@@ -5,8 +5,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.pmiops.workbench.db.model.DbStorageEnums.domainToStorage;
 
@@ -55,6 +57,7 @@ import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
+import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSetRequest;
@@ -101,11 +104,11 @@ public class DataSetServiceTest {
   @Autowired private CohortDao cohortDao;
   @Autowired private ConceptSetDao conceptSetDao;
   @Autowired private ConceptBigQueryService conceptBigQueryService;
-  @Autowired private CohortQueryBuilder cohortQueryBuilder;
   @Autowired private DataSetDao dataSetDao;
   @Autowired private DSLinkingDao dsLinkingDao;
   @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
   @Autowired private DataSetMapper dataSetMapper;
+  @Autowired private CohortQueryBuilder mockCohortQueryBuilder;
 
   @MockBean private BigQueryService mockBigQueryService;
   @MockBean private CohortDao mockCohortDao;
@@ -146,7 +149,7 @@ public class DataSetServiceTest {
             cohortDao,
             conceptBigQueryService,
             conceptSetDao,
-            cohortQueryBuilder,
+            mockCohortQueryBuilder,
             dataSetDao,
             dsLinkingDao,
             dsDataDictionaryDao,
@@ -155,7 +158,8 @@ public class DataSetServiceTest {
 
     final DbCohort cohort = buildSimpleCohort();
     when(cohortDao.findCohortByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(cohort);
-    when(cohortQueryBuilder.buildParticipantIdQuery(any())).thenReturn(QUERY_JOB_CONFIGURATION_1);
+    when(mockCohortQueryBuilder.buildParticipantIdQuery(any()))
+        .thenReturn(QUERY_JOB_CONFIGURATION_1);
   }
 
   private DbCohort buildSimpleCohort() {
@@ -502,6 +506,36 @@ public class DataSetServiceTest {
     assertThat(dataDictionaryEntry.getDescription()).isEqualTo("Gender testing");
   }
 
+  @Test
+  public void testGetPersonIdsWithWholeGenome_cohorts() {
+    mockPersonIdQuery();
+    when(cohortDao.findAllByCohortIdIn(anyList()))
+        .thenReturn(ImmutableList.of(buildSimpleCohort(), buildSimpleCohort()));
+
+    DbDataset dataset = new DbDataset();
+    dataset.setCohortIds(ImmutableList.of(1L, 2L));
+    dataSetServiceImpl.getPersonIdsWithWholeGenome(dataset);
+
+    // Two participant criteria, one per cohort.
+    verify(mockCohortQueryBuilder)
+        .buildUnionedParticipantIdQuery(argThat(criteriaList -> criteriaList.size() == 2));
+  }
+
+  @Test
+  public void testGetPersonIdsWithWholeGenome_allParticipants() {
+    mockPersonIdQuery();
+
+    DbDataset dataset = new DbDataset();
+    dataset.setIncludesAllParticipants(true);
+    dataSetServiceImpl.getPersonIdsWithWholeGenome(dataset);
+
+    // Expect one participant criteria: "has WGS".
+    // Note: this is dipping too much into implementation, but options are limited with the high
+    // amount of mocking in this test.
+    verify(mockCohortQueryBuilder)
+        .buildUnionedParticipantIdQuery(argThat(criteriaList -> criteriaList.size() == 1));
+  }
+
   private void mockDsLinkingTableForFitbit() {
     DbDSLinking dbDSLinkingFitbit_personId = new DbDSLinking();
     dbDSLinkingFitbit_personId.setDenormalizedName("PERSON_ID");
@@ -542,6 +576,24 @@ public class DataSetServiceTest {
                       return FieldValueList.of(rows, schema);
                     })
                 .collect(ImmutableList.toImmutableList()))
+        .when(tableResultMock)
+        .getValues();
+
+    doReturn(tableResultMock).when(mockBigQueryService).executeQuery(any());
+  }
+
+  private void mockPersonIdQuery() {
+    final TableResult tableResultMock = mock(TableResult.class);
+
+    final FieldList schema =
+        FieldList.of(ImmutableList.of(Field.of("person_id", LegacySQLTypeName.STRING)));
+
+    doReturn(
+            ImmutableList.of(
+                FieldValueList.of(
+                    ImmutableList.of(FieldValue.of(Attribute.PRIMITIVE, "1")), schema),
+                FieldValueList.of(
+                    ImmutableList.of(FieldValue.of(Attribute.PRIMITIVE, "2")), schema)))
         .when(tableResultMock)
         .getValues();
 

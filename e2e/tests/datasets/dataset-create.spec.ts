@@ -12,6 +12,8 @@ describe('Dataset test', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspace = 'e2eCreateDataSetsTest';
+
   /**
    * Test:
    * - Find an existing workspace. Create a new workspace if none exists.
@@ -22,7 +24,7 @@ describe('Dataset test', () => {
    * - Delete Dataset.
    */
   test('Create Dataset from user-defined Cohorts', async () => {
-    await findOrCreateWorkspace(page);
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Click Add Cohorts button
     const dataPage = new WorkspaceDataPage(page);

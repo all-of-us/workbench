@@ -1,17 +1,19 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { Language } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
-import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 
 describe('Jupyter notebook tests in R language', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
 
+  const workspace = 'e2eRNotebookTest';
+
   test(
     'Run code from file',
     async () => {
-      await createWorkspace(page);
+      await findOrCreateWorkspace(page, { workspaceName: workspace });
 
       const notebookName = makeRandomName('r-notebook');
       const dataPage = new WorkspaceDataPage(page);

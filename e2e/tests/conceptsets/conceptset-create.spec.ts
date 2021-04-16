@@ -11,13 +11,15 @@ describe('Create Concept Sets from Domains', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspace = 'e2eCreateConceptSetsTest';
+
   /**
    * Test:
    * - Create new Concept Set from Conditions domain.
    * - Delete Concept Set.
    */
   test('Create Concept Set from Conditions domain', async () => {
-    await findOrCreateWorkspace(page);
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Click Add Datasets button.
     const dataPage = new WorkspaceDataPage(page);
@@ -78,7 +80,7 @@ describe('Create Concept Sets from Domains', () => {
    * - Delete Dataset, Concept Set.
    */
   test('Create Concept Sets from Drug Exposures and Measurements domains', async () => {
-    await findOrCreateWorkspace(page);
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Click Add Datasets button.
     const dataPage = new WorkspaceDataPage(page);

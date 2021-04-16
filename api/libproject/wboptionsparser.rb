@@ -46,7 +46,8 @@ class WbOptionsParser
     @validators.each do |fn|
       begin
         fn.call(@opts)
-      rescue ArgumentError
+      rescue ArgumentError => e
+        STDERR.puts e.message unless e.message.nil?
         STDERR.puts @parser.help
         exit 1
       end

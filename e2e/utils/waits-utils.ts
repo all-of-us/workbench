@@ -44,10 +44,11 @@ export async function waitForDocumentTitle(page: Page, titleSubstr: string): Pro
   try {
     const jsHandle = await page.waitForFunction(
       (t) => {
+        const regExp = new RegExp(t);
         const actualTitle = document.title;
-        return actualTitle.includes(t);
+        return actualTitle && regExp.test(actualTitle);
       },
-      { timeout: 10 * 60 * 1000 },
+      { timeout: 60 * 1000 },
       titleSubstr
     );
     return (await jsHandle.jsonValue()) as boolean;

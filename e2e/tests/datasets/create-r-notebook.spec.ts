@@ -14,13 +14,15 @@ describe('Create dataset and export to notebook at same time', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspace = 'e2eDataSetsCreateRNotebookTest';
+
   /**
    * Create new Cohort thru Dataset Build page. Cohort built from demographics -> Ethnicity.
    * Create new Dataset with Cohort, then export to notebook in R language.
    * Delete Cohort, Dataset, and Notebook.
    */
   test('Jupyter Notebook for R programming language can be created', async () => {
-    const workspaceName = await findOrCreateWorkspace(page);
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Click Add Datasets button
     const dataPage = new WorkspaceDataPage(page);
@@ -70,7 +72,7 @@ describe('Create dataset and export to notebook at same time', () => {
     expect(code).toContain('library(bigrquery)');
 
     // Navigate to Workspace Data page.
-    const notebooksLink = Link.findByName(page, { name: workspaceName });
+    const notebooksLink = Link.findByName(page, { name: workspace });
     await notebooksLink.clickAndWait();
     await dataPage.waitForLoad();
 
