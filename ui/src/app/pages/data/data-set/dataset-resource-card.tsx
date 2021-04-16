@@ -8,6 +8,7 @@ import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/component
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {ExportDataSetModal} from 'app/pages/data/data-set/export-data-set-modal';
+import {GenomicExtractionModal} from 'app/pages/data/data-set/genomic-extraction-modal';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
@@ -26,6 +27,7 @@ interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSp
 interface State {
   showRenameModal: boolean;
   showExportToNotebookModal: boolean;
+  showGenomicExtractionModal: boolean;
 }
 
 export const DatasetResourceCard = fp.flow(
@@ -38,7 +40,8 @@ export const DatasetResourceCard = fp.flow(
     super(props);
     this.state = {
       showRenameModal: false,
-      showExportToNotebookModal: false
+      showExportToNotebookModal: false,
+      showGenomicExtractionModal: false
     };
   }
 
@@ -74,6 +77,17 @@ export const DatasetResourceCard = fp.flow(
           this.setState({showExportToNotebookModal: true});
         },
         disabled: this.props.disableExportToNotebook || !canWrite(resource),
+        hoverText: this.props.disableExportToNotebook && ACTION_DISABLED_INVALID_BILLING
+      },
+      // XXX: Conditional rendering
+      {
+        icon: 'clipboard',
+        displayName: 'Extract VCF files',
+        onClick: () => {
+          //AnalyticsTracker.DatasetBuilder.OpenGenomicExtractionModal();
+          this.setState({showGenomicExtractionModal: true});
+        },
+        disabled: !canWrite(resource),
         hoverText: this.props.disableExportToNotebook && ACTION_DISABLED_INVALID_BILLING
       },
       {
@@ -131,6 +145,12 @@ export const DatasetResourceCard = fp.flow(
                           workspaceNamespace={resource.workspaceNamespace}
                           workspaceFirecloudName={resource.workspaceFirecloudName}
                           closeFunction={() => this.setState({showExportToNotebookModal: false})}/>
+      }
+      {this.state.showGenomicExtractionModal &&
+      <GenomicExtractionModal dataSet={resource.dataSet}
+                              workspaceNamespace={resource.workspaceNamespace}
+                              workspaceFirecloudName={resource.workspaceFirecloudName}
+                              closeFunction={() => this.setState({showGenomicExtractionModal: false})}/>
       }
       {this.state.showRenameModal &&
       <RenameModal onRename={(name, description) => this.rename(name, description)}
