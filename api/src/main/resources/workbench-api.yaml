@@ -5981,10 +5981,21 @@ definitions:
     - USER_PROVIDED
   BillingProjectBufferStatus:
     type: object
+    required:
+      - availablePerTier
     properties:
-      bufferSize:
-        description: 'Current size of the billing buffer, i.e. the number of projects
-          ready to be claimed.'
+      availablePerTier:
+        type: array
+        items:
+          "$ref": "#/definitions/AvailableBufferPerTier"
+  AvailableBufferPerTier:
+    type: object
+    properties:
+      accessTierShortName:
+        description: 'The shortName of an access tier'
+        type: string
+      availableProjects:
+        description: 'Count of the AVAILABLE billing buffer projects in this access tier'
         type: integer
         format: int64
   StatusAlert:
