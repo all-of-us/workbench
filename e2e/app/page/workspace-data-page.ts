@@ -14,6 +14,8 @@ import NotebookPage from './notebook-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
 import WorkspaceBase from './workspace-base';
 import ConceptSetSearchPage from './conceptset-search-page';
+import { SaveOption } from 'app/modal/conceptset-save-modal';
+import ConceptSetActionsPage from './conceptset-actions-page';
 
 const PageTitle = 'Data Page';
 
@@ -148,5 +150,50 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     const workspaceLink = new Link(this.page, `//a[text()='${workspaceName}']`);
     await workspaceLink.waitForXPath({ visible: true });
     expect(await workspaceLink.isVisible()).toBe(true);
+  }
+
+  async findConceptSetsCard(conceptSetsName?: string): Promise<DataResourceCard> {
+    await this.openConceptSetsSubtab();
+    if (conceptSetsName === undefined) {
+      // if Concept Sets name isn't specified, find an existing Concept Sets.
+      return new DataResourceCard(this.page).findAnyCard(ResourceCard.ConceptSet);
+    }
+    // find Concept Set that match specified name.
+    return new DataResourceCard(this.page).findCard(conceptSetsName, ResourceCard.ConceptSet);
+  }
+
+  async findOrCreateConceptSet(): Promise<string> {
+    let conceptName: string;
+
+    // Open Concept Sets tab.
+    await this.openConceptSetsSubtab();
+
+    // Search for existing ConceptSet instead create new
+    const existingConceptSetName = await this.findConceptSetsCard();
+    if (existingConceptSetName !== null) {
+      conceptName = await existingConceptSetName.getResourceName();
+      await existingConceptSetName.clickResourceName();
+      return conceptName;
+    }
+
+    // Create new Concept Set
+    const { conceptSearchPage, criteriaSearch } = await this.openConceptSetSearch(Domain.Procedures);
+
+    // Search by Procedure name.
+    const procedureName = 'Radiologic examination';
+    await criteriaSearch.searchCriteria(procedureName);
+
+    // Select first two rows.
+    await criteriaSearch.resultsTableSelectRow(1, 1);
+    await criteriaSearch.resultsTableSelectRow(2, 1);
+
+    await conceptSearchPage.reviewAndSaveConceptSet();
+    conceptName = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
+
+    // Open Concept Set page.
+    const conceptSetActionPage = new ConceptSetActionsPage(page);
+    await conceptSetActionPage.openConceptSet(conceptName);
+
+    return conceptName;
   }
 }

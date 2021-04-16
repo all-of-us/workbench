@@ -60,7 +60,7 @@ module.exports = class JestReporter {
     }
 
     // Get failure messages.
-    fileLogger.info(`\n\nTests Summary`);
+    fileLogger.info('\n\nTests Summary');
     testResult.testResults.forEach((result) => {
       fileLogger.info('----------------------------------------------');
       fileLogger.log('info', 'test name: %s', result.title);
@@ -79,7 +79,7 @@ module.exports = class JestReporter {
     runResults.testResults.forEach((suite) => {
       const testFilePath = suite.testFilePath.split('e2e/')[1];
       const failedTests = [];
-      suite.testResults.forEach((result) => {
+      suite.testResults.some((result) => {
         if (result.status === 'failed') {
           failedTests.push(`yarn test ${testFilePath}`);
         }
