@@ -7,11 +7,10 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { MenuOption, Language, LinkText, ResourceCard, WorkspaceAccessLevel } from 'app/text-labels';
 import { config } from 'resources/workbench-config';
 import { makeRandomName } from 'utils/str-utils';
-import { signInWithAccessToken, signInAs, signOut, findOrCreateWorkspace } from 'utils/test-utils';
+import { createWorkspace, signInWithAccessToken, signInAs, signOut } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
 import WorkspacesPage from 'app/page/workspaces-page';
 import Modal from 'app/modal/modal';
-import HomePage from '../../app/page/home-page';
 
 // Retry one more when fails
 jest.retryTimes(1);
@@ -20,9 +19,6 @@ describe('Workspace reader Jupyter notebook action tests', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
-
-  const workspace = 'e2eReaderCopyNotebookTest';
-  const collaboratorWorkspace = 'e2eReaderCopyNotebookTestCollaborator';
 
   /**
    * Test: Workspace reader can copy notebook to another Workspace then gain Edit right to the clone notebook.
@@ -38,7 +34,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
   test(
     'Workspace reader copy notebook to another workspace',
     async () => {
-      await findOrCreateWorkspace(page, { workspaceName: workspace });
+      const workspaceName = await createWorkspace(page);
 
       let dataPage = new WorkspaceDataPage(page);
       const notebookName = makeRandomName('py');
@@ -56,7 +52,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
       await page.waitForTimeout(10000);
       const workspacesPage = new WorkspacesPage(page);
       await workspacesPage.load();
-      await WorkspaceCard.findCard(page, workspace).then((card) => card.clickWorkspaceName());
+      await WorkspaceCard.findCard(page, workspaceName).then((card) => card.clickWorkspaceName());
 
       dataPage = new WorkspaceDataPage(page);
       await dataPage.openAboutPage();
@@ -64,37 +60,28 @@ describe('Workspace reader Jupyter notebook action tests', () => {
 
       const aboutPage = new WorkspaceAboutPage(page);
       await aboutPage.waitForLoad();
-      await aboutPage.removeCollab();
-      await waitWhileLoading(page);
 
       // Share Workspace to collaborator as READER.
       const shareModal = await aboutPage.openShareModal();
       await shareModal.shareWithUser(config.collaboratorUsername, WorkspaceAccessLevel.Reader);
       await waitWhileLoading(page);
       await signOut(page);
-      const allPages = await browser.pages();
-      for (const p of allPages) {
-        await p.close();
-      }
 
       // Sign in as collaborator in new Incognito page.
       const newPage = await signInAs(config.collaboratorUsername, config.userPassword);
-      await new HomePage(newPage).load();
 
       // Create a new Workspace. This is the copy-to workspace.
-      await findOrCreateWorkspace(newPage, { workspaceName: collaboratorWorkspace });
+      const collaboratorWorkspaceName = await createWorkspace(newPage);
 
       // Verify shared Workspace Access Level is READER.
       await new WorkspacesPage(newPage).load();
-      const workspaceCard = await WorkspaceCard.findCard(newPage, workspace);
+      const workspaceCard = await WorkspaceCard.findCard(newPage, workspaceName);
       const accessLevel = await workspaceCard.getWorkspaceAccessLevel();
       expect(accessLevel).toBe(WorkspaceAccessLevel.Reader);
 
       // Verify notebook actions list.
       await workspaceCard.clickWorkspaceName();
       await new WorkspaceDataPage(newPage).openAnalysisPage();
-      const analysisPage = new WorkspaceAnalysisPage(newPage);
-      await analysisPage.waitForLoad();
 
       // Notebook actions Rename, Duplicate and Delete are disabled.
       const dataResourceCard = new DataResourceCard(newPage);
@@ -111,7 +98,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
       // Copy notebook to another Workspace and give notebook a new name.
       const newAnalysisPage = new WorkspaceAnalysisPage(newPage);
       const copiedNotebookName = `copy-of-${notebookName}`;
-      await newAnalysisPage.copyNotebookToWorkspace(notebookName, collaboratorWorkspace, copiedNotebookName);
+      await newAnalysisPage.copyNotebookToWorkspace(notebookName, collaboratorWorkspaceName, copiedNotebookName);
 
       // Verify Copy Success modal.
       const modal = new Modal(newPage);
@@ -126,7 +113,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
 
       // Verify current workspace is collaborator Workspace.
       await newAnalysisPage.waitForLoad();
-      const workspaceLink = Link.findByName(newPage, { name: collaboratorWorkspace });
+      const workspaceLink = Link.findByName(newPage, { name: collaboratorWorkspaceName });
       const linkDisplayed = await workspaceLink.isDisplayed();
       expect(linkDisplayed).toBe(true);
 
@@ -143,6 +130,7 @@ describe('Workspace reader Jupyter notebook action tests', () => {
       await notebookCard.clickSnowmanIcon(); // close menu
 
       await newAnalysisPage.deleteResource(copiedNotebookName, ResourceCard.Notebook);
+      await newAnalysisPage.deleteWorkspace();
     },
     30 * 60 * 1000
   );
