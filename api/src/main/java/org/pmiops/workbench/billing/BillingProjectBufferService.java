@@ -329,6 +329,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
     return new BillingProjectBufferStatus()
         .availablePerTier(
             billingProjectBufferEntryDao.getBillingBufferGaugeData().stream()
+                .filter(tier -> tier.getStatusEnum() == BufferEntryStatus.AVAILABLE)
                 .map(
                     tier ->
                         new AvailableBufferPerTier()
