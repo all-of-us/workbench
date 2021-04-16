@@ -226,3 +226,21 @@ iframe#launcher {
 #runtime-panel .p-dropdown .p-inputtext {
   color: #262262 !important
 }
+
+.hover-style:hover {
+  --hover-backgroundColor: var(--app-hover-backgroundColor);
+  --hover-border: var(--app-hover-border);
+  --hover-color: var(--app-hover-color);
+  --hover-boxShadow: var(--app-hover-boxShadow);
+  --hover-opacity: var(--app-hover-opacity);
+  --hover-textDecoration: var(--app-hover-textDecoration);
+}
+
+.hover-style:hover .hover-style:not(:hover) {
+  --hover-backgroundColor: initial;
+  --hover-border: initial;
+  --hover-color: initial;
+  --hover-boxShadow: initial;
+  --hover-opacity: initial;
+  --hover-textDecoration: initial;
+}

@@ -9,6 +9,7 @@ import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as Interactive from 'react-interactive';
+import {Interactivex} from 'app/components/Interactive.js';
 
 
 export const styles = reactStyles({
@@ -237,23 +238,23 @@ export const MenuItem = ({icon = null, tooltip = '', disabled = false, children,
   </TooltipTrigger>;
 };
 
-export const IconButton = ({icon, style = {}, tooltip = '', disabled = false, ...props}) => {
+export const IconButton = ({icon:Icon, style = {}, hover = {}, tooltip = '', disabled = false, ...props}) => {
   return <TooltipTrigger side='left' content={tooltip}>
-    <Clickable
-        data-test-id={icon}
-        disabled={disabled}
-        {...props}
-    >
-      <IconComponent icon={icon} disabled={disabled} style={style}/>
-    </Clickable>
+    <Interactivex tagName='div'
+                 style={{
+                   color: disabled ? colors.disabled : colors.accent,
+                   cursor: disabled ? 'auto' : 'pointer',
+                   ...style
+                  }} 
+                 hover={{color: !disabled && colorWithWhiteness(colors.accent, 0.2), ...hover}} 
+                 disabled={disabled} 
+                 {...props}>
+        <Icon disabled={disabled} style={{marginLeft: '.5rem', ...style}}/>
+      </Interactivex>
   </TooltipTrigger>;
 };
 
-export const SnowmanButton = ({disabled = false, style = {}, ...props}) => {
-  return <Clickable disabled={disabled} {...props} propagateDataTestId={true}>
-    <SnowmanIcon style={style} disabled={disabled}/>
-  </Clickable>;
-};
+export const SnowmanButton = ({...props}) => <IconButton icon={SnowmanIcon} {...props} propagateDataTestId={true}/>
 
 const cardButtonBase = {
   style: {

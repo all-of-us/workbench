@@ -1,6 +1,6 @@
 import {Button, IconButton} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {ClrIcon} from 'app/components/icons';
+import {ClrIcon, Times, Check} from 'app/components/icons';
 import {Toggle} from 'app/components/inputs';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -177,10 +177,10 @@ export class AdminUserBypass extends React.Component<Props, State> {
                                              fp.xor(selectedModules, [AccessModule.RASLINKLOGINGOV])}); }}
           />}
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-            <IconButton icon='times'
+            <IconButton icon={Times}
                         onClick={() => this.cancel()}
                         disabled={!this.hasEdited()}/>
-            <IconButton icon='check'
+            <IconButton icon={Check}
                         data-test-id='toggle-save'
                         onClick={() => this.save()}
                         disabled={!this.hasEdited()}/>

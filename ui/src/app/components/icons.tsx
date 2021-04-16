@@ -1,4 +1,4 @@
-import {faCheckCircle} from '@fortawesome/free-solid-svg-icons';
+import {faCheckCircle, faTimes, faCheck} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -37,14 +37,8 @@ export const ClrIcon = ({className = '', ...props}) => {
   return React.createElement('clr-icon', {class: className, ...fp.omit(['data-test-id'], props)});
 };
 
-export const SnowmanIcon = ({style= {}, disabled = false, ...props}) => {
-  return <ClrIcon shape='ellipsis-vertical' {...props}
-                  style={{
-                    ...styles.snowmanIcon,
-                    color: disabled ? colors.disabled : colors.accent,
-                    cursor: disabled ? 'auto' : 'pointer',
-                    ...style
-                  }}/>;
+export const SnowmanIcon = ({style= {}, ...props}) => {
+  return <ClrIcon shape='ellipsis-vertical' {...props} style={{...styles.snowmanIcon, ...style}}/>;
 };
 
 export const InfoIcon = ({style = {}, ...props}) =>
@@ -68,5 +62,7 @@ const Icon = ({ shape, size, style, color, ...props }) => {
 };
 
 export const CheckCircle = props => <Icon shape={faCheckCircle} {...props}/>;
+export const Check = props => <Icon shape={faCheck} {...props}/>;
+export const Times = props => <Icon shape={faTimes} {...props}/>;
 export const ControlledTierBadge = ({size = 25, ...props}) =>
   <img style={{height: size, width: size}} src={'/assets/icons/controlled-tier-badge.svg'} {...props}/>;
