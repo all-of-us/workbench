@@ -723,7 +723,7 @@ export const HelpSidebar = fp.flow(
                 });
 
               return <div id='extraction-data-table-container'>
-                <DataTable value={tableData} autoLayout>
+                <DataTable value={tableData} autoLayout sortField='dateStarted' sortOrder={-1}>
                   <Column field='datasetName' header='Dataset Name' sortable style={{maxWidth: '8rem', textOverflow: 'ellipsis', overflow: 'hidden'}}/>
                   <Column field='statusJsx' header='Status' sortable sortField='status'/>
                   <Column field='dateStarted' header='Date Started' sortable/>
