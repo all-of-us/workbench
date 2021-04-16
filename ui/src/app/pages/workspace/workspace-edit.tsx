@@ -267,7 +267,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       super(props);
       this.state = {
         billingAccounts: [],
-        cdrVersionItems: this.createInitialCdrVersionsList(DEFAULT_ACCESS_TIER),
+        cdrVersionItems: this.createInitialCdrVersionsList(),
         cloneUserRole: false,
         loading: false,
         populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : undefined,
@@ -418,14 +418,14 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       return workspace;
     }
 
-    createInitialCdrVersionsList(accessTierShortName: string): Array<CdrVersion> {
+    createInitialCdrVersionsList(): Array<CdrVersion> {
       if (this.isMode(WorkspaceEditMode.Edit)) {
         // In edit mode, you cannot modify the CDR version, therefore it's fine
         // to show archived CDRs in the drop-down so that it accurately displays
         // the current value.
-        return this.getAllCdrVersionsForTier(accessTierShortName);
+        return this.getAllCdrVersionsForTier(DEFAULT_ACCESS_TIER);
       } else {
-        return this.getLiveCdrVersionsForTier(accessTierShortName);
+        return this.getLiveCdrVersionsForTier(DEFAULT_ACCESS_TIER);
       }
     }
 
