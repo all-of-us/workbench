@@ -23,7 +23,6 @@ interface InteractiveProps {
   tagName: keyof JSX.IntrinsicElements;
 }
 
-// export const Interactivex: React.FunctionComponent<InteractiveProps & React.HTMLAttributes<HTMLOrSVGElement>> = forwardRef(({
 export const Interactivex: React.ForwardRefExoticComponent<InteractiveProps> = forwardRef(({
   className = '',
   tagName: TagName = 'div',
@@ -84,14 +83,12 @@ export const Interactivex: React.ForwardRefExoticComponent<InteractiveProps> = f
       !!outline && setOutline(undefined)
       onBlur && onBlur(e)
     },
-    // onKeyDown: onKeyDown || (e => {
-    //   if (e.key === 'Enter') {
-    //     e.stopPropagation()
-    //     e.target.click()
-    //   }
-    // }),
+    onKeyDown: onKeyDown || ((event: React.KeyboardEvent) => {
+      if (event.key === 'Enter') {
+        event.stopPropagation();
+        (event.target as HTMLElement).click()
+      }
+    }),
     ...props
   }, [children]);
 });
-
-// export default Interactive;
