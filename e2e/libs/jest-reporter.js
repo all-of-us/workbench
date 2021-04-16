@@ -60,7 +60,7 @@ module.exports = class JestReporter {
     }
 
     // Get failure messages.
-    fileLogger.info(`\n\nTests Summary`);
+    fileLogger.info('\n\nTests Summary');
     testResult.testResults.forEach((result) => {
       fileLogger.info('----------------------------------------------');
       fileLogger.log('info', 'test name: %s', result.title);

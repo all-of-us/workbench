@@ -83,6 +83,7 @@ beforeEach(async () => {
       const msgType = message.type() === 'warning' ? 'warn' : message.type();
       logger.info(`Page Console ${msgType.toUpperCase()}: "${title}"`);
       console.log(args);
+      console.log('');
     } catch (err) {
       console.error(`❗ "${title}"\nException occurred when getting page console message.\n${err}\n${message.text()}`);
     }
@@ -202,7 +203,15 @@ const notRedirectRequest = (request: Request): boolean => {
 };
 
 const getResponseText = async (request: Request): Promise<string> => {
-  return (await request.response().buffer()).toString();
+  const response = request.response();
+  const status = response && response.status() ? response.status() : null;
+  // Explanation:
+  //  !(status > 299 && status < 400) means it's not a redirect
+  //  && !(status === 204) means it's not a no-content response
+  if (status && !(status > 299 && status < 400) && !(status === 204)) {
+    return (await request.response().buffer()).toString();
+  }
+  return '';
 };
 
 const logError = async (request: Request): Promise<void> => {
