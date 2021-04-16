@@ -23,7 +23,8 @@ interface InteractiveProps {
   tagName: keyof JSX.IntrinsicElements;
 }
 
-export const Interactivex: React.FunctionComponent<InteractiveProps & React.HTMLAttributes<HTMLOrSVGElement>> = ({
+// export const Interactivex: React.FunctionComponent<InteractiveProps & React.HTMLAttributes<HTMLOrSVGElement>> = forwardRef(({
+export const Interactivex: React.ForwardRefExoticComponent<InteractiveProps> = forwardRef(({
   className = '',
   tagName: TagName = 'div',
   type, 
@@ -37,7 +38,7 @@ export const Interactivex: React.FunctionComponent<InteractiveProps & React.HTML
   tabIndex, 
   hover = {}, 
   style = {},
-  ...props}: InteractiveProps) => {
+  ...props}: InteractiveProps, ref) => {
   const [outline, setOutline] = useState(undefined)
   const { cursor } = style
   
@@ -69,6 +70,7 @@ export const Interactivex: React.FunctionComponent<InteractiveProps & React.HTML
   )(hover)
 
   return React.createElement(TagName, {
+    ref,
     className: `hover-style ${className}`,
     style: {...style, ...cssVariables, cursor: computedCursor, outline},
     role: computedRole,
@@ -90,6 +92,6 @@ export const Interactivex: React.FunctionComponent<InteractiveProps & React.HTML
     // }),
     ...props
   }, [children]);
-};
+});
 
 // export default Interactive;
