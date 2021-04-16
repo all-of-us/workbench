@@ -206,8 +206,8 @@ const getResponseText = async (request: Request): Promise<string> => {
   const response = request.response();
   const status = response && response.status() ? response.status() : null;
   // Explanation:
-  //  !(status > 299 && status < 400) means it's not a redirect
-  //  && !(status === 204) means it's not a no-content response
+  //  !(status > 299 && status < 400) -- it's not a redirect
+  //  !(status === 204) -- it's not a no-content response
   if (status && !(status > 299 && status < 400) && !(status === 204)) {
     return (await request.response().buffer()).toString();
   }
