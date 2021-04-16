@@ -16,7 +16,7 @@ import {
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 
-import {DataAccessLevel, Degree, Profile} from 'generated/fetch';
+import {Degree, Profile} from 'generated/fetch';
 
 import {FlexColumn} from 'app/components/flex';
 import {Footer, FooterTypeEnum} from 'app/components/footer';
@@ -129,7 +129,7 @@ export const createEmptyProfile = (): Profile => {
     // Note: We abuse the "username" field here by omitting "@domain.org". After
     // profile creation, this field is populated with the full email address.
     username: '',
-    dataAccessLevel: DataAccessLevel.Unregistered,
+    accessTierShortNames: [],
     givenName: '',
     familyName: '',
     contactEmail: '',

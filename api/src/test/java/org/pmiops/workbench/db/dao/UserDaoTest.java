@@ -2,6 +2,7 @@ package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -12,7 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.UserDao.DbAdminTableUser;
-import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
+import org.pmiops.workbench.db.dao.UserDao.UserCountByDisabledAndAccessTiers;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbInstitution;
@@ -61,11 +62,11 @@ public class UserDaoTest extends SpringTest {
     user1 = userDao.save(user1);
     addUserToTier(user1, registeredTier);
 
-    List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
+    List<UserCountByDisabledAndAccessTiers> rows = userDao.getUserCountGaugeData();
     assertThat(rows).hasSize(1);
-    final UserCountGaugeLabelsAndValue row = rows.get(0);
+    final UserCountByDisabledAndAccessTiers row = rows.get(0);
     assertThat(row.getAccessTierShortNames()).isNotNull();
-    assertThat(row.getAccessTierShortNames()).contains(registeredTier.getShortName());
+    assertThat(split(row.getAccessTierShortNames())).contains(registeredTier.getShortName());
     assertThat(row.getDisabled()).isFalse();
     assertThat(row.getUserCount()).isEqualTo(1L);
   }
@@ -77,17 +78,17 @@ public class UserDaoTest extends SpringTest {
     user1 = userDao.save(user1);
     addUserToTier(user1, registeredTier, TierAccessStatus.DISABLED);
 
-    List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
+    List<UserCountByDisabledAndAccessTiers> rows = userDao.getUserCountGaugeData();
     assertThat(rows).hasSize(1);
-    final UserCountGaugeLabelsAndValue row = rows.get(0);
-    assertThat(row.getAccessTierShortNames()).isNull();
+    final UserCountByDisabledAndAccessTiers row = rows.get(0);
+    assertThat(split(row.getAccessTierShortNames())).contains("[unregistered]");
     assertThat(row.getDisabled()).isFalse();
     assertThat(row.getUserCount()).isEqualTo(1L);
   }
 
   @Test
   public void testGetUserCountGaugeData_noUsers() {
-    List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
+    List<UserCountByDisabledAndAccessTiers> rows = userDao.getUserCountGaugeData();
     assertThat(rows).isEmpty();
   }
 
@@ -100,7 +101,7 @@ public class UserDaoTest extends SpringTest {
     insertTestUsers(true, 5, institution, registeredTier);
     insertTestUsers(false, 10, institution);
 
-    final List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
+    final List<UserCountByDisabledAndAccessTiers> rows = userDao.getUserCountGaugeData();
     // registered/enabled, registered/disabled, and unregistered/enabled
     assertThat(rows).hasSize(3);
 
@@ -108,12 +109,10 @@ public class UserDaoTest extends SpringTest {
     assertThat(
             rows.stream()
                 .filter(
-                    r ->
-                        r.getAccessTierShortNames() != null
-                            && r.getAccessTierShortNames().contains(registeredTier.getShortName()))
+                    r -> split(r.getAccessTierShortNames()).contains(registeredTier.getShortName()))
                 .filter(r -> !r.getDisabled())
                 .findFirst()
-                .map(UserCountGaugeLabelsAndValue::getUserCount)
+                .map(UserCountByDisabledAndAccessTiers::getUserCount)
                 .orElse(-1L))
         .isEqualTo(3);
 
@@ -121,27 +120,26 @@ public class UserDaoTest extends SpringTest {
     assertThat(
             rows.stream()
                 .filter(
-                    r ->
-                        r.getAccessTierShortNames() != null
-                            && r.getAccessTierShortNames().contains(registeredTier.getShortName()))
-                .filter(UserCountGaugeLabelsAndValue::getDisabled)
+                    r -> split(r.getAccessTierShortNames()).contains(registeredTier.getShortName()))
+                .filter(UserCountByDisabledAndAccessTiers::getDisabled)
                 .findFirst()
-                .map(UserCountGaugeLabelsAndValue::getUserCount)
+                .map(UserCountByDisabledAndAccessTiers::getUserCount)
                 .orElse(-1L))
         .isEqualTo(5);
 
     // unregistered/enabled: 10
     assertThat(
             rows.stream()
-                .filter(
-                    r ->
-                        r.getAccessTierShortNames() == null
-                            || !r.getAccessTierShortNames().contains(registeredTier.getShortName()))
+                .filter(r -> split(r.getAccessTierShortNames()).contains("[unregistered]"))
                 .filter(r -> !r.getDisabled())
                 .findFirst()
-                .map(UserCountGaugeLabelsAndValue::getUserCount)
+                .map(UserCountByDisabledAndAccessTiers::getUserCount)
                 .orElse(-1L))
         .isEqualTo(10);
+  }
+
+  private List<String> split(String input) {
+    return Splitter.on(',').splitToList(input);
   }
 
   @Test

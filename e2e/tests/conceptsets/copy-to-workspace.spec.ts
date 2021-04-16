@@ -10,7 +10,9 @@ import { makeRandomName } from 'utils/str-utils';
 import { createWorkspace, findOrCreateWorkspaceCard, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
 
-async function createConceptSet(srcWorkspaceCard: WorkspaceCard) {
+async function createConceptSet(
+  srcWorkspaceCard: WorkspaceCard
+): Promise<{ dataPage: WorkspaceDataPage; conceptSetName: string }> {
   // Open Source Workspace Data Page.
   await srcWorkspaceCard.clickWorkspaceName();
   // Open Concept Sets tab.
@@ -30,7 +32,7 @@ async function createConceptSet(srcWorkspaceCard: WorkspaceCard) {
 
   await conceptSearchPage.reviewAndSaveConceptSet();
 
-  const conceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
+  const conceptSetName: string = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
 
   // Click on link to open Concept Set page.
   const conceptSetActionPage = new ConceptSetActionsPage(page);
@@ -70,7 +72,7 @@ describe('Copy Concept Set to another workspace', () => {
     await conceptSetCopyModal.copyToAnotherWorkspace(destWorkspace, conceptSetCopyName);
 
     // Click "Go to Copied Concept Set" button.
-    await conceptSetCopyModal.waitForButton(LinkText.GoToCopiedConceptSet).then((butn) => butn.click());
+    await conceptSetCopyModal.waitForButton(LinkText.GoToCopiedConceptSet).click();
 
     await dataPage.waitForLoad();
 
@@ -83,7 +85,8 @@ describe('Copy Concept Set to another workspace', () => {
     expect(exists).toBe(true);
 
     console.log(
-      `Copied Concept Set "${conceptSetName} from workspace "${srcWorkspace}" to Concept Set "${conceptSetCopyName}" in another workspace "${destWorkspace}"`
+      `Copied Concept Set "${conceptSetName} from workspace "${srcWorkspace}" ` +
+        `to Concept Set "${conceptSetCopyName}" in another workspace "${destWorkspace}"`
     );
 
     // Delete Concept Set in destWorkspace.
@@ -112,7 +115,7 @@ describe('Copy Concept Set to another workspace', () => {
     const conceptCopyModal = await conceptSetPage.openCopyToWorkspaceModal(conceptSetName);
     await conceptCopyModal.beginCopyToAnotherWorkspace(destWorkspace, makeRandomName());
 
-    const copyButton = await conceptCopyModal.waitForButton(LinkText.Copy);
+    const copyButton = conceptCopyModal.waitForButton(LinkText.Copy);
     expect(await copyButton.isCursorNotAllowed()).toBe(true);
   });
 });

@@ -1,11 +1,10 @@
 import { Page } from 'puppeteer';
-
 import Button from 'app/element/button';
 import { Language, LinkText, PageUrl } from 'app/text-labels';
 import WorkspaceEditPage, { FIELD as EDIT_FIELD } from 'app/page/workspace-edit-page';
 import RadioButton from 'app/element/radiobutton';
 import { findOrCreateWorkspace } from 'utils/test-utils';
-import { waitForDocumentTitle, waitForText, waitWhileLoading } from 'utils/waits-utils';
+import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
 import ReactSelect from 'app/element/react-select';
 import WorkspaceDataPage from './workspace-data-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
@@ -13,8 +12,9 @@ import { config } from 'resources/workbench-config';
 import { UseFreeCredits } from './workspace-base';
 import OldCdrVersionModal from 'app/modal/old-cdr-version-modal';
 import AuthenticatedPage from './authenticated-page';
-
+import { logger } from 'libs/logger';
 const faker = require('faker/locale/en_US');
+
 export const PageTitle = 'View Workspace';
 
 export const FieldSelector = {
@@ -34,7 +34,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
     await waitForDocumentTitle(this.page, PageTitle);
 
     await waitWhileLoading(this.page, 120000).catch(async () => {
-      console.warn('Retry loading Workspaces page');
+      logger.warn('Retry loading Workspaces page');
       await this.page.reload({ waitUntil: ['networkidle0', 'load'] });
       await waitWhileLoading(this.page);
     });
@@ -66,7 +66,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
    * 4: return
    */
   async clickCreateNewWorkspace(): Promise<WorkspaceEditPage> {
-    const link = await Button.findByName(this.page, FieldSelector.CreateNewWorkspaceButton.textOption);
+    const link = Button.findByName(this.page, FieldSelector.CreateNewWorkspaceButton.textOption);
     await link.clickAndWait();
     const workspaceEdit = new WorkspaceEditPage(this.page);
     await workspaceEdit.waitForLoad();
@@ -80,7 +80,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
     workspaceName: string,
     cdrVersionName: string = config.defaultCdrVersionName,
     billingAccount: string = UseFreeCredits,
-    reviewRequest: boolean = false
+    reviewRequest = false
   ): Promise<string[]> {
     const editPage = await this.fillOutRequiredCreationFields(workspaceName, billingAccount, reviewRequest);
 
@@ -95,24 +95,25 @@ export default class WorkspacesPage extends AuthenticatedPage {
     }
 
     // click CREATE WORKSPACE button
-    const createButton = await editPage.getCreateWorkspaceButton();
+    const createButton = editPage.getCreateWorkspaceButton();
     await createButton.waitUntilEnabled();
     const modalContent = await editPage.clickCreateFinishButton(createButton);
-    console.log(`Created workspace "${workspaceName}" with CDR Version "${cdrVersionName}"`);
+    logger.info(`Created workspace "${workspaceName}" with CDR Version "${cdrVersionName}"`);
     return modalContent;
   }
 
   async fillOutRequiredCreationFields(
     workspaceName: string,
     billingAccount: string = UseFreeCredits,
-    reviewRequest: boolean = false
+    reviewRequest = false
   ): Promise<WorkspaceEditPage> {
     const editPage = await this.clickCreateNewWorkspace();
-    // wait for Billing Account default selected value
-    await waitForText(this.page, UseFreeCredits);
+    // wait for Billing Account default selected value to appear
+    const selectBilling = editPage.getBillingAccountSelect();
+    await selectBilling.waitForSelectedValue(UseFreeCredits);
 
-    await (await editPage.getWorkspaceNameTextbox()).type(workspaceName);
-    await (await editPage.getWorkspaceNameTextbox()).pressTab();
+    await editPage.getWorkspaceNameTextbox().type(workspaceName);
+    await editPage.getWorkspaceNameTextbox().pressTab();
 
     // select Billing Account
     await editPage.selectBillingAccount(billingAccount);
@@ -120,31 +121,28 @@ export default class WorkspacesPage extends AuthenticatedPage {
     // 1. What is the primary purpose of your project?
     // check Educational Purpose checkbox
     const educationPurpose = editPage.question1_educationalPurpose();
-    await (await educationPurpose.asCheckBox()).check();
+    await educationPurpose.asCheckBox().check();
 
     // 2. Please provide a summary of your research purpose by responding to the questions below.
     const scientificQuestions = editPage.question2_scientificQuestionsIntendToStudy();
-    await (await scientificQuestions.asTextArea()).paste(faker.lorem.paragraph());
+    await scientificQuestions.asTextArea().paste(faker.lorem.paragraph());
 
     const scientificApproaches = editPage.question2_scientificApproaches();
-    await (await scientificApproaches.asTextArea()).paste(faker.lorem.paragraph());
+    await scientificApproaches.asTextArea().paste(faker.lorem.paragraph());
 
     const anticipatedFindings = editPage.question2_anticipatedFindings();
-    await (await anticipatedFindings.asTextArea()).paste(faker.lorem.paragraph());
+    await anticipatedFindings.asTextArea().paste(faker.lorem.paragraph());
 
     // 3. The All of Us Research Program encourages researchers to disseminate ....
     const publicationInJournal = editPage.publicationInJournal();
-    await (await publicationInJournal.asCheckBox()).check();
+    await publicationInJournal.asCheckBox().check();
 
     // 4. The All of Us Research Program would like to understand how ....
     const increaseWellness = editPage.increaseWellnessResilience();
-    await (await increaseWellness.asCheckBox()).check();
+    await increaseWellness.asCheckBox().check();
 
     // 5. Population of interest: use default values. Using default value
-    const noRadiobutton = await RadioButton.findByName(
-      this.page,
-      EDIT_FIELD.POPULATION_OF_INTEREST.noRadiobutton.textOption
-    );
+    const noRadiobutton = RadioButton.findByName(this.page, EDIT_FIELD.POPULATION_OF_INTEREST.noRadiobutton.textOption);
     await noRadiobutton.select();
 
     // 6. Request for Review of Research Purpose Description. Using default value

@@ -83,8 +83,7 @@ const styles = reactStyles({
   controlSection: {
     backgroundColor: String(addOpacity(colors.white, .75)),
     borderRadius: '3px',
-    padding: '.75rem',
-    marginTop: '.75rem'
+    padding: '.75rem'
   },
   presetMenuItem: {
     color: colors.primary,
@@ -1053,12 +1052,6 @@ export const RuntimePanel = fp.flow(
   };
 
   return <div id='runtime-panel'>
-    <h3 style={{...styles.baseHeader, ...styles.bold, ...styles.sectionHeader}}>Cloud analysis environment</h3>
-    <div>
-      Your analysis environment consists of an application and compute resources.
-      Your cloud environment is unique to this workspace and not shared with other users.
-    </div>
-
     {switchCase(panelContent,
       [PanelContent.Create, () =>
             <Fragment>

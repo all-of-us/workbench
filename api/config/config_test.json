@@ -28,9 +28,9 @@
     "retryCount": 2,
     "bufferCapacityPerTier": {
       "registered": 300,
-      "controlled_test": 100
+      "controlled": 100
     },
-    "bufferRefillProjectsPerTask": 1,
+    "bufferRefillProjectsPerTask": 5,
     "bufferStatusChecksPerTask": 10,
     "defaultFreeCreditsDollarLimit": 300.0,
     "freeTierCostAlertThresholds": [

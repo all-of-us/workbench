@@ -163,6 +163,9 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
       this.selectDeceased();
     } else if (domain === Domain.FITBIT) {
       this.selectFitbit();
+
+    } else if (domain === Domain.WHOLEGENOMEVARIANT) {
+      this.selectGenome();
     }
     currentCohortCriteriaStore.next(selections);
     this.subscription = currentCohortCriteriaStore.subscribe(newSelections => {
@@ -277,6 +280,22 @@ export const CohortSearch = withCurrentCohortSearchContext()(class extends React
       name: 'Has any Fitbit data',
       group: false,
       domainId: Domain.FITBIT.toString(),
+      hasAttributes: false,
+      selectable: true,
+      attributes: []
+    } as Selection;
+    saveCriteria([param]);
+  }
+
+  selectGenome() {
+    const param = {
+      id: null,
+      parentId: null,
+      parameterId: '',
+      type: CriteriaType.PPI.toString(),
+      name: 'Whole Genome Variant',
+      group: false,
+      domainId: Domain.WHOLEGENOMEVARIANT.toString(),
       hasAttributes: false,
       selectable: true,
       attributes: []

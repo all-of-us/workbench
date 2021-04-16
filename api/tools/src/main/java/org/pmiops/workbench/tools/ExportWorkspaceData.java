@@ -24,6 +24,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.appengine.AppEngineMetadataSpringConfiguration;
 import org.pmiops.workbench.audit.ActionAuditSpringConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -63,6 +64,7 @@ import org.pmiops.workbench.monitoring.MonitoringSpringConfiguration;
 import org.pmiops.workbench.monitoring.StackdriverStatsExporterService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceFakeImpl;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -80,12 +82,14 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 /** A tool that will generate a CSV export of our workspace data */
 @Configuration
 @Import({
+  AccessTierServiceImpl.class,
   ActionAuditSpringConfiguration.class,
   AppEngineMetadataSpringConfiguration.class,
   LogsBasedMetricServiceImpl.class,
   MonitoringServiceImpl.class,
   MonitoringSpringConfiguration.class,
   NotebooksServiceImpl.class,
+  WorkspaceAuthService.class,
   StackdriverStatsExporterService.class,
   UserRecentResourceServiceImpl.class
 })

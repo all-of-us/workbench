@@ -97,6 +97,7 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
+import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
@@ -360,6 +361,7 @@ public class WorkspacesControllerTest extends SpringTest {
   @Autowired BigQueryService bigQueryService;
   @SpyBean @Autowired WorkspaceDao workspaceDao;
   @Autowired UserDao userDao;
+  @Autowired UserRecentWorkspaceDao userRecentWorkspaceDao;
   @Autowired AccessTierDao accessTierDao;
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired CohortDao cohortDao;

@@ -93,6 +93,15 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           Domain.PROCEDURE,
           Domain.PHYSICAL_MEASUREMENT_CSS);
 
+  private static final ImmutableList<Domain> DOMAIN_WITHOUT_CONCEPT_SETS =
+      ImmutableList.of(
+          Domain.PERSON,
+          Domain.FITBIT_ACTIVITY,
+          Domain.FITBIT_HEART_RATE_LEVEL,
+          Domain.FITBIT_HEART_RATE_SUMMARY,
+          Domain.FITBIT_INTRADAY_STEPS,
+          Domain.WHOLE_GENOME_VARIANT);
+
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
     Map<Boolean, Long> invalidToCount = dataSetDao.getInvalidToCountMap();
@@ -613,11 +622,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   private boolean supportsConceptSets(Domain domain) {
-    return domain != Domain.PERSON
-        && domain != Domain.FITBIT_ACTIVITY
-        && domain != Domain.FITBIT_HEART_RATE_LEVEL
-        && domain != Domain.FITBIT_HEART_RATE_SUMMARY
-        && domain != Domain.FITBIT_INTRADAY_STEPS;
+    return DOMAIN_WITHOUT_CONCEPT_SETS.stream().filter(d -> domain.equals(d)).count() == 0;
   }
 
   // Gather all the concept IDs from the ConceptSets provided, taking account of

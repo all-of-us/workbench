@@ -120,7 +120,7 @@ export default class GoogleLoginPage {
    * Open All-of-Us Google login page.
    */
   async load(): Promise<void> {
-    const url = config.uiBaseUrl + config.loginUrlPath;
+    const url = `${config.uiBaseUrl}${config.loginUrlPath}`;
     const response = await this.page.goto(url, {
       waitUntil: ['networkidle0', 'domcontentloaded', 'load'],
       timeout: 2 * 60 * 1000
@@ -129,7 +129,7 @@ export default class GoogleLoginPage {
       return;
     }
     // Retry load Login page.
-    console.warn(`Retry loading Login page`);
+    console.warn('Retry loading Login page');
     await this.page.goto(url, { waitUntil: ['networkidle0', 'domcontentloaded', 'load'], timeout: 30 * 1000 });
   }
 
@@ -139,7 +139,7 @@ export default class GoogleLoginPage {
    * @param email
    * @param paswd
    */
-  async login(email?: string, paswd?: string) {
+  async login(email?: string, paswd?: string): Promise<void> {
     const user = email || config.userEmail;
     const pwd = paswd || config.userPassword;
 
@@ -157,12 +157,12 @@ export default class GoogleLoginPage {
     await this.submit();
   }
 
-  async loginAs(email, paswd) {
+  async loginAs(email: string, paswd: string): Promise<void> {
     return this.login(email, paswd);
   }
 
   async clickCreateAccountButton(): Promise<void> {
-    const button = await Button.findByName(this.page, { name: 'Create Account' });
+    const button = Button.findByName(this.page, { name: 'Create Account' });
     await button.clickWithEval();
   }
 

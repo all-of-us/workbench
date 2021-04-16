@@ -82,7 +82,7 @@ export default class Table extends Container {
    */
   async getColumnNames(): Promise<string[]> {
     const columns = await this.getColumns();
-    const columnNames = [];
+    const columnNames: string[] = [];
     for (const column of columns) {
       const textContent = await getPropValue<string>(column, 'innerText');
       columnNames.push(textContent);
@@ -92,10 +92,10 @@ export default class Table extends Container {
   }
 
   async getColumnIndex(columName: string): Promise<number> {
-    const columnIndexXpath = `count(${this.theadXpath}[contains(normalize-space(text()), "${columName}")]/preceding-sibling::*)`;
-    const handle = await this.page.waitForXPath(columnIndexXpath, { visible: true });
+    const indexXpath =
+      `count(${this.theadXpath}[contains(normalize-space(text()), "${columName}")]` + '/preceding-sibling::*)';
+    const handle = await this.page.waitForXPath(indexXpath, { visible: true });
     const value = await handle.jsonValue();
-    console.log('getColumnIndex: ' + value);
     return Number(value.toString());
   }
 

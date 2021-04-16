@@ -1,6 +1,7 @@
 import { ClickOptions, ElementHandle, Page, WaitForSelectorOptions } from 'puppeteer';
 import Container from 'app/container';
 import { getAttrValue, getPropValue } from 'utils/element-utils';
+import { logger } from 'libs/logger';
 
 /**
  * BaseElement represents a web element in the DOM.
@@ -19,7 +20,7 @@ export default class BaseElement extends Container {
     super(page, xpath);
   }
 
-  protected setElementHandle(element: ElementHandle) {
+  protected setElementHandle(element: ElementHandle): void {
     this.element = element;
   }
 
@@ -33,10 +34,11 @@ export default class BaseElement extends Container {
     try {
       return this.page.waitForXPath(this.xpath, waitOptions).then((elemt) => (this.element = elemt.asElement()));
     } catch (err) {
-      console.error(`waitForXpath('${this.xpath}') encountered ${err}`);
+      logger.error(`waitForXpath('${this.xpath}') failed`);
+      logger.error(err);
       // Debugging pause
       // await jestPuppeteer.debug();
-      throw err;
+      throw new Error(err);
     }
   }
 
@@ -139,7 +141,6 @@ export default class BaseElement extends Container {
       const startTime = Date.now();
       let previousX: number;
       let previousY: number;
-      let i = 0;
       while (Date.now() - startTime < 30 * 1000) {
         const viewport = await element.isIntersectingViewport();
         if (viewport) {
@@ -149,18 +150,14 @@ export default class BaseElement extends Container {
           if (previousX !== undefined && previousY !== undefined) {
             // tslint:disable:triple-equals
             if (
-              parseFloat(previousX.toFixed(7)) == parseFloat(x.toFixed(7)) &&
-              parseFloat(previousY.toFixed(7)) == parseFloat(y.toFixed(7))
+              parseFloat(previousX.toFixed(7)) === parseFloat(x.toFixed(7)) &&
+              parseFloat(previousY.toFixed(7)) === parseFloat(y.toFixed(7))
             ) {
               break;
             }
           }
-          if (i > 0) {
-            console.warn(`Detected changing boundingBox: i=${i} prevX=${previousX} x=${x} prevY=${previousY} y=${y}`);
-          }
           previousX = x;
           previousY = y;
-          i++;
         }
         await element.hover();
         await this.page.waitForTimeout(200);
@@ -187,13 +184,14 @@ export default class BaseElement extends Container {
     const typeAndCheck = async () => {
       const actualValue = await clearAndType(textValue);
       if (actualValue === textValue) {
+        await this.pressTab();
         return; // success
       }
       if (maxRetries <= 0) {
         throw new Error(`BaseElement.type("${textValue}") failed. Actual text: "${actualValue}"`);
       }
       maxRetries--;
-      return await this.page.waitForTimeout(1000).then(typeAndCheck); // one second pause and retry type
+      await this.page.waitForTimeout(1000).then(typeAndCheck); // one second pause and retry type
     };
 
     await typeAndCheck();
@@ -249,9 +247,8 @@ export default class BaseElement extends Container {
    * Calling focus() and hover() together.
    */
   async focus(): Promise<void> {
-    return this.asElementHandle().then((elemt) => {
-      Promise.all([elemt.focus(), elemt.hover()]);
-    });
+    const element = await this.asElementHandle();
+    await Promise.all([element.focus(), element.hover()]);
   }
 
   /**
@@ -316,9 +313,8 @@ export default class BaseElement extends Container {
 
   // try this method when click() is not working
   async clickWithEval(): Promise<void> {
-    return this.asElementHandle().then((elemt) => {
-      return this.page.evaluate((elem) => elem.click(), elemt);
-    });
+    const element = await this.asElementHandle();
+    await this.page.evaluate((elem) => elem.click(), element);
   }
 
   /**

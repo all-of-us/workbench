@@ -8,7 +8,7 @@ import {SessionExpired} from 'app/pages/session-expired';
 import {SignInAgain} from 'app/pages/sign-in-again';
 import {UserDisabled} from 'app/pages/user-disabled';
 import {SignInService} from 'app/services/sign-in.service';
-import {hasRegisteredAccess, ReactWrapperBase} from 'app/utils';
+import {ReactWrapperBase} from 'app/utils';
 import {authStore, profileStore, useStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -40,6 +40,7 @@ import {WorkspaceAbout} from './pages/workspace/workspace-about';
 import {WorkspaceEdit, WorkspaceEditMode} from './pages/workspace/workspace-edit';
 import {WorkspaceLibrary} from './pages/workspace/workspace-library';
 import {WorkspaceList} from './pages/workspace/workspace-list';
+import {hasRegisteredAccess} from './utils/access-tiers';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
 
@@ -50,7 +51,7 @@ const signInGuard: Guard = {
 };
 
 const registrationGuard: Guard = {
-  allowed: (): boolean => hasRegisteredAccess(profileStore.get().profile.dataAccessLevel),
+  allowed: (): boolean => hasRegisteredAccess(profileStore.get().profile.accessTierShortNames),
   redirectPath: '/'
 };
 

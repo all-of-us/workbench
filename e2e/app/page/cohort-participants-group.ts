@@ -53,7 +53,7 @@ export default class CohortParticipantsGroup {
     await this.clickSnowmanIcon();
     await this.selectGroupSnowmanMenu(MenuOption.EditGroupName);
     const modal = new Modal(this.page);
-    const textbox = await modal.waitForTextbox('New Name:');
+    const textbox = modal.waitForTextbox('New Name:');
     await textbox.type(newGroupName);
     await modal.clickButton(LinkText.Rename, { waitForClose: true });
   }

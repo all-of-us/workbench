@@ -77,6 +77,7 @@ public class DataSetController implements DataSetApiDelegate {
 
   private static final String DATE_FORMAT_STRING = "yyyy/MM/dd HH:mm:ss";
   public static final String EMPTY_CELL_MARKER = "";
+  public static final String WHOLE_GENOME_VALUE = "VCF Files(s)";
 
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
@@ -479,16 +480,19 @@ public class DataSetController implements DataSetApiDelegate {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DomainValuesResponse response = new DomainValuesResponse();
-
-    Domain domain =
-        Domain.PHYSICAL_MEASUREMENT_CSS.equals(Domain.valueOf(domainValue))
-            ? Domain.MEASUREMENT
-            : Domain.valueOf(domainValue);
-    FieldList fieldList = bigQueryService.getTableFieldsFromDomain(domain);
-    response.setItems(
-        fieldList.stream()
-            .map(field -> new DomainValue().value(field.getName().toLowerCase()))
-            .collect(Collectors.toList()));
+    if (domainValue.equals(Domain.WHOLE_GENOME_VARIANT.toString())) {
+      response.addItemsItem(new DomainValue().value(WHOLE_GENOME_VALUE));
+    } else {
+      Domain domain =
+          Domain.PHYSICAL_MEASUREMENT_CSS.equals(Domain.valueOf(domainValue))
+              ? Domain.MEASUREMENT
+              : Domain.valueOf(domainValue);
+      FieldList fieldList = bigQueryService.getTableFieldsFromDomain(domain);
+      response.setItems(
+          fieldList.stream()
+              .map(field -> new DomainValue().value(field.getName().toLowerCase()))
+              .collect(Collectors.toList()));
+    }
 
     return ResponseEntity.ok(response);
   }

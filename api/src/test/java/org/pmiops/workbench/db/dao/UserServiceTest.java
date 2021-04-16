@@ -338,6 +338,7 @@ public class UserServiceTest {
     assertThat(dbUser.getBetaAccessBypassTime()).isNull();
     assertThat(dbUser.getEraCommonsBypassTime()).isNull();
     assertThat(dbUser.getTwoFactorAuthBypassTime()).isNull();
+    assertThat(dbUser.getRasLinkLoginGovBypassTime()).isNull();
 
     final Timestamp duaBypassTime = Timestamp.from(Instant.parse("2000-01-01T00:00:00.00Z"));
     userService.setDataUseAgreementBypassTime(dbUser.getUserId(), null, duaBypassTime);
@@ -399,6 +400,17 @@ public class UserServiceTest {
             Optional.empty(),
             nullableTimestampToOptionalInstant(twoFactorBypassTime));
     assertThat(dbUser.getTwoFactorAuthBypassTime()).isEqualTo(twoFactorBypassTime);
+
+    final Timestamp rasLinkLoginGovBypassTime =
+        Timestamp.from(Instant.parse("2004-01-01T00:00:00.00Z"));
+    userService.setRasLinkLoginGovBypassTime(dbUser.getUserId(), null, rasLinkLoginGovBypassTime);
+    verify(mockUserServiceAuditAdapter)
+        .fireAdministrativeBypassTime(
+            dbUser.getUserId(),
+            BypassTimeTargetProperty.RAS_LINK_LOGIN_GOV,
+            Optional.empty(),
+            nullableTimestampToOptionalInstant(rasLinkLoginGovBypassTime));
+    assertThat(dbUser.getRasLinkLoginGovBypassTime()).isEqualTo(rasLinkLoginGovBypassTime);
   }
 
   private Optional<Instant> nullableTimestampToOptionalInstant(

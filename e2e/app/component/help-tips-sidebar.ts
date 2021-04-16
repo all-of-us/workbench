@@ -2,6 +2,7 @@ import { SideBarLink } from 'app/text-labels';
 import { Page } from 'puppeteer';
 import { waitForText } from 'utils/waits-utils';
 import BaseHelpSidebar from './base-help-sidebar';
+import { logger } from 'libs/logger';
 
 const sidebarTitle = 'Help Tips';
 
@@ -19,6 +20,6 @@ export default class HelpTipsSidebar extends BaseHelpSidebar {
     // Wait for visible texts
     await this.page.waitForXPath(`${this.getXpath()}//h3`, { visible: true });
     const title = await this.getTitle();
-    console.log(`Opened "${title}" sidebar`);
+    logger.info(`Opened "${title}" sidebar`);
   }
 }

@@ -5,7 +5,7 @@ import BaseElement from './base-element';
 import { buildXPath } from 'app/xpath-builders';
 
 export default class RadioButton extends BaseElement {
-  static async findByName(page: Page, xOpt: XPathOptions, container?: Container): Promise<RadioButton> {
+  static findByName(page: Page, xOpt: XPathOptions, container?: Container): RadioButton {
     xOpt.type = ElementType.RadioButton;
     const radioButtonXpath = buildXPath(xOpt, container);
     const radioButton = new RadioButton(page, radioButtonXpath);

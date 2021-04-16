@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -59,6 +60,11 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
         DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
   }
 
+  default Optional<DbWorkspace> getByGoogleProject(String googleProject) {
+    return findFirstByGoogleProjectAndActiveStatusOrderByLastModifiedTimeDesc(
+        googleProject, DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
+  }
+
   DbWorkspace findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
       String workspaceNamespace, String firecloudName, short activeStatus);
 
@@ -96,6 +102,9 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   Optional<DbWorkspace> findFirstByWorkspaceNamespaceAndActiveStatusOrderByLastModifiedTimeDesc(
       String workspaceNamespace, short activeStatus);
 
+  Optional<DbWorkspace> findFirstByGoogleProjectAndActiveStatusOrderByLastModifiedTimeDesc(
+      String googleProject, short activeStatus);
+
   List<DbWorkspace> findAllByBillingMigrationStatus(Short billingMigrationStatus);
 
   DbWorkspace findDbWorkspaceByWorkspaceId(long workspaceId);
@@ -117,31 +126,24 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   @Query("SELECT w.creator FROM DbWorkspace w WHERE w.billingStatus = (:status)")
   Set<DbUser> findAllCreatorsByBillingStatus(@Param("status") BillingStatus status);
 
-  List<DbWorkspace> findAllByActiveStatusIn(Short workspaceActiveStatusOrdinal);
-
-  // TODO replace with AccessTier RW-6137
-  // @Query(
-  //      "SELECT activeStatus, dataAccessLevel, COUNT(workspaceId) FROM DbWorkspace "
-  //          + "GROUP BY activeStatus, dataAccessLevel ORDER BY activeStatus, dataAccessLevel")
-  //  List<ActiveStatusAndDataAccessLevelToCountResult> getActiveStatusAndDataAccessLevelToCount();
-
-  // TODO replace with AccessTier RW-6137
-  //  interface ActiveStatusAndDataAccessLevelToCountResult {
-  //      Short getWorkspaceActiveStatus();
-  //
-  //      Short getDataAccessLevel();
-  //
-  //      Long getWorkspaceCount();
-  //    }
-
   @Query(
-      "SELECT activeStatus, COUNT(workspaceId) FROM DbWorkspace GROUP BY activeStatus ORDER BY"
-          + " activeStatus")
-  List<ActiveStatusToCountResult> getActiveStatusToCount();
+      "SELECT COUNT(workspace.workspaceId) as workspaceCount, workspace.activeStatus, tier "
+          + "FROM DbWorkspace workspace "
+          + "JOIN DbCdrVersion version ON workspace.cdrVersion.cdrVersionId = version.cdrVersionId "
+          + "JOIN DbAccessTier tier ON version.accessTier.accessTierId = tier.accessTierId "
+          + "GROUP BY workspace.activeStatus, tier "
+          + "ORDER BY workspace.activeStatus, tier")
+  List<WorkspaceCountByActiveStatusAndTier> getWorkspaceCountGaugeData();
 
-  interface ActiveStatusToCountResult {
-    Short getWorkspaceActiveStatus();
-
+  interface WorkspaceCountByActiveStatusAndTier {
     Long getWorkspaceCount();
+
+    Short getActiveStatus();
+
+    DbAccessTier getTier();
+
+    default WorkspaceActiveStatus getActiveStatusEnum() {
+      return DbStorageEnums.workspaceActiveStatusFromStorage(getActiveStatus());
+    }
   }
 }

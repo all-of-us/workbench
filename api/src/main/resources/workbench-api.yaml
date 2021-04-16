@@ -4560,6 +4560,7 @@ definitions:
     - BETA_ACCESS
     - ERA_COMMONS
     - TWO_FACTOR_AUTH
+    - RAS_LINK_LOGIN_GOV
   AccessBypassRequest:
     type: object
     required:
@@ -4881,6 +4882,7 @@ definitions:
     - FITBIT_HEART_RATE_LEVEL
     - FITBIT_ACTIVITY
     - FITBIT_INTRADAY_STEPS
+    - WHOLE_GENOME
     - BOTH
   DataSetExportRequest:
     type: object
@@ -5284,6 +5286,12 @@ definitions:
         type: integer
         format: int64
       eraCommonsCompletionTime:
+        type: integer
+        format: int64
+      rasLinkLoginGovBypassTime:
+        type: integer
+        format: int64
+      rasLinkLoginGovCompletionTime:
         type: integer
         format: int64
       complianceTrainingBypassTime:

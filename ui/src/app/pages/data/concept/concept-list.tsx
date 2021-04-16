@@ -2,7 +2,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {domainToTitle} from 'app/cohort-search/utils';
-import {Button, Clickable} from 'app/components/buttons';
+import {Button} from 'app/components/buttons';
 import {FlexRow, FlexRowWrap} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -186,15 +186,6 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
       const {concept} = this.props;
       const {conceptAddModalOpen, updating} = this.state;
       return <div>
-        <FlexRow>
-          <h3 style={styles.sectionTitle}>Selected Concepts</h3>
-          <Clickable style={{marginRight: '1rem', position: 'absolute', right: '0px'}}
-                     onClick={() => setSidebarActiveIconStore.next(undefined)}>
-            <img src={'/assets/icons/times-light.svg'}
-                 style={{height: '27px', width: '17px'}}
-                 alt='Close'/>
-          </Clickable>
-        </FlexRow>
         <div style={styles.selectionContainer}>
           {updating && <SpinnerOverlay/>}
           {!!concept && concept.length > 0 && this.renderSelections()}

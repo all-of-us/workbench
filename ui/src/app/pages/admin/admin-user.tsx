@@ -411,6 +411,7 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
       updatedProfile,
       verifiedInstitutionOptions
     } = this.state;
+    const {enableRasLoginGovLinking} = serverConfigStore.getValue();
     const errors = validate({
       'verifiedInstitutionalAffiliation': this.validateVerifiedInstitutionalAffiliation(),
       'institutionShortName': this.validateInstitutionShortname(),
@@ -512,9 +513,14 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
                 containerStyle={styles.textInputContainer}
             />
             <TextInputWithLabel
-                labelText={'Registration state'}
-                placeholder={fp.capitalize(updatedProfile.dataAccessLevel.toString())}
-                inputId={'registrationState'}
+                labelText={'Access tiers'}
+                placeholder={
+                  fp.flow(
+                    fp.map(fp.capitalize),
+                    fp.join(', '))
+                  (updatedProfile.accessTierShortNames)
+                }
+                inputId={'accessTiers'}
                 disabled={true}
                 inputStyle={{...styles.textInput, ...styles.backgroundColorDark}}
                 containerStyle={styles.textInputContainer}
@@ -639,6 +645,13 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
                     onToggle={() => {}}
                     dataTestId={'dataUseAgreementBypassToggle'}
                 />
+                {enableRasLoginGovLinking && <ToggleWithLabelAndToggledText
+                    label={'RAS Login.gov Link'}
+                    initialValue={!!updatedProfile.rasLinkLoginGovBypassTime}
+                    disabled={true}
+                    onToggle={() => {}}
+                    dataTestId={'rasLinkLoginGovBypassToggle'}
+                />}
               </FlexRow>
             </div>
           </FlexColumn>

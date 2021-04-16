@@ -11,14 +11,15 @@ public class MetricTest {
 
   @Test
   public void testMatchingLabelIsSupported() {
-    assertThat(GaugeMetric.USER_COUNT.getLabels()).contains(MetricLabel.USER_BYPASSED_BETA);
-    assertThat(GaugeMetric.USER_COUNT.supportsLabel(MetricLabel.USER_BYPASSED_BETA)).isTrue();
-    assertThat(EventMetric.NOTEBOOK_CLONE.supportsLabel(MetricLabel.USER_BYPASSED_BETA)).isFalse();
+    assertThat(GaugeMetric.USER_COUNT.getLabels()).contains(MetricLabel.USER_DISABLED);
+    assertThat(GaugeMetric.USER_COUNT.supportsLabel(MetricLabel.USER_DISABLED)).isTrue();
+    assertThat(EventMetric.NOTEBOOK_CLONE.supportsLabel(MetricLabel.USER_DISABLED)).isFalse();
   }
 
   @Test
   public void testEmptyLabelsListAllowsNoLabels() {
     assertThat(GaugeMetric.COHORT_COUNT.getLabels()).isEmpty();
-    assertThat(GaugeMetric.COHORT_COUNT.supportsLabel(MetricLabel.DATA_ACCESS_LEVEL)).isFalse();
+    assertThat(GaugeMetric.COHORT_COUNT.supportsLabel(MetricLabel.ACCESS_TIER_SHORT_NAME))
+        .isFalse();
   }
 }

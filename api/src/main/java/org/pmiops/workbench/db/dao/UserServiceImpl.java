@@ -28,7 +28,6 @@ import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbAdminActionHistory;
@@ -234,7 +233,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         user.getBetaAccessBypassTime() != null || !configProvider.get().access.enableBetaAccess;
     boolean twoFactorAuthComplete =
         user.getTwoFactorAuthCompletionTime() != null || user.getTwoFactorAuthBypassTime() != null;
-
     // TODO: can take out other checks once we're entirely moved over to the 'module' columns
     return !user.getDisabled()
         && complianceTrainingCompliant
@@ -499,6 +497,17 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         newBypassTime,
         DbUser::setTwoFactorAuthBypassTime,
         BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME);
+  }
+
+  @Override
+  public void setRasLinkLoginGovBypassTime(
+      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime) {
+    setBypassTimeWithRetries(
+        userId,
+        previousBypassTime,
+        newBypassTime,
+        DbUser::setRasLinkLoginGovBypassTime,
+        BypassTimeTargetProperty.RAS_LINK_LOGIN_GOV);
   }
 
   /**
@@ -811,9 +820,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     syncTwoFactorAuthStatus(user, Agent.asUser(user));
   }
 
-  /** */
   @Override
   public DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent) {
+    return syncTwoFactorAuthStatus(
+        targetUser, agent, directoryService.getUser(targetUser.getUsername()).getIsEnrolledIn2Sv());
+  }
+
+  @Override
+  public DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent, boolean isEnrolledIn2FA) {
     if (isServiceAccount(targetUser)) {
       // Skip sync for service account user rows.
       return targetUser;
@@ -821,8 +835,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     return updateUserWithRetries(
         user -> {
-          boolean isEnrolledIn2FA =
-              directoryService.getUser(user.getUsername()).getIsEnrolledIn2Sv();
           if (isEnrolledIn2FA) {
             if (user.getTwoFactorAuthCompletionTime() == null) {
               user.setTwoFactorAuthCompletionTime(new Timestamp(clock.instant().toEpochMilli()));
@@ -838,20 +850,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    final List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
-    return rows.stream()
+    return userDao.getUserCountGaugeData().stream()
         .map(
             row ->
                 MeasurementBundle.builder()
                     .addMeasurement(GaugeMetric.USER_COUNT, row.getUserCount())
-                    // TODO remove in RW-6189 or RW-6137.
-                    // until then, what we're interested in is registered vs not
-                    .addTag(
-                        MetricLabel.DATA_ACCESS_LEVEL,
-                        AccessTierService.temporaryDataAccessLevelKluge(
-                                row.getAccessTierShortNames())
-                            .toString())
                     .addTag(MetricLabel.USER_DISABLED, row.getDisabled().toString())
+                    .addTag(MetricLabel.ACCESS_TIER_SHORT_NAMES, row.getAccessTierShortNames())
                     .build())
         .collect(ImmutableList.toImmutableList());
   }
@@ -910,6 +915,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       case TWO_FACTOR_AUTH:
         previousBypassTime = user.getTwoFactorAuthBypassTime();
         setTwoFactorAuthBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
+        break;
+      case RAS_LINK_LOGIN_GOV:
+        previousBypassTime = user.getRasLinkLoginGovBypassTime();
+        setRasLinkLoginGovBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
         break;
       default:
         throw new BadRequestException(

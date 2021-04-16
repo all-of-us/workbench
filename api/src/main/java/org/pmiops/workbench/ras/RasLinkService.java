@@ -3,7 +3,6 @@ package org.pmiops.workbench.ras;
 import static org.pmiops.workbench.ras.OpenIdConnectClient.decodedJwt;
 import static org.pmiops.workbench.ras.RasLinkConstants.ACR_CLAIM;
 import static org.pmiops.workbench.ras.RasLinkConstants.ACR_CLAIM_IAL_2_IDENTIFIER;
-import static org.pmiops.workbench.ras.RasLinkConstants.EMAIl_FIELD_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.Id_TOKEN_FIELD_NAME;
 import static org.pmiops.workbench.ras.RasLinkConstants.LOGIN_GOV_IDENTIFIER_LOWER_CASE;
 import static org.pmiops.workbench.ras.RasLinkConstants.PREFERRED_USERNAME_FIELD_NAME;
@@ -16,7 +15,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
@@ -72,7 +70,7 @@ import org.springframework.stereotype.Service;
  * }</pre>
  *
  * The {@code preferred_username} field should end with "@login.gov" if using that to login. The
- * {@code email} field is the user used to sign in in login.gov. We can use that as login.gov user
+ * {@code preferred_username} field is unique login.gov username. We can use that as login.gov user
  * name.
  *
  * <p>Step4: Use step3's login.gov username to update AoU database by {@link
@@ -128,7 +126,7 @@ public class RasLinkService {
 
   /** Validates user has IAL2 setup. See class javadoc Step2 for more details. */
   static boolean isIal2(String acrClaim) {
-    return Arrays.asList(acrClaim.split(" ")).contains(ACR_CLAIM_IAL_2_IDENTIFIER);
+    return acrClaim.contains(ACR_CLAIM_IAL_2_IDENTIFIER);
   }
 
   /**
@@ -137,15 +135,13 @@ public class RasLinkService {
    */
   private static String getLoginGovUsername(JsonNode userInfo) {
     String preferredUsername = userInfo.get(PREFERRED_USERNAME_FIELD_NAME).asText("");
-    String email = userInfo.get(EMAIl_FIELD_NAME).asText("");
-    if (email.isEmpty()
-        || !preferredUsername.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
+    if (!preferredUsername.toLowerCase().contains(LOGIN_GOV_IDENTIFIER_LOWER_CASE)) {
       throw new ForbiddenException(
           String.format(
-              "User does not have valid login.gov account, preferred_username: %s, email: %s",
-              preferredUsername, email));
+              "User does not have valid login.gov account, preferred_username: %s",
+              preferredUsername));
     }
-    return email;
+    return preferredUsername;
   }
 
   /** Decode an encoded url */

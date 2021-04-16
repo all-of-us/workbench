@@ -49,7 +49,7 @@ export default abstract class AuthenticatedPage extends BasePage {
    * Find the actual displayed User name string in sidenav dropdown.
    */
   async getUsername(): Promise<string> {
-    const xpath = `//*[child::clr-icon[@shape="angle"]/*[@role="img"]]`;
+    const xpath = '//*[child::clr-icon[@shape="angle"]/*[@role="img"]]';
     const username = (await this.page.$x(xpath))[0];
     return getPropValue<string>(username, 'innerText');
   }

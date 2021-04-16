@@ -263,9 +263,9 @@ export const NotebookRedirect = fp.flow(
 
     private notebookUrl(runtime: Runtime, nbName: string): string {
       return encodeURI(
-        environment.leoApiUrl + '/notebooks/'
+        environment.leoApiUrl + '/proxy/'
           + runtime.googleProject + '/'
-          + runtime.runtimeName + '/notebooks/' + nbName);
+          + runtime.runtimeName + '/jupyter/notebooks/' + nbName);
     }
 
     // get notebook name without file suffix

@@ -32,13 +32,13 @@ export default class CohortSearchPage extends AuthenticatedPage {
     return true;
   }
 
-  async waitForEthnicityCriteriaLink(criteriaType: Ethnicity): Promise<ClrIconLink> {
+  waitForEthnicityCriteriaLink(criteriaType: Ethnicity): ClrIconLink {
     return ClrIconLink.findByName(this.page, { startsWith: criteriaType, iconShape: 'plus-circle', ancestorLevel: 0 });
   }
 
   async addEthnicity(ethnicities: Ethnicity[]): Promise<void> {
     for (const ethnicity of ethnicities) {
-      const link = await this.waitForEthnicityCriteriaLink(ethnicity);
+      const link = this.waitForEthnicityCriteriaLink(ethnicity);
       await link.click();
     }
   }
@@ -63,19 +63,19 @@ export default class CohortSearchPage extends AuthenticatedPage {
     // Get count from slider badge
     const count = await waitForNumericalString(this.page, `${this.containerXpath}//*[@id="age-count"]`);
     // Click ADD SELECTION to add selected age range
-    await Button.findByName(this.page, { name: LinkText.AddSelection }).then((button) => button.click());
+    await Button.findByName(this.page, { name: LinkText.AddSelection }).click();
     await this.reviewAndSaveCriteria();
     return count;
   }
 
   async reviewAndSaveCriteria(): Promise<void> {
     // Click FINISH & REVIEW button. Sidebar should open.
-    const finishAndReviewButton = await Button.findByName(this.page, { name: LinkText.FinishAndReview });
+    const finishAndReviewButton = Button.findByName(this.page, { name: LinkText.FinishAndReview });
     await finishAndReviewButton.waitUntilEnabled();
     await finishAndReviewButton.click();
 
     // Click SAVE CRITERIA button. Sidebar closes.
-    const reviewCriteriaSidebar = await new ReviewCriteriaSidebar(this.page);
+    const reviewCriteriaSidebar = new ReviewCriteriaSidebar(this.page);
     await reviewCriteriaSidebar.waitUntilVisible();
     await reviewCriteriaSidebar.clickSaveCriteriaButton();
   }
@@ -83,7 +83,10 @@ export default class CohortSearchPage extends AuthenticatedPage {
   // Experimental
   async drageAgeSlider(): Promise<void> {
     const getXpath = (classValue: string) => {
-      return `${this.containerXpath}//*[text()="Age Range"]/ancestor::node()[1]//*[contains(@class,"${classValue}") and @role="slider"]`;
+      return (
+        `${this.containerXpath}//*[text()="Age Range"]/ancestor::node()[1]` +
+        `//*[contains(@class,"${classValue}") and @role="slider"]`
+      );
     };
 
     const lowerNumberInputHandle = await this.page.waitForXPath(getXpath('noUi-handle-lower'), { visible: true });
