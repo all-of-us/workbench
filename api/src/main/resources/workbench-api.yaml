@@ -2415,7 +2415,7 @@ paths:
           description: The Terra Job for the extraction workflow
           schema:
             "$ref": "#/definitions/GenomicExtractionJobListResponse"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/datasets/{datasetId}/extractGenomicData":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/datasets/{dataSetId}/extractGenomicData":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
