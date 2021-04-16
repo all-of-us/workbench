@@ -17,7 +17,7 @@ import {RuntimeConfigurationType, RuntimeStatus, WorkspaceAccessLevel, Workspace
 import {RuntimeApi} from 'generated/fetch/api';
 import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
+import {cdrVersionTiersResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {defaultGceConfig, defaultDataprocConfig, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {workspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
@@ -58,7 +58,7 @@ describe('RuntimePanel', () => {
         billingAccountType: BillingAccountType.FREETIER,
         cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
       },
-      cdrVersionListResponse,
+      cdrVersionTiersResponse,
       onClose
     };
 

@@ -13,12 +13,10 @@ import {UserMetricsApiStub} from 'testing/stubs/user-metrics-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {cdrVersionStore} from "../../utils/stores";
-import {cdrVersionListResponse} from "../../../testing/stubs/cdr-versions-api-stub";
-
+import {cdrVersionStore} from 'app/utils/stores';
+import {cdrVersionTiersResponse} from "testing/stubs/cdr-versions-api-stub";
 
 describe('HomepageComponent', () => {
-
   const profile = ProfileStubVariables.PROFILE_STUB;
   let profileApi: ProfileApiStub;
 

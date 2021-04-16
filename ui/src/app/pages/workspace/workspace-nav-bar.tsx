@@ -14,10 +14,14 @@ import {
   withCurrentWorkspace,
   withUrlParams
 } from 'app/utils';
-import {getCdrVersion, getDefaultCdrVersion, hasDefaultCdrVersion} from 'app/utils/cdr-versions';
+import {
+  getCdrVersion,
+  getDefaultCdrVersionForTier,
+  hasDefaultCdrVersion
+} from 'app/utils/cdr-versions';
 import {NavStore} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/navigation';
-import {CdrVersionListResponse, Workspace} from 'generated/fetch';
+import {CdrVersionTiersResponse, Workspace} from 'generated/fetch';
 import {CdrVersionUpgradeModal} from './cdr-version-upgrade-modal';
 
 const styles = reactStyles({
@@ -80,8 +84,8 @@ const stylesFunction = {
 
 const USER_DISMISSED_ALERT_VALUE = 'DISMISSED';
 
-const CdrVersion = (props: {workspace: Workspace, cdrVersionListResponse: CdrVersionListResponse}) => {
-  const {workspace, cdrVersionListResponse} = props;
+const CdrVersion = (props: {workspace: Workspace, cdrVersionTiersResponse: CdrVersionTiersResponse}) => {
+  const {workspace, cdrVersionTiersResponse} = props;
   const {namespace, id} = workspace;
 
   const localStorageKey = `${namespace}-${id}-user-dismissed-cdr-version-update-alert`;
@@ -110,10 +114,10 @@ const CdrVersion = (props: {workspace: Workspace, cdrVersionListResponse: CdrVer
   </Clickable>;
 
   return <FlexRow data-test-id='cdr-version' style={{textTransform: 'none'}}>
-    {getCdrVersion(workspace, cdrVersionListResponse).name}
-    {!hasDefaultCdrVersion(workspace, cdrVersionListResponse) && <NewVersionFlag/>}
+    {getCdrVersion(workspace, cdrVersionTiersResponse).name}
+    {!hasDefaultCdrVersion(workspace, cdrVersionTiersResponse) && <NewVersionFlag/>}
     {showModal && <CdrVersionUpgradeModal
-        defaultCdrVersionName={getDefaultCdrVersion(cdrVersionListResponse).name}
+        defaultCdrVersionName={getDefaultCdrVersionForTier(workspace, cdrVersionTiersResponse).name}
         onClose={() => setShowModal(false)}
         upgrade={() => NavStore.navigate(['/workspaces', namespace, id, 'duplicate'])}
     />}
@@ -138,7 +142,7 @@ export const WorkspaceNavBarReact = fp.flow(
   withUrlParams(),
   withCdrVersions(),
 )(props => {
-  const {tabPath, workspace, urlParams: {ns: namespace, wsid: id}, cdrVersionListResponse} = props;
+  const {tabPath, workspace, urlParams: {ns: namespace, wsid: id}, cdrVersionTiersResponse} = props;
   const activeTabIndex = fp.findIndex(['link', tabPath], tabs);
 
   const navTab = (currentTab, disabled) => {
@@ -164,7 +168,7 @@ export const WorkspaceNavBarReact = fp.flow(
     {activeTabIndex > 0 && navSeparator}
     {fp.map(tab => navTab(tab, restrictTab(props.workspace, tab)), tabs)}
     <div style={{flexGrow: 1}}/>
-    {workspace && <CdrVersion workspace={workspace} cdrVersionListResponse={cdrVersionListResponse}/>}
+    {workspace && <CdrVersion workspace={workspace} cdrVersionTiersResponse={cdrVersionTiersResponse}/>}
   </div>;
 });
 

@@ -7,7 +7,7 @@ import {currentWorkspaceStore, navigate, serverConfigStore} from 'app/utils/navi
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {DisseminateResearchEnum, ResearchOutcomeEnum, SpecificPopulationEnum,UserApi, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
+import {cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
 import {workspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';

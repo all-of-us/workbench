@@ -15,6 +15,7 @@ import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, validateInputForMySQL, withCdrVersions, withCurrentConcept, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
+import {findCdrVersion} from 'app/utils/cdr-versions';
 import {
   attributesSelectionStore,
   currentCohortSearchContextStore,
@@ -23,7 +24,7 @@ import {
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   CdrVersion,
-  CdrVersionListResponse,
+  CdrVersionTiersResponse,
   Criteria,
   CriteriaSubType,
   CriteriaType,
@@ -230,7 +231,7 @@ const columns = [
 const searchTrigger = 2;
 
 interface Props {
-  cdrVersionListResponse: CdrVersionListResponse;
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
   concept?: Array<Criteria>;
   hierarchy: Function;
   searchContext: any;
@@ -284,9 +285,8 @@ export const ListSearch = fp.flow(withCdrVersions(), withCurrentWorkspace(), wit
       };
     }
     componentDidMount(): void {
-      const {cdrVersionListResponse, searchTerms, searchContext: {source}, workspace: {cdrVersionId}} = this.props;
-      const cdrVersions = cdrVersionListResponse.items;
-      this.setState({cdrVersion: cdrVersions.find(cdr => cdr.cdrVersionId === cdrVersionId)});
+      const {cdrVersionTiersResponse, searchTerms, searchContext: {source}, workspace: {cdrVersionId}} = this.props;
+      this.setState({cdrVersion: findCdrVersion(cdrVersionId, cdrVersionTiersResponse)});
       if (source === 'conceptSetDetails') {
         this.setState({data: this.props.concept});
       } else {

@@ -373,9 +373,9 @@ export const withRouteConfigData = () => {
   return connectBehaviorSubject(routeConfigDataStore, 'routeConfigData');
 };
 
-// HOC that provides a 'cdrVersionListResponse' prop with the CDR version information.
+// HOC that provides a 'cdrVersionTiersResponse' prop with the CDR version information.
 export const withCdrVersions = () => {
-  return withStore(cdrVersionStore, 'cdrVersionListResponse');
+  return withStore(cdrVersionStore, 'cdrVersionTiersResponse');
 };
 
 // HOC that provides a 'queryParams' prop with current query params

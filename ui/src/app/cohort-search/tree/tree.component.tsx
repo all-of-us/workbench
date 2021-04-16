@@ -14,7 +14,7 @@ import {getCdrVersion} from 'app/utils/cdr-versions';
 import {currentCohortCriteriaStore, currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
-  CdrVersionListResponse,
+  CdrVersionTiersResponse,
   Criteria,
   CriteriaSubType,
   CriteriaType,
@@ -130,7 +130,7 @@ interface Props {
   setSearchTerms: Function;
   concept: Array<any>;
   workspace: WorkspaceData;
-  cdrVersionListResponse: CdrVersionListResponse;
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
 }
 
 interface State {
@@ -309,9 +309,9 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
 
   // Hides the tree node for COPE survey if config hasCopeSurveyData is set to false
   showNode(node: Criteria) {
-    const {workspace, cdrVersionListResponse} = this.props;
+    const {workspace, cdrVersionTiersResponse} = this.props;
     return node.subtype === CriteriaSubType.SURVEY.toString() && node.name.includes('COPE')
-        ? getCdrVersion(workspace, cdrVersionListResponse).hasCopeSurveyData
+        ? getCdrVersion(workspace, cdrVersionTiersResponse).hasCopeSurveyData
         : true;
   }
 

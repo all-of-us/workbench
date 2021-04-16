@@ -20,7 +20,7 @@ import {getCdrVersion} from 'app/utils/cdr-versions';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {
   BillingAccountType,
-  CdrVersionListResponse,
+  CdrVersionTiersResponse,
   Profile,
   UserRole,
   WorkspaceAccessLevel
@@ -28,7 +28,7 @@ import {
 
 interface WorkspaceProps {
   profileState: {profile: Profile, reload: Function, updateCache: Function};
-  cdrVersionListResponse: CdrVersionListResponse;
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
 }
 
 interface WorkspaceState {
@@ -197,7 +197,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
   }
 
   render() {
-    const {profileState: {profile}, cdrVersionListResponse} = this.props;
+    const {profileState: {profile}, cdrVersionTiersResponse} = this.props;
     const {workspace, workspaceUserRoles, sharing, publishing} = this.state;
     return <div style={styles.mainPage}>
       <FlexColumn style={{margin: '1rem', width: '98%'}}>
@@ -242,7 +242,7 @@ export const WorkspaceAbout = fp.flow(withUserProfile(), withUrlParams(), withCd
           <div style={styles.infoBox} data-test-id='cdrVersion'>
             <div style={styles.infoBoxHeader}>Dataset</div>
             <div style={{fontSize: '0.5rem'}}>
-              {workspace ? getCdrVersion(workspace, cdrVersionListResponse).name : 'Loading...'}
+              {workspace ? getCdrVersion(workspace, cdrVersionTiersResponse).name : 'Loading...'}
             </div>
           </div>
           <div style={styles.infoBox} data-test-id='creationDate'>
