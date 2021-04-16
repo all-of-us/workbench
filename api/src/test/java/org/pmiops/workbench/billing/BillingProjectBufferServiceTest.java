@@ -37,6 +37,7 @@ import java.util.concurrent.Future;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import org.javers.common.collections.Sets;
@@ -461,18 +462,15 @@ public class BillingProjectBufferServiceTest {
 
     billingProjectBufferService.syncBillingProjectStatus();
 
-    assertThat(
-            billingProjectBufferEntryDao.countByStatusAndAccessTier(
-                BufferEntryStatus.CREATING, registeredTier))
-        .isEqualTo(0);
-    assertThat(
-            billingProjectBufferEntryDao.countByStatusAndAccessTier(
-                BufferEntryStatus.AVAILABLE, registeredTier))
-        .isEqualTo(2);
-    assertThat(
-            billingProjectBufferEntryDao.countByStatusAndAccessTier(
-                BufferEntryStatus.ERROR, registeredTier))
-        .isEqualTo(1);
+    assertThat(countByStatus(BufferEntryStatus.CREATING)).isEqualTo(0);
+    assertThat(countByStatus(BufferEntryStatus.AVAILABLE)).isEqualTo(2);
+    assertThat(countByStatus(BufferEntryStatus.ERROR)).isEqualTo(1);
+  }
+
+  private long countByStatus(BufferEntryStatus status) {
+    return StreamSupport.stream(billingProjectBufferEntryDao.findAll().spliterator(), false)
+        .filter(entry -> entry.getStatusEnum() == status)
+        .count();
   }
 
   @Test

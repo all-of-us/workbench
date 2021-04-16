@@ -328,14 +328,12 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   public BillingProjectBufferStatus getStatus() {
     return new BillingProjectBufferStatus()
         .availablePerTier(
-            accessTierService.getAllTiers().stream()
+            billingProjectBufferEntryDao.getBillingBufferGaugeData().stream()
                 .map(
                     tier ->
                         new AvailableBufferPerTier()
-                            .accessTierShortName(tier.getShortName())
-                            .bufferSize(
-                                billingProjectBufferEntryDao.countByStatusAndAccessTier(
-                                    BufferEntryStatus.AVAILABLE, tier)))
+                            .accessTierShortName(tier.getAccessTier().getShortName())
+                            .bufferSize(tier.getNumProjects()))
                 .collect(Collectors.toList()));
   }
 }
