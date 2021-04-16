@@ -23,7 +23,7 @@ interface InteractiveProps {
   tagName: keyof JSX.IntrinsicElements;
 }
 
-export const Interactivex = ({
+export const Interactivex: React.FunctionComponent<InteractiveProps & React.HTMLAttributes<HTMLOrSVGElement>> = ({
   className = '',
   tagName: TagName = 'div',
   type, 
