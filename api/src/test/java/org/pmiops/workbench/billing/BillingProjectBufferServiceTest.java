@@ -925,7 +925,7 @@ public class BillingProjectBufferServiceTest {
 
     assertThat(
             billingProjectBufferService.getStatus().getAvailablePerTier().stream()
-                .allMatch(tier -> tier.getBufferSize() == 0))
+                .allMatch(tier -> tier.getAvailableProjects() == 0))
         .isTrue();
 
     makeEntry(BufferEntryStatus.AVAILABLE, registeredTier);
@@ -948,19 +948,19 @@ public class BillingProjectBufferServiceTest {
     List<AvailableBufferPerTier> perTier = status.getAvailablePerTier();
     assertThat(perTier).hasSize(2);
 
-    Optional<Long> registeredTierBufferSize =
+    Optional<Long> registeredAvailable =
         perTier.stream()
             .filter(tier -> tier.getAccessTierShortName().equals(registeredTier.getShortName()))
-            .map(AvailableBufferPerTier::getBufferSize)
+            .map(AvailableBufferPerTier::getAvailableProjects)
             .findAny();
-    assertThat(registeredTierBufferSize).hasValue(3);
+    assertThat(registeredAvailable).hasValue(3);
 
-    Optional<Long> controlledTierBufferSize =
+    Optional<Long> controlledAvailable =
         perTier.stream()
             .filter(tier -> tier.getAccessTierShortName().equals(controlledTier.getShortName()))
-            .map(AvailableBufferPerTier::getBufferSize)
+            .map(AvailableBufferPerTier::getAvailableProjects)
             .findAny();
-    assertThat(controlledTierBufferSize).hasValue(2);
+    assertThat(controlledAvailable).hasValue(2);
   }
 
   @Test

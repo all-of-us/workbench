@@ -5994,7 +5994,7 @@ definitions:
       accessTierShortName:
         description: 'The shortName of an access tier'
         type: string
-      bufferSize:
+      availableProjects:
         description: 'Count of the AVAILABLE billing buffer projects in this access tier'
         type: integer
         format: int64

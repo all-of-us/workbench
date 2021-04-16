@@ -334,7 +334,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
                     tier ->
                         new AvailableBufferPerTier()
                             .accessTierShortName(tier.getAccessTier().getShortName())
-                            .bufferSize(tier.getNumProjects()))
+                            .availableProjects(tier.getNumProjects()))
                 .collect(Collectors.toList()));
   }
 }
