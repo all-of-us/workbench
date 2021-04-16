@@ -4,7 +4,7 @@ import { LinkText, ResourceCard } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { config } from 'resources/workbench-config';
-import WorkspaceDataPage from '../../app/page/workspace-data-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 
 describe('Copy Concept Set to another workspace', () => {
   beforeEach(async () => {

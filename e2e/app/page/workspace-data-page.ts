@@ -162,13 +162,13 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     return new DataResourceCard(this.page).findCard(conceptSetsName, ResourceCard.ConceptSet);
   }
 
-  async findOrCreateConceptSet(): Promise<string> {
+  async findOrCreateConceptSet(procedureName = 'Radiologic examination'): Promise<string> {
     let conceptName: string;
 
     // Open Concept Sets tab.
     await this.openConceptSetsSubtab();
 
-    // Search for existing ConceptSet instead create new
+    // Search for existing ConceptSet
     const existingConceptSetName = await this.findConceptSetsCard();
     if (existingConceptSetName !== null) {
       conceptName = await existingConceptSetName.getResourceName();
@@ -178,20 +178,16 @@ export default class WorkspaceDataPage extends WorkspaceBase {
 
     // Create new Concept Set
     const { conceptSearchPage, criteriaSearch } = await this.openConceptSetSearch(Domain.Procedures);
-
     // Search by Procedure name.
-    const procedureName = 'Radiologic examination';
     await criteriaSearch.searchCriteria(procedureName);
-
     // Select first two rows.
     await criteriaSearch.resultsTableSelectRow(1, 1);
     await criteriaSearch.resultsTableSelectRow(2, 1);
-
     await conceptSearchPage.reviewAndSaveConceptSet();
     conceptName = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
 
-    // Open Concept Set page.
-    const conceptSetActionPage = new ConceptSetActionsPage(page);
+    // Open Concept Set tab.
+    const conceptSetActionPage = new ConceptSetActionsPage(this.page);
     await conceptSetActionPage.openConceptSet(conceptName);
 
     return conceptName;

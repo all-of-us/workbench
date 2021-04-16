@@ -33,9 +33,8 @@ beforeEach(async () => {
     }
     try {
       request.continue();
-    } catch (e) {
-      // Ignored
-    }
+      // tslint:disable-next-line:no-empty
+    } catch (e) {}
   });
 
   /** Emitted when a request fails. */

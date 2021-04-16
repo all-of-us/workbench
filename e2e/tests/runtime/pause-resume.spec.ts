@@ -17,15 +17,12 @@ describe('Updating runtime status', () => {
 
     // Create runtime
     await runtimePanel.createRuntime();
-    await page.waitForTimeout(2000);
 
     // Pause runtime
     await runtimePanel.pauseRuntime();
-    await page.waitForTimeout(2000);
 
     // Restart runtime
     await runtimePanel.resumeRuntime();
-    await page.waitForTimeout(2000);
 
     // Delete runtime
     await runtimePanel.deleteRuntime();
