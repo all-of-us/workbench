@@ -1,31 +1,12 @@
 package org.pmiops.workbench.access;
 
 import java.util.List;
-import javax.annotation.Nullable;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.model.DataAccessLevel;
 
 public interface AccessTierService {
   // TODO remove once we are no longer special-casing the Registered Tier
   String REGISTERED_TIER_SHORT_NAME = "registered";
-
-  /**
-   * Temporary kluge to assist in removing DataAccessLevel: return DataAccessLevel.REGISTERED if the
-   * user has Registered Tier membership
-   *
-   * @param accessTierShortNames a comma-separated list of shortNames associated with Access Tiers.
-   *     e.g. 'registered,controlled'
-   * @return whether a user has Registered Tier membership or not, as a DataAccessLevel
-   */
-  static DataAccessLevel temporaryDataAccessLevelKluge(@Nullable String accessTierShortNames) {
-    if (accessTierShortNames != null
-        && accessTierShortNames.contains(AccessTierService.REGISTERED_TIER_SHORT_NAME)) {
-      return DataAccessLevel.REGISTERED;
-    } else {
-      return DataAccessLevel.UNREGISTERED;
-    }
-  }
 
   /**
    * Return all access tiers in the database, in alphabetical order by shortName

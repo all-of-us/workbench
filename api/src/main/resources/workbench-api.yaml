@@ -3626,13 +3626,6 @@ definitions:
     enum:
     - LIVE
     - ARCHIVED
-  DataAccessLevel:
-    type: string
-    description: DEPRECATED.  Will be replaced by Access Tiers.  Was -> levels of access to data in the curated data repository
-    enum:
-    - unregistered
-    - registered
-    - protected
   RdrEntity:
     type: string
     description: Entities send to RDR
@@ -5246,9 +5239,6 @@ definitions:
         type: array
         items:
           type: string
-      dataAccessLevel:
-        "$ref": "#/definitions/DataAccessLevel"
-        description: DEPRECATED.  Will be replaced by accessTierShortNames.
       givenName:
         type: string
       familyName:
@@ -5351,9 +5341,6 @@ definitions:
         type: array
         items:
           type: string
-      dataAccessLevel:
-        "$ref": "#/definitions/DataAccessLevel"
-        description: DEPRECATED.  Will be replaced by accessTierShortNames.
       degrees:
         type: array
         items:

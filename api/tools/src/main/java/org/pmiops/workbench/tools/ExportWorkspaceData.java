@@ -306,12 +306,20 @@ public class ExportWorkspaceData {
         Optional.ofNullable(user.getDataUseAgreementCompletionTime())
             .map(dateFormat::format)
             .orElse(""));
+
     // TODO if we revive this tool:
     // update to use Access Tiers instead of Data Access Level
-    row.setCreatorRegistrationState(
-        AccessTierService.temporaryDataAccessLevelKluge(
-                String.join(",", accessTierService.getAccessTierShortNamesForUser(user)))
-            .toString());
+    // we can use this kluge in the meantime
+    // (migrated from AccessTierService.temporaryDataAccessLevelKluge)
+    final String accessTierShortNames =
+        String.join(",", accessTierService.getAccessTierShortNamesForUser(user));
+    if (accessTierShortNames != null
+        && accessTierShortNames.contains(AccessTierService.REGISTERED_TIER_SHORT_NAME)) {
+      row.setCreatorRegistrationState(AccessTierService.REGISTERED_TIER_SHORT_NAME);
+    } else {
+      row.setCreatorRegistrationState("unregistered");
+    }
+
     row.setDegrees(
         Optional.ofNullable(user.getDegreesEnum()).orElse(ImmutableList.of()).stream()
             .map(Degree::toString)
