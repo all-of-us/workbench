@@ -22,6 +22,7 @@ public class DbWgsExtractCromwellSubmission {
   private DbDataset dataset;
   private Long sampleCount;
   private Timestamp creationTime;
+  private Timestamp completionTime;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -91,6 +92,15 @@ public class DbWgsExtractCromwellSubmission {
     this.creationTime = creationTime;
   }
 
+  @Column(name = "completion_time")
+  public Timestamp getCompletionTime() {
+    return completionTime;
+  }
+
+  public void setCompletionTime(Timestamp completionTime) {
+    this.completionTime = completionTime;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -106,7 +116,8 @@ public class DbWgsExtractCromwellSubmission {
         && Objects.equals(workspace, that.workspace)
         && Objects.equals(creator, that.creator)
         && Objects.equals(dataset, that.dataset)
-        && Objects.equals(creationTime, that.creationTime);
+        && Objects.equals(creationTime, that.creationTime)
+        && Objects.equals(completionTime, that.completionTime);
   }
 
   @Override
@@ -118,6 +129,7 @@ public class DbWgsExtractCromwellSubmission {
         creator,
         dataset,
         sampleCount,
-        creationTime);
+        creationTime,
+        completionTime);
   }
 }

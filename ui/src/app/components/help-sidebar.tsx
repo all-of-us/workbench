@@ -717,7 +717,7 @@ export const HelpSidebar = fp.flow(
                 menu:  <FontAwesomeIcon icon={faEllipsisV} style={{color: colors.accent, fontSize: '.7rem', marginLeft: 0, paddingRight: 0, display: 'block'}}/>,
               }];
 
-              dataSetApi().getWgsCohortExtractionJobs(this.props.workspace.namespace, this.props.workspace.id)
+              dataSetApi().getGenomicExtractionJobs(this.props.workspace.namespace, this.props.workspace.id)
                 .then(jobs => {
                   console.log(jobs);
                 });

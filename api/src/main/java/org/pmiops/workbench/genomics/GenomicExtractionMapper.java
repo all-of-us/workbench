@@ -11,6 +11,9 @@ import org.pmiops.workbench.model.TerraJobStatus;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 @Mapper(
     config = MapStructConfig.class,
     collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE,
@@ -20,12 +23,17 @@ public interface GenomicExtractionMapper {
   @Mapping(
       target = "genomicExtractionJobId",
       source = "dbSubmission.wgsExtractCromwellSubmissionId")
+  @Mapping(target = "dataSetName", source = "dbSubmission.dataset.name")
   @Mapping(target = "status", source = "firecloudSubmission.status")
   @Mapping(target = "submissionDate", source = "firecloudSubmission.submissionDate")
   GenomicExtractionJob toApi(
       DbWgsExtractCromwellSubmission dbSubmission, FirecloudSubmission firecloudSubmission);
 
-  default TerraJobStatus cdrVersionId(FirecloudSubmissionStatus status) {
+  default BigDecimal convertMoney(Float f) {
+    return new BigDecimal(Float.toString(f)).setScale(2, RoundingMode.HALF_EVEN);
+  }
+
+  default TerraJobStatus convertJobStatus(FirecloudSubmissionStatus status) {
     if (status == FirecloudSubmissionStatus.DONE) {
       return TerraJobStatus.SUCCEEDED;
     } else if (status == FirecloudSubmissionStatus.ABORTED

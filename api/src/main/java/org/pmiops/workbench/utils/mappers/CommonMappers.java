@@ -10,7 +10,6 @@ import javax.inject.Provider;
 import joptsimple.internal.Strings;
 import org.mapstruct.Named;
 import org.pmiops.workbench.api.Etags;
-import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.stereotype.Service;
@@ -18,11 +17,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class CommonMappers {
 
-  private final Provider<WorkbenchConfig> workbenchConfigProvider;
   private final Clock clock;
 
-  public CommonMappers(Provider<WorkbenchConfig> workbenchConfigProvider, Clock clock) {
-    this.workbenchConfigProvider = workbenchConfigProvider;
+  public CommonMappers(Clock clock) {
     this.clock = clock;
   }
 
@@ -40,7 +37,7 @@ public class CommonMappers {
         .orElse(null);
   }
 
-  public Timestamp timestamp(OffsetDateTime offsetDateTime) {
+  public static Timestamp timestamp(OffsetDateTime offsetDateTime) {
     return Optional.ofNullable(offsetDateTime)
         .map(OffsetDateTime::toInstant)
         .map(Timestamp::from)
