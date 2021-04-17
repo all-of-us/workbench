@@ -55,7 +55,6 @@ import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 
 import {HelpTips} from 'app/components/help-tips';
 import {Criteria, ParticipantCohortStatus, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
-import {cohortsApi, dataSetApi} from '../services/swagger-fetch-clients';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {GenomicsExtractionTable} from './genomics-extraction-table';
 
@@ -601,6 +600,7 @@ export const HelpSidebar = fp.flow(
     }
 
     sidebarContent(activeIcon): {
+      overflow?: string;
       headerPadding?: string;
       renderHeader?: () => JSX.Element;
       bodyWidthRem?: string;
@@ -685,6 +685,7 @@ export const HelpSidebar = fp.flow(
           };
         case 'genomicExtractions':
           return {
+            overflow: 'visible',
             headerPadding: '0.75rem',
             renderHeader: () =>
               <h3 style={{...styles.sectionTitle, marginTop: 0}}>
@@ -693,7 +694,7 @@ export const HelpSidebar = fp.flow(
             bodyWidthRem: '30',
             renderBody: () => <GenomicsExtractionTable />,
             showFooter: false
-      }
+        }
       }
     }
 
@@ -736,7 +737,7 @@ export const HelpSidebar = fp.flow(
           <div style={this.sidebarStyle} data-test-id='sidebar-content'>
 
             {sidebarContent &&
-              <div style={{height: '100%', overflow: 'auto'}}>
+              <div style={{height: '100%', overflow: sidebarContent.overflow || 'auto'}}>
                 <FlexColumn style={{height: '100%'}}>
                   {sidebarContent.renderHeader &&
                     <FlexRow style={{justifyContent: 'space-between', padding: sidebarContent.headerPadding}}>

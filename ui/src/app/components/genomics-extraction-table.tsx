@@ -8,18 +8,21 @@ import * as moment from 'moment';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
-import {useContext, useEffect, useState} from 'react';
+import {Context, useContext, useEffect, useState} from 'react';
 import {CSSTransition, SwitchTransition} from 'react-transition-group';
 import {GenomicExtractionJob, TerraJobStatus} from '../../generated/fetch';
 import {dataSetApi} from '../services/swagger-fetch-clients';
 import colors from '../styles/colors';
 import {formatUsd} from '../utils/numbers';
+import {WorkspaceData} from '../utils/workspace-data';
+import {TooltipTrigger} from './popups';
 import {Spinner} from './spinners';
 
 function getIconConfigForStatus(status: TerraJobStatus) {
   if (status === TerraJobStatus.RUNNING) {
     return {
       icon: faSyncAlt,
+      iconTooltip: 'Processing extraction',
       style: {
         color: colors.success,
         animationName: 'spin',
@@ -38,6 +41,7 @@ function getIconConfigForStatus(status: TerraJobStatus) {
   } else if (status === TerraJobStatus.FAILED) {
     return {
       icon: faExclamationTriangle,
+      iconTooltip: 'This extraction has failed. Please try again from the dataset\'s page.',
       style: {
         color: colors.danger
       }
@@ -73,14 +77,18 @@ function mapJobToTableRow(job: GenomicExtractionJob) {
         {job.datasetName}
       </span>,
     status: job.status,
-    statusJsx: <FontAwesomeIcon
-      icon={iconConfig.icon}
-      style={{
-        ...iconConfig.style,
-        fontSize: '.7rem',
-        marginLeft: '.4rem',
-        display: 'block'
-      }}/>,
+    statusJsx: <TooltipTrigger content={iconConfig.iconTooltip}>
+      <div> {/*This div wrapper is needed so the tooltip doesn't move around with the spinning icon*/}
+        <FontAwesomeIcon
+          icon={iconConfig.icon}
+          style={{
+            ...iconConfig.style,
+            fontSize: '.7rem',
+            marginLeft: '.4rem',
+            display: 'block'
+          }}/>
+      </div>
+    </TooltipTrigger>,
     dateStarted: job.submissionDate,
     dateStartedDisplay: formatDatetime(job.submissionDate),
     duration: durationMoment && durationMoment.asSeconds(),
@@ -99,36 +107,35 @@ function mapJobToTableRow(job: GenomicExtractionJob) {
   };
 }
 
-function mapJobsToTableRows(jobs: Array<GenomicExtractionJob>) {
-  return jobs.map(job => mapJobToTableRow(job));
-  // return mockData();
-}
+const [workspaceWrapper, workspaceContext]: [any, Context<WorkspaceData>] = withCurrentWorkspaceContext();
 
-const [workspaceWrapper, workspaceContext] = withCurrentWorkspaceContext();
-
-export const GenomicsExtractionTable = fp.flow(workspaceWrapper)(() => {
+export const GenomicsExtractionTable = fp.flow(() => workspaceWrapper)(() => {
   const workspace = useContext(workspaceContext);
   const [extractionJobs, setExtractionJobs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     dataSetApi().getGenomicExtractionJobs(workspace.namespace, workspace.id).then(resp => {
-      setExtractionJobs(resp.jobs.concat(mockApiData()));
+      setExtractionJobs(resp.jobs.concat(mockApiData()).concat(mockApiData()).concat(mockApiData()).concat(mockApiData()));
       setIsLoading(false);
     });
   }, [workspace]);
 
-  console.log(extractionJobs);
-
   return <div id='extraction-data-table-container'>
-    <SwitchTransition>
-      <CSSTransition
-        key={isLoading}
-        classNames="switch-transition-container"
-        addEndListener={(node, done) => node.addEventListener('transitionend', done, false)}>
+    <div className='slim-scroll-bar'>
+      <SwitchTransition>
+        <CSSTransition
+          key={isLoading}
+          classNames='switch-transition-container'
+          addEndListener={(node, done) => node.addEventListener('transitionend', done, false)}>
           {isLoading
             ? <Spinner style={{display: 'block', margin: '3rem auto'}}/>
-            : <DataTable value={mapJobsToTableRows(extractionJobs)} autoLayout sortField='dateStarted' sortOrder={-1}>
+            : <DataTable autoLayout
+                         sortField='dateStarted'
+                         sortOrder={-1}
+                         value={extractionJobs.map(job => mapJobToTableRow(job))}
+                         style={{marginLeft: '0.5rem', marginRight: '0.5rem'}}
+            >
               <Column field='datasetNameDisplay' header='Dataset Name' sortable sortField='datasetName'
                       style={{maxWidth: '8rem', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap'}}/>
               <Column field='statusJsx' header='Status' sortable sortField='status'/>
@@ -138,8 +145,9 @@ export const GenomicsExtractionTable = fp.flow(workspaceWrapper)(() => {
               <Column field='menuJsx' header=''/>
             </DataTable>
           }
-      </CSSTransition>
-    </SwitchTransition>
+        </CSSTransition>
+      </SwitchTransition>
+    </div>
   </div>;
 });
 

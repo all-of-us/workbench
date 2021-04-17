@@ -22,14 +22,32 @@
 
 #extraction-data-table-container {
     width: calc(100% - 30px);
-    height: 80%;
+    height: 100%;
     margin: auto;
     overflow: hidden;
     background-color: white;
     border-radius: 6px;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
     padding-top: 0.2rem;
+    padding-bottom: 1rem;
+}
+
+#extraction-data-table-container .slim-scroll-bar {
+    overflow: auto;
+    height: 100%;
+    margin-right: 0.1rem;
+}
+
+#extraction-data-table-container .slim-scroll-bar::-webkit-scrollbar {
+    width: .3rem;
+}
+
+#extraction-data-table-container .slim-scroll-bar::-webkit-scrollbar-track-piece:start {
+    margin-top: 0.5rem;
+}
+
+#extraction-data-table-container .slim-scroll-bar::-webkit-scrollbar-thumb {
+    background-color: darkgrey;
+    border-radius: 5px;
 }
 
 #extraction-data-table-container th span {

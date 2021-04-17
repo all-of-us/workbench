@@ -257,9 +257,7 @@ export const summarizeErrors = errors => {
 
 export const connectBehaviorSubject = <T extends {}>(
   subject: BehaviorSubject<T>, name: string, preventRenderUntilDataIsPresent: boolean = false) => {
-  const MyContext = React.createContext(null);
-
-  return [(WrappedComponent) => {
+  return (WrappedComponent) => {
 
     class Wrapper extends React.Component<any, {value: T}> {
       static displayName = 'connectBehaviorSubject()';
@@ -287,14 +285,55 @@ export const connectBehaviorSubject = <T extends {}>(
         if (preventRenderUntilDataIsPresent && value == null) {
           return null;
         }
-        return <MyContext.Provider value={value}>
-          <WrappedComponent {...{[name]: value}} {...this.props}/>
-        </MyContext.Provider>;
+        return <WrappedComponent {...{[name]: value}} {...this.props}/>;
       }
     }
 
     return Wrapper;
-  }, MyContext];
+  };
+};
+
+export const createContextWrapper = <T extends {}>(subject: BehaviorSubject<T>,
+                                                   preventRenderUntilDataIsPresent: boolean = false): [any, any] => {
+  const Context = React.createContext(null);
+
+  return [(WrappedComponent) => {
+
+    class Wrapper extends React.Component<any, {value: T}> {
+      static displayName = 'createContextProvider()';
+      private subscription;
+
+      constructor(props) {
+        super(props);
+        this.state = {value: subject.getValue()};
+      }
+
+      componentDidMount() {
+        this.subscription = subject.subscribe(v => {
+          this.setState({value: v});
+        });
+      }
+
+      componentWillUnmount() {
+        this.subscription.unsubscribe();
+      }
+
+      render() {
+        const {value} = this.state;
+        // We allow overriding of the currentValue, for reuse of the same
+        // logic outside of the scope of a current workspace.
+        if (preventRenderUntilDataIsPresent && value == null) {
+          return null;
+        }
+
+        return <Context.Provider value={value}>
+          <WrappedComponent {...{[name]: value}} {...this.props}/>
+        </Context.Provider>;
+      }
+    }
+
+    return Wrapper;
+  }, Context];
 };
 
 export const connectReplaySubject = <T extends {}>(subject: ReplaySubject<T>, name: string) => {
@@ -330,54 +369,48 @@ export const connectReplaySubject = <T extends {}>(subject: ReplaySubject<T>, na
 
 // HOC that provides a 'workspace' prop with current WorkspaceData
 export const withCurrentWorkspace = () => {
-  return connectBehaviorSubject(currentWorkspaceStore, 'workspace')[0];
+  return connectBehaviorSubject(currentWorkspaceStore, 'workspace');
 };
 
-export const withCurrentWorkspaceContext = () => {
-  const [wrapper, context] = connectBehaviorSubject(currentWorkspaceStore, 'workspace');
-  return [wrapper, context];
+export const withCurrentWorkspaceContext = (): [any, any] => {
+  return createContextWrapper(currentWorkspaceStore);
 };
 
 // HOC that provides a 'cohort' prop with current Cohort
 export const withCurrentCohort = () => {
-  return connectBehaviorSubject(currentCohortStore, 'cohort')[0];
+  return connectBehaviorSubject(currentCohortStore, 'cohort');
 };
 
 // HOC that provides a 'criteria' prop with current Cohort
 export const withCurrentCohortCriteria = () => {
-  return connectBehaviorSubject(currentCohortCriteriaStore, 'criteria')[0];
+  return connectBehaviorSubject(currentCohortCriteriaStore, 'criteria');
 };
 
 export const withCurrentConcept = () => {
-  return connectBehaviorSubject(currentConceptStore, 'concept')[0];
+  return connectBehaviorSubject(currentConceptStore, 'concept');
 };
 
 export const withCurrentCohortSearchContext = () => {
-  return connectBehaviorSubject(currentCohortSearchContextStore, 'cohortContext')[0];
+  return connectBehaviorSubject(currentCohortSearchContextStore, 'cohortContext');
 };
 
 // HOC that provides a 'conceptSet' prop with current ConceptSet
 export const withCurrentConceptSet = () => {
-  return connectBehaviorSubject(currentConceptSetStore, 'conceptSet')[0];
+  return connectBehaviorSubject(currentConceptSetStore, 'conceptSet');
 };
 
 export const withGlobalError = () => {
-  return connectBehaviorSubject(globalErrorStore, 'globalError')[0];
+  return connectBehaviorSubject(globalErrorStore, 'globalError');
 };
 
 // HOC that provides a 'profileState' prop with current profile and a reload function
 export const withUserProfile = () => {
-  return connectBehaviorSubject(userProfileStore, 'profileState')[0];
-};
-
-export const withUserProfileContext = () => {
-  const [wrapper, context] = connectBehaviorSubject(userProfileStore, 'profileState');
-  return [wrapper, context];
+  return connectBehaviorSubject(userProfileStore, 'profileState');
 };
 
 // HOC that provides a 'urlParams' prop with the current url params object
 export const withUrlParams = () => {
-  return connectBehaviorSubject(urlParamsStore, 'urlParams')[0];
+  return connectBehaviorSubject(urlParamsStore, 'urlParams');
 };
 export interface UrlParamsProps {
   urlParams: { [key: string]: any; };
@@ -385,7 +418,7 @@ export interface UrlParamsProps {
 
 // HOC that provides a 'routeConfigData' prop with current route's data object
 export const withRouteConfigData = () => {
-  return connectBehaviorSubject(routeConfigDataStore, 'routeConfigData')[0];
+  return connectBehaviorSubject(routeConfigDataStore, 'routeConfigData');
 };
 
 // HOC that provides a 'cdrVersionListResponse' prop with the CDR version information.
@@ -395,7 +428,7 @@ export const withCdrVersions = () => {
 
 // HOC that provides a 'queryParams' prop with current query params
 export const withQueryParams = () => {
-  return connectBehaviorSubject(queryParamsStore, 'queryParams')[0];
+  return connectBehaviorSubject(queryParamsStore, 'queryParams');
 };
 
 // A HOC that provides a 'serverConfig' prop,
@@ -404,7 +437,7 @@ export const withQueryParams = () => {
 // See discussion on https://github.com/all-of-us/workbench/pull/2603/ for details on the type of
 // bugs that motivated this approach.
 export const withServerConfig = () => {
-  return connectBehaviorSubject(serverConfigStore, 'serverConfig', /* preventRenderUntilValuePresent */ true)[0];
+  return connectBehaviorSubject(serverConfigStore, 'serverConfig', /* preventRenderUntilValuePresent */ true);
 };
 export interface ServerConfigProps {
   serverConfig: ConfigResponse;
