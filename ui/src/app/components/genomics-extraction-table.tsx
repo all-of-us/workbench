@@ -17,6 +17,7 @@ import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 import {Context, useContext, useEffect, useState} from 'react';
 import {CSSTransition, SwitchTransition} from 'react-transition-group';
+import {TextColumn} from './text-column';
 
 function getIconConfigForStatus(status: TerraJobStatus) {
   if (status === TerraJobStatus.RUNNING) {
@@ -107,6 +108,11 @@ function mapJobToTableRow(job: GenomicExtractionJob) {
   };
 }
 
+const EmptyTableMessage = () => <TextColumn style={{fontSize: '0.5rem', paddingTop: '0.5rem'}}>
+  <span>This will be the location to find any extracted genomics files you may need for your research.</span>
+  <span>Genomic extractions can be created once you have a dataset that contains genomics data.</span>
+</TextColumn>;
+
 const [workspaceWrapper, workspaceContext]: [any, Context<WorkspaceData>] = withCurrentWorkspaceContext();
 
 export const GenomicsExtractionTable = fp.flow(workspaceWrapper)(() => {
@@ -116,7 +122,9 @@ export const GenomicsExtractionTable = fp.flow(workspaceWrapper)(() => {
 
   useEffect(() => {
     dataSetApi().getGenomicExtractionJobs(workspace.namespace, workspace.id).then(resp => {
-      setExtractionJobs(resp.jobs);
+      setExtractionJobs(resp.jobs
+        .concat(mockApiData())
+      );
       setIsLoading(false);
     });
   }, [workspace]);
@@ -131,7 +139,8 @@ export const GenomicsExtractionTable = fp.flow(workspaceWrapper)(() => {
           {isLoading
             ? <Spinner style={{display: 'block', margin: '3rem auto'}}/>
             : <DataTable autoLayout
-                         sortField='dateStarted'
+                         emptyMessage={<EmptyTableMessage/>}
+                         sortField={extractionJobs.length !== 0 ? 'dateStarted' : ''}
                          sortOrder={-1}
                          value={extractionJobs.map(job => mapJobToTableRow(job))}
                          style={{marginLeft: '0.5rem', marginRight: '0.5rem'}}
@@ -150,3 +159,29 @@ export const GenomicsExtractionTable = fp.flow(workspaceWrapper)(() => {
     </div>
   </div>;
 });
+
+function mockApiData() {
+    return [{
+      datasetName:  'My favorite dataset',
+        status: 'RUNNING',
+        submissionDate: 1618607580000
+    }, {
+        datasetName:  'This is a long datasettttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt',
+          status: 'FAILED',
+          cost: .48,
+          submissionDate: 1618096380000,
+          completionTime: 1618097400000, // should be 17m later
+        }, {
+        datasetName:  'This is another dataset',
+          status: 'SUCCEEDED',
+          cost: 521.20,
+          submissionDate: 1612528200000,
+          completionTime: 1612591320000, // should be quite a few hours after but less than 24
+        }, {
+        datasetName:  'Long job',
+          status: 'SUCCEEDED',
+          cost: 521.20,
+          submissionDate: 1612591320000,
+          completionTime: 1612832520000,
+        }];
+  }

@@ -7,6 +7,7 @@
     <changeSet author="nsaxena" id="changelog-160-extraction-table-add-completion-time">
         <addColumn tableName="wgs_extract_cromwell_submission">
             <column name="completion_time" type="datetime" />
+            <column name="cost" type="double" />
         </addColumn>
     </changeSet>
 </databaseChangeLog>

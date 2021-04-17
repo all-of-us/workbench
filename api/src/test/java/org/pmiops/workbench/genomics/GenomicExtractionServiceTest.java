@@ -198,12 +198,13 @@ public class GenomicExtractionServiceTest {
     OffsetDateTime submissionDate = OffsetDateTime.now();
     DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
         createDbWgsExtractCromwellSubmission();
+    dbWgsExtractCromwellSubmission.setCost(2.05);
+    wgsExtractCromwellSubmissionDao.save(dbWgsExtractCromwellSubmission);
 
     OffsetDateTime completionTimestamp = submissionDate.plusSeconds(127313);
 
     doReturn(
             new FirecloudSubmission()
-                .cost(2.051841974258423f) // Real example pulled from an API call
                 .status(FirecloudSubmissionStatus.DONE)
                 .addWorkflowsItem(new FirecloudWorkflow()
                     .statusLastChangedDate(completionTimestamp))
