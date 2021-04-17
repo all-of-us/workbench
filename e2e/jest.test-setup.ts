@@ -202,11 +202,6 @@ const notRedirectRequest = (request: Request): boolean => {
   return request && request.redirectChain().length === 0 && !request.isNavigationRequest();
 };
 
-// status !== 204 It's not a no-content response
-const isNotContent = (request: Request): boolean => {
-  return request && request.response().status() !== 204;
-};
-
 const getResponseText = async (request: Request): Promise<string> => {
   return (await request.response().buffer()).toString();
 };
@@ -241,7 +236,7 @@ const transformResponseBody = async (request: Request): Promise<string> => {
 
 const isWorkbenchRequest = fp.flow(isWorkbenchApi, notOptionsRequest, includeResourceType, includeUrl);
 const getRequestData = fp.flow(getRequestPostData, stringifyData);
-const canLogResponse = fp.flow(isWorkbenchRequest, notRedirectRequest, isNotContent);
+const canLogResponse = fp.flow(isWorkbenchRequest, notRedirectRequest);
 
 // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/puppeteer/index.d.ts
 
