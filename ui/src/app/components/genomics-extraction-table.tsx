@@ -2,7 +2,14 @@ import {faCheckCircle, faEllipsisV, faExclamationTriangle} from '@fortawesome/fr
 import {faSyncAlt} from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
+import {TooltipTrigger} from 'app/components/popups';
+import {Spinner} from 'app/components/spinners';
+import {dataSetApi} from 'app/services/swagger-fetch-clients';
+import colors from 'app/styles/colors';
 import {withCurrentWorkspaceContext} from 'app/utils';
+import {formatUsd} from 'app/utils/numbers';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {GenomicExtractionJob, TerraJobStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import {Column} from 'primereact/column';
@@ -10,13 +17,6 @@ import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 import {Context, useContext, useEffect, useState} from 'react';
 import {CSSTransition, SwitchTransition} from 'react-transition-group';
-import {GenomicExtractionJob, TerraJobStatus} from '../../generated/fetch';
-import {dataSetApi} from '../services/swagger-fetch-clients';
-import colors from '../styles/colors';
-import {formatUsd} from '../utils/numbers';
-import {WorkspaceData} from '../utils/workspace-data';
-import {TooltipTrigger} from './popups';
-import {Spinner} from './spinners';
 
 function getIconConfigForStatus(status: TerraJobStatus) {
   if (status === TerraJobStatus.RUNNING) {
@@ -109,14 +109,14 @@ function mapJobToTableRow(job: GenomicExtractionJob) {
 
 const [workspaceWrapper, workspaceContext]: [any, Context<WorkspaceData>] = withCurrentWorkspaceContext();
 
-export const GenomicsExtractionTable = fp.flow(() => workspaceWrapper)(() => {
+export const GenomicsExtractionTable = fp.flow(workspaceWrapper)(() => {
   const workspace = useContext(workspaceContext);
   const [extractionJobs, setExtractionJobs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     dataSetApi().getGenomicExtractionJobs(workspace.namespace, workspace.id).then(resp => {
-      setExtractionJobs(resp.jobs.concat(mockApiData()).concat(mockApiData()).concat(mockApiData()).concat(mockApiData()));
+      setExtractionJobs(resp.jobs);
       setIsLoading(false);
     });
   }, [workspace]);
@@ -150,30 +150,3 @@ export const GenomicsExtractionTable = fp.flow(() => workspaceWrapper)(() => {
     </div>
   </div>;
 });
-
-function mockApiData() {
-  return [{
-    datasetName:  'My favorite dataset',
-    status: 'RUNNING',
-    submissionDate: 1618607580000
-  }, {
-    datasetName:  'This is a long datasettttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt',
-    status: 'FAILED',
-    cost: .48,
-    submissionDate: 1618096380000,
-    completionTime: 1618097400000, // should be 17m later
-  }, {
-    datasetName:  'This is another dataset',
-    status: 'SUCCEEDED',
-    cost: 521.20,
-    submissionDate: 1612528200000,
-    completionTime: 1612591320000, // should be quite a few hours after but less than 24
-  }, {
-    datasetName:  'Long job',
-    status: 'SUCCEEDED',
-    cost: 521.20,
-    submissionDate: 1612591320000,
-    completionTime: 1612832520000,
-  }];
-}
-;;

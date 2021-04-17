@@ -17,6 +17,7 @@ import {
 import {ConfigResponse, Domain, } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {Context} from 'react';
 import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
@@ -293,47 +294,36 @@ export const connectBehaviorSubject = <T extends {}>(
   };
 };
 
-export const createContextWrapper = <T extends {}>(subject: BehaviorSubject<T>,
-                                                   preventRenderUntilDataIsPresent: boolean = false): [any, any] => {
-  const Context = React.createContext(null);
+export const createContextWrapper = <T extends {}>(subject: BehaviorSubject<T>, preventRenderUntilDataIsPresent: boolean = false):
+  [any, Context<T>] => {
+  const SubjectContext = React.createContext(null);
 
-  return [(WrappedComponent) => {
+  const ContextWrapper = (WrappedComponent) => {
+    return () => {
+      const [value, setValue] = useState(subject.getValue());
 
-    class Wrapper extends React.Component<any, {value: T}> {
-      static displayName = 'createContextProvider()';
-      private subscription;
-
-      constructor(props) {
-        super(props);
-        this.state = {value: subject.getValue()};
-      }
-
-      componentDidMount() {
-        this.subscription = subject.subscribe(v => {
-          this.setState({value: v});
+      useEffect(() => {
+        console.count('Subscribing on useEffect');
+        const subscription = subject.subscribe(v => {
+          setValue(v);
         });
+
+        return () => {subscription.unsubscribe(); };
+      }, [subject]);
+
+      // We allow overriding of the currentValue, for reuse of the same
+      // logic outside of the scope of a current workspace.
+      if (preventRenderUntilDataIsPresent && value == null) {
+        return null;
       }
 
-      componentWillUnmount() {
-        this.subscription.unsubscribe();
-      }
+      return <SubjectContext.Provider value={value}>
+        <WrappedComponent />
+      </SubjectContext.Provider>;
+    };
+  };
 
-      render() {
-        const {value} = this.state;
-        // We allow overriding of the currentValue, for reuse of the same
-        // logic outside of the scope of a current workspace.
-        if (preventRenderUntilDataIsPresent && value == null) {
-          return null;
-        }
-
-        return <Context.Provider value={value}>
-          <WrappedComponent {...{[name]: value}} {...this.props}/>
-        </Context.Provider>;
-      }
-    }
-
-    return Wrapper;
-  }, Context];
+  return [ContextWrapper, SubjectContext];
 };
 
 export const connectReplaySubject = <T extends {}>(subject: ReplaySubject<T>, name: string) => {

@@ -1,9 +1,8 @@
-import {workspace} from '@angular-devkit/core/src/experimental';
 import {Component, Input} from '@angular/core';
 import {faEdit} from '@fortawesome/free-regular-svg-icons';
 import {
-  faBook, faCheckCircle, faEllipsisH,
-  faEllipsisV, faExclamationTriangle,
+  faBook,
+  faEllipsisV,
   faFolderOpen,
   faInbox,
   faInfoCircle
@@ -11,8 +10,6 @@ import {
 import {faDna} from '@fortawesome/free-solid-svg-icons/faDna';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
-import {Column} from 'primereact/column';
-import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -694,7 +691,7 @@ export const HelpSidebar = fp.flow(
             bodyWidthRem: '30',
             renderBody: () => <GenomicsExtractionTable />,
             showFooter: false
-        }
+          };
       }
     }
 
