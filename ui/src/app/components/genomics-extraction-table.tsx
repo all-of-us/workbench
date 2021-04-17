@@ -122,9 +122,7 @@ export const GenomicsExtractionTable = fp.flow(workspaceWrapper)(() => {
 
   useEffect(() => {
     dataSetApi().getGenomicExtractionJobs(workspace.namespace, workspace.id).then(resp => {
-      setExtractionJobs(resp.jobs
-        .concat(mockApiData())
-      );
+      setExtractionJobs(resp.jobs);
       setIsLoading(false);
     });
   }, [workspace]);
@@ -160,28 +158,3 @@ export const GenomicsExtractionTable = fp.flow(workspaceWrapper)(() => {
   </div>;
 });
 
-function mockApiData() {
-    return [{
-      datasetName:  'My favorite dataset',
-        status: 'RUNNING',
-        submissionDate: 1618607580000
-    }, {
-        datasetName:  'This is a long datasettttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt',
-          status: 'FAILED',
-          cost: .48,
-          submissionDate: 1618096380000,
-          completionTime: 1618097400000, // should be 17m later
-        }, {
-        datasetName:  'This is another dataset',
-          status: 'SUCCEEDED',
-          cost: 521.20,
-          submissionDate: 1612528200000,
-          completionTime: 1612591320000, // should be quite a few hours after but less than 24
-        }, {
-        datasetName:  'Long job',
-          status: 'SUCCEEDED',
-          cost: 521.20,
-          submissionDate: 1612591320000,
-          completionTime: 1612832520000,
-        }];
-  }
