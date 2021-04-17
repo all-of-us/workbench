@@ -86,10 +86,7 @@ export default class DataResourceCard extends CardBase {
 
   async findAnyCard(cardType: ResourceCard): Promise<DataResourceCard | null> {
     const cards = await this.getResourceCard(cardType);
-    if (cards.length === 0) {
-      return null;
-    }
-    return fp.shuffle(cards)[0];
+    return cards.length ? fp.shuffle(cards)[0] : null;
   }
 
   async getResourceName(): Promise<string> {

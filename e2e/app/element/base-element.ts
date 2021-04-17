@@ -288,9 +288,8 @@ export default class BaseElement extends Container {
    * Determine if cursor is disabled (== " not-allowed ") by checking style 'cursor' value.
    */
   async isCursorNotAllowed(): Promise<boolean> {
-    return this.getComputedStyle('cursor').then((cursor) => {
-      return cursor && cursor === 'not-allowed';
-    });
+    const cursor = await this.getComputedStyle('cursor');
+    return !!cursor && cursor === 'not-allowed';
   }
 
   /**
