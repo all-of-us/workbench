@@ -160,13 +160,15 @@ export default class WorkspaceCard extends CardBase {
   async clickWorkspaceName(waitForDataPage = true): Promise<string> {
     const [elemt] = await this.asElementHandle().$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
     const name = await getPropValue<string>(elemt, 'textContent');
-    await Promise.all([
-      this.page.waitForNavigation({ waitUntil: ['domcontentloaded', 'networkidle0'] }),
-      elemt.click()
-    ]);
     if (waitForDataPage) {
+      await Promise.all([
+        this.page.waitForNavigation({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'] }),
+        elemt.click()
+      ]);
       const dataPage = new WorkspaceDataPage(this.page);
       await dataPage.waitForLoad();
+    } else {
+      await elemt.click();
     }
     return name;
   }
@@ -183,10 +185,9 @@ export default class WorkspaceCard extends CardBase {
     );
   }
 
-  // if the snowman menu options for WRITER & READER are disabled except duplicate option and all options are enabled for OWNER.
-  async verifyWorkspaceCardMenuOptions(): Promise<void> {
+  // snowman menu options for WRITER & READER are disabled except duplicate option and all options are enabled for OWNER
+  async verifyWorkspaceCardMenuOptions(accessLevel: string): Promise<void> {
     const snowmanMenu = await this.getSnowmanMenu();
-    const accessLevel = await this.getWorkspaceAccessLevel();
     if (accessLevel !== WorkspaceAccessLevel.Owner) {
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Share)).toBe(true);
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(true);

@@ -16,9 +16,9 @@ export default class Container {
     this.xpath = xpath;
   }
 
-  async isVisible(): Promise<boolean> {
+  async isVisible(timeout = 1000): Promise<boolean> {
     return this.page
-      .waitForXPath(this.xpath, { visible: true, timeout: 1000 })
+      .waitForXPath(this.xpath, { visible: true, timeout })
       .then(() => {
         return true;
       })
