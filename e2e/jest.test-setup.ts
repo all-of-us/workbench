@@ -204,7 +204,7 @@ const notRedirectRequest = (request: Request): boolean => {
 
 // status !== 204 It's not a no-content response
 const isNotContent = (request: Request): boolean => {
-  return request && (request.response() ? request.response().status() !== 204 : false);
+  return request && request.response().status() !== 204;
 };
 
 const getResponseText = async (request: Request): Promise<string> => {
