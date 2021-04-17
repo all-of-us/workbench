@@ -149,4 +149,14 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     await workspaceLink.waitForXPath({ visible: true });
     expect(await workspaceLink.isVisible()).toBe(true);
   }
+
+  async findConceptSetsCard(conceptSetsName?: string): Promise<DataResourceCard> {
+    await this.openConceptSetsSubtab();
+    if (conceptSetsName === undefined) {
+      // if Concept Sets name isn't specified, find an existing Concept Sets.
+      return new DataResourceCard(this.page).findAnyCard(ResourceCard.ConceptSet);
+    }
+    // find Concept Set that match specified name.
+    return new DataResourceCard(this.page).findCard(conceptSetsName, ResourceCard.ConceptSet);
+  }
 }
