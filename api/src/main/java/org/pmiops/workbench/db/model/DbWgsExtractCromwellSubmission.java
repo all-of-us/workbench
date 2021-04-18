@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.model;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Objects;
 import javax.persistence.Column;
@@ -21,6 +22,7 @@ public class DbWgsExtractCromwellSubmission {
   private DbUser creator;
   private DbDataset dataset;
   private Long sampleCount;
+  private BigDecimal userCost;
   private Timestamp creationTime;
   private Timestamp completionTime;
 
@@ -83,6 +85,15 @@ public class DbWgsExtractCromwellSubmission {
     this.sampleCount = sampleCount;
   }
 
+  @Column(name = "user_cost")
+  public BigDecimal getUserCost() {
+    return userCost;
+  }
+
+  public void setUserCost(BigDecimal userCost) {
+    this.userCost = userCost;
+  }
+
   @Column(name = "creation_time")
   public Timestamp getCreationTime() {
     return creationTime;
@@ -116,6 +127,7 @@ public class DbWgsExtractCromwellSubmission {
         && Objects.equals(workspace, that.workspace)
         && Objects.equals(creator, that.creator)
         && Objects.equals(dataset, that.dataset)
+        && Objects.equals(userCost, that.userCost)
         && Objects.equals(creationTime, that.creationTime)
         && Objects.equals(completionTime, that.completionTime);
   }
@@ -129,6 +141,7 @@ public class DbWgsExtractCromwellSubmission {
         creator,
         dataset,
         sampleCount,
+        userCost,
         creationTime,
         completionTime);
   }

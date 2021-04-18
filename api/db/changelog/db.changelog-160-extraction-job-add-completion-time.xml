@@ -4,10 +4,10 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-    <changeSet author="nsaxena" id="changelog-160-extraction-table-add-completion-time">
+    <changeSet author="ericsong" id="changelog-160-extraction-table-add-completion-time-and-user-cost">
         <addColumn tableName="wgs_extract_cromwell_submission">
             <column name="completion_time" type="datetime" />
-            <column name="cost" type="double" />
+            <column name="user-cost" type="numeric" />
         </addColumn>
     </changeSet>
 </databaseChangeLog>
