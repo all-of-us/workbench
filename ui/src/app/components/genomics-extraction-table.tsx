@@ -17,6 +17,7 @@ import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 import {Context, useContext, useEffect, useState} from 'react';
 import {CSSTransition, SwitchTransition} from 'react-transition-group';
+import {FlexRow} from './flex';
 import {TextColumn} from './text-column';
 
 function getIconConfigForStatus(status: TerraJobStatus) {
@@ -113,19 +114,43 @@ const EmptyTableMessage = () => <TextColumn style={{fontSize: '0.5rem', paddingT
   <span>Genomic extractions can be created once you have a dataset that contains genomics data.</span>
 </TextColumn>;
 
+const FailedRequestMessage = () => <div style={{textAlign: 'center'}}>
+  <FlexRow style={{
+    display: 'inline-flex',
+    alignItems: 'center',
+    margin: '2rem auto'
+  }}>
+    <FontAwesomeIcon
+      icon={faExclamationTriangle}
+      style={{
+        color: colors.danger,
+        fontSize: '.8rem'
+      }}/>
+    <TextColumn style={{textAlign: 'left', marginLeft: '0.5rem', marginBottom: 0}}>
+      <span>
+        Failed to retrieve genomic extraction jobs.
+      </span>
+        <span>
+        Please try again or contact <a href='mailto:support@researchallofus.org'>support@researchallofus.org</a>.
+      </span>
+    </TextColumn>
+  </FlexRow>
+</div>;
+
 const [workspaceWrapper, workspaceContext]: [any, Context<WorkspaceData>] = withCurrentWorkspaceContext();
 
 export const GenomicsExtractionTable = fp.flow(workspaceWrapper)(() => {
   const workspace = useContext(workspaceContext);
-  const [extractionJobs, setExtractionJobs] = useState([]);
+  const [extractionJobs, setExtractionJobs] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    dataSetApi().getGenomicExtractionJobs(workspace.namespace, workspace.id).then(resp => {
-      setExtractionJobs(resp.jobs);
-      setIsLoading(false);
-    });
+    dataSetApi().getGenomicExtractionJobs(workspace.namespace, workspace.id)
+      .then(resp => setExtractionJobs(resp.jobs))
+      .finally(() => setIsLoading(false));
   }, [workspace]);
+
+  const requestFailed = !isLoading && extractionJobs === null;
 
   return <div id='extraction-data-table-container'>
     <div className='slim-scroll-bar'>
@@ -134,23 +159,39 @@ export const GenomicsExtractionTable = fp.flow(workspaceWrapper)(() => {
           key={isLoading}
           classNames='switch-transition-container'
           addEndListener={(node, done) => node.addEventListener('transitionend', done, false)}>
-          {isLoading
-            ? <Spinner style={{display: 'block', margin: '3rem auto'}}/>
-            : <DataTable autoLayout
+          {
+            isLoading
+              ? <Spinner style={{display: 'block', margin: '3rem auto'}}/>
+              : requestFailed
+                ? <FailedRequestMessage/>
+                : <DataTable autoLayout
                          emptyMessage={<EmptyTableMessage/>}
                          sortField={extractionJobs.length !== 0 ? 'dateStarted' : ''}
                          sortOrder={-1}
                          value={extractionJobs.map(job => mapJobToTableRow(job))}
-                         style={{marginLeft: '0.5rem', marginRight: '0.5rem'}}
-            >
-              <Column field='datasetNameDisplay' header='Dataset Name' sortable sortField='datasetName'
-                      style={{maxWidth: '8rem', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap'}}/>
-              <Column field='statusJsx' header='Status' sortable sortField='status'/>
-              <Column field='dateStartedDisplay' header='Date Started' sortable sortField='dateStarted'/>
-              <Column field='costDisplay' header='Cost' sortable sortField='cost'/>
-              <Column field='durationDisplay' header='Duration' sortable sortField='duration'/>
-              <Column field='menuJsx' header=''/>
-            </DataTable>
+                         style={{marginLeft: '0.5rem', marginRight: '0.5rem'}}>
+                    <Column header='Dataset Name'
+                            field='datasetNameDisplay'
+                            sortable sortField='datasetName'
+                            style={{
+                              maxWidth: '8rem',
+                              textOverflow: 'ellipsis',
+                              overflow: 'hidden',
+                              whiteSpace: 'nowrap'}}/>
+                    <Column header='Status'
+                            field='statusJsx'
+                            sortable sortField='status'/>
+                    <Column header='Date Started'
+                            field='dateStartedDisplay'
+                            sortable sortField='dateStarted'/>
+                    <Column header='Cost'
+                            field='costDisplay'
+                            sortable sortField='cost'/>
+                    <Column header='Duration'
+                            field='durationDisplay'
+                            sortable sortField='duration'/>
+                    <Column header='' field='menuJsx' />
+                  </DataTable>
           }
         </CSSTransition>
       </SwitchTransition>
