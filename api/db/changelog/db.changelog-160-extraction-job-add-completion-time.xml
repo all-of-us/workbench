@@ -7,7 +7,7 @@
     <changeSet author="ericsong" id="changelog-160-extraction-table-add-completion-time-and-user-cost">
         <addColumn tableName="wgs_extract_cromwell_submission">
             <column name="completion_time" type="datetime" />
-            <column name="user-cost" type="numeric" />
+            <column name="user-cost" type="decimal(10,2)" />
         </addColumn>
     </changeSet>
 </databaseChangeLog>
