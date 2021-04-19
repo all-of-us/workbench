@@ -69,9 +69,9 @@ const MissingCell = () => <span style={{fontSize: '.4rem'}}>&mdash;</span>;
 
 function mapJobToTableRow(job: GenomicExtractionJob) {
   const iconConfig = getIconConfigForStatus(job.status);
-  console.log(job.datasetName);
   const durationMoment = job.completionTime && moment.duration(moment(job.completionTime).diff(moment(job.submissionDate)));
 
+  console.log(job);
   return {
     datasetName: job.datasetName,
     datasetNameDisplay:
@@ -96,7 +96,8 @@ function mapJobToTableRow(job: GenomicExtractionJob) {
     duration: durationMoment && durationMoment.asSeconds(),
     durationDisplay: !!durationMoment ? formatDuration(durationMoment) : <MissingCell/>,
     cost: job.cost,
-    costDisplay: !!job.cost ? formatUsd(job.cost) : <MissingCell/>,
+    costDisplay: job.cost === null ? // !!job.cost doesn't work here because 0 is a valid value
+      <MissingCell/> : formatUsd(job.cost),
     menuJsx: <FontAwesomeIcon
       icon={faEllipsisV}
       style={{

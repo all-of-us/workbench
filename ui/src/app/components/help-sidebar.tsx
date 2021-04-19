@@ -26,7 +26,7 @@ import {participantStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   reactStyles,
-  ReactWrapperBase,
+  ReactWrapperBase, withCdrVersions,
   withCurrentCohortCriteria,
   withCurrentConcept,
   withCurrentWorkspace,
@@ -51,6 +51,7 @@ import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 
 import {HelpTips} from 'app/components/help-tips';
+import {getCdrVersion} from 'app/utils/cdr-versions';
 import {Criteria, ParticipantCohortStatus, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {GenomicsExtractionTable} from './genomics-extraction-table';
@@ -282,27 +283,6 @@ const helpIconName = (helpContentKey: string) => {
   return helpContentKey === NOTEBOOK_HELP_CONTENT ? 'notebooksHelp' : 'help';
 };
 
-const icons = (
-  helpContentKey: string,
-  workspaceAccessLevel: WorkspaceAccessLevel
-) => {
-  const keys = [
-    'criteria',
-    'concept',
-    helpIconName(helpContentKey),
-    'dataDictionary',
-    'annotations'
-  ];
-
-  if (WorkspacePermissionsUtil.canWrite(workspaceAccessLevel)) {
-    keys.push('runtime');
-  }
-
-  keys.push('genomicExtractions');
-
-  return keys.map(k => ({...iconConfigs[k], id: k}));
-};
-
 const analyticsLabels = {
   about: 'About Page',
   cohortBuilder: 'Cohort Builder',
@@ -344,7 +324,8 @@ export const HelpSidebar = fp.flow(
   withCurrentWorkspace(),
   withRuntimeStore(),
   withStore(compoundRuntimeOpStore, 'compoundRuntimeOps'),
-  withUserProfile()
+  withUserProfile(),
+  withCdrVersions()
 )(
   class extends React.Component<Props, State> {
     subscription: Subscription;
@@ -359,6 +340,26 @@ export const HelpSidebar = fp.flow(
         showCriteria: false,
         tooltipId: undefined
       };
+    }
+
+    icons(helpContentKey: string, workspaceAccessLevel: WorkspaceAccessLevel) {
+      const keys = [
+        'criteria',
+        'concept',
+        helpIconName(helpContentKey),
+        'dataDictionary',
+        'annotations'
+      ];
+
+      if (WorkspacePermissionsUtil.canWrite(workspaceAccessLevel)) {
+        keys.push('runtime');
+      }
+
+      if (getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasWgsData) {
+        keys.push('genomicExtractions');
+      }
+
+      return keys.map(k => ({...iconConfigs[k], id: k}));
     }
 
     async componentDidMount() {
@@ -703,7 +704,7 @@ export const HelpSidebar = fp.flow(
       return <div id='help-sidebar'>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
           {!(criteria || concept)  && this.renderWorkspaceMenu()}
-          {icons(helpContentKey, workspace.accessLevel).map((icon, i) =>
+          {this.icons(helpContentKey, workspace.accessLevel).map((icon, i) =>
           this.showIcon(icon) && <div key={i} style={{display: 'table'}}>
                 <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
                   <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}

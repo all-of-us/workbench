@@ -22,6 +22,7 @@ import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 import {cdrVersionStore, withStore} from './stores';
+import {WorkspaceData} from './workspace-data';
 
 const {useEffect, useState} = React;
 
@@ -362,7 +363,7 @@ export const withCurrentWorkspace = () => {
   return connectBehaviorSubject(currentWorkspaceStore, 'workspace');
 };
 
-export const withCurrentWorkspaceContext = (): [any, any] => {
+export const withCurrentWorkspaceContext = (): [any, Context<WorkspaceData>] => {
   return createContextWrapper(currentWorkspaceStore);
 };
 
