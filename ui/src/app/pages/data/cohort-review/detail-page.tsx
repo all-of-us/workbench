@@ -20,8 +20,6 @@ interface State {
   participant: ParticipantCohortStatus;
 }
 
-// const [currentWorkspaceHoc, currentWorkspaceContext] = withCurrentWorkspace();
-
 export const DetailPage = withCurrentWorkspace()(
   class extends React.Component<Props, State> {
     private subscription;

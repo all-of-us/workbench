@@ -260,7 +260,6 @@ export const summarizeErrors = errors => {
 export const connectBehaviorSubject = <T extends {}>(
   subject: BehaviorSubject<T>, name: string, preventRenderUntilDataIsPresent: boolean = false) => {
   return (WrappedComponent) => {
-
     class Wrapper extends React.Component<any, {value: T}> {
       static displayName = 'connectBehaviorSubject()';
       private subscription;
@@ -295,7 +294,7 @@ export const connectBehaviorSubject = <T extends {}>(
   };
 };
 
-export const createContextWrapper = <T extends {}>(subject: BehaviorSubject<T>, preventRenderUntilDataIsPresent: boolean = false):
+export const createContextWrapper = <T extends {}>(subject: BehaviorSubject<T>):
   [any, Context<T>] => {
   const SubjectContext = React.createContext(null);
 
@@ -311,12 +310,6 @@ export const createContextWrapper = <T extends {}>(subject: BehaviorSubject<T>, 
 
         return () => {subscription.unsubscribe(); };
       }, [subject]);
-
-      // We allow overriding of the currentValue, for reuse of the same
-      // logic outside of the scope of a current workspace.
-      if (preventRenderUntilDataIsPresent && value == null) {
-        return null;
-      }
 
       return <SubjectContext.Provider value={value}>
         <WrappedComponent />
