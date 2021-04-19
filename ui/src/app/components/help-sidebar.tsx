@@ -5,11 +5,12 @@ import {
   faEllipsisV,
   faFolderOpen,
   faInbox,
-  faInfoCircle
+  faInfoCircle, IconDefinition
 } from '@fortawesome/free-solid-svg-icons';
 import {faDna} from '@fortawesome/free-solid-svg-icons/faDna';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
+import {CSSProperties} from 'react';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -50,6 +51,7 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 
+import {GenomicsExtractionTable} from 'app/components/genomics-extraction-table';
 import {HelpTips} from 'app/components/help-tips';
 import {getCdrVersion} from 'app/utils/cdr-versions';
 import {
@@ -60,7 +62,6 @@ import {
   WorkspaceAccessLevel
 } from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
-import {GenomicsExtractionTable} from './genomics-extraction-table';
 
 const proIcons = {
   arrowLeft: '/assets/icons/arrow-left-regular.svg',
@@ -218,8 +219,19 @@ const iconStyles = {
 
 export const NOTEBOOK_HELP_CONTENT = 'notebookStorage';
 
-const iconConfigs = {
+interface IconConfig {
+  id: string;
+  disabled: boolean;
+  faIcon: IconDefinition;
+  label: string;
+  page: string;
+  style: CSSProperties;
+  tooltip: string;
+}
+
+const iconConfigs: { [iconKey: string]: IconConfig } = {
   'criteria': {
+    id: 'criteria',
     disabled: false,
     faIcon: faInbox,
     label: 'Selected Criteria',
@@ -228,6 +240,7 @@ const iconConfigs = {
     tooltip: 'Selected Criteria',
   },
   'concept': {
+    id: 'concept',
     disabled: false,
     faIcon: faInbox,
     label: 'Selected Concepts',
@@ -236,6 +249,7 @@ const iconConfigs = {
     tooltip: 'Selected Concepts',
   },
   'help': {
+    id: 'help',
     disabled: false,
     faIcon: faInfoCircle,
     label: 'Help Icon',
@@ -244,6 +258,7 @@ const iconConfigs = {
     tooltip: 'Help Tips',
   },
   'notebooksHelp': {
+    id: 'notebooksHelp',
     disabled: false,
     faIcon: faFolderOpen,
     label: 'Storage Icon',
@@ -252,6 +267,7 @@ const iconConfigs = {
     tooltip: 'Workspace Storage',
   },
   'dataDictionary': {
+    id: 'dataDictionary',
     disabled: false,
     faIcon: faBook,
     label: 'Data Dictionary Icon',
@@ -260,6 +276,7 @@ const iconConfigs = {
     tooltip: 'Data Dictionary',
   },
   'annotations': {
+    id: 'annotations',
     disabled: false,
     faIcon: faEdit,
     label: 'Annotations Icon',
@@ -268,6 +285,7 @@ const iconConfigs = {
     tooltip: 'Annotations',
   },
   'runtime': {
+    id: 'runtime',
     disabled: false,
     faIcon: null,
     label: 'Cloud Icon',
@@ -276,9 +294,10 @@ const iconConfigs = {
     tooltip: 'Compute Configuration'
   },
   'genomicExtractions': {
+    id: 'genomicsExtractions',
     disabled: false,
     faIcon: faDna,
-    label: '', // TODO eric: where is this used?
+    label: 'Genomics Extraction',
     page: null,
     style: {height: '22px', width: '22px', marginTop: '0.25rem'},
     tooltip: 'Genomes Extraction History',
@@ -349,7 +368,7 @@ export const HelpSidebar = fp.flow(
       };
     }
 
-    icons(helpContentKey: string, workspaceAccessLevel: WorkspaceAccessLevel) {
+    icons(helpContentKey: string, workspaceAccessLevel: WorkspaceAccessLevel): IconConfig[] {
       const keys = [
         'criteria',
         'concept',
@@ -366,7 +385,7 @@ export const HelpSidebar = fp.flow(
         keys.push('genomicExtractions');
       }
 
-      return keys.map(k => ({...iconConfigs[k], id: k}));
+      return keys.map(k => iconConfigs[k]);
     }
 
     async componentDidMount() {
@@ -398,7 +417,7 @@ export const HelpSidebar = fp.flow(
       this.subscription.unsubscribe();
     }
 
-    onIconClick(icon: any) {
+    onIconClick(icon: IconConfig) {
       const {setSidebarState, sidebarOpen} = this.props;
       const {activeIcon} = this.state;
       const {id, label} = icon;
@@ -507,12 +526,12 @@ export const HelpSidebar = fp.flow(
       </PopupTrigger>;
     }
 
-    showIcon(icon) {
+    showIcon(icon: IconConfig) {
       const {concept, criteria, helpContentKey} = this.props;
       return !icon.page || icon.page === helpContentKey || (criteria && icon.page === 'criteria') || (concept && icon.page === 'concept');
     }
 
-    displayFontAwesomeIcon(icon) {
+    displayFontAwesomeIcon(icon: IconConfig) {
       const {concept, criteria} = this.props;
 
       return <React.Fragment>
@@ -526,7 +545,7 @@ export const HelpSidebar = fp.flow(
           </React.Fragment> ;
     }
 
-    displayRuntimeIcon(icon) {
+    displayRuntimeIcon(icon: IconConfig) {
       const {runtimeStore, compoundRuntimeOps, workspace} = this.props;
       let status = runtimeStore && runtimeStore.runtime && runtimeStore.runtime.status;
       if ((!status || status === RuntimeStatus.Deleted) &&

@@ -2,8 +2,10 @@ import {faCheckCircle, faEllipsisV, faExclamationTriangle} from '@fortawesome/fr
 import {faSyncAlt} from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
+import {FlexRow} from 'app/components/flex';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
+import {TextColumn} from 'app/components/text-column';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {withCurrentWorkspaceContext} from 'app/utils';
@@ -17,10 +19,8 @@ import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 import {Context, useContext, useEffect, useState} from 'react';
 import {CSSTransition, SwitchTransition} from 'react-transition-group';
-import {FlexRow} from './flex';
-import {TextColumn} from './text-column';
 
-function getIconConfigForStatus(status: TerraJobStatus) {
+const getIconConfigForStatus = (status: TerraJobStatus) => {
   if (status === TerraJobStatus.RUNNING) {
     return {
       icon: faSyncAlt,
@@ -49,25 +49,23 @@ function getIconConfigForStatus(status: TerraJobStatus) {
       }
     };
   }
-}
+};
 
-function formatDatetime(timeEpoch: number) {
+const formatDatetime = (timeEpoch: number) => {
   const timeMoment = moment(timeEpoch);
   const isToday = moment().isSame(timeMoment, 'day');
   const momentFormat = (isToday ? '[Today]' : 'MMM D, YYYY') + ' [at] h:mm a';
   return timeMoment.format(momentFormat);
-}
+};
 
-function formatDuration(durationMoment) {
+const formatDuration = (durationMoment) => {
   const hours = Math.floor(durationMoment.asHours());
   const minStr = Math.floor(durationMoment.minutes()) + ' min';
 
   return (hours > 0 ? hours + ' hr, ' : '') + minStr;
-}
+};
 
-const MissingCell = () => <span style={{fontSize: '.4rem'}}>&mdash;</span>;
-
-function mapJobToTableRow(job: GenomicExtractionJob) {
+const mapJobToTableRow = (job: GenomicExtractionJob) => {
   const iconConfig = getIconConfigForStatus(job.status);
   const durationMoment = job.completionTime && moment.duration(moment(job.completionTime).diff(moment(job.submissionDate)));
 
@@ -81,7 +79,7 @@ function mapJobToTableRow(job: GenomicExtractionJob) {
       job.status === TerraJobStatus.RUNNING ? 0 :
         job.status === TerraJobStatus.SUCCEEDED ? 1 :
           job.status === TerraJobStatus.FAILED ? 2 : Number.MAX_SAFE_INTEGER,
-    statusJsx: <TooltipTrigger content={iconConfig.iconTooltip}>
+    statusDisplay: <TooltipTrigger content={iconConfig.iconTooltip}>
       <div> {/*This div wrapper is needed so the tooltip doesn't move around with the spinning icon*/}
         <FontAwesomeIcon
           icon={iconConfig.icon}
@@ -110,7 +108,9 @@ function mapJobToTableRow(job: GenomicExtractionJob) {
         display: 'block'
       }}/>,
   };
-}
+};
+
+const MissingCell = () => <span style={{fontSize: '.4rem'}}>&mdash;</span>;
 
 const EmptyTableMessage = () => <TextColumn style={{fontSize: '0.5rem', paddingTop: '0.5rem'}}>
   <span>This will be the location to find any extracted genomics files you may need for your research.</span>
@@ -182,7 +182,7 @@ export const GenomicsExtractionTable = fp.flow(workspaceWrapper)(() => {
                               overflow: 'hidden',
                               whiteSpace: 'nowrap'}}/>
                     <Column header='Status'
-                            field='statusJsx'
+                            field='statusDisplay'
                             sortable sortField='statusOrdinal'/>
                     <Column header='Date Started'
                             field='dateStartedDisplay'
