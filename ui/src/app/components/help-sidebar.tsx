@@ -52,7 +52,13 @@ import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 
 import {HelpTips} from 'app/components/help-tips';
 import {getCdrVersion} from 'app/utils/cdr-versions';
-import {Criteria, ParticipantCohortStatus, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
+import {
+  CdrVersionListResponse,
+  Criteria,
+  ParticipantCohortStatus,
+  RuntimeStatus,
+  WorkspaceAccessLevel
+} from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {GenomicsExtractionTable} from './genomics-extraction-table';
 
@@ -307,6 +313,7 @@ interface Props {
   concept?: Array<Criteria>;
   runtimeStore: RuntimeStore;
   compoundRuntimeOps: CompoundRuntimeOpStore;
+  cdrVersionListResponse: CdrVersionListResponse;
 }
 
 interface State {

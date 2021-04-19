@@ -71,14 +71,16 @@ function mapJobToTableRow(job: GenomicExtractionJob) {
   const iconConfig = getIconConfigForStatus(job.status);
   const durationMoment = job.completionTime && moment.duration(moment(job.completionTime).diff(moment(job.submissionDate)));
 
-  console.log(job);
   return {
     datasetName: job.datasetName,
     datasetNameDisplay:
       <span style={{opacity: job.status === TerraJobStatus.RUNNING ? .5 : 1}}>
         {job.datasetName}
       </span>,
-    status: job.status,
+    statusOrdinal: // The true ordering doesn't matter so much as having RUNNING and FAILED be at both ends of the order
+      job.status === TerraJobStatus.RUNNING ? 0 :
+        job.status === TerraJobStatus.SUCCEEDED ? 1 :
+          job.status === TerraJobStatus.FAILED ? 2 : Number.MAX_SAFE_INTEGER,
     statusJsx: <TooltipTrigger content={iconConfig.iconTooltip}>
       <div> {/*This div wrapper is needed so the tooltip doesn't move around with the spinning icon*/}
         <FontAwesomeIcon
@@ -181,7 +183,7 @@ export const GenomicsExtractionTable = fp.flow(workspaceWrapper)(() => {
                               whiteSpace: 'nowrap'}}/>
                     <Column header='Status'
                             field='statusJsx'
-                            sortable sortField='status'/>
+                            sortable sortField='statusOrdinal'/>
                     <Column header='Date Started'
                             field='dateStartedDisplay'
                             sortable sortField='dateStarted'/>
