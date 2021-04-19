@@ -22,6 +22,5 @@ export const environment: Environment = {
   allowTestAccessTokenOverride: true,
   enableCaptcha: true,
   enablePublishedWorkspaces: false,
-  enableNewConceptTabs: true,
   enableFooter: true
 };
