@@ -294,13 +294,13 @@ const iconConfigs: { [iconKey: string]: IconConfig } = {
     tooltip: 'Compute Configuration'
   },
   'genomicExtractions': {
-    id: 'genomicsExtractions',
+    id: 'genomicExtractions',
     disabled: false,
     faIcon: faDna,
-    label: 'Genomics Extraction',
+    label: 'Genomic Extraction',
     page: null,
     style: {height: '22px', width: '22px', marginTop: '0.25rem'},
-    tooltip: 'Genomes Extraction History',
+    tooltip: 'Genomic Extraction History',
   }
 };
 
