@@ -1,8 +1,6 @@
 import {styles as cardStyles} from 'app/components/card';
-import {ClrIcon} from 'app/components/icons';
-import {SnowmanIcon} from 'app/components/icons';
+import {ClrIcon, SnowmanIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
-import {IconComponent} from 'app/icons/icon';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils/index';
 import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
@@ -244,6 +242,7 @@ export const IconButton = ({icon:Icon, style = {}, hover = {}, tooltip = '', dis
                  style={{
                    color: disabled ? colors.disabled : colors.accent,
                    cursor: disabled ? 'auto' : 'pointer',
+                   fill: colors.accent,
                    ...style
                   }} 
                  hover={{color: !disabled && colorWithWhiteness(colors.accent, 0.2), ...hover}} 

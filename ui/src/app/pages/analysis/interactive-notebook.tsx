@@ -7,6 +7,8 @@ import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {EditComponentReact} from 'app/icons/edit';
 import {PlaygroundModeIcon} from 'app/icons/playground-mode-icon';
+import {PlaygroundIcon} from 'app/components/icons';
+import {IconButton} from 'app/components/buttons'
 import {ConfirmPlaygroundModeModal} from 'app/pages/analysis/confirm-playground-mode-modal';
 import {NotebookInUseModal} from 'app/pages/analysis/notebook-in-use-modal';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
@@ -54,6 +56,7 @@ const styles = reactStyles({
   navBarIcon: {
     height: '16px',
     width: '16px',
+    lineHeight: '16px',
     marginRight: '5px'
   },
   previewDiv: {
@@ -330,9 +333,9 @@ export const InteractiveNotebook = fp.flow(
                              AnalyticsTracker.Notebooks.Run();
                              this.onPlaygroundModeClick();
                            }}>
-                        <PlaygroundModeIcon enableHoverEffect={false}
-                                            disabled={!this.canStartRuntimes}
-                                            style={styles.navBarIcon}/>
+                        <IconButton icon={PlaygroundIcon}
+                                    disabled={!this.canStartRuntimes}
+                                    style={styles.navBarIcon}/>
                         Run (Playground Mode)
                       </div>
                     </TooltipTrigger>
