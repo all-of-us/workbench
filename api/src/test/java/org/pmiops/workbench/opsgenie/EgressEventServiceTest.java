@@ -66,7 +66,7 @@ public class EgressEventServiceTest {
           .vmPrefix("all-of-us-111")
           .egressMib(120.7)
           .egressMibThreshold(100.0)
-          .timeWindowStart(NOW.minusMillis(700L).toEpochMilli())
+          .timeWindowStart(NOW.minusSeconds(630).toEpochMilli())
           .timeWindowDuration(600L);
   private static final Clock CLOCK = new FakeClock(NOW);
 
@@ -247,7 +247,7 @@ public class EgressEventServiceTest {
             .egressMibThreshold(100.0)
             // > 2 windows into the past
             .timeWindowStart(NOW.minus(Duration.ofMinutes(125)).toEpochMilli())
-            .timeWindowDuration(Duration.ofMinutes(60).toMillis());
+            .timeWindowDuration(Duration.ofMinutes(60).getSeconds());
 
     egressEventService.handleEvent(oldEgressEvent);
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
@@ -271,7 +271,7 @@ public class EgressEventServiceTest {
             .egressMibThreshold(100.0)
             // > 2 windows into the past
             .timeWindowStart(NOW.minus(Duration.ofMinutes(3)).toEpochMilli())
-            .timeWindowDuration(Duration.ofMinutes(1).toMillis());
+            .timeWindowDuration(Duration.ofMinutes(1).getSeconds());
 
     egressEventService.handleEvent(oldEgressEvent);
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
