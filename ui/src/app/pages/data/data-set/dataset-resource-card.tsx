@@ -10,16 +10,14 @@ import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-s
 import {ExportDataSetModal} from 'app/pages/data/data-set/export-data-set-modal';
 import {GenomicExtractionModal} from 'app/pages/data/data-set/genomic-extraction-modal';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
-import {withCdrVersions, WithCdrVersionsProps, withCurrentWorkspace} from 'app/utils';
+import {withCdrVersions, WithCdrVersionsProps} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {getDescription, getDisplayName, getType} from 'app/utils/resources';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
-import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspaceResource} from 'generated/fetch';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps, WithCdrVersionsProps {
-  workspace: WorkspaceData;
   resource: WorkspaceResource;
   existingNameList: string[];
   onUpdate: () => Promise<void>;
@@ -37,8 +35,7 @@ export const DatasetResourceCard = fp.flow(
   withErrorModal(),
   withConfirmDeleteModal(),
   withSpinnerOverlay(),
-  withCdrVersions(),
-  withCurrentWorkspace()
+  withCdrVersions()
 )(class extends React.Component<Props, State> {
 
   constructor(props: Props) {
@@ -51,8 +48,8 @@ export const DatasetResourceCard = fp.flow(
   }
 
   get actions(): Action[] {
-    const {resource, inactiveBilling, workspace: {cdrVersionId}, cdrVersionListResponse} = this.props;
-    const {hasWgsData} = fp.find({cdrVersionId}, cdrVersionListResponse.items) || {hasWgsData: false};
+    const {resource, inactiveBilling, cdrVersionListResponse} = this.props;
+    const {hasWgsData} = fp.find({cdrVersionId: resource.cdrVersionId}, cdrVersionListResponse.items) || {hasWgsData: false};
     return [
       {
         icon: 'pencil',
