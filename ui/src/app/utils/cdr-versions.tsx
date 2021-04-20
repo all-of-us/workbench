@@ -5,13 +5,6 @@ function getCdrVersionTier(accessTierShortName: string, cdrTiers: CdrVersionTier
   return cdrTiers.tiers.find(v => v.accessTierShortName === accessTierShortName);
 }
 
-function getCdrVersion(workspace: Workspace, cdrTiers: CdrVersionTiersResponse): CdrVersion {
-  const tier = getCdrVersionTier(workspace.accessTierShortName, cdrTiers);
-  if (tier) {
-    return tier.versions.find(v => v.cdrVersionId === workspace.cdrVersionId);
-  }
-}
-
 function getDefaultCdrVersionForTier(workspace: Workspace, cdrTiers: CdrVersionTiersResponse): CdrVersion {
   const tier = getCdrVersionTier(workspace.accessTierShortName, cdrTiers);
   if (tier) {
@@ -30,10 +23,14 @@ function findCdrVersion(cdrVersionId: string, cdrTiers: CdrVersionTiersResponse)
   return allTiersVersions.find(v => v.cdrVersionId === cdrVersionId);
 }
 
+function getCdrVersion(workspace: Workspace, cdrTiers: CdrVersionTiersResponse): CdrVersion {
+  return findCdrVersion(workspace.cdrVersionId, cdrTiers);
+}
+
 export {
     getCdrVersionTier,
-    getCdrVersion,
     getDefaultCdrVersionForTier,
     hasDefaultCdrVersion,
     findCdrVersion,
+    getCdrVersion,
 };
