@@ -10,14 +10,13 @@ import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-s
 import {ExportDataSetModal} from 'app/pages/data/data-set/export-data-set-modal';
 import {GenomicExtractionModal} from 'app/pages/data/data-set/genomic-extraction-modal';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
-import {withCdrVersions, WithCdrVersionsProps} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {getDescription, getDisplayName, getType} from 'app/utils/resources';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
-import {WorkspaceResource} from 'generated/fetch';
+import {WorkspaceResource, PrePackagedConceptSetEnum} from 'generated/fetch';
 
-interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps, WithCdrVersionsProps {
+interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: WorkspaceResource;
   existingNameList: string[];
   onUpdate: () => Promise<void>;
@@ -34,8 +33,7 @@ interface State {
 export const DatasetResourceCard = fp.flow(
   withErrorModal(),
   withConfirmDeleteModal(),
-  withSpinnerOverlay(),
-  withCdrVersions()
+  withSpinnerOverlay()
 )(class extends React.Component<Props, State> {
 
   constructor(props: Props) {
@@ -48,8 +46,8 @@ export const DatasetResourceCard = fp.flow(
   }
 
   get actions(): Action[] {
-    const {resource, inactiveBilling, cdrVersionListResponse} = this.props;
-    const {hasWgsData} = fp.find({cdrVersionId: resource.cdrVersionId}, cdrVersionListResponse.items) || {hasWgsData: false};
+    const {resource, inactiveBilling} = this.props;
+    const hasWgs = resource.dataSet.prePackagedConceptSet.includes(PrePackagedConceptSetEnum.WHOLEGENOME);
     return [
       {
         icon: 'pencil',
@@ -82,7 +80,7 @@ export const DatasetResourceCard = fp.flow(
         disabled: inactiveBilling || !canWrite(resource),
         hoverText: inactiveBilling && ACTION_DISABLED_INVALID_BILLING
       },
-      ...(hasWgsData ? [{
+      ...(hasWgs ? [{
         // TODO: Reconcile with font awesome faDna.
         icon: 'helix',
         displayName: 'Extract VCF files',
