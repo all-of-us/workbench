@@ -8,16 +8,15 @@ import {Spinner} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {withCurrentWorkspaceContext} from 'app/utils';
+import {withCurrentWorkspace} from 'app/utils';
 import {formatUsd} from 'app/utils/numbers';
-import {WorkspaceData} from 'app/utils/workspace-data';
 import {GenomicExtractionJob, TerraJobStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
-import {Context, useContext, useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {CSSTransition, SwitchTransition} from 'react-transition-group';
 
 const getIconConfigForStatus = (status: TerraJobStatus) => {
@@ -65,6 +64,8 @@ const formatDuration = (durationMoment) => {
   return (hours > 0 ? hours + ' hr, ' : '') + minStr;
 };
 
+const MissingCell = () => <span style={{fontSize: '.4rem'}}>&mdash;</span>;
+
 const mapJobToTableRow = (job: GenomicExtractionJob) => {
   const iconConfig = getIconConfigForStatus(job.status);
   const durationMoment = job.completionTime && moment.duration(moment(job.completionTime).diff(moment(job.submissionDate)));
@@ -110,8 +111,6 @@ const mapJobToTableRow = (job: GenomicExtractionJob) => {
   };
 };
 
-const MissingCell = () => <span style={{fontSize: '.4rem'}}>&mdash;</span>;
-
 const EmptyTableMessage = () => <TextColumn style={{fontSize: '0.5rem', paddingTop: '0.5rem'}}>
   <span>This will be the location to find any extracted genomics files you may need for your research.</span>
   <span>Genomic extractions can be created once you have a dataset that contains genomics data.</span>
@@ -140,10 +139,7 @@ const FailedRequestMessage = () => <div style={{textAlign: 'center'}}>
   </FlexRow>
 </div>;
 
-const [workspaceWrapper, workspaceContext]: [any, Context<WorkspaceData>] = withCurrentWorkspaceContext();
-
-export const GenomicsExtractionTable = fp.flow(workspaceWrapper)(() => {
-  const workspace = useContext(workspaceContext);
+export const GenomicsExtractionTable = fp.flow(withCurrentWorkspace())(({workspace = () => {}}) => {
   const [extractionJobs, setExtractionJobs] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 

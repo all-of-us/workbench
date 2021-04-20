@@ -17,12 +17,10 @@ import {
 import {ConfigResponse, Domain, } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-import {Context} from 'react';
 import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
 import {cdrVersionStore, withStore} from './stores';
-import {WorkspaceData} from './workspace-data';
 
 const {useEffect, useState} = React;
 
@@ -294,32 +292,6 @@ export const connectBehaviorSubject = <T extends {}>(
   };
 };
 
-export const createContextWrapper = <T extends {}>(subject: BehaviorSubject<T>):
-  [any, Context<T>] => {
-  const SubjectContext = React.createContext(null);
-
-  const ContextWrapper = (WrappedComponent) => {
-    return () => {
-      const [value, setValue] = useState(subject.getValue());
-
-      useEffect(() => {
-        console.count('Subscribing on useEffect');
-        const subscription = subject.subscribe(v => {
-          setValue(v);
-        });
-
-        return () => {subscription.unsubscribe(); };
-      }, [subject]);
-
-      return <SubjectContext.Provider value={value}>
-        <WrappedComponent />
-      </SubjectContext.Provider>;
-    };
-  };
-
-  return [ContextWrapper, SubjectContext];
-};
-
 export const connectReplaySubject = <T extends {}>(subject: ReplaySubject<T>, name: string) => {
   return (WrappedComponent) => {
     class Wrapper extends React.Component<any, {value: T}> {
@@ -354,10 +326,6 @@ export const connectReplaySubject = <T extends {}>(subject: ReplaySubject<T>, na
 // HOC that provides a 'workspace' prop with current WorkspaceData
 export const withCurrentWorkspace = () => {
   return connectBehaviorSubject(currentWorkspaceStore, 'workspace');
-};
-
-export const withCurrentWorkspaceContext = (): [any, Context<WorkspaceData>] => {
-  return createContextWrapper(currentWorkspaceStore);
 };
 
 // HOC that provides a 'cohort' prop with current Cohort
