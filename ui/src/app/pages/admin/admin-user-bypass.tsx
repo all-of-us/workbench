@@ -1,6 +1,6 @@
 import {Button, IconButton} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {ClrIcon, Times, Check} from 'app/components/icons';
+import {Check, ClrIcon, Times} from 'app/components/icons';
 import {Toggle} from 'app/components/inputs';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';

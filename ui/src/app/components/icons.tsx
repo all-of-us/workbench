@@ -1,4 +1,4 @@
-import {faCheckCircle, faTimes, faCheck} from '@fortawesome/free-solid-svg-icons';
+import {faCheck, faCheckCircle, faTimes} from '@fortawesome/free-solid-svg-icons';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -32,7 +32,7 @@ export const styles = {
   }
 };
 
-export const PlaygroundIcon = () => <svg 
+export const PlaygroundIcon = () => <svg
   version='1.1'
   id='Layer_1'
   viewBox='0 0 14.1 12.3'>
