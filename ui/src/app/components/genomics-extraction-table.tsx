@@ -139,7 +139,7 @@ const FailedRequestMessage = () => <div style={{textAlign: 'center'}}>
   </FlexRow>
 </div>;
 
-export const GenomicsExtractionTable = fp.flow(withCurrentWorkspace())(({workspace = () => {}}) => {
+export const GenomicsExtractionTable = fp.flow(withCurrentWorkspace())(({workspace}) => {
   const [extractionJobs, setExtractionJobs] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
