@@ -125,10 +125,11 @@ public class GenomicExtractionService {
                             cohortExtractionConfig.operationalTerraWorkspaceName,
                             dbSubmission.getSubmissionId());
 
-                if (genomicExtractionMapper.convertJobStatus(firecloudSubmission.getStatus()) != TerraJobStatus.RUNNING) {
-                  dbSubmission.setCompletionTime(CommonMappers.timestamp(
-                      firecloudSubmission.getWorkflows().get(0).getStatusLastChangedDate()
-                  ));
+                if (genomicExtractionMapper.convertJobStatus(firecloudSubmission.getStatus())
+                    != TerraJobStatus.RUNNING) {
+                  dbSubmission.setCompletionTime(
+                      CommonMappers.timestamp(
+                          firecloudSubmission.getWorkflows().get(0).getStatusLastChangedDate()));
                   wgsExtractCromwellSubmissionDao.save(dbSubmission);
                 }
 
