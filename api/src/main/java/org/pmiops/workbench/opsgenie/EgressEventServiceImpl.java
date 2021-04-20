@@ -124,7 +124,7 @@ public class EgressEventServiceImpl implements EgressEventService {
     // For shorter alerting windows, we don't make any claims about staleness. This ensures that we
     // don't misinterpret a delay in when Sumologic runs the query, and when our system receives the
     // event as a stale event.
-    final Duration windowDuration = Duration.ofMillis(egressEvent.getTimeWindowDuration());
+    final Duration windowDuration = Duration.ofSeconds(egressEvent.getTimeWindowDuration());
     if (windowDuration.getSeconds() < MAXIMUM_EXPECTED_EVENT_AGE.getSeconds()) {
       return false;
     }
@@ -145,7 +145,7 @@ public class EgressEventServiceImpl implements EgressEventService {
       messagePrefix =
           String.format(
               "[>%d mins old] ",
-              Duration.ofMillis(egressEvent.getTimeWindowDuration()).toMinutes());
+              Duration.ofSeconds(egressEvent.getTimeWindowDuration()).toMinutes());
     }
 
     return new CreateAlertRequest()
