@@ -198,7 +198,7 @@ public class GenomicExtractionServiceTest {
     OffsetDateTime submissionDate = OffsetDateTime.now();
     DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
         createDbWgsExtractCromwellSubmission();
-    dbWgsExtractCromwellSubmission.setCost(2.05);
+    dbWgsExtractCromwellSubmission.setUserCost(new BigDecimal("2.05"));
     wgsExtractCromwellSubmissionDao.save(dbWgsExtractCromwellSubmission);
 
     OffsetDateTime completionTimestamp = submissionDate.plusSeconds(127313);
