@@ -63,6 +63,13 @@ index ba7b907..6cb4068 100644
 2.29.2
 ```
 
+### Download nirvana annotation files (~22Gb)
+
+I just used the built in downloader in the test environment, cell 3 in the notebook file in the next section.
+We could have users run the downloader themselves if the directional service perimeter is set up. Otherwise,
+we can upload the files to a featured workspace and ask users to download the files from the 
+featured workspace bucket using `gsutil cp`.
+
 ### Notebook demo
 
 Running on above docker image (ericsongbroad/aou-nirvana)
