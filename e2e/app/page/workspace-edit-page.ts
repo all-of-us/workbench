@@ -272,8 +272,8 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     await Promise.all([this.getWorkspaceNameTextbox().waitForXPath(), select.waitForXPath()]);
     // Build Workspace page is used for Duplicate and Create. Wait for Create or Duplicate button.
     await Promise.race([
-      this.getCreateWorkspaceButton().waitForXPath(),
-      this.getDuplicateWorkspaceButton().waitForXPath()
+      this.getCreateWorkspaceButton().waitForXPath({}),
+      this.getDuplicateWorkspaceButton().waitForXPath({})
     ]);
     return true;
   }

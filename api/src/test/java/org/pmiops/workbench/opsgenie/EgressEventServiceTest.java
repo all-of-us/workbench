@@ -16,6 +16,7 @@ import com.ifountain.opsgenie.client.swagger.model.CreateAlertRequest;
 import com.ifountain.opsgenie.client.swagger.model.SuccessResponse;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -59,12 +60,13 @@ public class EgressEventServiceTest {
   private static final String INSTITUTION_2_NAME = "Auburn University";
   private static final String WORKSPACE_NAMEPACE = "aou-namespace";
   private static WorkbenchConfig workbenchConfig;
-  private static final EgressEvent EGRESS_EVENT_1 =
+  private static final EgressEvent RECENT_EGRESS_EVENT =
       new EgressEvent()
           .projectName(DEFAULT_GOOGLE_PROJECT)
           .vmPrefix("all-of-us-111")
           .egressMib(120.7)
           .egressMibThreshold(100.0)
+          .timeWindowStart(NOW.minusMillis(700L).toEpochMilli())
           .timeWindowDuration(600L);
   private static final Clock CLOCK = new FakeClock(NOW);
 
@@ -167,9 +169,9 @@ public class EgressEventServiceTest {
   public void testCreateEgressEventAlert() throws ApiException {
     when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
 
-    egressEventService.handleEvent(EGRESS_EVENT_1);
+    egressEventService.handleEvent(RECENT_EGRESS_EVENT);
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
-    verify(egressEventAuditor).fireEgressEvent(EGRESS_EVENT_1);
+    verify(egressEventAuditor).fireEgressEvent(RECENT_EGRESS_EVENT);
 
     final CreateAlertRequest request = alertRequestCaptor.getValue();
     assertThat(request.getDescription())
@@ -190,7 +192,7 @@ public class EgressEventServiceTest {
     when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
     doReturn(Optional.empty()).when(mockInstitutionService).getByUser(any(DbUser.class));
 
-    egressEventService.handleEvent(EGRESS_EVENT_1);
+    egressEventService.handleEvent(RECENT_EGRESS_EVENT);
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
 
     final CreateAlertRequest request = alertRequestCaptor.getValue();
@@ -212,9 +214,9 @@ public class EgressEventServiceTest {
     doReturn(Optional.empty()).when(workspaceDao).getByGoogleProject(DEFAULT_GOOGLE_PROJECT);
     when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
 
-    egressEventService.handleEvent(EGRESS_EVENT_1);
+    egressEventService.handleEvent(RECENT_EGRESS_EVENT);
     verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
-    verify(egressEventAuditor).fireEgressEvent(EGRESS_EVENT_1);
+    verify(egressEventAuditor).fireEgressEvent(RECENT_EGRESS_EVENT);
 
     final CreateAlertRequest request = alertRequestCaptor.getValue();
     assertThat(request.getDescription())
@@ -230,6 +232,54 @@ public class EgressEventServiceTest {
             Pattern.compile(
                 "user_id:\\s+111,\\s+Institution:\\s+Verily\\s+Life\\s+Sciences,\\s+Account\\s+Age:\\s+651\\s+days"));
     assertThat(request.getAlias()).isEqualTo(NOT_FOUND_WORKSPACE_NAMESPACE + " | all-of-us-111");
+  }
+
+  @Test
+  public void testCreateEgressEventAlert_staleEvent() throws ApiException {
+    doReturn(Optional.empty()).when(workspaceDao).getByGoogleProject(DEFAULT_GOOGLE_PROJECT);
+    when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
+
+    EgressEvent oldEgressEvent =
+        new EgressEvent()
+            .projectName(DEFAULT_GOOGLE_PROJECT)
+            .vmPrefix("all-of-us-111")
+            .egressMib(120.7)
+            .egressMibThreshold(100.0)
+            // > 2 windows into the past
+            .timeWindowStart(NOW.minus(Duration.ofMinutes(125)).toEpochMilli())
+            .timeWindowDuration(Duration.ofMinutes(60).toMillis());
+
+    egressEventService.handleEvent(oldEgressEvent);
+    verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
+    verify(egressEventAuditor).fireEgressEvent(oldEgressEvent);
+
+    final CreateAlertRequest request = alertRequestCaptor.getValue();
+    assertThat(request.getMessage()).contains("[>60 mins old] High-egress event");
+    assertThat(request.getNote()).contains("[>60 mins old] Time window");
+  }
+
+  @Test
+  public void testCreateEgressEventAlert_staleEventShortWindow() throws ApiException {
+    doReturn(Optional.empty()).when(workspaceDao).getByGoogleProject(DEFAULT_GOOGLE_PROJECT);
+    when(mockAlertApi.createAlert(any())).thenReturn(new SuccessResponse().requestId("12345"));
+
+    EgressEvent oldEgressEvent =
+        new EgressEvent()
+            .projectName(DEFAULT_GOOGLE_PROJECT)
+            .vmPrefix("all-of-us-111")
+            .egressMib(120.7)
+            .egressMibThreshold(100.0)
+            // > 2 windows into the past
+            .timeWindowStart(NOW.minus(Duration.ofMinutes(3)).toEpochMilli())
+            .timeWindowDuration(Duration.ofMinutes(1).toMillis());
+
+    egressEventService.handleEvent(oldEgressEvent);
+    verify(mockAlertApi).createAlert(alertRequestCaptor.capture());
+    verify(egressEventAuditor).fireEgressEvent(oldEgressEvent);
+
+    final CreateAlertRequest request = alertRequestCaptor.getValue();
+    assertThat(request.getMessage()).startsWith("High-egress event");
+    assertThat(request.getNote()).startsWith("Time window");
   }
 
   // I thought about adding this to a mapper, but it's such a backwards, test-only conversion,

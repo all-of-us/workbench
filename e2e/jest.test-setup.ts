@@ -83,6 +83,7 @@ beforeEach(async () => {
       const msgType = message.type() === 'warning' ? 'warn' : message.type();
       logger.info(`Page Console ${msgType.toUpperCase()}: "${title}"`);
       console.log(args);
+      console.log('');
     } catch (err) {
       console.error(`❗ "${title}"\nException occurred when getting page console message.\n${err}\n${message.text()}`);
     }
