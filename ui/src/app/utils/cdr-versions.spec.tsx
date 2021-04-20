@@ -50,10 +50,6 @@ describe('cdr-versions', () => {
         expect(getCdrVersion(testWorkspaceMissingVersion, cdrVersionTiersResponse)).toBeUndefined();
     });
 
-    it('should return undefined for a workspace with an invalid access tier', async () => {
-        expect(getCdrVersion(testWorkspaceMissingTier, cdrVersionTiersResponse)).toBeUndefined();
-    });
-
     it('should correctly get the default CDR Version for the registered tier', async () => {
         expect(getDefaultCdrVersionForTier(testWorkspace, cdrVersionTiersResponse)).toBe(defaultCdrVersion);
     });
