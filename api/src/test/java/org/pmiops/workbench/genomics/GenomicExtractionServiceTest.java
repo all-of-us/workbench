@@ -13,7 +13,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.storage.Blob;
 import com.google.common.collect.ImmutableList;
-
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
@@ -213,12 +212,11 @@ public class GenomicExtractionServiceTest {
     OffsetDateTime completionTimestamp = submissionDate.plusSeconds(127313);
 
     mockGetFirecloudSubmission(
-            new FirecloudSubmission()
-                .submissionId(dbWgsExtractCromwellSubmission.getSubmissionId())
-                .status(FirecloudSubmissionStatus.DONE)
-                .addWorkflowsItem(new FirecloudWorkflow()
-                    .statusLastChangedDate(completionTimestamp))
-                .submissionDate(submissionDate));
+        new FirecloudSubmission()
+            .submissionId(dbWgsExtractCromwellSubmission.getSubmissionId())
+            .status(FirecloudSubmissionStatus.DONE)
+            .addWorkflowsItem(new FirecloudWorkflow().statusLastChangedDate(completionTimestamp))
+            .submissionDate(submissionDate));
 
     GenomicExtractionJob wgsCohortExtractionJob =
         genomicExtractionService
@@ -249,8 +247,7 @@ public class GenomicExtractionServiceTest {
         new FirecloudSubmission()
             .submissionId(dbWgsExtractCromwellSubmission.getSubmissionId())
             .status(FirecloudSubmissionStatus.DONE)
-            .addWorkflowsItem(new FirecloudWorkflow()
-                .statusLastChangedDate(OffsetDateTime.now()))
+            .addWorkflowsItem(new FirecloudWorkflow().statusLastChangedDate(OffsetDateTime.now()))
             .submissionDate(OffsetDateTime.now()));
 
     doReturn(new FirecloudWorkspaceResponse().accessLevel("NO ACCESS"))
@@ -331,10 +328,11 @@ public class GenomicExtractionServiceTest {
     DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
         createDbWgsExtractCromwellSubmission();
     doReturn(
-        new FirecloudSubmission()
-            .addWorkflowsItem(new FirecloudWorkflow().statusLastChangedDate(OffsetDateTime.now()))
-            .status(status)
-            .submissionDate(OffsetDateTime.now()))
+            new FirecloudSubmission()
+                .addWorkflowsItem(
+                    new FirecloudWorkflow().statusLastChangedDate(OffsetDateTime.now()))
+                .status(status)
+                .submissionDate(OffsetDateTime.now()))
         .when(submissionsApi)
         .getSubmission(
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
