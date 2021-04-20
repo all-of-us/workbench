@@ -247,8 +247,8 @@ export default class BaseElement extends Container {
   /**
    * Calling focus() and hover() together.
    */
-  async focus(): Promise<void> {
-    const element = await this.asElementHandle();
+  async focus(timeout?: number): Promise<void> {
+    const element = await this.asElementHandle({ visible: true, timeout });
     await Promise.all([element.focus(), element.hover()]);
   }
 
@@ -366,7 +366,7 @@ export default class BaseElement extends Container {
   /**
    * Returns ElementHandle.
    */
-  async asElementHandle(): Promise<ElementHandle> {
-    return this.waitForXPath();
+  async asElementHandle(waitOptions: WaitForSelectorOptions = { visible: true }): Promise<ElementHandle> {
+    return this.waitForXPath(waitOptions);
   }
 }
