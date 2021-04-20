@@ -6,7 +6,6 @@ import {ClrIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {EditComponentReact} from 'app/icons/edit';
-import {PlaygroundModeIcon} from 'app/icons/playground-mode-icon';
 import {PlaygroundIcon} from 'app/components/icons';
 import {IconButton} from 'app/components/buttons'
 import {ConfirmPlaygroundModeModal} from 'app/pages/analysis/confirm-playground-mode-modal';
