@@ -14,7 +14,7 @@ import {
   urlParamsStore,
   userProfileStore
 } from 'app/utils/navigation';
-import {ConfigResponse, Domain, } from 'generated/fetch';
+import {CdrVersionListResponse, ConfigResponse, Domain} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -377,6 +377,9 @@ export const withRouteConfigData = () => {
 export const withCdrVersions = () => {
   return withStore(cdrVersionStore, 'cdrVersionListResponse');
 };
+export interface WithCdrVersionsProps {
+  cdrVersionListResponse: CdrVersionListResponse;
+}
 
 // HOC that provides a 'queryParams' prop with current query params
 export const withQueryParams = () => {

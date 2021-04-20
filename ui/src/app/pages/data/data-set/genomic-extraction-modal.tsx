@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
+import {ErrorMessage} from 'app/components/messages';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 
@@ -10,14 +11,15 @@ const {useState} = React;
 
 
 interface Props {
-  dataSet: DataSet
-  workspaceNamespace: string
-  workspaceFirecloudName: string
-  closeFunction: Function
+  dataSet: DataSet;
+  workspaceNamespace: string;
+  workspaceFirecloudName: string;
+  closeFunction: Function;
 }
 
 export const GenomicExtractionModal = ({
     dataSet, workspaceNamespace, workspaceFirecloudName, closeFunction}: Props) => {
+  const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
   return <Modal loading={loading}>
     <ModalTitle>Launch VCF extraction</ModalTitle>
@@ -26,6 +28,10 @@ export const GenomicExtractionModal = ({
       you’ll be notified when files are ready for analysis.
       VCF extraction will incur cloud compute costs.
     </ModalBody>
+    {error &&
+     <ErrorMessage iconSize={16} iconPosition={'top'}>
+       Failed to launch extraction, please try again.
+     </ErrorMessage>}
     <ModalFooter>
       <Button type='secondary' onClick={() => closeFunction()}>Cancel</Button>
       <Button data-test-id='extract-button'
@@ -35,10 +41,10 @@ export const GenomicExtractionModal = ({
                 setLoading(true);
                 try {
                   await dataSetApi().extractGenomicData(
-                      workspaceNamespace, workspaceFirecloudName, dataSet.id);
+                    workspaceNamespace, workspaceFirecloudName, dataSet.id);
                   closeFunction();
                 } catch (e) {
-                  // Handle error
+                  setError(true);
                 }
                 setLoading(false);
               }}>

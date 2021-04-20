@@ -10,17 +10,20 @@ import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-s
 import {ExportDataSetModal} from 'app/pages/data/data-set/export-data-set-modal';
 import {GenomicExtractionModal} from 'app/pages/data/data-set/genomic-extraction-modal';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
+import {withCdrVersions, WithCdrVersionsProps, withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {getDescription, getDisplayName, getType} from 'app/utils/resources';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
+import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspaceResource} from 'generated/fetch';
 
-interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
+interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps, WithCdrVersionsProps {
+  workspace: WorkspaceData;
   resource: WorkspaceResource;
   existingNameList: string[];
   onUpdate: () => Promise<void>;
-  disableExportToNotebook: boolean;
+  inactiveBilling: boolean;
   menuOnly: boolean;
 }
 
@@ -34,6 +37,8 @@ export const DatasetResourceCard = fp.flow(
   withErrorModal(),
   withConfirmDeleteModal(),
   withSpinnerOverlay(),
+  withCdrVersions(),
+  withCurrentWorkspace()
 )(class extends React.Component<Props, State> {
 
   constructor(props: Props) {
@@ -46,7 +51,8 @@ export const DatasetResourceCard = fp.flow(
   }
 
   get actions(): Action[] {
-    const {resource} = this.props;
+    const {resource, inactiveBilling, workspace: {cdrVersionId}, cdrVersionListResponse} = this.props;
+    const {hasWgsData} = fp.find({cdrVersionId}, cdrVersionListResponse.items) || {hasWgsData: false};
     return [
       {
         icon: 'pencil',
@@ -76,20 +82,20 @@ export const DatasetResourceCard = fp.flow(
           AnalyticsTracker.DatasetBuilder.OpenExportModal();
           this.setState({showExportToNotebookModal: true});
         },
-        disabled: this.props.disableExportToNotebook || !canWrite(resource),
-        hoverText: this.props.disableExportToNotebook && ACTION_DISABLED_INVALID_BILLING
+        disabled: inactiveBilling || !canWrite(resource),
+        hoverText: inactiveBilling && ACTION_DISABLED_INVALID_BILLING
       },
-      // XXX: Conditional rendering
-      {
-        icon: 'clipboard',
+      ...(hasWgsData ? [{
+        // TODO: Reconcile with font awesome faDna.
+        icon: 'helix',
         displayName: 'Extract VCF files',
         onClick: () => {
-          //AnalyticsTracker.DatasetBuilder.OpenGenomicExtractionModal();
+          AnalyticsTracker.DatasetBuilder.OpenGenomicExtractionModal('From Card Snowman');
           this.setState({showGenomicExtractionModal: true});
         },
-        disabled: !canWrite(resource),
-        hoverText: this.props.disableExportToNotebook && ACTION_DISABLED_INVALID_BILLING
-      },
+        disabled: inactiveBilling || !canWrite(resource),
+        hoverText: inactiveBilling && ACTION_DISABLED_INVALID_BILLING
+      }] : []),
       {
         icon: 'trash',
         displayName: 'Delete',
