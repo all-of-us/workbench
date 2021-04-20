@@ -77,11 +77,17 @@ export const Interactive: React.ForwardRefExoticComponent<InteractiveProps> = fo
     onClick,
     onMouseDown: e => {
       setOutline('none');
-      onMouseDown && onMouseDown(e);
+      if (onMouseDown) {
+        onMouseDown(e);
+      }
     },
     onBlur: e => {
-      !!outline && setOutline(undefined);
-      onBlur && onBlur(e);
+      if (!!outline) {
+        setOutline(undefined);
+      }
+      if (onBlur) {
+        onBlur(e);
+      }
     },
     onKeyDown: onKeyDown || ((event: React.KeyboardEvent) => {
       if (event.key === 'Enter') {
