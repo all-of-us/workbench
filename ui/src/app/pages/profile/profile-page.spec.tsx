@@ -12,6 +12,7 @@ import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 
+
 describe('ProfilePageComponent', () => {
   function getSubmitButton(wrapper: ReactWrapper): ReactWrapper {
     return wrapper.find('[data-test-id="submit-button"]');

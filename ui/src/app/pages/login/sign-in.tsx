@@ -107,6 +107,7 @@ export const StepToImageConfig: Map<SignInStep, BackgroundImageConfig> = new Map
   }]]
 );
 
+
 export interface SignInProps extends ServerConfigProps, WindowSizeProps {
   initialStep?: SignInStep;
   onSignIn: () => void;

@@ -2,12 +2,14 @@ import * as React from "react";
 
 import {Workspace} from 'generated/fetch';
 import {WorkspaceStubVariables} from 'testing/stubs/workspaces';
-import {cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
-import {getCdrVersion, hasDefaultCdrVersion, getDefaultCdrVersionForTier} from "./cdr-versions";
-import {AccessTierShortNames} from "./access-tiers";
-
-const registeredCdrVersionTier = cdrVersionTiersResponse.tiers[0];
-const controlledCdrVersionTier = cdrVersionTiersResponse.tiers[1];
+import {
+    altCdrVersion,
+    cdrVersionTiersResponse,
+    controlledCdrVersion,
+    defaultCdrVersion
+} from 'testing/stubs/cdr-versions-api-stub';
+import {getCdrVersion, hasDefaultCdrVersion, getDefaultCdrVersionForTier} from 'app/utils/cdr-versions';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 
 const stubWorkspace: Workspace = {
     name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME,
@@ -15,9 +17,6 @@ const stubWorkspace: Workspace = {
     namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS
 };
 
-const defaultCdrVersion = registeredCdrVersionTier.versions[0];
-const altCdrVersion = registeredCdrVersionTier.versions[1];
-const controlledCdrVersion = controlledCdrVersionTier.versions[0];
 
 const testWorkspace: Workspace = {
     ...stubWorkspace,

@@ -6,7 +6,7 @@ import {
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
-export class CdrVersionsStubVariables {
+class CdrVersionsStubVariables {
   static DEFAULT_WORKSPACE_CDR_VERSION = 'Fake CDR Version';
   static DEFAULT_WORKSPACE_CDR_VERSION_ID = 'fakeCdrVersion';
   static ALT_WORKSPACE_CDR_VERSION = 'Alternative CDR Version';
@@ -15,7 +15,7 @@ export class CdrVersionsStubVariables {
   static CONTROLLED_TIER_CDR_VERSION_ID = 'ctCdrVersion';
 }
 
-export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
+const cdrVersionTiersResponse: CdrVersionTiersResponse = {
   tiers: [{
     accessTierShortName: AccessTierShortNames.Registered,
     defaultCdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
@@ -59,7 +59,14 @@ export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
   ]
 };
 
-export class CdrVersionsApiStub extends CdrVersionsApi {
+const registeredCdrVersionTier = cdrVersionTiersResponse.tiers[0];
+const defaultCdrVersion = registeredCdrVersionTier.versions[0];
+const altCdrVersion = registeredCdrVersionTier.versions[1];
+
+const controlledCdrVersionTier = cdrVersionTiersResponse.tiers[1];
+const controlledCdrVersion = controlledCdrVersionTier.versions[0];
+
+class CdrVersionsApiStub extends CdrVersionsApi {
   constructor() {
     super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
   }
@@ -70,3 +77,14 @@ export class CdrVersionsApiStub extends CdrVersionsApi {
     });
   }
 }
+
+export {
+  CdrVersionsApiStub,
+  CdrVersionsStubVariables,
+  cdrVersionTiersResponse,
+  registeredCdrVersionTier,
+  controlledCdrVersionTier,
+  defaultCdrVersion,
+  altCdrVersion,
+  controlledCdrVersion,
+};
