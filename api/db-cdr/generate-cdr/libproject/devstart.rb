@@ -311,12 +311,12 @@ def create_wgs_extraction_dataset(cmd_name, args)
     "The Google Cloud project associated with this workbench environment, " +
       "e.g. all-of-us-rw-staging. Required."
   )
-  op.opts.tier = "controlled_test"
+  op.opts.tier = "controlled"
   op.add_option(
     "--tier [tier]",
     ->(opts, v) { opts.tier = v},
     "The access tier associated with this CDR, " +
-      "e.g. registered. Default is registered."
+      "e.g. registered. Default is controlled."
   )
   op.opts.ttl = 60 * 60 * 24 * 7
   op.add_option(
