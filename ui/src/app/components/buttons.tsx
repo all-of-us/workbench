@@ -1,6 +1,6 @@
 import {styles as cardStyles} from 'app/components/card';
 import {ClrIcon, SnowmanIcon} from 'app/components/icons';
-import {Interactive as LocalInteractive} from 'app/components/interactive.js';
+import {Interactive as LocalInteractive} from 'app/components/interactive';
 import {TooltipTrigger} from 'app/components/popups';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils/index';
