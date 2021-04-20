@@ -155,12 +155,12 @@ export const GenomicsExtractionTable = fp.flow(workspaceWrapper)(() => {
 
   const requestFailed = !isLoading && extractionJobs === null;
 
-  return <div id='extraction-data-table-container'>
+  return <div id='extraction-data-table-container' className='extraction-data-table-container'>
     <div className='slim-scroll-bar'>
       <SwitchTransition>
         <CSSTransition
           key={isLoading}
-          classNames='switch-transition-container'
+          classNames='switch-transition'
           addEndListener={(node, done) => node.addEventListener('transitionend', done, false)}>
           {
             isLoading
