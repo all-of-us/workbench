@@ -100,7 +100,6 @@ describe('WorkspaceWrapperComponent', () => {
 
   it('fetches user roles before opening the share dialog', fakeAsync(() => {
     updateAndTick(fixture);
-    console.log('first tick');
 
     const userRolesSpy = spyOn(workspacesApi(), 'getFirecloudWorkspaceUserRoles')
       .and.callThrough();
