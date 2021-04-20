@@ -110,7 +110,7 @@ export default class WorkspacesPage extends AuthenticatedPage {
     const editPage = await this.clickCreateNewWorkspace();
     // wait for Billing Account default selected value to appear
     const selectBilling = editPage.getBillingAccountSelect();
-    await selectBilling.waitForSelectedValue(UseFreeCredits);
+    await selectBilling.waitForSelectedValue(UseFreeCredits, 60000);
 
     await editPage.getWorkspaceNameTextbox().type(workspaceName);
     await editPage.getWorkspaceNameTextbox().pressTab();
