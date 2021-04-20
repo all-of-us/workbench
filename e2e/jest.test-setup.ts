@@ -30,7 +30,11 @@ beforeEach(async () => {
       const body = requestBody.length === 0 ? '' : `\n${requestBody}`;
       logger.log('info', 'Request issued: %s %s %s', request.method(), request.url(), body);
     }
-    request.continue().catch();
+    return Promise.resolve()
+      .then(() => request.continue())
+      .catch(() => {
+        // Ignored
+      });
   });
 
   /** Emitted when a request fails. */
@@ -60,7 +64,15 @@ beforeEach(async () => {
       // Try find out what the request was
       logger.log('error', '%s %s %s\n%s', status, method, url, err);
     }
-    await request.continue().catch();
+    /**
+     * Error: Request is already handled!
+     * Workaround: https://github.com/puppeteer/puppeteer/issues/3853#issuecomment-458193921
+     */
+    return Promise.resolve()
+      .then(() => request.continue())
+      .catch(() => {
+        // Ignored
+      });
   });
 
   /**

@@ -5,7 +5,8 @@ import {
   findOrCreateWorkspace,
   findOrCreateWorkspaceCard,
   performActions,
-  signInWithAccessToken, signOut
+  signInWithAccessToken,
+  signOut
 } from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
