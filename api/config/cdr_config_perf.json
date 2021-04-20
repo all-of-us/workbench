@@ -7,6 +7,14 @@
       "servicePerimeter": "accessPolicies/228353087260/servicePerimeters/terra_perf_aou_perf",
       "authDomainName": "all-of-us-registered-perf",
       "authDomainGroupEmail": "all-of-us-registered-perf@perf.test.firecloud.org"
+    },
+    {
+      "accessTierId": 2,
+      "shortName": "controlled",
+      "displayName": "Fake Controlled Tier For Perf",
+      "servicePerimeter": "accessPolicies/228353087260/servicePerimeters/terra_perf_aou_perf_2",
+      "authDomainName": "all-of-us-controlled-perf",
+      "authDomainGroupEmail": "[TBD]"
     }
   ],
   "cdrVersions": [
@@ -39,16 +47,34 @@
     {
       "cdrVersionId": 3,
       "isDefault": true,
+      "accessTier": "registered",
       "name": "Synthetic Dataset v3",
-      "bigqueryProject": "all-of-us-ehr-dev",
-      "bigqueryDataset": "test_R2019q4r3",
-      "creationTime": "2019-09-30 00:00:00Z",
+      "bigqueryProject": "fc-aou-cdr-perf",
+      "bigqueryDataset": "[TBD]",
+      "creationTime": "2021-04-20 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_14",
+      "cdrDbName": "cdr",
+      "elasticIndexBaseName": "cdr",
+      "microarrayBigqueryDataset": "microarray_data",
       "hasFitbitData": true,
-      "hasCopeSurveyData": true,
-      "accessTier": "registered"
+      "hasCopeSurveyData": true
+    },
+    {
+      "cdrVersionId": 4,
+      "isDefault": true,
+      "accessTier": "controlled",
+      "name": "CDR for Controlled Tier - DO NOT USE",
+      "bigqueryProject": "fc-aou-cdr-perf-ct",
+      "bigqueryDataset": "[TBD]",
+      "creationTime": "2021-04-20 00:00:00Z",
+      "releaseNumber": 3,
+      "numParticipants": 234525,
+      "cdrDbName": "cdr",
+      "elasticIndexBaseName": "cdr",
+      "microarrayBigqueryDataset": "microarray_data",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true
     }
   ]
 }
