@@ -11,7 +11,7 @@ import { makeWorkspaceName } from 'utils/str-utils';
 import Navigation, { NavLink } from 'app/component/navigation';
 import WorkspaceCard from 'app/component/workspace-card';
 
-describe('Workspace tests', () => {
+describe('Workspace create tests', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

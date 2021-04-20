@@ -7,7 +7,7 @@ import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import CdrVersionUpgradeModal from 'app/modal/cdr-version-upgrade-modal';
 import { MenuOption } from 'app/text-labels';
 import { logger } from 'libs/logger';
-import OldCdrVersionModal from '../../app/modal/old-cdr-version-modal';
+import OldCdrVersionModal from 'app/modal/old-cdr-version-modal';
 
 describe('Workspace CDR Version Upgrade modal', () => {
   beforeEach(async () => {

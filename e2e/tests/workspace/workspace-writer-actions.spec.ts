@@ -9,7 +9,7 @@ import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceReviewResearchPurposeModal from 'app/modal/workspace-review-research-purpose-modal';
 import * as fp from 'lodash/fp';
 
-describe('WRITER Workspace actions tests', () => {
+describe('Workspace WRITER actions tests', () => {
   beforeEach(async () => {
     await signIn(page, config.writerUserName, config.userPassword);
   });
@@ -22,7 +22,7 @@ describe('WRITER Workspace actions tests', () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.waitForLoad();
 
-    // Verify Workspace Access Level is READER.
+    // Verify Workspace Access Level is WRITER.
     const workspaceCards = await WorkspaceCard.findAllCards(page, WorkspaceAccessLevel.Writer);
     if (workspaceCards.length === 0) {
       return; // end test because no Workspace card available for checking

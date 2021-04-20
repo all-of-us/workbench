@@ -17,7 +17,7 @@ import { config } from 'resources/workbench-config';
 import { waitWhileLoading } from 'utils/waits-utils';
 import { logger } from 'libs/logger';
 
-describe('Workspace actions tests on existing workspace', () => {
+describe('Workspace actions tests', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });

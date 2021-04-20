@@ -9,7 +9,7 @@ import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceReviewResearchPurposeModal from 'app/modal/workspace-review-research-purpose-modal';
 import * as fp from 'lodash/fp';
 
-describe('READER Workspace actions tests', () => {
+describe('Workspace READER actions tests', () => {
   beforeEach(async () => {
     await signIn(page, config.collaboratorUsername, config.userPassword);
   });
