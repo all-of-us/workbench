@@ -55,7 +55,7 @@ import {GenomicsExtractionTable} from 'app/components/genomics-extraction-table'
 import {HelpTips} from 'app/components/help-tips';
 import {getCdrVersion} from 'app/utils/cdr-versions';
 import {
-  CdrVersionListResponse, CdrVersionTiersResponse,
+  CdrVersionTiersResponse,
   Criteria,
   ParticipantCohortStatus,
   RuntimeStatus,
