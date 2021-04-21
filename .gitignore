@@ -11,7 +11,6 @@ cron-emulator-err.log
 /api/?/
 /api/db/?/
 /api/db-cdr/csv
-/api/prep-tables/csv
 /api/.docker-sync/
 /api/.project/common/
 /api/.swagger-codegen/*
