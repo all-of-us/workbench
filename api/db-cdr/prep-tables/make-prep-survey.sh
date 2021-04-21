@@ -16,14 +16,18 @@ mkdir $TEMP_FILE_DIR
 
 if gsutil -m cp gs://$BUCKET/$CSV_HOME_DIR/*.csv $TEMP_FILE_DIR
 then
+  # Files that use the YYYY-MM-DD format are sorted* in alphabetical order.
+  # They are also sorted* in chronological order, so the last file will be the most recent
   for file in "$TEMP_FILE_DIR"/*; do
-    input=$file
+    most_recent_file=$file
   done
 
+  # Iterate
   while IFS= read -r line
   do
     echo "$line"
-  done < "$file"
+  done < "$most_recent_file"
+
 fi
 
 rm -rf $TEMP_FILE_DIR
