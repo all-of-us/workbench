@@ -16,6 +16,7 @@ import {
   NavigationStart,
   Router,
 } from '@angular/router';
+import {routeDataStore} from "../../utils/stores";
 
 @Component({
   selector: 'app-routing-spinner',
@@ -47,6 +48,10 @@ export class RoutingSpinnerComponent implements OnInit {
       } else if (this.isEnd(event)) {
         this.hideSpinner();
       }
+    });
+
+    routeDataStore.subscribe(() => {
+      this.hideSpinner();
     });
   }
 

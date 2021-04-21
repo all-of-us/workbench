@@ -13,13 +13,13 @@ import {
   urlParamsStore,
   userProfileStore
 } from 'app/utils/navigation';
-import {ConfigResponse, Domain, } from 'generated/fetch';
+import {Domain, } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
-import {cdrVersionStore, serverConfigStore, withStore} from './stores';
+import {cdrVersionStore, withStore} from './stores';
 
 const {useEffect, useState} = React;
 
@@ -383,12 +383,12 @@ export const withQueryParams = () => {
 };
 
 // A HOC that provides a 'serverConfig' prop
-export const withServerConfig = () => {
-  return withStore(serverConfigStore, 'serverConfig');
-};
-export interface ServerConfigProps {
-  serverConfig: ConfigResponse;
-}
+// export const withServerConfig = () => {
+//   return withStore(serverConfigStore, 'serverConfig');
+// };
+// export interface ServerConfigProps {
+//   serverConfig: ConfigResponse;
+// }
 
 export function displayDateWithoutHours(time: number): string {
   const date = new Date(time);

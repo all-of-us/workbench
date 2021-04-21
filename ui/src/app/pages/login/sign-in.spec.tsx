@@ -9,7 +9,6 @@ import {AccountCreationSuccess} from 'app/pages/login/account-creation/account-c
 import {AccountCreationSurvey} from 'app/pages/login/account-creation/account-creation-survey';
 import {AccountCreationTos} from 'app/pages/login/account-creation/account-creation-tos';
 import LoginReactComponent from 'app/pages/login/login';
-import {serverConfigStore} from 'app/utils/stores';
 import {createEmptyProfile, SignInProps, SignIn} from './sign-in';
 
 describe('SignInReact', () => {
@@ -19,9 +18,9 @@ describe('SignInReact', () => {
 
   const component = () => mount(<SignIn {...props}/>);
 
-  // To correctly shallow-render this component wrapped by two HOCs, we need to add two extra
-  // .shallow() calls at the end.
-  const shallowComponent = () => shallow(<SignIn {...props}/>).shallow().shallow();
+  // To correctly shallow-render this component wrapped by a HOC, we need to add an extra
+  // .shallow() call at the end.
+  const shallowComponent = () => shallow(<SignIn {...props}/>).shallow();
 
   const defaultConfig = {
     gsuiteDomain: 'researchallofus.org',
@@ -32,10 +31,8 @@ describe('SignInReact', () => {
     props = {
       onSignIn: () => {},
       signIn: signIn,
-      windowSize: {width: 1700, height: 0},
-      serverConfig: defaultConfig
+      windowSize: {width: 1700, height: 0}
     };
-    serverConfigStore.set({config: defaultConfig});
   });
 
   it('should display login background image and directive by default', () => {
@@ -66,7 +63,7 @@ describe('SignInReact', () => {
     const templateImage = wrapper.find('[data-test-id="sign-in-page"]');
   });
 
-  it('should handle sign-up flow', () => {
+  it('should handle sign-up flow', async () => {
     // This test is meant to validate the high-level flow through the sign-in component by checking
     // that each step of the user registration flow is correctly rendered in order.
     //
@@ -74,14 +71,13 @@ describe('SignInReact', () => {
     // we use Enzyme's shallow rendering to avoid needing to deal with the DOM-level details of
     // each of the sub-components. Tests within the 'account-creation' folder should cover those
     // details.
-    props.serverConfig = {...defaultConfig};
-
     const wrapper = shallowComponent();
 
     // To start, the landing page / login component should be shown.
     expect(wrapper.exists(LoginReactComponent)).toBeTruthy();
     // Simulate the "create account" button being clicked by firing the callback method.
     wrapper.find(LoginReactComponent).props().onCreateAccount();
+    await wrapper.update();
 
     // Terms of Service is part of the new-style flow.
     expect(wrapper.exists(AccountCreationTos)).toBeTruthy();

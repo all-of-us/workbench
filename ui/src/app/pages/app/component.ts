@@ -42,58 +42,63 @@ export class AppComponent implements OnInit {
     private titleService: Title
   ) {}
 
-  async ngOnInit() {
+  ngOnInit() {
     this.checkBrowserSupport();
-    await this.loadConfig();
-    this.loadErrorReporter();
+    this.loadConfig()
+      .then(() => {
+        this.loadErrorReporter();
 
-    this.cookiesEnabled = cookiesEnabled();
-    // Local storage breaks if cookies are not enabled
-    if (this.cookiesEnabled) {
-      try {
-        this.overriddenUrl = localStorage.getItem(LOCAL_STORAGE_API_OVERRIDE_KEY);
-        window['setAllOfUsApiUrl'] = (url: string) => {
-          if (url) {
-            if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
-              throw new Error('URL should be of the form "http[s]://host.example.com[:port]"');
-            }
-            this.overriddenUrl = url;
-            localStorage.setItem(LOCAL_STORAGE_API_OVERRIDE_KEY, url);
-          } else {
-            this.overriddenUrl = null;
-            localStorage.removeItem(LOCAL_STORAGE_API_OVERRIDE_KEY);
+        this.cookiesEnabled = cookiesEnabled();
+        // Local storage breaks if cookies are not enabled
+        if (this.cookiesEnabled) {
+          try {
+            this.overriddenUrl = localStorage.getItem(LOCAL_STORAGE_API_OVERRIDE_KEY);
+            window['setAllOfUsApiUrl'] = (url: string) => {
+              if (url) {
+                if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
+                  throw new Error('URL should be of the form "http[s]://host.example.com[:port]"');
+                }
+                this.overriddenUrl = url;
+                localStorage.setItem(LOCAL_STORAGE_API_OVERRIDE_KEY, url);
+              } else {
+                this.overriddenUrl = null;
+                localStorage.removeItem(LOCAL_STORAGE_API_OVERRIDE_KEY);
+              }
+              window.location.reload();
+            };
+            console.log('To override the API URLs, try:\n' +
+                'setAllOfUsApiUrl(\'https://host.example.com:1234\')');
+          } catch (err) {
+            console.log('Error setting urls: ' + err);
           }
-          window.location.reload();
-        };
-        console.log('To override the API URLs, try:\n' +
-          'setAllOfUsApiUrl(\'https://host.example.com:1234\')');
-      } catch (err) {
-        console.log('Error setting urls: ' + err);
-      }
-    }
+        }
 
-    // Pick up the global site title from HTML, and (for non-prod) add a tag
-    // naming the current environment.
-    if (environment.shouldShowDisplayTag) {
-      this.titleService.setTitle(buildPageTitleForEnvironment());
-    }
+        // Pick up the global site title from HTML, and (for non-prod) add a tag
+        // naming the current environment.
+        if (environment.shouldShowDisplayTag) {
+          this.titleService.setTitle(buildPageTitleForEnvironment());
+        }
 
-    this.router.events.subscribe((e: RouterEvent) => {
-      this.setTitleFromRoute(e);
-      if (e instanceof NavigationEnd || e instanceof NavigationError) {
-        // Terminal navigation events.
-        this.initialSpinner = false;
-      }
-      if (e instanceof NavigationEnd) {
-        const {snapshot: {params, queryParams, routeConfig}} = this.getLeafRoute();
-        urlParamsStore.next(params);
-        queryParamsStore.next(queryParams);
-        routeConfigDataStore.next(routeConfig.data);
-      }
-    });
+        this.router.events.subscribe((e: RouterEvent) => {
+          this.setTitleFromRoute(e);
+          if (e instanceof NavigationEnd || e instanceof NavigationError) {
+            // Terminal navigation events.
+            this.initialSpinner = false;
+          }
+          if (e instanceof NavigationEnd) {
+            const {snapshot: {params, queryParams, routeConfig}} = this.getLeafRoute();
+            urlParamsStore.next(params);
+            queryParamsStore.next(queryParams);
+            routeConfigDataStore.next(routeConfig.data);
+          }
+        });
 
-    routeDataStore.subscribe(({title, pathElementForTitle}) => this.setTitleFromReactRoute({title, pathElementForTitle}));
-    initializeAnalytics();
+        routeDataStore.subscribe(({title, pathElementForTitle}) => {
+          this.setTitleFromReactRoute({title, pathElementForTitle});
+          this.initialSpinner = false;
+        });
+        initializeAnalytics();
+      });
   }
 
   getLeafRoute(route = this.activatedRoute) {
