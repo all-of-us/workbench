@@ -793,15 +793,9 @@ def make_prep_survey(cmd_name, *args)
       "--dataset [dataset]",
       ->(opts, v) { opts.dataset = v},
       "Bigquery Dataset")
-  op.add_validator ->(opts) {
-    unless (opts.project or opts.dataset)
-      common.error "all arguments must be provided"
-      raise ArgumentError
-    end
-  }
 
   op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset }
-    op.parse.validate
+  op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
