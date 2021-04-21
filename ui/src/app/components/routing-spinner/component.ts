@@ -16,7 +16,7 @@ import {
   NavigationStart,
   Router,
 } from '@angular/router';
-import {routeDataStore} from "../../utils/stores";
+import {routeDataStore} from 'app/utils/stores';
 
 @Component({
   selector: 'app-routing-spinner',
