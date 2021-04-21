@@ -1,0 +1,6 @@
+namespace: somewebui
+source_file_paths:
+  - project.clj
+  - src/cljs
+static_file_src: src/static
+static_file_dest: resources/public
