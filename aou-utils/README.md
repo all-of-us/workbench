@@ -7,5 +7,5 @@ After checking out the code, run:
 ./project.rb
 ```
 
-to initialize git hooks and submodules.
+to initialize git hooks
 
