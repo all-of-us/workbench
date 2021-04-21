@@ -102,4 +102,13 @@ describe('Workspace UI tests', () => {
       }
     }
   });
+
+  /*
+
+  // TODO add new test
+  test('Recently Accessed Items table', async () => {
+
+  });
+
+   */
 });

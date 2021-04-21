@@ -57,6 +57,34 @@ describe('Workspace CDR Version Upgrade modal', () => {
     expect(await dataPage.isLoaded()).toBe(true);
   });
 
+  test('Cannot edit workspace to a newer CDR version', async () => {
+    logger.info('Running test name: Cannot edit workspace to a newer CDR version');
+    const workspaceCard = await findOrCreateWorkspaceCard(page, {
+      workspaceName: workspace,
+      cdrVersion: config.altCdrVersionName
+    });
+    await workspaceCard.asElementHandle().hover();
+    await workspaceCard.selectSnowmanMenu(MenuOption.Edit, { waitForNav: true });
+
+    // CDR Version Select is readonly and diplays old CDR version
+    const workspaceEditPage = new WorkspaceEditPage(page);
+    const cdrVersionSelect = workspaceEditPage.getCdrVersionSelect();
+    const cdrVersion = await cdrVersionSelect.getSelectedValue();
+    expect(cdrVersion).toEqual(config.altCdrVersionName);
+
+    const isSelectReadOnly = await cdrVersionSelect.isDisabled();
+    expect(isSelectReadOnly).toBe(true);
+
+    // The Update button is clickable
+    const updateButton = workspaceEditPage.getUpdateWorkspaceButton();
+    const isButtonReadOnly = await updateButton.isCursorNotAllowed();
+    expect(isButtonReadOnly).toBe(false);
+
+    // Update Workspace is successful without making any changes
+    await workspaceEditPage.clickCreateFinishButton(updateButton);
+    await new WorkspaceDataPage(page).waitForLoad();
+  });
+
   test('Can duplicate workspace to a newer CDR version', async () => {
     logger.info('Running test name: Can duplicate workspace to a newer CDR version');
     const workspaceCard = await findOrCreateWorkspaceCard(page, {
@@ -94,8 +122,8 @@ describe('Workspace CDR Version Upgrade modal', () => {
     await dataPage.deleteWorkspace();
   });
 
-  test('Can duplicate workspace with same CDR version', async () => {
-    logger.info('Running test name: Can duplicate workspace with same CDR version');
+  test('Can duplicate workspace with same old CDR version', async () => {
+    logger.info('Running test name: Can duplicate workspace with same old CDR version');
     const workspaceCard = await findOrCreateWorkspaceCard(page, {
       workspaceName: workspace,
       cdrVersion: config.altCdrVersionName

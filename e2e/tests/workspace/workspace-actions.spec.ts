@@ -5,8 +5,7 @@ import {
   findOrCreateWorkspace,
   findOrCreateWorkspaceCard,
   performActions,
-  signInWithAccessToken,
-  signOut
+  signInWithAccessToken
 } from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
@@ -79,8 +78,6 @@ describe('Workspace actions tests', () => {
     expect(todayWeekday).toBe(lastUpdatedWeekday);
     expect(todayYear).toBe(lastUpdatedYear);
     expect(todayDay).toBe(lastUpdatedDay);
-
-    await signOut(page);
   });
 
   test('Can access Edit Workspace page via workspace-action menu', async () => {
@@ -111,7 +108,6 @@ describe('Workspace actions tests', () => {
     const updateButton = workspaceEditPage.getUpdateWorkspaceButton();
     expect(await updateButton.isCursorNotAllowed()).toBe(false);
     // Finish update is not needed
-    await signOut(page);
   });
 
   test('Can duplicate workspace via Workspace card', async () => {
@@ -142,7 +138,6 @@ describe('Workspace actions tests', () => {
 
     await WorkspaceCard.deleteWorkspace(page, duplicateWorkspaceName);
     expect(await WorkspaceCard.findCard(page, duplicateWorkspaceName)).toBeFalsy();
-    await signOut(page);
   });
 
   test('Can access Duplicate Workspace page via Workspace-action menu', async () => {
@@ -168,7 +163,6 @@ describe('Workspace actions tests', () => {
     await finishButton.waitUntilEnabled();
     expect(await finishButton.isCursorNotAllowed()).toBe(false);
     // Click Finish button to clone workspace is not needed.
-    await signOut(page);
   });
 
   test('Can share workspace to another owner', async () => {
@@ -195,7 +189,6 @@ describe('Workspace actions tests', () => {
 
     accessLevel = await aboutPage.findUserInCollaboratorList(collaborator);
     expect(accessLevel).toBeNull();
-    await signOut(page);
   });
 
   test('Can share workspace to reader', async () => {
@@ -213,7 +206,6 @@ describe('Workspace actions tests', () => {
 
     const accessLevel = await aboutPage.findUserInCollaboratorList(collaborator);
     expect(accessLevel).toBe(WorkspaceAccessLevel.Reader);
-    await signOut(page);
   });
 
   test('Can share workspace to writer', async () => {
@@ -231,7 +223,6 @@ describe('Workspace actions tests', () => {
 
     const accessLevel = await aboutPage.findUserInCollaboratorList(collaborator);
     expect(accessLevel).toBe(WorkspaceAccessLevel.Writer);
-    await signOut(page);
   });
 });
 
