@@ -327,10 +327,11 @@ public class BillingProjectBufferService implements GaugeDataCollector {
         workbenchConfigProvider.get().billing.bufferCapacityPerTier;
 
     if (!capacityPerTier.containsKey(accessTierShortName)) {
-      log.log(
-          Level.SEVERE,
-          "Workbench Config Error: no 'billing.bufferCapacityPerTier' entry for '%s' tier",
-          accessTierShortName);
+      final String message =
+          String.format(
+              "Workbench Config Error: no 'billing.bufferCapacityPerTier' entry for '%s' tier",
+              accessTierShortName);
+      log.severe(message);
       return 0;
     }
 
