@@ -55,7 +55,7 @@ import {GenomicsExtractionTable} from 'app/components/genomics-extraction-table'
 import {HelpTips} from 'app/components/help-tips';
 import {getCdrVersion} from 'app/utils/cdr-versions';
 import {
-  CdrVersionListResponse,
+  CdrVersionListResponse, CdrVersionTiersResponse,
   Criteria,
   ParticipantCohortStatus,
   RuntimeStatus,
@@ -332,7 +332,7 @@ interface Props {
   concept?: Array<Criteria>;
   runtimeStore: RuntimeStore;
   compoundRuntimeOps: CompoundRuntimeOpStore;
-  cdrVersionListResponse: CdrVersionListResponse;
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
 }
 
 interface State {
@@ -381,7 +381,7 @@ export const HelpSidebar = fp.flow(
         keys.push('runtime');
       }
 
-      if (getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasWgsData) {
+      if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
         keys.push('genomicExtractions');
       }
 
