@@ -8865,12 +8865,21 @@ definitions:
         type: integer
         format: int64
         description: Workbench database Id for the job
+      datasetName:
+        type: string
+      cost:
+        type: number
+        format: currency
       status:
         "$ref": '#/definitions/TerraJobStatus'
       submissionDate:
         type: integer
         format: int64
         description: Submission Timestamp (epoch) according to Terra
+      completionTime:
+        type: integer
+        format: int64
+        description: Submission Completion Timestamp (epoch) according to Terra
   TerraJobStatus:
     type: string
     description: 'Terra job status. Indicates if the Terra Submission and Workflows are still running, succeeded, or failed.

@@ -35,6 +35,7 @@ import org.pmiops.workbench.google.StorageConfig;
 import org.pmiops.workbench.model.GenomicExtractionJob;
 import org.pmiops.workbench.model.TerraJobStatus;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
+import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -123,6 +124,14 @@ public class GenomicExtractionService {
                             cohortExtractionConfig.operationalTerraWorkspaceNamespace,
                             cohortExtractionConfig.operationalTerraWorkspaceName,
                             dbSubmission.getSubmissionId());
+
+                if (genomicExtractionMapper.convertJobStatus(firecloudSubmission.getStatus())
+                    != TerraJobStatus.RUNNING) {
+                  dbSubmission.setCompletionTime(
+                      CommonMappers.timestamp(
+                          firecloudSubmission.getWorkflows().get(0).getStatusLastChangedDate()));
+                  wgsExtractCromwellSubmissionDao.save(dbSubmission);
+                }
 
                 return genomicExtractionMapper.toApi(dbSubmission, firecloudSubmission);
               } catch (ApiException e) {

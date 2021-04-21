@@ -5,10 +5,12 @@ import {
   faEllipsisV,
   faFolderOpen,
   faInbox,
-  faInfoCircle
+  faInfoCircle, IconDefinition
 } from '@fortawesome/free-solid-svg-icons';
+import {faDna} from '@fortawesome/free-solid-svg-icons/faDna';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
+import {CSSProperties} from 'react';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -25,7 +27,7 @@ import {participantStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   reactStyles,
-  ReactWrapperBase,
+  ReactWrapperBase, withCdrVersions,
   withCurrentCohortCriteria,
   withCurrentConcept,
   withCurrentWorkspace,
@@ -49,8 +51,16 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 
+import {GenomicsExtractionTable} from 'app/components/genomics-extraction-table';
 import {HelpTips} from 'app/components/help-tips';
-import {Criteria, ParticipantCohortStatus, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
+import {getCdrVersion} from 'app/utils/cdr-versions';
+import {
+  CdrVersionListResponse,
+  Criteria,
+  ParticipantCohortStatus,
+  RuntimeStatus,
+  WorkspaceAccessLevel
+} from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 
 const proIcons = {
@@ -209,8 +219,19 @@ const iconStyles = {
 
 export const NOTEBOOK_HELP_CONTENT = 'notebookStorage';
 
-const iconConfigs = {
+interface IconConfig {
+  id: string;
+  disabled: boolean;
+  faIcon: IconDefinition;
+  label: string;
+  page: string;
+  style: CSSProperties;
+  tooltip: string;
+}
+
+const iconConfigs: { [iconKey: string]: IconConfig } = {
   'criteria': {
+    id: 'criteria',
     disabled: false,
     faIcon: faInbox,
     label: 'Selected Criteria',
@@ -219,6 +240,7 @@ const iconConfigs = {
     tooltip: 'Selected Criteria',
   },
   'concept': {
+    id: 'concept',
     disabled: false,
     faIcon: faInbox,
     label: 'Selected Concepts',
@@ -227,6 +249,7 @@ const iconConfigs = {
     tooltip: 'Selected Concepts',
   },
   'help': {
+    id: 'help',
     disabled: false,
     faIcon: faInfoCircle,
     label: 'Help Icon',
@@ -235,6 +258,7 @@ const iconConfigs = {
     tooltip: 'Help Tips',
   },
   'notebooksHelp': {
+    id: 'notebooksHelp',
     disabled: false,
     faIcon: faFolderOpen,
     label: 'Storage Icon',
@@ -243,6 +267,7 @@ const iconConfigs = {
     tooltip: 'Workspace Storage',
   },
   'dataDictionary': {
+    id: 'dataDictionary',
     disabled: false,
     faIcon: faBook,
     label: 'Data Dictionary Icon',
@@ -251,6 +276,7 @@ const iconConfigs = {
     tooltip: 'Data Dictionary',
   },
   'annotations': {
+    id: 'annotations',
     disabled: false,
     faIcon: faEdit,
     label: 'Annotations Icon',
@@ -259,35 +285,27 @@ const iconConfigs = {
     tooltip: 'Annotations',
   },
   'runtime': {
+    id: 'runtime',
     disabled: false,
     faIcon: null,
     label: 'Cloud Icon',
     page: null,
     style: {height: '22px', width: '22px'},
-    tooltip: 'Compute Configuration',
+    tooltip: 'Compute Configuration'
+  },
+  'genomicExtractions': {
+    id: 'genomicExtractions',
+    disabled: false,
+    faIcon: faDna,
+    label: 'Genomic Extraction',
+    page: null,
+    style: {height: '22px', width: '22px', marginTop: '0.25rem'},
+    tooltip: 'Genomic Extraction History',
   }
 };
 
 const helpIconName = (helpContentKey: string) => {
   return helpContentKey === NOTEBOOK_HELP_CONTENT ? 'notebooksHelp' : 'help';
-};
-
-const icons = (
-  helpContentKey: string,
-  workspaceAccessLevel: WorkspaceAccessLevel
-) => {
-  const keys = [
-    'criteria',
-    'concept',
-    helpIconName(helpContentKey),
-    'dataDictionary',
-    'annotations',
-  ];
-
-  if (WorkspacePermissionsUtil.canWrite(workspaceAccessLevel)) {
-    keys.push('runtime');
-  }
-  return keys.map(k => ({...iconConfigs[k], id: k}));
 };
 
 const analyticsLabels = {
@@ -314,6 +332,7 @@ interface Props {
   concept?: Array<Criteria>;
   runtimeStore: RuntimeStore;
   compoundRuntimeOps: CompoundRuntimeOpStore;
+  cdrVersionListResponse: CdrVersionListResponse;
 }
 
 interface State {
@@ -331,7 +350,8 @@ export const HelpSidebar = fp.flow(
   withCurrentWorkspace(),
   withRuntimeStore(),
   withStore(compoundRuntimeOpStore, 'compoundRuntimeOps'),
-  withUserProfile()
+  withUserProfile(),
+  withCdrVersions()
 )(
   class extends React.Component<Props, State> {
     subscription: Subscription;
@@ -346,6 +366,26 @@ export const HelpSidebar = fp.flow(
         showCriteria: false,
         tooltipId: undefined
       };
+    }
+
+    icons(helpContentKey: string, workspaceAccessLevel: WorkspaceAccessLevel): IconConfig[] {
+      const keys = [
+        'criteria',
+        'concept',
+        helpIconName(helpContentKey),
+        'dataDictionary',
+        'annotations'
+      ];
+
+      if (WorkspacePermissionsUtil.canWrite(workspaceAccessLevel)) {
+        keys.push('runtime');
+      }
+
+      if (getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasWgsData) {
+        keys.push('genomicExtractions');
+      }
+
+      return keys.map(k => iconConfigs[k]);
     }
 
     async componentDidMount() {
@@ -377,7 +417,7 @@ export const HelpSidebar = fp.flow(
       this.subscription.unsubscribe();
     }
 
-    onIconClick(icon: any) {
+    onIconClick(icon: IconConfig) {
       const {setSidebarState, sidebarOpen} = this.props;
       const {activeIcon} = this.state;
       const {id, label} = icon;
@@ -486,12 +526,12 @@ export const HelpSidebar = fp.flow(
       </PopupTrigger>;
     }
 
-    showIcon(icon) {
+    showIcon(icon: IconConfig) {
       const {concept, criteria, helpContentKey} = this.props;
       return !icon.page || icon.page === helpContentKey || (criteria && icon.page === 'criteria') || (concept && icon.page === 'concept');
     }
 
-    displayFontAwesomeIcon(icon) {
+    displayFontAwesomeIcon(icon: IconConfig) {
       const {concept, criteria} = this.props;
 
       return <React.Fragment>
@@ -505,7 +545,7 @@ export const HelpSidebar = fp.flow(
           </React.Fragment> ;
     }
 
-    displayRuntimeIcon(icon) {
+    displayRuntimeIcon(icon: IconConfig) {
       const {runtimeStore, compoundRuntimeOps, workspace} = this.props;
       let status = runtimeStore && runtimeStore.runtime && runtimeStore.runtime.status;
       if ((!status || status === RuntimeStatus.Deleted) &&
@@ -584,6 +624,7 @@ export const HelpSidebar = fp.flow(
     }
 
     sidebarContent(activeIcon): {
+      overflow?: string;
       headerPadding?: string;
       renderHeader?: () => JSX.Element;
       bodyWidthRem?: string;
@@ -666,6 +707,18 @@ export const HelpSidebar = fp.flow(
                 <SelectionList back={() => this.props.setSidebarState(false)} selections={[]}/>,
             showFooter: false
           };
+        case 'genomicExtractions':
+          return {
+            overflow: 'visible',
+            headerPadding: '0.75rem',
+            renderHeader: () =>
+              <h3 style={{...styles.sectionTitle, marginTop: 0}}>
+                Genomic Extractions
+              </h3>,
+            bodyWidthRem: '30',
+            renderBody: () => <GenomicsExtractionTable />,
+            showFooter: false
+          };
       }
     }
 
@@ -677,7 +730,7 @@ export const HelpSidebar = fp.flow(
       return <div id='help-sidebar'>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
           {!(criteria || concept)  && this.renderWorkspaceMenu()}
-          {icons(helpContentKey, workspace.accessLevel).map((icon, i) =>
+          {this.icons(helpContentKey, workspace.accessLevel).map((icon, i) =>
           this.showIcon(icon) && <div key={i} style={{display: 'table'}}>
                 <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
                   <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
@@ -708,7 +761,7 @@ export const HelpSidebar = fp.flow(
           <div style={this.sidebarStyle} data-test-id='sidebar-content'>
 
             {sidebarContent &&
-              <div style={{height: '100%', overflow: 'auto'}}>
+              <div style={{height: '100%', overflow: sidebarContent.overflow || 'auto'}}>
                 <FlexColumn style={{height: '100%'}}>
                   {sidebarContent.renderHeader &&
                     <FlexRow style={{justifyContent: 'space-between', padding: sidebarContent.headerPadding}}>
