@@ -6,7 +6,7 @@ import {
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
-class CdrVersionsStubVariables {
+export class CdrVersionsStubVariables {
   static DEFAULT_WORKSPACE_CDR_VERSION = 'Fake CDR Version';
   static DEFAULT_WORKSPACE_CDR_VERSION_ID = 'fakeCdrVersion';
   static ALT_WORKSPACE_CDR_VERSION = 'Alternative CDR Version';
@@ -15,7 +15,7 @@ class CdrVersionsStubVariables {
   static CONTROLLED_TIER_CDR_VERSION_ID = 'ctCdrVersion';
 }
 
-const cdrVersionTiersResponse: CdrVersionTiersResponse = {
+export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
   tiers: [{
     accessTierShortName: AccessTierShortNames.Registered,
     defaultCdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
@@ -59,14 +59,14 @@ const cdrVersionTiersResponse: CdrVersionTiersResponse = {
   ]
 };
 
-const registeredCdrVersionTier = cdrVersionTiersResponse.tiers[0];
-const defaultCdrVersion = registeredCdrVersionTier.versions[0];
-const altCdrVersion = registeredCdrVersionTier.versions[1];
+export const registeredCdrVersionTier = cdrVersionTiersResponse.tiers[0];
+export const defaultCdrVersion = registeredCdrVersionTier.versions[0];
+export const altCdrVersion = registeredCdrVersionTier.versions[1];
 
-const controlledCdrVersionTier = cdrVersionTiersResponse.tiers[1];
-const controlledCdrVersion = controlledCdrVersionTier.versions[0];
+export const controlledCdrVersionTier = cdrVersionTiersResponse.tiers[1];
+export const controlledCdrVersion = controlledCdrVersionTier.versions[0];
 
-class CdrVersionsApiStub extends CdrVersionsApi {
+export class CdrVersionsApiStub extends CdrVersionsApi {
   constructor() {
     super(undefined, undefined, (..._: any[]) => { throw stubNotImplementedError; });
   }
@@ -77,14 +77,3 @@ class CdrVersionsApiStub extends CdrVersionsApi {
     });
   }
 }
-
-export {
-  CdrVersionsApiStub,
-  CdrVersionsStubVariables,
-  cdrVersionTiersResponse,
-  registeredCdrVersionTier,
-  controlledCdrVersionTier,
-  defaultCdrVersion,
-  altCdrVersion,
-  controlledCdrVersion,
-};
