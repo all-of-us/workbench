@@ -35,7 +35,7 @@ import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {
   BillingStatus,
-  CdrVersionListResponse,
+  CdrVersionTiersResponse,
   Cohort,
   ConceptSet,
   DataDictionaryEntry,
@@ -422,7 +422,7 @@ interface DataSetPreviewInfo {
 
 interface Props {
   workspace: WorkspaceData;
-  cdrVersionListResponse: CdrVersionListResponse;
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
   urlParams: any;
   profileState: {
     profile: Profile,
@@ -487,13 +487,13 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     async componentDidMount() {
       const {namespace, id} = this.props.workspace;
       const resourcesPromise = this.loadResources();
-      if (getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasFitbitData) {
+      if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasFitbitData) {
         PREPACKAGED_DOMAINS =   {
           ...PREPACKAGED_SURVEY_PERSON_DOMAIN,
           ...PREPACKAGED_WITH_FITBIT_DOMAINS
         };
       }
-      if (getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasWgsData) {
+      if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
         PREPACKAGED_DOMAINS = {
           ...PREPACKAGED_DOMAINS,
           ...PREPACKAGED_WITH_WHOLE_GENOME
@@ -640,11 +640,11 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
 
     getPrePackagedList() {
       let prepackagedList = Object.keys(PrepackagedConceptSet);
-      if (!getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasFitbitData) {
+      if (!getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasFitbitData) {
         prepackagedList = prepackagedList
             .filter(prepack => !fp.startsWith('FITBIT', prepack));
       }
-      if (!getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasWgsData) {
+      if (!getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
         prepackagedList = prepackagedList.filter(prepack => prepack !== 'WHOLEGENOME');
       }
       return prepackagedList;
@@ -1267,7 +1267,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                            workspaceId={id}
                                            billingLocked={this.props.workspace.billingStatus === BillingStatus.INACTIVE}
                                            displayMicroarrayOptions={
-                                             getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasMicroarrayData}
+                                             getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasMicroarrayData}
                                            prePackagedConceptSet={this.getPrePackagedConceptSetApiEnum()}
                                            dataSet={dataSet ? dataSet : undefined}
                                            closeFunction={() => {

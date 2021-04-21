@@ -10,7 +10,7 @@ import {dropNotebookFileSuffix} from 'app/pages/analysis/util';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
+import {cdrVersionTiersResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 
 import {CopyModalComponent, CopyModalProps, CopyModalState} from './copy-modal';
 
@@ -85,7 +85,7 @@ describe('CopyModal', () => {
     registerApiClient(WorkspacesApi, wsApiStub);
 
     props = {
-      cdrVersionListResponse: cdrVersionListResponse,
+      cdrVersionTiersResponse: cdrVersionTiersResponse,
       fromWorkspaceNamespace: fromWorkspaceNamespace,
       fromWorkspaceFirecloudName: fromWorkspaceFirecloudName,
       fromResourceName: fromResourceName,

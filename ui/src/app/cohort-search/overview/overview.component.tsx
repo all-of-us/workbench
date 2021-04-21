@@ -22,7 +22,7 @@ import {currentWorkspaceStore, navigate, navigateByUrl, urlParamsStore} from 'ap
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   AgeType,
-  CdrVersionListResponse,
+  CdrVersionTiersResponse,
   Cohort,
   GenderOrSexType,
   ResourceType,
@@ -144,7 +144,7 @@ interface Props {
   updateCount: any;
   updating: Function;
   workspace: WorkspaceData;
-  cdrVersionListResponse: CdrVersionListResponse;
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
 }
 
 interface State {

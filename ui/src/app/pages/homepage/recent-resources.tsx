@@ -16,7 +16,7 @@ import {getCdrVersion} from 'app/utils/cdr-versions';
 import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {getDisplayName, isNotebook} from 'app/utils/resources';
 import {
-  CdrVersionListResponse,
+  CdrVersionTiersResponse,
   Workspace,
   WorkspaceResource,
   WorkspaceResourceResponse,
@@ -73,7 +73,7 @@ interface TableData {
 }
 
 interface Props {
-  cdrVersionListResponse: CdrVersionListResponse;
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
   workspaces: WorkspaceResponse[];
 }
 
@@ -113,8 +113,8 @@ export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
     };
 
     const getCdrVersionName = (r: WorkspaceResource) => {
-      const {cdrVersionListResponse} = props;
-      return getCdrVersion(getWorkspace(r), cdrVersionListResponse).name;
+      const {cdrVersionTiersResponse} = props;
+      return getCdrVersion(getWorkspace(r), cdrVersionTiersResponse).name;
     };
 
     if (resources && wsMap) {

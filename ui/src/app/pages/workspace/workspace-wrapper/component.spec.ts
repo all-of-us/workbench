@@ -25,7 +25,7 @@ import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 
 import {cdrVersionStore} from 'app/utils/stores';
 import {findElements} from 'testing/react-testing-utility';
-import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
+import {cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {setupModals, updateAndTick} from 'testing/test-helpers';
 
@@ -79,7 +79,7 @@ describe('WorkspaceWrapperComponent', () => {
       });
       serverConfigStore.next({gsuiteDomain: 'fake-research-aou.org',
         enableResearchReviewPrompt: true});
-      cdrVersionStore.set(cdrVersionListResponse);
+      cdrVersionStore.set(cdrVersionTiersResponse);
     });
   }));
 

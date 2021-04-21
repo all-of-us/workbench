@@ -95,7 +95,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
         this.profile = profile as unknown as FetchProfile;
         setInstitutionCategoryState(this.profile.verifiedInstitutionalAffiliation);
         if (hasRegisteredAccess(this.profile.accessTierShortNames)) {
-          cdrVersionsApi().getCdrVersions().then(resp => {
+          cdrVersionsApi().getCdrVersionsByTier().then(resp => {
             // cdrVersionsInitialized blocks app rendering so that route
             // components don't try to lookup CDR data before it's available.
             // This will need to be a step in the React bootstrapping as well.
