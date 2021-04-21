@@ -15,7 +15,7 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {getDescription, getDisplayName, getType} from 'app/utils/resources';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
-import {WorkspaceResource, PrePackagedConceptSetEnum} from 'generated/fetch';
+import {PrePackagedConceptSetEnum, WorkspaceResource} from 'generated/fetch';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: WorkspaceResource;

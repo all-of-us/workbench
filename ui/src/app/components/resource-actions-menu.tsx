@@ -1,7 +1,7 @@
+import {IconDefinition} from '@fortawesome/free-solid-svg-icons';
 import * as React from 'react';
 import {MenuItem, SnowmanButton} from './buttons';
 import {PopupTrigger, TooltipTrigger} from './popups';
-import {IconDefinition} from '@fortawesome/free-solid-svg-icons';
 
 interface Action {
   icon?: string;

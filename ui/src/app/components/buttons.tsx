@@ -1,6 +1,6 @@
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {styles as cardStyles} from 'app/components/card';
 import {ClrIcon} from 'app/components/icons';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {SnowmanIcon} from 'app/components/icons';
 import {TooltipTrigger} from 'app/components/popups';
 import {IconComponent} from 'app/icons/icon';
