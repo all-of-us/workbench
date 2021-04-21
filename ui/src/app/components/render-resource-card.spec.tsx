@@ -73,7 +73,7 @@ describe('renderResourceCard', () => {
       const wrapper = mount(menu);
       wrapper.find({'data-test-id': 'resource-card-menu'}).first().simulate('click');
       expect(wrapper.text()).toContain('Export to Notebook');
-      expect(wrapper.text()).not.toContain('Extract VCF files');
+      expect(wrapper.text()).not.toContain('Extract VCF Files');
     });
 
     it('renders a dataset menu, with WGS', () => {
@@ -97,6 +97,6 @@ describe('renderResourceCard', () => {
       const wrapper = mount(menu);
       wrapper.find({'data-test-id': 'resource-card-menu'}).first().simulate('click');
       expect(wrapper.text()).toContain('Export to Notebook');
-      expect(wrapper.text()).toContain('Extract VCF files');
+      expect(wrapper.text()).toContain('Extract VCF Files');
     });
 })

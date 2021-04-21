@@ -83,7 +83,7 @@ export const DatasetResourceCard = fp.flow(
       },
       ...(hasWgs ? [{
         faIcon: faDna,
-        displayName: 'Extract VCF files',
+        displayName: 'Extract VCF Files',
         onClick: () => {
           AnalyticsTracker.DatasetBuilder.OpenGenomicExtractionModal('From Card Snowman');
           this.setState({showGenomicExtractionModal: true});
