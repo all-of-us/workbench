@@ -322,6 +322,11 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   }
 
   private int getBufferMaxCapacity(String accessTierShortName) {
+    if (!workbenchConfigProvider.get().billing.bufferCapacityPerTier.containsKey(accessTierShortName)) {
+      log.log(Level.SEVERE, "Workbench Config Error: no 'billing.bufferCapacityPerTier' entry for '%s' tier", accessTierShortName);
+      return 0;
+    }
+
     return workbenchConfigProvider.get().billing.bufferCapacityPerTier.get(accessTierShortName);
   }
 
