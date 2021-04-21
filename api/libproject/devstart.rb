@@ -783,6 +783,38 @@ Common.register_command({
   :fn => ->() { run_local_rw_migrations() }
 })
 
+def make_prep_survey(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+      "--project [project]",
+      ->(opts, v) { opts.project = v},
+      "Bigquery Project")
+  op.add_option(
+      "--dataset [dataset]",
+      ->(opts, v) { opts.dataset = v},
+      "Bigquery Dataset")
+  op.add_validator ->(opts) {
+    unless (opts.project or opts.dataset)
+      common.error "all arguments must be provided"
+      raise ArgumentError
+    end
+  }
+
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset }
+    op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./prep-tables/make-prep-survey.sh #{op.opts.project} #{op.opts.dataset}}
+  end
+end
+
+Common.register_command({
+  :invocation => "make-prep-survey",
+  :description => "Build the prep survey table",
+  :fn => ->(*args) { make_prep_survey("make-prep-survey", *args) }
+})
+
 def circle_build_cdr_indices(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.data_browser = false
