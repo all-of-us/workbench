@@ -1,49 +1,7 @@
-import argparse
 import csv
-import sys
-from io import StringIO
-
-from google.cloud import bigquery
-from google.cloud import storage
 
 
 def main():
-    parser = argparse.ArgumentParser(prog='data_dictionary',
-                                     usage='%(prog)s --project <project> --dataset <dataset>',
-                                     description='Generate 3 csv files')
-    parser.add_argument('--project', type=str, help='project name',
-                        required=True)
-    parser.add_argument('--dataset', type=str, help='dataset name',
-                        required=True)
-    args = parser.parse_args()
-
-    storage_client = storage.Client.from_service_account_json(
-        '../../sa-key.json')
-    bucket = storage_client.get_bucket('all-of-us-workbench-private-cloudsql')
-    blob = bucket.blob('cb_prep_tables/thebasics_updated_controlled.csv')
-    blob = blob.download_as_string()
-    blob = blob.decode('utf-8')
-    blob = StringIO(blob)  # tranform bytes to string
-
-    names = csv.reader(blob)  # then use csv library to read the content
-    # for name in names:
-    # print(f"First Name: {name[0]}")
-
-    big_query_client = bigquery.Client.from_service_account_json(
-        "../../sa-key.json")
-    query = """
-    SELECT concept_code FROM `$project.dataset.concept`
-    WHERE concept_name = "$concept_name" and vocabulary_id = "PPI" and
-    concept_class_id = "Topic"
-    """.replace("$project.dataset", args.project + "." + args.dataset).replace(
-        "$concept_name", "Respiratory Conditions")
-    query_job = big_query_client.query(query)
-    rows = query_job.result()
-    for row in rows:
-        print(row.concept_code)
-
-    sys.exit()
-
     # Get the BigQuery curated dataset for the current workspace context.
     CDR = args.project + "." + args.dataset
     # CHANGE THIS PER SURVEY
