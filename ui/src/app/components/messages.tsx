@@ -84,8 +84,8 @@ export const ErrorMessage = ({
   iconPosition = 'center',
   children
 }: {
-  iconSize: number,
-  iconPosition: 'top' | 'center' | 'bottom',
+  iconSize?: number,
+  iconPosition?: 'top' | 'center' | 'bottom',
   children
 }) => {
   return <MessageWithIcon

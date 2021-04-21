@@ -29,7 +29,7 @@ export const GenomicExtractionModal = ({
       VCF extraction will incur cloud compute costs.
     </ModalBody>
     {error &&
-     <ErrorMessage iconSize={16} iconPosition={'top'}>
+     <ErrorMessage iconSize={16}>
        Failed to launch extraction, please try again.
      </ErrorMessage>}
     <ModalFooter>

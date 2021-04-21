@@ -1,9 +1,10 @@
-import * as React from "react";
+import * as React from 'react';
 
-import {WorkspaceResource} from 'generated/fetch';
+import {PrePackagedConceptSetEnum, WorkspaceResource} from 'generated/fetch';
 import {exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
-import {renderResourceCard} from "./render-resource-card";
-import {mount} from "enzyme";
+import {stubDataSet} from 'testing/stubs/data-set-api-stub';
+import {renderResourceCard} from './render-resource-card';
+import {mount} from 'enzyme';
 import {stubResource} from 'testing/stubs/resources-stub';
 
 describe('renderResourceCard', () => {
@@ -52,5 +53,50 @@ describe('renderResourceCard', () => {
         const wrapper = mount(menu);
         expect(wrapper.exists()).toBeTruthy();
         expect(wrapper.text()).toBe('');
+    });
+
+    it('renders a dataset menu', () => {
+      const testDataSet = {
+        ...stubResource,
+        dataSet: {
+          ...stubDataSet(),
+          prePackagedConceptSet: [PrePackagedConceptSetEnum.FITBIT]
+        }
+      } as WorkspaceResource;
+
+      const menu = renderResourceCard({
+        resource: testDataSet,
+        existingNameList: [],
+        onUpdate: async () => {},
+        menuOnly: true,
+      });
+      const wrapper = mount(menu);
+      wrapper.find({'data-test-id': 'resource-card-menu'}).first().simulate('click');
+      expect(wrapper.text()).toContain('Export to Notebook');
+      expect(wrapper.text()).not.toContain('Extract VCF files');
+    });
+
+    it('renders a dataset menu, with WGS', () => {
+      const testDataSet = {
+        ...stubResource,
+        dataSet: {
+          ...stubDataSet(),
+          prePackagedConceptSet: [
+            PrePackagedConceptSetEnum.PERSON,
+            PrePackagedConceptSetEnum.WHOLEGENOME
+          ]
+        },
+      } as WorkspaceResource;
+
+      const menu = renderResourceCard({
+        resource: testDataSet,
+        existingNameList: [],
+        onUpdate: async () => {},
+        menuOnly: true,
+      });
+      const wrapper = mount(menu);
+      wrapper.find({'data-test-id': 'resource-card-menu'}).first().simulate('click');
+      expect(wrapper.text()).toContain('Export to Notebook');
+      expect(wrapper.text()).toContain('Extract VCF files');
     });
 })

@@ -1,6 +1,7 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+import {faDna} from '@fortawesome/free-solid-svg-icons/faDna';
 import {RenameModal} from 'app/components/rename-modal';
 import {Action, ResourceActionsMenu} from 'app/components/resource-actions-menu';
 import {canDelete, canWrite, ResourceCard} from 'app/components/resource-card';
@@ -47,7 +48,7 @@ export const DatasetResourceCard = fp.flow(
 
   get actions(): Action[] {
     const {resource, inactiveBilling} = this.props;
-    const hasWgs = resource.dataSet.prePackagedConceptSet.includes(PrePackagedConceptSetEnum.WHOLEGENOME);
+    const hasWgs = (resource.dataSet.prePackagedConceptSet || []).includes(PrePackagedConceptSetEnum.WHOLEGENOME);
     return [
       {
         icon: 'pencil',
@@ -81,8 +82,7 @@ export const DatasetResourceCard = fp.flow(
         hoverText: inactiveBilling && ACTION_DISABLED_INVALID_BILLING
       },
       ...(hasWgs ? [{
-        // TODO: Reconcile with font awesome faDna.
-        icon: 'helix',
+        faIcon: faDna,
         displayName: 'Extract VCF files',
         onClick: () => {
           AnalyticsTracker.DatasetBuilder.OpenGenomicExtractionModal('From Card Snowman');
