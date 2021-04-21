@@ -55,8 +55,6 @@
       "releaseNumber": 3,
       "numParticipants": 234525,
       "cdrDbName": "synth_r_2019q4_14",
-      "elasticIndexBaseName": "cdr",
-      "microarrayBigqueryDataset": "microarray_data",
       "hasFitbitData": true,
       "hasCopeSurveyData": true
     },
@@ -71,8 +69,6 @@
       "releaseNumber": 3,
       "numParticipants": 234525,
       "cdrDbName": "synth_r_2019q4_14",
-      "elasticIndexBaseName": "cdr",
-      "microarrayBigqueryDataset": "microarray_data",
       "hasFitbitData": true,
       "hasCopeSurveyData": true
     }

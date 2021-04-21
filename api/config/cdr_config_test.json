@@ -84,7 +84,6 @@
       "releaseNumber": 3,
       "numParticipants": 234525,
       "cdrDbName": "synth_r_2019q4_14",
-      "elasticIndexBaseName": "cdr",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "controlled"
