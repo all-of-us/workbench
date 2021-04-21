@@ -8,17 +8,6 @@ module Workbench
   LIBPROJECT_DIR = File.dirname(__FILE__)
   WORKBENCH_ROOT = File.expand_path(File.join(LIBPROJECT_DIR, '..'))
 
-  def check_submodules()
-    # `git clone` includes submodule folders but nothing else.
-    unless File.exists? File.join(LIBPROJECT_DIR, "utils", "README.md")
-      unless system(*%W{git submodule update --init --recursive})
-        common.error "`git submodule update` failed."
-        exit 1
-      end
-    end
-  end
-  module_function :check_submodules
-
   def ensure_git_hooks()
     common = Common.new
     unless common.capture_stdout(%W{git config --get core.hooksPath}).chomp == "hooks"
@@ -38,7 +27,6 @@ module Workbench
   module_function :assert_in_docker
 
   def setup_workspace()
-    check_submodules
     ensure_git_hooks
   end
   module_function :setup_workspace
@@ -57,8 +45,7 @@ module Workbench
       common.print_usage
       exit 0
     end
-
-    common.handle_or_die(ARGV)
+common.handle_or_die(ARGV)
   end
   module_function :handle_argv_or_die
 
