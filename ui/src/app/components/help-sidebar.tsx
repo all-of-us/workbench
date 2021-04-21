@@ -12,6 +12,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import {CSSProperties} from 'react';
 import * as React from 'react';
+import {CSSTransition, SwitchTransition} from 'react-transition-group';
 import {Subscription} from 'rxjs/Subscription';
 
 import {faCircle} from '@fortawesome/free-solid-svg-icons/faCircle';
@@ -97,7 +98,7 @@ const styles = reactStyles({
     boxShadow: `-10px 0px 10px -8px ${colorWithWhiteness(colors.dark, .5)}`,
   },
   sidebarOpen: {
-    marginRight: 0,
+    // marginRight: 0, TODO eric: delete
   },
   iconContainer: {
     position: 'absolute',
@@ -359,7 +360,7 @@ export const HelpSidebar = fp.flow(
       super(props);
       this.state = {
         // TODO(RW-5607): Remember which icon was active.
-        activeIcon: props.sidebarOpen ? helpIconName(props.helpContentKey) : undefined,
+        activeIcon: props.sidebarOpen ? helpIconName(props.helpContentKey) : 'closed',
         filteredContent: undefined,
         participant: undefined,
         searchTerm: '',
@@ -404,12 +405,13 @@ export const HelpSidebar = fp.flow(
         setTimeout(() => {
           // check if the sidebar has been opened again before resetting activeIcon
           if (!this.props.sidebarOpen) {
-            this.setState({activeIcon: undefined});
+            this.setState({activeIcon: 'closed'});
           }
         }, 300);
       }
       if ((!this.props.criteria && !!prevProps.criteria ) || (!this.props.concept && !!prevProps.concept)) {
         this.props.setSidebarState(false);
+        // TODO eric: test this case. do I need a setState here?
       }
     }
 
@@ -428,6 +430,7 @@ export const HelpSidebar = fp.flow(
         this.analyticsEvent('OpenSidebar', `Sidebar - ${label}`);
       } else {
         setSidebarState(false);
+        this.setState({activeIcon: 'closed'});
       }
     }
 
@@ -455,13 +458,13 @@ export const HelpSidebar = fp.flow(
         if (activeIcon) {
           return {...sidebarContainerStyle, ...styles.notebookOverrides, ...styles.sidebarContainerActive};
         } else {
-          return {...sidebarContainerStyle, ...styles.notebookOverrides};
+          return {...sidebarContainerStyle, ...styles.notebookOverrides, ...styles.sidebarContainerActive}; // TODO eric: refactor this
         }
       } else {
         if (activeIcon) {
           return {...sidebarContainerStyle, ...styles.sidebarContainerActive};
         } else {
-          return sidebarContainerStyle;
+          return sidebarContainerStyle; // TODO eric: and this
         }
       }
     }
@@ -610,7 +613,7 @@ export const HelpSidebar = fp.flow(
     get sidebarStyle() {
       const sidebarStyle = {
         ...styles.sidebar,
-        marginRight: `calc(-${this.sidebarWidth}rem - 40px)`,
+        marginRight: 0, // TODO eric: refactor
         width: `${this.sidebarWidth}.5rem`,
       };
       return this.props.sidebarOpen ? {...sidebarStyle, ...styles.sidebarOpen} : sidebarStyle;
@@ -633,6 +636,12 @@ export const HelpSidebar = fp.flow(
       showFooter: boolean;
     } {
       switch (activeIcon) {
+        case 'closed':
+          return {
+            bodyWidthRem: '100rem',
+            renderBody: () => <div></div>,
+            showFooter: false
+          };
         case 'help':
           return {
             headerPadding: '0.5rem',
@@ -757,43 +766,55 @@ export const HelpSidebar = fp.flow(
             )
           }
         </div>
-        <div style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
-          <div style={this.sidebarStyle} data-test-id='sidebar-content'>
 
-            {sidebarContent &&
-              <div style={{height: '100%', overflow: sidebarContent.overflow || 'auto'}}>
-                <FlexColumn style={{height: '100%'}}>
-                  {sidebarContent.renderHeader &&
-                    <FlexRow style={{justifyContent: 'space-between', padding: sidebarContent.headerPadding}}>
-                      {sidebarContent.renderHeader()}
+        <SwitchTransition mode='out-in'>
+          <CSSTransition
+            key={activeIcon}
+            classNames='sidebar-fade'
+            addEndListener={(node, done) => {
+              node.addEventListener('transitionend', done, false);}}>
+            <div className={`sidebar-${activeIcon}`} style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
+              {/* TODO eric: Do I need both classNames?*/}
+              <div className='sidebar-content' style={this.sidebarStyle} data-test-id='sidebar-content'>
 
-                      <Clickable onClick={() => this.props.setSidebarState(false)}>
-                          <img src={proIcons.times}
-                               style={{height: '27px', width: '17px'}}
-                               alt='Close'/>
-                      </Clickable>
-                    </FlexRow>
-                  }
+                {sidebarContent &&
+                <div style={{height: '100%', overflow: sidebarContent.overflow || 'auto'}}>
+                    <FlexColumn style={{height: '100%'}}>
+                      {sidebarContent.renderHeader &&
+                      <FlexRow style={{justifyContent: 'space-between', padding: sidebarContent.headerPadding}}>
+                        {sidebarContent.renderHeader()}
 
-                  <div style={{flex: 1, padding: sidebarContent.bodyPadding || '0 0.5rem 5.5rem', height: '100%'}}>
-                    {sidebarContent.renderBody()}
-                  </div>
-                </FlexColumn>
+                          <Clickable onClick={() => this.props.setSidebarState(false)}>
+                              <img src={proIcons.times}
+                                   style={{height: '27px', width: '17px'}}
+                                   alt='Close'/>
+                          </Clickable>
+                      </FlexRow>
+                      }
 
-                {sidebarContent.showFooter &&
+                        <div style={{flex: 1, padding: sidebarContent.bodyPadding || '0 0.5rem 5.5rem', height: '100%'}}>
+                          {sidebarContent.renderBody()}
+                        </div>
+                    </FlexColumn>
+
+                  {sidebarContent.showFooter &&
                   <div style={{...styles.footer}}>
-                    <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
-                    <p style={styles.contentItem}>
-                        Visit our <StyledAnchorTag href={supportUrls.helpCenter}
-                                                   target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
-                    </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
-                    </p>
+                      <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
+                      <p style={styles.contentItem}>
+                          Visit our <StyledAnchorTag href={supportUrls.helpCenter}
+                                                     target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
+                      </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
+                      </p>
                   </div>
+                  }
+                </div>
                 }
               </div>
-            }
-          </div>
-        </div>
+            </div>
+          </CSSTransition>
+        </SwitchTransition>
+
+
       </div>;
     }
   }

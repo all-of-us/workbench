@@ -1,0 +1,25 @@
+.sidebar-fade-enter .sidebar-content {
+    transform: translateX(100%);
+}
+.sidebar-fade-enter-active .sidebar-content {
+    transform: translateX(0%);
+}
+.sidebar-fade-exit .sidebar-content {
+    transform: translateX(0%);
+}
+.sidebar-fade-exit-active .sidebar-content {
+    transform: translateX(100%);
+}
+.sidebar-fade-enter-active .sidebar-content,
+.sidebar-fade-exit-active .sidebar-content {
+    transition: transform 500ms;
+}
+
+.sidebar-fade-enter-active .sidebar-content,
+.sidebar-fade-exit-active .sidebar-content {
+    transition: transform 500ms;
+}
+
+.sidebar-fade-exit-active.sidebar-closed .sidebar-content {
+    transition: transform 1ms;
+}
