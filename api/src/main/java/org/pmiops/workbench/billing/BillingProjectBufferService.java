@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -322,7 +323,19 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   }
 
   private int getBufferMaxCapacity(String accessTierShortName) {
-    return workbenchConfigProvider.get().billing.bufferCapacityPerTier.get(accessTierShortName);
+    Map<String, Integer> capacityPerTier =
+        workbenchConfigProvider.get().billing.bufferCapacityPerTier;
+
+    if (!capacityPerTier.containsKey(accessTierShortName)) {
+      final String message =
+          String.format(
+              "Workbench Config Error: no 'billing.bufferCapacityPerTier' entry for '%s' tier",
+              accessTierShortName);
+      log.severe(message);
+      return 0;
+    }
+
+    return capacityPerTier.get(accessTierShortName);
   }
 
   public BillingProjectBufferStatus getStatus() {
