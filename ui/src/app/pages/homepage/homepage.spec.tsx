@@ -50,7 +50,7 @@ describe('HomepageComponent', () => {
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
       enableV3DataUserCodeOfConduct: true
-    });
+    }});
     cdrVersionStore.set(cdrVersionTiersResponse);
   });
 

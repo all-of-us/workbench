@@ -50,7 +50,7 @@ describe('WorkspaceAbout', () => {
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
-    });
+    }});
     cdrVersionStore.set(cdrVersionTiersResponse);
   });
 
