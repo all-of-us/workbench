@@ -5,7 +5,12 @@ import {act} from 'react-dom/test-utils';
 import {cohortReviewStore} from 'app/services/review-state.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {defaultRuntime, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
-import {currentCohortCriteriaStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
+import {
+  currentCohortCriteriaStore,
+  currentWorkspaceStore,
+  serverConfigStore,
+  setSidebarActiveIconStore
+} from 'app/utils/navigation';
 import {CdrVersionsApi, CohortAnnotationDefinitionApi, CohortReviewApi} from 'generated/fetch';
 import defaultServerConfig from 'testing/default-server-config';
 import {waitForFakeTimersAndUpdate, waitOneTickAndUpdate} from 'testing/react-test-helpers';
@@ -28,6 +33,13 @@ const criteria1 = {parameterId: '1', id: 1, parentId: 0,
 
 const criteria2 = {parameterId: '2', id: 2, parentId: 0,
   type: 'tree', name: 'Criteria 2', group: false, selectable: true, hasAttributes: false};
+
+jest.mock('react-transition-group', () => {
+  return {
+    CSSTransition: (props) => props.children,
+    TransitionGroup: (props) => props.children
+  };
+});
 
 describe('HelpSidebar', () => {
   let runtimeStub: RuntimeApiStub;
@@ -102,12 +114,16 @@ describe('HelpSidebar', () => {
     expect(wrapper.find('[data-test-id="help-sidebar-icon-notebooksHelp"]').get(0).props.icon.iconName).toBe('folder-open');
   });
 
+
   it('should update marginRight style when sidebarOpen prop changes', async() => {
-    props = {helpContentKey: 'data', sidebarOpen: true};
     const wrapper = await component();
-    expect(wrapper.find('[data-test-id="sidebar-content"]').prop('style').marginRight).toBe(0);
-    wrapper.setProps({sidebarOpen: false});
-    expect(wrapper.find('[data-test-id="sidebar-content"]').prop('style').marginRight).toBe('calc(-14rem - 40px)');
+    setSidebarActiveIconStore.next('help');
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="sidebar-content"]').parent().prop('style').width).toBe('calc(14rem + 70px)');
+
+    setSidebarActiveIconStore.next(null);
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="sidebar-content"]').parent().prop('style').width).toBe(0);
   });
 
   it('should call delete method when clicked', async() => {

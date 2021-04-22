@@ -87,9 +87,6 @@ const styles = reactStyles({
     top: '0px',
     height: '100%'
   },
-  sidebarContainerActive: {
-    zIndex: 100,
-  },
   sidebar: {
     position: 'absolute',
     top: 0,
@@ -134,11 +131,6 @@ const styles = reactStyles({
   rotate: {
     animation: 'rotation 2s infinite linear'
   },
-  navIcons: {
-    position: 'absolute',
-    right: '0',
-    top: '0.75rem',
-  },
   sectionTitle: {
     marginTop: '0.5rem',
     fontWeight: 600,
@@ -167,12 +159,6 @@ const styles = reactStyles({
     paddingLeft: 12,
     width: 160
   },
-  menuButtonIcon: {
-    width: 27,
-    height: 27,
-    opacity: 0.65,
-    marginRight: 16
-  },
   criteriaCount: {
     position: 'absolute',
     height: '0.8rem',
@@ -184,17 +170,6 @@ const styles = reactStyles({
     borderRadius: '50%',
     display: 'inline-block',
     fontSize: '0.4rem'
-  },
-  buttons: {
-    paddingTop: '1rem',
-    paddingLeft: '9rem',
-    position: 'absolute'
-  },
-  backButton: {
-    border: '0px',
-    backgroundColor: 'none',
-    color: colors.accent,
-    marginRight: '1rem'
   }
 });
 
