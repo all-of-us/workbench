@@ -60,7 +60,7 @@
       "cdrVersionId": 4,
       "isDefault": true,
       "accessTier": "controlled",
-      "name": "CDR for Controlled Tier - DO NOT USE",
+      "name": "Synthetic Dataset in the Controlled Tier",
       "bigqueryProject": "fc-aou-cdr-perf-ct",
       "bigqueryDataset": "test_R2019q4r3",
       "creationTime": "2021-04-20 00:00:00Z",
