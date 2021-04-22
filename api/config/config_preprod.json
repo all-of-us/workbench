@@ -89,7 +89,7 @@
     "sendRetries": 3
   },
   "zendesk": {
-    "host": "https:\/\/aoupreprodsupporthelp.zendesk.com/hc/en-us"
+    "host": "https:\/\/aoupreprodsupporthelp.zendesk.com"
   },
   "elasticsearch": {
     "baseUrl": "",
