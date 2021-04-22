@@ -5503,7 +5503,9 @@ definitions:
         format: int64
         description: Timestamp when the user was bypassed for completing login.gov linking
           linking.
-
+      accessHasExpired: 
+        type: boolean
+        description: Indicates whether one or more access modules have expired
   DemographicSurvey:
     type: object
     properties:
