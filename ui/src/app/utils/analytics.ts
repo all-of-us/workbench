@@ -75,6 +75,7 @@ export const AnalyticsTracker = {
     OpenExportModal: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Open Export Modal'),
     Export: (suffix) => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Export', suffix),
     OpenDeleteModal: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Open Delete Modal'),
+    OpenGenomicExtractionModal: (suffix) => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Open Genomic Extraction Modal', suffix),
     Delete: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Delete'),
     ViewPreviewTable: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'View Preview Table')
   },

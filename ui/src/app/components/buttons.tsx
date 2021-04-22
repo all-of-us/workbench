@@ -1,3 +1,4 @@
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {styles as cardStyles} from 'app/components/card';
 import {ClrIcon} from 'app/components/icons';
 import {SnowmanIcon} from 'app/components/icons';
@@ -213,7 +214,7 @@ export const Button = ({type = 'primary', style = {}, disabled = false, ...props
   />;
 };
 
-export const MenuItem = ({icon = null, tooltip = '', disabled = false, children, style = {}, ...props}) => {
+export const MenuItem = ({icon = null, faIcon = null, tooltip = '', disabled = false, children, style = {}, ...props}) => {
   return <TooltipTrigger side='left' content={tooltip}>
     <Clickable
       // data-test-id is the text within the MenuItem, with whitespace removed
@@ -231,7 +232,14 @@ export const MenuItem = ({icon = null, tooltip = '', disabled = false, children,
       hover={!disabled ? {backgroundColor: colorWithWhiteness(colors.accent, 0.92)} : undefined}
       {...props}
     >
-      {icon && <ClrIcon shape={icon} style={{marginRight: 8}} size={15}/>}
+      {icon &&
+       // TODO(RW-5682): Use a consistent icon type throughout. For now, support both.
+       <ClrIcon shape={icon} style={{marginRight: 8}} size={15}/>}
+      {faIcon &&
+       // For consistency with ClrIcon: FontAwesome default icon size is ~11px.
+       // To align these, we add 2px additional margin on either side.
+       // See also https://fontawesome.com/how-to-use/on-the-web/styling/sizing-icons
+       <FontAwesomeIcon icon={faIcon} style={{marginLeft: 2, marginRight: 10}}/>}
       {children}
     </Clickable>
   </TooltipTrigger>;
