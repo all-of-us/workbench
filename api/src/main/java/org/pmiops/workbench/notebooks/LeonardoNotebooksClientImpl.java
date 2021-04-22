@@ -92,9 +92,6 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
     nbExtensions.put(
         "aou-upload-policy-extension", assetsBaseUrl + "/aou-upload-policy-extension.js");
 
-    Map<String, String> labExtensions = new HashMap<>();
-    labExtensions.put("gcp-lab-extension", "@jupyter-widgets/jupyterlab-manager@1.1");
-
     Map<String, String> runtimeLabels = new HashMap<>();
     runtimeLabels.put(LeonardoMapper.RUNTIME_LABEL_AOU, "true");
     runtimeLabels.put(LeonardoMapper.RUNTIME_LABEL_CREATED_BY, userEmail);
@@ -109,7 +106,7 @@ public class LeonardoNotebooksClientImpl implements LeonardoNotebooksClient {
             .jupyterUserScriptUri(assetsBaseUrl + "/initialize_notebook_runtime.sh")
             .jupyterStartUserScriptUri(assetsBaseUrl + "/start_notebook_runtime.sh")
             .userJupyterExtensionConfig(
-                new LeonardoUserJupyterExtensionConfig().nbExtensions(nbExtensions).labExtensions(labExtensions))
+                new LeonardoUserJupyterExtensionConfig().nbExtensions(nbExtensions))
             // Matches Terra UI's scopes, see RW-3531 for rationale.
             .addScopesItem("https://www.googleapis.com/auth/cloud-platform")
             .addScopesItem("https://www.googleapis.com/auth/userinfo.email")
