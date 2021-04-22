@@ -51,7 +51,8 @@ import {
   hasDefaultCdrVersion
 } from 'app/utils/cdr-versions';
 import {reportError} from 'app/utils/errors';
-import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {getBillingAccountInfo} from 'app/utils/workbench-gapi-client';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
@@ -203,7 +204,7 @@ const NEW_ACL_DELAY_POLL_INTERVAL_MS = 10 * 1000;
 export enum WorkspaceEditMode { Create = 1, Edit = 2, Duplicate = 3 }
 
 function getDiseaseNames(keyword) {
-  const baseurl = serverConfigStore.getValue().firecloudURL;
+  const baseurl = serverConfigStore.get().config.firecloudURL;
   const url = baseurl + '/duos/autocomplete/' + keyword;
   return fetch(encodeURI(url)).then((response) => {
     return response.json();
@@ -820,7 +821,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     buildBillingAccountOptions() {
-      const {enableBillingUpgrade} = serverConfigStore.getValue();
+      const {enableBillingUpgrade} = serverConfigStore.get().config;
       const options = this.state.billingAccounts.map(a => ({
         label: a.displayName,
         value: a.name,
@@ -981,7 +982,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
     }
 
     render() {
-      const {enableBillingUpgrade} = serverConfigStore.getValue();
+      const {enableBillingUpgrade} = serverConfigStore.get().config;
       const {
         workspace: {
           billingAccountName,

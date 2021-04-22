@@ -1,7 +1,8 @@
 import {mount, shallow} from 'enzyme';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentCohortSearchContextStore, currentWorkspaceStore, serverConfigStore, urlParamsStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores'
+import {currentCohortSearchContextStore, currentWorkspaceStore, urlParamsStore} from 'app/utils/navigation';
 import {CohortBuilderApi, Domain, ModifierType, WorkspacesApi} from 'generated/fetch';
 import * as React from 'react';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
@@ -22,13 +23,13 @@ describe('ModifierPage', () => {
       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
     });
     currentWorkspaceStore.next(workspaceDataStub);
-    serverConfigStore.next({
+    serverConfigStore.set({config: {
       enableEventDateModifier: false,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
-    });
+    }});
   });
 
   it('should render', () => {

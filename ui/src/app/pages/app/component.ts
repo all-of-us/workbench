@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, NgZone, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {
   ActivatedRoute,
@@ -11,19 +11,17 @@ import {buildPageTitleForEnvironment} from 'app/utils/title';
 
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
-
-import {ServerConfigService} from 'app/services/server-config.service';
 import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from 'app/utils';
 import {initializeAnalytics} from 'app/utils/analytics';
 import {
   queryParamsStore,
   routeConfigDataStore,
-  serverConfigStore,
   urlParamsStore
 } from 'app/utils/navigation';
-import {routeDataStore, stackdriverErrorReporterStore} from 'app/utils/stores';
+import {routeDataStore, serverConfigStore, stackdriverErrorReporterStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 
+import {configApi} from 'app/services/swagger-fetch-clients';
 import outdatedBrowserRework from 'outdated-browser-rework';
 
 @Component({
@@ -40,14 +38,17 @@ export class AppComponent implements OnInit {
 
   constructor(
     private activatedRoute: ActivatedRoute,
-    private serverConfigService: ServerConfigService,
     private router: Router,
-    private titleService: Title
-  ) {}
+    private titleService: Title,
+    private zone: NgZone
+  ) {
+    this.zone = zone;
+  }
 
-  ngOnInit(): void {
+  async ngOnInit() {
     this.checkBrowserSupport();
-    this.loadConfigAndErrorReporter();
+    await this.loadConfig();
+    this.loadErrorReporter();
 
     this.cookiesEnabled = cookiesEnabled();
     // Local storage breaks if cookies are not enabled
@@ -68,7 +69,7 @@ export class AppComponent implements OnInit {
           window.location.reload();
         };
         console.log('To override the API URLs, try:\n' +
-          'setAllOfUsApiUrl(\'https://host.example.com:1234\')');
+            'setAllOfUsApiUrl(\'https://host.example.com:1234\')');
       } catch (err) {
         console.log('Error setting urls: ' + err);
       }
@@ -94,7 +95,12 @@ export class AppComponent implements OnInit {
       }
     });
 
-    routeDataStore.subscribe(({title, pathElementForTitle}) => this.setTitleFromReactRoute({title, pathElementForTitle}));
+    routeDataStore.subscribe(({title, pathElementForTitle}) => {
+      this.zone.run(() => {
+        this.setTitleFromReactRoute({title, pathElementForTitle});
+        this.initialSpinner = false;
+      });
+    });
     initializeAnalytics();
   }
 
@@ -171,17 +177,18 @@ export class AppComponent implements OnInit {
     });
   }
 
-  private loadConfigAndErrorReporter() {
-    this.serverConfigService.getConfig().subscribe((config) => {
-      serverConfigStore.next(config);
-
-      const reporter = new StackdriverErrorReporter();
-      reporter.start({
-        key: config.publicApiKeyForErrorReports,
-        projectId: config.projectId,
-      });
-      stackdriverErrorReporterStore.set(reporter);
-    });
+  private async loadConfig() {
+    const config = await configApi().getConfig();
+    serverConfigStore.set({config: config});
   }
 
+  private loadErrorReporter() {
+    const reporter = new StackdriverErrorReporter();
+    const {config} = serverConfigStore.get();
+    reporter.start({
+      key: config.publicApiKeyForErrorReports,
+      projectId: config.projectId,
+    });
+    stackdriverErrorReporterStore.set(reporter);
+  }
 }

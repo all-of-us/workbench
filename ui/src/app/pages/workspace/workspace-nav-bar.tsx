@@ -20,7 +20,7 @@ import {
   hasDefaultCdrVersion
 } from 'app/utils/cdr-versions';
 import {NavStore} from 'app/utils/navigation';
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {CdrVersionTiersResponse, Workspace} from 'generated/fetch';
 import {CdrVersionUpgradeModal} from './cdr-version-upgrade-modal';
 
@@ -133,7 +133,7 @@ const tabs = [
 const navSeparator = <div style={styles.separator}/>;
 
 function restrictTab(workspace, tab) {
-  return serverConfigStore.getValue().enableResearchReviewPrompt && workspace && workspace.accessLevel === 'OWNER'
+  return serverConfigStore.get().config.enableResearchReviewPrompt && workspace && workspace.accessLevel === 'OWNER'
       && workspace.researchPurpose.needsReviewPrompt && tab.name !== 'About';
 }
 

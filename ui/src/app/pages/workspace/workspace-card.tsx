@@ -19,7 +19,7 @@ import {displayDate, reactStyles} from 'app/utils';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {AnalyticsTracker, triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 
 const EVENT_CATEGORY = 'Workspace list';
@@ -220,7 +220,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
 
   onClick() {
     const {workspace} = this.props;
-    if (serverConfigStore.getValue().enableResearchReviewPrompt && workspace.researchPurpose.needsReviewPrompt) {
+    if (serverConfigStore.get().config.enableResearchReviewPrompt && workspace.researchPurpose.needsReviewPrompt) {
       this.setState({showResearchPurposeReviewModal: true});
     } else {
       workspace.published ?

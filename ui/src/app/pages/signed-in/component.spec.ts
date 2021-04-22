@@ -5,7 +5,6 @@ import {RouterTestingModule} from '@angular/router/testing';
 import {ClarityModule} from '@clr/angular';
 
 import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
-import {ServerConfigServiceStub} from 'testing/stubs/server-config-service-stub';
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 
 import {
@@ -14,7 +13,6 @@ import {
 } from 'testing/test-helpers';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
-import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 
@@ -47,12 +45,6 @@ describe('SignedInComponent', () => {
       ],
       providers: [
         {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
-        {
-          provide: ServerConfigService,
-          useValue: new ServerConfigServiceStub({
-            gsuiteDomain: 'fake-research-aou.org'
-          })
-        },
         {provide: SignInService, useValue: new SignInServiceStub()},
       ]
     }).compileComponents().then(() => {

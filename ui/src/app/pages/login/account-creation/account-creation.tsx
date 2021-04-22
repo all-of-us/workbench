@@ -33,7 +33,7 @@ import {
 } from 'app/pages/login/account-creation/common';
 import {isBlank, reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {NOT_ENOUGH_CHARACTERS_RESEARCH_DESCRIPTION} from 'app/utils/strings';
 
 const styles = reactStyles({
@@ -177,7 +177,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
   }
 
   validate(): {[key: string]: string} {
-    const {gsuiteDomain} = serverConfigStore.getValue();
+    const {gsuiteDomain} = serverConfigStore.get().config;
 
     const validationCheck = {
       'username': {
@@ -308,7 +308,7 @@ export class AccountCreation extends React.Component<AccountCreationProps, Accou
         },
       },
     } = this.state;
-    const {gsuiteDomain} = serverConfigStore.getValue();
+    const {gsuiteDomain} = serverConfigStore.get().config;
 
     const usernameLabelText =
       <div>New Username

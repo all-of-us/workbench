@@ -3,7 +3,8 @@ import * as React from 'react';
 
 import {DataUserCodeOfConduct} from 'app/pages/profile/data-user-code-of-conduct';
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {serverConfigStore, userProfileStore} from 'app/utils/navigation';
+import {userProfileStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {Profile, ProfileApi} from 'generated/fetch';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
@@ -35,13 +36,13 @@ describe('DataUserCodeOfConduct', () => {
   });
 
   it('should render - v2', () => {
-    serverConfigStore.next({...defaultConfig, enableV3DataUserCodeOfConduct: false});
+    serverConfigStore.set({config: {...defaultConfig, enableV3DataUserCodeOfConduct: false}});
     const wrapper = component();
     expect(wrapper).toBeTruthy();
   });
 
   it('should not allow DataUserCodeOfConduct without identical initials - v2', () => {
-    serverConfigStore.next({...defaultConfig, enableV3DataUserCodeOfConduct: false});
+    serverConfigStore.set({config: {...defaultConfig, enableV3DataUserCodeOfConduct: false}});
     const wrapper = component();
     expect(wrapper.find('[data-test-id="submit-dua-button"]').prop('disabled')).toBeTruthy();
 
@@ -53,7 +54,7 @@ describe('DataUserCodeOfConduct', () => {
   });
 
   it('should not allow DataUserCodeOfConduct with only one field populated - v2', () => {
-    serverConfigStore.next({...defaultConfig, enableV3DataUserCodeOfConduct: false});
+    serverConfigStore.set({config: {...defaultConfig, enableV3DataUserCodeOfConduct: false}});
     const wrapper = component();
     expect(wrapper.find('[data-test-id="submit-dua-button"]').prop('disabled')).toBeTruthy();
 
@@ -66,7 +67,7 @@ describe('DataUserCodeOfConduct', () => {
   });
 
   it('should populate username and name from the profile automatically - v2', async() => {
-    serverConfigStore.next({...defaultConfig, enableV3DataUserCodeOfConduct: false});
+    serverConfigStore.set({config: {...defaultConfig, enableV3DataUserCodeOfConduct: false}});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="dua-name-input"]').props().value).toBe(ProfileStubVariables.PROFILE_STUB.givenName +
@@ -77,7 +78,7 @@ describe('DataUserCodeOfConduct', () => {
   });
 
   it('should submit DataUserCodeOfConduct acceptance with version number - v2', async() => {
-    serverConfigStore.next({...defaultConfig, enableV3DataUserCodeOfConduct: false});
+    serverConfigStore.set({config: {...defaultConfig, enableV3DataUserCodeOfConduct: false}});
     const wrapper = component();
     const spy = jest.spyOn(profileApi(), 'submitDataUseAgreement');
     expect(wrapper.find('[data-test-id="submit-dua-button"]').prop('disabled')).toBeTruthy();
@@ -95,13 +96,13 @@ describe('DataUserCodeOfConduct', () => {
   });
 
   it('should render', () => {
-    serverConfigStore.next({...defaultConfig, enableV3DataUserCodeOfConduct: true});
+    serverConfigStore.set({config: {...defaultConfig, enableV3DataUserCodeOfConduct: true}});
     const wrapper = component();
     expect(wrapper).toBeTruthy();
   });
 
   it('should not allow DataUserCodeOfConduct without identical initials', async() => {
-    serverConfigStore.next({...defaultConfig, enableV3DataUserCodeOfConduct: true});
+    serverConfigStore.set({config: {...defaultConfig, enableV3DataUserCodeOfConduct: true}});
     const wrapper = component();
     // Need to step past the HOC before setting state.
     wrapper.childAt(0).setState({proceedDisabled: false});
@@ -119,7 +120,7 @@ describe('DataUserCodeOfConduct', () => {
   });
 
   it('should not allow DataUserCodeOfConduct with only one field populated', async() => {
-    serverConfigStore.next({...defaultConfig, enableV3DataUserCodeOfConduct: true});
+    serverConfigStore.set({config: {...defaultConfig, enableV3DataUserCodeOfConduct: true}});
     const wrapper = component();
     // Need to step past the HOC before setting state.
     wrapper.childAt(0).setState({proceedDisabled: false});
@@ -138,7 +139,7 @@ describe('DataUserCodeOfConduct', () => {
   });
 
   it('should populate username and name from the profile automatically', async() => {
-    serverConfigStore.next({...defaultConfig, enableV3DataUserCodeOfConduct: true});
+    serverConfigStore.set({config: {...defaultConfig, enableV3DataUserCodeOfConduct: true}});
     const wrapper = component();
     // Need to step past the HOC before setting state.
     wrapper.childAt(0).setState({proceedDisabled: false});
@@ -154,7 +155,7 @@ describe('DataUserCodeOfConduct', () => {
   });
 
   it('should submit DataUserCodeOfConduct acceptance with version number', async() => {
-    serverConfigStore.next({...defaultConfig, enableV3DataUserCodeOfConduct: true});
+    serverConfigStore.set({config: {...defaultConfig, enableV3DataUserCodeOfConduct: true}});
     const wrapper = component();
     // Need to step past the HOC before setting state.
     wrapper.childAt(0).setState({proceedDisabled: false});

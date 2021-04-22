@@ -9,10 +9,7 @@ import {WarningMessage} from 'app/components/messages';
 import {ConfirmDelete, RuntimePanel, Props} from 'app/pages/analysis/runtime-panel';
 import {registerApiClient, runtimeApi} from 'app/services/swagger-fetch-clients';
 import {findMachineByName, ComputeType} from 'app/utils/machines';
-import {clearCompoundRuntimeOperations} from 'app/utils/stores';
-import {serverConfigStore} from 'app/utils/navigation';
 import {runtimePresets} from 'app/utils/runtime-presets';
-import {runtimeStore} from 'app/utils/stores';
 import {RuntimeConfigurationType, RuntimeStatus, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import {RuntimeApi} from 'generated/fetch/api';
 import defaultServerConfig from 'testing/default-server-config';
@@ -22,7 +19,7 @@ import {defaultGceConfig, defaultDataprocConfig, RuntimeApiStub} from 'testing/s
 import {workspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {BillingAccountType, BillingStatus} from 'generated/fetch';
-import { cdrVersionStore } from 'app/utils/stores';
+import {cdrVersionStore, clearCompoundRuntimeOperations, serverConfigStore, runtimeStore} from 'app/utils/stores';
 
 describe('RuntimePanel', () => {
   let props: Props;
@@ -41,7 +38,7 @@ describe('RuntimePanel', () => {
 
   beforeEach(() => {
     cdrVersionStore.set(cdrVersionTiersResponse);
-    serverConfigStore.next({...defaultServerConfig});
+    serverConfigStore.set({config: {...defaultServerConfig}});
 
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);
