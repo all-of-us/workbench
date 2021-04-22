@@ -196,11 +196,9 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       this.setState({loading: true});
       const {cdrVersionId} = currentWorkspaceStore.getValue();
       const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
-      const parentId = domainId === Domain.PHYSICALMEASUREMENT.toString() ? null : id;
-
       const promises = this.sendOnlyCriteriaType(domainId)
           ? [cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType)]
-          : [cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, parentId)];
+          : [cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, id)];
       if (this.criteriaLookupNeeded) {
         const criteriaRequest = {
           sourceConceptIds: currentCohortCriteriaStore.getValue().filter(s => !s.isStandard).map(s => s.conceptId),
