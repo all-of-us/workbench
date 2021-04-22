@@ -15,6 +15,7 @@ describe('Cohorts', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspace = 'e2eCohortsCloneTest';
   /**
    * Test:
    * Find an existing workspace.
@@ -27,7 +28,7 @@ describe('Cohorts', () => {
    * Delete cohort via delete/trash icon on cohort build page
    */
   test('Create, duplicate and delete', async () => {
-    await findOrCreateWorkspace(page);
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Wait for the Data page.
     const dataPage = new WorkspaceDataPage(page);

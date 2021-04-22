@@ -39,6 +39,7 @@ public class EgressEventServiceImpl implements EgressEventService {
   private static final Logger logger = Logger.getLogger(EgressEventServiceImpl.class.getName());
   private static final Pattern VM_PREFIX_PATTERN = Pattern.compile("all-of-us-(?<userid>\\d+)");
   private static final String USER_ID_GROUP_NAME = "userid";
+  private static final Duration MAXIMUM_EXPECTED_EVENT_AGE = Duration.ofMinutes(5);
   private final Clock clock;
   private final EgressEventAuditor egressEventAuditor;
   private final InstitutionService institutionService;
@@ -119,28 +120,52 @@ public class EgressEventServiceImpl implements EgressEventService {
     }
   }
 
+  private boolean isEventStale(EgressEvent egressEvent) {
+    // For shorter alerting windows, we don't make any claims about staleness. This ensures that we
+    // don't misinterpret a delay in when Sumologic runs the query, and when our system receives the
+    // event as a stale event.
+    final Duration windowDuration = Duration.ofSeconds(egressEvent.getTimeWindowDuration());
+    if (windowDuration.getSeconds() < MAXIMUM_EXPECTED_EVENT_AGE.getSeconds()) {
+      return false;
+    }
+    // Anything which isn't from the most recent alerting window is considered stale. Restated
+    // differently: stale if more than 2 windows have elapsed since the alert window start.
+    final Instant windowStart = Instant.ofEpochMilli(egressEvent.getTimeWindowStart());
+    return windowStart.isBefore(clock.instant().minus(windowDuration.multipliedBy(2L)));
+  }
+
   private CreateAlertRequest egressEventToOpsGenieAlert(
       EgressEvent egressEvent, String workspaceNamespace) {
-    final CreateAlertRequest request = new CreateAlertRequest();
-    request.setMessage(String.format("High-egress event (%s)", workspaceNamespace));
-    request.setDescription(getDescription(egressEvent, workspaceNamespace));
+    // Our Sumologic query schedule currently builds in redundancy by overscanning an extra window
+    // into the past. This ensures we don't miss alerts if a single scheduled Sumologic query fails,
+    // but it also means we will typically receive alert events twice. Label alerts which occurred
+    // at least one window into the past, so the oncall can quickly identify such events.
+    String messagePrefix = "";
+    if (isEventStale(egressEvent)) {
+      messagePrefix =
+          String.format(
+              "[>%d mins old] ",
+              Duration.ofSeconds(egressEvent.getTimeWindowDuration()).toMinutes());
+    }
 
-    // Add a note with some more specific details about the alerting criteria and threshold. Notes
-    // are appended to an existing Opsgenie ticket if this request is de-duplicated against an
-    // existing ticket, so they're a helpful way to summarize temporal updates to the status of
-    // an incident.
-    request.setNote(
-        String.format(
-            "Time window: %d secs, threshold: %.2f MiB, observed: %.2f MiB",
-            egressEvent.getTimeWindowDuration(),
-            egressEvent.getEgressMibThreshold(),
-            egressEvent.getEgressMib()));
-    request.setTags(ImmutableList.of("high-egress-event"));
-
-    // Set the alias, which is Opsgenie's string key for alert de-duplication. See
-    // https://docs.opsgenie.com/docs/alert-deduplication
-    request.setAlias(workspaceNamespace + " | " + egressEvent.getVmPrefix());
-    return request;
+    return new CreateAlertRequest()
+        .message(String.format("%sHigh-egress event (%s)", messagePrefix, workspaceNamespace))
+        .description(getDescription(egressEvent, workspaceNamespace))
+        // Add a note with some more specific details about the alerting criteria and threshold.
+        // Notes are appended to an existing Opsgenie ticket if this request is de-duplicated
+        // against an existing ticket, so they're a helpful way to summarize temporal updates to the
+        // status of an incident.
+        .note(
+            String.format(
+                "%sTime window: %d secs, threshold: %.2f MiB, observed: %.2f MiB",
+                messagePrefix,
+                egressEvent.getTimeWindowDuration(),
+                egressEvent.getEgressMibThreshold(),
+                egressEvent.getEgressMib()))
+        .tags(ImmutableList.of("high-egress-event"))
+        // Set the alias, which is Opsgenie's string key for alert de-duplication. See
+        // https://docs.opsgenie.com/docs/alert-deduplication
+        .alias(workspaceNamespace + " | " + egressEvent.getVmPrefix());
   }
 
   @NotNull

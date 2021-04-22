@@ -102,7 +102,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.genomics.WgsCohortExtractionService;
+import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.BillingStatus;
@@ -111,6 +111,7 @@ import org.pmiops.workbench.model.Concept;
 import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
+import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetExportRequest;
 import org.pmiops.workbench.model.DataSetExportRequest.GenomicsAnalysisToolEnum;
 import org.pmiops.workbench.model.DataSetExportRequest.GenomicsDataTypeEnum;
@@ -190,6 +191,7 @@ public class DataSetControllerTest {
 
   private static DbUser currentUser;
   private Workspace workspace;
+  private DbCdrVersion cdrVersion;
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
@@ -200,7 +202,7 @@ public class DataSetControllerTest {
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspacesController workspacesController;
 
-  @MockBean private CdrVersionService cdrVersionService;
+  @MockBean private CdrVersionService mockCdrVersionService;
   @MockBean private CdrBigQuerySchemaConfigService mockCdrBigQuerySchemaConfigService;
   @MockBean private BillingProjectBufferService mockBillingProjectBufferService;
   @MockBean private BigQueryService mockBigQueryService;
@@ -208,6 +210,7 @@ public class DataSetControllerTest {
   @MockBean private FireCloudService fireCloudService;
   @MockBean private NotebooksService mockNotebooksService;
   @MockBean private DSDataDictionaryDao mockDSDataDictionaryDao;
+  @MockBean private GenomicExtractionService mockGenomicExtractionService;
 
   @Captor ArgumentCaptor<JSONObject> notebookContentsCaptor;
 
@@ -231,24 +234,21 @@ public class DataSetControllerTest {
     TestBigQueryCdrSchemaConfig.class,
     UserMapperImpl.class,
     UserServiceTestConfiguration.class,
+    WorkspaceAuthService.class,
     WorkspaceMapperImpl.class,
     WorkspaceResourcesServiceImpl.class,
     WorkspaceServiceImpl.class,
-    WorkspaceAuthService.class,
     WorkspacesController.class,
     AccessTierServiceImpl.class,
   })
   @MockBean({
     BigQueryService.class,
     BillingProjectAuditor.class,
-    CdrBigQuerySchemaConfigService.class,
-    CdrVersionService.class,
     CloudStorageClient.class,
     CohortBuilderMapper.class,
     CohortBuilderService.class,
     CohortCloningService.class,
     CohortMaterializationService.class,
-    CohortQueryBuilder.class,
     ComplianceService.class,
     ConceptBigQueryService.class,
     DirectoryService.class,
@@ -258,8 +258,7 @@ public class DataSetControllerTest {
     ReviewQueryBuilder.class,
     UserRecentResourceService.class,
     UserServiceAuditor.class,
-    WorkspaceAuditor.class,
-    WgsCohortExtractionService.class
+    WorkspaceAuditor.class
   })
   static class Configuration {
 
@@ -325,7 +324,7 @@ public class DataSetControllerTest {
     user = userDao.save(user);
     currentUser = user;
 
-    DbCdrVersion cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
+    cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
     cdrVersion.setMicroarrayBigqueryDataset("microarray");
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
@@ -715,6 +714,18 @@ public class DataSetControllerTest {
   }
 
   @Test
+  public void testGetValuesFromWholeGenomeDomain() {
+    List<DomainValue> domainValues =
+        dataSetController
+            .getValuesFromDomain(
+                workspace.getNamespace(), WORKSPACE_NAME, Domain.WHOLE_GENOME_VARIANT.toString())
+            .getBody()
+            .getItems();
+    assertThat(domainValues)
+        .containsExactly(new DomainValue().value(DataSetController.WHOLE_GENOME_VALUE));
+  }
+
+  @Test
   public void exportToNotebook_microarrayCodegen_cdrCheck() {
     DbCdrVersion cdrVersion =
         cdrVersionDao.findByCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
@@ -861,7 +872,7 @@ public class DataSetControllerTest {
 
   @Test
   public void getDataDictionaryEntry() {
-    when(cdrVersionService.findByCdrVersionId(2l))
+    when(mockCdrVersionService.findByCdrVersionId(2l))
         .thenReturn(Optional.ofNullable(new DbCdrVersion()));
     when(mockDSDataDictionaryDao.findFirstByFieldNameAndDomain(anyString(), anyString()))
         .thenReturn(new DbDSDataDictionary());
@@ -870,12 +881,95 @@ public class DataSetControllerTest {
     verify(mockDSDataDictionaryDao, times(1)).findFirstByFieldNameAndDomain("MockValue", "PERSON");
   }
 
+  @Test
+  public void testGenomicDataExtraction_permissions() {
+    cdrVersion.setWgsBigqueryDataset("wgs");
+    cdrVersionDao.save(cdrVersion);
+
+    DataSet dataSet =
+        dataSetController
+            .createDataSet(
+                workspace.getNamespace(), workspace.getName(), buildValidDataSetRequest())
+            .getBody();
+
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("NO ACCESS"));
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          dataSetController.extractGenomicData(
+              workspace.getNamespace(), workspace.getName(), dataSet.getId());
+        });
+
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("READER"));
+    assertThrows(
+        ForbiddenException.class,
+        () -> {
+          dataSetController.extractGenomicData(
+              workspace.getNamespace(), workspace.getName(), dataSet.getId());
+        });
+
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("WRITER"));
+    dataSetController.extractGenomicData(
+        workspace.getNamespace(), workspace.getName(), dataSet.getId());
+
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("OWNER"));
+    dataSetController.extractGenomicData(
+        workspace.getNamespace(), workspace.getName(), dataSet.getId());
+
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("PROJECT_OWNER"));
+    dataSetController.extractGenomicData(
+        workspace.getNamespace(), workspace.getName(), dataSet.getId());
+  }
+
+  @Test
+  public void testGenomicDataExtraction_notFound() {
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          dataSetController.extractGenomicData(workspace.getNamespace(), workspace.getName(), 404L);
+        });
+  }
+
+  @Test
+  public void testGenomicDataExtraction_validCdr() throws Exception {
+    cdrVersion.setWgsBigqueryDataset(null);
+    cdrVersionDao.save(cdrVersion);
+
+    DataSet dataSet =
+        dataSetController
+            .createDataSet(
+                workspace.getNamespace(), workspace.getName(), buildValidDataSetRequest())
+            .getBody();
+    assertThrows(
+        BadRequestException.class,
+        () -> {
+          dataSetController.extractGenomicData(
+              workspace.getNamespace(), workspace.getName(), dataSet.getId());
+        });
+
+    cdrVersion.setWgsBigqueryDataset("wgs");
+    cdrVersionDao.save(cdrVersion);
+
+    dataSetController.extractGenomicData(
+        workspace.getNamespace(), workspace.getName(), dataSet.getId());
+    verify(mockGenomicExtractionService, times(1)).submitGenomicExtractionJob(any(), any());
+  }
+
+  DataSetRequest buildValidDataSetRequest() {
+    return buildEmptyDataSetRequest()
+        .name("blah")
+        .addCohortIdsItem(COHORT_ONE_ID)
+        .addConceptSetIdsItem(CONCEPT_SET_ONE_ID)
+        .domainValuePairs(mockDomainValuePair());
+  }
+
   DataSetExportRequest setUpValidDataSetExportRequest() {
-    DataSetRequest dataSet = buildEmptyDataSetRequest().name("blah");
-    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
-    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
-    List<DomainValuePair> domainValuePairs = mockDomainValuePair();
-    dataSet.setDomainValuePairs(domainValuePairs);
+    DataSetRequest dataSet = buildValidDataSetRequest();
 
     ArrayList<String> tables = new ArrayList<>();
     tables.add("FROM `" + TEST_CDR_TABLE + ".condition_occurrence` c_occurrence");

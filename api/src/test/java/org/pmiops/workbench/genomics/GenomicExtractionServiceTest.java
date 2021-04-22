@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.storage.Blob;
 import com.google.common.collect.ImmutableList;
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -26,13 +27,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
+import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -47,12 +50,13 @@ import org.pmiops.workbench.firecloud.model.FirecloudSubmission;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionResponse;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudValidatedMethodConfiguration;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkflow;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
+import org.pmiops.workbench.model.GenomicExtractionJob;
 import org.pmiops.workbench.model.TerraJobStatus;
-import org.pmiops.workbench.model.WgsCohortExtractionJob;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
@@ -70,37 +74,39 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class WgsCohortExtractionServiceTest {
+public class GenomicExtractionServiceTest {
 
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
   private static final String FC_SUBMISSION_ID = "123";
 
-  @Autowired WgsCohortExtractionService wgsCohortExtractionService;
+  @Autowired GenomicExtractionService genomicExtractionService;
   @Autowired FireCloudService fireCloudService;
   @Autowired MethodConfigurationsApi methodConfigurationsApi;
   @Autowired SubmissionsApi submissionsApi;
   @Autowired WgsExtractCromwellSubmissionDao wgsExtractCromwellSubmissionDao;
   @Autowired UserDao userDao;
+  @Autowired DataSetDao dataSetDao;
   @Autowired WorkspaceDao workspaceDao;
   @Autowired WorkspaceAuthService workspaceAuthService;
   @Autowired CdrVersionDao cdrVersionDao;
-  @Autowired CohortService mockCohortService;
+  @Autowired DataSetService mockDataSetService;
 
   private DbWorkspace targetWorkspace;
 
   private static CloudStorageClient cloudStorageClient;
   private static WorkbenchConfig workbenchConfig;
   private static DbUser currentUser;
+  private static DbDataset dataset;
 
   @TestConfiguration
   @Import({
-    WgsCohortExtractionService.class,
-    WgsCohortExtractionMapperImpl.class,
+    GenomicExtractionService.class,
+    GenomicExtractionMapperImpl.class,
     CommonMappers.class,
     WorkspaceAuthService.class
   })
   @MockBean({
-    CohortService.class,
+    DataSetService.class,
     FireCloudService.class,
     MethodConfigurationsApi.class,
     SubmissionsApi.class
@@ -108,7 +114,7 @@ public class WgsCohortExtractionServiceTest {
   static class Configuration {
     @Bean
     @Scope("prototype")
-    @Qualifier(StorageConfig.WGS_EXTRACTION_STORAGE_CLIENT)
+    @Qualifier(StorageConfig.GENOMIC_EXTRACTION_STORAGE_CLIENT)
     CloudStorageClient cloudStorageClient() {
       return cloudStorageClient;
     }
@@ -182,6 +188,17 @@ public class WgsCohortExtractionServiceTest {
     doReturn(new FirecloudWorkspaceResponse().accessLevel("READER"))
         .when(fireCloudService)
         .getWorkspace(anyString(), anyString());
+
+    dataset = createDataset();
+  }
+
+  public void mockGetFirecloudSubmission(FirecloudSubmission submission) throws ApiException {
+    doReturn(submission)
+        .when(submissionsApi)
+        .getSubmission(
+            workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
+            workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
+            submission.getSubmissionId());
   }
 
   @Test
@@ -189,30 +206,35 @@ public class WgsCohortExtractionServiceTest {
     OffsetDateTime submissionDate = OffsetDateTime.now();
     DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
         createDbWgsExtractCromwellSubmission();
+    dbWgsExtractCromwellSubmission.setUserCost(new BigDecimal("2.05"));
+    wgsExtractCromwellSubmissionDao.save(dbWgsExtractCromwellSubmission);
 
-    doReturn(
-            new FirecloudSubmission()
-                .status(FirecloudSubmissionStatus.DONE)
-                .submissionDate(submissionDate))
-        .when(submissionsApi)
-        .getSubmission(
-            workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
-            workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
-            dbWgsExtractCromwellSubmission.getSubmissionId());
+    OffsetDateTime completionTimestamp = submissionDate.plusSeconds(127313);
 
-    WgsCohortExtractionJob wgsCohortExtractionJob =
-        wgsCohortExtractionService
-            .getWgsCohortExtractionJobs(
+    mockGetFirecloudSubmission(
+        new FirecloudSubmission()
+            .submissionId(dbWgsExtractCromwellSubmission.getSubmissionId())
+            .status(FirecloudSubmissionStatus.DONE)
+            .addWorkflowsItem(new FirecloudWorkflow().statusLastChangedDate(completionTimestamp))
+            .submissionDate(submissionDate));
+
+    GenomicExtractionJob wgsCohortExtractionJob =
+        genomicExtractionService
+            .getGenomicExtractionJobs(
                 targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName())
             .get(0);
 
+    assertThat(wgsCohortExtractionJob.getCost()).isEqualTo(new BigDecimal("2.05"));
+    assertThat(wgsCohortExtractionJob.getCompletionTime())
+        .isEqualTo(completionTimestamp.toInstant().toEpochMilli());
+    assertThat(wgsCohortExtractionJob.getDatasetName()).isEqualTo(dataset.getName());
     assertThat(wgsCohortExtractionJob.getStatus()).isEqualTo(TerraJobStatus.SUCCEEDED);
     assertThat(wgsCohortExtractionJob.getSubmissionDate())
         .isEqualTo(submissionDate.toInstant().toEpochMilli());
   }
 
   @Test
-  public void getExtractionJobs_userHasReaderWorkspaceAccess() {
+  public void getExtractionJobs_userHasReaderWorkspaceAccess() throws ApiException {
     final String submissionId = UUID.randomUUID().toString();
     DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
         new DbWgsExtractCromwellSubmission();
@@ -221,6 +243,13 @@ public class WgsCohortExtractionServiceTest {
     dbWgsExtractCromwellSubmission.setWorkspace(targetWorkspace);
     wgsExtractCromwellSubmissionDao.save(dbWgsExtractCromwellSubmission);
 
+    mockGetFirecloudSubmission(
+        new FirecloudSubmission()
+            .submissionId(dbWgsExtractCromwellSubmission.getSubmissionId())
+            .status(FirecloudSubmissionStatus.DONE)
+            .addWorkflowsItem(new FirecloudWorkflow().statusLastChangedDate(OffsetDateTime.now()))
+            .submissionDate(OffsetDateTime.now()));
+
     doReturn(new FirecloudWorkspaceResponse().accessLevel("NO ACCESS"))
         .when(fireCloudService)
         .getWorkspace(targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
@@ -228,14 +257,14 @@ public class WgsCohortExtractionServiceTest {
     assertThrows(
         ForbiddenException.class,
         () -> {
-          wgsCohortExtractionService.getWgsCohortExtractionJobs(
+          genomicExtractionService.getGenomicExtractionJobs(
               targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
         });
 
     doReturn(new FirecloudWorkspaceResponse().accessLevel("READER"))
         .when(fireCloudService)
         .getWorkspace(targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
-    wgsCohortExtractionService.getWgsCohortExtractionJobs(
+    genomicExtractionService.getGenomicExtractionJobs(
         targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName());
   }
 
@@ -272,19 +301,20 @@ public class WgsCohortExtractionServiceTest {
             .getWgsExtractCromwellSubmissionId(),
         TerraJobStatus.RUNNING);
 
-    wgsCohortExtractionService
-        .getWgsCohortExtractionJobs(
+    genomicExtractionService
+        .getGenomicExtractionJobs(
             targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName())
         .forEach(
             job -> {
               assertThat(job.getStatus())
-                  .isEqualTo(expectedStatuses.get(job.getWgsCohortExtractionJobId()));
+                  .isEqualTo(expectedStatuses.get(job.getGenomicExtractionJobId()));
             });
   }
 
   private DbWgsExtractCromwellSubmission createDbWgsExtractCromwellSubmission() {
     DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
         new DbWgsExtractCromwellSubmission();
+    dbWgsExtractCromwellSubmission.setDataset(dataset);
     dbWgsExtractCromwellSubmission.setSubmissionId(UUID.randomUUID().toString());
     dbWgsExtractCromwellSubmission.setCreator(currentUser);
     dbWgsExtractCromwellSubmission.setWorkspace(targetWorkspace);
@@ -297,7 +327,12 @@ public class WgsCohortExtractionServiceTest {
       FirecloudSubmissionStatus status) throws ApiException {
     DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
         createDbWgsExtractCromwellSubmission();
-    doReturn(new FirecloudSubmission().status(status).submissionDate(OffsetDateTime.now()))
+    doReturn(
+            new FirecloudSubmission()
+                .addWorkflowsItem(
+                    new FirecloudWorkflow().statusLastChangedDate(OffsetDateTime.now()))
+                .status(status)
+                .submissionDate(OffsetDateTime.now()))
         .when(submissionsApi)
         .getSubmission(
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
@@ -308,14 +343,14 @@ public class WgsCohortExtractionServiceTest {
 
   @Test
   public void submitExtractionJob() throws ApiException {
-    when(mockCohortService.getPersonIdsWithWholeGenome(any()))
+    when(mockDataSetService.getPersonIdsWithWholeGenome(any()))
         .thenReturn(ImmutableList.of("1", "2", "3"));
-    wgsCohortExtractionService.submitGenomicsCohortExtractionJob(targetWorkspace, 1l);
+    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
 
     verify(cloudStorageClient)
         .writeFile(
             eq(workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceBucket),
-            matches("wgs-cohort-extractions\\/.*\\/person_ids.txt"),
+            matches("genomic-extractions\\/.*\\/person_ids.txt"),
             any());
     List<DbWgsExtractCromwellSubmission> dbSubmissions =
         ImmutableList.copyOf(wgsExtractCromwellSubmissionDao.findAll());
@@ -326,8 +361,8 @@ public class WgsCohortExtractionServiceTest {
 
   @Test
   public void submitExtractionJob_outputVcfsInCorrectBucket() throws ApiException {
-    when(mockCohortService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of("1"));
-    wgsCohortExtractionService.submitGenomicsCohortExtractionJob(targetWorkspace, 1l);
+    when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of("1"));
+    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
 
     ArgumentCaptor<FirecloudMethodConfiguration> argument =
         ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
@@ -336,13 +371,20 @@ public class WgsCohortExtractionServiceTest {
     String actualOutputDir = argument.getValue().getInputs().get("WgsCohortExtract.output_gcs_dir");
 
     assertThat(actualOutputDir)
-        .matches("\"gs:\\/\\/user-bucket\\/wgs-cohort-extractions\\/.*\\/vcfs\\/\"");
+        .matches("\"gs:\\/\\/user-bucket\\/genomic-extractions\\/.*\\/vcfs\\/\"");
   }
 
   @Test(expected = FailedPreconditionException.class)
   public void submitExtractionJob_noWgsData() throws ApiException {
-    when(mockCohortService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of());
-    wgsCohortExtractionService.submitGenomicsCohortExtractionJob(targetWorkspace, 1l);
+    when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of());
+    genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
+  }
+
+  private DbDataset createDataset() {
+    DbDataset dataset = new DbDataset();
+    dataset.setWorkspaceId(targetWorkspace.getWorkspaceId());
+    dataset.setName("my dataset");
+    return dataSetDao.save(dataset);
   }
 
   private DbUser createUser(String email) {

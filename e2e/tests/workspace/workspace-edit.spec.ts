@@ -10,9 +10,7 @@ describe('Editing workspace via workspace card snowman menu', () => {
     await signInWithAccessToken(page);
   });
 
-  // Reuse same Workspace for all tests in this file to reduce test playback time.
-  // Workspace to be created in first test. If first test fails, next test will create it.
-  let workspaceName: string;
+  const workspaceName = 'e2eEditWorkspaceTest';
 
   /**
    * Test:
@@ -144,8 +142,5 @@ describe('Editing workspace via workspace card snowman menu', () => {
     expect(todayWeekday).toBe(lastUpdatedWeekday);
     expect(todayYear).toBe(lastUpdatedYear);
     expect(todayDay).toBe(lastUpdatedDay);
-
-    // Delete workspace
-    await dataPage.deleteWorkspace();
   });
 });

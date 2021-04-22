@@ -414,7 +414,7 @@ export const ProfilePage = fp.flow(
               <FlexColumn>
                 {makeProfileInput({
                   title: 'Your Institution',
-                  valueKey: 'verifiedInstitutionalAffiliation.institutionDisplayName',
+                  valueKey: ['verifiedInstitutionalAffiliation', 'institutionDisplayName'],
                   disabled: true
                 })}
                 {!profile.verifiedInstitutionalAffiliation &&

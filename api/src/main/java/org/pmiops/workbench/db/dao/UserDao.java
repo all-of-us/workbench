@@ -58,7 +58,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
   List<DbUser> findUsersBySearchStringAndTier(
       @Param("term") String term, Sort sort, @Param("shortName") String accessTierShortName);
 
-  interface UserCountGaugeLabelsAndValue {
+  interface UserCountByDisabledAndAccessTiers {
     Long getUserCount();
 
     Boolean getDisabled();
@@ -70,7 +70,8 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
       // JPQL doesn't allow join on subquery
       nativeQuery = true,
       value =
-          "SELECT COUNT(u.user_id) AS user_count, u.disabled, t.access_tier_short_names "
+          "SELECT COUNT(u.user_id) AS user_count, u.disabled, "
+              + "COALESCE(t.access_tier_short_names, '[unregistered]') AS access_tier_short_names "
               + "FROM user u "
               + "LEFT JOIN ("
               + "  SELECT u.user_id, "
@@ -81,8 +82,8 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "  WHERE uat.access_status = 1 " // ENABLED
               + "  GROUP BY u.user_id"
               + ") as t ON t.user_id = u.user_id "
-              + "GROUP BY u.disabled, t.access_tier_short_names ")
-  List<UserCountGaugeLabelsAndValue> getUserCountGaugeData();
+              + "GROUP BY u.disabled, access_tier_short_names ")
+  List<UserCountByDisabledAndAccessTiers> getUserCountGaugeData();
 
   // Note: setter methods are included only where necessary for testing. See ProfileServiceTest.
   interface DbAdminTableUser {

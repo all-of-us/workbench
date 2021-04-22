@@ -400,6 +400,7 @@ public final class DbStorageEnums {
               .put(PrePackagedConceptSetEnum.FITBIT_HEART_RATE_SUMMARY, (short) 6)
               .put(PrePackagedConceptSetEnum.FITBIT_INTRADAY_STEPS, (short) 7)
               .put(PrePackagedConceptSetEnum.FITBIT, (short) 8)
+              .put(PrePackagedConceptSetEnum.WHOLE_GENOME, (short) 9)
               .build();
 
   public static PrePackagedConceptSetEnum prePackagedConceptSetsFromStorage(Short conceptSet) {

@@ -5,17 +5,19 @@ import {
   faEllipsisV,
   faFolderOpen,
   faInbox,
-  faInfoCircle
+  faInfoCircle, IconDefinition
 } from '@fortawesome/free-solid-svg-icons';
+import {faDna} from '@fortawesome/free-solid-svg-icons/faDna';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
+import {CSSProperties} from 'react';
 import * as React from 'react';
 import {Subscription} from 'rxjs/Subscription';
 
 import {faCircle} from '@fortawesome/free-solid-svg-icons/faCircle';
 import {faSyncAlt} from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import {SelectionList} from 'app/cohort-search/selection-list/selection-list.component';
-import {FlexRow} from 'app/components/flex';
+import {FlexColumn, FlexRow} from 'app/components/flex';
 import {TooltipTrigger} from 'app/components/popups';
 import {PopupTrigger} from 'app/components/popups';
 import {RuntimePanel} from 'app/pages/analysis/runtime-panel';
@@ -25,7 +27,7 @@ import {participantStore} from 'app/services/review-state.service';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   reactStyles,
-  ReactWrapperBase,
+  ReactWrapperBase, withCdrVersions,
   withCurrentCohortCriteria,
   withCurrentConcept,
   withCurrentWorkspace,
@@ -49,8 +51,16 @@ import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 
+import {GenomicsExtractionTable} from 'app/components/genomics-extraction-table';
 import {HelpTips} from 'app/components/help-tips';
-import {Criteria, ParticipantCohortStatus, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
+import {getCdrVersion} from 'app/utils/cdr-versions';
+import {
+  CdrVersionTiersResponse,
+  Criteria,
+  ParticipantCohortStatus,
+  RuntimeStatus,
+  WorkspaceAccessLevel
+} from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 
 const proIcons = {
@@ -82,7 +92,6 @@ const styles = reactStyles({
     top: 0,
     right: '45px',
     height: '100%',
-    overflow: 'auto',
     background: colorWithWhiteness(colors.primary, .87),
     transition: 'margin-right 0.5s ease-out',
     boxShadow: `-10px 0px 10px -8px ${colorWithWhiteness(colors.dark, .5)}`,
@@ -210,30 +219,37 @@ const iconStyles = {
 
 export const NOTEBOOK_HELP_CONTENT = 'notebookStorage';
 
-const iconConfigs = {
+interface IconConfig {
+  id: string;
+  disabled: boolean;
+  faIcon: IconDefinition;
+  label: string;
+  page: string;
+  style: CSSProperties;
+  tooltip: string;
+}
+
+const iconConfigs: { [iconKey: string]: IconConfig } = {
   'criteria': {
+    id: 'criteria',
     disabled: false,
     faIcon: faInbox,
     label: 'Selected Criteria',
     page: 'criteria',
     style: {fontSize: '21px'},
     tooltip: 'Selected Criteria',
-    contentPadding: '0.5rem 0.5rem 0',
-    contentWidthRem: '20',
-    hideSidebarFooter: true
   },
   'concept': {
+    id: 'concept',
     disabled: false,
     faIcon: faInbox,
     label: 'Selected Concepts',
     page: 'concept',
     style: {fontSize: '21px'},
     tooltip: 'Selected Concepts',
-    contentPadding: '0.5rem 0.5rem 0',
-    contentWidthRem: '20',
-    hideSidebarFooter: true
   },
   'help': {
+    id: 'help',
     disabled: false,
     faIcon: faInfoCircle,
     label: 'Help Icon',
@@ -242,6 +258,7 @@ const iconConfigs = {
     tooltip: 'Help Tips',
   },
   'notebooksHelp': {
+    id: 'notebooksHelp',
     disabled: false,
     faIcon: faFolderOpen,
     label: 'Storage Icon',
@@ -250,6 +267,7 @@ const iconConfigs = {
     tooltip: 'Workspace Storage',
   },
   'dataDictionary': {
+    id: 'dataDictionary',
     disabled: false,
     faIcon: faBook,
     label: 'Data Dictionary Icon',
@@ -258,6 +276,7 @@ const iconConfigs = {
     tooltip: 'Data Dictionary',
   },
   'annotations': {
+    id: 'annotations',
     disabled: false,
     faIcon: faEdit,
     label: 'Annotations Icon',
@@ -266,38 +285,27 @@ const iconConfigs = {
     tooltip: 'Annotations',
   },
   'runtime': {
+    id: 'runtime',
     disabled: false,
     faIcon: null,
     label: 'Cloud Icon',
     page: null,
+    style: {height: '22px', width: '22px'},
+    tooltip: 'Compute Configuration'
+  },
+  'genomicExtractions': {
+    id: 'genomicExtractions',
+    disabled: false,
+    faIcon: faDna,
+    label: 'Genomic Extraction',
+    page: null,
     style: {height: '22px', width: '22px', marginTop: '0.25rem'},
-    tooltip: 'Compute Configuration',
-    contentPadding: '1.25rem',
-    contentWidthRem: '30',
-    hideSidebarFooter: true
+    tooltip: 'Genomic Extraction History',
   }
 };
 
 const helpIconName = (helpContentKey: string) => {
   return helpContentKey === NOTEBOOK_HELP_CONTENT ? 'notebooksHelp' : 'help';
-};
-
-const icons = (
-  helpContentKey: string,
-  workspaceAccessLevel: WorkspaceAccessLevel
-) => {
-  const keys = [
-    'criteria',
-    'concept',
-    helpIconName(helpContentKey),
-    'dataDictionary',
-    'annotations',
-  ];
-
-  if (WorkspacePermissionsUtil.canWrite(workspaceAccessLevel)) {
-    keys.push('runtime');
-  }
-  return keys.map(k => ({...iconConfigs[k], id: k}));
 };
 
 const analyticsLabels = {
@@ -324,6 +332,7 @@ interface Props {
   concept?: Array<Criteria>;
   runtimeStore: RuntimeStore;
   compoundRuntimeOps: CompoundRuntimeOpStore;
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
 }
 
 interface State {
@@ -341,7 +350,8 @@ export const HelpSidebar = fp.flow(
   withCurrentWorkspace(),
   withRuntimeStore(),
   withStore(compoundRuntimeOpStore, 'compoundRuntimeOps'),
-  withUserProfile()
+  withUserProfile(),
+  withCdrVersions()
 )(
   class extends React.Component<Props, State> {
     subscription: Subscription;
@@ -356,6 +366,26 @@ export const HelpSidebar = fp.flow(
         showCriteria: false,
         tooltipId: undefined
       };
+    }
+
+    icons(helpContentKey: string, workspaceAccessLevel: WorkspaceAccessLevel): IconConfig[] {
+      const keys = [
+        'criteria',
+        'concept',
+        helpIconName(helpContentKey),
+        'dataDictionary',
+        'annotations'
+      ];
+
+      if (WorkspacePermissionsUtil.canWrite(workspaceAccessLevel)) {
+        keys.push('runtime');
+      }
+
+      if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
+        keys.push('genomicExtractions');
+      }
+
+      return keys.map(k => iconConfigs[k]);
     }
 
     async componentDidMount() {
@@ -387,7 +417,7 @@ export const HelpSidebar = fp.flow(
       this.subscription.unsubscribe();
     }
 
-    onIconClick(icon: any) {
+    onIconClick(icon: IconConfig) {
       const {setSidebarState, sidebarOpen} = this.props;
       const {activeIcon} = this.state;
       const {id, label} = icon;
@@ -496,12 +526,12 @@ export const HelpSidebar = fp.flow(
       </PopupTrigger>;
     }
 
-    showIcon(icon) {
+    showIcon(icon: IconConfig) {
       const {concept, criteria, helpContentKey} = this.props;
       return !icon.page || icon.page === helpContentKey || (criteria && icon.page === 'criteria') || (concept && icon.page === 'concept');
     }
 
-    displayFontAwesomeIcon(icon) {
+    displayFontAwesomeIcon(icon: IconConfig) {
       const {concept, criteria} = this.props;
 
       return <React.Fragment>
@@ -515,7 +545,7 @@ export const HelpSidebar = fp.flow(
           </React.Fragment> ;
     }
 
-    displayRuntimeIcon(icon) {
+    displayRuntimeIcon(icon: IconConfig) {
       const {runtimeStore, compoundRuntimeOps, workspace} = this.props;
       let status = runtimeStore && runtimeStore.runtime && runtimeStore.runtime.status;
       if ((!status || status === RuntimeStatus.Deleted) &&
@@ -587,25 +617,120 @@ export const HelpSidebar = fp.flow(
     }
 
     get sidebarWidth() {
-      if (this.state.activeIcon && iconConfigs[this.state.activeIcon].contentWidthRem) {
-        return iconConfigs[this.state.activeIcon].contentWidthRem;
+      if (this.state.activeIcon && this.sidebarContent(this.state.activeIcon).bodyWidthRem) {
+        return this.sidebarContent(this.state.activeIcon).bodyWidthRem;
       }
       return '14';
     }
 
-    render() {
-      const {concept, criteria, helpContentKey, notebookStyles, setSidebarState, workspace} = this.props;
-      const {activeIcon, participant, tooltipId} = this.state;
+    sidebarContent(activeIcon): {
+      overflow?: string;
+      headerPadding?: string;
+      renderHeader?: () => JSX.Element;
+      bodyWidthRem?: string;
+      bodyPadding?: string;
+      renderBody: () => JSX.Element;
+      showFooter: boolean;
+    } {
+      switch (activeIcon) {
+        case 'help':
+          return {
+            headerPadding: '0.5rem',
+            renderHeader: () =>
+              <h3 style={{...styles.sectionTitle, marginTop: 0, lineHeight: 1.75}}>
+                Help Tips
+              </h3>,
+            renderBody: () =>
+              <HelpTips allowSearch={true}
+                        onSearch={() => this.analyticsEvent('Search')}
+                        contentKey={this.props.helpContentKey}/>,
+            showFooter: true
+          };
+        case 'runtime':
+          return {
+            headerPadding: '0.75rem',
+            renderHeader: () =>
+              <div>
+                <h3 style={{...styles.sectionTitle, marginTop: 0, lineHeight: 1.75}}>Cloud analysis environment</h3>
+                <div style={{padding: '0.5rem 1rem'}}>
+                  Your analysis environment consists of an application and compute resources.
+                  Your cloud environment is unique to this workspace and not shared with other users.
+                </div>
+              </div>,
+            bodyWidthRem: '30',
+            bodyPadding: '0 1.25rem',
+            renderBody: () =>
+              <RuntimePanel onClose={() => this.props.setSidebarState(false)}/>,
+            showFooter: false
+          };
+        case 'notebooksHelp':
+          return {
+            headerPadding: '0.5rem',
+            renderHeader: () =>
+              <h3 style={{...styles.sectionTitle, marginTop: 0}}>
+                Workspace storage
+              </h3>,
+            renderBody: () =>
+              <HelpTips allowSearch={false}
+                        contentKey={this.props.helpContentKey}/>,
+            showFooter: true
+          };
+        case 'annotations':
+          return {
+            headerPadding: '0.5rem 0.5rem 0 0.5rem',
+            renderHeader: () =>
+              <div style={{fontSize: 18, color: colors.primary}}>
+                Participant {this.state.participant.participantId}
+              </div>,
+            renderBody: () => this.state.participant &&
+                <SidebarContent/>,
+            showFooter: true
+          };
+        case 'concept':
+          return {
+            headerPadding: '0.75rem',
+            renderHeader: () =>
+              <h3 style={{...styles.sectionTitle, marginTop: 0}}>
+                Selected Concepts
+              </h3>,
+            bodyWidthRem: '20',
+            bodyPadding: '0.75rem 0.75rem 0',
+            renderBody: () => !!currentConceptStore.getValue() &&
+                <ConceptListPage/>,
+            showFooter: false
+          };
+        case 'criteria':
+          return {
+            bodyWidthRem: '20',
+            bodyPadding: '0.75rem 0.75rem 0',
+            renderBody: () => !!currentCohortSearchContextStore.getValue() &&
+                <SelectionList back={() => this.props.setSidebarState(false)} selections={[]}/>,
+            showFooter: false
+          };
+        case 'genomicExtractions':
+          return {
+            overflow: 'visible',
+            headerPadding: '0.75rem',
+            renderHeader: () =>
+              <h3 style={{...styles.sectionTitle, marginTop: 0}}>
+                Genomic Extractions
+              </h3>,
+            bodyWidthRem: '30',
+            renderBody: () => <GenomicsExtractionTable />,
+            showFooter: false
+          };
+      }
+    }
 
-      const contentStyle = (tab: string) => ({
-        height: 'calc(100% - 1rem)',
-        overflow: 'auto',
-        padding: iconConfigs[tab].contentPadding || '0.5rem 0.5rem 5.5rem'
-      });
+    render() {
+      const {concept, criteria, helpContentKey, notebookStyles, workspace} = this.props;
+      const {activeIcon, tooltipId} = this.state;
+      const sidebarContent = this.sidebarContent(activeIcon);
+
       return <div id='help-sidebar'>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
           {!(criteria || concept)  && this.renderWorkspaceMenu()}
-          {icons(helpContentKey, workspace.accessLevel).map((icon, i) =>
+          {this.icons(helpContentKey, workspace.accessLevel).map((icon, i) =>
           this.showIcon(icon) && <div key={i} style={{display: 'table'}}>
                 <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
                   <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
@@ -634,53 +759,39 @@ export const HelpSidebar = fp.flow(
         </div>
         <div style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
           <div style={this.sidebarStyle} data-test-id='sidebar-content'>
-            {!(activeIcon === 'criteria' || activeIcon === 'concept') && <FlexRow style={styles.navIcons}>
-              <Clickable style={{marginRight: '1rem'}}
-                         onClick={() => setSidebarState(false)}>
-                <img src={proIcons.times}
-                     style={{height: '27px', width: '17px'}}
-                     alt='Close'/>
-              </Clickable>
-            </FlexRow>}
-            {activeIcon === 'help' && <div style={contentStyle('help')}>
-              <h3 style={{...styles.sectionTitle, marginTop: 0}}>
-                Help Tips
-              </h3>
-              <HelpTips allowSearch={true}
-                        onSearch={() => this.analyticsEvent('Search')}
-                        contentKey={helpContentKey}/>
-            </div>}
-            {activeIcon === 'notebooksHelp' && <div style={contentStyle('notebooksHelp')}>
-              <h3 style={{...styles.sectionTitle, marginTop: 0}}>
-                Workspace storage
-              </h3>
-              <HelpTips allowSearch={false}
-                        contentKey={helpContentKey}/>
-            </div>}
-            {activeIcon === 'runtime' && <div style={contentStyle('runtime')}>
-              {<RuntimePanel onClose={() => this.props.setSidebarState(false)}/>}
-            </div>}
-            {activeIcon === 'annotations' && <div style={contentStyle('annotations')}>
-              {participant && <SidebarContent />}
-            </div>}
-            {activeIcon === 'criteria' && <div style={contentStyle('criteria')}>
-              <div style={{height: '100%', padding: '0.25rem 0.25rem 0rem'}}>
-                {!!currentCohortSearchContextStore.getValue() && <SelectionList back={() => setSidebarState(false)} selections={[]}/>}
+
+            {sidebarContent &&
+              <div style={{height: '100%', overflow: sidebarContent.overflow || 'auto'}}>
+                <FlexColumn style={{height: '100%'}}>
+                  {sidebarContent.renderHeader &&
+                    <FlexRow style={{justifyContent: 'space-between', padding: sidebarContent.headerPadding}}>
+                      {sidebarContent.renderHeader()}
+
+                      <Clickable onClick={() => this.props.setSidebarState(false)}>
+                          <img src={proIcons.times}
+                               style={{height: '27px', width: '17px'}}
+                               alt='Close'/>
+                      </Clickable>
+                    </FlexRow>
+                  }
+
+                  <div style={{flex: 1, padding: sidebarContent.bodyPadding || '0 0.5rem 5.5rem', height: '100%'}}>
+                    {sidebarContent.renderBody()}
+                  </div>
+                </FlexColumn>
+
+                {sidebarContent.showFooter &&
+                  <div style={{...styles.footer}}>
+                    <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
+                    <p style={styles.contentItem}>
+                        Visit our <StyledAnchorTag href={supportUrls.helpCenter}
+                                                   target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
+                    </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
+                    </p>
+                  </div>
+                }
               </div>
-            </div>}
-            {activeIcon === 'concept' && <div style={contentStyle('concept')}>
-              <div style={{padding: '0.25rem 0.25rem 0rem'}}>
-                {!!currentConceptStore.getValue() && <ConceptListPage/>}
-              </div>
-            </div>}
-            {(iconConfigs[activeIcon] || {}).hideSidebarFooter || <div style={styles.footer}>
-              <h3 style={{...styles.sectionTitle, marginTop: 0}}>Not finding what you're looking for?</h3>
-              <p style={styles.contentItem}>
-                Visit our <StyledAnchorTag href={supportUrls.helpCenter}
-                                           target='_blank' onClick={() => this.analyticsEvent('UserSupport')}> User Support Hub
-                </StyledAnchorTag> page or <span style={styles.link} onClick={() => this.openContactWidget()}> contact us</span>.
-              </p>
-            </div>}
+            }
           </div>
         </div>
       </div>;

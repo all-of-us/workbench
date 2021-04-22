@@ -24,6 +24,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.appengine.AppEngineMetadataSpringConfiguration;
 import org.pmiops.workbench.audit.ActionAuditSpringConfiguration;
 import org.pmiops.workbench.config.WorkbenchConfig;
@@ -63,6 +64,7 @@ import org.pmiops.workbench.monitoring.MonitoringSpringConfiguration;
 import org.pmiops.workbench.monitoring.StackdriverStatsExporterService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceFakeImpl;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -80,12 +82,14 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 /** A tool that will generate a CSV export of our workspace data */
 @Configuration
 @Import({
+  AccessTierServiceImpl.class,
   ActionAuditSpringConfiguration.class,
   AppEngineMetadataSpringConfiguration.class,
   LogsBasedMetricServiceImpl.class,
   MonitoringServiceImpl.class,
   MonitoringSpringConfiguration.class,
   NotebooksServiceImpl.class,
+  WorkspaceAuthService.class,
   StackdriverStatsExporterService.class,
   UserRecentResourceServiceImpl.class
 })
@@ -302,12 +306,20 @@ public class ExportWorkspaceData {
         Optional.ofNullable(user.getDataUseAgreementCompletionTime())
             .map(dateFormat::format)
             .orElse(""));
+
     // TODO if we revive this tool:
     // update to use Access Tiers instead of Data Access Level
-    row.setCreatorRegistrationState(
-        AccessTierService.temporaryDataAccessLevelKluge(
-                String.join(",", accessTierService.getAccessTierShortNamesForUser(user)))
-            .toString());
+    // we can use this kluge in the meantime
+    // (migrated from AccessTierService.temporaryDataAccessLevelKluge)
+    final String accessTierShortNames =
+        String.join(",", accessTierService.getAccessTierShortNamesForUser(user));
+    if (accessTierShortNames != null
+        && accessTierShortNames.contains(AccessTierService.REGISTERED_TIER_SHORT_NAME)) {
+      row.setCreatorRegistrationState(AccessTierService.REGISTERED_TIER_SHORT_NAME);
+    } else {
+      row.setCreatorRegistrationState("unregistered");
+    }
+
     row.setDegrees(
         Optional.ofNullable(user.getDegreesEnum()).orElse(ImmutableList.of()).stream()
             .map(Degree::toString)

@@ -4,15 +4,19 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.springframework.test.util.AssertionErrors.fail;
 
 import java.time.Clock;
+import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.access.AccessTierService;
+import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.dao.WorkspaceDao.WorkspaceCountByActiveStatusAndTier;
 import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.testconfig.ReportingTestConfig;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -34,6 +38,7 @@ public class WorkspaceDaoTest {
 
   @Autowired WorkspaceDao workspaceDao;
 
+  @Autowired AccessTierDao accessTierDao;
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired UserDao userDao;
 
@@ -44,6 +49,8 @@ public class WorkspaceDaoTest {
 
   @Test
   public void testWorkspaceVersionLocking() {
+    workspaceDao.deleteAll();
+
     DbWorkspace ws = new DbWorkspace();
     ws.setVersion(1);
     ws = workspaceDao.save(ws);
@@ -64,11 +71,35 @@ public class WorkspaceDaoTest {
 
   @Test
   public void testGetWorkspaceByGoogleProject() {
+    workspaceDao.deleteAll();
+
     DbWorkspace dbWorkspace = createWorkspace();
     assertThat(workspaceDao.getByGoogleProject(GOOGLE_PROJECT).get().getName())
         .isEqualTo(dbWorkspace.getName());
     assertThat(workspaceDao.getByGoogleProject(GOOGLE_PROJECT).get().getGoogleProject())
         .isEqualTo(dbWorkspace.getGoogleProject());
+  }
+
+  @Test
+  public void testGetWorkspaceCountGaugeData_empty() {
+    workspaceDao.deleteAll();
+    assertThat(workspaceDao.getWorkspaceCountGaugeData()).isEmpty();
+  }
+
+  @Test
+  public void testGetWorkspaceCountGaugeData_one() {
+    workspaceDao.deleteAll();
+    createWorkspace();
+
+    final List<WorkspaceCountByActiveStatusAndTier> gaugeData =
+        workspaceDao.getWorkspaceCountGaugeData();
+    assertThat(gaugeData).hasSize(1);
+
+    WorkspaceCountByActiveStatusAndTier count = gaugeData.get(0);
+    assertThat(count.getWorkspaceCount()).isEqualTo(1);
+    assertThat(count.getTier().getShortName())
+        .isEqualTo(AccessTierService.REGISTERED_TIER_SHORT_NAME);
+    assertThat(count.getActiveStatusEnum()).isEqualTo(WorkspaceActiveStatus.ACTIVE);
   }
 
   private DbWorkspace createWorkspace() {
@@ -77,21 +108,9 @@ public class WorkspaceDaoTest {
     workspace.setName(WORKSPACE_1_NAME);
     workspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
     workspace.setGoogleProject(GOOGLE_PROJECT);
+    workspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.ACTIVE);
+    workspace.setCdrVersion(TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao));
     workspace = workspaceDao.save(workspace);
     return workspace;
-  }
-
-  public DbUser getDbUser() {
-    DbUser user = new DbUser();
-    user.setGivenName("Jay");
-    user = userDao.save(user);
-    return user;
-  }
-
-  public DbCdrVersion getDbCdrVersion() {
-    DbCdrVersion cdrVersion = new DbCdrVersion();
-    cdrVersion.setCdrDbName("foo");
-    cdrVersion = cdrVersionDao.save(cdrVersion);
-    return cdrVersion;
   }
 }

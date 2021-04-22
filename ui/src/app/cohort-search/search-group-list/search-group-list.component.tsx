@@ -13,7 +13,7 @@ import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {CdrVersionListResponse, CriteriaMenu, Domain, SearchRequest} from 'generated/fetch';
+import {CdrVersionTiersResponse, CriteriaMenu, Domain, SearchRequest} from 'generated/fetch';
 
 function initItem(id: string, type: string) {
   return {
@@ -137,7 +137,7 @@ interface Props {
   updated: number;
   updateRequest: Function;
   workspace: WorkspaceData;
-  cdrVersionListResponse: CdrVersionListResponse;
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
 }
 
 interface State {

@@ -4,7 +4,7 @@ import NotebookPreviewPage from 'app/page/notebook-preview-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { LinkText, MenuOption, ResourceCard } from 'app/text-labels';
 import { makeRandomName } from 'utils/str-utils';
-import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { waitWhileLoading } from 'utils/waits-utils';
 
 describe('Export to notebook from dataset', () => {
@@ -12,13 +12,15 @@ describe('Export to notebook from dataset', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspace = 'e2eExportDataSetsToNotebookTest';
+
   /**
    * Test:
    * - Create dataset.
    * - Export dataset to notebook thru snowman menu.
    */
   test('Create Jupyter notebook for Python programming language from existing dataset', async () => {
-    await createWorkspace(page);
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Click Add Datasets button.
     const dataPage = new WorkspaceDataPage(page);
@@ -55,8 +57,5 @@ describe('Export to notebook from dataset', () => {
     // Delete Dataset
     await analysisPage.openDatasetsSubtab();
     await analysisPage.deleteResource(datasetName, ResourceCard.Dataset);
-
-    // Delete workspace
-    await dataPage.deleteWorkspace();
   });
 });

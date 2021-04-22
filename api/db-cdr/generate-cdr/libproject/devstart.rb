@@ -16,7 +16,7 @@ ENVIRONMENTS = {
         :dest_cdr_project => "fc-aou-cdr-synth-test",
         :auth_domain_group_email => "GROUP_all-of-us-registered-test@dev.test.firecloud.org",
       },
-      "controlled_test" => {
+      "controlled" => {
         :source_cdr_project => "all-of-us-ehr-dev",
         :ingest_cdr_project => "fc-aou-cdr-ingest-test-2",
         :dest_cdr_project => "fc-aou-cdr-synth-test-2",
@@ -38,14 +38,20 @@ ENVIRONMENTS = {
   },
   "all-of-us-rw-perf" => {
     :config_json => "config_perf.json",
-    :publisher_account => "circle-deploy-account@all-of-us-workbench-perf.iam.gserviceaccount.com",
+    :publisher_account => "circle-deploy-account@all-of-us-workbench-test.iam.gserviceaccount.com",
     :accessTiers => {
       "registered" => {
         :source_cdr_project => "all-of-us-ehr-dev",
-        :ingest_cdr_project => "fc-aou-vpc-ingest-perf", # DNE yet. Follow up w/ RW-6423
-        :dest_cdr_project => "fc-aou-cdr-synth-perf", # DNE yet. Follow up w/ RW-6423
+        :ingest_cdr_project => "fc-aou-vpc-ingest-perf",
+        :dest_cdr_project => "fc-aou-cdr-perf",
         :auth_domain_group_email => "all-of-us-registered-perf@perf.test.firecloud.org",
       },
+      "controlled" => {
+        :source_cdr_project => "all-of-us-ehr-dev",
+        :ingest_cdr_project => "fc-aou-vpc-ingest-perf-ct",
+        :dest_cdr_project => "fc-aou-cdr-perf-ct",
+        :auth_domain_group_email => "all-of-us-controlled-perf@perf.test.firecloud.org",
+      }
     }
   },
   "all-of-us-rw-stable" => {
@@ -305,12 +311,12 @@ def create_wgs_extraction_dataset(cmd_name, args)
     "The Google Cloud project associated with this workbench environment, " +
       "e.g. all-of-us-rw-staging. Required."
   )
-  op.opts.tier = "controlled_test"
+  op.opts.tier = "controlled"
   op.add_option(
     "--tier [tier]",
     ->(opts, v) { opts.tier = v},
     "The access tier associated with this CDR, " +
-      "e.g. registered. Default is registered."
+      "e.g. registered. Default is controlled."
   )
   op.opts.ttl = 60 * 60 * 24 * 7
   op.add_option(

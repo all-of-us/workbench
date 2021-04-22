@@ -14,7 +14,7 @@ import {
   WorkspaceAccessLevel
 } from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {cdrVersionListResponse, CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
+import {cdrVersionTiersResponse, CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
@@ -32,7 +32,7 @@ describe('DataSetPage', () => {
       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
     });
     currentWorkspaceStore.next(workspaceDataStub);
-    cdrVersionStore.set(cdrVersionListResponse);
+    cdrVersionStore.set(cdrVersionTiersResponse);
   });
 
   it('should render', async() => {
@@ -347,6 +347,31 @@ describe('DataSetPage', () => {
 
     expect(wrapper.find('[data-test-id="cohort-list-item"]').first().props().checked).toBeTruthy();
     expect(wrapper.find('[data-test-id="all-participant"]').props().checked).toBeFalsy();
+  });
+
+  it('should display Pre packaged concept set as per CDR data', async () => {
+    let wrapper = mount(<DataSetPage/>);
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(7);
+
+    cdrVersionTiersResponse.tiers[0].versions[0].hasWgsData = false;
+    wrapper = mount(<DataSetPage/>);
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(6);
+
+
+    cdrVersionTiersResponse.tiers[0].versions[0].hasFitbitData = false;
+    cdrVersionTiersResponse.tiers[0].versions[0].hasWgsData = true;
+    wrapper = mount(<DataSetPage/>);
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(3);
+
+
+    cdrVersionTiersResponse.tiers[0].versions[0].hasFitbitData = false;
+    cdrVersionTiersResponse.tiers[0].versions[0].hasWgsData = false;
+    wrapper = mount(<DataSetPage/>);
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(2);
 
   });
 });

@@ -28,7 +28,6 @@
       "releaseNumber": 1,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_3",
-      "elasticIndexBaseName": "synth_r_2020q1_1",
       "accessTier": "registered"
     },
     {
@@ -41,7 +40,6 @@
       "releaseNumber": 2,
       "numParticipants": 0,
       "cdrDbName": "synth_r_2020q1_3",
-      "elasticIndexBaseName": "synth_r_2019q1_1",
       "accessTier": "registered"
     },
     {
@@ -79,12 +77,10 @@
       "name": "CDR for Controlled Tier - DO NOT USE",
       "bigqueryProject": "fc-aou-cdr-synth-test-2",
       "bigqueryDataset": "test_R2019q4r3",
-      "microarrayBigqueryDataset": "microarray_data",
       "creationTime": "2020-08-26 00:09:51Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
-      "cdrDbName": "cdr",
-      "elasticIndexBaseName": "cdr",
+      "cdrDbName": "synth_r_2019q4_14",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "controlled"

@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Streams;
 import com.google.gson.Gson;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
@@ -60,6 +62,9 @@ import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResourceType;
+import org.pmiops.workbench.model.SearchGroup;
+import org.pmiops.workbench.model.SearchGroupItem;
+import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
@@ -92,6 +97,15 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           Domain.OBSERVATION,
           Domain.PROCEDURE,
           Domain.PHYSICAL_MEASUREMENT_CSS);
+
+  private static final ImmutableList<Domain> DOMAIN_WITHOUT_CONCEPT_SETS =
+      ImmutableList.of(
+          Domain.PERSON,
+          Domain.FITBIT_ACTIVITY,
+          Domain.FITBIT_HEART_RATE_LEVEL,
+          Domain.FITBIT_HEART_RATE_SUMMARY,
+          Domain.FITBIT_INTRADAY_STEPS,
+          Domain.WHOLE_GENOME_VARIANT);
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
@@ -613,11 +627,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   private boolean supportsConceptSets(Domain domain) {
-    return domain != Domain.PERSON
-        && domain != Domain.FITBIT_ACTIVITY
-        && domain != Domain.FITBIT_HEART_RATE_LEVEL
-        && domain != Domain.FITBIT_HEART_RATE_SUMMARY
-        && domain != Domain.FITBIT_INTRADAY_STEPS;
+    return DOMAIN_WITHOUT_CONCEPT_SETS.stream().filter(d -> domain.equals(d)).count() == 0;
   }
 
   // Gather all the concept IDs from the ConceptSets provided, taking account of
@@ -981,8 +991,13 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
-  public Optional<DataSet> getDbDataSet(Long dataSetId) {
-    return Optional.of(dataSetMapper.dbModelToClient(dataSetDao.findOne(dataSetId)));
+  public Optional<DataSet> getDataSet(Long dataSetId) {
+    return getDbDataSet(dataSetId).map(dataSetMapper::dbModelToClient);
+  }
+
+  @Override
+  public Optional<DbDataset> getDbDataSet(Long dataSetId) {
+    return Optional.ofNullable(dataSetDao.findOne(dataSetId));
   }
 
   @Override
@@ -1054,6 +1069,53 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             .collect(ImmutableList.toImmutableList());
 
     return new ValuesLinkingPair(valueSelects, valueJoins, domainTable);
+  }
+
+  @Override
+  public List<String> getPersonIdsWithWholeGenome(DbDataset dataSet) {
+    List<ParticipantCriteria> participantCriteriaList;
+    if (Boolean.TRUE.equals(dataSet.getIncludesAllParticipants())) {
+      // Select all participants with WGS data.
+      participantCriteriaList =
+          ImmutableList.of(
+              new ParticipantCriteria(
+                  new SearchRequest().addIncludesItem(createHasWgsSearchGroup())));
+    } else {
+      participantCriteriaList =
+          this.cohortDao.findAllByCohortIdIn(dataSet.getCohortIds()).stream()
+              .map(
+                  cohort -> {
+                    final SearchRequest searchRequest =
+                        new Gson().fromJson(cohort.getCriteria(), SearchRequest.class);
+                    // AND the existing search criteria with participants having genomics data.
+                    searchRequest.addIncludesItem(createHasWgsSearchGroup());
+                    return new ParticipantCriteria(searchRequest);
+                  })
+              .collect(Collectors.toList());
+    }
+
+    final QueryJobConfiguration participantIdQuery =
+        cohortQueryBuilder.buildUnionedParticipantIdQuery(participantCriteriaList);
+
+    return Streams.stream(
+            bigQueryService
+                .executeQuery(bigQueryService.filterBigQueryConfig(participantIdQuery))
+                .getValues())
+        .map(personId -> personId.get(0).getValue().toString())
+        .collect(Collectors.toList());
+  }
+
+  private SearchGroup createHasWgsSearchGroup() {
+    return new SearchGroup()
+        .items(
+            ImmutableList.of(
+                new SearchGroupItem()
+                    .type(Domain.WHOLE_GENOME_VARIANT.toString())
+                    .addSearchParametersItem(
+                        new SearchParameter()
+                            .domain(Domain.WHOLE_GENOME_VARIANT.toString())
+                            .type(CriteriaType.PPI.toString())
+                            .group(false))));
   }
 
   // Capitalizes the first letter of a string and lowers the remaining ones.

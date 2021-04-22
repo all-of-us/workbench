@@ -42,11 +42,9 @@ import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
-import org.pmiops.workbench.db.dao.WorkspaceDao.ActiveStatusToCountResult;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbDataset;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserRecentWorkspace;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -61,7 +59,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.BillingStatus;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.UserRole;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -88,7 +85,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   protected static final int RECENT_WORKSPACE_COUNT = 4;
   private static final Logger log = Logger.getLogger(WorkspaceService.class.getName());
-  private static final String FC_OWNER_ROLE = "OWNER";
 
   private final BillingProjectAuditor billingProjectAuditor;
   private final Clock clock;
@@ -217,6 +213,7 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     return workspaceResponse;
   }
 
+  @Transactional
   @Override
   public void deleteWorkspace(DbWorkspace dbWorkspace) {
     // This deletes all Firecloud and google resources, however saves all references
@@ -229,7 +226,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
         dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
     dbWorkspace.setWorkspaceActiveStatusEnum(WorkspaceActiveStatus.DELETED);
     dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
-    maybeDeleteRecentWorkspace(dbWorkspace.getWorkspaceId());
 
     String billingProjectName = dbWorkspace.getWorkspaceNamespace();
     try {
@@ -421,19 +417,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
     userRecentWorkspaceDao.deleteByUserIdAndWorkspaceIdIn(userId, idsToDelete);
   }
 
-  /** Returns true if anything was deleted from user_recent_workspaces, false if nothing was */
-  private boolean maybeDeleteRecentWorkspace(long workspaceId) {
-    long userId = userProvider.get().getUserId();
-    Optional<DbUserRecentWorkspace> maybeRecentWorkspace =
-        userRecentWorkspaceDao.findFirstByWorkspaceIdAndUserId(workspaceId, userId);
-    if (maybeRecentWorkspace.isPresent()) {
-      userRecentWorkspaceDao.delete(maybeRecentWorkspace.get());
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   // this is necessary because the grant ownership call in create/clone
   // may not have propagated. Adding a few retries drastically reduces
   // the likely of failing due to slow propagation
@@ -515,22 +498,14 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    final List<ActiveStatusToCountResult> rows = workspaceDao.getActiveStatusToCount();
-    return rows.stream()
+    return workspaceDao.getWorkspaceCountGaugeData().stream()
         .map(
             row ->
                 MeasurementBundle.builder()
-                    .addTag(
-                        MetricLabel.WORKSPACE_ACTIVE_STATUS,
-                        DbStorageEnums.workspaceActiveStatusFromStorage(
-                                row.getWorkspaceActiveStatus())
-                            .toString())
-
-                    // tmp record all workspaces as Registered Tier.
-                    // This is mostly true in test/local and fully true in higher environments.
-                    // RW-6137: Replace with AccessTier
-                    .addTag(MetricLabel.DATA_ACCESS_LEVEL, DataAccessLevel.REGISTERED.toString())
                     .addMeasurement(GaugeMetric.WORKSPACE_COUNT, row.getWorkspaceCount())
+                    .addTag(
+                        MetricLabel.WORKSPACE_ACTIVE_STATUS, row.getActiveStatusEnum().toString())
+                    .addTag(MetricLabel.ACCESS_TIER_SHORT_NAME, row.getTier().getShortName())
                     .build())
         .collect(ImmutableList.toImmutableList());
   }

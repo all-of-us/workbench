@@ -6,14 +6,15 @@ import {cohortReviewStore} from 'app/services/review-state.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {defaultRuntime, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {currentCohortCriteriaStore, currentWorkspaceStore, serverConfigStore} from 'app/utils/navigation';
-import {CohortAnnotationDefinitionApi, CohortReviewApi} from 'generated/fetch';
+import {CdrVersionsApi, CohortAnnotationDefinitionApi, CohortReviewApi} from 'generated/fetch';
 import defaultServerConfig from 'testing/default-server-config';
 import {waitForFakeTimersAndUpdate, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {CohortAnnotationDefinitionServiceStub} from 'testing/stubs/cohort-annotation-definition-service-stub';
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import colors from 'app/styles/colors';
-import {runtimeStore} from 'app/utils/stores';
+import {cdrVersionStore, runtimeStore} from 'app/utils/stores';
+import {cdrVersionTiersResponse, CdrVersionsApiStub} from '../../testing/stubs/cdr-versions-api-stub';
 import {HelpSidebar} from './help-sidebar';
 import {RuntimeApi, RuntimeStatus, WorkspaceAccessLevel} from "generated/fetch";
 import {WorkspacesApi} from "generated/fetch";
@@ -60,6 +61,7 @@ describe('HelpSidebar', () => {
     props = {};
     runtimeStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeStub);
+    registerApiClient(CdrVersionsApi, new CdrVersionsApiStub());
     registerApiClient(CohortReviewApi, new CohortReviewServiceStub());
     registerApiClient(CohortAnnotationDefinitionApi, new CohortAnnotationDefinitionServiceStub());
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
@@ -69,6 +71,7 @@ describe('HelpSidebar', () => {
       ...defaultServerConfig
     });
     runtimeStore.set({workspaceNamespace: workspaceDataStub.namespace, runtime: runtimeStub.runtime});
+    cdrVersionStore.set(cdrVersionTiersResponse);
 
     // mock timers
     jest.useFakeTimers();

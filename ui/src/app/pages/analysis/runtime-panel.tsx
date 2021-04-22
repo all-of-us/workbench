@@ -42,10 +42,11 @@ import {
 import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {AoU} from 'app/components/text-wrappers';
+import {findCdrVersion} from 'app/utils/cdr-versions';
 import {
   BillingAccountType,
   BillingStatus,
-  CdrVersionListResponse,
+  CdrVersionTiersResponse,
   DataprocConfig,
   Runtime,
   RuntimeConfigurationType,
@@ -83,8 +84,7 @@ const styles = reactStyles({
   controlSection: {
     backgroundColor: String(addOpacity(colors.white, .75)),
     borderRadius: '3px',
-    padding: '.75rem',
-    marginTop: '.75rem'
+    padding: '.75rem'
   },
   presetMenuItem: {
     color: colors.primary,
@@ -177,7 +177,7 @@ enum PanelContent {
 // this is only used in the test.
 export interface Props {
   workspace: WorkspaceData;
-  cdrVersionListResponse?: CdrVersionListResponse;
+  cdrVersionTiersResponse?: CdrVersionTiersResponse;
   onClose: () => void;
 }
 
@@ -798,12 +798,12 @@ export const RuntimePanel = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace(),
   withUserProfile()
-)(({cdrVersionListResponse, workspace, profileState, onClose = () => {}}) => {
+)(({ cdrVersionTiersResponse, workspace, profileState, onClose = () => {}}) => {
   const {namespace, id, cdrVersionId, googleProject} = workspace;
 
   const {profile} = profileState;
 
-  const {hasMicroarrayData} = fp.find({cdrVersionId}, cdrVersionListResponse.items) || {hasMicroarrayData: false};
+  const {hasMicroarrayData} = findCdrVersion(cdrVersionId, cdrVersionTiersResponse) || {hasMicroarrayData: false};
   let [{currentRuntime, pendingRuntime}, setRequestedRuntime] = useCustomRuntime(namespace);
 
   // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
@@ -1053,12 +1053,6 @@ export const RuntimePanel = fp.flow(
   };
 
   return <div id='runtime-panel'>
-    <h3 style={{...styles.baseHeader, ...styles.bold, ...styles.sectionHeader}}>Cloud analysis environment</h3>
-    <div>
-      Your analysis environment consists of an application and compute resources.
-      Your cloud environment is unique to this workspace and not shared with other users.
-    </div>
-
     {switchCase(panelContent,
       [PanelContent.Create, () =>
             <Fragment>

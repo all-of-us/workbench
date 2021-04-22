@@ -5,12 +5,19 @@ import { Button } from 'app/components/buttons';
 import { styles as headerStyles } from 'app/components/headers';
 import { Select, TextInput, ValidationError } from 'app/components/inputs';
 import { Modal, ModalBody, ModalFooter, ModalTitle } from 'app/components/modals';
-import {CdrVersionListResponse, ConceptSet, FileDetail, ResourceType, Workspace} from 'generated/fetch';
+import {
+  CdrVersionTiersResponse,
+  ConceptSet,
+  FileDetail,
+  ResourceType,
+  Workspace
+} from 'generated/fetch';
 
 import { Spinner } from 'app/components/spinners';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions} from 'app/utils';
+import {findCdrVersion} from 'app/utils/cdr-versions';
 import { navigate } from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resources';
 import { WorkspacePermissions } from 'app/utils/workspace-permissions';
@@ -26,7 +33,7 @@ const ResourceTypeHomeTabs = new Map()
   .set(ResourceType.DATASET, 'data');
 
 export interface Props {
-  cdrVersionListResponse: CdrVersionListResponse;
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
   fromWorkspaceNamespace: string;
   fromWorkspaceFirecloudName: string;
   fromResourceName: string;
@@ -130,8 +137,8 @@ class CopyModalComponent extends React.Component<Props, State> {
   }
 
   cdrName(cdrVersionId: string): string {
-    const {cdrVersionListResponse} = this.props;
-    const version = cdrVersionListResponse.items.find(v => v.cdrVersionId === cdrVersionId);
+    const {cdrVersionTiersResponse} = this.props;
+    const version = findCdrVersion(cdrVersionId, cdrVersionTiersResponse);
     return version ? version.name : '[CDR version not found]';
   }
 

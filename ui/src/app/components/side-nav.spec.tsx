@@ -2,7 +2,7 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {SideNav, SideNavItem, SideNavProps} from './side-nav';
-import {ProfileStubVariables} from "../../testing/stubs/profile-api-stub";
+import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 
 describe('SideNav', () => {
   const props: SideNavProps = {

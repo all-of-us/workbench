@@ -8,10 +8,10 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -25,12 +25,12 @@ import org.pmiops.workbench.db.dao.BillingProjectBufferEntryDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus.CreationStatusEnum;
+import org.pmiops.workbench.model.AvailableBufferPerTier;
 import org.pmiops.workbench.model.BillingProjectBufferStatus;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
@@ -90,17 +90,15 @@ public class BillingProjectBufferService implements GaugeDataCollector {
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-    final ImmutableMap<BufferEntryStatus, Long> entryStatusToCount =
-        ImmutableMap.copyOf(billingProjectBufferEntryDao.getCountByStatusMap());
-
-    return Arrays.stream(BufferEntryStatus.values())
+    return billingProjectBufferEntryDao.getBillingBufferGaugeData().stream()
         .map(
-            status ->
+            projects ->
                 MeasurementBundle.builder()
                     .addMeasurement(
-                        GaugeMetric.BILLING_BUFFER_PROJECT_COUNT,
-                        entryStatusToCount.getOrDefault(status, 0L))
-                    .addTag(MetricLabel.BUFFER_ENTRY_STATUS, status.toString())
+                        GaugeMetric.BILLING_BUFFER_PROJECT_COUNT, projects.getNumProjects())
+                    .addTag(MetricLabel.BUFFER_ENTRY_STATUS, projects.getStatusEnum().toString())
+                    .addTag(
+                        MetricLabel.ACCESS_TIER_SHORT_NAME, projects.getAccessTier().getShortName())
                     .build())
         .collect(Collectors.toList());
   }
@@ -325,13 +323,31 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   }
 
   private int getBufferMaxCapacity(String accessTierShortName) {
-    return workbenchConfigProvider.get().billing.bufferCapacityPerTier.get(accessTierShortName);
+    Map<String, Integer> capacityPerTier =
+        workbenchConfigProvider.get().billing.bufferCapacityPerTier;
+
+    if (!capacityPerTier.containsKey(accessTierShortName)) {
+      final String message =
+          String.format(
+              "Workbench Config Error: no 'billing.bufferCapacityPerTier' entry for '%s' tier",
+              accessTierShortName);
+      log.severe(message);
+      return 0;
+    }
+
+    return capacityPerTier.get(accessTierShortName);
   }
 
   public BillingProjectBufferStatus getStatus() {
-    final long bufferSize =
-        billingProjectBufferEntryDao.countByStatus(
-            DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.AVAILABLE));
-    return new BillingProjectBufferStatus().bufferSize(bufferSize);
+    return new BillingProjectBufferStatus()
+        .availablePerTier(
+            billingProjectBufferEntryDao.getBillingBufferGaugeData().stream()
+                .filter(tier -> tier.getStatusEnum() == BufferEntryStatus.AVAILABLE)
+                .map(
+                    tier ->
+                        new AvailableBufferPerTier()
+                            .accessTierShortName(tier.getAccessTier().getShortName())
+                            .availableProjects(tier.getNumProjects()))
+                .collect(Collectors.toList()));
   }
 }

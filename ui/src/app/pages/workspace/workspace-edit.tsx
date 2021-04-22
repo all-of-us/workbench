@@ -42,8 +42,14 @@ import {
   withCurrentWorkspace,
   withUserProfile
 } from 'app/utils';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {getCdrVersion, hasDefaultCdrVersion} from 'app/utils/cdr-versions';
+import {
+  getCdrVersion,
+  getCdrVersionTier,
+  getDefaultCdrVersionForTier,
+  hasDefaultCdrVersion
+} from 'app/utils/cdr-versions';
 import {reportError} from 'app/utils/errors';
 import {currentWorkspaceStore, navigate, nextWorkspaceWarmupStore, serverConfigStore} from 'app/utils/navigation';
 import {getBillingAccountInfo} from 'app/utils/workbench-gapi-client';
@@ -53,7 +59,7 @@ import {
   ArchivalStatus,
   BillingAccount,
   CdrVersion,
-  CdrVersionListResponse,
+  CdrVersionTiersResponse,
   DisseminateResearchEnum,
   Profile,
   ResearchOutcomeEnum,
@@ -185,6 +191,9 @@ export const styles = reactStyles({
 
 const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
 
+// default to creating workspaces in the Registered Tier
+const DEFAULT_ACCESS_TIER = AccessTierShortNames.Registered;
+
 // Poll parameters to check Workspace ACLs after creation of a new workspace. See
 // SATURN-104 for details, eventually the root cause should be resolved by fixes
 // to Sam (as part of Postgres migration).
@@ -208,12 +217,12 @@ function getDiseaseNames(keyword) {
 interface UpgradeProps {
   srcWorkspace: Workspace;
   destWorkspace: Workspace;
-  cdrVersionListResponse: CdrVersionListResponse;
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
 }
 const CdrVersionUpgrade = (props: UpgradeProps) => {
-  const {srcWorkspace, destWorkspace, cdrVersionListResponse} = props;
-  const fromCdrVersion = <span style={{fontWeight: 'bold'}}>{getCdrVersion(srcWorkspace, cdrVersionListResponse).name}</span>;
-  const toCdrVersion = <span style={{fontWeight: 'bold'}}>{getCdrVersion(destWorkspace, cdrVersionListResponse).name}</span>;
+  const {srcWorkspace, destWorkspace, cdrVersionTiersResponse} = props;
+  const fromCdrVersion = <span style={{fontWeight: 'bold'}}>{getCdrVersion(srcWorkspace, cdrVersionTiersResponse).name}</span>;
+  const toCdrVersion = <span style={{fontWeight: 'bold'}}>{getCdrVersion(destWorkspace, cdrVersionTiersResponse).name}</span>;
 
   return <div data-test-id='cdr-version-upgrade' style={styles.cdrVersionUpgrade}>
     <div>{`You're duplicating the workspace "${srcWorkspace.name}" to upgrade from`} {fromCdrVersion} to {toCdrVersion}.</div>
@@ -222,7 +231,7 @@ const CdrVersionUpgrade = (props: UpgradeProps) => {
 };
 
 export interface WorkspaceEditProps {
-  cdrVersionListResponse: CdrVersionListResponse;
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
   workspace: WorkspaceData;
   cancel: Function;
   profileState: {
@@ -353,7 +362,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       if (this.isMode(WorkspaceEditMode.Create)) {
         workspace = {
           name: '',
-          accessTierShortName: 'registered',
+          accessTierShortName: DEFAULT_ACCESS_TIER,
           cdrVersionId: '',
           researchPurpose: {
             ancestry: false,
@@ -403,7 +412,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       // We preselect the default CDR version when a new workspace is being
       // created (via create or duplicate)
       if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
-        workspace.cdrVersionId = this.props.cdrVersionListResponse.defaultCdrVersionId;
+        workspace.cdrVersionId = getDefaultCdrVersionForTier(workspace, this.props.cdrVersionTiersResponse).cdrVersionId;
       }
 
       return workspace;
@@ -414,9 +423,9 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         // In edit mode, you cannot modify the CDR version, therefore it's fine
         // to show archived CDRs in the drop-down so that it accurately displays
         // the current value.
-        return this.getAllCdrVersions();
+        return this.getAllCdrVersionsForTier(DEFAULT_ACCESS_TIER);
       } else {
-        return this.getLiveCdrVersions();
+        return this.getLiveCdrVersionsForTier(DEFAULT_ACCESS_TIER);
       }
     }
 
@@ -435,9 +444,9 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         researchPurpose.populationHealth || researchPurpose.socialBehavioral;
     }
 
-    getLiveCdrVersions(): Array<CdrVersion> {
-      const cdrResp = this.props.cdrVersionListResponse;
-      const liveCdrVersions = cdrResp.items.filter(cdr => cdr.archivalStatus === ArchivalStatus.LIVE);
+    getLiveCdrVersionsForTier(accessTierShortName: string): Array<CdrVersion> {
+      const versionsForTier = this.getAllCdrVersionsForTier(accessTierShortName);
+      const liveCdrVersions = versionsForTier.filter(cdr => cdr.archivalStatus === ArchivalStatus.LIVE);
       if (liveCdrVersions.length === 0) {
         throw Error('no live CDR versions were found');
       }
@@ -445,8 +454,8 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       return liveCdrVersions;
     }
 
-    getAllCdrVersions(): Array<CdrVersion> {
-      return [...this.props.cdrVersionListResponse.items];
+    getAllCdrVersionsForTier(accessTierShortName: string): Array<CdrVersion> {
+      return getCdrVersionTier(accessTierShortName, this.props.cdrVersionTiersResponse).versions;
     }
 
     makeDiseaseInput(): React.ReactNode {
@@ -835,7 +844,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       const {workspace: destWorkspace} = this.state;
       return this.isMode(WorkspaceEditMode.Duplicate) &&
           srcWorkspace.cdrVersionId !== destWorkspace.cdrVersionId &&
-          hasDefaultCdrVersion(destWorkspace, this.props.cdrVersionListResponse);
+          hasDefaultCdrVersion(destWorkspace, this.props.cdrVersionTiersResponse);
     }
 
     /**
@@ -999,7 +1008,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         workspaceCreationErrorMessage,
         workspaceNewAclDelayed
       } = this.state;
-      const {cdrVersionListResponse, profileState: {profile: {freeTierDollarQuota, freeTierUsage}}} = this.props;
+      const {cdrVersionTiersResponse, profileState: {profile: {freeTierDollarQuota, freeTierUsage}}} = this.props;
       const freeTierCreditsBalance = freeTierDollarQuota - freeTierUsage;
       // defined below in the OverlayPanel declaration
       let freeTierBalancePanel: OverlayPanel;
@@ -1008,10 +1017,11 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       return <FadeBox  style={{margin: 'auto', marginTop: '1rem', width: '95.7%'}}>
         <div style={{width: '1120px'}}>
           {loading && <SpinnerOverlay overrideStylesOverlay={styles.spinner}/>}
-          {!hasDefaultCdrVersion(this.state.workspace, cdrVersionListResponse) && showCdrVersionModal &&
+          {!hasDefaultCdrVersion(this.state.workspace, cdrVersionTiersResponse) && showCdrVersionModal &&
             <OldCdrVersionModal
                 onCancel={() => {
-                  this.setState(fp.set(['workspace', 'cdrVersionId'], cdrVersionListResponse.defaultCdrVersionId));
+                  this.setState(fp.set(['workspace', 'cdrVersionId'],
+                    getDefaultCdrVersionForTier(this.state.workspace, cdrVersionTiersResponse)));
                   this.setState({showCdrVersionModal: false});
                 }}
                 onContinue={() => this.setState({showCdrVersionModal: false})}
@@ -1019,7 +1029,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
           {this.isCdrVersionUpgrade() && <CdrVersionUpgrade
               srcWorkspace={this.props.workspace}
               destWorkspace={this.state.workspace}
-              cdrVersionListResponse={cdrVersionListResponse}
+              cdrVersionTiersResponse={cdrVersionTiersResponse}
           />}
           <WorkspaceEditSection header={this.renderHeader()} tooltip={toolTipText.header}
                                 style={{marginTop: '24px'}} largeHeader
@@ -1038,7 +1048,8 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                   onChange={(v: React.FormEvent<HTMLSelectElement>) => {
                     const selectedVersion = v.currentTarget.value;
                     this.setState(fp.set(['workspace', 'cdrVersionId'], selectedVersion));
-                    this.setState({showCdrVersionModal: selectedVersion !== cdrVersionListResponse.defaultCdrVersionId});
+                    this.setState({showCdrVersionModal: selectedVersion !==
+                          getDefaultCdrVersionForTier(this.state.workspace, cdrVersionTiersResponse).cdrVersionId});
                   }}
                   disabled={this.isMode(WorkspaceEditMode.Edit)}>
                     {cdrVersionItems.map((version, i) => (

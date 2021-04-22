@@ -12,7 +12,7 @@ import {currentWorkspaceStore, serverConfigStore, userProfileStore} from 'app/ut
 import {userRolesStub, workspaceStubs} from 'testing/stubs/workspaces';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
-import {CdrVersionsStubVariables, cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
+import {CdrVersionsStubVariables, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {SpecificPopulationItems} from './workspace-edit-text';
 import {cdrVersionStore} from "app/utils/stores";
 
@@ -51,7 +51,7 @@ describe('WorkspaceAbout', () => {
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
     });
-    cdrVersionStore.set(cdrVersionListResponse);
+    cdrVersionStore.set(cdrVersionTiersResponse);
   });
 
   it('should render', () => {
