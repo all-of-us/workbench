@@ -589,6 +589,7 @@ export const HelpSidebar = fp.flow(
       switch (activeIcon) {
         case 'help':
           return {
+            overflow: 'visible',
             headerPadding: '0.5rem',
             renderHeader: () =>
               <h3 style={{...styles.sectionTitle, marginTop: 0, lineHeight: 1.75}}>
@@ -740,7 +741,7 @@ export const HelpSidebar = fp.flow(
                       </Clickable>
                     </FlexRow>}
 
-                    <div style={{flex: 1, padding: sidebarContent.bodyPadding || '0 0.5rem 5.5rem', height: '100%'}}>
+                    <div className='slim-scroll-bar' style={{flex: 1, padding: sidebarContent.bodyPadding || '0 0.5rem 5.5rem'}}>
                       {sidebarContent.renderBody()}
                     </div>
                   </FlexColumn>
