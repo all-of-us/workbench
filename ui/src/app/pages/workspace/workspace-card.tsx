@@ -7,7 +7,7 @@ import {Button, Clickable, MenuItem, SnowmanButton} from 'app/components/buttons
 import {WorkspaceCardBase} from 'app/components/card';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {ClrIcon} from 'app/components/icons';
+import {ClrIcon, ControlledTierBadge} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -20,6 +20,7 @@ import {AnalyticsTracker, triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/navigation';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
+import {AccessTierShortNames} from 'app/utils/access-tiers'
 
 const EVENT_CATEGORY = 'Workspace list';
 
@@ -230,7 +231,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
   }
 
   render() {
-    const {userEmail, workspace, accessLevel} = this.props;
+    const {userEmail, workspace, workspace: {accessTierShortName}, accessLevel} = this.props;
     const {bugReportError, bugReportOpen, confirmDeleting, loadingData,
       sharing, showResearchPurposeReviewModal, userRoles} = this.state;
 
@@ -281,18 +282,25 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
                 </div>
               }
             </FlexColumn>
-            <div
-              style={{
-                ...styles.permissionBox,
-                backgroundColor: colors.workspacePermissionsHighlights[accessLevel]
-              }}
-             data-test-id='workspace-access-level'
-            >
-              {accessLevel}
-            </div>
-            <div style={{fontSize: 12}}>
-              Last Changed: {displayDate(workspace.lastModifiedTime)}
-            </div>
+            <FlexRow style={{justifyContent: 'space-between'}}>
+              <FlexColumn>
+                <div
+                  style={{
+                    ...styles.permissionBox,
+                    backgroundColor: colors.workspacePermissionsHighlights[accessLevel]
+                  }}
+                data-test-id='workspace-access-level'
+                >
+                  {accessLevel}
+                </div>
+                <div style={{fontSize: 12}}>
+                  Last Changed: {displayDate(workspace.lastModifiedTime)}
+                </div>
+              </FlexColumn>
+              <FlexColumn style={{justifyContent: 'flex-end'}}>
+                {accessTierShortName === AccessTierShortNames.Controlled && <ControlledTierBadge/>}
+              </FlexColumn>
+            </FlexRow>
           </FlexColumn>
         </FlexRow>
       </WorkspaceCardBase>
