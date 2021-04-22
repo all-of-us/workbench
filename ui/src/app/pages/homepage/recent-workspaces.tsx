@@ -51,7 +51,7 @@ export const RecentWorkspaces = withUserProfile()
           <div>To see all workspaces created, click on <b>See all workspaces</b> to the right.</div>
         </div> :
         <div>
-          <FlexRow style={{marginTop: '1rem', minHeight: 247, position: 'relative', overflow: 'scroll'}}>
+          <FlexRow style={{marginTop: '1rem', minHeight: 247, position: 'relative', overflow: 'auto'}}>
             {
               this.state.recentWorkspaces.map(recentWorkspace => {
                 return <WorkspaceCard
