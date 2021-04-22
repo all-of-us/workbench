@@ -10,7 +10,7 @@ import {AdminUserBypass} from 'app/pages/admin/admin-user-bypass';
 import {authDomainApi, profileApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, withUserProfile} from 'app/utils';
 import {usernameWithoutDomain} from 'app/utils/audit-utils';
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {
   AdminTableUser,
   Profile,
@@ -207,7 +207,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
 
   render() {
     const {contentLoaded, filter, loading, users} = this.state;
-    const {enableRasLoginGovLinking} = serverConfigStore.getValue();
+    const {enableRasLoginGovLinking} = serverConfigStore.get().config;
     return <div style={{position: 'relative'}}>
       <h2>User Admin Table</h2>
       {loading &&

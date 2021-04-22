@@ -9,9 +9,7 @@ import {LoginReactComponent} from 'app/pages/login/login';
 import colors from 'app/styles/colors';
 import {
   reactStyles,
-  ServerConfigProps,
   WindowSizeProps,
-  withServerConfig,
   withWindowSize,
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
@@ -108,7 +106,7 @@ export const StepToImageConfig: Map<SignInStep, BackgroundImageConfig> = new Map
 );
 
 
-export interface SignInProps extends ServerConfigProps, WindowSizeProps {
+export interface SignInProps extends WindowSizeProps {
   initialStep?: SignInStep;
   onSignIn: () => void;
   signIn: () => void;
@@ -191,8 +189,6 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
   }
 
   /**
-   * Creates the appropriate set of steps based on the server-side config.
-   *
    * Made visible for ease of unit-testing.
    */
   public getAccountCreationSteps(): Array<SignInStep> {
@@ -248,9 +244,9 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
 
     switch (currentStep) {
       case SignInStep.LANDING:
-        return <LoginReactComponent signIn={this.props.signIn} onCreateAccount={() => {
+        return <LoginReactComponent signIn={this.props.signIn} onCreateAccount={async() => {
           AnalyticsTracker.Registration.CreateAccount();
-          this.setState({
+          await this.setState({
             currentStep: this.getNextStep(currentStep)
           });
         }}/>;
@@ -304,4 +300,4 @@ export class SignInImpl extends React.Component<SignInProps, SignInState> {
   }
 }
 
-export const SignIn = fp.flow(withServerConfig(), withWindowSize())(SignInImpl);
+export const SignIn = fp.flow(withWindowSize())(SignInImpl);

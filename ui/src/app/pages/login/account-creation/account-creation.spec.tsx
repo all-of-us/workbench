@@ -2,7 +2,7 @@ import {mount, ReactWrapper} from 'enzyme';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {Profile} from 'generated/fetch';
 import {createEmptyProfile} from 'app/pages/login/sign-in';
 import {AccountCreation, AccountCreationProps} from './account-creation';
@@ -20,7 +20,7 @@ function getCharactersLimitProps(wrapper: ReactWrapper) {
 const defaultConfig = {gsuiteDomain: 'researchallofus.org'};
 
 beforeEach(() => {
-  serverConfigStore.next(defaultConfig);
+  serverConfigStore.set({config: defaultConfig});
   props = {
     profile: createEmptyProfile(),
     onComplete: (profile: Profile) => {},

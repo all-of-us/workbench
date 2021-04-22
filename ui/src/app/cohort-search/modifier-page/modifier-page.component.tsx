@@ -13,7 +13,8 @@ import {Spinner} from 'app/components/spinners';
 import {cohortBuilderApi} from 'app/services/swagger-fetch-clients';
 import {reactStyles, withCurrentCohortSearchContext, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
-import {currentCohortSearchContextStore, serverConfigStore} from 'app/utils/navigation';
+import {currentCohortSearchContextStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {Criteria, CriteriaType, Domain, ModifierType, Operator} from 'generated/fetch';
 
@@ -231,7 +232,7 @@ export const ModifierPage = fp.flow(withCurrentWorkspace(), withCurrentCohortSea
           }]
         });
       }
-      if (serverConfigStore.getValue().enableEventDateModifier) {
+      if (serverConfigStore.get().config.enableEventDateModifier) {
         formState.push({
           name: ModifierType.EVENTDATE,
           label: 'Event Date',

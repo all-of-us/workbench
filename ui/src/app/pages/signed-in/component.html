@@ -27,7 +27,7 @@
 
   <div class="content-container">
     <div class="background-image"></div>
-    <div *ngIf="cdrVersionsInitialized"
+    <div *ngIf="cdrVersionsInitialized && serverConfigInitialized"
          class="app-container"
          [class.minimize-chrome]="minimizeChrome">
       <!--

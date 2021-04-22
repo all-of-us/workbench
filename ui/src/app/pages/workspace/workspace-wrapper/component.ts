@@ -19,7 +19,6 @@ import {routeDataStore, runtimeStore} from 'app/utils/stores';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
 import {ResourceType, UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
-import * as util from 'util';
 
 @Component({
   styleUrls: ['../../../styles/buttons.css',

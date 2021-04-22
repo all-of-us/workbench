@@ -7,7 +7,8 @@ import {Profile, ProfileApi, WorkspacesApi, WorkspaceAccessLevel} from 'generate
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {workspaceStubs, userRolesStub} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {serverConfigStore, userProfileStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
+import {userProfileStore} from 'app/utils/navigation';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {WorkspaceCard} from './workspace-card';
 
@@ -46,7 +47,7 @@ describe('WorkspaceCard', () => {
     });
 
     userProfileStore.next({profile, reload, updateCache});
-    serverConfigStore.next({gsuiteDomain: 'abc'});
+    serverConfigStore.set({config: {gsuiteDomain: 'abc'}});
   });
 
   it('fetches user roles before opening the share dialog', async() => {

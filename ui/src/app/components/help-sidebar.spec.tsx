@@ -8,7 +8,6 @@ import {defaultRuntime, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {
   currentCohortCriteriaStore,
   currentWorkspaceStore,
-  serverConfigStore,
   setSidebarActiveIconStore
 } from 'app/utils/navigation';
 import {CdrVersionsApi, CohortAnnotationDefinitionApi, CohortReviewApi} from 'generated/fetch';
@@ -18,8 +17,8 @@ import {CohortAnnotationDefinitionServiceStub} from 'testing/stubs/cohort-annota
 import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-review-service-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import colors from 'app/styles/colors';
-import {cdrVersionStore, runtimeStore} from 'app/utils/stores';
-import {cdrVersionTiersResponse, CdrVersionsApiStub} from '../../testing/stubs/cdr-versions-api-stub';
+import {cdrVersionStore, runtimeStore, serverConfigStore} from 'app/utils/stores';
+import {cdrVersionTiersResponse, CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
 import {HelpSidebar} from './help-sidebar';
 import {RuntimeApi, RuntimeStatus, WorkspaceAccessLevel} from "generated/fetch";
 import {WorkspacesApi} from "generated/fetch";
@@ -58,7 +57,7 @@ describe('HelpSidebar', () => {
   };
 
   const setRuntimeStatus = (status) => {
-    const runtime = { ...defaultRuntime(), status };
+    const runtime = {...defaultRuntime(), status};
     runtimeStub.runtime = runtime;
     runtimeStore.set({workspaceNamespace: workspaceDataStub.namespace, runtime});
   };
@@ -79,9 +78,7 @@ describe('HelpSidebar', () => {
     registerApiClient(WorkspacesApi, new WorkspacesApiStub());
     currentWorkspaceStore.next(workspaceDataStub);
     cohortReviewStore.next(cohortReviewStubs[0]);
-    serverConfigStore.next({
-      ...defaultServerConfig
-    });
+    serverConfigStore.set({config: {...defaultServerConfig}});
     runtimeStore.set({workspaceNamespace: workspaceDataStub.namespace, runtime: runtimeStub.runtime});
     cdrVersionStore.set(cdrVersionTiersResponse);
 

@@ -1,7 +1,7 @@
 import {mount} from 'enzyme';
 import * as React from 'react';
 
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {Profile, ProfileApi, WorkspacesApi} from 'generated/fetch';
 import {AdminReviewWorkspace} from './admin-review-workspace';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
@@ -18,13 +18,13 @@ describe('AdminReviewWorkspace', () => {
   };
 
   beforeEach(() => {
-    serverConfigStore.next({
+    serverConfigStore.set({config: {
       enableDataUseAgreement: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
-    });
+    }});
     props = {
       profile: ProfileStubVariables.PROFILE_STUB
     };

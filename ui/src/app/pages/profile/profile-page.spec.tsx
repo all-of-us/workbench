@@ -4,7 +4,8 @@ import * as React from 'react';
 import {TextInput} from 'app/components/inputs';
 import {ProfilePage} from 'app/pages/profile/profile-page';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {serverConfigStore, userProfileStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
+import {userProfileStore} from 'app/utils/navigation';
 import {InstitutionApi, ProfileApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import SpyInstance = jest.SpyInstance;
@@ -56,14 +57,14 @@ describe('ProfilePageComponent', () => {
 
     userProfileStore.next({profile, reload, updateCache});
 
-    serverConfigStore.next({
+    serverConfigStore.set({config: {
       enableDataUseAgreement: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
       enableComplianceTraining: true
-    });
+    }});
 
     const institutionApi = new InstitutionApiStub();
     registerApiClient(InstitutionApi, institutionApi);

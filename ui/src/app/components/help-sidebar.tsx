@@ -639,7 +639,7 @@ export const HelpSidebar = fp.flow(
             ,
             renderBody: () => this.state.participant ?
                <SidebarContent/> : <Spinner style={{display: 'block', margin: '3rem auto'}}/>,
-          showFooter: true
+            showFooter: true
           };
         case 'concept':
           return {

@@ -29,7 +29,7 @@ import {
   withUserProfile
 } from 'app/utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
@@ -315,7 +315,7 @@ export const ProfilePage = fp.flow(
       } = this.props;
       const {currentProfile, updating, showDemographicSurveyModal} = this.state;
       const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement} =
-      serverConfigStore.getValue();
+      serverConfigStore.get().config;
       const {
       givenName, familyName, areaOfResearch, professionalUrl,
         address: {
