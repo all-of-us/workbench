@@ -1,7 +1,6 @@
 import {Component} from '@angular/core';
 import {
   ComponentFixture,
-  discardPeriodicTasks,
   fakeAsync,
   TestBed,
   tick
@@ -92,13 +91,12 @@ describe('WorkspaceWrapperComponent', () => {
     });
   }));
 
-  it('should render', fakeAsync(() => {
+  it('should render', () => {
     updateAndTick(fixture);
     expect(fixture).toBeTruthy();
-    discardPeriodicTasks();
-  }));
+  });
 
-  it('fetches user roles before opening the share dialog', fakeAsync(() => {
+  it('fetches user roles before opening the share dialog', () => {
     updateAndTick(fixture);
 
     const userRolesSpy = spyOn(workspacesApi(), 'getFirecloudWorkspaceUserRoles')
@@ -122,6 +120,5 @@ describe('WorkspaceWrapperComponent', () => {
       });
     tick();
     expect(elements.length).toBe(expectedRoles);
-    discardPeriodicTasks();
-  }));
+  });
 });
