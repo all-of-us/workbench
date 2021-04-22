@@ -38,7 +38,7 @@ ENVIRONMENTS = {
         :source_cdr_project => "all-of-us-ehr-dev",
         :ingest_cdr_project => "fc-aou-vpc-ingest-staging-ct",
         :dest_cdr_project => "fc-aou-cdr-staging-ct",
-        :auth_domain_group_email => "[TBD]",
+        :auth_domain_group_email => "all-of-us-controlled-staging@firecloud.org",
       }
     }
   },
