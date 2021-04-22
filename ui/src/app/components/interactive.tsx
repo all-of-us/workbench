@@ -71,7 +71,7 @@ export const Interactive: React.ForwardRefExoticComponent<InteractiveProps> = fo
   return React.createElement(TagName, {
     ref,
     className: `hover-style ${className}`,
-    style: {...style, ...cssVariables, cursor: computedCursor, outline},
+    style: {...style, ...cssVariables, fill: `var(--hover-color, ${style.color})`,  cursor: computedCursor, outline},
     role: computedRole,
     tabIndex: computedTabIndex,
     onClick,

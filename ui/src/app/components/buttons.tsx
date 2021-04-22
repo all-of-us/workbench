@@ -242,7 +242,6 @@ export const IconButton = ({icon: Icon, style = {}, hover = {}, tooltip = '', di
                  style={{
                    color: disabled ? colors.disabled : colors.accent,
                    cursor: disabled ? 'auto' : 'pointer',
-                   fill: colors.accent,
                    ...style
                  }}
                  hover={{color: !disabled && colorWithWhiteness(colors.accent, 0.2), ...hover}}
