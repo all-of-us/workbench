@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {Component, NgZone, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {
   ActivatedRoute,
@@ -40,8 +40,10 @@ export class AppComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private titleService: Title,
-    private cd: ChangeDetectorRef,
-  ) {}
+    private zone: NgZone
+  ) {
+    this.zone = zone;
+  }
 
   ngOnInit() {
     this.checkBrowserSupport();
@@ -95,9 +97,10 @@ export class AppComponent implements OnInit {
         });
 
         routeDataStore.subscribe(({title, pathElementForTitle}) => {
-          this.setTitleFromReactRoute({title, pathElementForTitle});
-          this.initialSpinner = false;
-          this.cd.detectChanges();
+          this.zone.run(() => {
+            this.setTitleFromReactRoute({title, pathElementForTitle});
+            this.initialSpinner = false;
+          });
         });
         initializeAnalytics();
       });
