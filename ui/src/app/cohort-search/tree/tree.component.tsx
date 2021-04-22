@@ -186,6 +186,10 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
     }
   }
 
+  sendOnlyCriteriaType(domainId) {
+    return domainId === Domain.VISIT.toString() || domainId === Domain.PHYSICALMEASUREMENT.toString();
+  }
+
   async loadRootNodes() {
     try {
       const {node: {domainId, id, isStandard, type}, selectedSurvey} = this.props;
@@ -194,8 +198,8 @@ export const CriteriaTree = fp.flow(withCurrentWorkspace(), withCurrentConcept()
       const criteriaType = domainId === Domain.DRUG.toString() ? CriteriaType.ATC.toString() : type;
       const parentId = domainId === Domain.PHYSICALMEASUREMENT.toString() ? null : id;
 
-      const promises = (domainId === Domain.VISIT.toString())
-          ? [cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard)]
+      const promises = this.sendOnlyCriteriaType(domainId)
+          ? [cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType)]
           : [cohortBuilderApi().findCriteriaBy(+cdrVersionId, domainId, criteriaType, isStandard, parentId)];
       if (this.criteriaLookupNeeded) {
         const criteriaRequest = {
