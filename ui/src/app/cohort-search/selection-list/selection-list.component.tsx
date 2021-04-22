@@ -300,7 +300,7 @@ export const SelectionList = fp.flow(withCurrentCohortCriteria(), withCurrentCoh
 
     closeSidebar() {
       attributesSelectionStore.next(undefined);
-      setSidebarActiveIconStore.next(undefined);
+      setSidebarActiveIconStore.next(null);
     }
 
     get showModifierButton() {

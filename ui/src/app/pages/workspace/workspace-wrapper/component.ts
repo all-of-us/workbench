@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import {ActivatedRoute, NavigationEnd, Router, RouterEvent} from '@angular/router';
 import * as fp from 'lodash/fp';
 
 import {WorkspaceShareComponent} from 'app/pages/workspace/workspace-share';
@@ -19,8 +19,7 @@ import {routeDataStore, runtimeStore} from 'app/utils/stores';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
 import {ResourceType, UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
-
-const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
+import * as util from 'util';
 
 @Component({
   styleUrls: ['../../../styles/buttons.css',
@@ -44,7 +43,6 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   resourceType: ResourceType = ResourceType.WORKSPACE;
   userRoles?: UserRole[];
   helpContentKey = 'data';
-  sidebarOpen = false;
   notebookStyles = false;
   pollAborter = new AbortController();
   // The iframe we use to display the Jupyter notebook does something strange
@@ -82,25 +80,19 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
       }
     ));
 
-    const sidebarState = localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
-    if (!!sidebarState) {
-      this.sidebarOpen = sidebarState === 'open';
-    } else {
-      // Default the sidebar to open if no localStorage value is set
-      this.setSidebarState(true);
-    }
     this.tabPath = this.getTabPath();
     this.setHelpContentKeyAndMaybeSetNotebookStyles();
     this.subscriptions.push(
       this.router.events.filter(event => event instanceof NavigationEnd)
-        .subscribe(() => {
+        .subscribe((e: RouterEvent) => {
           this.tabPath = this.getTabPath();
           this.setHelpContentKeyAndMaybeSetNotebookStyles();
           // Close sidebar on route change unless navigating between participants in cohort review
-          if (this.helpContentKey !== 'reviewParticipantDetail') {
-            // Reset store to prevent blank sidebar on notebook pages
+          // Bit of a hack to use regex to test if we're in the cohort review but the helpContentKey
+          // isn't being set to the correct value at the time when a user clicks onto a new participant.
+          // We can probably clean this up after we fully migrate to React router
+          if (!/\/data\/cohorts\/.*\/review\/participants\/.*/.test(e.url)) {
             setSidebarActiveIconStore.next(null);
-            this.setSidebarState(false);
           }
         }));
     this.subscriptions.push(routeConfigDataStore.subscribe((data) => {
@@ -278,16 +270,11 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
           contentFullHeightOverride = false
         } = child.snapshot.data || {};
         this.helpContentKey = helpContentKey;
+        console.log(this.helpContentKey);
         this.notebookStyles = notebookHelpSidebarStyles;
         this.contentFullHeightOverride = contentFullHeightOverride;
         child = null;
       }
     }
-  }
-
-  setSidebarState = (sidebarOpen: boolean) => {
-    this.sidebarOpen = sidebarOpen;
-    const sidebarState = sidebarOpen ? 'open' : 'closed';
-    localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, sidebarState);
   }
 }

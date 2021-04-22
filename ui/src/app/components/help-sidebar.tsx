@@ -12,7 +12,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import {CSSProperties} from 'react';
 import * as React from 'react';
-import {CSSTransition, SwitchTransition, TransitionGroup} from 'react-transition-group';
+import {CSSTransition, TransitionGroup} from 'react-transition-group';
 import {Subscription} from 'rxjs/Subscription';
 
 import {faCircle} from '@fortawesome/free-solid-svg-icons/faCircle';
@@ -44,7 +44,7 @@ import {
 import {withRuntimeStore} from 'app/utils/runtime-utils';
 import {
   CompoundRuntimeOpStore,
-  compoundRuntimeOpStore,
+  compoundRuntimeOpStore, routeDataStore,
   RuntimeStore,
   withStore
 } from 'app/utils/stores';
@@ -63,6 +63,9 @@ import {
   WorkspaceAccessLevel
 } from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
+import {Spinner} from './spinners';
+
+const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
 const proIcons = {
   arrowLeft: '/assets/icons/arrow-left-regular.svg',
@@ -76,7 +79,6 @@ const styles = reactStyles({
     top: '60px',
     right: 0,
     height: 'calc(100% - 60px)',
-    //transition: 'width 0.5s ease-out',
     overflow: 'hidden',
     color: colors.primary,
     zIndex: 100,
@@ -94,11 +96,7 @@ const styles = reactStyles({
     right: '45px',
     height: '100%',
     background: colorWithWhiteness(colors.primary, .87),
-    //transition: 'margin-right 0.5s ease-out',
     boxShadow: `-10px 0px 10px -8px ${colorWithWhiteness(colors.dark, .5)}`,
-  },
-  sidebarOpen: {
-    // marginRight: 0, TODO eric: delete
   },
   iconContainer: {
     position: 'absolute',
@@ -119,7 +117,6 @@ const styles = reactStyles({
     borderBottom: `1px solid ${colorWithWhiteness(colors.primary, 0.4)}`,
     cursor: 'pointer',
     textAlign: 'center',
-    //transition: 'background 0.2s linear',
     verticalAlign: 'middle'
   },
   runtimeStatusIcon: {
@@ -305,10 +302,6 @@ const iconConfigs: { [iconKey: string]: IconConfig } = {
   }
 };
 
-const helpIconName = (helpContentKey: string) => {
-  return helpContentKey === NOTEBOOK_HELP_CONTENT ? 'notebooksHelp' : 'help';
-};
-
 const analyticsLabels = {
   about: 'About Page',
   cohortBuilder: 'Cohort Builder',
@@ -324,9 +317,7 @@ interface Props {
   deleteFunction: Function;
   helpContentKey: string;
   profileState: any;
-  setSidebarState: Function;
   shareFunction: Function;
-  sidebarOpen: boolean;
   notebookStyles: boolean;
   workspace: WorkspaceData;
   criteria: Array<Selection>;
@@ -358,9 +349,9 @@ export const HelpSidebar = fp.flow(
     subscription: Subscription;
     constructor(props: Props) {
       super(props);
+
       this.state = {
-        // TODO(RW-5607): Remember which icon was active.
-        activeIcon: props.sidebarOpen ? helpIconName(props.helpContentKey) : null,
+        activeIcon: null,
         filteredContent: undefined,
         participant: undefined,
         searchTerm: '',
@@ -373,7 +364,8 @@ export const HelpSidebar = fp.flow(
       const keys = [
         'criteria',
         'concept',
-        helpIconName(helpContentKey),
+        'help',
+        'notebooksHelp',
         'dataDictionary',
         'annotations'
       ];
@@ -389,29 +381,27 @@ export const HelpSidebar = fp.flow(
       return keys.map(k => iconConfigs[k]);
     }
 
+    setActiveIcon(activeIcon: string) {
+      this.setState({activeIcon});
+      localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
+    }
+
     async componentDidMount() {
+      const iconConfig = iconConfigs[localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE)];
+      setSidebarActiveIconStore.next(iconConfig ? iconConfig['id'] : 'help');
+
       this.subscription = participantStore.subscribe(participant => this.setState({participant}));
-      this.subscription.add(setSidebarActiveIconStore.subscribe(activeIcon => {
-        if (activeIcon !== null) {
-          this.setState({activeIcon});
-          this.props.setSidebarState(!!activeIcon);
+      this.subscription.add(setSidebarActiveIconStore.subscribe(activeIcon => this.setActiveIcon(activeIcon)));
+      this.subscription.add(routeDataStore.subscribe((newRoute, oldRoute) => {
+        if (!fp.isEmpty(oldRoute) && !fp.isEqual(newRoute, oldRoute)) {
+          this.setActiveIcon(null);
         }
       }));
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-      // close the sidebar on each navigation excluding navigating between participants in cohort review
-      if (!this.props.sidebarOpen && prevProps.sidebarOpen) {
-        setTimeout(() => {
-          // check if the sidebar has been opened again before resetting activeIcon
-          if (!this.props.sidebarOpen) {
-            this.setState({activeIcon: null});
-          }
-        }, 300);
-      }
       if ((!this.props.criteria && !!prevProps.criteria ) || (!this.props.concept && !!prevProps.concept)) {
-        this.props.setSidebarState(false);
-        // TODO eric: test this case. do I need a setState here?
+        this.setActiveIcon(null);
       }
     }
 
@@ -420,17 +410,14 @@ export const HelpSidebar = fp.flow(
     }
 
     onIconClick(icon: IconConfig) {
-      const {setSidebarState, sidebarOpen} = this.props;
       const {activeIcon} = this.state;
-      const {id, label} = icon;
-      const newSidebarOpen = !(id === activeIcon && sidebarOpen);
-      if (newSidebarOpen) {
-        this.setState({activeIcon: id});
-        setSidebarState(true);
-        this.analyticsEvent('OpenSidebar', `Sidebar - ${label}`);
+      const {id: clickedActiveIconId, label} = icon;
+
+      if (activeIcon === clickedActiveIconId) {
+        this.setActiveIcon(null);
       } else {
-        setSidebarState(false);
-        this.setState({activeIcon: null});
+        this.analyticsEvent('OpenSidebar', `Sidebar - ${label}`);
+        this.setActiveIcon(clickedActiveIconId);
       }
     }
 
@@ -599,12 +586,10 @@ export const HelpSidebar = fp.flow(
     }
 
     get sidebarStyle() {
-      const sidebarStyle = {
+      return {
         ...styles.sidebar,
-        marginRight: 0, // TODO eric: refactor
         width: `${this.sidebarWidth}.5rem`,
       };
-      return this.props.sidebarOpen ? {...sidebarStyle, ...styles.sidebarOpen} : sidebarStyle;
     }
 
     get sidebarWidth() {
@@ -651,7 +636,7 @@ export const HelpSidebar = fp.flow(
             bodyWidthRem: '30',
             bodyPadding: '0 1.25rem',
             renderBody: () =>
-             <RuntimePanel onClose={() => this.props.setSidebarState(false)}/>,
+             <RuntimePanel onClose={() => this.setActiveIcon(null)}/>,
             showFooter: false
           };
         case 'notebooksHelp':
@@ -669,13 +654,14 @@ export const HelpSidebar = fp.flow(
         case 'annotations':
           return {
             headerPadding: '0.5rem 0.5rem 0 0.5rem',
-            renderHeader: () =>
+            renderHeader: () => this.state.participant &&
               <div style={{fontSize: 18, color: colors.primary}}>
-                Participant {this.state.participant.participantId}
-              </div>,
-            renderBody: () => this.state.participant &&
-                <SidebarContent/>,
-            showFooter: true
+                {this.state.participant ? 'Participant ' + this.state.participant.participantId : ' '}
+              </div>
+            ,
+            renderBody: () => this.state.participant ?
+               <SidebarContent/> : <Spinner style={{display: 'block', margin: '3rem auto'}}/>,
+          showFooter: true
           };
         case 'concept':
           return {
@@ -695,7 +681,7 @@ export const HelpSidebar = fp.flow(
             bodyWidthRem: '20',
             bodyPadding: '0.75rem 0.75rem 0',
             renderBody: () => !!currentCohortSearchContextStore.getValue() &&
-                <SelectionList back={() => this.props.setSidebarState(false)} selections={[]}/>,
+                <SelectionList back={() => this.setActiveIcon(null)} selections={[]}/>,
             showFooter: false
           };
         case 'genomicExtractions':
@@ -769,7 +755,7 @@ export const HelpSidebar = fp.flow(
                     <FlexRow style={{justifyContent: 'space-between', padding: sidebarContent.headerPadding}}>
                       {sidebarContent.renderHeader()}
 
-                      <Clickable onClick={() => this.props.setSidebarState(false)}>
+                      <Clickable style={{marginLeft: 'auto'}} onClick={() => this.setActiveIcon(null)}>
                         <img src={proIcons.times}
                              style={{height: '27px', width: '17px'}}
                              alt='Close'/>
@@ -807,11 +793,10 @@ export const HelpSidebar = fp.flow(
 export class HelpSidebarComponent extends ReactWrapperBase {
   @Input('deleteFunction') deleteFunction: Props['deleteFunction'];
   @Input('helpContentKey') helpContentKey: Props['helpContentKey'];
-  @Input('setSidebarState') setSidebarState: Props['setSidebarState'];
   @Input('shareFunction') shareFunction: Props['shareFunction'];
-  @Input('sidebarOpen') sidebarOpen: Props['sidebarOpen'];
   @Input('notebookStyles') notebookStyles: Props['notebookStyles'];
+
   constructor() {
-    super(HelpSidebar, ['deleteFunction', 'helpContentKey', 'setSidebarState', 'shareFunction', 'sidebarOpen', 'notebookStyles']);
+    super(HelpSidebar, ['deleteFunction', 'helpContentKey', 'shareFunction', 'notebookStyles']);
   }
 }

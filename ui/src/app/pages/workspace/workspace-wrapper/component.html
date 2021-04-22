@@ -22,12 +22,9 @@
   <app-bug-report *ngIf="bugReportOpen"
                   [bugReportDescription]="bugReportDescription"
                   [onClose]="closeBugReport"></app-bug-report>
-  <app-help-sidebar *ngIf="helpContentKey"
-                    [deleteFunction]="openConfirmDelete"
+  <app-help-sidebar [deleteFunction]="openConfirmDelete"
                     [helpContentKey]="helpContentKey"
-                    [setSidebarState]="setSidebarState"
                     [shareFunction]="handleShareAction"
-                    [sidebarOpen]="sidebarOpen"
                     [notebookStyles]="notebookStyles"></app-help-sidebar>
   <div [style.margin-right]="helpContentKey ? '45px' : 0" [style.height]="helpContentKey && !contentFullHeightOverride ? 'auto': '100%'">
     <router-outlet *ngIf="workspace"></router-outlet>
