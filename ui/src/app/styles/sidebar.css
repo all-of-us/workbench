@@ -1,25 +1,17 @@
-.sidebar-fade-enter .sidebar-content {
+.sidebar-enter {
     transform: translateX(100%);
 }
-.sidebar-fade-enter-active .sidebar-content {
+
+.sidebar-enter-active {
+    transition: transform 750ms;
     transform: translateX(0%);
 }
-.sidebar-fade-exit .sidebar-content {
+
+.sidebar-exit {
     transform: translateX(0%);
 }
-.sidebar-fade-exit-active .sidebar-content {
+
+.sidebar-exit-active {
+    transition: transform 500ms;
     transform: translateX(100%);
-}
-.sidebar-fade-enter-active .sidebar-content,
-.sidebar-fade-exit-active .sidebar-content {
-    transition: transform 500ms;
-}
-
-.sidebar-fade-enter-active .sidebar-content,
-.sidebar-fade-exit-active .sidebar-content {
-    transition: transform 500ms;
-}
-
-.sidebar-fade-exit-active.sidebar-closed .sidebar-content {
-    transition: transform 1ms;
 }
