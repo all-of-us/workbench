@@ -34,7 +34,6 @@ public interface ProfileMapper {
   @Mapping(source = "latestTermsOfService.tosVersion", target = "latestTermsOfServiceVersion")
   @Mapping(source = "latestTermsOfService.agreementTime", target = "latestTermsOfServiceTime")
   @Mapping(source = "dbUser.userId", target = "userId")
-  @Mapping(target = "accessHasExpired", ignore = true)
   Profile toModel(
       DbUser dbUser,
       VerifiedInstitutionalAffiliation verifiedInstitutionalAffiliation,
