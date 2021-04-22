@@ -14,7 +14,7 @@ import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-r
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import colors from 'app/styles/colors';
 import {cdrVersionStore, runtimeStore} from 'app/utils/stores';
-import {cdrVersionListResponse, CdrVersionsApiStub} from '../../testing/stubs/cdr-versions-api-stub';
+import {cdrVersionTiersResponse, CdrVersionsApiStub} from '../../testing/stubs/cdr-versions-api-stub';
 import {HelpSidebar} from './help-sidebar';
 import {RuntimeApi, RuntimeStatus, WorkspaceAccessLevel} from "generated/fetch";
 import {WorkspacesApi} from "generated/fetch";
@@ -71,7 +71,7 @@ describe('HelpSidebar', () => {
       ...defaultServerConfig
     });
     runtimeStore.set({workspaceNamespace: workspaceDataStub.namespace, runtime: runtimeStub.runtime});
-    cdrVersionStore.set(cdrVersionListResponse);
+    cdrVersionStore.set(cdrVersionTiersResponse);
 
     // mock timers
     jest.useFakeTimers();
