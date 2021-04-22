@@ -19,6 +19,10 @@ const zendeskConfigs = {
     baseUrl: 'https://aousupporthelp.zendesk.com/hc',
     widgetKey: '5a7d70b9-37f9-443b-8d0e-c3bd3c2a55e3'
   },
+  [ZendeskEnv.Preprod]: {
+    baseUrl: 'https://aoupreprodsupporthelp.zendesk.com/hc',
+    widgetKey: '5a7d70b9-37f9-443b-8d0e-c3bd3c2a55e3'
+  },
   [ZendeskEnv.Sandbox]: {
     baseUrl: 'https://aousupporthelp1580753096.zendesk.com/hc',
     widgetKey: 'df0a2e39-f8a8-482b-baf5-af82e14d38f9'
