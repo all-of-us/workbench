@@ -9,7 +9,7 @@ export BQ_DATASET=$2        # CDR dataset
 export WGV_PROJECT=$3       # whole genome variant project
 export WGV_DATASET=$4       # whole genome variant dataset
 export CDR_VERSION=$5       # CDR version
-export DATA_BROWSER=$8      # data browser flag
+export DATA_BROWSER=$6      # data browser flag
 
 echo ""
 echo 'Validating that all prerequisites exist'
