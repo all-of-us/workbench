@@ -349,7 +349,6 @@ export const HelpSidebar = fp.flow(
     subscription: Subscription;
     constructor(props: Props) {
       super(props);
-
       this.state = {
         activeIcon: null,
         filteredContent: undefined,
@@ -360,7 +359,7 @@ export const HelpSidebar = fp.flow(
       };
     }
 
-    icons(helpContentKey: string, workspaceAccessLevel: WorkspaceAccessLevel): IconConfig[] {
+    icons(): IconConfig[] {
       const keys = [
         'criteria',
         'concept',
@@ -370,7 +369,7 @@ export const HelpSidebar = fp.flow(
         'annotations'
       ];
 
-      if (WorkspacePermissionsUtil.canWrite(workspaceAccessLevel)) {
+      if (WorkspacePermissionsUtil.canWrite(this.props.workspace.accessLevel)) {
         keys.push('runtime');
       }
 
@@ -381,13 +380,17 @@ export const HelpSidebar = fp.flow(
       return keys.map(k => iconConfigs[k]);
     }
 
+    currentPageIcons(): IconConfig[] {
+      return this.icons().filter(icon => this.showIcon(icon));
+    }
+
     setActiveIcon(activeIcon: string) {
       this.setState({activeIcon});
       localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
     }
 
     async componentDidMount() {
-      const iconConfig = iconConfigs[localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE)];
+      const iconConfig = this.currentPageIcons().find(icon => icon.id === localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE));
       setSidebarActiveIconStore.next(iconConfig ? iconConfig['id'] : 'help');
 
       this.subscription = participantStore.subscribe(participant => this.setState({participant}));
@@ -700,15 +703,15 @@ export const HelpSidebar = fp.flow(
     }
 
     render() {
-      const {concept, criteria, helpContentKey, notebookStyles, workspace} = this.props;
+      const {concept, criteria, notebookStyles} = this.props;
       const {activeIcon, tooltipId} = this.state;
       const sidebarContent = this.sidebarContent(activeIcon);
 
       return <div id='help-sidebar'>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
           {!(criteria || concept)  && this.renderWorkspaceMenu()}
-          {this.icons(helpContentKey, workspace.accessLevel).map((icon, i) =>
-          this.showIcon(icon) && <div key={i} style={{display: 'table'}}>
+          {this.currentPageIcons().map((icon, i) =>
+              <div key={i} style={{display: 'table'}}>
                 <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
                   <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
                        onClick={() => {
