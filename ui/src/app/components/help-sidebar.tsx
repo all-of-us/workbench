@@ -12,7 +12,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import {CSSProperties} from 'react';
 import * as React from 'react';
-import {CSSTransition, SwitchTransition} from 'react-transition-group';
+import {CSSTransition, SwitchTransition, TransitionGroup} from 'react-transition-group';
 import {Subscription} from 'rxjs/Subscription';
 
 import {faCircle} from '@fortawesome/free-solid-svg-icons/faCircle';
@@ -76,7 +76,7 @@ const styles = reactStyles({
     top: '60px',
     right: 0,
     height: 'calc(100% - 60px)',
-    transition: 'width 0.5s ease-out',
+    //transition: 'width 0.5s ease-out',
     overflow: 'hidden',
     color: colors.primary,
     zIndex: -1,
@@ -94,7 +94,7 @@ const styles = reactStyles({
     right: '45px',
     height: '100%',
     background: colorWithWhiteness(colors.primary, .87),
-    transition: 'margin-right 0.5s ease-out',
+    //transition: 'margin-right 0.5s ease-out',
     boxShadow: `-10px 0px 10px -8px ${colorWithWhiteness(colors.dark, .5)}`,
   },
   sidebarOpen: {
@@ -119,7 +119,7 @@ const styles = reactStyles({
     borderBottom: `1px solid ${colorWithWhiteness(colors.primary, 0.4)}`,
     cursor: 'pointer',
     textAlign: 'center',
-    transition: 'background 0.2s linear',
+    //transition: 'background 0.2s linear',
     verticalAlign: 'middle'
   },
   runtimeStatusIcon: {
@@ -427,6 +427,7 @@ export const HelpSidebar = fp.flow(
       if (newSidebarOpen) {
         this.setState({activeIcon: id});
         setSidebarState(true);
+        console.log(id);
         this.analyticsEvent('OpenSidebar', `Sidebar - ${label}`);
       } else {
         setSidebarState(false);
@@ -464,7 +465,7 @@ export const HelpSidebar = fp.flow(
         if (activeIcon) {
           return {...sidebarContainerStyle, ...styles.sidebarContainerActive};
         } else {
-          return sidebarContainerStyle; // TODO eric: and this
+          return {...sidebarContainerStyle, ...styles.sidebarContainerActive}; // TODO eric: and this
         }
       }
     }
@@ -735,6 +736,8 @@ export const HelpSidebar = fp.flow(
       const {concept, criteria, helpContentKey, notebookStyles, workspace} = this.props;
       const {activeIcon, tooltipId} = this.state;
       const sidebarContent = this.sidebarContent(activeIcon);
+      console.log(activeIcon);
+      console.log(`sidebar-${activeIcon}`);
 
       return <div id='help-sidebar'>
         <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
@@ -767,16 +770,19 @@ export const HelpSidebar = fp.flow(
           }
         </div>
 
-        <SwitchTransition mode='out-in'>
+        <TransitionGroup>
           <CSSTransition
             key={activeIcon}
             classNames='sidebar-fade'
             addEndListener={(node, done) => {
               node.addEventListener('transitionend', done, false);}}>
+
             <div className={`sidebar-${activeIcon}`} style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
               {/* TODO eric: Do I need both classNames?*/}
               <div className='sidebar-content' style={this.sidebarStyle} data-test-id='sidebar-content'>
 
+                <div>
+                <div style={{height: '100%', overflow: 'auto'}}>
                 {sidebarContent &&
                 <div style={{height: '100%', overflow: sidebarContent.overflow || 'auto'}}>
                     <FlexColumn style={{height: '100%'}}>
@@ -809,10 +815,13 @@ export const HelpSidebar = fp.flow(
                   }
                 </div>
                 }
+                </div>
+                </div>
               </div>
             </div>
+
           </CSSTransition>
-        </SwitchTransition>
+        </TransitionGroup>
 
 
       </div>;
