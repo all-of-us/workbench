@@ -16,11 +16,11 @@ import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {displayDate, reactStyles} from 'app/utils';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {AnalyticsTracker, triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
 import {serverConfigStore} from 'app/utils/navigation';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
-import {AccessTierShortNames} from 'app/utils/access-tiers'
 
 const EVENT_CATEGORY = 'Workspace list';
 
