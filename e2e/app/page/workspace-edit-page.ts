@@ -464,4 +464,12 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     const element = Checkbox.findByName(this.page, FIELD.shareWithCollaboratorsCheckbox.textOption);
     await element.check();
   }
+
+  // Fill out only the fields needed for a successful duplication
+  async fillOutRequiredDuplicationFields(): Promise<string> {
+    await this.getWorkspaceNameTextbox().clear();
+    const workspaceName = await this.fillOutWorkspaceName();
+    await this.requestForReviewRadiobutton(false);
+    return workspaceName;
+  }
 }
