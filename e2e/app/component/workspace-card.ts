@@ -68,8 +68,7 @@ export default class WorkspaceCard extends CardBase {
     if (cards.length === 0) {
       throw new Error('FAILED to find any Workspace card on page.');
     }
-    const anyCard = fp.shuffle(cards)[0];
-    return anyCard;
+    return fp.shuffle(cards)[0];
   }
 
   static async findCard(page: Page, workspaceName: string): Promise<WorkspaceCard | null> {
@@ -187,9 +186,8 @@ export default class WorkspaceCard extends CardBase {
   }
 
   // if the snowman menu options for WRITER & READER are disabled except duplicate option and all options are enabled for OWNER.
-  async verifyWorkspaceCardMenuOptions(): Promise<void> {
+  async verifyWorkspaceCardMenuOptions(accessLevel: string): Promise<void> {
     const snowmanMenu = await this.getSnowmanMenu();
-    const accessLevel = await this.getWorkspaceAccessLevel();
     if (accessLevel !== WorkspaceAccessLevel.Owner) {
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Share)).toBe(true);
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(true);
