@@ -68,8 +68,7 @@ export default class WorkspaceCard extends CardBase {
     if (cards.length === 0) {
       throw new Error('FAILED to find any Workspace card on page.');
     }
-    const anyCard = fp.shuffle(cards)[0];
-    return anyCard;
+    return fp.shuffle(cards)[0];
   }
 
   static async findCard(page: Page, workspaceName: string): Promise<WorkspaceCard | null> {
@@ -158,15 +157,18 @@ export default class WorkspaceCard extends CardBase {
    * @param {boolean} waitForDataPage Waiting for Data page load and ready after click on Workspace name link.
    */
   async clickWorkspaceName(waitForDataPage = true): Promise<string> {
-    const [elemt] = await this.asElementHandle().$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
-    const name = await getPropValue<string>(elemt, 'textContent');
-    await Promise.all([
-      this.page.waitForNavigation({ waitUntil: ['domcontentloaded', 'networkidle0'] }),
-      elemt.click()
-    ]);
+    const [element] = await this.asElementHandle().$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
+    const name = await getPropValue<string>(element, 'textContent');
     if (waitForDataPage) {
+      await Promise.all([
+        this.page.waitForNavigation({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'] }),
+        element.click()
+      ]);
       const dataPage = new WorkspaceDataPage(this.page);
       await dataPage.waitForLoad();
+    } else {
+      await element.click();
+      await waitWhileLoading(this.page);
     }
     return name;
   }
@@ -184,9 +186,9 @@ export default class WorkspaceCard extends CardBase {
   }
 
   // if the snowman menu options for WRITER & READER are disabled except duplicate option and all options are enabled for OWNER.
-  async verifyWorkspaceCardMenuOptions(): Promise<void> {
+  async verifyWorkspaceCardMenuOptions(accessLevel?: string): Promise<void> {
     const snowmanMenu = await this.getSnowmanMenu();
-    const accessLevel = await this.getWorkspaceAccessLevel();
+    accessLevel = accessLevel || (await this.getWorkspaceAccessLevel());
     if (accessLevel !== WorkspaceAccessLevel.Owner) {
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Share)).toBe(true);
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(true);

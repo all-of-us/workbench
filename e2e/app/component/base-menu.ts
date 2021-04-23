@@ -86,7 +86,7 @@ export default abstract class BaseMenu extends Container {
   protected async findMenuItemLink(menuItemText: string, menuParentXpath: string): Promise<Link> {
     const menuItemSelector = `${menuParentXpath}${this.getMenuItemXpath(menuItemText)}`;
     const link = new Link(this.page, menuItemSelector);
-    await link.focus();
+    await link.focus(60000);
     await this.page.waitForTimeout(500);
     return link;
   }
