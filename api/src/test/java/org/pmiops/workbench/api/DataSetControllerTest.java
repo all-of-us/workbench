@@ -325,7 +325,6 @@ public class DataSetControllerTest {
     currentUser = user;
 
     cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
-    cdrVersion.setMicroarrayBigqueryDataset("microarray");
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
     workspace = new Workspace();
@@ -729,7 +728,6 @@ public class DataSetControllerTest {
   public void exportToNotebook_microarrayCodegen_cdrCheck() {
     DbCdrVersion cdrVersion =
         cdrVersionDao.findByCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
-    cdrVersion.setMicroarrayBigqueryDataset(null);
     cdrVersionDao.save(cdrVersion);
 
     DataSetExportRequest request =

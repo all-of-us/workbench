@@ -118,7 +118,6 @@ public class CdrVersionServiceTest {
             registeredTier,
             null,
             null,
-            null,
             null);
 
     controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
@@ -130,7 +129,6 @@ public class CdrVersionServiceTest {
             "Test Controlled CDR",
             456L,
             controlledTier,
-            null,
             null,
             null,
             null);
@@ -327,16 +325,7 @@ public class CdrVersionServiceTest {
     // hasFitBitData, hasCopeSurveyData, hasMicroarrayData, and hasWgsData are false by default
     assertThat(cdrVersions.stream().anyMatch(hasType)).isFalse();
 
-    makeCdrVersion(
-        3L,
-        true,
-        "Test CDR With Data Types",
-        123L,
-        registeredTier,
-        "microarray",
-        "wgs",
-        true,
-        true);
+    makeCdrVersion(3L, true, "Test CDR With Data Types", 123L, registeredTier, "wgs", true, true);
     final List<CdrVersion> newVersions =
         parseRegisteredTier(cdrVersionService.getCdrVersionsByTier());
 
@@ -363,7 +352,6 @@ public class CdrVersionServiceTest {
       String name,
       long creationTime,
       DbAccessTier accessTier,
-      String microarrayDataset,
       String wgsDataset,
       Boolean hasFitbit,
       Boolean hasCopeSurveyData) {
@@ -378,7 +366,6 @@ public class CdrVersionServiceTest {
     cdrVersion.setName(name);
     cdrVersion.setNumParticipants(123);
     cdrVersion.setReleaseNumber((short) 1);
-    cdrVersion.setMicroarrayBigqueryDataset(microarrayDataset);
     cdrVersion.setWgsBigqueryDataset(wgsDataset);
     cdrVersion.setHasFitbitData(hasFitbit);
     cdrVersion.setHasCopeSurveyData(hasCopeSurveyData);

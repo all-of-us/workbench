@@ -3800,8 +3800,6 @@ definitions:
         type: string
       archivalStatus:
         "$ref": "#/definitions/ArchivalStatus"
-      hasMicroarrayData:
-        type: boolean
       hasWgsData:
         type: boolean
       hasFitbitData:
