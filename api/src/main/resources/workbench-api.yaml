@@ -2450,7 +2450,7 @@ paths:
           type: string
           required: true
       tags:
-        - cohorts
+        - dataSet
       description: 'Aborts a running genome extract job. Requires WRITER access on the workspace.
         Workspace CDR must also have access to a Wgs dataset'
       operationId: abortExtract

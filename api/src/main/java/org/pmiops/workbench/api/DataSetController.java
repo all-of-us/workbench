@@ -547,4 +547,25 @@ public class DataSetController implements DataSetApiDelegate {
         .put("outputs", new JSONArray())
         .put("source", new JSONArray().put(cellInformation));
   }
+
+  @Override
+  public ResponseEntity<EmptyResponse> abortExtract(
+      String workspaceNamespace,
+      String workspaceId,
+      String wgsCohortExtractionJobId
+  ) {
+    DbWorkspace workspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    if (workspace.getCdrVersion().getWgsBigqueryDataset() == null) {
+      throw new BadRequestException("Workspace CDR does not have access to WGS data");
+    }
+
+    try {
+      genomicExtractionService.abortExtract(workspace, wgsCohortExtractionJobId);
+      return ResponseEntity.ok(new EmptyResponse());
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+      throw new ServerErrorException(e);
+    }
+  }
 }
