@@ -111,7 +111,6 @@ export class HelpTips extends React.Component<Props, State> {
     const {filteredContent} = this.state;
     const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[this.props.contentKey];
 
-    // TODO eric: remove margin top on Cohorts when there is no search
     return <div>
       {this.props.allowSearch && <div style={styles.textSearch}>
           <ClrIcon style={{color: colors.primary, margin: '0 0.25rem'}} shape='search' size={16} />

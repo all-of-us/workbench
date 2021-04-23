@@ -327,14 +327,16 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           path='/workspaces/:ns/:wsid/data/concepts'
           component={() => <ConceptHomepagePage routeData={{
             title: 'Search Concepts',
-            breadcrumb: BreadcrumbType.SearchConcepts
+            breadcrumb: BreadcrumbType.SearchConcepts,
+            helpContentKey: 'conceptSets'
           }}/>}
         />
         <AppRoute
           path='/workspaces/:ns/:wsid/data/concepts/sets/:csid/actions'
           component={() => <ConceptSetActionsPage routeData={{
             title: 'Concept Set Actions',
-            breadcrumb: BreadcrumbType.ConceptSet
+            breadcrumb: BreadcrumbType.ConceptSet,
+            helpContentKey: 'conceptSets'
           }}/>}
         />
       </ProtectedRoutes>

@@ -12,6 +12,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import {CSSProperties} from 'react';
 import * as React from 'react';
+import {Simulate} from 'react-dom/test-utils';
 import {CSSTransition, TransitionGroup} from 'react-transition-group';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -64,6 +65,7 @@ import {
 } from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {Spinner} from './spinners';
+import load = Simulate.load;
 
 const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
@@ -321,6 +323,7 @@ export const HelpSidebar = fp.flow(
 )(
   class extends React.Component<Props, State> {
     subscription: Subscription;
+    private loadLastSavedKey: () => void;
     constructor(props: Props) {
       super(props);
       this.state = {
@@ -368,11 +371,27 @@ export const HelpSidebar = fp.flow(
     }
 
     async componentDidMount() {
-      const iconConfig = this.icons().find(icon => icon.id === localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE));
-      setSidebarActiveIconStore.next(iconConfig ? iconConfig['id'] : null);
+      const lastSavedKey = localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
+
+      // This is a little hacky but it's necessary because
+      // 1. the helpContentKey is needed for this to run properly but it's not always available on mount
+      // 2. router events during page load will overwrite the value of the localStorage key so we need to "save" it here
+      // I'd like to clean this up but I think it'll have to wait until the router migration is complete.
+      this.loadLastSavedKey = (() => {
+        let loadedLastSavedKey = false;
+        return () => {
+          if (!loadedLastSavedKey && this.props.helpContentKey) {
+            const iconConfig = this.icons().find(icon => icon.id === lastSavedKey);
+            setSidebarActiveIconStore.next(iconConfig ? iconConfig.id : null);
+            loadedLastSavedKey = true;
+          }
+        };
+      })();
+
+      this.loadLastSavedKey();
 
       this.subscription = participantStore.subscribe(participant => this.setState({participant}));
-      this.subscription.add(setSidebarActiveIconStore.subscribe(activeIcon => this.setActiveIcon(activeIcon)));
+      this.subscription.add(setSidebarActiveIconStore.subscribe(activeIcon => {this.setActiveIcon(activeIcon);}));
       this.subscription.add(routeDataStore.subscribe((newRoute, oldRoute) => {
         if (!fp.isEmpty(oldRoute) && !fp.isEqual(newRoute, oldRoute)) {
           this.setActiveIcon(null);
@@ -381,8 +400,8 @@ export const HelpSidebar = fp.flow(
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
+      this.loadLastSavedKey();
       if ((!this.props.criteria && !!prevProps.criteria ) || (!this.props.concept && !!prevProps.concept)) {
-        console.log('unset');
         this.setActiveIcon(null);
       }
     }
@@ -490,10 +509,10 @@ export const HelpSidebar = fp.flow(
       const {concept, criteria} = this.props;
 
       return <React.Fragment>
-        {(criteria && icon.id === 'criteria' && criteria.length > 0) && <span data-test-id='criteria-count'
+        {(this.showIcon('criteria') && criteria && criteria.length > 0) && <span data-test-id='criteria-count'
                                                          style={styles.criteriaCount}>
           {criteria.length}</span>}
-        {(concept && icon.id === 'concept' && concept.length > 0) && <span data-test-id='concept-count'
+        {(this.showIcon('concept') && concept && concept.length > 0) && <span data-test-id='concept-count'
                                                          style={styles.criteriaCount}>
           {concept.length}</span>}
             <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
@@ -585,7 +604,6 @@ export const HelpSidebar = fp.flow(
       switch (activeIcon) {
         case 'help':
           return {
-            overflow: 'visible',
             headerPadding: '0.5rem',
             renderHeader: () =>
               <h3 style={{...styles.sectionTitle, marginTop: 0, lineHeight: 1.75}}>
@@ -631,7 +649,7 @@ export const HelpSidebar = fp.flow(
             headerPadding: '0.5rem 0.5rem 0 0.5rem',
             renderHeader: () => this.state.participant &&
               <div style={{fontSize: 18, color: colors.primary}}>
-                {this.state.participant ? 'Participant ' + this.state.participant.participantId : ' '}
+                {'Participant ' + this.state.participant.participantId}
               </div>
             ,
             renderBody: () => this.state.participant ?
@@ -677,7 +695,7 @@ export const HelpSidebar = fp.flow(
     render() {
       const {activeIcon, tooltipId} = this.state;
       const sidebarContent = this.sidebarContent(activeIcon);
-      const shouldRenderWorkspaceMenu = !this.showIcon('concept') && !this.showIcon('criteria')
+      const shouldRenderWorkspaceMenu = !this.showIcon('concept') && !this.showIcon('criteria');
 
       return <div id='help-sidebar'>
         <div style={{...styles.iconContainer, ...(this.props.helpContentKey === NOTEBOOK_HELP_CONTENT ? styles.notebookOverrides : {})}}>
