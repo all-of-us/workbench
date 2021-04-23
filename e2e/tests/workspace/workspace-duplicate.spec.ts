@@ -29,18 +29,17 @@ describe('Duplicate workspace', () => {
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.selectWorkspaceAction(MenuOption.Duplicate);
 
-    // Fill out Workspace Name should be just enough for successful duplication
     const workspaceEditPage = new WorkspaceEditPage(page);
-    await workspaceEditPage.getWorkspaceNameTextbox().clear();
-    const duplicateWorkspaceName = await workspaceEditPage.fillOutWorkspaceName();
 
     // observe that we cannot change the Data Access Tier.
     const accessTierSelect = workspaceEditPage.getDataAccessTierSelect();
     expect(await accessTierSelect.isDisabled()).toEqual(true);
 
+    // fill out the fields required for duplication and observe that duplication is enabled
+    const duplicateWorkspaceName = await workspaceEditPage.fillOutRequiredDuplicationFields();
     const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
-    await workspaceEditPage.requestForReviewRadiobutton(false);
     await finishButton.waitUntilEnabled();
+
     await workspaceEditPage.clickCreateFinishButton(finishButton);
 
     // Duplicate workspace Data page is loaded.
