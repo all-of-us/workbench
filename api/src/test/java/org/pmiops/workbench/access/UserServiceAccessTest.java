@@ -49,18 +49,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * org.pmiops.workbench.db.model.DbUser, org.pmiops.workbench.actionaudit.Agent)} with different
  * configurations, which ultimately executes the private method {@link
  * UserServiceImpl#shouldUserBeRegistered(org.pmiops.workbench.db.model.DbUser)} to make this
- * determination:
- *
- * <pre>{@code
- * return !user.getDisabled()
- *   && complianceTrainingCompliant
- *   && eraCommonsCompliant
- *   && betaAccessGranted
- *   && twoFactorAuthComplete
- *   && dataUseAgreementCompliant
- *   && EmailVerificationStatus.SUBSCRIBED.equals(
- *     user.getEmailVerificationStatusEnum());
- * }</pre>
+ * determination.
  */
 @RunWith(SpringRunner.class)
 @DataJpaTest
