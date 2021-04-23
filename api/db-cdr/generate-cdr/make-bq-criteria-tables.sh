@@ -1542,7 +1542,10 @@ SELECT
     , 1
     , 'GENDER'
     , concept_id
-    , CASE WHEN b.concept_id = 0 THEN 'Unknown' ELSE b.concept_name END as name
+    , CASE
+          WHEN b.concept_id = 0 THEN 'Unknown'
+          ELSE regexp_replace(b.concept_name, r'^.+:\s', '')
+      END as name
     , 0
     , a.cnt
     , a.cnt
@@ -1586,7 +1589,10 @@ then
       , 1
       , 'SEX'
       , concept_id
-      , CASE WHEN b.concept_id = 0 THEN 'Unknown' ELSE b.concept_name END as name
+      , CASE
+            WHEN b.concept_id = 0 THEN 'Unknown'
+            ELSE regexp_replace(b.concept_name, r'^.+:\s', '')
+        END as name
       , 0
       , a.cnt
       , a.cnt
@@ -1630,8 +1636,8 @@ SELECT
     , 'RACE'
     , concept_id
     , CASE
-        WHEN a.race_concept_id = 0 THEN 'Unknown'
-        ELSE regexp_replace(b.concept_name, r'^.+:\s', '')
+          WHEN a.race_concept_id = 0 THEN 'Unknown'
+          ELSE regexp_replace(b.concept_name, r'^.+:\s', '')
       END as name
     , 0
     , a.cnt
