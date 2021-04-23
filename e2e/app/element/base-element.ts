@@ -366,7 +366,7 @@ export default class BaseElement extends Container {
   /**
    * Returns ElementHandle.
    */
-  async asElementHandle(waitOptions: WaitForSelectorOptions = { visible: true }): Promise<ElementHandle> {
+  async asElementHandle(waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
     return this.waitForXPath(waitOptions);
   }
 }
