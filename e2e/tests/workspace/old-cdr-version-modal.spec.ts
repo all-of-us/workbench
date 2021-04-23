@@ -15,12 +15,14 @@ describe('OldCdrVersion Modal restrictions', () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
 
+    // fill out the fields required for creation and observe that creation is enabled
     const editPage = await workspacesPage.fillOutRequiredCreationFields(makeWorkspaceName());
+    const createButton = editPage.getCreateWorkspaceButton();
+    await createButton.waitUntilEnabled();
 
     // select an old CDR Version
     await editPage.selectCdrVersion(config.altCdrVersionName);
 
-    const createButton = editPage.getCreateWorkspaceButton();
     expect(await createButton.isCursorNotAllowed()).toBe(true);
 
     // fill out the modal checkboxes
@@ -39,15 +41,16 @@ describe('OldCdrVersion Modal restrictions', () => {
     await workspaceCard.asElementHandle().hover();
     await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
 
-    // Fill out Workspace Name should be just enough for successful duplication
     const workspaceEditPage = new WorkspaceEditPage(page);
-    await workspaceEditPage.getWorkspaceNameTextbox().clear();
-    await workspaceEditPage.fillOutWorkspaceName();
+
+    // fill out the fields required for duplication and observe that duplication is enabled
+    await workspaceEditPage.fillOutRequiredDuplicationFields();
+    const duplicateButton = workspaceEditPage.getDuplicateWorkspaceButton();
+    await duplicateButton.waitUntilEnabled();
 
     // change CDR Version
     await workspaceEditPage.selectCdrVersion(config.altCdrVersionName);
 
-    const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
-    expect(await finishButton.isCursorNotAllowed()).toBe(true);
+    expect(await duplicateButton.isCursorNotAllowed()).toBe(true);
   });
 });

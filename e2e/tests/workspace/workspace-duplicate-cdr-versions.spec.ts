@@ -20,10 +20,12 @@ describe('Duplicate workspace, changing CDR versions', () => {
     await workspaceCard.asElementHandle().hover();
     await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
 
-    // Fill out Workspace Name should be just enough for successful duplication
     const workspaceEditPage = new WorkspaceEditPage(page);
-    await workspaceEditPage.getWorkspaceNameTextbox().clear();
-    const duplicateWorkspaceName = await workspaceEditPage.fillOutWorkspaceName();
+
+    // fill out the fields required for duplication and observe that duplication is enabled
+    const duplicateWorkspaceName = await workspaceEditPage.fillOutRequiredDuplicationFields();
+    const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
+    await finishButton.waitUntilEnabled();
 
     // change CDR Version
     await workspaceEditPage.selectCdrVersion(config.altCdrVersionName);
@@ -32,8 +34,6 @@ describe('Duplicate workspace, changing CDR versions', () => {
     const modal = new OldCdrVersionModal(page);
     await modal.consentToOldCdrRestrictions();
 
-    const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
-    await workspaceEditPage.requestForReviewRadiobutton(false);
     await finishButton.waitUntilEnabled();
     await workspaceEditPage.clickCreateFinishButton(finishButton);
 
@@ -63,10 +63,12 @@ describe('Duplicate workspace, changing CDR versions', () => {
     await workspaceCard.asElementHandle().hover();
     await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
 
-    // Fill out Workspace Name should be just enough for successful duplication
     const workspaceEditPage = new WorkspaceEditPage(page);
-    await workspaceEditPage.getWorkspaceNameTextbox().clear();
-    const duplicateWorkspaceName = await workspaceEditPage.fillOutWorkspaceName();
+
+    // fill out the fields required for duplication and observe that duplication is enabled
+    const duplicateWorkspaceName = await workspaceEditPage.fillOutRequiredDuplicationFields();
+    const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
+    await finishButton.waitUntilEnabled();
 
     // change CDR Version
     await workspaceEditPage.selectCdrVersion(config.defaultCdrVersionName);
@@ -75,8 +77,6 @@ describe('Duplicate workspace, changing CDR versions', () => {
     expect(upgradeMessage).toContain(originalWorkspaceName2);
     expect(upgradeMessage).toContain(`${config.altCdrVersionName} to ${config.defaultCdrVersionName}.`);
 
-    const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
-    await workspaceEditPage.requestForReviewRadiobutton(false);
     await finishButton.waitUntilEnabled();
     await workspaceEditPage.clickCreateFinishButton(finishButton);
 

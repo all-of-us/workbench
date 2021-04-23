@@ -25,14 +25,13 @@ describe('Duplicate workspace', () => {
     await workspaceCard.asElementHandle().hover();
     await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
 
-    // Fill out Workspace Name should be just enough for successful duplication
     const workspaceEditPage = new WorkspaceEditPage(page);
-    await workspaceEditPage.getWorkspaceNameTextbox().clear();
-    const duplicateWorkspaceName = await workspaceEditPage.fillOutWorkspaceName();
 
+    // fill out the fields required for duplication and observe that duplication is enabled
+    const duplicateWorkspaceName = await workspaceEditPage.fillOutRequiredDuplicationFields();
     const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
-    await workspaceEditPage.requestForReviewRadiobutton(false);
     await finishButton.waitUntilEnabled();
+
     await workspaceEditPage.clickCreateFinishButton(finishButton);
 
     // Duplicate workspace Data page is loaded.
@@ -61,15 +60,8 @@ describe('Duplicate workspace', () => {
     const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
     expect(await finishButton.isCursorNotAllowed()).toBe(true);
 
-    // Fill out Workspace Name
-    await workspaceEditPage.getWorkspaceNameTextbox().clear();
-    await workspaceEditPage.fillOutWorkspaceName();
-    // select "Share workspace with same set of collaborators radiobutton
-    await workspaceEditPage.clickShareWithCollaboratorsCheckbox();
-
-    await workspaceEditPage.requestForReviewRadiobutton(false);
+    // fill out the fields required for duplication and observe that duplication is enabled
+    await workspaceEditPage.fillOutRequiredDuplicationFields();
     await finishButton.waitUntilEnabled();
-    expect(await finishButton.isCursorNotAllowed()).toBe(false);
-    // Click Finish button to clone workspace is not needed.
   });
 });
