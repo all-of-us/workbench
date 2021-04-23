@@ -3772,10 +3772,13 @@ definitions:
     type: object
     required:
       - accessTierShortName
+      - accessTierDisplayName
       - defaultCdrVersionId
       - versions
     properties:
       accessTierShortName:
+        type: string
+      accessTierDisplayName:
         type: string
       defaultCdrVersionId:
         type: string
