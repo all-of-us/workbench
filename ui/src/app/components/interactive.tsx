@@ -43,7 +43,7 @@ export const Interactive: React.ForwardRefExoticComponent<InteractiveProps> = fo
 
   const computedCursor = Utils.cond(
     [!!cursor, () => cursor],
-    [disabled, () => undefined],
+    [disabled, () => 'not-allowed'],
     [!!onClick || pointerTags.includes(TagName) || pointerTypes.includes(type), () => 'pointer']
   );
 
@@ -75,6 +75,7 @@ export const Interactive: React.ForwardRefExoticComponent<InteractiveProps> = fo
     role: computedRole,
     tabIndex: computedTabIndex,
     onClick,
+    disabled,
     onMouseDown: e => {
       setOutline('none');
       if (onMouseDown) {

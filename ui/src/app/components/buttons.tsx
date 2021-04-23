@@ -248,7 +248,7 @@ export const IconButton = ({icon: Icon, style = {}, hover = {}, tooltip = '', di
                  disabled={disabled}
                  {...props}>
         <Icon disabled={disabled} style={{marginLeft: '.5rem', ...style}}/>
-      </LocalInteractive>
+    </LocalInteractive>
   </TooltipTrigger>;
 };
 
