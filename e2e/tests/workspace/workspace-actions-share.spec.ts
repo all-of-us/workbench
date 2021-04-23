@@ -127,7 +127,7 @@ describe('Share workspace', () => {
     const modal2 = await aboutPage.openShareModal();
     const searchInput = modal2.waitForSearchBox();
     expect(await searchInput.isDisabled()).toBe(true);
-    await modal2.clickButton(LinkText.Cancel);
+    await modal2.clickButton(LinkText.Create);
   });
 
   test('In About page via Share modal, OWNER can share workspace', async () => {

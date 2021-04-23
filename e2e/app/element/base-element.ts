@@ -2,6 +2,7 @@ import { ClickOptions, ElementHandle, Page, WaitForSelectorOptions } from 'puppe
 import Container from 'app/container';
 import { getAttrValue, getPropValue } from 'utils/element-utils';
 import { logger } from 'libs/logger';
+import { withErrorLogging } from 'utils/error-handling';
 
 /**
  * BaseElement represents a web element in the DOM.
@@ -320,20 +321,17 @@ export default class BaseElement extends Container {
   /**
    * Click on element then wait for page navigation to finish.
    */
-  async clickAndWait(timeout: number = 2 * 60 * 1000): Promise<void> {
-    await Promise.all([
-      this.page.waitForNavigation({
-        waitUntil: ['load', 'domcontentloaded', 'networkidle0'],
-        timeout
-      }),
-      this.click({ delay: 10 })
-    ]).catch((err) => {
-      logger.error('clickAndWait() failed.');
-      logger.error(err);
-      logger.error(err.stack);
-      throw new Error(err);
-    });
-  }
+  clickAndWait = withErrorLogging({
+    fn: async (timeout: number = 2 * 60 * 1000): Promise<void> => {
+      await Promise.all([
+        this.page.waitForNavigation({
+          waitUntil: ['load', 'domcontentloaded', 'networkidle0'],
+          timeout
+        }),
+        this.click({ delay: 10 })
+      ]);
+    }
+  });
 
   /**
    * Paste texts in textarea instead type one char at a time. Very fast.

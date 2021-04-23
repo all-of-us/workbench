@@ -3,7 +3,7 @@ import Container from 'app/container';
 import { ElementType, XPathOptions } from 'app/xpath-options';
 import BaseElement from './base-element';
 import { buildXPath } from 'app/xpath-builders';
-import { logger } from 'libs/logger';
+import { withErrorLogging } from 'utils/error-handling';
 
 export default class Button extends BaseElement {
   /**
@@ -28,25 +28,21 @@ export default class Button extends BaseElement {
    * @param {string} xpathSelector (Optional) Button Xpath selector.
    * @throws Timeout exception if button is not enabled after waiting.
    */
-  async waitUntilEnabled(xpathSelector?: string): Promise<void> {
-    const selector = xpathSelector || this.getXpath();
-    await this.page.waitForXPath(selector, { visible: true });
-    await this.page
-      .waitForFunction(
+  waitUntilEnabled = withErrorLogging({
+    fn: async (xpathSelector?: string): Promise<void> => {
+      const selector = xpathSelector || this.getXpath();
+      await this.page.waitForXPath(selector, { visible: true });
+      await this.page.waitForFunction(
         (xpath) => {
-          const elemt = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+          const element = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
             .singleNodeValue;
-          const style = window.getComputedStyle(elemt as Element);
+          const style = window.getComputedStyle(element as Element);
           const propValue = style.getPropertyValue('cursor');
-          return propValue === 'pointer';
+          return propValue && propValue === 'pointer';
         },
         {},
         selector
-      )
-      .catch((err) => {
-        logger.error(`waitUntilEnabled() failed: xpath=${selector}`);
-        logger.error(err);
-        throw new Error(err);
-      });
-  }
+      );
+    }
+  });
 }
