@@ -50,4 +50,29 @@ describe('OldCdrVersion Modal restrictions', () => {
     const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
     expect(await finishButton.isCursorNotAllowed()).toBe(true);
   });
+
+  test('OWNER cannot bypass older CDR Version restrictions by clicking cancel', async () => {
+    const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName: workspace });
+    await workspaceCard.asElementHandle().hover();
+    await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
+
+    const workspaceEditPage = new WorkspaceEditPage(page);
+
+    // fill out the fields required for duplication and observe that duplication is enabled
+    await workspaceEditPage.fillOutRequiredDuplicationFields();
+    const duplicateButton = workspaceEditPage.getDuplicateWorkspaceButton();
+    await duplicateButton.waitUntilEnabled();
+
+    // change CDR Version
+    await workspaceEditPage.selectCdrVersion(config.altCdrVersionName);
+    expect(await duplicateButton.isCursorNotAllowed()).toBe(true);
+
+    const modal = new OldCdrVersionModal(page);
+    const cancelButton = await modal.getCancelButton();
+    await cancelButton.click();
+
+    // the CDR version is forcibly reverted back to the default
+    const cdrVersionSelect = await workspaceEditPage.getCdrVersionSelect();
+    expect(await cdrVersionSelect.getSelectedValue()).toBe(config.defaultCdrVersionName);
+  });
 });
