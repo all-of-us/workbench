@@ -1,10 +1,10 @@
 import { logger } from 'libs/logger';
 
-export const withErrorLogging = (opts: { fn: (...args) => any; message?: string }): any => {
+export const withErrorLogging = async (opts: { fn: (...args) => any; message?: string }): Promise<any> => {
   const { fn, message } = opts;
   return async (...args) => {
     try {
-      await fn(...args);
+      return await fn(...args);
     } catch (err) {
       message && logger.error(message);
       logger.error(err);
@@ -17,7 +17,7 @@ export const withErrorLogging = (opts: { fn: (...args) => any; message?: string 
 export const withErrorIgnoring = (fn: (...args) => any): any => {
   return async (...args) => {
     try {
-      await fn(...args);
+      return await fn(...args);
     } catch (err) {
       // Ignored
     }

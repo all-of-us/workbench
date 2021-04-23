@@ -5,6 +5,7 @@ import * as fp from 'lodash/fp';
 import { Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
 import { logger } from 'libs/logger';
+import { withErrorLogging } from '../../utils/error-handling';
 
 const enum Selectors {
   rootXpath = '//*[@id="help-sidebar"]',
@@ -94,23 +95,23 @@ export default abstract class BaseHelpSidebar extends Container {
     }
   }
 
-  async waitUntilClose(): Promise<void> {
-    await Promise.all([
-      super.waitUntilClose(),
-      this.page.waitForXPath(this.deleteIconXpath, { hidden: true }),
-      this.page.waitForFunction(
-        (selector) => {
-          const node = document.evaluate(selector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-            .singleNodeValue;
-          return node === null;
-        },
-        { polling: 'mutation' },
-        this.deleteIconXpath
-      )
-    ]).catch((err) => {
-      logger.error('waitUntilClose() failed');
-      logger.error(err);
-      throw new Error(err);
-    });
-  }
+  // eslint-ignore
+  waitUntilClose = withErrorLogging({
+    message: 'waitUntilClose() failed',
+    fn: async (): Promise<void> => {
+      await Promise.all([
+        super.waitUntilClose(),
+        this.page.waitForXPath(this.deleteIconXpath, { hidden: true }),
+        this.page.waitForFunction(
+          (selector) => {
+            const node = document.evaluate(selector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+              .singleNodeValue;
+            return node === null;
+          },
+          { polling: 'mutation' },
+          this.deleteIconXpath
+        )
+      ]);
+    }
+  });
 }

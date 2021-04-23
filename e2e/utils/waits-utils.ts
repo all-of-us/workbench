@@ -1,5 +1,6 @@
 import { Page } from 'puppeteer';
 import { logger } from 'libs/logger';
+import { withErrorLogging } from './error-handling';
 
 export const waitForFn = async (fn: () => any, interval = 2000, timeout = 10000): Promise<boolean> => {
   const start = Date.now();
@@ -17,8 +18,8 @@ export const waitForFn = async (fn: () => any, interval = 2000, timeout = 10000)
  * @param {Page} page The Puppeteer Page.
  * @param {string} urlSubstr - The URL partial string.
  */
-export async function waitForUrl(page: Page, urlSubstr: string): Promise<boolean> {
-  try {
+export const waitForUrl = withErrorLogging({
+  fn: async (page: Page, urlSubstr: string): Promise<boolean> => {
     const jsHandle = await page.waitForFunction(
       (txt) => {
         const href = window.location.href;
@@ -28,36 +29,28 @@ export async function waitForUrl(page: Page, urlSubstr: string): Promise<boolean
       urlSubstr
     );
     return (await jsHandle.jsonValue()) as boolean;
-  } catch (err) {
-    logger.error(`waitForUrl() failed: not contains "${urlSubstr}"`);
-    logger.error(err);
-    throw new Error(err);
   }
-}
+});
 
 /**
  * Wait for the document title to match string.
  * @param {Page} page The Puppeteer Page.
  * @param {string} titleSubstr The Document title partial string.
  */
-export async function waitForDocumentTitle(page: Page, titleSubstr: string): Promise<boolean> {
-  try {
+export const waitForDocumentTitle = await withErrorLogging({
+  fn: async (page: Page, titleSubstr: string): Promise<boolean> => {
     const jsHandle = await page.waitForFunction(
       (t) => {
         const regExp = new RegExp(t);
         const actualTitle = document.title;
-        return actualTitle && regExp.test(actualTitle);
+        return !!actualTitle && regExp.test(actualTitle);
       },
       { timeout: 60 * 1000 },
       titleSubstr
     );
     return (await jsHandle.jsonValue()) as boolean;
-  } catch (err) {
-    logger.error(`waitForDocumentTitle() failed: page title is ${await page.title()}. Not contains "${titleSubstr}"`);
-    logger.error(err);
-    throw new Error(err);
   }
-}
+});
 
 // ************************************************************************
 /**
@@ -93,10 +86,10 @@ export async function waitForPropertyEquality(
   }
 }
 
-export async function waitForNumericalString(page: Page, xpath: string, timeout?: number): Promise<string> {
-  await page.waitForXPath(xpath, { visible: true, timeout });
-  const numbers = await page
-    .waitForFunction(
+export const waitForNumericalString = withErrorLogging({
+  fn: async (page: Page, xpath: string, timeout?: number): Promise<string> => {
+    await page.waitForXPath(xpath, { visible: true, timeout });
+    const numbers = await page.waitForFunction(
       (xpathSelector) => {
         const node = document.evaluate(xpathSelector, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
           .singleNodeValue;
@@ -112,15 +105,10 @@ export async function waitForNumericalString(page: Page, xpath: string, timeout?
       },
       { timeout },
       xpath
-    )
-    .catch((err) => {
-      logger.error(`waitForNumericalString() failed: xpath="${xpath}"`);
-      logger.error(err);
-      throw new Error(err);
-    });
-
-  return (await numbers.jsonValue()).toString();
-}
+    );
+    return (await numbers.jsonValue()).toString();
+  }
+});
 
 export async function waitForPropertyNotExists(
   page: Page,
@@ -146,8 +134,8 @@ export async function waitForPropertyNotExists(
   }
 }
 
-export async function waitForPropertyExists(page: Page, xpathSelector: string, propertyName: string): Promise<boolean> {
-  try {
+export const waitForPropertyExists = withErrorLogging({
+  fn: async (page: Page, xpathSelector: string, propertyName: string): Promise<boolean> => {
     await page.waitForFunction(
       (xpath, prop) => {
         const element = document.evaluate(xpath, document.body, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
@@ -159,12 +147,8 @@ export async function waitForPropertyExists(page: Page, xpathSelector: string, p
       propertyName
     );
     return true;
-  } catch (err) {
-    logger.error(`waitForPropertyExists() failed: xpath="${xpathSelector}" property: ${propertyName}`);
-    logger.error(err);
-    throw new Error(err);
   }
-}
+});
 
 // ************************************************************************
 /**
@@ -222,7 +206,8 @@ export async function waitForHidden(page: Page, cssSelector: string): Promise<bo
 
 /**
  * Wait for the element found from the selector has a particular attribute value pair
- * @param {string} cssSelector - The selector for the element on the page
+ * @param page
+ * @param selector: xpath or css
  * @param {string} attribute - The attribute name
  * @param {string} value - The attribute value to match
  * @param {number} timeout - the timeout in msecs
@@ -314,6 +299,7 @@ export async function waitForNumberElements(page: Page, cssSelector: string, exp
  * @param page
  * @param textSubstr
  * @param selector: {css, xpath}
+ * @param timeout
  */
 export async function waitForText(
   page: Page,
@@ -378,7 +364,6 @@ export async function waitWhileLoading(
   opts: { waitForRuntime?: boolean } = {}
 ): Promise<void> {
   const { waitForRuntime = false } = opts;
-
   const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
   const spinElementsSelector = `[style*="running spin"], .spinner:empty, [style*="running rotation"]${
     waitForRuntime ? '' : ':not([aria-hidden="true"]):not([data-test-id="runtime-status-icon"])'
@@ -388,27 +373,25 @@ export async function waitWhileLoading(
   await Promise.race([page.waitForSelector(notBlankPageSelector), page.waitForSelector(spinElementsSelector)]);
 
   // Wait for spinners stop and gone.
-  await page
-    .waitForFunction(
-      (css) => {
-        const elements = document.querySelectorAll(css);
-        return elements && elements.length === 0;
-      },
-      { polling: 'mutation', timeout },
-      spinElementsSelector
-    )
-    .catch((err) => {
-      logger.error(`waitWhileLoading() failed: spinner xpath="${spinElementsSelector}"`);
-      logger.error(err);
-      throw new Error(err);
-    });
-
+  await withErrorLogging({
+    message: `waitWhileLoading() failed: spinner xpath="${spinElementsSelector}"`,
+    fn: async (): Promise<void> => {
+      await page.waitForFunction(
+        (css) => {
+          const elements = document.querySelectorAll(css);
+          return elements.length === 0;
+        },
+        { polling: 'mutation', timeout },
+        spinElementsSelector
+      );
+    }
+  });
   await page.waitForTimeout(500);
 }
 
-export async function waitUntilEnabled(page: Page, cssSelector: string): Promise<boolean> {
-  const jsHandle = await page
-    .waitForFunction(
+export const waitUntilEnabled = withErrorLogging({
+  fn: async (page: Page, cssSelector: string): Promise<boolean> => {
+    const jsHandle = await page.waitForFunction(
       (xpathSelector) => {
         const element = document.evaluate(xpathSelector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
           .singleNodeValue;
@@ -418,11 +401,7 @@ export async function waitUntilEnabled(page: Page, cssSelector: string): Promise
       },
       {},
       cssSelector
-    )
-    .catch((err) => {
-      logger.error(`waitUntilEnabled() failed: spinner css="${cssSelector}"`);
-      logger.error(err);
-      throw new Error(err);
-    });
-  return (await jsHandle.jsonValue()) as boolean;
-}
+    );
+    return (await jsHandle.jsonValue()) as boolean;
+  }
+});

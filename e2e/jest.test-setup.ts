@@ -91,8 +91,7 @@ beforeEach(async () => {
       const args = await Promise.all(message.args().map((a) => describeJsHandle(a)));
       const msgType = message.type() === 'warning' ? 'warn' : message.type();
       logger.info(`Page Console ${msgType.toUpperCase()}: "${title}"`);
-      console.log(args);
-      console.log('');
+      console[msgType](...args);
     } catch (err) {
       console.error(`❗ "${title}"\nException occurred when getting page console message.\n${err}\n${message.text()}`);
     }
@@ -113,7 +112,7 @@ beforeEach(async () => {
   page.on('pageerror', async (error: Error) => {
     const title = await getPageTitle();
     try {
-      logger.error('PAGEERROR: "$title}"');
+      logger.error(`PAGEERROR: "${title}"`);
       logger.error(JSON.stringify(error, null, 2));
     } catch (err) {
       console.error(`❗ "${title}"\nPage exception occurred when getting pageerror.\n${err}`);

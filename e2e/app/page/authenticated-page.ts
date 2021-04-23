@@ -3,6 +3,8 @@ import { PageUrl } from 'app/text-labels';
 import BasePage from 'app/page/base-page';
 import { getPropValue } from 'utils/element-utils';
 import HelpTipsSidebar from 'app/component/help-tips-sidebar';
+import { withErrorLogging } from 'utils/error-handling';
+import * as fp from 'lodash/fp';
 
 const signedInIndicator = 'app-signed-in';
 
@@ -15,10 +17,11 @@ export default abstract class AuthenticatedPage extends BasePage {
     super(page);
   }
 
-  protected async isSignedIn(): Promise<boolean> {
-    return this.page
+  protected async isSignedIn(): Promise<this> {
+    await this.page
       .waitForSelector(signedInIndicator, { timeout: 5 * 60 * 1000 })
       .then((elemt) => elemt.asElement() !== null);
+    return this;
   }
 
   /**
@@ -31,9 +34,8 @@ export default abstract class AuthenticatedPage extends BasePage {
    * Wait until current page is loaded and without spinners spinning.
    */
   async waitForLoad(): Promise<this> {
-    await this.isSignedIn();
-    await this.isLoaded();
-    await this.closeHelpSidebarIfOpen();
+    const fn = fp.flow(this.isSignedIn, this.isLoaded, this.closeHelpSidebarIfOpen);
+    withErrorLogging({ fn });
     return this;
   }
 

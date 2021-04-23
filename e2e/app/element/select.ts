@@ -4,6 +4,7 @@ import { ElementType, XPathOptions } from 'app/xpath-options';
 import { getPropValue } from 'utils/element-utils';
 import BaseElement from './base-element';
 import { buildXPath } from 'app/xpath-builders';
+import { withErrorLogging } from '../../utils/error-handling';
 
 /**
  * <select> element
@@ -50,23 +51,22 @@ export default class Select extends BaseElement {
    */
   async getSelectedValue(): Promise<string> {
     const selectElement = await this.page.waitForXPath(this.getXpath(), { visible: true });
-    const selectedOption = await this.page.evaluate((select) => {
+    return this.page.evaluate((select) => {
       for (const option of select.options) {
         if (option.selected) {
           return option.textContent;
         }
       }
     }, selectElement);
-    return selectedOption;
   }
 
   /**
    * Wait until value of Selected option equals to expected option.
    */
-  async waitForSelectedValue(expectedOption: string, timeout = 30000): Promise<void> {
-    const selectElement = await this.page.waitForXPath(this.getXpath(), { visible: true });
-    await this.page
-      .waitForFunction(
+  waitForSelectedValue = withErrorLogging({
+    fn: async (expectedOption: string, timeout = 30000): Promise<void> => {
+      const selectElement = await this.page.waitForXPath(this.getXpath(), { visible: true });
+      await this.page.waitForFunction(
         (select, text) => {
           for (const option of select.options) {
             if (option.selected) {
@@ -78,11 +78,7 @@ export default class Select extends BaseElement {
         { timeout },
         selectElement,
         expectedOption
-      )
-      .catch((err) => {
-        console.error(`waitForSelectedValue() failed. Expected selected option is ${expectedOption}`);
-        console.error(err);
-        throw new Error(err);
-      });
-  }
+      );
+    }
+  });
 }

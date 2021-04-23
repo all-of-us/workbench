@@ -1,7 +1,6 @@
 import { ClickOptions, ElementHandle, Page, WaitForSelectorOptions } from 'puppeteer';
 import Container from 'app/container';
 import { getAttrValue, getPropValue } from 'utils/element-utils';
-import { logger } from 'libs/logger';
 import { withErrorLogging } from 'utils/error-handling';
 
 /**
@@ -30,37 +29,15 @@ export default class BaseElement extends Container {
    * If there is no element matching xpath selector, null is returned.
    * @param {WaitForSelectorOptions} waitOptions
    */
-  async waitForXPath(waitOptions: WaitForSelectorOptions = { visible: true }): Promise<ElementHandle> {
-    if (this.xpath === undefined && this.element !== undefined) return this.element.asElement();
-    return this.page
-      .waitForXPath(this.xpath, waitOptions)
-      .then((elemt) => (this.element = elemt.asElement()))
-      .catch((err) => {
-        logger.error(`waitForXpath('${this.xpath}') failed`);
-        logger.error(err);
-        logger.error(err.stack);
-        // Debugging pause
-        // await jestPuppeteer.debug();
-        throw new Error(err);
-      });
-  }
-
-  /**
-   * Find all elements matching xpath selector.
-   */
-  async findAllElements(): Promise<ElementHandle[]> {
-    return this.page.$x(this.xpath);
-  }
-
-  /**
-   * Find descendant elements matching xpath selector.
-   * @param {string} descendantXpath Be sure to begin xpath with a dot. e.g. ".//div".
-   */
-  async findDescendant(descendantXpath: string): Promise<ElementHandle[]> {
-    return this.asElementHandle().then((elemt) => {
-      return elemt.$x(descendantXpath);
-    });
-  }
+  waitForXPath = withErrorLogging({
+    message: `waitForXpath('${this.xpath}') failed`,
+    fn: async (waitOptions: WaitForSelectorOptions = { visible: true }): Promise<ElementHandle> => {
+      if (this.xpath === undefined && this.element !== undefined) {
+        return this.element.asElement();
+      }
+      return this.page.waitForXPath(this.xpath, waitOptions).then((element) => (this.element = element.asElement()));
+    }
+  });
 
   /**
    * Finds the value of a property for this element.

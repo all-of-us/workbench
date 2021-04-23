@@ -3,6 +3,7 @@ import Container from 'app/container';
 import { ElementType, XPathOptions } from 'app/xpath-options';
 import BaseElement from './base-element';
 import { buildXPath } from 'app/xpath-builders';
+import { withErrorLogging } from '../../utils/error-handling';
 
 export default class ClrIconLink extends BaseElement {
   static findByName(page: Page, xOpt: XPathOptions, container?: Container): ClrIconLink {
@@ -22,7 +23,11 @@ export default class ClrIconLink extends BaseElement {
    */
   async isDisabled(): Promise<boolean> {
     const selector = `${this.xpath}/ancestor::node()[1]`;
-    const element = await this.page.waitForXPath(selector, { visible: true });
-    return ClrIconLink.asBaseElement(this.page, element).isCursorNotAllowed();
+    return withErrorLogging({
+      fn: async (): Promise<boolean> => {
+        const element = await this.page.waitForXPath(selector, { visible: true });
+        return element && ClrIconLink.asBaseElement(this.page, element).isCursorNotAllowed();
+      }
+    });
   }
 }

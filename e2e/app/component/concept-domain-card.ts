@@ -57,7 +57,7 @@ export default class ConceptDomainCard extends Container {
   }
 
   private async extractConceptsCount(selector: string): Promise<string> {
-    const elemt = await this.page.waitForXPath(selector, { visible: true });
+    const elemt = await this.page.waitForXPath(selector, { visible: true, timeout: 60000 });
     const textContent = await getPropValue<string>(elemt, 'textContent');
     const regex = new RegExp(/\d{1,3}(,?\d{3})*/); // Match numbers with comma
     return regex.exec(textContent)[0];

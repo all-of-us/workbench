@@ -1,5 +1,6 @@
-import { Page } from 'puppeteer';
+import { ElementHandle, Page } from 'puppeteer';
 import { waitWhileLoading } from 'utils/waits-utils';
+import { withErrorLogging } from 'utils/error-handling';
 
 /**
  * This is the super base class.
@@ -28,16 +29,28 @@ export default class Container {
   }
 
   async waitUntilVisible(): Promise<void> {
-    await Promise.all([
-      waitWhileLoading(this.page, 60000),
-      this.page.waitForXPath(this.getXpath(), { visible: true, timeout: 60000 })
-    ]);
+    withErrorLogging({
+      fn: async (): Promise<void> => {
+        await Promise.all([
+          waitWhileLoading(this.page, 60000),
+          this.page.waitForXPath(this.getXpath(), { visible: true, timeout: 60000 })
+        ]);
+      }
+    });
   }
 
   async waitUntilClose(): Promise<void> {
-    await Promise.all([
-      waitWhileLoading(this.page, 60000),
-      this.page.waitForXPath(this.getXpath(), { hidden: true, timeout: 60000 })
-    ]);
+    withErrorLogging({
+      fn: async (): Promise<void> => {
+        await Promise.all([
+          waitWhileLoading(this.page, 60000),
+          this.page.waitForXPath(this.getXpath(), { hidden: true, timeout: 60000 })
+        ]);
+      }
+    });
+  }
+
+  async asElement(): Promise<ElementHandle> {
+    return this.page.waitForXPath(this.xpath, { timeout: 1000, visible: true }).then((elemt) => elemt.asElement());
   }
 }
