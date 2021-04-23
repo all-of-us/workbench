@@ -31,10 +31,15 @@ beforeEach(async () => {
       const body = requestBody.length === 0 ? '' : `\n${requestBody}`;
       logger.log('info', 'Request issued: %s %s %s', request.method(), request.url(), body);
     }
-    try {
-      request.continue();
-      // tslint:disable-next-line:no-empty
-    } catch (e) {}
+    /**
+     * May encounter "Error: Request is already handled!"
+     * Workaround: https://github.com/puppeteer/puppeteer/issues/3853#issuecomment-458193921
+     */
+    return Promise.resolve()
+      .then(() => request.continue())
+      .catch(() => {
+        // Ignored
+      });
   });
 
   /** Emitted when a request fails. */
@@ -64,11 +69,15 @@ beforeEach(async () => {
       // Try find out what the request was
       logger.log('error', '%s %s %s\n%s', status, method, url, err);
     }
-    try {
-      await request.continue();
-    } catch (e) {
-      // Ignored
-    }
+    /**
+     * May encounter "Error: Request is already handled!"
+     * Workaround: https://github.com/puppeteer/puppeteer/issues/3853#issuecomment-458193921
+     */
+    return Promise.resolve()
+      .then(() => request.continue())
+      .catch(() => {
+        // Ignored
+      });
   });
 
   /**
@@ -128,7 +137,7 @@ const getPageTitle = async () => {
 
 const describeJsHandle = async (jsHandle: JSHandle): Promise<string> => {
   return jsHandle.executionContext().evaluate((obj) => {
-    // Get error message if obj is an error. Error is not serializeable.
+    // Get error message if obj is an error. Error is not serializable.
     if (obj instanceof Error) {
       return obj.message;
     }
