@@ -25,6 +25,7 @@ const local = {
   apiBaseUrl: process.env.DEV_API_URL || 'http://localhost/v1',
   userEmailDomain: '@fake-research-aou.org',
   collaboratorUsername: process.env.DEV_COLLABORATOR || 'puppetmaster@fake-research-aou.org',
+  writerUserName: process.env.DEV_WRITER || 'puppetmaster@fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v3',
   altCdrVersionName: 'Synthetic Dataset v3 with Microarray'
 };
@@ -35,6 +36,7 @@ const test = {
   apiBaseUrl: process.env.TEST_API_URL || 'https://api-dot-all-of-us-workbench-test.appspot.com/v1',
   userEmailDomain: '@fake-research-aou.org',
   collaboratorUsername: process.env.TEST_COLLABORATOR || 'puppetmaster@fake-research-aou.org',
+  writerUserName: process.env.TEST_WRITER || 'puppetmaster@fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v3',
   altCdrVersionName: 'Synthetic Dataset v3 with Microarray'
 };
@@ -45,6 +47,7 @@ const staging = {
   apiBaseUrl: process.env.STAGING_API_URL || 'https://api-dot-all-of-us-rw-staging.appspot.com/v1',
   userEmailDomain: '@staging.fake-research-aou.org',
   collaboratorUsername: process.env.STAGING_COLLABORATOR || 'puppetcitester4@staging.fake-research-aou.org',
+  writerUserName: process.env.STAGING_WRITER || 'puppetmaster@staging.fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v4',
   altCdrVersionName: 'Synthetic Dataset v3'
 };
