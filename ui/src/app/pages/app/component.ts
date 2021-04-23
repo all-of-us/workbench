@@ -183,8 +183,15 @@ export class AppComponent implements OnInit {
   }
 
   private loadErrorReporter() {
+    // We don't report to stackdriver on local servers.
+    if (environment.debug) {
+      return;
+    }
     const reporter = new StackdriverErrorReporter();
     const {config} = serverConfigStore.get();
+    if (!config.publicApiKeyForErrorReports) {
+      return;
+    }
     reporter.start({
       key: config.publicApiKeyForErrorReports,
       projectId: config.projectId,
