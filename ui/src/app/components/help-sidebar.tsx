@@ -382,6 +382,7 @@ export const HelpSidebar = fp.flow(
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
       if ((!this.props.criteria && !!prevProps.criteria ) || (!this.props.concept && !!prevProps.concept)) {
+        console.log('unset');
         this.setActiveIcon(null);
       }
     }
@@ -675,9 +676,6 @@ export const HelpSidebar = fp.flow(
 
     render() {
       const {activeIcon, tooltipId} = this.state;
-      console.log(activeIcon);
-      console.log(this.sidebarContainerStyles(activeIcon));
-      console.log(this.sidebarStyle);
       const sidebarContent = this.sidebarContent(activeIcon);
       const shouldRenderWorkspaceMenu = !this.showIcon('concept') && !this.showIcon('criteria')
 

@@ -111,7 +111,6 @@ describe('HelpSidebar', () => {
     expect(wrapper.find('[data-test-id="help-sidebar-icon-notebooksHelp"]').get(0).props.icon.iconName).toBe('folder-open');
   });
 
-
   it('should update marginRight style when sidebarOpen prop changes', async() => {
     const wrapper = await component();
     setSidebarActiveIconStore.next('help');
