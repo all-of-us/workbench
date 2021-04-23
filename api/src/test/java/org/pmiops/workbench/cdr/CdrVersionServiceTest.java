@@ -309,11 +309,6 @@ public class CdrVersionServiceTest {
   }
 
   @Test
-  public void testGetCdrVersionsHasMicroarrayData() {
-    testGetCdrVersionsHasDataType(CdrVersion::getHasMicroarrayData);
-  }
-
-  @Test
   public void testGetCdrVersionsHasWgsData() {
     testGetCdrVersionsHasDataType(CdrVersion::getHasWgsData);
   }

@@ -36,6 +36,7 @@ import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -45,6 +46,7 @@ import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
+import org.pmiops.workbench.model.DataSetExportRequest.GenomicsDataTypeEnum;
 import org.pmiops.workbench.model.DataSetListResponse;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetPreviewResponse;
@@ -65,6 +67,7 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RestController;
@@ -349,6 +352,19 @@ public class DataSetController implements DataSetApiDelegate {
             dbWorkspace.getCdrVersion().getName(),
             qualifier,
             queriesByDomain);
+
+    if (GenomicsDataTypeEnum.WHOLE_GENOME.equals(dataSetExportRequest.getGenomicsDataType())) {
+      if (Strings.isNullOrEmpty(dbWorkspace.getCdrVersion().getWgsBigqueryDataset())) {
+        throw new FailedPreconditionException(
+            "The workspace CDR version does not have whole genome data");
+      }
+      if (!dataSetExportRequest.getKernelType().equals(KernelTypeEnum.PYTHON)) {
+        throw new BadRequestException("Genomics code generation is only supported in Python");
+      }
+
+      // TODO(RW-6633): Add WGS codegen support.
+      return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
 
     if (dataSetExportRequest.getNewNotebook()) {
       notebookFile =
