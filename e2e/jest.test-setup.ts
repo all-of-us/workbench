@@ -14,6 +14,7 @@ const userAgent =
  * - waitFor functions timeout
  */
 beforeEach(async () => {
+  await jestPuppeteer.resetPage();
   await jestPuppeteer.resetBrowser();
   await page.setUserAgent(userAgent);
   await page.setViewport({ width: 1300, height: 0 });
@@ -30,6 +31,10 @@ beforeEach(async () => {
       const body = requestBody.length === 0 ? '' : `\n${requestBody}`;
       logger.log('info', 'Request issued: %s %s %s', request.method(), request.url(), body);
     }
+    /**
+     * May encounter "Error: Request is already handled!"
+     * Workaround: https://github.com/puppeteer/puppeteer/issues/3853#issuecomment-458193921
+     */
     return Promise.resolve()
       .then(() => request.continue())
       .catch(() => {
@@ -65,7 +70,7 @@ beforeEach(async () => {
       logger.log('error', '%s %s %s\n%s', status, method, url, err);
     }
     /**
-     * Error: Request is already handled!
+     * May encounter "Error: Request is already handled!"
      * Workaround: https://github.com/puppeteer/puppeteer/issues/3853#issuecomment-458193921
      */
     return Promise.resolve()
