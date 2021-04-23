@@ -12,7 +12,6 @@ export interface RouteDataStore {
   helpContentKey?: string;
   breadcrumb?: BreadcrumbType;
   pathElementForTitle?: string;
-  notebookHelpSidebarStyles?: boolean;
   contentFullHeightOverride?: boolean;
 }
 

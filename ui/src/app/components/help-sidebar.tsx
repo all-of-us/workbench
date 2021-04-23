@@ -208,7 +208,7 @@ const iconConfigs: { [iconKey: string]: IconConfig } = {
     disabled: false,
     faIcon: faInbox,
     label: 'Selected Criteria',
-    page: 'criteria',
+    page: 'cohortBuilder',
     style: {fontSize: '21px'},
     tooltip: 'Selected Criteria',
   },
@@ -217,7 +217,7 @@ const iconConfigs: { [iconKey: string]: IconConfig } = {
     disabled: false,
     faIcon: faInbox,
     label: 'Selected Concepts',
-    page: 'concept',
+    page: 'conceptSets',
     style: {fontSize: '21px'},
     tooltip: 'Selected Concepts',
   },
@@ -293,7 +293,6 @@ interface Props {
   helpContentKey: string;
   profileState: any;
   shareFunction: Function;
-  notebookStyles: boolean;
   workspace: WorkspaceData;
   criteria: Array<Selection>;
   concept?: Array<Criteria>;
@@ -342,7 +341,7 @@ export const HelpSidebar = fp.flow(
         'notebooksHelp',
         'dataDictionary',
         'annotations'
-      ];
+      ].filter(key => this.showIcon(key));
 
       if (WorkspacePermissionsUtil.canWrite(this.props.workspace.accessLevel)) {
         keys.push('runtime');
@@ -355,18 +354,22 @@ export const HelpSidebar = fp.flow(
       return keys.map(k => iconConfigs[k]);
     }
 
-    currentPageIcons(): IconConfig[] {
-      return this.icons().filter(icon => this.showIcon(icon));
+    showIcon(iconKey: string) {
+      return !iconConfigs[iconKey].page || iconConfigs[iconKey].page === this.props.helpContentKey;
     }
 
     setActiveIcon(activeIcon: string) {
       this.setState({activeIcon});
-      localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
+      if (activeIcon) {
+        localStorage.setItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE, activeIcon);
+      } else {
+        localStorage.removeItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
+      }
     }
 
     async componentDidMount() {
-      const iconConfig = this.currentPageIcons().find(icon => icon.id === localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE));
-      setSidebarActiveIconStore.next(iconConfig ? iconConfig['id'] : 'help');
+      const iconConfig = this.icons().find(icon => icon.id === localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE));
+      setSidebarActiveIconStore.next(iconConfig ? iconConfig['id'] : null);
 
       this.subscription = participantStore.subscribe(participant => this.setState({participant}));
       this.subscription.add(setSidebarActiveIconStore.subscribe(activeIcon => this.setActiveIcon(activeIcon)));
@@ -414,11 +417,11 @@ export const HelpSidebar = fp.flow(
       }
     }
 
-    sidebarContainerStyles(activeIcon, notebookStyles) {
+    sidebarContainerStyles(activeIcon) {
       return {
         ...styles.sidebarContainer,
         width: activeIcon ? `calc(${this.sidebarWidth}rem + 70px)` : 0, // +70px accounts for the width of the icon sidebar + box shadow
-        ...(notebookStyles ? styles.notebookOverrides : {})
+        ...(this.props.helpContentKey === NOTEBOOK_HELP_CONTENT ? styles.notebookOverrides : {})
       };
     }
 
@@ -482,19 +485,14 @@ export const HelpSidebar = fp.flow(
       </PopupTrigger>;
     }
 
-    showIcon(icon: IconConfig) {
-      const {concept, criteria, helpContentKey} = this.props;
-      return !icon.page || icon.page === helpContentKey || (criteria && icon.page === 'criteria') || (concept && icon.page === 'concept');
-    }
-
     displayFontAwesomeIcon(icon: IconConfig) {
       const {concept, criteria} = this.props;
 
       return <React.Fragment>
-        {(criteria && icon.page === 'criteria' && criteria.length > 0) && <span data-test-id='criteria-count'
+        {(criteria && icon.id === 'criteria' && criteria.length > 0) && <span data-test-id='criteria-count'
                                                          style={styles.criteriaCount}>
           {criteria.length}</span>}
-        {(concept && icon.page === 'concept' && concept.length > 0) && <span data-test-id='concept-count'
+        {(concept && icon.id === 'concept' && concept.length > 0) && <span data-test-id='concept-count'
                                                          style={styles.criteriaCount}>
           {concept.length}</span>}
             <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
@@ -571,10 +569,7 @@ export const HelpSidebar = fp.flow(
     }
 
     get sidebarWidth() {
-      if (this.state.activeIcon && this.sidebarContent(this.state.activeIcon).bodyWidthRem) {
-        return this.sidebarContent(this.state.activeIcon).bodyWidthRem;
-      }
-      return '14';
+      return fp.getOr('14', 'bodyWidthRem', this.sidebarContent(this.state.activeIcon));
     }
 
     sidebarContent(activeIcon): {
@@ -679,14 +674,17 @@ export const HelpSidebar = fp.flow(
     }
 
     render() {
-      const {concept, criteria, notebookStyles} = this.props;
       const {activeIcon, tooltipId} = this.state;
+      console.log(activeIcon);
+      console.log(this.sidebarContainerStyles(activeIcon));
+      console.log(this.sidebarStyle);
       const sidebarContent = this.sidebarContent(activeIcon);
+      const shouldRenderWorkspaceMenu = !this.showIcon('concept') && !this.showIcon('criteria')
 
       return <div id='help-sidebar'>
-        <div style={notebookStyles ? {...styles.iconContainer, ...styles.notebookOverrides} : {...styles.iconContainer}}>
-          {!(criteria || concept)  && this.renderWorkspaceMenu()}
-          {this.currentPageIcons().map((icon, i) =>
+        <div style={{...styles.iconContainer, ...(this.props.helpContentKey === NOTEBOOK_HELP_CONTENT ? styles.notebookOverrides : {})}}>
+          {shouldRenderWorkspaceMenu && this.renderWorkspaceMenu()}
+          {this.icons().map((icon, i) =>
               <div key={i} style={{display: 'table'}}>
                 <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
                   <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
@@ -725,7 +723,7 @@ export const HelpSidebar = fp.flow(
                 }
               }, false);
             }}>
-            <div style={this.sidebarContainerStyles(activeIcon, notebookStyles)}>
+            <div style={this.sidebarContainerStyles(activeIcon)}>
               <div style={this.sidebarStyle} data-test-id='sidebar-content'>
                 {activeIcon && sidebarContent &&
                 <div style={{height: '100%', overflow: sidebarContent.overflow || 'auto'}}>
@@ -773,9 +771,8 @@ export class HelpSidebarComponent extends ReactWrapperBase {
   @Input('deleteFunction') deleteFunction: Props['deleteFunction'];
   @Input('helpContentKey') helpContentKey: Props['helpContentKey'];
   @Input('shareFunction') shareFunction: Props['shareFunction'];
-  @Input('notebookStyles') notebookStyles: Props['notebookStyles'];
 
   constructor() {
-    super(HelpSidebar, ['deleteFunction', 'helpContentKey', 'shareFunction', 'notebookStyles']);
+    super(HelpSidebar, ['deleteFunction', 'helpContentKey', 'shareFunction']);
   }
 }

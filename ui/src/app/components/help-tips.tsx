@@ -7,7 +7,6 @@ const sidebarContent = require('assets/json/help-sidebar.json');
 
 const styles = reactStyles({
   sectionTitle: {
-    marginTop: '0.5rem',
     fontWeight: 600,
     color: colors.primary
   },
@@ -26,6 +25,7 @@ const styles = reactStyles({
     borderRadius: '4px',
     backgroundColor: colorWithWhiteness(colors.primary, .95),
     marginTop: '5px',
+    marginBottom: '0.5rem',
     color: colors.primary,
   },
   textInput: {
@@ -124,7 +124,7 @@ export class HelpTips extends React.Component<Props, State> {
       </div>}
       {!!displayContent && displayContent.length > 0
         ? displayContent.map((section, s) => <div key={s}>
-          <h3 style={styles.sectionTitle} data-test-id={`section-title-${s}`}>{this.highlightMatches(section.title)}</h3>
+          <h3 style={{...styles.sectionTitle, marginTop: s === 0 ? 0 : '0.5rem'}} data-test-id={`section-title-${s}`}>{this.highlightMatches(section.title)}</h3>
           {section.content.map((content, c) => {
             return typeof content === 'string'
               ? <p key={c} style={styles.contentItem}>{this.highlightMatches(content)}</p>

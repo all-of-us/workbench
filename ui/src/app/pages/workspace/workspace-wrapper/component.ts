@@ -42,7 +42,6 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   resourceType: ResourceType = ResourceType.WORKSPACE;
   userRoles?: UserRole[];
   helpContentKey = 'data';
-  notebookStyles = false;
   pollAborter = new AbortController();
   // The iframe we use to display the Jupyter notebook does something strange
   // to the height calculation of the container, which is normally set to auto.
@@ -71,21 +70,20 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     // ROUTER MIGRATION: This is allows the react-router conversion to utilize various route config properties
     // Once we are fully converted the help sidebar and modals will need to be reworked a bit to eliminate this Angular code
     this.subscriptions.push(routeDataStore.subscribe(
-      ({minimizeChrome, helpContentKey, notebookHelpSidebarStyles, contentFullHeightOverride}) => {
+      ({minimizeChrome, helpContentKey, contentFullHeightOverride}) => {
         this.helpContentKey = helpContentKey;
-        this.notebookStyles = !!notebookHelpSidebarStyles;
         this.contentFullHeightOverride = contentFullHeightOverride;
         this.displayNavBar = !minimizeChrome;
       }
     ));
 
     this.tabPath = this.getTabPath();
-    this.setHelpContentKeyAndMaybeSetNotebookStyles();
+    this.setHelpContentKey();
     this.subscriptions.push(
       this.router.events.filter(event => event instanceof NavigationEnd)
         .subscribe((e: RouterEvent) => {
           this.tabPath = this.getTabPath();
-          this.setHelpContentKeyAndMaybeSetNotebookStyles();
+          this.setHelpContentKey();
           // Close sidebar on route change unless navigating between participants in cohort review
           // Bit of a hack to use regex to test if we're in the cohort review but the helpContentKey
           // isn't being set to the correct value at the time when a user clicks onto a new participant.
@@ -249,13 +247,9 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
 
   // This function does multiple things so we don't have to have two separate'
   // where loops on the route.
-  setHelpContentKeyAndMaybeSetNotebookStyles() {
+  setHelpContentKey() {
     let child = this.route.firstChild;
     while (child) {
-      if (child.snapshot.data.notebookHelpSidebarStyles) {
-        this.notebookStyles = true;
-      }
-
       if (child.snapshot.data.contentFullHeightOverride) {
         this.contentFullHeightOverride = true;
       }
@@ -265,12 +259,9 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
       } else {
         const {
           helpContentKey = null,
-          notebookHelpSidebarStyles = false,
           contentFullHeightOverride = false
         } = child.snapshot.data || {};
         this.helpContentKey = helpContentKey;
-        console.log(this.helpContentKey);
-        this.notebookStyles = notebookHelpSidebarStyles;
         this.contentFullHeightOverride = contentFullHeightOverride;
         child = null;
       }

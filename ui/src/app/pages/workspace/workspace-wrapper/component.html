@@ -24,8 +24,7 @@
                   [onClose]="closeBugReport"></app-bug-report>
   <app-help-sidebar [deleteFunction]="openConfirmDelete"
                     [helpContentKey]="helpContentKey"
-                    [shareFunction]="handleShareAction"
-                    [notebookStyles]="notebookStyles"></app-help-sidebar>
+                    [shareFunction]="handleShareAction"></app-help-sidebar>
   <div [style.margin-right]="helpContentKey ? '45px' : 0" [style.height]="helpContentKey && !contentFullHeightOverride ? 'auto': '100%'">
     <router-outlet *ngIf="workspace"></router-outlet>
   </div>

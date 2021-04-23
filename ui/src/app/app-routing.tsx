@@ -267,7 +267,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             pathElementForTitle: 'nbName',
             breadcrumb: BreadcrumbType.Notebook,
             helpContentKey: NOTEBOOK_HELP_CONTENT,
-            notebookHelpSidebarStyles: true,
             minimizeChrome: true
           }}/>}
         />
@@ -281,7 +280,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             // Setting this flag sets the container to 100% so that no content is clipped.
             contentFullHeightOverride: true,
             helpContentKey: NOTEBOOK_HELP_CONTENT,
-            notebookHelpSidebarStyles: true,
             minimizeChrome: true
           }}/>}
         />
@@ -329,8 +327,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           path='/workspaces/:ns/:wsid/data/concepts'
           component={() => <ConceptHomepagePage routeData={{
             title: 'Search Concepts',
-            breadcrumb: BreadcrumbType.SearchConcepts,
-            helpContentKey: 'conceptSets'
+            breadcrumb: BreadcrumbType.SearchConcepts
           }}/>}
         />
         <AppRoute
