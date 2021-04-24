@@ -1,10 +1,8 @@
 import {AlertDanger} from 'app/components/alert';
 import {Button, Link} from 'app/components/buttons';
-import {styles as headerStyles} from 'app/components/headers';
-import {CheckBox, RadioButton, TextInput} from 'app/components/inputs';
+import {CheckBox, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
-import {TextColumn} from 'app/components/text-column';
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
@@ -15,18 +13,15 @@ import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {
   DataSet,
-  DataSetExportRequest,
   DataSetRequest,
   DomainValuePair,
   FileDetail,
   KernelTypeEnum,
   PrePackagedConceptSetEnum
 } from 'generated/fetch';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {validate} from 'validate.js';
-import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
 import {ExportDataSet} from './export-data-set';
 
 interface Props {

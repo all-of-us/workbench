@@ -727,6 +727,7 @@ public class DataSetControllerTest {
   public void exportToNotebook_wgsCodegen_cdrCheck() {
     DbCdrVersion cdrVersion =
         cdrVersionDao.findByCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
+    cdrVersion.setWgsBigqueryDataset(null);
     cdrVersionDao.save(cdrVersion);
 
     DataSetExportRequest request =
@@ -745,6 +746,11 @@ public class DataSetControllerTest {
 
   @Test
   public void exportToNotebook_wgsCodegen_kernelCheck() {
+    DbCdrVersion cdrVersion =
+        cdrVersionDao.findByCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
+    cdrVersion.setWgsBigqueryDataset("wgs");
+    cdrVersionDao.save(cdrVersion);
+
     DataSetExportRequest request =
         setUpValidDataSetExportRequest()
             .kernelType(KernelTypeEnum.R)
