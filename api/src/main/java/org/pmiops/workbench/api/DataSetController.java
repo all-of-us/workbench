@@ -550,11 +550,9 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> abortExtract(
-      String workspaceNamespace,
-      String workspaceId,
-      String wgsCohortExtractionJobId
-  ) {
-    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+      String workspaceNamespace, String workspaceId, String wgsCohortExtractionJobId) {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     try {
       genomicExtractionService.abortExtract(wgsCohortExtractionJobId);

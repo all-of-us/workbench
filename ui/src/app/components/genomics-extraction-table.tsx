@@ -2,12 +2,12 @@ import {
   faBan,
   faCheckCircle, faClipboard,
   faEllipsisV,
-  faExclamationTriangle,
-  faLocationArrow, faTrash
+  faExclamationTriangle, faTrash
 } from '@fortawesome/free-solid-svg-icons';
 import {faSyncAlt} from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
+import {faLocationCircle} from '@fortawesome/pro-solid-svg-icons';
 import {FlexRow} from 'app/components/flex';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
@@ -16,7 +16,9 @@ import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {withCurrentWorkspace} from 'app/utils';
 import {formatUsd} from 'app/utils/numbers';
-import {GenomicExtractionJob, TerraJobStatus, WorkspaceAccessLevel} from 'generated/fetch';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
+import {GenomicExtractionJob, TerraJobStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import {Column} from 'primereact/column';
@@ -24,11 +26,7 @@ import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {CSSTransition, SwitchTransition} from 'react-transition-group';
-import {MenuItem} from "./buttons";
-import {faLocationCircle} from "@fortawesome/pro-solid-svg-icons";
-import {WorkspacePermissionsUtil} from "../utils/workspace-permissions";
-import canWrite = WorkspacePermissionsUtil.canWrite;
-import {WorkspaceData} from "../utils/workspace-data";
+import {MenuItem} from './buttons';
 
 const getIconConfigForStatus = (status: TerraJobStatus) => {
   if (status === TerraJobStatus.RUNNING) {
@@ -98,16 +96,16 @@ const GenomicsExtractionMenu = ({job, workspace}) => {
        <hr/>
        <MenuItem
            faIcon={faBan}
-           disabled={job.status !== TerraJobStatus.RUNNING || !canWrite(workspace.accessLevel)}
+           disabled={job.status !== TerraJobStatus.RUNNING || !WorkspacePermissionsUtil.canWrite(workspace.accessLevel)}
            onClick={() => {
-             dataSetApi().abortExtract(workspace.namespace, workspace.id, job.genomicExtractionJobId)
+             dataSetApi().abortExtract(workspace.namespace, workspace.id, job.genomicExtractionJobId);
            }}
            tooltip={
              job.status !== TerraJobStatus.RUNNING
-               ? "Extraction job is not currently running"
-               : !canWrite(workspace.accessLevel)
-                 ? "You do not have permission to modify this workspace"
-                 : ""
+               ? 'Extraction job is not currently running'
+               : !WorkspacePermissionsUtil.canWrite(workspace.accessLevel)
+                 ? 'You do not have permission to modify this workspace'
+                 : ''
            }
        >
          Abort Extraction
@@ -133,8 +131,8 @@ const GenomicsExtractionMenu = ({job, workspace}) => {
           display: 'block'
         }}
     />
-  </PopupTrigger>
-}
+  </PopupTrigger>;
+};
 
 const MissingCell = () => <span style={{fontSize: '.4rem'}}>&mdash;</span>;
 

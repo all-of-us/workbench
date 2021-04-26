@@ -284,6 +284,9 @@ commands:
       - restore_cache:
           key: v5-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
       - run:
+          working_directory: ~/workbench
+          command: gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc .
+      - run:
           working_directory: ~/workbench/ui
           command: yarn install --verbose --frozen-lockfile --non-interactive
       - save_cache:

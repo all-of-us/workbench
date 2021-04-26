@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +29,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudMethodConfiguration;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmission;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionRequest;
 import org.pmiops.workbench.firecloud.model.FirecloudSubmissionResponse;
-import org.pmiops.workbench.firecloud.model.FirecloudSubmissionStatus;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.google.StorageConfig;
@@ -278,17 +276,17 @@ public class GenomicExtractionService {
   }
 
   public void abortExtract(String wgsCohortExtractionId) throws ApiException {
-    DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission = wgsExtractCromwellSubmissionDao
-        .findOne(Long.valueOf(wgsCohortExtractionId));
+    DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
+        wgsExtractCromwellSubmissionDao.findOne(Long.valueOf(wgsCohortExtractionId));
 
-    WgsCohortExtractionConfig cohortExtractionConfig = workbenchConfigProvider.get().wgsCohortExtraction;
+    WgsCohortExtractionConfig cohortExtractionConfig =
+        workbenchConfigProvider.get().wgsCohortExtraction;
 
     submissionApiProvider
         .get()
         .abortSubmission(
             cohortExtractionConfig.operationalTerraWorkspaceNamespace,
             cohortExtractionConfig.operationalTerraWorkspaceName,
-            dbWgsExtractCromwellSubmission.getSubmissionId()
-        );
+            dbWgsExtractCromwellSubmission.getSubmissionId());
   }
 }
