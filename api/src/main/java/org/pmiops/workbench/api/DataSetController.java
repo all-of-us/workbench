@@ -562,7 +562,7 @@ public class DataSetController implements DataSetApiDelegate {
     }
 
     try {
-      genomicExtractionService.abortExtract(workspace, wgsCohortExtractionJobId);
+      genomicExtractionService.abortExtract(wgsCohortExtractionJobId);
       return ResponseEntity.ok(new EmptyResponse());
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
       throw new ServerErrorException(e);

@@ -144,6 +144,11 @@ The `status` column enum values can be found in `org.pmiops.workbench.db.model.S
 
 ### UI
 
+In the UI, we use some [Fontawesome](https://fontawesome.com/) Pro icons. In order to install the Fontawesome Pro packages, you will need to download an `.npmrc` file with a Fontawesome license token. Copy it into the workbench root directory:
+```
+workbench$ gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc .
+```
+
 Before launching or testing the UI, yarn must first install the neccessary packages. From the `ui/` directory:
 ```Shell
 yarn install
