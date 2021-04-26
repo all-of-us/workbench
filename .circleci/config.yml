@@ -283,6 +283,7 @@ commands:
     steps:
       - restore_cache:
           key: v5-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
+      - gcloud-auth-login
       - run:
           working_directory: ~/workbench
           command: gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc .
