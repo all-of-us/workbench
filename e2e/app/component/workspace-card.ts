@@ -31,7 +31,9 @@ export default class WorkspaceCard extends CardBase {
     const card = await WorkspaceCard.findCard(page, workspaceName);
     await card.selectSnowmanMenu(MenuOption.Delete, { waitForNav: false });
     // Handle Delete Confirmation modal
-    return new WorkspaceEditPage(page).dismissDeleteWorkspaceModal();
+    const modalText = new WorkspaceEditPage(page).dismissDeleteWorkspaceModal();
+    await WorkspaceCard.waitUntilGone(page, workspaceName);
+    return modalText;
   }
 
   /**
@@ -85,6 +87,13 @@ export default class WorkspaceCard extends CardBase {
     }
     logger.info(`"${workspaceName}" workspace card not found`);
     return null; // not found
+  }
+
+  static async waitUntilGone(page: Page, workspaceName: string, timeout = 60000): Promise<void> {
+    const selector =
+      `${WorkspaceCardSelector.cardRootXpath}//*[${WorkspaceCardSelector.cardNameXpath}` +
+      ` and normalize-space(text())="${workspaceName}"]`;
+    await page.waitForXPath(selector, { hidden: true, timeout });
   }
 
   constructor(page: Page) {
@@ -200,5 +209,12 @@ export default class WorkspaceCard extends CardBase {
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(false);
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(false);
     }
+  }
+
+  async waitUntilGone(workspaceName: string, timeout: 60000): Promise<void> {
+    const selector =
+      `${WorkspaceCardSelector.cardRootXpath}//*[${WorkspaceCardSelector.cardNameXpath}` +
+      ` and normalize-space(text())="${workspaceName}"]`;
+    await this.page.waitForXPath(selector, { hidden: true, timeout });
   }
 }
