@@ -554,12 +554,7 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceId,
       String wgsCohortExtractionJobId
   ) {
-    DbWorkspace workspace =
-        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    if (workspace.getCdrVersion().getWgsBigqueryDataset() == null) {
-      throw new BadRequestException("Workspace CDR does not have access to WGS data");
-    }
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     try {
       genomicExtractionService.abortExtract(wgsCohortExtractionJobId);

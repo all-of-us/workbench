@@ -7,7 +7,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -150,6 +152,8 @@ public class GenomicExtractionServiceTest {
     workbenchConfig.wgsCohortExtraction.extractionMethodConfigurationName = "methodName";
     workbenchConfig.wgsCohortExtraction.extractionMethodConfigurationNamespace = "methodNamespace";
     workbenchConfig.wgsCohortExtraction.extractionMethodConfigurationVersion = 1;
+    workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace = "operationalTerraWorkspaceNamespace";
+    workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName = "operationalTerraWorkspaceName";
 
     FirecloudWorkspace fcWorkspace = new FirecloudWorkspace().bucketName("user-bucket");
     FirecloudWorkspaceResponse fcWorkspaceResponse =
@@ -378,6 +382,23 @@ public class GenomicExtractionServiceTest {
   public void submitExtractionJob_noWgsData() throws ApiException {
     when(mockDataSetService.getPersonIdsWithWholeGenome(any())).thenReturn(ImmutableList.of());
     genomicExtractionService.submitGenomicExtractionJob(targetWorkspace, dataset);
+  }
+
+  @Test
+  public void abortExtract() throws ApiException {
+    DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission = createDbWgsExtractCromwellSubmission();
+
+    doNothing().when(submissionsApi).abortSubmission(
+        workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
+        workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
+        dbWgsExtractCromwellSubmission.getSubmissionId()
+    );
+
+    genomicExtractionService.abortExtract(
+        String.valueOf(dbWgsExtractCromwellSubmission.getWgsExtractCromwellSubmissionId())
+    );
+
+    verify(submissionsApi, times(1)).abortSubmission(anyString(), anyString(), anyString());
   }
 
   private DbDataset createDataset() {
