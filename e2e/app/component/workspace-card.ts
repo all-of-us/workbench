@@ -211,10 +211,4 @@ export default class WorkspaceCard extends CardBase {
     }
   }
 
-  async waitUntilGone(workspaceName: string, timeout: 60000): Promise<void> {
-    const selector =
-      `${WorkspaceCardSelector.cardRootXpath}//*[${WorkspaceCardSelector.cardNameXpath}` +
-      ` and normalize-space(text())="${workspaceName}"]`;
-    await this.page.waitForXPath(selector, { hidden: true, timeout });
-  }
 }
