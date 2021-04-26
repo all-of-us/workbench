@@ -42,7 +42,14 @@ beforeEach(async () => {
       });
   });
 
-  /** Emitted when a request fails. */
+  // Emitted when a request fails: 4xx..5xx status codes
+  page.on('requestfailed', async (request) => {
+    if (canLogResponse(request)) {
+      await logError(request);
+    }
+  });
+
+  /** Emitted when a request finishes. */
   page.on('requestfinished', async (request: Request) => {
     let method;
     let url;
@@ -88,13 +95,17 @@ beforeEach(async () => {
     if (!message.args().length) return;
     const title = await getPageTitle();
     try {
-      const args = await Promise.all(message.args().map((a) => describeJsHandle(a)));
+      const args = await Promise.all(message.args().map((jsHandle) => describeJsHandle(jsHandle)));
+      let concatenatedText = '';
+      for (let i = 0; i < args.length; ++i) {
+        if (args[i] !== undefined) {
+          concatenatedText += `${args[i]}\n`;
+        }
+      }
       const msgType = message.type() === 'warning' ? 'warn' : message.type();
-      logger.info(`Page Console ${msgType.toUpperCase()}: "${title}"`);
-      console.log(args);
-      console.log('');
+      logger.info(`Page Console ${msgType.toUpperCase()}: "${title}"\n${concatenatedText}`);
     } catch (err) {
-      console.error(`❗ "${title}"\nException occurred when getting page console message.\n${err}\n${message.text()}`);
+      console.error(`❗ "${title}"\nException occurred when getting page console message.\n${err}`);
     }
   });
 
@@ -137,12 +148,7 @@ const getPageTitle = async () => {
 
 const describeJsHandle = async (jsHandle: JSHandle): Promise<string> => {
   return jsHandle.executionContext().evaluate((obj) => {
-    // Get error message if obj is an error. Error is not serializable.
-    if (obj instanceof Error) {
-      return obj.message;
-    }
-    // Return JSON value of the argument or `undefined`.
-    return obj.toString();
+    return obj;
   }, jsHandle);
 };
 
@@ -212,7 +218,19 @@ const notRedirectRequest = (request: Request): boolean => {
 };
 
 const getResponseText = async (request: Request): Promise<string> => {
-  return (await request.response().buffer()).toString();
+  const REDIRECT_CODE_START = 299;
+  const REDIRECT_CODE_END = 400;
+  const NO_CONTENT_RESPONSE_CODE = 204;
+  const response = request.response();
+  // Log response if response it's not a redirect or no-content
+  const status = response && response.status() ? response.status() : null;
+  if (
+    status &&
+    !(status > REDIRECT_CODE_START && status < REDIRECT_CODE_END) &&
+    !(status === NO_CONTENT_RESPONSE_CODE)
+  ) {
+    return (await request.response().buffer()).toString();
+  }
 };
 
 const logError = async (request: Request): Promise<void> => {
