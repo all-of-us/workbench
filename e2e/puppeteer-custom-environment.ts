@@ -22,7 +22,7 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
   localDateTimeString() {
     const localTime = new Date();
     const fakeUtcTime = new Date(localTime.getTime() - localTime.getTimezoneOffset() * 60000);
-    return fakeUtcTime.toISOString().replace(/[-:]/g, '').replace('T', '_').slice(0, 15);
+    return fakeUtcTime.toISOString().replace(/[-:]/g, '').slice(0, 15);
   }
 
   // jest-circus: https://github.com/facebook/jest/blob/master/packages/jest-circus/README.md#overview
@@ -41,10 +41,9 @@ class PuppeteerCustomEnvironment extends PuppeteerEnvironment {
           }
           await fs.ensureDir(this.screenshotDir);
           await fs.ensureDir(this.htmlDir);
-          const timestamp = this.localDateTimeString();
-          const screenshotFile = `${this.screenshotDir}/${testName}_${timestamp}.png`;
+          const screenshotFile = `${this.screenshotDir}/${testName}.png`;
           await this.takeScreenshot(screenshotFile);
-          const htmlFile = `${this.htmlDir}/${testName}_${timestamp}.html`;
+          const htmlFile = `${this.htmlDir}/${testName}.html`;
           await this.savePageToFile(htmlFile);
         }
         break;
