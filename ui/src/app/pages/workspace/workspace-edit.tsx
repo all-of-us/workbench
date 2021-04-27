@@ -996,6 +996,14 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       return validate(values, constraints, {fullMessages: false});
     }
 
+    // show the Access Tiers selection dropdown only when there are multiple tiers to choose from
+    enableAccessTierSelection(): boolean {
+      const {cdrVersionTiersResponse} = this.props;
+      console.log(cdrVersionTiersResponse.tiers.length);
+      console.log(JSON.stringify(cdrVersionTiersResponse.tiers));
+      return !!cdrVersionTiersResponse && !!cdrVersionTiersResponse.tiers && cdrVersionTiersResponse.tiers.length > 1;
+    }
+
     render() {
       const {enableBillingUpgrade} = serverConfigStore.get().config;
       const {
@@ -1064,38 +1072,39 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                          value = {name}
                          onChange={v => this.setState(fp.set(['workspace', 'name'], v))}/>
             </FlexColumn>
-            <FlexColumn style={{marginRight: '20px'}}>
-              <div style={styles.fieldHeader}>
-                Data access tier
-                <TooltipTrigger content={toolTipText.tierSelect}>
-                  <InfoIcon style={styles.infoIcon}/>
-                </TooltipTrigger>
-              </div>
-              <TooltipTrigger
-                content='To use a different access tier, create a new workspace.'
-                disabled={this.isMode(WorkspaceEditMode.Create)}>
-                <div data-test-id='select-access-tier' style={styles.select}>
-                  <select style={styles.selectInput}
-                          value={accessTierShortName}
-                          onChange={(v: React.FormEvent<HTMLSelectElement>) => {
-                            const selectedTier = v.currentTarget.value;
-                            this.setState(fp.set(['workspace', 'accessTierShortName'], selectedTier));
-
-                            // Populate CDR Versions dropdown and set default version
-                            this.setState({cdrVersions: this.getCdrVersions(selectedTier)});
-                            this.setState(fp.set(['workspace', 'cdrVersionId'],
-                              getDefaultCdrVersionForTier(selectedTier, cdrVersionTiersResponse).cdrVersionId));
-                          }}
-                          disabled={!this.isMode(WorkspaceEditMode.Create)}>
-                    {cdrVersionTiersResponse.tiers.map((tier, i) => (
-                        <option key={tier.accessTierShortName} value={tier.accessTierShortName}>
-                          {tier.accessTierDisplayName}
-                        </option>
-                    ))}
-                  </select>
+            {this.enableAccessTierSelection() &&
+              <FlexColumn style={{marginRight: '20px'}}>
+                <div style={styles.fieldHeader}>
+                  Data access tier
+                  <TooltipTrigger content={toolTipText.tierSelect}>
+                    <InfoIcon style={styles.infoIcon}/>
+                  </TooltipTrigger>
                 </div>
-              </TooltipTrigger>
-            </FlexColumn>
+                <TooltipTrigger
+                  content='To use a different access tier, create a new workspace.'
+                  disabled={this.isMode(WorkspaceEditMode.Create)}>
+                  <div data-test-id='select-access-tier' style={styles.select}>
+                    <select style={styles.selectInput}
+                            value={accessTierShortName}
+                            onChange={(v: React.FormEvent<HTMLSelectElement>) => {
+                              const selectedTier = v.currentTarget.value;
+                              this.setState(fp.set(['workspace', 'accessTierShortName'], selectedTier));
+
+                              // Populate CDR Versions dropdown and set default version
+                              this.setState({cdrVersions: this.getCdrVersions(selectedTier)});
+                              this.setState(fp.set(['workspace', 'cdrVersionId'],
+                                getDefaultCdrVersionForTier(selectedTier, cdrVersionTiersResponse).cdrVersionId));
+                            }}
+                            disabled={!this.isMode(WorkspaceEditMode.Create)}>
+                      {cdrVersionTiersResponse.tiers.map((tier, i) => (
+                          <option key={tier.accessTierShortName} value={tier.accessTierShortName}>
+                            {tier.accessTierDisplayName}
+                          </option>
+                      ))}
+                    </select>
+                  </div>
+                </TooltipTrigger>
+              </FlexColumn>}
             <FlexColumn>
               <div style={styles.fieldHeader}>
                 Dataset version
