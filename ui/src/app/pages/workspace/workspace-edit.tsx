@@ -292,7 +292,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         showResearchPurpose: this.updateSelectedResearch(),
         showStigmatizationDetails: false,
         showUnderservedPopulationDetails: false,
-        workspace: this.createInitialWorkspaceState(),
+        workspace: this.initializeWorkspaceState(),
         workspaceCreationConflictError: false,
         workspaceCreationError: false,
         workspaceCreationErrorMessage: '',
@@ -362,6 +362,36 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       await this.fetchBillingAccounts();
     }
 
+    createWorkspace(): Workspace {
+      return {
+        name: '',
+        accessTierShortName: DEFAULT_ACCESS_TIER,
+        cdrVersionId: '',
+        researchPurpose: {
+          ancestry: false,
+          anticipatedFindings: '',
+          commercialPurpose: false,
+          controlSet: false,
+          diseaseFocusedResearch: false,
+          diseaseOfFocus: '',
+          drugDevelopment: false,
+          educational: false,
+          intendedStudy: '',
+          scientificApproach: '',
+          methodsDevelopment: false,
+          otherPopulationDetails: '',
+          otherPurpose: false,
+          otherPurposeDetails: '',
+          ethics: false,
+          populationDetails: [],
+          populationHealth: false,
+          reviewRequested: undefined,
+          socialBehavioral: false,
+          reasonForAllOfUs: '',
+        }
+      };
+    }
+
     /**
      * Creates the initial workspace state object. For a CREATE mode dialog,
      * this is effectively an empty Workspace object. For EDIT or DUPLICATE
@@ -370,38 +400,9 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
      * This is where logic lives to auto-set the CDR version and
      * "reviewRequested" flag, which depend on the workspace state & edit mode.
      */
-    createInitialWorkspaceState(): Workspace {
-      // copy the props into a new object so our modifications here don't affect them
-      let workspace: Workspace = {...this.props.workspace};
-      if (this.isMode(WorkspaceEditMode.Create)) {
-        workspace = {
-          name: '',
-          accessTierShortName: DEFAULT_ACCESS_TIER,
-          cdrVersionId: '',
-          researchPurpose: {
-            ancestry: false,
-            anticipatedFindings: '',
-            commercialPurpose: false,
-            controlSet: false,
-            diseaseFocusedResearch: false,
-            diseaseOfFocus: '',
-            drugDevelopment: false,
-            educational: false,
-            intendedStudy: '',
-            scientificApproach: '',
-            methodsDevelopment: false,
-            otherPopulationDetails: '',
-            otherPurpose: false,
-            otherPurposeDetails: '',
-            ethics: false,
-            populationDetails: [],
-            populationHealth: false,
-            reviewRequested: undefined,
-            socialBehavioral: false,
-            reasonForAllOfUs: '',
-          }
-        };
-      }
+    initializeWorkspaceState(): Workspace {
+      // create a new Workspace from scratch or copy the props into a new object so our modifications here don't affect them
+      const workspace: Workspace = this.isMode(WorkspaceEditMode.Create) ? this.createWorkspace() : {...this.props.workspace};
 
       if (!fp.includes(DisseminateResearchEnum.OTHER, workspace.researchPurpose.disseminateResearchFindingList)) {
         workspace.researchPurpose.otherDisseminateResearchFindings = '';
