@@ -190,7 +190,7 @@ const iconStyles = {
   }
 };
 
-export const NOTEBOOK_HELP_CONTENT = 'notebookStorage';
+export const NOTEBOOK_PAGE_KEY = 'notebook';
 
 interface IconConfig {
   id: string;
@@ -202,7 +202,7 @@ interface IconConfig {
   tooltip: string;
 }
 
-const analyticsLabels = {
+const pageKeyToAnalyticsLabels = {
   about: 'About Page',
   cohortBuilder: 'Cohort Builder',
   conceptSets: 'Concept Set',
@@ -372,8 +372,9 @@ export const HelpSidebar = fp.flow(
       const lastSavedKey = localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
 
       // This is a little hacky but it's necessary because
-      // 1. the pageKey is needed for this to run properly but it's not always available on mount
-      // 2. router events during page load will overwrite the value of the localStorage key so we need to "save" it here
+      // 1. the pageKey is needed to know which icons are available on this page but it's not always available on mount
+      // 2. router events (which usually close the sidebar panel) during initial page load will update the activeIcon
+      //    and overwrite the value stored in localStorage key so we need to "save" it here
       // I'd like to clean this up but I think it'll have to wait until the router migration is complete.
       this.loadLastSavedKey = (() => {
         let loadedLastSavedKey = false;
@@ -387,7 +388,6 @@ export const HelpSidebar = fp.flow(
       })();
 
       this.loadLastSavedKey();
-
       this.subscription = participantStore.subscribe(participant => this.setState({participant}));
       this.subscription.add(setSidebarActiveIconStore.subscribe(activeIcon => {this.setActiveIcon(activeIcon); }));
       this.subscription.add(routeDataStore.subscribe((newRoute, oldRoute) => {
@@ -428,7 +428,7 @@ export const HelpSidebar = fp.flow(
 
     analyticsEvent(type: string, label?: string) {
       const {pageKey} = this.props;
-      const analyticsLabel = analyticsLabels[pageKey];
+      const analyticsLabel = pageKeyToAnalyticsLabels[pageKey];
       if (analyticsLabel) {
         const eventLabel = label ? `${label} - ${analyticsLabel}` : analyticsLabel;
         AnalyticsTracker.Sidebar[type](eventLabel);
@@ -439,7 +439,7 @@ export const HelpSidebar = fp.flow(
       return {
         ...styles.sidebarContainer,
         width: activeIcon ? `calc(${this.sidebarWidth}rem + 70px)` : 0, // +70px accounts for the width of the icon sidebar + box shadow
-        ...(this.props.pageKey === NOTEBOOK_HELP_CONTENT ? styles.notebookOverrides : {})
+        ...(this.props.pageKey === NOTEBOOK_PAGE_KEY ? styles.notebookOverrides : {})
       };
     }
 
@@ -696,7 +696,7 @@ export const HelpSidebar = fp.flow(
       const shouldRenderWorkspaceMenu = !this.iconConfig('concept').showIcon() && !this.iconConfig('criteria').showIcon();
 
       return <div id='help-sidebar'>
-        <div style={{...styles.iconContainer, ...(this.props.pageKey === NOTEBOOK_HELP_CONTENT ? styles.notebookOverrides : {})}}>
+        <div style={{...styles.iconContainer, ...(this.props.pageKey === NOTEBOOK_PAGE_KEY ? styles.notebookOverrides : {})}}>
           {shouldRenderWorkspaceMenu && this.renderWorkspaceMenu()}
           {this.icons().map((icon, i) =>
               <div key={i} style={{display: 'table'}}>

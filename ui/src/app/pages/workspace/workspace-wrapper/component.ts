@@ -85,8 +85,8 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
           this.tabPath = this.getTabPath();
           this.setPageKey();
           // Close sidebar on route change unless navigating between participants in cohort review
-          // Bit of a hack to use regex to test if we're in the cohort review but the pageKey
-          // isn't being set to the correct value at the time when a user clicks onto a new participant.
+          // Bit of a hack to use regex to test if we're in the cohort review but the pageKey isn't being set at the
+          // time when a user clicks onto a new participant so we can't use that to check if we're in the cohort review
           // We can probably clean this up after we fully migrate to React router
           if (!/\/data\/cohorts\/.*\/review\/participants\/.*/.test(e.url)) {
             setSidebarActiveIconStore.next(null);

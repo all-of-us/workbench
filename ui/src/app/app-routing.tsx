@@ -13,7 +13,7 @@ import {authStore, profileStore, useStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
-import {NOTEBOOK_HELP_CONTENT} from './components/help-sidebar';
+import {NOTEBOOK_PAGE_KEY} from './components/help-sidebar';
 import { AdminBanner } from './pages/admin/admin-banner';
 import {AdminInstitution} from './pages/admin/admin-institution';
 import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
@@ -266,7 +266,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           component={() => <InteractiveNotebookPage routeData={{
             pathElementForTitle: 'nbName',
             breadcrumb: BreadcrumbType.Notebook,
-            pageKey: NOTEBOOK_HELP_CONTENT,
+            pageKey: NOTEBOOK_PAGE_KEY,
             minimizeChrome: true
           }}/>}
         />
@@ -279,7 +279,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             // to the height calculation of the container, which is normally set to auto.
             // Setting this flag sets the container to 100% so that no content is clipped.
             contentFullHeightOverride: true,
-            pageKey: NOTEBOOK_HELP_CONTENT,
+            pageKey: NOTEBOOK_PAGE_KEY,
             minimizeChrome: true
           }}/>}
         />

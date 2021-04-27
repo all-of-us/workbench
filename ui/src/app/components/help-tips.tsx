@@ -108,10 +108,15 @@ export class HelpTips extends React.Component<Props, State> {
   }
 
   helpContentKey(pageKey: string) {
-    if (pageKey === 'conceptSetActions' || pageKey === 'searchConceptSets') {
-      return 'conceptSets';
+    switch (pageKey) {
+      case 'conceptSetActions':
+      case 'searchConceptSets':
+        return 'conceptSets';
+      case 'notebook':
+        return 'notebookStorage';
+      default:
+        return pageKey;
     }
-    return pageKey;
   }
 
   render() {
