@@ -25,7 +25,6 @@ export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
         cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
         accessTierShortName: AccessTierShortNames.Registered,
         archivalStatus: ArchivalStatus.LIVE,
-        hasMicroarrayData: true,
         hasFitbitData: true,
         hasWgsData: true,
         creationTime: 0
@@ -35,7 +34,6 @@ export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
         cdrVersionId: CdrVersionsStubVariables.ALT_WORKSPACE_CDR_VERSION_ID,
         accessTierShortName: AccessTierShortNames.Registered,
         archivalStatus: ArchivalStatus.LIVE,
-        hasMicroarrayData: false,
         hasFitbitData: true,
         hasWgsData: false,
         creationTime: 0
@@ -50,7 +48,6 @@ export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
           cdrVersionId: CdrVersionsStubVariables.CONTROLLED_TIER_CDR_VERSION_ID,
           accessTierShortName: AccessTierShortNames.Controlled,
           archivalStatus: ArchivalStatus.LIVE,
-          hasMicroarrayData: true,
           hasFitbitData: true,
           hasWgsData: true,
           creationTime: 0

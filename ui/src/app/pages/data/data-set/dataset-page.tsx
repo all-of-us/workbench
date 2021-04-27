@@ -1266,8 +1266,6 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                            workspaceNamespace={namespace}
                                            workspaceId={id}
                                            billingLocked={this.props.workspace.billingStatus === BillingStatus.INACTIVE}
-                                           displayMicroarrayOptions={
-                                             getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasMicroarrayData}
                                            prePackagedConceptSet={this.getPrePackagedConceptSetApiEnum()}
                                            dataSet={dataSet ? dataSet : undefined}
                                            closeFunction={() => {
