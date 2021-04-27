@@ -200,84 +200,10 @@ interface IconConfig {
   faIcon: IconDefinition;
   label: string;
   page: string;
+  showIcon: () => boolean;
   style: CSSProperties;
   tooltip: string;
 }
-
-const iconConfigs: { [iconKey: string]: IconConfig } = {
-  'criteria': {
-    id: 'criteria',
-    disabled: false,
-    faIcon: faInbox,
-    label: 'Selected Criteria',
-    page: 'cohortBuilder',
-    style: {fontSize: '21px'},
-    tooltip: 'Selected Criteria',
-  },
-  'concept': {
-    id: 'concept',
-    disabled: false,
-    faIcon: faInbox,
-    label: 'Selected Concepts',
-    page: 'conceptSets',
-    style: {fontSize: '21px'},
-    tooltip: 'Selected Concepts',
-  },
-  'help': {
-    id: 'help',
-    disabled: false,
-    faIcon: faInfoCircle,
-    label: 'Help Icon',
-    page: null,
-    style: {fontSize: '21px'},
-    tooltip: 'Help Tips',
-  },
-  'notebooksHelp': {
-    id: 'notebooksHelp',
-    disabled: false,
-    faIcon: faFolderOpen,
-    label: 'Storage Icon',
-    page: null,
-    style: {fontSize: '21px'},
-    tooltip: 'Workspace Storage',
-  },
-  'dataDictionary': {
-    id: 'dataDictionary',
-    disabled: false,
-    faIcon: faBook,
-    label: 'Data Dictionary Icon',
-    page: null,
-    style: {color: colors.white, fontSize: '20px', marginTop: '5px'},
-    tooltip: 'Data Dictionary',
-  },
-  'annotations': {
-    id: 'annotations',
-    disabled: false,
-    faIcon: faEdit,
-    label: 'Annotations Icon',
-    page: 'reviewParticipantDetail',
-    style: {fontSize: '20px', marginLeft: '3px'},
-    tooltip: 'Annotations',
-  },
-  'runtime': {
-    id: 'runtime',
-    disabled: false,
-    faIcon: null,
-    label: 'Cloud Icon',
-    page: null,
-    style: {height: '22px', width: '22px'},
-    tooltip: 'Compute Configuration'
-  },
-  'genomicExtractions': {
-    id: 'genomicExtractions',
-    disabled: false,
-    faIcon: faDna,
-    label: 'Genomic Extraction',
-    page: null,
-    style: {height: '22px', width: '22px', marginTop: '0.25rem'},
-    tooltip: 'Genomic Extraction History',
-  }
-};
 
 const analyticsLabels = {
   about: 'About Page',
@@ -336,6 +262,91 @@ export const HelpSidebar = fp.flow(
       };
     }
 
+    iconConfig(iconKey): IconConfig {
+      return {
+        'criteria': {
+          id: 'criteria',
+          disabled: false,
+          faIcon: faInbox,
+          label: 'Selected Criteria',
+          page: 'cohortBuilder',
+          showIcon: () => this.props.helpContentKey === 'cohortBuilder' && !!this.props.criteria,
+          style: {fontSize: '21px'},
+          tooltip: 'Selected Criteria',
+        },
+        'concept': {
+          id: 'concept',
+          disabled: false,
+          faIcon: faInbox,
+          label: 'Selected Concepts',
+          page: 'conceptSets',
+          showIcon: () => this.props.helpContentKey === 'conceptSets' && !!this.props.concept,
+          style: {fontSize: '21px'},
+          tooltip: 'Selected Concepts',
+        },
+        'help': {
+          id: 'help',
+          disabled: false,
+          faIcon: faInfoCircle,
+          label: 'Help Icon',
+          page: null,
+          showIcon: () => true,
+          style: {fontSize: '21px'},
+          tooltip: 'Help Tips',
+        },
+        'notebooksHelp': {
+          id: 'notebooksHelp',
+          disabled: false,
+          faIcon: faFolderOpen,
+          label: 'Storage Icon',
+          page: null,
+          showIcon: () => true,
+          style: {fontSize: '21px'},
+          tooltip: 'Workspace Storage',
+        },
+        'dataDictionary': {
+          id: 'dataDictionary',
+          disabled: false,
+          faIcon: faBook,
+          label: 'Data Dictionary Icon',
+          page: null,
+          showIcon: () => true,
+          style: {color: colors.white, fontSize: '20px', marginTop: '5px'},
+          tooltip: 'Data Dictionary',
+        },
+        'annotations': {
+          id: 'annotations',
+          disabled: false,
+          faIcon: faEdit,
+          label: 'Annotations Icon',
+          page: 'reviewParticipantDetail',
+          showIcon: () => this.props.helpContentKey === 'reviewParticipantDetail',
+          style: {fontSize: '20px', marginLeft: '3px'},
+          tooltip: 'Annotations',
+        },
+        'runtime': {
+          id: 'runtime',
+          disabled: false,
+          faIcon: null,
+          label: 'Cloud Icon',
+          page: null,
+          showIcon: () => true,
+          style: {height: '22px', width: '22px'},
+          tooltip: 'Compute Configuration'
+        },
+        'genomicExtractions': {
+          id: 'genomicExtractions',
+          disabled: false,
+          faIcon: faDna,
+          label: 'Genomic Extraction',
+          page: null,
+          showIcon: () => true,
+          style: {height: '22px', width: '22px', marginTop: '0.25rem'},
+          tooltip: 'Genomic Extraction History',
+        }
+      }[iconKey];
+    }
+
     icons(): IconConfig[] {
       const keys = [
         'criteria',
@@ -344,7 +355,7 @@ export const HelpSidebar = fp.flow(
         'notebooksHelp',
         'dataDictionary',
         'annotations'
-      ].filter(key => this.showIcon(key));
+      ].filter(key => this.iconConfig(key).showIcon());
 
       if (WorkspacePermissionsUtil.canWrite(this.props.workspace.accessLevel)) {
         keys.push('runtime');
@@ -354,11 +365,7 @@ export const HelpSidebar = fp.flow(
         keys.push('genomicExtractions');
       }
 
-      return keys.map(k => iconConfigs[k]);
-    }
-
-    showIcon(iconKey: string) {
-      return !iconConfigs[iconKey].page || iconConfigs[iconKey].page === this.props.helpContentKey;
+      return keys.map(k => this.iconConfig(k));
     }
 
     setActiveIcon(activeIcon: string) {
@@ -393,6 +400,8 @@ export const HelpSidebar = fp.flow(
       this.subscription = participantStore.subscribe(participant => this.setState({participant}));
       this.subscription.add(setSidebarActiveIconStore.subscribe(activeIcon => {this.setActiveIcon(activeIcon);}));
       this.subscription.add(routeDataStore.subscribe((newRoute, oldRoute) => {
+        console.log(oldRoute);
+        console.log(newRoute);
         if (!fp.isEmpty(oldRoute) && !fp.isEqual(newRoute, oldRoute)) {
           this.setActiveIcon(null);
         }
@@ -509,10 +518,10 @@ export const HelpSidebar = fp.flow(
       const {concept, criteria} = this.props;
 
       return <React.Fragment>
-        {(this.showIcon('criteria') && criteria && criteria.length > 0) && <span data-test-id='criteria-count'
+        {(this.iconConfig('criteria').showIcon() && criteria.length > 0) && <span data-test-id='criteria-count'
                                                          style={styles.criteriaCount}>
           {criteria.length}</span>}
-        {(this.showIcon('concept') && concept && concept.length > 0) && <span data-test-id='concept-count'
+        {(this.iconConfig('concept').showIcon() && concept.length > 0) && <span data-test-id='concept-count'
                                                          style={styles.criteriaCount}>
           {concept.length}</span>}
             <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
@@ -695,7 +704,7 @@ export const HelpSidebar = fp.flow(
     render() {
       const {activeIcon, tooltipId} = this.state;
       const sidebarContent = this.sidebarContent(activeIcon);
-      const shouldRenderWorkspaceMenu = !this.showIcon('concept') && !this.showIcon('criteria');
+      const shouldRenderWorkspaceMenu = !this.iconConfig('concept').showIcon() && !this.iconConfig('criteria').showIcon();
 
       return <div id='help-sidebar'>
         <div style={{...styles.iconContainer, ...(this.props.helpContentKey === NOTEBOOK_HELP_CONTENT ? styles.notebookOverrides : {})}}>
