@@ -14,7 +14,7 @@ import {Spinner} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {withCurrentWorkspace} from 'app/utils';
+import {switchCase, withCurrentWorkspace} from 'app/utils';
 import {formatUsd} from 'app/utils/numbers';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -74,6 +74,8 @@ const formatDuration = (durationMoment) => {
 };
 
 const GenomicsExtractionMenu = ({job, workspace}) => {
+  const isRunning = job.status === TerraJobStatus.RUNNING;
+  const canWrite = WorkspacePermissionsUtil.canWrite(workspace.accessLevel);
   return <PopupTrigger
     side='bottom-left'
     closeOnClick
@@ -96,16 +98,17 @@ const GenomicsExtractionMenu = ({job, workspace}) => {
        <hr/>
        <MenuItem
            faIcon={faBan}
-           disabled={job.status !== TerraJobStatus.RUNNING || !WorkspacePermissionsUtil.canWrite(workspace.accessLevel)}
+           disabled={!isRunning || !canWrite}
            onClick={() => {
              dataSetApi().abortGenomicExtractionJob(workspace.namespace, workspace.id, job.genomicExtractionJobId);
            }}
            tooltip={
-             job.status !== TerraJobStatus.RUNNING
-               ? 'Extraction job is not currently running'
-               : !WorkspacePermissionsUtil.canWrite(workspace.accessLevel)
-                 ? 'You do not have permission to modify this workspace'
-                 : ''
+             switchCase({r: isRunning, w: canWrite},
+                 [{r: true, w: true}, () => ''],
+                 [{r: true, w: false}, () => 'You do not have permission to modify this workspace'],
+                 [{r: false, w: true}, () => 'Extraction job is not currently running'],
+                 [{r: false, w: false}, () => 'Extraction job is not currently running']
+             )
            }
        >
          Abort Extraction

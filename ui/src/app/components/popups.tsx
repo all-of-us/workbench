@@ -115,6 +115,7 @@ export const computePopupPosition = ({side, viewport, target, element, gap}) => 
       ['bottom', () => ({top: target.bottom + gap, left})],
       ['left', () => ({left: target.left - element.width - gap, top})],
       ['right', () => ({left: target.right + gap, top})],
+      // Using half a gap here so the popup lines up with the snowman menu.
       ['bottom-left', () => ({top: target.bottom + gap, left: target.left - element.width + (.5 * gap)})],
       ['bottom-right', () => ({top: target.bottom + gap, left: target.right - (.5 * gap)})],
       ['top-left', () => ({top: target.top - element.height - gap, left: target.left - element.width + (.5 * gap)})],
@@ -122,6 +123,9 @@ export const computePopupPosition = ({side, viewport, target, element, gap}) => 
     );
   };
   const position = getPosition(side);
+  const pickCorner = c => {
+
+  }
   const maybeFlip = d => {
     return switchCase(d,
       ['top', () => position.top < 0 ? 'bottom' : 'top'],
