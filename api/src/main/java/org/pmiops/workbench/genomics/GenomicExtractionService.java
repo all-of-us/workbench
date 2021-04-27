@@ -275,9 +275,12 @@ public class GenomicExtractionService {
     return new GenomicExtractionJob().status(TerraJobStatus.RUNNING);
   }
 
-  public void abortExtract(String wgsCohortExtractionId) throws ApiException {
+  public void abortGenomicExtractionJob(String workspaceNamespace, String workspaceId, String jobId) throws ApiException {
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
     DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
-        wgsExtractCromwellSubmissionDao.findOne(Long.valueOf(wgsCohortExtractionId));
+        wgsExtractCromwellSubmissionDao.findOne(Long.valueOf(jobId));
 
     WgsCohortExtractionConfig cohortExtractionConfig =
         workbenchConfigProvider.get().wgsCohortExtraction;

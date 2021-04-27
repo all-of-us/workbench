@@ -66,6 +66,13 @@ git secrets --scan /path/to/file (/other/path/to/file *)
 git secrets --scan -r /path/to/directory
 ```
 
+## .npmrc
+
+In the UI, we use some [Fontawesome](https://fontawesome.com/) Pro icons. In order to install the Fontawesome Pro packages, you will need to download an `.npmrc` file with a Fontawesome license token. Copy it into the workbench root directory:
+```
+workbench$ gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc .
+```
+
 ## Initial Smoke Test
 Before doing any development, you must run the following from `/api`:
 ```Shell

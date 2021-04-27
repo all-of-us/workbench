@@ -98,7 +98,7 @@ const GenomicsExtractionMenu = ({job, workspace}) => {
            faIcon={faBan}
            disabled={job.status !== TerraJobStatus.RUNNING || !WorkspacePermissionsUtil.canWrite(workspace.accessLevel)}
            onClick={() => {
-             dataSetApi().abortExtract(workspace.namespace, workspace.id, job.genomicExtractionJobId);
+             dataSetApi().abortGenomicExtractionJob(workspace.namespace, workspace.id, job.genomicExtractionJobId);
            }}
            tooltip={
              job.status !== TerraJobStatus.RUNNING

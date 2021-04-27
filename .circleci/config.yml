@@ -285,6 +285,7 @@ commands:
           key: v5-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
       - gcloud-auth-login
       - run:
+          name: "Download .npmrc file with Fontawesome Pro license key so FA icon SVG packages can be installed"
           working_directory: ~/workbench
           command: gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc .
       - run:

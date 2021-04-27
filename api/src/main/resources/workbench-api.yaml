@@ -2432,7 +2432,7 @@ paths:
           description: The Terra Job for the extraction workflow
           schema:
             "$ref": "#/definitions/GenomicExtractionJob"
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/abortExtract/{wgsCohortExtractionJobId}":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/genomicExtractionJobs/{jobId}/abort":
     post:
       parameters:
         - in: path
@@ -2446,14 +2446,14 @@ paths:
           required: true
           type: string
         - in: path
-          name: wgsCohortExtractionJobId
+          name: jobId
           type: string
           required: true
       tags:
         - dataSet
       description: 'Aborts a running genome extract job. Requires WRITER access on the workspace.
         Workspace CDR must also have access to a Wgs dataset'
-      operationId: abortExtract
+      operationId: abortGenomicExtractionJob
       responses:
         204:
           description: Successful request
