@@ -44,7 +44,6 @@
     },
     {
       "cdrVersionId": 3,
-      "isDefault": true,
       "accessTier": "registered",
       "name": "Synthetic Dataset v3",
       "bigqueryProject": "fc-aou-cdr-perf",
@@ -72,6 +71,7 @@
     },
     {
       "cdrVersionId": 5,
+      "isDefault": true,
       "name": "Synthetic Dataset v4",
       "bigqueryProject": "fc-aou-cdr-perf",
       "bigqueryDataset": "test_R2019q4r3",
