@@ -379,11 +379,7 @@ export const HelpSidebar = fp.flow(
         let loadedLastSavedKey = false;
         return () => {
           if (!loadedLastSavedKey && this.props.helpContentKey) {
-            console.log('trying to load ' + lastSavedKey);
             const iconConfig = this.icons().find(icon => icon.id === lastSavedKey);
-            console.log(iconConfig);
-            console.log(this.props.concept);
-            console.log(this.props);
             setSidebarActiveIconStore.next(iconConfig ? iconConfig.id : null);
             loadedLastSavedKey = true;
           }
@@ -395,8 +391,6 @@ export const HelpSidebar = fp.flow(
       this.subscription = participantStore.subscribe(participant => this.setState({participant}));
       this.subscription.add(setSidebarActiveIconStore.subscribe(activeIcon => {this.setActiveIcon(activeIcon); }));
       this.subscription.add(routeDataStore.subscribe((newRoute, oldRoute) => {
-        console.log(oldRoute);
-        console.log(newRoute);
         if (!fp.isEmpty(oldRoute) && !fp.isEqual(newRoute, oldRoute)) {
           this.setActiveIcon(null);
         }
@@ -616,7 +610,7 @@ export const HelpSidebar = fp.flow(
             renderBody: () =>
               <HelpTips allowSearch={true}
                         onSearch={() => this.analyticsEvent('Search')}
-                        contentKey={this.props.helpContentKey}/>,
+                        pageKey={this.props.helpContentKey}/>,
             showFooter: true
           };
         case 'runtime':
@@ -645,7 +639,7 @@ export const HelpSidebar = fp.flow(
               </h3>,
             renderBody: () =>
               <HelpTips allowSearch={false}
-                        contentKey={this.props.helpContentKey}/>,
+                        pageKey={this.props.helpContentKey}/>,
             showFooter: true
           };
         case 'annotations':

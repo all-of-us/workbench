@@ -39,7 +39,7 @@ const styles = reactStyles({
 });
 
 interface Props {
-  contentKey: string;
+  pageKey: string;
   allowSearch: boolean;
   onSearch?: Function;
 }
@@ -107,9 +107,16 @@ export class HelpTips extends React.Component<Props, State> {
     return highlightSearchTerm(searchTerm, content, colors.success);
   }
 
+  helpContentKey(pageKey: string) {
+    if (pageKey === 'conceptSetActions' || pageKey === 'searchConceptSets') {
+      return 'conceptSets';
+    }
+    return pageKey;
+  }
+
   render() {
     const {filteredContent} = this.state;
-    const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[this.props.contentKey];
+    const displayContent = filteredContent !== undefined ? filteredContent : sidebarContent[this.helpContentKey(this.props.pageKey)];
 
     return <div>
       {this.props.allowSearch && <div style={styles.textSearch}>

@@ -67,6 +67,10 @@ describe('HelpSidebar', () => {
     runtimeStore.set({workspaceNamespace: workspaceDataStub.namespace, runtime: null});
   };
 
+  const setActiveIcon = async(wrapper, activeIconKey) => {
+    setSidebarActiveIconStore.next(activeIconKey);
+    await waitOneTickAndUpdate(wrapper);
+  };
 
   beforeEach(() => {
     props = {};
@@ -97,28 +101,28 @@ describe('HelpSidebar', () => {
   });
 
   it('should update content when helpContentKey prop changes', async() => {
-    props = {helpContentKey: 'data', sidebarOpen: true};
+    props = {helpContentKey: 'data'};
     const wrapper = await component();
+    await setActiveIcon(wrapper, 'help');
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.data[0].title);
     wrapper.setProps({helpContentKey: 'cohortBuilder'});
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.cohortBuilder[0].title);
   });
 
   it('should show a different icon and title when helpContentKey is notebookStorage', async() => {
-    props = {helpContentKey: 'notebookStorage', sidebarOpen: true};
+    props = {helpContentKey: 'notebookStorage'};
     const wrapper = await component();
+    await setActiveIcon(wrapper, 'notebooksHelp');
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.notebookStorage[0].title);
     expect(wrapper.find('[data-test-id="help-sidebar-icon-notebooksHelp"]').get(0).props.icon.iconName).toBe('folder-open');
   });
 
   it('should update marginRight style when sidebarOpen prop changes', async() => {
     const wrapper = await component();
-    setSidebarActiveIconStore.next('help');
-    await waitOneTickAndUpdate(wrapper);
+    await setActiveIcon(wrapper, 'help');
     expect(wrapper.find('[data-test-id="sidebar-content"]').parent().prop('style').width).toBe('calc(14rem + 70px)');
 
-    setSidebarActiveIconStore.next(null);
-    await waitOneTickAndUpdate(wrapper);
+    await setActiveIcon(wrapper, null);
     expect(wrapper.find('[data-test-id="sidebar-content"]').parent().prop('style').width).toBe(0);
   });
 
@@ -140,10 +144,12 @@ describe('HelpSidebar', () => {
     expect(shareSpy).toHaveBeenCalled();
   });
 
-  it('should hide workspace icon if on critera search page', async() => {
+  it('should hide workspace icon if on criteria search page', async() => {
+    props = {helpContentKey: 'cohortBuilder'};
     const wrapper = await component();
     currentCohortCriteriaStore.next([]);
     await waitForFakeTimersAndUpdate(wrapper);
+
     expect(wrapper.find({'data-test-id': 'workspace-menu-button'}).length).toBe(0);
     expect(wrapper.find({'data-test-id': 'criteria-count'}).length).toBe(0);
     currentCohortCriteriaStore.next([criteria1]);
@@ -152,6 +158,7 @@ describe('HelpSidebar', () => {
   });
 
   it('should update count if criteria is added', async() => {
+    props = {helpContentKey: 'cohortBuilder'};
     const wrapper = await component();
     currentCohortCriteriaStore.next([criteria1, criteria2]);
     await waitForFakeTimersAndUpdate(wrapper);
