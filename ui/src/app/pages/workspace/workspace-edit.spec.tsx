@@ -5,7 +5,15 @@ import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {DisseminateResearchEnum, ResearchOutcomeEnum, SpecificPopulationEnum,UserApi, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
+import {
+  CdrVersionTier,
+  DisseminateResearchEnum,
+  ResearchOutcomeEnum,
+  SpecificPopulationEnum,
+  UserApi,
+  WorkspaceAccessLevel,
+  WorkspacesApi
+} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
@@ -14,7 +22,8 @@ import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-edit';
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
-import {cdrVersionStore, serverConfigStore} from "app/utils/stores";
+import {cdrVersionStore, serverConfigStore} from 'app/utils/stores';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 
 jest.mock('app/utils/navigation', () => ({
   ...(jest.requireActual('app/utils/navigation')),
@@ -260,6 +269,29 @@ describe('WorkspaceEdit', () => {
 
     // old CDR Version warning does not appear
     expect(wrapper.find('[data-test-id="old-cdr-version-warning"]').exists()).toBeFalsy();
+  });
+
+  it('enables access tier selection on creation when multiple tiers are available', async() => {
+    workspaceEditMode = WorkspaceEditMode.Create;
+
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    const accessTierSelection = wrapper.find('[data-test-id="select-access-tier"]');
+    expect(accessTierSelection.exists()).toBeTruthy();
+
+    // defaults to registered
+    expect(accessTierSelection.find('select').props().value).toBe(AccessTierShortNames.Registered);
+  });
+
+  it('does not enable access tier selection on creation when multiple tiers are not available', async() => {
+    cdrVersionStore.set( {tiers: [cdrVersionTiersResponse.tiers[0]]});
+    workspaceEditMode = WorkspaceEditMode.Create;
+
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.find('[data-test-id="select-access-tier"]').exists()).toBeFalsy();
   });
 
   // regression test for RW-5132
