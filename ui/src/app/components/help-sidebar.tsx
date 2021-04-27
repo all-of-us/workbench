@@ -199,7 +199,6 @@ interface IconConfig {
   disabled: boolean;
   faIcon: IconDefinition;
   label: string;
-  page: string;
   showIcon: () => boolean;
   style: CSSProperties;
   tooltip: string;
@@ -209,6 +208,8 @@ const analyticsLabels = {
   about: 'About Page',
   cohortBuilder: 'Cohort Builder',
   conceptSets: 'Concept Set',
+  searchConceptSets: 'Concept Set',
+  conceptSetActions: 'Concept Set',
   data: 'Data Landing Page',
   datasetBuilder: 'Dataset Builder',
   notebooks: 'Analysis Tab Landing Page',
@@ -269,7 +270,6 @@ export const HelpSidebar = fp.flow(
           disabled: false,
           faIcon: faInbox,
           label: 'Selected Criteria',
-          page: 'cohortBuilder',
           showIcon: () => this.props.helpContentKey === 'cohortBuilder' && !!this.props.criteria,
           style: {fontSize: '21px'},
           tooltip: 'Selected Criteria',
@@ -279,8 +279,7 @@ export const HelpSidebar = fp.flow(
           disabled: false,
           faIcon: faInbox,
           label: 'Selected Concepts',
-          page: 'conceptSets',
-          showIcon: () => this.props.helpContentKey === 'conceptSets' && !!this.props.concept,
+          showIcon: () => this.props.helpContentKey === 'conceptSets',
           style: {fontSize: '21px'},
           tooltip: 'Selected Concepts',
         },
@@ -289,7 +288,6 @@ export const HelpSidebar = fp.flow(
           disabled: false,
           faIcon: faInfoCircle,
           label: 'Help Icon',
-          page: null,
           showIcon: () => true,
           style: {fontSize: '21px'},
           tooltip: 'Help Tips',
@@ -299,7 +297,6 @@ export const HelpSidebar = fp.flow(
           disabled: false,
           faIcon: faFolderOpen,
           label: 'Storage Icon',
-          page: null,
           showIcon: () => true,
           style: {fontSize: '21px'},
           tooltip: 'Workspace Storage',
@@ -309,7 +306,6 @@ export const HelpSidebar = fp.flow(
           disabled: false,
           faIcon: faBook,
           label: 'Data Dictionary Icon',
-          page: null,
           showIcon: () => true,
           style: {color: colors.white, fontSize: '20px', marginTop: '5px'},
           tooltip: 'Data Dictionary',
@@ -319,7 +315,6 @@ export const HelpSidebar = fp.flow(
           disabled: false,
           faIcon: faEdit,
           label: 'Annotations Icon',
-          page: 'reviewParticipantDetail',
           showIcon: () => this.props.helpContentKey === 'reviewParticipantDetail',
           style: {fontSize: '20px', marginLeft: '3px'},
           tooltip: 'Annotations',
@@ -329,7 +324,6 @@ export const HelpSidebar = fp.flow(
           disabled: false,
           faIcon: null,
           label: 'Cloud Icon',
-          page: null,
           showIcon: () => true,
           style: {height: '22px', width: '22px'},
           tooltip: 'Compute Configuration'
@@ -339,7 +333,6 @@ export const HelpSidebar = fp.flow(
           disabled: false,
           faIcon: faDna,
           label: 'Genomic Extraction',
-          page: null,
           showIcon: () => true,
           style: {height: '22px', width: '22px', marginTop: '0.25rem'},
           tooltip: 'Genomic Extraction History',
@@ -388,7 +381,11 @@ export const HelpSidebar = fp.flow(
         let loadedLastSavedKey = false;
         return () => {
           if (!loadedLastSavedKey && this.props.helpContentKey) {
+            console.log('trying to load ' + lastSavedKey);
             const iconConfig = this.icons().find(icon => icon.id === lastSavedKey);
+            console.log(iconConfig);
+            console.log(this.props.concept);
+            console.log(this.props);
             setSidebarActiveIconStore.next(iconConfig ? iconConfig.id : null);
             loadedLastSavedKey = true;
           }
@@ -518,10 +515,10 @@ export const HelpSidebar = fp.flow(
       const {concept, criteria} = this.props;
 
       return <React.Fragment>
-        {(this.iconConfig('criteria').showIcon() && criteria.length > 0) && <span data-test-id='criteria-count'
+        {(icon.id === 'criteria' && criteria && criteria.length > 0) && <span data-test-id='criteria-count'
                                                          style={styles.criteriaCount}>
           {criteria.length}</span>}
-        {(this.iconConfig('concept').showIcon() && concept.length > 0) && <span data-test-id='concept-count'
+        {(icon.id === 'concept' && concept && concept.length > 0) && <span data-test-id='concept-count'
                                                          style={styles.criteriaCount}>
           {concept.length}</span>}
             <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />
@@ -702,7 +699,7 @@ export const HelpSidebar = fp.flow(
     }
 
     render() {
-      const {activeIcon, tooltipId} = this.state;
+      const {activeIcon} = this.state;
       const sidebarContent = this.sidebarContent(activeIcon);
       const shouldRenderWorkspaceMenu = !this.iconConfig('concept').showIcon() && !this.iconConfig('criteria').showIcon();
 
@@ -711,15 +708,13 @@ export const HelpSidebar = fp.flow(
           {shouldRenderWorkspaceMenu && this.renderWorkspaceMenu()}
           {this.icons().map((icon, i) =>
               <div key={i} style={{display: 'table'}}>
-                <TooltipTrigger content={<div>{tooltipId === i && icon.tooltip}</div>} side='left'>
+                <TooltipTrigger content={<div>{icon.tooltip}</div>} side='left'>
                   <div style={activeIcon === icon.id ? iconStyles.active : icon.disabled ? iconStyles.disabled : styles.icon}
                        onClick={() => {
                          if (icon.id !== 'dataDictionary' && !icon.disabled) {
                            this.onIconClick(icon);
                          }
-                       }}
-                       onMouseOver={() => this.setState({tooltipId: i})}
-                       onMouseOut={() => this.setState({tooltipId: undefined})}>
+                       }}>
                     {icon.id === 'dataDictionary'
                       ? <a href={supportUrls.dataDictionary} target='_blank'>
                           <FontAwesomeIcon data-test-id={'help-sidebar-icon-' + icon.id} icon={icon.faIcon} style={icon.style} />

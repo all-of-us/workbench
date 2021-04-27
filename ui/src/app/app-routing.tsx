@@ -328,7 +328,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           component={() => <ConceptHomepagePage routeData={{
             title: 'Search Concepts',
             breadcrumb: BreadcrumbType.SearchConcepts,
-            helpContentKey: 'conceptSets'
+            helpContentKey: 'searchConceptSets'
           }}/>}
         />
         <AppRoute
@@ -336,7 +336,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           component={() => <ConceptSetActionsPage routeData={{
             title: 'Concept Set Actions',
             breadcrumb: BreadcrumbType.ConceptSet,
-            helpContentKey: 'conceptSets'
+            helpContentKey: 'conceptSetActions'
           }}/>}
         />
       </ProtectedRoutes>
