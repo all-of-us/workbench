@@ -217,7 +217,7 @@ const analyticsLabels = {
 
 interface Props {
   deleteFunction: Function;
-  helpContentKey: string;
+  pageKey: string;
   profileState: any;
   shareFunction: Function;
   workspace: WorkspaceData;
@@ -268,7 +268,7 @@ export const HelpSidebar = fp.flow(
           disabled: false,
           faIcon: faInbox,
           label: 'Selected Criteria',
-          showIcon: () => this.props.helpContentKey === 'cohortBuilder' && !!this.props.criteria,
+          showIcon: () => this.props.pageKey === 'cohortBuilder' && !!this.props.criteria,
           style: {fontSize: '21px'},
           tooltip: 'Selected Criteria',
         },
@@ -277,7 +277,7 @@ export const HelpSidebar = fp.flow(
           disabled: false,
           faIcon: faInbox,
           label: 'Selected Concepts',
-          showIcon: () => this.props.helpContentKey === 'conceptSets',
+          showIcon: () => this.props.pageKey === 'conceptSets',
           style: {fontSize: '21px'},
           tooltip: 'Selected Concepts',
         },
@@ -313,7 +313,7 @@ export const HelpSidebar = fp.flow(
           disabled: false,
           faIcon: faEdit,
           label: 'Annotations Icon',
-          showIcon: () => this.props.helpContentKey === 'reviewParticipantDetail',
+          showIcon: () => this.props.pageKey === 'reviewParticipantDetail',
           style: {fontSize: '20px', marginLeft: '3px'},
           tooltip: 'Annotations',
         },
@@ -372,13 +372,13 @@ export const HelpSidebar = fp.flow(
       const lastSavedKey = localStorage.getItem(LOCAL_STORAGE_KEY_SIDEBAR_STATE);
 
       // This is a little hacky but it's necessary because
-      // 1. the helpContentKey is needed for this to run properly but it's not always available on mount
+      // 1. the pageKey is needed for this to run properly but it's not always available on mount
       // 2. router events during page load will overwrite the value of the localStorage key so we need to "save" it here
       // I'd like to clean this up but I think it'll have to wait until the router migration is complete.
       this.loadLastSavedKey = (() => {
         let loadedLastSavedKey = false;
         return () => {
-          if (!loadedLastSavedKey && this.props.helpContentKey) {
+          if (!loadedLastSavedKey && this.props.pageKey) {
             const iconConfig = this.icons().find(icon => icon.id === lastSavedKey);
             setSidebarActiveIconStore.next(iconConfig ? iconConfig.id : null);
             loadedLastSavedKey = true;
@@ -427,8 +427,8 @@ export const HelpSidebar = fp.flow(
     }
 
     analyticsEvent(type: string, label?: string) {
-      const {helpContentKey} = this.props;
-      const analyticsLabel = analyticsLabels[helpContentKey];
+      const {pageKey} = this.props;
+      const analyticsLabel = analyticsLabels[pageKey];
       if (analyticsLabel) {
         const eventLabel = label ? `${label} - ${analyticsLabel}` : analyticsLabel;
         AnalyticsTracker.Sidebar[type](eventLabel);
@@ -439,7 +439,7 @@ export const HelpSidebar = fp.flow(
       return {
         ...styles.sidebarContainer,
         width: activeIcon ? `calc(${this.sidebarWidth}rem + 70px)` : 0, // +70px accounts for the width of the icon sidebar + box shadow
-        ...(this.props.helpContentKey === NOTEBOOK_HELP_CONTENT ? styles.notebookOverrides : {})
+        ...(this.props.pageKey === NOTEBOOK_HELP_CONTENT ? styles.notebookOverrides : {})
       };
     }
 
@@ -610,7 +610,7 @@ export const HelpSidebar = fp.flow(
             renderBody: () =>
               <HelpTips allowSearch={true}
                         onSearch={() => this.analyticsEvent('Search')}
-                        pageKey={this.props.helpContentKey}/>,
+                        pageKey={this.props.pageKey}/>,
             showFooter: true
           };
         case 'runtime':
@@ -639,7 +639,7 @@ export const HelpSidebar = fp.flow(
               </h3>,
             renderBody: () =>
               <HelpTips allowSearch={false}
-                        pageKey={this.props.helpContentKey}/>,
+                        pageKey={this.props.pageKey}/>,
             showFooter: true
           };
         case 'annotations':
@@ -696,7 +696,7 @@ export const HelpSidebar = fp.flow(
       const shouldRenderWorkspaceMenu = !this.iconConfig('concept').showIcon() && !this.iconConfig('criteria').showIcon();
 
       return <div id='help-sidebar'>
-        <div style={{...styles.iconContainer, ...(this.props.helpContentKey === NOTEBOOK_HELP_CONTENT ? styles.notebookOverrides : {})}}>
+        <div style={{...styles.iconContainer, ...(this.props.pageKey === NOTEBOOK_HELP_CONTENT ? styles.notebookOverrides : {})}}>
           {shouldRenderWorkspaceMenu && this.renderWorkspaceMenu()}
           {this.icons().map((icon, i) =>
               <div key={i} style={{display: 'table'}}>
@@ -781,10 +781,10 @@ export const HelpSidebar = fp.flow(
 })
 export class HelpSidebarComponent extends ReactWrapperBase {
   @Input('deleteFunction') deleteFunction: Props['deleteFunction'];
-  @Input('helpContentKey') helpContentKey: Props['helpContentKey'];
+  @Input('pageKey') pageKey: Props['pageKey'];
   @Input('shareFunction') shareFunction: Props['shareFunction'];
 
   constructor() {
-    super(HelpSidebar, ['deleteFunction', 'helpContentKey', 'shareFunction']);
+    super(HelpSidebar, ['deleteFunction', 'pageKey', 'shareFunction']);
   }
 }

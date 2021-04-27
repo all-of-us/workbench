@@ -100,17 +100,17 @@ describe('HelpSidebar', () => {
     expect(wrapper.exists()).toBeTruthy();
   });
 
-  it('should update content when helpContentKey prop changes', async() => {
-    props = {helpContentKey: 'data'};
+  it('should update content when pageKey prop changes', async() => {
+    props = {pageKey: 'data'};
     const wrapper = await component();
     await setActiveIcon(wrapper, 'help');
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.data[0].title);
-    wrapper.setProps({helpContentKey: 'cohortBuilder'});
+    wrapper.setProps({pageKey: 'cohortBuilder'});
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.cohortBuilder[0].title);
   });
 
-  it('should show a different icon and title when helpContentKey is notebookStorage', async() => {
-    props = {helpContentKey: 'notebookStorage'};
+  it('should show a different icon and title when pageKey is notebookStorage', async() => {
+    props = {pageKey: 'notebookStorage'};
     const wrapper = await component();
     await setActiveIcon(wrapper, 'notebooksHelp');
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.notebookStorage[0].title);
@@ -145,7 +145,7 @@ describe('HelpSidebar', () => {
   });
 
   it('should hide workspace icon if on criteria search page', async() => {
-    props = {helpContentKey: 'cohortBuilder'};
+    props = {pageKey: 'cohortBuilder'};
     const wrapper = await component();
     currentCohortCriteriaStore.next([]);
     await waitForFakeTimersAndUpdate(wrapper);
@@ -158,7 +158,7 @@ describe('HelpSidebar', () => {
   });
 
   it('should update count if criteria is added', async() => {
-    props = {helpContentKey: 'cohortBuilder'};
+    props = {pageKey: 'cohortBuilder'};
     const wrapper = await component();
     currentCohortCriteriaStore.next([criteria1, criteria2]);
     await waitForFakeTimersAndUpdate(wrapper);

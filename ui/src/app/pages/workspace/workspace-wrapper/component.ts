@@ -41,7 +41,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
   menuDataLoading = false;
   resourceType: ResourceType = ResourceType.WORKSPACE;
   userRoles?: UserRole[];
-  helpContentKey = 'data';
+  pageKey = 'data';
   pollAborter = new AbortController();
   // The iframe we use to display the Jupyter notebook does something strange
   // to the height calculation of the container, which is normally set to auto.
@@ -70,22 +70,22 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
     // ROUTER MIGRATION: This is allows the react-router conversion to utilize various route config properties
     // Once we are fully converted the help sidebar and modals will need to be reworked a bit to eliminate this Angular code
     this.subscriptions.push(routeDataStore.subscribe(
-      ({minimizeChrome, helpContentKey, contentFullHeightOverride}) => {
-        this.helpContentKey = helpContentKey;
+      ({minimizeChrome, pageKey, contentFullHeightOverride}) => {
+        this.pageKey = pageKey;
         this.contentFullHeightOverride = contentFullHeightOverride;
         this.displayNavBar = !minimizeChrome;
       }
     ));
 
     this.tabPath = this.getTabPath();
-    this.setHelpContentKey();
+    this.setPageKey();
     this.subscriptions.push(
       this.router.events.filter(event => event instanceof NavigationEnd)
         .subscribe((e: RouterEvent) => {
           this.tabPath = this.getTabPath();
-          this.setHelpContentKey();
+          this.setPageKey();
           // Close sidebar on route change unless navigating between participants in cohort review
-          // Bit of a hack to use regex to test if we're in the cohort review but the helpContentKey
+          // Bit of a hack to use regex to test if we're in the cohort review but the pageKey
           // isn't being set to the correct value at the time when a user clicks onto a new participant.
           // We can probably clean this up after we fully migrate to React router
           if (!/\/data\/cohorts\/.*\/review\/participants\/.*/.test(e.url)) {
@@ -247,7 +247,7 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
 
   // This function does multiple things so we don't have to have two separate'
   // where loops on the route.
-  setHelpContentKey() {
+  setPageKey() {
     let child = this.route.firstChild;
     while (child) {
       if (child.snapshot.data.contentFullHeightOverride) {
@@ -258,10 +258,10 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
         child = child.firstChild;
       } else {
         const {
-          helpContentKey = null,
+          pageKey = null,
           contentFullHeightOverride = false
         } = child.snapshot.data || {};
-        this.helpContentKey = helpContentKey;
+        this.pageKey = pageKey;
         this.contentFullHeightOverride = contentFullHeightOverride;
         child = null;
       }
