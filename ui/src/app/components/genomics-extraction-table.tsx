@@ -75,7 +75,7 @@ const formatDuration = (durationMoment) => {
 
 const GenomicsExtractionMenu = ({job, workspace}) => {
   return <PopupTrigger
-    side='bottom'
+    side='bottom-left'
     closeOnClick
     content={
      <React.Fragment>

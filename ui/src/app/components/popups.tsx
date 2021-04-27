@@ -114,7 +114,11 @@ export const computePopupPosition = ({side, viewport, target, element, gap}) => 
       ['top', () => ({top: target.top - element.height - gap, left})],
       ['bottom', () => ({top: target.bottom + gap, left})],
       ['left', () => ({left: target.left - element.width - gap, top})],
-      ['right', () => ({left: target.right + gap, top})]
+      ['right', () => ({left: target.right + gap, top})],
+      ['bottom-left', () => ({top: target.bottom + gap, left: target.left - element.width + (.5 * gap)})],
+      ['bottom-right', () => ({top: target.bottom + gap, left: target.right - (.5 * gap)})],
+      ['top-left', () => ({top: target.top - element.height - gap, left: target.left - element.width + (.5 * gap)})],
+      ['top-right', () => ({top: target.top - element.height - gap, left: target.right - (.5 * gap)})]
     );
   };
   const position = getPosition(side);
@@ -123,7 +127,38 @@ export const computePopupPosition = ({side, viewport, target, element, gap}) => 
       ['top', () => position.top < 0 ? 'bottom' : 'top'],
       ['bottom', () => position.top + element.height >= viewport.height ? 'top' : 'bottom'],
       ['left', () => position.left < 0 ? 'right' : 'left'],
-      ['right', () => position.left + element.width >= viewport.width ? 'left' : 'right']
+      ['right', () => position.left + element.width >= viewport.width ? 'left' : 'right'],
+      ['bottom-left', () => position.top + element.height >= viewport.height
+          ? position.left < 0
+              ? 'top-right'
+              : 'top-left'
+          : position.left < 0
+              ? 'bottom-right'
+              : 'bottom-left'],
+      ['bottom-right', () => position.top + element.height >= viewport.height
+          ? position.left + element.width >= viewport.width
+            ? 'top-left'
+            : 'top-right'
+          : position.left + element.width >= viewport.width
+            ? 'bottom-left'
+            : 'bottom-right'
+      ],
+      ['top-left', () => position.top < 0
+          ? position.left < 0
+            ? 'bottom-right'
+            : 'bottom-left'
+          : position.left < 0
+            ? 'top-right'
+            : 'top-left'
+      ],
+      ['top-right', () => position.top < 0
+          ? position.left + element.width >= viewport.width
+            ? 'bottom-left'
+            : 'bottom-right'
+          : position.left + element.width >= viewport.width
+            ? 'top-left'
+            : 'top-right'
+      ]
     );
   };
   const finalSide = maybeFlip(side);
@@ -242,7 +277,6 @@ export const Popup = fp.flow(
     } = this.props;
 
     const {position} = computePopupPosition({side, target, element, viewport, gap: 10});
-
     return <PopupPortal>
       <div
         onClick={onClick}
