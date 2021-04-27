@@ -998,10 +998,8 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
 
     // show the Access Tiers selection dropdown only when there are multiple tiers to choose from
     enableAccessTierSelection(): boolean {
-      const {cdrVersionTiersResponse} = this.props;
-      console.log(cdrVersionTiersResponse.tiers.length);
-      console.log(JSON.stringify(cdrVersionTiersResponse.tiers));
-      return !!cdrVersionTiersResponse && !!cdrVersionTiersResponse.tiers && cdrVersionTiersResponse.tiers.length > 1;
+      const {tiers} = this.props.cdrVersionTiersResponse || {tiers: []};
+      return tiers.length > 1;
     }
 
     render() {
