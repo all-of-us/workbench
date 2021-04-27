@@ -12,7 +12,6 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import {CSSProperties} from 'react';
 import * as React from 'react';
-import {Simulate} from 'react-dom/test-utils';
 import {CSSTransition, TransitionGroup} from 'react-transition-group';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -65,7 +64,6 @@ import {
 } from 'generated/fetch';
 import {Clickable, MenuItem, StyledAnchorTag} from './buttons';
 import {Spinner} from './spinners';
-import load = Simulate.load;
 
 const LOCAL_STORAGE_KEY_SIDEBAR_STATE = 'WORKSPACE_SIDEBAR_STATE';
 
@@ -395,7 +393,7 @@ export const HelpSidebar = fp.flow(
       this.loadLastSavedKey();
 
       this.subscription = participantStore.subscribe(participant => this.setState({participant}));
-      this.subscription.add(setSidebarActiveIconStore.subscribe(activeIcon => {this.setActiveIcon(activeIcon);}));
+      this.subscription.add(setSidebarActiveIconStore.subscribe(activeIcon => {this.setActiveIcon(activeIcon); }));
       this.subscription.add(routeDataStore.subscribe((newRoute, oldRoute) => {
         console.log(oldRoute);
         console.log(newRoute);
