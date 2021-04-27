@@ -47,6 +47,7 @@ import {
   compoundRuntimeOpStore,
   routeDataStore,
   RuntimeStore,
+  serverConfigStore,
   withStore
 } from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -353,7 +354,8 @@ export const HelpSidebar = fp.flow(
         keys.push('runtime');
       }
 
-      if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
+      if (serverConfigStore.get().config.enableGenomicExtraction &&
+          getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
         keys.push('genomicExtractions');
       }
 

@@ -27,6 +27,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.DatasetConfig;
@@ -90,6 +91,7 @@ public class DataSetController implements DataSetApiDelegate {
   private final NotebooksService notebooksService;
   private final GenomicExtractionService genomicExtractionService;
   private final WorkspaceAuthService workspaceAuthService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   DataSetController(
@@ -100,7 +102,8 @@ public class DataSetController implements DataSetApiDelegate {
       Provider<DbUser> userProvider,
       @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
       GenomicExtractionService genomicExtractionService,
-      WorkspaceAuthService workspaceAuthService) {
+      WorkspaceAuthService workspaceAuthService,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.cdrVersionService = cdrVersionService;
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
@@ -109,6 +112,7 @@ public class DataSetController implements DataSetApiDelegate {
     this.prefixProvider = prefixProvider;
     this.genomicExtractionService = genomicExtractionService;
     this.workspaceAuthService = workspaceAuthService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
@@ -341,6 +345,10 @@ public class DataSetController implements DataSetApiDelegate {
             queriesByDomain);
 
     if (GenomicsDataTypeEnum.WHOLE_GENOME.equals(dataSetExportRequest.getGenomicsDataType())) {
+      if (!workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+      }
+
       if (Strings.isNullOrEmpty(dbWorkspace.getCdrVersion().getWgsBigqueryDataset())) {
         throw new FailedPreconditionException(
             "The workspace CDR version does not have whole genome data");
@@ -463,7 +471,9 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DomainValuesResponse response = new DomainValuesResponse();
     if (domainValue.equals(Domain.WHOLE_GENOME_VARIANT.toString())) {
-      response.addItemsItem(new DomainValue().value(WHOLE_GENOME_VALUE));
+      if (workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
+        response.addItemsItem(new DomainValue().value(WHOLE_GENOME_VALUE));
+      }
     } else {
       response.setItems(dataSetService.getValueListFromDomain(domainValue));
     }
@@ -474,6 +484,9 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<GenomicExtractionJob> extractGenomicData(
       String workspaceNamespace, String workspaceId, Long dataSetId) {
+    if (!workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
+      return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
     DbWorkspace workspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
