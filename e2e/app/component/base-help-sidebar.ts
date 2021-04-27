@@ -8,8 +8,8 @@ import { logger } from 'libs/logger';
 
 const enum Selectors {
   rootXpath = '//*[@id="help-sidebar"]',
-  // "margin-right: 0px;" is used to determine visibility
-  contentXpath = '//*[@data-test-id="sidebar-content" and contains(normalize-space(@style), "margin-right: 0px;")]',
+  // not(contains(normalize-space(@style), "width: 0px;")) is used to determine visibility
+  contentXpath = '//*[not(contains(normalize-space(@style), "width: 0px;"))]/*[@data-test-id="sidebar-content"]',
   closeIconXpath = '//*[@role="button"][./*[@alt="Close"]]'
 }
 
