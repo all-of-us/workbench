@@ -1022,7 +1022,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             <OldCdrVersionModal
                 onCancel={() => {
                   this.setState(fp.set(['workspace', 'cdrVersionId'],
-                    getDefaultCdrVersionForTier(this.state.workspace, cdrVersionTiersResponse)));
+                    getDefaultCdrVersionForTier(this.state.workspace, cdrVersionTiersResponse).cdrVersionId));
                   this.setState({showCdrVersionModal: false});
                 }}
                 onContinue={() => this.setState({showCdrVersionModal: false})}

@@ -1,6 +1,7 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+import {faDna} from '@fortawesome/free-solid-svg-icons/faDna';
 import {RenameModal} from 'app/components/rename-modal';
 import {Action, ResourceActionsMenu} from 'app/components/resource-actions-menu';
 import {canDelete, canWrite, ResourceCard} from 'app/components/resource-card';
@@ -8,42 +9,46 @@ import {withConfirmDeleteModal, WithConfirmDeleteModalProps} from 'app/component
 import {withErrorModal, WithErrorModalProps} from 'app/components/with-error-modal';
 import {withSpinnerOverlay, WithSpinnerOverlayProps} from 'app/components/with-spinner-overlay';
 import {ExportDataSetModal} from 'app/pages/data/data-set/export-data-set-modal';
+import {GenomicExtractionModal} from 'app/pages/data/data-set/genomic-extraction-modal';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {getDescription, getDisplayName, getType} from 'app/utils/resources';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
-import {WorkspaceResource} from 'generated/fetch';
+import {PrePackagedConceptSetEnum, WorkspaceResource} from 'generated/fetch';
 
 interface Props extends WithConfirmDeleteModalProps, WithErrorModalProps, WithSpinnerOverlayProps {
   resource: WorkspaceResource;
   existingNameList: string[];
   onUpdate: () => Promise<void>;
-  disableExportToNotebook: boolean;
+  inactiveBilling: boolean;
   menuOnly: boolean;
 }
 
 interface State {
   showRenameModal: boolean;
   showExportToNotebookModal: boolean;
+  showGenomicExtractionModal: boolean;
 }
 
 export const DatasetResourceCard = fp.flow(
   withErrorModal(),
   withConfirmDeleteModal(),
-  withSpinnerOverlay(),
+  withSpinnerOverlay()
 )(class extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
     this.state = {
       showRenameModal: false,
-      showExportToNotebookModal: false
+      showExportToNotebookModal: false,
+      showGenomicExtractionModal: false
     };
   }
 
   get actions(): Action[] {
-    const {resource} = this.props;
+    const {resource, inactiveBilling} = this.props;
+    const hasWgs = (resource.dataSet.prePackagedConceptSet || []).includes(PrePackagedConceptSetEnum.WHOLEGENOME);
     return [
       {
         icon: 'pencil',
@@ -73,9 +78,19 @@ export const DatasetResourceCard = fp.flow(
           AnalyticsTracker.DatasetBuilder.OpenExportModal();
           this.setState({showExportToNotebookModal: true});
         },
-        disabled: this.props.disableExportToNotebook || !canWrite(resource),
-        hoverText: this.props.disableExportToNotebook && ACTION_DISABLED_INVALID_BILLING
+        disabled: inactiveBilling || !canWrite(resource),
+        hoverText: inactiveBilling && ACTION_DISABLED_INVALID_BILLING
       },
+      ...(hasWgs ? [{
+        faIcon: faDna,
+        displayName: 'Extract VCF Files',
+        onClick: () => {
+          AnalyticsTracker.DatasetBuilder.OpenGenomicExtractionModal('From Card Snowman');
+          this.setState({showGenomicExtractionModal: true});
+        },
+        disabled: inactiveBilling || !canWrite(resource),
+        hoverText: inactiveBilling && ACTION_DISABLED_INVALID_BILLING
+      }] : []),
       {
         icon: 'trash',
         displayName: 'Delete',
@@ -131,6 +146,12 @@ export const DatasetResourceCard = fp.flow(
                           workspaceNamespace={resource.workspaceNamespace}
                           workspaceFirecloudName={resource.workspaceFirecloudName}
                           closeFunction={() => this.setState({showExportToNotebookModal: false})}/>
+      }
+      {this.state.showGenomicExtractionModal &&
+      <GenomicExtractionModal dataSet={resource.dataSet}
+                              workspaceNamespace={resource.workspaceNamespace}
+                              workspaceFirecloudName={resource.workspaceFirecloudName}
+                              closeFunction={() => this.setState({showGenomicExtractionModal: false})}/>
       }
       {this.state.showRenameModal &&
       <RenameModal onRename={(name, description) => this.rename(name, description)}

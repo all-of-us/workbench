@@ -169,7 +169,7 @@ public class ConceptSetService {
           String.format("Exceeded %d concept set limit", MAX_CONCEPTS_PER_SET));
     }
 
-    dbConceptSet.setLastModifiedTime(new Timestamp(clock.instant().toEpochMilli()));
+    dbConceptSet.setLastModifiedTime(Timestamp.from(clock.instant()));
     try {
       return toHydratedConcepts(conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSet)));
     } catch (OptimisticLockException e) {

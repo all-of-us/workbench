@@ -1,9 +1,11 @@
+import {IconDefinition} from '@fortawesome/free-solid-svg-icons';
 import * as React from 'react';
 import {MenuItem, SnowmanButton} from './buttons';
 import {PopupTrigger, TooltipTrigger} from './popups';
 
 interface Action {
-  icon: string;
+  icon?: string;
+  faIcon?: IconDefinition;
   displayName: string;
   onClick: () => void;
   disabled: boolean;
@@ -23,6 +25,7 @@ const ResourceActionsMenu = (props: { actions: Action[] }) => {
                         <TooltipTrigger key={i} content={action.hoverText}>
                             <MenuItem
                                 icon={action.icon}
+                                faIcon={action.faIcon}
                                 onClick={() => action.onClick()}
                                 disabled={action.disabled}>
                                 {action.displayName}
