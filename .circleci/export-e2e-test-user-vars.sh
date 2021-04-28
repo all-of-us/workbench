@@ -6,6 +6,11 @@ ENV=${1:-test}
 for arg in "$@"
 do
   case "$arg" in
+    "perf")
+       echo "export PERF_WRITER=$PUPPETEER_WRITER_PERF" >> $BASH_ENV
+       echo "export PERF_COLLABORATOR=$PUPPETEER_COLLABORATOR_PERF" >> $BASH_ENV
+       echo "export USER_NAME=$PUPPETEER_USER_PERF@perf.fake-research-aou.org" >> $BASH_ENV
+       ;;
     "staging")
        echo "export STAGING_WRITER=$PUPPETEER_WRITER_STAGING" >> $BASH_ENV
        echo "export STAGING_COLLABORATOR=$PUPPETEER_COLLABORATOR_STAGING" >> $BASH_ENV
