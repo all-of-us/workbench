@@ -34,6 +34,7 @@ import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
@@ -551,22 +552,18 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> abortGenomicExtractionJob(
       String workspaceNamespace, String workspaceId, String jobId) {
-    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    DbWorkspace dbWorkspace = workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    List<GenomicExtractionJob> allWorkspaceExtractJobs =
-        genomicExtractionService.getGenomicExtractionJobs(workspaceNamespace, workspaceId);
-
-    if (allWorkspaceExtractJobs.stream()
-        .noneMatch(job -> job.getGenomicExtractionJobId().equals(Long.valueOf(jobId)))) {
-      throw new ServerErrorException("Could not find this job in this workspace");
-    }
-
     try {
-      genomicExtractionService.abortGenomicExtractionJob(workspaceNamespace, workspaceId, jobId);
+      genomicExtractionService.abortGenomicExtractionJob(dbWorkspace, jobId);
       return ResponseEntity.ok(new EmptyResponse());
     } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      throw new ServerErrorException(e);
+      if (e.getCode() == 404) {
+        throw new NotFoundException(e);
+      } else {
+        throw new ServerErrorException(e);
+      }
     }
   }
 }

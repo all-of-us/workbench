@@ -402,48 +402,9 @@ public class GenomicExtractionServiceTest {
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
             dbWgsExtractCromwellSubmission.getSubmissionId());
 
-    genomicExtractionService.abortGenomicExtractionJob(
-        targetWorkspace.getWorkspaceNamespace(),
-        targetWorkspace.getFirecloudName(),
-        String.valueOf(dbWgsExtractCromwellSubmission.getWgsExtractCromwellSubmissionId()));
+    genomicExtractionService.abortGenomicExtractionJob(targetWorkspace, String.valueOf(dbWgsExtractCromwellSubmission.getWgsExtractCromwellSubmissionId()));
 
     verify(submissionsApi, times(1)).abortSubmission(anyString(), anyString(), anyString());
-  }
-
-  @Test(expected = ForbiddenException.class)
-  public void abortGenomicExtractionJob_readerCannotAbort() throws ApiException {
-    DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
-        createDbWgsExtractCromwellSubmission();
-
-    doNothing()
-        .when(submissionsApi)
-        .abortSubmission(
-            workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
-            workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
-            dbWgsExtractCromwellSubmission.getSubmissionId());
-
-    genomicExtractionService.abortGenomicExtractionJob(
-        targetWorkspace.getWorkspaceNamespace(),
-        targetWorkspace.getFirecloudName(),
-        String.valueOf(dbWgsExtractCromwellSubmission.getWgsExtractCromwellSubmissionId()));
-  }
-
-  @Test(expected = ForbiddenException.class)
-  public void abortGenomicExtractionJob_randomWorkspace() throws ApiException {
-    DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
-        createDbWgsExtractCromwellSubmission();
-
-    doNothing()
-        .when(submissionsApi)
-        .abortSubmission(
-            workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
-            workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
-            dbWgsExtractCromwellSubmission.getSubmissionId());
-
-    genomicExtractionService.abortGenomicExtractionJob(
-        workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
-        workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
-        String.valueOf(dbWgsExtractCromwellSubmission.getWgsExtractCromwellSubmissionId()));
   }
 
   private DbDataset createDataset() {

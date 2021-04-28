@@ -29,7 +29,12 @@ cd workbench
 git submodule update --init --recursive
 ```
 
-Then set up [git secrets](#git-secrets) and fire up the [development servers](#running-the-dev-servers).
+## .npmrc
+
+In the UI, we use some [Fontawesome](https://fontawesome.com/) Pro icons. In order to install the Fontawesome Pro packages, you will need to download an `.npmrc` file with a Fontawesome license token. Copy it into the workbench root directory:
+```
+workbench$ gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc .
+```
 
 ## git-secrets
 
@@ -64,13 +69,6 @@ git secrets --scan /path/to/file (/other/path/to/file *)
 #### A Directory (recursively)
 ```Shell
 git secrets --scan -r /path/to/directory
-```
-
-## .npmrc
-
-In the UI, we use some [Fontawesome](https://fontawesome.com/) Pro icons. In order to install the Fontawesome Pro packages, you will need to download an `.npmrc` file with a Fontawesome license token. Copy it into the workbench root directory:
-```
-workbench$ gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc .
 ```
 
 ## Initial Smoke Test
