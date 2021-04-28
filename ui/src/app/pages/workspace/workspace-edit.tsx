@@ -1096,12 +1096,10 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                             value={accessTierShortName}
                             onChange={(v: React.FormEvent<HTMLSelectElement>) => {
                               const selectedTier = v.currentTarget.value;
-                              this.setState(fp.set(['workspace', 'accessTierShortName'], selectedTier));
-
-                              // Populate CDR Versions dropdown and set default version
-                              this.setState({cdrVersions: this.getCdrVersions(selectedTier)});
-                              this.setState(fp.set(['workspace', 'cdrVersionId'],
-                                getDefaultCdrVersionForTier(selectedTier, cdrVersionTiersResponse).cdrVersionId));
+                              this.setState(fp.flow(
+                                fp.set(['workspace', 'accessTierShortName'], selectedTier),
+                                fp.set(['cdrVersions'], this.getCdrVersions(selectedTier)),
+                                fp.set(['workspace', 'cdrVersionId'], getDefaultCdrVersionForTier(selectedTier, cdrVersionTiersResponse).cdrVersionId)));
                             }}
                             disabled={!this.isMode(WorkspaceEditMode.Create)}>
                       {cdrVersionTiersResponse.tiers.map((tier, i) => (
