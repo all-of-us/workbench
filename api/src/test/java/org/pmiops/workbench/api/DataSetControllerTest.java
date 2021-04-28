@@ -149,6 +149,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
@@ -188,6 +189,7 @@ public class DataSetControllerTest {
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
+  private static WorkbenchConfig workbenchConfig;
   private static DbUser currentUser;
   private Workspace workspace;
   private DbCdrVersion cdrVersion;
@@ -288,9 +290,8 @@ public class DataSetControllerTest {
     }
 
     @Bean
+    @Scope("prototype")
     WorkbenchConfig workbenchConfig() {
-      WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
-      workbenchConfig.billing.accountId = "free-tier";
       return workbenchConfig;
     }
 
@@ -314,6 +315,10 @@ public class DataSetControllerTest {
         gson.fromJson(new FileReader("config/cdm/cdm_5_2.json"), CdrBigQuerySchemaConfig.class);
 
     doReturn(cdrBigQuerySchemaConfig).when(mockCdrBigQuerySchemaConfigService).getConfig();
+
+    workbenchConfig = WorkbenchConfig.createEmptyConfig();
+    workbenchConfig.billing.accountId = "free-tier";
+    workbenchConfig.featureFlags.enableGenomicExtraction = true;
 
     DbUser user = new DbUser();
     user.setUsername(USER_EMAIL);
@@ -819,6 +824,16 @@ public class DataSetControllerTest {
         .thenReturn(new FirecloudWorkspaceResponse().accessLevel("PROJECT_OWNER"));
     dataSetController.extractGenomicData(
         workspace.getNamespace(), workspace.getName(), dataSet.getId());
+  }
+
+  @Test
+  public void testGenomicDataExtraction_featureDisabled() {
+    workbenchConfig.featureFlags.enableGenomicExtraction = false;
+    assertThat(
+            dataSetController
+                .extractGenomicData(workspace.getNamespace(), workspace.getName(), 501L)
+                .getStatusCode())
+        .isEqualTo(HttpStatus.NOT_IMPLEMENTED);
   }
 
   @Test

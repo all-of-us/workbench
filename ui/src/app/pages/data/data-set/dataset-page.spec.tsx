@@ -19,7 +19,7 @@ import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 import {workspaceDataStub, workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
-import {cdrVersionStore} from "app/utils/stores";
+import {cdrVersionStore, serverConfigStore} from "app/utils/stores";
 
 describe('DataSetPage', () => {
   beforeEach(() => {
@@ -31,6 +31,7 @@ describe('DataSetPage', () => {
       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
     });
+    serverConfigStore.set({config: {enableGenomicExtraction: true, gsuiteDomain: ''}});
     currentWorkspaceStore.next(workspaceDataStub);
     cdrVersionStore.set(cdrVersionTiersResponse);
   });

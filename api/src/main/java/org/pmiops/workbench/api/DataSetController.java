@@ -471,9 +471,7 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DomainValuesResponse response = new DomainValuesResponse();
     if (domainValue.equals(Domain.WHOLE_GENOME_VARIANT.toString())) {
-      if (workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
-        response.addItemsItem(new DomainValue().value(WHOLE_GENOME_VALUE));
-      }
+      response.addItemsItem(new DomainValue().value(WHOLE_GENOME_VALUE));
     } else {
       response.setItems(dataSetService.getValueListFromDomain(domainValue));
     }
