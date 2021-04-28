@@ -14,6 +14,7 @@ import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {getDescription, getDisplayName, getType} from 'app/utils/resources';
+import {serverConfigStore} from 'app/utils/stores';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {PrePackagedConceptSetEnum, WorkspaceResource} from 'generated/fetch';
 
@@ -48,7 +49,8 @@ export const DatasetResourceCard = fp.flow(
 
   get actions(): Action[] {
     const {resource, inactiveBilling} = this.props;
-    const hasWgs = (resource.dataSet.prePackagedConceptSet || []).includes(PrePackagedConceptSetEnum.WHOLEGENOME);
+    const enableExtraction = serverConfigStore.get().enableGenomicExtraction && (
+      resource.dataSet.prePackagedConceptSet || []).includes(PrePackagedConceptSetEnum.WHOLEGENOME);
     return [
       {
         icon: 'pencil',
@@ -81,7 +83,7 @@ export const DatasetResourceCard = fp.flow(
         disabled: inactiveBilling || !canWrite(resource),
         hoverText: inactiveBilling && ACTION_DISABLED_INVALID_BILLING
       },
-      ...(hasWgs ? [{
+      ...(enableExtraction ? [{
         faIcon: faDna,
         displayName: 'Extract VCF Files',
         onClick: () => {
