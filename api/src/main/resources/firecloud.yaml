@@ -1075,6 +1075,7 @@ paths:
           description: Workspace or Method Configuration not found
         500:
           description: Internal Server Error
+
   /api/workspaces/{workspaceNamespace}/{workspaceName}/submissions/{submissionId}:
     get:
       tags:
@@ -1103,6 +1104,38 @@ paths:
           description: Successful Request
           schema:
             $ref: '#/definitions/Submission'
+        404:
+          description: Submission not found
+          schema:
+            $ref: '#/definitions/ErrorReport'
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorReport'
+    delete:
+      tags:
+        - Submissions
+      summary: Abort a running submission.
+      operationId: abortSubmission
+      parameters:
+        - name: workspaceNamespace
+          in: path
+          description: Workspace Namespace
+          required: true
+          type: string
+        - name: workspaceName
+          in: path
+          description: Workspace Name
+          required: true
+          type: string
+        - name: submissionId
+          in: path
+          description: Submission ID
+          required: true
+          type: string
+      responses:
+        204:
+          description: Successful request
         404:
           description: Submission not found
           schema:

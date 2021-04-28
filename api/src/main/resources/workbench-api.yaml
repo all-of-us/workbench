@@ -2432,6 +2432,41 @@ paths:
           description: The Terra Job for the extraction workflow
           schema:
             "$ref": "#/definitions/GenomicExtractionJob"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/genomicExtractionJobs/{jobId}/abort":
+    post:
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          description: workspaceNamespace
+          required: true
+          type: string
+        - in: path
+          name: workspaceId
+          description: workspaceId
+          required: true
+          type: string
+        - in: path
+          name: jobId
+          type: string
+          required: true
+      tags:
+        - dataSet
+      description: 'Aborts a running genome extract job. Requires WRITER access on the workspace.
+        Workspace CDR must also have access to a Wgs dataset'
+      operationId: abortGenomicExtractionJob
+      responses:
+        204:
+          description: Successful request
+          schema:
+            $ref: '#/definitions/EmptyResponse'
+        404:
+          description: Submission not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
   "/v1/{workspaceNamespace}/{workspaceId}/data-set/exportToNotebook":
     post:
       tags:

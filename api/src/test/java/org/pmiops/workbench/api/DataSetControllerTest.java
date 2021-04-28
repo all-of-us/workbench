@@ -855,6 +855,26 @@ public class DataSetControllerTest {
     verify(mockGenomicExtractionService, times(1)).submitGenomicExtractionJob(any(), any());
   }
 
+  @Test(expected = ForbiddenException.class)
+  public void testAbortGenomicExtractionJob_readerCannotAbort() {
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("READER"));
+    dataSetController.abortGenomicExtractionJob(
+        workspace.getNamespace(), workspace.getName(), "lol");
+
+    verify(mockGenomicExtractionService, times(0)).getGenomicExtractionJobs(any(), any());
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void testAbortGenomicExtractionJob_noAccess() {
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("NO ACCESS"));
+    dataSetController.abortGenomicExtractionJob(
+        workspace.getNamespace(), workspace.getName(), "lol");
+
+    verify(mockGenomicExtractionService, times(0)).getGenomicExtractionJobs(any(), any());
+  }
+
   DataSetRequest buildValidDataSetRequest() {
     return buildEmptyDataSetRequest()
         .name("blah")

@@ -539,4 +539,23 @@ public class DataSetController implements DataSetApiDelegate {
         .put("outputs", new JSONArray())
         .put("source", new JSONArray().put(cellInformation));
   }
+
+  @Override
+  public ResponseEntity<EmptyResponse> abortGenomicExtractionJob(
+      String workspaceNamespace, String workspaceId, String jobId) {
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
+    try {
+      genomicExtractionService.abortGenomicExtractionJob(dbWorkspace, jobId);
+      return ResponseEntity.ok(new EmptyResponse());
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+      if (e.getCode() == 404) {
+        throw new NotFoundException(e);
+      } else {
+        throw new ServerErrorException(e);
+      }
+    }
+  }
 }
