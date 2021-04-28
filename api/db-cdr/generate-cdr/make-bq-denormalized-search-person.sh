@@ -8,6 +8,7 @@ export BQ_PROJECT=$1        # CDR project
 export BQ_DATASET=$2        # CDR dataset
 export WGV_PROJECT=$3       # whole genome variant project
 export WGV_DATASET=$4       # whole genome variant dataset
+export WGV_TABLE=$5         # whole genome variant table
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
@@ -145,7 +146,7 @@ LEFT JOIN
         union distinct
         SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.steps_intraday\`
     ) f on (p.person_id = f.person_id)
-LEFT JOIN \`$WGV_PROJECT.$WGV_DATASET.metadata\` w on (p.person_id = CAST(w.sample_name as int64))"
+LEFT JOIN \`$WGV_PROJECT.$WGV_DATASET.$WGV_TABLE\` w on (p.person_id = CAST(w.sample_name as int64))"
 fi
 
 ################################################
