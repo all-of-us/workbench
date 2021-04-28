@@ -639,7 +639,7 @@ export const HelpSidebar = fp.flow(
               </h3>,
             renderBody: () =>
               <HelpTips allowSearch={false}
-                        pageKey={this.props.pageKey}/>,
+                        pageKey='notebook'/>,
             showFooter: true
           };
         case 'annotations':
