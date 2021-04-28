@@ -20,8 +20,8 @@ import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
-import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FireCloudService;
@@ -282,20 +282,19 @@ public class GenomicExtractionService {
         wgsExtractCromwellSubmissionDao.findByWorkspaceWorkspaceIdAndWgsExtractCromwellSubmissionId(
             dbWorkspace.getWorkspaceId(), Long.valueOf(jobId));
 
-    if (dbSubmission.isPresent()) {
-      WgsCohortExtractionConfig cohortExtractionConfig =
-          workbenchConfigProvider.get().wgsCohortExtraction;
-
-      submissionApiProvider
-          .get()
-          .abortSubmission(
-              cohortExtractionConfig.operationalTerraWorkspaceNamespace,
-              cohortExtractionConfig.operationalTerraWorkspaceName,
-              dbSubmission.get().getSubmissionId());
-
-    } else {
-      throw new BadRequestException(
+    if (!dbSubmission.isPresent()) {
+      throw new NotFoundException(
           "Specified dataset is not in workspace " + dbWorkspace.getName());
     }
+
+    WgsCohortExtractionConfig cohortExtractionConfig =
+        workbenchConfigProvider.get().wgsCohortExtraction;
+
+    submissionApiProvider
+        .get()
+        .abortSubmission(
+            cohortExtractionConfig.operationalTerraWorkspaceNamespace,
+            cohortExtractionConfig.operationalTerraWorkspaceName,
+            dbSubmission.get().getSubmissionId());
   }
 }
