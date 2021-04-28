@@ -265,6 +265,17 @@ export const FIELD = {
   }
 };
 
+// matches ui/src/app/utils/access-tiers.tsx
+export enum AccessTierShortNames {
+  Registered = 'registered',
+  Controlled = 'controlled',
+}
+
+export enum AccessTierDisplayNames {
+  Registered = 'Registered Tier',
+  Controlled = 'Controlled Tier',
+}
+
 export default class WorkspaceEditPage extends WorkspaceBase {
   constructor(page: Page) {
     super(page);
@@ -279,6 +290,10 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     // Build Workspace page is used for Duplicate and Create. Wait for Create or Duplicate button.
     await this.getCancelButton().waitForXPath();
     return true;
+  }
+
+  getDataAccessTierSelect(): Select {
+    return Select.findByName(this.page, FIELD.accessTierSelect.textOption);
   }
 
   /**
@@ -362,6 +377,15 @@ export default class WorkspaceEditPage extends WorkspaceBase {
   // Question 4. one of many checkboxes
   increaseWellnessResilience(): WebComponent {
     return new WebComponent(this.page, FIELD.DESCRIBE_ANTICIPATED_OUTCOMES.seeksIncreaseWellnessCheckbox.textOption);
+  }
+
+  /**
+   * Select Data Access Tier by name.
+   * @param {string} value
+   */
+  async selectAccessTier(value: string = AccessTierShortNames.Registered): Promise<string> {
+    const select = this.getDataAccessTierSelect();
+    return select.selectOption(value);
   }
 
   /**
