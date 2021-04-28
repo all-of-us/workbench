@@ -19,42 +19,43 @@ module.exports = class JestReporter {
   onTestStart(test) {
     console.info(`Running ${path.parse(test.path).name} at ${this.timeNow()}`);
     this.testName = path.parse(test.path).name;
-    this.testLogName = `${this.logDir}/${this.testName}.log`;
   }
 
   // Called with the result of every test file
   onTestResult(_testRunConfig, testResult, _runResults) {
+    console.log(...arguments);
     const hasFailure = testResult.testResults.some((result) => {
       return result.status === 'failed';
     });
+    // Save logs of failed test
     if (hasFailure) {
-      // Save logs of failed test
       this.testLogName = `${this.logDir}/${this.testName}-FAILED.log`;
       this.logger = this.createLogger(this.testLogName);
-
-      // Read jest console messages and save to a log file.
-      // Get all console logs.
-      if (testResult.console) {
-        testResult.console.forEach((log) => {
-          this.logger.info(log.message);
-        });
-      }
-
-      // Get failure messages.
-      this.logger.info('\n\nTests Summary');
-      testResult.testResults.forEach((result) => {
-        this.logger.info('----------------------------------------------');
-        this.logger.log('info', 'test name: %s', result.title);
-        this.logger.log('info', 'status: %s', result.status);
-        // Get failure message.
-        if (result.failureMessages) {
-          const failure = result.failureMessages;
-          this.logger.log('info', 'failure: %s', failure);
-        }
-        this.logger.info('');
-      });
-      console.log(`Saved log of failed test: ${this.testLogName}`);
+    } else {
+      this.testLogName = `${this.logDir}/${this.testName}.log`;
     }
+    // Read jest console messages and save to a log file.
+    // Get all console logs.
+    if (testResult.console) {
+      testResult.console.forEach((log) => {
+        this.logger.info(log.message);
+      });
+    }
+
+    // Get failure messages.
+    this.logger.info('\n\nTests Summary');
+    testResult.testResults.forEach((result) => {
+      this.logger.info('----------------------------------------------');
+      this.logger.log('info', 'test name: %s', result.title);
+      this.logger.log('info', 'status: %s', result.status);
+      // Get failure message.
+      if (result.failureMessages) {
+        const failure = result.failureMessages;
+        this.logger.log('info', 'failure: %s', failure);
+      }
+      this.logger.info('');
+    });
+    console.log(`Saved log of failed test: ${this.testLogName}`);
   }
 
   // Called after all tests have completed

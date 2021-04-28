@@ -7,6 +7,7 @@ import { waitForText } from 'utils/waits-utils';
 
 describe('Cohorts', () => {
   beforeEach(async () => {
+    await page.setRequestInterception(true);
     await signInWithAccessToken(page);
   });
 

@@ -30,6 +30,7 @@ beforeEach(async () => {
       const requestBody = getRequestData(request);
       const body = requestBody.length === 0 ? '' : `\n${requestBody}`;
       logger.log('info', 'Request issued: %s %s %s', request.method(), request.url(), body);
+      console.log('info', 'Request issued: %s %s %s', request.method(), request.url(), body);
     }
     /**
      * May encounter "Error: Request is already handled!"
@@ -70,6 +71,7 @@ beforeEach(async () => {
             text = `${text}\n${await transformResponseBody(request)}`;
           }
           logger.log('info', text);
+          console.log('info', text);
         }
       }
     } catch (err) {
@@ -246,6 +248,15 @@ const logError = async (request: Request): Promise<void> => {
     responseText,
     failureText
   );
+  console.log(
+    'error',
+    'Request failed: %s %s %s\n%s %s',
+    response.status(),
+    request.method(),
+    request.url(),
+    responseText,
+    failureText
+  );
 };
 
 const transformResponseBody = async (request: Request): Promise<string> => {
@@ -266,7 +277,3 @@ const getRequestData = fp.flow(getRequestPostData, stringifyData);
 const canLogResponse = fp.flow(isWorkbenchRequest, notRedirectRequest);
 
 // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/puppeteer/index.d.ts
-
-afterEach(async () => {
-  await page.setRequestInterception(false);
-});

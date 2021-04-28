@@ -1,5 +1,15 @@
 const winston = require('winston');
-const { createLogger, format } = winston;
+const util = require('util');
+
+const combineMessageAndSplat = () => {
+  return {
+    transform: (info, _opts) => {
+      //combine message and args if any
+      info.message = util.format(info.message, ...(info[Symbol.for('splat')] || []));
+      return info;
+    }
+  };
+};
 
 const timeNow = () => {
   return new Date().toLocaleString('en-US', {
@@ -9,17 +19,21 @@ const timeNow = () => {
 };
 
 // Log to Console.
-const logger = createLogger({
+const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
-  format: format.combine(
-    format.prettyPrint(),
-    format.splat(),
-    format.timestamp({ format: timeNow }),
-    format.printf((info) => {
-      return `${info.level.toUpperCase()}: [${info.timestamp}] - ${info.message}`;
+  format: winston.format.combine(
+    combineMessageAndSplat(),
+    winston.format.timestamp({ format: timeNow }),
+    winston.format.printf((info) => {
+      return `[${info.timestamp}] - ${info.message}`;
     })
   ),
-  transports: [new winston.transports.Console({ handleExceptions: true })],
+  transports: [
+    new winston.transports.Console({
+      level: process.env.LOG_LEVEL || 'info',
+      handleExceptions: true
+    })
+  ],
   exitOnError: false
 });
 
