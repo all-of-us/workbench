@@ -39,6 +39,7 @@ import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
@@ -112,6 +113,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private NotebooksService notebooksService;
   @Autowired private Provider<DbUser> userProvider;
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
+  @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspaceAuthService workspaceAuthService;
   @Autowired private GenomicExtractionService genomicExtractionService;
@@ -228,7 +230,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
                 userProvider,
                 prefixProvider,
                 genomicExtractionService,
-                workspaceAuthService));
+                workspaceAuthService,
+                workbenchConfigProvider));
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());
