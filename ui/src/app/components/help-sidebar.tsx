@@ -44,7 +44,8 @@ import {
 import {withRuntimeStore} from 'app/utils/runtime-utils';
 import {
   CompoundRuntimeOpStore,
-  compoundRuntimeOpStore, routeDataStore,
+  compoundRuntimeOpStore,
+  routeDataStore,
   RuntimeStore,
   withStore
 } from 'app/utils/stores';
