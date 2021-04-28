@@ -66,6 +66,8 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    // This method will throw a NotFoundException if no conceptSet exists for specified
+    // conceptSetId and workspaceId
     ConceptSet conceptSet =
         conceptSetService.getConceptSet(conceptSetId, dbWorkspace.getWorkspaceId());
     conceptSetService.delete(conceptSet.getId());
