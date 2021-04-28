@@ -5,7 +5,7 @@ import Button from 'app/element/button';
 import * as testData from 'resources/data/workspace-data';
 import { makeWorkspaceName } from 'utils/str-utils';
 import { UseFreeCredits } from 'app/page/workspace-base';
-import WorkspaceEditPage, {AccessTierShortNames} from 'app/page/workspace-edit-page';
+import WorkspaceEditPage, {AccessTierDisplayNames} from 'app/page/workspace-edit-page';
 import { config } from 'resources/workbench-config';
 
 describe('Creating new workspaces', () => {
@@ -97,7 +97,7 @@ describe('Creating new workspaces', () => {
     const cdrVersionSelect = await createPage.getCdrVersionSelect();
     expect(await cdrVersionSelect.getSelectedValue()).toBe(config.defaultCdrVersionName);
 
-    await createPage.selectAccessTier(AccessTierShortNames.Controlled);
+    await createPage.selectAccessTier(AccessTierDisplayNames.Controlled);
 
     // observe that the CDR Version default has changed
     const selectedCdrVersion = await cdrVersionSelect.getSelectedValue();
