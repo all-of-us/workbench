@@ -69,8 +69,8 @@ export const LabelAlias = {
 export const DataTestAlias = {
   WORKSPACE_NAME: 'workspace-name',
   ACCESS_TIER_SELECT: 'select-access-tier',
-  CDR_VERSION_SELECT: 'select-cdr-version',
-}
+  CDR_VERSION_SELECT: 'select-cdr-version'
+};
 
 export const FIELD = {
   createWorkspaceButton: {
@@ -89,7 +89,7 @@ export const FIELD = {
     textOption: { dataTestId: DataTestAlias.ACCESS_TIER_SELECT, type: ElementType.Select }
   },
   cdrVersionSelect: {
-     textOption: { dataTestId: DataTestAlias.CDR_VERSION_SELECT, type: ElementType.Select }
+    textOption: { dataTestId: DataTestAlias.CDR_VERSION_SELECT, type: ElementType.Select }
   },
   billingAccountSelect: {
     textOption: { name: LabelAlias.SELECT_BILLING, type: ElementType.Select }
@@ -268,12 +268,12 @@ export const FIELD = {
 // matches ui/src/app/utils/access-tiers.tsx
 export enum AccessTierShortNames {
   Registered = 'registered',
-  Controlled = 'controlled',
+  Controlled = 'controlled'
 }
 
 export enum AccessTierDisplayNames {
   Registered = 'Registered Tier',
-  Controlled = 'Controlled Tier',
+  Controlled = 'Controlled Tier'
 }
 
 export default class WorkspaceEditPage extends WorkspaceBase {
