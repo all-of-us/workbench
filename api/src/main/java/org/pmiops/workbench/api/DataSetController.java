@@ -93,7 +93,6 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Autowired
   DataSetController(
-      //      BigQueryService bigQueryService,
       CdrVersionService cdrVersionService,
       DataSetService dataSetService,
       FireCloudService fireCloudService,
@@ -102,7 +101,6 @@ public class DataSetController implements DataSetApiDelegate {
       @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
       GenomicExtractionService genomicExtractionService,
       WorkspaceAuthService workspaceAuthService) {
-    //    this.bigQueryService = bigQueryService;
     this.cdrVersionService = cdrVersionService;
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
