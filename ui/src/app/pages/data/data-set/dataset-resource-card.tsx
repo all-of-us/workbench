@@ -49,7 +49,7 @@ export const DatasetResourceCard = fp.flow(
 
   get actions(): Action[] {
     const {resource, inactiveBilling} = this.props;
-    const enableExtraction = serverConfigStore.get().enableGenomicExtraction && (
+    const enableExtraction = serverConfigStore.get().config.enableGenomicExtraction && (
       resource.dataSet.prePackagedConceptSet || []).includes(PrePackagedConceptSetEnum.WHOLEGENOME);
     return [
       {

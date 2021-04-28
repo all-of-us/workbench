@@ -19,7 +19,7 @@ import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 import {workspaceDataStub, workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
-import {cdrVersionStore, serverConfigStore} from "app/utils/stores";
+import {cdrVersionStore, serverConfigStore} from 'app/utils/stores';
 
 describe('DataSetPage', () => {
   beforeEach(() => {
