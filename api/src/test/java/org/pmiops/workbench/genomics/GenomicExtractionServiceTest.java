@@ -405,8 +405,7 @@ public class GenomicExtractionServiceTest {
     genomicExtractionService.abortGenomicExtractionJob(
         targetWorkspace.getWorkspaceNamespace(),
         targetWorkspace.getFirecloudName(),
-        String.valueOf(dbWgsExtractCromwellSubmission.getWgsExtractCromwellSubmissionId())
-    );
+        String.valueOf(dbWgsExtractCromwellSubmission.getWgsExtractCromwellSubmissionId()));
 
     verify(submissionsApi, times(1)).abortSubmission(anyString(), anyString(), anyString());
   }
@@ -426,8 +425,7 @@ public class GenomicExtractionServiceTest {
     genomicExtractionService.abortGenomicExtractionJob(
         targetWorkspace.getWorkspaceNamespace(),
         targetWorkspace.getFirecloudName(),
-        String.valueOf(dbWgsExtractCromwellSubmission.getWgsExtractCromwellSubmissionId())
-    );
+        String.valueOf(dbWgsExtractCromwellSubmission.getWgsExtractCromwellSubmissionId()));
   }
 
   @Test(expected = ForbiddenException.class)
@@ -445,8 +443,7 @@ public class GenomicExtractionServiceTest {
     genomicExtractionService.abortGenomicExtractionJob(
         workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
         workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
-        String.valueOf(dbWgsExtractCromwellSubmission.getWgsExtractCromwellSubmissionId())
-    );
+        String.valueOf(dbWgsExtractCromwellSubmission.getWgsExtractCromwellSubmissionId()));
   }
 
   private DbDataset createDataset() {

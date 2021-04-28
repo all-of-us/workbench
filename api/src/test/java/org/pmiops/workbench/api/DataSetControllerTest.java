@@ -51,7 +51,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.invocation.InvocationOnMock;
-import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
@@ -965,7 +964,8 @@ public class DataSetControllerTest {
   public void testAbortGenomicExtractionJob_readerCannotAbort() {
     when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
         .thenReturn(new FirecloudWorkspaceResponse().accessLevel("READER"));
-    dataSetController.abortGenomicExtractionJob(workspace.getNamespace(), workspace.getName(), "lol");
+    dataSetController.abortGenomicExtractionJob(
+        workspace.getNamespace(), workspace.getName(), "lol");
 
     verify(mockGenomicExtractionService, times(0)).getGenomicExtractionJobs(any(), any());
   }
@@ -974,7 +974,8 @@ public class DataSetControllerTest {
   public void testAbortGenomicExtractionJob_noAccess() {
     when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
         .thenReturn(new FirecloudWorkspaceResponse().accessLevel("NO ACCESS"));
-    dataSetController.abortGenomicExtractionJob(workspace.getNamespace(), workspace.getName(), "lol");
+    dataSetController.abortGenomicExtractionJob(
+        workspace.getNamespace(), workspace.getName(), "lol");
 
     verify(mockGenomicExtractionService, times(0)).getGenomicExtractionJobs(any(), any());
   }

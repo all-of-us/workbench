@@ -275,7 +275,8 @@ public class GenomicExtractionService {
     return new GenomicExtractionJob().status(TerraJobStatus.RUNNING);
   }
 
-  public void abortGenomicExtractionJob(String workspaceNamespace, String workspaceId, String jobId) throws ApiException {
+  public void abortGenomicExtractionJob(String workspaceNamespace, String workspaceId, String jobId)
+      throws ApiException {
     workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
