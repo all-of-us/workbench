@@ -2356,7 +2356,7 @@ paths:
           description: A list of data sets containg cohort/concept Id passed.
           schema:
             "$ref": "#/definitions/DataSetListResponse"
-  "/v1/cdrVersionId/{cdrVersionId}/domain/{domain}/domainValue/{value}/dataDictionaryEntry":
+  "/v1/{cdrVersionId}/dataDictionaryEntry/{domain}/{value}":
     get:
       parameters:
       - in: path
