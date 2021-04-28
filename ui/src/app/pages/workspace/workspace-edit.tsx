@@ -75,13 +75,19 @@ import {OldCdrVersionModal} from './old-cdr-version-modal';
 
 export const styles = reactStyles({
   categoryRow: {
-    display: 'flex', flexDirection: 'row', padding: '0.6rem 0', width: '95%'
+    display: 'flex',
+    flexDirection: 'row',
+    padding: '0.6rem 0',
+    width: '95%'
   },
   checkboxRow: {
-    display: 'inline-block', padding: '0.2rem 0', marginRight: '1rem'
+    display: 'inline-block',
+    padding: '0.2rem 0',
+    marginRight: '1rem'
   },
   checkboxStyle: {
-    marginRight: '.31667rem', zoom: '1.5'
+    marginRight: '.31667rem',
+    zoom: '1.5'
   },
   header: {
     fontWeight: 600,
@@ -139,7 +145,6 @@ export const styles = reactStyles({
     verticalAlign: 'middle',
     position: 'relative',
     overflow: 'visible',
-    width: '11.3rem',
     marginRight: '20px'
   },
   shortDescription: {
@@ -175,7 +180,6 @@ export const styles = reactStyles({
     borderColor: 'rgb(151, 151, 151)',
     borderRadius: '6px',
     height: '1.5rem',
-    width: '12rem',
   },
   researchPurposeDescription: {
     marginLeft: '-0.9rem',
@@ -201,6 +205,12 @@ export const styles = reactStyles({
     backgroundColor: colorWithWhiteness(colors.accent, 0.85),
     maxWidth: 'fit-content',
   },
+  accessTierSpacing: {
+    width: '11em',
+  },
+  cdrVersionSpacing: {
+    width: '30em',
+  }
 });
 
 const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
@@ -1071,7 +1081,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                          onChange={v => this.setState(fp.set(['workspace', 'name'], v))}/>
             </FlexColumn>
             {this.enableAccessTierSelection() &&
-              <FlexColumn style={{marginRight: '20px'}}>
+              <FlexColumn>
                 <div style={styles.fieldHeader}>
                   Data access tier
                   <TooltipTrigger content={toolTipText.tierSelect}>
@@ -1081,8 +1091,8 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                 <TooltipTrigger
                   content='To use a different access tier, create a new workspace.'
                   disabled={this.isMode(WorkspaceEditMode.Create)}>
-                  <div data-test-id='select-access-tier' style={styles.select}>
-                    <select style={styles.selectInput}
+                  <div data-test-id='select-access-tier' style={{...styles.select, ...styles.accessTierSpacing}}>
+                    <select style={{...styles.selectInput, ...styles.accessTierSpacing}}
                             value={accessTierShortName}
                             onChange={(v: React.FormEvent<HTMLSelectElement>) => {
                               const selectedTier = v.currentTarget.value;
@@ -1113,8 +1123,8 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
               <TooltipTrigger
                 content='To use a different dataset version, duplicate or create a new workspace.'
                 disabled={!(this.isMode(WorkspaceEditMode.Edit))}>
-              <div data-test-id='select-cdr-version' style={styles.select}>
-                <select style={styles.selectInput}
+              <div data-test-id='select-cdr-version' style={{...styles.select, ...styles.cdrVersionSpacing}}>
+                <select style={{...styles.selectInput, ...styles.cdrVersionSpacing}}
                   value={cdrVersionId}
                   onChange={(v: React.FormEvent<HTMLSelectElement>) => {
                     const selectedVersion = v.currentTarget.value;
