@@ -6,7 +6,6 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
-  CdrVersionTier,
   DisseminateResearchEnum,
   ResearchOutcomeEnum,
   SpecificPopulationEnum,
@@ -15,7 +14,11 @@ import {
   WorkspacesApi
 } from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
+import {
+  altCdrVersion,
+  cdrVersionTiersResponse,
+  defaultCdrVersion,
+} from 'testing/stubs/cdr-versions-api-stub';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
 import {workspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
@@ -271,6 +274,15 @@ describe('WorkspaceEdit', () => {
     expect(wrapper.find('[data-test-id="old-cdr-version-warning"]').exists()).toBeFalsy();
   });
 
+  it('does not display the access tier dropdown when multiple tiers are not available', async() => {
+    cdrVersionStore.set( {tiers: [cdrVersionTiersResponse.tiers[0]]});
+
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.find('[data-test-id="select-access-tier"]').exists()).toBeFalsy();
+  });
+
   it('enables access tier selection on creation when multiple tiers are available', async() => {
     workspaceEditMode = WorkspaceEditMode.Create;
 
@@ -281,18 +293,63 @@ describe('WorkspaceEdit', () => {
     expect(accessTierSelection.exists()).toBeTruthy();
 
     // defaults to registered
-    expect(accessTierSelection.find('select').props().value).toBe(AccessTierShortNames.Registered);
+    const selectionProps = accessTierSelection.find('select').props();
+    expect(selectionProps.disabled).toBeFalsy();
+    expect(selectionProps.value).toBe(AccessTierShortNames.Registered);
+
+    // when Registered is selected, the CDR Version dropdown lists the registered tier CDR Versions
+    // defaultCdrVersion and altCdrVersion, with defaultCdrVersion selected
+
+    const cdrVersionsSelect = wrapper.find('[data-test-id="select-cdr-version"]').find('select');
+    expect(cdrVersionsSelect.props().value).toBe(defaultCdrVersion.cdrVersionId);
+
+    const cdrVersionSelectOptions: Array<string> = cdrVersionsSelect.children().map(o => o.props().value);
+    expect(cdrVersionSelectOptions).toEqual([defaultCdrVersion.cdrVersionId, altCdrVersion.cdrVersionId]);
+
+    // when Controlled is selected, the CDR Version dropdown lists the (one) controlled tier CDR Version
+
+    // TODO make this test work somehow - I have manually tested the functionality here
+    // accessTierSelection.simulate('change', {target: {value: AccessTierShortNames.Controlled}});
+    // await waitOneTickAndUpdate(accessTierSelection);
+    // expect(cdrVersionsSelect.props().value).toBe(controlledCdrVersion.cdrVersionId);
+    // expect(cdrVersionSelectOptions).toEqual([controlledCdrVersion.cdrVersionId]);
   });
 
-  it('does not enable access tier selection on creation when multiple tiers are not available', async() => {
-    cdrVersionStore.set( {tiers: [cdrVersionTiersResponse.tiers[0]]});
-    workspaceEditMode = WorkspaceEditMode.Create;
+  it('retains the tier on edit and does not permit changes - Registered', async() => {
+    workspaceEditMode = WorkspaceEditMode.Edit;
+    workspace.accessTierShortName = AccessTierShortNames.Registered;
+    await expectNoTierChangesAllowed();
+  });
 
+  it('retains the tier on edit and does not permit changes - Controlled', async() => {
+    workspaceEditMode = WorkspaceEditMode.Edit;
+    workspace.accessTierShortName = AccessTierShortNames.Controlled;
+    await expectNoTierChangesAllowed();
+  });
+
+  it('retains the tier on duplication and does not permit changes - Registered', async() => {
+    workspaceEditMode = WorkspaceEditMode.Duplicate;
+    workspace.accessTierShortName = AccessTierShortNames.Registered;
+    await expectNoTierChangesAllowed();
+  });
+
+  it('retains the tier on duplication and does not permit changes - Controlled', async() => {
+    workspaceEditMode = WorkspaceEditMode.Duplicate;
+    workspace.accessTierShortName = AccessTierShortNames.Controlled;
+    await expectNoTierChangesAllowed();
+  });
+
+  async function expectNoTierChangesAllowed() {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
-    expect(wrapper.find('[data-test-id="select-access-tier"]').exists()).toBeFalsy();
-  });
+    const accessTierSelection = wrapper.find('[data-test-id="select-access-tier"]');
+    expect(accessTierSelection.exists()).toBeTruthy();
+
+    const selectionProps = accessTierSelection.find('select').props();
+    expect(selectionProps.disabled).toBeTruthy();
+    expect(selectionProps.value).toBe(workspace.accessTierShortName);
+  }
 
   // regression test for RW-5132
   it('prevents multiple Workspace creations via the same confirmation dialog', async() => {
