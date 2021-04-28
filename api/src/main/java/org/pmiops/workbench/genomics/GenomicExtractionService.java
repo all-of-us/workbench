@@ -283,8 +283,7 @@ public class GenomicExtractionService {
             dbWorkspace.getWorkspaceId(), Long.valueOf(jobId));
 
     if (!dbSubmission.isPresent()) {
-      throw new NotFoundException(
-          "Specified dataset is not in workspace " + dbWorkspace.getName());
+      throw new NotFoundException("Specified dataset is not in workspace " + dbWorkspace.getName());
     }
 
     WgsCohortExtractionConfig cohortExtractionConfig =
