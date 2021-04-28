@@ -388,10 +388,6 @@ public class GenomicExtractionServiceTest {
 
   @Test
   public void abortGenomicExtractionJob() throws ApiException {
-    doReturn(new FirecloudWorkspaceResponse().accessLevel("WRITER"))
-        .when(fireCloudService)
-        .getWorkspace(anyString(), anyString());
-
     DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
         createDbWgsExtractCromwellSubmission();
 
@@ -402,9 +398,15 @@ public class GenomicExtractionServiceTest {
             workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
             dbWgsExtractCromwellSubmission.getSubmissionId());
 
-    genomicExtractionService.abortGenomicExtractionJob(targetWorkspace, String.valueOf(dbWgsExtractCromwellSubmission.getWgsExtractCromwellSubmissionId()));
+    genomicExtractionService.abortGenomicExtractionJob(
+        targetWorkspace,
+        String.valueOf(dbWgsExtractCromwellSubmission.getWgsExtractCromwellSubmissionId()));
 
-    verify(submissionsApi, times(1)).abortSubmission(anyString(), anyString(), anyString());
+    verify(submissionsApi, times(1))
+        .abortSubmission(
+            workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceNamespace,
+            workbenchConfig.wgsCohortExtraction.operationalTerraWorkspaceName,
+            dbWgsExtractCromwellSubmission.getSubmissionId());
   }
 
   private DbDataset createDataset() {
