@@ -76,6 +76,12 @@ const formatDuration = (durationMoment) => {
 const GenomicsExtractionMenu = ({job, workspace}) => {
   const isRunning = job.status === TerraJobStatus.RUNNING;
   const canWrite = WorkspacePermissionsUtil.canWrite(workspace.accessLevel);
+  const tooltip = switchCase({r: isRunning, w: canWrite},
+      [{r: true, w: true}, () => ''],
+      [{r: true, w: false}, () => 'You do not have permission to modify this workspace'],
+      [{r: false, w: true}, () => 'Extraction job is not currently running'],
+      [{r: false, w: false}, () => 'Extraction job is not currently running']
+  );
   return <PopupTrigger
     side='bottom-left'
     closeOnClick
@@ -102,14 +108,7 @@ const GenomicsExtractionMenu = ({job, workspace}) => {
            onClick={() => {
              dataSetApi().abortGenomicExtractionJob(workspace.namespace, workspace.id, job.genomicExtractionJobId);
            }}
-           tooltip={
-             switchCase({r: isRunning, w: canWrite},
-                 [{r: true, w: true}, () => ''],
-                 [{r: true, w: false}, () => 'You do not have permission to modify this workspace'],
-                 [{r: false, w: true}, () => 'Extraction job is not currently running'],
-                 [{r: false, w: false}, () => 'Extraction job is not currently running']
-             )
-           }
+           tooltip={tooltip}
        >
          Abort Extraction
        </MenuItem>

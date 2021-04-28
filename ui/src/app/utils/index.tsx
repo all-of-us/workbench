@@ -58,7 +58,7 @@ export function randomString(len): string {
 export const DEFAULT = Symbol();
 
 export const switchCase = (value, ...pairs) => {
-  const match = fp.find(([v]) => v === value || v === DEFAULT, pairs);
+  const match = fp.find(([v]) => fp.isEqual(v, value) || fp.isEqual(v, DEFAULT), pairs);
   return match && match[1]();
 };
 

@@ -123,46 +123,41 @@ export const computePopupPosition = ({side, viewport, target, element, gap}) => 
     );
   };
   const position = getPosition(side);
-  const pickCorner = c => {
-
-  }
+  const overflowsTop = position.top < 0;
+  const overflowsBottom = position.top + element.height >= viewport.height;
+  const overflowsLeft = position.left < 0;
+  const overflowsRight = position.left + element.width >= viewport.width;
   const maybeFlip = d => {
     return switchCase(d,
-      ['top', () => position.top < 0 ? 'bottom' : 'top'],
-      ['bottom', () => position.top + element.height >= viewport.height ? 'top' : 'bottom'],
-      ['left', () => position.left < 0 ? 'right' : 'left'],
-      ['right', () => position.left + element.width >= viewport.width ? 'left' : 'right'],
-      ['bottom-left', () => position.top + element.height >= viewport.height
-          ? position.left < 0
-              ? 'top-right'
-              : 'top-left'
-          : position.left < 0
-              ? 'bottom-right'
-              : 'bottom-left'],
-      ['bottom-right', () => position.top + element.height >= viewport.height
-          ? position.left + element.width >= viewport.width
-            ? 'top-left'
-            : 'top-right'
-          : position.left + element.width >= viewport.width
-            ? 'bottom-left'
-            : 'bottom-right'
-      ],
-      ['top-left', () => position.top < 0
-          ? position.left < 0
-            ? 'bottom-right'
-            : 'bottom-left'
-          : position.left < 0
-            ? 'top-right'
-            : 'top-left'
-      ],
-      ['top-right', () => position.top < 0
-          ? position.left + element.width >= viewport.width
-            ? 'bottom-left'
-            : 'bottom-right'
-          : position.left + element.width >= viewport.width
-            ? 'top-left'
-            : 'top-right'
-      ]
+      ['top', () => overflowsTop ? 'bottom' : 'top'],
+      ['bottom', () => overflowsBottom ? 'top' : 'bottom'],
+      ['left', () => overflowsLeft ? 'right' : 'left'],
+      ['right', () => overflowsRight ? 'left' : 'right'],
+      // Unfortunately, nested switchCase is probably the clearest way to express this.
+      ['bottom-left', () => switchCase({ob: overflowsBottom, ol: overflowsLeft},
+          [{ob: false, ol: false}, () => 'bottom-left'],
+          [{ob: false, ol: true}, () => 'bottom-right'],
+          [{ob: true, ol: false}, () => 'top-left'],
+          [{ob: true, ol: true}, () => 'top-right']
+      )],
+      ['bottom-right', () => switchCase({ob: overflowsBottom, or: overflowsRight},
+          [{ob: false, or: false}, () => 'bottom-right'],
+          [{ob: false, or: true}, () => 'bottom-left'],
+          [{ob: true, or: false}, () => 'top-right'],
+          [{ob: true, or: true}, () => 'top-left']
+      )],
+      ['top-left', () => switchCase({ot: overflowsTop, ol: overflowsLeft},
+          [{ot: false, ol: false}, () => 'top-left'],
+          [{ot: false, ol: true}, () => 'top-right'],
+          [{ot: true, ol: false}, () => 'bottom-left'],
+          [{ot: true, ol: true}, () => 'bottom-right']
+      )],
+      ['top-right', () => switchCase({ot: overflowsTop, or: overflowsRight},
+          [{ot: false, or: false}, () => 'top-right'],
+          [{ot: false, or: true}, () => 'top-left'],
+          [{ot: true, or: false}, () => 'bottom-right'],
+          [{ot: true, or: true}, () => 'bottom-left']
+      )]
     );
   };
   const finalSide = maybeFlip(side);
