@@ -756,18 +756,19 @@ public class WorkspacesControllerTest extends SpringTest {
     assertThat(requestedWorkspace.getAccessTierShortName()).isNull();
     requestedWorkspace.setAccessTierShortName("some nonsense value!");
 
-    final Workspace createdWorkspace = workspacesController.createWorkspace(requestedWorkspace).getBody();
+    final Workspace createdWorkspace =
+        workspacesController.createWorkspace(requestedWorkspace).getBody();
     assertThat(createdWorkspace.getAccessTierShortName()).isEqualTo(accessTier.getShortName());
-}
+  }
 
   @Test
   public void testCreateWorkspace_accessTierIgnored_controlled() {
     final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
 
-    DbCdrVersion controlledTierCdr = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
+    DbCdrVersion controlledTierCdr =
+        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
     controlledTierCdr.setAccessTier(controlledTier);
     controlledTierCdr = cdrVersionDao.save(controlledTierCdr);
-
 
     final Workspace requestedWorkspace = createWorkspace();
     assertThat(requestedWorkspace.getAccessTierShortName()).isNull();
@@ -776,7 +777,8 @@ public class WorkspacesControllerTest extends SpringTest {
     // even if we pretend it's registered - the CDR Version will override this
     requestedWorkspace.setAccessTierShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME);
 
-    final Workspace createdWorkspace = workspacesController.createWorkspace(requestedWorkspace).getBody();
+    final Workspace createdWorkspace =
+        workspacesController.createWorkspace(requestedWorkspace).getBody();
     assertThat(createdWorkspace.getAccessTierShortName()).isEqualTo(controlledTier.getShortName());
   }
 
