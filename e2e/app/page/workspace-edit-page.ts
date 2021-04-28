@@ -383,7 +383,7 @@ export default class WorkspaceEditPage extends WorkspaceBase {
    * Select Data Access Tier by name.
    * @param {string} value
    */
-  async selectAccessTier(value: string = AccessTierShortNames.Registered): Promise<string> {
+  async selectAccessTier(value: string = AccessTierDisplayNames.Registered): Promise<string> {
     const select = this.getDataAccessTierSelect();
     return select.selectOption(value);
   }
