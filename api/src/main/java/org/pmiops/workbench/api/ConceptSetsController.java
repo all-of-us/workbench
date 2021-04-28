@@ -69,7 +69,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
     // This method will throw a NotFoundException if no conceptSet exists for specified
     // conceptSetId and workspaceId
     ConceptSet conceptSet =
-        conceptSetService.getConceptSet(conceptSetId, dbWorkspace.getWorkspaceId());
+        conceptSetService.getConceptSet(dbWorkspace.getWorkspaceId(), conceptSetId);
     conceptSetService.delete(conceptSet.getId());
     return ResponseEntity.ok(new EmptyResponse());
   }
@@ -82,7 +82,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     return ResponseEntity.ok(
-        conceptSetService.getConceptSet(conceptSetId, dbWorkspace.getWorkspaceId()));
+        conceptSetService.getConceptSet(dbWorkspace.getWorkspaceId(), conceptSetId));
   }
 
   @Override
@@ -109,7 +109,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     return ResponseEntity.ok(
-        conceptSetService.updateConceptSet(conceptSetId, dbWorkspace.getWorkspaceId(), conceptSet));
+        conceptSetService.updateConceptSet(dbWorkspace.getWorkspaceId(), conceptSetId, conceptSet));
   }
 
   @Override
@@ -127,7 +127,7 @@ public class ConceptSetsController implements ConceptSetsApiDelegate {
 
     return ResponseEntity.ok(
         conceptSetService.updateConceptSetConcepts(
-            conceptSetId, dbWorkspace.getWorkspaceId(), request));
+            dbWorkspace.getWorkspaceId(), conceptSetId, request));
   }
 
   @Override

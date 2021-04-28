@@ -60,7 +60,7 @@ public class ConceptSetService {
       String newConceptSetName,
       DbUser creator,
       Long toWorkspaceId) {
-    final DbConceptSet existingConceptSet = getDbConceptSet(fromConceptSetId, fromWorkspaceId);
+    final DbConceptSet existingConceptSet = getDbConceptSet(fromWorkspaceId, fromConceptSetId);
     final Timestamp now = Timestamp.from(clock.instant());
     ConceptSetContext conceptSetContext =
         new ConceptSetContext.Builder()
@@ -94,8 +94,8 @@ public class ConceptSetService {
     }
   }
 
-  public ConceptSet updateConceptSet(Long conceptSetId, Long workspaceId, ConceptSet conceptSet) {
-    DbConceptSet dbConceptSet = getDbConceptSet(conceptSetId, workspaceId);
+  public ConceptSet updateConceptSet(Long workspaceId, Long conceptSetId, ConceptSet conceptSet) {
+    DbConceptSet dbConceptSet = getDbConceptSet(workspaceId, conceptSetId);
     if (dbConceptSet.getVersion() != Etags.toVersion(conceptSet.getEtag())) {
       throw new ConflictException("Attempted to modify outdated concept set version");
     }
@@ -119,8 +119,8 @@ public class ConceptSetService {
   }
 
   public ConceptSet updateConceptSetConcepts(
-      Long conceptSetId, Long workspaceId, UpdateConceptSetRequest request) {
-    DbConceptSet dbConceptSet = getDbConceptSet(conceptSetId, workspaceId);
+      Long workspaceId, Long conceptSetId, UpdateConceptSetRequest request) {
+    DbConceptSet dbConceptSet = getDbConceptSet(workspaceId, conceptSetId);
 
     int version = Etags.toVersion(request.getEtag());
     if (dbConceptSet.getVersion() != version) {
@@ -170,8 +170,8 @@ public class ConceptSetService {
     conceptSetDao.delete(conceptSetId);
   }
 
-  public ConceptSet getConceptSet(Long conceptSetId, Long workspaceId) {
-    DbConceptSet dbConceptSet = getDbConceptSet(conceptSetId, workspaceId);
+  public ConceptSet getConceptSet(Long workspaceId, Long conceptSetId) {
+    DbConceptSet dbConceptSet = getDbConceptSet(workspaceId, conceptSetId);
     return toHydratedConcepts(
         conceptSetMapper.dbModelToClient(dbConceptSet, conceptBigQueryService));
   }
@@ -211,15 +211,15 @@ public class ConceptSetService {
     return conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());
   }
 
-  private DbConceptSet getDbConceptSet(Long conceptSetId, Long workspaceId) {
+  private DbConceptSet getDbConceptSet(Long workspaceId, Long conceptSetId) {
     return conceptSetDao
-        .findByConceptSetIdAndWorkspaceId(conceptSetId, workspaceId)
+        .findByWorkspaceIdAndConceptSetId(workspaceId, conceptSetId)
         .orElseThrow(
             () ->
                 new NotFoundException(
                     String.format(
-                        "ConceptSet not found for conceptSetId: %d and workspaceId: %d",
-                        conceptSetId, workspaceId)));
+                        "ConceptSet not found for workspaceId: %d and conceptSetId: %d",
+                        workspaceId, conceptSetId)));
   }
 
   private ConceptSet toHydratedConcepts(ConceptSet conceptSet) {
