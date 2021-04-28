@@ -1099,7 +1099,8 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                               this.setState(fp.flow(
                                 fp.set(['workspace', 'accessTierShortName'], selectedTier),
                                 fp.set(['cdrVersions'], this.getCdrVersions(selectedTier)),
-                                fp.set(['workspace', 'cdrVersionId'], getDefaultCdrVersionForTier(selectedTier, cdrVersionTiersResponse).cdrVersionId)));
+                                fp.set(['workspace', 'cdrVersionId'],
+                                  getDefaultCdrVersionForTier(selectedTier, cdrVersionTiersResponse).cdrVersionId)));
                             }}
                             disabled={!this.isMode(WorkspaceEditMode.Create)}>
                       {cdrVersionTiersResponse.tiers.map((tier, i) => (
