@@ -11,7 +11,7 @@
     {
       "accessTierId": 2,
       "shortName": "controlled",
-      "displayName": "Fake Controlled Tier For Perf",
+      "displayName": "Controlled Tier",
       "servicePerimeter": "accessPolicies/228353087260/servicePerimeters/terra_perf_aou_perf_2",
       "authDomainName": "all-of-us-controlled-perf",
       "authDomainGroupEmail": "all-of-us-controlled-perf@perf.test.firecloud.org"

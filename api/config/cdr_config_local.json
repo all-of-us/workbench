@@ -11,7 +11,7 @@
     {
       "accessTierId": 2,
       "shortName": "controlled",
-      "displayName": "Fake Controlled Tier For Test/Local",
+      "displayName": "Controlled Tier",
       "servicePerimeter": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test_2",
       "authDomainName": "all-of-us-test-prototype-3",
       "authDomainGroupEmail": "all-of-us-test-prototype-3@dev.test.firecloud.org"
