@@ -5,7 +5,7 @@ import Button from 'app/element/button';
 import * as testData from 'resources/data/workspace-data';
 import { makeWorkspaceName } from 'utils/str-utils';
 import { UseFreeCredits } from 'app/page/workspace-base';
-import WorkspaceEditPage, {AccessTierDisplayNames} from 'app/page/workspace-edit-page';
+import WorkspaceEditPage, { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
 import { config } from 'resources/workbench-config';
 
 describe('Creating new workspaces', () => {
