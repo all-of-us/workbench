@@ -30,6 +30,10 @@ describe('Duplicate workspace', () => {
     await workspaceEditPage.getWorkspaceNameTextbox().clear();
     const duplicateWorkspaceName = await workspaceEditPage.fillOutWorkspaceName();
 
+    // observe that we cannot change Data Access Tier.
+    const accessTierSelect = workspaceEditPage.getDataAccessTierSelect();
+    expect(await accessTierSelect.isCursorNotAllowed()).toEqual(true);
+
     const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
     await workspaceEditPage.requestForReviewRadiobutton(false);
     await finishButton.waitUntilEnabled();

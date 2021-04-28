@@ -5,7 +5,7 @@ import Button from 'app/element/button';
 import * as testData from 'resources/data/workspace-data';
 import { makeWorkspaceName } from 'utils/str-utils';
 import { UseFreeCredits } from 'app/page/workspace-base';
-import WorkspaceEditPage from 'app/page/workspace-edit-page';
+import WorkspaceEditPage, {AccessTierShortNames} from 'app/page/workspace-edit-page';
 import { config } from 'resources/workbench-config';
 
 describe('Creating new workspaces', () => {
@@ -83,6 +83,38 @@ describe('Creating new workspaces', () => {
 
     const dataPage1 = new WorkspaceDataPage(page);
     await dataPage1.verifyWorkspaceNameOnDataPage(newWorkspaceName);
+  });
+
+  // TODO for Controlled Tier Beta: ensure the user has CT access first
+
+  test('User can create a workspace in the Controlled Tier', async () => {
+    const workspacesPage = new WorkspacesPage(page);
+    await workspacesPage.load();
+
+    const name = makeWorkspaceName();
+    const createPage = await workspacesPage.fillOutRequiredCreationFields(name);
+
+    const cdrVersionSelect = await createPage.getCdrVersionSelect();
+    expect(await cdrVersionSelect.getSelectedValue()).toBe(config.defaultCdrVersionName);
+
+    await createPage.selectAccessTier(AccessTierShortNames.Controlled);
+
+    // observe that the CDR Version default has changed
+    const selectedCdrVersion = await cdrVersionSelect.getSelectedValue();
+    expect(selectedCdrVersion).not.toBe(config.defaultCdrVersionName);
+
+    // click CREATE WORKSPACE button
+    const createButton = createPage.getCreateWorkspaceButton();
+    await createButton.waitUntilEnabled();
+    await createPage.clickCreateFinishButton(createButton);
+
+    const dataPage = new WorkspaceDataPage(page);
+
+    // Verify that the CDR version is what we expect
+    expect(await dataPage.getCdrVersion()).toBe(selectedCdrVersion);
+
+    // cleanup
+    await dataPage.deleteWorkspace();
   });
 
   // // helper function to check visible workspace link on Data page

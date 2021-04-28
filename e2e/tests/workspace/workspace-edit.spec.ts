@@ -25,8 +25,13 @@ describe('Editing workspace via workspace card snowman menu', () => {
 
     const workspaceEditPage = new WorkspaceEditPage(page);
 
+    // Data Access Tier is readonly.
+    const accessTierSelect = workspaceEditPage.getDataAccessTierSelect();
+    expect(await accessTierSelect.isDisabled()).toEqual(true);
+
     // CDR Version Select is readonly. Get selected value.
     const cdrVersionSelect = workspaceEditPage.getCdrVersionSelect();
+    expect(await cdrVersionSelect.isDisabled()).toEqual(true);
     const selectedValue = await cdrVersionSelect.getSelectedValue();
 
     // Change question #2 answer
