@@ -61,7 +61,6 @@ beforeEach(async () => {
         const resp = request.response();
         url = resp.url();
         status = resp.status();
-
         if (isApiFailure(request)) {
           await logError(request);
         } else {
@@ -96,12 +95,7 @@ beforeEach(async () => {
     const title = await getPageTitle();
     try {
       const args = await Promise.all(message.args().map((jsHandle) => describeJsHandle(jsHandle)));
-      let concatenatedText = '';
-      for (let i = 0; i < args.length; ++i) {
-        if (args[i] !== undefined) {
-          concatenatedText += `${args[i]}\n`;
-        }
-      }
+      const concatenatedText = args.filter((arg) => !!arg).join('\n');
       const msgType = message.type() === 'warning' ? 'warn' : message.type();
       logger.info(`Page Console ${msgType.toUpperCase()}: "${title}"\n${concatenatedText}`);
     } catch (err) {
@@ -113,8 +107,7 @@ beforeEach(async () => {
   page.on('error', async (error: Error) => {
     const title = await getPageTitle();
     try {
-      logger.error('PAGE ERROR: "$title}"');
-      logger.error(JSON.stringify(error, null, 2));
+      logger.error(`PAGE ERROR: "${title}"\n${error}`);
     } catch (err) {
       console.error(`❗ "${title}"\nException occurred when getting page error.\n${err}`);
     }
@@ -124,8 +117,7 @@ beforeEach(async () => {
   page.on('pageerror', async (error: Error) => {
     const title = await getPageTitle();
     try {
-      logger.error('PAGEERROR: "$title}"');
-      logger.error(JSON.stringify(error, null, 2));
+      logger.error(`PAGEERROR: "${title}"\n${error}`);
     } catch (err) {
       console.error(`❗ "${title}"\nPage exception occurred when getting pageerror.\n${err}`);
     }
@@ -218,16 +210,16 @@ const notRedirectRequest = (request: Request): boolean => {
 };
 
 const getResponseText = async (request: Request): Promise<string> => {
-  const REDIRECT_CODE_START = 299;
-  const REDIRECT_CODE_END = 400;
+  const REDIRECT_CODE_START = 300;
+  const REDIRECT_CODE_END = 308;
   const NO_CONTENT_RESPONSE_CODE = 204;
   const response = request.response();
   // Log response if response it's not a redirect or no-content
-  const status = response && response.status() ? response.status() : null;
+  const status = response && response.status();
   if (
     status &&
-    !(status > REDIRECT_CODE_START && status < REDIRECT_CODE_END) &&
-    !(status === NO_CONTENT_RESPONSE_CODE)
+    !(status >= REDIRECT_CODE_START && status <= REDIRECT_CODE_END) &&
+    status !== NO_CONTENT_RESPONSE_CODE
   ) {
     return (await request.response().buffer()).toString();
   }
