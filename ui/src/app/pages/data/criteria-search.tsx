@@ -235,7 +235,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
 
   closeSidebar() {
     attributesSelectionStore.next(undefined);
-    setSidebarActiveIconStore.next(undefined);
+    setSidebarActiveIconStore.next(null);
   }
 
   addSelection = (selectCriteria)  => {

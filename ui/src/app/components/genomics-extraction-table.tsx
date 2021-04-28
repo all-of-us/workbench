@@ -157,7 +157,14 @@ export const GenomicsExtractionTable = fp.flow(withCurrentWorkspace())(({workspa
         <CSSTransition
           key={isLoading}
           classNames='switch-transition'
-          addEndListener={(node, done) => node.addEventListener('transitionend', done, false)}>
+          addEndListener={(node, done) => {
+            node.addEventListener('transitionend', (e) => {
+              if (node.isEqualNode(e.target)) {
+                done(e);
+              }
+            }, false);
+          }}
+        >
           {
             isLoading
               ? <Spinner style={{display: 'block', margin: '3rem auto'}}/>
