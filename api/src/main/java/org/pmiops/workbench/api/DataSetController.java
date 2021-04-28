@@ -66,6 +66,7 @@ import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
+import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -95,6 +96,7 @@ public class DataSetController implements DataSetApiDelegate {
   private final NotebooksService notebooksService;
   private final GenomicExtractionService genomicExtractionService;
   private final WorkspaceAuthService workspaceAuthService;
+  private final WorkspaceService workspaceService;
 
   @Autowired
   DataSetController(
@@ -116,6 +118,7 @@ public class DataSetController implements DataSetApiDelegate {
     this.prefixProvider = prefixProvider;
     this.genomicExtractionService = genomicExtractionService;
     this.workspaceAuthService = workspaceAuthService;
+    this.workspaceService = workspaceService;
   }
 
   @Override
@@ -435,7 +438,7 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataSet> getDataSet(
       String workspaceNamespace, String workspaceId, Long dataSetId) {
-    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    DbWorkspace dbWorkspace = workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     DataSet dataSet =
@@ -445,7 +448,12 @@ public class DataSetController implements DataSetApiDelegate {
                 () -> {
                   throw new NotFoundException("No DataSet found for dataSetId: " + dataSetId);
                 });
-    return ResponseEntity.ok(dataSet);
+
+    if (dataSet.getWorkspaceId() == dbWorkspace.getWorkspaceId()) {
+      return ResponseEntity.ok(dataSet);
+    } else {
+      throw new BadRequestException("Data set " + dataSetId + " is not a part of workspace " + dbWorkspace.getName());
+    }
   }
 
   @Override
