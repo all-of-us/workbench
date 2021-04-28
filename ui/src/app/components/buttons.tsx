@@ -1,9 +1,8 @@
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {styles as cardStyles} from 'app/components/card';
-import {ClrIcon} from 'app/components/icons';
-import {SnowmanIcon} from 'app/components/icons';
+import {ClrIcon, SnowmanIcon} from 'app/components/icons';
+import {Interactive as LocalInteractive} from 'app/components/interactive';
 import {TooltipTrigger} from 'app/components/popups';
-import {IconComponent} from 'app/icons/icon';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils/index';
 import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
@@ -245,23 +244,23 @@ export const MenuItem = ({icon = null, faIcon = null, tooltip = '', disabled = f
   </TooltipTrigger>;
 };
 
-export const IconButton = ({icon, style = {}, tooltip = '', disabled = false, ...props}) => {
+export const IconButton = ({icon: Icon, style = {}, hover = {}, tooltip = '', disabled = false, ...props}) => {
   return <TooltipTrigger side='left' content={tooltip}>
-    <Clickable
-        data-test-id={icon}
-        disabled={disabled}
-        {...props}
-    >
-      <IconComponent icon={icon} disabled={disabled} style={style}/>
-    </Clickable>
+    <LocalInteractive tagName='div'
+                 style={{
+                   color: disabled ? colors.disabled : colors.accent,
+                   cursor: disabled ? 'auto' : 'pointer',
+                   ...style
+                 }}
+                 hover={{color: !disabled && colorWithWhiteness(colors.accent, 0.2), ...hover}}
+                 disabled={disabled}
+                 {...props}>
+        <Icon disabled={disabled} style={{marginLeft: '.5rem', ...style}}/>
+    </LocalInteractive>
   </TooltipTrigger>;
 };
 
-export const SnowmanButton = ({disabled = false, style = {}, ...props}) => {
-  return <Clickable disabled={disabled} {...props} propagateDataTestId={true}>
-    <SnowmanIcon style={style} disabled={disabled}/>
-  </Clickable>;
-};
+export const SnowmanButton = ({...props}) => <IconButton icon={SnowmanIcon} {...props} propagateDataTestId={true}/>;
 
 const cardButtonBase = {
   style: {

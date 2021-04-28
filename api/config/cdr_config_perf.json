@@ -44,7 +44,6 @@
     },
     {
       "cdrVersionId": 3,
-      "isDefault": true,
       "accessTier": "registered",
       "name": "Synthetic Dataset v3",
       "bigqueryProject": "fc-aou-cdr-perf",
@@ -69,6 +68,20 @@
       "cdrDbName": "synth_r_2019q4_14",
       "hasFitbitData": true,
       "hasCopeSurveyData": true
+    },
+    {
+      "cdrVersionId": 5,
+      "isDefault": true,
+      "name": "Synthetic Dataset v4",
+      "bigqueryProject": "fc-aou-cdr-perf",
+      "bigqueryDataset": "test_R2019q4r3",
+      "creationTime": "2019-09-30 00:00:00Z",
+      "releaseNumber": 4,
+      "numParticipants": 234525,
+      "cdrDbName": "synth_r_2019q4_14",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true,
+      "accessTier": "registered"
     }
   ]
 }

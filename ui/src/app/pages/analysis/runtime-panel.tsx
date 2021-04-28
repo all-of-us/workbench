@@ -403,7 +403,7 @@ const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
 
 // Select a recommended preset configuration.
 const PresetSelector = ({
-  hasMicroarrayData, setSelectedDiskSize, setSelectedMachine,
+  allowDataproc, setSelectedDiskSize, setSelectedMachine,
   setSelectedCompute, setSelectedDataprocConfig, disabled}) => {
   return <Dropdown
     id='runtime-presets-menu'
@@ -412,7 +412,7 @@ const PresetSelector = ({
     placeholder='Recommended environments'
     options={fp.flow(
       fp.values,
-      fp.filter(({runtimeTemplate}) => hasMicroarrayData || !runtimeTemplate.dataprocConfig),
+      fp.filter(({runtimeTemplate}) => allowDataproc || !runtimeTemplate.dataprocConfig),
       fp.map(({displayName, runtimeTemplate}) => ({label: displayName, value: runtimeTemplate}))
       )(runtimePresets)
     }
@@ -803,7 +803,7 @@ export const RuntimePanel = fp.flow(
 
   const {profile} = profileState;
 
-  const {hasMicroarrayData} = findCdrVersion(cdrVersionId, cdrVersionTiersResponse) || {hasMicroarrayData: false};
+  const {hasWgsData: allowDataproc} = findCdrVersion(cdrVersionId, cdrVersionTiersResponse) || {hasWgsData: false};
   let [{currentRuntime, pendingRuntime}, setRequestedRuntime] = useCustomRuntime(namespace);
 
   // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
@@ -1087,7 +1087,7 @@ export const RuntimePanel = fp.flow(
                   />
               </FlexRow>
               <PresetSelector
-                hasMicroarrayData={hasMicroarrayData}
+                allowDataproc={allowDataproc}
                 disabled={disableControls}
                 setSelectedDiskSize={(disk) => setSelectedDiskSize(disk)}
                 setSelectedMachine={(machine) => setSelectedMachine(machine)}
@@ -1116,7 +1116,7 @@ export const RuntimePanel = fp.flow(
              <FlexColumn style={{marginTop: '1rem'}}>
                <label style={styles.label} htmlFor='runtime-compute'>Compute type</label>
                <Dropdown id='runtime-compute'
-                         disabled={!hasMicroarrayData || disableControls}
+                         disabled={!allowDataproc || disableControls}
                          style={{width: '10rem'}}
                          options={[ComputeType.Standard, ComputeType.Dataproc]}
                          value={selectedCompute || ComputeType.Standard}
