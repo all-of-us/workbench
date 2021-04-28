@@ -221,7 +221,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     controller =
         spy(
             new DataSetController(
-                bigQueryService,
                 cdrVersionService,
                 dataSetServiceImpl,
                 fireCloudService,

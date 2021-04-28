@@ -31,6 +31,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -62,6 +63,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.SearchRequest;
@@ -534,6 +536,33 @@ public class DataSetServiceTest {
     // amount of mocking in this test.
     verify(mockCohortQueryBuilder)
         .buildUnionedParticipantIdQuery(argThat(criteriaList -> criteriaList.size() == 1));
+  }
+
+  @Test
+  public void testGetValueListFromDomain() {
+    mockDomainTableFields();
+    List<DomainValue> conditionDomainValueList =
+        dataSetServiceImpl.getValueListFromDomain("CONDITION");
+    assertThat(conditionDomainValueList.size()).isEqualTo(2);
+
+    List<DomainValue> measurementDomainValueList =
+        dataSetServiceImpl.getValueListFromDomain("PHYSICAL_MEASUREMENT_CSS");
+    assertThat(measurementDomainValueList.size()).isEqualTo(1);
+  }
+
+  private void mockDomainTableFields() {
+    FieldList conditionList =
+        FieldList.of(
+            ImmutableList.of(
+                Field.of("OMOP_SQL_Condition", LegacySQLTypeName.STRING),
+                Field.of("JOIN_VALUE", LegacySQLTypeName.STRING)));
+
+    FieldList measurementList =
+        FieldList.of(ImmutableList.of(Field.of("OMOP_SQL_M", LegacySQLTypeName.STRING)));
+    doReturn(conditionList).when(mockBigQueryService).getTableFieldsFromDomain(Domain.CONDITION);
+    doReturn(measurementList)
+        .when(mockBigQueryService)
+        .getTableFieldsFromDomain(Domain.MEASUREMENT);
   }
 
   private void mockDsLinkingTableForFitbit() {
