@@ -15,8 +15,8 @@ import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {serverConfigStore} from 'app/utils/stores';
 
 
 describe('DataPage', () => {
@@ -30,6 +30,7 @@ describe('DataPage', () => {
       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
     });
+    serverConfigStore.set({config: {enableGenomicExtraction: true, gsuiteDomain: ''}});
     currentWorkspaceStore.next(workspaceDataStub);
   });
 

@@ -277,6 +277,9 @@ public class WorkbenchConfig {
     public boolean enableReportingUploadCron;
     // If true, user account setup requires linking eRA commons via RAS instead of Shibboleth.
     public boolean enableRasLoginGovLinking;
+    // If true, enable genomic extraction functionality for datasets which have genomics data
+    // associated with their CDRs.
+    public boolean enableGenomicExtraction;
   }
 
   public static class ActionAuditConfig {

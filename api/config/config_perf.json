@@ -122,7 +122,8 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableReportingUploadCron": false,
-    "enableRasLoginGovLinking": false
+    "enableRasLoginGovLinking": false,
+    "enableGenomicExtraction": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",
