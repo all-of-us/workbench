@@ -48,12 +48,12 @@ class Common
   end
 
   def print_usage()
-    STDERR.puts "\nUsage: ./project.rb <command> <options>\n\n"
-    STDERR.puts "COMMANDS\n\n"
+    STDOUT.puts "\nUsage: ./project.rb <command> <options>\n\n"
+    STDOUT.puts "COMMANDS\n\n"
     @@commands.each do |command|
-      STDERR.puts bold_term_text(command[:invocation])
-      STDERR.puts command[:description] || "(no description specified)"
-      STDERR.puts
+      STDOUT.puts bold_term_text(command[:invocation])
+      STDOUT.puts command[:description] || "(no description specified)"
+      STDOUT.puts
     end
   end
 
