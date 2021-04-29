@@ -51,11 +51,11 @@
       "name": "All of Us Dataset v5",
       "isDefault": true,
       "bigqueryProject": "fc-aou-cdr-preprod",
-      "bigqueryDataset": "R2020Q4R2",
+      "bigqueryDataset": "R2020Q4R3",
       "creationTime": "2020-10-20 00:00:00Z",
       "releaseNumber": 5,
       "numParticipants": 315297,
-      "cdrDbName": "r_2020q4_3",
+      "cdrDbName": "r_2020q4_4",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
