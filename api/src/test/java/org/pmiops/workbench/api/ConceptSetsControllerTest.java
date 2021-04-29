@@ -370,9 +370,8 @@ public class ConceptSetsControllerTest {
         makeConceptSet(
             CLIENT_CRITERIA_2, Domain.MEASUREMENT, workspace2.getNamespace(), WORKSPACE_NAME_2);
 
-    conceptSetsController
-        .getConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId())
-        .getBody();
+    conceptSetsController.getConceptSet(
+        workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId());
   }
 
   @Test(expected = NotFoundException.class)
@@ -380,10 +379,8 @@ public class ConceptSetsControllerTest {
     ConceptSet conceptSet =
         makeConceptSet(
             CLIENT_CRITERIA_2, Domain.MEASUREMENT, workspace2.getNamespace(), WORKSPACE_NAME_2);
-    conceptSetsController
-        .updateConceptSet(
-            workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId(), makeConceptSet1())
-        .getBody();
+    conceptSetsController.updateConceptSet(
+        workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId(), makeConceptSet1());
   }
 
   @Test(expected = NotFoundException.class)
@@ -391,13 +388,11 @@ public class ConceptSetsControllerTest {
     ConceptSet conceptSet =
         makeConceptSet(
             CLIENT_CRITERIA_2, Domain.MEASUREMENT, workspace2.getNamespace(), WORKSPACE_NAME_2);
-    conceptSetsController
-        .updateConceptSetConcepts(
-            workspace.getNamespace(),
-            WORKSPACE_NAME,
-            conceptSet.getId(),
-            addConceptsRequest(conceptSet.getEtag(), CLIENT_CRITERIA_1.getConceptId()))
-        .getBody();
+    conceptSetsController.updateConceptSetConcepts(
+        workspace.getNamespace(),
+        WORKSPACE_NAME,
+        conceptSet.getId(),
+        addConceptsRequest(conceptSet.getEtag(), CLIENT_CRITERIA_1.getConceptId()));
   }
 
   @Test
