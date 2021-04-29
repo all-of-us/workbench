@@ -52,7 +52,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     validateColumnName(cohortAnnotationDefinition.getColumnName());
-    validateCohortExist(cohortId, dbWorkspace);
+    validateCohortExist(dbWorkspace, cohortId);
     validateDefinitionExists(cohortId, cohortAnnotationDefinition.getColumnName());
 
     cohortAnnotationDefinition.setCohortId(cohortId);
@@ -69,7 +69,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    validateCohortExist(cohortId, dbWorkspace);
+    validateCohortExist(dbWorkspace, cohortId);
     // Validate that CohortAnnotationDefinition exist
     findCohortAnnotationDefinition(cohortId, annotationDefinitionId);
 
@@ -85,7 +85,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    validateCohortExist(cohortId, dbWorkspace);
+    validateCohortExist(dbWorkspace, cohortId);
 
     return ResponseEntity.ok(findCohortAnnotationDefinition(cohortId, annotationDefinitionId));
   }
@@ -98,7 +98,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    validateCohortExist(cohortId, dbWorkspace);
+    validateCohortExist(dbWorkspace, cohortId);
 
     List<CohortAnnotationDefinition> defs =
         cohortAnnotationDefinitionService.findByCohortId(cohortId);
@@ -121,7 +121,7 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     validateColumnName(columnName);
-    validateCohortExist(cohortId, dbWorkspace);
+    validateCohortExist(dbWorkspace, cohortId);
 
     CohortAnnotationDefinition cohortAnnotationDefinition =
         findCohortAnnotationDefinition(cohortId, annotationDefinitionId).columnName(columnName);
@@ -138,8 +138,8 @@ public class CohortAnnotationDefinitionController implements CohortAnnotationDef
         cohortId, annotationDefinitionId);
   }
 
-  private void validateCohortExist(long cohortId, DbWorkspace dbWorkspace) {
-    cohortReviewService.findCohort(cohortId, dbWorkspace.getWorkspaceId());
+  private void validateCohortExist(DbWorkspace dbWorkspace, long cohortId) {
+    cohortReviewService.findCohort(dbWorkspace.getWorkspaceId(), cohortId);
   }
 
   private CohortAnnotationDefinition save(CohortAnnotationDefinition cohortAnnotationDefinition) {

@@ -179,7 +179,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
       throw new NotFoundException(
           String.format(
               "Not Found: No CohortReview exists for cohortReviewId: %s and cohortId: %s",
-              cohortReviewId, dbCohort.getCohortId()));
+              cohortReviewId, cohortReview.getCohortId()));
     }
     return cohortReview;
   }
