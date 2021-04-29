@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import com.google.cloud.bigquery.Field;
-import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
@@ -75,16 +74,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class DataSetController implements DataSetApiDelegate {
 
-  // See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
-  private static final long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000L;
-
   private static final String DATE_FORMAT_STRING = "yyyy/MM/dd HH:mm:ss";
   public static final String EMPTY_CELL_MARKER = "";
   public static final String WHOLE_GENOME_VALUE = "VCF Files(s)";
 
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
-  private final BigQueryService bigQueryService;
   private final DataSetService dataSetService;
 
   private final Provider<DbUser> userProvider;
@@ -98,7 +93,6 @@ public class DataSetController implements DataSetApiDelegate {
 
   @Autowired
   DataSetController(
-      BigQueryService bigQueryService,
       CdrVersionService cdrVersionService,
       DataSetService dataSetService,
       FireCloudService fireCloudService,
@@ -107,7 +101,6 @@ public class DataSetController implements DataSetApiDelegate {
       @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
       GenomicExtractionService genomicExtractionService,
       WorkspaceAuthService workspaceAuthService) {
-    this.bigQueryService = bigQueryService;
     this.cdrVersionService = cdrVersionService;
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
@@ -200,13 +193,7 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
 
-    QueryJobConfiguration previewBigQueryJobConfig =
-        dataSetService.previewBigQueryJobConfig(dataSetPreviewRequest);
-
-    TableResult queryResponse =
-        bigQueryService.executeQuery(
-            bigQueryService.filterBigQueryConfig(previewBigQueryJobConfig),
-            APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC);
+    TableResult queryResponse = dataSetService.previewBigQueryJobConfig(dataSetPreviewRequest);
 
     if (queryResponse.getTotalRows() != 0) {
       valuePreviewList.addAll(
@@ -478,15 +465,7 @@ public class DataSetController implements DataSetApiDelegate {
     if (domainValue.equals(Domain.WHOLE_GENOME_VARIANT.toString())) {
       response.addItemsItem(new DomainValue().value(WHOLE_GENOME_VALUE));
     } else {
-      Domain domain =
-          Domain.PHYSICAL_MEASUREMENT_CSS.equals(Domain.valueOf(domainValue))
-              ? Domain.MEASUREMENT
-              : Domain.valueOf(domainValue);
-      FieldList fieldList = bigQueryService.getTableFieldsFromDomain(domain);
-      response.setItems(
-          fieldList.stream()
-              .map(field -> new DomainValue().value(field.getName().toLowerCase()))
-              .collect(Collectors.toList()));
+      response.setItems(dataSetService.getValueListFromDomain(domainValue));
     }
 
     return ResponseEntity.ok(response);

@@ -1,6 +1,7 @@
 package org.pmiops.workbench.dataset;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.cloud.bigquery.TableResult;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetRequest;
+import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.ResourceType;
 
@@ -24,7 +26,7 @@ public interface DataSetService {
 
   DataSet updateDataSet(DataSetRequest dataSetRequest, Long DataSetId);
 
-  QueryJobConfiguration previewBigQueryJobConfig(DataSetPreviewRequest dataSetPreviewRequest);
+  TableResult previewBigQueryJobConfig(DataSetPreviewRequest dataSetPreviewRequest);
 
   Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSet);
 
@@ -61,4 +63,6 @@ public interface DataSetService {
   DataDictionaryEntry findDataDictionaryEntry(String fieldName, String domain);
 
   List<String> getPersonIdsWithWholeGenome(DbDataset dataSet);
+
+  List<DomainValue> getValueListFromDomain(String domain);
 }

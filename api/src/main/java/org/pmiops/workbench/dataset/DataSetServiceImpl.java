@@ -3,8 +3,10 @@ package org.pmiops.workbench.dataset;
 import static com.google.cloud.bigquery.StandardSQLTypeName.ARRAY;
 import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
 
+import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -57,6 +59,7 @@ import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
@@ -105,6 +108,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           Domain.FITBIT_HEART_RATE_SUMMARY,
           Domain.FITBIT_INTRADAY_STEPS,
           Domain.WHOLE_GENOME_VARIANT);
+
+  // See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
+  private static final long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000L;
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
@@ -272,7 +278,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           .build();
 
   @Override
-  public QueryJobConfiguration previewBigQueryJobConfig(DataSetPreviewRequest request) {
+  public TableResult previewBigQueryJobConfig(DataSetPreviewRequest request) {
     final Domain domain = request.getDomain();
     final List<String> values = request.getValues();
     Map<String, QueryParameterValue> mergedQueryParameterValues = new HashMap<>();
@@ -364,8 +370,13 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
               .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
     queryBuilder.append(LIMIT_20);
-
-    return buildQueryJobConfiguration(mergedQueryParameterValues, queryBuilder.toString());
+    QueryJobConfiguration previewBigQueryJobConfig =
+        buildQueryJobConfiguration(mergedQueryParameterValues, queryBuilder.toString());
+    TableResult queryResponse =
+        bigQueryService.executeQuery(
+            bigQueryService.filterBigQueryConfig(previewBigQueryJobConfig),
+            APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC);
+    return queryResponse;
   }
 
   @Override
@@ -937,6 +948,18 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 .executeQuery(bigQueryService.filterBigQueryConfig(participantIdQuery))
                 .getValues())
         .map(personId -> personId.get(0).getValue().toString())
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<DomainValue> getValueListFromDomain(String domainValue) {
+    Domain domain =
+        Domain.PHYSICAL_MEASUREMENT_CSS.equals(Domain.valueOf(domainValue))
+            ? Domain.MEASUREMENT
+            : Domain.valueOf(domainValue);
+    FieldList fieldList = bigQueryService.getTableFieldsFromDomain(domain);
+    return fieldList.stream()
+        .map(field -> new DomainValue().value(field.getName().toLowerCase()))
         .collect(Collectors.toList());
   }
 
