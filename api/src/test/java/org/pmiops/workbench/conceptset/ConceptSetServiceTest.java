@@ -60,6 +60,9 @@ public class ConceptSetServiceTest {
     assertThat(copiedConceptSet).isNotNull();
   }
 
+  @Test
+  public void testUpdateConceptSetConcepts() {}
+
   private DbConceptSet mockConceptSet() {
     DbConceptSetConceptId dbConceptSetConceptId1 =
         DbConceptSetConceptId.builder().addConceptId(1L).addStandard(true).build();
