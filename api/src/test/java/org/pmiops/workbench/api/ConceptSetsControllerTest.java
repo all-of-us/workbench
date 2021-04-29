@@ -365,7 +365,7 @@ public class ConceptSetsControllerTest {
   }
 
   @Test(expected = NotFoundException.class)
-  public void testGetConceptSet() {
+  public void testGetConceptSetWrongWorkspace() {
     ConceptSet conceptSet =
         makeConceptSet(
             CLIENT_CRITERIA_2, Domain.MEASUREMENT, workspace2.getNamespace(), WORKSPACE_NAME_2);
@@ -375,8 +375,41 @@ public class ConceptSetsControllerTest {
         .getBody();
   }
 
+  @Test(expected = NotFoundException.class)
+  public void testUpdateConceptSetWrongWorkspace() {
+    ConceptSet conceptSet =
+        makeConceptSet(
+            CLIENT_CRITERIA_2, Domain.MEASUREMENT, workspace2.getNamespace(), WORKSPACE_NAME_2);
+    ConceptSet request = makeConceptSet1();
+    request.setDescription("new description");
+    request.setName("new name");
+    Instant newInstant = NOW.plusMillis(1);
+    CLOCK.setInstant(newInstant);
+    conceptSetsController
+        .updateConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId(), request)
+        .getBody();
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void testUpdateConceptSetConceptsWrongWorkspace() {
+    ConceptSet conceptSet =
+        makeConceptSet(
+            CLIENT_CRITERIA_2, Domain.MEASUREMENT, workspace2.getNamespace(), WORKSPACE_NAME_2);
+    conceptSetsController
+        .updateConceptSetConcepts(
+            workspace.getNamespace(),
+            WORKSPACE_NAME,
+            conceptSet.getId(),
+            addConceptsRequest(
+                conceptSet.getEtag(),
+                CLIENT_CRITERIA_1.getConceptId(),
+                CLIENT_CRITERIA_3.getConceptId(),
+                CLIENT_CRITERIA_4.getConceptId()))
+        .getBody();
+  }
+
   @Test
-  public void testGetConceptSetNoAccess() {
+  public void testGetConceptSet() {
     ConceptSet surveyConceptSet = makeSurveyConceptSet1();
     surveyConceptSet.setParticipantCount(0);
     assertThat(
