@@ -64,6 +64,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.model.AnnotationType;
 import org.pmiops.workbench.model.CohortReview;
 import org.pmiops.workbench.model.CohortStatus;
@@ -108,6 +109,8 @@ public class CohortReviewControllerTest {
 
   private static final String WORKSPACE_NAMESPACE = "namespace";
   private static final String WORKSPACE_NAME = "name";
+  private static final String WORKSPACE_NAMESPACE2 = "namespace";
+  private static final String WORKSPACE_NAME2 = "name2";
   private DbCdrVersion cdrVersion;
   private DbCohortReview cohortReview;
   private DbCohort cohort;
@@ -152,6 +155,8 @@ public class CohortReviewControllerTest {
   @Autowired private BigQueryService bigQueryService;
 
   @Autowired private UserDao userDao;
+
+  @Autowired FireCloudService fireCloudService;
 
   private enum TestConcepts {
     ASIAN("Asian", 8515),
@@ -203,6 +208,7 @@ public class CohortReviewControllerTest {
     CohortReviewMapperImpl.class,
     ParticipantCohortAnnotationMapperImpl.class,
     CommonMappers.class,
+    WorkspaceAuthService.class,
   })
   @MockBean({
     BigQueryService.class,
@@ -210,7 +216,6 @@ public class CohortReviewControllerTest {
     FireCloudService.class,
     UserRecentResourceService.class,
     WorkspaceService.class,
-    WorkspaceAuthService.class,
     AccessTierService.class,
     CdrVersionService.class,
   })
@@ -420,6 +425,12 @@ public class CohortReviewControllerTest {
                 .annotationValueString("test")
                 .cohortAnnotationDefinitionId(
                     stringAnnotationDefinition.getCohortAnnotationDefinitionId()));
+
+    FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
+    fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());
+    when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE, WORKSPACE_NAME)).thenReturn(fcResponse);
+    when(fireCloudService.getWorkspace(WORKSPACE_NAMESPACE2, WORKSPACE_NAME2))
+        .thenReturn(fcResponse);
   }
 
   @Test
@@ -458,10 +469,6 @@ public class CohortReviewControllerTest {
 
   @Test
   public void createCohortReviewAlreadyExists() {
-    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(workspace);
-
     stubBigQueryCohortCalls();
 
     try {
@@ -485,10 +492,6 @@ public class CohortReviewControllerTest {
 
   @Test
   public void createCohortReview() {
-    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(workspace);
-
     stubBigQueryCohortCalls();
 
     CohortReview cohortReview =
@@ -513,10 +516,6 @@ public class CohortReviewControllerTest {
   @Test
   public void createCohortReviewNoCohortException() {
     long cohortId = 99;
-    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(workspace);
-
     stubBigQueryCohortCalls();
 
     try {
@@ -537,10 +536,6 @@ public class CohortReviewControllerTest {
 
   @Test
   public void updateCohortReview() {
-    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(workspace);
-
     CohortReview requestCohortReview =
         new CohortReview()
             .cohortReviewId(cohortReview.getCohortReviewId())
@@ -563,12 +558,18 @@ public class CohortReviewControllerTest {
     assertThat(responseCohortReview.getLastModifiedTime()).isNotNull();
   }
 
+  @Test(expected = NotFoundException.class)
+  public void deleteCohortReviewWrongWorkspace() {
+    CohortReview requestCohortReview =
+        new CohortReview()
+            .cohortReviewId(cohortReview.getCohortReviewId())
+            .etag(Etags.fromVersion(cohortReview.getVersion()));
+    cohortReviewController.deleteCohortReview(
+        WORKSPACE_NAMESPACE2, WORKSPACE_NAME2, requestCohortReview.getCohortReviewId());
+  }
+
   @Test
   public void deleteCohortReview() {
-    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(workspace);
-
     CohortReview requestCohortReview =
         new CohortReview()
             .cohortReviewId(cohortReview.getCohortReviewId())
@@ -585,10 +586,6 @@ public class CohortReviewControllerTest {
   @Test
   public void createParticipantCohortAnnotationNoAnnotationDefinitionFound() {
     Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
-
-    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(workspace);
 
     try {
       cohortReviewController
@@ -689,10 +686,6 @@ public class CohortReviewControllerTest {
                 stringAnnotationDefinition.getCohortAnnotationDefinitionId());
     participantCohortAnnotationDao.save(annotation);
 
-    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(workspace);
-
     cohortReviewController.deleteParticipantCohortAnnotation(
         WORKSPACE_NAMESPACE,
         WORKSPACE_NAME,
@@ -708,10 +701,6 @@ public class CohortReviewControllerTest {
   public void deleteParticipantCohortAnnotationNoAnnotation() {
     Long participantId = participantCohortStatus1.getParticipantKey().getParticipantId();
     Long annotationId = 9999L;
-
-    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(workspace);
 
     try {
       cohortReviewController.deleteParticipantCohortAnnotation(
@@ -736,10 +725,6 @@ public class CohortReviewControllerTest {
 
   @Test
   public void getParticipantCohortAnnotations() {
-    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.READER))
-        .thenReturn(workspace);
-
     ParticipantCohortAnnotationListResponse response =
         cohortReviewController
             .getParticipantCohortAnnotations(
@@ -758,10 +743,6 @@ public class CohortReviewControllerTest {
 
   @Test
   public void getParticipantCohortStatus() {
-    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.READER))
-        .thenReturn(workspace);
-
     ParticipantCohortStatus response =
         cohortReviewController
             .getParticipantCohortStatus(
@@ -801,10 +782,6 @@ public class CohortReviewControllerTest {
         createCohortReview(
             cohortReview, ImmutableList.of(participantCohortStatus1, participantCohortStatus2));
 
-    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.READER))
-        .thenReturn(workspace);
-
     assertParticipantCohortStatuses(
         expectedReview1, page, pageSize, SortOrder.DESC, FilterColumns.STATUS);
 
@@ -824,10 +801,6 @@ public class CohortReviewControllerTest {
 
   @Test
   public void updateParticipantCohortAnnotation() {
-    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(workspace);
-
     ParticipantCohortAnnotation participantCohortAnnotation =
         cohortReviewController
             .updateParticipantCohortAnnotation(
@@ -845,9 +818,6 @@ public class CohortReviewControllerTest {
   @Test
   public void updateParticipantCohortAnnotationNoAnnotationForIdException() {
     long badAnnotationId = 99;
-    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(workspace);
 
     try {
       cohortReviewController
@@ -873,10 +843,6 @@ public class CohortReviewControllerTest {
 
   @Test
   public void updateParticipantCohortStatus() {
-    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(workspace);
-
     ParticipantCohortStatus participantCohortStatus =
         cohortReviewController
             .updateParticipantCohortStatus(
@@ -893,10 +859,6 @@ public class CohortReviewControllerTest {
   /** Helper method to consolidate assertions for all the {@link AnnotationType}s. */
   private void assertCreateParticipantCohortAnnotation(
       Long participantId, Long annotationDefinitionId, ParticipantCohortAnnotation request) {
-    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(workspace);
-
     ParticipantCohortAnnotation response =
         cohortReviewController
             .createParticipantCohortAnnotation(
@@ -923,10 +885,6 @@ public class CohortReviewControllerTest {
    */
   private void assertConflictExceptionForAnnotationType(
       Long participantId, Long cohortAnnotationDefId, String type) {
-    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(workspace);
-
     try {
       cohortReviewController
           .createParticipantCohortAnnotation(
