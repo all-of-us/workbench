@@ -82,6 +82,12 @@ ENVIRONMENTS = {
         :dest_cdr_project => "fc-aou-cdr-preprod",
         :auth_domain_group_email => "all-of-us-registered-preprod@firecloud.org",
       },
+      "controlled" => {
+        :source_cdr_project => "aou-res-curation-output-prod",
+        :ingest_cdr_project => "fc-aou-vpc-ingest-preprod-ct",
+        :dest_cdr_project => "fc-aou-cdr-preprod-ct",
+        :auth_domain_group_email => "[TBD - fill in ASAP after creation]",
+      }
     }
   },
   "all-of-us-rw-prod" => {
