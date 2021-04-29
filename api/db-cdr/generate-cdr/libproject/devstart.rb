@@ -86,7 +86,7 @@ ENVIRONMENTS = {
         :source_cdr_project => "aou-res-curation-output-prod",
         :ingest_cdr_project => "fc-aou-vpc-ingest-preprod-ct",
         :dest_cdr_project => "fc-aou-cdr-preprod-ct",
-        :auth_domain_group_email => "[TBD - fill in ASAP after creation]",
+        :auth_domain_group_email => "all-of-us-controlled-preprod@firecloud.org",
       }
     }
   },

@@ -14,7 +14,7 @@
       "displayName": "Controlled Tier",
       "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_preprod_2",
       "authDomainName": "all-of-us-controlled-preprod",
-      "authDomainGroupEmail": "[TBD - will fill in ASAP after creation]"
+      "authDomainGroupEmail": "all-of-us-controlled-preprod@firecloud.org"
     }
   ],
   "cdrVersions": [
