@@ -19,8 +19,8 @@ describe('Workspace UI tests', () => {
     expect(await homePage.isLoaded()).toBe(true);
 
     const cards = await WorkspaceCard.findAllCards(page);
-    let width = -1;
-    let height = -1;
+    let width;
+    let height;
     for (const card of cards) {
       const cardElem = BaseElement.asBaseElement(page, card.asElementHandle());
       expect(await cardElem.isVisible()).toBe(true);
@@ -42,25 +42,25 @@ describe('Workspace UI tests', () => {
 
     // Randomly choose one card to check
     const card = await WorkspaceCard.findAnyCard(page);
+    const workspaceName = await card.getWorkspaceName();
+    const accessLevel = await card.getWorkspaceAccessLevel();
+    const lastChangedTime = Date.parse(await card.getLastChangedTime());
 
     // Check workspace name string is made of english characters
-    const workspaceName = await card.getWorkspaceName();
     await expect(workspaceName).toMatch(new RegExp(/^[a-zA-Z]+/));
 
     // Check Access Level is one of three levels
     const levels = ['WRITER', 'READER', 'OWNER'];
-    const accessLevel = await card.getWorkspaceAccessLevel();
     expect(levels).toContain(accessLevel);
+
+    // Check Last Changed time is valid date time
+    // Date.parse returns 'NaN' if string is not a valid time. NaN is never equal to itself.
+    expect(lastChangedTime === lastChangedTime).toBe(true);
 
     // Check snowman menu options contains expected options
     const snowmanMenu = await card.getSnowmanMenu();
     const links = await snowmanMenu.getAllOptionTexts();
     expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
-
-    // Check Last Changed time is valid date time
-    const lastChangedTime = Date.parse(await card.getLastChangedTime());
-    // Date.parse returns 'NaN' if string is not a valid time. NaN is never equal to itself.
-    expect(lastChangedTime === lastChangedTime).toBe(true);
   });
 
   test('CANCEL in Edit page go back to Your Workspaces page', async () => {

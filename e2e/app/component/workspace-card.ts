@@ -12,7 +12,8 @@ const WorkspaceCardSelector = {
   cardRootXpath: './/*[child::*[@data-test-id="workspace-card"]]', // finds 'workspace-card' parent container node
   cardNameXpath: '@data-test-id="workspace-card-name"',
   accessLevelXpath: './/*[@data-test-id="workspace-access-level"]',
-  dateTimeXpath: './/*[@data-test-id="workspace-card"]/div[3]'
+  dateTimeXpath:
+    './/*[@data-test-id="workspace-card"]//*[@data-test-id="workspace-access-level"]/following-sibling::div'
 };
 
 /**
