@@ -27,7 +27,7 @@ const local = {
   collaboratorUsername: process.env.DEV_COLLABORATOR || 'puppetmaster@fake-research-aou.org',
   writerUserName: process.env.DEV_WRITER || 'puppetmaster@fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v3',
-  altCdrVersionName: 'Synthetic Dataset v3 with Microarray'
+  altCdrVersionName: 'Synthetic Dataset v3 with WGS'
 };
 
 // workbench test environment
@@ -38,7 +38,7 @@ const test = {
   collaboratorUsername: process.env.TEST_COLLABORATOR || 'puppetmaster@fake-research-aou.org',
   writerUserName: process.env.TEST_WRITER || 'puppetmaster@fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v3',
-  altCdrVersionName: 'Synthetic Dataset v3 with Microarray'
+  altCdrVersionName: 'Synthetic Dataset v3 with WGS'
 };
 
 // workbench staging environment
