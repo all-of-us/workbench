@@ -195,7 +195,11 @@ export default class WorkspacesPage extends AuthenticatedPage {
       // Click "Looks Good" link
       await this.page
         .waitForXPath('//a[text()="Looks Good"]', { visible: true, timeout: 2000 })
-        .then((link) => link.click());
+        .then((link) => link.click())
+        .catch(() => {
+          // READER doesn't have permission to review research purpose. "Looks Good" link is not available to click.
+          // Ignore timeout error thrown by waitForXpath
+        });
     } else {
       await new WorkspaceDataPage(this.page).openAboutPage();
     }
