@@ -17,6 +17,7 @@ import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {
   altCdrVersion,
   cdrVersionTiersResponse,
+  controlledCdrVersion,
   defaultCdrVersion,
 } from 'testing/stubs/cdr-versions-api-stub';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
@@ -289,30 +290,31 @@ describe('WorkspaceEdit', () => {
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
 
-    const accessTierSelection = wrapper.find('[data-test-id="select-access-tier"]');
+    const accessTierSelection = wrapper.find('[data-test-id="select-access-tier"]').find('select');
     expect(accessTierSelection.exists()).toBeTruthy();
 
     // defaults to registered
-    const selectionProps = accessTierSelection.find('select').props();
+    const selectionProps = accessTierSelection.props();
     expect(selectionProps.disabled).toBeFalsy();
     expect(selectionProps.value).toBe(AccessTierShortNames.Registered);
 
     // when Registered is selected, the CDR Version dropdown lists the registered tier CDR Versions
     // defaultCdrVersion and altCdrVersion, with defaultCdrVersion selected
 
-    const cdrVersionsSelect = wrapper.find('[data-test-id="select-cdr-version"]').find('select');
-    expect(cdrVersionsSelect.props().value).toBe(defaultCdrVersion.cdrVersionId);
+    const cdrVersionsSelect = () => wrapper.find('[data-test-id="select-cdr-version"]').find('select');
+    expect(cdrVersionsSelect().props().value).toBe(defaultCdrVersion.cdrVersionId);
 
-    const cdrVersionSelectOptions: Array<string> = cdrVersionsSelect.children().map(o => o.props().value);
-    expect(cdrVersionSelectOptions).toEqual([defaultCdrVersion.cdrVersionId, altCdrVersion.cdrVersionId]);
+    const cdrVersionSelectOptions = (): Array<string> => cdrVersionsSelect().children().map(o => o.props().value);
+    expect(cdrVersionSelectOptions()).toEqual([defaultCdrVersion.cdrVersionId, altCdrVersion.cdrVersionId]);
 
     // when Controlled is selected, the CDR Version dropdown lists the (one) controlled tier CDR Version
 
-    // TODO make this test work somehow - I have manually tested the functionality here
-    // accessTierSelection.simulate('change', {target: {value: AccessTierShortNames.Controlled}});
-    // await waitOneTickAndUpdate(accessTierSelection);
-    // expect(cdrVersionsSelect.props().value).toBe(controlledCdrVersion.cdrVersionId);
-    // expect(cdrVersionSelectOptions).toEqual([controlledCdrVersion.cdrVersionId]);
+    const domNode = accessTierSelection.getDOMNode() as HTMLSelectElement;
+    domNode.value = AccessTierShortNames.Controlled;
+    accessTierSelection.simulate('change', {target: domNode});
+    await waitOneTickAndUpdate(accessTierSelection);
+    expect(cdrVersionsSelect().props().value).toBe(controlledCdrVersion.cdrVersionId);
+    expect(cdrVersionSelectOptions()).toEqual([controlledCdrVersion.cdrVersionId]);
   });
 
   it('retains the tier on edit and does not permit changes - Registered', async() => {
