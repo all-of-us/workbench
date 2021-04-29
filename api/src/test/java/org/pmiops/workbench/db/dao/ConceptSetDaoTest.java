@@ -66,8 +66,8 @@ public class ConceptSetDaoTest extends SpringTest {
   public void findByConceptSetIdAndWorkspaceId() {
     assertThat(
             conceptSetDao
-                .findByConceptSetIdAndWorkspaceId(
-                    dbConceptSet.getConceptSetId(), dbConceptSet.getWorkspaceId())
+                .findByWorkspaceIdAndConceptSetId(
+                    dbConceptSet.getWorkspaceId(), dbConceptSet.getConceptSetId())
                 .get())
         .isEqualTo(dbConceptSet);
   }
