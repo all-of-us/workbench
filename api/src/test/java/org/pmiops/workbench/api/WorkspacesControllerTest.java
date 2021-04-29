@@ -2828,6 +2828,52 @@ public class WorkspacesControllerTest extends SpringTest {
         copyNotebookRequest);
   }
 
+  @Test(expected = BadRequestException.class)
+  public void testCopyNotebook_notAllowedBetweenTiers() {
+    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+
+    DbCdrVersion controlledCdr =
+        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
+    controlledCdr.setName("2");
+    controlledCdr.setAccessTier(controlledTier);
+    controlledCdr = cdrVersionDao.save(controlledCdr);
+
+    Workspace fromWorkspace = createWorkspace();
+    fromWorkspace.setCdrVersionId(String.valueOf(controlledCdr.getCdrVersionId()));
+    fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
+    String fromNotebookName = "origin";
+
+    stubGetWorkspace(
+        fromWorkspace.getNamespace(),
+        fromWorkspace.getName(),
+        LOGGED_IN_USER_EMAIL,
+        WorkspaceAccessLevel.OWNER);
+
+    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
+    // a CDR Version in the Registered Tier
+    toWorkspace.setCdrVersionId(cdrVersionId);
+    toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
+    String newNotebookName = NotebooksService.withNotebookExtension("new");
+
+    stubGetWorkspace(
+        toWorkspace.getNamespace(),
+        toWorkspace.getName(),
+        LOGGED_IN_USER_EMAIL,
+        WorkspaceAccessLevel.OWNER);
+
+    CopyRequest copyNotebookRequest =
+        new CopyRequest()
+            .toWorkspaceName(toWorkspace.getName())
+            .toWorkspaceNamespace(toWorkspace.getNamespace())
+            .newName(newNotebookName);
+
+    workspacesController.copyNotebook(
+        fromWorkspace.getNamespace(),
+        fromWorkspace.getName(),
+        fromNotebookName,
+        copyNotebookRequest);
+  }
+
   @Test
   public void testCloneNotebook() {
     Workspace workspace = createWorkspace();
