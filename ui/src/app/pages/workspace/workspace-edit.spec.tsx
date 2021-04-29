@@ -13,7 +13,7 @@ import {
   WorkspaceAccessLevel,
   WorkspacesApi
 } from 'generated/fetch';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {simulateSelection, waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {
   altCdrVersion,
   cdrVersionTiersResponse,
@@ -309,10 +309,8 @@ describe('WorkspaceEdit', () => {
 
     // when Controlled is selected, the CDR Version dropdown lists the (one) controlled tier CDR Version
 
-    const domNode = accessTierSelection.getDOMNode() as HTMLSelectElement;
-    domNode.value = AccessTierShortNames.Controlled;
-    accessTierSelection.simulate('change', {target: domNode});
-    await waitOneTickAndUpdate(accessTierSelection);
+    await simulateSelection(accessTierSelection, AccessTierShortNames.Controlled);
+
     expect(cdrVersionsSelect().props().value).toBe(controlledCdrVersion.cdrVersionId);
     expect(cdrVersionSelectOptions()).toEqual([controlledCdrVersion.cdrVersionId]);
   });
