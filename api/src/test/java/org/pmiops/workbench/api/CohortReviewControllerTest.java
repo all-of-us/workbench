@@ -537,13 +537,14 @@ public class CohortReviewControllerTest {
 
   @Test
   public void updateCohortReview() {
-    when(workspaceAuthService.enforceWorkspaceAccessLevel(
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(WorkspaceAccessLevel.WRITER);
+        .thenReturn(workspace);
 
     CohortReview requestCohortReview =
         new CohortReview()
             .cohortReviewId(cohortReview.getCohortReviewId())
+            .cohortId(cohortReview.getCohortId())
             .etag(Etags.fromVersion(cohortReview.getVersion()));
     requestCohortReview.setCohortName("blahblah");
     requestCohortReview.setDescription("new desc");
@@ -564,9 +565,9 @@ public class CohortReviewControllerTest {
 
   @Test
   public void deleteCohortReview() {
-    when(workspaceAuthService.enforceWorkspaceAccessLevel(
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(WorkspaceAccessLevel.WRITER);
+        .thenReturn(workspace);
 
     CohortReview requestCohortReview =
         new CohortReview()

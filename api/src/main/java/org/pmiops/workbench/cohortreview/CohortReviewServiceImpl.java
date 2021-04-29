@@ -142,8 +142,8 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   public CohortReviewServiceImpl() {}
 
   @Override
-  public DbCohort findCohort(long cohortId) {
-    DbCohort cohort = cohortDao.findOne(cohortId);
+  public DbCohort findCohort(long workspaceId, long cohortId) {
+    DbCohort cohort = cohortDao.findCohortByWorkspaceIdAndCohortId(workspaceId, cohortId);
     if (cohort == null) {
       throw new NotFoundException(
           String.format("Not Found: No Cohort exists for cohortId: %s", cohortId));
@@ -171,8 +171,22 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   }
 
   @Override
+  public CohortReview findCohortReviewForWorkspace(Long workspaceId, Long cohortReviewId) {
+    CohortReview cohortReview = findCohortReview(cohortReviewId);
+    DbCohort dbCohort =
+        cohortDao.findCohortByWorkspaceIdAndCohortId(workspaceId, cohortReview.getCohortId());
+    if (dbCohort == null) {
+      throw new NotFoundException(
+          String.format(
+              "Not Found: No CohortReview exists for cohortReviewId: %s and cohortId: %s",
+              cohortReviewId, dbCohort.getCohortId()));
+    }
+    return cohortReview;
+  }
+
+  @Override
   public void deleteCohortReview(Long cohortReviewId) {
-    cohortReviewDao.delete(findDbCohortReview(cohortReviewId));
+    cohortReviewDao.delete(cohortReviewId);
   }
 
   @Override
@@ -354,7 +368,8 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   public List<ParticipantCohortAnnotation> findParticipantCohortAnnotations(
       Long cohortReviewId, Long participantId) {
     return participantCohortAnnotationDao
-        .findByCohortReviewIdAndParticipantId(cohortReviewId, participantId).stream()
+        .findByCohortReviewIdAndParticipantId(cohortReviewId, participantId)
+        .stream()
         .map(participantCohortAnnotationMapper::dbModelToClient)
         .collect(Collectors.toList());
   }
