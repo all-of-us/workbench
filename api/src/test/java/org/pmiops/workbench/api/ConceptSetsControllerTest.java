@@ -380,13 +380,9 @@ public class ConceptSetsControllerTest {
     ConceptSet conceptSet =
         makeConceptSet(
             CLIENT_CRITERIA_2, Domain.MEASUREMENT, workspace2.getNamespace(), WORKSPACE_NAME_2);
-    ConceptSet request = makeConceptSet1();
-    request.setDescription("new description");
-    request.setName("new name");
-    Instant newInstant = NOW.plusMillis(1);
-    CLOCK.setInstant(newInstant);
     conceptSetsController
-        .updateConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId(), request)
+        .updateConceptSet(
+            workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId(), makeConceptSet1())
         .getBody();
   }
 
@@ -400,11 +396,7 @@ public class ConceptSetsControllerTest {
             workspace.getNamespace(),
             WORKSPACE_NAME,
             conceptSet.getId(),
-            addConceptsRequest(
-                conceptSet.getEtag(),
-                CLIENT_CRITERIA_1.getConceptId(),
-                CLIENT_CRITERIA_3.getConceptId(),
-                CLIENT_CRITERIA_4.getConceptId()))
+            addConceptsRequest(conceptSet.getEtag(), CLIENT_CRITERIA_1.getConceptId()))
         .getBody();
   }
 
