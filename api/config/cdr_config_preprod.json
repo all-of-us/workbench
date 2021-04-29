@@ -12,7 +12,7 @@
       "accessTierId": 2,
       "shortName": "controlled",
       "displayName": "Controlled Tier",
-      "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_preprod",
+      "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_preprod_2",
       "authDomainName": "all-of-us-controlled-preprod",
       "authDomainGroupEmail": "[TBD - will fill in ASAP after creation]"
     }
