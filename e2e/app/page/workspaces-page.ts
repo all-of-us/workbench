@@ -13,6 +13,9 @@ import { UseFreeCredits } from './workspace-base';
 import OldCdrVersionModal from 'app/modal/old-cdr-version-modal';
 import AuthenticatedPage from './authenticated-page';
 import { logger } from 'libs/logger';
+import WorkspaceAboutPage from './workspace-about-page';
+import WorkspaceReviewResearchPurposeModal from 'app/modal/workspace-review-research-purpose-modal';
+import WorkspaceCard from 'app/component/workspace-card';
 const faker = require('faker/locale/en_US');
 
 export const PageTitle = 'View Workspace';
@@ -177,5 +180,30 @@ export default class WorkspacesPage extends AuthenticatedPage {
     await selectMenu.selectOption(level);
     await waitWhileLoading(this.page);
     return selectMenu.getSelectedOption();
+  }
+
+  async openAboutPage(workspaceCard: WorkspaceCard): Promise<WorkspaceAboutPage> {
+    await workspaceCard.clickWorkspaceName(false);
+    const aboutPage = new WorkspaceAboutPage(this.page);
+    // Older workspace requires Review Research Purpose
+    const reviewPurposeModal = new WorkspaceReviewResearchPurposeModal(this.page);
+    // Wait maximum 3 seconds to find Review Purpose modal.
+    const modalVisible = await reviewPurposeModal.isVisible(3000);
+    if (modalVisible) {
+      await reviewPurposeModal.clickReviewNowButton();
+      await aboutPage.waitForLoad();
+      // Click "Looks Good" link
+      await this.page
+        .waitForXPath('//a[text()="Looks Good"]', { visible: true, timeout: 2000 })
+        .then((link) => link.click())
+        .catch(() => {
+          // READER doesn't have permission to review research purpose. "Looks Good" link is not available to click.
+          // Ignore timeout error thrown by waitForXpath
+        });
+    } else {
+      await new WorkspaceDataPage(this.page).openAboutPage();
+    }
+    await aboutPage.waitForLoad();
+    return aboutPage;
   }
 }
