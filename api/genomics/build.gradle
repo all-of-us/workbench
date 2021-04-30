@@ -3,6 +3,9 @@ apply plugin: 'idea'
 
 repositories {
     mavenCentral()
+    maven {
+        url "https://broadinstitute.jfrog.io/broadinstitute/libs-snapshot-local/"
+    }
 }
 
 dependencies {
