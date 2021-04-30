@@ -101,9 +101,11 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private CdrVersionService cdrVersionService;
   @Autowired private CohortDao cohortDao;
+  @Autowired private CohortService cohortService;
   @Autowired private CohortQueryBuilder cohortQueryBuilder;
   @Autowired private ConceptBigQueryService conceptBigQueryService;
   @Autowired private ConceptSetDao conceptSetDao;
+  @Autowired private ConceptSetService conceptSetService;
   @Autowired private DSLinkingDao dsLinkingDao;
   @Autowired private DataSetDao dataSetDao;
   @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
@@ -142,6 +144,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     BigQueryTestService.class,
     CdrBigQuerySchemaConfigService.class,
     CdrVersionService.class,
+    CohortService.class,
+    ConceptSetService.class,
     CohortQueryBuilder.class,
     ConceptBigQueryService.class,
     DataSetMapperImpl.class,
@@ -223,6 +227,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
             new DataSetController(
                 bigQueryService,
                 cdrVersionService,
+                cohortService,
+                conceptSetService,
                 dataSetServiceImpl,
                 fireCloudService,
                 notebooksService,
