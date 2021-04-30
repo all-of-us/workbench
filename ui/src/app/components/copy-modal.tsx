@@ -329,6 +329,8 @@ class CopyModalComponent extends React.Component<Props, State> {
   validateAndSetDestination(destination: Workspace) {
     const {fromCdrVersionId, fromAccessTierShortName, resourceType} = this.props;
 
+    console.log('fromAccessTierShortName = ' + fromAccessTierShortName);
+
     this.clearCopyError();
 
     const cdrVersionMismatch: boolean = fromCdrVersionId !== destination.cdrVersionId;

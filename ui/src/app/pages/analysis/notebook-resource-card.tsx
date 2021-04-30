@@ -162,6 +162,7 @@ export const NotebookResourceCard = fp.flow(
         fromWorkspaceFirecloudName={resource.workspaceFirecloudName}
         fromResourceName={getDisplayName(resource)}
         fromCdrVersionId={resource.cdrVersionId}
+        fromAccessTierShortname={resource.cdrVersionId}
         resourceType={getType(resource)}
         onClose={() => this.setState({showCopyNotebookModal: false})}
         onCopy={() => this.props.onUpdate()}
