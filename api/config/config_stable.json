@@ -107,7 +107,8 @@
     "enableDataUseAgreement": true,
     "enableBetaAccess": false,
     "unsafeAllowSelfBypass": false,
-    "unsafeAllowUserCreationFromGSuiteData": false
+    "unsafeAllowUserCreationFromGSuiteData": false,
+    "enableAccessRenewal": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,

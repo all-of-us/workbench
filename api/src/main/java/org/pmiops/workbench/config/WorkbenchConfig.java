@@ -250,6 +250,8 @@ public class WorkbenchConfig {
     public boolean enableEraCommons;
     public boolean enableDataUseAgreement;
     public boolean enableBetaAccess;
+    // If true, users can be expired on the system, losing access
+    public boolean enableAccessRenewal;
   }
 
   public static class FeatureFlagsConfig {

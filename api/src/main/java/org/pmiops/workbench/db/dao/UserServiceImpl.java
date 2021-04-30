@@ -220,7 +220,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   public boolean isNotExpired(Timestamp completionTime) {
-    if (configProvider.get().featureFlags.enableAccessRenewal == false) {
+    if (configProvider.get().access.enableAccessRenewal == false) {
       return completionTime != null && notExpired.apply(completionTime);
     }
     return true;
