@@ -45,6 +45,9 @@ public class TestMockFactory {
       "gonewiththewind"; // should match workspace name w/o spaces
   public static final String DEFAULT_GOOGLE_PROJECT = "aou-rw-test-123";
 
+  // TODO there's something off about how "workspaceName" here works.  Investigate.
+  // For best results, use a lowercase-only workspaceName.
+  // To me, this hints at a firecloudName/aouName discrepancy somewhere in here.
   public Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
     List<DisseminateResearchEnum> disseminateResearchEnumsList = new ArrayList<>();
     disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES);
