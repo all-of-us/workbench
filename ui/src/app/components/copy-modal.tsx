@@ -16,7 +16,7 @@ import {
 import { Spinner } from 'app/components/spinners';
 import { workspacesApi } from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withCdrVersions} from 'app/utils';
+import {cond, reactStyles, withCdrVersions} from 'app/utils';
 import {findCdrVersion} from 'app/utils/cdr-versions';
 import { navigate } from 'app/utils/navigation';
 import {toDisplay} from 'app/utils/resources';
@@ -38,6 +38,7 @@ export interface Props {
   fromWorkspaceFirecloudName: string;
   fromResourceName: string;
   fromCdrVersionId: string;
+  fromAccessTierShortName: string;
   onClose: Function;
   onCopy: Function;
   resourceType: ResourceType;
@@ -57,13 +58,14 @@ interface State {
   copyErrorMsg: string;
   loading: boolean;
   cdrMismatch: string;
+  accessTierMismatch: string;
 }
 
 const styles = reactStyles({
   bold: {
     fontWeight: 600
   },
-  conceptSetCdrMismatch: {
+  mismatchError: {
     color: colors.danger,
     marginLeft: '0.5rem',
     marginTop: '0.25rem',
@@ -72,7 +74,7 @@ const styles = reactStyles({
     letterSpacing: 0,
     lineHeight: '22px',
   },
-  notebookCdrMismatch: {
+  mismatchWarning: {
     padding: '8px',
     fontFamily: 'Font Awesome 5 Pro',
     letterSpacing: 0,
@@ -86,7 +88,7 @@ const styles = reactStyles({
     lineHeight: '24px',
     marginTop: '1rem',
   },
-  conceptSetsRestriction: {
+  restriction: {
     color: colors.primary,
     fontFamily: 'Montserrat',
     fontSize: '14px',
@@ -99,11 +101,14 @@ const styles = reactStyles({
   },
 });
 
+const AccessTierMismatch = (props: {text: string}) =>
+    <div data-test-id='access-tier-mismatch-error' style={styles.mismatchError}>{props.text}</div>;
+
 const ConceptSetCdrMismatch = (props: {text: string}) =>
-    <div data-test-id='concept-set-cdr-mismatch-error' style={styles.conceptSetCdrMismatch}>{props.text}</div>;
+    <div data-test-id='concept-set-cdr-mismatch-error' style={styles.mismatchError}>{props.text}</div>;
 
 const NotebookCdrMismatch = (props: {text: string}) =>
-    <div data-test-id='notebook-cdr-mismatch-warning' style={styles.notebookCdrMismatch}>
+    <div data-test-id='notebook-cdr-mismatch-warning' style={styles.mismatchWarning}>
       <FlexRow>
         <div style={{paddingRight: '0.5rem'}}>
           <ClrIcon shape='warning-standard' class='is-solid' style={styles.warningIcon}/>
@@ -112,8 +117,12 @@ const NotebookCdrMismatch = (props: {text: string}) =>
       </FlexRow>
     </div>;
 
-const ConceptSetRestrictionText = () => <div style={styles.conceptSetsRestriction}>
+const ConceptSetRestrictionText = () => <div style={styles.restriction}>
   Concept sets can only be copied to workspaces using the same CDR version.
+</div>;
+
+const NotebookRestrictionText = () => <div style={styles.restriction}>
+  Notebooks can only be copied to workspaces in the same access tier.
 </div>;
 
 class CopyModalComponent extends React.Component<Props, State> {
@@ -128,6 +137,7 @@ class CopyModalComponent extends React.Component<Props, State> {
       copyErrorMsg: '',
       loading: true,
       cdrMismatch: '',
+      accessTierMismatch: '',
     };
   }
 
@@ -241,6 +251,7 @@ class CopyModalComponent extends React.Component<Props, State> {
       <Modal onRequestClose={this.props.onClose}>
         <ModalTitle style={{marginBottom: '0.5rem'}}>Copy to Workspace</ModalTitle>
         {resourceType === ResourceType.CONCEPTSET && <ConceptSetRestrictionText/>}
+        {resourceType === ResourceType.NOTEBOOK && <NotebookRestrictionText/>}
         {loading ?
           <ModalBody style={{ textAlign: 'center' }}><Spinner /></ModalBody> :
           <ModalBody>
@@ -289,10 +300,14 @@ class CopyModalComponent extends React.Component<Props, State> {
     }
   }
 
+  clearMismatchErrors(destination: Workspace) {
+    this.setState({accessTierMismatch: '', cdrMismatch: '', destination: destination});
+  }
+
   // OK to copy a notebook with a mismatch, but show a warning message
   setNotebookCdrMismatchWarning(destination: Workspace, fromCdrVersionId: string) {
     const warningMsg = `The selected destination workspace uses a different dataset version ` +
-        `(${this.cdrName(destination.cdrVersionId)}) than the current workspace (${this.cdrName(fromCdrVersionId)}). ` +
+        `(${this.cdrName(destination.cdrVersionId)}) from the current workspace (${this.cdrName(fromCdrVersionId)}). ` +
         'Edits may be required to ensure your analysis is functional and accurate.';
     this.setState({ cdrMismatch: warningMsg, destination: destination });
   }
@@ -300,30 +315,37 @@ class CopyModalComponent extends React.Component<Props, State> {
   // not OK to copy a Concept Set with a mismatch.  Show an error message and prevent copy
   setConceptSetCdrMismatchError(destination: Workspace, fromCdrVersionId: string) {
     const errorMsg = `Can’t copy to that workspace. It uses a different dataset version ` +
-        `(${this.cdrName(destination.cdrVersionId)}) than the current workspace (${this.cdrName(fromCdrVersionId)}).`;
+        `(${this.cdrName(destination.cdrVersionId)}) from the current workspace (${this.cdrName(fromCdrVersionId)}).`;
     this.setState({ cdrMismatch: errorMsg, destination: null });
   }
 
+  // never OK to copy anything across an access tier boundary.  Show an error message and prevent copy
+  setAccessTierMismatchError(destination: Workspace, fromAccessTierShortName: string) {
+    const errorMsg = `Can’t copy to that workspace. It has a different access tier ` +
+        `(${destination.accessTierShortName}) from the current workspace (${fromAccessTierShortName}).`;
+    this.setState({ accessTierMismatch: errorMsg, destination: null });
+  }
+
   validateAndSetDestination(destination: Workspace) {
-    const {fromCdrVersionId, resourceType} = this.props;
+    const {fromCdrVersionId, fromAccessTierShortName, resourceType} = this.props;
 
     this.clearCopyError();
 
-    if (fromCdrVersionId === destination.cdrVersionId) {
-      this.setState({cdrMismatch: '', destination: destination});
-      return;
-    }
+    const cdrVersionMismatch: boolean = fromCdrVersionId !== destination.cdrVersionId;
+    const accessTierMismatch: boolean = fromAccessTierShortName !== destination.accessTierShortName;
+    const isNotebook: boolean = resourceType === ResourceType.NOTEBOOK;
+    const isConceptSet: boolean = resourceType === ResourceType.CONCEPTSET;
 
-    if (resourceType === ResourceType.NOTEBOOK) {
-      this.setNotebookCdrMismatchWarning(destination, fromCdrVersionId);
-    } else if (resourceType === ResourceType.CONCEPTSET) {
-      this.setConceptSetCdrMismatchError(destination, fromCdrVersionId);
-    }
+    cond([!accessTierMismatch && !cdrVersionMismatch, () => this.clearMismatchErrors(destination)],
+        [accessTierMismatch, () => this.setAccessTierMismatchError(destination, fromAccessTierShortName)],
+        [cdrVersionMismatch && isConceptSet, () => this.setConceptSetCdrMismatchError(destination, fromCdrVersionId)],
+        // notebooks can be copied to different versions; warn only.
+        [cdrVersionMismatch && isNotebook, () => this.setNotebookCdrMismatchWarning(destination, fromCdrVersionId)]);
   }
 
   renderFormBody() {
     const {resourceType} = this.props;
-    const {destination, workspaceOptions, requestState, cdrMismatch, copyErrorMsg, newName} = this.state;
+    const {destination, workspaceOptions, requestState, accessTierMismatch, cdrMismatch, copyErrorMsg, newName} = this.state;
     return (
       <div>
         <div style={headerStyles.formLabel}>Destination *</div>
@@ -333,16 +355,16 @@ class CopyModalComponent extends React.Component<Props, State> {
           onChange={(destWorkspace) => this.validateAndSetDestination(destWorkspace)}
           isOptionDisabled={(option) => this.isDestinationSameWorkspace(option.value)}
         />
-        {cdrMismatch && resourceType === ResourceType.CONCEPTSET && <ConceptSetCdrMismatch text={cdrMismatch}/>}
+        {accessTierMismatch && <AccessTierMismatch text={accessTierMismatch}/>}
+        {!accessTierMismatch && cdrMismatch && resourceType === ResourceType.CONCEPTSET && <ConceptSetCdrMismatch text={cdrMismatch}/>}
         <div style={headerStyles.formLabel}>Name *</div>
         <TextInput
           autoFocus
           value={newName}
           onChange={v => this.setState({ newName: v })}
         />
-        {cdrMismatch && resourceType === ResourceType.NOTEBOOK && <NotebookCdrMismatch text={cdrMismatch}/>}
-        {requestState === RequestState.COPY_ERROR &&
-        <ValidationError> {copyErrorMsg} </ValidationError>}
+        {!accessTierMismatch && cdrMismatch && resourceType === ResourceType.NOTEBOOK && <NotebookCdrMismatch text={cdrMismatch}/>}
+        {requestState === RequestState.COPY_ERROR && <ValidationError>{copyErrorMsg}</ValidationError>}
       </div>
     );
   }
