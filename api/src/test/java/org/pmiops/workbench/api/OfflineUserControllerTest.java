@@ -1,7 +1,9 @@
 package org.pmiops.workbench.api;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -10,21 +12,27 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.api.services.cloudresourcemanager.model.Project;
+import com.google.common.base.Functions;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.google.CloudResourceManagerService;
+import org.pmiops.workbench.google.DirectoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -39,9 +47,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class OfflineUserControllerTest {
+public class OfflineUserControllerTest extends SpringTest {
   @Autowired private CloudResourceManagerService cloudResourceManagerService;
-  @Autowired private UserService userService;
+  @Autowired private UserService mockUserService;
+  @Autowired private DirectoryService mockDirectoryService;
   @Autowired private OfflineUserController offlineUserController;
 
   private Long incrementedUserId = 1L;
@@ -50,7 +59,12 @@ public class OfflineUserControllerTest {
 
   @TestConfiguration
   @Import({OfflineUserController.class})
-  @MockBean({CloudResourceManagerService.class, UserService.class})
+  @MockBean({
+    AccessTierService.class,
+    CloudResourceManagerService.class,
+    UserService.class,
+    DirectoryService.class
+  })
   static class Configuration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -61,8 +75,8 @@ public class OfflineUserControllerTest {
 
   @Before
   public void setUp() {
-    when(userService.getAllUsersExcludingDisabled()).thenReturn(getUsers());
-    when(userService.getAllUsers()).thenReturn(getUsers());
+    when(mockUserService.getAllUsersExcludingDisabled()).thenReturn(getUsers());
+    when(mockUserService.getAllUsers()).thenReturn(getUsers());
     workbenchConfig = WorkbenchConfig.createEmptyConfig();
   }
 
@@ -93,32 +107,69 @@ public class OfflineUserControllerTest {
   public void testBulkSyncTrainingStatusV2()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
     // Mock out the service under test to simply return the passed user argument.
-    doAnswer(i -> i.getArgument(0)).when(userService).syncComplianceTrainingStatusV2(any(), any());
+    doAnswer(i -> i.getArgument(0))
+        .when(mockUserService)
+        .syncComplianceTrainingStatusV2(any(), any());
     offlineUserController.bulkSyncComplianceTrainingStatus();
-    verify(userService, times(4)).syncComplianceTrainingStatusV2(any(), any());
+    verify(mockUserService, times(4)).syncComplianceTrainingStatusV2(any(), any());
   }
 
   @Test(expected = ServerErrorException.class)
   public void testBulkSyncTrainingStatusWithSingleUserErrorV2()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException {
-    doAnswer(i -> i.getArgument(0)).when(userService).syncComplianceTrainingStatusV2(any(), any());
+    doAnswer(i -> i.getArgument(0))
+        .when(mockUserService)
+        .syncComplianceTrainingStatusV2(any(), any());
     doThrow(new org.pmiops.workbench.moodle.ApiException("Unknown error"))
-        .when(userService)
+        .when(mockUserService)
         .syncComplianceTrainingStatusV2(
             argThat(user -> user.getUsername().equals("a@fake-research-aou.org")), any());
     offlineUserController.bulkSyncComplianceTrainingStatus();
     // Even when a single call throws an exception, we call the service for all users.
-    verify(userService, times(4)).syncComplianceTrainingStatusV2(any(), any());
+    verify(mockUserService, times(4)).syncComplianceTrainingStatusV2(any(), any());
+  }
+
+  @Test
+  public void testBulkSyncTwoFactorAuthSync() {
+    Map<String, Boolean> allTwoFactorEnabled =
+        getUsers().stream()
+            .collect(Collectors.toMap(DbUser::getUsername, Functions.constant(true)));
+    doReturn(allTwoFactorEnabled).when(mockDirectoryService).getAllTwoFactorAuthStatuses();
+    doAnswer(i -> i.getArgument(0))
+        .when(mockUserService)
+        .syncTwoFactorAuthStatus(any(), any(), anyBoolean());
+
+    offlineUserController.bulkSyncTwoFactorAuthStatus();
+    verify(mockUserService, times(4)).syncTwoFactorAuthStatus(any(), any(), eq(true));
+  }
+
+  @Test
+  public void testBulkSyncTwoFactorAuthSyncMissingUsers() {
+    Map<String, Boolean> allTwoFactorEnabled =
+        getUsers().stream()
+            .limit(2)
+            .collect(Collectors.toMap(DbUser::getUsername, Functions.constant(false)));
+    doReturn(allTwoFactorEnabled).when(mockDirectoryService).getAllTwoFactorAuthStatuses();
+    doAnswer(i -> i.getArgument(0))
+        .when(mockUserService)
+        .syncTwoFactorAuthStatus(any(), any(), anyBoolean());
+
+    try {
+      offlineUserController.bulkSyncTwoFactorAuthStatus();
+    } catch (ServerErrorException e) {
+      // expected
+    }
+    verify(mockUserService, times(2)).syncTwoFactorAuthStatus(any(), any(), eq(false));
   }
 
   @Test
   public void testBulkSyncEraCommonsStatus()
       throws IOException, org.pmiops.workbench.firecloud.ApiException {
     doAnswer(i -> i.getArgument(0))
-        .when(userService)
+        .when(mockUserService)
         .syncEraCommonsStatusUsingImpersonation(any(), any());
     offlineUserController.bulkSyncEraCommonsStatus();
-    verify(userService, times(3)).syncEraCommonsStatusUsingImpersonation(any(), any());
+    verify(mockUserService, times(3)).syncEraCommonsStatusUsingImpersonation(any(), any());
   }
 
   @Test(expected = ServerErrorException.class)
@@ -126,15 +177,15 @@ public class OfflineUserControllerTest {
       throws ApiException, NotFoundException, IOException,
           org.pmiops.workbench.firecloud.ApiException {
     doAnswer(i -> i.getArgument(0))
-        .when(userService)
+        .when(mockUserService)
         .syncEraCommonsStatusUsingImpersonation(any(), any());
     doThrow(new org.pmiops.workbench.firecloud.ApiException("Unknown error"))
-        .when(userService)
+        .when(mockUserService)
         .syncEraCommonsStatusUsingImpersonation(
             argThat(user -> user.getUsername().equals("a@fake-research-aou.org")), any());
     offlineUserController.bulkSyncEraCommonsStatus();
     // Even when a single call throws an exception, we call the service for all users.
-    verify(userService, times(3)).syncEraCommonsStatusUsingImpersonation(any(), any());
+    verify(mockUserService, times(3)).syncEraCommonsStatusUsingImpersonation(any(), any());
   }
 
   @Test

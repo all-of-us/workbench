@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
-import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.pmiops.workbench.monitoring.LogsBasedMetricServiceImpl.PayloadKey;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
@@ -78,8 +78,9 @@ public class LogsBasedMetricsServiceTest {
     final MeasurementBundle gaugeMeasurement =
         MeasurementBundle.builder()
             .addMeasurement(GaugeMetric.WORKSPACE_COUNT, 3)
-            .addTag(MetricLabel.DATA_ACCESS_LEVEL, DataAccessLevel.PROTECTED.toString())
             .addTag(MetricLabel.WORKSPACE_ACTIVE_STATUS, WorkspaceActiveStatus.ACTIVE.toString())
+            .addTag(
+                MetricLabel.ACCESS_TIER_SHORT_NAME, AccessTierService.REGISTERED_TIER_SHORT_NAME)
             .build();
     logsBasedMetricService.record(gaugeMeasurement);
     List<LogEntry> sentEntries = getWrittenLogEntries();
@@ -105,8 +106,10 @@ public class LogsBasedMetricsServiceTest {
         (Map<String, String>)
             payloadMap.getOrDefault(PayloadKey.LABELS.getKeyName(), ImmutableMap.of());
     assertThat(labelToValue).hasSize(2);
-    assertThat(labelToValue.get(MetricLabel.DATA_ACCESS_LEVEL.getName()))
-        .isEqualTo(DataAccessLevel.PROTECTED.toString());
+    assertThat(labelToValue.get(MetricLabel.WORKSPACE_ACTIVE_STATUS.getName()))
+        .isEqualTo(WorkspaceActiveStatus.ACTIVE.toString());
+    assertThat(labelToValue.get(MetricLabel.ACCESS_TIER_SHORT_NAME.getName()))
+        .isEqualTo(AccessTierService.REGISTERED_TIER_SHORT_NAME);
   }
 
   @NotNull

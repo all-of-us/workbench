@@ -27,7 +27,9 @@
 
   <div class="content-container">
     <div class="background-image"></div>
-    <div class="app-container" [class.minimize-chrome]="minimizeChrome">
+    <div *ngIf="cdrVersionsInitialized && serverConfigInitialized"
+         class="app-container"
+         [class.minimize-chrome]="minimizeChrome">
       <!--
         Angular's builtin Router module will attach specific views here
         based on clicking routerLink elements (above) or router.navigate calls.

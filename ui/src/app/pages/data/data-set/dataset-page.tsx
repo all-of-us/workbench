@@ -30,12 +30,13 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {getCdrVersion} from 'app/utils/cdr-versions';
 import {currentWorkspaceStore, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
+import {serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
 import {
   BillingStatus,
-  CdrVersionListResponse,
+  CdrVersionTiersResponse,
   Cohort,
   ConceptSet,
   DataDictionaryEntry,
@@ -390,10 +391,11 @@ const BoxHeader = ({step = '', header =  '', subHeader = '', style = {}, ...prop
 enum PrepackagedConceptSet {
   PERSON = 'Demographics',
   SURVEYS = 'All Surveys',
-  FITIBITHEARTRATESUMMARY = 'Fitbit Heart Rate Summary',
+  FITBITHEARTRATESUMMARY = 'Fitbit Heart Rate Summary',
   FITBITACTIVITY = 'Fitbit Activity Summary',
   FITBITHEARTRATELEVEL = 'Fitbit Heart Rate Level',
-  FITBITINTRADAYSTEPS = 'Fitbit Intra Day Steps'
+  FITBITINTRADAYSTEPS = 'Fitbit Intra Day Steps',
+  WHOLEGENOME = 'All whole genome variant data'
 }
 
 const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
@@ -402,13 +404,15 @@ const PREPACKAGED_SURVEY_PERSON_DOMAIN = {
 };
 
 const PREPACKAGED_WITH_FITBIT_DOMAINS = {
-  ...PREPACKAGED_SURVEY_PERSON_DOMAIN,
-  [PrepackagedConceptSet.FITIBITHEARTRATESUMMARY]: Domain.FITBITHEARTRATESUMMARY,
+  [PrepackagedConceptSet.FITBITHEARTRATESUMMARY]: Domain.FITBITHEARTRATESUMMARY,
   [PrepackagedConceptSet.FITBITACTIVITY]: Domain.FITBITACTIVITY,
   [PrepackagedConceptSet.FITBITHEARTRATELEVEL]: Domain.FITBITHEARTRATELEVEL,
   [PrepackagedConceptSet.FITBITINTRADAYSTEPS]: Domain.FITBITINTRADAYSTEPS,
 };
 
+const PREPACKAGED_WITH_WHOLE_GENOME = {
+  [PrepackagedConceptSet.WHOLEGENOME]: Domain.WHOLEGENOMEVARIANT
+};
 let PREPACKAGED_DOMAINS = PREPACKAGED_SURVEY_PERSON_DOMAIN;
 
 interface DataSetPreviewInfo {
@@ -419,7 +423,7 @@ interface DataSetPreviewInfo {
 
 interface Props {
   workspace: WorkspaceData;
-  cdrVersionListResponse: CdrVersionListResponse;
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
   urlParams: any;
   profileState: {
     profile: Profile,
@@ -484,8 +488,22 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     async componentDidMount() {
       const {namespace, id} = this.props.workspace;
       const resourcesPromise = this.loadResources();
-      if (getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasFitbitData) {
-        PREPACKAGED_DOMAINS = PREPACKAGED_WITH_FITBIT_DOMAINS;
+      if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasFitbitData) {
+        PREPACKAGED_DOMAINS =   {
+          ...PREPACKAGED_SURVEY_PERSON_DOMAIN,
+          ...PREPACKAGED_WITH_FITBIT_DOMAINS
+        };
+      }
+      // Only allow selection of genomics prepackaged concept sets if genomics
+      // data extraction is possible, since extraction is the only action that
+      // can be taken on genomics variant data from the dataset builder.
+      if (serverConfigStore.get().config.enableGenomicExtraction &&
+          getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
+        PREPACKAGED_DOMAINS = {
+          ...PREPACKAGED_DOMAINS,
+          ...PREPACKAGED_WITH_WHOLE_GENOME
+        };
+
       }
       if (!this.editing) {
         return;
@@ -624,6 +642,19 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       const setsById = new Map(this.state.conceptSetList.map(cs => [cs.id, cs] as [any, any]));
       return ids.map(id => setsById.get(id));
     }
+
+    getPrePackagedList() {
+      let prepackagedList = Object.keys(PrepackagedConceptSet);
+      if (!getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasFitbitData) {
+        prepackagedList = prepackagedList
+            .filter(prepack => !fp.startsWith('FITBIT', prepack));
+      }
+      if (!getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
+        prepackagedList = prepackagedList.filter(prepack => prepack !== 'WHOLEGENOME');
+      }
+      return prepackagedList;
+    }
+
 
     selectPrePackagedConceptSet(prepackaged: PrepackagedConceptSet, selected: boolean) {
       this.setState(({selectedConceptSetIds, selectedPrepackagedConceptSets}) => {
@@ -784,7 +815,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
               break;
             }
             case PrePackagedConceptSetEnum.FITBITHEARTRATESUMMARY: {
-              re.add(PrepackagedConceptSet.FITIBITHEARTRATESUMMARY);
+              re.add(PrepackagedConceptSet.FITBITHEARTRATESUMMARY);
               break;
             }
             case PrePackagedConceptSetEnum.FITBITHEARTRATELEVEL: {
@@ -797,6 +828,10 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
             }
             case PrePackagedConceptSetEnum.FITBITACTIVITY: {
               re.add(PrepackagedConceptSet.FITBITACTIVITY);
+              break;
+            }
+            case PrePackagedConceptSetEnum.WHOLEGENOME: {
+              re.add(PrepackagedConceptSet.WHOLEGENOME);
               break;
             }
             case PrePackagedConceptSetEnum.NONE:
@@ -826,12 +861,16 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
           case PrepackagedConceptSet.FITBITINTRADAYSTEPS:
             selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.FITBITINTRADAYSTEPS);
             break;
-          case PrepackagedConceptSet.FITIBITHEARTRATESUMMARY:
+          case PrepackagedConceptSet.FITBITHEARTRATESUMMARY:
             selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.FITBITHEARTRATESUMMARY);
             break;
           case PrepackagedConceptSet.FITBITHEARTRATELEVEL:
             selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.FITBITHEARTRATELEVEL);
             break;
+          case PrepackagedConceptSet.WHOLEGENOME:
+            selectedPrePackagedConceptSDetEnum.push(PrePackagedConceptSetEnum.WHOLEGENOME);
+            break;
+
         }
       });
       return selectedPrePackagedConceptSDetEnum;
@@ -852,6 +891,14 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     }
 
     async getPreviewByDomain(domain: Domain) {
+      if (domain === Domain.WHOLEGENOMEVARIANT) {
+        this.setState(state => ({previewList: state.previewList.set(domain, {
+          isLoading: false,
+          errorText: null,
+          values: []
+        })}));
+        return;
+      }
       const {namespace, id} = this.props.workspace;
       const domainRequest: DataSetPreviewRequest = {
         domain: domain,
@@ -1057,31 +1104,18 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                style={{paddingRight: '1rem'}}>
                       {plusLink('concept-sets-link', conceptSetsPath, !this.canWrite)}
                     </BoxHeader>
-                  <div style={{height: '9rem', overflowY: 'auto'}}>
+                  <div style={{height: '9rem', overflowY: 'auto'}} data-test-id='prePackage-concept-set'>
                     <Subheader>Prepackaged Concept Sets</Subheader>
-                    {/*If cdr does not have FITBIT data just show Survey and demographic optons*/}
-                    {!getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasFitbitData &&
-                    Object.keys(PrepackagedConceptSet)
-                        .filter(conceptSet => conceptSet === 'SURVEYS' || conceptSet === 'PERSON')
+                    {this.getPrePackagedList()
                         .map((prepackaged: PrepackagedConceptSet) => {
                           const p = PrepackagedConceptSet[prepackaged];
-                          return <ImmutableListItem name={p}
-                                                    key={prepackaged}
-                                                    checked={selectedPrepackagedConceptSets.has(p)}
-                                                    onChange={() => this.selectPrePackagedConceptSet(
-                                                      p, !selectedPrepackagedConceptSets.has(p))
-                                                    }/>;
+                          return <ImmutableListItem name={p}  data-test-id='prePackage-concept-set-item'
+                                                key={prepackaged}
+                                                checked={selectedPrepackagedConceptSets.has(p)}
+                                                onChange={() => this.selectPrePackagedConceptSet(
+                                                  p, !selectedPrepackagedConceptSets.has(p))
+                                                }/>;
                         })}
-                    {getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasFitbitData
-                    && Object.keys(PrepackagedConceptSet).map((prepackaged: PrepackagedConceptSet) => {
-                      const p = PrepackagedConceptSet[prepackaged];
-                      return <ImmutableListItem name={p}
-                                         key={prepackaged}
-                                         checked={selectedPrepackagedConceptSets.has(p)}
-                                         onChange={() => this.selectPrePackagedConceptSet(
-                                           p, !selectedPrepackagedConceptSets.has(p))
-                                         }/>;
-                    })}
                     <Subheader>Workspace Concept Sets</Subheader>
                     {!loadingResources && this.state.conceptSetList.map(conceptSet =>
                         <ImmutableListItem key={conceptSet.id} name={conceptSet.name}
@@ -1237,8 +1271,6 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                            workspaceNamespace={namespace}
                                            workspaceId={id}
                                            billingLocked={this.props.workspace.billingStatus === BillingStatus.INACTIVE}
-                                           displayMicroarrayOptions={
-                                             getCdrVersion(this.props.workspace, this.props.cdrVersionListResponse).hasMicroarrayData}
                                            prePackagedConceptSet={this.getPrePackagedConceptSetApiEnum()}
                                            dataSet={dataSet ? dataSet : undefined}
                                            closeFunction={() => {

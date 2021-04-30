@@ -8,29 +8,7 @@ export BQ_PROJECT=$1        # CDR project
 export BQ_DATASET=$2        # CDR dataset
 export WGV_PROJECT=$3       # whole genome variant project
 export WGV_DATASET=$4       # whole genome variant dataset
-export CDR_DATE=$5          # cdr date
-
-# Test that dependant tables exist
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.prep_concept_ancestor")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.person")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.concept")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.cb_criteria")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.condition_occurrence")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.procedure_occurrence")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.device_exposure")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.drug_exposure")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.measurement")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.visit_occurrence")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.condition_occurrence_ext")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.procedure_occurrence_ext")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.device_exposure_ext")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.drug_exposure_ext")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.observation_ext")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.measurement_ext")
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET.visit_occurrence_ext")
-test=$(bq show "$WGV_PROJECT:$WGV_DATASET.metadata")
-echo "$test"
+export WGV_TABLE=$5         # whole genome variant table
 
 # Create bq tables we have json schema for
 schema_path=generate-cdr/bq-schemas
@@ -168,7 +146,7 @@ LEFT JOIN
         union distinct
         SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.steps_intraday\`
     ) f on (p.person_id = f.person_id)
-LEFT JOIN \`$WGV_PROJECT.$WGV_DATASET.metadata\` w on (p.person_id = CAST(w.sample_name as int64))"
+LEFT JOIN \`$WGV_PROJECT.$WGV_DATASET.$WGV_TABLE\` w on (p.person_id = CAST(w.sample_name as int64))"
 fi
 
 ################################################
@@ -192,7 +170,7 @@ FROM
             SELECT a.person_id
                 , date(a.birth_datetime) as date_of_birth
                 , coalesce(b.observation_date, c.observation_date, d.observation_date) as date_of_consent
-                , date('$CDR_DATE') as date_of_cdr
+                , date((select cdr_date from \`$BQ_PROJECT.$BQ_DATASET.prep_cdr_date\` where bq_dataset = '$BQ_DATASET')) as date_of_cdr
             FROM \`$BQ_PROJECT.$BQ_DATASET.person\` a
             LEFT JOIN
             (

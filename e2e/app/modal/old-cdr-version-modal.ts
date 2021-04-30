@@ -21,6 +21,9 @@ const FIELD = {
   },
   continueButton: {
     textOption: { name: LinkText.Continue }
+  },
+  cancelButton: {
+    textOption: { name: LinkText.Cancel }
   }
 };
 
@@ -37,31 +40,35 @@ export default class OldCdrVersionModal extends Modal {
     return true;
   }
 
-  async getWillUseCheckbox(): Promise<Checkbox> {
+  getWillUseCheckbox(): Checkbox {
     return Checkbox.findByName(this.page, FIELD.willUseCheckbox.textOption, this);
   }
 
-  async getWillIdentifyCheckbox(): Promise<Checkbox> {
+  getWillIdentifyCheckbox(): Checkbox {
     return Checkbox.findByName(this.page, FIELD.willIdentifyCheckbox.textOption, this);
   }
 
-  async getContinueButton(): Promise<Button> {
+  getContinueButton(): Button {
     return Button.findByName(this.page, FIELD.continueButton.textOption, this);
+  }
+
+  getCancelButton(): Button {
+    return Button.findByName(this.page, FIELD.cancelButton.textOption, this);
   }
 
   /**
    * if the CDR Version is not the default, consent to the necessary restrictions in the modal which appears
    */
-  async consentToOldCdrRestrictions() {
+  async consentToOldCdrRestrictions(): Promise<void> {
     // can't continue yet - user has not yet consented
-    const continueButton: Button = await this.getContinueButton();
+    const continueButton: Button = this.getContinueButton();
     expect(await continueButton.isCursorNotAllowed()).toBe(true);
 
-    const willUse: Checkbox = await this.getWillUseCheckbox();
+    const willUse: Checkbox = this.getWillUseCheckbox();
     expect(await willUse.isChecked()).toBe(false);
     await willUse.check();
 
-    const willIdentify: Checkbox = await this.getWillIdentifyCheckbox();
+    const willIdentify: Checkbox = this.getWillIdentifyCheckbox();
     expect(await willIdentify.isChecked()).toBe(false);
     await willIdentify.check();
 

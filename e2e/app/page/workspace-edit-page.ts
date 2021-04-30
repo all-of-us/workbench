@@ -16,11 +16,10 @@ import { makeWorkspaceName } from 'utils/str-utils';
 
 const faker = require('faker/locale/en_US');
 
-export const PageTitle = 'Create Workspace';
+export const PageTitle = 'Create|Duplicate Workspace';
 
 export const LabelAlias = {
   SELECT_BILLING: 'Select account', // select billing account
-  WORKSPACE_NAME: 'Workspace Name', // Workspace name input textbox
   RESEARCH_PURPOSE: 'Research purpose',
   EDUCATION_PURPOSE: 'Educational Purpose',
   FOR_PROFIT_PURPOSE: 'For-Profit Purpose',
@@ -67,6 +66,12 @@ export const LabelAlias = {
   SHARE_WITH_COLLABORATORS: 'Share workspace with the same set of collaborators' // visible when clone workspace
 };
 
+export const DataTestAlias = {
+  WORKSPACE_NAME: 'workspace-name',
+  ACCESS_TIER_SELECT: 'select-access-tier',
+  CDR_VERSION_SELECT: 'select-cdr-version'
+};
+
 export const FIELD = {
   createWorkspaceButton: {
     textOption: { name: LinkText.CreateWorkspace }
@@ -78,12 +83,13 @@ export const FIELD = {
     textOption: { name: LinkText.Cancel }
   },
   workspaceNameTextbox: {
-    textOption: { name: LabelAlias.WORKSPACE_NAME, ancestorLevel: 2, type: ElementType.Textbox }
+    textOption: { dataTestId: DataTestAlias.WORKSPACE_NAME, type: ElementType.Textbox }
+  },
+  accessTierSelect: {
+    textOption: { dataTestId: DataTestAlias.ACCESS_TIER_SELECT, type: ElementType.Select }
   },
   cdrVersionSelect: {
-    // Note: The CDR Version dropdown does not have a label of its own.
-    // Use the nearby Workspace Name instead.
-    textOption: { name: LabelAlias.WORKSPACE_NAME, type: ElementType.Select }
+    textOption: { dataTestId: DataTestAlias.CDR_VERSION_SELECT, type: ElementType.Select }
   },
   billingAccountSelect: {
     textOption: { name: LabelAlias.SELECT_BILLING, type: ElementType.Select }
@@ -259,6 +265,17 @@ export const FIELD = {
   }
 };
 
+// matches ui/src/app/utils/access-tiers.tsx
+export enum AccessTierShortNames {
+  Registered = 'registered',
+  Controlled = 'controlled'
+}
+
+export enum AccessTierDisplayNames {
+  Registered = 'Registered Tier',
+  Controlled = 'Controlled Tier'
+}
+
 export default class WorkspaceEditPage extends WorkspaceBase {
   constructor(page: Page) {
     super(page);
@@ -268,14 +285,21 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     await Promise.all([waitForDocumentTitle(this.page, PageTitle), waitWhileLoading(this.page)]);
     const selectXpath = buildXPath(FIELD.billingAccountSelect.textOption);
     const select = new Select(this.page, selectXpath);
-    await Promise.all([this.getWorkspaceNameTextbox(), select.asElementHandle(), this.getCreateWorkspaceButton()]);
+    // Wait for Workspace name text-field, Billing Account Select.
+    await Promise.all([this.getWorkspaceNameTextbox().waitForXPath(), select.waitForXPath()]);
+    // Build Workspace page is used for Duplicate and Create. Wait for Create or Duplicate button.
+    await this.getCancelButton().waitForXPath();
     return true;
+  }
+
+  getDataAccessTierSelect(): Select {
+    return Select.findByName(this.page, FIELD.accessTierSelect.textOption);
   }
 
   /**
    * Find the CDR Version Select element.
    */
-  async getCdrVersionSelect(): Promise<Select> {
+  getCdrVersionSelect(): Select {
     return Select.findByName(this.page, FIELD.cdrVersionSelect.textOption);
   }
 
@@ -285,30 +309,30 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     return element.getTextContent();
   }
 
-  async getBillingAccountSelect(): Promise<Select> {
+  getBillingAccountSelect(): Select {
     return Select.findByName(this.page, FIELD.billingAccountSelect.textOption);
   }
 
-  async getCreateWorkspaceButton(): Promise<Button> {
+  getCreateWorkspaceButton(): Button {
     return Button.findByName(this.page, FIELD.createWorkspaceButton.textOption);
   }
 
-  async getDuplicateWorkspaceButton(): Promise<Button> {
+  getDuplicateWorkspaceButton(): Button {
     // Cannot use Button.forLabel because it finds two elements on Duplicate workspace page.
     // Don't change. use this xpath to find the button "DUPLICATE WORKSPACE".
     return new Button(this.page, '//*[text()="Duplicate Workspace" and @role="button"]');
   }
 
-  async getUpdateWorkspaceButton(): Promise<Button> {
+  getUpdateWorkspaceButton(): Button {
     return new Button(this.page, '//*[text()="Update Workspace" and @role="button"]');
   }
 
-  async getCancelButton(): Promise<Button> {
+  getCancelButton(): Button {
     return Button.findByName(this.page, FIELD.cancelWorkspaceButton.textOption);
   }
 
-  async getWorkspaceNameTextbox(): Promise<Textbox> {
-    return await Textbox.findByName(this.page, FIELD.workspaceNameTextbox.textOption);
+  getWorkspaceNameTextbox(): Textbox {
+    return Textbox.findByName(this.page, FIELD.workspaceNameTextbox.textOption);
   }
 
   question1_researchPurpose(): WebComponent {
@@ -317,10 +341,6 @@ export default class WorkspaceEditPage extends WorkspaceBase {
 
   question1_educationalPurpose(): WebComponent {
     return new WebComponent(this.page, FIELD.PRIMARY_PURPOSE.educationPurposeCheckbox.textOption);
-  }
-
-  question1_forProfitPurpose(): WebComponent {
-    return new WebComponent(this.page, FIELD.PRIMARY_PURPOSE.forProfitPurposeCheckbox.textOption);
   }
 
   question1_otherPurpose(): WebComponent {
@@ -360,11 +380,20 @@ export default class WorkspaceEditPage extends WorkspaceBase {
   }
 
   /**
+   * Select Data Access Tier by name.
+   * @param {string} value
+   */
+  async selectAccessTier(value: string = AccessTierDisplayNames.Registered): Promise<string> {
+    const select = this.getDataAccessTierSelect();
+    return select.selectOption(value);
+  }
+
+  /**
    * Select CDR Version by name.
    * @param {string} value
    */
   async selectCdrVersion(value: string = config.defaultCdrVersionName): Promise<string> {
-    const select = await this.getCdrVersionSelect();
+    const select = this.getCdrVersionSelect();
     return select.selectOption(value);
   }
 
@@ -372,8 +401,8 @@ export default class WorkspaceEditPage extends WorkspaceBase {
    * Select Billing Account
    * @param {string} billingAccount
    */
-  async selectBillingAccount(billingAccount: string = UseFreeCredits) {
-    const billingAccountSelect = await this.getBillingAccountSelect();
+  async selectBillingAccount(billingAccount: string = UseFreeCredits): Promise<void> {
+    const billingAccountSelect = this.getBillingAccountSelect();
     await billingAccountSelect.selectOption(billingAccount);
   }
 
@@ -381,10 +410,10 @@ export default class WorkspaceEditPage extends WorkspaceBase {
    * Assumption: Checked checkbox means to expand the section, hidden questions will become visible.
    * @param {boolean} yesOrNo: True means to check checkbox. False means to uncheck.
    */
-  async expandResearchPurposeGroup(yesOrNo: boolean = true) {
+  async expandResearchPurposeGroup(yesOrNo = true): Promise<void> {
     // expand Disease purpose section if needed
     const researchPurpose = this.question1_researchPurpose();
-    const researchPurposeCheckbox = await researchPurpose.asCheckBox();
+    const researchPurposeCheckbox = researchPurpose.asCheckBox();
     const is = await researchPurposeCheckbox.isChecked();
     if (yesOrNo !== is) {
       // click checkbox expands or collapses the section, reveal hidden questions contained inside.
@@ -398,8 +427,8 @@ export default class WorkspaceEditPage extends WorkspaceBase {
    */
   async fillOutWorkspaceName(): Promise<string> {
     const newWorkspaceName = makeWorkspaceName();
-    await (await this.getWorkspaceNameTextbox()).type(newWorkspaceName);
-    await (await this.getWorkspaceNameTextbox()).pressTab();
+    await this.getWorkspaceNameTextbox().type(newWorkspaceName);
+    await this.getWorkspaceNameTextbox().pressTab();
     return newWorkspaceName;
   }
 
@@ -407,39 +436,39 @@ export default class WorkspaceEditPage extends WorkspaceBase {
    *  Enter value in 'Disease-focused research' textbox
    * @param {string} diseaseName
    */
-  async fillOutDiseaseFocusedResearch(diseaseName: string = 'diabetic cataract') {
+  async fillOutDiseaseFocusedResearch(diseaseName = 'diabetic cataract'): Promise<void> {
     const diseaseNameComponent = this.question1_diseaseFocusedResearch();
-    await (await diseaseNameComponent.asCheckBox()).check();
-    await (await diseaseNameComponent.asTextBox()).type(diseaseName);
-    await (await diseaseNameComponent.asTextBox()).pressTab();
+    await diseaseNameComponent.asCheckBox().check();
+    await diseaseNameComponent.asTextBox().type(diseaseName);
+    await diseaseNameComponent.asTextBox().pressTab();
   }
 
   /**
    * Enter value in Other Purpose textarea
    * @param {string} value
    */
-  async fillOutOtherPurpose(value?: string) {
+  async fillOutOtherPurpose(value?: string): Promise<void> {
     if (value === undefined) {
       value = faker.lorem.paragraph();
     }
     // check Other-Purpose checkbox
     const otherPurpose = this.question1_otherPurpose();
-    await (await otherPurpose.asCheckBox()).check(); // enables textarea
-    await (await otherPurpose.asTextArea()).type(value);
+    await otherPurpose.asCheckBox().check(); // enables textarea
+    await otherPurpose.asTextArea().type(value);
   }
 
   /**
    * Question 6. Request for Review of Research Purpose Description
    * @param selected: True means select "Yes, Request Review" radiobutton. False means select "No, Request Review" radiobutton.
    */
-  async requestForReviewRadiobutton(selected: boolean) {
+  async requestForReviewRadiobutton(selected: boolean): Promise<void> {
     let radioComponent;
     if (selected) {
       radioComponent = new WebComponent(this.page, FIELD.REQUEST_FOR_REVIEW.yesRequestReviewRadiobutton.textOption);
     } else {
       radioComponent = new WebComponent(this.page, FIELD.REQUEST_FOR_REVIEW.noRequestReviewRadiobutton.textOption);
     }
-    await (await radioComponent.asRadioButton()).select();
+    await radioComponent.asRadioButton().select();
   }
 
   /**
@@ -458,8 +487,16 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     return modalTextContent;
   }
 
-  async clickShareWithCollaboratorsCheckbox() {
-    const elemt = await Checkbox.findByName(this.page, FIELD.shareWithCollaboratorsCheckbox.textOption);
-    await elemt.check();
+  async clickShareWithCollaboratorsCheckbox(): Promise<void> {
+    const element = Checkbox.findByName(this.page, FIELD.shareWithCollaboratorsCheckbox.textOption);
+    await element.check();
+  }
+
+  // Fill out only the fields needed for a successful duplication
+  async fillOutRequiredDuplicationFields(): Promise<string> {
+    await this.getWorkspaceNameTextbox().clear();
+    const workspaceName = await this.fillOutWorkspaceName();
+    await this.requestForReviewRadiobutton(false);
+    return workspaceName;
   }
 }

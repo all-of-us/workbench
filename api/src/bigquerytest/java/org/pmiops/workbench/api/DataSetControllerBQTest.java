@@ -39,6 +39,7 @@ import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
@@ -58,6 +59,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
@@ -77,8 +79,7 @@ import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.UserMapper;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
-import org.pmiops.workbench.workspaces.WorkspaceService;
-import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -112,8 +113,10 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private NotebooksService notebooksService;
   @Autowired private Provider<DbUser> userProvider;
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
+  @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
   @Autowired private WorkspaceDao workspaceDao;
-  @Autowired private WorkspaceService workspaceService;
+  @Autowired private WorkspaceAuthService workspaceAuthService;
+  @Autowired private GenomicExtractionService genomicExtractionService;
 
   @Autowired
   @Qualifier(DatasetConfig.DATASET_PREFIX_CODE)
@@ -146,7 +149,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     DataSetMapperImpl.class,
     DataSetServiceImpl.class,
     TestBigQueryCdrSchemaConfig.class,
-    WorkspaceServiceImpl.class
+    WorkspaceAuthService.class
   })
   @MockBean({
     BillingProjectAuditor.class,
@@ -163,6 +166,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     WorkspaceMapperImpl.class,
     AccessTierService.class,
     CdrVersionService.class,
+    GenomicExtractionService.class
   })
   static class Configuration {
     @Bean
@@ -219,14 +223,15 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     controller =
         spy(
             new DataSetController(
-                bigQueryService,
                 cdrVersionService,
                 dataSetServiceImpl,
                 fireCloudService,
                 notebooksService,
                 userProvider,
                 prefixProvider,
-                workspaceService));
+                genomicExtractionService,
+                workspaceAuthService,
+                workbenchConfigProvider));
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());

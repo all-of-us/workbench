@@ -9,11 +9,12 @@
 import {
   BaseAPI,
   Configuration as FetchConfiguration,
-  FetchAPI,
   JupyterApi,
   ProxyApi,
   RuntimesApi
 } from 'notebooks-generated/fetch';
+import * as portableFetch from 'portable-fetch';
+
 
 let frozen = false;
 function checkFrozen() {
@@ -48,7 +49,7 @@ export const leoRuntimesApi = bindCtor(RuntimesApi);
 export const proxyApi = bindCtor(ProxyApi);
 export const jupyterApi = bindCtor(JupyterApi);
 
-export function bindApiClients(conf: FetchConfiguration, f: FetchAPI) {
+export function bindApiClients(conf: FetchConfiguration) {
   for (const ctor of apiCtors) {
     // We use an anonymous subclass here because Swagger's typescript-fetch
     // codegen creates API client subclasses which lack a public interface for
@@ -59,7 +60,7 @@ export function bindApiClients(conf: FetchConfiguration, f: FetchAPI) {
         super();
         this.configuration = conf;
         this.basePath = conf.basePath;
-        this.fetch = f;
+        this.fetch = portableFetch;
       }
     }());
   }

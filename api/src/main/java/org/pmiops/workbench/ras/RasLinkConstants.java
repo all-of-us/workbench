@@ -27,14 +27,11 @@ public class RasLinkConstants {
   // The login.gov's PREFERRED_USERNAME field from RAS UserInfo endpoint
   static final String PREFERRED_USERNAME_FIELD_NAME = "preferred_username";
 
-  // The login.gov's email field which we choose as login.gov username.
-  static final String EMAIl_FIELD_NAME = "email";
-
   // The identifier that indicate users login using login.gov account.
   static final String LOGIN_GOV_IDENTIFIER_LOWER_CASE = "@login.gov";
 
   // The string in ACR claim that we can use to identify user IAL status.
-  static final String ACR_CLAIM_IAL_2_IDENTIFIER = "https://stsstg.nih.gov/assurance/ial/2";
+  static final String ACR_CLAIM_IAL_2_IDENTIFIER = "/assurance/ial/2";
 
   // The required scopes to finish RAS OAuth flow, and get enough information AoU needs.
   static final Set<String> RAS_AUTH_CODE_SCOPES =

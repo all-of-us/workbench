@@ -2,7 +2,6 @@ package org.pmiops.workbench.db.jdbc;
 
 import static org.pmiops.workbench.db.model.DbStorageEnums.billingAccountTypeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.billingStatusFromStorage;
-import static org.pmiops.workbench.db.model.DbStorageEnums.dataAccessLevelFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.degreeFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.disabilityFromStorage;
 import static org.pmiops.workbench.db.model.DbStorageEnums.educationFromStorage;
@@ -21,9 +20,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
-import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.ReportingCohort;
 import org.pmiops.workbench.model.ReportingDataset;
 import org.pmiops.workbench.model.ReportingDatasetCohort;
@@ -185,7 +182,6 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  u.contact_email,\n"
                 + "  u.creation_time,\n"
                 + "  u.current_position,\n"
-                + "  u.data_access_level,\n"
                 + "  u.data_use_agreement_bypass_time,\n"
                 + "  u.data_use_agreement_completion_time,\n"
                 + "  u.data_use_agreement_signed_version,\n"
@@ -194,7 +190,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  u.era_commons_bypass_time,\n"
                 + "  u.era_commons_completion_time,\n"
                 + "  u.family_name,\n"
-                + "  u.first_registration_completion_time,\n"
+                // temporary solution to RW-6566
+                + "  uat.first_enabled AS first_registration_completion_time,\n"
                 + "  u.first_sign_in_time,\n"
                 + "  u.free_tier_credits_limit_days_override,\n"
                 + "  u.free_tier_credits_limit_dollars_override,\n"
@@ -222,8 +219,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  dm.lgbtq_identity,\n"
                 + "  dm.gender_identity,\n"
                 + "  dm.race,\n"
-                + "  dm.sex_at_birth\n"
-                + "  \n"
+                + "  dm.sex_at_birth,\n"
+                + "  t.access_tier_short_names\n"
                 + "FROM user u"
                 + "  LEFT OUTER JOIN address AS a ON u.user_id = a.user_id\n"
                 + "  LEFT OUTER JOIN user_verified_institutional_affiliation AS via on u.user_id = via.user_id\n"
@@ -250,8 +247,23 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "             ON demo.demographic_survey_id = ds.demographic_survey_id\n"
                 + "         LEFT OUTER JOIN user_degree AS ud on demo.user_id = ud.user_id "
                 + "         GROUP BY demo.user_id "
-                + "  ) AS dm "
-                + "  on u.user_id = dm.user_id"
+                + "  ) AS dm on u.user_id = dm.user_id"
+                + "  LEFT OUTER JOIN ("
+                + "    SELECT u.user_id, GROUP_CONCAT(DISTINCT a.short_name) AS access_tier_short_names "
+                + "    FROM user u "
+                + "      JOIN user_access_tier uat ON u.user_id = uat.user_id "
+                + "      JOIN access_tier a ON a.access_tier_id = uat.access_tier_id "
+                + "      WHERE uat.access_status = 1 " // ENABLED
+                + "      GROUP BY u.user_id"
+                + "  ) as t ON t.user_id = u.user_id "
+                // temporary solution to RW-6566: retrieve first_enabled from user_access_tier
+                // for 'registered' entries as a substitute for first_registration_completion_time
+                + "  LEFT OUTER JOIN ( "
+                + "    SELECT uat.user_id, uat.first_enabled FROM user_access_tier uat "
+                + "    JOIN access_tier at ON at.access_tier_id = uat.access_tier_id "
+                + "    WHERE uat.access_status = 1 AND at.short_name = 'registered' "
+                + "  ) uat ON u.user_id = uat.user_id "
+                // end temporary solution for RW-6566
                 + "  ORDER BY u.user_id"
                 + "  LIMIT %d\n"
                 + "  OFFSET %d",
@@ -269,13 +281,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .contactEmail(rs.getString("contact_email"))
                 .creationTime(offsetDateTimeUtc(rs.getTimestamp("creation_time")))
                 .currentPosition(rs.getString("current_position"))
-                .dataAccessLevel(dataAccessLevelFromStorage(rs.getShort("data_access_level")))
-                // TODO placeholder until we have a proper association of users to tiers
-                .accessTierShortNames(
-                    dataAccessLevelFromStorage(rs.getShort("data_access_level"))
-                            == DataAccessLevel.REGISTERED
-                        ? AccessTierService.REGISTERED_TIER_SHORT_NAME
-                        : "none")
+                .accessTierShortNames(rs.getString("access_tier_short_names"))
                 .dataUseAgreementBypassTime(
                     offsetDateTimeUtc(rs.getTimestamp("data_use_agreement_bypass_time")))
                 .dataUseAgreementCompletionTime(
@@ -374,6 +380,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 + "  rp_social_behavioral,\n"
                 + "  rp_time_requested,\n"
                 + "  workspace_id,\n"
+                + "  workspace_namespace,\n"
                 + "  a.short_name AS access_tier_short_name\n"
                 + "FROM workspace w\n"
                 + "  JOIN cdr_version c ON w.cdr_version_id = c.cdr_version_id\n"
@@ -419,7 +426,8 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
                 .rpScientificApproach(rs.getString("rp_scientific_approach"))
                 .rpSocialBehavioral(rs.getBoolean("rp_social_behavioral"))
                 .rpTimeRequested(offsetDateTimeUtc(rs.getTimestamp("rp_time_requested")))
-                .workspaceId(rs.getLong("workspace_id")));
+                .workspaceId(rs.getLong("workspace_id"))
+                .workspaceNamespace(rs.getString("workspace_namespace")));
   }
 
   @Override
@@ -432,7 +440,7 @@ public class ReportingQueryServiceImpl implements ReportingQueryService {
     return jdbcTemplate.queryForObject("SELECT count(*) FROM user", Integer.class);
   }
 
-  /** Converts agreegated storage enums to String value. e.g. 0. 8 -> BA, MS. */
+  /** Converts aggregated storage enums to String value. e.g. 0. 8 -> BA, MS. */
   private static String convertListEnumFromStorage(
       String stringEnums, Function<Short, String> convertDbEnum) {
     if (Strings.isNullOrEmpty(stringEnums)) {

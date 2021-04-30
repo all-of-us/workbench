@@ -3,17 +3,31 @@ import * as React from 'react';
 import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {cdrVersionStore, currentWorkspaceStore, navigate, serverConfigStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {DisseminateResearchEnum, ResearchOutcomeEnum, SpecificPopulationEnum,UserApi, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
-import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
+import {
+  DisseminateResearchEnum,
+  ResearchOutcomeEnum,
+  SpecificPopulationEnum,
+  UserApi,
+  WorkspaceAccessLevel,
+  WorkspacesApi
+} from 'generated/fetch';
+import {simulateSelection, waitOneTickAndUpdate} from 'testing/react-test-helpers';
+import {
+  altCdrVersion,
+  cdrVersionTiersResponse,
+  controlledCdrVersion,
+  defaultCdrVersion,
+} from 'testing/stubs/cdr-versions-api-stub';
 import {UserApiStub} from 'testing/stubs/user-api-stub';
 import {workspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-edit';
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
+import {cdrVersionStore, serverConfigStore} from 'app/utils/stores';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 
 jest.mock('app/utils/navigation', () => ({
   ...(jest.requireActual('app/utils/navigation')),
@@ -69,8 +83,8 @@ describe('WorkspaceEdit', () => {
     registerApiClient(WorkspacesApi, workspacesApi);
 
     currentWorkspaceStore.next(workspace);
-    cdrVersionStore.next(cdrVersionListResponse);
-    serverConfigStore.next({enableBillingUpgrade: true, defaultFreeCreditsDollarLimit: 100.0, gsuiteDomain: ''});
+    cdrVersionStore.set(cdrVersionTiersResponse);
+    serverConfigStore.set({config: {enableBillingUpgrade: true, defaultFreeCreditsDollarLimit: 100.0, gsuiteDomain: ''}});
   });
 
   it('displays workspaces create page', async () => {
@@ -260,6 +274,82 @@ describe('WorkspaceEdit', () => {
     // old CDR Version warning does not appear
     expect(wrapper.find('[data-test-id="old-cdr-version-warning"]').exists()).toBeFalsy();
   });
+
+  it('does not display the access tier dropdown when multiple tiers are not available', async() => {
+    cdrVersionStore.set( {tiers: [cdrVersionTiersResponse.tiers[0]]});
+
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    expect(wrapper.find('[data-test-id="select-access-tier"]').exists()).toBeFalsy();
+  });
+
+  it('enables access tier selection on creation when multiple tiers are available', async() => {
+    workspaceEditMode = WorkspaceEditMode.Create;
+
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    const accessTierSelection = wrapper.find('[data-test-id="select-access-tier"]').find('select');
+    expect(accessTierSelection.exists()).toBeTruthy();
+
+    // defaults to registered
+    const selectionProps = accessTierSelection.props();
+    expect(selectionProps.disabled).toBeFalsy();
+    expect(selectionProps.value).toBe(AccessTierShortNames.Registered);
+
+    // when Registered is selected, the CDR Version dropdown lists the registered tier CDR Versions
+    // defaultCdrVersion and altCdrVersion, with defaultCdrVersion selected
+
+    const cdrVersionsSelect = () => wrapper.find('[data-test-id="select-cdr-version"]').find('select');
+    expect(cdrVersionsSelect().props().value).toBe(defaultCdrVersion.cdrVersionId);
+
+    const cdrVersionSelectOptions = (): Array<string> => cdrVersionsSelect().children().map(o => o.props().value);
+    expect(cdrVersionSelectOptions()).toEqual([defaultCdrVersion.cdrVersionId, altCdrVersion.cdrVersionId]);
+
+    // when Controlled is selected, the CDR Version dropdown lists the (one) controlled tier CDR Version
+
+    await simulateSelection(accessTierSelection, AccessTierShortNames.Controlled);
+
+    expect(cdrVersionsSelect().props().value).toBe(controlledCdrVersion.cdrVersionId);
+    expect(cdrVersionSelectOptions()).toEqual([controlledCdrVersion.cdrVersionId]);
+  });
+
+  it('retains the tier on edit and does not permit changes - Registered', async() => {
+    workspaceEditMode = WorkspaceEditMode.Edit;
+    workspace.accessTierShortName = AccessTierShortNames.Registered;
+    await expectNoTierChangesAllowed();
+  });
+
+  it('retains the tier on edit and does not permit changes - Controlled', async() => {
+    workspaceEditMode = WorkspaceEditMode.Edit;
+    workspace.accessTierShortName = AccessTierShortNames.Controlled;
+    await expectNoTierChangesAllowed();
+  });
+
+  it('retains the tier on duplication and does not permit changes - Registered', async() => {
+    workspaceEditMode = WorkspaceEditMode.Duplicate;
+    workspace.accessTierShortName = AccessTierShortNames.Registered;
+    await expectNoTierChangesAllowed();
+  });
+
+  it('retains the tier on duplication and does not permit changes - Controlled', async() => {
+    workspaceEditMode = WorkspaceEditMode.Duplicate;
+    workspace.accessTierShortName = AccessTierShortNames.Controlled;
+    await expectNoTierChangesAllowed();
+  });
+
+  async function expectNoTierChangesAllowed() {
+    const wrapper = component();
+    await waitOneTickAndUpdate(wrapper);
+
+    const accessTierSelection = wrapper.find('[data-test-id="select-access-tier"]');
+    expect(accessTierSelection.exists()).toBeTruthy();
+
+    const selectionProps = accessTierSelection.find('select').props();
+    expect(selectionProps.disabled).toBeTruthy();
+    expect(selectionProps.value).toBe(workspace.accessTierShortName);
+  }
 
   // regression test for RW-5132
   it('prevents multiple Workspace creations via the same confirmation dialog', async() => {

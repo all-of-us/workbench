@@ -9,6 +9,7 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,21 +19,19 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.inject.Provider;
 import org.hibernate.exception.GenericJDBCException;
+import org.javers.common.collections.Lists;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.UserDao.UserCountGaugeLabelsAndValue;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbAdminActionHistory;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserDataUseAgreement;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
@@ -47,7 +46,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
@@ -71,7 +69,7 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>A large portion of this class is dedicated to:
  *
  * <p>(1) making it easy to consistently modify a subset of fields in a User entry, with retries (2)
- * ensuring we call a single updateDataAccessLevel method whenever a User entry is saved.
+ * ensuring we call a single updateUserAccessTiers method whenever a User entry is saved.
  */
 @Service
 public class UserServiceImpl implements UserService, GaugeDataCollector {
@@ -139,7 +137,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   /**
    * Updates a user record with a modifier function.
    *
-   * <p>Ensures that the data access level for the user reflects the state of other fields on the
+   * <p>Ensures that the data access tiers for the user reflect the state of other fields on the
    * user; handles conflicts with concurrent updates by retrying.
    */
   @Override
@@ -149,7 +147,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     int statementClosedCount = 0;
     while (true) {
       dbUser = userModifier.apply(dbUser);
-      updateDataAccessLevel(dbUser, agent);
+      updateUserAccessTiers(dbUser, agent);
       Timestamp now = new Timestamp(clock.instant().toEpochMilli());
       dbUser.setLastModifiedTime(now);
       try {
@@ -186,56 +184,30 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
   }
 
-  private void updateDataAccessLevel(DbUser dbUser, Agent agent) {
-    final DataAccessLevel previousDataAccessLevel = dbUser.getDataAccessLevelEnum();
-    final DataAccessLevel newDataAccessLevel;
-    if (shouldUserBeRegistered(dbUser)) {
-      addToRegisteredTierGroupIdempotent(dbUser);
-      newDataAccessLevel = DataAccessLevel.REGISTERED;
+  private void updateUserAccessTiers(DbUser dbUser, Agent agent) {
+    final List<DbAccessTier> previousAccessTiers = accessTierService.getAccessTiersForUser(dbUser);
 
-      // record the user as having Registered Tier membership in user_access_tier
-      // which will eventually serve as the source of truth (TODO)
-      accessTierService.addUserToRegisteredTier(dbUser);
+    // TODO for Controlled Tier Beta: different access module evaluation criteria
+    // For Controlled Tier Alpha, we simply evaluate whether the user is qualified for
+    // Registered Tier and set RT+CT or RT only based on the feature flag
 
-      // if this is the first time the user has completed registration, record it
-      // this starts the Free Tier Credits countdown clock
-      if (dbUser.getFirstRegistrationCompletionTime() == null) {
-        dbUser.setFirstRegistrationCompletionTime();
-      }
-    } else {
-      removeFromRegisteredTierGroupIdempotent(dbUser);
-      newDataAccessLevel = DataAccessLevel.UNREGISTERED;
+    final List<DbAccessTier> newAccessTiers =
+        shouldUserBeRegistered(dbUser)
+            ? accessTierService.getTiersForRegisteredUsers()
+            : Collections.emptyList();
 
-      // record the user as lacking Registered Tier membership in user_access_tier
-      // which will eventually serve as the source of truth (TODO)
-      accessTierService.removeUserFromRegisteredTier(dbUser);
+    if (!newAccessTiers.equals(previousAccessTiers)) {
+      userServiceAuditor.fireUpdateAccessTiersAction(
+          dbUser, previousAccessTiers, newAccessTiers, agent);
     }
-    if (!newDataAccessLevel.equals(previousDataAccessLevel)) {
-      dbUser.setDataAccessLevelEnum(newDataAccessLevel);
-      userServiceAuditor.fireUpdateDataAccessAction(
-          dbUser, previousDataAccessLevel, newDataAccessLevel, agent);
-    }
-  }
 
-  private void removeFromRegisteredTierGroupIdempotent(DbUser dbUser) {
-    if (isUserMemberOfRegisteredTierGroup(dbUser)) {
-      this.fireCloudService.removeUserFromGroup(
-          dbUser.getUsername(), configProvider.get().firecloud.registeredDomainName);
-      log.info(String.format("Removed user %s from registered-tier group.", dbUser.getUsername()));
-    }
-  }
+    // add user to each Access Tier DB table and the tiers' Terra Auth Domains
+    newAccessTiers.forEach(tier -> accessTierService.addUserToTier(dbUser, tier));
 
-  private boolean isUserMemberOfRegisteredTierGroup(DbUser dbUser) {
-    return this.fireCloudService.isUserMemberOfGroup(
-        dbUser.getUsername(), configProvider.get().firecloud.registeredDomainName);
-  }
-
-  private void addToRegisteredTierGroupIdempotent(DbUser user) {
-    if (!isUserMemberOfRegisteredTierGroup(user)) {
-      this.fireCloudService.addUserToGroup(
-          user.getUsername(), configProvider.get().firecloud.registeredDomainName);
-      log.info(String.format("Added user %s to registered-tier group.", user.getUsername()));
-    }
+    // remove user from all other Access Tier DB tables and the tiers' Terra Auth Domains
+    final List<DbAccessTier> tiersForRemoval =
+        Lists.difference(accessTierService.getAllTiers(), newAccessTiers);
+    tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
   }
 
   private boolean shouldUserBeRegistered(DbUser user) {
@@ -261,7 +233,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         user.getBetaAccessBypassTime() != null || !configProvider.get().access.enableBetaAccess;
     boolean twoFactorAuthComplete =
         user.getTwoFactorAuthCompletionTime() != null || user.getTwoFactorAuthBypassTime() != null;
-
     // TODO: can take out other checks once we're entirely moved over to the 'module' columns
     return !user.getDisabled()
         && complianceTrainingCompliant
@@ -279,7 +250,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   public DbUser createServiceAccountUser(String username) {
     DbUser user = new DbUser();
-    user.setDataAccessLevelEnum(DataAccessLevel.PROTECTED);
     user.setUsername(username);
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.UNVERIFIED);
@@ -357,7 +327,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       DbVerifiedInstitutionalAffiliation dbVerifiedAffiliation) {
     DbUser dbUser = new DbUser();
     dbUser.setCreationNonce(Math.abs(random.nextLong()));
-    dbUser.setDataAccessLevelEnum(DataAccessLevel.UNREGISTERED);
     dbUser.setUsername(username);
     dbUser.setContactEmail(contactEmail);
     dbUser.setCurrentPosition(currentPosition);
@@ -530,6 +499,17 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         BypassTimeTargetProperty.TWO_FACTOR_AUTH_BYPASS_TIME);
   }
 
+  @Override
+  public void setRasLinkLoginGovBypassTime(
+      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime) {
+    setBypassTimeWithRetries(
+        userId,
+        previousBypassTime,
+        newBypassTime,
+        DbUser::setRasLinkLoginGovBypassTime,
+        BypassTimeTargetProperty.RAS_LINK_LOGIN_GOV);
+  }
+
   /**
    * Functional bypass time column setter, using retry logic.
    *
@@ -625,14 +605,32 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     adminActionHistoryDao.save(adminActionHistory);
   }
 
-  /** Find users matching the user's name or email */
+  /**
+   * Find users with Registered Tier access whose name or username match the supplied search terms.
+   *
+   * @param term User-supplied search term
+   * @param sort Option(s) for ordering query results
+   * @return the List of DbUsers which meet the search and access requirements
+   * @deprecated use {@link UserService#findUsersBySearchString(String, Sort, String)} instead.
+   */
+  @Deprecated
   @Override
   public List<DbUser> findUsersBySearchString(String term, Sort sort) {
-    List<Short> dataAccessLevels =
-        Stream.of(DataAccessLevel.REGISTERED, DataAccessLevel.PROTECTED)
-            .map(DbStorageEnums::dataAccessLevelToStorage)
-            .collect(Collectors.toList());
-    return userDao.findUsersByDataAccessLevelsAndSearchString(dataAccessLevels, term, sort);
+    return findUsersBySearchString(term, sort, accessTierService.REGISTERED_TIER_SHORT_NAME);
+  }
+
+  /**
+   * Find users whose name or username match the supplied search terms and who have the appropriate
+   * access tier.
+   *
+   * @param term User-supplied search term
+   * @param sort Option(s) for ordering query results
+   * @param accessTierShortName the shortName of the access tier to check
+   * @return the List of DbUsers which meet the search and access requirements
+   */
+  @Override
+  public List<DbUser> findUsersBySearchString(String term, Sort sort, String accessTierShortName) {
+    return userDao.findUsersBySearchStringAndTier(term, sort, accessTierShortName);
   }
 
   /** Syncs the current user's training status from Moodle. */
@@ -822,9 +820,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     syncTwoFactorAuthStatus(user, Agent.asUser(user));
   }
 
-  /** */
   @Override
   public DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent) {
+    return syncTwoFactorAuthStatus(
+        targetUser, agent, directoryService.getUser(targetUser.getUsername()).getIsEnrolledIn2Sv());
+  }
+
+  @Override
+  public DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent, boolean isEnrolledIn2FA) {
     if (isServiceAccount(targetUser)) {
       // Skip sync for service account user rows.
       return targetUser;
@@ -832,8 +835,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
     return updateUserWithRetries(
         user -> {
-          boolean isEnrolledIn2FA =
-              directoryService.getUser(user.getUsername()).getIsEnrolledIn2Sv();
           if (isEnrolledIn2FA) {
             if (user.getTwoFactorAuthCompletionTime() == null) {
               user.setTwoFactorAuthCompletionTime(new Timestamp(clock.instant().toEpochMilli()));
@@ -849,19 +850,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
-
-    final List<UserCountGaugeLabelsAndValue> rows = userDao.getUserCountGaugeData();
-    return rows.stream()
+    return userDao.getUserCountGaugeData().stream()
         .map(
             row ->
                 MeasurementBundle.builder()
                     .addMeasurement(GaugeMetric.USER_COUNT, row.getUserCount())
-                    .addTag(
-                        MetricLabel.DATA_ACCESS_LEVEL,
-                        DbStorageEnums.dataAccessLevelFromStorage(row.getDataAccessLevel())
-                            .toString())
                     .addTag(MetricLabel.USER_DISABLED, row.getDisabled().toString())
-                    .addTag(MetricLabel.USER_BYPASSED_BETA, row.getBetaIsBypassed().toString())
+                    .addTag(MetricLabel.ACCESS_TIER_SHORT_NAMES, row.getAccessTierShortNames())
                     .build())
         .collect(ImmutableList.toImmutableList());
   }
@@ -920,6 +915,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       case TWO_FACTOR_AUTH:
         previousBypassTime = user.getTwoFactorAuthBypassTime();
         setTwoFactorAuthBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
+        break;
+      case RAS_LINK_LOGIN_GOV:
+        previousBypassTime = user.getRasLinkLoginGovBypassTime();
+        setRasLinkLoginGovBypassTime(userDatabaseId, previousBypassTime, newBypassTime);
         break;
       default:
         throw new BadRequestException(

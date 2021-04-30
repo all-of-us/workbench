@@ -13,7 +13,7 @@
     "xAppIdValue": "perf-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/228353087260/servicePerimeters/terra_perf_aou_perf",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.0.23",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.2",
     "shibbolethApiBaseUrl": "",
     "shibbolethUiBaseUrl": "",
     "runtimeImages": {
@@ -27,7 +27,8 @@
     "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.rw_test_firecloud_view",
     "retryCount": 4,
     "bufferCapacityPerTier": {
-      "registered": 300
+      "registered": 300,
+      "controlled": 20
     },
     "bufferRefillProjectsPerTask": 5,
     "bufferStatusChecksPerTask": 10,
@@ -56,7 +57,7 @@
     "operationalTerraWorkspaceName": "aouwgscohortextractionperf",
     "operationalTerraWorkspaceBucket": "fc-71462dce-ffcf-4d66-9075-7fce9b8daf4b",
     "extractionPetServiceAccount": "pet-111879944971009838720@aouwgscohortextraction-perf.iam.gserviceaccount.com",
-    "extractionMethodConfigurationNamespace": "",
+    "extractionMethodConfigurationNamespace": "aouwgscohortextraction-perf",
     "extractionMethodConfigurationName": "",
     "extractionMethodConfigurationVersion": 1,
     "extractionCohortsDataset": "",
@@ -114,14 +115,15 @@
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
-    "unsafeAllowAccessToAllTiersForRegisteredUsers": false,
+    "unsafeAllowAccessToAllTiersForRegisteredUsers": true,
     "enableRdrExport": true,
     "enableBillingUpgrade": true,
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableReportingUploadCron": false,
-    "enableRasLoginGovLinking": false
+    "enableRasLoginGovLinking": false,
+    "enableGenomicExtraction": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",

@@ -24,10 +24,12 @@ public interface LeonardoNotebooksClient {
    * Creates a notebooks runtime owned by the current authenticated user.
    *
    * @param runtime the details for the runtime to create
+   * @param workspaceNamespace the workspace namespace to identify a workspace.
    * @param workspaceFirecloudName the firecloudName of the workspace this runtime is associated
    *     with
    */
-  void createRuntime(Runtime runtime, String workspaceFirecloudName) throws WorkbenchException;
+  void createRuntime(Runtime runtime, String workspaceNamespace, String workspaceFirecloudName)
+      throws WorkbenchException;
 
   void updateRuntime(Runtime runtime) throws WorkbenchException;
 

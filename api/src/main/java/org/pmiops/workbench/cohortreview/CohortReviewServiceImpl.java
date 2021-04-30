@@ -142,6 +142,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   public CohortReviewServiceImpl() {}
 
   @Override
+<<<<<<< HEAD
   public DbCohort findCohort(long cohortId) {
     return cohortDao
         .findById(cohortId)
@@ -149,6 +150,15 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
             () ->
                 new NotFoundException(
                     String.format("Not Found: No Cohort exists for cohortId: %s", cohortId)));
+=======
+  public DbCohort findCohort(long workspaceId, long cohortId) {
+    DbCohort cohort = cohortDao.findCohortByWorkspaceIdAndCohortId(workspaceId, cohortId);
+    if (cohort == null) {
+      throw new NotFoundException(
+          String.format("Not Found: No Cohort exists for cohortId: %s", cohortId));
+    }
+    return cohort;
+>>>>>>> origin/master
   }
 
   @Override
@@ -171,8 +181,22 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   }
 
   @Override
+  public CohortReview findCohortReviewForWorkspace(Long workspaceId, Long cohortReviewId) {
+    CohortReview cohortReview = findCohortReview(cohortReviewId);
+    DbCohort dbCohort =
+        cohortDao.findCohortByWorkspaceIdAndCohortId(workspaceId, cohortReview.getCohortId());
+    if (dbCohort == null) {
+      throw new NotFoundException(
+          String.format(
+              "Not Found: No CohortReview exists for cohortReviewId: %s and cohortId: %s",
+              cohortReviewId, cohortReview.getCohortId()));
+    }
+    return cohortReview;
+  }
+
+  @Override
   public void deleteCohortReview(Long cohortReviewId) {
-    cohortReviewDao.delete(findDbCohortReview(cohortReviewId));
+    cohortReviewDao.delete(cohortReviewId);
   }
 
   @Override

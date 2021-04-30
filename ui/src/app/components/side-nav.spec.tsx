@@ -2,9 +2,7 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {SideNav, SideNavItem, SideNavProps} from './side-nav';
-import {ProfileStubVariables} from "../../testing/stubs/profile-api-stub";
-import {DataAccessLevel} from "../../generated/fetch";
-
+import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 
 describe('SideNav', () => {
   const props: SideNavProps = {
@@ -27,8 +25,7 @@ describe('SideNav', () => {
   });
 
   it('disables options when user not registered', () => {
-    const wrapper = mount(<SideNav {...props} profile={{...ProfileStubVariables.PROFILE_STUB,
-      dataAccessLevel: DataAccessLevel.Unregistered}}/>);
+    const wrapper = mount(<SideNav {...props} profile={{...ProfileStubVariables.PROFILE_STUB, accessTierShortNames: []}}/>);
     wrapper.setState({showUserOptions: true});
     // These are our expected items to be disabled when you are not registered
     let disabledItemText = ['Profile', 'Your Workspaces', 'Featured Workspaces', 'User Support Hub'];

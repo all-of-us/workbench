@@ -1,7 +1,6 @@
 package org.pmiops.workbench.profile;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
@@ -16,6 +15,7 @@ import org.javers.core.diff.Change;
 import org.javers.core.diff.Diff;
 import org.javers.core.diff.changetype.NewObject;
 import org.javers.core.diff.changetype.PropertyChange;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.ProfileAuditor;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.pmiops.workbench.db.dao.InstitutionDao;
@@ -48,6 +48,7 @@ public class ProfileService {
 
   private static final Logger log = Logger.getLogger(ProfileService.class.getName());
 
+  private final AccessTierService accessTierService;
   private final AddressMapper addressMapper;
   private final Clock clock;
   private final DemographicSurveyMapper demographicSurveyMapper;
@@ -66,6 +67,7 @@ public class ProfileService {
 
   @Autowired
   public ProfileService(
+      AccessTierService accessTierService,
       AddressMapper addressMapper,
       Clock clock,
       DemographicSurveyMapper demographicSurveyMapper,
@@ -81,6 +83,7 @@ public class ProfileService {
       UserTermsOfServiceDao userTermsOfServiceDao,
       VerifiedInstitutionalAffiliationDao verifiedInstitutionalAffiliationDao,
       VerifiedInstitutionalAffiliationMapper verifiedInstitutionalAffiliationMapper) {
+    this.accessTierService = accessTierService;
     this.addressMapper = addressMapper;
     this.clock = clock;
     this.demographicSurveyMapper = demographicSurveyMapper;
@@ -115,12 +118,17 @@ public class ProfileService {
 
     final @Nullable DbUserTermsOfService latestTermsOfService =
         userTermsOfServiceDao.findFirstByUserIdOrderByTosVersionDesc(user.getUserId()).orElse(null);
+
+    final List<String> accessTierShortNames =
+        accessTierService.getAccessTierShortNamesForUser(user);
+
     return profileMapper.toModel(
         user,
         verifiedInstitutionalAffiliation,
         latestTermsOfService,
         freeTierUsage,
-        freeTierDollarQuota);
+        freeTierDollarQuota,
+        accessTierShortNames);
   }
 
   public void validateAffiliation(Profile profile) {
@@ -456,10 +464,9 @@ public class ProfileService {
   }
 
   public List<AdminTableUser> getAdminTableUsers() {
-    return userDao.getAdminTableUsers().stream()
-        .map(dbUser -> profileMapper.adminViewToModel(dbUser))
-        .collect(ImmutableList.toImmutableList());
+    return profileMapper.adminViewToModel(userDao.getAdminTableUsers());
   }
+
   /**
    * Updates the user metadata referenced by the fields of AccountPropertyUpdate.
    *

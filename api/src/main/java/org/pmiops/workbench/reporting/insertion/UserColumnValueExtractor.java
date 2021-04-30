@@ -27,7 +27,6 @@ public enum UserColumnValueExtractor implements ColumnValueExtractor<ReportingUs
   CONTACT_EMAIL("contact_email", ReportingUser::getContactEmail),
   CREATION_TIME("creation_time", u -> toInsertRowString(u.getCreationTime())),
   CURRENT_POSITION("current_position", ReportingUser::getCurrentPosition),
-  DATA_ACCESS_LEVEL("data_access_level", u -> enumToString(u.getDataAccessLevel())),
   DATA_USE_AGREEMENT_BYPASS_TIME(
       "data_use_agreement_bypass_time", u -> toInsertRowString(u.getDataUseAgreementBypassTime())),
   DATA_USE_AGREEMENT_COMPLETION_TIME(

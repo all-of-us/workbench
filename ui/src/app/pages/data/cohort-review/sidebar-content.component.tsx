@@ -163,7 +163,7 @@ const AnnotationItem = fp.flow(
       console.error(error);
       this.setState({saving: false, error: true});
     } finally {
-      const timeout = setTimeout(() => this.setState({error: false, success: false}), 5000);
+      const timeout: Timeout = global.setTimeout(() => this.setState({error: false, success: false}), 5000);
       this.setState({savingValue: undefined, timeout});
     }
   }
@@ -363,7 +363,6 @@ export const SidebarContent = fp.flow(
       accessLevel === WorkspaceAccessLevel.READER;
     const annotationsExist = annotationDefinitions && annotationDefinitions.length > 0;
     return <React.Fragment>
-      <div style={styles.header}>Participant {participantId}</div>
       <div><span style={{fontWeight: 'bold'}}>DOB:</span> {birthDate}</div>
       <div><span style={{fontWeight: 'bold'}}>Gender:</span> {gender}</div>
       <div><span style={{fontWeight: 'bold'}}>Race:</span> {race}</div>

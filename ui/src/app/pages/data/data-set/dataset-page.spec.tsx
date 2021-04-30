@@ -4,7 +4,7 @@ import * as React from 'react';
 import {Button, Clickable} from 'app/components/buttons';
 import {DataSetPage, COMPARE_DOMAINS_FOR_DISPLAY} from 'app/pages/data/data-set/dataset-page';
 import {dataSetApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {cdrVersionStore, currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
+import {currentWorkspaceStore, NavStore, urlParamsStore} from 'app/utils/navigation';
 import {
   CdrVersionsApi,
   CohortsApi,
@@ -14,11 +14,12 @@ import {
   WorkspaceAccessLevel
 } from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {cdrVersionListResponse, CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
+import {cdrVersionTiersResponse, CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
 import {CohortsApiStub, exampleCohortStubs} from 'testing/stubs/cohorts-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {DataSetApiStub} from 'testing/stubs/data-set-api-stub';
 import {workspaceDataStub, workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
+import {cdrVersionStore, serverConfigStore} from 'app/utils/stores';
 
 describe('DataSetPage', () => {
   beforeEach(() => {
@@ -30,8 +31,9 @@ describe('DataSetPage', () => {
       ns: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS,
       wsid: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID
     });
+    serverConfigStore.set({config: {enableGenomicExtraction: true, gsuiteDomain: ''}});
     currentWorkspaceStore.next(workspaceDataStub);
-    cdrVersionStore.next(cdrVersionListResponse);
+    cdrVersionStore.set(cdrVersionTiersResponse);
   });
 
   it('should render', async() => {
@@ -346,6 +348,31 @@ describe('DataSetPage', () => {
 
     expect(wrapper.find('[data-test-id="cohort-list-item"]').first().props().checked).toBeTruthy();
     expect(wrapper.find('[data-test-id="all-participant"]').props().checked).toBeFalsy();
+  });
+
+  it('should display Pre packaged concept set as per CDR data', async () => {
+    let wrapper = mount(<DataSetPage/>);
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(7);
+
+    cdrVersionTiersResponse.tiers[0].versions[0].hasWgsData = false;
+    wrapper = mount(<DataSetPage/>);
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(6);
+
+
+    cdrVersionTiersResponse.tiers[0].versions[0].hasFitbitData = false;
+    cdrVersionTiersResponse.tiers[0].versions[0].hasWgsData = true;
+    wrapper = mount(<DataSetPage/>);
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(3);
+
+
+    cdrVersionTiersResponse.tiers[0].versions[0].hasFitbitData = false;
+    cdrVersionTiersResponse.tiers[0].versions[0].hasWgsData = false;
+    wrapper = mount(<DataSetPage/>);
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(2);
 
   });
 });

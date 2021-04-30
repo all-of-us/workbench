@@ -235,7 +235,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
 
   closeSidebar() {
     attributesSelectionStore.next(undefined);
-    setSidebarActiveIconStore.next(undefined);
+    setSidebarActiveIconStore.next(null);
   }
 
   addSelection = (selectCriteria)  => {
@@ -272,7 +272,7 @@ export const CriteriaSearch = fp.flow(withUrlParams(), withCurrentWorkspace())(c
       clearTimeout(this.growlTimer);
     }
     // This is to set style display: 'none' on the growl so it doesn't block the nav icons in the sidebar
-    this.growlTimer = setTimeout(() => this.setState({growlVisible: false}), 2500);
+    this.growlTimer = global.setTimeout(() => this.setState({growlVisible: false}), 2500);
     this.setState({growlVisible: true});
   }
 

@@ -106,11 +106,11 @@ export default class CreateAccountPage extends BasePage {
     return true;
   }
 
-  async getSubmitButton(): Promise<Button> {
+  getSubmitButton(): Button {
     return Button.findByName(this.page, { name: LinkText.Submit });
   }
 
-  async getNextButton(): Promise<Button> {
+  getNextButton(): Button {
     return Button.findByName(this.page, { name: LinkText.Next });
   }
 
@@ -138,11 +138,7 @@ export default class CreateAccountPage extends BasePage {
     return new Checkbox(this.page, selector);
   }
 
-  async getInstitutionNameInput(): Promise<Textbox> {
-    return Textbox.findByName(this.page, { name: LabelAlias.InstitutionName });
-  }
-
-  async getResearchBackgroundTextarea(): Promise<Textarea> {
+  getResearchBackgroundTextarea(): Textarea {
     return Textarea.findByName(this.page, { normalizeSpace: LabelAlias.ResearchBackground });
   }
 
@@ -154,11 +150,11 @@ export default class CreateAccountPage extends BasePage {
   async fillInFormFields(fields: { label: string; value: string }[]): Promise<string> {
     let newUserName;
     for (const field of fields) {
-      const textbox = await Textbox.findByName(this.page, { name: field.label });
+      const textbox = Textbox.findByName(this.page, { name: field.label });
       await textbox.type(field.value);
       await textbox.pressTab();
       if (field.label === 'New Username') {
-        await ClrIconLink.findByName(this.page, { name: field.label, iconShape: 'success-standard' });
+        await ClrIconLink.findByName(this.page, { name: field.label, iconShape: 'success-standard' }).asElementHandle();
         newUserName = field.value; // store new username for return
       }
     }
@@ -167,30 +163,30 @@ export default class CreateAccountPage extends BasePage {
 
   // select Institution Affiliation from a dropdown
   async selectInstitution(selectTextValue: string): Promise<void> {
-    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.InstitutionSelect.textOption);
+    const dropdown = SelectMenu.findByName(this.page, FieldSelector.InstitutionSelect.textOption);
     return dropdown.select(selectTextValue);
   }
 
   async getInstitutionValue(): Promise<string> {
-    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.InstitutionSelect.textOption);
+    const dropdown = SelectMenu.findByName(this.page, FieldSelector.InstitutionSelect.textOption);
     return dropdown.getSelectedValue();
   }
 
   // select Education Level from a dropdown
   async selectEducationLevel(selectTextValue: string): Promise<void> {
-    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.EducationLevelSelect.textOption);
+    const dropdown = SelectMenu.findByName(this.page, FieldSelector.EducationLevelSelect.textOption);
     return dropdown.select(selectTextValue);
   }
 
   // select Year of Birth from a dropdown
   async selectYearOfBirth(year: string): Promise<void> {
-    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.BirthYearSelect.textOption);
+    const dropdown = SelectMenu.findByName(this.page, FieldSelector.BirthYearSelect.textOption);
     return dropdown.select(year);
   }
 
   // select Ethnicity from a dropdown
   async selectEthnicity(option: string): Promise<void> {
-    const dropdown = await SelectMenu.findByName(this.page, FieldSelector.EthnicitySelect.textOption);
+    const dropdown = SelectMenu.findByName(this.page, FieldSelector.EthnicitySelect.textOption);
     return dropdown.select(option);
   }
 
@@ -202,16 +198,16 @@ export default class CreateAccountPage extends BasePage {
 
     await this.selectInstitution(InstitutionSelectValue.Broad);
     await this.getInstitutionValue();
-    const emailAddressTextbox = await Textbox.findByName(this.page, FieldSelector.InstitutionEmailTextbox.textOption);
+    const emailAddressTextbox = Textbox.findByName(this.page, FieldSelector.InstitutionEmailTextbox.textOption);
     await emailAddressTextbox.type(config.institutionContactEmail);
     await emailAddressTextbox.pressTab(); // tab out to start email validation
     await ClrIconLink.findByName(this.page, {
       containsText: LabelAlias.InstitutionEmail,
       ancestorLevel: 2,
       iconShape: 'success-standard'
-    });
+    }).asElementHandle();
 
-    const roleSelect = await SelectMenu.findByName(this.page, FieldSelector.DescribeRole.textOption);
+    const roleSelect = SelectMenu.findByName(this.page, FieldSelector.DescribeRole.textOption);
     await roleSelect.select(InstitutionRoleSelectValue.UndergraduteStudent);
   }
 
@@ -230,7 +226,7 @@ export default class CreateAccountPage extends BasePage {
   // Step 3: Fill out user information with default values
   async fillOutUserInformation(): Promise<string> {
     const newUserName = await this.fillInFormFields(defaultFieldValues);
-    await (await this.getResearchBackgroundTextarea()).type(faker.lorem.word());
+    await this.getResearchBackgroundTextarea().type(faker.lorem.word());
     return newUserName;
   }
 
@@ -239,7 +235,8 @@ export default class CreateAccountPage extends BasePage {
     await waitForText(this.page, 'Demographics Survey');
     // Find and check on all checkboxes with same label: Prefer not to answer
     const targetXpath =
-      '//*[normalize-space(text())="Prefer not to answer"]/ancestor::node()[1]/input[@type="checkbox" or @type="radio"]';
+      '//*[normalize-space(text())="Prefer not to answer"]/ancestor::node()[1]' +
+      '/input[@type="checkbox" or @type="radio"]';
     await this.page.waitForXPath(targetXpath, { visible: true });
     const checkboxes = await this.page.$x(targetXpath);
     for (const ck of checkboxes) {

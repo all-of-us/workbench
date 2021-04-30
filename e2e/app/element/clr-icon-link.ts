@@ -5,7 +5,7 @@ import BaseElement from './base-element';
 import { buildXPath } from 'app/xpath-builders';
 
 export default class ClrIconLink extends BaseElement {
-  static async findByName(page: Page, xOpt: XPathOptions, container?: Container): Promise<ClrIconLink> {
+  static findByName(page: Page, xOpt: XPathOptions, container?: Container): ClrIconLink {
     xOpt.type = ElementType.Icon;
     const iconXpath = buildXPath(xOpt, container);
     const iconLink = new ClrIconLink(page, iconXpath);
@@ -22,7 +22,7 @@ export default class ClrIconLink extends BaseElement {
    */
   async isDisabled(): Promise<boolean> {
     const selector = `${this.xpath}/ancestor::node()[1]`;
-    const elemt = await this.page.waitForXPath(selector, { visible: true });
-    return ClrIconLink.asBaseElement(this.page, elemt).isCursorNotAllowed();
+    const element = await this.page.waitForXPath(selector, { visible: true });
+    return ClrIconLink.asBaseElement(this.page, element).isCursorNotAllowed();
   }
 }

@@ -50,7 +50,7 @@ export default class NotebookPreviewPage extends AuthenticatedPage {
    * This function does not handle Unsaved Changes confirmation.
    */
   async goAnalysisPage(): Promise<WorkspaceAnalysisPage> {
-    const notebooksLink = await Link.findByName(this.page, { name: 'Notebooks' });
+    const notebooksLink = Link.findByName(this.page, { name: 'Notebooks' });
     await notebooksLink.clickAndWait();
     await waitWhileLoading(this.page);
 

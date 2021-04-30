@@ -3,7 +3,6 @@ package org.pmiops.workbench.api;
 import com.google.common.collect.ImmutableList;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.Clock;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -13,14 +12,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.json.JSONObject;
 import org.pmiops.workbench.actionaudit.auditors.LeonardoRuntimeAuditor;
 import org.pmiops.workbench.annotations.AuthorityRequired;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
-import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -29,6 +28,8 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.leonardo.model.LeonardoClusterError;
+import org.pmiops.workbench.leonardo.model.LeonardoGetRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoListRuntimeResponse;
 import org.pmiops.workbench.leonardo.model.LeonardoRuntimeStatus;
 import org.pmiops.workbench.model.Authority;
@@ -44,7 +45,7 @@ import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.LeonardoNotebooksClient;
 import org.pmiops.workbench.notebooks.model.StorageLink;
 import org.pmiops.workbench.utils.mappers.LeonardoMapper;
-import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -70,39 +71,33 @@ public class RuntimeController implements RuntimeApiDelegate {
   private final LeonardoRuntimeAuditor leonardoRuntimeAuditor;
   private final LeonardoNotebooksClient leonardoNotebooksClient;
   private final Provider<DbUser> userProvider;
-  private final WorkspaceService workspaceService;
+  private final WorkspaceAuthService workspaceAuthService;
+  private final WorkspaceDao workspaceDao;
   private final FireCloudService fireCloudService;
   private final Provider<WorkbenchConfig> workbenchConfigProvider;
-  private final UserService userService;
   private final UserRecentResourceService userRecentResourceService;
-  private final UserDao userDao;
   private final LeonardoMapper leonardoMapper;
-  private final Clock clock;
 
   @Autowired
   RuntimeController(
       LeonardoRuntimeAuditor leonardoRuntimeAuditor,
       LeonardoNotebooksClient leonardoNotebooksClient,
       Provider<DbUser> userProvider,
-      WorkspaceService workspaceService,
+      WorkspaceAuthService workspaceAuthService,
+      WorkspaceDao workspaceDao,
       FireCloudService fireCloudService,
       Provider<WorkbenchConfig> workbenchConfigProvider,
-      UserService userService,
       UserRecentResourceService userRecentResourceService,
-      UserDao userDao,
-      LeonardoMapper leonardoMapper,
-      Clock clock) {
+      LeonardoMapper leonardoMapper) {
     this.leonardoRuntimeAuditor = leonardoRuntimeAuditor;
     this.leonardoNotebooksClient = leonardoNotebooksClient;
     this.userProvider = userProvider;
-    this.workspaceService = workspaceService;
+    this.workspaceAuthService = workspaceAuthService;
+    this.workspaceDao = workspaceDao;
     this.fireCloudService = fireCloudService;
     this.workbenchConfigProvider = workbenchConfigProvider;
-    this.userService = userService;
     this.userRecentResourceService = userRecentResourceService;
-    this.userDao = userDao;
     this.leonardoMapper = leonardoMapper;
-    this.clock = clock;
   }
 
   private Stream<LeonardoListRuntimeResponse> filterByRuntimesInList(
@@ -160,31 +155,47 @@ public class RuntimeController implements RuntimeApiDelegate {
   }
 
   private DbWorkspace lookupWorkspace(String workspaceNamespace) throws NotFoundException {
-    return workspaceService
+    return workspaceDao
         .getByNamespace(workspaceNamespace)
         .orElseThrow(() -> new NotFoundException("Workspace not found: " + workspaceNamespace));
   }
 
   @Override
   public ResponseEntity<Runtime> getRuntime(String workspaceNamespace) {
-    String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
+    String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
+    String googleProject = dbWorkspace.getGoogleProject();
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
-    workspaceService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
+    workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
     try {
-      return ResponseEntity.ok(
-          leonardoMapper.toApiRuntime(
-              leonardoNotebooksClient.getRuntime(
-                  workspaceNamespace, userProvider.get().getRuntimeName())));
+      LeonardoGetRuntimeResponse leoRuntimeResponse =
+          leonardoNotebooksClient.getRuntime(googleProject, userProvider.get().getRuntimeName());
+      if (LeonardoRuntimeStatus.ERROR.equals(leoRuntimeResponse.getStatus())) {
+        log.warning(
+            String.format(
+                "Observed Leonardo runtime with unexpected error status:\n%s",
+                formatRuntimeErrors(leoRuntimeResponse.getErrors())));
+      }
+      return ResponseEntity.ok(leonardoMapper.toApiRuntime(leoRuntimeResponse));
     } catch (NotFoundException e) {
-      return ResponseEntity.ok(getOverrideFromListRuntimes(workspaceNamespace));
+      return ResponseEntity.ok(getOverrideFromListRuntimes(googleProject));
     }
   }
 
-  private Runtime getOverrideFromListRuntimes(String workspaceNamespace) {
+  private String formatRuntimeErrors(@Nullable List<LeonardoClusterError> errors) {
+    if (errors == null || errors.isEmpty()) {
+      return "no error messages";
+    }
+    return errors.stream()
+        .map(err -> String.format("error %d: %s", err.getErrorCode(), err.getErrorMessage()))
+        .collect(Collectors.joining("\n"));
+  }
+
+  private Runtime getOverrideFromListRuntimes(String googleProject) {
     Optional<LeonardoListRuntimeResponse> mostRecentRuntimeMaybe =
-        leonardoNotebooksClient.listRuntimesByProject(workspaceNamespace, true).stream()
+        leonardoNotebooksClient.listRuntimesByProject(googleProject, true).stream()
             .sorted(
                 (a, b) -> {
                   String aCreatedDate, bCreatedDate;
@@ -249,15 +260,16 @@ public class RuntimeController implements RuntimeApiDelegate {
       throw new BadRequestException("Only one of GceConfig or DataprocConfig must be provided");
     }
 
-    String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
+    String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
-    workspaceService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
+    workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
-    runtime.setGoogleProject(workspaceNamespace);
+    runtime.setGoogleProject(dbWorkspace.getGoogleProject());
     runtime.setRuntimeName(userProvider.get().getRuntimeName());
 
-    leonardoNotebooksClient.createRuntime(runtime, firecloudWorkspaceName);
+    leonardoNotebooksClient.createRuntime(runtime, workspaceNamespace, firecloudWorkspaceName);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -278,12 +290,13 @@ public class RuntimeController implements RuntimeApiDelegate {
       throw new BadRequestException("Only one of GceConfig or DataprocConfig must be provided");
     }
 
-    String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
+    String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
-    workspaceService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
+    workspaceAuthService.validateActiveBilling(workspaceNamespace, firecloudWorkspaceName);
 
-    runtimeRequest.getRuntime().setGoogleProject(workspaceNamespace);
+    runtimeRequest.getRuntime().setGoogleProject(dbWorkspace.getGoogleProject());
     runtimeRequest.getRuntime().setRuntimeName(userProvider.get().getRuntimeName());
 
     leonardoNotebooksClient.updateRuntime(runtimeRequest.getRuntime());
@@ -293,11 +306,13 @@ public class RuntimeController implements RuntimeApiDelegate {
 
   @Override
   public ResponseEntity<EmptyResponse> deleteRuntime(String workspaceNamespace) {
-    String firecloudWorkspaceName = lookupWorkspace(workspaceNamespace).getFirecloudName();
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
+    String firecloudWorkspaceName = dbWorkspace.getFirecloudName();
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, firecloudWorkspaceName, WorkspaceAccessLevel.WRITER);
 
-    leonardoNotebooksClient.deleteRuntime(workspaceNamespace, userProvider.get().getRuntimeName());
+    leonardoNotebooksClient.deleteRuntime(
+        dbWorkspace.getGoogleProject(), userProvider.get().getRuntimeName());
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -305,11 +320,11 @@ public class RuntimeController implements RuntimeApiDelegate {
   public ResponseEntity<RuntimeLocalizeResponse> localize(
       String workspaceNamespace, RuntimeLocalizeRequest body) {
     DbWorkspace dbWorkspace = lookupWorkspace(workspaceNamespace);
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         dbWorkspace.getWorkspaceNamespace(),
         dbWorkspace.getFirecloudName(),
         WorkspaceAccessLevel.WRITER);
-    workspaceService.validateActiveBilling(
+    workspaceAuthService.validateActiveBilling(
         dbWorkspace.getWorkspaceNamespace(), dbWorkspace.getFirecloudName());
 
     final FirecloudWorkspace firecloudWorkspace;
@@ -342,12 +357,13 @@ public class RuntimeController implements RuntimeApiDelegate {
                     gcsNotebooksDir + "/" + notebookName));
 
     String workspacePath = dbWorkspace.getFirecloudName();
+    String googleProjectId = dbWorkspace.getGoogleProject();
     String editDir = "workspaces/" + workspacePath;
     String playgroundDir = "workspaces_playground/" + workspacePath;
     String targetDir = body.getPlaygroundMode() ? playgroundDir : editDir;
 
     leonardoNotebooksClient.createStorageLink(
-        workspaceNamespace,
+        googleProjectId,
         userProvider.get().getRuntimeName(),
         new StorageLink()
             .cloudStorageDirectory(gcsNotebooksDir)
@@ -374,7 +390,7 @@ public class RuntimeController implements RuntimeApiDelegate {
     }
     log.info(localizeMap.toString());
     leonardoNotebooksClient.localize(
-        workspaceNamespace, userProvider.get().getRuntimeName(), localizeMap);
+        googleProjectId, userProvider.get().getRuntimeName(), localizeMap);
 
     // This is the Jupyer-server-root-relative path, the style used by the Jupyter REST API.
     return ResponseEntity.ok(new RuntimeLocalizeResponse().runtimeLocalDirectory(targetDir));

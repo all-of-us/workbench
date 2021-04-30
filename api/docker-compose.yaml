@@ -28,6 +28,10 @@ x-api-defaults: &api-defaults
 services:
   scripts:
     <<: *api-defaults
+  ports-scripts:
+    <<: *api-defaults
+    ports:
+      - 127.0.0.1:3307:3307
   db:
     image: mysql:5.7.27
     env_file:

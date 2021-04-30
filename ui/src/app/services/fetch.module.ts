@@ -1,43 +1,58 @@
-import { Inject, NgModule } from '@angular/core';
+import { NgModule } from '@angular/core';
 import {bindApiClients as notebooksBindApiClients} from 'app/services/notebooks-swagger-fetch-clients';
-import {bindApiClients} from 'app/services/swagger-fetch-clients';
-import * as portableFetch from 'portable-fetch';
+import {SignInService} from 'app/services/sign-in.service';
+import {bindApiClients, getApiBaseUrl} from 'app/services/swagger-fetch-clients';
 
 import {
-  Configuration as FetchConfiguration,
-  FetchAPI,
+  Configuration,
 } from 'generated/fetch';
 
 import {
   Configuration as LeoConfiguration
 } from 'notebooks-generated/fetch';
 
+import {environment} from 'environments/environment';
 
-const FETCH_API_REF = 'fetchApi';
+
+// "Configuration" means Swagger API Client configuration.
+export function getConfiguration(signInService: SignInService): Configuration {
+  return new Configuration({
+    basePath: getApiBaseUrl(),
+    accessToken: () => signInService.currentAccessToken
+  });
+}
+
+export function getLeoConfiguration(signInService: SignInService): LeoConfiguration {
+  return new LeoConfiguration({
+    basePath: environment.leoApiUrl,
+    accessToken: () => signInService.currentAccessToken
+  });
+}
 
 /**
  * This module requires a FETCH_API_REF and FetchConfiguration instance to be
  * provided. Unfortunately typescript-fetch does not provide this module by
  * default, so a new entry will need to be added below for each new API service
  * added to the Swagger interfaces.
- *
- * This module is transitional for the Angular -> React conversion. Once routing
- * switches off Angular, we should generate these API stubs dynamically.
  */
 @NgModule({
   imports:      [],
   declarations: [],
   exports:      [],
   providers: [{
-    provide: FETCH_API_REF,
-    useValue: portableFetch
+    provide: Configuration,
+    deps: [SignInService],
+    useFactory: getConfiguration
+  }, {
+    provide: LeoConfiguration,
+    deps: [SignInService],
+    useFactory: getLeoConfiguration
   }]
 })
 export class FetchModule {
-  constructor(conf: FetchConfiguration,
-    leoConf: LeoConfiguration,
-    @Inject(FETCH_API_REF) fetchApi: FetchAPI) {
-    bindApiClients(conf, fetchApi);
-    notebooksBindApiClients(leoConf, fetchApi);
+  constructor(conf: Configuration,
+    leoConf: LeoConfiguration) {
+    bindApiClients(conf);
+    notebooksBindApiClients(leoConf);
   }
 }

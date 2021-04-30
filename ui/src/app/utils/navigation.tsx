@@ -2,6 +2,7 @@ import {ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy} from '@
 
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {WorkspaceData} from 'app/utils/workspace-data';
+<<<<<<< HEAD
 import {ConfigResponse} from 'generated';
 import {
   CdrVersionListResponse,
@@ -11,10 +12,12 @@ import {
   ErrorResponse,
   Profile
 } from 'generated/fetch';
+=======
+import {Cohort, ConceptSet, Criteria, ErrorResponse, Profile} from 'generated/fetch';
+>>>>>>> origin/master
 import * as fp from 'lodash/fp';
 import {useLocation} from 'react-router';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
-import {ReplaySubject} from 'rxjs/ReplaySubject';
 
 export const NavStore = {
   navigate: undefined,
@@ -35,7 +38,6 @@ export const globalErrorStore = new BehaviorSubject<ErrorResponse>(undefined);
 export const urlParamsStore = new BehaviorSubject<any>({});
 export const queryParamsStore = new BehaviorSubject<any>({});
 export const routeConfigDataStore = new BehaviorSubject<any>({});
-export const serverConfigStore = new BehaviorSubject<ConfigResponse>(undefined);
 export const currentCohortCriteriaStore = new BehaviorSubject<Array<Selection>>(undefined);
 export const currentConceptStore = new BehaviorSubject<Array<Criteria>>(undefined);
 export const attributesSelectionStore = new BehaviorSubject<Criteria>(undefined);
@@ -60,12 +62,6 @@ export const signInStore =
       },
       profileImage: {} as string,
     });
-
-// Use ReplaySubject over BehaviorSubject as this store does not have a legal
-// initial value and should not be accessed synchronously. The other stores
-// which meet this criteria should likely follow this same pattern, though a
-// broader redesign of these value stores is also probably in order.
-export const cdrVersionStore = new ReplaySubject<CdrVersionListResponse>(1);
 
 /**
  * Slightly stricter variant of Angular's DefaultRouteReuseStrategy. This

@@ -5,6 +5,7 @@ import * as validate from 'validate.js';
 import {Button} from 'app/components/buttons';
 import {FadeBox} from 'app/components/containers';
 import {FlexColumn, FlexRow} from 'app/components/flex';
+import {ControlledTierBadge} from 'app/components/icons';
 import {TextAreaWithLengthValidationMessage, TextInput, ValidationError} from 'app/components/inputs';
 import {BulletAlignedUnorderedList} from 'app/components/lists';
 import {Modal} from 'app/components/modals';
@@ -14,103 +15,26 @@ import {AoU} from 'app/components/text-wrappers';
 import {withProfileErrorModal, WithProfileErrorModalProps} from 'app/components/with-error-modal';
 import {getRegistrationTasksMap} from 'app/pages/homepage/registration-dashboard';
 import {AccountCreationOptions} from 'app/pages/login/account-creation/account-creation-options';
+import {DataAccessPanel} from 'app/pages/profile/data-access-panel';
 import {DemographicSurvey} from 'app/pages/profile/demographic-survey';
 import {ProfileRegistrationStepStatus} from 'app/pages/profile/profile-registration-step-status';
+import {styles} from 'app/pages/profile/profile-styles';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import {institutionApi} from 'app/services/swagger-fetch-clients';
-import colors, {colorWithWhiteness} from 'app/styles/colors';
+import colors from 'app/styles/colors';
 import {
   displayDateWithoutHours,
   formatFreeCreditsUSD,
   lensOnProps,
-  reactStyles,
   withUserProfile
 } from 'app/utils';
 import {convertAPIError, reportError} from 'app/utils/errors';
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {InstitutionalRole, Profile} from 'generated/fetch';
 import {PublicInstitutionDetails} from 'generated/fetch';
 import {Dropdown} from 'primereact/dropdown';
 
-
-const controlledTierBadge = '/assets/icons/controlled-tier-badge.svg';
-
-const styles = reactStyles({
-  h1: {
-    color: colors.primary,
-    fontSize: 20,
-    fontWeight: 500,
-    lineHeight: '24px'
-  },
-  inputLabel: {
-    color: colors.primary,
-    fontSize: 14,
-    fontWeight: 600,
-    lineHeight: '22px',
-    marginBottom: 6
-  },
-  inputStyle: {
-    width: 300,
-    height: 40,
-    fontSize: 14,
-    marginRight: 20
-  },
-  longInputContainerStyle: {
-    width: 420,
-    resize: 'both'
-  },
-  longInputHeightStyle: {
-    height: 175,
-  },
-  box: {
-    backgroundColor: colors.white,
-    borderRadius: 8,
-    padding: 21
-  },
-  title: {
-    color: colors.primary,
-    fontSize: 16,
-    fontWeight: 500,
-    width: '40%',
-    display: 'inline',
-    alignItems: 'flexEnd'
-  },
-  uneditableProfileElement: {
-    paddingLeft: '0.5rem',
-    marginRight: 20,
-    marginBottom: 20,
-    height: '1.5rem',
-    color: colors.primary
-  },
-  fadebox: {
-    margin: '1rem 0 0 3%',
-    width: '95%',
-    padding: '0 0.1rem'
-  },
-  verticalLine: {
-    marginTop: '0.3rem', marginInlineStart: '0rem', width: '64%'
-  },
-  researchPurposeInfo: {
-    fontWeight: 100,
-    width: '80%',
-    marginTop: '0.5rem',
-    marginBottom: '0.3rem'
-  },
-  freeCreditsBox: {
-    borderRadius: '0.4rem',
-    height: '3rem',
-    marginTop: '0.7rem',
-    marginBottom: '1.4rem',
-    color: colors.primary,
-    backgroundColor: colorWithWhiteness(colors.disabled, 0.7)
-  },
-  updateSurveyButton: {
-    textTransform: 'none',
-    padding: 0,
-    height: 'auto'
-  }
-});
 
 // validators for validate.js
 const required = {presence: {allowEmpty: false}};
@@ -379,12 +303,10 @@ export const ProfilePage = fp.flow(
       }
     }
 
-
-
     render() {
       const {
         profileState: {
-          profile,
+          profile
         },
         // TODO: when the controlled tier data is available fetch it from the profile
         controlledTierProfile: {
@@ -393,7 +315,7 @@ export const ProfilePage = fp.flow(
       } = this.props;
       const {currentProfile, updating, showDemographicSurveyModal} = this.state;
       const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement} =
-      serverConfigStore.getValue();
+      serverConfigStore.get().config;
       const {
       givenName, familyName, areaOfResearch, professionalUrl,
         address: {
@@ -433,7 +355,10 @@ export const ProfilePage = fp.flow(
 
       const makeProfileInput = ({title, valueKey, isLong = false, ...props}) => {
         let errorText = profile && errors && errors[valueKey];
-        if (valueKey && Array.isArray(valueKey) && valueKey.length > 1) {
+        if (valueKey && !Array.isArray(valueKey)) {
+          valueKey = [valueKey];
+        }
+        if (valueKey && valueKey.length > 1) {
           errorText = profile && errors && errors[valueKey[1]];
         }
         const inputProps = {
@@ -474,7 +399,7 @@ export const ProfilePage = fp.flow(
         <FlexRow style={{justifyContent: 'spaceBetween'}}>
           <div>
             <div style={styles.title}>Public displayed Information</div>
-            <hr style={styles.verticalLine}/>
+            <hr style={{...styles.verticalLine, width: '64%'}}/>
             <FlexRow style={{marginTop: '1rem'}}>
               {makeProfileInput({
                 title: 'First Name',
@@ -489,7 +414,7 @@ export const ProfilePage = fp.flow(
               <FlexColumn>
                 {makeProfileInput({
                   title: 'Your Institution',
-                  valueKey: 'verifiedInstitutionalAffiliation.institutionDisplayName',
+                  valueKey: ['verifiedInstitutionalAffiliation', 'institutionDisplayName'],
                   disabled: true
                 })}
                 {!profile.verifiedInstitutionalAffiliation &&
@@ -601,7 +526,7 @@ export const ProfilePage = fp.flow(
           <div style={{width: '20rem', marginRight: '4rem'}}>
             <div style={styles.title}>Free credits balance
             </div>
-            <hr style={{...styles.verticalLine, width: '15.7rem'}}/>
+            <hr style={{...styles.verticalLine}}/>
             {profile && <FlexRow style={styles.freeCreditsBox}>
                 <FlexColumn style={{marginLeft: '0.8rem'}}>
                     <div style={{marginTop: '0.4rem'}}><i>All of Us</i> free credits used:</div>
@@ -612,10 +537,11 @@ export const ProfilePage = fp.flow(
                   <div style={{fontWeight: 600}}>{formatFreeCreditsUSD(profile.freeTierDollarQuota - profile.freeTierUsage)}</div>
                 </FlexColumn>
             </FlexRow>}
+            {controlledTierEnabled && <DataAccessPanel tiers={profile.accessTierShortNames}/>}
             <div style={styles.title}>
               Requirements for <AoU/> Workbench access
             </div>
-            <hr style={{...styles.verticalLine, width: '15.8rem'}}/>
+            <hr style={{...styles.verticalLine}}/>
             <div style={{display: 'grid', gap: '10px', gridAutoRows: '225px', gridTemplateColumns: '220px 220px'}}>
               {controlledTierEnabled && <ProfileRegistrationStepStatus
                 title={<span><i>All of Us</i> Controlled Tier Data Training</span>}
@@ -629,7 +555,7 @@ export const ProfilePage = fp.flow(
                 >
                 <div>
                   {!(controlledTierCompletionTime || controlledTierBypassTime) && <div>To be completed</div>}
-                  <img style={{height: 25, width: 24}} src={controlledTierBadge}/>
+                  <ControlledTierBadge/>
                 </div>
               </ProfileRegistrationStepStatus>}
               <ProfileRegistrationStepStatus
@@ -677,7 +603,7 @@ export const ProfilePage = fp.flow(
             <div style={{marginTop: '1rem', marginLeft: '1rem'}}>
 
               <div style={styles.title}>Optional Demographics Survey</div>
-              <hr style={{...styles.verticalLine, width: '15.8rem'}}/>
+              <hr style={{...styles.verticalLine}}/>
               <div style={{color: colors.primary, fontSize: '14px'}}>
                 <div>Survey Completed</div>
                 {/*If a user has created an account, they have, by definition, completed the demographic survey*/}

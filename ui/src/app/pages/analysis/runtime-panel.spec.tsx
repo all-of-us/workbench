@@ -9,19 +9,17 @@ import {WarningMessage} from 'app/components/messages';
 import {ConfirmDelete, RuntimePanel, Props} from 'app/pages/analysis/runtime-panel';
 import {registerApiClient, runtimeApi} from 'app/services/swagger-fetch-clients';
 import {findMachineByName, ComputeType} from 'app/utils/machines';
-import {clearCompoundRuntimeOperations} from 'app/utils/stores';
-import {cdrVersionStore, serverConfigStore} from 'app/utils/navigation';
 import {runtimePresets} from 'app/utils/runtime-presets';
-import {runtimeStore} from 'app/utils/stores';
 import {RuntimeConfigurationType, RuntimeStatus, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
 import {RuntimeApi} from 'generated/fetch/api';
 import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {cdrVersionListResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
+import {cdrVersionTiersResponse, CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {defaultGceConfig, defaultDataprocConfig, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {workspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {BillingAccountType, BillingStatus} from 'generated/fetch';
+import {cdrVersionStore, clearCompoundRuntimeOperations, serverConfigStore, runtimeStore} from 'app/utils/stores';
 
 describe('RuntimePanel', () => {
   let props: Props;
@@ -39,8 +37,8 @@ describe('RuntimePanel', () => {
   };
 
   beforeEach(() => {
-    cdrVersionStore.next(cdrVersionListResponse);
-    serverConfigStore.next({...defaultServerConfig});
+    cdrVersionStore.set(cdrVersionTiersResponse);
+    serverConfigStore.set({config: {...defaultServerConfig}});
 
     runtimeApiStub = new RuntimeApiStub();
     registerApiClient(RuntimeApi, runtimeApiStub);
@@ -57,7 +55,7 @@ describe('RuntimePanel', () => {
         billingAccountType: BillingAccountType.FREETIER,
         cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID
       },
-      cdrVersionListResponse,
+      cdrVersionTiersResponse,
       onClose
     };
 

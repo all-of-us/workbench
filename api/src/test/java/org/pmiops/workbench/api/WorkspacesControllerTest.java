@@ -34,11 +34,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,6 +56,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.actionaudit.auditors.BillingProjectAuditor;
 import org.pmiops.workbench.actionaudit.auditors.WorkspaceAuditor;
@@ -99,6 +97,7 @@ import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.DataSetDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
+import org.pmiops.workbench.db.dao.UserRecentWorkspaceDao;
 import org.pmiops.workbench.db.dao.UserService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.dao.WorkspaceFreeTierUsageDao;
@@ -125,7 +124,7 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdateResponseList;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
-import org.pmiops.workbench.genomics.WgsCohortExtractionService;
+import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.google.CloudStorageClient;
 import org.pmiops.workbench.mail.MailService;
 import org.pmiops.workbench.model.AnnotationType;
@@ -178,13 +177,13 @@ import org.pmiops.workbench.monitoring.LogsBasedMetricServiceFakeImpl;
 import org.pmiops.workbench.monitoring.MonitoringService;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.notebooks.NotebooksServiceImpl;
-import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
 import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
 import org.pmiops.workbench.utils.mappers.UserMapperImpl;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapperImpl;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.pmiops.workbench.workspaces.WorkspaceServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -207,10 +206,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class WorkspacesControllerTest {
-  private static final Timestamp NOW = Timestamp.from(Instant.now());
-  private static final long NOW_TIME = NOW.getTime();
-  private static final FakeClock CLOCK = new FakeClock(NOW.toInstant(), ZoneId.systemDefault());
+public class WorkspacesControllerTest extends SpringTest {
   private static final String LOGGED_IN_USER_EMAIL = "bob@gmail.com";
   private static final String LOCK_EXPIRE_TIME_KEY = "lockExpiresAt";
   private static final String LAST_LOCKING_USER_KEY = "lastLockedBy";
@@ -301,6 +297,7 @@ public class WorkspacesControllerTest {
     ParticipantCohortStatusMapperImpl.class,
     ReviewQueryBuilder.class,
     UserMapperImpl.class,
+    WorkspaceAuthService.class,
     WorkspaceMapperImpl.class,
     WorkspaceResourcesServiceImpl.class,
     WorkspacesController.class,
@@ -323,7 +320,7 @@ public class WorkspacesControllerTest {
     MonitoringService.class,
     UserRecentResourceService.class,
     UserService.class,
-    WgsCohortExtractionService.class,
+    GenomicExtractionService.class,
     WorkspaceAuditor.class,
     AccessTierService.class,
     CdrVersionService.class,
@@ -340,11 +337,6 @@ public class WorkspacesControllerTest {
     @Scope("prototype")
     Cloudbilling serviceAccountCloudbilling() {
       return serviceAccountCloudbilling;
-    }
-
-    @Bean
-    Clock clock() {
-      return CLOCK;
     }
 
     @Bean
@@ -369,6 +361,7 @@ public class WorkspacesControllerTest {
   @Autowired BigQueryService bigQueryService;
   @SpyBean @Autowired WorkspaceDao workspaceDao;
   @Autowired UserDao userDao;
+  @Autowired UserRecentWorkspaceDao userRecentWorkspaceDao;
   @Autowired AccessTierDao accessTierDao;
   @Autowired CdrVersionDao cdrVersionDao;
   @Autowired CohortDao cohortDao;
@@ -577,7 +570,7 @@ public class WorkspacesControllerTest {
     for (UserRole userRole : collaborators) {
       FirecloudWorkspaceACLUpdate aclUpdate =
           new FirecloudWorkspaceACLUpdate().email(userRole.getEmail());
-      aclUpdate = workspaceService.updateFirecloudAclsOnUser(userRole.getRole(), aclUpdate);
+      aclUpdate = WorkspaceAuthService.updateFirecloudAclsOnUser(userRole.getRole(), aclUpdate);
       updateACLRequestList.add(aclUpdate);
     }
     return updateACLRequestList;
@@ -620,6 +613,7 @@ public class WorkspacesControllerTest {
     assertThat(workspace2.getCreationTime()).isEqualTo(NOW_TIME);
     assertThat(workspace2.getLastModifiedTime()).isEqualTo(NOW_TIME);
     assertThat(workspace2.getCdrVersionId()).isEqualTo(cdrVersionId);
+    assertThat(workspace2.getAccessTierShortName()).isEqualTo(accessTier.getShortName());
     assertThat(workspace2.getCreator()).isEqualTo(LOGGED_IN_USER_EMAIL);
     assertThat(workspace2.getId()).isEqualTo("name");
     assertThat(workspace2.getName()).isEqualTo("name");
@@ -645,7 +639,7 @@ public class WorkspacesControllerTest {
 
     verify(endUserCloudbillingProvider.get().projects())
         .updateBillingInfo(
-            "projects/" + workspace.getNamespace(),
+            "projects/" + workspace.getGoogleProject(),
             new ProjectBillingInfo()
                 .setBillingAccountName(TestMockFactory.WORKSPACE_BILLING_ACCOUNT_NAME));
     assertThat(workspace2.getBillingAccountName())
@@ -753,6 +747,41 @@ public class WorkspacesControllerTest {
     workspacesController.createWorkspace(workspace).getBody();
   }
 
+  // we do not actually use the accessTierShortName of the Workspace passed to
+  // createWorkspace() - instead we derive it from the cdrVersionId
+
+  @Test
+  public void testCreateWorkspace_accessTierIgnored() {
+    final Workspace requestedWorkspace = createWorkspace();
+    assertThat(requestedWorkspace.getAccessTierShortName()).isNull();
+    requestedWorkspace.setAccessTierShortName("some nonsense value!");
+
+    final Workspace createdWorkspace =
+        workspacesController.createWorkspace(requestedWorkspace).getBody();
+    assertThat(createdWorkspace.getAccessTierShortName()).isEqualTo(accessTier.getShortName());
+  }
+
+  @Test
+  public void testCreateWorkspace_accessTierIgnored_controlled() {
+    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+
+    DbCdrVersion controlledTierCdr =
+        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
+    controlledTierCdr.setAccessTier(controlledTier);
+    controlledTierCdr = cdrVersionDao.save(controlledTierCdr);
+
+    final Workspace requestedWorkspace = createWorkspace();
+    assertThat(requestedWorkspace.getAccessTierShortName()).isNull();
+
+    requestedWorkspace.setCdrVersionId(String.valueOf(controlledTierCdr.getCdrVersionId()));
+    // even if we pretend it's registered - the CDR Version will override this
+    requestedWorkspace.setAccessTierShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME);
+
+    final Workspace createdWorkspace =
+        workspacesController.createWorkspace(requestedWorkspace).getBody();
+    assertThat(createdWorkspace.getAccessTierShortName()).isEqualTo(controlledTier.getShortName());
+  }
+
   @Test
   public void testDeleteWorkspace() {
     Workspace workspace = createWorkspace();
@@ -805,7 +834,7 @@ public class WorkspacesControllerTest {
         ArgumentCaptor.forClass(ProjectBillingInfo.class);
     verify(endUserCloudbillingProvider.get().projects(), times(2))
         .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
-    assertThat("projects/" + ws.getNamespace()).isEqualTo(projectCaptor.getAllValues().get(1));
+    assertThat("projects/" + ws.getGoogleProject()).isEqualTo(projectCaptor.getAllValues().get(1));
     assertThat(new ProjectBillingInfo().setBillingAccountName("update-billing-account"))
         .isEqualTo(billingCaptor.getAllValues().get(1));
 
@@ -1000,7 +1029,7 @@ public class WorkspacesControllerTest {
           ArgumentCaptor.forClass(ProjectBillingInfo.class);
       verify(endUserCloudbillingProvider.get().projects(), times(3))
           .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
-      assertThat("projects/" + workspace.getNamespace())
+      assertThat("projects/" + workspace.getGoogleProject())
           .isEqualTo(projectCaptor.getAllValues().get(2));
       assertThat(new ProjectBillingInfo().setBillingAccountName(originalBillingAccountName))
           .isEqualTo(billingCaptor.getAllValues().get(2));
@@ -1240,7 +1269,7 @@ public class WorkspacesControllerTest {
         ArgumentCaptor.forClass(ProjectBillingInfo.class);
     verify(endUserCloudbillingProvider.get().projects(), times(2))
         .updateBillingInfo(projectCaptor.capture(), billingCaptor.capture());
-    assertThat("projects/" + clonedWorkspace.getNamespace())
+    assertThat("projects/" + clonedWorkspace.getGoogleProject())
         .isEqualTo(projectCaptor.getAllValues().get(1));
     assertThat(new ProjectBillingInfo().setBillingAccountName(newBillingAccountName))
         .isEqualTo(billingCaptor.getAllValues().get(1));
@@ -1349,14 +1378,7 @@ public class WorkspacesControllerTest {
     Workspace originalWorkspace = createWorkspace();
     originalWorkspace = workspacesController.createWorkspace(originalWorkspace).getBody();
 
-    DbAccessTier altAccessTier =
-        new DbAccessTier()
-            .setAccessTierId(2)
-            .setShortName("controlled")
-            .setDisplayName("Controlled Tier")
-            .setAuthDomainName("a different one")
-            .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
-            .setServicePerimeter("controlled/tier/perimeter");
+    DbAccessTier altAccessTier = TestMockFactory.createControlledTierForTests(accessTierDao);
     altAccessTier = accessTierDao.save(altAccessTier);
 
     DbCdrVersion altCdrVersion = new DbCdrVersion();
@@ -2806,6 +2828,52 @@ public class WorkspacesControllerTest {
         copyNotebookRequest);
   }
 
+  @Test(expected = BadRequestException.class)
+  public void testCopyNotebook_notAllowedBetweenTiers() {
+    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+
+    DbCdrVersion controlledCdr =
+        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
+    controlledCdr.setName("2");
+    controlledCdr.setAccessTier(controlledTier);
+    controlledCdr = cdrVersionDao.save(controlledCdr);
+
+    Workspace fromWorkspace = createWorkspace();
+    fromWorkspace.setCdrVersionId(String.valueOf(controlledCdr.getCdrVersionId()));
+    fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
+    String fromNotebookName = "origin";
+
+    stubGetWorkspace(
+        fromWorkspace.getNamespace(),
+        fromWorkspace.getName(),
+        LOGGED_IN_USER_EMAIL,
+        WorkspaceAccessLevel.OWNER);
+
+    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
+    // a CDR Version in the Registered Tier
+    toWorkspace.setCdrVersionId(cdrVersionId);
+    toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
+    String newNotebookName = NotebooksService.withNotebookExtension("new");
+
+    stubGetWorkspace(
+        toWorkspace.getNamespace(),
+        toWorkspace.getName(),
+        LOGGED_IN_USER_EMAIL,
+        WorkspaceAccessLevel.OWNER);
+
+    CopyRequest copyNotebookRequest =
+        new CopyRequest()
+            .toWorkspaceName(toWorkspace.getName())
+            .toWorkspaceNamespace(toWorkspace.getNamespace())
+            .newName(newNotebookName);
+
+    workspacesController.copyNotebook(
+        fromWorkspace.getNamespace(),
+        fromWorkspace.getName(),
+        fromNotebookName,
+        copyNotebookRequest);
+  }
+
   @Test
   public void testCloneNotebook() {
     Workspace workspace = createWorkspace();
@@ -3180,8 +3248,8 @@ public class WorkspacesControllerTest {
         workspace.getName(),
         LOGGED_IN_USER_EMAIL,
         WorkspaceAccessLevel.OWNER);
-    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
-    workspaceService.updateRecentWorkspaces(dbWorkspace, currentUser.getUserId(), NOW);
+    DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getId());
+    workspaceService.updateRecentWorkspaces(dbWorkspace);
     ResponseEntity<RecentWorkspaceResponse> recentWorkspaceResponseEntity =
         workspacesController.getUserRecentWorkspaces();
     RecentWorkspace recentWorkspace = recentWorkspaceResponseEntity.getBody().get(0);
@@ -3200,7 +3268,7 @@ public class WorkspacesControllerTest {
   public void cloneNotebook_validateActiveBilling() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
-    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
+    DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getId());
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 
@@ -3215,7 +3283,7 @@ public class WorkspacesControllerTest {
   public void renameNotebook_validateActiveBilling() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
-    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
+    DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getId());
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 
@@ -3232,7 +3300,7 @@ public class WorkspacesControllerTest {
   public void copyNotebook_validateActiveBilling() {
     Workspace workspace = workspacesController.createWorkspace(createWorkspace()).getBody();
 
-    DbWorkspace dbWorkspace = workspaceService.get(workspace.getNamespace(), workspace.getId());
+    DbWorkspace dbWorkspace = workspaceDao.get(workspace.getNamespace(), workspace.getId());
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 

@@ -263,9 +263,9 @@ export const NotebookRedirect = fp.flow(
 
     private notebookUrl(runtime: Runtime, nbName: string): string {
       return encodeURI(
-        environment.leoApiUrl + '/notebooks/'
+        environment.leoApiUrl + '/proxy/'
           + runtime.googleProject + '/'
-          + runtime.runtimeName + '/notebooks/' + nbName);
+          + runtime.runtimeName + '/jupyter/notebooks/' + nbName);
     }
 
     // get notebook name without file suffix
@@ -355,7 +355,7 @@ export const NotebookRedirect = fp.flow(
       this.incrementProgress(Progress.Redirecting);
 
       // give it a second to "redirect"
-      this.redirectTimer = setTimeout(() => this.incrementProgress(Progress.Loaded), redirectMillis);
+      this.redirectTimer = global.setTimeout(() => this.incrementProgress(Progress.Loaded), redirectMillis);
     }
 
     private async getNotebookPathAndLocalize(runtime: Runtime) {

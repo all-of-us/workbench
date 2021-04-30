@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="srushtigangireddy" id="changelog-14">
+    <validCheckSum>ANY</validCheckSum>
+
+    <createTable tableName="concept_synonym">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints primaryKey="true" nullable="true"/>
+      </column>
+      <column name="concept_id" type="INTEGER">
+        <constraints nullable="true"/>
+      </column>
+      <column name="concept_synonym_name" type="VARCHAR(1000)">
+        <constraints nullable="true"/>
+      </column>
+    </createTable>
+
+  </changeSet>
+
+
+  <changeSet id="add concept_synonym_name_index full_text" author="srushtigangireddy"
+    runAlways="true">
+    <validCheckSum>ANY</validCheckSum>
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <indexExists indexName="concept_synonym_name_index"/>
+      </not>
+    </preConditions>
+    <sql dbms="mysql">
+      ALTER TABLE concept_synonym
+      ADD FULLTEXT INDEX concept_synonym_name_index
+      (concept_synonym_name);
+    </sql>
+
+    <createIndex tableName="concept_synonym" indexName="idx_concept_id">
+      <column name="concept_id" type="INTEGER"></column>
+    </createIndex>
+  </changeSet>
+
+</databaseChangeLog>
+

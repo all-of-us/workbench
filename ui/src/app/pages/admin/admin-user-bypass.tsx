@@ -1,13 +1,13 @@
 import {Button, IconButton} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {ClrIcon} from 'app/components/icons';
+import {Check, ClrIcon, Times} from 'app/components/icons';
 import {Toggle} from 'app/components/inputs';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {AccessModule, AdminTableUser} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -50,6 +50,7 @@ const getBypassedModules = (user: AdminTableUser): Array<AccessModule> => {
     ...(user.dataUseAgreementBypassTime ? [AccessModule.DATAUSEAGREEMENT] : []),
     ...(user.eraCommonsBypassTime ? [AccessModule.ERACOMMONS] : []),
     ...(user.twoFactorAuthBypassTime ? [AccessModule.TWOFACTORAUTH] : []),
+    ...(user.rasLinkLoginGovBypassTime ? [AccessModule.RASLINKLOGINGOV] : []),
   ];
 };
 
@@ -125,7 +126,8 @@ export class AdminUserBypass extends React.Component<Props, State> {
     const {enableBetaAccess,
       enableComplianceTraining,
       enableEraCommons,
-      enableDataUseAgreement} = serverConfigStore.getValue();
+      enableDataUseAgreement,
+      enableRasLoginGovLinking} = serverConfigStore.get().config;
     return <PopupTrigger
         ref={this.popupRef}
         side='bottom'
@@ -168,11 +170,17 @@ export class AdminUserBypass extends React.Component<Props, State> {
                   onToggle={() => {this.setState({selectedModules:
                     fp.xor(selectedModules, [AccessModule.DATAUSEAGREEMENT])}); }}
           />}
+          {enableRasLoginGovLinking && <Toggle name='RAS Login.gov Link'
+                                       checked={selectedModules.includes(AccessModule.RASLINKLOGINGOV)}
+                                       data-test-id='ras-link-login-gov-toggle'
+                                       onToggle={() => {this.setState({selectedModules:
+                                             fp.xor(selectedModules, [AccessModule.RASLINKLOGINGOV])}); }}
+          />}
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-            <IconButton icon='times'
+            <IconButton icon={Times}
                         onClick={() => this.cancel()}
                         disabled={!this.hasEdited()}/>
-            <IconButton icon='check'
+            <IconButton icon={Check}
                         data-test-id='toggle-save'
                         onClick={() => this.save()}
                         disabled={!this.hasEdited()}/>

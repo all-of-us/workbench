@@ -3,13 +3,16 @@ package org.pmiops.workbench.dataset;
 import static com.google.cloud.bigquery.StandardSQLTypeName.ARRAY;
 import static org.pmiops.workbench.model.PrePackagedConceptSetEnum.SURVEY;
 
+import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Streams;
 import com.google.gson.Gson;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -20,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -51,15 +53,20 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.model.CriteriaType;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
+import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResourceType;
+import org.pmiops.workbench.model.SearchGroup;
+import org.pmiops.workbench.model.SearchGroupItem;
+import org.pmiops.workbench.model.SearchParameter;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
@@ -92,6 +99,18 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           Domain.OBSERVATION,
           Domain.PROCEDURE,
           Domain.PHYSICAL_MEASUREMENT_CSS);
+
+  private static final ImmutableList<Domain> DOMAIN_WITHOUT_CONCEPT_SETS =
+      ImmutableList.of(
+          Domain.PERSON,
+          Domain.FITBIT_ACTIVITY,
+          Domain.FITBIT_HEART_RATE_LEVEL,
+          Domain.FITBIT_HEART_RATE_SUMMARY,
+          Domain.FITBIT_INTRADAY_STEPS,
+          Domain.WHOLE_GENOME_VARIANT);
+
+  // See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
+  private static final long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000L;
 
   @Override
   public Collection<MeasurementBundle> getGaugeData() {
@@ -264,7 +283,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
           .build();
 
   @Override
-  public QueryJobConfiguration previewBigQueryJobConfig(DataSetPreviewRequest request) {
+  public TableResult previewBigQueryJobConfig(DataSetPreviewRequest request) {
     final Domain domain = request.getDomain();
     final List<String> values = request.getValues();
     Map<String, QueryParameterValue> mergedQueryParameterValues = new HashMap<>();
@@ -356,8 +375,13 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
               .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
     queryBuilder.append(LIMIT_20);
-
-    return buildQueryJobConfiguration(mergedQueryParameterValues, queryBuilder.toString());
+    QueryJobConfiguration previewBigQueryJobConfig =
+        buildQueryJobConfiguration(mergedQueryParameterValues, queryBuilder.toString());
+    TableResult queryResponse =
+        bigQueryService.executeQuery(
+            bigQueryService.filterBigQueryConfig(previewBigQueryJobConfig),
+            APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC);
+    return queryResponse;
   }
 
   @Override
@@ -620,11 +644,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   private boolean supportsConceptSets(Domain domain) {
-    return domain != Domain.PERSON
-        && domain != Domain.FITBIT_ACTIVITY
-        && domain != Domain.FITBIT_HEART_RATE_LEVEL
-        && domain != Domain.FITBIT_HEART_RATE_SUMMARY
-        && domain != Domain.FITBIT_INTRADAY_STEPS;
+    return DOMAIN_WITHOUT_CONCEPT_SETS.stream().filter(d -> domain.equals(d)).count() == 0;
   }
 
   // Gather all the concept IDs from the ConceptSets provided, taking account of
@@ -760,170 +780,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
-  public List<String> generateMicroarrayCohortExtractCodeCells(
-      DbWorkspace dbWorkspace,
-      String qualifier,
-      Map<String, QueryJobConfiguration> queriesByDomain) {
-    String joinedDatasetVariableNames =
-        queriesByDomain.entrySet().stream()
-            .map(
-                e ->
-                    "dataset_"
-                        + qualifier
-                        + "_"
-                        + Domain.fromValue(e.getKey()).toString().toLowerCase()
-                        + "_df")
-            .collect(Collectors.joining(", "));
-
-    final String cohortSampleNamesFilename = "cohort_sample_names_" + qualifier + ".txt";
-    final String cohortSampleMapFilename = "cohort_sample_map_" + qualifier + ".csv";
-    final String cohortVcfFilename = "cohort_" + qualifier + ".vcf";
-    // TODO(RW-5735): Writing to the "tmp" dataset is a temporary workaround.
-    final String cohortExtractTable =
-        "fc-aou-cdr-synth-test.tmp_shared_cohort_extract."
-            + UUID.randomUUID().toString().replace("-", "_");
-
-    return ImmutableList.of(
-        "person_ids = set()\n"
-            + "datasets = ["
-            + joinedDatasetVariableNames
-            + "]\n"
-            + "\n"
-            + "for dataset in datasets:\n"
-            + "    if 'PERSON_ID' in dataset:\n"
-            + "        person_ids = person_ids.union(dataset['PERSON_ID'])\n"
-            + "    elif 'person_id' in dataset:\n"
-            + "        person_ids = person_ids.union(dataset['person_id']) \n"
-            + "\n\n"
-            + "with open('"
-            + cohortSampleNamesFilename
-            + "', 'w') as cohort_file:\n"
-            + "    for person_id in person_ids:\n"
-            + "        cohort_file.write(str(person_id) + '\\n')\n"
-            + "    cohort_file.close()\n",
-        "!python3 /usr/local/share/raw_array_cohort_extract.py \\\n"
-            + "          --dataset fc-aou-cdr-synth-test.synthetic_microarray_data \\\n"
-            + "          --fq_destination_table "
-            + cohortExtractTable
-            + " \\\n"
-            + "          --query_project ${GOOGLE_PROJECT} \\\n"
-            // TODO: Replace hardcoded dataset reference: RW-5748
-            + "          --fq_sample_mapping_table fc-aou-cdr-synth-test.synthetic_microarray_data.sample_list \\\n"
-            + "          --cohort_sample_names_file "
-            + cohortSampleNamesFilename
-            + " \\\n"
-            + "          --sample_map_outfile "
-            + cohortSampleMapFilename
-            + "\n",
-        "!java -jar ${GATK_LOCAL_JAR} ArrayExtractCohort \\\n"
-            // TODO: This value will need to be tuned per environment.
-            + "        -R gs://fc-aou-cdr-synth-test-genomics/extract_resources/Homo_sapiens_assembly19.fasta \\\n"
-            + "        -O "
-            + cohortVcfFilename
-            + " \\\n"
-            + "        --probe-info-table fc-aou-cdr-synth-test.synthetic_microarray_data.probe_info \\\n"
-            + "        --read-project-id ${GOOGLE_PROJECT} \\\n"
-            + "        --cohort-sample-file "
-            + cohortSampleMapFilename
-            + " \\\n"
-            + "        --use-compressed-data \"false\" \\\n"
-            + "        --cohort-extract-table "
-            + cohortExtractTable
-            + "\n",
-        "!gsutil cp " + cohortVcfFilename + " ${WORKSPACE_BUCKET}/cohort-extract/");
-  }
-
-  @Override
-  public List<String> generatePlinkDemoCode(String qualifier) {
-    final String cohortQualifier = "cohort_" + qualifier;
-    final String phenotypeFilename = "phenotypes_" + qualifier + ".phe";
-    final String cohortVcfFilename = cohortQualifier + ".vcf";
-
-    return ImmutableList.of(
-        "import random\n\n"
-            + "phenotypes_table = []\n"
-            + "for person_id in person_ids:\n"
-            + "    family_id = 0 # Family ID is set to 0 for all participants because we do not provide familial information at this time\n"
-            + "    person_id = person_id\n"
-            + "    phenotype_1 = random.randint(0, 2) # Change this value to what makes sense for your research by looking through the dataset(s)\n"
-            + "    phenotype_2 = random.randint(0, 2) # Change this value as well or remove if you are only processing one phenotype \n"
-            + "    phenotypes_table.append([family_id, person_id, phenotype_1, phenotype_2])\n"
-            + "\n"
-            + "cohort_phenotypes = pandas.DataFrame(phenotypes_table) \n"
-            + "cohort_phenotypes.to_csv('"
-            + phenotypeFilename
-            + "', header=False, index=False, sep=' ')",
-        "%%bash\n\n"
-            + "# Convert VCF info plink binary files \n"
-            + "plink --vcf-half-call m --const-fid 0 --vcf "
-            + cohortVcfFilename
-            + " --out "
-            + cohortQualifier
-            + "\n"
-            + "# Run GWAS \n"
-            + "plink --bfile "
-            + cohortQualifier
-            + " --pheno "
-            + phenotypeFilename
-            + " --all-pheno --allow-no-sex --assoc --out results\n"
-            + "\n"
-            + "head results.P1.assoc\n"
-            + "head results.P2.assoc");
-  }
-
-  @Override
-  public List<String> generateHailDemoCode(String qualifier) {
-    final String phenotypeFilename = "phenotypes_annotations_" + qualifier + ".tsv";
-    final String cohortQualifier = "cohort_" + qualifier;
-    final String cohortVcfFilename = cohortQualifier + ".vcf";
-    final String cohortMatrixFilename = cohortQualifier + ".mt";
-
-    return ImmutableList.of(
-        "import subprocess, os\n"
-            + "import random\n"
-            + "\n"
-            + "# Creating phenotype annotations file\n"
-            + "phenotypes_table = []\n"
-            + "for person_id in person_ids:\n"
-            + "    phenotype_1 = random.randint(0, 2) # Change this value to what makes sense for your research by looking through the dataset(s)\n"
-            + "    phenotype_2 = random.randint(0, 2) # Change this value as well or remove if you are only processing one phenotype \n"
-            + "    phenotypes_table.append([person_id, phenotype_1, phenotype_2])\n"
-            + "\n"
-            + "cohort_phenotypes = pandas.DataFrame(phenotypes_table,columns=[\"sample_name\", \"phenotype1\", \"phenotype2\"]) \n"
-            + "cohort_phenotypes.to_csv('"
-            + phenotypeFilename
-            + "', index=False, sep='\\t')\n"
-            + "\n"
-            + "subprocess.run([\"gsutil\", \"cp\", \""
-            + phenotypeFilename
-            + "\", os.environ['WORKSPACE_BUCKET']])",
-        "import hail as hl\n"
-            + "import os\n"
-            + "from hail.plot import show\n"
-            + "\n"
-            + "hl.plot.output_notebook()\n"
-            + "bucket = os.environ['WORKSPACE_BUCKET']\n"
-            + "hl.import_vcf(f'{bucket}/cohort-extract/"
-            + cohortVcfFilename
-            + "').write(f'{bucket}/"
-            + cohortMatrixFilename
-            + "')\n"
-            + "table = hl.import_table(f'{bucket}/"
-            + phenotypeFilename
-            + "', types={'sample_name': hl.tstr}, impute=True, key='sample_name')\n"
-            + "\n"
-            + "mt = hl.read_matrix_table(f'{bucket}/"
-            + cohortMatrixFilename
-            + "');\n"
-            + "mt = mt.annotate_cols(pheno = table[mt.s])\n"
-            + "\n"
-            + "covariates = [1, mt.pheno.phenotype2]\n"
-            + "gwas = hl.linear_regression_rows(y=mt.pheno.phenotype1, x=mt.GT.n_alt_alleles(), covariates=covariates)\n"
-            + "p = hl.plot.manhattan(gwas.p_value)\n"
-            + "show(p)");
-  }
-
-  @Override
   @Transactional
   public DbDataset cloneDataSetToWorkspace(
       DbDataset fromDataSet,
@@ -1001,8 +857,18 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
+<<<<<<< HEAD
   public Optional<DataSet> getDbDataSet(Long dataSetId) {
     return Optional.of(dataSetMapper.dbModelToClient(dataSetDao.findById(dataSetId).get()));
+=======
+  public Optional<DataSet> getDataSet(Long dataSetId) {
+    return getDbDataSet(dataSetId).map(dataSetMapper::dbModelToClient);
+  }
+
+  @Override
+  public Optional<DbDataset> getDbDataSet(Long dataSetId) {
+    return Optional.ofNullable(dataSetDao.findOne(dataSetId));
+>>>>>>> origin/master
   }
 
   @Override
@@ -1019,7 +885,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public DataDictionaryEntry findDataDictionaryEntry(String fieldName, String domain) {
     DbDSDataDictionary dbDSDataDictionary =
-        dsDataDictionaryDao.findByFieldNameAndDomain(fieldName, domain);
+        dsDataDictionaryDao.findFirstByFieldNameAndDomain(fieldName, domain);
     if (dbDSDataDictionary == null) {
       throw new NotFoundException(
           "No Data Dictionary Entry found for field " + fieldName + "and domain: " + domain);
@@ -1074,6 +940,65 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             .collect(ImmutableList.toImmutableList());
 
     return new ValuesLinkingPair(valueSelects, valueJoins, domainTable);
+  }
+
+  @Override
+  public List<String> getPersonIdsWithWholeGenome(DbDataset dataSet) {
+    List<ParticipantCriteria> participantCriteriaList;
+    if (Boolean.TRUE.equals(dataSet.getIncludesAllParticipants())) {
+      // Select all participants with WGS data.
+      participantCriteriaList =
+          ImmutableList.of(
+              new ParticipantCriteria(
+                  new SearchRequest().addIncludesItem(createHasWgsSearchGroup())));
+    } else {
+      participantCriteriaList =
+          this.cohortDao.findAllByCohortIdIn(dataSet.getCohortIds()).stream()
+              .map(
+                  cohort -> {
+                    final SearchRequest searchRequest =
+                        new Gson().fromJson(cohort.getCriteria(), SearchRequest.class);
+                    // AND the existing search criteria with participants having genomics data.
+                    searchRequest.addIncludesItem(createHasWgsSearchGroup());
+                    return new ParticipantCriteria(searchRequest);
+                  })
+              .collect(Collectors.toList());
+    }
+
+    final QueryJobConfiguration participantIdQuery =
+        cohortQueryBuilder.buildUnionedParticipantIdQuery(participantCriteriaList);
+
+    return Streams.stream(
+            bigQueryService
+                .executeQuery(bigQueryService.filterBigQueryConfig(participantIdQuery))
+                .getValues())
+        .map(personId -> personId.get(0).getValue().toString())
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<DomainValue> getValueListFromDomain(String domainValue) {
+    Domain domain =
+        Domain.PHYSICAL_MEASUREMENT_CSS.equals(Domain.valueOf(domainValue))
+            ? Domain.MEASUREMENT
+            : Domain.valueOf(domainValue);
+    FieldList fieldList = bigQueryService.getTableFieldsFromDomain(domain);
+    return fieldList.stream()
+        .map(field -> new DomainValue().value(field.getName().toLowerCase()))
+        .collect(Collectors.toList());
+  }
+
+  private SearchGroup createHasWgsSearchGroup() {
+    return new SearchGroup()
+        .items(
+            ImmutableList.of(
+                new SearchGroupItem()
+                    .type(Domain.WHOLE_GENOME_VARIANT.toString())
+                    .addSearchParametersItem(
+                        new SearchParameter()
+                            .domain(Domain.WHOLE_GENOME_VARIANT.toString())
+                            .type(CriteriaType.PPI.toString())
+                            .group(false))));
   }
 
   // Capitalizes the first letter of a string and lowers the remaining ones.

@@ -10,7 +10,8 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,7 +22,11 @@ import org.apache.commons.cli.Options;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.firecloud.api.BillingApi;
-import org.pmiops.workbench.firecloud.model.*;
+import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectStatus;
+import org.pmiops.workbench.firecloud.model.FirecloudCreateRawlsBillingProjectFullRequest;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACLUpdate;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceIngest;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -55,7 +60,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
   private static final Logger log =
       Logger.getLogger(CreateWgsCohortExtractionBillingProjectWorkspace.class.getName());
 
-  WorkbenchConfig workbenchConfig(String configJsonFilepath) throws IOException {
+  public static WorkbenchConfig workbenchConfig(String configJsonFilepath) throws IOException {
     ObjectMapper jackson = new ObjectMapper();
     String rawJson =
         new String(Files.readAllBytes(Paths.get(configJsonFilepath)), Charset.defaultCharset());
@@ -66,13 +71,13 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
     return (new Gson()).fromJson(newJson.toString(), WorkbenchConfig.class);
   }
 
-  ImpersonatedServiceAccountApiClientFactory wgsCohortExtractionServiceAccountApiClientFactory(
-      WorkbenchConfig config) throws IOException {
+  public static ImpersonatedServiceAccountApiClientFactory
+      wgsCohortExtractionServiceAccountApiClientFactory(WorkbenchConfig config) throws IOException {
     return new ImpersonatedServiceAccountApiClientFactory(
         config.wgsCohortExtraction.serviceAccount, config.firecloud.baseUrl);
   }
 
-  private String getExtractionPetSa(String workspaceNamespace, WorkbenchConfig workbenchConfig)
+  private String getExtractionPetSa(String googleProject, WorkbenchConfig workbenchConfig)
       throws IOException, InterruptedException {
     String accessToken =
         ImpersonatedServiceAccountApiClientFactory.getAccessToken(
@@ -84,7 +89,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
             .url(
                 workbenchConfig.firecloud.samBaseUrl
                     + "/api/google/v1/user/petServiceAccount/"
-                    + workspaceNamespace)
+                    + googleProject)
             .addHeader("Authorization", "Bearer " + accessToken)
             .build();
 
@@ -183,7 +188,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
               + proxyGroup
               + "\n"
               + "extractionPetServiceAccount: "
-              + getExtractionPetSa(workspace.getNamespace(), workbenchConfig)
+              + getExtractionPetSa(workspace.getGoogleProject(), workbenchConfig)
               + "\n"
               + "operationalTerraWorkspaceNamespace: "
               + workspace.getNamespace()

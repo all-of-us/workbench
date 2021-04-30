@@ -20,7 +20,6 @@ public class CdrVersionVO {
   public int numParticipants;
   public String cdrDbName;
   public String elasticIndexBaseName;
-  public String microarrayBigqueryDataset;
   public String wgsBigqueryDataset;
   public Boolean hasFitbitData;
   public Boolean hasCopeSurveyData;

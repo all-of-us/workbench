@@ -2,20 +2,21 @@ import {CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
 import {async, TestBed} from '@angular/core/testing';
 import {FormsModule} from '@angular/forms';
 import {RouterTestingModule} from '@angular/router/testing';
-
 import {ClarityModule} from '@clr/angular';
 
 import {AppComponent} from 'app/pages/app/component';
-import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
-
+import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {ConfigApiStub} from 'testing/stubs/config-api-stub';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 
-import {AuthDomainService, CohortsService, ProfileService} from 'generated';
+import {ConfigApi, ProfileApi} from 'generated/fetch';
 
 describe('AppComponent', () => {
 
   beforeEach(async(() => {
+    registerApiClient(ProfileApi, new ProfileApiStub());
+    registerApiClient(ConfigApi, new ConfigApiStub());
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
@@ -27,11 +28,7 @@ describe('AppComponent', () => {
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [
-        { provide: AuthDomainService, useValue: {} },
         { provide: SignInService, useValue: {} },
-        { provide: CohortsService, useValue: {} },
-        { provide: ServerConfigService, useValue: {} },
-        { provide: ProfileService, useValue: new ProfileApiStub() }
       ] }).compileComponents();
   }));
 

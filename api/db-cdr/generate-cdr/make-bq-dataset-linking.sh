@@ -7,9 +7,6 @@ set -ex
 export BQ_PROJECT=$1  # project
 export BQ_DATASET=$2  # dataset
 
-# Test that datset exists
-test=$(bq show "$BQ_PROJECT:$BQ_DATASET")
-
 ################################################
 # CREATE LINKING TABLE
 ################################################

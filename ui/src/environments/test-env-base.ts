@@ -24,6 +24,5 @@ export const testEnvironmentBase: EnvironmentBase = {
   allowTestAccessTokenOverride: true,
   enableCaptcha: true,
   enablePublishedWorkspaces: false,
-  enableNewConceptTabs: true,
   enableFooter: true
 };

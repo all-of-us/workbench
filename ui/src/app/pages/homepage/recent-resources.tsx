@@ -16,7 +16,7 @@ import {getCdrVersion} from 'app/utils/cdr-versions';
 import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {getDisplayName, isNotebook} from 'app/utils/resources';
 import {
-  CdrVersionListResponse,
+  CdrVersionTiersResponse,
   Workspace,
   WorkspaceResource,
   WorkspaceResourceResponse,
@@ -73,11 +73,11 @@ interface TableData {
 }
 
 interface Props {
-  cdrVersionListResponse: CdrVersionListResponse;
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
   workspaces: WorkspaceResponse[];
 }
 
-const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
+export const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
   const [loading, setLoading] = useState(true);
   const [resources, setResources] = useState<WorkspaceResourceResponse>();
   const [wsMap, setWorkspaceMap] = useState<Map<string, Workspace>>();
@@ -113,8 +113,8 @@ const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
     };
 
     const getCdrVersionName = (r: WorkspaceResource) => {
-      const {cdrVersionListResponse} = props;
-      return getCdrVersion(getWorkspace(r), cdrVersionListResponse).name;
+      const {cdrVersionTiersResponse} = props;
+      return getCdrVersion(getWorkspace(r), cdrVersionTiersResponse).name;
     };
 
     if (resources && wsMap) {
@@ -148,7 +148,3 @@ const RecentResources = fp.flow(withCdrVersions())((props: Props) => {
       </DataTable></div>
   </React.Fragment> : <SpinnerOverlay/>;
 });
-
-export {
-  RecentResources
-};

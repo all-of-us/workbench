@@ -72,6 +72,7 @@ public class RdrExportServiceImplTest {
   private static final Instant NOW = Instant.now();
   private static final Timestamp NOW_TIMESTAMP = Timestamp.from(NOW);
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
+  private static final boolean NO_BACKFILL = false;
 
   private DbUser dbUserWithEmail;
   private DbUser dbUserWithoutEmail;
@@ -196,13 +197,13 @@ public class RdrExportServiceImplTest {
     workspaceID.add(1l);
     RdrWorkspace rdrWorkspace = toDefaultRdrWorkspace(mockWorkspace);
     when(rdrMapper.toRdrModel(mockWorkspace)).thenReturn(rdrWorkspace);
-    rdrExportService.exportWorkspaces(workspaceID);
+    rdrExportService.exportWorkspaces(workspaceID, NO_BACKFILL);
     verify(mockWorkspaceService)
         .getFirecloudUserRoles(
             mockWorkspace.getWorkspaceNamespace(), mockWorkspace.getFirecloudName());
     verify(rdrExportDao, times(1)).saveAll(anyList());
 
-    verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
+    verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace), NO_BACKFILL);
   }
 
   /**
@@ -223,7 +224,7 @@ public class RdrExportServiceImplTest {
 
     when(rdrMapper.toRdrModel(mockWorkspace)).thenReturn(rdrWorkspace);
 
-    rdrExportService.exportWorkspaces(workspaceID);
+    rdrExportService.exportWorkspaces(workspaceID, NO_BACKFILL);
     verify(mockWorkspaceService)
         .getFirecloudUserRoles(
             mockWorkspace.getWorkspaceNamespace(), mockWorkspace.getFirecloudName());
@@ -233,7 +234,7 @@ public class RdrExportServiceImplTest {
         .getWorkspaceDemographic()
         .setRaceEthnicity(Arrays.asList(RdrWorkspaceDemographic.RaceEthnicityEnum.AA));
     rdrWorkspace.setFocusOnUnderrepresentedPopulations(true);
-    verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
+    verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace), NO_BACKFILL);
   }
 
   @Test
@@ -243,19 +244,19 @@ public class RdrExportServiceImplTest {
     RdrWorkspace rdrWorkspace = toDefaultRdrWorkspace(mockWorkspace);
     when(rdrMapper.toRdrModel(mockWorkspace)).thenReturn(rdrWorkspace);
 
-    rdrExportService.exportWorkspaces(workspaceIdList);
+    rdrExportService.exportWorkspaces(workspaceIdList, NO_BACKFILL);
 
-    verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
+    verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace), NO_BACKFILL);
 
     workspaceIdList = new ArrayList<>();
     workspaceIdList.add(3l);
     rdrWorkspace = toDefaultRdrWorkspace(mockCreatorWorkspace);
     when(rdrMapper.toRdrModel(mockCreatorWorkspace)).thenReturn(rdrWorkspace);
 
-    rdrExportService.exportWorkspaces(workspaceIdList);
+    rdrExportService.exportWorkspaces(workspaceIdList, NO_BACKFILL);
     rdrWorkspace.setCreator(
         new RdrWorkspaceCreator().userId(2l).familyName("email").givenName("icannothas"));
-    verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
+    verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace), NO_BACKFILL);
   }
 
   /**
@@ -271,14 +272,14 @@ public class RdrExportServiceImplTest {
     RdrWorkspace rdrWorkspace = toDefaultRdrWorkspace(mockDeletedWorkspace);
     when(rdrMapper.toRdrModel(mockDeletedWorkspace)).thenReturn(rdrWorkspace);
 
-    rdrExportService.exportWorkspaces(workspaceID);
+    rdrExportService.exportWorkspaces(workspaceID, NO_BACKFILL);
     verify(mockWorkspaceService, never())
         .getFirecloudUserRoles(
             mockDeletedWorkspace.getWorkspaceNamespace(), mockDeletedWorkspace.getFirecloudName());
     verify(rdrExportDao, times(1)).saveAll(anyList());
 
     rdrWorkspace.setStatus(RdrWorkspace.StatusEnum.INACTIVE);
-    verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace));
+    verify(mockRdrApi).exportWorkspaces(Arrays.asList(rdrWorkspace), NO_BACKFILL);
   }
 
   private RdrWorkspace toDefaultRdrWorkspace(DbWorkspace dbWorkspace) {

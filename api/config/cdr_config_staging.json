@@ -7,13 +7,20 @@
       "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_staging",
       "authDomainName": "all-of-us-registered-staging",
       "authDomainGroupEmail": "GROUP_all-of-us-registered-staging@firecloud.org"
+    },
+    {
+      "accessTierId": 2,
+      "shortName": "controlled",
+      "displayName": "Controlled Tier",
+      "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_staging",
+      "authDomainName": "all-of-us-controlled-staging",
+      "authDomainGroupEmail": "all-of-us-controlled-staging@firecloud.org"
     }
   ],
   "cdrVersions": [
     {
       "cdrVersionId": 1,
       "name": "[Removed] Synthetic Dataset v1 (Legacy)",
-      "dataAccessLevel": 1,
       "archivalStatus": 1,
       "bigqueryProject": "",
       "bigqueryDataset": "",
@@ -27,7 +34,6 @@
     {
       "cdrVersionId": 2,
       "name": "[Removed] Synthetic Dataset v2 (Legacy)",
-      "dataAccessLevel": 1,
       "archivalStatus": 1,
       "bigqueryProject": "",
       "bigqueryDataset": "",
@@ -41,7 +47,6 @@
     {
       "cdrVersionId": 3,
       "name": "[Removed] Synthetic Dataset v1",
-      "dataAccessLevel": 1,
       "archivalStatus": 1,
       "bigqueryProject": "",
       "bigqueryDataset": "",
@@ -55,7 +60,6 @@
     {
       "cdrVersionId": 4,
       "name": "[Removed] Synthetic Dataset v2",
-      "dataAccessLevel": 1,
       "archivalStatus": 1,
       "bigqueryProject": "",
       "bigqueryDataset": "",
@@ -69,13 +73,12 @@
     {
       "cdrVersionId": 5,
       "name": "Synthetic Dataset v3",
-      "dataAccessLevel": 1,
       "bigqueryProject": "fc-aou-cdr-synth-staging",
-      "bigqueryDataset": "SR2019q4r4",
+      "bigqueryDataset": "test_R2019q4r3",
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_13",
+      "cdrDbName": "synth_r_2019q4_14",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
@@ -84,16 +87,29 @@
       "cdrVersionId": 6,
       "isDefault": true,
       "name": "Synthetic Dataset v4",
-      "dataAccessLevel": 1,
       "bigqueryProject": "fc-aou-cdr-synth-staging",
-      "bigqueryDataset": "SR2019q4r4",
+      "bigqueryDataset": "test_R2019q4r3",
       "creationTime": "2019-09-30 00:00:00Z",
       "releaseNumber": 4,
       "numParticipants": 234525,
-      "cdrDbName": "synth_r_2019q4_13",
+      "cdrDbName": "synth_r_2019q4_14",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"
+    },
+    {
+      "cdrVersionId": 7,
+      "isDefault": true,
+      "accessTier": "controlled",
+      "name": "Synthetic Dataset in the Controlled Tier",
+      "bigqueryProject": "fc-aou-cdr-staging-ct",
+      "bigqueryDataset": "test_R2019q4r3",
+      "creationTime": "2021-04-20 00:00:00Z",
+      "releaseNumber": 3,
+      "numParticipants": 234525,
+      "cdrDbName": "synth_r_2019q4_14",
+      "hasFitbitData": true,
+      "hasCopeSurveyData": true
     }
   ]
 }

@@ -1,0 +1,17 @@
+.sidebar-enter {
+    transform: translateX(100%);
+}
+
+.sidebar-enter-active {
+    transition: transform 750ms;
+    transform: translateX(0%);
+}
+
+.sidebar-exit {
+    transform: translateX(0%);
+}
+
+.sidebar-exit-active {
+    transition: transform 500ms;
+    transform: translateX(100%);
+}

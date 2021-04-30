@@ -7,12 +7,12 @@ import {Runtime} from 'generated/fetch';
 import {RuntimeStatus} from 'generated/fetch';
 import {RuntimeApi} from 'generated/fetch/api';
 import SpyInstance = jest.SpyInstance;
-import expect = jest.Expect;
+import {expect} from '@jest/globals';
 import {RuntimesApi as LeoRuntimesApi} from 'notebooks-generated/fetch';
 import {defaultRuntime, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {LeoRuntimesApiStub} from 'testing/stubs/leo-runtimes-api-stub';
 import {RuntimeConfigurationType} from 'generated/fetch';
-import {serverConfigStore} from "./navigation";
+import {serverConfigStore} from "app/utils/stores";
 import {runtimePresets} from './runtime-presets';
 
 let mockGetRuntime: SpyInstance;
@@ -44,7 +44,7 @@ describe('RuntimeInitializer', () => {
     mockDeleteRuntime = jest.spyOn(runtimeApi(), 'deleteRuntime');
     mockStartRuntime = jest.spyOn(leoRuntimesApi(), 'startRuntime');
 
-    serverConfigStore.next({gsuiteDomain: 'researchallofus.org'});
+    serverConfigStore.set({config: {gsuiteDomain: 'researchallofus.org'}});
   });
 
   afterEach(() => {
@@ -165,7 +165,7 @@ describe('RuntimeInitializer', () => {
   });
 
   it('should lazily create user\'s most runtime if a valid one exists', async() => {
-    serverConfigStore.next({gsuiteDomain: 'researchallofus.org'});
+    serverConfigStore.set({config: {gsuiteDomain: 'researchallofus.org'}});
     mockGetRuntime.mockImplementation(namespace => {
       return {
         ...defaultRuntime(),
@@ -191,7 +191,7 @@ describe('RuntimeInitializer', () => {
   });
 
   it('should use preset values during lazy runtime creation if a preset was selected', async() => {
-    serverConfigStore.next({gsuiteDomain: 'researchallofus.org'});
+    serverConfigStore.set({config: {gsuiteDomain: 'researchallofus.org'}});
     mockGetRuntime.mockImplementation(namespace => {
       return {
         ...defaultRuntime(),

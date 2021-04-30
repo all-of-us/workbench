@@ -325,13 +325,19 @@ export const SearchGroup = withCurrentWorkspace()(
     }
 
     get disableTemporal() {
-      return this.items.some(it => [Domain.PHYSICALMEASUREMENT, Domain.PERSON, Domain.SURVEY, Domain.FITBIT].includes(it.type));
+      return this.items.some(it => [
+        Domain.PHYSICALMEASUREMENT,
+        Domain.PERSON,
+        Domain.SURVEY,
+        Domain.FITBIT,
+        Domain.WHOLEGENOMEVARIANT
+      ].includes(it.type));
     }
 
     remove() {
       triggerEvent('Delete', 'Click', 'Snowman - Delete Group - Cohort Builder');
       this.hide('pending');
-      this.deleteTimeout = setTimeout(() => {
+      this.deleteTimeout = global.setTimeout(() => {
         this.removeGroup();
       }, 10000);
     }

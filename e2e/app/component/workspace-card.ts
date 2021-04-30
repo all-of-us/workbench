@@ -5,12 +5,15 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { getPropValue } from 'utils/element-utils';
 import CardBase from './card-base';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
+import { waitWhileLoading } from 'utils/waits-utils';
+import { logger } from 'libs/logger';
 
 const WorkspaceCardSelector = {
-  cardRootXpath: '//*[child::*[@data-test-id="workspace-card"]]', // finds 'workspace-card' parent container node
+  cardRootXpath: './/*[child::*[@data-test-id="workspace-card"]]', // finds 'workspace-card' parent container node
   cardNameXpath: '@data-test-id="workspace-card-name"',
   accessLevelXpath: './/*[@data-test-id="workspace-access-level"]',
-  dateTimeXpath: './/*[@data-test-id="workspace-card"]/div[3]'
+  dateTimeXpath:
+    './/*[@data-test-id="workspace-card"]//*[@data-test-id="workspace-access-level"]/following-sibling::div'
 };
 
 /**
@@ -29,7 +32,9 @@ export default class WorkspaceCard extends CardBase {
     const card = await WorkspaceCard.findCard(page, workspaceName);
     await card.selectSnowmanMenu(MenuOption.Delete, { waitForNav: false });
     // Handle Delete Confirmation modal
-    return new WorkspaceEditPage(page).dismissDeleteWorkspaceModal();
+    const modalText = new WorkspaceEditPage(page).dismissDeleteWorkspaceModal();
+    await WorkspaceCard.waitUntilGone(page, workspaceName);
+    return modalText;
   }
 
   /**
@@ -39,6 +44,7 @@ export default class WorkspaceCard extends CardBase {
    */
   static async findAllCards(page: Page, accessLevel?: WorkspaceAccessLevel): Promise<WorkspaceCard[]> {
     try {
+      await waitWhileLoading(page);
       await page.waitForXPath(WorkspaceCardSelector.cardRootXpath, { visible: true, timeout: 1000 });
     } catch (e) {
       return [];
@@ -47,7 +53,7 @@ export default class WorkspaceCard extends CardBase {
       new WorkspaceCard(page).asCard(card)
     );
 
-    const filtered = [];
+    const filtered: WorkspaceCard[] = [];
     if (accessLevel !== undefined) {
       for (const card of workspaceCards) {
         const cardAccessLevel = await card.getWorkspaceAccessLevel();
@@ -65,8 +71,7 @@ export default class WorkspaceCard extends CardBase {
     if (cards.length === 0) {
       throw new Error('FAILED to find any Workspace card on page.');
     }
-    const anyCard = fp.shuffle(cards)[0];
-    return anyCard;
+    return fp.shuffle(cards)[0];
   }
 
   static async findCard(page: Page, workspaceName: string): Promise<WorkspaceCard | null> {
@@ -76,13 +81,20 @@ export default class WorkspaceCard extends CardBase {
       const handle = card.asElementHandle();
       const children = await handle.$x(selector);
       if (children.length > 0) {
-        console.log(`Found "${workspaceName}" workspace card`);
+        logger.info(`Found "${workspaceName}" workspace card`);
         return card; // matched workspace name, found the Workspace card.
       }
       await handle.dispose(); // not it, dispose the ElementHandle.
     }
-    console.log(`"${workspaceName}" workspace card not found`);
+    logger.info(`"${workspaceName}" workspace card not found`);
     return null; // not found
+  }
+
+  static async waitUntilGone(page: Page, workspaceName: string, timeout = 60000): Promise<void> {
+    const selector =
+      `${WorkspaceCardSelector.cardRootXpath}//*[${WorkspaceCardSelector.cardNameXpath}` +
+      ` and normalize-space(text())="${workspaceName}"]`;
+    await page.waitForXPath(selector, { hidden: true, timeout });
   }
 
   constructor(page: Page) {
@@ -108,8 +120,8 @@ export default class WorkspaceCard extends CardBase {
   }
 
   async getWorkspaceName(): Promise<string> {
-    const workspaceNameElemt = await this.cardElement.$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
-    return getPropValue<string>(workspaceNameElemt[0], 'innerText');
+    const workspaceNameElement = await this.cardElement.$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
+    return getPropValue<string>(workspaceNameElement[0], 'innerText');
   }
 
   /**
@@ -154,16 +166,19 @@ export default class WorkspaceCard extends CardBase {
    * Click workspace name link in Workspace Card.
    * @param {boolean} waitForDataPage Waiting for Data page load and ready after click on Workspace name link.
    */
-  async clickWorkspaceName(waitForDataPage: boolean = true): Promise<string> {
-    const [elemt] = await this.asElementHandle().$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
-    const name = await getPropValue<string>(elemt, 'textContent');
-    await Promise.all([
-      this.page.waitForNavigation({ waitUntil: ['domcontentloaded', 'networkidle0'] }),
-      elemt.click()
-    ]);
+  async clickWorkspaceName(waitForDataPage = true): Promise<string> {
+    const [element] = await this.asElementHandle().$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
+    const name = await getPropValue<string>(element, 'textContent');
     if (waitForDataPage) {
+      await Promise.all([
+        this.page.waitForNavigation({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'] }),
+        element.click()
+      ]);
       const dataPage = new WorkspaceDataPage(this.page);
       await dataPage.waitForLoad();
+    } else {
+      await element.click();
+      await waitWhileLoading(this.page);
     }
     return name;
   }
@@ -174,13 +189,16 @@ export default class WorkspaceCard extends CardBase {
   }
 
   private workspaceNameLinkSelector(workspaceName: string): string {
-    return `//*[@role='button'][./*[${WorkspaceCardSelector.cardNameXpath} and normalize-space(text())="${workspaceName}"]]`;
+    return (
+      `//*[@role='button'][./*[${WorkspaceCardSelector.cardNameXpath}` +
+      ` and normalize-space(text())="${workspaceName}"]]`
+    );
   }
 
   // if the snowman menu options for WRITER & READER are disabled except duplicate option and all options are enabled for OWNER.
-  async verifyWorkspaceCardMenuOptions(): Promise<void> {
+  async verifyWorkspaceCardMenuOptions(accessLevel?: string): Promise<void> {
     const snowmanMenu = await this.getSnowmanMenu();
-    const accessLevel = await this.getWorkspaceAccessLevel();
+    accessLevel = accessLevel || (await this.getWorkspaceAccessLevel());
     if (accessLevel !== WorkspaceAccessLevel.Owner) {
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Share)).toBe(true);
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(true);

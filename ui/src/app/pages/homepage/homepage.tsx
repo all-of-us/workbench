@@ -1,12 +1,16 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+<<<<<<< HEAD
 import {
   buildRasRedirectUrl,
   navigate,
   queryParamsStore,
   serverConfigStore
 } from 'app/utils/navigation';
+=======
+import {navigate, queryParamsStore} from 'app/utils/navigation';
+>>>>>>> origin/master
 
 import {
   Clickable, StyledAnchorTag,
@@ -29,9 +33,12 @@ import {
 } from 'app/pages/homepage/registration-dashboard';
 import {profileApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {addOpacity} from 'app/styles/colors';
-import {hasRegisteredAccessFetch, reactStyles, withUserProfile} from 'app/utils';
+import {reactStyles, withUserProfile} from 'app/utils';
+import {hasRegisteredAccess} from 'app/utils/access-tiers';
 import {AnalyticsTracker} from 'app/utils/analytics';
+import {buildRasRedirectUrl} from 'app/utils/ras';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
+import {serverConfigStore} from 'app/utils/stores';
 import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
 
@@ -177,6 +184,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
   }
 
   async validateRasLoginGovLink() {
+<<<<<<< HEAD
     const code = (new URL(window.location.href)).searchParams.get('code');
     const redirectUrl = buildRasRedirectUrl();
     if (code) {
@@ -186,6 +194,14 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
           authCode: code,
           redirectUrl: redirectUrl
         });
+=======
+    const authCode = (new URL(window.location.href)).searchParams.get('code');
+    const redirectUrl = buildRasRedirectUrl();
+    if (authCode) {
+      this.setState({rasLoginGovLoading: true});
+      try {
+        const profileResponse = await profileApi().linkRasAccount({ authCode, redirectUrl });
+>>>>>>> origin/master
         if (profileResponse.rasLinkLoginGovUsername !== undefined) {
           this.setState({rasLoginGovLinked: true});
         }
@@ -195,7 +211,11 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
       }
     }
     // Cleanup parameter from URL after linking.
+<<<<<<< HEAD
     window.history.pushState({}, '', '/');
+=======
+    window.history.replaceState({}, '', '/');
+>>>>>>> origin/master
   }
 
   setFirstVisit() {
@@ -232,7 +252,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         reload();
       }, 10000);
     } else {
-      if (serverConfigStore.getValue().enableBetaAccess && !profile.betaAccessRequestTime) {
+      if (serverConfigStore.get().config.enableBetaAccess && !profile.betaAccessRequestTime) {
         profileApi().requestBetaAccess();
       }
       if (profile.pageVisits) {
@@ -248,24 +268,33 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
       }
 
       this.setState({
+<<<<<<< HEAD
         eraCommonsLinked: !!(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile)),
         dataUserCodeOfConductCompleted: (serverConfigStore.getValue().enableDataUseAgreement ?
             (() => !!(getRegistrationTasksMap()['dataUserCodeOfConduct']
               .completionTimestamp(profile)))() : true)
+=======
+        eraCommonsLinked: (serverConfigStore.get().config.enableEraCommons ?
+            (() => !!(getRegistrationTasksMap()['eraCommons']
+              .completionTimestamp(profile)))() : true),
+        dataUserCodeOfConductCompleted: (serverConfigStore.get().config.enableDataUseAgreement ?
+          (() => !!(getRegistrationTasksMap()['dataUserCodeOfConduct']
+            .completionTimestamp(profile)))() : true)
+>>>>>>> origin/master
       });
       // TODO(RW-6493): Update rasCommonsLinked similar to what we are doing for eraCommons
       this.setState({betaAccessGranted: !!profile.betaAccessBypassTime});
 
       const {workbenchAccessTasks} = queryParamsStore.getValue();
-      const hasRegisteredAccess = hasRegisteredAccessFetch(profile.dataAccessLevel);
-      if (!hasRegisteredAccess || workbenchAccessTasks) {
+      const hasAccess = hasRegisteredAccess(profile.accessTierShortNames);
+      if (!hasAccess || workbenchAccessTasks) {
         await this.syncCompliance();
       }
       if (workbenchAccessTasks) {
         this.setState({accessTasksRemaining: true, accessTasksLoaded: true});
       } else {
         this.setState({
-          accessTasksRemaining: !hasRegisteredAccess,
+          accessTasksRemaining: !hasAccess,
           accessTasksLoaded: true
         });
       }
@@ -278,7 +307,11 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
 
   async checkWorkspaces() {
     return fetchWithGlobalErrorHandler(() => workspacesApi().getWorkspaces())
+<<<<<<< HEAD
     .then(response => this.setState({userWorkspacesResponse: response}));
+=======
+        .then(response => this.setState({userWorkspacesResponse: response}));
+>>>>>>> origin/master
   }
 
   userHasWorkspaces(): boolean {
@@ -356,6 +389,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
           <FlexColumn style={{justifyContent: 'flex-start'}}>
             {accessTasksLoaded ?
                 (accessTasksRemaining ?
+<<<<<<< HEAD
                         (<RegistrationDashboard eraCommonsError={eraCommonsError}
                                                 eraCommonsLinked={eraCommonsLinked}
                                                 eraCommonsLoading={eraCommonsLoading}
@@ -398,6 +432,40 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
                                       }}
                                       onClick={() => navigate(['workspaces'])}
                                   >
+=======
+                    (<RegistrationDashboard eraCommonsError={eraCommonsError}
+                                            eraCommonsLinked={eraCommonsLinked}
+                                            eraCommonsLoading={eraCommonsLoading}
+                                            rasLoginGovLinkError={rasLoginGovLinkError}
+                                            rasLoginGovLinked={rasLoginGovLinked}
+                                            rasLoginGovLoading={rasLoginGovLoading}
+                                            trainingCompleted={trainingCompleted}
+                                            firstVisitTraining={firstVisitTraining}
+                                            betaAccessGranted={betaAccessGranted}
+                                            twoFactorAuthCompleted={twoFactorAuthCompleted}
+                                            dataUserCodeOfConductCompleted={dataUserCodeOfConductCompleted}/>
+                    ) : (
+                        <React.Fragment>
+                          <FlexColumn>
+                            <FlexRow style={{justifyContent: 'space-between', alignItems: 'center'}}>
+                              <FlexRow style={{alignItems: 'center'}}>
+                                <SemiBoldHeader style={{marginTop: '0px'}}>Workspaces</SemiBoldHeader>
+                                <ClrIcon
+                                  shape='plus-circle'
+                                  size={30}
+                                  className={'is-solid'}
+                                  style={{color: colors.accent, marginLeft: '1rem', cursor: 'pointer'}}
+                                  onClick={() => {
+                                    AnalyticsTracker.Workspaces.OpenCreatePage();
+                                    navigate(['workspaces/build']);
+                                  }}
+                                />
+                              </FlexRow>
+                              <span
+                                style={{alignSelf: 'flex-end', color: colors.accent, cursor: 'pointer'}}
+                                onClick={() => navigate(['workspaces'])}
+                              >
+>>>>>>> origin/master
                                 See all workspaces
                               </span>
                                 </FlexRow>

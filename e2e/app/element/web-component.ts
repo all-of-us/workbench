@@ -16,31 +16,31 @@ import Textbox from './textbox';
 export default class WebComponent {
   constructor(private readonly page: Page, private readonly xpathOptions: XPathOptions) {}
 
-  async asCheckBox(): Promise<Checkbox> {
-    return await Checkbox.findByName(this.page, this.xpathOptions);
+  asCheckBox(): Checkbox {
+    return Checkbox.findByName(this.page, this.xpathOptions);
   }
 
-  async asTextBox(): Promise<Textbox> {
-    return await Textbox.findByName(this.page, this.xpathOptions);
+  asTextBox(): Textbox {
+    return Textbox.findByName(this.page, this.xpathOptions);
   }
 
-  async asTextArea(): Promise<Textarea> {
-    return await Textarea.findByName(this.page, this.xpathOptions);
+  asTextArea(): Textarea {
+    return Textarea.findByName(this.page, this.xpathOptions);
   }
 
-  async asRadioButton(): Promise<RadioButton> {
-    return await RadioButton.findByName(this.page, this.xpathOptions);
+  asRadioButton(): RadioButton {
+    return RadioButton.findByName(this.page, this.xpathOptions);
   }
 
-  async asButton(): Promise<Button> {
-    return await Button.findByName(this.page, this.xpathOptions);
+  asButton(): Button {
+    return Button.findByName(this.page, this.xpathOptions);
   }
 
-  async asSelect(): Promise<Select> {
-    return await Select.findByName(this.page, this.xpathOptions);
+  asSelect(): Select {
+    return Select.findByName(this.page, this.xpathOptions);
   }
 
-  async asLink(): Promise<Link> {
-    return await Link.findByName(this.page, this.xpathOptions);
+  asLink(): Link {
+    return Link.findByName(this.page, this.xpathOptions);
   }
 }

@@ -16,7 +16,6 @@ import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.CdrVersionListResponse;
 import org.pmiops.workbench.model.CdrVersionTier;
 import org.pmiops.workbench.model.CdrVersionTiersResponse;
-import org.pmiops.workbench.model.DataAccessLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -57,7 +56,7 @@ public class CdrVersionService {
         .getAccessTiersForUser(userProvider.get())
         .contains(version.getAccessTier())) {
       throw new ForbiddenException(
-          "Requester does not have access to tier  "
+          "Requester does not have access to tier "
               + version.getAccessTier().getShortName()
               + ", cannot access CDR");
     }
@@ -116,16 +115,18 @@ public class CdrVersionService {
 
   @Deprecated // only handles the Registered Tier
   public CdrVersionListResponse getCdrVersions() {
-    DataAccessLevel accessLevel = userProvider.get().getDataAccessLevelEnum();
-    if (accessLevel == DataAccessLevel.REGISTERED) {
-      CdrVersionTier registeredTierVersions =
-          getVersionsForTier(accessTierService.getRegisteredTier());
-      return new CdrVersionListResponse()
-          .items(registeredTierVersions.getVersions())
-          .defaultCdrVersionId(String.valueOf(registeredTierVersions.getDefaultCdrVersionId()));
-    } else {
-      throw new ForbiddenException("User does not have access to any CDR versions");
-    }
+    DbAccessTier registeredTier =
+        accessTierService.getAccessTiersForUser(userProvider.get()).stream()
+            .filter(
+                tier -> tier.getShortName().equals(AccessTierService.REGISTERED_TIER_SHORT_NAME))
+            .findFirst()
+            .orElseThrow(
+                () -> new ForbiddenException("User does not have access to any CDR versions"));
+
+    CdrVersionTier registeredTierVersions = getVersionsForTier(registeredTier);
+    return new CdrVersionListResponse()
+        .items(registeredTierVersions.getVersions())
+        .defaultCdrVersionId(String.valueOf(registeredTierVersions.getDefaultCdrVersionId()));
   }
 
   public CdrVersionTiersResponse getCdrVersionsByTier() {
@@ -172,6 +173,7 @@ public class CdrVersionService {
                 .map(cdrVersionMapper::dbModelToClient)
                 .collect(Collectors.toList()))
         .defaultCdrVersionId(String.valueOf(defaultVersions.get(0)))
-        .accessTierShortName(accessTier.getShortName());
+        .accessTierShortName(accessTier.getShortName())
+        .accessTierDisplayName(accessTier.getDisplayName());
   }
 }

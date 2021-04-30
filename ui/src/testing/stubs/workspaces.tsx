@@ -1,3 +1,4 @@
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {
   RecentWorkspace,
   RecentWorkspaceResponse,
@@ -7,7 +8,6 @@ import {
 } from 'generated/fetch';
 import {CdrVersionsStubVariables} from './cdr-versions-api-stub';
 
-
 export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_NS = 'defaultNamespace';
   static DEFAULT_WORKSPACE_NAME = 'defaultWorkspace';
@@ -15,13 +15,13 @@ export class WorkspaceStubVariables {
   static DEFAULT_WORKSPACE_PERMISSION = WorkspaceAccessLevel.OWNER;
 }
 
-function buildWorkspaceStub(suffix): Workspace {
+export function buildWorkspaceStub(suffix = ''): Workspace {
   return {
     name: WorkspaceStubVariables.DEFAULT_WORKSPACE_NAME + suffix,
     id: WorkspaceStubVariables.DEFAULT_WORKSPACE_ID + suffix,
     namespace: WorkspaceStubVariables.DEFAULT_WORKSPACE_NS + suffix,
     cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID + suffix,
-    accessTierShortName: CdrVersionsStubVariables.DEFAULT_ACCESS_TIER_SHORT_NAME,
+    accessTierShortName: AccessTierShortNames.Registered,
     creationTime: new Date().getTime(),
     lastModifiedTime: new Date().getTime(),
     researchPurpose: {

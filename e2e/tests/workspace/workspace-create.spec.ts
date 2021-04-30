@@ -5,7 +5,7 @@ import Button from 'app/element/button';
 import * as testData from 'resources/data/workspace-data';
 import { makeWorkspaceName } from 'utils/str-utils';
 import { UseFreeCredits } from 'app/page/workspace-base';
-import WorkspaceEditPage from 'app/page/workspace-edit-page';
+import WorkspaceEditPage, { AccessTierDisplayNames } from 'app/page/workspace-edit-page';
 import { config } from 'resources/workbench-config';
 
 describe('Creating new workspaces', () => {
@@ -24,7 +24,8 @@ describe('Creating new workspaces', () => {
     // Pick out few sentenses to verify
     expect(modalTextContent).toContain('Create Workspace');
     expect(modalTextContent).toContain(
-      'Primary purpose of your project (Question 1)Summary of research purpose (Question 2)Population of interest (Question 5)'
+      'Primary purpose of your project (Question 1)' +
+        'Summary of research purpose (Question 2)Population of interest (Question 5)'
     );
     expect(modalTextContent).toContain('You can also make changes to your answers after you create your workspace.');
 
@@ -42,7 +43,7 @@ describe('Creating new workspaces', () => {
     const workspacesPage = new WorkspacesPage(page);
     await workspacesPage.load();
 
-    const createNewWorkspaceButton = await Button.findByName(page, FieldSelector.CreateNewWorkspaceButton.textOption);
+    const createNewWorkspaceButton = Button.findByName(page, FieldSelector.CreateNewWorkspaceButton.textOption);
     await createNewWorkspaceButton.clickAndWait();
 
     const workspaceEditPage = new WorkspaceEditPage(page);
@@ -76,12 +77,44 @@ describe('Creating new workspaces', () => {
     // -- No Review Required
     await performActions(page, testData.defaultAnswersRequestForReview);
 
-    const finishButton = await workspaceEditPage.getCreateWorkspaceButton();
+    const finishButton = workspaceEditPage.getCreateWorkspaceButton();
     await finishButton.waitUntilEnabled();
     await workspaceEditPage.clickCreateFinishButton(finishButton);
 
     const dataPage1 = new WorkspaceDataPage(page);
     await dataPage1.verifyWorkspaceNameOnDataPage(newWorkspaceName);
+  });
+
+  // TODO for Controlled Tier Beta: ensure the user has CT access first
+
+  test('User can create a workspace in the Controlled Tier', async () => {
+    const workspacesPage = new WorkspacesPage(page);
+    await workspacesPage.load();
+
+    const name = makeWorkspaceName();
+    const createPage = await workspacesPage.fillOutRequiredCreationFields(name);
+
+    const cdrVersionSelect = await createPage.getCdrVersionSelect();
+    expect(await cdrVersionSelect.getSelectedValue()).toBe(config.defaultCdrVersionName);
+
+    await createPage.selectAccessTier(AccessTierDisplayNames.Controlled);
+
+    // observe that the CDR Version default has changed
+    const selectedCdrVersion = await cdrVersionSelect.getSelectedValue();
+    expect(selectedCdrVersion).not.toBe(config.defaultCdrVersionName);
+
+    // click CREATE WORKSPACE button
+    const createButton = createPage.getCreateWorkspaceButton();
+    await createButton.waitUntilEnabled();
+    await createPage.clickCreateFinishButton(createButton);
+
+    const dataPage = new WorkspaceDataPage(page);
+
+    // Verify that the CDR version is what we expect
+    expect(await dataPage.getCdrVersion()).toBe(selectedCdrVersion);
+
+    // cleanup
+    await dataPage.deleteWorkspace();
   });
 
   // // helper function to check visible workspace link on Data page

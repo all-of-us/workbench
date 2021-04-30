@@ -3,19 +3,19 @@ import * as React from 'react';
 
 import {cohortsApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, queryParamsStore} from 'app/utils/navigation';
-import {cdrVersionStore} from 'app/utils/navigation';
 import {CohortBuilderApi, CohortsApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {cdrVersionListResponse} from 'testing/stubs/cdr-versions-api-stub';
+import {cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {CohortBuilderServiceStub} from 'testing/stubs/cohort-builder-service-stub';
 import {CohortsApiStub} from 'testing/stubs/cohorts-api-stub';
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import {CohortPage} from './cohort-page.component';
+import {cdrVersionStore} from "app/utils/stores";
 
 describe('CohortPage', () => {
   beforeEach(() => {
     currentWorkspaceStore.next(workspaceDataStub);
-    cdrVersionStore.next(cdrVersionListResponse);
+    cdrVersionStore.set(cdrVersionTiersResponse);
     registerApiClient(CohortBuilderApi, new CohortBuilderServiceStub());
     registerApiClient(CohortsApi, new CohortsApiStub());
   });

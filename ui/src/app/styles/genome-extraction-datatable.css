@@ -1,0 +1,114 @@
+.extraction-data-table-container {
+    width: calc(100% - 30px);
+    height: 100%;
+    margin: auto;
+    overflow: hidden;
+    background-color: white;
+    border-radius: 6px;
+    padding-top: 0.2rem;
+    padding-bottom: 1rem;
+}
+
+.extraction-data-table-container tr.p-datatable-row,thead>tr {
+    border-bottom: 1px solid rgba(151,151,151,0.5);
+}
+
+.extraction-data-table-container .p-datatable .p-datatable-thead > tr > th,
+.extraction-data-table-container .p-datatable .p-datatable-tbody > tr > td {
+    background-color: white;
+    border: 0px;
+    padding: .3rem 1rem 0.3rem 0;
+    color: #262262;
+    font-size: .5rem;
+}
+
+.extraction-data-table-container td:last-child {
+    padding-right: 0;
+}
+
+.extraction-data-table-container .p-datatable .p-datatable-thead > tr > th {
+    padding-bottom: .1rem;
+    font-size: .4rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.extraction-data-table-container th span {
+    float: left;
+}
+
+.extraction-data-table-container th.p-sortable-column.p-highlight:hover:first-child span:hover:first-child {
+    text-decoration: underline;
+}
+
+.extraction-data-table-container .pi-sort-amount-up-alt:before,
+.extraction-data-table-container .pi-sort-amount-down:before {
+    color: #216FB4;
+    font-size: 18px;
+    line-height: 1.2;
+    margin-left: .1rem;
+}
+
+.extraction-data-table-container .pi-sort-amount-up-alt:before {
+    content: '\1F815';
+}
+
+.extraction-data-table-container .pi-sort-amount-down:before {
+    content: '\1F817';
+}
+
+.extraction-data-table-container .p-sortable-column.p-highlight span {
+    color: #216FB4;
+}
+
+.extraction-data-table-container th.p-sortable-column:hover span:first-child {
+    color: #216FB4;
+    text-decoration: underline;
+    text-underline-position: under;
+}
+
+.extraction-data-table-container th.p-sortable-column:not(.p-highlight):hover {
+    background-color: white;
+}
+
+.extraction-data-table-container tr .empty-table-message {
+    border-bottom: 0;
+}
+
+.slim-scroll-bar {
+    overflow: auto;
+    height: 100%;
+    margin-right: 0.1rem;
+}
+
+.slim-scroll-bar::-webkit-scrollbar {
+    width: .3rem;
+}
+
+.extraction-data-table-container .slim-scroll-bar::-webkit-scrollbar-track-piece:start {
+    margin-top: 0.5rem;
+}
+
+.slim-scroll-bar::-webkit-scrollbar-thumb {
+    background-color: darkgrey;
+    border-radius: 5px;
+}
+
+/* Following styles are applied by SwitchTransition */
+.extraction-data-table-container .switch-transition-enter {
+    opacity: 0;
+}
+
+.extraction-data-table-container .switch-transition-enter-active {
+    opacity: 1;
+    transition: opacity 250ms;
+}
+
+.extraction-data-table-container .switch-transition-exit {
+    opacity: 1;
+}
+
+.extraction-data-table-container .switch-transition-exit-active {
+    opacity: 0;
+    transition: opacity 250ms;
+}
