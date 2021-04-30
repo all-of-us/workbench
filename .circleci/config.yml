@@ -533,6 +533,7 @@ jobs:
     environment:
       WORKBENCH_ENV: << parameters.env_name >>
       TEST_MODE: << parameters.test_mode >>
+      CIRCLE_BUILD_NUM: $CIRCLE_BUILD_NUM
     parallelism: << parameters.parallel_num >>
     steps:
       - attach_workspace:

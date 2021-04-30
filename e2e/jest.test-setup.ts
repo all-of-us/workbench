@@ -2,9 +2,11 @@ import { logger } from 'libs/logger';
 import * as fp from 'lodash/fp';
 import { ConsoleMessage, JSHandle, Request } from 'puppeteer';
 
+const { CIRCLE_BUILD_NUM } = process.env;
+
 const userAgent =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko)' +
-  ' Chrome/80.0.3987.149 Safari/537.36';
+  ' Chrome/80.0.3987.149 Safari/537.36' + CIRCLE_BUILD_NUM ? ` (circle-build-number/${CIRCLE_BUILD_NUM})` : '';
 
 /**
  * Set up page common properties:
