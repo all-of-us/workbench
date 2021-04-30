@@ -34,7 +34,6 @@ import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
-import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -173,8 +172,9 @@ public class DataSetController implements DataSetApiDelegate {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    Optional<DbDataset> dbDataset = dataSetService.getDbDataSet(dataSetRequest.getDataSetId(), dbWorkspace.getWorkspaceId());
-    if(!dbDataset.isPresent()) {
+    Optional<DbDataset> dbDataset =
+        dataSetService.getDbDataSet(dataSetRequest.getDataSetId(), dbWorkspace.getWorkspaceId());
+    if (!dbDataset.isPresent()) {
       throw new NotFoundException(
           "No DataSet found for dataSetId "
               + dataSetRequest.getDataSetId()
@@ -216,23 +216,28 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataSetPreviewResponse> previewDataSetByDomain(
       String workspaceNamespace, String workspaceId, DataSetPreviewRequest dataSetPreviewRequest) {
-    DbWorkspace dbWorkspace = workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    List<Long> cohortIds = cohortService.findByWorkspaceId(dbWorkspace.getWorkspaceId()).stream()
-        .map(Cohort::getId)
-        .collect(Collectors.toList());
+    List<Long> cohortIds =
+        cohortService.findByWorkspaceId(dbWorkspace.getWorkspaceId()).stream()
+            .map(Cohort::getId)
+            .collect(Collectors.toList());
 
     if (!cohortIds.containsAll(dataSetPreviewRequest.getCohortIds())) {
-      throw new NotFoundException("Not all cohorts in preview request exist in workspace " + dbWorkspace.getName());
+      throw new NotFoundException(
+          "Not all cohorts in preview request exist in workspace " + dbWorkspace.getName());
     }
 
-    List<Long> conceptSetIds = conceptSetService.findByWorkspaceId(dbWorkspace.getWorkspaceId()).stream()
-        .map(ConceptSet::getId)
-        .collect(Collectors.toList());
+    List<Long> conceptSetIds =
+        conceptSetService.findByWorkspaceId(dbWorkspace.getWorkspaceId()).stream()
+            .map(ConceptSet::getId)
+            .collect(Collectors.toList());
 
     if (!conceptSetIds.containsAll(dataSetPreviewRequest.getConceptSetIds())) {
-      throw new NotFoundException("Not all concept sets in preview request exist in workspace " + dbWorkspace.getName());
+      throw new NotFoundException(
+          "Not all concept sets in preview request exist in workspace " + dbWorkspace.getName());
     }
 
     List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
@@ -322,8 +327,10 @@ public class DataSetController implements DataSetApiDelegate {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    Optional<DbDataset> dbDataset = dataSetService.getDbDataSet(dataSetExportRequest.getDataSetRequest().getDataSetId(), dbWorkspace.getWorkspaceId());
-    if(!dbDataset.isPresent()) {
+    Optional<DbDataset> dbDataset =
+        dataSetService.getDbDataSet(
+            dataSetExportRequest.getDataSetRequest().getDataSetId(), dbWorkspace.getWorkspaceId());
+    if (!dbDataset.isPresent()) {
       throw new NotFoundException(
           "No DataSet found for dataSetId "
               + dataSetExportRequest.getDataSetRequest().getDataSetId()
@@ -447,21 +454,22 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<Boolean> markDirty(
       String workspaceNamespace, String workspaceId, MarkDataSetRequest markDataSetRequest) {
-    DbWorkspace dbWorkspace = workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     dataSetService.markDirty(
         markDataSetRequest.getResourceType(),
         markDataSetRequest.getId(),
-        dbWorkspace.getWorkspaceId()
-    );
+        dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(true);
   }
 
   @Override
   public ResponseEntity<EmptyResponse> deleteDataSet(
       String workspaceNamespace, String workspaceId, Long dataSetId) {
-    DbWorkspace dbWorkspace = workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     dataSetService.deleteDataSet(dataSetId, dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(new EmptyResponse());
@@ -474,25 +482,30 @@ public class DataSetController implements DataSetApiDelegate {
       throw new BadRequestException("missing required update field 'etag'");
     }
     DbWorkspace dbWorkspace =
-        workspaceAuthService
-            .getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-                workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    return ResponseEntity.ok(dataSetService.updateDataSet(request, dataSetId, dbWorkspace.getWorkspaceId()));
+    return ResponseEntity.ok(
+        dataSetService.updateDataSet(request, dataSetId, dbWorkspace.getWorkspaceId()));
   }
 
   @Override
   public ResponseEntity<DataSet> getDataSet(
       String workspaceNamespace, String workspaceId, Long dataSetId) {
-    DbWorkspace dbWorkspace = workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     DataSet dataSet =
         dataSetService
             .getDataSet(dataSetId, dbWorkspace.getWorkspaceId())
             .<NotFoundException>orElseThrow(
                 () -> {
-                  throw new NotFoundException("No DataSet found for dataSetId " + dataSetId + "and workspaceId " + dbWorkspace.getWorkspaceId());
+                  throw new NotFoundException(
+                      "No DataSet found for dataSetId "
+                          + dataSetId
+                          + "and workspaceId "
+                          + dbWorkspace.getWorkspaceId());
                 });
 
     return ResponseEntity.ok(dataSet);
@@ -501,11 +514,13 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataSetListResponse> getDataSetByResourceId(
       String workspaceNamespace, String workspaceId, ResourceType resourceType, Long id) {
-    DbWorkspace dbWorkspace = workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     return ResponseEntity.ok(
-        new DataSetListResponse().items(dataSetService.getDataSets(resourceType, id, dbWorkspace.getWorkspaceId())));
+        new DataSetListResponse()
+            .items(dataSetService.getDataSets(resourceType, id, dbWorkspace.getWorkspaceId())));
   }
 
   @Override

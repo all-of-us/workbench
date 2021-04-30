@@ -243,10 +243,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @Override
   public DataSet updateDataSet(DataSetRequest request, Long dataSetId, Long workspaceId) {
-    Optional<DbDataset> dbDataSet = dataSetDao.findByDataSetIdAndWorkspaceId(dataSetId, workspaceId);
+    Optional<DbDataset> dbDataSet =
+        dataSetDao.findByDataSetIdAndWorkspaceId(dataSetId, workspaceId);
 
-    if(!dbDataSet.isPresent()) {
-      throw new NotFoundException("No DataSet found for dataSetId " + dataSetId + "and workspaceId " + workspaceId);
+    if (!dbDataSet.isPresent()) {
+      throw new NotFoundException(
+          "No DataSet found for dataSetId " + dataSetId + "and workspaceId " + workspaceId);
     }
 
     int version = Etags.toVersion(request.getEtag());
@@ -976,7 +978,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         .collect(Collectors.toList());
   }
 
-  public List<DbDataset> getDbDataSets(ResourceType resourceType, long resourceId, long workspaceId) {
+  public List<DbDataset> getDbDataSets(
+      ResourceType resourceType, long resourceId, long workspaceId) {
     List<DbDataset> dbDataSets = new ArrayList<>();
     switch (resourceType) {
       case COHORT:
@@ -993,14 +996,17 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   public void deleteDataSet(Long dataSetId, Long workspaceId) {
     Optional<DbDataset> dbDataset = this.getDbDataSet(dataSetId, workspaceId);
     if (!dbDataset.isPresent()) {
-      throw new NotFoundException("No DataSet found for dataSetId " + dataSetId + "and workspaceId " + workspaceId);
+      throw new NotFoundException(
+          "No DataSet found for dataSetId " + dataSetId + "and workspaceId " + workspaceId);
     }
     dataSetDao.delete(dataSetId);
   }
 
   @Override
   public Optional<DataSet> getDataSet(Long dataSetId, Long workspaceId) {
-   return dataSetDao.findByDataSetIdAndWorkspaceId(dataSetId, workspaceId).map(dataSetMapper::dbModelToClient);
+    return dataSetDao
+        .findByDataSetIdAndWorkspaceId(dataSetId, workspaceId)
+        .map(dataSetMapper::dbModelToClient);
   }
 
   @Override
