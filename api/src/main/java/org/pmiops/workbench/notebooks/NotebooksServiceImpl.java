@@ -152,7 +152,8 @@ public class NotebooksServiceImpl implements NotebooksService {
     if (!fromTier.equals(toTier)) {
       final String msg =
           String.format(
-              "Cannot copy from %s to %s", fromTier.getDisplayName(), toTier.getDisplayName());
+              "Cannot copy between access tiers (attempted copy from %s to %s)",
+              fromTier.getDisplayName(), toTier.getDisplayName());
       throw new BadRequestException(msg);
     }
 
