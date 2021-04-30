@@ -9,10 +9,9 @@ const {useEffect, useState} = React;
 export interface RouteDataStore {
   title?: string;
   minimizeChrome?: boolean;
-  helpContentKey?: string;
+  pageKey?: string;
   breadcrumb?: BreadcrumbType;
   pathElementForTitle?: string;
-  notebookHelpSidebarStyles?: boolean;
   contentFullHeightOverride?: boolean;
 }
 

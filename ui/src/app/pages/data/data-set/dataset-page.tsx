@@ -30,6 +30,7 @@ import {AnalyticsTracker} from 'app/utils/analytics';
 import {getCdrVersion} from 'app/utils/cdr-versions';
 import {currentWorkspaceStore, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
 import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
+import {serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {openZendeskWidget, supportUrls} from 'app/utils/zendesk';
@@ -493,7 +494,11 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
           ...PREPACKAGED_WITH_FITBIT_DOMAINS
         };
       }
-      if (getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
+      // Only allow selection of genomics prepackaged concept sets if genomics
+      // data extraction is possible, since extraction is the only action that
+      // can be taken on genomics variant data from the dataset builder.
+      if (serverConfigStore.get().config.enableGenomicExtraction &&
+          getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
         PREPACKAGED_DOMAINS = {
           ...PREPACKAGED_DOMAINS,
           ...PREPACKAGED_WITH_WHOLE_GENOME
@@ -1266,8 +1271,6 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                            workspaceNamespace={namespace}
                                            workspaceId={id}
                                            billingLocked={this.props.workspace.billingStatus === BillingStatus.INACTIVE}
-                                           displayMicroarrayOptions={
-                                             getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasMicroarrayData}
                                            prePackagedConceptSet={this.getPrePackagedConceptSetApiEnum()}
                                            dataSet={dataSet ? dataSet : undefined}
                                            closeFunction={() => {

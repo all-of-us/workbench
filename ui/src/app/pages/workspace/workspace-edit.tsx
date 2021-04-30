@@ -75,18 +75,31 @@ import {OldCdrVersionModal} from './old-cdr-version-modal';
 
 export const styles = reactStyles({
   categoryRow: {
-    display: 'flex', flexDirection: 'row', padding: '0.6rem 0', width: '95%'
+    display: 'flex',
+    flexDirection: 'row',
+    padding: '0.6rem 0',
+    width: '95%'
   },
   checkboxRow: {
-    display: 'inline-block', padding: '0.2rem 0', marginRight: '1rem'
+    display: 'inline-block',
+    padding: '0.2rem 0',
+    marginRight: '1rem'
   },
   checkboxStyle: {
-    marginRight: '.31667rem', zoom: '1.5'
+    marginRight: '.31667rem',
+    zoom: '1.5'
   },
   header: {
     fontWeight: 600,
     lineHeight: '24px',
     color: colors.primary
+  },
+  fieldHeader: {
+    fontWeight: 600,
+    lineHeight: '24px',
+    color: colors.primary,
+    fontSize: 14,
+    marginBottom: '0.2rem'
   },
   flexColumnBy2: {
     flex: '1 1 0',
@@ -132,7 +145,6 @@ export const styles = reactStyles({
     verticalAlign: 'middle',
     position: 'relative',
     overflow: 'visible',
-    width: '11.3rem',
     marginRight: '20px'
   },
   shortDescription: {
@@ -164,6 +176,11 @@ export const styles = reactStyles({
     marginRight: '20px',
     marginBottom: '5px'
   },
+  selectInput: {
+    borderColor: 'rgb(151, 151, 151)',
+    borderRadius: '6px',
+    height: '1.5rem',
+  },
   researchPurposeDescription: {
     marginLeft: '-0.9rem',
     fontSize: 14,
@@ -188,6 +205,12 @@ export const styles = reactStyles({
     backgroundColor: colorWithWhiteness(colors.accent, 0.85),
     maxWidth: 'fit-content',
   },
+  accessTierSpacing: {
+    width: '11em',
+  },
+  cdrVersionSpacing: {
+    width: '30em',
+  }
 });
 
 const CREATE_BILLING_ACCOUNT_OPTION_VALUE = 'CREATE_BILLING_ACCOUNT_OPTION';
@@ -243,7 +266,7 @@ export interface WorkspaceEditProps {
 
 export interface WorkspaceEditState {
   billingAccounts: Array<BillingAccount>;
-  cdrVersionItems: Array<CdrVersion>;
+  cdrVersions: Array<CdrVersion>;
   cloneUserRole: boolean;
   loading: boolean;
   populationChecked: boolean;
@@ -268,7 +291,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       super(props);
       this.state = {
         billingAccounts: [],
-        cdrVersionItems: this.createInitialCdrVersionsList(),
+        cdrVersions: props.workspace ? this.getCdrVersions(props.workspace.accessTierShortName) : this.getCdrVersions(DEFAULT_ACCESS_TIER),
         cloneUserRole: false,
         loading: false,
         populationChecked: props.workspace ? props.workspace.researchPurpose.populationDetails.length > 0 : undefined,
@@ -279,7 +302,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         showResearchPurpose: this.updateSelectedResearch(),
         showStigmatizationDetails: false,
         showUnderservedPopulationDetails: false,
-        workspace: this.createInitialWorkspaceState(),
+        workspace: this.initializeWorkspaceState(),
         workspaceCreationConflictError: false,
         workspaceCreationError: false,
         workspaceCreationErrorMessage: '',
@@ -349,6 +372,36 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       await this.fetchBillingAccounts();
     }
 
+    createWorkspace(): Workspace {
+      return {
+        name: '',
+        accessTierShortName: DEFAULT_ACCESS_TIER,
+        cdrVersionId: '',
+        researchPurpose: {
+          ancestry: false,
+          anticipatedFindings: '',
+          commercialPurpose: false,
+          controlSet: false,
+          diseaseFocusedResearch: false,
+          diseaseOfFocus: '',
+          drugDevelopment: false,
+          educational: false,
+          intendedStudy: '',
+          scientificApproach: '',
+          methodsDevelopment: false,
+          otherPopulationDetails: '',
+          otherPurpose: false,
+          otherPurposeDetails: '',
+          ethics: false,
+          populationDetails: [],
+          populationHealth: false,
+          reviewRequested: undefined,
+          socialBehavioral: false,
+          reasonForAllOfUs: '',
+        }
+      };
+    }
+
     /**
      * Creates the initial workspace state object. For a CREATE mode dialog,
      * this is effectively an empty Workspace object. For EDIT or DUPLICATE
@@ -357,38 +410,9 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
      * This is where logic lives to auto-set the CDR version and
      * "reviewRequested" flag, which depend on the workspace state & edit mode.
      */
-    createInitialWorkspaceState(): Workspace {
-      // copy the props into a new object so our modifications here don't affect them
-      let workspace: Workspace = {...this.props.workspace};
-      if (this.isMode(WorkspaceEditMode.Create)) {
-        workspace = {
-          name: '',
-          accessTierShortName: DEFAULT_ACCESS_TIER,
-          cdrVersionId: '',
-          researchPurpose: {
-            ancestry: false,
-            anticipatedFindings: '',
-            commercialPurpose: false,
-            controlSet: false,
-            diseaseFocusedResearch: false,
-            diseaseOfFocus: '',
-            drugDevelopment: false,
-            educational: false,
-            intendedStudy: '',
-            scientificApproach: '',
-            methodsDevelopment: false,
-            otherPopulationDetails: '',
-            otherPurpose: false,
-            otherPurposeDetails: '',
-            ethics: false,
-            populationDetails: [],
-            populationHealth: false,
-            reviewRequested: undefined,
-            socialBehavioral: false,
-            reasonForAllOfUs: '',
-          }
-        };
-      }
+    initializeWorkspaceState(): Workspace {
+      // create a new Workspace from scratch or copy the props into a new object so our modifications here don't affect them
+      const workspace: Workspace = this.isMode(WorkspaceEditMode.Create) ? this.createWorkspace() : {...this.props.workspace};
 
       if (!fp.includes(DisseminateResearchEnum.OTHER, workspace.researchPurpose.disseminateResearchFindingList)) {
         workspace.researchPurpose.otherDisseminateResearchFindings = '';
@@ -413,20 +437,21 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       // We preselect the default CDR version when a new workspace is being
       // created (via create or duplicate)
       if (this.isMode(WorkspaceEditMode.Create) || this.isMode(WorkspaceEditMode.Duplicate)) {
-        workspace.cdrVersionId = getDefaultCdrVersionForTier(workspace, this.props.cdrVersionTiersResponse).cdrVersionId;
+        const cdrVersion = getDefaultCdrVersionForTier(workspace.accessTierShortName, this.props.cdrVersionTiersResponse);
+        workspace.cdrVersionId = cdrVersion.cdrVersionId;
       }
 
       return workspace;
     }
 
-    createInitialCdrVersionsList(): Array<CdrVersion> {
+    getCdrVersions(accessTierShortName: string): Array<CdrVersion> {
       if (this.isMode(WorkspaceEditMode.Edit)) {
         // In edit mode, you cannot modify the CDR version, therefore it's fine
         // to show archived CDRs in the drop-down so that it accurately displays
         // the current value.
-        return this.getAllCdrVersionsForTier(DEFAULT_ACCESS_TIER);
+        return this.getAllCdrVersionsForTier(accessTierShortName);
       } else {
-        return this.getLiveCdrVersionsForTier(DEFAULT_ACCESS_TIER);
+        return this.getLiveCdrVersionsForTier(accessTierShortName);
       }
     }
 
@@ -981,13 +1006,20 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
       return validate(values, constraints, {fullMessages: false});
     }
 
+    // show the Access Tiers selection dropdown only when there are multiple tiers to choose from
+    enableAccessTierSelection(): boolean {
+      const {tiers} = this.props.cdrVersionTiersResponse || {tiers: []};
+      return tiers.length > 1;
+    }
+
     render() {
       const {enableBillingUpgrade} = serverConfigStore.get().config;
       const {
         workspace: {
+          name,
           billingAccountName,
           cdrVersionId,
-          name,
+          accessTierShortName,
           researchPurpose: {
             anticipatedFindings,
             intendedStudy,
@@ -997,7 +1029,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             reviewRequested
           }
         },
-        cdrVersionItems,
+        cdrVersions,
         loading,
         populationChecked,
         showCdrVersionModal,
@@ -1022,7 +1054,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
             <OldCdrVersionModal
                 onCancel={() => {
                   this.setState(fp.set(['workspace', 'cdrVersionId'],
-                    getDefaultCdrVersionForTier(this.state.workspace, cdrVersionTiersResponse)));
+                    getDefaultCdrVersionForTier(this.state.workspace.accessTierShortName, cdrVersionTiersResponse).cdrVersionId));
                   this.setState({showCdrVersionModal: false});
                 }}
                 onContinue={() => this.setState({showCdrVersionModal: false})}
@@ -1036,24 +1068,71 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                                 style={{marginTop: '24px'}} largeHeader
                                 required={!this.isMode(WorkspaceEditMode.Duplicate)}>
           <FlexRow style={{alignItems: 'baseline'}}>
-            <TextInput type='text' style={styles.textInput} autoFocus placeholder='Workspace Name'
-              value = {name}
-              onChange={v => this.setState(fp.set(['workspace', 'name'], v))}/>
-            <TooltipTrigger
+            <FlexColumn>
+              <div style={styles.fieldHeader}>
+                Workspace name
+              </div>
+              <TextInput data-test-id='workspace-name'
+                         type='text'
+                         style={styles.textInput}
+                         autoFocus
+                         placeholder='Workspace Name'
+                         value = {name}
+                         onChange={v => this.setState(fp.set(['workspace', 'name'], v))}/>
+            </FlexColumn>
+            {this.enableAccessTierSelection() &&
+              <FlexColumn>
+                <div style={styles.fieldHeader}>
+                  Data access tier
+                  <TooltipTrigger content={toolTipText.tierSelect}>
+                    <InfoIcon style={styles.infoIcon}/>
+                  </TooltipTrigger>
+                </div>
+                <TooltipTrigger
+                  content='To use a different access tier, create a new workspace.'
+                  disabled={this.isMode(WorkspaceEditMode.Create)}>
+                  <div data-test-id='select-access-tier' style={{...styles.select, ...styles.accessTierSpacing}}>
+                    <select style={{...styles.selectInput, ...styles.accessTierSpacing}}
+                            value={accessTierShortName}
+                            onChange={(v: React.FormEvent<HTMLSelectElement>) => {
+                              const selectedTier = v.currentTarget.value;
+                              this.setState(fp.flow(
+                                fp.set(['workspace', 'accessTierShortName'], selectedTier),
+                                fp.set(['cdrVersions'], this.getCdrVersions(selectedTier)),
+                                fp.set(['workspace', 'cdrVersionId'],
+                                  getDefaultCdrVersionForTier(selectedTier, cdrVersionTiersResponse).cdrVersionId)));
+                            }}
+                            disabled={!this.isMode(WorkspaceEditMode.Create)}>
+                      {cdrVersionTiersResponse.tiers.map((tier, i) => (
+                          <option key={tier.accessTierShortName} value={tier.accessTierShortName}>
+                            {tier.accessTierDisplayName}
+                          </option>
+                      ))}
+                    </select>
+                  </div>
+                </TooltipTrigger>
+              </FlexColumn>}
+            <FlexColumn>
+              <div style={styles.fieldHeader}>
+                Dataset version
+                <TooltipTrigger content={toolTipText.cdrSelect}>
+                  <InfoIcon style={styles.infoIcon}/>
+                </TooltipTrigger>
+              </div>
+              <TooltipTrigger
                 content='To use a different dataset version, duplicate or create a new workspace.'
                 disabled={!(this.isMode(WorkspaceEditMode.Edit))}>
-              <div data-test-id='select-cdr-version' style={styles.select}>
-                <select style={{borderColor: 'rgb(151, 151, 151)', borderRadius: '6px',
-                  height: '1.5rem', width: '12rem'}}
+              <div data-test-id='select-cdr-version' style={{...styles.select, ...styles.cdrVersionSpacing}}>
+                <select style={{...styles.selectInput, ...styles.cdrVersionSpacing}}
                   value={cdrVersionId}
                   onChange={(v: React.FormEvent<HTMLSelectElement>) => {
                     const selectedVersion = v.currentTarget.value;
                     this.setState(fp.set(['workspace', 'cdrVersionId'], selectedVersion));
                     this.setState({showCdrVersionModal: selectedVersion !==
-                          getDefaultCdrVersionForTier(this.state.workspace, cdrVersionTiersResponse).cdrVersionId});
+                          getDefaultCdrVersionForTier(this.state.workspace.accessTierShortName, cdrVersionTiersResponse).cdrVersionId});
                   }}
                   disabled={this.isMode(WorkspaceEditMode.Edit)}>
-                    {cdrVersionItems.map((version, i) => (
+                    {cdrVersions.map((version, i) => (
                       <option key={version.cdrVersionId} value={version.cdrVersionId}>
                         {version.name}
                       </option>
@@ -1061,9 +1140,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
                 </select>
               </div>
             </TooltipTrigger>
-            <TooltipTrigger content={toolTipText.cdrSelect}>
-              <InfoIcon style={{...styles.infoIcon, marginTop: '0.4rem'}}/>
-            </TooltipTrigger>
+            </FlexColumn>
           </FlexRow>
         </WorkspaceEditSection>
         {this.isMode(WorkspaceEditMode.Duplicate) &&
@@ -1078,7 +1155,7 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         {(!this.isMode(WorkspaceEditMode.Edit) || this.props.workspace.accessLevel === WorkspaceAccessLevel.OWNER) &&
           <WorkspaceEditSection header={<div><AoU/> billing account</div>}
                                 description={this.renderBillingDescription()} descriptionStyle={{marginLeft: '0rem'}}>
-            <div style={{...styles.header, color: colors.primary, fontSize: 14, marginBottom: '0.2rem'}}>
+            <div style={styles.fieldHeader}>
               Select account
             </div>
             <OverlayPanel ref={(me) => freeTierBalancePanel = me} dismissable={true} appendTo={document.body}>
@@ -1480,5 +1557,4 @@ export const WorkspaceEdit = fp.flow(withCurrentWorkspace(), withCdrVersions(), 
         </div>
       </FadeBox> ;
     }
-
   });

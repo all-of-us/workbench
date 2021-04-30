@@ -113,7 +113,6 @@ import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetExportRequest;
-import org.pmiops.workbench.model.DataSetExportRequest.GenomicsAnalysisToolEnum;
 import org.pmiops.workbench.model.DataSetExportRequest.GenomicsDataTypeEnum;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
@@ -150,6 +149,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
@@ -189,6 +189,7 @@ public class DataSetControllerTest {
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
+  private static WorkbenchConfig workbenchConfig;
   private static DbUser currentUser;
   private Workspace workspace;
   private DbCdrVersion cdrVersion;
@@ -289,9 +290,8 @@ public class DataSetControllerTest {
     }
 
     @Bean
+    @Scope("prototype")
     WorkbenchConfig workbenchConfig() {
-      WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
-      workbenchConfig.billing.accountId = "free-tier";
       return workbenchConfig;
     }
 
@@ -316,6 +316,10 @@ public class DataSetControllerTest {
 
     doReturn(cdrBigQuerySchemaConfig).when(mockCdrBigQuerySchemaConfigService).getConfig();
 
+    workbenchConfig = WorkbenchConfig.createEmptyConfig();
+    workbenchConfig.billing.accountId = "free-tier";
+    workbenchConfig.featureFlags.enableGenomicExtraction = true;
+
     DbUser user = new DbUser();
     user.setUsername(USER_EMAIL);
     user.setUserId(123L);
@@ -325,7 +329,6 @@ public class DataSetControllerTest {
     currentUser = user;
 
     cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
-    cdrVersion.setMicroarrayBigqueryDataset("microarray");
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
     workspace = new Workspace();
@@ -726,14 +729,14 @@ public class DataSetControllerTest {
   }
 
   @Test
-  public void exportToNotebook_microarrayCodegen_cdrCheck() {
+  public void exportToNotebook_wgsCodegen_cdrCheck() {
     DbCdrVersion cdrVersion =
         cdrVersionDao.findByCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
-    cdrVersion.setMicroarrayBigqueryDataset(null);
+    cdrVersion.setWgsBigqueryDataset(null);
     cdrVersionDao.save(cdrVersion);
 
     DataSetExportRequest request =
-        setUpValidDataSetExportRequest().genomicsDataType(GenomicsDataTypeEnum.MICROARRAY);
+        setUpValidDataSetExportRequest().genomicsDataType(GenomicsDataTypeEnum.WHOLE_GENOME);
 
     FailedPreconditionException e =
         assertThrows(
@@ -743,15 +746,20 @@ public class DataSetControllerTest {
                     workspace.getNamespace(), WORKSPACE_NAME, request));
     assertThat(e)
         .hasMessageThat()
-        .contains("The workspace CDR version does not have microarray data");
+        .contains("The workspace CDR version does not have whole genome data");
   }
 
   @Test
-  public void exportToNotebook_microarrayCodegen_kernelCheck() {
+  public void exportToNotebook_wgsCodegen_kernelCheck() {
+    DbCdrVersion cdrVersion =
+        cdrVersionDao.findByCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
+    cdrVersion.setWgsBigqueryDataset("wgs");
+    cdrVersionDao.save(cdrVersion);
+
     DataSetExportRequest request =
         setUpValidDataSetExportRequest()
             .kernelType(KernelTypeEnum.R)
-            .genomicsDataType(GenomicsDataTypeEnum.MICROARRAY);
+            .genomicsDataType(GenomicsDataTypeEnum.WHOLE_GENOME);
 
     BadRequestException e =
         assertThrows(
@@ -760,114 +768,6 @@ public class DataSetControllerTest {
                 dataSetController.exportToNotebook(
                     workspace.getNamespace(), WORKSPACE_NAME, request));
     assertThat(e).hasMessageThat().contains("Genomics code generation is only supported in Python");
-  }
-
-  @Test
-  public void exportToNotebook_microarrayCodegen_noGenomicsTool() {
-    DataSetExportRequest request =
-        setUpValidDataSetExportRequest()
-            .genomicsDataType(GenomicsDataTypeEnum.MICROARRAY)
-            .genomicsAnalysisTool(GenomicsAnalysisToolEnum.NONE);
-
-    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
-
-    verify(mockNotebooksService, times(1))
-        .saveNotebook(
-            eq(WORKSPACE_BUCKET_NAME),
-            eq(request.getNotebookName()),
-            notebookContentsCaptor.capture());
-
-    List<String> codeCells = notebookContentsToStrings(notebookContentsCaptor.getValue());
-
-    assertThat(codeCells.size()).isEqualTo(5);
-    assertThat(codeCells.get(2)).contains("raw_array_cohort_extract.py");
-    assertThat(codeCells.get(3)).contains("ArrayExtractCohort");
-    assertThat(codeCells.get(4)).contains("gsutil cp");
-  }
-
-  @Test
-  public void exportToNotebook_microarrayCodegen_plink() {
-    DataSetExportRequest request =
-        setUpValidDataSetExportRequest()
-            .genomicsDataType(GenomicsDataTypeEnum.MICROARRAY)
-            .genomicsAnalysisTool(GenomicsAnalysisToolEnum.PLINK);
-
-    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
-
-    verify(mockNotebooksService, times(1))
-        .saveNotebook(
-            eq(WORKSPACE_BUCKET_NAME),
-            eq(request.getNotebookName()),
-            notebookContentsCaptor.capture());
-
-    List<String> codeCells = notebookContentsToStrings(notebookContentsCaptor.getValue());
-
-    assertThat(codeCells.size()).isEqualTo(7);
-    assertThat(codeCells.get(3)).contains("ArrayExtractCohort");
-    assertThat(codeCells.get(5)).contains("cohort_phenotypes.to_csv");
-    assertThat(codeCells.get(5)).contains(".phe");
-    assertThat(codeCells.get(6)).contains("plink");
-  }
-
-  List<String> notebookContentsToStrings(JSONObject notebookContents) {
-    List<String> codeCellStrings = new ArrayList<>();
-
-    JSONArray cells = notebookContents.getJSONArray("cells");
-    for (int i = 0; i < cells.length(); i++) {
-      StringBuilder cellString = new StringBuilder();
-      JSONArray innerCells = cells.getJSONObject(i).getJSONArray("source");
-
-      for (int j = 0; j < innerCells.length(); j++) {
-        cellString.append(innerCells.getString(j));
-      }
-
-      codeCellStrings.add(cellString.toString());
-    }
-
-    return codeCellStrings;
-  }
-
-  @Test
-  public void exportToNotebook_microarrayCodegen_hail() {
-    DataSetExportRequest request =
-        setUpValidDataSetExportRequest()
-            .genomicsDataType(GenomicsDataTypeEnum.MICROARRAY)
-            .genomicsAnalysisTool(GenomicsAnalysisToolEnum.HAIL);
-
-    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
-
-    verify(mockNotebooksService, times(1))
-        .saveNotebook(
-            eq(WORKSPACE_BUCKET_NAME),
-            eq(request.getNotebookName()),
-            notebookContentsCaptor.capture());
-
-    List<String> codeCells = notebookContentsToStrings(notebookContentsCaptor.getValue());
-
-    assertThat(codeCells.size()).isEqualTo(7);
-    assertThat(codeCells.get(3)).contains("ArrayExtractCohort");
-    assertThat(codeCells.get(5)).contains("cohort_phenotypes.to_csv");
-    assertThat(codeCells.get(5)).contains(".tsv");
-    assertThat(codeCells.get(6)).contains("import hail as hl");
-  }
-
-  @Test
-  public void exportToNotebook_microarrayCodegen_noneGenomicsDataType() {
-    DataSetExportRequest request =
-        setUpValidDataSetExportRequest()
-            .genomicsDataType(GenomicsDataTypeEnum.NONE)
-            .genomicsAnalysisTool(GenomicsAnalysisToolEnum.HAIL);
-
-    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
-
-    verify(mockNotebooksService, times(1))
-        .saveNotebook(
-            eq(WORKSPACE_BUCKET_NAME),
-            eq(request.getNotebookName()),
-            notebookContentsCaptor.capture());
-
-    List<String> codeCells = notebookContentsToStrings(notebookContentsCaptor.getValue());
-    assertThat(codeCells.size()).isEqualTo(1);
   }
 
   @Test
@@ -927,6 +827,16 @@ public class DataSetControllerTest {
   }
 
   @Test
+  public void testGenomicDataExtraction_featureDisabled() {
+    workbenchConfig.featureFlags.enableGenomicExtraction = false;
+    assertThat(
+            dataSetController
+                .extractGenomicData(workspace.getNamespace(), workspace.getName(), 501L)
+                .getStatusCode())
+        .isEqualTo(HttpStatus.NOT_IMPLEMENTED);
+  }
+
+  @Test
   public void testGenomicDataExtraction_notFound() {
     assertThrows(
         BadRequestException.class,
@@ -958,6 +868,26 @@ public class DataSetControllerTest {
     dataSetController.extractGenomicData(
         workspace.getNamespace(), workspace.getName(), dataSet.getId());
     verify(mockGenomicExtractionService, times(1)).submitGenomicExtractionJob(any(), any());
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void testAbortGenomicExtractionJob_readerCannotAbort() {
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("READER"));
+    dataSetController.abortGenomicExtractionJob(
+        workspace.getNamespace(), workspace.getName(), "lol");
+
+    verify(mockGenomicExtractionService, times(0)).getGenomicExtractionJobs(any(), any());
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void testAbortGenomicExtractionJob_noAccess() {
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("NO ACCESS"));
+    dataSetController.abortGenomicExtractionJob(
+        workspace.getNamespace(), workspace.getName(), "lol");
+
+    verify(mockGenomicExtractionService, times(0)).getGenomicExtractionJobs(any(), any());
   }
 
   DataSetRequest buildValidDataSetRequest() {

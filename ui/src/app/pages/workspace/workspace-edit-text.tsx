@@ -1,3 +1,4 @@
+import {FlexColumn} from 'app/components/flex';
 import {TooltipTrigger} from 'app/components/popups';
 import {AoU, AouTitle} from 'app/components/text-wrappers';
 import colors from 'app/styles/colors';
@@ -8,7 +9,6 @@ import {
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
-
 
 export const toolTipTextDemographic = 'For example, by stratifying results based on race/ethnicity, age, ' +
     'sex, gender identity, sexual orientation, geography, disability status, access to care, ' +
@@ -140,6 +140,12 @@ export const toolTipText = {
   cdrSelect: <div>The Curated Data Repository (CDR) is where research data from the <AouTitle/> is
     stored. The CDR is periodically updated as new data becomes available for
     use. You can select which version of the CDR you wish to query in this workspace.</div>,
+  tierSelect: <FlexColumn>
+    <div style={{fontWeight: 'bold'}}>Registered Tier dataset</div>
+    <div>This dataset includes surveys, electronic health records, biosamples, and physical measurements.</div>
+    <div style={{fontWeight: 'bold'}}>Controlled Tier dataset</div>
+    <div>This dataset contains expanded participant data, including genomics. Before you can access controlled tier data,
+    your institution will need to sign an amended agreement with the All of Us Data and Research Center.</div></FlexColumn>,
   researchPurpose: <div>You are required to describe your research purpose, or the reason why you
     are conducting this study. This information, along with your name, will be posted on the
     publicly available <i>All of Us</i> website (https://www.researchallofus.org/) to inform our

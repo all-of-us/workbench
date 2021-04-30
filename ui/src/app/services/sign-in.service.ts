@@ -34,6 +34,20 @@ export class SignInService {
   constructor(private zone: NgZone) {
     this.zone = zone;
 
+    // Set this as early as possible in the application boot-strapping process,
+    // so it's available for Puppeteer to call. If we need this even earlier in
+    // the page, it could go into something like main.ts, but ideally we'd keep
+    // this logic in one place, and keep main.ts minimal.
+    if (environment.allowTestAccessTokenOverride) {
+      window.setTestAccessTokenOverride = (token: string) => {
+        if (token) {
+          window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
+        } else {
+          window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
+        }
+      };
+    }
+
     if (serverConfigStore.get().config) {
       this.serverConfigStoreCallback(serverConfigStore.get().config);
     } else {
@@ -57,18 +71,11 @@ export class SignInService {
   }
 
   private serverConfigStoreCallback(config: ConfigResponse) {
-    // Enable test access token override via global function. Intended to support
+    // Enable test access token override via local storage. Intended to support
     // Puppeteer testing flows. This is handled in the server config callback
     // for signin timing consistency. Normally we cannot sign in until we've
     // loaded the oauth client ID from the config service.
     if (environment.allowTestAccessTokenOverride) {
-      window.setTestAccessTokenOverride = (token: string) => {
-        if (token) {
-          window.localStorage.setItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN, token);
-        } else {
-          window.localStorage.removeItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
-        }
-      };
       this.testAccessTokenOverride = window.localStorage.getItem(LOCAL_STORAGE_KEY_TEST_ACCESS_TOKEN);
       if (this.testAccessTokenOverride) {
         // The client has already configured an access token override. Skip the normal oauth flow.

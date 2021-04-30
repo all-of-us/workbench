@@ -448,7 +448,7 @@ export const DetailTabTable = withCurrentWorkspace()(
             if (domain === Domain.VITAL || domain === Domain.LAB) {
               item['itemTime'] = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('hh:mm a z');
             }
-            item.itemDate = moment(item.itemDate).format('YYYY-MM-DD');
+            item.itemDate = moment(item.itemDate, 'YYYY-MM-DD HH:mm Z').format('YYYY-MM-DD');
             return item;
           });
         });

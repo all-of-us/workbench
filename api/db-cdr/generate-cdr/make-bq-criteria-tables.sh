@@ -1138,70 +1138,70 @@ WHERE a.domain_id = 'SURVEY'
     and a.type = 'PPI'
 ORDER BY 1"
 
-echo "PPI SURVEYS - insert extra answers (Skip, Prefer Not To Answer, Dont Know)"
-bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
-"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-    (
-          id
-        , parent_id
-        , domain_id
-        , is_standard
-        , type
-        , subtype
-        , concept_id
-        , name
-        , value
-        , rollup_count
-        , is_group
-        , is_selectable
-        , has_attribute
-        , has_hierarchy
-        , path
-    )
-SELECT
-      ROW_NUMBER() OVER (ORDER BY e.id, d.answer) +
-        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as id
-    , e.id as parent_id
-    , e.domain_id
-    , e.is_standard
-    , e.type
-    , 'ANSWER'
-    , e.concept_id
-    , d.answer as name
-    , CAST(d.value_source_concept_id as STRING)
-    , 0
-    , 0
-    , 1
-    , 0
-    , 1
-    , CONCAT(e.path, '.',
-        CAST(ROW_NUMBER() OVER (ORDER BY e.id, d.answer) +
-        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS STRING))
-FROM
-    (
-        SELECT DISTINCT a.observation_source_concept_id
-            , a.value_source_concept_id
-            , regexp_replace(b.concept_name, r'^.+:\s', '') as answer  --remove 'PMI: ' from concept name (ex: PMI: Skip)
-        FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
-        JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.value_source_concept_id = b.concept_id
-        LEFT JOIN  --filter out items already in the table
-            (
-                SELECT *
-                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-                WHERE domain_id = 'SURVEY'
-            ) c on (a.observation_source_concept_id = c.concept_id and CAST(a.value_source_concept_id as STRING) = c.value)
-        WHERE a.value_source_concept_id in (903096, 903079, 903087)
-            and a.observation_source_concept_id in
-                (
-                    SELECT concept_id
-                    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-                    WHERE domain_id = 'SURVEY'
-                        and concept_id is not null
-                )
-            and c.id is null
-    ) d
-LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` e on
-    (d.observation_source_concept_id = e.concept_id and e.domain_id = 'SURVEY' and e.is_group = 1)"
+#echo "PPI SURVEYS - insert extra answers (Skip, Prefer Not To Answer, Dont Know)"
+#bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+#"INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+#    (
+#          id
+#        , parent_id
+#        , domain_id
+#        , is_standard
+#        , type
+#        , subtype
+#        , concept_id
+#        , name
+#        , value
+#        , rollup_count
+#        , is_group
+#        , is_selectable
+#        , has_attribute
+#        , has_hierarchy
+#        , path
+#    )
+#SELECT
+#      ROW_NUMBER() OVER (ORDER BY e.id, d.answer) +
+#        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as id
+#    , e.id as parent_id
+#    , e.domain_id
+#    , e.is_standard
+#    , e.type
+#    , 'ANSWER'
+#    , e.concept_id
+#    , d.answer as name
+#    , CAST(d.value_source_concept_id as STRING)
+#    , 0
+#    , 0
+#    , 1
+#    , 0
+#    , 1
+#    , CONCAT(e.path, '.',
+#        CAST(ROW_NUMBER() OVER (ORDER BY e.id, d.answer) +
+#        (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS STRING))
+#FROM
+#    (
+#        SELECT DISTINCT a.observation_source_concept_id
+#            , a.value_source_concept_id
+#            , regexp_replace(b.concept_name, r'^.+:\s', '') as answer  --remove 'PMI: ' from concept name (ex: PMI: Skip)
+#        FROM \`$BQ_PROJECT.$BQ_DATASET.observation\` a
+#        JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.value_source_concept_id = b.concept_id
+#        LEFT JOIN  --filter out items already in the table
+#            (
+#                SELECT *
+#                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+#                WHERE domain_id = 'SURVEY'
+#            ) c on (a.observation_source_concept_id = c.concept_id and CAST(a.value_source_concept_id as STRING) = c.value)
+#        WHERE a.value_source_concept_id in (903096, 903079, 903087)
+#            and a.observation_source_concept_id in
+#                (
+#                    SELECT concept_id
+#                    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+#                    WHERE domain_id = 'SURVEY'
+#                        and concept_id is not null
+#                )
+#            and c.id is null
+#    ) d
+#LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` e on
+#    (d.observation_source_concept_id = e.concept_id and e.domain_id = 'SURVEY' and e.is_group = 1)"
 
 # the concept_id of the answer, is the concept_id for the question
 # we do this because there are a few answers that are attached to a topic and we want to get those as well
@@ -1542,7 +1542,10 @@ SELECT
     , 1
     , 'GENDER'
     , concept_id
-    , CASE WHEN b.concept_id = 0 THEN 'Unknown' ELSE b.concept_name END as name
+    , CASE
+          WHEN b.concept_id = 0 THEN 'Unknown'
+          ELSE regexp_replace(b.concept_name, r'^.+:\s', '')
+      END as name
     , 0
     , a.cnt
     , a.cnt
@@ -1586,7 +1589,10 @@ then
       , 1
       , 'SEX'
       , concept_id
-      , CASE WHEN b.concept_id = 0 THEN 'Unknown' ELSE b.concept_name END as name
+      , CASE
+            WHEN b.concept_id = 0 THEN 'Unknown'
+            ELSE regexp_replace(b.concept_name, r'^.+:\s', '')
+        END as name
       , 0
       , a.cnt
       , a.cnt
@@ -1630,8 +1636,8 @@ SELECT
     , 'RACE'
     , concept_id
     , CASE
-        WHEN a.race_concept_id = 0 THEN 'Unknown'
-        ELSE regexp_replace(b.concept_name, r'^.+:\s', '')
+          WHEN a.race_concept_id = 0 THEN 'Unknown'
+          ELSE regexp_replace(b.concept_name, r'^.+:\s', '')
       END as name
     , 0
     , a.cnt

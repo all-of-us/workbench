@@ -20,7 +20,6 @@ export const PageTitle = 'Create|Duplicate Workspace';
 
 export const LabelAlias = {
   SELECT_BILLING: 'Select account', // select billing account
-  WORKSPACE_NAME: 'Workspace Name', // Workspace name input textbox
   RESEARCH_PURPOSE: 'Research purpose',
   EDUCATION_PURPOSE: 'Educational Purpose',
   FOR_PROFIT_PURPOSE: 'For-Profit Purpose',
@@ -67,6 +66,12 @@ export const LabelAlias = {
   SHARE_WITH_COLLABORATORS: 'Share workspace with the same set of collaborators' // visible when clone workspace
 };
 
+export const DataTestAlias = {
+  WORKSPACE_NAME: 'workspace-name',
+  ACCESS_TIER_SELECT: 'select-access-tier',
+  CDR_VERSION_SELECT: 'select-cdr-version'
+};
+
 export const FIELD = {
   createWorkspaceButton: {
     textOption: { name: LinkText.CreateWorkspace }
@@ -78,12 +83,13 @@ export const FIELD = {
     textOption: { name: LinkText.Cancel }
   },
   workspaceNameTextbox: {
-    textOption: { name: LabelAlias.WORKSPACE_NAME, ancestorLevel: 2, type: ElementType.Textbox }
+    textOption: { dataTestId: DataTestAlias.WORKSPACE_NAME, type: ElementType.Textbox }
+  },
+  accessTierSelect: {
+    textOption: { dataTestId: DataTestAlias.ACCESS_TIER_SELECT, type: ElementType.Select }
   },
   cdrVersionSelect: {
-    // Note: The CDR Version dropdown does not have a label of its own.
-    // Use the nearby Workspace Name instead.
-    textOption: { name: LabelAlias.WORKSPACE_NAME, type: ElementType.Select }
+    textOption: { dataTestId: DataTestAlias.CDR_VERSION_SELECT, type: ElementType.Select }
   },
   billingAccountSelect: {
     textOption: { name: LabelAlias.SELECT_BILLING, type: ElementType.Select }
@@ -259,6 +265,17 @@ export const FIELD = {
   }
 };
 
+// matches ui/src/app/utils/access-tiers.tsx
+export enum AccessTierShortNames {
+  Registered = 'registered',
+  Controlled = 'controlled'
+}
+
+export enum AccessTierDisplayNames {
+  Registered = 'Registered Tier',
+  Controlled = 'Controlled Tier'
+}
+
 export default class WorkspaceEditPage extends WorkspaceBase {
   constructor(page: Page) {
     super(page);
@@ -271,11 +288,12 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     // Wait for Workspace name text-field, Billing Account Select.
     await Promise.all([this.getWorkspaceNameTextbox().waitForXPath(), select.waitForXPath()]);
     // Build Workspace page is used for Duplicate and Create. Wait for Create or Duplicate button.
-    await Promise.race([
-      this.getCreateWorkspaceButton().waitForXPath({}),
-      this.getDuplicateWorkspaceButton().waitForXPath({})
-    ]);
+    await this.getCancelButton().waitForXPath();
     return true;
+  }
+
+  getDataAccessTierSelect(): Select {
+    return Select.findByName(this.page, FIELD.accessTierSelect.textOption);
   }
 
   /**
@@ -359,6 +377,15 @@ export default class WorkspaceEditPage extends WorkspaceBase {
   // Question 4. one of many checkboxes
   increaseWellnessResilience(): WebComponent {
     return new WebComponent(this.page, FIELD.DESCRIBE_ANTICIPATED_OUTCOMES.seeksIncreaseWellnessCheckbox.textOption);
+  }
+
+  /**
+   * Select Data Access Tier by name.
+   * @param {string} value
+   */
+  async selectAccessTier(value: string = AccessTierDisplayNames.Registered): Promise<string> {
+    const select = this.getDataAccessTierSelect();
+    return select.selectOption(value);
   }
 
   /**
@@ -463,5 +490,13 @@ export default class WorkspaceEditPage extends WorkspaceBase {
   async clickShareWithCollaboratorsCheckbox(): Promise<void> {
     const element = Checkbox.findByName(this.page, FIELD.shareWithCollaboratorsCheckbox.textOption);
     await element.check();
+  }
+
+  // Fill out only the fields needed for a successful duplication
+  async fillOutRequiredDuplicationFields(): Promise<string> {
+    await this.getWorkspaceNameTextbox().clear();
+    const workspaceName = await this.fillOutWorkspaceName();
+    await this.requestForReviewRadiobutton(false);
+    return workspaceName;
   }
 }

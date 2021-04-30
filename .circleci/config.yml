@@ -283,6 +283,11 @@ commands:
     steps:
       - restore_cache:
           key: v5-ui-cache-{{ .Branch }}-{{ checksum "~/workbench/ui/yarn.lock" }}
+      - gcloud-auth-login
+      - run:
+          name: "Download .npmrc file with Fontawesome Pro license key so FA icon SVG packages can be installed"
+          working_directory: ~/workbench
+          command: gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc .
       - run:
           working_directory: ~/workbench/ui
           command: yarn install --verbose --frozen-lockfile --non-interactive
@@ -510,10 +515,10 @@ jobs:
     executor: puppeteer-executor
     parameters:
       env_name:
-        description: The target environment for run Puppeteer end-to-end test. Must be one of "test", "staging", "local".
+        description: The target environment for run Puppeteer end-to-end test. Must be one of "test", "staging", "local", "perf".
         default: "test"
         type: enum
-        enum: ["test", "staging", "local"]
+        enum: ["test", "staging", "local", "perf"]
       test_mode:
         description: Switching between "nightly-integration" and normal "integration" test mode
         default: "integration"
