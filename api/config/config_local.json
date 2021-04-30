@@ -104,7 +104,7 @@
   },
   "access": {
     "enableComplianceTraining": true,
-    "enableEraCommons": false,
+    "enableEraCommons": true,
     "enableDataUseAgreement": true,
     "enableBetaAccess": false,
     "unsafeAllowSelfBypass": true,
