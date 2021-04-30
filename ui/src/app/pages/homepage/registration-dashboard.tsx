@@ -155,11 +155,11 @@ export const getRegistrationTasks = () => serverConfigStore.get().config ? ([
     title: 'Connect Your eRA Commons Account',
     description: 'Connect your Researcher Workbench account to your eRA Commons account. ' +
       'There is no exchange of personal data in this step.',
+    featureFlag: serverConfigStore.get().config.enableEraCommons,
     buttonText: 'Connect',
     completedText: 'Linked',
     completionTimestamp: (profile: Profile) => {
-      const {enableEraCommons} = serverConfigStore.get().config;
-      return !enableEraCommons || profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
+      return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
     },
     onClick: redirectToNiH
   }, {
