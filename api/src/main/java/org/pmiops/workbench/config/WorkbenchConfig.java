@@ -277,6 +277,8 @@ public class WorkbenchConfig {
     public boolean enableReportingUploadCron;
     // If true, user account setup requires linking eRA commons via RAS instead of Shibboleth.
     public boolean enableRasLoginGovLinking;
+    // If true, users can be expired on the system, losing access
+    public boolean enableAccessRenewal;
   }
 
   public static class ActionAuditConfig {
