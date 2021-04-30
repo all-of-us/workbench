@@ -57,7 +57,7 @@ public class NotebooksServiceTest {
   private static final String PREVIOUS_NOTEBOOK = "previous notebook";
 
   private static DbUser dbUser;
-  private static DbWorkspace dbWorkspace = new DbWorkspace();
+  private static DbWorkspace dbWorkspace;
 
   @MockBean private LogsBasedMetricService mockLogsBasedMetricsService;
 
@@ -96,6 +96,7 @@ public class NotebooksServiceTest {
     dbUser = userDao.save(dbUser);
 
     // workspaceDao is a mock, so we don't need to save the workspace
+    dbWorkspace = new DbWorkspace();
     dbWorkspace.setCdrVersion(
         TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao));
   }
