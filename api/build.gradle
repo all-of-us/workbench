@@ -29,7 +29,7 @@ buildscript {
 
   repositories {
     // Bintray's repository - a fast Maven Central mirror & more
-    jcenter()
+    mavenCentral()
     maven {
       url "https://plugins.gradle.org/m2/"
     }
@@ -358,7 +358,7 @@ clean.doFirst {
 }
 
 repositories {
-  jcenter()
+  mavenCentral()
 }
 
 // To show the dependency tree, try: ./project.rb gradle dependencies --configuration compile
