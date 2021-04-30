@@ -227,12 +227,13 @@ const getResponseText = async (request: Request): Promise<string> => {
 
 const logError = async (request: Request): Promise<void> => {
   const response = request.response();
+  const status = response ? response.status() : '';
   const failureText = request.failure() !== null ? stringifyData(request.failure().errorText) : '';
   const responseText = stringifyData(await getResponseText(request));
   logger.log(
     'error',
     'Request failed: %s %s %s\n%s %s',
-    response.status(),
+    status,
     request.method(),
     request.url(),
     responseText,
