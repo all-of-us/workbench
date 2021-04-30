@@ -97,6 +97,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
@@ -888,6 +889,32 @@ public class DataSetControllerTest {
         workspace.getNamespace(), workspace.getName(), "lol");
 
     verify(mockGenomicExtractionService, times(0)).getGenomicExtractionJobs(any(), any());
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void testGetDataset_wrongWorkspace() {
+    Workspace otherWorkspace = new Workspace();
+    otherWorkspace.setName("Other Workspace");
+    otherWorkspace.setResearchPurpose(new ResearchPurpose());
+    otherWorkspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
+    otherWorkspace.setBillingAccountName("billing-account");
+
+    otherWorkspace = workspacesController.createWorkspace(otherWorkspace).getBody();
+
+    when(fireCloudService.getWorkspace(otherWorkspace.getNamespace(), otherWorkspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("OWNER"));
+
+    DataSet dataSet = dataSetController.createDataSet(otherWorkspace.getNamespace(), otherWorkspace.getName(), buildValidDataSetRequest()).getBody();
+
+    dataSetController.getDataSet(workspace.getNamespace(), workspace.getName(), dataSet.getId());
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void testGetDataset_noAccess() {
+    DataSet dataSet = dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), buildValidDataSetRequest()).getBody();
+    when(fireCloudService.getWorkspace(workspace.getNamespace(), workspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("NO ACCESS"));
+    dataSetController.getDataSet(workspace.getNamespace(), workspace.getName(), dataSet.getId());
   }
 
   DataSetRequest buildValidDataSetRequest() {

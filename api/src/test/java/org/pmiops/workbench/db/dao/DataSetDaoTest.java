@@ -7,7 +7,9 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -101,5 +103,62 @@ public class DataSetDaoTest extends SpringTest {
     assertThat(dataset2.getCohortIds())
         .containsExactly(dbCohort1.getCohortId(), dbCohort2.getCohortId());
     assertThat(dataset2.getCohortIds()).doesNotContain(0);
+  }
+
+  @Test
+  public void testFindByDataSetIdAndWorkspaceId() {
+    final DbDataset dbDataset = dataSetDao.save(ReportingTestUtils.createDbDataset(workspace.getWorkspaceId()));
+
+    Optional<DbDataset> actual = dataSetDao.findByDataSetIdAndWorkspaceId(dbDataset.getDataSetId(), workspace.getWorkspaceId());
+
+    assertThat(actual.isPresent()).isTrue();
+  }
+
+  @Test
+  public void testFindByDataSetIdAndWorkspaceId_noMatch() {
+    DbWorkspace dbWorkspace = workspaceDao.save(new DbWorkspace());
+
+    final DbDataset dbDataset = dataSetDao.save(ReportingTestUtils.createDbDataset(dbWorkspace.getWorkspaceId()));
+
+    Optional<DbDataset> actual = dataSetDao.findByDataSetIdAndWorkspaceId(dbDataset.getDataSetId(), workspace.getWorkspaceId());
+
+    assertThat(actual.isPresent()).isFalse();
+  }
+
+  @Test
+  public void testFindDataSetsByCohortIdsAndWorkspaceId() {
+    DbCohort dbCohort = new DbCohort();
+    dbCohort.setName("Cohort");
+    dbCohort.setWorkspaceId(workspace.getWorkspaceId());
+    dbCohort = cohortDao.save(dbCohort);
+
+    DbDataset dbDataset1 = ReportingTestUtils.createDbDataset(workspace.getWorkspaceId());
+    dbDataset1.setCohortIds(ImmutableList.of(dbCohort.getCohortId()));
+    dbDataset1 = dataSetDao.save(dbDataset1);
+
+    DbDataset dbDataset2 = ReportingTestUtils.createDbDataset(workspace.getWorkspaceId());
+    dbDataset2.setCohortIds(ImmutableList.of(dbCohort.getCohortId()));
+    dbDataset2 = dataSetDao.save(dbDataset2);
+
+    List<DbDataset> actual = dataSetDao.findDataSetsByCohortIdsAndWorkspaceId(dbCohort.getCohortId(), workspace.getWorkspaceId());
+    assertThat(actual.size()).isEqualTo(2);
+    assertThat(actual).containsAllIn(ImmutableList.of(dbDataset1, dbDataset2));
+  }
+
+  @Test
+  public void testFindDataSetsByCohortIdsAndWorkspaceId_noMatch() {
+    DbCohort dbCohort = new DbCohort();
+    dbCohort.setName("Cohort");
+    dbCohort.setWorkspaceId(workspace.getWorkspaceId());
+    dbCohort = cohortDao.save(dbCohort);
+
+    DbDataset dbDataset = ReportingTestUtils.createDbDataset(workspace.getWorkspaceId());
+    dbDataset.setCohortIds(ImmutableList.of(dbCohort.getCohortId()));
+    dbDataset = dataSetDao.save(dbDataset);
+
+    DbWorkspace otherWorkspace = workspaceDao.save(new DbWorkspace());
+
+    List<DbDataset> actual = dataSetDao.findDataSetsByCohortIdsAndWorkspaceId(dbCohort.getCohortId(), otherWorkspace.getWorkspaceId());
+    assertThat(actual.size()).isEqualTo(0);
   }
 }

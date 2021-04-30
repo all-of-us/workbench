@@ -85,7 +85,6 @@ public class DataSetController implements DataSetApiDelegate {
 
   private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
-  private final BigQueryService bigQueryService;
   private final CohortService cohortService;
   private final ConceptSetService conceptSetService;
   private final DataSetService dataSetService;
