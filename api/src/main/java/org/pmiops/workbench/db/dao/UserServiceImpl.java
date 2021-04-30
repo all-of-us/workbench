@@ -15,8 +15,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
@@ -93,6 +95,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
   private final AccessTierService accessTierService;
+
+  private final Supplier<Timestamp> expirationTime =
+      () ->
+          new Timestamp(
+              Instant.now().toEpochMilli() - TimeUnit.MILLISECONDS.convert(365, TimeUnit.DAYS));
+  private final Function<Timestamp, Boolean> notExpired =
+      (completionTime) -> expirationTime.get().after(completionTime);
 
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
@@ -210,36 +219,51 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
   }
 
-  private boolean shouldUserBeRegistered(DbUser user) {
-    boolean dataUseAgreementCompliant = false;
+  public boolean isNotExpired(Timestamp completionTime) {
+    if (configProvider.get().featureFlags.enableAccessRenewal == false) {
+      return completionTime != null && notExpired.apply(completionTime);
+    }
+    return true;
+  }
+
+  private boolean isDataUseAgreementCompliant(DbUser user) {
     if (user.getDataUseAgreementBypassTime() != null
         || !configProvider.get().access.enableDataUseAgreement) {
       // Data use agreement version may be ignored, since it's bypassed on the user or env level.
-      dataUseAgreementCompliant = true;
+      return true;
     } else if (user.getDataUseAgreementSignedVersion() != null
-        && user.getDataUseAgreementSignedVersion() == getCurrentDuccVersion()) {
+        && user.getDataUseAgreementSignedVersion() == getCurrentDuccVersion()
+        && isNotExpired(user.getDataUseAgreementCompletionTime())) {
       // User has signed the most-recent DUCC version.
-      dataUseAgreementCompliant = true;
+      return true;
     }
-    boolean eraCommonsCompliant =
-        user.getEraCommonsBypassTime() != null
-            || !configProvider.get().access.enableEraCommons
-            || user.getEraCommonsCompletionTime() != null;
-    boolean complianceTrainingCompliant =
-        user.getComplianceTrainingCompletionTime() != null
-            || user.getComplianceTrainingBypassTime() != null
-            || !configProvider.get().access.enableComplianceTraining;
+    return false;
+  }
+
+  private boolean isEraCommonsCompliant(DbUser user) {
+    return user.getEraCommonsBypassTime() != null
+        || !configProvider.get().access.enableEraCommons
+        || isNotExpired(user.getEraCommonsCompletionTime());
+  }
+
+  private boolean isComplianceTrainingCompliant(DbUser user) {
+    return user.getComplianceTrainingBypassTime() != null
+        || isNotExpired(user.getComplianceTrainingCompletionTime())
+        || !configProvider.get().access.enableComplianceTraining;
+  }
+
+  private boolean shouldUserBeRegistered(DbUser user) {
     boolean betaAccessGranted =
         user.getBetaAccessBypassTime() != null || !configProvider.get().access.enableBetaAccess;
     boolean twoFactorAuthComplete =
         user.getTwoFactorAuthCompletionTime() != null || user.getTwoFactorAuthBypassTime() != null;
     // TODO: can take out other checks once we're entirely moved over to the 'module' columns
     return !user.getDisabled()
-        && complianceTrainingCompliant
-        && eraCommonsCompliant
+        && isComplianceTrainingCompliant(user)
+        && isEraCommonsCompliant(user)
         && betaAccessGranted
         && twoFactorAuthComplete
-        && dataUseAgreementCompliant
+        && isDataUseAgreementCompliant(user)
         && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
   }
 
