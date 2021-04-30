@@ -613,6 +613,7 @@ public class WorkspacesControllerTest extends SpringTest {
     assertThat(workspace2.getCreationTime()).isEqualTo(NOW_TIME);
     assertThat(workspace2.getLastModifiedTime()).isEqualTo(NOW_TIME);
     assertThat(workspace2.getCdrVersionId()).isEqualTo(cdrVersionId);
+    assertThat(workspace2.getAccessTierShortName()).isEqualTo(accessTier.getShortName());
     assertThat(workspace2.getCreator()).isEqualTo(LOGGED_IN_USER_EMAIL);
     assertThat(workspace2.getId()).isEqualTo("name");
     assertThat(workspace2.getName()).isEqualTo("name");
@@ -744,6 +745,41 @@ public class WorkspacesControllerTest extends SpringTest {
     Workspace workspace = createWorkspace();
     workspace.setCdrVersionId(archivedCdrVersionId);
     workspacesController.createWorkspace(workspace).getBody();
+  }
+
+  // we do not actually use the accessTierShortName of the Workspace passed to
+  // createWorkspace() - instead we derive it from the cdrVersionId
+
+  @Test
+  public void testCreateWorkspace_accessTierIgnored() {
+    final Workspace requestedWorkspace = createWorkspace();
+    assertThat(requestedWorkspace.getAccessTierShortName()).isNull();
+    requestedWorkspace.setAccessTierShortName("some nonsense value!");
+
+    final Workspace createdWorkspace =
+        workspacesController.createWorkspace(requestedWorkspace).getBody();
+    assertThat(createdWorkspace.getAccessTierShortName()).isEqualTo(accessTier.getShortName());
+  }
+
+  @Test
+  public void testCreateWorkspace_accessTierIgnored_controlled() {
+    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+
+    DbCdrVersion controlledTierCdr =
+        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
+    controlledTierCdr.setAccessTier(controlledTier);
+    controlledTierCdr = cdrVersionDao.save(controlledTierCdr);
+
+    final Workspace requestedWorkspace = createWorkspace();
+    assertThat(requestedWorkspace.getAccessTierShortName()).isNull();
+
+    requestedWorkspace.setCdrVersionId(String.valueOf(controlledTierCdr.getCdrVersionId()));
+    // even if we pretend it's registered - the CDR Version will override this
+    requestedWorkspace.setAccessTierShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME);
+
+    final Workspace createdWorkspace =
+        workspacesController.createWorkspace(requestedWorkspace).getBody();
+    assertThat(createdWorkspace.getAccessTierShortName()).isEqualTo(controlledTier.getShortName());
   }
 
   @Test

@@ -211,5 +211,4 @@ export default class WorkspaceCard extends CardBase {
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(false);
     }
   }
-
 }
