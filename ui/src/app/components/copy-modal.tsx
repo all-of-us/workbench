@@ -128,7 +128,6 @@ const NotebookRestrictionText = () => <div style={styles.restriction}>
 class CopyModalComponent extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-
     this.state = {
       workspaceOptions: [],
       newName: props.fromResourceName,
@@ -328,8 +327,6 @@ class CopyModalComponent extends React.Component<Props, State> {
 
   validateAndSetDestination(destination: Workspace) {
     const {fromCdrVersionId, fromAccessTierShortName, resourceType} = this.props;
-
-    console.log('fromAccessTierShortName = ' + fromAccessTierShortName);
 
     this.clearCopyError();
 

@@ -5920,7 +5920,7 @@ definitions:
       - workspaceFirecloudName
       - workspaceBillingStatus
       - cdrVersionId
-      - accessTiershortName
+      - accessTierShortName
       - permission
       - modifiedTime
     properties:

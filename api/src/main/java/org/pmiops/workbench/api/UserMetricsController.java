@@ -284,6 +284,7 @@ public class UserMetricsController implements UserMetricsApiDelegate {
 
   private void buildFromDbWorkspace(WorkspaceResource resource, DbWorkspace dbWorkspace) {
     resource.setCdrVersionId(commonMappers.cdrVersionToId(dbWorkspace.getCdrVersion()));
+    resource.setAccessTierShortName(dbWorkspace.getCdrVersion().getAccessTier().getShortName());
     resource.setWorkspaceBillingStatus(dbWorkspace.getBillingStatus());
   }
 
