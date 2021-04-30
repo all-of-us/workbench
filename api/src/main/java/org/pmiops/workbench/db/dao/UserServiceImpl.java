@@ -101,7 +101,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
           new Timestamp(
               Instant.now().toEpochMilli() - TimeUnit.MILLISECONDS.convert(365, TimeUnit.DAYS));
   private final Function<Timestamp, Boolean> notExpired =
-      (completionTime) -> expirationTime.get().after(completionTime);
+      (completionTime) -> expirationTime.get().before(completionTime);
 
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
@@ -220,7 +220,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   public boolean isNotExpired(Timestamp completionTime) {
-    if (configProvider.get().access.enableAccessRenewal == false) {
+    if (configProvider.get().access.enableAccessRenewal) {
       return completionTime != null && notExpired.apply(completionTime);
     }
     return true;
