@@ -207,7 +207,7 @@ export const AdminUsers = withUserProfile()(class extends React.Component<Props,
 
   render() {
     const {contentLoaded, filter, loading, users} = this.state;
-    const {enableBetaAccess, enableComplianceTraining, enableEraCommons, enableDataUseAgreement, enableRasLoginGovLinking} = serverConfigStore.get().config;
+    const {enableComplianceTraining, enableEraCommons, enableDataUseAgreement, enableRasLoginGovLinking} = serverConfigStore.get().config;
     return <div style={{position: 'relative'}}>
       <h2>User Admin Table</h2>
       {loading &&
