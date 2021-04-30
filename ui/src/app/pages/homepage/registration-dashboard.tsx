@@ -158,7 +158,8 @@ export const getRegistrationTasks = () => serverConfigStore.get().config ? ([
     buttonText: 'Connect',
     completedText: 'Linked',
     completionTimestamp: (profile: Profile) => {
-      return profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
+      const {enableEraCommons} = serverConfigStore.get().config;
+      return !enableEraCommons || profile.eraCommonsCompletionTime || profile.eraCommonsBypassTime;
     },
     onClick: redirectToNiH
   }, {
