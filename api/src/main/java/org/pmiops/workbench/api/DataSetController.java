@@ -169,24 +169,14 @@ public class DataSetController implements DataSetApiDelegate {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-    Optional<DbDataset> dbDataset =
-        dataSetService.getDbDataSet(dataSetRequest.getDataSetId(), dbWorkspace.getWorkspaceId());
-    if (!dbDataset.isPresent()) {
-      throw new NotFoundException(
-          "No DataSet found for dataSetId "
-              + dataSetRequest.getDataSetId()
-              + "and workspaceId "
-              + workspaceId);
-    }
 
-    final KernelTypeEnum kernelTypeEnum = KernelTypeEnum.fromValue(kernelTypeEnumString);
+    validateDataSetRequestResources(dbWorkspace.getWorkspaceId(), dataSetRequest);
 
     // Generate query per domain for the selected concept set, cohort and values
-    // TODO(jaycarlton): return better error information form this function for common validation
-    // scenarios
-    if (dataSetRequest.getWorkspaceId() == null) {
-      dataSetRequest.setWorkspaceId(dbWorkspace.getWorkspaceId());
-    }
+    // TODO(calbach): I don't understand what this was trying to support - the inner workspaceId is
+    // not documented, and allowing this to be a different value than what is sent in the URL is
+    // a potential security issue.
+    dataSetRequest.setWorkspaceId(dbWorkspace.getWorkspaceId());
     final Map<String, QueryJobConfiguration> bigQueryJobConfigsByDomain =
         dataSetService.domainToBigQueryConfig(dataSetRequest);
 
@@ -194,8 +184,8 @@ public class DataSetController implements DataSetApiDelegate {
       log.warning("Empty query map generated for this DataSetRequest");
     }
 
-    String qualifier = generateRandomEightCharacterQualifier();
-
+    final String qualifier = generateRandomEightCharacterQualifier();
+    final KernelTypeEnum kernelTypeEnum = KernelTypeEnum.fromValue(kernelTypeEnumString);
     final ImmutableList<String> codeCells =
         ImmutableList.copyOf(
             dataSetService.generateCodeCells(
@@ -216,29 +206,9 @@ public class DataSetController implements DataSetApiDelegate {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-
-    List<Long> cohortIds =
-        cohortService.findByWorkspaceId(dbWorkspace.getWorkspaceId()).stream()
-            .map(Cohort::getId)
-            .collect(Collectors.toList());
-
-    if (!cohortIds.containsAll(dataSetPreviewRequest.getCohortIds())) {
-      throw new NotFoundException(
-          "Not all cohorts in preview request exist in workspace " + dbWorkspace.getName());
-    }
-
-    List<Long> conceptSetIds =
-        conceptSetService.findByWorkspaceId(dbWorkspace.getWorkspaceId()).stream()
-            .map(ConceptSet::getId)
-            .collect(Collectors.toList());
-
-    if (!conceptSetIds.containsAll(dataSetPreviewRequest.getConceptSetIds())) {
-      throw new NotFoundException(
-          "Not all concept sets in preview request exist in workspace " + dbWorkspace.getName());
-    }
+    validateDataSetPreviewRequestResources(dbWorkspace.getWorkspaceId(), dataSetPreviewRequest);
 
     List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
-
     TableResult queryResponse = dataSetService.previewBigQueryJobConfig(dataSetPreviewRequest);
 
     if (queryResponse.getTotalRows() != 0) {
@@ -318,18 +288,11 @@ public class DataSetController implements DataSetApiDelegate {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    Optional<DbDataset> dbDataset =
-        dataSetService.getDbDataSet(
-            dataSetExportRequest.getDataSetRequest().getDataSetId(), dbWorkspace.getWorkspaceId());
-    if (!dbDataset.isPresent()) {
-      throw new NotFoundException(
-          "No DataSet found for dataSetId "
-              + dataSetExportRequest.getDataSetRequest().getDataSetId()
-              + "and workspaceId "
-              + workspaceId);
-    }
-
     workspaceAuthService.validateActiveBilling(workspaceNamespace, workspaceId);
+
+    validateDataSetRequestResources(
+        dbWorkspace.getWorkspaceId(), dataSetExportRequest.getDataSetRequest());
+
     // This suppresses 'may not be initialized errors. We will always init to something else before
     // used.
     JSONObject notebookFile = new JSONObject();
@@ -381,9 +344,9 @@ public class DataSetController implements DataSetApiDelegate {
       }
     }
 
-    if (dataSetExportRequest.getDataSetRequest().getWorkspaceId() == null) {
-      dataSetExportRequest.getDataSetRequest().setWorkspaceId(dbWorkspace.getWorkspaceId());
-    }
+    // TODO(calbach): Verify whether the request payload is ever expected toinclude a different
+    // workspace ID.
+    dataSetExportRequest.getDataSetRequest().setWorkspaceId(dbWorkspace.getWorkspaceId());
     Map<String, QueryJobConfiguration> queriesByDomain =
         dataSetService.domainToBigQueryConfig(dataSetExportRequest.getDataSetRequest());
 
@@ -438,6 +401,43 @@ public class DataSetController implements DataSetApiDelegate {
     return ResponseEntity.ok(new EmptyResponse());
   }
 
+  /** Validate that the requested resources are contained by the given workspace. */
+  private void validateDataSetRequestResources(long workspaceId, DataSetRequest request) {
+    if (request.getDataSetId() != null) {
+      mustGetDbDataset(workspaceId, request.getDataSetId());
+    } else {
+      validateCohortsInWorkspace(workspaceId, request.getCohortIds());
+      validateConceptSetsInWorkspace(workspaceId, request.getCohortIds());
+    }
+  }
+
+  private void validateDataSetPreviewRequestResources(
+      long workspaceId, DataSetPreviewRequest request) {
+    validateCohortsInWorkspace(workspaceId, request.getCohortIds());
+    validateConceptSetsInWorkspace(workspaceId, request.getConceptSetIds());
+  }
+
+  private void validateCohortsInWorkspace(long workspaceId, List<Long> cohortIds) {
+    List<Long> workspaceCohortIds =
+        cohortService.findByWorkspaceId(workspaceId).stream()
+            .map(Cohort::getId)
+            .collect(Collectors.toList());
+
+    if (!workspaceCohortIds.containsAll(cohortIds)) {
+      throw new NotFoundException("one or more of the requested cohorts were not found");
+    }
+  }
+
+  private void validateConceptSetsInWorkspace(long workspaceId, List<Long> conceptSetIds) {
+    List<Long> workspaceConceptSetIds =
+        conceptSetService.findByWorkspaceId(workspaceId).stream()
+            .map(ConceptSet::getId)
+            .collect(Collectors.toList());
+    if (!workspaceConceptSetIds.containsAll(conceptSetIds)) {
+      throw new NotFoundException("one or more of the requested concept sets were not found");
+    }
+  }
+
   @Override
   public ResponseEntity<Boolean> markDirty(
       String workspaceNamespace, String workspaceId, MarkDataSetRequest markDataSetRequest) {
@@ -445,9 +445,9 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     dataSetService.markDirty(
+        dbWorkspace.getWorkspaceId(),
         markDataSetRequest.getResourceType(),
-        markDataSetRequest.getId(),
-        dbWorkspace.getWorkspaceId());
+        markDataSetRequest.getId());
     return ResponseEntity.ok(true);
   }
 
@@ -458,7 +458,7 @@ public class DataSetController implements DataSetApiDelegate {
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    dataSetService.deleteDataSet(dataSetId, dbWorkspace.getWorkspaceId());
+    dataSetService.deleteDataSet(dbWorkspace.getWorkspaceId(), dataSetId);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -473,7 +473,7 @@ public class DataSetController implements DataSetApiDelegate {
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     return ResponseEntity.ok(
-        dataSetService.updateDataSet(request, dataSetId, dbWorkspace.getWorkspaceId()));
+        dataSetService.updateDataSet(dbWorkspace.getWorkspaceId(), dataSetId, request));
   }
 
   @Override
@@ -485,7 +485,7 @@ public class DataSetController implements DataSetApiDelegate {
 
     DataSet dataSet =
         dataSetService
-            .getDataSet(dataSetId, dbWorkspace.getWorkspaceId())
+            .getDataSet(dbWorkspace.getWorkspaceId(), dataSetId)
             .<NotFoundException>orElseThrow(
                 () -> {
                   throw new NotFoundException(
@@ -507,7 +507,7 @@ public class DataSetController implements DataSetApiDelegate {
 
     return ResponseEntity.ok(
         new DataSetListResponse()
-            .items(dataSetService.getDataSets(resourceType, id, dbWorkspace.getWorkspaceId())));
+            .items(dataSetService.getDataSets(dbWorkspace.getWorkspaceId(), resourceType, id)));
   }
 
   @Override
@@ -557,13 +557,7 @@ public class DataSetController implements DataSetApiDelegate {
       throw new BadRequestException("Workspace CDR does not have access to WGS data");
     }
 
-    DbDataset dataSet =
-        dataSetService
-            .getDbDataSet(dataSetId, workspace.getWorkspaceId())
-            .<NotFoundException>orElseThrow(
-                () -> {
-                  throw new NotFoundException("No DataSet found for dataSetId: " + dataSetId);
-                });
+    DbDataset dataSet = mustGetDbDataset(workspace.getWorkspaceId(), dataSetId);
     try {
       return ResponseEntity.ok(
           genomicExtractionService.submitGenomicExtractionJob(workspace, dataSet));
@@ -612,5 +606,17 @@ public class DataSetController implements DataSetApiDelegate {
         throw new ServerErrorException(e);
       }
     }
+  }
+
+  private DbDataset mustGetDbDataset(long workspaceId, long dataSetId) {
+    return dataSetService
+        .getDbDataSet(workspaceId, dataSetId)
+        .<NotFoundException>orElseThrow(
+            () -> {
+              throw new NotFoundException(
+                  String.format(
+                      "No DataSet found for workspaceId: %s, dataSetId: %s",
+                      workspaceId, dataSetId));
+            });
   }
 }

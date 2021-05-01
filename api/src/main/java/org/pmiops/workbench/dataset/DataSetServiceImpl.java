@@ -247,7 +247,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
-  public DataSet updateDataSet(DataSetRequest request, Long dataSetId, Long workspaceId) {
+  public DataSet updateDataSet(long workspaceId, long dataSetId, DataSetRequest request) {
     Optional<DbDataset> dbDataSet =
         dataSetDao.findByDataSetIdAndWorkspaceId(dataSetId, workspaceId);
 
@@ -818,14 +818,14 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     return cohortDao.findAllByCohortIdIn(dataSetDao.findOne(dataSet.getDataSetId()).getCohortIds());
   }
 
-  public List<DataSet> getDataSets(ResourceType resourceType, long resourceId, long workspaceId) {
-    return getDbDataSets(resourceType, resourceId, workspaceId).stream()
+  public List<DataSet> getDataSets(long workspaceId, ResourceType resourceType, long resourceId) {
+    return getDbDataSets(workspaceId, resourceType, resourceId).stream()
         .map(dataSetMapper::dbModelToClient)
         .collect(Collectors.toList());
   }
 
-  public List<DbDataset> getDbDataSets(
-      ResourceType resourceType, long resourceId, long workspaceId) {
+  private List<DbDataset> getDbDataSets(
+      long workspaceId, ResourceType resourceType, long resourceId) {
     List<DbDataset> dbDataSets = new ArrayList<>();
     switch (resourceType) {
       case COHORT:
@@ -847,7 +847,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
-  public void deleteDataSet(Long dataSetId, Long workspaceId) {
+  public void deleteDataSet(long workspaceId, long dataSetId) {
     Optional<DbDataset> dbDataset = this.getDbDataSet(dataSetId, workspaceId);
     if (!dbDataset.isPresent()) {
       throw new NotFoundException(
@@ -857,20 +857,20 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
-  public Optional<DataSet> getDataSet(Long dataSetId, Long workspaceId) {
+  public Optional<DataSet> getDataSet(long workspaceId, long dataSetId) {
     return dataSetDao
         .findByDataSetIdAndWorkspaceId(dataSetId, workspaceId)
         .map(dataSetMapper::dbModelToClient);
   }
 
   @Override
-  public Optional<DbDataset> getDbDataSet(Long dataSetId, Long workspaceId) {
+  public Optional<DbDataset> getDbDataSet(long workspaceId, long dataSetId) {
     return dataSetDao.findByDataSetIdAndWorkspaceId(dataSetId, workspaceId);
   }
 
   @Override
-  public void markDirty(ResourceType resourceType, long resourceId, long workspaceId) {
-    List<DbDataset> dbDataSetList = getDbDataSets(resourceType, resourceId, workspaceId);
+  public void markDirty(long workspaceId, ResourceType resourceType, long resourceId) {
+    List<DbDataset> dbDataSetList = getDbDataSets(workspaceId, resourceType, resourceId);
     dbDataSetList.forEach(dataSet -> dataSet.setInvalid(true));
     try {
       dataSetDao.save(dbDataSetList);
