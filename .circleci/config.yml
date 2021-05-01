@@ -472,7 +472,7 @@ jobs:
             ./project.rb deploy-ui \
               --project all-of-us-workbench-test \
               --account << pipeline.parameters.circle-service-account >> \
-              --version circle-ci-test-$CIRCLE_BUILD_NUM \
+              --version circle-ci-test \
               --key-file circle-sa-key.json \
               --promote
 
@@ -490,7 +490,7 @@ jobs:
             ./project.rb deploy \
               --project all-of-us-workbench-test \
               --account << pipeline.parameters.circle-service-account >> \
-              --version circle-ci-test-$CIRCLE_BUILD_NUM \
+              --version circle-ci-test \
               --key-file circle-sa-key.json \
               --promote
 
