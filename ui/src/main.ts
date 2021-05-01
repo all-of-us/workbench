@@ -19,6 +19,7 @@ if (!environment.debug) {
 setupCustomValidators();
 ReactModal.defaultStyles.overlay = {};
 ReactModal.defaultStyles.content = {};
+
 const domContainer = document.querySelector('#error-handler-root');
 ReactDOM.render(React.createElement(ErrorHandler), domContainer);
 
