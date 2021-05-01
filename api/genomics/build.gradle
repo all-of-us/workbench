@@ -2,7 +2,10 @@ apply plugin: 'java'
 apply plugin: 'idea'
 
 repositories {
-    jcenter()
+    mavenCentral()
+    maven {
+        url 'https://broadinstitute.jfrog.io/broadinstitute/libs-release/'
+    }
 }
 
 dependencies {

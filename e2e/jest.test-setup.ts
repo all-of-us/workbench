@@ -44,7 +44,14 @@ beforeEach(async () => {
       });
   });
 
-  /** Emitted when a request fails. */
+  // Emitted when a request fails: 4xx..5xx status codes
+  page.on('requestfailed', async (request) => {
+    if (canLogResponse(request)) {
+      await logError(request);
+    }
+  });
+
+  /** Emitted when a request finishes. */
   page.on('requestfinished', async (request: Request) => {
     let method;
     let url;
@@ -56,7 +63,6 @@ beforeEach(async () => {
         const resp = request.response();
         url = resp.url();
         status = resp.status();
-
         if (isApiFailure(request)) {
           await logError(request);
         } else {
@@ -90,13 +96,12 @@ beforeEach(async () => {
     if (!message.args().length) return;
     const title = await getPageTitle();
     try {
-      const args = await Promise.all(message.args().map((a) => describeJsHandle(a)));
+      const args = await Promise.all(message.args().map((jsHandle) => describeJsHandle(jsHandle)));
+      const concatenatedText = args.filter((arg) => !!arg).join('\n');
       const msgType = message.type() === 'warning' ? 'warn' : message.type();
-      logger.info(`Page Console ${msgType.toUpperCase()}: "${title}"`);
-      console.log(args);
-      console.log('');
+      logger.info(`Page Console ${msgType.toUpperCase()}: "${title}"\n${concatenatedText}`);
     } catch (err) {
-      console.error(`❗ "${title}"\nException occurred when getting page console message.\n${err}\n${message.text()}`);
+      console.error(`❗ "${title}"\nException occurred when getting page console message.\n${err}`);
     }
   });
 
@@ -104,8 +109,7 @@ beforeEach(async () => {
   page.on('error', async (error: Error) => {
     const title = await getPageTitle();
     try {
-      logger.error('PAGE ERROR: "$title}"');
-      logger.error(JSON.stringify(error, null, 2));
+      logger.error(`PAGE ERROR: "${title}"\n${error}`);
     } catch (err) {
       console.error(`❗ "${title}"\nException occurred when getting page error.\n${err}`);
     }
@@ -115,8 +119,7 @@ beforeEach(async () => {
   page.on('pageerror', async (error: Error) => {
     const title = await getPageTitle();
     try {
-      logger.error('PAGEERROR: "$title}"');
-      logger.error(JSON.stringify(error, null, 2));
+      logger.error(`PAGEERROR: "${title}"\n${error}`);
     } catch (err) {
       console.error(`❗ "${title}"\nPage exception occurred when getting pageerror.\n${err}`);
     }
@@ -139,12 +142,7 @@ const getPageTitle = async () => {
 
 const describeJsHandle = async (jsHandle: JSHandle): Promise<string> => {
   return jsHandle.executionContext().evaluate((obj) => {
-    // Get error message if obj is an error. Error is not serializable.
-    if (obj instanceof Error) {
-      return obj.message;
-    }
-    // Return JSON value of the argument or `undefined`.
-    return obj.toString();
+    return obj;
   }, jsHandle);
 };
 
@@ -214,17 +212,30 @@ const notRedirectRequest = (request: Request): boolean => {
 };
 
 const getResponseText = async (request: Request): Promise<string> => {
-  return (await request.response().buffer()).toString();
+  const REDIRECT_CODE_START = 300;
+  const REDIRECT_CODE_END = 308;
+  const NO_CONTENT_RESPONSE_CODE = 204;
+  const response = request.response();
+  // Log response if response it's not a redirect or no-content
+  const status = response && response.status();
+  if (
+    status &&
+    !(status >= REDIRECT_CODE_START && status <= REDIRECT_CODE_END) &&
+    status !== NO_CONTENT_RESPONSE_CODE
+  ) {
+    return (await request.response().buffer()).toString();
+  }
 };
 
 const logError = async (request: Request): Promise<void> => {
   const response = request.response();
+  const status = response ? response.status() : '';
   const failureText = request.failure() !== null ? stringifyData(request.failure().errorText) : '';
   const responseText = stringifyData(await getResponseText(request));
   logger.log(
     'error',
     'Request failed: %s %s %s\n%s %s',
-    response.status(),
+    status,
     request.method(),
     request.url(),
     responseText,

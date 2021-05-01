@@ -27,7 +27,8 @@
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "retryCount": 4,
     "bufferCapacityPerTier": {
-      "registered": 20
+      "registered": 20,
+      "controlled": 20
     },
     "bufferRefillProjectsPerTask": 1,
     "bufferStatusChecksPerTask": 10,
@@ -103,7 +104,7 @@
   },
   "access": {
     "enableComplianceTraining": false,
-    "enableEraCommons": true,
+    "enableEraCommons": false,
     "enableDataUseAgreement": true,
     "enableBetaAccess": false,
     "unsafeAllowSelfBypass": false,
@@ -118,7 +119,8 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableReportingUploadCron": true,
-    "enableRasLoginGovLinking": false
+    "enableRasLoginGovLinking": false,
+    "enableGenomicExtraction": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-preprod",

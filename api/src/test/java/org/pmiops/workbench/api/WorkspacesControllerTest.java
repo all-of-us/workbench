@@ -613,6 +613,7 @@ public class WorkspacesControllerTest extends SpringTest {
     assertThat(workspace2.getCreationTime()).isEqualTo(NOW_TIME);
     assertThat(workspace2.getLastModifiedTime()).isEqualTo(NOW_TIME);
     assertThat(workspace2.getCdrVersionId()).isEqualTo(cdrVersionId);
+    assertThat(workspace2.getAccessTierShortName()).isEqualTo(accessTier.getShortName());
     assertThat(workspace2.getCreator()).isEqualTo(LOGGED_IN_USER_EMAIL);
     assertThat(workspace2.getId()).isEqualTo("name");
     assertThat(workspace2.getName()).isEqualTo("name");
@@ -744,6 +745,41 @@ public class WorkspacesControllerTest extends SpringTest {
     Workspace workspace = createWorkspace();
     workspace.setCdrVersionId(archivedCdrVersionId);
     workspacesController.createWorkspace(workspace).getBody();
+  }
+
+  // we do not actually use the accessTierShortName of the Workspace passed to
+  // createWorkspace() - instead we derive it from the cdrVersionId
+
+  @Test
+  public void testCreateWorkspace_accessTierIgnored() {
+    final Workspace requestedWorkspace = createWorkspace();
+    assertThat(requestedWorkspace.getAccessTierShortName()).isNull();
+    requestedWorkspace.setAccessTierShortName("some nonsense value!");
+
+    final Workspace createdWorkspace =
+        workspacesController.createWorkspace(requestedWorkspace).getBody();
+    assertThat(createdWorkspace.getAccessTierShortName()).isEqualTo(accessTier.getShortName());
+  }
+
+  @Test
+  public void testCreateWorkspace_accessTierIgnored_controlled() {
+    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+
+    DbCdrVersion controlledTierCdr =
+        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
+    controlledTierCdr.setAccessTier(controlledTier);
+    controlledTierCdr = cdrVersionDao.save(controlledTierCdr);
+
+    final Workspace requestedWorkspace = createWorkspace();
+    assertThat(requestedWorkspace.getAccessTierShortName()).isNull();
+
+    requestedWorkspace.setCdrVersionId(String.valueOf(controlledTierCdr.getCdrVersionId()));
+    // even if we pretend it's registered - the CDR Version will override this
+    requestedWorkspace.setAccessTierShortName(AccessTierService.REGISTERED_TIER_SHORT_NAME);
+
+    final Workspace createdWorkspace =
+        workspacesController.createWorkspace(requestedWorkspace).getBody();
+    assertThat(createdWorkspace.getAccessTierShortName()).isEqualTo(controlledTier.getShortName());
   }
 
   @Test
@@ -2784,6 +2820,52 @@ public class WorkspacesControllerTest extends SpringTest {
     doReturn(Collections.singleton(newBlobId))
         .when(cloudStorageClient)
         .getExistingBlobIdsIn(Collections.singletonList(newBlobId));
+
+    workspacesController.copyNotebook(
+        fromWorkspace.getNamespace(),
+        fromWorkspace.getName(),
+        fromNotebookName,
+        copyNotebookRequest);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void testCopyNotebook_notAllowedBetweenTiers() {
+    final DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
+
+    DbCdrVersion controlledCdr =
+        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao, 2);
+    controlledCdr.setName("2");
+    controlledCdr.setAccessTier(controlledTier);
+    controlledCdr = cdrVersionDao.save(controlledCdr);
+
+    Workspace fromWorkspace = createWorkspace();
+    fromWorkspace.setCdrVersionId(String.valueOf(controlledCdr.getCdrVersionId()));
+    fromWorkspace = workspacesController.createWorkspace(fromWorkspace).getBody();
+    String fromNotebookName = "origin";
+
+    stubGetWorkspace(
+        fromWorkspace.getNamespace(),
+        fromWorkspace.getName(),
+        LOGGED_IN_USER_EMAIL,
+        WorkspaceAccessLevel.OWNER);
+
+    Workspace toWorkspace = testMockFactory.createWorkspace("toWorkspaceNs", "toworkspace");
+    // a CDR Version in the Registered Tier
+    toWorkspace.setCdrVersionId(cdrVersionId);
+    toWorkspace = workspacesController.createWorkspace(toWorkspace).getBody();
+    String newNotebookName = NotebooksService.withNotebookExtension("new");
+
+    stubGetWorkspace(
+        toWorkspace.getNamespace(),
+        toWorkspace.getName(),
+        LOGGED_IN_USER_EMAIL,
+        WorkspaceAccessLevel.OWNER);
+
+    CopyRequest copyNotebookRequest =
+        new CopyRequest()
+            .toWorkspaceName(toWorkspace.getName())
+            .toWorkspaceNamespace(toWorkspace.getNamespace())
+            .newName(newNotebookName);
 
     workspacesController.copyNotebook(
         fromWorkspace.getNamespace(),

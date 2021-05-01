@@ -160,6 +160,7 @@ public class CdrVersionService {
                 .map(cdrVersionMapper::dbModelToClient)
                 .collect(Collectors.toList()))
         .defaultCdrVersionId(String.valueOf(defaultVersions.get(0)))
-        .accessTierShortName(accessTier.getShortName());
+        .accessTierShortName(accessTier.getShortName())
+        .accessTierDisplayName(accessTier.getDisplayName());
   }
 }

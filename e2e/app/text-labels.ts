@@ -90,6 +90,8 @@ export enum LinkText {
   RenameConceptSet = 'Rename Concept Set',
   RenameDataset = 'Rename Dataset',
   RenameNotebook = 'Rename Notebook',
+  ReviewLater = 'REVIEW LATER',
+  ReviewNow = 'REVIEW NOW',
   Save = 'Save',
   SaveCohort = 'Save Cohort',
   SaveConceptSet = 'Save Concept Set',

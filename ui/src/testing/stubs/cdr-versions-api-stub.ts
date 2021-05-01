@@ -1,4 +1,4 @@
-import {AccessTierShortNames} from 'app/utils/access-tiers';
+import {AccessTierDisplayNames, AccessTierShortNames} from 'app/utils/access-tiers';
 import {
   ArchivalStatus,
   CdrVersionsApi,
@@ -18,6 +18,7 @@ export class CdrVersionsStubVariables {
 export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
   tiers: [{
     accessTierShortName: AccessTierShortNames.Registered,
+    accessTierDisplayName: AccessTierDisplayNames.Registered,
     defaultCdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
     versions: [
       {
@@ -41,6 +42,7 @@ export const cdrVersionTiersResponse: CdrVersionTiersResponse = {
     ]},
     {
       accessTierShortName: AccessTierShortNames.Controlled,
+      accessTierDisplayName: AccessTierDisplayNames.Controlled,
       defaultCdrVersionId: CdrVersionsStubVariables.CONTROLLED_TIER_CDR_VERSION_ID,
       versions: [
         {
