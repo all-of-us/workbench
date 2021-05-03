@@ -419,7 +419,7 @@ public class DataSetController implements DataSetApiDelegate {
   }
 
   private void validateCohortsInWorkspace(long workspaceId, @Nullable List<Long> cohortIds) {
-    if (cohortIds == null || cohortIds.isEmpty()) {
+    if (collectionUtils.isEmpty(cohortIds)) {
       return;
     }
     List<Long> workspaceCohortIds =
