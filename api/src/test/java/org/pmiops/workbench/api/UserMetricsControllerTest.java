@@ -22,8 +22,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
+import org.pmiops.workbench.db.dao.AccessTierDao;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbUser;
@@ -39,6 +42,7 @@ import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
@@ -66,8 +70,12 @@ public class UserMetricsControllerTest {
   @Autowired private CohortMapper cohortMapper;
   @Autowired private CommonMappers commonMappers;
   @Autowired private FirecloudMapper firecloudMapper;
+  @Autowired private AccessTierDao accessTierDao;
+  @Autowired private CdrVersionDao cdrVersionDao;
 
   private FakeClock fakeClock = new FakeClock(NOW);
+
+  private DbCdrVersion dbCdrVersion;
 
   private DbUser dbUser;
   private DbUserRecentResource dbUserRecentResource1;
@@ -87,6 +95,8 @@ public class UserMetricsControllerTest {
 
   @Before
   public void setUp() {
+    dbCdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
+
     dbUser = new DbUser();
     dbUser.setUserId(123L);
 
@@ -110,11 +120,13 @@ public class UserMetricsControllerTest {
     dbWorkspace1.setWorkspaceId(1L);
     dbWorkspace1.setWorkspaceNamespace("workspaceNamespace1");
     dbWorkspace1.setFirecloudName("firecloudname1");
+    dbWorkspace1.setCdrVersion(dbCdrVersion);
 
     dbWorkspace2 = new DbWorkspace();
     dbWorkspace2.setWorkspaceId(2L);
     dbWorkspace2.setWorkspaceNamespace("workspaceNamespace2");
     dbWorkspace2.setFirecloudName("firecloudName2");
+    dbWorkspace2.setCdrVersion(dbCdrVersion);
 
     dbUserRecentResource1 = new DbUserRecentResource();
     dbUserRecentResource1.setNotebookName("gs://bucketFile/notebooks/notebook1.ipynb");
