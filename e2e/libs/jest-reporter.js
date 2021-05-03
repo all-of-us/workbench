@@ -27,7 +27,7 @@ module.exports = class JestReporter {
     });
     if (hasFailure) {
       // Save logs of failed test
-      this.testName = path.parse(testResult.path).name;
+      this.testName = path.parse(testResult.testFilePath).name;
       this.testLogName = `${this.logDir}/${this.testName}-FAILED.log`;
       this.logger = this.createLogger(this.testLogName);
 
