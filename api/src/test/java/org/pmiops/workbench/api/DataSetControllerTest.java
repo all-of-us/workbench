@@ -702,11 +702,11 @@ public class DataSetControllerTest {
             .dataSetRequest(new DataSetRequest().includesAllParticipants(true)));
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test(expected = NotFoundException.class)
   public void exportToNotebook_noAccessDataSet() {
     dataSetController.exportToNotebook(
-        noAccessWorkspace.getNamespace(),
-        noAccessWorkspace.getName(),
+        workspace.getNamespace(),
+        workspace.getName(),
         new DataSetExportRequest()
             .dataSetRequest(new DataSetRequest().dataSetId(noAccessDataSet.getId())));
   }
@@ -747,6 +747,45 @@ public class DataSetControllerTest {
                 new DataSetRequest()
                     .conceptSetIds(
                         ImmutableList.of(conceptSet1.getId(), noAccessConceptSet.getId()))));
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void generateCode_noAccess() {
+    dataSetController.generateCode(
+        noAccessWorkspace.getNamespace(),
+        noAccessWorkspace.getName(),
+        KernelTypeEnum.PYTHON.toString(),
+        new DataSetRequest().includesAllParticipants(true));
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void generateCode_noAccessDataSet() {
+    dataSetController.generateCode(
+        workspace.getNamespace(),
+        workspace.getName(),
+        KernelTypeEnum.PYTHON.toString(),
+        new DataSetRequest().dataSetId(noAccessDataSet.getId()));
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void generateCode_cohortInvalid() {
+    dataSetController.generateCode(
+        workspace.getNamespace(),
+        workspace.getName(),
+        KernelTypeEnum.PYTHON.toString(),
+        new DataSetRequest()
+            .conceptSetIds(ImmutableList.of(conceptSet1.getId()))
+            .cohortIds(ImmutableList.of(cohort.getId(), noAccessCohort.getId())));
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void generateCode_conceptSetInvalid() {
+    dataSetController.generateCode(
+        workspace.getNamespace(),
+        workspace.getName(),
+        KernelTypeEnum.PYTHON.toString(),
+        new DataSetRequest()
+            .conceptSetIds(ImmutableList.of(conceptSet1.getId(), noAccessConceptSet.getId())));
   }
 
   @Test
@@ -1013,12 +1052,30 @@ public class DataSetControllerTest {
   }
 
   @Test(expected = ForbiddenException.class)
+  public void testUpdateDataset_noAccess() {
+    dataSetController.updateDataSet(
+        noAccessWorkspace.getNamespace(),
+        noAccessWorkspace.getName(),
+        noAccessDataSet.getId(),
+        new DataSetRequest().etag("1"));
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void testUpdateDataset_noAccessMismatchDataSetId() {
+    dataSetController.updateDataSet(
+        workspace.getNamespace(),
+        workspace.getName(),
+        noAccessDataSet.getId(),
+        new DataSetRequest().etag("1"));
+  }
+
+  @Test(expected = ForbiddenException.class)
   public void testDeleteDataset_noAccess() {
     dataSetController.deleteDataSet(
         noAccessWorkspace.getNamespace(), noAccessWorkspace.getName(), noAccessDataSet.getId());
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test(expected = NotFoundException.class)
   public void testDeleteDataset_noAccessMismatchDataSetId() {
     dataSetController.deleteDataSet(
         workspace.getNamespace(), workspace.getName(), noAccessDataSet.getId());
