@@ -850,7 +850,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
   @Override
   public void deleteDataSet(long workspaceId, long dataSetId) {
-    Optional<DbDataset> dbDataset = this.getDbDataSet(dataSetId, workspaceId);
+    Optional<DbDataset> dbDataset = this.getDbDataSet(workspaceId, dataSetId);
     if (!dbDataset.isPresent()) {
       throw new NotFoundException(
           "No DataSet found for dataSetId " + dataSetId + "and workspaceId " + workspaceId);

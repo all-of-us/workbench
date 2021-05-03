@@ -1046,13 +1046,13 @@ public class DataSetControllerTest {
   }
 
   @Test(expected = ForbiddenException.class)
-  public void testGetDataset_noAccess() {
+  public void testGetDataSet_noAccess() {
     dataSetController.getDataSet(
         noAccessWorkspace.getNamespace(), noAccessWorkspace.getName(), noAccessDataSet.getId());
   }
 
   @Test(expected = ForbiddenException.class)
-  public void testUpdateDataset_noAccess() {
+  public void testUpdateDataSet_noAccess() {
     dataSetController.updateDataSet(
         noAccessWorkspace.getNamespace(),
         noAccessWorkspace.getName(),
@@ -1061,7 +1061,7 @@ public class DataSetControllerTest {
   }
 
   @Test(expected = NotFoundException.class)
-  public void testUpdateDataset_noAccessMismatchDataSetId() {
+  public void testUpdateDataSet_noAccessMismatchDataSetId() {
     dataSetController.updateDataSet(
         workspace.getNamespace(),
         workspace.getName(),
@@ -1070,15 +1070,34 @@ public class DataSetControllerTest {
   }
 
   @Test(expected = ForbiddenException.class)
-  public void testDeleteDataset_noAccess() {
+  public void testDeleteDataSet_noAccess() {
     dataSetController.deleteDataSet(
         noAccessWorkspace.getNamespace(), noAccessWorkspace.getName(), noAccessDataSet.getId());
   }
 
   @Test(expected = NotFoundException.class)
-  public void testDeleteDataset_noAccessMismatchDataSetId() {
+  public void testDeleteDataSet_noAccessMismatchDataSetId() {
     dataSetController.deleteDataSet(
         workspace.getNamespace(), workspace.getName(), noAccessDataSet.getId());
+  }
+
+  @Test
+  public void testDeleteDataSet_success() {
+    // Create several datasets to ensure we don't have an overlapping ID with a workspace, which
+    // could mask bugs.
+    DataSet dataSet = null;
+    for (int i = 0; i < 3; i++) {
+      dataSet =
+          dataSetController
+              .createDataSet(
+                  workspace.getNamespace(), workspace.getName(), buildValidDataSetRequest())
+              .getBody();
+    }
+
+    dataSetController.deleteDataSet(workspace.getNamespace(), workspace.getName(), dataSet.getId());
+
+    expectedException.expect(NotFoundException.class);
+    dataSetController.getDataSet(workspace.getNamespace(), workspace.getName(), dataSet.getId());
   }
 
   DataSetRequest buildValidDataSetRequest() {
