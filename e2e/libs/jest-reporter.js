@@ -18,8 +18,6 @@ module.exports = class JestReporter {
   // Called at the beginning of every test file
   onTestStart(test) {
     console.info(`Running ${path.parse(test.path).name} at ${this.timeNow()}`);
-    this.testName = path.parse(test.path).name;
-    this.testLogName = `${this.logDir}/${this.testName}.log`;
   }
 
   // Called with the result of every test file
@@ -29,6 +27,7 @@ module.exports = class JestReporter {
     });
     if (hasFailure) {
       // Save logs of failed test
+      this.testName = path.parse(testResult.path).name;
       this.testLogName = `${this.logDir}/${this.testName}-FAILED.log`;
       this.logger = this.createLogger(this.testLogName);
 
