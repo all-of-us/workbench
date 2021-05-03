@@ -21,6 +21,23 @@ were copied into `gs://all-of-us-workbench-test-genomics/1kg_gvcfs/`
   - `cat 1kg_reblocked_gvcfs_list.txt | pcregrep -o1 'gvcf/(.+).haplo' | awk '{print NR*100","$0}' > 1kg_sample_map.txt`
   - ImportGenomes wdl - https://github.com/broadinstitute/gatk/blob/75f0bd80a45ed46e171ba2125fcb6a6b825c1b74/scripts/variantstore/wdl/ImportGenomes.wdl
 
+- Open a Terra Dev workspace
+- Create a Terra Data Table with the following columns [1kg_sample_id, gvcf, gvcf_index]
+  - `echo -e "entity:1kg_sample_id\tgvcf\tgvcf_index" > data_table.tsv`
+  - `cat 1kg_reblocked_gvcfs_list.txt |  awk '{print NR"\t"$0"\t"$0".tbi"}' >> data_table.tsv`
+  - Go to Terra Workspace -> Data -> Click Tables (+) -> Upload data_table.tsv
+- ```{
+  "GvsImportGenomes.dataset_name": "1kg_wgs",
+  "GvsImportGenomes.gatk_override": "gs://fc-56d2f6f5-3efa-46f7-8c01-0911fd77f888/gatk-package-4.2.0.0-326-g84ce13a-SNAPSHOT-local.jar",
+  "GvsImportGenomes.input_vcf_indexes": "${this.1kg_samples.gvcf_index}",
+  "GvsImportGenomes.input_vcfs": "${this.1kg_samples.gvcf}",
+  "GvsImportGenomes.interval_list": "gs://gcp-public-data--broad-references/hg38/v0/wgs_calling_regions.hg38.noCentromeres.noTelomeres.interval_list",
+  "GvsImportGenomes.output_directory": "gs://fc-56d2f6f5-3efa-46f7-8c01-0911fd77f888/import_genomes/9",
+  "GvsImportGenomes.project_id": "all-of-us-workbench-test",
+  "GvsImportGenomes.sample_map": "gs://fc-56d2f6f5-3efa-46f7-8c01-0911fd77f888/1kg_sample_map.txt",
+}```
+
+
 ### Fixing sample_names
 - Right now, the sample_names in the `sample_info` table match the sample_names in the VCFs
 - However, we need the sample_names to match participant_ids in AoU
