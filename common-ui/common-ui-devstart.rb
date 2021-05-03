@@ -42,7 +42,7 @@ def build(cmd_name, ui_name, args)
 
   common = Common.new
 
-  common.run_inline %W{gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc .}
+  common.run_inline %W{gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc ..}
   common.run_inline %W{yarn install --frozen-lockfile}
 
   # Just use --aot for "test", which catches many compilation issues. Go full
