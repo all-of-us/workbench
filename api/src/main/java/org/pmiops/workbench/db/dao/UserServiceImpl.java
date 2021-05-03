@@ -17,8 +17,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Provider;
@@ -96,12 +96,11 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final DirectoryService directoryService;
   private final AccessTierService accessTierService;
 
-  private final Supplier<Timestamp> expirationTime =
-      () ->
-          new Timestamp(
-              Instant.now().toEpochMilli() - TimeUnit.MILLISECONDS.convert(365, TimeUnit.DAYS));
-  private final Function<Timestamp, Boolean> notExpired =
-      (completionTime) -> expirationTime.get().before(completionTime);
+  private final Function<Long, Timestamp> expirationTime =
+      (currentTime) ->
+          new Timestamp(currentTime - TimeUnit.MILLISECONDS.convert(365, TimeUnit.DAYS));
+  private final BiFunction<Timestamp, Long, Boolean> notExpired =
+      (completionTime, currentTime) -> expirationTime.apply(currentTime).before(completionTime);
 
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
@@ -154,6 +153,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       Function<DbUser, DbUser> userModifier, DbUser dbUser, Agent agent) {
     int objectLockingFailureCount = 0;
     int statementClosedCount = 0;
+    System.out.printf("\n\n\nUPDATE\n\n\n");
     while (true) {
       dbUser = userModifier.apply(dbUser);
       updateUserAccessTiers(dbUser, agent);
@@ -219,9 +219,9 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
   }
 
-  public boolean isNotExpired(Timestamp completionTime) {
+  public boolean isCompleteAndNotExpired(Timestamp completionTime) {
     if (configProvider.get().access.enableAccessRenewal) {
-      return completionTime != null && notExpired.apply(completionTime);
+      return completionTime != null && notExpired.apply(completionTime, clock.millis());
     }
     return true;
   }
@@ -233,7 +233,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       return true;
     } else if (user.getDataUseAgreementSignedVersion() != null
         && user.getDataUseAgreementSignedVersion() == getCurrentDuccVersion()
-        && isNotExpired(user.getDataUseAgreementCompletionTime())) {
+        && isCompleteAndNotExpired(user.getDataUseAgreementCompletionTime())) {
       // User has signed the most-recent DUCC version.
       return true;
     }
@@ -243,12 +243,12 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private boolean isEraCommonsCompliant(DbUser user) {
     return user.getEraCommonsBypassTime() != null
         || !configProvider.get().access.enableEraCommons
-        || isNotExpired(user.getEraCommonsCompletionTime());
+        || user.getEraCommonsCompletionTime() != null;
   }
 
   private boolean isComplianceTrainingCompliant(DbUser user) {
     return user.getComplianceTrainingBypassTime() != null
-        || isNotExpired(user.getComplianceTrainingCompletionTime())
+        || isCompleteAndNotExpired(user.getComplianceTrainingCompletionTime())
         || !configProvider.get().access.enableComplianceTraining;
   }
 
