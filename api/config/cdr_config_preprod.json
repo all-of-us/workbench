@@ -20,7 +20,7 @@
   "cdrVersions": [
     {
       "cdrVersionId": 1,
-      "name": "All of Us Dataset v3",
+      "name": "All of Us Registered Tier Dataset v3",
       "bigqueryProject": "fc-aou-cdr-preprod",
       "bigqueryDataset": "R2019Q4R3",
       "creationTime": "2019-10-21 00:00:00Z",
@@ -31,7 +31,7 @@
     },
     {
       "cdrVersionId": 2,
-      "name": "All of Us Dataset v4",
+      "name": "All of Us Registered Tier Dataset v3 rc2",
       "bigqueryProject": "fc-aou-cdr-preprod",
       "bigqueryDataset": "R2019Q4R4",
       "creationTime": "2020-04-16 00:00:00Z",
@@ -56,7 +56,7 @@
     },
     {
       "cdrVersionId": 4,
-      "name": "All of Us Dataset v5",
+      "name": "All of Us Registered Tier Dataset v4",
       "isDefault": true,
       "bigqueryProject": "fc-aou-cdr-preprod",
       "bigqueryDataset": "R2020Q4R3",
