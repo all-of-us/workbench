@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -344,7 +345,7 @@ public class DataSetController implements DataSetApiDelegate {
       }
     }
 
-    // TODO(calbach): Verify whether the request payload is ever expected toinclude a different
+    // TODO(calbach): Verify whether the request payload is ever expected to include a different
     // workspace ID.
     dataSetExportRequest.getDataSetRequest().setWorkspaceId(dbWorkspace.getWorkspaceId());
     Map<String, QueryJobConfiguration> queriesByDomain =
@@ -407,7 +408,7 @@ public class DataSetController implements DataSetApiDelegate {
       mustGetDbDataset(workspaceId, request.getDataSetId());
     } else {
       validateCohortsInWorkspace(workspaceId, request.getCohortIds());
-      validateConceptSetsInWorkspace(workspaceId, request.getCohortIds());
+      validateConceptSetsInWorkspace(workspaceId, request.getConceptSetIds());
     }
   }
 
@@ -417,7 +418,10 @@ public class DataSetController implements DataSetApiDelegate {
     validateConceptSetsInWorkspace(workspaceId, request.getConceptSetIds());
   }
 
-  private void validateCohortsInWorkspace(long workspaceId, List<Long> cohortIds) {
+  private void validateCohortsInWorkspace(long workspaceId, @Nullable List<Long> cohortIds) {
+    if (cohortIds == null || cohortIds.isEmpty()) {
+      return;
+    }
     List<Long> workspaceCohortIds =
         cohortService.findByWorkspaceId(workspaceId).stream()
             .map(Cohort::getId)
@@ -428,7 +432,11 @@ public class DataSetController implements DataSetApiDelegate {
     }
   }
 
-  private void validateConceptSetsInWorkspace(long workspaceId, List<Long> conceptSetIds) {
+  private void validateConceptSetsInWorkspace(
+      long workspaceId, @Nullable List<Long> conceptSetIds) {
+    if (conceptSetIds == null || conceptSetIds.isEmpty()) {
+      return;
+    }
     List<Long> workspaceConceptSetIds =
         conceptSetService.findByWorkspaceId(workspaceId).stream()
             .map(ConceptSet::getId)

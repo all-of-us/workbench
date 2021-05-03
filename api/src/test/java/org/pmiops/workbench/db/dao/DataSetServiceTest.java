@@ -60,7 +60,6 @@ import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.exceptions.BadRequestException;
-import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSetRequest;
@@ -82,6 +81,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+// TODO(calbach): Move this test to the correct package.
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -563,13 +563,13 @@ public class DataSetServiceTest {
     dbDataset.setWorkspaceId(cohort.getWorkspaceId());
     dataSetServiceImpl.saveDataSet(dbDataset);
 
-    when(dataSetDao.findDataSetsByCohortIdsAndWorkspaceId(cohort.getCohortId(), cohort.getWorkspaceId()))
+    when(dataSetDao.findDataSetsByCohortIdsAndWorkspaceId(
+            cohort.getCohortId(), cohort.getWorkspaceId()))
         .thenReturn(ImmutableList.of(dbDataset));
 
-    List<DbDataset> dbDatasets = dataSetServiceImpl.getDbDataSets(
-        ResourceType.COHORT,
-        cohort.getCohortId(),
-        cohort.getWorkspaceId());
+    List<DbDataset> dbDatasets =
+        dataSetServiceImpl.getDbDataSets(
+            cohort.getWorkspaceId(), ResourceType.COHORT, cohort.getCohortId());
     assertThat(dbDatasets.size()).isEqualTo(1);
     assertThat(dbDatasets.get(0)).isEqualTo(dbDataset);
   }
@@ -583,7 +583,7 @@ public class DataSetServiceTest {
     dbDataset.setWorkspaceId(cohort.getWorkspaceId());
     dataSetServiceImpl.saveDataSet(dbDataset);
 
-    dataSetServiceImpl.getDbDataSets(ResourceType.COHORT, cohort.getCohortId(), 101L);
+    dataSetServiceImpl.getDbDataSets(101L, ResourceType.COHORT, cohort.getCohortId());
   }
 
   @Test
@@ -601,13 +601,13 @@ public class DataSetServiceTest {
     dbDataset.setWorkspaceId(WORKSPACE_ID);
     dataSetServiceImpl.saveDataSet(dbDataset);
 
-    when(dataSetDao.findDataSetsByConceptSetIdsAndWorkspaceId(dbConceptSet.getConceptSetId(), WORKSPACE_ID))
+    when(dataSetDao.findDataSetsByConceptSetIdsAndWorkspaceId(
+            dbConceptSet.getConceptSetId(), WORKSPACE_ID))
         .thenReturn(ImmutableList.of(dbDataset));
 
-    List<DbDataset> dbDatasets = dataSetServiceImpl.getDbDataSets(
-        ResourceType.CONCEPT_SET,
-        dbConceptSet.getConceptSetId(),
-        WORKSPACE_ID);
+    List<DbDataset> dbDatasets =
+        dataSetServiceImpl.getDbDataSets(
+            WORKSPACE_ID, ResourceType.CONCEPT_SET, dbConceptSet.getConceptSetId());
     assertThat(dbDatasets.size()).isEqualTo(1);
     assertThat(dbDatasets.get(0)).isEqualTo(dbDataset);
   }
@@ -627,7 +627,8 @@ public class DataSetServiceTest {
     dbDataset.setWorkspaceId(WORKSPACE_ID);
     dataSetServiceImpl.saveDataSet(dbDataset);
 
-    dataSetServiceImpl.getDbDataSets(ResourceType.CONCEPT_SET, dbConceptSet.getConceptSetId(), 101L);
+    dataSetServiceImpl.getDbDataSets(
+        101L, ResourceType.CONCEPT_SET, dbConceptSet.getConceptSetId());
   }
 
   @Test(expected = NotFoundException.class)
@@ -636,11 +637,12 @@ public class DataSetServiceTest {
     dbDataset.setDataSetId(1L);
     dbDataset.setWorkspaceId(2L);
 
-    when(dataSetDao.findByDataSetIdAndWorkspaceId(dbDataset.getDataSetId(), dbDataset.getWorkspaceId()))
+    when(dataSetDao.findByDataSetIdAndWorkspaceId(
+            dbDataset.getDataSetId(), dbDataset.getWorkspaceId()))
         .thenReturn(Optional.empty());
 
     DataSetRequest request = buildEmptyRequest();
-    dataSetServiceImpl.updateDataSet(request, dbDataset.getDataSetId(), dbDataset.getWorkspaceId());
+    dataSetServiceImpl.updateDataSet(dbDataset.getWorkspaceId(), dbDataset.getDataSetId(), request);
   }
 
   @Test(expected = NotFoundException.class)
@@ -649,7 +651,8 @@ public class DataSetServiceTest {
     dbDataset.setDataSetId(1L);
     dbDataset.setWorkspaceId(2L);
 
-    when(dataSetDao.findByDataSetIdAndWorkspaceId(anyLong(), anyLong())).thenReturn(Optional.empty());
+    when(dataSetDao.findByDataSetIdAndWorkspaceId(anyLong(), anyLong()))
+        .thenReturn(Optional.empty());
 
     dataSetServiceImpl.deleteDataSet(dbDataset.getDataSetId(), dbDataset.getWorkspaceId());
   }
