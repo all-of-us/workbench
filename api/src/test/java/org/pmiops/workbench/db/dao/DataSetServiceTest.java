@@ -60,12 +60,14 @@ import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.exceptions.BadRequestException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuePair;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
+import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.test.SearchRequests;
@@ -79,6 +81,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+// TODO(calbach): Move this test to the correct package.
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -115,6 +118,7 @@ public class DataSetServiceTest {
   @MockBean private BigQueryService mockBigQueryService;
   @MockBean private CohortDao mockCohortDao;
 
+  private DbCohort cohort;
   private DataSetServiceImpl dataSetServiceImpl;
 
   @TestConfiguration
@@ -158,7 +162,7 @@ public class DataSetServiceTest {
             dataSetMapper,
             CLOCK);
 
-    final DbCohort cohort = buildSimpleCohort();
+    cohort = buildSimpleCohort();
     when(cohortDao.findCohortByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(cohort);
     when(mockCohortQueryBuilder.buildParticipantIdQuery(any()))
         .thenReturn(QUERY_JOB_CONFIGURATION_1);
@@ -548,6 +552,109 @@ public class DataSetServiceTest {
     List<DomainValue> measurementDomainValueList =
         dataSetServiceImpl.getValueListFromDomain("PHYSICAL_MEASUREMENT_CSS");
     assertThat(measurementDomainValueList.size()).isEqualTo(1);
+  }
+
+  @Test
+  public void testGetDbDataSets_cohort() {
+    when(cohortDao.findOne(cohort.getCohortId())).thenReturn(cohort);
+
+    DbDataset dbDataset = new DbDataset();
+    dbDataset.setCohortIds(ImmutableList.of(cohort.getCohortId()));
+    dbDataset.setWorkspaceId(cohort.getWorkspaceId());
+    dataSetServiceImpl.saveDataSet(dbDataset);
+
+    when(dataSetDao.findDataSetsByCohortIdsAndWorkspaceId(
+            cohort.getCohortId(), cohort.getWorkspaceId()))
+        .thenReturn(ImmutableList.of(dbDataset));
+
+    List<DbDataset> dbDatasets =
+        dataSetServiceImpl.getDbDataSets(
+            cohort.getWorkspaceId(), ResourceType.COHORT, cohort.getCohortId());
+    assertThat(dbDatasets.size()).isEqualTo(1);
+    assertThat(dbDatasets.get(0)).isEqualTo(dbDataset);
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void testGetDbDataSets_cohortWrongWorkspace() {
+    when(cohortDao.findOne(cohort.getCohortId())).thenReturn(cohort);
+
+    DbDataset dbDataset = new DbDataset();
+    dbDataset.setCohortIds(ImmutableList.of(cohort.getCohortId()));
+    dbDataset.setWorkspaceId(cohort.getWorkspaceId());
+    dataSetServiceImpl.saveDataSet(dbDataset);
+
+    dataSetServiceImpl.getDbDataSets(101L, ResourceType.COHORT, cohort.getCohortId());
+  }
+
+  @Test
+  public void testGetDbDataSets_conceptSet() {
+    long WORKSPACE_ID = 1L;
+
+    DbConceptSet dbConceptSet = new DbConceptSet();
+    dbConceptSet.setConceptSetId(3L);
+    dbConceptSet.setWorkspaceId(WORKSPACE_ID);
+
+    when(conceptSetDao.findOne(dbConceptSet.getConceptSetId())).thenReturn(dbConceptSet);
+
+    DbDataset dbDataset = new DbDataset();
+    dbDataset.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
+    dbDataset.setWorkspaceId(WORKSPACE_ID);
+    dataSetServiceImpl.saveDataSet(dbDataset);
+
+    when(dataSetDao.findDataSetsByConceptSetIdsAndWorkspaceId(
+            dbConceptSet.getConceptSetId(), WORKSPACE_ID))
+        .thenReturn(ImmutableList.of(dbDataset));
+
+    List<DbDataset> dbDatasets =
+        dataSetServiceImpl.getDbDataSets(
+            WORKSPACE_ID, ResourceType.CONCEPT_SET, dbConceptSet.getConceptSetId());
+    assertThat(dbDatasets.size()).isEqualTo(1);
+    assertThat(dbDatasets.get(0)).isEqualTo(dbDataset);
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void testGetDbDataSets_conceptSetWrongWorkspace() {
+    long WORKSPACE_ID = 1L;
+
+    DbConceptSet dbConceptSet = new DbConceptSet();
+    dbConceptSet.setConceptSetId(3L);
+    dbConceptSet.setWorkspaceId(WORKSPACE_ID);
+
+    when(conceptSetDao.findOne(dbConceptSet.getConceptSetId())).thenReturn(dbConceptSet);
+
+    DbDataset dbDataset = new DbDataset();
+    dbDataset.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
+    dbDataset.setWorkspaceId(WORKSPACE_ID);
+    dataSetServiceImpl.saveDataSet(dbDataset);
+
+    dataSetServiceImpl.getDbDataSets(
+        101L, ResourceType.CONCEPT_SET, dbConceptSet.getConceptSetId());
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void testUpdateDataSet_wrongWorkspace() {
+    DbDataset dbDataset = new DbDataset();
+    dbDataset.setDataSetId(1L);
+    dbDataset.setWorkspaceId(2L);
+
+    when(dataSetDao.findByDataSetIdAndWorkspaceId(
+            dbDataset.getDataSetId(), dbDataset.getWorkspaceId()))
+        .thenReturn(Optional.empty());
+
+    DataSetRequest request = buildEmptyRequest();
+    dataSetServiceImpl.updateDataSet(dbDataset.getWorkspaceId(), dbDataset.getDataSetId(), request);
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void testDeleteDataSet_wrongWorkspace() {
+    DbDataset dbDataset = new DbDataset();
+    dbDataset.setDataSetId(1L);
+    dbDataset.setWorkspaceId(2L);
+
+    when(dataSetDao.findByDataSetIdAndWorkspaceId(anyLong(), anyLong()))
+        .thenReturn(Optional.empty());
+
+    dataSetServiceImpl.deleteDataSet(dbDataset.getDataSetId(), dbDataset.getWorkspaceId());
   }
 
   private void mockDomainTableFields() {
