@@ -146,7 +146,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       Function<DbUser, DbUser> userModifier, DbUser dbUser, Agent agent) {
     int objectLockingFailureCount = 0;
     int statementClosedCount = 0;
-    System.out.printf("\n\n\nUPDATE\n\n\n");
     while (true) {
       dbUser = userModifier.apply(dbUser);
       updateUserAccessTiers(dbUser, agent);
@@ -221,7 +220,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     if (configProvider.get().access.enableAccessRenewal) {
       return completionTime != null && expirationTime.before(completionTime);
     }
-    return true;
+    return completionTime != null;
   }
 
   private boolean isDataUseAgreementCompliant(DbUser user) {
