@@ -17,7 +17,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -95,12 +94,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   private final ComplianceService complianceService;
   private final DirectoryService directoryService;
   private final AccessTierService accessTierService;
-
-  private final Function<Long, Timestamp> expirationTime =
-      (currentTime) ->
-          new Timestamp(currentTime - TimeUnit.MILLISECONDS.convert(365, TimeUnit.DAYS));
-  private final BiFunction<Timestamp, Long, Boolean> notExpired =
-      (completionTime, currentTime) -> expirationTime.apply(currentTime).before(completionTime);
 
   private static final Logger log = Logger.getLogger(UserServiceImpl.class.getName());
 
@@ -220,8 +213,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   public boolean isCompleteAndNotExpired(Timestamp completionTime) {
+    Timestamp expirationTime =
+        new Timestamp(
+            clock.millis()
+                - TimeUnit.MILLISECONDS.convert(
+                    configProvider.get().accessRenewal.expiryDays, TimeUnit.DAYS));
     if (configProvider.get().access.enableAccessRenewal) {
-      return completionTime != null && notExpired.apply(completionTime, clock.millis());
+      return completionTime != null && expirationTime.before(completionTime);
     }
     return true;
   }

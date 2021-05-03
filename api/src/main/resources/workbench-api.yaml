@@ -4033,6 +4033,9 @@ definitions:
       rasHost:
         type: string
         description: The RAS base host name.
+      accessRenewalExpiry:
+        type: number
+        description: Days a user's module completion is good for until it expires.
       rasClientId:
         type: string
         description: The RAS OAuth client id.
