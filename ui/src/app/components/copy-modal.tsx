@@ -329,14 +329,14 @@ class CopyModalComponent extends React.Component<Props, State> {
     const {fromCdrVersionId, fromAccessTierShortName, resourceType} = this.props;
 
     this.clearCopyError();
+    this.clearMismatchErrors(destination);
 
     const cdrVersionMismatch: boolean = fromCdrVersionId !== destination.cdrVersionId;
     const accessTierMismatch: boolean = fromAccessTierShortName !== destination.accessTierShortName;
     const isNotebook: boolean = resourceType === ResourceType.NOTEBOOK;
     const isConceptSet: boolean = resourceType === ResourceType.CONCEPTSET;
 
-    cond([!accessTierMismatch && !cdrVersionMismatch, () => this.clearMismatchErrors(destination)],
-        [accessTierMismatch, () => this.setAccessTierMismatchError(destination, fromAccessTierShortName)],
+    cond([accessTierMismatch, () => this.setAccessTierMismatchError(destination, fromAccessTierShortName)],
         [cdrVersionMismatch && isConceptSet, () => this.setConceptSetCdrMismatchError(destination, fromCdrVersionId)],
         // notebooks can be copied to different versions; warn only.
         [cdrVersionMismatch && isNotebook, () => this.setNotebookCdrMismatchWarning(destination, fromCdrVersionId)]);
