@@ -37,7 +37,8 @@ were copied into `gs://all-of-us-workbench-test-genomics/1kg_gvcfs/`
   - Select Data -> Select all samples
   - Inputs (This is what I used but change what makes sense for you.)
     - Note: The output_directory can be any empty folder but it must change from run to run because of leftover files from preexisting runs.  
-    - ```{
+    - ```
+      {
       "GvsImportGenomes.dataset_name": "1kg_wgs",
       "GvsImportGenomes.gatk_override": "upload and copy from 'Create a GATK jar' step",
       "GvsImportGenomes.input_vcf_indexes": "${this.1kg_samples.gvcf_index}",
@@ -46,7 +47,8 @@ were copied into `gs://all-of-us-workbench-test-genomics/1kg_gvcfs/`
       "GvsImportGenomes.output_directory": "gs://fc-56d2f6f5-3efa-46f7-8c01-0911fd77f888/import_genomes/9",
       "GvsImportGenomes.project_id": "all-of-us-workbench-test",
       "GvsImportGenomes.sample_map": "upload and copy from 'Create sample_map' step",
-      }```
+      }
+      ```
 
 
 ### Fixing sample_names
