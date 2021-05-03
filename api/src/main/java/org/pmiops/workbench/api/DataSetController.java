@@ -479,7 +479,7 @@ public class DataSetController implements DataSetApiDelegate {
     DbWorkspace dbWorkspace =
         workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-
+    request.setWorkspaceId(dbWorkspace.getWorkspaceId());
     return ResponseEntity.ok(
         dataSetService.updateDataSet(dbWorkspace.getWorkspaceId(), dataSetId, request));
   }
