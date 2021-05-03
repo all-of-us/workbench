@@ -434,7 +434,7 @@ public class DataSetController implements DataSetApiDelegate {
 
   private void validateConceptSetsInWorkspace(
       long workspaceId, @Nullable List<Long> conceptSetIds) {
-    if (conceptSetIds == null || conceptSetIds.isEmpty()) {
+    if (CollectionUtils.isEmpty(conceptSetIds)) {
       return;
     }
     List<Long> workspaceConceptSetIds =
