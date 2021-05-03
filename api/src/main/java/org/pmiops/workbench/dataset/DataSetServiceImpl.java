@@ -253,7 +253,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     if (!dbDataSet.isPresent()) {
       throw new NotFoundException(
-          "No DataSet found for dataSetId " + dataSetId + "and workspaceId " + workspaceId);
+          "No DataSet found for dataSetId " + dataSetId + " and workspaceId " + workspaceId);
     }
 
     int version = Etags.toVersion(request.getEtag());
@@ -853,7 +853,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     Optional<DbDataset> dbDataset = this.getDbDataSet(workspaceId, dataSetId);
     if (!dbDataset.isPresent()) {
       throw new NotFoundException(
-          "No DataSet found for dataSetId " + dataSetId + "and workspaceId " + workspaceId);
+          "No DataSet found for dataSetId " + dataSetId + " and workspaceId " + workspaceId);
     }
     dataSetDao.delete(dataSetId);
   }

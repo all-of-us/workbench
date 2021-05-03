@@ -499,7 +499,7 @@ public class DataSetController implements DataSetApiDelegate {
                   throw new NotFoundException(
                       "No DataSet found for dataSetId "
                           + dataSetId
-                          + "and workspaceId "
+                          + " and workspaceId "
                           + dbWorkspace.getWorkspaceId());
                 });
 
