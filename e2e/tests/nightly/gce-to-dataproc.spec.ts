@@ -37,14 +37,14 @@ describe('Updating runtime compute type', () => {
     expect(parseInt(cpusOutputText, 10)).toBe(4);
     // This gets the amount of memory available to Python in bytes
     const memoryOutputText = await notebook.runCodeCell(2, { codeFile: 'resources/python-code/count-memory.py' });
-    // Default memory is 15 gibibytes, we'll check that it is between 14 billion and 16 billion bytes
-    expect(parseInt(memoryOutputText, 10)).toBeGreaterThanOrEqual(14 * 1000 * 1000 * 1000);
-    expect(parseInt(memoryOutputText, 10)).toBeLessThanOrEqual(16 * 1000 * 1000 * 1000);
+    // Default memory is 15 gibibytes, we'll check that it is between 14GiB and 16GiB
+    expect(parseFloat(memoryOutputText)).toBeGreaterThanOrEqual(14);
+    expect(parseFloat(memoryOutputText)).toBeLessThanOrEqual(16);
     // This gets the disk space in bytes
     const diskOutputText = await notebook.runCodeCell(3, { codeFile: 'resources/python-code/count-disk-space.py' });
-    // Default disk is 50 gibibytes, we'll check that it is between 45 and 55 billion bytes
-    expect(parseInt(diskOutputText, 10)).toBeGreaterThanOrEqual(45 * 1000 * 1000 * 1000);
-    expect(parseInt(diskOutputText, 10)).toBeLessThanOrEqual(55 * 1000 * 1000 * 1000);
+    // Default disk is 100 gibibytes, we'll check that it is between 95GiB and 105GiB
+    expect(parseFloat(diskOutputText)).toBeGreaterThanOrEqual(95);
+    expect(parseFloat(diskOutputText)).toBeLessThanOrEqual(105);
     await notebook.save();
 
     // Open runtime panel
