@@ -49,7 +49,9 @@ were copied into `gs://all-of-us-workbench-test-genomics/1kg_gvcfs/`
       "GvsImportGenomes.sample_map": "upload and copy from 'Create sample_map' step",
       }
       ```
-
+- Some gotchas if it fails
+  - Your Terra pet service account needs access to the input vcfs, you can grant this through Google Cloud Console
+  - If the workflow fails towards the end and just a few shards fail, it might be a flaky error. Just try again. 
 
 ### Fixing sample_names
 - Right now, the sample_names in the `sample_info` table match the sample_names in the VCFs
