@@ -91,6 +91,12 @@
       "namespace": "aou-rw-a5a507b6",
       "id": "demosystemicdiseaseandglaucoma",
       "category": "DEMO_PROJECTS"
+    },
+    {
+      "name": "Demo - Family History in EHR & PPI Data",
+      "namespace": "aou-rw-a324db3e",
+      "id": "demofamilyhistoryinehrppidata",
+      "category": "DEMO_PROJECTS"
     }
   ]
 }
