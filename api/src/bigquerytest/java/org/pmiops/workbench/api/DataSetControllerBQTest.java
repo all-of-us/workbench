@@ -61,6 +61,8 @@ import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.model.ArchivalStatus;
+import org.pmiops.workbench.model.Cohort;
+import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValue;
@@ -256,10 +258,16 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbWorkspace.setFirecloudName(WORKSPACE_NAME);
     dbWorkspace.setCdrVersion(dbCdrVersion);
     dbWorkspace = workspaceDao.save(dbWorkspace);
+
     dbConditionConceptSet =
         conceptSetDao.save(createConceptSet(Domain.CONDITION, dbWorkspace.getWorkspaceId()));
     dbProcedureConceptSet =
         conceptSetDao.save(createConceptSet(Domain.PROCEDURE, dbWorkspace.getWorkspaceId()));
+    when(conceptSetService.findByWorkspaceId(dbWorkspace.getWorkspaceId()))
+        .thenReturn(
+            ImmutableList.of(
+                new ConceptSet().id(dbConditionConceptSet.getConceptSetId()),
+                new ConceptSet().id(dbProcedureConceptSet.getConceptSetId())));
 
     dbCohort1 = new DbCohort();
     dbCohort1.setWorkspaceId(dbWorkspace.getWorkspaceId());
@@ -271,6 +279,11 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbCohort2.setCriteria(new Gson().toJson(SearchRequests.icd9Codes()));
     dbCohort2 = cohortDao.save(dbCohort2);
 
+    when(cohortService.findByWorkspaceId(dbWorkspace.getWorkspaceId()))
+        .thenReturn(
+            ImmutableList.of(
+                new Cohort().id(dbCohort1.getCohortId()),
+                new Cohort().id(dbCohort2.getCohortId())));
     when(controller.generateRandomEightCharacterQualifier()).thenReturn("00000000");
 
     conditionLinking1 =
