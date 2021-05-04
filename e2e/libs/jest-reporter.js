@@ -3,10 +3,6 @@ const path = require('path');
 const winston = require('winston');
 
 module.exports = class JestReporter {
-  testName;
-  testLogName;
-  logger;
-
   constructor(globalConfig, options) {
     if (globalConfig.verbose === true) {
       throw Error("Verbose must be false or Console messages won't be available.");
@@ -18,8 +14,6 @@ module.exports = class JestReporter {
   // Called at the beginning of every test file
   onTestStart(test) {
     console.info(`Running ${path.parse(test.path).name} at ${this.timeNow()}`);
-    this.testName = path.parse(test.path).name;
-    this.testLogName = `${this.logDir}/${this.testName}.log`;
   }
 
   // Called with the result of every test file
@@ -29,31 +23,32 @@ module.exports = class JestReporter {
     });
     if (hasFailure) {
       // Save logs of failed test
-      this.testLogName = `${this.logDir}/${this.testName}-FAILED.log`;
-      this.logger = this.createLogger(this.testLogName);
+      const testName = path.parse(testResult.testFilePath).name;
+      const testLogName = `${this.logDir}/${testName}-FAILED.log`;
+      const logger = this.createLogger(testLogName);
 
       // Read jest console messages and save to a log file.
       // Get all console logs.
       if (testResult.console) {
         testResult.console.forEach((log) => {
-          this.logger.info(log.message);
+          logger.info(log.message);
         });
       }
 
       // Get failure messages.
-      this.logger.info('\n\nTests Summary');
+      logger.info('\n\nTests Summary');
       testResult.testResults.forEach((result) => {
-        this.logger.info('----------------------------------------------');
-        this.logger.log('info', 'test name: %s', result.title);
-        this.logger.log('info', 'status: %s', result.status);
+        logger.info('----------------------------------------------');
+        logger.log('info', 'test name: %s', result.title);
+        logger.log('info', 'status: %s', result.status);
         // Get failure message.
         if (result.failureMessages) {
           const failure = result.failureMessages;
-          this.logger.log('info', 'failure: %s', failure);
+          logger.log('info', 'failure: %s', failure);
         }
-        this.logger.info('');
+        logger.info('');
       });
-      console.log(`Saved log of failed test: ${this.testLogName}`);
+      console.log(`Saved log of failed test: ${testLogName}`);
     }
   }
 
@@ -77,7 +72,7 @@ module.exports = class JestReporter {
   }
 
   createLogger(fileName) {
-    const logger = winston.createLogger({
+    const loggerInstance = winston.createLogger({
       level: process.env.LOG_LEVEL || 'info',
       format: winston.format.combine(
         winston.format.splat(),
@@ -94,6 +89,6 @@ module.exports = class JestReporter {
       ],
       exitOnError: false
     });
-    return logger;
+    return loggerInstance;
   }
 };
