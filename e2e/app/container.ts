@@ -62,7 +62,7 @@ export default class Container {
     await Promise.all(
       fp.flow(
         fp.filter<{ shouldWait: boolean; waitFn: () => Promise<void> }>('shouldWait'),
-        fp.map(async (item) => await item.waitFn()),
+        fp.map((item) => item.waitFn()),
         fp.concat([button.click({ delay: 10 })])
       )([
         {
