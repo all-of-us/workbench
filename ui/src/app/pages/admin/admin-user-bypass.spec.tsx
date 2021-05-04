@@ -3,7 +3,7 @@ import * as React from 'react';
 import {AdminUserBypass} from './admin-user-bypass';
 import {AdminTableUser} from 'generated/fetch';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 
 describe('AdminUserBypassSpec', () => {
   let props: {user: AdminTableUser};
@@ -13,13 +13,14 @@ describe('AdminUserBypassSpec', () => {
   };
 
   beforeEach(() => {
-    serverConfigStore.next({
+    serverConfigStore.set({config: {
       enableDataUseAgreement: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
-    });
+      enableRasLoginGovLinking: true,
+    }});
     props = {
       user: ProfileStubVariables.ADMIN_TABLE_USER_STUB
     };

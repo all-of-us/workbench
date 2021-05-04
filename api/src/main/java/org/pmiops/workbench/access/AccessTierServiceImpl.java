@@ -1,11 +1,13 @@
 package org.pmiops.workbench.access;
 
-import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
@@ -14,61 +16,47 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.model.DataAccessLevel;
+import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AccessTierServiceImpl implements AccessTierService {
-
   private final Provider<WorkbenchConfig> configProvider;
   private final Clock clock;
 
   private final AccessTierDao accessTierDao;
   private final UserAccessTierDao userAccessTierDao;
 
+  private final FireCloudService fireCloudService;
+
+  private static final Logger log = Logger.getLogger(AccessTierServiceImpl.class.getName());
+
   @Autowired
   public AccessTierServiceImpl(
       Provider<WorkbenchConfig> configProvider,
       Clock clock,
       AccessTierDao accessTierDao,
-      UserAccessTierDao userAccessTierDao) {
+      UserAccessTierDao userAccessTierDao,
+      FireCloudService fireCloudService) {
     this.configProvider = configProvider;
+    this.clock = clock;
     this.accessTierDao = accessTierDao;
     this.userAccessTierDao = userAccessTierDao;
-    this.clock = clock;
+    this.fireCloudService = fireCloudService;
   }
 
   /**
-   * Return all access tiers in the database
+   * Return all access tiers in the database, in alphabetical order by shortName
    *
    * @return the List of all DbAccessTiers in the database
    */
+  @Override
   public List<DbAccessTier> getAllTiers() {
-    return accessTierDao.findAll();
-  }
-
-  /**
-   * Return the access tier referred to by the shortName in the database
-   *
-   * @param shortName the short name of the access tier to look up in the database
-   * @return an {@code Optional<DbAccessTier>} if one matches the shortName passed in, EMPTY
-   *     otherwise
-   */
-  public Optional<DbAccessTier> getAccessTier(String shortName) {
-    return accessTierDao.findOneByShortName(shortName);
-  }
-
-  /**
-   * Return the Registered Tier if it exists in the database
-   *
-   * @return a DbAccessTier representing the Registered Tier
-   * @throws ServerErrorException if there is no Registered Tier
-   */
-  public DbAccessTier getRegisteredTier() {
-    return getAccessTier(REGISTERED_TIER_SHORT_NAME)
-        .orElseThrow(() -> new ServerErrorException("Cannot find Registered Tier in database."));
+    return accessTierDao.findAll().stream()
+        .sorted(Comparator.comparing(DbAccessTier::getShortName))
+        .collect(Collectors.toList());
   }
 
   /**
@@ -77,38 +65,9 @@ public class AccessTierServiceImpl implements AccessTierService {
    *
    * @param user the DbUser in the user-accessTier mappings we're updating
    */
+  @Override
   public void addUserToAllTiers(DbUser user) {
     getAllTiers().forEach(tier -> addUserToTier(user, tier));
-  }
-
-  /**
-   * Add a Registered Tier membership to a user if none exists by inserting a DB row set to ENABLED.
-   * If such a membership exists and is DISABLED, set it to ENABLED.
-   *
-   * <p>Currently, this does not synchronize Terra Auth Domain group membership, but it will do so
-   * when the user_access_tier table is the source of truth for tier membership. The existing method
-   * UserServiceImpl.addToRegisteredTierGroupIdempotent() continues to handle group membership until
-   * then.
-   *
-   * @param user the DbUser in the user-accessTier mapping we're updating
-   */
-  public void addUserToRegisteredTier(DbUser user) {
-    addUserToTier(user, getRegisteredTier());
-  }
-
-  /**
-   * Remove a Registered Tier membership from a user if one exists and is ENABLED by marking that
-   * membership as DISABLED. Do nothing if no membership exists.
-   *
-   * <p>Currently, this does not synchronize Terra Auth Domain group membership, but it will do so
-   * when the user_access_tier table is the source of truth for tier membership. The existing method
-   * UserServiceImpl.removeFromRegisteredTierGroupIdempotent() continues to handle group membership
-   * until then.
-   *
-   * @param user the DbUser in the user-accessTier mapping we're updating
-   */
-  public void removeUserFromRegisteredTier(DbUser user) {
-    removeUserFromTier(user, getRegisteredTier());
   }
 
   /**
@@ -118,7 +77,10 @@ public class AccessTierServiceImpl implements AccessTierService {
    * @param user the DbUser in the user-accessTier mapping we're updating
    * @param accessTier the DbAccessTier in the user-accessTier mapping we're updating
    */
-  private void addUserToTier(DbUser user, DbAccessTier accessTier) {
+  @Override
+  public void addUserToTier(DbUser user, DbAccessTier accessTier) {
+    addToAuthDomainIdempotent(user, accessTier);
+
     Optional<DbUserAccessTier> existingEntryMaybe =
         userAccessTierDao.getByUserAndAccessTier(user, accessTier);
 
@@ -149,7 +111,10 @@ public class AccessTierServiceImpl implements AccessTierService {
    * @param user the DbUser in the user-accessTier mapping we're updating
    * @param accessTier the DbAccessTier in the user-accessTier mapping we're updating
    */
-  private void removeUserFromTier(DbUser user, DbAccessTier accessTier) {
+  @Override
+  public void removeUserFromTier(DbUser user, DbAccessTier accessTier) {
+    removeFromAuthDomainIdempotent(user, accessTier);
+
     userAccessTierDao
         .getByUserAndAccessTier(user, accessTier)
         .filter(entry -> entry.getTierAccessStatusEnum() == TierAccessStatus.ENABLED)
@@ -161,26 +126,82 @@ public class AccessTierServiceImpl implements AccessTierService {
                         .setLastUpdated(now())));
   }
 
+  private void addToAuthDomainIdempotent(DbUser dbUser, DbAccessTier accessTier) {
+    final String username = dbUser.getUsername();
+    final String authDomainName = accessTier.getAuthDomainName();
+    if (!fireCloudService.isUserMemberOfGroup(username, authDomainName)) {
+      fireCloudService.addUserToGroup(username, authDomainName);
+      log.info(
+          String.format(
+              "Added user %s to auth domain for tier '%s'", username, accessTier.getShortName()));
+    }
+  }
+
+  private void removeFromAuthDomainIdempotent(DbUser dbUser, DbAccessTier accessTier) {
+    final String username = dbUser.getUsername();
+    final String authDomainName = accessTier.getAuthDomainName();
+    if (fireCloudService.isUserMemberOfGroup(username, authDomainName)) {
+      fireCloudService.removeUserFromGroup(username, authDomainName);
+      log.info(
+          String.format(
+              "Removed user %s from auth domain for tier '%s'",
+              username, accessTier.getShortName()));
+    }
+  }
+
   /**
-   * A placeholder implementation until we establish userAccessTierDao as the source of truth for
-   * access tier membership.
-   *
-   * <p>For registered users, return the registered tier or all tiers if we're in an environment
-   * which has enabled all tiers for registered users. Return no access tiers for unregistered
-   * users.
+   * Return the list of tiers a user has access to: those where a DbUserAccessTier exists with
+   * status ENABLED
    *
    * @param user the user whose access we're checking
-   * @return The List of DbAccessTiers the DbUser has access to in this environment
+   * @return The List of DbAccessTiers the DbUser has access to in this environment, in alphabetical
+   *     order by shortName
    */
+  @Override
   public List<DbAccessTier> getAccessTiersForUser(DbUser user) {
-    if (user.getDataAccessLevelEnum() == DataAccessLevel.REGISTERED) {
-      if (configProvider.get().featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers) {
-        return accessTierDao.findAll();
-      } else {
-        return ImmutableList.of(getRegisteredTier());
-      }
+    return userAccessTierDao.getAllByUser(user).stream()
+        .filter(uat -> uat.getTierAccessStatusEnum() == TierAccessStatus.ENABLED)
+        .map(DbUserAccessTier::getAccessTier)
+        .sorted(Comparator.comparing(DbAccessTier::getShortName))
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Return the list of tiers a user has access to, as shortNames
+   *
+   * @param user the user whose access we're checking
+   * @return The List of shortNames of DbAccessTiers the DbUser has access to in this environment,
+   *     in alphabetical order
+   */
+  @Override
+  public List<String> getAccessTierShortNamesForUser(DbUser user) {
+    return getAccessTiersForUser(user).stream()
+        .map(DbAccessTier::getShortName)
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Return a list of access tiers which Registered users have access to. Depending on environment,
+   * this will either be the Registered Tier or all tiers. This is a temporary measure until we
+   * implement Controlled Tier Beta access controls.
+   *
+   * <p>See https://precisionmedicineinitiative.atlassian.net/browse/RW-6237
+   *
+   * @return the list of tiers which Registered users have access to.
+   */
+  @Override
+  public List<DbAccessTier> getTiersForRegisteredUsers() {
+    // check this regardless of feature flag
+    final DbAccessTier registeredTier =
+        accessTierDao
+            .findOneByShortName(REGISTERED_TIER_SHORT_NAME)
+            .orElseThrow(
+                () -> new ServerErrorException("Cannot find Registered Tier in database."));
+
+    if (configProvider.get().featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers) {
+      return getAllTiers();
     } else {
-      return Collections.emptyList();
+      return Collections.singletonList(registeredTier);
     }
   }
 

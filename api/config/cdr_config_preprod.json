@@ -7,13 +7,20 @@
       "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_preprod",
       "authDomainName": "all-of-us-registered-preprod",
       "authDomainGroupEmail": "all-of-us-registered-preprod@firecloud.org"
+    },
+    {
+      "accessTierId": 2,
+      "shortName": "controlled",
+      "displayName": "Controlled Tier",
+      "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_preprod_2",
+      "authDomainName": "all-of-us-controlled-preprod",
+      "authDomainGroupEmail": "all-of-us-controlled-preprod@firecloud.org"
     }
   ],
   "cdrVersions": [
     {
       "cdrVersionId": 1,
       "name": "All of Us Dataset v3",
-      "dataAccessLevel": 1,
       "bigqueryProject": "fc-aou-cdr-preprod",
       "bigqueryDataset": "R2019Q4R3",
       "creationTime": "2019-10-21 00:00:00Z",
@@ -25,7 +32,6 @@
     {
       "cdrVersionId": 2,
       "name": "All of Us Dataset v4",
-      "dataAccessLevel": 1,
       "bigqueryProject": "fc-aou-cdr-preprod",
       "bigqueryDataset": "R2019Q4R4",
       "creationTime": "2020-04-16 00:00:00Z",
@@ -37,7 +43,6 @@
     {
       "cdrVersionId": 3,
       "name": "[Removed] Synthetic Dataset v3",
-      "dataAccessLevel": 1,
       "archivalStatus": 1,
       "bigqueryProject": "",
       "bigqueryDataset": "",
@@ -53,13 +58,12 @@
       "cdrVersionId": 4,
       "name": "All of Us Dataset v5",
       "isDefault": true,
-      "dataAccessLevel": 1,
       "bigqueryProject": "fc-aou-cdr-preprod",
-      "bigqueryDataset": "R2020Q4R2",
+      "bigqueryDataset": "R2020Q4R3",
       "creationTime": "2020-10-20 00:00:00Z",
       "releaseNumber": 5,
       "numParticipants": 315297,
-      "cdrDbName": "r_2020q4_3",
+      "cdrDbName": "r_2020q4_4",
       "hasFitbitData": true,
       "hasCopeSurveyData": true,
       "accessTier": "registered"

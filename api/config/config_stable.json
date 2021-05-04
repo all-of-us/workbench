@@ -13,7 +13,7 @@
     "xAppIdValue": "stable-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_stable",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.0.23",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.2",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
     "runtimeImages": {
@@ -53,7 +53,7 @@
     "operationalTerraWorkspaceName": "aouwgscohortextractionstable",
     "operationalTerraWorkspaceBucket": "fc-b7045821-7a05-497e-844d-8889625ed10e",
     "extractionPetServiceAccount": "pet-116281557770103257351@aouwgscohortextraction-stable.iam.gserviceaccount.com",
-    "extractionMethodConfigurationNamespace": "",
+    "extractionMethodConfigurationNamespace": "aouwgscohortextraction-stable",
     "extractionMethodConfigurationName": "",
     "extractionMethodConfigurationVersion": 1,
     "extractionCohortsDataset": "",
@@ -118,7 +118,8 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableReportingUploadCron": true,
-    "enableRasLoginGovLinking": false
+    "enableRasLoginGovLinking": false,
+    "enableGenomicExtraction": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",

@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, NgZone, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {
   ActivatedRoute,
@@ -9,22 +9,20 @@ import {
 } from '@angular/router';
 import {buildPageTitleForEnvironment} from 'app/utils/title';
 
+import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
-import {ServerConfigService} from 'app/services/server-config.service';
-import {cookiesEnabled} from 'app/utils';
+import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from 'app/utils';
 import {initializeAnalytics} from 'app/utils/analytics';
 import {
   queryParamsStore,
   routeConfigDataStore,
-  serverConfigStore,
   urlParamsStore
 } from 'app/utils/navigation';
-import {routeDataStore} from 'app/utils/stores';
+import {routeDataStore, serverConfigStore, stackdriverErrorReporterStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 
+import {configApi} from 'app/services/swagger-fetch-clients';
 import outdatedBrowserRework from 'outdated-browser-rework';
-
-export const overriddenUrlKey = 'allOfUsApiUrlOverride';
 
 @Component({
   selector: 'app-aou',
@@ -40,35 +38,38 @@ export class AppComponent implements OnInit {
 
   constructor(
     private activatedRoute: ActivatedRoute,
-    private serverConfigService: ServerConfigService,
     private router: Router,
-    private titleService: Title
-  ) {}
+    private titleService: Title,
+    private zone: NgZone
+  ) {
+    this.zone = zone;
+  }
 
-  ngOnInit(): void {
+  async ngOnInit() {
     this.checkBrowserSupport();
-    this.loadConfig();
+    await this.loadConfig();
+    this.loadErrorReporter();
 
     this.cookiesEnabled = cookiesEnabled();
     // Local storage breaks if cookies are not enabled
     if (this.cookiesEnabled) {
       try {
-        this.overriddenUrl = localStorage.getItem(overriddenUrlKey);
+        this.overriddenUrl = localStorage.getItem(LOCAL_STORAGE_API_OVERRIDE_KEY);
         window['setAllOfUsApiUrl'] = (url: string) => {
           if (url) {
             if (!url.match(/^https?:[/][/][a-z0-9.:-]+$/)) {
               throw new Error('URL should be of the form "http[s]://host.example.com[:port]"');
             }
             this.overriddenUrl = url;
-            localStorage.setItem(overriddenUrlKey, url);
+            localStorage.setItem(LOCAL_STORAGE_API_OVERRIDE_KEY, url);
           } else {
             this.overriddenUrl = null;
-            localStorage.removeItem(overriddenUrlKey);
+            localStorage.removeItem(LOCAL_STORAGE_API_OVERRIDE_KEY);
           }
           window.location.reload();
         };
         console.log('To override the API URLs, try:\n' +
-          'setAllOfUsApiUrl(\'https://host.example.com:1234\')');
+            'setAllOfUsApiUrl(\'https://host.example.com:1234\')');
       } catch (err) {
         console.log('Error setting urls: ' + err);
       }
@@ -94,7 +95,12 @@ export class AppComponent implements OnInit {
       }
     });
 
-    routeDataStore.subscribe(({title, pathElementForTitle}) => this.setTitleFromReactRoute({title, pathElementForTitle}));
+    routeDataStore.subscribe(({title, pathElementForTitle}) => {
+      this.zone.run(() => {
+        this.setTitleFromReactRoute({title, pathElementForTitle});
+        this.initialSpinner = false;
+      });
+    });
     initializeAnalytics();
   }
 
@@ -171,10 +177,25 @@ export class AppComponent implements OnInit {
     });
   }
 
-  private loadConfig() {
-    this.serverConfigService.getConfig().subscribe((config) => {
-      serverConfigStore.next(config);
-    });
+  private async loadConfig() {
+    const config = await configApi().getConfig();
+    serverConfigStore.set({config: config});
   }
 
+  private loadErrorReporter() {
+    // We don't report to stackdriver on local servers.
+    if (environment.debug) {
+      return;
+    }
+    const reporter = new StackdriverErrorReporter();
+    const {config} = serverConfigStore.get();
+    if (!config.publicApiKeyForErrorReports) {
+      return;
+    }
+    reporter.start({
+      key: config.publicApiKeyForErrorReports,
+      projectId: config.projectId,
+    });
+    stackdriverErrorReporterStore.set(reporter);
+  }
 }

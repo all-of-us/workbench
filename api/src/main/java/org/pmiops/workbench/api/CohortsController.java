@@ -23,6 +23,7 @@ import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.CohortReviewDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbCohortReview;
@@ -34,7 +35,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.ConflictException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
-import org.pmiops.workbench.genomics.WgsCohortExtractionService;
 import org.pmiops.workbench.model.CdrQuery;
 import org.pmiops.workbench.model.Cohort;
 import org.pmiops.workbench.model.CohortAnnotationsRequest;
@@ -47,9 +47,8 @@ import org.pmiops.workbench.model.MaterializeCohortRequest;
 import org.pmiops.workbench.model.MaterializeCohortResponse;
 import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.TableQuery;
-import org.pmiops.workbench.model.TerraJob;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -62,13 +61,13 @@ public class CohortsController implements CohortsApiDelegate {
   @VisibleForTesting static final int DEFAULT_PAGE_SIZE = 1000;
   private static final Logger log = Logger.getLogger(CohortsController.class.getName());
 
-  private final WorkspaceService workspaceService;
+  private final WorkspaceDao workspaceDao;
+  private final WorkspaceAuthService workspaceAuthService;
   private final CohortDao cohortDao;
   private final CdrVersionDao cdrVersionDao;
   private final CohortFactory cohortFactory;
   private final CohortMapper cohortMapper;
   private final CohortReviewDao cohortReviewDao;
-  private final WgsCohortExtractionService wgsCohortExtractionService;
   private final ConceptSetDao conceptSetDao;
   private final CohortMaterializationService cohortMaterializationService;
   private Provider<DbUser> userProvider;
@@ -78,26 +77,26 @@ public class CohortsController implements CohortsApiDelegate {
 
   @Autowired
   CohortsController(
-      WorkspaceService workspaceService,
+      WorkspaceDao workspaceDao,
+      WorkspaceAuthService workspaceAuthService,
       CohortDao cohortDao,
       CdrVersionDao cdrVersionDao,
       CohortFactory cohortFactory,
       CohortMapper cohortMapper,
       CohortReviewDao cohortReviewDao,
-      WgsCohortExtractionService wgsCohortExtractionService,
       ConceptSetDao conceptSetDao,
       CohortMaterializationService cohortMaterializationService,
       Provider<DbUser> userProvider,
       Clock clock,
       CdrVersionService cdrVersionService,
       UserRecentResourceService userRecentResourceService) {
-    this.workspaceService = workspaceService;
+    this.workspaceDao = workspaceDao;
+    this.workspaceAuthService = workspaceAuthService;
     this.cohortDao = cohortDao;
     this.cdrVersionDao = cdrVersionDao;
     this.cohortFactory = cohortFactory;
     this.cohortMapper = cohortMapper;
     this.cohortReviewDao = cohortReviewDao;
-    this.wgsCohortExtractionService = wgsCohortExtractionService;
     this.conceptSetDao = conceptSetDao;
     this.cohortMaterializationService = cohortMaterializationService;
     this.userProvider = userProvider;
@@ -120,9 +119,9 @@ public class CohortsController implements CohortsApiDelegate {
   public ResponseEntity<Cohort> createCohort(
       String workspaceNamespace, String workspaceId, Cohort cohort) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    DbWorkspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
 
     try {
       // validate the cohort definition
@@ -159,9 +158,9 @@ public class CohortsController implements CohortsApiDelegate {
   @Override
   public ResponseEntity<Cohort> duplicateCohort(
       String workspaceNamespace, String workspaceId, DuplicateCohortRequest params) {
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    DbWorkspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
 
     checkForDuplicateCohortNameException(params.getNewName(), workspace);
 
@@ -189,7 +188,7 @@ public class CohortsController implements CohortsApiDelegate {
   public ResponseEntity<EmptyResponse> deleteCohort(
       String workspaceNamespace, String workspaceId, Long cohortId) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     DbCohort dbCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
@@ -201,7 +200,7 @@ public class CohortsController implements CohortsApiDelegate {
   public ResponseEntity<Cohort> getCohort(
       String workspaceNamespace, String workspaceId, Long cohortId) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     DbCohort dbCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
@@ -212,11 +211,10 @@ public class CohortsController implements CohortsApiDelegate {
   public ResponseEntity<CohortListResponse> getCohortsInWorkspace(
       String workspaceNamespace, String workspaceId) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
-    DbWorkspace workspace =
-        workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
+    DbWorkspace workspace = workspaceDao.getRequiredWithCohorts(workspaceNamespace, workspaceId);
     CohortListResponse response = new CohortListResponse();
     Set<DbCohort> cohorts = workspace.getCohorts();
     if (cohorts != null) {
@@ -233,7 +231,7 @@ public class CohortsController implements CohortsApiDelegate {
   public ResponseEntity<Cohort> updateCohort(
       String workspaceNamespace, String workspaceId, Long cohortId, Cohort cohort) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     DbCohort dbCohort = getDbCohort(workspaceNamespace, workspaceId, cohortId);
@@ -304,7 +302,7 @@ public class CohortsController implements CohortsApiDelegate {
       String workspaceNamespace, String workspaceId, MaterializeCohortRequest request) {
     // This also enforces registered auth domain.
     DbWorkspace workspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DbCdrVersion cdrVersion = workspace.getCdrVersion();
 
@@ -366,7 +364,7 @@ public class CohortsController implements CohortsApiDelegate {
   public ResponseEntity<CdrQuery> getDataTableQuery(
       String workspaceNamespace, String workspaceId, DataTableSpecification request) {
     DbWorkspace workspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DbCdrVersion cdrVersion = workspace.getCdrVersion();
 
@@ -412,7 +410,7 @@ public class CohortsController implements CohortsApiDelegate {
   public ResponseEntity<CohortAnnotationsResponse> getCohortAnnotations(
       String workspaceNamespace, String workspaceId, CohortAnnotationsRequest request) {
     DbWorkspace workspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DbCdrVersion cdrVersion = workspace.getCdrVersion();
     if (request.getCdrVersionName() != null) {
@@ -441,28 +439,8 @@ public class CohortsController implements CohortsApiDelegate {
     return ResponseEntity.ok(cohortMaterializationService.getAnnotations(cohortReview, request));
   }
 
-  @Override
-  public ResponseEntity<TerraJob> extractCohortGenomes(
-      String workspaceNamespace, String workspaceId, Long cohortId) {
-    DbWorkspace workspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    if (workspace.getCdrVersion().getWgsBigqueryDataset() == null) {
-      throw new BadRequestException("Workspace CDR does not have access to WGS data");
-    }
-
-    try {
-      return ResponseEntity.ok(
-          wgsCohortExtractionService.submitGenomicsCohortExtractionJob(workspace, cohortId));
-    } catch (org.pmiops.workbench.firecloud.ApiException e) {
-      // Given that there are no input arguments ATM, any API exceptions are due to programming or
-      // Firecloud errors
-      throw new ServerErrorException(e);
-    }
-  }
-
   private DbCohort getDbCohort(String workspaceNamespace, String workspaceId, Long cohortId) {
-    DbWorkspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
 
     DbCohort cohort = cohortDao.findById(cohortId).orElse(null);
     if (cohort == null || cohort.getWorkspaceId() != workspace.getWorkspaceId()) {

@@ -1,6 +1,7 @@
 package org.pmiops.workbench.dataset;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.cloud.bigquery.TableResult;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetRequest;
+import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.ResourceType;
 
@@ -24,7 +26,7 @@ public interface DataSetService {
 
   DataSet updateDataSet(DataSetRequest dataSetRequest, Long DataSetId);
 
-  QueryJobConfiguration previewBigQueryJobConfig(DataSetPreviewRequest dataSetPreviewRequest);
+  TableResult previewBigQueryJobConfig(DataSetPreviewRequest dataSetPreviewRequest);
 
   Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSet);
 
@@ -34,15 +36,6 @@ public interface DataSetService {
       String cdrVersionName,
       String qualifier,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap);
-
-  List<String> generateMicroarrayCohortExtractCodeCells(
-      DbWorkspace dbWorkspace,
-      String qualifier,
-      Map<String, QueryJobConfiguration> queryJobConfigurationMap);
-
-  List<String> generatePlinkDemoCode(String qualifier);
-
-  List<String> generateHailDemoCode(String qualifier);
 
   DbDataset cloneDataSetToWorkspace(
       DbDataset fromDataSet,
@@ -61,9 +54,15 @@ public interface DataSetService {
 
   void deleteDataSet(Long dataSetId);
 
-  Optional<DataSet> getDbDataSet(Long dataSetId);
+  Optional<DataSet> getDataSet(Long dataSetId);
+
+  Optional<DbDataset> getDbDataSet(Long dataSetId);
 
   void markDirty(ResourceType resourceType, long resourceId);
 
   DataDictionaryEntry findDataDictionaryEntry(String fieldName, String domain);
+
+  List<String> getPersonIdsWithWholeGenome(DbDataset dataSet);
+
+  List<DomainValue> getValueListFromDomain(String domain);
 }

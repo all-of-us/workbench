@@ -67,6 +67,9 @@ public interface UserService {
   void setTwoFactorAuthBypassTime(
       Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
 
+  void setRasLinkLoginGovBypassTime(
+      Long userId, Timestamp previousBypassTime, Timestamp newBypassTime);
+
   DbUser setDisabledStatus(Long userId, boolean disabled);
 
   List<DbUser> getAllUsers();
@@ -80,7 +83,27 @@ public interface UserService {
   void logAdminWorkspaceAction(
       long targetWorkspaceId, String targetAction, Object oldValue, Object newValue);
 
+  /**
+   * Find users with Registered Tier access whose name or username match the supplied search terms.
+   *
+   * @param term User-supplied search term
+   * @param sort Option(s) for ordering query results
+   * @return the List of DbUsers which meet the search and access requirements
+   * @deprecated use {@link #findUsersBySearchString(String, Sort, String)} instead.
+   */
+  @Deprecated
   List<DbUser> findUsersBySearchString(String term, Sort sort);
+
+  /**
+   * Find users whose name or username match the supplied search terms and who have the appropriate
+   * access tier.
+   *
+   * @param term User-supplied search term
+   * @param sort Option(s) for ordering query results
+   * @param accessTierShortName the shortName of the access tier to check
+   * @return the List of DbUsers which meet the search and access requirements
+   */
+  List<DbUser> findUsersBySearchString(String term, Sort sort, String accessTierShortName);
 
   DbUser syncComplianceTrainingStatusV2()
       throws org.pmiops.workbench.moodle.ApiException, NotFoundException;
@@ -93,9 +116,30 @@ public interface UserService {
   DbUser syncEraCommonsStatusUsingImpersonation(DbUser user, Agent agent)
       throws IOException, org.pmiops.workbench.firecloud.ApiException;
 
+  /**
+   * Synchronize the 2FA enablement status of the currently signed-in user between the Workbench
+   * database and the gsuite directory API. This may affect the user's enabled access tiers. This
+   * can only be called within the context of a user-authenticated API request.
+   */
   void syncTwoFactorAuthStatus();
 
+  /**
+   * Synchronize the 2FA enablement status of the target user between the Workbench database and the
+   * gsuite directory API, acting as the provided agent type. This may affect the user's enabled
+   * access tiers. This can be called administratively, or from an offline cron.
+   */
   DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent);
+
+  /**
+   * Synchronize the 2FA enablement status of the target user between the Workbench database and the
+   * provided 2FA status, acting as the provided agent type. This may affect the user's enabled
+   * access tiers. This can be called administratively, or from an offline cron.
+   *
+   * <p>This method is provided to allow for optimization to the lookup of the enrolled 2FA status,
+   * enables batch 2FA synchronization to be implemented without repeated calls to Gsuite. The
+   * source value for isEnrolledIn2FA should always be Gsuite.
+   */
+  DbUser syncTwoFactorAuthStatus(DbUser targetUser, Agent agent, boolean isEnrolledIn2FA);
 
   int getCurrentDuccVersion();
 

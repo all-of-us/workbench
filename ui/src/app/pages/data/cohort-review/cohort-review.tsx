@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import * as React from 'react';
 
 import {Button} from 'app/components/buttons';
@@ -8,7 +7,7 @@ import {CreateReviewModal} from 'app/pages/data/cohort-review/create-review-moda
 import {cohortReviewStore, queryResultSizeStore, visitsFilterOptions} from 'app/services/review-state.service';
 import {cohortBuilderApi, cohortReviewApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {reactStyles, ReactWrapperBase} from 'app/utils';
+import {reactStyles} from 'app/utils';
 import {currentWorkspaceStore, navigate, urlParamsStore} from 'app/utils/navigation';
 import {Cohort, CriteriaType, Domain, ReviewStatus, SortOrder, WorkspaceAccessLevel} from 'generated/fetch';
 
@@ -95,15 +94,5 @@ export class CohortReview extends React.Component<{}, State> {
         </Modal>}
       </React.Fragment>}
     </React.Fragment>;
-  }
-}
-
-@Component({
-  selector: 'app-cohort-review',
-  template: '<div #root></div>'
-})
-export class CohortReviewComponent extends ReactWrapperBase {
-  constructor() {
-    super(CohortReview, []);
   }
 }

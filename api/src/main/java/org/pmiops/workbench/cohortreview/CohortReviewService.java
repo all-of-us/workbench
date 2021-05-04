@@ -22,13 +22,16 @@ import org.pmiops.workbench.model.Vocabulary;
 public interface CohortReviewService {
 
   /** Find the {@link DbCohort} for the specified cohortId. */
-  DbCohort findCohort(long cohortId);
+  DbCohort findCohort(long workspaceId, long cohortId);
 
   /** Find the {@link DbCohortReview} for the specified cohortId and cdrVersionId. */
   CohortReview findCohortReview(Long cohortId, Long cdrVersionId);
 
   /** Find the {@link DbCohortReview} for the specified cohortReviewId. */
   CohortReview findCohortReview(Long cohortReviewId);
+
+  /** Find the {@link CohortReview} for the specified workspaceId and cohortReviewId. */
+  CohortReview findCohortReviewForWorkspace(Long workspaceId, Long cohortReviewId);
 
   /** Delete the specified cohort review. */
   void deleteCohortReview(Long cohortReviewId);

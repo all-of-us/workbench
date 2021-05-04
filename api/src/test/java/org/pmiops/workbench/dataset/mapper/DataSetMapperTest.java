@@ -18,6 +18,7 @@ import org.junit.runner.RunWith;
 import org.pmiops.workbench.api.BigQueryService;
 import org.pmiops.workbench.api.Etags;
 import org.pmiops.workbench.cdr.ConceptBigQueryService;
+import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
 import org.pmiops.workbench.cohortbuilder.CohortBuilderService;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.mapper.CohortBuilderMapper;
@@ -32,7 +33,6 @@ import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
-import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbDatasetValue;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -59,7 +59,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class DataSetMapperTest {
 
   private DbDataset dbDataset;
-  private DbDataDictionaryEntry dbDataDictionaryEntry;
+  private DbDSDataDictionary dbDataDictionaryEntry;
 
   @Autowired private DataSetMapper dataSetMapper;
   @Autowired private ConceptSetDao mockConceptSetDao;
@@ -131,9 +131,7 @@ public class DataSetMapperTest {
 
     DbCdrVersion cdrVersion = new DbCdrVersion();
     cdrVersion.setCdrVersionId(1L);
-    dbDataDictionaryEntry = new DbDataDictionaryEntry();
-    dbDataDictionaryEntry.setCdrVersion(cdrVersion);
-    dbDataDictionaryEntry.setDefinedTime(Timestamp.from(Instant.now()));
+    dbDataDictionaryEntry = new DbDSDataDictionary();
     dbDataDictionaryEntry.setDataProvenance("p");
     dbDataDictionaryEntry.setRelevantOmopTable("person");
     dbDataDictionaryEntry.setFieldName("field");
@@ -141,7 +139,6 @@ public class DataSetMapperTest {
     dbDataDictionaryEntry.setDescription("desc");
     dbDataDictionaryEntry.setFieldType("type");
     dbDataDictionaryEntry.setSourcePpiModule("s");
-    dbDataDictionaryEntry.setTransformedByRegisteredTierPrivacyMethods(false);
   }
 
   @Test
@@ -159,7 +156,7 @@ public class DataSetMapperTest {
   @Test
   public void dbModelToClientDataDictionaryEntry() {
     final DataDictionaryEntry toClientDataDictionaryEntry =
-        dataSetMapper.dbModelToClient(dbDataDictionaryEntry);
+        dataSetMapper.dbDsModelToClient(dbDataDictionaryEntry);
     assertDbModelToClient(toClientDataDictionaryEntry, dbDataDictionaryEntry);
   }
 
@@ -247,7 +244,7 @@ public class DataSetMapperTest {
   }
 
   private void assertDbModelToClient(
-      DataDictionaryEntry dataDictionaryEntry, DbDataDictionaryEntry dbDataDictionaryEntry) {
+      DataDictionaryEntry dataDictionaryEntry, DbDSDataDictionary dbDataDictionaryEntry) {
     assertThat(dbDataDictionaryEntry.getDataProvenance())
         .isEqualTo(dataDictionaryEntry.getDataProvenance());
     assertThat(dbDataDictionaryEntry.getRelevantOmopTable())

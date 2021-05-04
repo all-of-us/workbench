@@ -2,11 +2,12 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {getTwoFactorSetupUrl, RegistrationDashboard, RegistrationDashboardProps} from 'app/pages/homepage/registration-dashboard';
 import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {userProfileStore} from 'app/utils/navigation';
+import {buildRasRedirectUrl} from 'app/utils/ras';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 
 describe('RegistrationDashboard', () => {
@@ -24,19 +25,23 @@ describe('RegistrationDashboard', () => {
       reload: jest.fn(),
       updateCache: jest.fn()
     });
-    serverConfigStore.next({
+    serverConfigStore.set({config: {
       enableBetaAccess: true,
       enableDataUseAgreement: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
-      enableV3DataUserCodeOfConduct: true
-    });
+      enableV3DataUserCodeOfConduct: true,
+      enableRasLoginGovLinking: false,
+    }});
     props = {
       eraCommonsLinked: false,
       eraCommonsLoading: false,
       eraCommonsError: '',
+      rasLoginGovLinked: false,
+      rasLoginGovLoading: false,
+      rasLoginGovLinkError: '',
       trainingCompleted: false,
       firstVisitTraining: true,
       betaAccessGranted: false,
@@ -78,21 +83,21 @@ describe('RegistrationDashboard', () => {
   });
 
   it('should display a warning when beta access has not been granted', () => {
-    serverConfigStore.next({...serverConfigStore.getValue(), enableBetaAccess: true});
+    serverConfigStore.set({config: {...serverConfigStore.get().config, enableBetaAccess: true}});
     props.betaAccessGranted = false;
     const wrapper = component();
     expect(wrapper.find('[data-test-id="beta-access-warning"]').length).toBe(1);
   });
 
   it('should clear warning when user has been granted beta access', () => {
-    serverConfigStore.next({...serverConfigStore.getValue(), enableBetaAccess: true});
+    serverConfigStore.set({config: {...serverConfigStore.get().config, enableBetaAccess: true}});
     props.betaAccessGranted = true;
     const wrapper = component();
     expect(wrapper.find('[data-test-id="beta-access-warning"]').length).toBe(0);
   });
 
   it('should not display a warning when enableBetaAccess is false', () => {
-    serverConfigStore.next({...serverConfigStore.getValue(), enableBetaAccess: false});
+    serverConfigStore.set({config: {...serverConfigStore.get().config, enableBetaAccess: false}});
     props.betaAccessGranted = false;
     const wrapper = component();
     expect(wrapper.find('[data-test-id="beta-access-warning"]').length).toBe(0);
@@ -109,7 +114,7 @@ describe('RegistrationDashboard', () => {
   });
 
   it('should display a success message when complete and enableBetaAccess is false', () => {
-    serverConfigStore.next({...serverConfigStore.getValue(), enableBetaAccess: false});
+    serverConfigStore.set({config: {...serverConfigStore.get().config, enableBetaAccess: false}});
     // When enableBetaAccess is false, we shouldn't need to have been granted beta access.
     props.betaAccessGranted = false;
     props.eraCommonsLinked = true;
@@ -120,14 +125,37 @@ describe('RegistrationDashboard', () => {
     expect(wrapper.find('[data-test-id="success-message"]').length).toBe(1);
   });
 
+  it('should have RAS link card then display a success message after linking when enableRasLoginGovLinking is true', () => {
+    serverConfigStore.set({config: {...serverConfigStore.get().config, enableRasLoginGovLinking: true}});
+    // When enableRasLoginGovLinking is true, show RAS linking card.
+    props.betaAccessGranted = true;
+    props.eraCommonsLinked = true;
+    props.trainingCompleted = true;
+    props.twoFactorAuthCompleted = true;
+    props.dataUserCodeOfConductCompleted = true;
+    props.rasLoginGovLinked = false;
+
+    let wrapper = component();
+    expect(wrapper.find('[data-test-id="success-message"]').length).toBe(0);
+    expect(wrapper.find('[data-test-id="registration-task-rasLoginGov"]')
+    .find('[data-test-id="registration-task-link"]').first().prop('disabled')).toBeFalsy();
+
+    // Now mark loginGov link succeed
+    props.rasLoginGovLinked = true;
+    wrapper = component();
+    expect(wrapper.find('[data-test-id="registration-task-rasLoginGov"]')
+    .find('[data-test-id="completed-button"]').length).toBeGreaterThanOrEqual(1);
+  });
+
+
   it('should not show self-bypass UI when unsafeSelfBypass is false', () => {
-    serverConfigStore.next({...serverConfigStore.getValue(), unsafeAllowSelfBypass: false});
+    serverConfigStore.set({config: {...serverConfigStore.get().config, unsafeAllowSelfBypass: false}});
     const wrapper = component();
     expect(wrapper.find('[data-test-id="self-bypass"]').length).toBe(0);
   });
 
   it('should show self-bypass when unsafeSelfBypass is true', () => {
-    serverConfigStore.next({...serverConfigStore.getValue(), unsafeAllowSelfBypass: true});
+    serverConfigStore.set({config: {...serverConfigStore.get().config, unsafeAllowSelfBypass: true}});
     const wrapper = component();
     expect(wrapper.find('[data-test-id="self-bypass"]').length).toBe(1);
   });
@@ -138,4 +166,7 @@ describe('RegistrationDashboard', () => {
     expect(getTwoFactorSetupUrl()).toMatch(encodeURIComponent('https://myaccount.google.com/signinoptions/'));
   });
 
+  it('should generate expected RAS redirect URL', () => {
+    expect(buildRasRedirectUrl()).toMatch(encodeURIComponent('http://localhost/ras-callback'));
+  });
 });

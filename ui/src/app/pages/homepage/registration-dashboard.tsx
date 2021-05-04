@@ -14,7 +14,9 @@ import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDataUseAgreementVersion} from 'app/utils/code-of-conduct';
-import {navigate, serverConfigStore, userProfileStore} from 'app/utils/navigation';
+import {navigate, userProfileStore} from 'app/utils/navigation';
+import {buildRasRedirectUrl} from 'app/utils/ras';
+import {serverConfigStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {AccessModule, Profile} from 'generated/fetch';
 
@@ -91,9 +93,18 @@ function redirectToTwoFactorSetup(): void {
 
 function redirectToNiH(): void {
   AnalyticsTracker.Registration.ERACommons();
-  const url = serverConfigStore.getValue().shibbolethUiBaseUrl + '/login?return-url=' +
+  const url = serverConfigStore.get().config.shibbolethUiBaseUrl + '/login?return-url=' +
       encodeURIComponent(
         window.location.origin.toString() + '/nih-callback?token=<token>');
+  window.open(url, '_blank');
+}
+
+function redirectToRas(): void {
+  AnalyticsTracker.Registration.RasLoginGov();
+  // The scopes are also used in backend for fetching user info.
+  const url = serverConfigStore.get().config.rasHost + '/auth/oauth/v2/authorize?client_id=' + serverConfigStore.get().config.rasClientId
+      + '&prompt=login+consent&redirect_uri=' + buildRasRedirectUrl()
+      + '&response_type=code&scope=openid+profile+email+ga4gh_passport_v1';
   window.open(url, '_blank');
 }
 
@@ -124,7 +135,7 @@ interface RegistrationTask {
 // the server-side logic, else users can get stuck on the registration dashboard
 // without a next step:
 // https://github.com/all-of-us/workbench/blob/master/api/src/main/java/org/pmiops/workbench/db/dao/UserServiceImpl.java#L240-L272
-export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
+export const getRegistrationTasks = () => serverConfigStore.get().config ? ([
   {
     key: 'twoFactorAuth',
     completionPropsKey: 'twoFactorAuthCompleted',
@@ -144,6 +155,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     title: 'Connect Your eRA Commons Account',
     description: 'Connect your Researcher Workbench account to your eRA Commons account. ' +
       'There is no exchange of personal data in this step.',
+    featureFlag: serverConfigStore.get().config.enableEraCommons,
     buttonText: 'Connect',
     completedText: 'Linked',
     completionTimestamp: (profile: Profile) => {
@@ -151,13 +163,26 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     },
     onClick: redirectToNiH
   }, {
+    key: 'rasLoginGov',
+    completionPropsKey: 'rasLoginGovLinked',
+    loadingPropsKey: 'rasLoginGovLoading',
+    title: 'Connect Your Login.Gov Account',
+    featureFlag: serverConfigStore.get().config.enableRasLoginGovLinking,
+    description: 'Connect your Researcher Workbench account to your login.gov account. ',
+    buttonText: 'Connect',
+    completedText: 'Linked',
+    completionTimestamp: (profile: Profile) => {
+      return profile.rasLinkLoginGovCompletionTime || profile.rasLinkLoginGovBypassTime;
+    },
+    onClick: redirectToRas
+  }, {
     key: 'complianceTraining',
     completionPropsKey: 'trainingCompleted',
     title: <span><i>All of Us</i> Responsible Conduct of Research Training</span>,
     description: <div>Complete ethics training courses to understand the privacy safeguards and the
       compliance requirements for using the <AoU/> dataset.</div>,
     buttonText: 'Complete training',
-    featureFlag: serverConfigStore.getValue().enableComplianceTraining,
+    featureFlag: serverConfigStore.get().config.enableComplianceTraining,
     completedText: 'Completed',
     completionTimestamp: (profile: Profile) => {
       return profile.complianceTrainingCompletionTime || profile.complianceTrainingBypassTime;
@@ -169,7 +194,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
     title: 'Data User Code of Conduct',
     description: <span>Sign the Data User Code of Conduct consenting to the <i>All of Us</i> data use policy.</span>,
     buttonText: 'View & Sign',
-    featureFlag: serverConfigStore.getValue().enableDataUseAgreement,
+    featureFlag: serverConfigStore.get().config.enableDataUseAgreement,
     completedText: 'Signed',
     completionTimestamp: (profile: Profile) => {
       if (profile.dataUseAgreementBypassTime) {
@@ -177,7 +202,7 @@ export const getRegistrationTasks = () => serverConfigStore.getValue() ? ([
       }
       // The DUA completion time field tracks the most recent DUA completion
       // timestamp, but doesn't specify whether that DUA is currently active.
-      const requiredDuaVersion = getLiveDataUseAgreementVersion(serverConfigStore.getValue());
+      const requiredDuaVersion = getLiveDataUseAgreementVersion(serverConfigStore.get().config);
       if (profile.dataUseAgreementSignedVersion === requiredDuaVersion) {
         return profile.dataUseAgreementCompletionTime;
       }
@@ -203,6 +228,9 @@ export interface RegistrationDashboardProps {
   eraCommonsError: string;
   eraCommonsLinked: boolean;
   eraCommonsLoading: boolean;
+  rasLoginGovLinkError: string;
+  rasLoginGovLinked: boolean;
+  rasLoginGovLoading: boolean;
   trainingCompleted: boolean;
   firstVisitTraining: boolean;
   twoFactorAuthCompleted: boolean;
@@ -244,7 +272,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
 
   allTasksCompleted(): boolean {
     const {betaAccessGranted} = this.props;
-    const {enableBetaAccess} = serverConfigStore.getValue();
+    const {enableBetaAccess} = serverConfigStore.get().config;
 
     // Beta access is awkwardly not treated as a task in the completion list. So we manually
     // check whether (1) beta access requirement is turned off for this env, or (2) the user
@@ -292,7 +320,8 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
       AccessModule.ERACOMMONS,
       AccessModule.TWOFACTORAUTH,
       AccessModule.DATAUSEAGREEMENT,
-      AccessModule.BETAACCESS
+      AccessModule.BETAACCESS,
+      AccessModule.RASLINKLOGINGOV,
     ];
 
     for (const module of modules) {
@@ -307,8 +336,8 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
 
   render() {
     const {bypassActionComplete, bypassInProgress, trainingWarningOpen} = this.state;
-    const {betaAccessGranted, eraCommonsError, trainingCompleted} = this.props;
-    const {enableBetaAccess, unsafeAllowSelfBypass} = serverConfigStore.getValue();
+    const {betaAccessGranted, eraCommonsError, trainingCompleted, rasLoginGovLinkError} = this.props;
+    const {enableBetaAccess, unsafeAllowSelfBypass} = serverConfigStore.get().config;
 
     const anyBypassActionsRemaining = !(this.allTasksCompleted() && betaAccessGranted);
 
@@ -320,6 +349,7 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
         registrationTask);
     // Assign relative positioning so the spinner's absolute positioning anchors
     // it within the registration box.
+    // TODO(RW-6495): Decide the correct error message for login.gov linking failure.
     return <FlexColumn style={{position: 'relative'}} data-test-id='registration-dashboard'>
       {bypassInProgress && <SpinnerOverlay />}
       <div style={styles.mainHeader}>Complete Registration</div>
@@ -389,6 +419,11 @@ export class RegistrationDashboard extends React.Component<RegistrationDashboard
                                         style={{margin: '0px 1rem 1rem 0px'}}>
           <ClrIcon shape='exclamation-triangle' class='is-solid'/>
           Error Linking NIH Username: {eraCommonsError} Please try again!
+      </AlertDanger>}
+      {rasLoginGovLinkError && <AlertDanger data-test-id='ras-login-gov-error'
+                                       style={{margin: '0px 1rem 1rem 0px'}}>
+        <ClrIcon shape='exclamation-triangle' class='is-solid'/>
+        Error Linking login.gov account: {rasLoginGovLinkError} Please try again!
       </AlertDanger>}
       {trainingWarningOpen && !trainingCompleted &&
       <AlertWarning style={styles.closeableWarning}>

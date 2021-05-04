@@ -1,18 +1,17 @@
 import { BreadcrumbType } from 'app/utils/navigation';
 import {atom, Atom} from 'app/utils/subscribable';
-import {Profile} from 'generated';
-import {CdrVersion, Runtime} from 'generated/fetch';
+import {CdrVersionTiersResponse, ConfigResponse, Profile, Runtime} from 'generated/fetch';
 import * as React from 'react';
+import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
 const {useEffect, useState} = React;
 
 export interface RouteDataStore {
   title?: string;
   minimizeChrome?: boolean;
-  helpContentKey?: string;
+  pageKey?: string;
   breadcrumb?: BreadcrumbType;
   pathElementForTitle?: string;
-  notebookHelpSidebarStyles?: boolean;
   contentFullHeightOverride?: boolean;
 }
 
@@ -25,12 +24,7 @@ interface AuthStore {
 
 export const authStore = atom<AuthStore>({authLoaded: false, isSignedIn: false});
 
-interface CdrVersionStore {
-  items?: Array<CdrVersion>;
-  defaultCdrVersionId: string;
-}
-
-export const cdrVersionStore = atom<CdrVersionStore>({items: [], defaultCdrVersionId: '-1'});
+export const cdrVersionStore = atom<CdrVersionTiersResponse>({tiers: []});
 
 interface ProfileStore {
   profile?: Profile;
@@ -80,6 +74,19 @@ export interface RuntimeStore {
 }
 
 export const runtimeStore = atom<RuntimeStore>({workspaceNamespace: undefined, runtime: undefined});
+
+export interface StackdriverErrorReporterStore {
+  reporter?: StackdriverErrorReporter;
+}
+
+export const stackdriverErrorReporterStore = atom<StackdriverErrorReporterStore>({});
+
+export interface ServerConfigStore {
+  config?: ConfigResponse;
+}
+
+export const serverConfigStore = atom<ServerConfigStore>({});
+
 
 /**
  * @name useStore

@@ -42,10 +42,11 @@ import {
 import {WorkspaceData} from 'app/utils/workspace-data';
 
 import {AoU} from 'app/components/text-wrappers';
+import {findCdrVersion} from 'app/utils/cdr-versions';
 import {
   BillingAccountType,
   BillingStatus,
-  CdrVersionListResponse,
+  CdrVersionTiersResponse,
   DataprocConfig,
   Runtime,
   RuntimeConfigurationType,
@@ -83,8 +84,7 @@ const styles = reactStyles({
   controlSection: {
     backgroundColor: String(addOpacity(colors.white, .75)),
     borderRadius: '3px',
-    padding: '.75rem',
-    marginTop: '.75rem'
+    padding: '.75rem'
   },
   presetMenuItem: {
     color: colors.primary,
@@ -177,7 +177,7 @@ enum PanelContent {
 // this is only used in the test.
 export interface Props {
   workspace: WorkspaceData;
-  cdrVersionListResponse?: CdrVersionListResponse;
+  cdrVersionTiersResponse?: CdrVersionTiersResponse;
   onClose: () => void;
 }
 
@@ -403,7 +403,7 @@ const DataProcConfigSelector = ({onChange, disabled, dataprocConfig})  => {
 
 // Select a recommended preset configuration.
 const PresetSelector = ({
-  hasMicroarrayData, setSelectedDiskSize, setSelectedMachine,
+  allowDataproc, setSelectedDiskSize, setSelectedMachine,
   setSelectedCompute, setSelectedDataprocConfig, disabled}) => {
   return <Dropdown
     id='runtime-presets-menu'
@@ -412,7 +412,7 @@ const PresetSelector = ({
     placeholder='Recommended environments'
     options={fp.flow(
       fp.values,
-      fp.filter(({runtimeTemplate}) => hasMicroarrayData || !runtimeTemplate.dataprocConfig),
+      fp.filter(({runtimeTemplate}) => allowDataproc || !runtimeTemplate.dataprocConfig),
       fp.map(({displayName, runtimeTemplate}) => ({label: displayName, value: runtimeTemplate}))
       )(runtimePresets)
     }
@@ -447,8 +447,8 @@ const PresetSelector = ({
     }} />;
 };
 
-const StartStopRuntimeButton = ({workspaceNamespace}) => {
-  const [status, setRuntimeStatus] = useRuntimeStatus(workspaceNamespace);
+const StartStopRuntimeButton = ({workspaceNamespace, googleProject}) => {
+  const [status, setRuntimeStatus] = useRuntimeStatus(workspaceNamespace, googleProject);
 
   const rotateStyle = {animation: 'rotation 2s infinite linear'};
   const {altText, iconShape = null, styleOverrides = {}, onClick = null } = switchCase(status,
@@ -682,7 +682,7 @@ const CreatePanel = ({creatorFreeCreditsRemaining, profile, setPanelContent, wor
 
   return <div data-test-id='runtime-create-panel' style={styles.controlSection}>
     <FlexRow style={styles.costPredictorWrapper}>
-      <StartStopRuntimeButton workspaceNamespace={workspace.namespace}/>
+      <StartStopRuntimeButton workspaceNamespace={workspace.namespace} googleProject={workspace.googleProject}/>
       <CostInfo runtimeChanged={false}
                 runtimeConfig={runtimeConfig}
                 currentUser={profile.username}
@@ -798,12 +798,12 @@ export const RuntimePanel = fp.flow(
   withCdrVersions(),
   withCurrentWorkspace(),
   withUserProfile()
-)(({cdrVersionListResponse, workspace, profileState, onClose = () => {}}) => {
-  const {namespace, id, cdrVersionId} = workspace;
+)(({ cdrVersionTiersResponse, workspace, profileState, onClose = () => {}}) => {
+  const {namespace, id, cdrVersionId, googleProject} = workspace;
 
   const {profile} = profileState;
 
-  const {hasMicroarrayData} = fp.find({cdrVersionId}, cdrVersionListResponse.items) || {hasMicroarrayData: false};
+  const {hasWgsData: allowDataproc} = findCdrVersion(cdrVersionId, cdrVersionTiersResponse) || {hasWgsData: false};
   let [{currentRuntime, pendingRuntime}, setRequestedRuntime] = useCustomRuntime(namespace);
 
   // If the runtime has been deleted, it's possible that the default preset values have changed since its creation
@@ -814,7 +814,7 @@ export const RuntimePanel = fp.flow(
   // Prioritize the "pendingRuntime", if any. When an update is pending, we want
   // to render the target runtime details, which  may not match the current runtime.
   const {dataprocConfig = null, gceConfig = {diskSize: defaultDiskSize}} = pendingRuntime || currentRuntime || {} as Partial<Runtime>;
-  const [status, setRuntimeStatus] = useRuntimeStatus(namespace);
+  const [status, setRuntimeStatus] = useRuntimeStatus(namespace, googleProject);
   const diskSize = dataprocConfig ? dataprocConfig.masterDiskSize : gceConfig.diskSize;
   const machineName = dataprocConfig ? dataprocConfig.masterMachineType : gceConfig.machineType;
   const initialMasterMachine = findMachineByName(machineName) || defaultMachineType;
@@ -1053,12 +1053,6 @@ export const RuntimePanel = fp.flow(
   };
 
   return <div id='runtime-panel'>
-    <h3 style={{...styles.baseHeader, ...styles.bold, ...styles.sectionHeader}}>Cloud analysis environment</h3>
-    <div>
-      Your analysis environment consists of an application and compute resources.
-      Your cloud environment is unique to this workspace and not shared with other users.
-    </div>
-
     {switchCase(panelContent,
       [PanelContent.Create, () =>
             <Fragment>
@@ -1084,7 +1078,7 @@ export const RuntimePanel = fp.flow(
       [PanelContent.Customize, () => <Fragment>
             <div style={styles.controlSection}>
               <FlexRow style={styles.costPredictorWrapper}>
-                <StartStopRuntimeButton workspaceNamespace={workspace.namespace}/>
+                <StartStopRuntimeButton workspaceNamespace={workspace.namespace} googleProject={workspace.googleProject}/>
                 <CostInfo runtimeChanged={runtimeChanged}
                   runtimeConfig={newRuntimeConfig}
                   currentUser={profile.username}
@@ -1093,7 +1087,7 @@ export const RuntimePanel = fp.flow(
                   />
               </FlexRow>
               <PresetSelector
-                hasMicroarrayData={hasMicroarrayData}
+                allowDataproc={allowDataproc}
                 disabled={disableControls}
                 setSelectedDiskSize={(disk) => setSelectedDiskSize(disk)}
                 setSelectedMachine={(machine) => setSelectedMachine(machine)}
@@ -1122,7 +1116,7 @@ export const RuntimePanel = fp.flow(
              <FlexColumn style={{marginTop: '1rem'}}>
                <label style={styles.label} htmlFor='runtime-compute'>Compute type</label>
                <Dropdown id='runtime-compute'
-                         disabled={!hasMicroarrayData || disableControls}
+                         disabled={!allowDataproc || disableControls}
                          style={{width: '10rem'}}
                          options={[ComputeType.Standard, ComputeType.Dataproc]}
                          value={selectedCompute || ComputeType.Standard}

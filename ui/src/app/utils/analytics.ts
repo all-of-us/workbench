@@ -75,6 +75,7 @@ export const AnalyticsTracker = {
     OpenExportModal: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Open Export Modal'),
     Export: (suffix) => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Export', suffix),
     OpenDeleteModal: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Open Delete Modal'),
+    OpenGenomicExtractionModal: (suffix) => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Open Genomic Extraction Modal', suffix),
     Delete: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'Delete'),
     ViewPreviewTable: () => triggerEvent(AnalyticsCategory.DATASET_BUILDER, 'View Preview Table')
   },
@@ -106,6 +107,7 @@ export const AnalyticsTracker = {
     TwoFactorAuth: () => triggerEvent('Registration', 'Clicked on \'2FA\' button', '2FA'),
     EthicsTraining: () => triggerEvent('Registration', 'Clicked on \'Ethics training\' button', 'Training'),
     ERACommons: () => triggerEvent('Registration', 'Clicked on eRA commons button', 'eRA commons'),
+    RasLoginGov: () => triggerEvent('Registration', 'Clicked on RAS LoginGov linking button', 'RAS LoginGov'),
     EnterDUCC: () => triggerEvent('Registration', 'Clicked in DUCC button', 'Entered DUCC'),
     AcceptDUCC: () => triggerEvent('Registration', 'Clicked in DUCC button', 'Accepted DUCC'),
     TutorialVideo: () => triggerEvent('Home Page', 'Clicked on a tutorial video', 'Tutorial videos'),

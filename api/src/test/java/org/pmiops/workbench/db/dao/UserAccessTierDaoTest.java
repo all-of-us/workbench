@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserAccessTier;
@@ -22,7 +23,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class UserAccessTierDaoTest {
+public class UserAccessTierDaoTest extends SpringTest {
   @Autowired private UserDao userDao;
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private UserAccessTierDao userAccessTierDao;
@@ -38,16 +39,7 @@ public class UserAccessTierDaoTest {
     user = userDao.save(user);
 
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
-
-    controlledTier =
-        accessTierDao.save(
-            new DbAccessTier()
-                .setAccessTierId(2)
-                .setShortName("controlled")
-                .setDisplayName("Controlled Tier")
-                .setAuthDomainName("Controlled Tier Auth Domain")
-                .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
-                .setServicePerimeter("controlled/tier/perimeter"));
+    controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
   }
 
   @Test

@@ -13,7 +13,7 @@
     "xAppIdValue": "staging-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_staging",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.0.23",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.2",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
     "runtimeImages": {
@@ -27,7 +27,8 @@
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "retryCount": 2,
     "bufferCapacityPerTier": {
-      "registered": 150
+      "registered": 150,
+      "controlled": 20
     },
     "bufferRefillProjectsPerTask": 1,
     "bufferStatusChecksPerTask": 10,
@@ -53,7 +54,7 @@
     "operationalTerraWorkspaceName": "aouwgscohortextractionstaging",
     "operationalTerraWorkspaceBucket": "fc-c143d305-0ffd-4ca5-b585-9b222691da6c",
     "extractionPetServiceAccount": "pet-112406122740824430926@aouwgscohortextraction-staging.iam.gserviceaccount.com",
-    "extractionMethodConfigurationNamespace": "",
+    "extractionMethodConfigurationNamespace": "aouwgscohortextraction-staging",
     "extractionMethodConfigurationName": "",
     "extractionMethodConfigurationVersion": 1,
     "extractionCohortsDataset": "",
@@ -111,14 +112,15 @@
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
-    "unsafeAllowAccessToAllTiersForRegisteredUsers": false,
+    "unsafeAllowAccessToAllTiersForRegisteredUsers": true,
     "enableRdrExport": true,
     "enableBillingUpgrade": true,
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableReportingUploadCron": true,
-    "enableRasLoginGovLinking": false
+    "enableRasLoginGovLinking": false,
+    "enableGenomicExtraction": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-staging",

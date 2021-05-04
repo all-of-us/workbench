@@ -1,10 +1,8 @@
 import {AlertDanger} from 'app/components/alert';
 import {Button, Link} from 'app/components/buttons';
-import {styles as headerStyles} from 'app/components/headers';
-import {CheckBox, RadioButton, TextInput} from 'app/components/inputs';
+import {CheckBox, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
-import {TextColumn} from 'app/components/text-column';
 import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
 
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
@@ -15,19 +13,15 @@ import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {
   DataSet,
-  DataSetExportRequest,
   DataSetRequest,
   DomainValuePair,
   FileDetail,
   KernelTypeEnum,
   PrePackagedConceptSetEnum
 } from 'generated/fetch';
-import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {validate} from 'validate.js';
-import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
-import GenomicsDataTypeEnum = DataSetExportRequest.GenomicsDataTypeEnum;
 import {ExportDataSet} from './export-data-set';
 
 interface Props {
@@ -41,7 +35,6 @@ interface Props {
   workspaceNamespace: string;
   workspaceId: string;
   billingLocked: boolean;
-  displayMicroarrayOptions: boolean;
 }
 
 interface State {
@@ -57,8 +50,6 @@ interface State {
   previewedKernelType: KernelTypeEnum;
   queries: Map<KernelTypeEnum, String>;
   seePreview: boolean;
-  includeRawMicroarrayData: boolean;
-  genomicsAnalysisTool: GenomicsAnalysisToolEnum;
   saveError: boolean;
   exportError: boolean;
 }
@@ -79,8 +70,6 @@ class NewDataSetModal extends React.Component<Props, State> {
       previewedKernelType: KernelTypeEnum.Python,
       queries: new Map([[KernelTypeEnum.Python, undefined], [KernelTypeEnum.R, undefined]]),
       seePreview: false,
-      includeRawMicroarrayData: false,
-      genomicsAnalysisTool: GenomicsAnalysisToolEnum.NONE,
       saveError: false,
       exportError: false
     };
@@ -152,9 +141,7 @@ class NewDataSetModal extends React.Component<Props, State> {
             dataSetRequest: request,
             kernelType: this.state.kernelType,
             notebookName: this.state.notebookName,
-            newNotebook: this.state.newNotebook,
-            genomicsDataType: this.state.includeRawMicroarrayData ? GenomicsDataTypeEnum.MICROARRAY : GenomicsDataTypeEnum.NONE,
-            genomicsAnalysisTool: this.state.genomicsAnalysisTool
+            newNotebook: this.state.newNotebook
           });
         // Open notebook in a new tab and return back to the Data tab
         const notebookUrl = `/workspaces/${workspaceNamespace}/${workspaceId}/notebooks/preview/` +
@@ -268,48 +255,11 @@ class NewDataSetModal extends React.Component<Props, State> {
         <React.Fragment>  {exportToNotebook && <ExportDataSet
             dataSetRequest={this.getDataSetRequest()}
             notebookType={(kernelTypeEnum) => this.setState({
-              kernelType: kernelTypeEnum,
-              includeRawMicroarrayData: kernelTypeEnum === KernelTypeEnum.R ? false : this.state.includeRawMicroarrayData
+              kernelType: kernelTypeEnum
             })}
             newNotebook={(v) => this.setState({newNotebook: v})}
             updateNotebookName={(v) => this.setState({notebookName: v})}
             workspaceNamespace={this.props.workspaceNamespace} workspaceFirecloudName={this.props.workspaceId}/>}
-          {this.props.displayMicroarrayOptions && this.state.kernelType === KernelTypeEnum.Python &&
-          <div style={{border: '1px solid grey', padding: '.5rem', paddingTop: 0, marginTop: '.5rem'}}>
-            <TextColumn>
-              <div style={headerStyles.formLabel}>Genomics Pre-alpha</div>
-              <div>(non-production only; synthetic data)</div>
-            </TextColumn>
-
-            <div style={{display: 'flex', alignItems: 'center'}}>
-              <CheckBox style={{height: 17, width: 17}}
-                        data-test-id='include-raw-microarray-data'
-                        onChange={(checked) => this.setState({includeRawMicroarrayData: checked})}
-                        checked={this.state.includeRawMicroarrayData} />
-              <div style={{marginLeft: '.5rem', color: colors.primary}}>
-                Include raw microarray data
-              </div>
-            </div>
-
-            {this.state.includeRawMicroarrayData && <div style={{marginTop: '.3rem'}}>
-              <p style={{color: colors.primary}}>
-                Extract genomics data for analysis using:
-              </p>
-
-              {Object.keys(GenomicsAnalysisToolEnum).map((enumKey, i) => {
-                return <React.Fragment>
-                  <label key={i} style={{display: 'block'}}>
-                    <RadioButton
-                      data-test-id={'genomics-analysis-tool-' + enumKey.toLowerCase()}
-                      checked={this.state.genomicsAnalysisTool === GenomicsAnalysisToolEnum[enumKey]}
-                      onChange={() => this.setState({genomicsAnalysisTool: GenomicsAnalysisToolEnum[enumKey]})}
-                    />
-                    &nbsp; {fp.startCase(enumKey.toLowerCase())}
-                  </label>
-                </React.Fragment>;
-              })}
-            </div>}
-          </div> }
         </React.Fragment>
       </ModalBody>
       <ModalFooter>

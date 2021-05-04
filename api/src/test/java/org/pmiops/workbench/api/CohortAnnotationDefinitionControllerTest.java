@@ -43,7 +43,7 @@ import org.pmiops.workbench.model.EmptyResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.test.FakeClock;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
-import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -59,6 +59,8 @@ public class CohortAnnotationDefinitionControllerTest {
 
   private static final String NAMESPACE = "aou-test";
   private static final String NAME = "test";
+  private static final String NAMESPACE2 = "aou-test";
+  private static final String NAME2 = "test2";
   private static final String EXISTING_COLUMN_NAME = "testing";
   private static final String NEW_COLUMN_NAME = "new_column";
   private DbCohort cohort;
@@ -77,10 +79,12 @@ public class CohortAnnotationDefinitionControllerTest {
   @Mock private ParticipantCohortStatusDao participantCohortStatusDao;
   @Mock private ParticipantCohortStatusMapper participantCohortStatusMapper;
   @Mock private ReviewQueryBuilder reviewQueryBuilder;
-  @Mock private WorkspaceService workspaceService;
+  @Mock private WorkspaceAuthService workspaceAuthService;
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
   private CohortAnnotationDefinitionController cohortAnnotationDefinitionController;
+  private DbWorkspace workspace;
+  private DbWorkspace workspace2;
 
   @TestConfiguration
   @Import({CohortAnnotationDefinitionMapperImpl.class, CommonMappers.class})
@@ -109,12 +113,19 @@ public class CohortAnnotationDefinitionControllerTest {
             cohortAnnotationDefinitionDao, cohortAnnotationDefinitionMapper);
     cohortAnnotationDefinitionController =
         new CohortAnnotationDefinitionController(
-            cohortAnnotationDefinitionService, cohortReviewService, workspaceService);
+            cohortAnnotationDefinitionService, cohortReviewService, workspaceAuthService);
 
-    DbWorkspace workspace = new DbWorkspace();
+    workspace = new DbWorkspace();
     workspace.setWorkspaceNamespace(NAMESPACE);
     workspace.setFirecloudName(NAME);
+    workspace.setWorkspaceId(1L);
     workspaceDao.save(workspace);
+
+    workspace2 = new DbWorkspace();
+    workspace2.setWorkspaceNamespace(NAMESPACE2);
+    workspace2.setFirecloudName(NAME2);
+    workspace2.setWorkspaceId(2L);
+    workspaceDao.save(workspace2);
 
     cohort = new DbCohort();
     cohort.setWorkspaceId(workspace.getWorkspaceId());
@@ -131,7 +142,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
   @Test
   public void createCohortAnnotationDefinition_BadCohortId() {
-    setupWorkspaceServiceMock();
+    setupWorkspaceServiceMock(WorkspaceAccessLevel.WRITER);
 
     try {
       cohortAnnotationDefinitionController.createCohortAnnotationDefinition(
@@ -144,7 +155,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
   @Test
   public void createCohortAnnotationDefinition_NameConflict() {
-    setupWorkspaceServiceMock();
+    setupWorkspaceServiceMock(WorkspaceAccessLevel.WRITER);
 
     CohortAnnotationDefinition request =
         new CohortAnnotationDefinition()
@@ -170,7 +181,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
   @Test
   public void createCohortAnnotationDefinition() {
-    setupWorkspaceServiceMock();
+    setupWorkspaceServiceMock(WorkspaceAccessLevel.WRITER);
 
     CohortAnnotationDefinition request =
         new CohortAnnotationDefinition()
@@ -197,7 +208,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
   @Test
   public void createCohortAnnotationDefinitionEnumValues() {
-    setupWorkspaceServiceMock();
+    setupWorkspaceServiceMock(WorkspaceAccessLevel.WRITER);
 
     CohortAnnotationDefinition request =
         new CohortAnnotationDefinition()
@@ -224,7 +235,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
   @Test
   public void updateCohortAnnotationDefinition_BadCohortId() {
-    setupWorkspaceServiceMock();
+    setupWorkspaceServiceMock(WorkspaceAccessLevel.WRITER);
 
     CohortAnnotationDefinition request = new CohortAnnotationDefinition().columnName("ignore");
 
@@ -243,7 +254,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
   @Test
   public void updateCohortAnnotationDefinition_BadAnnotationDefinitionId() {
-    setupWorkspaceServiceMock();
+    setupWorkspaceServiceMock(WorkspaceAccessLevel.WRITER);
 
     CohortAnnotationDefinition request = new CohortAnnotationDefinition().columnName("ignore");
 
@@ -261,7 +272,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
   @Test
   public void updateCohortAnnotationDefinition_NameConflict() {
-    setupWorkspaceServiceMock();
+    setupWorkspaceServiceMock(WorkspaceAccessLevel.WRITER);
 
     CohortAnnotationDefinition request =
         new CohortAnnotationDefinition()
@@ -285,7 +296,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
   @Test
   public void updateCohortAnnotationDefinition() {
-    setupWorkspaceServiceMock();
+    setupWorkspaceServiceMock(WorkspaceAccessLevel.WRITER);
 
     CohortAnnotationDefinition request =
         new CohortAnnotationDefinition()
@@ -320,7 +331,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
   @Test
   public void deleteCohortAnnotationDefinition_BadCohortId() {
-    setupWorkspaceServiceMock();
+    setupWorkspaceServiceMock(WorkspaceAccessLevel.WRITER);
 
     try {
       cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
@@ -333,7 +344,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
   @Test
   public void deleteCohortAnnotationDefinition_BadAnnotationDefinitionId() {
-    setupWorkspaceServiceMock();
+    setupWorkspaceServiceMock(WorkspaceAccessLevel.WRITER);
 
     try {
       cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
@@ -347,9 +358,51 @@ public class CohortAnnotationDefinitionControllerTest {
     }
   }
 
+  @Test(expected = NotFoundException.class)
+  public void deleteCohortAnnotationDefinitionWrongWorkspace() {
+    setupWorkspace2ServiceMock(WorkspaceAccessLevel.WRITER);
+
+    cohortAnnotationDefinitionController.deleteCohortAnnotationDefinition(
+        NAMESPACE2,
+        NAME2,
+        cohort.getCohortId(),
+        dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId());
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void getCohortAnnotationDefinitionWrongWorkspace() {
+    setupWorkspace2ServiceMock(WorkspaceAccessLevel.READER);
+
+    cohortAnnotationDefinitionController.getCohortAnnotationDefinition(
+        NAMESPACE2,
+        NAME2,
+        cohort.getCohortId(),
+        dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId());
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void updateCohortAnnotationDefinitionWrongWorkspace() {
+    setupWorkspace2ServiceMock(WorkspaceAccessLevel.WRITER);
+
+    CohortAnnotationDefinition request =
+        new CohortAnnotationDefinition()
+            .cohortAnnotationDefinitionId(
+                dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId())
+            .columnName(NEW_COLUMN_NAME)
+            .etag(Etags.fromVersion(0))
+            .cohortId(cohort.getCohortId());
+
+    cohortAnnotationDefinitionController.updateCohortAnnotationDefinition(
+        NAMESPACE2,
+        NAME2,
+        cohort.getCohortId(),
+        dbCohortAnnotationDefinition.getCohortAnnotationDefinitionId(),
+        request);
+  }
+
   @Test
   public void deleteCohortAnnotationDefinition() {
-    setupWorkspaceServiceMock();
+    setupWorkspaceServiceMock(WorkspaceAccessLevel.WRITER);
 
     EmptyResponse response =
         cohortAnnotationDefinitionController
@@ -365,7 +418,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
   @Test
   public void getCohortAnnotationDefinition_NotFoundCohort() {
-    setupWorkspaceServiceMock();
+    setupWorkspaceServiceMock(WorkspaceAccessLevel.READER);
 
     try {
       cohortAnnotationDefinitionController.getCohortAnnotationDefinition(
@@ -378,7 +431,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
   @Test
   public void getCohortAnnotationDefinition_NotFoundAnnotationDefinition() {
-    setupWorkspaceServiceMock();
+    setupWorkspaceServiceMock(WorkspaceAccessLevel.READER);
 
     try {
       cohortAnnotationDefinitionController.getCohortAnnotationDefinition(
@@ -394,7 +447,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
   @Test
   public void getCohortAnnotationDefinition() {
-    setupWorkspaceServiceMock();
+    setupWorkspaceServiceMock(WorkspaceAccessLevel.READER);
 
     CohortAnnotationDefinition responseDefinition =
         cohortAnnotationDefinitionController
@@ -420,7 +473,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
   @Test
   public void getCohortAnnotationDefinitions_NotFoundCohort() {
-    setupWorkspaceServiceMock();
+    setupWorkspaceServiceMock(WorkspaceAccessLevel.READER);
 
     try {
       cohortAnnotationDefinitionController.getCohortAnnotationDefinitions(NAMESPACE, NAME, 99L);
@@ -432,7 +485,7 @@ public class CohortAnnotationDefinitionControllerTest {
 
   @Test
   public void getCohortAnnotationDefinitions() {
-    setupWorkspaceServiceMock();
+    setupWorkspaceServiceMock(WorkspaceAccessLevel.READER);
 
     CohortAnnotationDefinitionListResponse responseDefinition =
         cohortAnnotationDefinitionController
@@ -453,9 +506,15 @@ public class CohortAnnotationDefinitionControllerTest {
     assertThat(responseDefinition.getItems().get(0)).isEqualTo(expectedResponse);
   }
 
-  private void setupWorkspaceServiceMock() {
-    when(workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-            NAMESPACE, NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(WorkspaceAccessLevel.OWNER);
+  private void setupWorkspaceServiceMock(WorkspaceAccessLevel workspaceAccessLevel) {
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            NAMESPACE, NAME, workspaceAccessLevel))
+        .thenReturn(workspace);
+  }
+
+  private void setupWorkspace2ServiceMock(WorkspaceAccessLevel workspaceAccessLevel) {
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            NAMESPACE2, NAME2, workspaceAccessLevel))
+        .thenReturn(workspace2);
   }
 }

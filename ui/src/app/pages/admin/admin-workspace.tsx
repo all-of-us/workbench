@@ -10,7 +10,7 @@ import {Error as ErrorDiv, TextArea} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
-import {runtimeApi, workspaceAdminApi} from 'app/services/swagger-fetch-clients';
+import {workspaceAdminApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles, UrlParamsProps, withUrlParams} from 'app/utils';
 import {navigate} from 'app/utils/navigation';
@@ -316,7 +316,7 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
   }
 
   private async deleteRuntime() {
-    await runtimeApi().deleteRuntimesInProject(
+    await workspaceAdminApi().deleteRuntimesInWorkspace(
       this.props.urlParams.workspaceNamespace,
       {runtimesToDelete: [this.state.runtimeToDelete.runtimeName]});
     this.setState({runtimeToDelete: null});
@@ -355,7 +355,8 @@ class AdminWorkspaceImpl extends React.Component<UrlParamsProps, State> {
           <h3>Basic Information</h3>
           <div className='basic-info' style={{marginTop: '1rem'}}>
             <WorkspaceInfoField labelText='Workspace Name'>{workspace.name}</WorkspaceInfoField>
-            <WorkspaceInfoField labelText='Google Project Id'>{workspace.namespace}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Workspace Namespace'>{workspace.namespace}</WorkspaceInfoField>
+            <WorkspaceInfoField labelText='Google Project Id'>{workspace.googleProject}</WorkspaceInfoField>
             <WorkspaceInfoField labelText='Billing Status'>{workspace.billingStatus}</WorkspaceInfoField>
             <WorkspaceInfoField labelText='Billing Account Type'>{workspace.billingAccountType}</WorkspaceInfoField>
             <WorkspaceInfoField labelText='Creation Time'>{new Date(workspace.creationTime).toDateString()}</WorkspaceInfoField>

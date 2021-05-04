@@ -2,6 +2,7 @@ package org.pmiops.workbench.cohortbuilder;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
 import com.google.cloud.bigquery.QueryParameterValue;
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -179,15 +180,23 @@ public class CohortQueryBuilder {
         .build();
   }
 
-  // implemented for use with the Data Set Builder. Please remove if this does not become the
-  // preferred solution
-  // https://docs.google.com/document/d/1-wzSCHDM_LSaBRARyLFbsTGcBaKi5giRs-eDmaMBr0Y/edit#
+  // This method supports the Data Set Builder, for further details see:
+  // https://docs.google.com/document/d/1-wzSCHDM_LSaBRARyLFbsTGcBaKi5giRs-eDmaMBr0Y/edit
   public QueryJobConfiguration buildParticipantIdQuery(ParticipantCriteria participantCriteria) {
-    Map<String, QueryParameterValue> params = new HashMap<>();
-    StringBuilder queryBuilder = new StringBuilder(ID_SQL_TEMPLATE);
-    addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
+    return buildUnionedParticipantIdQuery(ImmutableList.of(participantCriteria));
+  }
 
-    return QueryJobConfiguration.newBuilder(queryBuilder.toString())
+  public QueryJobConfiguration buildUnionedParticipantIdQuery(
+      List<ParticipantCriteria> participantCriteriaList) {
+    List<String> queries = new ArrayList<>();
+    Map<String, QueryParameterValue> params = new HashMap<>();
+
+    for (ParticipantCriteria participantCriteria : participantCriteriaList) {
+      StringBuilder queryBuilder = new StringBuilder(ID_SQL_TEMPLATE);
+      addWhereClause(participantCriteria, SEARCH_PERSON_TABLE, queryBuilder, params);
+      queries.add(queryBuilder.toString());
+    }
+    return QueryJobConfiguration.newBuilder(String.join(UNION_TEMPLATE, queries))
         .setNamedParameters(params)
         .setUseLegacySql(false)
         .build();

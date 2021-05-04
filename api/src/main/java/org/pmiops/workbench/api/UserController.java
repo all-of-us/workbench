@@ -72,9 +72,18 @@ public class UserController implements UserApiDelegate {
     this.cloudBillingProvider = cloudBillingProvider;
   }
 
+  /**
+   * Return a page of users matching a search term. Used by autocomplete for workspace sharing.
+   *
+   * @param term
+   * @param pageToken
+   * @param pageSize
+   * @param sortOrder
+   * @return
+   */
   @Override
   public ResponseEntity<UserResponse> user(
-      String term, String pageToken, Integer size, String sortOrder) {
+      String term, String pageToken, Integer pageSize, String sortOrder) {
     UserResponse response = new UserResponse();
     response.setUsers(Collections.emptyList());
     response.setNextPageToken("");
@@ -110,8 +119,8 @@ public class UserController implements UserApiDelegate {
             .filter(user -> user.getFirstSignInTime() != null)
             .collect(Collectors.toList());
 
-    int pageSize = Optional.ofNullable(size).orElse(DEFAULT_PAGE_SIZE);
-    List<List<DbUser>> pagedUsers = Lists.partition(users, pageSize);
+    List<List<DbUser>> pagedUsers =
+        Lists.partition(users, Optional.ofNullable(pageSize).orElse(DEFAULT_PAGE_SIZE));
 
     int pageOffset = Long.valueOf(paginationToken.getOffset()).intValue();
 

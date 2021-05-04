@@ -52,7 +52,7 @@ export default abstract class BaseModal extends Container {
     waitOptions: { waitForNav?: boolean; waitForClose?: boolean; timeout?: number } = {}
   ): Promise<void> {
     const { waitForNav = false, waitForClose = false, timeout } = waitOptions;
-    const button = await this.waitForButton(buttonLabel);
+    const button = this.waitForButton(buttonLabel);
     await button.waitUntilEnabled();
     await button.focus();
     const handle = await button.asElementHandle();
@@ -67,23 +67,23 @@ export default abstract class BaseModal extends Container {
     }
   }
 
-  async waitForButton(buttonLabel: LinkText): Promise<Button> {
+  waitForButton(buttonLabel: LinkText): Button {
     return Button.findByName(this.page, { normalizeSpace: buttonLabel }, this);
   }
 
-  async waitForTextbox(textboxName: string): Promise<Textbox> {
+  waitForTextbox(textboxName: string): Textbox {
     return Textbox.findByName(this.page, { name: textboxName }, this);
   }
 
-  async waitForTextarea(textareaName: string): Promise<Textarea> {
+  waitForTextarea(textareaName: string): Textarea {
     return Textarea.findByName(this.page, { name: textareaName }, this);
   }
 
-  async waitForCheckbox(checkboxName: string): Promise<Checkbox> {
+  waitForCheckbox(checkboxName: string): Checkbox {
     return Checkbox.findByName(this.page, { name: checkboxName }, this);
   }
 
-  async waitUntilClose(timeout: number = 60000): Promise<void> {
+  async waitUntilClose(timeout = 60000): Promise<void> {
     await this.page.waitForXPath(this.xpath, { hidden: true, timeout });
   }
 

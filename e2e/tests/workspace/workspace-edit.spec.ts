@@ -1,7 +1,7 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { MenuOption, WorkspaceAccessLevel } from 'app/text-labels';
 import * as testData from 'resources/data/workspace-data';
-import { createWorkspace, findOrCreateWorkspace, performActions, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspaceCard, performActions, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 
@@ -10,9 +10,7 @@ describe('Editing workspace via workspace card snowman menu', () => {
     await signInWithAccessToken(page);
   });
 
-  // Reuse same Workspace for all tests in this file to reduce test playback time.
-  // Workspace to be created in first test. If first test fails, next test will create it.
-  let workspaceName: string;
+  const workspaceName = 'e2eEditWorkspaceTest';
 
   /**
    * Test:
@@ -22,20 +20,24 @@ describe('Editing workspace via workspace card snowman menu', () => {
    * - Verify Workspace Information in ABOUT tab.
    */
   test('User as OWNER can edit workspace', async () => {
-    const workspaceCard = await createWorkspace(page);
-    workspaceName = await workspaceCard.getWorkspaceName();
+    const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName });
     await workspaceCard.selectSnowmanMenu(MenuOption.Edit, { waitForNav: true });
 
     const workspaceEditPage = new WorkspaceEditPage(page);
 
+    // Data Access Tier is readonly.
+    const accessTierSelect = workspaceEditPage.getDataAccessTierSelect();
+    expect(await accessTierSelect.isDisabled()).toEqual(true);
+
     // CDR Version Select is readonly. Get selected value.
-    const cdrVersionSelect = await workspaceEditPage.getCdrVersionSelect();
+    const cdrVersionSelect = workspaceEditPage.getCdrVersionSelect();
+    expect(await cdrVersionSelect.isDisabled()).toEqual(true);
     const selectedValue = await cdrVersionSelect.getSelectedValue();
 
     // Change question #2 answer
     await performActions(page, testData.defaultAnswersResearchPurposeSummary);
 
-    const updateButton = await workspaceEditPage.getUpdateWorkspaceButton();
+    const updateButton = workspaceEditPage.getUpdateWorkspaceButton();
     await updateButton.waitUntilEnabled();
     await workspaceEditPage.clickCreateFinishButton(updateButton);
 
@@ -86,8 +88,7 @@ describe('Editing workspace via workspace card snowman menu', () => {
    */
 
   test('User as OWNER can edit workspace via workspace action menu', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page, { workspaceName });
-    await workspaceCard.getWorkspaceName();
+    const workspaceCard = await findOrCreateWorkspaceCard(page, { workspaceName });
 
     // Verify Workspace Access Level is OWNER.
     const accessLevel = await workspaceCard.getWorkspaceAccessLevel();
@@ -103,13 +104,13 @@ describe('Editing workspace via workspace card snowman menu', () => {
     const workspaceEditPage = new WorkspaceEditPage(page);
 
     // CDR Version Select is readonly. Get selected value.
-    const cdrVersionSelect = await workspaceEditPage.getCdrVersionSelect();
+    const cdrVersionSelect = workspaceEditPage.getCdrVersionSelect();
     const selectedValue = await cdrVersionSelect.getSelectedValue();
 
     // Change question #2 answer
     await performActions(page, testData.defaultAnswersResearchPurposeSummary);
 
-    const updateButton = await workspaceEditPage.getUpdateWorkspaceButton();
+    const updateButton = workspaceEditPage.getUpdateWorkspaceButton();
     await updateButton.waitUntilEnabled();
     await workspaceEditPage.clickCreateFinishButton(updateButton);
 

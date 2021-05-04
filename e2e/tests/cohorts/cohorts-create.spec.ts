@@ -10,6 +10,8 @@ describe('Cohorts', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspace = 'e2eCreateCohortsTest';
+
   /**
    * Test:
    * Find an existing workspace or create a new workspace if none exists.
@@ -19,14 +21,13 @@ describe('Cohorts', () => {
    * Renaming Group 1 and 2 names.
    */
   test('Create, edit and delete', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Wait for the Data page.
     const dataPage = new WorkspaceDataPage(page);
 
     // Click Add Cohorts button
-    const addCohortsButton = await dataPage.getAddCohortsButton();
+    const addCohortsButton = dataPage.getAddCohortsButton();
     await addCohortsButton.clickAndWait();
 
     // In Build Cohort Criteria page.
@@ -40,7 +41,7 @@ describe('Cohorts', () => {
     // Checking Group 1 Count. should match Group 1 participants count.
     const group1CountInt = Number((await group1.getGroupCount()).replace(/,/g, ''));
     expect(group1CountInt).toBeGreaterThan(1);
-    console.log('Group 1: Physical Measurement -> BMI count: ' + group1CountInt);
+    console.log(`Group 1: Physical Measurement -> BMI count: ${group1CountInt}`);
 
     // Checking Total Count: should match Group 1 participants count.
     const totalCount = await cohortPage.getTotalCount();
@@ -51,21 +52,21 @@ describe('Cohorts', () => {
     const group2Count = await group2.includeDemographicsDeceased();
     const group2CountInt = Number(group2Count.replace(/,/g, ''));
     expect(group2CountInt).toBeGreaterThan(1);
-    console.log('Group 2: Demographics -> Deceased count: ' + group2CountInt);
+    console.log(`Group 2: Demographics -> Deceased count: ${group2CountInt}`);
 
     // Compare the new Total Count with the old Total Count.
     const newTotalCount = await cohortPage.getTotalCount();
     const newTotalCountInt = Number(newTotalCount.replace(/,/g, ''));
     // Adding additional group decreased Total Count.
     expect(newTotalCountInt).toBeLessThan(group1CountInt);
-    console.log('New Total Count: ' + newTotalCountInt);
+    console.log(`New Total Count: ${newTotalCountInt}`);
 
     // Save new cohort - click create cohort button
     const cohortName = await cohortPage.saveCohortAs();
     console.log(`Created Cohort "${cohortName}"`);
 
     // Open Cohort details.
-    const cohortLink = await Link.findByName(page, { name: cohortName });
+    const cohortLink = Link.findByName(page, { name: cohortName });
     await cohortLink.clickAndWait();
     await waitForText(page, newTotalCount, { xpath: FieldSelector.TotalCount }, 60000);
 

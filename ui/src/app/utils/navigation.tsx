@@ -2,7 +2,6 @@ import {ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy} from '@
 
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {ConfigResponse} from 'generated';
 import {Cohort, ConceptSet, Criteria, ErrorResponse, Profile} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {useLocation} from 'react-router';
@@ -27,7 +26,6 @@ export const globalErrorStore = new BehaviorSubject<ErrorResponse>(undefined);
 export const urlParamsStore = new BehaviorSubject<any>({});
 export const queryParamsStore = new BehaviorSubject<any>({});
 export const routeConfigDataStore = new BehaviorSubject<any>({});
-export const serverConfigStore = new BehaviorSubject<ConfigResponse>(undefined);
 export const currentCohortCriteriaStore = new BehaviorSubject<Array<Selection>>(undefined);
 export const currentConceptStore = new BehaviorSubject<Array<Criteria>>(undefined);
 export const attributesSelectionStore = new BehaviorSubject<Criteria>(undefined);

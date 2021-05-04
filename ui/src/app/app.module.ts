@@ -1,21 +1,17 @@
-import {ErrorHandler, NgModule} from '@angular/core';
+import {NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {Http, HttpModule} from '@angular/http';
+import {HttpModule} from '@angular/http';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {RouteReuseStrategy} from '@angular/router';
 import {ClarityModule} from '@clr/angular';
 import {WorkspaceWrapperComponent} from 'app/pages/workspace/workspace-wrapper/component';
-import {environment} from 'environments/environment';
 import * as StackTrace from 'stacktrace-js';
 
 import {CanDeactivateGuard} from './guards/can-deactivate-guard.service';
-import {ErrorReporterService} from './services/error-reporter.service';
-import {GoogleAnalyticsEventsService} from './services/google-analytics-events.service';
 import {ProfileStorageService} from './services/profile-storage.service';
-import {ServerConfigService} from './services/server-config.service';
 import {SignInService} from './services/sign-in.service';
-import {cookiesEnabled, WINDOW_REF} from './utils';
+import {WINDOW_REF} from './utils';
 import {WorkbenchRouteReuseStrategy} from './utils/navigation';
 
 import {AppRouting} from './app-routing';
@@ -24,11 +20,7 @@ import {BugReportComponent} from './components/bug-report';
 import {ConfirmDeleteModalComponent} from './components/confirm-delete-modal';
 import {HelpSidebarComponent} from './components/help-sidebar';
 import {RoutingSpinnerComponent} from './components/routing-spinner/component';
-import {AppComponent, overriddenUrlKey} from './pages/app/component';
-import {CohortReviewComponent} from './pages/data/cohort-review/cohort-review';
-import {DetailPageComponent} from './pages/data/cohort-review/detail-page';
-import {QueryReportComponent} from './pages/data/cohort-review/query-report.component';
-import {TablePage} from './pages/data/cohort-review/table-page';
+import {AppComponent} from './pages/app/component';
 import {ConceptSearchComponent} from './pages/data/concept/concept-search';
 import {InitialErrorComponent} from './pages/initial-error/component';
 import {SignedInComponent} from './pages/signed-in/component';
@@ -38,16 +30,6 @@ import {WorkspaceShareComponent} from './pages/workspace/workspace-share';
 /* Our Modules */
 import {AppRoutingModule} from './app-routing.module';
 import {FetchModule} from './services/fetch.module';
-
-import {
-  ApiModule,
-  ConfigService,
-  Configuration,
-} from 'generated';
-import {Configuration as FetchConfiguration} from 'generated/fetch';
-import {
-  Configuration as LeoConfiguration,
-} from 'notebooks-generated/fetch';
 
 import {TextModalComponent} from 'app/components/text-modal';
 import {DataPageComponent} from 'app/pages/data/data-page';
@@ -62,36 +44,8 @@ import {FooterComponent} from './components/footer';
 // https://github.com/GoogleCloudPlatform/stackdriver-errors-js/issues/2
 (<any>window).StackTrace = StackTrace;
 
-function getBasePath() {
-  if (cookiesEnabled()) {
-    return localStorage.getItem(overriddenUrlKey) || environment.allOfUsApiUrl;
-  } else {
-    return environment.allOfUsApiUrl;
-  }
-}
-
-export function getConfigService(http: Http) {
-  return new ConfigService(http, getBasePath(), null);
-}
-
-// "Configuration" means Swagger API Client configuration.
-export function getConfiguration(signInService: SignInService): Configuration {
-  return new Configuration({
-    basePath: getBasePath(),
-    accessToken: () => signInService.currentAccessToken
-  });
-}
-
-export function getLeoConfiguration(signInService: SignInService): LeoConfiguration {
-  return new LeoConfiguration({
-    basePath: environment.leoApiUrl,
-    accessToken: () => signInService.currentAccessToken
-  });
-}
-
 @NgModule({
   imports: [
-    ApiModule,
     AppRoutingModule,
 
     BrowserModule,
@@ -108,58 +62,24 @@ export function getLeoConfiguration(signInService: SignInService): LeoConfigurat
     AppRouting,
     BugReportComponent,
     CohortPageComponent,
-    CohortReviewComponent,
     ConceptSearchComponent,
     ConfirmDeleteModalComponent,
     DataPageComponent,
     DataSetPageComponent,
-    DetailPageComponent,
     FooterComponent,
     HelpSidebarComponent,
     InitialErrorComponent,
-    QueryReportComponent,
     RoutingSpinnerComponent,
     SignedInComponent,
     NavBarComponent,
-    TablePage,
     TextModalComponent,
     WorkspaceNavBarComponent,
     WorkspaceShareComponent,
     WorkspaceWrapperComponent,
   ],
   providers: [
-    {
-      provide: ConfigService,
-      deps: [Http],
-      useFactory: getConfigService
-    },
-    {
-      provide: Configuration,
-      deps: [SignInService],
-      useFactory: getConfiguration
-    },
-    {
-      provide: LeoConfiguration,
-      deps: [SignInService],
-      useFactory: getLeoConfiguration
-    },
-    {
-      provide: FetchConfiguration,
-      deps: [Configuration],
-      useFactory: (c: Configuration) => new FetchConfiguration({
-        accessToken: c.accessToken,
-        basePath: c.basePath
-      })
-    },
-    ServerConfigService,
-    {
-      provide: ErrorHandler,
-      deps: [ServerConfigService],
-      useClass: ErrorReporterService,
-    },
     ProfileStorageService,
     SignInService,
-    GoogleAnalyticsEventsService,
     {
       provide: WINDOW_REF,
       useValue: window

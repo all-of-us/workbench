@@ -45,6 +45,9 @@ public class TestMockFactory {
       "gonewiththewind"; // should match workspace name w/o spaces
   public static final String DEFAULT_GOOGLE_PROJECT = "aou-rw-test-123";
 
+  // TODO there's something off about how "workspaceName" here works.  Investigate.
+  // For best results, use a lowercase-only workspaceName.
+  // To me, this hints at a firecloudName/aouName discrepancy somewhere in here.
   public Workspace createWorkspace(String workspaceNameSpace, String workspaceName) {
     List<DisseminateResearchEnum> disseminateResearchEnumsList = new ArrayList<>();
     disseminateResearchEnumsList.add(DisseminateResearchEnum.PRESENATATION_SCIENTIFIC_CONFERENCES);
@@ -62,10 +65,12 @@ public class TestMockFactory {
         .googleBucketName(WORKSPACE_BUCKET_NAME)
         .billingAccountName(WORKSPACE_BILLING_ACCOUNT_NAME)
         .billingAccountType(BillingAccountType.FREE_TIER)
+        .googleProject(DEFAULT_GOOGLE_PROJECT)
         .creationTime(1588097211621L)
         .creator("jay@unit-test-research-aou.org")
         .creationTime(Instant.parse("2000-01-01T00:00:00.00Z").toEpochMilli())
         .lastModifiedTime(1588097211621L)
+        .googleProject(DEFAULT_GOOGLE_PROJECT)
         .published(false)
         .researchPurpose(
             new ResearchPurpose()
@@ -222,6 +227,17 @@ public class TestMockFactory {
             .setAuthDomainGroupEmail("rt-users@fake-research-aou.org")
             .setServicePerimeter("registered/tier/perimeter");
     return accessTierDao.save(accessTier);
+  }
+
+  public static DbAccessTier createControlledTierForTests(AccessTierDao accessTierDao) {
+    return accessTierDao.save(
+        new DbAccessTier()
+            .setAccessTierId(2)
+            .setShortName("controlled")
+            .setDisplayName("Controlled Tier")
+            .setAuthDomainName("Controlled Tier Auth Domain")
+            .setAuthDomainGroupEmail("ct-users@fake-research-aou.org")
+            .setServicePerimeter("controlled/tier/perimeter"));
   }
 
   public static DbCdrVersion createDefaultCdrVersion(

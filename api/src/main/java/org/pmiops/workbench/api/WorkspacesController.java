@@ -31,6 +31,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserService;
+import org.pmiops.workbench.db.dao.WorkspaceDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -46,7 +47,6 @@ import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.exceptions.TooManyRequestsException;
 import org.pmiops.workbench.firecloud.FireCloudService;
-import org.pmiops.workbench.firecloud.model.FirecloudManagedGroupWithMembers;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceAccessEntry;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -86,6 +86,7 @@ import org.pmiops.workbench.notebooks.BlobAlreadyExistsException;
 import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.utils.RandomUtils;
 import org.pmiops.workbench.utils.mappers.WorkspaceMapper;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.pmiops.workbench.workspaces.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -115,7 +116,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   private final WorkspaceAuditor workspaceAuditor;
   private final WorkspaceMapper workspaceMapper;
   private final WorkspaceResourcesService workspaceResourcesService;
+  private final WorkspaceDao workspaceDao;
   private final WorkspaceService workspaceService;
+  private final WorkspaceAuthService workspaceAuthService;
 
   @Autowired
   public WorkspacesController(
@@ -134,7 +137,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       WorkspaceAuditor workspaceAuditor,
       WorkspaceMapper workspaceMapper,
       WorkspaceResourcesService workspaceResourcesService,
-      WorkspaceService workspaceService) {
+      WorkspaceDao workspaceDao,
+      WorkspaceService workspaceService,
+      WorkspaceAuthService workspaceAuthService) {
     this.billingProjectBufferService = billingProjectBufferService;
     this.cdrVersionDao = cdrVersionDao;
     this.clock = clock;
@@ -151,12 +156,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     this.workspaceMapper = workspaceMapper;
     this.workspaceResourcesService = workspaceResourcesService;
     this.workspaceService = workspaceService;
-  }
-
-  private String getRegisteredUserDomainEmail() {
-    FirecloudManagedGroupWithMembers registeredDomainGroup =
-        fireCloudService.getGroup(workbenchConfigProvider.get().firecloud.registeredDomainName);
-    return registeredDomainGroup.getGroupEmail();
+    this.workspaceAuthService = workspaceAuthService;
+    this.workspaceDao = workspaceDao;
   }
 
   private DbCdrVersion getLiveCdrVersionId(String cdrVersionId) {
@@ -222,7 +223,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     DbWorkspace dbWorkspace =
         createDbWorkspace(workspace, cdrVersion, user, workspaceId, fcWorkspace);
     try {
-      dbWorkspace = workspaceService.getDao().save(dbWorkspace);
+      dbWorkspace = workspaceDao.save(dbWorkspace);
     } catch (Exception e) {
       // Tell Google to set the billing account back to the free tier if the workspace
       // creation fails
@@ -231,6 +232,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           "Could not save new workspace to database. Calling Google Cloud billing to update the failed billing project's billing account back to the free tier.",
           e);
 
+      // I don't think this is a bug but it's confusing that we're calling a function that is
+      // updating the dbWorkspace object and expecting for it to not be saved.
+      // There might be a refactoring opportunity here to separate out the Google Cloud
+      // API calls so we can call just that instead of this which does that and a little more.
       workspaceService.updateWorkspaceBillingAccount(
           dbWorkspace, workbenchConfigProvider.get().billing.freeTierBillingAccountName());
       throw e;
@@ -322,7 +327,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspaceNamespace, String workspaceId) {
     recordOperationTime(
         () -> {
-          DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+          DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
           workspaceService.deleteWorkspace(dbWorkspace);
           workspaceAuditor.fireDeleteAction(dbWorkspace);
         },
@@ -357,8 +362,8 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   private Workspace updateWorkspaceImpl(
       String workspaceNamespace, String workspaceId, UpdateWorkspaceRequest request) {
-    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.OWNER);
     Workspace workspace = request.getWorkspace();
     FirecloudWorkspace fcWorkspace =
@@ -411,7 +416,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     try {
       // The version asserted on save is the same as the one we read via
       // getRequired() above, see RW-215 for details.
-      dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+      dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
     } catch (Exception e) {
       // Tell Google Cloud to set the billing account back to the original one since our
       // update database call failed
@@ -441,11 +446,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     validateWorkspaceApiModel(toWorkspace);
 
     // First verify the caller has read access to the source workspace.
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         fromWorkspaceNamespace, fromWorkspaceId, WorkspaceAccessLevel.READER);
 
     DbWorkspace fromWorkspace =
-        workspaceService.getRequiredWithCohorts(fromWorkspaceNamespace, fromWorkspaceId);
+        workspaceDao.getRequiredWithCohorts(fromWorkspaceNamespace, fromWorkspaceId);
     if (fromWorkspace == null) {
       throw new NotFoundException(
           String.format("DbWorkspace %s/%s not found", fromWorkspaceNamespace, fromWorkspaceId));
@@ -506,7 +511,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // committed to the database in an earlier call
     if (Optional.ofNullable(body.getIncludeUserRoles()).orElse(false)) {
       Map<String, FirecloudWorkspaceAccessEntry> fromAclsMap =
-          workspaceService.getFirecloudWorkspaceAcls(
+          workspaceAuthService.getFirecloudWorkspaceAcls(
               fromWorkspace.getWorkspaceNamespace(), fromWorkspace.getFirecloudName());
 
       Map<String, WorkspaceAccessLevel> clonedRoles = new HashMap<>();
@@ -518,12 +523,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
           clonedRoles.put(entry.getKey(), WorkspaceAccessLevel.OWNER);
         }
       }
-      dbWorkspace =
-          workspaceService.updateWorkspaceAcls(
-              dbWorkspace, clonedRoles, getRegisteredUserDomainEmail());
+      dbWorkspace = workspaceAuthService.updateWorkspaceAcls(dbWorkspace, clonedRoles);
     }
 
-    dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+    dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
 
     final Workspace savedWorkspace = workspaceMapper.toApiWorkspace(dbWorkspace, toFcWorkspace);
     workspaceAuditor.fireDuplicateAction(
@@ -537,10 +540,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     // This is its own method as opposed to part of the workspace response because this is gated
     // behind write+ access, and adding access based composition to the workspace response
     // would add a lot of unnecessary complexity.
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
-    DbWorkspace workspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace workspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
     return ResponseEntity.ok(
         new WorkspaceBillingUsageResponse()
             .cost(freeTierBillingService.getWorkspaceFreeTierBillingUsage(workspace)));
@@ -553,7 +556,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       throw new BadRequestException("Missing required update field 'workspaceEtag'");
     }
 
-    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
     int version = Etags.toVersion(request.getWorkspaceEtag());
     if (dbWorkspace.getVersion() != version) {
       throw new ConflictException("Attempted to modify user roles with outdated workspace etag");
@@ -578,9 +581,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     final ImmutableMap<String, WorkspaceAccessLevel> aclsByEmail = shareRolesMapBuilder.build();
 
     // This automatically enforces the "canShare" permission.
-    dbWorkspace =
-        workspaceService.updateWorkspaceAcls(
-            dbWorkspace, aclsByEmail, getRegisteredUserDomainEmail());
+    dbWorkspace = workspaceAuthService.updateWorkspaceAcls(dbWorkspace, aclsByEmail);
     WorkspaceUserRolesResponse resp = new WorkspaceUserRolesResponse();
     resp.setWorkspaceEtag(Etags.fromVersion(dbWorkspace.getVersion()));
 
@@ -598,7 +599,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
   public ResponseEntity<EmptyResponse> reviewWorkspace(
       String ns, String id, ResearchPurposeReviewRequest review) {
-    DbWorkspace workspace = workspaceService.getRequired(ns, id);
+    DbWorkspace workspace = workspaceDao.getRequired(ns, id);
     userService.logAdminWorkspaceAction(
         workspace.getWorkspaceId(),
         "research purpose approval",
@@ -619,10 +620,14 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @AuthorityRequired({Authority.REVIEW_RESEARCH_PURPOSE})
   public ResponseEntity<WorkspaceListResponse> getWorkspacesForReview() {
     WorkspaceListResponse response = new WorkspaceListResponse();
-    List<DbWorkspace> workspaces = workspaceService.findForReview();
+    List<DbWorkspace> workspaces = findForReview();
     response.setItems(
         workspaces.stream().map(workspaceMapper::toApiWorkspace).collect(Collectors.toList()));
     return ResponseEntity.ok(response);
+  }
+
+  private List<DbWorkspace> findForReview() {
+    return workspaceDao.findByApprovedIsNullAndReviewRequestedTrueOrderByTimeRequested();
   }
 
   @Override
@@ -709,10 +714,10 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<Workspace> markResearchPurposeReviewed(
       String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
     dbWorkspace.setNeedsReviewPrompt(false);
     try {
-      dbWorkspace = workspaceService.saveWithLastModified(dbWorkspace);
+      dbWorkspace = workspaceDao.saveWithLastModified(dbWorkspace);
     } catch (Exception e) {
       throw e;
     }
@@ -769,7 +774,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         // https://precisionmedicineinitiative.atlassian.net/browse/RW-3094
 
         Set<String> workspaceUsers =
-            workspaceService.getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName).keySet();
+            workspaceAuthService
+                .getFirecloudWorkspaceAcls(workspaceNamespace, workspaceName)
+                .keySet();
 
         response.lastLockedBy(findHashedUser(bucketName, workspaceUsers, lastLockedByHash));
       }
@@ -817,7 +824,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<WorkspaceUserRolesResponse> getFirecloudWorkspaceUserRoles(
       String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
 
     List<UserRole> userRoles =
         workspaceService.getFirecloudUserRoles(workspaceNamespace, dbWorkspace.getFirecloudName());
@@ -837,9 +844,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
   public ResponseEntity<EmptyResponse> publishWorkspace(
       String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-
-    workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), true);
+    workspaceService.setPublished(workspaceNamespace, workspaceId, true);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -847,9 +852,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @AuthorityRequired({Authority.FEATURED_WORKSPACE_ADMIN})
   public ResponseEntity<EmptyResponse> unpublishWorkspace(
       String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-
-    workspaceService.setPublished(dbWorkspace, getRegisteredUserDomainEmail(), false);
+    workspaceService.setPublished(workspaceNamespace, workspaceId, false);
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -860,7 +863,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
         userRecentWorkspaces.stream()
             .map(DbUserRecentWorkspace::getWorkspaceId)
             .collect(Collectors.toList());
-    List<DbWorkspace> dbWorkspaces = workspaceService.getDao().findAllByWorkspaceIdIn(workspaceIds);
+    List<DbWorkspace> dbWorkspaces = workspaceDao.findAllByWorkspaceIdIn(workspaceIds);
     Map<Long, DbWorkspace> dbWorkspacesById =
         dbWorkspaces.stream()
             .collect(Collectors.toMap(DbWorkspace::getWorkspaceId, Function.identity()));
@@ -872,7 +875,7 @@ public class WorkspacesController implements WorkspacesApiDelegate {
                   Collectors.toMap(
                       DbWorkspace::getWorkspaceId,
                       dbWorkspace ->
-                          workspaceService.getWorkspaceAccessLevel(
+                          workspaceAuthService.getWorkspaceAccessLevel(
                               dbWorkspace.getWorkspaceNamespace(),
                               dbWorkspace.getFirecloudName())));
 
@@ -896,14 +899,13 @@ public class WorkspacesController implements WorkspacesApiDelegate {
   @Override
   public ResponseEntity<RecentWorkspaceResponse> updateRecentWorkspaces(
       String workspaceNamespace, String workspaceId) {
-    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
-    DbUserRecentWorkspace userRecentWorkspace =
-        workspaceService.updateRecentWorkspaces(dbWorkspace);
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
+    workspaceService.updateRecentWorkspaces(dbWorkspace);
     final WorkspaceAccessLevel workspaceAccessLevel;
 
     try {
       workspaceAccessLevel =
-          workspaceService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
+          workspaceAuthService.getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
     } catch (IllegalArgumentException e) {
       throw new ServerErrorException(e);
     }
@@ -921,11 +923,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       String workspaceId,
       WorkspaceResourcesRequest workspaceResourcesRequest) {
     WorkspaceAccessLevel workspaceAccessLevel =
-        workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+        workspaceAuthService.enforceWorkspaceAccessLevel(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     final DbWorkspace dbWorkspace =
-        workspaceService.getRequiredWithCohorts(workspaceNamespace, workspaceId);
+        workspaceDao.getRequiredWithCohorts(workspaceNamespace, workspaceId);
     // When loading resources we are not accessing CDR tables for concept sets
     CdrVersionContext.setCdrVersionNoCheckAuthDomain(dbWorkspace.getCdrVersion());
     WorkspaceResourceResponse workspaceResourceResponse = new WorkspaceResourceResponse();
@@ -953,9 +955,9 @@ public class WorkspacesController implements WorkspacesApiDelegate {
 
   public ResponseEntity<WorkspaceCreatorFreeCreditsRemainingResponse>
       getWorkspaceCreatorFreeCreditsRemaining(String workspaceNamespace, String workspaceId) {
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    DbWorkspace dbWorkspace = workspaceService.getRequired(workspaceNamespace, workspaceId);
+    DbWorkspace dbWorkspace = workspaceDao.getRequired(workspaceNamespace, workspaceId);
     double freeCreditsRemaining =
         freeTierBillingService.getWorkspaceCreatorFreeCreditsRemaining(dbWorkspace);
     return ResponseEntity.ok(

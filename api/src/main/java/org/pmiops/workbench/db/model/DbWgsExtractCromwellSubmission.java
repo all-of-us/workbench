@@ -1,5 +1,6 @@
 package org.pmiops.workbench.db.model;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Objects;
 import javax.persistence.Column;
@@ -21,7 +22,9 @@ public class DbWgsExtractCromwellSubmission {
   private DbUser creator;
   private DbDataset dataset;
   private Long sampleCount;
+  private BigDecimal userCost;
   private Timestamp creationTime;
+  private Timestamp completionTime;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -82,6 +85,15 @@ public class DbWgsExtractCromwellSubmission {
     this.sampleCount = sampleCount;
   }
 
+  @Column(name = "user_cost")
+  public BigDecimal getUserCost() {
+    return userCost;
+  }
+
+  public void setUserCost(BigDecimal userCost) {
+    this.userCost = userCost;
+  }
+
   @Column(name = "creation_time")
   public Timestamp getCreationTime() {
     return creationTime;
@@ -89,6 +101,15 @@ public class DbWgsExtractCromwellSubmission {
 
   public void setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
+  }
+
+  @Column(name = "completion_time")
+  public Timestamp getCompletionTime() {
+    return completionTime;
+  }
+
+  public void setCompletionTime(Timestamp completionTime) {
+    this.completionTime = completionTime;
   }
 
   @Override
@@ -106,7 +127,9 @@ public class DbWgsExtractCromwellSubmission {
         && Objects.equals(workspace, that.workspace)
         && Objects.equals(creator, that.creator)
         && Objects.equals(dataset, that.dataset)
-        && Objects.equals(creationTime, that.creationTime);
+        && Objects.equals(userCost, that.userCost)
+        && Objects.equals(creationTime, that.creationTime)
+        && Objects.equals(completionTime, that.completionTime);
   }
 
   @Override
@@ -118,6 +141,8 @@ public class DbWgsExtractCromwellSubmission {
         creator,
         dataset,
         sampleCount,
-        creationTime);
+        userCost,
+        creationTime,
+        completionTime);
   }
 }

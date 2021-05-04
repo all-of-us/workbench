@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.stream.Collectors;
+import org.pmiops.workbench.access.AccessTierService;
 import org.pmiops.workbench.db.model.DbAddress;
 import org.pmiops.workbench.db.model.DbDemographicSurvey;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -57,7 +58,8 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
   public static final Timestamp USER__CREATION_TIME =
       Timestamp.from(Instant.parse("2015-05-11T00:00:00.00Z"));
   public static final String USER__CURRENT_POSITION = "foo_7";
-  public static final Short USER__DATA_ACCESS_LEVEL = 1;
+  public static final String USER__ACCESS_TIER_SHORT_NAMES =
+      AccessTierService.REGISTERED_TIER_SHORT_NAME;
   public static final Timestamp USER__DATA_USE_AGREEMENT_BYPASS_TIME =
       Timestamp.from(Instant.parse("2015-05-14T00:00:00.00Z"));
   public static final Timestamp USER__DATA_USE_AGREEMENT_COMPLETION_TIME =
@@ -71,8 +73,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
   public static final Timestamp USER__ERA_COMMONS_COMPLETION_TIME =
       Timestamp.from(Instant.parse("2015-05-20T00:00:00.00Z"));
   public static final String USER__FAMILY_NAME = "foo_16";
-  public static final Timestamp USER__FIRST_REGISTRATION_COMPLETION_TIME =
-      Timestamp.from(Instant.parse("2015-05-22T00:00:00.00Z"));
   public static final Timestamp USER__FIRST_SIGN_IN_TIME =
       Timestamp.from(Instant.parse("2015-05-23T00:00:00.00Z"));
   public static final Short USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE = 19;
@@ -98,7 +98,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
   public static final InstitutionalRole USER__INSTITUTIONAL_ROLE_ENUM =
       InstitutionalRole.UNDERGRADUATE;
   public static final String USER__INSTITUTIONAL_ROLE_OTHER_TEXT = "foo_2";
-  public static final String USER__ACCESS_TIER_SHORT_NAMES = "registered";
 
   // Those enums are manually added
   public static Ethnicity USER__ETHNICITY = Ethnicity.PREFER_NO_ANSWER;
@@ -124,10 +123,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     assertThat(user.getContactEmail()).isEqualTo(USER__CONTACT_EMAIL);
     assertTimeApprox(user.getCreationTime(), USER__CREATION_TIME);
     assertThat(user.getCurrentPosition()).isEqualTo(USER__CURRENT_POSITION);
-    assertThat(user.getDataAccessLevel())
-        .isEqualTo(
-            DbStorageEnums.dataAccessLevelFromStorage(
-                USER__DATA_ACCESS_LEVEL)); // manual adjustment
     assertThat(user.getAccessTierShortNames()).isEqualTo(USER__ACCESS_TIER_SHORT_NAMES);
     assertTimeApprox(user.getDataUseAgreementBypassTime(), USER__DATA_USE_AGREEMENT_BYPASS_TIME);
     assertTimeApprox(
@@ -140,8 +135,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     assertTimeApprox(user.getEraCommonsBypassTime(), USER__ERA_COMMONS_BYPASS_TIME);
     assertTimeApprox(user.getEraCommonsCompletionTime(), USER__ERA_COMMONS_COMPLETION_TIME);
     assertThat(user.getFamilyName()).isEqualTo(USER__FAMILY_NAME);
-    assertTimeApprox(
-        user.getFirstRegistrationCompletionTime(), USER__FIRST_REGISTRATION_COMPLETION_TIME);
     assertTimeApprox(user.getFirstSignInTime(), USER__FIRST_SIGN_IN_TIME);
     assertThat(user.getFreeTierCreditsLimitDaysOverride())
         .isEqualTo(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE);
@@ -179,7 +172,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     user.setContactEmail(USER__CONTACT_EMAIL);
     user.setCreationTime(USER__CREATION_TIME);
     user.setCurrentPosition(USER__CURRENT_POSITION);
-    user.setDataAccessLevel(USER__DATA_ACCESS_LEVEL);
     user.setDataUseAgreementBypassTime(USER__DATA_USE_AGREEMENT_BYPASS_TIME);
     user.setDataUseAgreementCompletionTime(USER__DATA_USE_AGREEMENT_COMPLETION_TIME);
     user.setDataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION);
@@ -188,7 +180,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     user.setEraCommonsBypassTime(USER__ERA_COMMONS_BYPASS_TIME);
     user.setEraCommonsCompletionTime(USER__ERA_COMMONS_COMPLETION_TIME);
     user.setFamilyName(USER__FAMILY_NAME);
-    user.setFirstRegistrationCompletionTime(USER__FIRST_REGISTRATION_COMPLETION_TIME);
     user.setFirstSignInTime(USER__FIRST_SIGN_IN_TIME);
     user.setFreeTierCreditsLimitDaysOverride(USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE);
     user.setFreeTierCreditsLimitDollarsOverride(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE);
@@ -218,7 +209,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
         .contactEmail(USER__CONTACT_EMAIL)
         .creationTime(offsetDateTimeUtc(USER__CREATION_TIME))
         .currentPosition(USER__CURRENT_POSITION)
-        .dataAccessLevel(DbStorageEnums.dataAccessLevelFromStorage(USER__DATA_ACCESS_LEVEL))
         .dataUseAgreementBypassTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_BYPASS_TIME))
         .dataUseAgreementCompletionTime(offsetDateTimeUtc(USER__DATA_USE_AGREEMENT_COMPLETION_TIME))
         .dataUseAgreementSignedVersion(USER__DATA_USE_AGREEMENT_SIGNED_VERSION)
@@ -228,8 +218,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
         .eraCommonsBypassTime(offsetDateTimeUtc(USER__ERA_COMMONS_BYPASS_TIME))
         .eraCommonsCompletionTime(offsetDateTimeUtc(USER__ERA_COMMONS_COMPLETION_TIME))
         .familyName(USER__FAMILY_NAME)
-        .firstRegistrationCompletionTime(
-            offsetDateTimeUtc(USER__FIRST_REGISTRATION_COMPLETION_TIME))
         .firstSignInTime(offsetDateTimeUtc(USER__FIRST_SIGN_IN_TIME))
         .freeTierCreditsLimitDaysOverride(
             USER__FREE_TIER_CREDITS_LIMIT_DAYS_OVERRIDE.intValue()) // manual adjustment

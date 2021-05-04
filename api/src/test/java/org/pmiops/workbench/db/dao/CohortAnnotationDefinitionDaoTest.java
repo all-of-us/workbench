@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbCohortAnnotationDefinition;
 import org.pmiops.workbench.db.model.DbCohortAnnotationEnumValue;
 import org.pmiops.workbench.model.AnnotationType;
@@ -17,7 +18,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-public class CohortAnnotationDefinitionDaoTest {
+public class CohortAnnotationDefinitionDaoTest extends SpringTest {
 
   private static long COHORT_ID = 1;
   @Autowired CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;

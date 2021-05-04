@@ -18,6 +18,7 @@ import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbParticipantCohortStatus;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.model.CohortChartDataListResponse;
@@ -42,7 +43,7 @@ import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SortOrder;
 import org.pmiops.workbench.model.VocabularyListResponse;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
-import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -67,7 +68,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   private final CohortReviewService cohortReviewService;
   private final UserRecentResourceService userRecentResourceService;
   private final Provider<DbUser> userProvider;
-  private final WorkspaceService workspaceService;
+  private final WorkspaceAuthService workspaceAuthService;
   private final Clock clock;
 
   @Autowired
@@ -76,13 +77,13 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       CohortBuilderService cohortBuilderService,
       UserRecentResourceService userRecentResourceService,
       Provider<DbUser> userProvider,
-      WorkspaceService workspaceService,
+      WorkspaceAuthService workspaceAuthService,
       Clock clock) {
     this.cohortReviewService = cohortReviewService;
     this.cohortBuilderService = cohortBuilderService;
     this.userRecentResourceService = userRecentResourceService;
     this.userProvider = userProvider;
-    this.workspaceService = workspaceService;
+    this.workspaceAuthService = workspaceAuthService;
     this.clock = clock;
   }
 
@@ -105,13 +106,16 @@ public class CohortReviewController implements CohortReviewApiDelegate {
     }
 
     // this validates that the user is in the proper workspace
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     CohortReview cohortReview;
-    DbCohort cohort = cohortReviewService.findCohort(cohortId);
+    DbCohort cohort = cohortReviewService.findCohort(dbWorkspace.getWorkspaceId(), cohortId);
     try {
-      cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+      cohortReview =
+          cohortReviewService.findCohortReview(
+              cohort.getCohortId(), dbWorkspace.getCdrVersion().getCdrVersionId());
     } catch (NotFoundException nfe) {
       cohortReview = cohortReviewService.initializeCohortReview(cdrVersionId, cohort);
       cohortReview = cohortReviewService.saveCohortReview(cohortReview, userProvider.get());
@@ -160,20 +164,29 @@ public class CohortReviewController implements CohortReviewApiDelegate {
           "Bad Request: request cohort review id must equal path parameter cohort review id.");
     }
 
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
+    CohortReview cohortReview =
+        cohortReviewService.findCohortReviewForWorkspace(
+            dbWorkspace.getWorkspaceId(), cohortReviewId);
 
     return ResponseEntity.ok(
-        cohortReviewService.saveParticipantCohortAnnotation(request.getCohortReviewId(), request));
+        cohortReviewService.saveParticipantCohortAnnotation(
+            cohortReview.getCohortReviewId(), request));
   }
 
   @Override
   public ResponseEntity<EmptyResponse> deleteCohortReview(
       String workspaceNamespace, String workspaceId, Long cohortReviewId) {
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-
-    cohortReviewService.deleteCohortReview(cohortReviewId);
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    CohortReview cohortReview =
+        cohortReviewService.findCohortReviewForWorkspace(
+            dbWorkspace.getWorkspaceId(), cohortReviewId);
+    cohortReviewService.deleteCohortReview(cohortReview.getCohortReviewId());
     return ResponseEntity.ok(new EmptyResponse());
   }
 
@@ -185,12 +198,16 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long participantId,
       Long annotationId) {
 
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
+    CohortReview cohortReview =
+        cohortReviewService.findCohortReviewForWorkspace(
+            dbWorkspace.getWorkspaceId(), cohortReviewId);
     // will throw a NotFoundException if participant cohort annotation does not exist
     cohortReviewService.deleteParticipantCohortAnnotation(
-        annotationId, cohortReviewId, participantId);
+        annotationId, cohortReview.getCohortReviewId(), participantId);
 
     return ResponseEntity.ok(new EmptyResponse());
   }
@@ -210,10 +227,12 @@ public class CohortReviewController implements CohortReviewApiDelegate {
               MIN_LIMIT, MAX_LIMIT));
     }
 
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     CohortReview cohortReview = cohortReviewService.findCohortReview(cohortReviewId);
-    DbCohort dbCohort = cohortReviewService.findCohort(cohortReview.getCohortId());
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    DbCohort dbCohort =
+        cohortReviewService.findCohort(dbWorkspace.getWorkspaceId(), cohortReview.getCohortId());
     return ResponseEntity.ok(
         new CohortChartDataListResponse()
             .count(cohortReview.getMatchedParticipantCount())
@@ -226,7 +245,7 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   public ResponseEntity<CohortReviewListResponse> getCohortReviewsInWorkspace(
       String workspaceNamespace, String workspaceId) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
+    workspaceAuthService.enforceWorkspaceAccessLevel(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     return ResponseEntity.ok(
@@ -250,24 +269,38 @@ public class CohortReviewController implements CohortReviewApiDelegate {
               "Bad Request: Please provide a chart limit between %d and %d.",
               MIN_LIMIT, MAX_LIMIT));
     }
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
+    CohortReview cohortReview =
+        cohortReviewService.findCohortReviewForWorkspace(
+            dbWorkspace.getWorkspaceId(), cohortReviewId);
+    ParticipantCohortStatus pcs =
+        cohortReviewService.findParticipantCohortStatus(
+            cohortReview.getCohortReviewId(), participantId);
 
     return ResponseEntity.ok(
         new ParticipantChartDataListResponse()
             .items(
                 cohortReviewService.findParticipantChartData(
-                    participantId, Objects.requireNonNull(Domain.fromValue(domain)), chartLimit)));
+                    pcs.getParticipantId(),
+                    Objects.requireNonNull(Domain.fromValue(domain)),
+                    chartLimit)));
   }
 
   @Override
   public ResponseEntity<ParticipantCohortAnnotationListResponse> getParticipantCohortAnnotations(
       String workspaceNamespace, String workspaceId, Long cohortReviewId, Long participantId) {
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    CohortReview cohortReview =
+        cohortReviewService.findCohortReviewForWorkspace(
+            dbWorkspace.getWorkspaceId(), cohortReviewId);
     List<ParticipantCohortAnnotation> annotations =
-        cohortReviewService.findParticipantCohortAnnotations(cohortReviewId, participantId);
+        cohortReviewService.findParticipantCohortAnnotations(
+            cohortReview.getCohortReviewId(), participantId);
 
     return ResponseEntity.ok(new ParticipantCohortAnnotationListResponse().items(annotations));
   }
@@ -275,11 +308,15 @@ public class CohortReviewController implements CohortReviewApiDelegate {
   @Override
   public ResponseEntity<ParticipantCohortStatus> getParticipantCohortStatus(
       String workspaceNamespace, String workspaceId, Long cohortReviewId, Long participantId) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    CohortReview cohortReview =
+        cohortReviewService.findCohortReviewForWorkspace(
+            dbWorkspace.getWorkspaceId(), cohortReviewId);
     return ResponseEntity.ok(
-        cohortReviewService.findParticipantCohortStatus(cohortReviewId, participantId));
+        cohortReviewService.findParticipantCohortStatus(
+            cohortReview.getCohortReviewId(), participantId));
   }
 
   /**
@@ -293,17 +330,20 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long cohortId,
       Long cdrVersionId,
       PageFilterRequest request) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     CohortReview cohortReview;
     List<ParticipantCohortStatus> participantCohortStatuses = new ArrayList<>();
-    DbCohort cohort = cohortReviewService.findCohort(cohortId);
+    DbCohort cohort = cohortReviewService.findCohort(dbWorkspace.getWorkspaceId(), cohortId);
     PageRequest pageRequest = createPageRequest(request);
     convertGenderRaceEthnicitySortOrder(pageRequest);
 
     try {
-      cohortReview = cohortReviewService.findCohortReview(cohortId, cdrVersionId);
+      cohortReview =
+          cohortReviewService.findCohortReview(
+              cohort.getCohortId(), dbWorkspace.getCdrVersion().getCdrVersionId());
       participantCohortStatuses =
           cohortReviewService.findAll(cohortReview.getCohortReviewId(), pageRequest);
     } catch (NotFoundException nfe) {
@@ -331,13 +371,20 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long cohortReviewId,
       Long participantId,
       PageFilterRequest request) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    CohortReview cohortReview =
+        cohortReviewService.findCohortReviewForWorkspace(
+            dbWorkspace.getWorkspaceId(), cohortReviewId);
+    ParticipantCohortStatus pcs =
+        cohortReviewService.findParticipantCohortStatus(
+            cohortReview.getCohortReviewId(), participantId);
     return ResponseEntity.ok(
         new ParticipantDataCountResponse()
             .count(
                 cohortReviewService.findParticipantCount(
-                    participantId, request.getDomain(), createPageRequest(request))));
+                    pcs.getParticipantId(), request.getDomain(), createPageRequest(request))));
   }
 
   @Override
@@ -347,23 +394,27 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long cohortReviewId,
       Long participantId,
       PageFilterRequest request) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
-
-    // this validates that the participant is in the requested review.
-    cohortReviewService.findParticipantCohortStatus(cohortReviewId, participantId);
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+    CohortReview cohortReview =
+        cohortReviewService.findCohortReviewForWorkspace(
+            dbWorkspace.getWorkspaceId(), cohortReviewId);
+    ParticipantCohortStatus pcs =
+        cohortReviewService.findParticipantCohortStatus(
+            cohortReview.getCohortReviewId(), participantId);
 
     return ResponseEntity.ok(
         new ParticipantDataListResponse()
             .items(
                 cohortReviewService.findParticipantData(
-                    participantId, request.getDomain(), createPageRequest(request))));
+                    pcs.getParticipantId(), request.getDomain(), createPageRequest(request))));
   }
 
   @Override
   public ResponseEntity<VocabularyListResponse> getVocabularies(
       String workspaceNamespace, String workspaceId, Long cohortReviewId) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     return ResponseEntity.ok(
@@ -377,12 +428,15 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long cohortReviewId,
       CohortReview cohortReview) {
     // This also enforces registered auth domain.
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    CohortReview cr =
+        cohortReviewService.findCohortReviewForWorkspace(
+            dbWorkspace.getWorkspaceId(), cohortReviewId);
     return ResponseEntity.ok(
         cohortReviewService.updateCohortReview(
-            cohortReview, cohortReviewId, new Timestamp(clock.instant().toEpochMilli())));
+            cohortReview, cr.getCohortReviewId(), new Timestamp(clock.instant().toEpochMilli())));
   }
 
   @Override
@@ -393,12 +447,18 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long participantId,
       Long annotationId,
       ModifyParticipantCohortAnnotationRequest request) {
-    workspaceService.enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    CohortReview cohortReview =
+        cohortReviewService.findCohortReviewForWorkspace(
+            dbWorkspace.getWorkspaceId(), cohortReviewId);
+    ParticipantCohortStatus pcs =
+        cohortReviewService.findParticipantCohortStatus(
+            cohortReview.getCohortReviewId(), participantId);
     return ResponseEntity.ok(
         cohortReviewService.updateParticipantCohortAnnotation(
-            annotationId, cohortReviewId, participantId, request));
+            annotationId, cohortReview.getCohortReviewId(), pcs.getParticipantId(), request));
   }
 
   @Override
@@ -408,13 +468,20 @@ public class CohortReviewController implements CohortReviewApiDelegate {
       Long cohortReviewId,
       Long participantId,
       ModifyCohortStatusRequest cohortStatusRequest) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-        workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    CohortReview cohortReview =
+        cohortReviewService.findCohortReviewForWorkspace(
+            dbWorkspace.getWorkspaceId(), cohortReviewId);
+    ParticipantCohortStatus pcs =
+        cohortReviewService.findParticipantCohortStatus(
+            cohortReview.getCohortReviewId(), participantId);
 
     return ResponseEntity.ok(
         cohortReviewService.updateParticipantCohortStatus(
-            cohortReviewId,
-            participantId,
+            cohortReview.getCohortReviewId(),
+            pcs.getParticipantId(),
             cohortStatusRequest.getStatus(),
             new Timestamp(clock.instant().toEpochMilli())));
   }

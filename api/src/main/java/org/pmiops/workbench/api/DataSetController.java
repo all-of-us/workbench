@@ -1,7 +1,6 @@
 package org.pmiops.workbench.api;
 
 import com.google.cloud.bigquery.Field;
-import com.google.cloud.bigquery.FieldList;
 import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.bigquery.QueryJobConfiguration;
@@ -28,22 +27,25 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.pmiops.workbench.cdr.CdrVersionContext;
 import org.pmiops.workbench.cdr.CdrVersionService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.BigQueryTableInfo;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.db.model.DbCdrVersion;
+import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.NotFoundException;
+import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
+import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetCodeResponse;
 import org.pmiops.workbench.model.DataSetExportRequest;
-import org.pmiops.workbench.model.DataSetExportRequest.GenomicsAnalysisToolEnum;
 import org.pmiops.workbench.model.DataSetExportRequest.GenomicsDataTypeEnum;
 import org.pmiops.workbench.model.DataSetListResponse;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
@@ -54,15 +56,18 @@ import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.DomainValuesResponse;
 import org.pmiops.workbench.model.EmptyResponse;
+import org.pmiops.workbench.model.GenomicExtractionJob;
+import org.pmiops.workbench.model.GenomicExtractionJobListResponse;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.MarkDataSetRequest;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
-import org.pmiops.workbench.workspaces.WorkspaceService;
+import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RestController;
@@ -70,43 +75,44 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class DataSetController implements DataSetApiDelegate {
 
-  private final BigQueryService bigQueryService;
+  private static final String DATE_FORMAT_STRING = "yyyy/MM/dd HH:mm:ss";
+  public static final String EMPTY_CELL_MARKER = "";
+  public static final String WHOLE_GENOME_VALUE = "VCF Files(s)";
+
+  private static final Logger log = Logger.getLogger(DataSetController.class.getName());
+
   private final DataSetService dataSetService;
 
   private final Provider<DbUser> userProvider;
   private final Provider<String> prefixProvider;
-  private final WorkspaceService workspaceService;
-
-  // See https://cloud.google.com/appengine/articles/deadlineexceedederrors for details
-  private static final long APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC = 55000L;
-
-  private static final String DATE_FORMAT_STRING = "yyyy/MM/dd HH:mm:ss";
-  public static final String EMPTY_CELL_MARKER = "";
-
-  private static final Logger log = Logger.getLogger(DataSetController.class.getName());
 
   private final CdrVersionService cdrVersionService;
   private final FireCloudService fireCloudService;
   private final NotebooksService notebooksService;
+  private final GenomicExtractionService genomicExtractionService;
+  private final WorkspaceAuthService workspaceAuthService;
+  private final Provider<WorkbenchConfig> workbenchConfigProvider;
 
   @Autowired
   DataSetController(
-      BigQueryService bigQueryService,
       CdrVersionService cdrVersionService,
       DataSetService dataSetService,
       FireCloudService fireCloudService,
       NotebooksService notebooksService,
       Provider<DbUser> userProvider,
       @Qualifier(DatasetConfig.DATASET_PREFIX_CODE) Provider<String> prefixProvider,
-      WorkspaceService workspaceService) {
-    this.bigQueryService = bigQueryService;
+      GenomicExtractionService genomicExtractionService,
+      WorkspaceAuthService workspaceAuthService,
+      Provider<WorkbenchConfig> workbenchConfigProvider) {
     this.cdrVersionService = cdrVersionService;
     this.dataSetService = dataSetService;
     this.fireCloudService = fireCloudService;
     this.notebooksService = notebooksService;
     this.userProvider = userProvider;
     this.prefixProvider = prefixProvider;
-    this.workspaceService = workspaceService;
+    this.genomicExtractionService = genomicExtractionService;
+    this.workspaceAuthService = workspaceAuthService;
+    this.workbenchConfigProvider = workbenchConfigProvider;
   }
 
   @Override
@@ -114,7 +120,7 @@ public class DataSetController implements DataSetApiDelegate {
       String workspaceNamespace, String workspaceFirecloudName, DataSetRequest dataSetRequest) {
     validateDataSetCreateRequest(dataSetRequest);
     final long workspaceId =
-        workspaceService
+        workspaceAuthService
             .getWorkspaceEnforceAccessLevelAndSetCdrVersion(
                 workspaceNamespace, workspaceFirecloudName, WorkspaceAccessLevel.WRITER)
             .getWorkspaceId();
@@ -151,7 +157,7 @@ public class DataSetController implements DataSetApiDelegate {
       String kernelTypeEnumString,
       DataSetRequest dataSetRequest) {
     DbWorkspace dbWorkspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     final KernelTypeEnum kernelTypeEnum = KernelTypeEnum.fromValue(kernelTypeEnumString);
 
@@ -187,17 +193,11 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataSetPreviewResponse> previewDataSetByDomain(
       String workspaceNamespace, String workspaceId, DataSetPreviewRequest dataSetPreviewRequest) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     List<DataSetPreviewValueList> valuePreviewList = new ArrayList<>();
 
-    QueryJobConfiguration previewBigQueryJobConfig =
-        dataSetService.previewBigQueryJobConfig(dataSetPreviewRequest);
-
-    TableResult queryResponse =
-        bigQueryService.executeQuery(
-            bigQueryService.filterBigQueryConfig(previewBigQueryJobConfig),
-            APP_ENGINE_HARD_TIMEOUT_MSEC_MINUS_FIVE_SEC);
+    TableResult queryResponse = dataSetService.previewBigQueryJobConfig(dataSetPreviewRequest);
 
     if (queryResponse.getTotalRows() != 0) {
       valuePreviewList.addAll(
@@ -274,9 +274,9 @@ public class DataSetController implements DataSetApiDelegate {
   public ResponseEntity<EmptyResponse> exportToNotebook(
       String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
     DbWorkspace dbWorkspace =
-        workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
-    workspaceService.validateActiveBilling(workspaceNamespace, workspaceId);
+    workspaceAuthService.validateActiveBilling(workspaceNamespace, workspaceId);
     // This suppresses 'may not be initialized errors. We will always init to something else before
     // used.
     JSONObject notebookFile = new JSONObject();
@@ -344,25 +344,21 @@ public class DataSetController implements DataSetApiDelegate {
             qualifier,
             queriesByDomain);
 
-    if (GenomicsDataTypeEnum.MICROARRAY.equals(dataSetExportRequest.getGenomicsDataType())) {
-      if (dbWorkspace.getCdrVersion().getMicroarrayBigqueryDataset() == null) {
+    if (GenomicsDataTypeEnum.WHOLE_GENOME.equals(dataSetExportRequest.getGenomicsDataType())) {
+      if (!workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+      }
+
+      if (Strings.isNullOrEmpty(dbWorkspace.getCdrVersion().getWgsBigqueryDataset())) {
         throw new FailedPreconditionException(
-            "The workspace CDR version does not have microarray data");
+            "The workspace CDR version does not have whole genome data");
       }
       if (!dataSetExportRequest.getKernelType().equals(KernelTypeEnum.PYTHON)) {
         throw new BadRequestException("Genomics code generation is only supported in Python");
       }
 
-      queriesAsStrings.addAll(
-          dataSetService.generateMicroarrayCohortExtractCodeCells(
-              dbWorkspace, qualifier, queriesByDomain));
-
-      if (GenomicsAnalysisToolEnum.PLINK.equals(dataSetExportRequest.getGenomicsAnalysisTool())) {
-        queriesAsStrings.addAll(dataSetService.generatePlinkDemoCode(qualifier));
-      } else if (GenomicsAnalysisToolEnum.HAIL.equals(
-          dataSetExportRequest.getGenomicsAnalysisTool())) {
-        queriesAsStrings.addAll(dataSetService.generateHailDemoCode(qualifier));
-      }
+      // TODO(RW-6633): Add WGS codegen support.
+      return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
     }
 
     if (dataSetExportRequest.getNewNotebook()) {
@@ -392,7 +388,7 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<Boolean> markDirty(
       String workspaceNamespace, String workspaceId, MarkDataSetRequest markDataSetRequest) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
     dataSetService.markDirty(markDataSetRequest.getResourceType(), markDataSetRequest.getId());
     return ResponseEntity.ok(true);
@@ -401,7 +397,7 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<EmptyResponse> deleteDataSet(
       String workspaceNamespace, String workspaceId, Long dataSetId) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
 
     dataSetService.deleteDataSet(dataSetId);
@@ -415,7 +411,7 @@ public class DataSetController implements DataSetApiDelegate {
       throw new BadRequestException("missing required update field 'etag'");
     }
     long dataSetWorkspaceId =
-        workspaceService
+        workspaceAuthService
             .getWorkspaceEnforceAccessLevelAndSetCdrVersion(
                 workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER)
             .getWorkspaceId();
@@ -426,13 +422,13 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataSet> getDataSet(
       String workspaceNamespace, String workspaceId, Long dataSetId) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     DataSet dataSet =
         dataSetService
-            .getDbDataSet(dataSetId)
-            .<BadRequestException>orElseThrow(
+            .getDataSet(dataSetId)
+            .<NotFoundException>orElseThrow(
                 () -> {
                   throw new NotFoundException("No DataSet found for dataSetId: " + dataSetId);
                 });
@@ -442,7 +438,7 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DataSetListResponse> getDataSetByResourceId(
       String workspaceNamespace, String workspaceId, ResourceType resourceType, Long id) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
 
     return ResponseEntity.ok(
@@ -471,21 +467,56 @@ public class DataSetController implements DataSetApiDelegate {
   @Override
   public ResponseEntity<DomainValuesResponse> getValuesFromDomain(
       String workspaceNamespace, String workspaceId, String domainValue) {
-    workspaceService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+    workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
         workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
     DomainValuesResponse response = new DomainValuesResponse();
-
-    Domain domain =
-        Domain.PHYSICAL_MEASUREMENT_CSS.equals(Domain.valueOf(domainValue))
-            ? Domain.MEASUREMENT
-            : Domain.valueOf(domainValue);
-    FieldList fieldList = bigQueryService.getTableFieldsFromDomain(domain);
-    response.setItems(
-        fieldList.stream()
-            .map(field -> new DomainValue().value(field.getName().toLowerCase()))
-            .collect(Collectors.toList()));
+    if (domainValue.equals(Domain.WHOLE_GENOME_VARIANT.toString())) {
+      response.addItemsItem(new DomainValue().value(WHOLE_GENOME_VALUE));
+    } else {
+      response.setItems(dataSetService.getValueListFromDomain(domainValue));
+    }
 
     return ResponseEntity.ok(response);
+  }
+
+  @Override
+  public ResponseEntity<GenomicExtractionJob> extractGenomicData(
+      String workspaceNamespace, String workspaceId, Long dataSetId) {
+    if (!workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
+      return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
+    DbWorkspace workspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+    if (workspace.getCdrVersion().getWgsBigqueryDataset() == null) {
+      throw new BadRequestException("Workspace CDR does not have access to WGS data");
+    }
+
+    DbDataset dataSet =
+        dataSetService
+            .getDbDataSet(dataSetId)
+            .<NotFoundException>orElseThrow(
+                () -> {
+                  throw new NotFoundException("No DataSet found for dataSetId: " + dataSetId);
+                });
+    try {
+      return ResponseEntity.ok(
+          genomicExtractionService.submitGenomicExtractionJob(workspace, dataSet));
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+      // Our usage of Terra is an internal implementation detail to the client. Any error returned
+      // from Firecloud is either a bug within our Cromwell integration or a backend failure.
+      throw new ServerErrorException(e);
+    }
+  }
+
+  @Override
+  public ResponseEntity<GenomicExtractionJobListResponse> getGenomicExtractionJobs(
+      String workspaceNamespace, String workspaceId) {
+    return ResponseEntity.ok(
+        new GenomicExtractionJobListResponse()
+            .jobs(
+                genomicExtractionService.getGenomicExtractionJobs(
+                    workspaceNamespace, workspaceId)));
   }
 
   // TODO(jaycarlton) create a class that knows about code cells and their properties,
@@ -497,5 +528,24 @@ public class DataSetController implements DataSetApiDelegate {
         .put("execution_count", JSONObject.NULL)
         .put("outputs", new JSONArray())
         .put("source", new JSONArray().put(cellInformation));
+  }
+
+  @Override
+  public ResponseEntity<EmptyResponse> abortGenomicExtractionJob(
+      String workspaceNamespace, String workspaceId, String jobId) {
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.WRITER);
+
+    try {
+      genomicExtractionService.abortGenomicExtractionJob(dbWorkspace, jobId);
+      return ResponseEntity.ok(new EmptyResponse());
+    } catch (org.pmiops.workbench.firecloud.ApiException e) {
+      if (e.getCode() == 404) {
+        throw new NotFoundException(e);
+      } else {
+        throw new ServerErrorException(e);
+      }
+    }
   }
 }

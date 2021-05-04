@@ -550,7 +550,9 @@ paths:
     get:
       tags:
       - user
-      description: Returns user information matching search terms
+      description: >
+        Return a page of users matching a search term.
+        Used by autocomplete for workspace sharing.
       operationId: user
       responses:
         200:
@@ -617,6 +619,40 @@ paths:
         required: true
         schema:
           "$ref": "#/definitions/ListRuntimeDeleteRequest"
+      responses:
+        200:
+          description: Runtimes deleted
+          schema:
+            type: array
+            items:
+              "$ref": "#/definitions/ListRuntimeResponse"
+        500:
+          description: Internal Error
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
+  "/v1/admin/security/workspaces/{workspaceNamespace}/delete-runtimes":
+    post:
+      summary: Delete specified (or all if no specified list) runtimes in given workspace namespace.
+      description: 'An admin gated endpoint that deletes given runtimes in a given
+        workspaace.'
+      operationId: deleteRuntimesInWorkspace
+      tags:
+        - workspaceAdmin
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          description: The workspace's workspace namespace.
+            the runtimes
+          required: true
+          type: string
+        - in: body
+          name: runtimesToDelete
+          description: A list of names of runtimes to delete. To delete all runtimes,
+            use an empty object, without providing a list property at all (e.g., {})
+            An empty list will delete no runtimes.
+          required: true
+          schema:
+            "$ref": "#/definitions/ListRuntimeDeleteRequest"
       responses:
         200:
           description: Runtimes deleted
@@ -2320,7 +2356,7 @@ paths:
           description: A list of data sets containg cohort/concept Id passed.
           schema:
             "$ref": "#/definitions/DataSetListResponse"
-  "/v1/cdrVersionId/{cdrVersionId}/domain/{domain}/domainValue/{value}/dataDictionaryEntry":
+  "/v1/{cdrVersionId}/dataDictionaryEntry/{domain}/{value}":
     get:
       parameters:
       - in: path
@@ -2364,23 +2400,73 @@ paths:
           schema:
             type: boolean
             default: false
-  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/cohorts/{cohortId}/extractGenomes":
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/genomicExtractionJobs":
     parameters:
       - "$ref": "#/parameters/workspaceNamespace"
       - "$ref": "#/parameters/workspaceId"
-      - "$ref": "#/parameters/cohortId"
-    post:
+    get:
       tags:
-        - cohorts
-      description: 'Initiates a Terra Cromwell job to extract genomes of the given cohort.
-        Requires WRITER access on the workspace.
-        Workspace CDR must also have access to a Wgs dataset'
-      operationId: extractCohortGenomes
+        - dataSet
+      description: 'Retrieve Job details for given ID.
+       Requires READER access on the workspace.'
+      operationId: getGenomicExtractionJobs
       responses:
         200:
           description: The Terra Job for the extraction workflow
           schema:
-            "$ref": "#/definitions/TerraJob"
+            "$ref": "#/definitions/GenomicExtractionJobListResponse"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/datasets/{dataSetId}/extractGenomicData":
+    parameters:
+      - "$ref": "#/parameters/workspaceNamespace"
+      - "$ref": "#/parameters/workspaceId"
+      - "$ref": "#/parameters/dataSetId"
+    post:
+      tags:
+        - dataSet
+      description: 'Initiates a Terra Cromwell job to extract genomes of the given dataset.
+        Requires WRITER access on the workspace.
+        Workspace CDR must also have an associated WGS dataset'
+      operationId: extractGenomicData
+      responses:
+        200:
+          description: The Terra Job for the extraction workflow
+          schema:
+            "$ref": "#/definitions/GenomicExtractionJob"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/genomicExtractionJobs/{jobId}/abort":
+    post:
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          description: workspaceNamespace
+          required: true
+          type: string
+        - in: path
+          name: workspaceId
+          description: workspaceId
+          required: true
+          type: string
+        - in: path
+          name: jobId
+          type: string
+          required: true
+      tags:
+        - dataSet
+      description: 'Aborts a running genome extract job. Requires WRITER access on the workspace.
+        Workspace CDR must also have access to a Wgs dataset'
+      operationId: abortGenomicExtractionJob
+      responses:
+        204:
+          description: Successful request
+          schema:
+            $ref: '#/definitions/EmptyResponse'
+        404:
+          description: Submission not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
   "/v1/{workspaceNamespace}/{workspaceId}/data-set/exportToNotebook":
     post:
       tags:
@@ -2482,6 +2568,10 @@ paths:
         to send Workspace data'
       operationId: exportWorkspaceData
       parameters:
+      - in: query
+        name: backfill
+        type: boolean
+        required: false
       - in: body
         name: researchIds
         required: true
@@ -3571,13 +3661,6 @@ definitions:
     enum:
     - LIVE
     - ARCHIVED
-  DataAccessLevel:
-    type: string
-    description: DEPRECATED.  Will be replaced by Access Tiers.  Was -> levels of access to data in the curated data repository
-    enum:
-    - unregistered
-    - registered
-    - protected
   RdrEntity:
     type: string
     description: Entities send to RDR
@@ -3724,10 +3807,13 @@ definitions:
     type: object
     required:
       - accessTierShortName
+      - accessTierDisplayName
       - defaultCdrVersionId
       - versions
     properties:
       accessTierShortName:
+        type: string
+      accessTierDisplayName:
         type: string
       defaultCdrVersionId:
         type: string
@@ -3752,8 +3838,6 @@ definitions:
         type: string
       archivalStatus:
         "$ref": "#/definitions/ArchivalStatus"
-      hasMicroarrayData:
-        type: boolean
       hasWgsData:
         type: boolean
       hasFitbitData:
@@ -3978,6 +4062,16 @@ definitions:
         type: boolean
         default: false
         description: Whether to use enable RAS-AoU linking for login.gov when user setup account.
+      enableGenomicExtraction:
+        type: boolean
+        default: false
+        description: Whether to enable genomic data extraction for eligible datasets.
+      rasHost:
+        type: string
+        description: The RAS base host name.
+      rasClientId:
+        type: string
+        description: The RAS OAuth client id.
       runtimeImages:
         type: array
         items:
@@ -4499,6 +4593,7 @@ definitions:
     - BETA_ACCESS
     - ERA_COMMONS
     - TWO_FACTOR_AUTH
+    - RAS_LINK_LOGIN_GOV
   AccessBypassRequest:
     type: object
     required:
@@ -4820,6 +4915,7 @@ definitions:
     - FITBIT_HEART_RATE_LEVEL
     - FITBIT_ACTIVITY
     - FITBIT_INTRADAY_STEPS
+    - WHOLE_GENOME
     - BOTH
   DataSetExportRequest:
     type: object
@@ -4842,7 +4938,7 @@ definitions:
         default: NONE
         enum:
           - NONE
-          - MICROARRAY
+          - WHOLE_GENOME
       genomicsAnalysisTool:
         type: string
         default: NONE
@@ -5178,9 +5274,11 @@ definitions:
         format: int64
       username:
         type: string
-      dataAccessLevel:
-        "$ref": "#/definitions/DataAccessLevel"
-        description: DEPRECATED.  Will be replaced by Access Tiers.
+      accessTierShortNames:
+        description: Short names of access tiers available to the user.
+        type: array
+        items:
+          type: string
       givenName:
         type: string
       familyName:
@@ -5218,6 +5316,12 @@ definitions:
         type: integer
         format: int64
       eraCommonsCompletionTime:
+        type: integer
+        format: int64
+      rasLinkLoginGovBypassTime:
+        type: integer
+        format: int64
+      rasLinkLoginGovCompletionTime:
         type: integer
         format: int64
       complianceTrainingBypassTime:
@@ -5272,9 +5376,11 @@ definitions:
       firstSignInTime:
         type: integer
         format: int64
-      dataAccessLevel:
-        description: DEPRECATED.  Will be replaced by Access Tiers.  Was -> what level of data access the user has
-        "$ref": "#/definitions/DataAccessLevel"
+      accessTierShortNames:
+        description: Short names of access tiers available to the user.
+        type: array
+        items:
+          type: string
       degrees:
         type: array
         items:
@@ -5902,10 +6008,21 @@ definitions:
     - USER_PROVIDED
   BillingProjectBufferStatus:
     type: object
+    required:
+      - availablePerTier
     properties:
-      bufferSize:
-        description: 'Current size of the billing buffer, i.e. the number of projects
-          ready to be claimed.'
+      availablePerTier:
+        type: array
+        items:
+          "$ref": "#/definitions/AvailableBufferPerTier"
+  AvailableBufferPerTier:
+    type: object
+    properties:
+      accessTierShortName:
+        description: 'The shortName of an access tier'
+        type: string
+      availableProjects:
+        description: 'Count of the AVAILABLE billing buffer projects in this access tier'
         type: integer
         format: int64
   StatusAlert:
@@ -7304,7 +7421,7 @@ definitions:
         description: The unique identifier for the menu parent
         type: integer
         format: int64
-      category: 
+      category:
         description: The category for this menu item(Program Data or Domains)
         type: string
       domainId:
@@ -7313,14 +7430,14 @@ definitions:
       type:
         description: The type for this menu item
         type: string
-      name: 
+      name:
         description: The name
         type: string
       group:
         description: Is this a parent
         type: boolean
         default: false
-      sortOrder: 
+      sortOrder:
         description: The order
         type: integer
         format: int64
@@ -8247,12 +8364,6 @@ definitions:
       currentPosition:
         type: string
         description: User's current role/position.
-      dataAccessLevel:
-        description: |-
-          DEPRECATED.  Will be replaced by Access Tiers.
-          An indication of whether the user has completed the requirements for access to the
-          registered tier.
-        "$ref": "#/definitions/DataAccessLevel"
       dataUseAgreementBypassTime:
         type: string
         format: date-time
@@ -8782,13 +8893,33 @@ definitions:
         type: integer
         format: int64
         description: ''
-  TerraJob:
+  GenomicExtractionJobListResponse:
     properties:
-      submissionId:
+      jobs:
+        type: array
+        items:
+          "$ref": "#/definitions/GenomicExtractionJob"
+  GenomicExtractionJob:
+    properties:
+      genomicExtractionJobId:
+        type: integer
+        format: int64
+        description: Workbench database Id for the job
+      datasetName:
         type: string
-        description: Terra SubmissionRequest unique identifier (matches Submission.submissionId in Terra)
+      cost:
+        type: number
+        format: currency
       status:
         "$ref": '#/definitions/TerraJobStatus'
+      submissionDate:
+        type: integer
+        format: int64
+        description: Submission Timestamp (epoch) according to Terra
+      completionTime:
+        type: integer
+        format: int64
+        description: Submission Completion Timestamp (epoch) according to Terra
   TerraJobStatus:
     type: string
     description: 'Terra job status. Indicates if the Terra Submission and Workflows are still running, succeeded, or failed.

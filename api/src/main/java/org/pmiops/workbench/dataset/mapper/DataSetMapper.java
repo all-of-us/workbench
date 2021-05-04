@@ -17,7 +17,6 @@ import org.mapstruct.NullValueCheckStrategy;
 import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
-import org.pmiops.workbench.db.model.DbDataDictionaryEntry;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbDatasetValue;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -133,8 +132,6 @@ public interface DataSetMapper {
         .value(dbDatasetValue.getValue())
         .domain(dbDatasetValue.getDomainEnum());
   }
-
-  DataDictionaryEntry dbModelToClient(DbDataDictionaryEntry dbModel);
 
   DataDictionaryEntry dbDsModelToClient(DbDSDataDictionary dbModel);
 }

@@ -6,9 +6,9 @@ export BQ_PROJECT=$1  # project
 export BQ_DATASET=$2  # dataset
 export WORKBENCH_PROJECT=$3 # workbench project
 export CDR_VERSION=$4 # cdr version
-export BUCKET=$5 # GCS bucket
 
 WORKBENCH_DATASET=$CDR_VERSION
+BUCKET="all-of-us-workbench-private-cloudsql"
 
 startDate=$(date)
 echo $(date) " Starting generate-private-cdr-counts $startDate"

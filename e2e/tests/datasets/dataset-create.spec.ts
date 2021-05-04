@@ -12,6 +12,8 @@ describe('Dataset test', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspace = 'e2eCreateDataSetsTest';
+
   /**
    * Test:
    * - Find an existing workspace. Create a new workspace if none exists.
@@ -22,12 +24,11 @@ describe('Dataset test', () => {
    * - Delete Dataset.
    */
   test('Create Dataset from user-defined Cohorts', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Click Add Cohorts button
     const dataPage = new WorkspaceDataPage(page);
-    const addCohortsButton = await dataPage.getAddCohortsButton();
+    const addCohortsButton = dataPage.getAddCohortsButton();
     await addCohortsButton.clickAndWait();
 
     // Build new Cohort
@@ -40,7 +41,7 @@ describe('Dataset test', () => {
     const searchResultsTable = await searchPage.searchCriteria('hydroxychloroquine');
     // Add a drug in Result table first row. Drug name ignored.
     const nameValue = await searchResultsTable.getCellValue(1, 1);
-    const addIcon = await ClrIconLink.findByName(
+    const addIcon = ClrIconLink.findByName(
       page,
       { containsText: nameValue, iconShape: 'plus-circle' },
       searchResultsTable

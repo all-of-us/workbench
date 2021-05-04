@@ -10,6 +10,8 @@ describe('Jupyter notebook tests in Python language', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspace = 'e2ePy3NotebookTest';
+
   /**
    * Test:
    * - Find an existing workspace.
@@ -22,8 +24,7 @@ describe('Jupyter notebook tests in Python language', () => {
   test(
     'Run code from file',
     async () => {
-      const workspaceCard = await findOrCreateWorkspace(page);
-      await workspaceCard.clickWorkspaceName();
+      await findOrCreateWorkspace(page, { workspaceName: workspace });
 
       const dataPage = new WorkspaceDataPage(page);
       const notebookName = makeRandomName('py');
@@ -44,7 +45,7 @@ describe('Jupyter notebook tests in Python language', () => {
       await notebook.runCodeCell(3, { codeFile: 'resources/python-code/simple-pyplot.py' });
 
       // Verify plot is the output.
-      const cell = await notebook.findCell(3);
+      const cell = notebook.findCell(3);
       const cellOutputElement = await cell.findOutputElementHandle();
       const [imgElement] = await cellOutputElement.$x('./img[@src]');
       expect(imgElement).toBeTruthy(); // plot format is a img.

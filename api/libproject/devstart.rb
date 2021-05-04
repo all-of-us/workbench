@@ -15,6 +15,8 @@ require "json"
 require "optparse"
 require "ostruct"
 require "tempfile"
+require "net/http"
+require "json"
 
 TEST_PROJECT = "all-of-us-workbench-test"
 INSTANCE_NAME = "workbenchmaindb"
@@ -44,8 +46,7 @@ ENVIRONMENTS = {
     :cdr_config_json => "cdr_config_local.json",
     :featured_workspaces_json => "featured_workspaces_local.json",
     :gae_vars => make_gae_vars,
-    :source_cdr_project => "all-of-us-ehr-dev",
-    :source_wgv_project => "all-of-us-workbench-test"
+    :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-workbench-test" => {
     :env_name => "test",
@@ -55,8 +56,7 @@ ENVIRONMENTS = {
     :cdr_config_json => "cdr_config_test.json",
     :featured_workspaces_json => "featured_workspaces_test.json",
     :gae_vars => make_gae_vars(0, 10, 'F4'),
-    :source_cdr_project => "all-of-us-ehr-dev",
-    :source_wgv_project => "all-of-us-workbench-test"
+    :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-rw-staging" => {
     :env_name => "staging",
@@ -65,9 +65,8 @@ ENVIRONMENTS = {
     :config_json => "config_staging.json",
     :cdr_config_json => "cdr_config_staging.json",
     :featured_workspaces_json => "featured_workspaces_staging.json",
-    :gae_vars => make_gae_vars,
-    :source_cdr_project => "all-of-us-ehr-dev",
-    :source_wgv_project => "all-of-us-workbench-test"
+    :gae_vars => make_gae_vars(0, 10, 'F2'),
+    :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-rw-perf" => {
     :env_name => "perf",
@@ -77,8 +76,7 @@ ENVIRONMENTS = {
     :cdr_config_json => "cdr_config_perf.json",
     :featured_workspaces_json => "featured_workspaces_perf.json",
     :gae_vars => make_gae_vars(20, 20),
-    :source_cdr_project => "all-of-us-ehr-dev",
-    :source_wgv_project => "all-of-us-workbench-test"
+    :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-rw-stable" => {
     :env_name => "stable",
@@ -88,8 +86,7 @@ ENVIRONMENTS = {
     :cdr_config_json => "cdr_config_stable.json",
     :featured_workspaces_json => "featured_workspaces_stable.json",
     :gae_vars => make_gae_vars,
-    :source_cdr_project => "all-of-us-ehr-dev",
-    :source_wgv_project => "all-of-us-workbench-test"
+    :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-rw-preprod" => {
     :env_name => "preprod",
@@ -99,8 +96,7 @@ ENVIRONMENTS = {
     :cdr_config_json => "cdr_config_preprod.json",
     :featured_workspaces_json => "featured_workspaces_preprod.json",
     :gae_vars => make_gae_vars,
-    :source_cdr_project => "aou-res-curation-output-prod",
-    :source_wgv_project => ""
+    :source_cdr_project => "aou-res-curation-output-prod"
   },
   "all-of-us-rw-prod" => {
     :env_name => "prod",
@@ -110,8 +106,7 @@ ENVIRONMENTS = {
     :cdr_config_json => "cdr_config_prod.json",
     :featured_workspaces_json => "featured_workspaces_prod.json",
     :gae_vars => make_gae_vars(8, 64, 'F4'),
-    :source_cdr_project => "aou-res-curation-output-prod",
-    :source_wgv_project => ""
+    :source_cdr_project => "aou-res-curation-output-prod"
   }
 }
 
@@ -147,6 +142,14 @@ def ensure_docker(cmd_name, args=nil)
   end
 end
 
+def ensure_docker_with_ports(cmd_name, args=nil)
+  args = (args or [])
+  unless Workbench.in_docker?
+    ensure_docker_sync()
+    exec(*(%W{docker-compose run --service-ports --rm ports-scripts ./project.rb #{cmd_name}} + args))
+  end
+end
+
 def init_new_cdr_db(args)
   Common.new.run_inline %W{docker-compose run --rm cdr-scripts generate-cdr/init-new-cdr-db.sh} + args
 end
@@ -169,19 +172,22 @@ def ensure_docker_api(cmd_name, args)
   exit 1
 end
 
+def gcs_vars_path(project)
+  return "gs://#{project}-credentials/vars.env"
+end
+
 def read_db_vars(gcc)
   Workbench.assert_in_docker
-  vars_path = "gs://#{gcc.project}-credentials/vars.env"
   vars = Workbench.read_vars(Common.new.capture_stdout(%W{
-    gsutil cat #{vars_path}
+    gsutil cat #{gcs_vars_path(gcc.project)}
   }))
   if vars.empty?
-    Common.new.error "Failed to read #{vars_path}"
+    Common.new.error "Failed to read #{gcs_vars_path(gcc.project)}"
     exit 1
   end
   # Note: CDR project and target project may be the same.
   cdr_project = get_cdr_sql_project(gcc.project)
-  cdr_vars_path = "gs://#{cdr_project}-credentials/vars.env"
+  cdr_vars_path = gcs_vars_path(cdr_project)
   cdr_vars = Workbench.read_vars(Common.new.capture_stdout(%W{
     gsutil cat #{cdr_vars_path}
   }))
@@ -525,7 +531,7 @@ def docker_clean()
   # specific to Docker, it is mounted locally for docker runs. For lack of a
   # better "dev teardown" hook, purge that file here; e.g. in case we decide to
   # invalidate a dev key or change the service account.
-  common.run_inline %W{rm -f #{ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH} #{GSUITE_ADMIN_KEY_PATH}}
+  common.run_inline %W{rm -f #{ServiceAccountContext::SERVICE_ACCOUNT_KEY_PATH}}
 
   # See https://github.com/docker/compose/issues/3447
   common.status "Cleaning complete. docker-compose 'not found' errors can be safely ignored"
@@ -790,9 +796,19 @@ def circle_build_cdr_indices(cmd_name, args)
     "BQ dataset. Required."
   )
   op.add_option(
+    "--wgv-project [wgv-project]",
+    ->(opts, v) { opts.wgv_project = v},
+    "Whole genome variant project."
+  )
+  op.add_option(
     "--wgv-dataset [wgv-dataset]",
     ->(opts, v) { opts.wgv_dataset = v},
-    "Whole genome variant dataset. Required."
+    "Whole genome variant dataset."
+  )
+  op.add_option(
+    "--wgv-table [wgv-table]",
+    ->(opts, v) { opts.wgv_table = v},
+    "Whole genome variant table."
   )
   op.add_option(
     "--cdr-version [cdr-version]",
@@ -800,16 +816,11 @@ def circle_build_cdr_indices(cmd_name, args)
     "CDR version. Required."
   )
   op.add_option(
-    "--cdr-date [cdr-date]",
-    ->(opts, v) { opts.cdr_date = v},
-    "CDR date is Required. Please use the date from the source CDR. <YYYY-mm-dd>"
-  )
-  op.add_option(
     "--data-browser [data-browser]",
     ->(opts, v) { opts.data_browser = v},
     "Generate for data browser. Optional - Default is false"
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.bq_dataset and opts.cdr_version and opts.cdr_date }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.bq_dataset and opts.cdr_version }
   op.parse.validate
 
   env = ENVIRONMENTS[op.opts.project]
@@ -818,7 +829,7 @@ def circle_build_cdr_indices(cmd_name, args)
   content_type = "Content-Type: application/json"
   accept = "Accept: application/json"
   circle_token = "Circle-Token: "
-  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_build_cdr_indices\": true, \"cdr_source_project\": \"#{env.fetch(:source_cdr_project)}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"wgv_source_project\": \"#{env.fetch(:source_wgv_project)}\", \"wgv_source_dataset\": \"#{op.opts.wgv_dataset}\", \"cdr_sql_bucket\": \"all-of-us-workbench-private-cloudsql\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"cdr_date\": \"#{op.opts.cdr_date}\", \"data_browser\": #{op.opts.data_browser} }}"
+  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_build_cdr_indices\": true, \"cdr_source_project\": \"#{env.fetch(:source_cdr_project)}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"wgv_source_project\": \"#{op.opts.wgv_project}\", \"wgv_source_dataset\": \"#{op.opts.wgv_dataset}\", \"wgv_source_table\": \"#{op.opts.wgv_table}\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"data_browser\": #{op.opts.data_browser} }}"
   common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/cdr-indices/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
 end
 
@@ -828,11 +839,36 @@ Common.register_command({
   :fn => ->(*args) { circle_build_cdr_indices("circle-build-cdr-indices", args) }
 })
 
+def make_prep_tables_from_csv(cmd_name, *args)
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.cdr_version = "!_prep_tables_!"
+  op.add_option(
+    "--bq-project [bq-project]",
+    ->(opts, v) { opts.bq_project = v},
+    "BQ Project. Required."
+  )
+  op.add_option(
+    "--bq-dataset [bq-dataset]",
+    ->(opts, v) { opts.bq_dataset = v},
+    "BQ dataset. Required."
+  )
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
+  op.parse.validate
+
+  common = Common.new
+  Dir.chdir('db-cdr') do
+    common.run_inline %W{./generate-cdr/validate-prerequisites-exist.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.cdr_version}}
+  end
+end
+
+Common.register_command({
+  :invocation => "make-prep-tables-from-csv",
+  :description => "Generates criteria prep tables from csv files.",
+  :fn => ->(*args) { make_prep_tables_from_csv("make-prep-tables-from-csv", *args) }
+})
+
 def make_bq_denormalized_tables(cmd_name, *args)
   op = WbOptionsParser.new(cmd_name, args)
-  date = Time.new
-  date = date.year.to_s + "-" + date.month.to_s + "-" + date.day.to_s
-  op.opts.cdr_date = date.to_s
   op.opts.data_browser = false
   op.add_option(
     "--bq-project [bq-project]",
@@ -850,36 +886,31 @@ def make_bq_denormalized_tables(cmd_name, *args)
     "CDR version. Required."
   )
   op.add_option(
-    "--cdr-date [cdr-date]",
-    ->(opts, v) { opts.cdr_date = v},
-    "CDR date is Required. Please use the date from the source CDR. <YYYY-mm-dd>"
-  )
-  op.add_option(
-    "--bucket [bucket]",
-    ->(opts, v) { opts.bucket = v},
-    "GCS bucket. Required."
-  )
-  op.add_option(
     "--wgv-project [wgv-project]",
     ->(opts, v) { opts.wgv_project = v},
-    "Whole Genome Variant Project. Optional."
+    "Whole genome variant project."
   )
   op.add_option(
     "--wgv-dataset [wgv-dataset]",
     ->(opts, v) { opts.wgv_dataset = v},
-    "Whole Genome Variant Dataset. Optional."
+    "Whole genome variant dataset."
+  )
+  op.add_option(
+    "--wgv-table [wgv-table]",
+    ->(opts, v) { opts.wgv_table = v},
+    "Whole genome variant table."
   )
   op.add_option(
     "--data-browser [data-browser]",
     ->(opts, v) { opts.data_browser = v},
     "Is this run for data browser. Optional - Default is false"
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.cdr_version and opts.bucket }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.cdr_version }
   op.parse.validate
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.cdr_version} #{op.opts.cdr_date} #{op.opts.bucket} #{op.opts.data_browser}}
+    common.run_inline %W{./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.wgv_table} #{op.opts.cdr_version} #{op.opts.data_browser}}
   end
 end
 
@@ -964,23 +995,23 @@ def make_bq_denormalized_search_person(cmd_name, *args)
   op.add_option(
     "--wgv-project [wgv-project]",
     ->(opts, v) { opts.wgv_project = v},
-    "Whole Genome Variant Project. Required."
+    "Whole genome variant project."
   )
   op.add_option(
     "--wgv-dataset [wgv-dataset]",
     ->(opts, v) { opts.wgv_dataset = v},
-    "Whole Genome Variant Dataset. Required."
+    "Whole genome variant dataset."
   )
   op.add_option(
-    "--cdr-date [cdr-date]",
-    ->(opts, v) { opts.cdr_date = v},
-    "CDR date is Required. Please use the date from the source CDR. <YYYY-mm-dd>"
+    "--wgv-table [wgv-table]",
+    ->(opts, v) { opts.wgv_table = v},
+    "Whole genome variant table."
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.cdr_date }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.cdr_date}}
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.wgv_table}}
 end
 
 Common.register_command({
@@ -1096,12 +1127,7 @@ def generate_private_cdr_counts(cmd_name, *args)
     ->(opts, v) { opts.cdr_version = v},
     "CDR version. Required."
   )
-  op.add_option(
-    "--bucket [bucket]",
-    ->(opts, v) { opts.bucket = v},
-    "GCS bucket. Required."
-  )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.project and opts.cdr_version and opts.bucket }
+  op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset and opts.project and opts.cdr_version }
   op.parse.validate
   gcc = GcloudContextV2.new(op)
   op.parse.validate
@@ -1110,7 +1136,7 @@ def generate_private_cdr_counts(cmd_name, *args)
   with_cloud_proxy_and_db(gcc) do
     common = Common.new
     Dir.chdir('db-cdr') do
-      common.run_inline %W{./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.project} #{op.opts.cdr_version} #{op.opts.bucket}}
+      common.run_inline %W{./generate-cdr/generate-private-cdr-counts.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.project} #{op.opts.cdr_version}}
     end
   end
 end
@@ -1327,11 +1353,16 @@ def create_auth_domain(cmd_name, args)
     "Workbench Project (environment) for creating the authorization domain"
   )
   op.add_option(
+    "--tier [tier]",
+    ->(opts, v) { opts.tier = v},
+    "Access tier for creating the authorization domain"
+  )
+  op.add_option(
     "--user [user]",
     ->(opts, v) { opts.user = v},
     "A Workbench user you control with DEVELOPER Authority in the environment"
   )
-  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.user}
+  op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.user and opts.tier }
   op.parse.validate
 
   common = Common.new
@@ -1342,14 +1373,14 @@ def create_auth_domain(cmd_name, args)
   content_type = "Content-type: application/json"
   api_base_url = get_server_config(op.opts.project)["apiBaseUrl"]
 
-  domain_name = get_auth_domain(op.opts.project)
+  domain_name = get_auth_domain_name(op.opts.project, op.opts.tier)
   common.run_inline %W{curl -X POST -H #{header} -H #{content_type} -d {}
      #{api_base_url}/v1/auth-domain/#{domain_name}}
 end
 
 Common.register_command({
   :invocation => "create-auth-domain",
-  :description => "Creates an authorization domain in Firecloud for registered users",
+  :description => "Creates an authorization domain in Terra for users of the supplied tier",
     :fn => ->(*args) { create_auth_domain("create-auth-domain", args) }
 })
 
@@ -1866,6 +1897,51 @@ Common.register_command({
     :fn => ->(*args) {delete_workspace_rdr_export(DELETE_WORKSPACE_RDR_EXPORT, *args)}
 })
 
+def backfill_workspaces_to_rdr(cmd_name, *args)
+  common = Common.new
+  ensure_docker cmd_name, args
+
+  op = WbOptionsParser.new(cmd_name, args)
+  op.opts.dry_run = true
+
+  op.add_typed_option(
+    "--dry_run=[dry_run]",
+    TrueClass,
+    ->(opts, v) { opts.dry_run = v},
+    "When true, print the number of workspaces that will be exported, will not export")
+  op.add_typed_option(
+    "--limit=[LIMIT]",
+    String,
+    ->(opts, v) { opts.limit = v},
+    "The number of workspaces exported will not to exceed this limit.")
+
+  # Create a cloud context and apply the DB connection variables to the environment.
+  # These will be read by Gradle and passed as Spring Boot properties to the command-line.
+
+  context = GcloudContextV2.new(op)
+  op.parse.validate
+  context.validate()
+
+  hasLimit = op.opts.limit ? "--limit=#{op.opts.limit}" : nil
+  isDryRun = op.opts.dry_run ? "--dry-run" : nil
+  flags = [hasLimit, isDryRun].map{ |v| v && "'#{v}'" }.select{ |v| !v.nil? }
+  gradleCommand = %W{
+    gradle backfillWorkspacesToRdr
+   -PappArgs=[#{flags.join(',')}]}
+
+  with_optional_cloud_proxy_and_db(context) do
+    common.run_inline gradleCommand
+  end
+end
+
+BACKFILL_WORKSPACES_TO_RDR = "backfill-workspaces-to-rdr";
+
+Common.register_command({
+    :invocation => BACKFILL_WORKSPACES_TO_RDR,
+    :description => "Backfill workspaces from workspace table, exporting them to the rdr.\n",
+    :fn => ->(*args) {backfill_workspaces_to_rdr(BACKFILL_WORKSPACES_TO_RDR, *args)}
+})
+
 def authority_options(cmd_name, args)
   op = WbOptionsParser.new(cmd_name, args)
   op.opts.remove = false
@@ -1935,7 +2011,6 @@ def create_wgs_cohort_extraction_bp_workspace(cmd_name, *args)
 
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
-  op.opts.dry_run = true
   op.add_option(
       "--billing-project-name [billing-project-name]",
       ->(opts, v) { opts.billing_project_name = v},
@@ -1980,6 +2055,88 @@ Common.register_command({
   :invocation => "create-wgs-cohort-extraction-bp-workspace",
   :description => "Create Terra billing project and workspace impersonating the Genomics Cohort Extraction SA. This will NOT show up as an AoU workspace.",
   :fn => ->(*args) { create_wgs_cohort_extraction_bp_workspace("create-wgs-cohort-extraction-bp-workspace", *args) }
+})
+
+def get_github_commit_hash(repo, branch)
+  response = Net::HTTP.get(URI("https://api.github.com/repos/#{repo}/branches/#{branch}"))
+  return JSON.parse(response)['commit']['sha']
+end
+
+def create_terra_method_snapshot(cmd_name, *args)
+  ensure_docker cmd_name, args
+
+  common = Common.new
+  op = WbOptionsParser.new(cmd_name, args)
+  op.add_option(
+    "--project [GOOGLE_PROJECT]",
+    ->(opts, v) { opts.project = v},
+    "Google project to act on (e.g. all-of-us-workbench-test). Cannot be used with --all-projects"
+  )
+  op.opts.all_projects = false
+  op.add_option(
+    "--all-projects [all-projects]",
+    ->(opts, _) { opts.all_projects = true},
+    "Create snapshot in every AoU environment. Cannot be used with --project.")
+  op.opts.source_git_repo = "broadinstitute/gatk"
+  op.add_option(
+    "--source-git-repo [source-git-repo]",
+    ->(opts, v) { opts.source_git_repo = v},
+    "git owner/repo where the source file is located. default: #{op.opts.source_git_repo}")
+  op.opts.source_git_path = "scripts/variantstore/wdl/ngs_cohort_extract.wdl"
+  op.add_option(
+    "--source-git-path [source-git-path]",
+    ->(opts, v) { opts.source_git_path = v},
+    "git path where the source file is located, relative to the repo's root directory. default: #{op.opts.source_git_path}")
+  op.opts.source_git_branch = "ah_var_store"
+  op.add_option(
+    "--source-git-branch[source-git-branch]",
+    ->(opts, v) { opts.source_git_ref = v},
+    "git branch where the source file is located. default: #{op.opts.source_git_branch}")
+  op.add_option(
+    "--method-name [method-name]",
+    ->(opts, v) { opts.method_name = v},
+    "Agora method name to create snapshot in. default: WorkbenchConfig.wgsCohortExtraction.extractionMethodConfigurationName
+          Method Namespace will be pulled from WorkbenchConfig.wgsCohortExtraction.extractionMethodConfigurationNamespace")
+  op.add_validator ->(opts) {
+    if (!opts.project and !opts.all_projects)
+      common.error "A project must be set or --all-projects must be true"
+      raise ArgumentError
+    end
+  }
+
+  # Use GcloudContextV2 to validate gcloud auth but we need to drop the
+  # --project argument validation that's built into the constructor
+  GcloudContextV2.validate_gcloud_auth()
+  op.parse.validate
+
+  source_file_commit_hash = get_github_commit_hash(op.opts.source_git_repo, op.opts.source_git_branch)
+
+  projects = op.opts.all_projects ? ENVIRONMENTS.keys - ["local"] : [op.opts.project]
+  projects.each { |project|
+    extractionConfig = get_config(project)['wgsCohortExtraction']
+    flags = ([
+      ["--config-json", get_config_file(project)],
+      ["--source-git-repo", op.opts.source_git_repo],
+      ["--source-git-path", op.opts.source_git_path],
+      ["--source-git-ref", source_file_commit_hash],
+      ["--method-namespace", extractionConfig['extractionMethodConfigurationNamespace']],
+      ["--method-name", op.opts.method_name || extractionConfig['extractionMethodConfigurationName']],
+    ]).map { |kv| "#{kv[0]}=#{kv[1]}" }
+    flags.map! { |f| "'#{f}'" }
+
+    ServiceAccountContext.new(project).run do
+      common.run_inline %W{
+       gradle createTerraMethodSnapshot
+       -PappArgs=[#{flags.join(',')}]}
+    end
+  }
+end
+
+Common.register_command({
+  :invocation => "create-terra-method-snapshot",
+  :description => "Create Terra Method snapshot in single or all environments.
+    Method Namespace will be pulled from WorkbenchConfig.wgsCohortExtraction.extractionMethodConfigurationNamespace",
+  :fn => ->(*args) { create_terra_method_snapshot("create-terra-method-snapshot", *args) }
 })
 
 def delete_runtimes(cmd_name, *args)
@@ -2039,33 +2196,8 @@ def describe_runtime(cmd_name, *args)
   op.add_option(
       "--project [project]",
       ->(opts, v) { opts.project = v},
-      "Optional project ID; by default will infer the project from the runtime ID")
+      "Required project ID")
   op.add_validator ->(opts) { raise ArgumentError unless opts.runtime_id }
-  op.parse.validate
-
-  # Infer the project from the runtime ID project ID. If for some reason, the
-  # target runtime ID does not conform to the current billing prefix (e.g. if we
-  # changed the prefix), --project can be used to override this.
-  common = Common.new
-  matching_prefix = ""
-  project_from_runtime = nil
-  ENVIRONMENTS.each_key do |env|
-    env_prefix = get_billing_project_prefix(env)
-    if op.opts.runtime_id.start_with?(env_prefix)
-      # Take the most specific prefix match, since prod is a substring of the others.
-      if matching_prefix.length < env_prefix.length
-        project_from_runtime = env
-        matching_prefix = env_prefix
-      end
-    end
-  end
-  if project_from_runtime == "local"
-    project_from_runtime = TEST_PROJECT
-  end
-  common.warning "unable to determine project by runtime ID" unless project_from_runtime
-  unless op.opts.project
-    op.opts.project = project_from_runtime
-  end
 
   # Add the GcloudContext after setting up the project parameter to avoid
   # earlier validation failures.
@@ -2271,7 +2403,7 @@ Common.register_command({
 })
 
 def connect_to_cloud_db(cmd_name, *args)
-  ensure_docker cmd_name, args
+  ensure_docker_with_ports cmd_name, args
   common = Common.new
   op = WbOptionsParser.new(cmd_name, args)
   op.add_option(
@@ -2280,6 +2412,7 @@ def connect_to_cloud_db(cmd_name, *args)
     "Optional database user to connect as, defaults to 'dev-readonly'. " +
     "To perform mutations use 'workbench'. Avoid using 'root' unless " +
     "absolutely necessary.")
+
   gcc = GcloudContextV2.new(op)
   op.parse.validate
   gcc.validate
@@ -2307,11 +2440,13 @@ def connect_to_cloud_db(cmd_name, *args)
       common.status "Database session will be read-only; use --db-user to change this"
       common.status ""
     end
+    common.status "Fetch credentials from #{gcs_vars_path(gcc.project)} to connect through a different SQL tool"
     common.run_inline %W{
       mysql --host=127.0.0.1 --port=3307 --user=#{op.opts.db_user}
       --database=#{env["DB_NAME"]} --password=#{db_password}},
       db_password
   end
+
 end
 
 Common.register_command({
@@ -2481,6 +2616,15 @@ def get_config(project)
   return JSON.parse(File.read(get_config_file(project)))
 end
 
+def get_cdr_config_file(project)
+  cdr_config_json = must_get_env_value(project, :cdr_config_json)
+  return "config/#{cdr_config_json}"
+end
+
+def get_cdr_config(project)
+  return JSON.parse(File.read(get_cdr_config_file(project)))
+end
+
 def get_fc_config(project)
   return get_config(project)["firecloud"]
 end
@@ -2501,8 +2645,17 @@ def get_leo_api_url(project)
   return get_fc_config(project)["leoBaseUrl"]
 end
 
-def get_auth_domain(project)
-  return get_fc_config(project)["registeredDomainName"]
+def get_access_tier_config(project, tier_short_name)
+  tiers = get_cdr_config(project)["accessTiers"]
+  tier = tiers.find { |tier| tier['shortName'] == tier_short_name }
+  unless tier
+    raise("Could not find access tier '#{tier_short_name}' in cdr_config for project #{project}")
+  end
+  return tier
+end
+
+def get_auth_domain_name(project, tier)
+  return get_access_tier_config(project, tier)["authDomainName"]
 end
 
 def get_firecloud_base_url(project)
@@ -2611,8 +2764,6 @@ def deploy(cmd_name, args)
     load_config(ctx.project, op.opts.dry_run)
     cdr_config_file = must_get_env_value(gcc.project, :cdr_config_json)
     update_cdr_config_for_project("config/#{cdr_config_file}", op.opts.dry_run)
-
-    common.run_inline %W{gradle loadDataDictionary -PappArgs=#{op.opts.dry_run ? true : false}}
 
     # Keep the cloud proxy context open for the service account credentials.
     dry_flag = op.opts.dry_run ? %W{--dry-run} : []

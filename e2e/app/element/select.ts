@@ -11,7 +11,7 @@ import { buildXPath } from 'app/xpath-builders';
 export default class Select extends BaseElement {
   private selectedOption: string;
 
-  static async findByName(page: Page, xOpt: XPathOptions, container?: Container): Promise<Select> {
+  static findByName(page: Page, xOpt: XPathOptions, container?: Container): Select {
     xOpt.type = ElementType.Select;
     const selectXpath = buildXPath(xOpt, container);
     const select = new Select(page, selectXpath);
@@ -53,10 +53,36 @@ export default class Select extends BaseElement {
     const selectedOption = await this.page.evaluate((select) => {
       for (const option of select.options) {
         if (option.selected) {
-          return option.value;
+          return option.textContent;
         }
       }
     }, selectElement);
     return selectedOption;
+  }
+
+  /**
+   * Wait until value of Selected option equals to expected option.
+   */
+  async waitForSelectedValue(expectedOption: string, timeout = 30000): Promise<void> {
+    const selectElement = await this.page.waitForXPath(this.getXpath(), { visible: true });
+    await this.page
+      .waitForFunction(
+        (select, text) => {
+          for (const option of select.options) {
+            if (option.selected) {
+              console.log(option.textContent);
+              return option.textContent === text;
+            }
+          }
+        },
+        { timeout },
+        selectElement,
+        expectedOption
+      )
+      .catch((err) => {
+        console.error(`waitForSelectedValue() failed. Expected selected option is ${expectedOption}`);
+        console.error(err);
+        throw new Error(err);
+      });
   }
 }

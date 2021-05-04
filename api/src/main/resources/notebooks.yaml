@@ -238,7 +238,7 @@ paths:
   # "workspaces/..." fragment into a single "path" var, as is used in Jupyter's
   # own Swagger definition. Note: this does not initialize any parent
   # directories. The Leo proxy localize API can be used for this purpose.
-  /notebooks/{googleProject}/{runtimeName}/api/contents/{fileName}:
+  /proxy/{googleProject}/{runtimeName}/jupyter/api/contents/{fileName}:
     parameters:
       - in: path
         name: googleProject
@@ -305,7 +305,7 @@ paths:
             $ref: '#/definitions/JupyterContents'
         500:
           description: Model key error
-  /notebooks/{googleProject}/{runtimeName}/api/contents/workspaces/{workspaceDir}:
+  /proxy/{googleProject}/{runtimeName}/jupyter/api/contents/workspaces/{workspaceDir}:
     parameters:
       - in: path
         name: googleProject
@@ -364,7 +364,7 @@ paths:
               reason:
                 type: string
                 description: Explanation of error reason
-  /notebooks/{googleProject}/{runtimeName}/api/contents/workspaces/{workspaceDir}/{fileName}:
+  /proxy/{googleProject}/{runtimeName}/jupyter/api/contents/workspaces/{workspaceDir}/{fileName}:
     parameters:
       - in: path
         name: googleProject

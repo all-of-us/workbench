@@ -5,7 +5,7 @@ import SpyInstance = jest.SpyInstance;
 import {AccountCreationSurvey, AccountCreationSurveyProps} from 'app/pages/login/account-creation/account-creation-survey';
 import {createEmptyProfile} from 'app/pages/login/sign-in';
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 
@@ -19,7 +19,7 @@ function getSubmitButton(wrapper: ReactWrapper): ReactWrapper {
 }
 
 beforeEach(() => {
-  serverConfigStore.next(defaultConfig);
+  serverConfigStore.set({config: defaultConfig});
 
   registerApiClient(ProfileApi, new ProfileApiStub());
   mockCreateAccount = jest.spyOn(profileApi(), 'createAccount');

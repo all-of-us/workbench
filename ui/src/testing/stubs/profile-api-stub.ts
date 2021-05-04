@@ -3,13 +3,13 @@ import {
   AccessModule,
   AdminTableUser,
   CreateAccountRequest,
-  DataAccessLevel,
   InstitutionalRole,
   NihToken,
   Profile,
   ProfileApi,
 } from 'generated/fetch';
 
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {EmptyResponse} from 'generated/fetch/api';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
@@ -17,7 +17,7 @@ export class ProfileStubVariables {
   static PROFILE_STUB = <Profile>{
     username: 'tester@fake-research-aou.org',
     contactEmail: 'tester@mactesterson.edu><script>alert("hello");</script>',
-    dataAccessLevel: DataAccessLevel.Registered,
+    accessTierShortNames: [AccessTierShortNames.Registered],
     givenName: 'Tester!@#$%^&*()><script>alert("hello");</script>',
     familyName: 'MacTesterson!@#$%^&*()><script>alert("hello");</script>',
     phoneNumber: '999-999-9999',
@@ -31,6 +31,7 @@ export class ProfileStubVariables {
     complianceTrainingBypassTime: null,
     eraCommonsCompletionTime: null,
     eraCommonsBypassTime: null,
+    rasLinkLoginGovBypassTime: null,
     authorities: [],
     freeTierUsage: 1.23,
     freeTierDollarQuota: 34.56,
@@ -115,6 +116,9 @@ export class ProfileApiStub extends ProfileApi {
           break;
         case AccessModule.ERACOMMONS:
           this.profile.eraCommonsBypassTime = valueToSet;
+          break;
+        case AccessModule.RASLINKLOGINGOV:
+          this.profile.rasLinkLoginGovBypassTime = valueToSet;
           break;
       }
       resolve({});

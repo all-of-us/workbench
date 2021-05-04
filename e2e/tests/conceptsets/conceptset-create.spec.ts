@@ -11,14 +11,15 @@ describe('Create Concept Sets from Domains', () => {
     await signInWithAccessToken(page);
   });
 
+  const workspace = 'e2eCreateConceptSetsTest';
+
   /**
    * Test:
    * - Create new Concept Set from Conditions domain.
    * - Delete Concept Set.
    */
   test('Create Concept Set from Conditions domain', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Click Add Datasets button.
     const dataPage = new WorkspaceDataPage(page);
@@ -28,7 +29,7 @@ describe('Create Concept Sets from Domains', () => {
     const conceptSetPage = await datasetBuildPage.clickAddConceptSetsButton();
 
     // Start: Add a Concept in Conditions domain
-    const conditionDomainCard = await ConceptDomainCard.findDomainCard(page, Domain.Conditions);
+    const conditionDomainCard = ConceptDomainCard.findDomainCard(page, Domain.Conditions);
 
     // In Conditions domain, both Concepts and Participants counts should be non-zero numberical digits.
     const conceptsCount = await conditionDomainCard.getConceptsCount();
@@ -56,7 +57,7 @@ describe('Create Concept Sets from Domains', () => {
     const conceptSetName = await conceptSetPage.saveConceptSet();
 
     // Verify Concept Set created successfully.
-    const successMessage = `Concept Set Saved Successfully`;
+    const successMessage = 'Concept Set Saved Successfully';
     const isSuccess = await waitForText(page, successMessage);
     expect(isSuccess).toBe(true);
 
@@ -79,8 +80,7 @@ describe('Create Concept Sets from Domains', () => {
    * - Delete Dataset, Concept Set.
    */
   test('Create Concept Sets from Drug Exposures and Measurements domains', async () => {
-    const workspaceCard = await findOrCreateWorkspace(page);
-    await workspaceCard.clickWorkspaceName();
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Click Add Datasets button.
     const dataPage = new WorkspaceDataPage(page);
@@ -91,7 +91,7 @@ describe('Create Concept Sets from Domains', () => {
     const conceptSearchPage = await datasetBuildPage.clickAddConceptSetsButton();
 
     // Add new Concept in Drug Exposures domain
-    const drugDomainCard = await ConceptDomainCard.findDomainCard(page, Domain.DrugExposures);
+    const drugDomainCard = ConceptDomainCard.findDomainCard(page, Domain.DrugExposures);
 
     // In Drug Exposures domain, both Concepts and Participants counts should be non-zero numberical digits.
     const conceptsCount = await drugDomainCard.getConceptsCount();
@@ -122,7 +122,7 @@ describe('Create Concept Sets from Domains', () => {
     await conceptActionPage.clickCreateAnotherConceptSetButton();
 
     // Add new Concept in Measurements domain
-    const measurementsDomainCard = await ConceptDomainCard.findDomainCard(page, Domain.Measurements);
+    const measurementsDomainCard = ConceptDomainCard.findDomainCard(page, Domain.Measurements);
     await measurementsDomainCard.getConceptsCount();
     await measurementsDomainCard.clickSelectConceptButton();
 

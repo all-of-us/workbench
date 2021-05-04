@@ -16,8 +16,9 @@ import org.springframework.web.context.annotation.RequestScope;
 @Configuration
 public class StorageConfig {
 
-  public static final String WGS_EXTRACTION_STORAGE = "WGS_EXTRACTION_STORAGE";
-  public static final String WGS_EXTRACTION_STORAGE_CLIENT = "WGS_EXTRACTION_STORAGE_CLIENT";
+  public static final String GENOMIC_EXTRACTION_STORAGE = "GENOMIC_EXTRACTION_STORAGE";
+  public static final String GENOMIC_EXTRACTION_STORAGE_CLIENT =
+      "GENOMIC_EXTRACTION_STORAGE_CLIENT";
 
   @Bean
   @Primary
@@ -25,9 +26,9 @@ public class StorageConfig {
     return StorageOptions.getDefaultInstance().getService();
   }
 
-  @Bean(name = WGS_EXTRACTION_STORAGE)
+  @Bean(name = GENOMIC_EXTRACTION_STORAGE)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  Storage wgsExtractionStorage(
+  Storage genomicExtractionStorage(
       @Qualifier(FireCloudConfig.WGS_EXTRACTION_SA_CREDENTIALS) Credentials credentials) {
     return StorageOptions.newBuilder().setCredentials(credentials).build().getService();
   }
@@ -39,10 +40,10 @@ public class StorageConfig {
     return new CloudStorageClientImpl(storageProvider, configProvider);
   }
 
-  @Bean(name = WGS_EXTRACTION_STORAGE_CLIENT)
+  @Bean(name = GENOMIC_EXTRACTION_STORAGE_CLIENT)
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  CloudStorageClient wgsExtractioncloudStorageClient(
-      @Qualifier(WGS_EXTRACTION_STORAGE) Provider<Storage> storageProvider,
+  CloudStorageClient genomicExtractioncloudStorageClient(
+      @Qualifier(GENOMIC_EXTRACTION_STORAGE) Provider<Storage> storageProvider,
       Provider<WorkbenchConfig> configProvider) {
     return new CloudStorageClientImpl(storageProvider, configProvider);
   }

@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
 import org.pmiops.workbench.model.Domain;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,15 +16,17 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class DSDataDictionaryDaoTest {
+public class DSDataDictionaryDaoTest extends SpringTest {
 
   @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
 
-  private DbDSDataDictionary dbDSDataDictionary_Condition;
+  private DbDSDataDictionary dbDSDataDictionaryCondition_ds;
+  private DbDSDataDictionary dbDSDataDictionaryCondition;
+  private DbDSDataDictionary dbDSDataDictionaryPerson;
 
   @Before
   public void setUp() {
-    dbDSDataDictionary_Condition =
+    dbDSDataDictionaryCondition_ds =
         dsDataDictionaryDao.save(
             DbDSDataDictionary.builder()
                 .addDataProvenance("Mock Data Provenance")
@@ -32,29 +35,51 @@ public class DSDataDictionaryDaoTest {
                 .addFieldName("Mock Condition Field")
                 .addFieldType("Integer")
                 .addOmopCdmStandardOrCustomField("Custom")
-                .addRelevantOmopTable("omop")
+                .addRelevantOmopTable("ds_condition")
                 .addSourcePpiModule("ppi")
                 .build());
-    dsDataDictionaryDao.save(
-        DbDSDataDictionary.builder()
-            .addDataProvenance("Mock Data Provenance")
-            .addDescription("Mock description for Condition")
-            .addDomain(Domain.CONDITION.toString())
-            .addFieldName("Mock Condition Field")
-            .addFieldType("Integer")
-            .addOmopCdmStandardOrCustomField("Custom")
-            .addRelevantOmopTable("omop_2")
-            .addSourcePpiModule("ppi")
-            .build());
+    dbDSDataDictionaryPerson =
+        dsDataDictionaryDao.save(
+            DbDSDataDictionary.builder()
+                .addDataProvenance("Mock Data Provenance")
+                .addDescription("Mock description for Person")
+                .addDomain(Domain.PERSON.toString())
+                .addFieldName("Mock Person Field")
+                .addFieldType("Integer")
+                .addOmopCdmStandardOrCustomField("Custom")
+                .addRelevantOmopTable("ds_person")
+                .addSourcePpiModule("ppi")
+                .build());
+    dbDSDataDictionaryCondition =
+        dsDataDictionaryDao.save(
+            DbDSDataDictionary.builder()
+                .addDataProvenance("Mock Data Provenance")
+                .addDescription("Mock description for Condition")
+                .addDomain(Domain.CONDITION.toString())
+                .addFieldName("Mock Condition Field")
+                .addFieldType("Integer")
+                .addOmopCdmStandardOrCustomField("Custom")
+                .addRelevantOmopTable("condition")
+                .addSourcePpiModule("ppi")
+                .build());
   }
 
   @Test
-  public void findByFieldNameAndDomain() {
+  public void findByFieldNameAndDomain_twoEntries() {
     DbDSDataDictionary mockConditionDictionary =
         dsDataDictionaryDao.findFirstByFieldNameAndDomain(
             "Mock Condition Field", Domain.CONDITION.toString());
     assertThat(mockConditionDictionary).isNotNull();
-    assertThat(mockConditionDictionary).isEqualTo(dbDSDataDictionary_Condition);
+    assertThat(mockConditionDictionary).isEqualTo(dbDSDataDictionaryCondition);
+  }
+
+  @Test
+  public void findByFieldNameAndDomain_oneEntry() {
+    DbDSDataDictionary mockPersonDictionary =
+        dsDataDictionaryDao.findFirstByFieldNameAndDomain(
+            "Mock Person Field", Domain.PERSON.toString());
+    assertThat(mockPersonDictionary).isNotNull();
+    assertThat(mockPersonDictionary).isEqualTo(dbDSDataDictionaryPerson);
   }
 
   @Test

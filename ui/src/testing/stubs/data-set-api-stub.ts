@@ -14,21 +14,21 @@ import {
 } from 'generated/fetch';
 import {stubNotImplementedError} from 'testing/stubs/stub-utils';
 
+export const stubDataSet = (): DataSet => ({
+  id: 0,
+  name: 'Stub Dataset',
+  description: 'Stub Dataset',
+  includesAllParticipants: false,
+  workspaceId: 0,
+  lastModifiedTime: 10000,
+  conceptSets: [],
+  cohorts: [],
+  domainValuePairs: []
+});
+
 export class DataSetApiStub extends DataSetApi {
   static stubDataSets(): DataSet[] {
-    return [
-      {
-        id: 0,
-        name: 'Stub Dataset',
-        description: 'Stub Dataset',
-        includesAllParticipants: false,
-        workspaceId: 0,
-        lastModifiedTime: 10000,
-        conceptSets: [],
-        cohorts: [],
-        domainValuePairs: []
-      }
-    ];
+    return [stubDataSet()];
   }
 
   constructor() {

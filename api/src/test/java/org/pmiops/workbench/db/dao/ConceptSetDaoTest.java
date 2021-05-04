@@ -9,6 +9,7 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbConceptSetConceptId;
 import org.pmiops.workbench.db.model.DbStorageEnums;
@@ -24,7 +25,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ConceptSetDaoTest {
+public class ConceptSetDaoTest extends SpringTest {
 
   @Autowired private ConceptSetDao conceptSetDao;
   @Autowired private UserDao userDao;
@@ -65,8 +66,8 @@ public class ConceptSetDaoTest {
   public void findByConceptSetIdAndWorkspaceId() {
     assertThat(
             conceptSetDao
-                .findByConceptSetIdAndWorkspaceId(
-                    dbConceptSet.getConceptSetId(), dbConceptSet.getWorkspaceId())
+                .findByWorkspaceIdAndConceptSetId(
+                    dbConceptSet.getWorkspaceId(), dbConceptSet.getConceptSetId())
                 .get())
         .isEqualTo(dbConceptSet);
   }

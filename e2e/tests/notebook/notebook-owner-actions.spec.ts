@@ -2,43 +2,38 @@ import DataResourceCard from 'app/component/data-resource-card';
 import NewNotebookModal from 'app/modal/new-notebook-modal';
 import WorkspacesPage from 'app/page/workspaces-page';
 import { LinkText, ResourceCard } from 'app/text-labels';
-import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
+import { makeRandomName } from 'utils/str-utils';
 import { signInWithAccessToken } from 'utils/test-utils';
 
 describe('Workspace owner Jupyter notebook action tests', () => {
-  // In order to reduce test playback time, reuse same Workspace for all tests in this file.
-  // Workspace to be created in first test. If first test fails, next test will create it.
-  let workspaceName: string;
-
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
 
+  const workspace = 'e2eNotebookActionTest';
+
   test(
     'Notebook name must be unique in same workspace',
     async () => {
-      const workspacesPage = new WorkspacesPage(page);
-
       const notebookName = makeRandomName('pyNotebook1');
-      workspaceName = makeWorkspaceName();
-
-      const workspaceAnalysisPage = await workspacesPage.createNotebook({ workspaceName, notebookName });
+      const workspacesPage = new WorkspacesPage(page);
+      const workspaceAnalysisPage = await workspacesPage.createNotebook({ workspaceName: workspace, notebookName });
 
       const notebookCard = await DataResourceCard.findCard(page, notebookName);
       expect(notebookCard).toBeTruthy();
 
-      await workspaceAnalysisPage.createNewNotebookLink().then((link) => link.click());
+      await workspaceAnalysisPage.createNewNotebookLink().click();
 
       const modal = new NewNotebookModal(page);
       await modal.waitForLoad();
 
-      await modal.name().then((textbox) => textbox.type(notebookName));
+      await modal.name().type(notebookName);
 
       const errorTextXpath = `${modal.getXpath()}//*[text()="Name already exists"]`;
       const errorExists = await page.waitForXPath(errorTextXpath, { visible: true });
       expect(errorExists.asElement()).not.toBeNull();
 
-      const createButton = await modal.createNotebookButton();
+      const createButton = modal.createNotebookButton();
       const disabledButton = await createButton.isCursorNotAllowed();
       expect(disabledButton).toBe(true);
 
@@ -58,9 +53,9 @@ describe('Workspace owner Jupyter notebook action tests', () => {
   test(
     'Notebook can be duplicated by workspace owner',
     async () => {
-      const workspacesPage = new WorkspacesPage(page);
       const notebookName = makeRandomName('pyNotebook2');
-      const workspaceAnalysisPage = await workspacesPage.createNotebook({ workspaceName, notebookName });
+      const workspacesPage = new WorkspacesPage(page);
+      const workspaceAnalysisPage = await workspacesPage.createNotebook({ workspaceName: workspace, notebookName });
       const duplNotebookName = await workspaceAnalysisPage.duplicateNotebook(notebookName);
       // Delete clone notebook.
       await workspaceAnalysisPage.deleteResource(duplNotebookName, ResourceCard.Notebook);
@@ -72,9 +67,9 @@ describe('Workspace owner Jupyter notebook action tests', () => {
   test(
     'Notebook can be renamed by workspace owner',
     async () => {
-      const workspacesPage = new WorkspacesPage(page);
       const notebookName = makeRandomName('pyNotebook3');
-      const workspaceAnalysisPage = await workspacesPage.createNotebook({ workspaceName, notebookName });
+      const workspacesPage = new WorkspacesPage(page);
+      const workspaceAnalysisPage = await workspacesPage.createNotebook({ workspaceName: workspace, notebookName });
 
       const newName = makeRandomName('test-notebook');
       const modalTextContents = await workspaceAnalysisPage.renameResource(

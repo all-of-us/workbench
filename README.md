@@ -144,6 +144,11 @@ The `status` column enum values can be found in `org.pmiops.workbench.db.model.S
 
 ### UI
 
+In the UI, we use some [Fontawesome](https://fontawesome.com/) Pro icons. In order to install the Fontawesome Pro packages, you will need to download an `.npmrc` file with a Fontawesome license token. Copy it into the workbench root directory:
+```
+workbench$ gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc .
+```
+
 Before launching or testing the UI, yarn must first install the neccessary packages. From the `ui/` directory:
 ```Shell
 yarn install
@@ -529,4 +534,5 @@ implementation in this [document](api/docs/action-audit.md).
 ### Workbench Reporting Dataset
 To support analytics, we have a reporting pipeline that exports data to a BigQuery dataset. See the [wiki](https://github.com/all-of-us/workbench/wiki/Workbench-Reporting-Dataset-(WRD)) for details.
 
-
+### Monitoring, Alerts, and Dashboards
+The API server periodically records various metrics, powering Stackdriver dashboards and alerts.  See the [wiki](https://github.com/all-of-us/workbench/wiki/Monitoring,-Alerts,-and-Dashboards) for details.

@@ -1,11 +1,4 @@
 import {ElementRef, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import * as fp from 'lodash/fp';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
-import {ReplaySubject} from 'rxjs/ReplaySubject';
-const {useEffect, useState} = React;
-
 import {colorWithWhiteness} from 'app/styles/colors';
 import {
   currentCohortCriteriaStore,
@@ -17,19 +10,23 @@ import {
   globalErrorStore,
   queryParamsStore,
   routeConfigDataStore,
-  serverConfigStore,
   urlParamsStore,
   userProfileStore
 } from 'app/utils/navigation';
-import {DataAccessLevel, Domain} from 'generated';
-import {
-  ConfigResponse,
-  DataAccessLevel as FetchDataAccessLevel,
-  Domain as FetchDomain,
-} from 'generated/fetch';
+import {Domain, } from 'generated/fetch';
+import * as fp from 'lodash/fp';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import {ReplaySubject} from 'rxjs/ReplaySubject';
 import {cdrVersionStore, withStore} from './stores';
 
+const {useEffect, useState} = React;
+
 export const WINDOW_REF = 'window-ref';
+
+// Local storage key to override the API base path.
+export const LOCAL_STORAGE_API_OVERRIDE_KEY = 'allOfUsApiUrlOverride';
 
 export function isBlank(toTest: String): boolean {
   if (toTest === null || toTest === undefined) {
@@ -38,26 +35,6 @@ export function isBlank(toTest: String): boolean {
     toTest = toTest.trim();
     return toTest === '';
   }
-}
-
-/**
- * Determine whether the given access level is >= registered. This is the
- * minimum required level to do most things in the Workbench app (outside of
- * local/test development).
- */
-export function hasRegisteredAccess(access: DataAccessLevel): boolean {
-  return [
-    DataAccessLevel.Registered,
-    DataAccessLevel.Protected
-  ].includes(access);
-}
-
-// TODO: consolidate this with above when UI is fully converted
-export function hasRegisteredAccessFetch(access: FetchDataAccessLevel): boolean {
-  return [
-    FetchDataAccessLevel.Registered,
-    FetchDataAccessLevel.Protected
-  ].includes(access);
 }
 
 
@@ -81,7 +58,7 @@ export function randomString(len): string {
 export const DEFAULT = Symbol();
 
 export const switchCase = (value, ...pairs) => {
-  const match = fp.find(([v]) => v === value || v === DEFAULT, pairs);
+  const match = fp.find(([v]) => fp.isEqual(v, value) || fp.isEqual(v, DEFAULT), pairs);
   return match && match[1]();
 };
 
@@ -395,12 +372,9 @@ export const withRouteConfigData = () => {
   return connectBehaviorSubject(routeConfigDataStore, 'routeConfigData');
 };
 
-// HOC that provides a 'cdrVersionListResponse' prop with the CDR version
-// information. Rendering of the connected component is blocked on initial load
-// of the CDR versions. This should only affect initial page loads, this HOC can
-// be included last (if multiple HOCs are in use) to minimize this impact.
+// HOC that provides a 'cdrVersionTiersResponse' prop with the CDR version information.
 export const withCdrVersions = () => {
-  return withStore(cdrVersionStore, 'cdrVersionListResponse');
+  return withStore(cdrVersionStore, 'cdrVersionTiersResponse');
 };
 
 // HOC that provides a 'queryParams' prop with current query params
@@ -408,23 +382,13 @@ export const withQueryParams = () => {
   return connectBehaviorSubject(queryParamsStore, 'queryParams');
 };
 
-// A HOC that provides a 'serverConfig' prop,
-// For similar reasons to the withCdrVersions store above, we want the serverConfig HOC to not
-// render child components until the store has a non-empty value.
-// See discussion on https://github.com/all-of-us/workbench/pull/2603/ for details on the type of
-// bugs that motivated this approach.
-export const withServerConfig = () => {
-  return connectBehaviorSubject(serverConfigStore, 'serverConfig', /* preventRenderUntilValuePresent */ true);
-};
-export interface ServerConfigProps {
-  serverConfig: ConfigResponse;
-}
-
-// Temporary method for converting generated/models/Domain to generated/models/fetch/Domain
-export function generateDomain(domain: FetchDomain): Domain {
-  const d = fp.capitalize(FetchDomain[domain]);
-  return Domain[d];
-}
+// A HOC that provides a 'serverConfig' prop
+// export const withServerConfig = () => {
+//   return withStore(serverConfigStore, 'serverConfig');
+// };
+// export interface ServerConfigProps {
+//   serverConfig: ConfigResponse;
+// }
 
 export function displayDateWithoutHours(time: number): string {
   const date = new Date(time);
@@ -453,11 +417,13 @@ export function formatWorkspaceResourceDisplayDate(time: string): string {
 }
 
 export function formatDomainString(domainString: string): string {
-  return fp.capitalize(domainString === Domain.PHYSICALMEASUREMENTCSS.toString()
-    ? Domain.PHYSICALMEASUREMENT.toString() : domainString);
+  return domainString === Domain.PHYSICALMEASUREMENTCSS.toString()
+      ? fp.capitalize(Domain.PHYSICALMEASUREMENT.toString())
+      : domainString === Domain.WHOLEGENOMEVARIANT.toString()
+          ? 'VCF Files' : fp.capitalize(domainString);
 }
 
-export function formatDomain(domain: FetchDomain): string {
+export function formatDomain(domain: Domain): string {
   return formatDomainString(domain.toString());
 }
 
@@ -644,4 +610,27 @@ export const lensOnProps = fp.curry((setters: string[], getters: string[], obj: 
 export const useId = () => {
   const [id] = useState(() => fp.uniqueId('element-'));
   return id;
+};
+
+export const nothing = {};
+
+// maybe - takes a function and a value. If the value is not defined returns "nothing"
+// Example usage: fp.flow(maybe(doSomethingIfIhaveData), maybe(doAnotherThingIfThereIsAResult))(getData())
+export const maybe = fp.curry((fn, value) => value !== nothing && value ? fn(value) : nothing);
+
+// cond - useful for representing conditionals as an expression
+// Operates like fp.cond, but a bit more concise - no need for array of arrays and allows for a clear default case
+// Example usage: cond<numer | string>(
+//  [v === 1, () => v + 2],
+//  [v === 2, () => v * 2],
+//  () => 'default' // Default case
+// )
+export const cond = <T extends unknown>(...args: ([boolean, () => T] | (() => T))[]) => {
+  for (const arg of args) {
+    // If the arg is an array, conditionally execute (maybe). If not an array, then this is the default case.
+    const result = Array.isArray(arg) ? maybe(...fp.reverse(arg)) : arg();
+    if (result !== nothing) {
+      return result;
+    }
+  }
 };

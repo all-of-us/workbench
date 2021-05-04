@@ -5,6 +5,7 @@
 .project
 .externalToolBuilders
 .settings
+.npmrc
 cron-emulator.log
 cron-emulator-err.log
 /api/?/

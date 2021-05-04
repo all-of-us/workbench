@@ -9,6 +9,7 @@ import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbCdrVersion;
@@ -25,7 +26,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @Import(CdrConfigVOMapperImpl.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class CdrConfigVOMapperTest {
+public class CdrConfigVOMapperTest extends SpringTest {
   @Autowired CdrConfigVOMapper mapper;
   @Autowired AccessTierDao accessTierDao;
 
@@ -55,7 +56,6 @@ public class CdrConfigVOMapperTest {
     testVersionJson.numParticipants = 100;
     testVersionJson.cdrDbName = "data";
     testVersionJson.elasticIndexBaseName = "elastic";
-    testVersionJson.microarrayBigqueryDataset = "micro big";
     testVersionJson.wgsBigqueryDataset = "wgs1";
     testVersionJson.hasFitbitData = false;
     testVersionJson.hasCopeSurveyData = true;
@@ -155,7 +155,6 @@ public class CdrConfigVOMapperTest {
     expected.setNumParticipants(testVersionJson.numParticipants);
     expected.setCdrDbName(testVersionJson.cdrDbName);
     expected.setElasticIndexBaseName(testVersionJson.elasticIndexBaseName);
-    expected.setMicroarrayBigqueryDataset(testVersionJson.microarrayBigqueryDataset);
     expected.setWgsBigqueryDataset(testVersionJson.wgsBigqueryDataset);
     expected.setHasFitbitData(testVersionJson.hasFitbitData);
     expected.setHasCopeSurveyData(testVersionJson.hasCopeSurveyData);

@@ -70,3 +70,11 @@ import 'zone.js/dist/zone';  // Included with Angular CLI.
  * Need to import at least one locale-data with intl.
  */
 // import 'intl/locale-data/jsonp/en';
+
+/**
+ * https://github.com/angular/angular-cli/issues/9827#issuecomment-386154063
+ * Add global to window, assigning the value of window itself.
+ * Resolving ERROR: ReferenceError: global is not defined.
+ *
+ */
+(window as any).global = window;

@@ -3,16 +3,21 @@ import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from
 import {Subscription} from 'rxjs/Subscription';
 
 import {ProfileStorageService} from 'app/services/profile-storage.service';
-import {ServerConfigService} from 'app/services/server-config.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 
 import {FooterTypeEnum} from 'app/components/footer';
-import {debouncer, hasRegisteredAccessFetch} from 'app/utils';
+import {debouncer} from 'app/utils';
+import {hasRegisteredAccess} from 'app/utils/access-tiers';
 import Timeout = NodeJS.Timeout;
 import {setInstitutionCategoryState} from 'app/utils/analytics';
 import {navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
-import {cdrVersionStore, compoundRuntimeOpStore, routeDataStore} from 'app/utils/stores';
+import {
+  cdrVersionStore,
+  compoundRuntimeOpStore,
+  routeDataStore,
+  serverConfigStore
+} from 'app/utils/stores';
 import {initializeZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
 import {Profile as FetchProfile} from 'generated/fetch';
@@ -56,6 +61,8 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   shouldShowDisplayTag = environment.shouldShowDisplayTag;
   enableSignedInFooter = environment.enableFooter;
   minimizeChrome = false;
+  cdrVersionsInitialized = false;
+  serverConfigInitialized = false;
   // True if the user tried to open the Zendesk support widget and an error
   // occurred.
   zendeskLoadError = false;
@@ -78,7 +85,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     /* Ours */
     private signInService: SignInService,
-    private serverConfigService: ServerConfigService,
     private profileStorageService: ProfileStorageService,
     /* Angular's */
     private locationService: Location,
@@ -87,18 +93,22 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     this.closeInactivityModal = this.closeInactivityModal.bind(this);
   }
 
-  ngOnInit(): void {
-    this.serverConfigService.getConfig().subscribe((config) => {
-      this.profileLoadingSub = this.profileStorageService.profile$.subscribe((profile) => {
-        this.profile = profile as unknown as FetchProfile;
-        setInstitutionCategoryState(this.profile.verifiedInstitutionalAffiliation);
-        if (hasRegisteredAccessFetch(this.profile.dataAccessLevel)) {
-          cdrVersionsApi().getCdrVersions().then(resp => {
-            cdrVersionStore.set(resp);
-          });
-        }
+  async ngOnInit() {
+    // We want to block app rendering on the presence of server config
+    // data so that route components don't try to lookup config data
+    // before it's available.
+    // This will need to be a step in the React bootstrapping as well.
+    // See discussion on https://github.com/all-of-us/workbench/pull/4713
+    if (serverConfigStore.get().config) {
+      // This particular callback doesn't care about what's in the server
+      // config store, only that it's populated.
+      this.serverConfigStoreCallback();
+    } else {
+      const {unsubscribe} = serverConfigStore.subscribe(() => {
+        unsubscribe();
+        this.serverConfigStoreCallback();
       });
-    });
+    }
 
     this.signOutNavigateSub = this.signInService.isSignedIn$.subscribe(signedIn => {
       if (!signedIn) {
@@ -127,6 +137,26 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     this.startInactivityMonitoring();
 
     window.addEventListener('beforeunload', checkOpsBeforeUnload);
+  }
+
+  private serverConfigStoreCallback() {
+    this.serverConfigInitialized = true;
+    this.profileLoadingSub = this.profileStorageService.profile$.subscribe((profile) => {
+      this.profile = profile as unknown as FetchProfile;
+      setInstitutionCategoryState(this.profile.verifiedInstitutionalAffiliation);
+      if (hasRegisteredAccess(this.profile.accessTierShortNames)) {
+        cdrVersionsApi().getCdrVersionsByTier().then(resp => {
+          // cdrVersionsInitialized blocks app rendering so that route
+          // components don't try to lookup CDR data before it's available.
+          // This will need to be a step in the React bootstrapping as well.
+          // See discussion on https://github.com/all-of-us/workbench/pull/4713
+          cdrVersionStore.set(resp);
+          this.cdrVersionsInitialized = true;
+        });
+      } else {
+        this.cdrVersionsInitialized = true;
+      }
+    });
   }
 
   private getInactivityElapsedMs(): number {

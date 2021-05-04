@@ -2,9 +2,9 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {DataAccessLevel, Profile, ProfileApi} from 'generated/fetch';
+import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {serverConfigStore, userProfileStore} from 'app/utils/navigation';
+import {userProfileStore} from 'app/utils/navigation';
 
 import {Homepage} from './homepage';
 import {CohortsApi, ConceptSetsApi, UserMetricsApi, WorkspacesApi} from 'generated/fetch/api';
@@ -13,13 +13,11 @@ import {UserMetricsApiStub} from 'testing/stubs/user-metrics-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {cdrVersionStore} from "../../utils/stores";
-import {cdrVersionListResponse} from "../../../testing/stubs/cdr-versions-api-stub";
-
+import {cdrVersionStore, serverConfigStore} from "app/utils/stores";
+import {cdrVersionTiersResponse} from "testing/stubs/cdr-versions-api-stub";
 
 describe('HomepageComponent', () => {
-
-  const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
+  const profile = ProfileStubVariables.PROFILE_STUB;
   let profileApi: ProfileApiStub;
 
   const component = () => {
@@ -45,15 +43,15 @@ describe('HomepageComponent', () => {
     });
 
     userProfileStore.next({profile, reload, updateCache: () => {}});
-    serverConfigStore.next({
+    serverConfigStore.set({config: {
       enableDataUseAgreement: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
       enableV3DataUserCodeOfConduct: true
-    });
-    cdrVersionStore.set(cdrVersionListResponse);
+    }});
+    cdrVersionStore.set(cdrVersionTiersResponse);
   });
 
   it('should render the homepage', () => {
@@ -91,9 +89,9 @@ describe('HomepageComponent', () => {
   it('should show access tasks dashboard if the user is not registered', async () => {
     const newProfile = {
       ...profile,
-      dataAccessLevel: DataAccessLevel.Unregistered
+      accessTierShortNames: [],   // unregistered
     };
-    serverConfigStore.next({...serverConfigStore.getValue()});
+    serverConfigStore.set({config: {...serverConfigStore.get().config}});
     userProfileStore.next({profile: newProfile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -106,9 +104,9 @@ describe('HomepageComponent', () => {
       dataUseAgreementBypassTime: null,
       dataUseAgreementCompletionTime: 1000,
       dataUseAgreementSignedVersion: 2, // Old version
-      dataAccessLevel: DataAccessLevel.Unregistered
+      accessTierShortNames: [],   // unregistered
     };
-    serverConfigStore.next({...serverConfigStore.getValue()});
+    serverConfigStore.set({config: {...serverConfigStore.get().config}});
     userProfileStore.next({profile: newProfile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -123,9 +121,9 @@ describe('HomepageComponent', () => {
       dataUseAgreementBypassTime: null,
       dataUseAgreementCompletionTime: 1000,
       dataUseAgreementSignedVersion: 3, // Live version
-      dataAccessLevel: DataAccessLevel.Unregistered
+      accessTierShortNames: [],   // unregistered
     };
-    serverConfigStore.next({...serverConfigStore.getValue()});
+    serverConfigStore.set({config: {...serverConfigStore.get().config}});
     userProfileStore.next({profile: newProfile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -137,9 +135,9 @@ describe('HomepageComponent', () => {
   it('should not display the quick tour if registration dashboard is open', async () => {
     const newProfile = {
       ...profile,
-      dataAccessLevel: DataAccessLevel.Unregistered
+      accessTierShortNames: [],   // unregistered
     };
-    serverConfigStore.next({...serverConfigStore.getValue()});
+    serverConfigStore.set({config: {...serverConfigStore.get().config}});
     userProfileStore.next({profile: newProfile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);

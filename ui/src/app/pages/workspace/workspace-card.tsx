@@ -3,11 +3,11 @@ import * as React from 'react';
 import {ResourceType, UserRole, Workspace, WorkspaceAccessLevel} from 'generated/fetch';
 
 import {BugReportModal} from 'app/components/bug-report';
-import {Button, Clickable, Link, MenuItem} from 'app/components/buttons';
+import {Button, Clickable, MenuItem, SnowmanButton} from 'app/components/buttons';
 import {WorkspaceCardBase} from 'app/components/card';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {ClrIcon, SnowmanIcon} from 'app/components/icons';
+import {ClrIcon, ControlledTierBadge} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -16,9 +16,10 @@ import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {displayDate, reactStyles} from 'app/utils';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {AnalyticsTracker, triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 
 const EVENT_CATEGORY = 'Workspace list';
@@ -65,7 +66,6 @@ interface WorkspaceCardMenuProps {
 }
 
 const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
-  disabled,
   workspace,
   accessLevel,
   onShare,
@@ -125,12 +125,7 @@ const WorkspaceCardMenu: React.FunctionComponent<WorkspaceCardMenuProps> = ({
       </React.Fragment>
     }
   >
-    <Clickable disabled={disabled} data-test-id='workspace-card-menu'>
-      <SnowmanIcon
-        style={{marginLeft: '0px'}}
-        disabled={disabled}
-      />
-    </Clickable>
+    <SnowmanButton style={{marginLeft: 0}} data-test-id='workspace-card-menu'/>
   </PopupTrigger>;
 };
 
@@ -145,7 +140,6 @@ interface WorkspaceCardState {
   // The list of user roles associated with this workspace. Lazily populated
   // only when the workspace share dialog is opened.
   userRoles?: UserRole[];
-  workspaceDeletionError: boolean;
 }
 
 interface WorkspaceCardProps {
@@ -167,8 +161,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
       loadingData: false,
       sharing: false,
       showResearchPurposeReviewModal: false,
-      userRoles: null,
-      workspaceDeletionError: false
+      userRoles: null
     };
   }
 
@@ -182,7 +175,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
       this.setState({loadingData: false});
       await this.props.reload();
     } catch (e) {
-      this.setState({workspaceDeletionError: true, loadingData: false});
+      this.setState({bugReportOpen: true, bugReportError: 'Could not delete workspace', loadingData: false});
     }
   }
 
@@ -213,13 +206,6 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
     this.reloadData();
   }
 
-  submitWorkspaceDeletionError(): void {
-    this.setState({
-      bugReportOpen: true,
-      bugReportError: 'Could not delete workspace.',
-      workspaceDeletionError: false});
-  }
-
   // Reloads data by calling the callback from the owning component. This
   // currently causes the workspace-list to reload the entire list of recentWorkspaces.
   async reloadData() {
@@ -234,7 +220,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
 
   onClick() {
     const {workspace} = this.props;
-    if (serverConfigStore.getValue().enableResearchReviewPrompt && workspace.researchPurpose.needsReviewPrompt) {
+    if (serverConfigStore.get().config.enableResearchReviewPrompt && workspace.researchPurpose.needsReviewPrompt) {
       this.setState({showResearchPurposeReviewModal: true});
     } else {
       workspace.published ?
@@ -245,9 +231,9 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
   }
 
   render() {
-    const {userEmail, workspace, accessLevel} = this.props;
+    const {userEmail, workspace, workspace: {accessTierShortName}, accessLevel} = this.props;
     const {bugReportError, bugReportOpen, confirmDeleting, loadingData,
-      sharing, showResearchPurposeReviewModal, userRoles, workspaceDeletionError} = this.state;
+      sharing, showResearchPurposeReviewModal, userRoles} = this.state;
 
     return <React.Fragment>
       <WorkspaceCardBase>
@@ -296,32 +282,28 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
                 </div>
               }
             </FlexColumn>
-            <div
-              style={{
-                ...styles.permissionBox,
-                backgroundColor: colors.workspacePermissionsHighlights[accessLevel]
-              }}
-             data-test-id='workspace-access-level'
-            >
-              {accessLevel}
-            </div>
-            <div style={{fontSize: 12}}>
-              Last Changed: {displayDate(workspace.lastModifiedTime)}
-            </div>
+            <FlexRow style={{justifyContent: 'space-between'}}>
+              <FlexColumn>
+                <div
+                  style={{
+                    ...styles.permissionBox,
+                    backgroundColor: colors.workspacePermissionsHighlights[accessLevel]
+                  }}
+                data-test-id='workspace-access-level'
+                >
+                  {accessLevel}
+                </div>
+                <div style={{fontSize: 12}}>
+                  Last Changed: {displayDate(workspace.lastModifiedTime)}
+                </div>
+              </FlexColumn>
+              <FlexColumn style={{justifyContent: 'flex-end'}}>
+                {accessTierShortName === AccessTierShortNames.Controlled && <ControlledTierBadge/>}
+              </FlexColumn>
+            </FlexRow>
           </FlexColumn>
         </FlexRow>
       </WorkspaceCardBase>
-      {workspaceDeletionError && <Modal>
-        <ModalTitle>Error: Could not delete workspace '{workspace.name}'</ModalTitle>
-        <ModalBody style={{display: 'flex', flexDirection: 'row'}}>
-          Please{' '}
-          <Link onClick={() => this.submitWorkspaceDeletionError()}>submit a bug report.</Link>
-        </ModalBody>
-        <ModalFooter>
-          <Button type='secondary'
-                  onClick={() => this.setState({workspaceDeletionError: false})}>Close</Button>
-        </ModalFooter>
-      </Modal>}
       {confirmDeleting &&
       <ConfirmDeleteModal data-test-id='confirm-delete-modal'
                           resourceType={ResourceType.WORKSPACE}

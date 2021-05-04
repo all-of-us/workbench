@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import {AdminUsers} from './admin-users';
 import {AuthDomainApi, Profile, ProfileApi} from 'generated/fetch';
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {AuthDomainApiStub} from 'testing/stubs/auth-domain-api-stub';
@@ -17,13 +17,13 @@ describe('AdminUser', () => {
   };
 
   beforeEach(() => {
-    serverConfigStore.next({
+    serverConfigStore.set({config: {
       enableDataUseAgreement: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
-    });
+    }});
     props = {
       profile: ProfileStubVariables.PROFILE_STUB
     };
