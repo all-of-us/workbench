@@ -5,10 +5,10 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
 import { ResourceCard } from 'app/text-labels';
 
-// This one is going to take a long time
+// This test could take a long time to run
 jest.setTimeout(60 * 30 * 1000);
 // Retry one more when fails
-jest.retryTimes(1);
+jest.retryTimes(0);
 
 describe('Updating runtime compute type', () => {
   beforeEach(async () => {
@@ -40,11 +40,7 @@ describe('Updating runtime compute type', () => {
     // Default memory is 15 gibibytes, we'll check that it is between 14GiB and 16GiB
     expect(parseFloat(memoryOutputText)).toBeGreaterThanOrEqual(14);
     expect(parseFloat(memoryOutputText)).toBeLessThanOrEqual(16);
-    // This gets the disk space in bytes
-    const diskOutputText = await notebook.runCodeCell(3, { codeFile: 'resources/python-code/count-disk-space.py' });
-    // Default disk is 100 gibibytes, we'll check that it is between 95GiB and 105GiB
-    expect(parseFloat(diskOutputText)).toBeGreaterThanOrEqual(95);
-    expect(parseFloat(diskOutputText)).toBeLessThanOrEqual(105);
+
     await notebook.save();
 
     // Open runtime panel
@@ -71,7 +67,7 @@ describe('Updating runtime compute type', () => {
     await notebookPreviewPage.openEditMode(notebookName);
 
     // Run notebook to validate runtime settings
-    const workersOutputText = await notebook.runCodeCell(4, { codeFile: 'resources/python-code/count-workers.py' });
+    const workersOutputText = await notebook.runCodeCell(3, { codeFile: 'resources/python-code/count-workers.py' });
     // Spark config always seems to start at this and then scale if you need additional threads.
     expect(workersOutputText).toBe("'2'");
     await notebook.save();
