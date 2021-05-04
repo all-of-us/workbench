@@ -1594,22 +1594,6 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/billingProjectGarbageCollection":
-    get:
-      security: []
-      tags:
-      - offlineBilling
-      - cron
-      description: Trigger a bulk transfer of ownership of billing projects associated
-        with deleted workspaces
-      operationId: billingProjectGarbageCollection
-      responses:
-        204:
-          description: Billing Project Garbage Collection was successful.
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
   "/v1/monitoring/billingProjectBufferStatus":
     get:
       tags:

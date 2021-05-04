@@ -1,9 +1,7 @@
 package org.pmiops.workbench.google;
 
-import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,9 +43,6 @@ public interface CloudStorageClient {
   String getCredentialsBucketString(String objectPath);
 
   JSONObject getElasticCredentials();
-
-  ServiceAccountCredentials getGarbageCollectionServiceAccountCredentials(
-      String garbageCollectionEmail) throws IOException;
 
   Map<String, String> getMetadata(String bucketName, String objectPath);
 
