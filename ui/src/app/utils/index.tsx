@@ -10,8 +10,7 @@ import {
   globalErrorStore,
   queryParamsStore,
   routeConfigDataStore,
-  urlParamsStore,
-  userProfileStore
+  urlParamsStore
 } from 'app/utils/navigation';
 import {Domain, } from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -19,7 +18,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
-import {cdrVersionStore, withStore} from './stores';
+import {cdrVersionStore, profileStore, withStore} from './stores';
 
 const {useEffect, useState} = React;
 
@@ -356,7 +355,7 @@ export const withGlobalError = () => {
 
 // HOC that provides a 'profileState' prop with current profile and a reload function
 export const withUserProfile = () => {
-  return connectBehaviorSubject(userProfileStore, 'profileState');
+  return withStore(profileStore, 'profileState');
 };
 
 // HOC that provides a 'urlParams' prop with the current url params object
@@ -381,14 +380,6 @@ export const withCdrVersions = () => {
 export const withQueryParams = () => {
   return connectBehaviorSubject(queryParamsStore, 'queryParams');
 };
-
-// A HOC that provides a 'serverConfig' prop
-// export const withServerConfig = () => {
-//   return withStore(serverConfigStore, 'serverConfig');
-// };
-// export interface ServerConfigProps {
-//   serverConfig: ConfigResponse;
-// }
 
 export function displayDateWithoutHours(time: number): string {
   const date = new Date(time);

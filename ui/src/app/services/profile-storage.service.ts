@@ -1,4 +1,3 @@
-import {userProfileStore} from 'app/utils/navigation';
 import 'rxjs/Rx';
 
 import {Injectable} from '@angular/core';
@@ -29,7 +28,6 @@ export class ProfileStorageService {
       .then((profile) => {
         profileStore.set({...profileStore.get(), profile: profile});
         this.profile.next(profile);
-        this.nextUserProfileStore(profile);
         this.activeCall = false;
       }).catch((err) => {
         profileStore.set({...profileStore.get(), profile: null});
@@ -38,16 +36,8 @@ export class ProfileStorageService {
       });
   }
 
-  nextUserProfileStore(profile) {
-    userProfileStore.next({
-      profile,
-      reload: () => this.reload(),
-      updateCache: p => this.updateCache(p)
-    });
-  }
-
   updateCache(profile) {
+    profileStore.set({...profileStore.get(), profile: profile});
     this.profile.next(profile);
-    this.nextUserProfileStore(profile);
   }
 }

@@ -2,7 +2,6 @@ import {Location} from '@angular/common';
 import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Subscription} from 'rxjs/Subscription';
 
-import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {cdrVersionsApi} from 'app/services/swagger-fetch-clients';
 
@@ -15,12 +14,13 @@ import {navigateSignOut, routeConfigDataStore} from 'app/utils/navigation';
 import {
   cdrVersionStore,
   compoundRuntimeOpStore,
+  profileStore,
   routeDataStore,
   serverConfigStore
 } from 'app/utils/stores';
 import {initializeZendeskWidget} from 'app/utils/zendesk';
 import {environment} from 'environments/environment';
-import {Profile as FetchProfile} from 'generated/fetch';
+import {Profile} from 'generated/fetch';
 
 /*
  * The user's last known active timestamp is stored in localStorage with the key of
@@ -55,7 +55,7 @@ const checkOpsBeforeUnload = (e) => {
   templateUrl: './component.html'
 })
 export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
-  profile: FetchProfile;
+  profile: Profile;
   headerImg = '/assets/images/all-of-us-logo.svg';
   displayTag = environment.displayTag;
   shouldShowDisplayTag = environment.shouldShowDisplayTag;
@@ -85,7 +85,6 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     /* Ours */
     private signInService: SignInService,
-    private profileStorageService: ProfileStorageService,
     /* Angular's */
     private locationService: Location,
     private elementRef: ElementRef
@@ -139,24 +138,29 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
     window.addEventListener('beforeunload', checkOpsBeforeUnload);
   }
 
-  private serverConfigStoreCallback() {
+  private async serverConfigStoreCallback() {
     this.serverConfigInitialized = true;
-    this.profileLoadingSub = this.profileStorageService.profile$.subscribe((profile) => {
-      this.profile = profile as unknown as FetchProfile;
-      setInstitutionCategoryState(this.profile.verifiedInstitutionalAffiliation);
-      if (hasRegisteredAccess(this.profile.accessTierShortNames)) {
-        cdrVersionsApi().getCdrVersionsByTier().then(resp => {
-          // cdrVersionsInitialized blocks app rendering so that route
-          // components don't try to lookup CDR data before it's available.
-          // This will need to be a step in the React bootstrapping as well.
-          // See discussion on https://github.com/all-of-us/workbench/pull/4713
-          cdrVersionStore.set(resp);
-          this.cdrVersionsInitialized = true;
-        });
-      } else {
+    if (!profileStore.get().profile) {
+      await profileStore.get().reload();
+    }
+    this.profileStoreCallback(profileStore.get().profile);
+  }
+
+  private profileStoreCallback(profile: Profile) {
+    this.profile = profile;
+    setInstitutionCategoryState(this.profile.verifiedInstitutionalAffiliation);
+    if (hasRegisteredAccess(this.profile.accessTierShortNames)) {
+      cdrVersionsApi().getCdrVersionsByTier().then(resp => {
+        // cdrVersionsInitialized blocks app rendering so that route
+        // components don't try to lookup CDR data before it's available.
+        // This will need to be a step in the React bootstrapping as well.
+        // See discussion on https://github.com/all-of-us/workbench/pull/4713
+        cdrVersionStore.set(resp);
         this.cdrVersionsInitialized = true;
-      }
-    });
+      });
+    } else {
+      this.cdrVersionsInitialized = true;
+    }
   }
 
   private getInactivityElapsedMs(): number {

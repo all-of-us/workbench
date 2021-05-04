@@ -33,12 +33,6 @@ export const currentCohortSearchContextStore = new BehaviorSubject<any>(undefine
 export const setSidebarActiveIconStore = new BehaviorSubject<string>(null);
 export const conceptSetUpdating = new BehaviorSubject<boolean>(false);
 
-export const userProfileStore =
-  new BehaviorSubject<{ profile: Profile, reload: Function, updateCache: Function }>({
-    profile: {} as Profile,
-    reload: () => {},
-    updateCache: (profile) => {},
-  });
 export const signInStore =
   new BehaviorSubject<{
     signOut: Function,

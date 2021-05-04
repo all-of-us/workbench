@@ -9,32 +9,29 @@ import {Observable} from 'rxjs/Observable';
 
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
 import {Profile} from "generated/fetch";
-import {ProfileStore, profileStore} from "app/utils/stores";
+import {profileStore} from "app/utils/stores";
 
 @Injectable()
 export class RegistrationGuard implements CanActivate, CanActivateChild {
   constructor(private router: Router) {}
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
-    if (profileStore.get().profile) {
-      return this.profileStoreCallback(profileStore.get().profile);
-    } else {
-      profileStore.subscribe((newValue: ProfileStore) => {
-        return this.profileStoreCallback(newValue.profile);
-      });
+  async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> {
+    if (!profileStore.get().profile) {
+      await profileStore.get().reload();
     }
+    return this.profileStoreCallback(profileStore.get().profile);
   }
 
-  profileStoreCallback(profile: Profile): Observable<boolean> {
+  profileStoreCallback(profile: Profile): boolean {
     if (hasRegisteredAccess(profile.accessTierShortNames)) {
-      return Observable.from([true]);
+      return true;
     } else {
       this.router.navigate(['/']);
-      return Observable.from([false]);
+      return false;
     }
   }
 
-  canActivateChild(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
+  async canActivateChild(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> {
     return this.canActivate(route, state);
   }
 }

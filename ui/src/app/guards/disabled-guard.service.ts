@@ -4,7 +4,7 @@ import {ActivatedRouteSnapshot, CanActivate, CanActivateChild, Router, RouterSta
 import {SignInService} from 'app/services/sign-in.service';
 import {convertAPIError} from 'app/utils/errors';
 import {ErrorCode} from 'generated/fetch';
-import {profileApi} from "app/services/swagger-fetch-clients";
+import {profileStore} from "app/utils/stores";
 
 @Injectable()
 export class DisabledGuard implements CanActivate, CanActivateChild {
@@ -19,7 +19,7 @@ export class DisabledGuard implements CanActivate, CanActivateChild {
       if (!isSignedIn) {
         return false;
       }
-      await profileApi().getMe();
+      await profileStore.get().reload();
       return true;
     } catch (e) {
       const errorResponse = await convertAPIError(e);
