@@ -5,7 +5,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
 import { ResourceCard } from 'app/text-labels';
 
-// This one is going to take a long time
+// This test could take a long time to run
 jest.setTimeout(60 * 30 * 1000);
 // Retry one more when fails
 jest.retryTimes(0);
@@ -67,7 +67,7 @@ describe('Updating runtime compute type', () => {
     await notebookPreviewPage.openEditMode(notebookName);
 
     // Run notebook to validate runtime settings
-    const workersOutputText = await notebook.runCodeCell(4, { codeFile: 'resources/python-code/count-workers.py' });
+    const workersOutputText = await notebook.runCodeCell(3, { codeFile: 'resources/python-code/count-workers.py' });
     // Spark config always seems to start at this and then scale if you need additional threads.
     expect(workersOutputText).toBe("'2'");
     await notebook.save();

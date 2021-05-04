@@ -5,7 +5,7 @@ import { config } from 'resources/workbench-config';
 import { makeRandomName } from 'utils/str-utils';
 import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
 
-// This one is going to take a long time
+// This test could take a long time to run
 jest.setTimeout(60 * 30 * 1000);
 // Retry one more when fails
 jest.retryTimes(0);
@@ -60,7 +60,7 @@ describe('Updating runtime compute type', () => {
     const cpusOutputText = await notebook.runCodeCell(2, { codeFile: 'resources/python-code/count-cpus.py' });
     expect(parseInt(cpusOutputText, 10)).toBe(8);
 
-    // This gets the amount of memory available to Python in bytes
+    // This gets the amount of memory available to Python in GiB
     const memoryOutputText = await notebook.runCodeCell(3, { codeFile: 'resources/python-code/count-memory.py' });
     expect(parseInt(memoryOutputText, 10)).toBeGreaterThanOrEqual(28);
     expect(parseInt(memoryOutputText, 10)).toBeLessThanOrEqual(32);
