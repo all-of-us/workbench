@@ -54,10 +54,14 @@ were copied into `gs://all-of-us-workbench-test-genomics/1kg_gvcfs/`
   - If the workflow fails towards the end and just a few shards fail, it might be a flaky error. Just try again. 
 
 ### Fixing sample_names
-- Right now, the sample_names in the `sample_info` table match the sample_names in the VCFs
-- However, we need the sample_names to match participant_ids in AoU
+- Right now, the sample_names in the `sample_info` table match the sample_names in the VCFs.
+- However, we need the sample_names to match participant_ids in AoU.
+- Additionally, subsequent runs of updating the 1kg dataset should use the same sample_names from the first run so it's consistent with which participants the test CDR believes has WGS data.
 
-- ```bq query --max_rows=1000000 --format=csv --nouse_legacy_sql 'SELECT person_id FROM `all-of-us-workbench-test.synth_r_2019q4_9.cb_person`;' | sed -e 1d > ehr_sample_names.txt```
+- Grab sample_names (person_ids)
+  - If running for the first time 
+    - ```bq query --max_rows=1000000 --format=csv --nouse_legacy_sql 'SELECT person_id FROM `all-of-us-workbench-test.synth_r_2019q4_9.cb_person`;' | sed -e 1d > ehr_sample_names.txt```
+  - If not, grab the list from the published CDR or the test dataset that was used to publish into the CDR.
 - ```bq query --max_rows=1000000 --format=csv --nouse_legacy_sql 'SELECT sample_name FROM `all-of-us-workbench-test.1kg_wgs.sample_info`' | sed -e 1d > vcf_sample_names.txt```
 - ```paste -d "," <(shuf -n $(cat vcf_sample_names.txt | wc -l) ehr_sample_names.txt) vcf_sample_names.txt > new_old_sample_names_map.csv```
 - ```cat new_old_sample_names_map.csv | awk -F',' '{print "UPDATE `all-of-us-workbench-test.1kg_wgs.sample_info` set sample_name=\""$1"\" where sample_name=\""$2"\";"}'```
