@@ -118,7 +118,7 @@ commands:
     steps:
       - checkout
       - run:
-          command: git submodule update --init --recursive
+          command: git submodule update -f --init --recursive
 
   deploy-to-staging-perf:
     description: "Deploy API and UI to staging or perf App Engine"

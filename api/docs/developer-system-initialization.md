@@ -26,7 +26,7 @@ cd workbench
 # though this mechanism is being phased out. In the meantime, we need
 # to run this on every clone (or on certain changes to the upstream
 # repositories). 
-git submodule update --init --recursive
+git submodule update -f --init --recursive
 ```
 
 ## .npmrc
