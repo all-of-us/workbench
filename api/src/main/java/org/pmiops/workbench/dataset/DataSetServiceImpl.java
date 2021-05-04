@@ -1089,7 +1089,10 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                     queryJobConfiguration.getNamedParameters())
                 + "\"\"\"";
         dataFrameSection =
-            namespace + "df = pandas.read_gbq(" + namespace + "sql, dialect=\"standard\", progress_bar_type=\"tqdm_notebook\")";
+            namespace
+                + "df = pandas.read_gbq("
+                + namespace
+                + "sql, dialect=\"standard\", progress_bar_type=\"tqdm_notebook\")";
         displayHeadSection = namespace + "df.head(5)";
         break;
       case R:
