@@ -10,6 +10,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,6 +65,10 @@ public class UserServiceAccessTest {
   private static WorkbenchConfig providedWorkbenchConfig;
 
   private static DbAccessTier registeredTier;
+  private Function<Timestamp, Function<DbUser, DbUser>> registerUserWithTime =
+      t -> dbu -> registerUser(t, dbu);
+  private Function<DbUser, DbUser> registerUserNow =
+      registerUserWithTime.apply(Timestamp.from(Instant.now()));
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private UserAccessTierDao userAccessTierDao;
@@ -121,7 +127,7 @@ public class UserServiceAccessTest {
     DbUser dbUser = userDao.save(new DbUser());
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
-    dbUser = userService.updateUserWithRetries(this::registerUser, dbUser, Agent.asUser(dbUser));
+    dbUser = userService.updateUserWithRetries(registerUserNow, dbUser, Agent.asUser(dbUser));
 
     assertThat(userAccessTierDao.findAll()).hasSize(1);
     Optional<DbUserAccessTier> userAccessMaybe =
@@ -148,7 +154,7 @@ public class UserServiceAccessTest {
     DbUser dbUser = userDao.save(new DbUser());
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
-    dbUser = userService.updateUserWithRetries(this::registerUser, dbUser, Agent.asUser(dbUser));
+    dbUser = userService.updateUserWithRetries(registerUserNow, dbUser, Agent.asUser(dbUser));
 
     List<DbAccessTier> expectedTiers =
         ImmutableList.of(registeredTier, controlledTier, aThirdTierWhyNot);
@@ -183,7 +189,7 @@ public class UserServiceAccessTest {
     DbUser dbUser = new DbUser();
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
-    dbUser = userService.updateUserWithRetries(this::registerUser, dbUser, Agent.asUser(dbUser));
+    dbUser = userService.updateUserWithRetries(registerUserNow, dbUser, Agent.asUser(dbUser));
     dbUser = userService.updateUserWithRetries(this::unregisterUser, dbUser, Agent.asUser(dbUser));
 
     // The user received a DbUserAccessTier when they were registered.
@@ -197,7 +203,28 @@ public class UserServiceAccessTest {
         .isEqualTo(TierAccessStatus.DISABLED);
   }
 
-  private DbUser registerUser(DbUser user) {
+  @Test
+  public void test_updateUserWithRetries_access_renewal() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+    DbUser dbUser = new DbUser();
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+
+    Timestamp expiredTime =
+        new Timestamp(
+            Instant.now().toEpochMilli() - TimeUnit.MILLISECONDS.convert(366, TimeUnit.DAYS));
+
+    dbUser.setDataUseAgreementCompletionTime(expiredTime);
+    assertThat(userAccessTierDao.findAll()).isEmpty();
+    // assertThat(userAccessTierDao.getAllByUser(dbUser)).hasSize(1);
+
+    // registerUserWithTime.apply(Timestamp.from(Instant.now()));
+    dbUser =
+        userService.updateUserWithRetries(
+            registerUserWithTime.apply(expiredTime), dbUser, Agent.asUser(dbUser));
+    assertThat(userAccessTierDao.getAllByUser(dbUser)).hasSize(1);
+  }
+
+  private DbUser registerUser(Timestamp timestamp, DbUser user) {
     // shouldUserBeRegistered logic:
     //    return !user.getDisabled()
     //        && complianceTrainingCompliant
@@ -207,15 +234,13 @@ public class UserServiceAccessTest {
     //        && dataUseAgreementCompliant
     //        && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
 
-    Timestamp now = Timestamp.from(Instant.now());
-
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
-    user.setComplianceTrainingBypassTime(now);
-    user.setEraCommonsBypassTime(now);
-    user.setBetaAccessBypassTime(now);
-    user.setTwoFactorAuthBypassTime(now);
-    user.setDataUseAgreementBypassTime(now);
+    user.setComplianceTrainingBypassTime(timestamp);
+    user.setEraCommonsBypassTime(timestamp);
+    user.setBetaAccessBypassTime(timestamp);
+    user.setTwoFactorAuthBypassTime(timestamp);
+    user.setDataUseAgreementBypassTime(timestamp);
 
     return userDao.save(user);
   }
