@@ -40,7 +40,7 @@ describe('Updating runtime compute type', () => {
     // Default memory is 15 gibibytes, we'll check that it is between 14GiB and 16GiB
     expect(parseFloat(memoryOutputText)).toBeGreaterThanOrEqual(14);
     expect(parseFloat(memoryOutputText)).toBeLessThanOrEqual(16);
-    
+
     await notebook.save();
 
     // Open runtime panel
