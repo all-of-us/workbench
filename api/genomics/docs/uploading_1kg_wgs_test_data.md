@@ -63,7 +63,7 @@ were copied into `gs://all-of-us-workbench-test-genomics/1kg_gvcfs/`
     - ```bq query --max_rows=1000000 --format=csv --nouse_legacy_sql 'SELECT person_id FROM `all-of-us-workbench-test.synth_r_2019q4_9.cb_person`;' | sed -e 1d > ehr_sample_names.txt```
   - If not, grab the list from the published CDR or the test dataset that was used to publish into the CDR.
 - ```bq query --max_rows=1000000 --format=csv --nouse_legacy_sql 'SELECT sample_name FROM `all-of-us-workbench-test.1kg_wgs.sample_info`' | sed -e 1d > vcf_sample_names.txt```
-- ```paste -d "," <(shuf -n $(cat vcf_sample_names.txt | wc -l) ehr_sample_names.txt) vcf_sample_names.txt > new_old_sample_names_map.csv```
+- ```paste -d "," <(shuf -n $(cat vcf_sample_names.txt | wc -l) ehr_sample_names.txt) vcf_sample_names.txt | grep -v ^, > new_old_sample_names_map.csv```
 - ```cat new_old_sample_names_map.csv | awk -F',' '{print "UPDATE `all-of-us-workbench-test.1kg_wgs.sample_info` set sample_name=\""$1"\" where sample_name=\""$2"\";"}'```
 - Run update queries in BQ console or bq CLI
 
