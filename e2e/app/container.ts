@@ -68,7 +68,7 @@ export default class Container {
         {
           shouldWait: waitForNav,
           waitFn: () => {
-            this.page.waitForNavigation({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'] });
+            this.page.waitForNavigation({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout });
           }
         },
         {
