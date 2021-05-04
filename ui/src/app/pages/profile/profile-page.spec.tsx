@@ -76,7 +76,7 @@ describe('ProfilePageComponent', () => {
 
   it('should save correctly', async() => {
     const wrapper = component();
-    expect(userProfileStore.getValue().profile.givenName).toEqual(profile.givenName);
+    expect(profileStore.get().profile.givenName).toEqual(profile.givenName);
 
     wrapper.find(TextInput).first().simulate('change', {target: {value: 'x'}});
     clickSaveProfileButton(wrapper);
