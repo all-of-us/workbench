@@ -21,5 +21,5 @@ RUN wget "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin
 ENV PATH="/opt/gradle/gradle-${GRADLE_VERSION}/bin:${PATH}"
 # Force a lower concurrent-ruby version, as we only have Ruby 2.3.
 RUN gem install jira-ruby
-RUN git clone https://github.com/all-of-us/workbench && cd workbench && git submodule update --init --recursive
+RUN git clone https://github.com/all-of-us/workbench && cd workbench && git submodule update -f --init --recursive
 RUN cd workbench/api && ./gradlew -p genomics build
