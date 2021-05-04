@@ -8,7 +8,7 @@ import { createWorkspace, signInWithAccessToken } from 'utils/test-utils';
 // This one is going to take a long time
 jest.setTimeout(60 * 30 * 1000);
 // Retry one more when fails
-jest.retryTimes(1);
+jest.retryTimes(0);
 
 describe('Updating runtime compute type', () => {
   beforeEach(async () => {
