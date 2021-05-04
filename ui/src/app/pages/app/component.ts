@@ -11,7 +11,7 @@ import {buildPageTitleForEnvironment} from 'app/utils/title';
 
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
 
-import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from 'app/utils';
+import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from 'app/utils/cookies';
 import {initializeAnalytics} from 'app/utils/analytics';
 import {
   queryParamsStore,
