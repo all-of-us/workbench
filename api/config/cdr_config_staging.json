@@ -12,7 +12,7 @@
       "accessTierId": 2,
       "shortName": "controlled",
       "displayName": "Controlled Tier",
-      "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_staging",
+      "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_staging_2",
       "authDomainName": "all-of-us-controlled-staging",
       "authDomainGroupEmail": "all-of-us-controlled-staging@firecloud.org"
     }
