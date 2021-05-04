@@ -5,11 +5,10 @@ import {
   CanActivateChild,
   Router, RouterStateSnapshot
 } from '@angular/router';
-import {Observable} from 'rxjs/Observable';
 
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
-import {Profile} from "generated/fetch";
-import {profileStore} from "app/utils/stores";
+import {profileStore} from 'app/utils/stores';
+import {Profile} from 'generated/fetch';
 
 @Injectable()
 export class RegistrationGuard implements CanActivate, CanActivateChild {

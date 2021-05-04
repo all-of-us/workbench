@@ -7,7 +7,7 @@ declare let gtag: Function;
  * Triggers a Google Analytics event.
  *
  * For guidance on how to use action names, categories, and labels effectively,
- * see https://support.google.com/analytics/answer/1033068#Anatomy.
+ * see ttps://support.google.com/analytics/answer/1033068#Anatomy.
  *
  * @param category The page, feature, or section where this event is happening.
  *   Examples: "Workspaces", "Cohort Builder", "Homepage"

@@ -3,8 +3,8 @@ import {ActivatedRouteSnapshot, CanActivate, CanActivateChild, Router, RouterSta
 
 import {SignInService} from 'app/services/sign-in.service';
 import {convertAPIError} from 'app/utils/errors';
+import {profileStore} from 'app/utils/stores';
 import {ErrorCode} from 'generated/fetch';
-import {profileStore} from "app/utils/stores";
 
 @Injectable()
 export class DisabledGuard implements CanActivate, CanActivateChild {

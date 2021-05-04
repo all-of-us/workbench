@@ -1,9 +1,9 @@
+import {profileApi} from 'app/services/swagger-fetch-clients';
 import { BreadcrumbType } from 'app/utils/navigation';
 import {atom, Atom} from 'app/utils/subscribable';
 import {CdrVersionTiersResponse, ConfigResponse, Profile, Runtime} from 'generated/fetch';
 import * as React from 'react';
 import {StackdriverErrorReporter} from 'stackdriver-errors-js';
-import {profileApi} from "../services/swagger-fetch-clients";
 
 const {useEffect, useState} = React;
 
@@ -35,22 +35,16 @@ export interface ProfileStore {
 
 export const profileStore = atom<ProfileStore>({
   profile: null,
-  reload: async () => reloadProfileStore(),
-  updateCache: p => updateCache(p)
+  reload: async() => {
+    const profile = await profileApi().getMe();
+    profileStore.get().updateCache(profile);
+  },
+  updateCache: p => profileStore.set({
+    profile: p,
+    reload: profileStore.get().reload,
+    updateCache: profileStore.get().updateCache
+  })
 });
-
-const reloadProfileStore = async () => {
-  const profile = await profileApi().getMe();
-  updateCache(profile);
-}
-
-const updateCache = (profile: Profile) => {
-  profileStore.set({
-    profile: profile,
-    reload: () => reloadProfileStore(),
-    updateCache: p => updateCache(p)
-  });
-}
 
 export interface CompoundRuntimeOperation {
   pendingRuntime?: Runtime;
