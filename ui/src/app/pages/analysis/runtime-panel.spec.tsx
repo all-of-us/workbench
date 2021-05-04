@@ -7,10 +7,16 @@ import {Button, Link} from 'app/components/buttons';
 import {Spinner} from 'app/components/spinners';
 import {WarningMessage} from 'app/components/messages';
 import {ConfirmDelete, RuntimePanel, Props} from 'app/pages/analysis/runtime-panel';
-import {registerApiClient, runtimeApi} from 'app/services/swagger-fetch-clients';
+import {profileApi, registerApiClient, runtimeApi} from 'app/services/swagger-fetch-clients';
 import {findMachineByName, ComputeType} from 'app/utils/machines';
 import {runtimePresets} from 'app/utils/runtime-presets';
-import {RuntimeConfigurationType, RuntimeStatus, WorkspaceAccessLevel, WorkspacesApi} from 'generated/fetch';
+import {
+  ProfileApi,
+  RuntimeConfigurationType,
+  RuntimeStatus,
+  WorkspaceAccessLevel,
+  WorkspacesApi
+} from 'generated/fetch';
 import {RuntimeApi} from 'generated/fetch/api';
 import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
@@ -19,7 +25,14 @@ import {defaultGceConfig, defaultDataprocConfig, RuntimeApiStub} from 'testing/s
 import {workspaceStubs} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {BillingAccountType, BillingStatus} from 'generated/fetch';
-import {cdrVersionStore, clearCompoundRuntimeOperations, serverConfigStore, runtimeStore} from 'app/utils/stores';
+import {
+  cdrVersionStore,
+  clearCompoundRuntimeOperations,
+  serverConfigStore,
+  runtimeStore,
+  profileStore
+} from 'app/utils/stores';
+import {ProfileApiStub} from "../../../testing/stubs/profile-api-stub";
 
 describe('RuntimePanel', () => {
   let props: Props;
@@ -36,7 +49,7 @@ describe('RuntimePanel', () => {
     return c;
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     cdrVersionStore.set(cdrVersionTiersResponse);
     serverConfigStore.set({config: {...defaultServerConfig}});
 
@@ -45,6 +58,13 @@ describe('RuntimePanel', () => {
 
     workspacesApiStub = new WorkspacesApiStub();
     registerApiClient(WorkspacesApi, workspacesApiStub);
+
+    registerApiClient(ProfileApi, new ProfileApiStub());
+    profileStore.set({
+      profile: await profileApi().getMe(),
+      reload: jest.fn(),
+      updateCache: jest.fn()
+    });
 
     onClose = jest.fn();
     runtimeStore.set({runtime: runtimeApiStub.runtime, workspaceNamespace: workspaceStubs[0].namespace});
