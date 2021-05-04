@@ -2,11 +2,10 @@ import {mount} from 'enzyme';
 import * as React from 'react';
 
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {serverConfigStore} from 'app/utils/stores';
+import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {getTwoFactorSetupUrl, RegistrationDashboard, RegistrationDashboardProps} from 'app/pages/homepage/registration-dashboard';
 import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
-import {userProfileStore} from 'app/utils/navigation';
 import {buildRasRedirectUrl} from 'app/utils/ras';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 
@@ -20,7 +19,7 @@ describe('RegistrationDashboard', () => {
 
   beforeEach(async() => {
     registerApiClient(ProfileApi, new ProfileApiStub());
-    userProfileStore.next({
+    profileStore.set({
       profile: await profileApi().getMe(),
       reload: jest.fn(),
       updateCache: jest.fn()

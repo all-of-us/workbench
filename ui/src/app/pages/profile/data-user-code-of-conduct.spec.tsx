@@ -3,8 +3,7 @@ import * as React from 'react';
 
 import {DataUserCodeOfConduct} from 'app/pages/profile/data-user-code-of-conduct';
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {userProfileStore} from 'app/utils/navigation';
-import {serverConfigStore} from 'app/utils/stores';
+import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {Profile, ProfileApi} from 'generated/fetch';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
@@ -29,10 +28,10 @@ describe('DataUserCodeOfConduct', () => {
     registerApiClient(ProfileApi, new ProfileApiStub());
     reload.mockImplementation(async() => {
       const newProfile = await profileApi().getMe();
-      userProfileStore.next({profile: newProfile, reload, updateCache});
+      profileStore.set({profile: newProfile, reload, updateCache});
     });
 
-    userProfileStore.next({profile, reload, updateCache});
+    profileStore.set({profile, reload, updateCache});
   });
 
   it('should render - v2', () => {

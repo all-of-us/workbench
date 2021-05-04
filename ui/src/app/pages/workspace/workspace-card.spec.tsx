@@ -7,8 +7,7 @@ import {Profile, ProfileApi, WorkspacesApi, WorkspaceAccessLevel} from 'generate
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {workspaceStubs, userRolesStub} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {serverConfigStore} from 'app/utils/stores';
-import {userProfileStore} from 'app/utils/navigation';
+import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {WorkspaceCard} from './workspace-card';
 
@@ -43,10 +42,10 @@ describe('WorkspaceCard', () => {
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async() => {
       const newProfile = await profileApi.getMe();
-      userProfileStore.next({profile: newProfile, reload, updateCache});
+      profileStore.set({profile: newProfile, reload, updateCache});
     });
 
-    userProfileStore.next({profile, reload, updateCache});
+    profileStore.set({profile, reload, updateCache});
     serverConfigStore.set({config: {gsuiteDomain: 'abc'}});
   });
 

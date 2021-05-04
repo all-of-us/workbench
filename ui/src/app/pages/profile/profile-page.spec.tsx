@@ -4,8 +4,7 @@ import * as React from 'react';
 import {TextInput} from 'app/components/inputs';
 import {ProfilePage} from 'app/pages/profile/profile-page';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {serverConfigStore} from 'app/utils/stores';
-import {userProfileStore} from 'app/utils/navigation';
+import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {InstitutionApi, ProfileApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import SpyInstance = jest.SpyInstance;
@@ -52,10 +51,10 @@ describe('ProfilePageComponent', () => {
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async() => {
       const newProfile = await profileApi.getMe();
-      userProfileStore.next({profile: newProfile, reload, updateCache});
+      profileStore.set({profile: newProfile, reload, updateCache});
     });
 
-    userProfileStore.next({profile, reload, updateCache});
+    profileStore.set({profile, reload, updateCache});
 
     serverConfigStore.set({config: {
       enableDataUseAgreement: true,

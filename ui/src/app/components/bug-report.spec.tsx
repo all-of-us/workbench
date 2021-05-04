@@ -6,8 +6,7 @@ import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {Profile, ProfileApi} from 'generated/fetch';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {userProfileStore} from 'app/utils/navigation';
-
+import {profileStore} from "app/utils/stores";
 
 describe('BugReport', () => {
   const description = 'test';
@@ -29,10 +28,10 @@ describe('BugReport', () => {
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async () => {
       const newProfile = await profileApi.getMe();
-      userProfileStore.next({profile: newProfile, reload, updateCache});
+      profileStore.set({profile: newProfile, reload, updateCache});
     });
 
-    userProfileStore.next({profile, reload, updateCache});
+    profileStore.set({profile, reload, updateCache});
   });
 
   it('should render', () => {
