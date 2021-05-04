@@ -1,17 +1,14 @@
 import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, CanActivate, CanActivateChild, Router, RouterStateSnapshot} from '@angular/router';
 
-import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {convertAPIError} from 'app/utils/errors';
 import {ErrorCode} from 'generated/fetch';
+import {profileApi} from "app/services/swagger-fetch-clients";
 
 @Injectable()
 export class DisabledGuard implements CanActivate, CanActivateChild {
-  constructor(
-    private router: Router,
-    private signInService: SignInService,
-    private profileStorageService: ProfileStorageService) {}
+  constructor(private router: Router, private signInService: SignInService) {}
 
   async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> {
     try {
@@ -22,7 +19,7 @@ export class DisabledGuard implements CanActivate, CanActivateChild {
       if (!isSignedIn) {
         return false;
       }
-      await this.profileStorageService.profile$.first().toPromise();
+      await profileApi().getMe();
       return true;
     } catch (e) {
       const errorResponse = await convertAPIError(e);

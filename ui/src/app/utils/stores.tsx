@@ -26,7 +26,7 @@ export const authStore = atom<AuthStore>({authLoaded: false, isSignedIn: false})
 
 export const cdrVersionStore = atom<CdrVersionTiersResponse>({tiers: []});
 
-interface ProfileStore {
+export interface ProfileStore {
   profile?: Profile;
 }
 
