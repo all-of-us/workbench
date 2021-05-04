@@ -2,11 +2,11 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
 
-import {registerApiClient} from 'app/services/swagger-fetch-clients';
+import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
 import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
-  DisseminateResearchEnum,
+  DisseminateResearchEnum, ProfileApi,
   ResearchOutcomeEnum,
   SpecificPopulationEnum,
   UserApi,
@@ -26,8 +26,9 @@ import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceEdit, WorkspaceEditMode} from 'app/pages/workspace/workspace-edit';
 import {WorkspaceEditSection} from 'app/pages/workspace/workspace-edit-section';
 import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
-import {cdrVersionStore, serverConfigStore} from 'app/utils/stores';
+import {cdrVersionStore, profileStore, serverConfigStore} from 'app/utils/stores';
 import {AccessTierShortNames} from 'app/utils/access-tiers';
+import {ProfileApiStub} from "../../../testing/stubs/profile-api-stub";
 
 jest.mock('app/utils/navigation', () => ({
   ...(jest.requireActual('app/utils/navigation')),
@@ -54,7 +55,7 @@ describe('WorkspaceEdit', () => {
     return mount(<WorkspaceEdit cancel={() => {}} workspaceEditMode={workspaceEditMode}/>);
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     workspace = {
       // accessLevel is a required WorkspaceData property (WorkspaceData extends
       // from Workspace)
@@ -82,6 +83,12 @@ describe('WorkspaceEdit', () => {
     workspacesApi = new WorkspacesApiStub([workspace]);
     registerApiClient(WorkspacesApi, workspacesApi);
 
+    registerApiClient(ProfileApi, new ProfileApiStub());
+    profileStore.set({
+      profile: await profileApi().getMe(),
+      reload: jest.fn(),
+      updateCache: jest.fn()
+    });
     currentWorkspaceStore.next(workspace);
     cdrVersionStore.set(cdrVersionTiersResponse);
     serverConfigStore.set({config: {enableBillingUpgrade: true, defaultFreeCreditsDollarLimit: 100.0, gsuiteDomain: ''}});
