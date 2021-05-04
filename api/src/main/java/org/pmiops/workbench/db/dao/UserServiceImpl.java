@@ -217,6 +217,10 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             clock.millis()
                 - TimeUnit.MILLISECONDS.convert(
                     configProvider.get().accessRenewal.expiryDays, TimeUnit.DAYS));
+    System.out.println("main code~~~~~~~ ");
+    System.out.println("main code~~~~~~~ d");
+    System.out.println(expirationTime);
+    System.out.println(completionTime);
     if (configProvider.get().access.enableAccessRenewal) {
       return completionTime != null && expirationTime.before(completionTime);
     }
