@@ -1,7 +1,6 @@
 import Container from 'app/container';
 import Button from 'app/element/button';
-import { LinkText, SideBarLink } from 'app/text-labels';
-import * as fp from 'lodash/fp';
+import { SideBarLink } from 'app/text-labels';
 import { Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
 import { logger } from 'libs/logger';
@@ -49,24 +48,6 @@ export default abstract class BaseHelpSidebar extends Container {
         break;
     }
     await this.page.waitForXPath(xpath, { visible: true }).then((link) => link.click());
-  }
-
-  /**
-   * Click a button inside the sidebar.
-   * @param {string} buttonLabel The button text label.
-   * @param waitOptions Wait for navigation or/and modal close after click button.
-   */
-  async clickButton(buttonLabel: LinkText, waitOptions: { waitForClose?: boolean } = {}): Promise<void> {
-    const { waitForClose = false } = waitOptions;
-    const button = Button.findByName(this.page, { normalizeSpace: buttonLabel }, this);
-    await button.waitUntilEnabled();
-    await Promise.all(
-      fp.flow(
-        fp.filter<{ shouldWait: boolean; waitFn: () => Promise<void> }>('shouldWait'),
-        fp.map((item) => item.waitFn()),
-        fp.concat([button.click()])
-      )([{ shouldWait: waitForClose, waitFn: () => this.waitUntilClose() }])
-    );
   }
 
   /**
