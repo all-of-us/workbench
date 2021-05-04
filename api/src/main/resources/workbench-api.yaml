@@ -4062,17 +4062,14 @@ definitions:
         type: boolean
         default: false
         description: Whether to use enable RAS-AoU linking for login.gov when user setup account.
-<<<<<<< HEAD
       enableGenomicExtraction:
         type: boolean
         default: false
         description: Whether to enable genomic data extraction for eligible datasets.
-=======
       enableAccessRenewal:
         type: boolean
         default: false
         description: Whether to enable the access renewal, allowing users to expire.
->>>>>>> e9e48563315139c414734e72b6e062ad802965c4
       rasHost:
         type: string
         description: The RAS base host name.
