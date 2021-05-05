@@ -790,9 +790,10 @@ def make_prep_survey(cmd_name, *args)
   op.add_validator ->(opts) { raise ArgumentError unless opts.project and opts.dataset }
   op.parse.validate
 
-  common = Common.new
-  Dir.chdir('db-cdr') do
-    common.run_inline %W{./prep-tables/make-prep-survey.sh #{op.opts.project} #{op.opts.dataset}}
+  ServiceAccountContext.new(op.opts.project).run do
+    common = Common.new
+    Dir.chdir('db-cdr/prep-tables')
+    common.run_inline %W{./make-prep-survey.sh #{op.opts.project} #{op.opts.dataset}}
   end
 end
 
