@@ -4,20 +4,14 @@ import com.google.common.io.Resources;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import org.hibernate.annotations.Filter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.cdr.CdrDbConfig;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.config.WorkbenchConfig.CdrConfig;
-import org.pmiops.workbench.firecloud.ApiClient;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
@@ -28,6 +22,9 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
 @Import({IntegrationTestConfig.class})
+@PropertySources({
+  @PropertySource("classpath:application-integration.properties"),
+})
 @DataJpaTest
 public abstract class BaseIntegrationTest {
 

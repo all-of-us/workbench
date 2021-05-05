@@ -101,6 +101,8 @@ public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @TestConfiguration
   @Import({
+    TestJpaConfig.class,
+    CohortReviewController.class,
     BigQueryTestService.class,
     CohortCloningService.class,
     CohortMapperImpl.class,

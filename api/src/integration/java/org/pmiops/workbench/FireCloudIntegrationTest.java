@@ -15,8 +15,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.google.StorageConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 
 public class FireCloudIntegrationTest extends BaseIntegrationTest {
@@ -24,8 +22,8 @@ public class FireCloudIntegrationTest extends BaseIntegrationTest {
   @Autowired private FireCloudService service;
 
   @TestConfiguration
-//  @ComponentScan(basePackageClasses = FireCloudServiceImpl.class, excludeFilters={
-//      @ComponentScan.Filter(type= FilterType.ASSIGNABLE_TYPE, classes = ApiClient.class)})
+  //  @ComponentScan(basePackageClasses = FireCloudServiceImpl.class, excludeFilters={
+  //      @ComponentScan.Filter(type= FilterType.ASSIGNABLE_TYPE, classes = ApiClient.class)})
   @Import({FireCloudConfig.class, FireCloudServiceImpl.class, StorageConfig.class})
   static class Configuration {}
 
