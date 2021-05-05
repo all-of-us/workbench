@@ -224,10 +224,13 @@ public class ConceptSetService {
 
   private ConceptSet toHydratedConcepts(ConceptSet conceptSet) {
     Set<DbConceptSetConceptId> dbConceptSetConceptIds =
-        conceptSetDao.findById(conceptSet.getId()).orElseThrow(
-            () ->
-                new NotFoundException(
-                    String.format("Concept set %s does not exist", conceptSet.getId()))).getConceptSetConceptIds();
+        conceptSetDao
+            .findById(conceptSet.getId())
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("Concept set %s does not exist", conceptSet.getId())))
+            .getConceptSetConceptIds();
     List<Criteria> criteriaList =
         cohortBuilderService.findCriteriaByDomainIdAndConceptIds(
             conceptSet.getDomain().toString(), dbConceptSetConceptIds);

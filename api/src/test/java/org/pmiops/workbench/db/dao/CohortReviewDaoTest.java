@@ -44,7 +44,8 @@ public class CohortReviewDaoTest extends SpringTest {
 
   @Test
   public void save() {
-    assertThat(cohortReviewDao.findById(cohortReview.getCohortReviewId()).get()).isEqualTo(cohortReview);
+    assertThat(cohortReviewDao.findById(cohortReview.getCohortReviewId()).get())
+        .isEqualTo(cohortReview);
   }
 
   @Test
@@ -52,7 +53,8 @@ public class CohortReviewDaoTest extends SpringTest {
     cohortReview = cohortReviewDao.findById(cohortReview.getCohortReviewId()).get();
     cohortReview.setReviewedCount(3);
     cohortReviewDao.saveAndFlush(cohortReview);
-    assertThat(cohortReviewDao.findById(cohortReview.getCohortReviewId()).get()).isEqualTo(cohortReview);
+    assertThat(cohortReviewDao.findById(cohortReview.getCohortReviewId()).get())
+        .isEqualTo(cohortReview);
   }
 
   @Test

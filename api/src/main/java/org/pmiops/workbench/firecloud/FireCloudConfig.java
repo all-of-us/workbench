@@ -220,10 +220,4 @@ public class FireCloudConfig {
         .setReadTimeout(workbenchConfig.firecloud.timeoutInSeconds, TimeUnit.SECONDS);
     return apiClient;
   }
-
-  @Bean
-  @Lazy
-  public IamCredentialsClient getIamCredentialsClient() throws IOException {
-    return IamCredentialsClient.create();
-  }
 }

@@ -310,19 +310,19 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       final List<DbConceptSetConceptId> dbConceptSetConceptIds =
           (domain.equals(Domain.SURVEY) && request.getPrePackagedConceptSet().contains(SURVEY))
               ? conceptBigQueryService.getSurveyQuestionConceptIds().stream()
-              .map(
-                  c ->
-                      DbConceptSetConceptId.builder()
-                          .addConceptId(c)
-                          .addStandard(false)
-                          .build())
-              .collect(Collectors.toList())
+                  .map(
+                      c ->
+                          DbConceptSetConceptId.builder()
+                              .addConceptId(c)
+                              .addStandard(false)
+                              .build())
+                  .collect(Collectors.toList())
               : conceptSetDao.findAllByConceptSetIdIn(request.getConceptSetIds()).stream()
                   .filter(
                       cs ->
                           cs.getDomainEnum().equals(domain)
                               || (cs.getDomainEnum().equals(Domain.PHYSICAL_MEASUREMENT_CSS)
-                              && domain.equals(Domain.MEASUREMENT)))
+                                  && domain.equals(Domain.MEASUREMENT)))
                   .flatMap(cs -> cs.getConceptSetConceptIds().stream())
                   .collect(Collectors.toList());
       Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
@@ -656,16 +656,16 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 cs ->
                     cs.getDomainEnum().equals(domain)
                         || (cs.getDomainEnum().equals(Domain.PHYSICAL_MEASUREMENT)
-                        && domain.equals(Domain.MEASUREMENT)))
+                            && domain.equals(Domain.MEASUREMENT)))
             .collect(Collectors.toList());
     if (preDefinedSurveyConceptSet(dbConceptSets)) {
       return Optional.of(
           "("
               + BigQueryDataSetTableInfo.getConceptIdIn(domain, false)
-              .replace("unnest", "")
-              .replace(
-                  "@sourceConceptIds",
-                  ConceptBigQueryService.SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE)
+                  .replace("unnest", "")
+                  .replace(
+                      "@sourceConceptIds",
+                      ConceptBigQueryService.SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE)
               + ")");
     } else {
       final List<DbConceptSetConceptId> dbConceptSetConceptIds =
@@ -769,12 +769,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 prerequisites
                     + "\n\n"
                     + generateNotebookUserCode(
-                    entry.getValue(),
-                    Domain.fromValue(entry.getKey()),
-                    dataSetName,
-                    cdrVersionName,
-                    qualifier,
-                    kernelTypeEnum))
+                        entry.getValue(),
+                        Domain.fromValue(entry.getKey()),
+                        dataSetName,
+                        cdrVersionName,
+                        qualifier,
+                        kernelTypeEnum))
         .collect(Collectors.toList());
   }
 
@@ -809,13 +809,26 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public List<DbConceptSet> getConceptSetsForDataset(DbDataset dataSet) {
     return conceptSetDao.findAllByConceptSetIdIn(
-        dataSetDao.findById(dataSet.getDataSetId()).orElseThrow(() -> new NotFoundException(String.format("ConceptSets %s does not exist", dataSet.getDataSetId()))).getCohortIds());
+        dataSetDao
+            .findById(dataSet.getDataSetId())
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("ConceptSets %s does not exist", dataSet.getDataSetId())))
+            .getCohortIds());
   }
 
   @Transactional
   @Override
   public List<DbCohort> getCohortsForDataset(DbDataset dataSet) {
-    return cohortDao.findAllByCohortIdIn(dataSetDao.findById(dataSet.getDataSetId()).orElseThrow(() -> new NotFoundException(String.format("Cohorts %s does not exist", dataSet.getDataSetId()))).getCohortIds());
+    return cohortDao.findAllByCohortIdIn(
+        dataSetDao
+            .findById(dataSet.getDataSetId())
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("Cohorts %s does not exist", dataSet.getDataSetId())))
+            .getCohortIds());
   }
 
   public List<DataSet> getDataSets(long workspaceId, ResourceType resourceType, long resourceId) {
@@ -968,9 +981,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         cohortQueryBuilder.buildUnionedParticipantIdQuery(participantCriteriaList);
 
     return Streams.stream(
-        bigQueryService
-            .executeQuery(bigQueryService.filterBigQueryConfig(participantIdQuery))
-            .getValues())
+            bigQueryService
+                .executeQuery(bigQueryService.filterBigQueryConfig(participantIdQuery))
+                .getValues())
         .map(personId -> personId.get(0).getValue().toString())
         .collect(Collectors.toList());
   }
@@ -1033,8 +1046,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     String value =
         ARRAY.equals(parameter.getValue().getType())
             ? nullableListToEmpty(parameter.getValue().getArrayValues()).stream()
-            .map(DataSetServiceImpl::convertSqlTypeToString)
-            .collect(Collectors.joining(", "))
+                .map(DataSetServiceImpl::convertSqlTypeToString)
+                .collect(Collectors.joining(", "))
             : convertSqlTypeToString(parameter.getValue());
     String key = String.format("@%s", parameter.getKey());
     return s.replaceAll(key, value);
@@ -1084,9 +1097,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             namespace
                 + "sql = \"\"\""
                 + fillInQueryParams(
-                generateSqlWithEnvironmentVariables(
-                    queryJobConfiguration.getQuery(), kernelTypeEnum),
-                queryJobConfiguration.getNamedParameters())
+                    generateSqlWithEnvironmentVariables(
+                        queryJobConfiguration.getQuery(), kernelTypeEnum),
+                    queryJobConfiguration.getNamedParameters())
                 + "\"\"\"";
         dataFrameSection =
             namespace + "df = pandas.read_gbq(" + namespace + "sql, dialect=\"standard\")";
@@ -1097,9 +1110,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             namespace
                 + "sql <- paste(\""
                 + fillInQueryParams(
-                generateSqlWithEnvironmentVariables(
-                    queryJobConfiguration.getQuery(), kernelTypeEnum),
-                queryJobConfiguration.getNamedParameters())
+                    generateSqlWithEnvironmentVariables(
+                        queryJobConfiguration.getQuery(), kernelTypeEnum),
+                    queryJobConfiguration.getNamedParameters())
                 + "\", sep=\"\")";
         dataFrameSection =
             namespace

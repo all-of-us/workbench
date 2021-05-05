@@ -76,9 +76,11 @@ public class UserDaoTest extends SpringTest {
     DbUser user1 = new DbUser();
     user1.setDisabled(false);
     user1 = userDao.save(user1);
+    System.out.println("~~~~~111111");
     addUserToTier(user1, registeredTier, TierAccessStatus.DISABLED);
-
+    System.out.println("~~~~~11111122222");
     List<UserCountByDisabledAndAccessTiers> rows = userDao.getUserCountGaugeData();
+    System.out.println("~~~~~1111112222333333333333");
     assertThat(rows).hasSize(1);
     final UserCountByDisabledAndAccessTiers row = rows.get(0);
     assertThat(split(row.getAccessTierShortNames())).contains("[unregistered]");

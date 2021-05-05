@@ -71,7 +71,7 @@ public interface BillingProjectBufferEntryDao
 
   @Query(
       value =
-          "select count(entry.id) as numProjects, entry.status, entry.accessTier \n"
+          "select count(entry.id) as numProjects, entry.status as status, entry.accessTier as accessTier \n"
               + "from DbBillingProjectBufferEntry entry \n"
               + "group by entry.status, entry.accessTier\n"
               + "order by entry.status, entry.accessTier")

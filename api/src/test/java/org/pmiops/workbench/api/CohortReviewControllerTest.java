@@ -802,7 +802,7 @@ public class CohortReviewControllerTest {
         annotation.getAnnotationId());
 
     assertThat(participantCohortAnnotationDao.findById(annotation.getAnnotationId()).isPresent())
-       .isFalse();
+        .isFalse();
   }
 
   @Test

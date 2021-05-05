@@ -313,12 +313,15 @@ sourceSets {
 
   // Integration testing sources
   __integration__ {
+    compileClasspath += main.output + generated.output
+    runtimeClasspath += main.output + generated.output
+
     resources {
+      srcDir "src/integration/resources"
       srcDir "config/"
+      srcDir "db/"
     }
     java {
-      compileClasspath += main.output + generated.output
-      runtimeClasspath += main.output + generated.output
       srcDir file('src/integration/java')
     }
   }

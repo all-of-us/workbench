@@ -594,7 +594,8 @@ public class DataSetServiceTest {
     dbConceptSet.setConceptSetId(3L);
     dbConceptSet.setWorkspaceId(WORKSPACE_ID);
 
-    when(conceptSetDao.findById(dbConceptSet.getConceptSetId())).thenReturn(Optional.of(dbConceptSet));
+    when(conceptSetDao.findById(dbConceptSet.getConceptSetId()))
+        .thenReturn(Optional.of(dbConceptSet));
 
     DbDataset dbDataset = new DbDataset();
     dbDataset.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
@@ -620,7 +621,8 @@ public class DataSetServiceTest {
     dbConceptSet.setConceptSetId(3L);
     dbConceptSet.setWorkspaceId(WORKSPACE_ID);
 
-    when(conceptSetDao.findById(dbConceptSet.getConceptSetId())).thenReturn(Optional.of(dbConceptSet));
+    when(conceptSetDao.findById(dbConceptSet.getConceptSetId()))
+        .thenReturn(Optional.of(dbConceptSet));
 
     DbDataset dbDataset = new DbDataset();
     dbDataset.setConceptSetIds(ImmutableList.of(dbConceptSet.getConceptSetId()));
