@@ -335,6 +335,10 @@ export default class WorkspaceEditPage extends WorkspaceBase {
     return Textbox.findByName(this.page, FIELD.workspaceNameTextbox.textOption);
   }
 
+  getShareWithCollaboratorsCheckbox(): Checkbox {
+    return Checkbox.findByName(this.page, FIELD.shareWithCollaboratorsCheckbox.textOption);
+  }
+
   question1_researchPurpose(): WebComponent {
     return new WebComponent(this.page, FIELD.PRIMARY_PURPOSE.researchPurposeCheckbox.textOption);
   }
@@ -488,8 +492,8 @@ export default class WorkspaceEditPage extends WorkspaceBase {
   }
 
   async clickShareWithCollaboratorsCheckbox(): Promise<void> {
-    const element = Checkbox.findByName(this.page, FIELD.shareWithCollaboratorsCheckbox.textOption);
-    await element.check();
+    const checkbox = this.getShareWithCollaboratorsCheckbox();
+    await checkbox.check();
   }
 
   // Fill out only the fields needed for a successful duplication
