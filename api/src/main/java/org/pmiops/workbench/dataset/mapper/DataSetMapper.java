@@ -96,6 +96,9 @@ public interface DataSetMapper {
 
   default List<PrePackagedConceptSetEnum> prePackagedConceptSetFromStorage(
       List<Short> prePackagedConceptSet) {
+    if (prePackagedConceptSet == null) {
+      return null;
+    }
     return prePackagedConceptSet.stream()
         .map(DbStorageEnums::prePackagedConceptSetsFromStorage)
         .collect(Collectors.toList());
@@ -103,6 +106,9 @@ public interface DataSetMapper {
 
   default List<Short> toDBPrePackagedConceptSet(
       List<PrePackagedConceptSetEnum> prePackagedConceptSetEnum) {
+    if (prePackagedConceptSetEnum == null) {
+      return null;
+    }
     return prePackagedConceptSetEnum.stream()
         .map(DbStorageEnums::prePackagedConceptSetsToStorage)
         .collect(Collectors.toList());
@@ -114,7 +120,7 @@ public interface DataSetMapper {
           .map(this::getDataSetValuesFromDomainValueSet)
           .collect(toImmutableList());
     }
-    return new ArrayList<DbDatasetValue>();
+    return new ArrayList<>();
   }
 
   default DbDatasetValue getDataSetValuesFromDomainValueSet(DomainValuePair domainValuePair) {
@@ -124,6 +130,9 @@ public interface DataSetMapper {
   }
 
   default List<DomainValuePair> copyDomainValuePairsToClient(List<DbDatasetValue> values) {
+    if (values == null) {
+      return null;
+    }
     return values.stream().map(this::createDomainValuePair).collect(Collectors.toList());
   }
 

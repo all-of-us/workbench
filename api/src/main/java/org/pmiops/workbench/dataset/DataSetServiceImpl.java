@@ -820,9 +820,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         .collect(Collectors.toList());
   }
 
-  // TODO(calbach): Remove direct testing of this - cover via public interface.
-  @VisibleForTesting
-  public List<DbDataset> getDbDataSets(
+  private List<DbDataset> getDbDataSets(
       long workspaceId, ResourceType resourceType, long resourceId) {
     List<DbDataset> dbDataSets = new ArrayList<>();
     switch (resourceType) {
