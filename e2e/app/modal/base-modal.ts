@@ -42,31 +42,6 @@ export default abstract class BaseModal extends Container {
     )(elements);
   }
 
-  /**
-   * Click a button.
-   * @param {string} buttonLabel The button text label.
-   * @param waitOptions Wait for navigation or/and modal close after click button.
-   */
-  async clickButton(
-    buttonLabel: LinkText,
-    waitOptions: { waitForNav?: boolean; waitForClose?: boolean; timeout?: number } = {}
-  ): Promise<void> {
-    const { waitForNav = false, waitForClose = false, timeout } = waitOptions;
-    const button = this.waitForButton(buttonLabel);
-    await button.waitUntilEnabled();
-    await button.focus();
-    const handle = await button.asElementHandle();
-    await handle.hover();
-    if (waitForNav) {
-      await button.clickAndWait(timeout);
-    } else {
-      await button.click({ delay: 10 });
-    }
-    if (waitForClose) {
-      await this.waitUntilClose(timeout);
-    }
-  }
-
   waitForButton(buttonLabel: LinkText): Button {
     return Button.findByName(this.page, { normalizeSpace: buttonLabel }, this);
   }

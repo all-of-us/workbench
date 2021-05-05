@@ -1,5 +1,8 @@
 import { Page } from 'puppeteer';
 import { waitWhileLoading } from 'utils/waits-utils';
+import * as fp from 'lodash/fp';
+import { LinkText } from 'app/text-labels';
+import Button from 'app/element/button';
 
 /**
  * This is the super base class.
@@ -27,17 +30,54 @@ export default class Container {
       });
   }
 
-  async waitUntilVisible(): Promise<void> {
+  async waitUntilVisible(timeout = 60000): Promise<void> {
     await Promise.all([
-      waitWhileLoading(this.page, 60000),
-      this.page.waitForXPath(this.getXpath(), { visible: true, timeout: 60000 })
+      waitWhileLoading(this.page, timeout),
+      this.page.waitForXPath(this.getXpath(), { visible: true, timeout })
     ]);
   }
 
-  async waitUntilClose(): Promise<void> {
+  async waitUntilClose(timeout = 60000): Promise<void> {
     await Promise.all([
-      waitWhileLoading(this.page, 60000),
-      this.page.waitForXPath(this.getXpath(), { hidden: true, timeout: 60000 })
+      waitWhileLoading(this.page, timeout),
+      this.page.waitForXPath(this.getXpath(), { hidden: true, timeout })
     ]);
+  }
+
+  /**
+   * Click a button.
+   * @param {string} buttonLabel The button text label.
+   * @param waitOptions Wait for navigation or/and modal close after click button with a timeout.
+   */
+  async clickButton(
+    buttonLabel: LinkText,
+    waitOptions: { waitForNav?: boolean; waitForClose?: boolean; timeout?: number } = {}
+  ): Promise<void> {
+    const { waitForNav = false, waitForClose = false, timeout } = waitOptions;
+
+    const button = Button.findByName(this.page, { normalizeSpace: buttonLabel }, this);
+    await button.waitUntilEnabled();
+    await button.focus();
+
+    await Promise.all(
+      fp.flow(
+        fp.filter<{ shouldWait: boolean; waitFn: () => Promise<void> }>('shouldWait'),
+        fp.map((item) => item.waitFn()),
+        fp.concat([button.click({ delay: 10 })])
+      )([
+        {
+          shouldWait: waitForNav,
+          waitFn: () => {
+            this.page.waitForNavigation({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'], timeout });
+          }
+        },
+        {
+          shouldWait: waitForClose,
+          waitFn: () => {
+            this.waitUntilClose(timeout);
+          }
+        }
+      ])
+    );
   }
 }
