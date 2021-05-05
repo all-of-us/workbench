@@ -109,7 +109,7 @@ public class DataSetServiceTest {
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private CohortDao cohortDao;
   @Autowired private ConceptSetDao conceptSetDao;
-  @Autowired DataSetServiceImpl dataSetServiceImpl;
+  @Autowired private DataSetServiceImpl dataSetServiceImpl;
 
   private DbWorkspace workspace;
   private DbCohort cohort;
@@ -137,14 +137,10 @@ public class DataSetServiceTest {
 
   @Before
   public void setUp() {
-    workspace = workspaceDao.save(buildSimpleWorkspace());
+    workspace = workspaceDao.save(new DbWorkspace());
     cohort = cohortDao.save(buildSimpleCohort(workspace));
     when(mockCohortQueryBuilder.buildParticipantIdQuery(any()))
         .thenReturn(QUERY_JOB_CONFIGURATION_1);
-  }
-
-  private DbWorkspace buildSimpleWorkspace() {
-    return new DbWorkspace();
   }
 
   private DbCohort buildSimpleCohort(DbWorkspace workspace) {
