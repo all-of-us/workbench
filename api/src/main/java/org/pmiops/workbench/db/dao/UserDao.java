@@ -1,8 +1,10 @@
 package org.pmiops.workbench.db.dao;
 
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
@@ -71,7 +73,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
       nativeQuery = true,
       value =
           "SELECT COUNT(u.user_id) AS userCount, u.disabled AS disabled, "
-              + "COALESCE(t.accessTierShortNames, 'unregistered') AS accessTierShortNames "
+              + "COALESCE(t.accessTierShortNames, '[unregistered]') AS accessTierShortNames "
               + "FROM user u "
               + "LEFT JOIN ("
               + "  SELECT u.user_id, "
@@ -83,7 +85,28 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "  GROUP BY u.user_id"
               + ") as t ON t.user_id = u.user_id "
               + "GROUP BY disabled, accessTierShortNames ")
-  List<UserCountByDisabledAndAccessTiers> getUserCountGaugeData();
+  List<Object[]> getUserCountGaugeDataHack();
+
+  default List<UserCountByDisabledAndAccessTiers> getUserCountGaugeData() {
+    return getUserCountGaugeDataHack().stream().map(x ->
+        new UserCountByDisabledAndAccessTiers() {
+          @Override
+          public Long getUserCount() {
+            return ((BigInteger)(x[0])).longValue();
+          }
+
+          @Override
+          public Boolean getDisabled() {
+            return (Boolean)(x[1]);
+          }
+
+          @Override
+          public String getAccessTierShortNames() {
+            return (String)(x[2]);
+          }
+        }
+    ).collect(Collectors.toList());
+  }
 
   // Note: setter methods are included only where necessary for testing. See ProfileServiceTest.
   interface DbAdminTableUser {
