@@ -74,13 +74,13 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "COALESCE(t.accessTierShortNames, 'unregistered') AS accessTierShortNames "
               + "FROM user u "
               + "LEFT JOIN ("
-              + "  SELECT u.user_id, "
+              + "  SELECT u2.user_id, "
               + "  GROUP_CONCAT(DISTINCT a.short_name ORDER BY a.short_name) AS accessTierShortNames "
-              + "  FROM user u "
-              + "  JOIN user_access_tier uat ON u.user_id = uat.user_id "
+              + "  FROM user u2 "
+              + "  JOIN user_access_tier uat ON u2.user_id = uat.user_id "
               + "  JOIN access_tier a ON a.access_tier_id = uat.access_tier_id "
               + "  WHERE uat.access_status = 1 " // ENABLED
-              + "  GROUP BY u.user_id"
+              + "  GROUP BY u2.user_id"
               + ") as t ON t.user_id = u.user_id "
               + "GROUP BY disabled, accessTierShortNames ")
   List<UserCountByDisabledAndAccessTiers> getUserCountGaugeData();
@@ -152,8 +152,8 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
       // JPQL doesn't allow join on subquery
       nativeQuery = true,
       value =
-          "SELECT u.user_id AS userID, u.email AS username, u.disabled AS disabled, u.given_name AS givenName, u.family_name AS familyName, "
-              + "u.contact_email AS contactEmail, i.display_name AS institution_name, "
+          "SELECT u.user_id, u.email AS username, u.disabled, u.given_name, u.family_name, "
+              + "u.contact_email, i.display_name AS institution_name, "
               + "u.first_registration_completion_time, u.creation_time, u.first_sign_in_time, "
               + "u.data_use_agreement_bypass_time, u.data_use_agreement_completion_time, "
               + "u.compliance_training_bypass_time, u.compliance_training_completion_time, "

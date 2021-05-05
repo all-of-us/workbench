@@ -133,7 +133,7 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select cr from DbCriteria cr where cr.conceptId in (:conceptIds) and cr.standard = :standard and cr.domainId = :domain and match(cr.fullText, concat('+[', :domain, '_rank1]')) > 0)")
+          "select cr from DbCriteria cr where cr.conceptId in (:conceptIds) and cr.standard = :standard and cr.domainId = :domain and match(cr.fullText, concat('+[', :domain, '_rank1]')) > 0")
   List<DbCriteria> findStandardCriteriaByDomainAndConceptId(
       @Param("domain") String domain,
       @Param("standard") Boolean isStandard,
@@ -277,12 +277,12 @@ public interface CBCriteriaDao extends CrudRepository<DbCriteria, Long> {
 
   @Query(
       value =
-          "select count(*) from DbCriteria where match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0)")
+          "select count(*) from DbCriteria where match(fullText, concat(:term, '+[', :domain, '_rank1]')) > 0")
   Long findDomainCount(@Param("term") String term, @Param("domain") String domain);
 
   @Query(
       value =
-          "select count(*) from DbCriteria where code like upper(concat(:term,'%')) and match(fullText, concat('+[', :domain, '_rank1]')) > 0)")
+          "select count(*) from DbCriteria where code like upper(concat(:term,'%')) and match(fullText, concat('+[', :domain, '_rank1]')) > 0")
   Long findDomainCountOnCode(@Param("term") String term, @Param("domain") String domain);
 
   @Query(
