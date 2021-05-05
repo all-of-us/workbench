@@ -132,7 +132,6 @@ describe('Workspace UI tests', () => {
     await workspaceCard.asElementHandle().hover();
     await workspaceCard.selectSnowmanMenu(MenuOption.Duplicate, { waitForNav: true });
 
-    // Fill out Workspace Name should be just enough for successful duplication.
     const workspaceEditPage = new WorkspaceEditPage(page);
     await workspaceEditPage.waitForLoad();
 
