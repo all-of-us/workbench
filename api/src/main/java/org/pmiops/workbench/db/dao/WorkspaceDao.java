@@ -87,7 +87,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   List<DbWorkspace> findAllByWorkspaceIdIn(Collection<Long> dbIds);
 
   default Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId) {
-    DbWorkspace workspace = findOne(workspaceId);
+    DbWorkspace workspace = findById(workspaceId).orElse(null);
     if (workspace == null || !workspace.isActive()) {
       return Optional.empty();
     }
@@ -124,33 +124,11 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
                 () ->
                     new NotFoundException(
                         String.format("DbWorkspace %s does not exist", workspaceId)));
-    toUpdate.setBillingStatus(status);
-    save(toUpdate);
   }
 
   @Query("SELECT w.creator FROM DbWorkspace w WHERE w.billingStatus = (:status)")
   Set<DbUser> findAllCreatorsByBillingStatus(@Param("status") BillingStatus status);
 
-<<<<<<< HEAD
-  List<DbWorkspace> findAllByActiveStatus(Short workspaceActiveStatusOrdinal);
-
-  // TODO replace with AccessTier RW-6137
-  // @Query(
-  //      "SELECT activeStatus, dataAccessLevel, COUNT(workspaceId) FROM DbWorkspace "
-  //          + "GROUP BY activeStatus, dataAccessLevel ORDER BY activeStatus, dataAccessLevel")
-  //  List<ActiveStatusAndDataAccessLevelToCountResult> getActiveStatusAndDataAccessLevelToCount();
-
-  // TODO replace with AccessTier RW-6137
-  //  interface ActiveStatusAndDataAccessLevelToCountResult {
-  //      Short getWorkspaceActiveStatus();
-  //
-  //      Short getDataAccessLevel();
-  //
-  //      Long getWorkspaceCount();
-  //    }
-
-=======
->>>>>>> origin/master
   @Query(
       "SELECT COUNT(workspace.workspaceId) as workspaceCount, workspace.activeStatus, tier "
           + "FROM DbWorkspace workspace "

@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -97,6 +98,7 @@ import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.exceptions.ForbiddenException;
+import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceACL;
@@ -123,7 +125,6 @@ import org.pmiops.workbench.model.EmailVerificationStatus;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
 import org.pmiops.workbench.model.ResearchPurpose;
-import org.pmiops.workbench.model.SearchRequest;
 import org.pmiops.workbench.model.Workspace;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
@@ -164,11 +165,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class DataSetControllerTest {
 
-  private static final String COHORT_ONE_NAME = "cohort";
   private static final String CONCEPT_SET_ONE_NAME = "concept set";
   private static final String CONCEPT_SET_TWO_NAME = "concept set two";
   private static final String CONCEPT_SET_SURVEY_NAME = "concept survey set";
-  private static final String WORKSPACE_NAME = "name";
   private static final String WORKSPACE_BUCKET_NAME = "fc://bucket-hash";
   private static final String USER_EMAIL = "bob@gmail.com";
   private static final String TEST_CDR_PROJECT_ID = "all-of-us-ehr-dev";
@@ -181,17 +180,20 @@ public class DataSetControllerTest {
   private static final QueryParameterValue NAMED_PARAMETER_ARRAY_VALUE =
       QueryParameterValue.array(new Integer[] {2, 5}, StandardSQLTypeName.INT64);
 
-  private Long COHORT_ONE_ID;
-  private Long CONCEPT_SET_ONE_ID;
-  private Long CONCEPT_SET_TWO_ID;
-  private Long CONCEPT_SET_SURVEY_ID;
-
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
   private static WorkbenchConfig workbenchConfig;
   private static DbUser currentUser;
   private Workspace workspace;
+  private Workspace noAccessWorkspace;
+  private Cohort cohort;
+  private Cohort noAccessCohort;
+  private ConceptSet conceptSet1;
+  private ConceptSet conceptSet2;
+  private ConceptSet surveyConceptSet;
+  private ConceptSet noAccessConceptSet;
+  private DataSet noAccessDataSet;
   private DbCdrVersion cdrVersion;
 
   @Autowired private AccessTierDao accessTierDao;
@@ -304,10 +306,14 @@ public class DataSetControllerTest {
 
   @Before
   public void setUp() throws Exception {
-    DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
-    entry.setFireCloudProjectName(UUID.randomUUID().toString());
-
-    doReturn(entry).when(mockBillingProjectBufferService).assignBillingProject(any(), any());
+    doAnswer(
+            (invocation) -> {
+              DbBillingProjectBufferEntry entry = new DbBillingProjectBufferEntry();
+              entry.setFireCloudProjectName(UUID.randomUUID().toString());
+              return entry;
+            })
+        .when(mockBillingProjectBufferService)
+        .assignBillingProject(any(), any());
     TestMockFactory.stubCreateFcWorkspace(fireCloudService);
 
     Gson gson = new Gson();
@@ -331,24 +337,45 @@ public class DataSetControllerTest {
     cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
-    workspace = new Workspace();
-    workspace.setName(WORKSPACE_NAME);
-    workspace.setResearchPurpose(new ResearchPurpose());
-    workspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
-    workspace.setBillingAccountName("billing-account");
+    workspace =
+        new Workspace()
+            .name("name")
+            .researchPurpose(new ResearchPurpose())
+            .cdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()))
+            .billingAccountName("billing-account");
 
     workspace = workspacesController.createWorkspace(workspace).getBody();
     stubGetWorkspace(workspace.getNamespace(), workspace.getName());
-    stubGetWorkspaceAcl(workspace.getNamespace());
+    stubGetWorkspaceAcl(workspace, WorkspaceAccessLevel.OWNER);
 
-    SearchRequest searchRequest = SearchRequests.males();
+    noAccessWorkspace =
+        new Workspace()
+            .name("other")
+            .researchPurpose(new ResearchPurpose())
+            .cdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()))
+            .billingAccountName("billing-account");
 
-    String cohortCriteria = new Gson().toJson(searchRequest);
+    noAccessWorkspace = workspacesController.createWorkspace(noAccessWorkspace).getBody();
+    // Allow access initially for setup, update the mocks after initialization to remove access.
+    stubGetWorkspace(noAccessWorkspace.getNamespace(), noAccessWorkspace.getName());
+    stubGetWorkspaceAcl(noAccessWorkspace, WorkspaceAccessLevel.OWNER);
 
-    Cohort cohort = new Cohort().name(COHORT_ONE_NAME).criteria(cohortCriteria);
+    noAccessCohort =
+        cohortsController
+            .createCohort(
+                noAccessWorkspace.getNamespace(),
+                noAccessWorkspace.getName(),
+                new Cohort()
+                    .name("noAccessCohort")
+                    .criteria(new Gson().toJson(SearchRequests.allGenders())))
+            .getBody();
     cohort =
-        cohortsController.createCohort(workspace.getNamespace(), WORKSPACE_NAME, cohort).getBody();
-    COHORT_ONE_ID = cohort.getId();
+        cohortsController
+            .createCohort(
+                workspace.getNamespace(),
+                workspace.getName(),
+                new Cohort().name("cohort1").criteria(new Gson().toJson(SearchRequests.males())))
+            .getBody();
 
     List<Concept> conceptList = new ArrayList<>();
 
@@ -365,8 +392,7 @@ public class DataSetControllerTest {
             .prevalence(0.2F)
             .conceptSynonyms(Collections.emptyList()));
 
-    ConceptSet conceptSet =
-        new ConceptSet().id(CONCEPT_SET_ONE_ID).name(CONCEPT_SET_ONE_NAME).domain(Domain.CONDITION);
+    ConceptSet conceptSet = new ConceptSet().name(CONCEPT_SET_ONE_NAME).domain(Domain.CONDITION);
 
     List<ConceptSetConceptId> conceptSetConceptIds =
         conceptList.stream()
@@ -378,16 +404,26 @@ public class DataSetControllerTest {
                   return conceptSetConceptId;
                 })
             .collect(Collectors.toList());
-    CreateConceptSetRequest conceptSetRequest =
-        new CreateConceptSetRequest()
-            .conceptSet(conceptSet)
-            .addedConceptSetConceptIds(conceptSetConceptIds);
 
-    conceptSet =
+    noAccessConceptSet =
         conceptSetsController
-            .createConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSetRequest)
+            .createConceptSet(
+                noAccessWorkspace.getNamespace(),
+                noAccessWorkspace.getName(),
+                new CreateConceptSetRequest()
+                    .conceptSet(conceptSet)
+                    .addedConceptSetConceptIds(conceptSetConceptIds))
             .getBody();
-    CONCEPT_SET_ONE_ID = conceptSet.getId();
+
+    conceptSet1 =
+        conceptSetsController
+            .createConceptSet(
+                workspace.getNamespace(),
+                workspace.getName(),
+                new CreateConceptSetRequest()
+                    .conceptSet(conceptSet)
+                    .addedConceptSetConceptIds(conceptSetConceptIds))
+            .getBody();
 
     conceptList = new ArrayList<>();
 
@@ -404,36 +440,38 @@ public class DataSetControllerTest {
             .prevalence(0.2F)
             .conceptSynonyms(new ArrayList<>()));
 
-    ConceptSet conceptSurveySet =
-        new ConceptSet()
-            .id(CONCEPT_SET_SURVEY_ID)
-            .name(CONCEPT_SET_SURVEY_NAME)
-            .domain(Domain.OBSERVATION);
-
-    CreateConceptSetRequest conceptSetRequest1 =
-        new CreateConceptSetRequest()
-            .conceptSet(conceptSurveySet)
-            .addedConceptSetConceptIds(conceptSetConceptIds);
-
-    conceptSurveySet =
+    surveyConceptSet =
         conceptSetsController
-            .createConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSetRequest1)
+            .createConceptSet(
+                workspace.getNamespace(),
+                workspace.getName(),
+                new CreateConceptSetRequest()
+                    .conceptSet(
+                        new ConceptSet().name(CONCEPT_SET_SURVEY_NAME).domain(Domain.OBSERVATION))
+                    .addedConceptSetConceptIds(conceptSetConceptIds))
             .getBody();
-    CONCEPT_SET_SURVEY_ID = conceptSurveySet.getId();
 
-    ConceptSet conceptSetTwo =
-        new ConceptSet().id(CONCEPT_SET_TWO_ID).name(CONCEPT_SET_TWO_NAME).domain(Domain.DRUG);
-
-    CreateConceptSetRequest conceptSetTwoRequest =
-        new CreateConceptSetRequest()
-            .conceptSet(conceptSetTwo)
-            .addedConceptSetConceptIds(conceptSetConceptIds);
-
-    conceptSetTwo =
+    conceptSet2 =
         conceptSetsController
-            .createConceptSet(workspace.getNamespace(), WORKSPACE_NAME, conceptSetTwoRequest)
+            .createConceptSet(
+                workspace.getNamespace(),
+                workspace.getName(),
+                new CreateConceptSetRequest()
+                    .conceptSet(new ConceptSet().name(CONCEPT_SET_TWO_NAME).domain(Domain.DRUG))
+                    .addedConceptSetConceptIds(conceptSetConceptIds))
             .getBody();
-    CONCEPT_SET_TWO_ID = conceptSetTwo.getId();
+
+    noAccessDataSet =
+        dataSetController
+            .createDataSet(
+                noAccessWorkspace.getNamespace(),
+                noAccessWorkspace.getName(),
+                buildEmptyDataSetRequest()
+                    .name("no access ds")
+                    .addCohortIdsItem(noAccessCohort.getId())
+                    .addConceptSetIdsItem(noAccessConceptSet.getId())
+                    .domainValuePairs(mockDomainValuePair()))
+            .getBody();
 
     when(mockCohortQueryBuilder.buildParticipantIdQuery(any()))
         .thenReturn(
@@ -446,6 +484,11 @@ public class DataSetControllerTest {
                 .addNamedParameter(NAMED_PARAMETER_NAME, NAMED_PARAMETER_VALUE)
                 .addNamedParameter(NAMED_PARAMETER_ARRAY_NAME, NAMED_PARAMETER_ARRAY_VALUE)
                 .build());
+
+    when(fireCloudService.getWorkspace(
+            noAccessWorkspace.getNamespace(), noAccessWorkspace.getName()))
+        .thenThrow(new ForbiddenException());
+
     // This is not great, but due to the interaction of mocks and bigquery, it is
     // exceptionally hard to fix it so that it calls the real filterBitQueryConfig
     // but _does not_ call the real methods in the rest of the bigQueryService.
@@ -485,14 +528,14 @@ public class DataSetControllerTest {
     when(fireCloudService.getWorkspace(ns, name)).thenReturn(fcResponse);
   }
 
-  private void stubGetWorkspaceAcl(String ns) {
+  private void stubGetWorkspaceAcl(Workspace w, WorkspaceAccessLevel accessLevel) {
     FirecloudWorkspaceACL workspaceAccessLevelResponse = new FirecloudWorkspaceACL();
     FirecloudWorkspaceAccessEntry accessLevelEntry =
-        new FirecloudWorkspaceAccessEntry().accessLevel(WorkspaceAccessLevel.OWNER.toString());
+        new FirecloudWorkspaceAccessEntry().accessLevel(accessLevel.toString());
     Map<String, FirecloudWorkspaceAccessEntry> userEmailToAccessEntry =
         ImmutableMap.of(DataSetControllerTest.USER_EMAIL, accessLevelEntry);
     workspaceAccessLevelResponse.setAcl(userEmailToAccessEntry);
-    when(fireCloudService.getWorkspaceAclAsService(ns, DataSetControllerTest.WORKSPACE_NAME))
+    when(fireCloudService.getWorkspaceAclAsService(w.getNamespace(), w.getName()))
         .thenReturn(workspaceAccessLevelResponse);
   }
 
@@ -544,11 +587,11 @@ public class DataSetControllerTest {
     DataSetRequest dataSet = buildEmptyDataSetRequest();
     dataSet =
         dataSet
-            .addConceptSetIdsItem(CONCEPT_SET_ONE_ID)
+            .addConceptSetIdsItem(conceptSet1.getId())
             .domainValuePairs(ImmutableList.of(new DomainValuePair().domain(Domain.CONDITION)));
 
     dataSetController.generateCode(
-        workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet);
+        workspace.getNamespace(), workspace.getName(), KernelTypeEnum.PYTHON.toString(), dataSet);
   }
 
   @Test(expected = BadRequestException.class)
@@ -556,11 +599,11 @@ public class DataSetControllerTest {
     DataSetRequest dataSet = buildEmptyDataSetRequest();
     dataSet =
         dataSet
-            .addCohortIdsItem(COHORT_ONE_ID)
+            .addCohortIdsItem(cohort.getId())
             .domainValuePairs(ImmutableList.of(new DomainValuePair().domain(Domain.CONDITION)));
 
     dataSetController.generateCode(
-        workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet);
+        workspace.getNamespace(), workspace.getName(), KernelTypeEnum.PYTHON.toString(), dataSet);
   }
 
   @Rule public ExpectedException expectedException = ExpectedException.none();
@@ -570,14 +613,17 @@ public class DataSetControllerTest {
     final DataSetRequest dataSet =
         buildEmptyDataSetRequest()
             .dataSetId(1L)
-            .addCohortIdsItem(COHORT_ONE_ID)
-            .addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
+            .addCohortIdsItem(cohort.getId())
+            .addConceptSetIdsItem(conceptSet1.getId());
 
-    expectedException.expect(BadRequestException.class);
+    expectedException.expect(NotFoundException.class);
 
     dataSetController
         .generateCode(
-            workspace.getNamespace(), WORKSPACE_NAME, KernelTypeEnum.PYTHON.toString(), dataSet)
+            workspace.getNamespace(),
+            workspace.getName(),
+            KernelTypeEnum.PYTHON.toString(),
+            dataSet)
         .getBody();
   }
 
@@ -605,7 +651,7 @@ public class DataSetControllerTest {
     expectedException.expect(BadRequestException.class);
     expectedException.expectMessage("Missing name");
 
-    dataSetController.createDataSet(workspace.getNamespace(), WORKSPACE_NAME, dataSet);
+    dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet);
 
     dataSet.setName("dataSet");
     dataSet.setCohortIds(null);
@@ -613,7 +659,7 @@ public class DataSetControllerTest {
     expectedException.expect(BadRequestException.class);
     expectedException.expectMessage("Missing cohort ids");
 
-    dataSetController.createDataSet(workspace.getNamespace(), WORKSPACE_NAME, dataSet);
+    dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet);
 
     dataSet.setCohortIds(cohortIds);
     dataSet.setConceptSetIds(null);
@@ -621,7 +667,7 @@ public class DataSetControllerTest {
     expectedException.expect(BadRequestException.class);
     expectedException.expectMessage("Missing concept set ids");
 
-    dataSetController.createDataSet(workspace.getNamespace(), WORKSPACE_NAME, dataSet);
+    dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet);
 
     dataSet.setConceptSetIds(conceptIds);
     dataSet.setDomainValuePairs(null);
@@ -629,14 +675,16 @@ public class DataSetControllerTest {
     expectedException.expect(BadRequestException.class);
     expectedException.expectMessage("Missing values");
 
-    dataSetController.createDataSet(workspace.getNamespace(), WORKSPACE_NAME, dataSet);
+    dataSetController.createDataSet(workspace.getNamespace(), workspace.getName(), dataSet);
   }
 
   @Test
   public void exportToNewNotebook() {
     DataSetExportRequest request = setUpValidDataSetExportRequest();
 
-    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request).getBody();
+    dataSetController
+        .exportToNotebook(workspace.getNamespace(), workspace.getName(), request)
+        .getBody();
     verify(mockNotebooksService, never()).getNotebookContents(any(), any());
     // I tried to have this verify against the actual expected contents of the json object, but
     // java equivalence didn't handle it well.
@@ -646,24 +694,105 @@ public class DataSetControllerTest {
   }
 
   @Test(expected = ForbiddenException.class)
+  public void exportToNotebook_noAccess() {
+    dataSetController.exportToNotebook(
+        noAccessWorkspace.getNamespace(),
+        noAccessWorkspace.getName(),
+        new DataSetExportRequest()
+            .dataSetRequest(new DataSetRequest().includesAllParticipants(true)));
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void exportToNotebook_noAccessDataSet() {
+    dataSetController.exportToNotebook(
+        workspace.getNamespace(),
+        workspace.getName(),
+        new DataSetExportRequest()
+            .dataSetRequest(new DataSetRequest().dataSetId(noAccessDataSet.getId())));
+  }
+
+  @Test(expected = ForbiddenException.class)
   public void exportToNotebook_requiresActiveBilling() {
     DbWorkspace dbWorkspace =
         workspaceDao.findByWorkspaceNamespaceAndFirecloudNameAndActiveStatus(
             workspace.getNamespace(),
-            WORKSPACE_NAME,
+            workspace.getName(),
             DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
     dbWorkspace.setBillingStatus(BillingStatus.INACTIVE);
     workspaceDao.save(dbWorkspace);
 
     DataSetExportRequest request = new DataSetExportRequest();
-    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
+    dataSetController.exportToNotebook(workspace.getNamespace(), workspace.getName(), request);
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void exportToNotebook_cohortInvalid() {
+    dataSetController.exportToNotebook(
+        workspace.getNamespace(),
+        workspace.getName(),
+        new DataSetExportRequest()
+            .dataSetRequest(
+                new DataSetRequest()
+                    .conceptSetIds(ImmutableList.of(conceptSet1.getId()))
+                    .cohortIds(ImmutableList.of(cohort.getId(), noAccessCohort.getId()))));
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void exportToNotebook_conceptSetInvalid() {
+    dataSetController.exportToNotebook(
+        workspace.getNamespace(),
+        workspace.getName(),
+        new DataSetExportRequest()
+            .dataSetRequest(
+                new DataSetRequest()
+                    .conceptSetIds(
+                        ImmutableList.of(conceptSet1.getId(), noAccessConceptSet.getId()))));
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void generateCode_noAccess() {
+    dataSetController.generateCode(
+        noAccessWorkspace.getNamespace(),
+        noAccessWorkspace.getName(),
+        KernelTypeEnum.PYTHON.toString(),
+        new DataSetRequest().includesAllParticipants(true));
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void generateCode_noAccessDataSet() {
+    dataSetController.generateCode(
+        workspace.getNamespace(),
+        workspace.getName(),
+        KernelTypeEnum.PYTHON.toString(),
+        new DataSetRequest().dataSetId(noAccessDataSet.getId()));
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void generateCode_cohortInvalid() {
+    dataSetController.generateCode(
+        workspace.getNamespace(),
+        workspace.getName(),
+        KernelTypeEnum.PYTHON.toString(),
+        new DataSetRequest()
+            .conceptSetIds(ImmutableList.of(conceptSet1.getId()))
+            .cohortIds(ImmutableList.of(cohort.getId(), noAccessCohort.getId())));
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void generateCode_conceptSetInvalid() {
+    dataSetController.generateCode(
+        workspace.getNamespace(),
+        workspace.getName(),
+        KernelTypeEnum.PYTHON.toString(),
+        new DataSetRequest()
+            .conceptSetIds(ImmutableList.of(conceptSet1.getId(), noAccessConceptSet.getId())));
   }
 
   @Test
   public void exportToExistingNotebook() {
     DataSetRequest dataSet = buildEmptyDataSetRequest();
-    dataSet = dataSet.addCohortIdsItem(COHORT_ONE_ID);
-    dataSet = dataSet.addConceptSetIdsItem(CONCEPT_SET_ONE_ID);
+    dataSet = dataSet.addCohortIdsItem(cohort.getId());
+    dataSet = dataSet.addConceptSetIdsItem(conceptSet1.getId());
     List<DomainValuePair> domainValuePairs = mockDomainValuePair();
     dataSet.setDomainValuePairs(domainValuePairs);
 
@@ -688,7 +817,9 @@ public class DataSetControllerTest {
             .newNotebook(false)
             .notebookName(notebookName);
 
-    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request).getBody();
+    dataSetController
+        .exportToNotebook(workspace.getNamespace(), workspace.getName(), request)
+        .getBody();
     verify(mockNotebooksService, times(1)).getNotebookContents(WORKSPACE_BUCKET_NAME, notebookName);
     // I tried to have this verify against the actual expected contents of the json object, but
     // java equivalence didn't handle it well.
@@ -706,7 +837,7 @@ public class DataSetControllerTest {
     List<DomainValue> domainValues =
         dataSetController
             .getValuesFromDomain(
-                workspace.getNamespace(), WORKSPACE_NAME, Domain.CONDITION.toString())
+                workspace.getNamespace(), workspace.getName(), Domain.CONDITION.toString())
             .getBody()
             .getItems();
     verify(mockBigQueryService).getTableFieldsFromDomain(Domain.CONDITION);
@@ -721,7 +852,9 @@ public class DataSetControllerTest {
     List<DomainValue> domainValues =
         dataSetController
             .getValuesFromDomain(
-                workspace.getNamespace(), WORKSPACE_NAME, Domain.WHOLE_GENOME_VARIANT.toString())
+                workspace.getNamespace(),
+                workspace.getName(),
+                Domain.WHOLE_GENOME_VARIANT.toString())
             .getBody()
             .getItems();
     assertThat(domainValues)
@@ -743,7 +876,7 @@ public class DataSetControllerTest {
             FailedPreconditionException.class,
             () ->
                 dataSetController.exportToNotebook(
-                    workspace.getNamespace(), WORKSPACE_NAME, request));
+                    workspace.getNamespace(), workspace.getName(), request));
     assertThat(e)
         .hasMessageThat()
         .contains("The workspace CDR version does not have whole genome data");
@@ -766,7 +899,7 @@ public class DataSetControllerTest {
             BadRequestException.class,
             () ->
                 dataSetController.exportToNotebook(
-                    workspace.getNamespace(), WORKSPACE_NAME, request));
+                    workspace.getNamespace(), workspace.getName(), request));
     assertThat(e).hasMessageThat().contains("Genomics code generation is only supported in Python");
   }
 
@@ -890,11 +1023,88 @@ public class DataSetControllerTest {
     verify(mockGenomicExtractionService, times(0)).getGenomicExtractionJobs(any(), any());
   }
 
+  @Test(expected = NotFoundException.class)
+  public void testGetDataset_wrongWorkspace() {
+    Workspace otherWorkspace = new Workspace();
+    otherWorkspace.setName("Other Workspace");
+    otherWorkspace.setResearchPurpose(new ResearchPurpose());
+    otherWorkspace.setCdrVersionId(String.valueOf(cdrVersion.getCdrVersionId()));
+    otherWorkspace.setBillingAccountName("billing-account");
+
+    otherWorkspace = workspacesController.createWorkspace(otherWorkspace).getBody();
+
+    when(fireCloudService.getWorkspace(otherWorkspace.getNamespace(), otherWorkspace.getName()))
+        .thenReturn(new FirecloudWorkspaceResponse().accessLevel("OWNER"));
+
+    DataSet dataSet =
+        dataSetController
+            .createDataSet(
+                otherWorkspace.getNamespace(), otherWorkspace.getName(), buildValidDataSetRequest())
+            .getBody();
+
+    dataSetController.getDataSet(workspace.getNamespace(), workspace.getName(), dataSet.getId());
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void testGetDataSet_noAccess() {
+    dataSetController.getDataSet(
+        noAccessWorkspace.getNamespace(), noAccessWorkspace.getName(), noAccessDataSet.getId());
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void testUpdateDataSet_noAccess() {
+    dataSetController.updateDataSet(
+        noAccessWorkspace.getNamespace(),
+        noAccessWorkspace.getName(),
+        noAccessDataSet.getId(),
+        new DataSetRequest().etag("1"));
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void testUpdateDataSet_noAccessMismatchDataSetId() {
+    dataSetController.updateDataSet(
+        workspace.getNamespace(),
+        workspace.getName(),
+        noAccessDataSet.getId(),
+        new DataSetRequest().etag("1"));
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void testDeleteDataSet_noAccess() {
+    dataSetController.deleteDataSet(
+        noAccessWorkspace.getNamespace(), noAccessWorkspace.getName(), noAccessDataSet.getId());
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void testDeleteDataSet_noAccessMismatchDataSetId() {
+    dataSetController.deleteDataSet(
+        workspace.getNamespace(), workspace.getName(), noAccessDataSet.getId());
+  }
+
+  @Test
+  public void testDeleteDataSet_success() {
+    // Create several datasets to ensure we don't have an overlapping ID with a workspace, which
+    // could mask bugs.
+    DataSet dataSet = null;
+    for (int i = 0; i < 3; i++) {
+      dataSet =
+          dataSetController
+              .createDataSet(
+                  workspace.getNamespace(), workspace.getName(), buildValidDataSetRequest())
+              .getBody();
+    }
+
+    dataSetController.deleteDataSet(workspace.getNamespace(), workspace.getName(), dataSet.getId());
+
+    expectedException.expect(NotFoundException.class);
+    dataSetController.getDataSet(workspace.getNamespace(), workspace.getName(), dataSet.getId());
+  }
+
   DataSetRequest buildValidDataSetRequest() {
     return buildEmptyDataSetRequest()
         .name("blah")
-        .addCohortIdsItem(COHORT_ONE_ID)
-        .addConceptSetIdsItem(CONCEPT_SET_ONE_ID)
+        .addCohortIdsItem(cohort.getId())
+        .addConceptSetIdsItem(conceptSet1.getId())
         .domainValuePairs(mockDomainValuePair());
   }
 

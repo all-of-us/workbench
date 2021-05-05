@@ -4,17 +4,21 @@ import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
-import org.junit.runner.RunWith;
-import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.test.FakeClock;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Scope;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@Import({BaseTestConfiguration.class})
-public class SpringTest {
+@TestConfiguration
+public class BaseTestConfiguration {
+
+  public static final Timestamp NOW = Timestamp.from(Instant.now());
+  public static final long NOW_TIME = NOW.getTime();
+  public static final FakeClock CLOCK = new FakeClock(NOW.toInstant(), ZoneId.systemDefault());
+
+  @Bean
+  Clock clock() {
+    return CLOCK;
+  }
 }

@@ -24,7 +24,7 @@ public interface DataSetService {
 
   DataSet saveDataSet(DbDataset dataset);
 
-  DataSet updateDataSet(DataSetRequest dataSetRequest, Long DataSetId);
+  DataSet updateDataSet(long workspaceId, long dataSetId, DataSetRequest dataSetRequest);
 
   TableResult previewBigQueryJobConfig(DataSetPreviewRequest dataSetPreviewRequest);
 
@@ -50,15 +50,15 @@ public interface DataSetService {
 
   List<DbCohort> getCohortsForDataset(DbDataset dataSet);
 
-  List<DataSet> getDataSets(ResourceType resourceType, long resourceId);
+  List<DataSet> getDataSets(long workspaceId, ResourceType resourceType, long resourceId);
 
-  void deleteDataSet(Long dataSetId);
+  void deleteDataSet(long workspaceId, long dataSetId);
 
-  Optional<DataSet> getDataSet(Long dataSetId);
+  Optional<DataSet> getDataSet(long workspaceId, long dataSetId);
 
-  Optional<DbDataset> getDbDataSet(Long dataSetId);
+  Optional<DbDataset> getDbDataSet(long workspaceId, long dataSetId);
 
-  void markDirty(ResourceType resourceType, long resourceId);
+  void markDirty(long workspaceId, ResourceType resourceType, long resourceId);
 
   DataDictionaryEntry findDataDictionaryEntry(String fieldName, String domain);
 

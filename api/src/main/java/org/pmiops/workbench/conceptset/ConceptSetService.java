@@ -55,23 +55,12 @@ public class ConceptSetService {
   }
 
   public ConceptSet copyAndSave(
-<<<<<<< HEAD
-      Long fromConceptSetId, String newConceptSetName, DbUser creator, Long toWorkspaceId) {
-    final DbConceptSet existingConceptSet =
-        conceptSetDao
-            .findById(fromConceptSetId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("Concept set %s does not exist", fromConceptSetId)));
-=======
       Long fromConceptSetId,
       Long fromWorkspaceId,
       String newConceptSetName,
       DbUser creator,
       Long toWorkspaceId) {
     final DbConceptSet existingConceptSet = getDbConceptSet(fromWorkspaceId, fromConceptSetId);
->>>>>>> origin/master
     final Timestamp now = Timestamp.from(clock.instant());
     ConceptSetContext conceptSetContext =
         new ConceptSetContext.Builder()
@@ -105,19 +94,8 @@ public class ConceptSetService {
     }
   }
 
-<<<<<<< HEAD
-  public ConceptSet updateConceptSet(Long conceptSetId, ConceptSet conceptSet) {
-    DbConceptSet dbConceptSet =
-        conceptSetDao
-            .findById(conceptSetId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("ConceptSet not found for conceptSetId: %d", conceptSetId)));
-=======
   public ConceptSet updateConceptSet(Long workspaceId, Long conceptSetId, ConceptSet conceptSet) {
     DbConceptSet dbConceptSet = getDbConceptSet(workspaceId, conceptSetId);
->>>>>>> origin/master
     if (dbConceptSet.getVersion() != Etags.toVersion(conceptSet.getEtag())) {
       throw new ConflictException("Attempted to modify outdated concept set version");
     }
@@ -140,20 +118,9 @@ public class ConceptSetService {
     }
   }
 
-<<<<<<< HEAD
-  public ConceptSet updateConceptSetConcepts(Long conceptSetId, UpdateConceptSetRequest request) {
-    DbConceptSet dbConceptSet =
-        conceptSetDao
-            .findById(conceptSetId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("ConceptSet not found for concept id: %d", conceptSetId)));
-=======
   public ConceptSet updateConceptSetConcepts(
       Long workspaceId, Long conceptSetId, UpdateConceptSetRequest request) {
     DbConceptSet dbConceptSet = getDbConceptSet(workspaceId, conceptSetId);
->>>>>>> origin/master
 
     int version = Etags.toVersion(request.getEtag());
     if (dbConceptSet.getVersion() != version) {
@@ -203,19 +170,8 @@ public class ConceptSetService {
     conceptSetDao.deleteById(conceptSetId);
   }
 
-<<<<<<< HEAD
-  public ConceptSet getConceptSet(Long conceptSetId) {
-    DbConceptSet dbConceptSet =
-        conceptSetDao
-            .findById(conceptSetId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("ConceptSet not found for concept id: %d", conceptSetId)));
-=======
   public ConceptSet getConceptSet(Long workspaceId, Long conceptSetId) {
     DbConceptSet dbConceptSet = getDbConceptSet(workspaceId, conceptSetId);
->>>>>>> origin/master
     return toHydratedConcepts(
         conceptSetMapper.dbModelToClient(dbConceptSet, conceptBigQueryService));
   }
@@ -268,14 +224,10 @@ public class ConceptSetService {
 
   private ConceptSet toHydratedConcepts(ConceptSet conceptSet) {
     Set<DbConceptSetConceptId> dbConceptSetConceptIds =
-        conceptSetDao
-            .findById(conceptSet.getId())
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format(
-                            "ConceptSet not found for concept id: %d", conceptSet.getId())))
-            .getConceptSetConceptIds();
+        conceptSetDao.findById(conceptSet.getId()).orElseThrow(
+            () ->
+                new NotFoundException(
+                    String.format("Concept set %s does not exist", conceptSet.getId()))).getConceptSetConceptIds();
     List<Criteria> criteriaList =
         cohortBuilderService.findCriteriaByDomainIdAndConceptIds(
             conceptSet.getDomain().toString(), dbConceptSetConceptIds);

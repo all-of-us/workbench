@@ -247,19 +247,20 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   @Override
-  public DataSet updateDataSet(DataSetRequest request, Long dataSetId) {
-    DbDataset dbDataSet =
-        dataSetDao
-            .findById(dataSetId)
-            .orElseThrow(
-                () ->
-                    new NotFoundException(String.format("DbDataset %s does not exist", dataSetId)));
+  public DataSet updateDataSet(long workspaceId, long dataSetId, DataSetRequest request) {
+    Optional<DbDataset> dbDataSet =
+        dataSetDao.findByDataSetIdAndWorkspaceId(dataSetId, workspaceId);
+
+    if (!dbDataSet.isPresent()) {
+      throw new NotFoundException(
+          "No DataSet found for dataSetId " + dataSetId + " and workspaceId " + workspaceId);
+    }
 
     int version = Etags.toVersion(request.getEtag());
-    if (dbDataSet.getVersion() != version) {
+    if (dbDataSet.get().getVersion() != version) {
       throw new ConflictException("Attempted to modify outdated data set version");
     }
-    DbDataset dbMappingConvert = dataSetMapper.dataSetRequestToDb(request, dbDataSet, clock);
+    DbDataset dbMappingConvert = dataSetMapper.dataSetRequestToDb(request, dbDataSet.get(), clock);
     return saveDataSet(dbMappingConvert);
   }
 
@@ -309,19 +310,19 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       final List<DbConceptSetConceptId> dbConceptSetConceptIds =
           (domain.equals(Domain.SURVEY) && request.getPrePackagedConceptSet().contains(SURVEY))
               ? conceptBigQueryService.getSurveyQuestionConceptIds().stream()
-                  .map(
-                      c ->
-                          DbConceptSetConceptId.builder()
-                              .addConceptId(c)
-                              .addStandard(false)
-                              .build())
-                  .collect(Collectors.toList())
+              .map(
+                  c ->
+                      DbConceptSetConceptId.builder()
+                          .addConceptId(c)
+                          .addStandard(false)
+                          .build())
+              .collect(Collectors.toList())
               : conceptSetDao.findAllByConceptSetIdIn(request.getConceptSetIds()).stream()
                   .filter(
                       cs ->
                           cs.getDomainEnum().equals(domain)
                               || (cs.getDomainEnum().equals(Domain.PHYSICAL_MEASUREMENT_CSS)
-                                  && domain.equals(Domain.MEASUREMENT)))
+                              && domain.equals(Domain.MEASUREMENT)))
                   .flatMap(cs -> cs.getConceptSetConceptIds().stream())
                   .collect(Collectors.toList());
       Map<Boolean, List<DbConceptSetConceptId>> partitionSourceAndStandard =
@@ -388,13 +389,11 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   public Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSetRequest) {
     DbDataset dbDataset;
     if (dataSetRequest.getDataSetId() != null) {
-      dbDataset =
-          dataSetDao
-              .findById(dataSetRequest.getDataSetId())
-              .orElseThrow(
-                  // In case wrong dataSetId is passed to Api
-                  () ->
-                      new BadRequestException("Data Set Generate code Failed: Data set not found"));
+      dbDataset = dataSetDao.findById(dataSetRequest.getDataSetId()).orElse(null);
+      // In case wrong dataSetId is passed to Api
+      if (dbDataset == null) {
+        throw new BadRequestException("Data Set Generate code Failed: Data set not found");
+      }
     } else {
       dbDataset = dataSetMapper.dataSetRequestToDb(dataSetRequest, null, clock);
     }
@@ -657,16 +656,16 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 cs ->
                     cs.getDomainEnum().equals(domain)
                         || (cs.getDomainEnum().equals(Domain.PHYSICAL_MEASUREMENT)
-                            && domain.equals(Domain.MEASUREMENT)))
+                        && domain.equals(Domain.MEASUREMENT)))
             .collect(Collectors.toList());
     if (preDefinedSurveyConceptSet(dbConceptSets)) {
       return Optional.of(
           "("
               + BigQueryDataSetTableInfo.getConceptIdIn(domain, false)
-                  .replace("unnest", "")
-                  .replace(
-                      "@sourceConceptIds",
-                      ConceptBigQueryService.SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE)
+              .replace("unnest", "")
+              .replace(
+                  "@sourceConceptIds",
+                  ConceptBigQueryService.SURVEY_QUESTION_CONCEPT_ID_SQL_TEMPLATE)
               + ")");
     } else {
       final List<DbConceptSetConceptId> dbConceptSetConceptIds =
@@ -770,12 +769,12 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                 prerequisites
                     + "\n\n"
                     + generateNotebookUserCode(
-                        entry.getValue(),
-                        Domain.fromValue(entry.getKey()),
-                        dataSetName,
-                        cdrVersionName,
-                        qualifier,
-                        kernelTypeEnum))
+                    entry.getValue(),
+                    Domain.fromValue(entry.getKey()),
+                    dataSetName,
+                    cdrVersionName,
+                    qualifier,
+                    kernelTypeEnum))
         .collect(Collectors.toList());
   }
 
@@ -810,70 +809,70 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @Override
   public List<DbConceptSet> getConceptSetsForDataset(DbDataset dataSet) {
     return conceptSetDao.findAllByConceptSetIdIn(
-        dataSetDao
-            .findById(dataSet.getDataSetId())
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("DbDataset %s does not exist", dataSet.getDataSetId())))
-            .getCohortIds());
+        dataSetDao.findById(dataSet.getDataSetId()).orElseThrow(() -> new NotFoundException(String.format("ConceptSets %s does not exist", dataSet.getDataSetId()))).getCohortIds());
   }
 
   @Transactional
   @Override
   public List<DbCohort> getCohortsForDataset(DbDataset dataSet) {
-    return cohortDao.findAllByCohortIdIn(
-        dataSetDao
-            .findById(dataSet.getDataSetId())
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("DbDataset %s does not exist", dataSet.getDataSetId())))
-            .getCohortIds());
+    return cohortDao.findAllByCohortIdIn(dataSetDao.findById(dataSet.getDataSetId()).orElseThrow(() -> new NotFoundException(String.format("Cohorts %s does not exist", dataSet.getDataSetId()))).getCohortIds());
   }
 
-  public List<DataSet> getDataSets(ResourceType resourceType, long resourceId) {
-    return getDbDataSets(resourceType, resourceId).stream()
+  public List<DataSet> getDataSets(long workspaceId, ResourceType resourceType, long resourceId) {
+    return getDbDataSets(workspaceId, resourceType, resourceId).stream()
         .map(dataSetMapper::dbModelToClient)
         .collect(Collectors.toList());
   }
 
-  public List<DbDataset> getDbDataSets(ResourceType resourceType, long resourceId) {
+  // TODO(calbach): Remove direct testing of this - cover via public interface.
+  @VisibleForTesting
+  public List<DbDataset> getDbDataSets(
+      long workspaceId, ResourceType resourceType, long resourceId) {
     List<DbDataset> dbDataSets = new ArrayList<>();
     switch (resourceType) {
       case COHORT:
-        dbDataSets = dataSetDao.findDataSetsByCohortIds(resourceId);
+        DbCohort dbCohort = cohortDao.findById(resourceId).orElse(null);
+        if (dbCohort == null || dbCohort.getWorkspaceId() != workspaceId) {
+          throw new NotFoundException("Resource does not belong to specified workspace");
+        }
+        dbDataSets = dataSetDao.findDataSetsByCohortIdsAndWorkspaceId(resourceId, workspaceId);
         break;
       case CONCEPT_SET:
-        dbDataSets = dataSetDao.findDataSetsByConceptSetIds(resourceId);
+        DbConceptSet dbConceptSet = conceptSetDao.findById(resourceId).orElse(null);
+        if (dbConceptSet == null || dbConceptSet.getWorkspaceId() != workspaceId) {
+          throw new NotFoundException("Resource does not belong to specified workspace");
+        }
+        dbDataSets = dataSetDao.findDataSetsByConceptSetIdsAndWorkspaceId(resourceId, workspaceId);
         break;
     }
     return dbDataSets;
   }
 
   @Override
-  public void deleteDataSet(Long dataSetId) {
+  public void deleteDataSet(long workspaceId, long dataSetId) {
+    Optional<DbDataset> dbDataset = this.getDbDataSet(workspaceId, dataSetId);
+    if (!dbDataset.isPresent()) {
+      throw new NotFoundException(
+          "No DataSet found for dataSetId " + dataSetId + " and workspaceId " + workspaceId);
+    }
     dataSetDao.deleteById(dataSetId);
   }
 
   @Override
-<<<<<<< HEAD
-  public Optional<DataSet> getDbDataSet(Long dataSetId) {
-    return Optional.of(dataSetMapper.dbModelToClient(dataSetDao.findById(dataSetId).get()));
-=======
-  public Optional<DataSet> getDataSet(Long dataSetId) {
-    return getDbDataSet(dataSetId).map(dataSetMapper::dbModelToClient);
+  public Optional<DataSet> getDataSet(long workspaceId, long dataSetId) {
+    return dataSetDao
+        .findByDataSetIdAndWorkspaceId(dataSetId, workspaceId)
+        .map(dataSetMapper::dbModelToClient);
   }
 
   @Override
-  public Optional<DbDataset> getDbDataSet(Long dataSetId) {
-    return Optional.ofNullable(dataSetDao.findOne(dataSetId));
->>>>>>> origin/master
+  public Optional<DbDataset> getDbDataSet(long workspaceId, long dataSetId) {
+    return dataSetDao.findByDataSetIdAndWorkspaceId(dataSetId, workspaceId);
   }
 
   @Override
-  public void markDirty(ResourceType resourceType, long resourceId) {
-    List<DbDataset> dbDataSetList = getDbDataSets(resourceType, resourceId);
+  public void markDirty(long workspaceId, ResourceType resourceType, long resourceId) {
+    List<DbDataset> dbDataSetList = getDbDataSets(workspaceId, resourceType, resourceId);
     dbDataSetList.forEach(dataSet -> dataSet.setInvalid(true));
     try {
       dataSetDao.saveAll(dbDataSetList);
@@ -969,9 +968,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
         cohortQueryBuilder.buildUnionedParticipantIdQuery(participantCriteriaList);
 
     return Streams.stream(
-            bigQueryService
-                .executeQuery(bigQueryService.filterBigQueryConfig(participantIdQuery))
-                .getValues())
+        bigQueryService
+            .executeQuery(bigQueryService.filterBigQueryConfig(participantIdQuery))
+            .getValues())
         .map(personId -> personId.get(0).getValue().toString())
         .collect(Collectors.toList());
   }
@@ -1034,8 +1033,8 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
     String value =
         ARRAY.equals(parameter.getValue().getType())
             ? nullableListToEmpty(parameter.getValue().getArrayValues()).stream()
-                .map(DataSetServiceImpl::convertSqlTypeToString)
-                .collect(Collectors.joining(", "))
+            .map(DataSetServiceImpl::convertSqlTypeToString)
+            .collect(Collectors.joining(", "))
             : convertSqlTypeToString(parameter.getValue());
     String key = String.format("@%s", parameter.getKey());
     return s.replaceAll(key, value);
@@ -1085,9 +1084,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             namespace
                 + "sql = \"\"\""
                 + fillInQueryParams(
-                    generateSqlWithEnvironmentVariables(
-                        queryJobConfiguration.getQuery(), kernelTypeEnum),
-                    queryJobConfiguration.getNamedParameters())
+                generateSqlWithEnvironmentVariables(
+                    queryJobConfiguration.getQuery(), kernelTypeEnum),
+                queryJobConfiguration.getNamedParameters())
                 + "\"\"\"";
         dataFrameSection =
             namespace + "df = pandas.read_gbq(" + namespace + "sql, dialect=\"standard\")";
@@ -1098,9 +1097,9 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
             namespace
                 + "sql <- paste(\""
                 + fillInQueryParams(
-                    generateSqlWithEnvironmentVariables(
-                        queryJobConfiguration.getQuery(), kernelTypeEnum),
-                    queryJobConfiguration.getNamedParameters())
+                generateSqlWithEnvironmentVariables(
+                    queryJobConfiguration.getQuery(), kernelTypeEnum),
+                queryJobConfiguration.getNamedParameters())
                 + "\", sep=\"\")";
         dataFrameSection =
             namespace

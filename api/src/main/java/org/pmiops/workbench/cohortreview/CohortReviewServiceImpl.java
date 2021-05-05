@@ -142,15 +142,6 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
   public CohortReviewServiceImpl() {}
 
   @Override
-<<<<<<< HEAD
-  public DbCohort findCohort(long cohortId) {
-    return cohortDao
-        .findById(cohortId)
-        .orElseThrow(
-            () ->
-                new NotFoundException(
-                    String.format("Not Found: No Cohort exists for cohortId: %s", cohortId)));
-=======
   public DbCohort findCohort(long workspaceId, long cohortId) {
     DbCohort cohort = cohortDao.findCohortByWorkspaceIdAndCohortId(workspaceId, cohortId);
     if (cohort == null) {
@@ -158,7 +149,6 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
           String.format("Not Found: No Cohort exists for cohortId: %s", cohortId));
     }
     return cohort;
->>>>>>> origin/master
   }
 
   @Override
@@ -196,7 +186,7 @@ public class CohortReviewServiceImpl implements CohortReviewService, GaugeDataCo
 
   @Override
   public void deleteCohortReview(Long cohortReviewId) {
-    cohortReviewDao.delete(cohortReviewId);
+    cohortReviewDao.deleteById(cohortReviewId);
   }
 
   @Override

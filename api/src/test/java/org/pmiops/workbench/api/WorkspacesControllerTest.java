@@ -19,6 +19,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static org.pmiops.workbench.BaseTestConfiguration.CLOCK;
+import static org.pmiops.workbench.BaseTestConfiguration.NOW_TIME;
 import static org.pmiops.workbench.utils.TestMockFactory.DEFAULT_GOOGLE_PROJECT;
 
 import com.google.api.services.cloudbilling.Cloudbilling;
@@ -413,8 +415,6 @@ public class WorkspacesControllerTest extends SpringTest {
     archivedCdrVersion.setArchivalStatusEnum(ArchivalStatus.ARCHIVED);
     archivedCdrVersion = cdrVersionDao.save(archivedCdrVersion);
     archivedCdrVersionId = Long.toString(archivedCdrVersion.getCdrVersionId());
-
-    CLOCK.setInstant(NOW.toInstant());
 
     fcWorkspaceAcl = createWorkspaceACL();
     testMockFactory.stubBufferBillingProject(billingProjectBufferService);

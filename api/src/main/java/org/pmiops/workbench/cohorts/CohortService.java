@@ -30,38 +30,14 @@ public class CohortService {
     this.cohortMapper = cohortMapper;
   }
 
-<<<<<<< HEAD
-  public List<String> getPersonIdsWithWholeGenome(Long cohortId) {
-    String cohortDefinition = cohortDao.findById(cohortId).get().getCriteria();
-
-    // AND the existing search criteria with participants having genomics data.
-    final SearchRequest searchRequest = new Gson().fromJson(cohortDefinition, SearchRequest.class);
-    searchRequest.addIncludesItem(
-        new SearchGroup()
-            .items(
-                ImmutableList.of(
-                    new SearchGroupItem()
-                        .type(Domain.WHOLE_GENOME_VARIANT.toString())
-                        .addSearchParametersItem(
-                            new SearchParameter()
-                                .domain(Domain.WHOLE_GENOME_VARIANT.toString())
-                                .type(CriteriaType.PPI.toString())
-                                .group(false)))));
-    final QueryJobConfiguration participantIdQuery =
-        cohortQueryBuilder.buildParticipantIdQuery(new ParticipantCriteria(searchRequest));
-
-    return Streams.stream(
-            bigQueryService
-                .executeQuery(bigQueryService.filterBigQueryConfig(participantIdQuery))
-                .getValues())
-        .map(personId -> personId.get(0).getValue().toString())
-        .collect(Collectors.toList());
-  }
-
-=======
->>>>>>> origin/master
   public List<Cohort> findAll(List<Long> cohortIds) {
     return ((List<DbCohort>) cohortDao.findAllById(cohortIds))
         .stream().map(cohortMapper::dbModelToClient).collect(Collectors.toList());
+  }
+
+  public List<Cohort> findByWorkspaceId(Long workspaceId) {
+    return cohortDao.findByWorkspaceId(workspaceId).stream()
+        .map(cohortMapper::dbModelToClient)
+        .collect(Collectors.toList());
   }
 }

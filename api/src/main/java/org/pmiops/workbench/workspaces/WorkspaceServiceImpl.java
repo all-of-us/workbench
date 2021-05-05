@@ -292,63 +292,6 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
   }
 
   @Override
-<<<<<<< HEAD
-  public WorkspaceAccessLevel getWorkspaceAccessLevel(String workspaceNamespace, String workspaceId)
-      throws IllegalArgumentException {
-    String userAccess =
-        fireCloudService.getWorkspace(workspaceNamespace, workspaceId).getAccessLevel();
-    if (PROJECT_OWNER_ACCESS_LEVEL.equals(userAccess)) {
-      return WorkspaceAccessLevel.OWNER;
-    }
-    return Optional.ofNullable(WorkspaceAccessLevel.fromValue(userAccess))
-        .orElseThrow(
-            () -> new IllegalArgumentException("Unrecognized access level: " + userAccess));
-  }
-
-  @Override
-  public WorkspaceAccessLevel enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-      String workspaceNamespace, String workspaceId, WorkspaceAccessLevel requiredAccess) {
-    final WorkspaceAccessLevel access;
-    try {
-      access = getWorkspaceAccessLevel(workspaceNamespace, workspaceId);
-    } catch (IllegalArgumentException e) {
-      throw new ServerErrorException(e);
-    }
-    if (requiredAccess.compareTo(access) > 0) {
-      throw new ForbiddenException(
-          String.format(
-              "You do not have sufficient permissions to access workspace %s/%s",
-              workspaceNamespace, workspaceId));
-    } else {
-      return access;
-    }
-  }
-
-  @Override
-  public DbWorkspace getWorkspaceEnforceAccessLevelAndSetCdrVersion(
-      String workspaceNamespace, String workspaceId, WorkspaceAccessLevel workspaceAccessLevel) {
-    enforceWorkspaceAccessLevelAndRegisteredAuthDomain(
-        workspaceNamespace, workspaceId, workspaceAccessLevel);
-    DbWorkspace workspace = getRequired(workspaceNamespace, workspaceId);
-    // Because we've already checked that the user has access to the workspace in question,
-    // we don't need to check their membership in the authorization domain for the CDR version
-    // associated with the workspace.
-    CdrVersionContext.setCdrVersionNoCheckAuthDomain(workspace.getCdrVersion());
-    return workspace;
-  }
-
-  @Override
-  public Optional<DbWorkspace> findActiveByWorkspaceId(long workspaceId) {
-    DbWorkspace workspace = getDao().findById(workspaceId).orElse(null);
-    if (workspace == null || !workspace.isActive()) {
-      return Optional.empty();
-    }
-    return Optional.of(workspace);
-  }
-
-  @Override
-=======
->>>>>>> origin/master
   public List<UserRole> getFirecloudUserRoles(String workspaceNamespace, String firecloudName) {
     Map<String, FirecloudWorkspaceAccessEntry> emailToRole =
         workspaceAuthService.getFirecloudWorkspaceAcls(workspaceNamespace, firecloudName);
@@ -566,13 +509,4 @@ public class WorkspaceServiceImpl implements WorkspaceService, GaugeDataCollecto
                     .build())
         .collect(ImmutableList.toImmutableList());
   }
-<<<<<<< HEAD
-
-  @Override
-  public List<DbWorkspace> getAllActiveWorkspaces() {
-    return workspaceDao.findAllByActiveStatus(
-        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.ACTIVE));
-  }
-=======
->>>>>>> origin/master
 }
