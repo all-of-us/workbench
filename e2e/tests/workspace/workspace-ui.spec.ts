@@ -36,9 +36,13 @@ describe('Workspace UI tests', () => {
       }
     }
 
-    // Open Your Workspaces page
+    // In Your Workspaces page, check Workspace name, Last Changed Time and Access Role.
     await Navigation.navMenu(page, NavLink.YOUR_WORKSPACES);
     await new WorkspacesPage(page).waitForLoad();
+
+    if ((await WorkspaceCard.findAllCards(page)).length === 0) {
+      return; // End test now, no Workspace card.
+    }
 
     // Randomly choose one card to check
     const card = await WorkspaceCard.findAnyCard(page);
