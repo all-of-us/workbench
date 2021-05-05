@@ -7,10 +7,10 @@ import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.junit.Before;
 import org.junit.Test;
@@ -206,22 +206,55 @@ public class UserServiceAccessTest {
   @Test
   public void test_updateUserWithRetries_access_renewal() {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
+    providedWorkbenchConfig.access.enableDataUseAgreement = true;
+    providedWorkbenchConfig.accessRenewal.expiryDays = (long) 365;
     DbUser dbUser = new DbUser();
-    assertThat(userAccessTierDao.findAll()).isEmpty();
 
-    Timestamp expiredTime =
-        new Timestamp(
-            Instant.now().toEpochMilli() - TimeUnit.MILLISECONDS.convert(366, TimeUnit.DAYS));
+    // The user is still compliant and has bypass set
+    dbUser.setDataUseAgreementCompletionTime(
+        Timestamp.from(
+            START_INSTANT.minus(
+                (providedWorkbenchConfig.accessRenewal.expiryDays - 1), ChronoUnit.DAYS)));
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser = userService.updateUserWithRetries(registerUserNow, dbUser, Agent.asUser(dbUser));
 
-    dbUser.setDataUseAgreementCompletionTime(expiredTime);
-    assertThat(userAccessTierDao.findAll()).isEmpty();
-    // assertThat(userAccessTierDao.getAllByUser(dbUser)).hasSize(1);
+    assertThat(userAccessTierDao.findAll()).hasSize(1);
+    assertThat(userAccessTierDao.getAllByUser(dbUser).get(0).getTierAccessStatusEnum())
+        .isEqualTo(TierAccessStatus.ENABLED);
 
-    // registerUserWithTime.apply(Timestamp.from(Instant.now()));
+    // User is compliant and we remove dua bypass
+    dbUser.setDataUseAgreementCompletionTime(
+        Timestamp.from(
+            START_INSTANT.minus(
+                (providedWorkbenchConfig.accessRenewal.expiryDays - 1), ChronoUnit.DAYS)));
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
     dbUser =
         userService.updateUserWithRetries(
-            registerUserWithTime.apply(expiredTime), dbUser, Agent.asUser(dbUser));
+            this::registerUserWithoutDuaBypass, dbUser, Agent.asUser(dbUser));
+
+    assertThat(userAccessTierDao.findAll()).hasSize(1);
+    assertThat(userAccessTierDao.getAllByUser(dbUser).get(0).getTierAccessStatusEnum())
+        .isEqualTo(TierAccessStatus.ENABLED);
+
+    // The user DUA is no longer compliant
+    dbUser.setDataUseAgreementCompletionTime(
+        Timestamp.from(
+            START_INSTANT.minus(
+                (providedWorkbenchConfig.accessRenewal.expiryDays + 1), ChronoUnit.DAYS)));
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+    dbUser =
+        userService.updateUserWithRetries(
+            this::registerUserWithoutDuaBypass, dbUser, Agent.asUser(dbUser));
+
+    // Submit Data Use Agreement at START_INSTANT timestamp
     assertThat(userAccessTierDao.getAllByUser(dbUser)).hasSize(1);
+    assertThat(userAccessTierDao.getAllByUser(dbUser).get(0).getTierAccessStatusEnum())
+        .isEqualTo(TierAccessStatus.DISABLED);
+  }
+
+  private DbUser registerUserWithoutDuaBypass(DbUser user) {
+    user.setDataUseAgreementBypassTime(null);
+    return userDao.save(user);
   }
 
   private DbUser registerUser(Timestamp timestamp, DbUser user) {
