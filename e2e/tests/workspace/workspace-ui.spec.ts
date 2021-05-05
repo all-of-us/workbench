@@ -8,8 +8,11 @@ import ReactSelect from 'app/element/react-select';
 import { MenuOption } from 'app/text-labels';
 import WorkspaceEditPage from 'app/page/workspace-edit-page';
 import { getPropValue } from 'utils/element-utils';
+import { waitForNumericalString } from 'utils/waits-utils';
 
 describe('Workspace UI tests', () => {
+  const charLimitXpath = '//*[@data-test-id="characterLimit"]';
+
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
@@ -80,7 +83,8 @@ describe('Workspace UI tests', () => {
     const dataAccessTierSelect = await editPage.getDataAccessTierSelect();
     expect(await dataAccessTierSelect.isDisabled()).toBe(false);
 
-    const textAreaCharLimitElements = await page.$$('[data-test-id="characterLimit"]');
+    // 1000 characters is the limit in textarea.
+    const textAreaCharLimitElements = await page.$x(charLimitXpath);
     for (const elm of textAreaCharLimitElements) {
       const charLimitTexts = await getPropValue<string>(elm, 'textContent');
       expect(charLimitTexts).toEqual('1000 characters remaining');
@@ -149,6 +153,11 @@ describe('Workspace UI tests', () => {
 
     const shareWorkspaceCheckbox = await workspaceEditPage.getShareWithCollaboratorsCheckbox();
     expect(await shareWorkspaceCheckbox.isChecked()).toBe(false);
+
+    // Textarea character count should be a positive number and less than 1000.
+    const charCount = await waitForNumericalString(page, charLimitXpath);
+    expect(parseInt(charCount)).toBeGreaterThan(1);
+    expect(parseInt(charCount)).toBeLessThan(1000);
 
     const cancelButton = workspaceEditPage.getCancelButton();
     await cancelButton.clickAndWait();
