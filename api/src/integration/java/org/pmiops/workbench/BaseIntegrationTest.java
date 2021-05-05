@@ -28,10 +28,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
 @Import({IntegrationTestConfig.class})
-@PropertySources({
-    @PropertySource("classpath:application.properties"),
-    @PropertySource("classpath:application-integration.properties"),
-})
 @DataJpaTest
 public abstract class BaseIntegrationTest {
 

@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.junit.Test;
 import org.pmiops.workbench.firecloud.ApiClient;
 import org.pmiops.workbench.firecloud.ApiException;
+import org.pmiops.workbench.firecloud.FireCloudConfig;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.api.NihApi;
@@ -15,6 +16,7 @@ import org.pmiops.workbench.google.StorageConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 
 public class FireCloudIntegrationTest extends BaseIntegrationTest {
@@ -22,8 +24,9 @@ public class FireCloudIntegrationTest extends BaseIntegrationTest {
   @Autowired private FireCloudService service;
 
   @TestConfiguration
-  @ComponentScan(basePackageClasses = FireCloudServiceImpl.class)
-  @Import({FireCloudServiceImpl.class, StorageConfig.class})
+//  @ComponentScan(basePackageClasses = FireCloudServiceImpl.class, excludeFilters={
+//      @ComponentScan.Filter(type= FilterType.ASSIGNABLE_TYPE, classes = ApiClient.class)})
+  @Import({FireCloudConfig.class, FireCloudServiceImpl.class, StorageConfig.class})
   static class Configuration {}
 
   @Test
