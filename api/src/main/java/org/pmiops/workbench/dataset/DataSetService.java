@@ -37,6 +37,15 @@ public interface DataSetService {
       String qualifier,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap);
 
+  List<String> generateMicroarrayCohortExtractCodeCells(
+      DbWorkspace dbWorkspace,
+      String qualifier,
+      Map<String, QueryJobConfiguration> queryJobConfigurationMap);
+
+  List<String> generatePlinkDemoCode(String qualifier);
+
+  List<String> generateHailDemoCode(String qualifier);
+
   DbDataset cloneDataSetToWorkspace(
       DbDataset fromDataSet,
       DbWorkspace toWorkspace,

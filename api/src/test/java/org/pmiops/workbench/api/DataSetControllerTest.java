@@ -115,6 +115,7 @@ import org.pmiops.workbench.model.ConceptSetConceptId;
 import org.pmiops.workbench.model.CreateConceptSetRequest;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetExportRequest;
+import org.pmiops.workbench.model.DataSetExportRequest.GenomicsAnalysisToolEnum;
 import org.pmiops.workbench.model.DataSetExportRequest.GenomicsDataTypeEnum;
 import org.pmiops.workbench.model.DataSetPreviewValueList;
 import org.pmiops.workbench.model.DataSetRequest;
@@ -335,6 +336,7 @@ public class DataSetControllerTest {
     currentUser = user;
 
     cdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
+    cdrVersion.setMicroarrayBigqueryDataset("microarray");
     cdrVersion = cdrVersionDao.save(cdrVersion);
 
     workspace =
@@ -862,14 +864,14 @@ public class DataSetControllerTest {
   }
 
   @Test
-  public void exportToNotebook_wgsCodegen_cdrCheck() {
+  public void exportToNotebook_microarrayCodegen_cdrCheck() {
     DbCdrVersion cdrVersion =
         cdrVersionDao.findByCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
-    cdrVersion.setWgsBigqueryDataset(null);
+    cdrVersion.setMicroarrayBigqueryDataset(null);
     cdrVersionDao.save(cdrVersion);
 
     DataSetExportRequest request =
-        setUpValidDataSetExportRequest().genomicsDataType(GenomicsDataTypeEnum.WHOLE_GENOME);
+        setUpValidDataSetExportRequest().genomicsDataType(GenomicsDataTypeEnum.MICROARRAY);
 
     FailedPreconditionException e =
         assertThrows(
@@ -879,20 +881,15 @@ public class DataSetControllerTest {
                     workspace.getNamespace(), workspace.getName(), request));
     assertThat(e)
         .hasMessageThat()
-        .contains("The workspace CDR version does not have whole genome data");
+        .contains("The workspace CDR version does not have microarray data");
   }
 
   @Test
-  public void exportToNotebook_wgsCodegen_kernelCheck() {
-    DbCdrVersion cdrVersion =
-        cdrVersionDao.findByCdrVersionId(Long.parseLong(workspace.getCdrVersionId()));
-    cdrVersion.setWgsBigqueryDataset("wgs");
-    cdrVersionDao.save(cdrVersion);
-
+  public void exportToNotebook_microarrayCodegen_kernelCheck() {
     DataSetExportRequest request =
         setUpValidDataSetExportRequest()
             .kernelType(KernelTypeEnum.R)
-            .genomicsDataType(GenomicsDataTypeEnum.WHOLE_GENOME);
+            .genomicsDataType(GenomicsDataTypeEnum.MICROARRAY);
 
     BadRequestException e =
         assertThrows(
@@ -901,6 +898,114 @@ public class DataSetControllerTest {
                 dataSetController.exportToNotebook(
                     workspace.getNamespace(), workspace.getName(), request));
     assertThat(e).hasMessageThat().contains("Genomics code generation is only supported in Python");
+  }
+
+  @Test
+  public void exportToNotebook_microarrayCodegen_noGenomicsTool() {
+    DataSetExportRequest request =
+        setUpValidDataSetExportRequest()
+            .genomicsDataType(GenomicsDataTypeEnum.MICROARRAY)
+            .genomicsAnalysisTool(GenomicsAnalysisToolEnum.NONE);
+
+    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
+
+    verify(mockNotebooksService, times(1))
+        .saveNotebook(
+            eq(WORKSPACE_BUCKET_NAME),
+            eq(request.getNotebookName()),
+            notebookContentsCaptor.capture());
+
+    List<String> codeCells = notebookContentsToStrings(notebookContentsCaptor.getValue());
+
+    assertThat(codeCells.size()).isEqualTo(5);
+    assertThat(codeCells.get(2)).contains("raw_array_cohort_extract.py");
+    assertThat(codeCells.get(3)).contains("ArrayExtractCohort");
+    assertThat(codeCells.get(4)).contains("gsutil cp");
+  }
+
+  @Test
+  public void exportToNotebook_microarrayCodegen_plink() {
+    DataSetExportRequest request =
+        setUpValidDataSetExportRequest()
+            .genomicsDataType(GenomicsDataTypeEnum.MICROARRAY)
+            .genomicsAnalysisTool(GenomicsAnalysisToolEnum.PLINK);
+
+    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
+
+    verify(mockNotebooksService, times(1))
+        .saveNotebook(
+            eq(WORKSPACE_BUCKET_NAME),
+            eq(request.getNotebookName()),
+            notebookContentsCaptor.capture());
+
+    List<String> codeCells = notebookContentsToStrings(notebookContentsCaptor.getValue());
+
+    assertThat(codeCells.size()).isEqualTo(7);
+    assertThat(codeCells.get(3)).contains("ArrayExtractCohort");
+    assertThat(codeCells.get(5)).contains("cohort_phenotypes.to_csv");
+    assertThat(codeCells.get(5)).contains(".phe");
+    assertThat(codeCells.get(6)).contains("plink");
+  }
+
+  List<String> notebookContentsToStrings(JSONObject notebookContents) {
+    List<String> codeCellStrings = new ArrayList<>();
+
+    JSONArray cells = notebookContents.getJSONArray("cells");
+    for (int i = 0; i < cells.length(); i++) {
+      StringBuilder cellString = new StringBuilder();
+      JSONArray innerCells = cells.getJSONObject(i).getJSONArray("source");
+
+      for (int j = 0; j < innerCells.length(); j++) {
+        cellString.append(innerCells.getString(j));
+      }
+
+      codeCellStrings.add(cellString.toString());
+    }
+
+    return codeCellStrings;
+  }
+
+  @Test
+  public void exportToNotebook_microarrayCodegen_hail() {
+    DataSetExportRequest request =
+        setUpValidDataSetExportRequest()
+            .genomicsDataType(GenomicsDataTypeEnum.MICROARRAY)
+            .genomicsAnalysisTool(GenomicsAnalysisToolEnum.HAIL);
+
+    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
+
+    verify(mockNotebooksService, times(1))
+        .saveNotebook(
+            eq(WORKSPACE_BUCKET_NAME),
+            eq(request.getNotebookName()),
+            notebookContentsCaptor.capture());
+
+    List<String> codeCells = notebookContentsToStrings(notebookContentsCaptor.getValue());
+
+    assertThat(codeCells.size()).isEqualTo(7);
+    assertThat(codeCells.get(3)).contains("ArrayExtractCohort");
+    assertThat(codeCells.get(5)).contains("cohort_phenotypes.to_csv");
+    assertThat(codeCells.get(5)).contains(".tsv");
+    assertThat(codeCells.get(6)).contains("import hail as hl");
+  }
+
+  @Test
+  public void exportToNotebook_microarrayCodegen_noneGenomicsDataType() {
+    DataSetExportRequest request =
+        setUpValidDataSetExportRequest()
+            .genomicsDataType(GenomicsDataTypeEnum.NONE)
+            .genomicsAnalysisTool(GenomicsAnalysisToolEnum.HAIL);
+
+    dataSetController.exportToNotebook(workspace.getNamespace(), WORKSPACE_NAME, request);
+
+    verify(mockNotebooksService, times(1))
+        .saveNotebook(
+            eq(WORKSPACE_BUCKET_NAME),
+            eq(request.getNotebookName()),
+            notebookContentsCaptor.capture());
+
+    List<String> codeCells = notebookContentsToStrings(notebookContentsCaptor.getValue());
+    assertThat(codeCells.size()).isEqualTo(1);
   }
 
   @Test

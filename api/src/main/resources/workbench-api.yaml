@@ -3838,6 +3838,8 @@ definitions:
         type: string
       archivalStatus:
         "$ref": "#/definitions/ArchivalStatus"
+      hasMicroarrayData:
+        type: boolean
       hasWgsData:
         type: boolean
       hasFitbitData:
@@ -4938,7 +4940,7 @@ definitions:
         default: NONE
         enum:
           - NONE
-          - WHOLE_GENOME
+          - MICROARRAY
       genomicsAnalysisTool:
         type: string
         default: NONE

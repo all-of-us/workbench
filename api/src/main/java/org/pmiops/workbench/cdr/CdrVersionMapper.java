@@ -12,6 +12,7 @@ import org.pmiops.workbench.utils.mappers.MapStructConfig;
     uses = {CommonMappers.class})
 public interface CdrVersionMapper {
 
+  @Mapping(source = "microarrayBigqueryDataset", target = "hasMicroarrayData")
   @Mapping(source = "wgsBigqueryDataset", target = "hasWgsData")
   @Mapping(source = "archivalStatusEnum", target = "archivalStatus")
   @Mapping(source = "accessTier.shortName", target = "accessTierShortName")

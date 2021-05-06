@@ -56,6 +56,7 @@ public class CdrConfigVOMapperTest extends SpringTest {
     testVersionJson.numParticipants = 100;
     testVersionJson.cdrDbName = "data";
     testVersionJson.elasticIndexBaseName = "elastic";
+    testVersionJson.microarrayBigqueryDataset = "micro big";
     testVersionJson.wgsBigqueryDataset = "wgs1";
     testVersionJson.hasFitbitData = false;
     testVersionJson.hasCopeSurveyData = true;
@@ -155,6 +156,7 @@ public class CdrConfigVOMapperTest extends SpringTest {
     expected.setNumParticipants(testVersionJson.numParticipants);
     expected.setCdrDbName(testVersionJson.cdrDbName);
     expected.setElasticIndexBaseName(testVersionJson.elasticIndexBaseName);
+    expected.setMicroarrayBigqueryDataset(testVersionJson.microarrayBigqueryDataset);
     expected.setWgsBigqueryDataset(testVersionJson.wgsBigqueryDataset);
     expected.setHasFitbitData(testVersionJson.hasFitbitData);
     expected.setHasCopeSurveyData(testVersionJson.hasCopeSurveyData);

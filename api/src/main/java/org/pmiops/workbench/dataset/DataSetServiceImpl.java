@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -776,6 +777,170 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
                         qualifier,
                         kernelTypeEnum))
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<String> generateMicroarrayCohortExtractCodeCells(
+      DbWorkspace dbWorkspace,
+      String qualifier,
+      Map<String, QueryJobConfiguration> queriesByDomain) {
+    String joinedDatasetVariableNames =
+        queriesByDomain.entrySet().stream()
+            .map(
+                e ->
+                    "dataset_"
+                        + qualifier
+                        + "_"
+                        + Domain.fromValue(e.getKey()).toString().toLowerCase()
+                        + "_df")
+            .collect(Collectors.joining(", "));
+
+    final String cohortSampleNamesFilename = "cohort_sample_names_" + qualifier + ".txt";
+    final String cohortSampleMapFilename = "cohort_sample_map_" + qualifier + ".csv";
+    final String cohortVcfFilename = "cohort_" + qualifier + ".vcf";
+    // TODO(RW-5735): Writing to the "tmp" dataset is a temporary workaround.
+    final String cohortExtractTable =
+        "fc-aou-cdr-synth-test.tmp_shared_cohort_extract."
+            + UUID.randomUUID().toString().replace("-", "_");
+
+    return ImmutableList.of(
+        "person_ids = set()\n"
+            + "datasets = ["
+            + joinedDatasetVariableNames
+            + "]\n"
+            + "\n"
+            + "for dataset in datasets:\n"
+            + "    if 'PERSON_ID' in dataset:\n"
+            + "        person_ids = person_ids.union(dataset['PERSON_ID'])\n"
+            + "    elif 'person_id' in dataset:\n"
+            + "        person_ids = person_ids.union(dataset['person_id']) \n"
+            + "\n\n"
+            + "with open('"
+            + cohortSampleNamesFilename
+            + "', 'w') as cohort_file:\n"
+            + "    for person_id in person_ids:\n"
+            + "        cohort_file.write(str(person_id) + '\\n')\n"
+            + "    cohort_file.close()\n",
+        "!python3 /usr/local/share/raw_array_cohort_extract.py \\\n"
+            + "          --dataset fc-aou-cdr-synth-test.synthetic_microarray_data \\\n"
+            + "          --fq_destination_table "
+            + cohortExtractTable
+            + " \\\n"
+            + "          --query_project ${GOOGLE_PROJECT} \\\n"
+            // TODO: Replace hardcoded dataset reference: RW-5748
+            + "          --fq_sample_mapping_table fc-aou-cdr-synth-test.synthetic_microarray_data.sample_list \\\n"
+            + "          --cohort_sample_names_file "
+            + cohortSampleNamesFilename
+            + " \\\n"
+            + "          --sample_map_outfile "
+            + cohortSampleMapFilename
+            + "\n",
+        "!java -jar ${GATK_LOCAL_JAR} ArrayExtractCohort \\\n"
+            // TODO: This value will need to be tuned per environment.
+            + "        -R gs://fc-aou-cdr-synth-test-genomics/extract_resources/Homo_sapiens_assembly19.fasta \\\n"
+            + "        -O "
+            + cohortVcfFilename
+            + " \\\n"
+            + "        --probe-info-table fc-aou-cdr-synth-test.synthetic_microarray_data.probe_info \\\n"
+            + "        --read-project-id ${GOOGLE_PROJECT} \\\n"
+            + "        --cohort-sample-file "
+            + cohortSampleMapFilename
+            + " \\\n"
+            + "        --use-compressed-data \"false\" \\\n"
+            + "        --cohort-extract-table "
+            + cohortExtractTable
+            + "\n",
+        "!gsutil cp " + cohortVcfFilename + " ${WORKSPACE_BUCKET}/cohort-extract/");
+  }
+
+  @Override
+  public List<String> generatePlinkDemoCode(String qualifier) {
+    final String cohortQualifier = "cohort_" + qualifier;
+    final String phenotypeFilename = "phenotypes_" + qualifier + ".phe";
+    final String cohortVcfFilename = cohortQualifier + ".vcf";
+
+    return ImmutableList.of(
+        "import random\n\n"
+            + "phenotypes_table = []\n"
+            + "for person_id in person_ids:\n"
+            + "    family_id = 0 # Family ID is set to 0 for all participants because we do not provide familial information at this time\n"
+            + "    person_id = person_id\n"
+            + "    phenotype_1 = random.randint(0, 2) # Change this value to what makes sense for your research by looking through the dataset(s)\n"
+            + "    phenotype_2 = random.randint(0, 2) # Change this value as well or remove if you are only processing one phenotype \n"
+            + "    phenotypes_table.append([family_id, person_id, phenotype_1, phenotype_2])\n"
+            + "\n"
+            + "cohort_phenotypes = pandas.DataFrame(phenotypes_table) \n"
+            + "cohort_phenotypes.to_csv('"
+            + phenotypeFilename
+            + "', header=False, index=False, sep=' ')",
+        "%%bash\n\n"
+            + "# Convert VCF info plink binary files \n"
+            + "plink --vcf-half-call m --const-fid 0 --vcf "
+            + cohortVcfFilename
+            + " --out "
+            + cohortQualifier
+            + "\n"
+            + "# Run GWAS \n"
+            + "plink --bfile "
+            + cohortQualifier
+            + " --pheno "
+            + phenotypeFilename
+            + " --all-pheno --allow-no-sex --assoc --out results\n"
+            + "\n"
+            + "head results.P1.assoc\n"
+            + "head results.P2.assoc");
+  }
+
+  @Override
+  public List<String> generateHailDemoCode(String qualifier) {
+    final String phenotypeFilename = "phenotypes_annotations_" + qualifier + ".tsv";
+    final String cohortQualifier = "cohort_" + qualifier;
+    final String cohortVcfFilename = cohortQualifier + ".vcf";
+    final String cohortMatrixFilename = cohortQualifier + ".mt";
+
+    return ImmutableList.of(
+        "import subprocess, os\n"
+            + "import random\n"
+            + "\n"
+            + "# Creating phenotype annotations file\n"
+            + "phenotypes_table = []\n"
+            + "for person_id in person_ids:\n"
+            + "    phenotype_1 = random.randint(0, 2) # Change this value to what makes sense for your research by looking through the dataset(s)\n"
+            + "    phenotype_2 = random.randint(0, 2) # Change this value as well or remove if you are only processing one phenotype \n"
+            + "    phenotypes_table.append([person_id, phenotype_1, phenotype_2])\n"
+            + "\n"
+            + "cohort_phenotypes = pandas.DataFrame(phenotypes_table,columns=[\"sample_name\", \"phenotype1\", \"phenotype2\"]) \n"
+            + "cohort_phenotypes.to_csv('"
+            + phenotypeFilename
+            + "', index=False, sep='\\t')\n"
+            + "\n"
+            + "subprocess.run([\"gsutil\", \"cp\", \""
+            + phenotypeFilename
+            + "\", os.environ['WORKSPACE_BUCKET']])",
+        "import hail as hl\n"
+            + "import os\n"
+            + "from hail.plot import show\n"
+            + "\n"
+            + "hl.plot.output_notebook()\n"
+            + "bucket = os.environ['WORKSPACE_BUCKET']\n"
+            + "hl.import_vcf(f'{bucket}/cohort-extract/"
+            + cohortVcfFilename
+            + "').write(f'{bucket}/"
+            + cohortMatrixFilename
+            + "')\n"
+            + "table = hl.import_table(f'{bucket}/"
+            + phenotypeFilename
+            + "', types={'sample_name': hl.tstr}, impute=True, key='sample_name')\n"
+            + "\n"
+            + "mt = hl.read_matrix_table(f'{bucket}/"
+            + cohortMatrixFilename
+            + "');\n"
+            + "mt = mt.annotate_cols(pheno = table[mt.s])\n"
+            + "\n"
+            + "covariates = [1, mt.pheno.phenotype2]\n"
+            + "gwas = hl.linear_regression_rows(y=mt.pheno.phenotype1, x=mt.GT.n_alt_alleles(), covariates=covariates)\n"
+            + "p = hl.plot.manhattan(gwas.p_value)\n"
+            + "show(p)");
   }
 
   @Override
