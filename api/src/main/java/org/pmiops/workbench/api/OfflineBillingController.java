@@ -1,6 +1,5 @@
 package org.pmiops.workbench.api;
 
-import org.pmiops.workbench.billing.BillingGarbageCollectionService;
 import org.pmiops.workbench.billing.BillingProjectBufferService;
 import org.pmiops.workbench.billing.FreeTierBillingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,22 +11,13 @@ public class OfflineBillingController implements OfflineBillingApiDelegate {
 
   private final FreeTierBillingService freeTierBillingService;
   private final BillingProjectBufferService billingProjectBufferService;
-  private final BillingGarbageCollectionService billingGarbageCollectionService;
 
   @Autowired
   OfflineBillingController(
       FreeTierBillingService freeTierBillingService,
-      BillingProjectBufferService billingProjectBufferService,
-      BillingGarbageCollectionService billingGarbageCollectionService) {
+      BillingProjectBufferService billingProjectBufferService) {
     this.freeTierBillingService = freeTierBillingService;
     this.billingProjectBufferService = billingProjectBufferService;
-    this.billingGarbageCollectionService = billingGarbageCollectionService;
-  }
-
-  @Override
-  public ResponseEntity<Void> billingProjectGarbageCollection() {
-    billingGarbageCollectionService.deletedWorkspaceGarbageCollection();
-    return ResponseEntity.noContent().build();
   }
 
   @Override

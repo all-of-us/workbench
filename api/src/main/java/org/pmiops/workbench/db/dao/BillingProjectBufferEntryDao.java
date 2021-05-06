@@ -7,8 +7,6 @@ import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry;
 import org.pmiops.workbench.db.model.DbBillingProjectBufferEntry.BufferEntryStatus;
 import org.pmiops.workbench.db.model.DbStorageEnums;
-import org.pmiops.workbench.db.model.DbWorkspace.BillingMigrationStatus;
-import org.pmiops.workbench.model.WorkspaceActiveStatus;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -82,15 +80,6 @@ public interface BillingProjectBufferEntryDao
 
   @Query(value = "SELECT RELEASE_LOCK('" + ASSIGNING_LOCK + "')", nativeQuery = true)
   int releaseAssigningLock();
-
-  // get Billing Projects which are ASSIGNED to Workspaces which have been DELETED and have NEW
-  // Billing Migration Status.  These are ready to be garbage-collected
-  default List<String> findBillingProjectsForGarbageCollection() {
-    return findByStatusAndActiveStatusAndBillingMigrationStatus(
-        DbStorageEnums.billingProjectBufferEntryStatusToStorage(BufferEntryStatus.ASSIGNED),
-        DbStorageEnums.workspaceActiveStatusToStorage(WorkspaceActiveStatus.DELETED),
-        DbStorageEnums.billingMigrationStatusToStorage(BillingMigrationStatus.NEW));
-  }
 
   @Query(
       "SELECT p.fireCloudProjectName "
