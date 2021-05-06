@@ -125,7 +125,7 @@ describe('WorkspaceAbout', () => {
 
   it('should display Publish/Unpublish buttons with FEATUREDWORKSPACEADMIN Authority', async () => {
     const profileWithAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.FEATUREDWORKSPACEADMIN]};
-    profileStore.set({profile: profileWithAuth, reload, updateCache});
+    profileStore.set({profile: profileWithAuth, load, reload, updateCache});
 
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -135,7 +135,7 @@ describe('WorkspaceAbout', () => {
 
   it('should display Publish/Unpublish buttons with DEVELOPER Authority', async () => {
     const profileWithAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.DEVELOPER]};
-    profileStore.set({profile: profileWithAuth, reload, updateCache});
+    profileStore.set({profile: profileWithAuth, load, reload, updateCache});
 
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);

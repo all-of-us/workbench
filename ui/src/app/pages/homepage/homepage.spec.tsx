@@ -75,7 +75,7 @@ describe('HomepageComponent', () => {
       ...profile,
       pageVisits: [{page: 'homepage'}],
     };
-    profileStore.set({profile: newProfile, reload, updateCache});
+    profileStore.set({profile: newProfile, load, reload, updateCache});
     const wrapper = component();
     expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeFalsy();
   });
@@ -92,7 +92,7 @@ describe('HomepageComponent', () => {
       accessTierShortNames: [],   // unregistered
     };
     serverConfigStore.set({config: {...serverConfigStore.get().config}});
-    profileStore.set({profile: newProfile, reload, updateCache});
+    profileStore.set({profile: newProfile, load, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="registration-dashboard"]').length).toBeGreaterThanOrEqual(1);
@@ -107,7 +107,7 @@ describe('HomepageComponent', () => {
       accessTierShortNames: [],   // unregistered
     };
     serverConfigStore.set({config: {...serverConfigStore.get().config}});
-    profileStore.set({profile: newProfile, reload, updateCache});
+    profileStore.set({profile: newProfile, load, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     const duccTask = wrapper.find('[data-test-id="registration-task-dataUserCodeOfConduct"]');
@@ -124,7 +124,7 @@ describe('HomepageComponent', () => {
       accessTierShortNames: [],   // unregistered
     };
     serverConfigStore.set({config: {...serverConfigStore.get().config}});
-    profileStore.set({profile: newProfile, reload, updateCache});
+    profileStore.set({profile: newProfile, load, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     const duccTask = wrapper.find('[data-test-id="registration-task-dataUserCodeOfConduct"]');
@@ -138,7 +138,7 @@ describe('HomepageComponent', () => {
       accessTierShortNames: [],   // unregistered
     };
     serverConfigStore.set({config: {...serverConfigStore.get().config}});
-    profileStore.set({profile: newProfile, reload, updateCache});
+    profileStore.set({profile: newProfile, load, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeFalsy();
