@@ -205,8 +205,7 @@ public class ConceptSetService {
 
   private ConceptSet saveDbConceptSet(DbConceptSet dbConceptSet) {
     try {
-      return toHydratedConcepts(
-          conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSet)));
+      return toHydratedConcepts(conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSet)));
     } catch (DataIntegrityViolationException e) {
       throw new ConflictException(
           String.format("Concept set %s already exists.", dbConceptSet.getName()));
