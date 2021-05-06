@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 import javax.persistence.EntityManager;
 import org.junit.Before;
@@ -99,7 +100,7 @@ public class ReportingVerificationServiceTest {
 
     logCapturingStream = new ByteArrayOutputStream();
     Handler[] handlers = LOGGER.getParent().getHandlers();
-    customLogHandler = new StreamHandler(logCapturingStream, handlers[0].getFormatter());
+    customLogHandler = new StreamHandler(logCapturingStream, new SimpleFormatter());
     LOGGER.addHandler(customLogHandler);
   }
 
