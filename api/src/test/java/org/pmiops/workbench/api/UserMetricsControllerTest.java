@@ -73,17 +73,12 @@ public class UserMetricsControllerTest {
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private CdrVersionDao cdrVersionDao;
 
-  private FakeClock fakeClock = new FakeClock(NOW);
-
-  private DbCdrVersion dbCdrVersion;
+  private final FakeClock fakeClock = new FakeClock(NOW);
 
   private DbUser dbUser;
   private DbUserRecentResource dbUserRecentResource1;
   private DbUserRecentResource dbUserRecentResource2;
   private DbUserRecentResource dbUserRecentResource3;
-
-  private FirecloudWorkspace fcWorkspace1;
-  private FirecloudWorkspace fcWorkspace2;
 
   private DbWorkspace dbWorkspace1;
   private DbWorkspace dbWorkspace2;
@@ -95,7 +90,8 @@ public class UserMetricsControllerTest {
 
   @Before
   public void setUp() {
-    dbCdrVersion = TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
+    final DbCdrVersion dbCdrVersion =
+        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
 
     dbUser = new DbUser();
     dbUser.setUserId(123L);
@@ -158,17 +154,17 @@ public class UserMetricsControllerTest {
     when(workspaceDao.findActiveByWorkspaceId(dbUserRecentResource3.getWorkspaceId()))
         .thenReturn(Optional.of(dbWorkspace2));
 
-    fcWorkspace1 = new FirecloudWorkspace();
+    final FirecloudWorkspace fcWorkspace1 = new FirecloudWorkspace();
     fcWorkspace1.setNamespace(dbWorkspace1.getFirecloudName());
 
-    fcWorkspace2 = new FirecloudWorkspace();
+    final FirecloudWorkspace fcWorkspace2 = new FirecloudWorkspace();
     fcWorkspace1.setNamespace(dbWorkspace2.getFirecloudName());
 
-    FirecloudWorkspaceResponse workspaceResponse = new FirecloudWorkspaceResponse();
+    final FirecloudWorkspaceResponse workspaceResponse = new FirecloudWorkspaceResponse();
     workspaceResponse.setAccessLevel("OWNER");
     workspaceResponse.setWorkspace(fcWorkspace1);
 
-    FirecloudWorkspaceResponse workspaceResponse2 = new FirecloudWorkspaceResponse();
+    final FirecloudWorkspaceResponse workspaceResponse2 = new FirecloudWorkspaceResponse();
     workspaceResponse2.setAccessLevel("READER");
     workspaceResponse2.setWorkspace(fcWorkspace2);
 
