@@ -237,6 +237,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     return false;
   }
 
+  // Checking for annual completion time is not a part of this module
   private boolean isEraCommonsCompliant(DbUser user) {
     return user.getEraCommonsBypassTime() != null
         || !configProvider.get().access.enableEraCommons
@@ -250,6 +251,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   private boolean shouldUserBeRegistered(DbUser user) {
+    // beta access bypass and 2FA do not need to be checked for annual renewal
     boolean betaAccessGranted =
         user.getBetaAccessBypassTime() != null || !configProvider.get().access.enableBetaAccess;
     boolean twoFactorAuthComplete =
