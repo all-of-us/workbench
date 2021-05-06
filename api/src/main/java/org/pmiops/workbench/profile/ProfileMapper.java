@@ -12,6 +12,7 @@ import org.pmiops.workbench.db.dao.UserDao.DbAdminTableUser;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
+import org.pmiops.workbench.model.AccessModuleExpiration;
 import org.pmiops.workbench.model.AdminTableUser;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
@@ -40,7 +41,9 @@ public interface ProfileMapper {
       DbUserTermsOfService latestTermsOfService,
       Double freeTierUsage,
       Double freeTierDollarQuota,
-      List<String> accessTierShortNames);
+      List<String> accessTierShortNames,
+      Boolean accessWillExpire,
+      List<AccessModuleExpiration> modulesExpiring);
 
   List<AdminTableUser> adminViewToModel(List<DbAdminTableUser> adminTableUsers);
 

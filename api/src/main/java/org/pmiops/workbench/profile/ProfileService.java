@@ -1,6 +1,7 @@
 package org.pmiops.workbench.profile;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
@@ -32,6 +33,7 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
+import org.pmiops.workbench.model.AccessModuleExpiration;
 import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.AdminTableUser;
@@ -122,13 +124,20 @@ public class ProfileService {
     final List<String> accessTierShortNames =
         accessTierService.getAccessTierShortNamesForUser(user);
 
+    // stubs created for RW-6617, to be filled in by RW-6667
+    final Boolean accessWillExpire = true;
+    final List<AccessModuleExpiration> modulesExpiring =
+        ImmutableList.of(new AccessModuleExpiration().accessModule("module1").expiration(0L));
+
     return profileMapper.toModel(
         user,
         verifiedInstitutionalAffiliation,
         latestTermsOfService,
         freeTierUsage,
         freeTierDollarQuota,
-        accessTierShortNames);
+        accessTierShortNames,
+        accessWillExpire,
+        modulesExpiring);
   }
 
   public void validateAffiliation(Profile profile) {
