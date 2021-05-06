@@ -76,8 +76,7 @@ describe('User can create, modify, rename and delete Cohort', () => {
     await waitForText(page, totalCount, { xpath: FieldSelector.TotalCount }, 60000);
 
     // Remove Exclude Group 3.
-    const groupCriteriasList = await group3.deleteGroup();
-    expect(groupCriteriasList.length).toBe(0);
+    await group3.deleteGroup();
     console.log('Removed Exclude Group 3');
 
     await cohortBuildPage.saveChanges();

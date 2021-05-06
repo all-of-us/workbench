@@ -57,6 +57,7 @@ export default abstract class BaseHelpSidebar extends Container {
     const sidePanelTitle = await this.getTitle();
     const closeButton = new Button(this.page, this.deleteIconXpath);
     await closeButton.waitUntilEnabled();
+    await closeButton.focus();
     await closeButton.click();
     await this.waitUntilClose();
     logger.info(`Closed "${sidePanelTitle}" sidebar panel`);

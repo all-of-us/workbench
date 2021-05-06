@@ -175,7 +175,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
    */
   findIncludeParticipantsGroup(groupName: string): CohortParticipantsGroup {
     const group = new CohortParticipantsGroup(this.page);
-    group.setXpath(`//*[@id="list-include-groups"][.//*[normalize-space()="${groupName}"]]`);
+    group.setXpath(`//*[@id="list-include-groups"]/div[.//*[normalize-space()="${groupName}"]]`);
     return group;
   }
 

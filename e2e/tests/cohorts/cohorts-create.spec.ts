@@ -1,11 +1,12 @@
 import { PhysicalMeasurementsCriteria } from 'app/page/criteria-search-page';
-import Link from 'app/element/link';
 import CohortBuildPage, { FieldSelector } from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { waitForText } from 'utils/waits-utils';
+import { numericalStringToNumber } from 'utils/str-utils';
+import CohortActionsPage from 'app/page/cohort-actions-page';
 
-describe('Cohorts', () => {
+describe('Create Cohort', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
@@ -20,7 +21,7 @@ describe('Cohorts', () => {
    * Checking counts.
    * Renaming Group 1 and 2 names.
    */
-  test('Create, edit and delete', async () => {
+  test('Create cohort from BMI', async () => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     // Wait for the Data page.
@@ -44,8 +45,7 @@ describe('Cohorts', () => {
     console.log(`Group 1: Physical Measurement -> BMI count: ${group1CountInt}`);
 
     // Checking Total Count: should match Group 1 participants count.
-    const totalCount = await cohortPage.getTotalCount();
-    expect(group1Count).toEqual(totalCount);
+    expect(group1Count).toEqual(await cohortPage.getTotalCount());
 
     // Include Participants Group 2: Select menu Demographics -> Deceased
     const group2 = cohortPage.findIncludeParticipantsGroup('Group 2');
@@ -55,20 +55,18 @@ describe('Cohorts', () => {
     console.log(`Group 2: Demographics -> Deceased count: ${group2CountInt}`);
 
     // Compare the new Total Count with the old Total Count.
-    const newTotalCount = await cohortPage.getTotalCount();
-    const newTotalCountInt = Number(newTotalCount.replace(/,/g, ''));
-    // Adding additional group decreased Total Count.
-    expect(newTotalCountInt).toBeLessThan(group1CountInt);
-    console.log(`New Total Count: ${newTotalCountInt}`);
+    const totalCount = numericalStringToNumber(await cohortPage.getTotalCount());
+    console.log(`New Total Count: ${totalCount}`);
 
     // Save new cohort - click create cohort button
     const cohortName = await cohortPage.createCohort();
     console.log(`Created Cohort "${cohortName}"`);
 
     // Open Cohort details.
-    const cohortLink = Link.findByName(page, { name: cohortName });
-    await cohortLink.clickAndWait();
-    await waitForText(page, newTotalCount, { xpath: FieldSelector.TotalCount }, 60000);
+    const cohortActionPage = new CohortActionsPage(page);
+    await cohortActionPage.waitForLoad();
+    await cohortActionPage.clickCohortNameLink(cohortName);
+    await waitForText(page, totalCount.toString(), { xpath: FieldSelector.TotalCount }, 60000);
 
     // Modify Cohort: Edit Group 1 name successfully.
     const newName1 = 'Group 1: BMI';
@@ -85,14 +83,15 @@ describe('Cohorts', () => {
     expect(await groupDeceased.exists()).toBe(true);
 
     // Check Total Count is unaffected by group name rename.
-    const newTotalCount2 = await cohortPage.getTotalCount();
-    const newTotalCountInt2 = Number(newTotalCount2.replace(/,/g, ''));
-    expect(newTotalCountInt2).toBe(newTotalCountInt);
+    const newTotalCount = numericalStringToNumber(await cohortPage.getTotalCount());
+    expect(newTotalCount).toBe(newTotalCount);
 
-    // Clean up: delete cohort
-    const modalContent = await cohortPage.deleteCohort();
-    // Verify dialog content text
-    expect(modalContent).toContain(`Are you sure you want to delete Cohort: ${cohortName}?`);
-    console.log(`Deleted Cohort "${cohortName}"`);
+    await cohortPage.saveChanges();
+
+    await cohortActionPage.waitForLoad();
+    await cohortActionPage.clickCohortNameLink(cohortName);
+    await waitForText(page, totalCount.toString(), { xpath: FieldSelector.TotalCount }, 60000);
+
+    await cohortPage.deleteCohort();
   });
 });

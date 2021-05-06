@@ -8,7 +8,7 @@ import { LinkText, MenuOption } from 'app/text-labels';
 import { snowmanIconXpath } from 'app/component/snowman-menu';
 import Modal from 'app/modal/modal';
 import InputSwitch from 'app/element/input-switch';
-import Button from '../element/button';
+import Button from 'app/element/button';
 
 export default class CohortParticipantsGroup {
   private rootXpath: string;
@@ -39,11 +39,12 @@ export default class CohortParticipantsGroup {
   }
 
   getGroupCountXpath(): string {
-    return `${this.rootXpath}/ancestor::node()[1]${FieldSelector.GroupCount}`;
+    return `${this.rootXpath}${FieldSelector.GroupCount}`;
   }
 
   async clickSnowmanIcon(): Promise<void> {
     const iconXpath = `${this.rootXpath}${snowmanIconXpath}`;
+    console.log(`snowman xpath: ${iconXpath}`);
     await this.page.waitForXPath(iconXpath, { visible: true }).then((icon) => icon.click());
   }
 
