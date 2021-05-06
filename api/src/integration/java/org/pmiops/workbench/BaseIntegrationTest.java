@@ -24,9 +24,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @WebAppConfiguration
 @Import({IntegrationTestConfig.class})
 @TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
-@PropertySources({
-  @PropertySource("classpath:application.properties"),
-})
 @DataJpaTest
 public abstract class BaseIntegrationTest {
 
