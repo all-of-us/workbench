@@ -156,7 +156,7 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
     }
 
     await modal.clickButton(link, { waitForClose: true });
-    await this.waitForLoad();
+    await waitWhileLoading(this.page);
     logger.info(`Deleted ${resourceType} "${resourceName}"`);
     return modalTextContent;
   }
