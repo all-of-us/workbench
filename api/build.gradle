@@ -25,7 +25,7 @@ buildscript {
     SWAGGER_3_CODEGEN_VERSION = '3.0.21'
   }
 
-  project.ext['hibernate.version'] = '5.2.10.Final'
+  project.ext['hibernate.version'] = '5.4.31.Final'
 
   repositories {
     // Bintray's repository - a fast Maven Central mirror & more
