@@ -30,6 +30,7 @@ public class WorkbenchConfig {
   public CaptchaConfig captcha;
   public ReportingConfig reporting;
   public RasConfig ras;
+  public AccessRenewalConfig accessRenewal;
 
   /** Creates a config with non-null-but-empty member variables, for use in testing. */
   public static WorkbenchConfig createEmptyConfig() {
@@ -55,6 +56,7 @@ public class WorkbenchConfig {
     config.captcha = new CaptchaConfig();
     config.reporting = new ReportingConfig();
     config.ras = new RasConfig();
+    config.accessRenewal = new AccessRenewalConfig();
     return config;
   }
 
@@ -248,6 +250,8 @@ public class WorkbenchConfig {
     public boolean enableEraCommons;
     public boolean enableDataUseAgreement;
     public boolean enableBetaAccess;
+    // If true, users can be expired on the system, losing access
+    public boolean enableAccessRenewal;
   }
 
   public static class FeatureFlagsConfig {
@@ -327,5 +331,10 @@ public class WorkbenchConfig {
     public String host;
     // RAS client id to finish the OAuth flow.
     public String clientId;
+  }
+
+  public static class AccessRenewalConfig {
+    // Days a user's module completion is good for until it expires
+    public Long expiryDays;
   }
 }

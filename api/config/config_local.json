@@ -108,7 +108,9 @@
     "enableDataUseAgreement": true,
     "enableBetaAccess": false,
     "unsafeAllowSelfBypass": true,
-    "unsafeAllowUserCreationFromGSuiteData": true
+    "unsafeAllowUserCreationFromGSuiteData": true,
+    "enableAccessRenewal": false
+
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
@@ -143,5 +145,8 @@
   "ras": {
     "host": "https:\/\/stsstg.nih.gov",
     "clientId": "e5c5d714-d597-48c8-b564-a249d729d0c9"
+  },
+  "accessRenewal": {
+    "expiryDays": 365 
   }
 }

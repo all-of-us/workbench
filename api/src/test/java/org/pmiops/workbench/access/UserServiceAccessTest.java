@@ -7,9 +7,11 @@ import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.Function;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,6 +65,10 @@ public class UserServiceAccessTest {
   private static WorkbenchConfig providedWorkbenchConfig;
 
   private static DbAccessTier registeredTier;
+  private Function<Timestamp, Function<DbUser, DbUser>> registerUserWithTime =
+      t -> dbu -> registerUser(t, dbu);
+  private Function<DbUser, DbUser> registerUserNow =
+      registerUserWithTime.apply(Timestamp.from(Instant.now()));
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private UserAccessTierDao userAccessTierDao;
@@ -121,7 +127,7 @@ public class UserServiceAccessTest {
     DbUser dbUser = userDao.save(new DbUser());
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
-    dbUser = userService.updateUserWithRetries(this::registerUser, dbUser, Agent.asUser(dbUser));
+    dbUser = userService.updateUserWithRetries(registerUserNow, dbUser, Agent.asUser(dbUser));
 
     assertThat(userAccessTierDao.findAll()).hasSize(1);
     Optional<DbUserAccessTier> userAccessMaybe =
@@ -148,7 +154,7 @@ public class UserServiceAccessTest {
     DbUser dbUser = userDao.save(new DbUser());
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
-    dbUser = userService.updateUserWithRetries(this::registerUser, dbUser, Agent.asUser(dbUser));
+    dbUser = userService.updateUserWithRetries(registerUserNow, dbUser, Agent.asUser(dbUser));
 
     List<DbAccessTier> expectedTiers =
         ImmutableList.of(registeredTier, controlledTier, aThirdTierWhyNot);
@@ -183,7 +189,7 @@ public class UserServiceAccessTest {
     DbUser dbUser = new DbUser();
     assertThat(userAccessTierDao.findAll()).isEmpty();
 
-    dbUser = userService.updateUserWithRetries(this::registerUser, dbUser, Agent.asUser(dbUser));
+    dbUser = userService.updateUserWithRetries(registerUserNow, dbUser, Agent.asUser(dbUser));
     dbUser = userService.updateUserWithRetries(this::unregisterUser, dbUser, Agent.asUser(dbUser));
 
     // The user received a DbUserAccessTier when they were registered.
@@ -197,7 +203,99 @@ public class UserServiceAccessTest {
         .isEqualTo(TierAccessStatus.DISABLED);
   }
 
-  private DbUser registerUser(DbUser user) {
+  @Test
+  public void testSimulateUserFlowThroughRenewal() {
+    providedWorkbenchConfig.access.enableAccessRenewal = true;
+    providedWorkbenchConfig.access.enableDataUseAgreement = true;
+    providedWorkbenchConfig.accessRenewal.expiryDays = (long) 365;
+    DbUser dbUser = new DbUser();
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+    // The user is still compliant and has bypass set
+    dbUser.setDataUseAgreementCompletionTime(
+        Timestamp.from(
+            START_INSTANT.minus(
+                (providedWorkbenchConfig.accessRenewal.expiryDays - 1), ChronoUnit.DAYS)));
+    dbUser = userService.updateUserWithRetries(registerUserNow, dbUser, Agent.asUser(dbUser));
+
+    assertThat(userAccessTierDao.findAll()).hasSize(1);
+    assertThat(userAccessTierDao.getAllByUser(dbUser).get(0).getTierAccessStatusEnum())
+        .isEqualTo(TierAccessStatus.ENABLED);
+
+    // User is compliant and we remove dua bypass
+    dbUser =
+        userService.updateUserWithRetries(
+            this::registerUserWithoutDuaBypass, dbUser, Agent.asUser(dbUser));
+
+    assertThat(userAccessTierDao.findAll()).hasSize(1);
+    assertThat(userAccessTierDao.getAllByUser(dbUser).get(0).getTierAccessStatusEnum())
+        .isEqualTo(TierAccessStatus.ENABLED);
+
+    // Simulate time passing, user is no longer compliant
+    PROVIDED_CLOCK.setInstant(START_INSTANT.plus(1, ChronoUnit.DAYS));
+    dbUser =
+        userService.updateUserWithRetries(
+            this::registerUserWithoutDuaBypass, dbUser, Agent.asUser(dbUser));
+    assertThat(userAccessTierDao.getAllByUser(dbUser)).hasSize(1);
+    assertThat(userAccessTierDao.getAllByUser(dbUser).get(0).getTierAccessStatusEnum())
+        .isEqualTo(TierAccessStatus.DISABLED);
+
+    // Simulate user filling out DUA, becoming compliant again
+    dbUser.setDataUseAgreementCompletionTime(
+        Timestamp.from(START_INSTANT.plus(2, ChronoUnit.DAYS)));
+    dbUser =
+        userService.updateUserWithRetries(
+            this::registerUserWithoutDuaBypass, dbUser, Agent.asUser(dbUser));
+    assertThat(userAccessTierDao.getAllByUser(dbUser)).hasSize(1);
+    assertThat(userAccessTierDao.getAllByUser(dbUser).get(0).getTierAccessStatusEnum())
+        .isEqualTo(TierAccessStatus.ENABLED);
+  }
+
+  @Test
+  public void testRenewalFlag() {
+    providedWorkbenchConfig.access.enableAccessRenewal = false;
+    providedWorkbenchConfig.access.enableDataUseAgreement = true;
+    providedWorkbenchConfig.accessRenewal.expiryDays = (long) 365;
+    DbUser dbUser = new DbUser();
+    dbUser.setDataUseAgreementSignedVersion(userService.getCurrentDuccVersion());
+
+    // The user is still compliant and has bypass set
+    dbUser.setDataUseAgreementCompletionTime(
+        Timestamp.from(
+            START_INSTANT.minus(
+                (providedWorkbenchConfig.accessRenewal.expiryDays - 1), ChronoUnit.DAYS)));
+    dbUser = userService.updateUserWithRetries(registerUserNow, dbUser, Agent.asUser(dbUser));
+
+    assertThat(userAccessTierDao.findAll()).hasSize(1);
+    assertThat(userAccessTierDao.getAllByUser(dbUser).get(0).getTierAccessStatusEnum())
+        .isEqualTo(TierAccessStatus.ENABLED);
+
+    // User is compliant and we remove dua bypass
+    dbUser =
+        userService.updateUserWithRetries(
+            this::registerUserWithoutDuaBypass, dbUser, Agent.asUser(dbUser));
+
+    assertThat(userAccessTierDao.findAll()).hasSize(1);
+    assertThat(userAccessTierDao.getAllByUser(dbUser).get(0).getTierAccessStatusEnum())
+        .isEqualTo(TierAccessStatus.ENABLED);
+
+    // Simulate time passing, user is no longer compliant, but the flag is not set so they should be
+    // enabled
+    PROVIDED_CLOCK.setInstant(START_INSTANT.plus(1, ChronoUnit.DAYS));
+    dbUser =
+        userService.updateUserWithRetries(
+            this::registerUserWithoutDuaBypass, dbUser, Agent.asUser(dbUser));
+    assertThat(userAccessTierDao.getAllByUser(dbUser)).hasSize(1);
+    assertThat(userAccessTierDao.getAllByUser(dbUser).get(0).getTierAccessStatusEnum())
+        .isEqualTo(TierAccessStatus.ENABLED);
+  }
+
+  private DbUser registerUserWithoutDuaBypass(DbUser user) {
+    user.setDataUseAgreementBypassTime(null);
+    return userDao.save(user);
+  }
+
+  private DbUser registerUser(Timestamp timestamp, DbUser user) {
     // shouldUserBeRegistered logic:
     //    return !user.getDisabled()
     //        && complianceTrainingCompliant
@@ -207,15 +305,13 @@ public class UserServiceAccessTest {
     //        && dataUseAgreementCompliant
     //        && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
 
-    Timestamp now = Timestamp.from(Instant.now());
-
     user.setDisabled(false);
     user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
-    user.setComplianceTrainingBypassTime(now);
-    user.setEraCommonsBypassTime(now);
-    user.setBetaAccessBypassTime(now);
-    user.setTwoFactorAuthBypassTime(now);
-    user.setDataUseAgreementBypassTime(now);
+    user.setComplianceTrainingBypassTime(timestamp);
+    user.setEraCommonsBypassTime(timestamp);
+    user.setBetaAccessBypassTime(timestamp);
+    user.setTwoFactorAuthBypassTime(timestamp);
+    user.setDataUseAgreementBypassTime(timestamp);
 
     return userDao.save(user);
   }
