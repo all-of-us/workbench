@@ -342,8 +342,13 @@ class CopyModalComponent extends React.Component<Props, State> {
         [cdrVersionMismatch && isNotebook, () => this.setNotebookCdrMismatchWarning(destination, fromCdrVersionId)]);
   }
 
-  renderFormBody() {
+  showCdrMismatch(type: ResourceType) {
     const {resourceType} = this.props;
+    const {accessTierMismatch, cdrMismatch} = this.state;
+    return !accessTierMismatch && cdrMismatch && resourceType === type;
+  }
+
+  renderFormBody() {
     const {destination, workspaceOptions, requestState, accessTierMismatch, cdrMismatch, copyErrorMsg, newName} = this.state;
     return (
       <div>
@@ -355,14 +360,14 @@ class CopyModalComponent extends React.Component<Props, State> {
           isOptionDisabled={(option) => this.isDestinationSameWorkspace(option.value)}
         />
         {accessTierMismatch && <AccessTierMismatch text={accessTierMismatch}/>}
-        {!accessTierMismatch && cdrMismatch && resourceType === ResourceType.CONCEPTSET && <ConceptSetCdrMismatch text={cdrMismatch}/>}
+        {this.showCdrMismatch(ResourceType.CONCEPTSET) && <ConceptSetCdrMismatch text={cdrMismatch}/>}
         <div style={headerStyles.formLabel}>Name *</div>
         <TextInput
           autoFocus
           value={newName}
           onChange={v => this.setState({ newName: v })}
         />
-        {!accessTierMismatch && cdrMismatch && resourceType === ResourceType.NOTEBOOK && <NotebookCdrMismatch text={cdrMismatch}/>}
+        {this.showCdrMismatch(ResourceType.NOTEBOOK) && <NotebookCdrMismatch text={cdrMismatch}/>}
         {requestState === RequestState.COPY_ERROR && <ValidationError>{copyErrorMsg}</ValidationError>}
       </div>
     );
