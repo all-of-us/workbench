@@ -8,14 +8,13 @@ import {
 } from '@angular/router';
 
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
-import {ProfileStore, profileStore} from 'app/utils/stores';
-import {Profile} from 'generated/fetch';
+import {profileStore} from 'app/utils/stores';
 
 @Injectable()
 export class RegistrationGuard implements CanActivate, CanActivateChild {
   constructor(private router: Router) {}
 
-  async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> {;
+  async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> {
     const {profile} = await profileStore.get().load();
     if (hasRegisteredAccess(profile.accessTierShortNames)) {
       return true;

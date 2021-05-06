@@ -9,7 +9,7 @@ import {
 
 import {SignInService} from 'app/services/sign-in.service';
 import {convertAPIError} from 'app/utils/errors';
-import {ProfileStore, profileStore} from 'app/utils/stores';
+import {profileStore} from 'app/utils/stores';
 import {ErrorCode} from 'generated/fetch';
 
 @Injectable()
