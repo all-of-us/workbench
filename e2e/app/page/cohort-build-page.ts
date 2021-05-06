@@ -4,7 +4,7 @@ import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
 import { ElementType } from 'app/xpath-options';
 import { makeRandomName } from 'utils/str-utils';
-import { waitForDocumentTitle, waitForNumericalString, waitWhileLoading } from 'utils/waits-utils';
+import { waitForDocumentTitle, waitForNumericalString, waitForText, waitWhileLoading } from 'utils/waits-utils';
 import { buildXPath } from 'app/xpath-builders';
 import { LinkText, MenuOption } from 'app/text-labels';
 import Modal from 'app/modal/modal';
@@ -63,6 +63,8 @@ export default class CohortBuildPage extends AuthenticatedPage {
     await modal.clickButton(LinkText.Save, { waitForClose: true, timeout: 2 * 60 * 1000 });
     await waitWhileLoading(this.page);
 
+    await waitForText(this.page, 'Cohort Saved Successfully');
+    console.log(`Created Cohort: "${cohortName}"`);
     return cohortName;
   }
 
@@ -81,6 +83,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
     const contentText = await modal.getTextContent();
     await modal.clickButton(LinkText.DeleteCohort, { waitForClose: true });
     await waitWhileLoading(this.page);
+    console.log(`Delete Confirmation modal:\n${contentText}`);
     return contentText;
   }
 
@@ -102,8 +105,13 @@ export default class CohortBuildPage extends AuthenticatedPage {
    * This function also can be used to wait until participants calculation has completed.
    * @return {string} Total Count.
    */
-  async getTotalCount(): Promise<string> {
-    return waitForNumericalString(this.page, FieldSelector.TotalCount, 60000);
+  async getTotalCount(timeout = 60000): Promise<string> {
+    const highCharts = '//*[@class="highcharts-container "]//*[contains(@class, "highcharts-bar-series")]/*';
+    const [count] = await Promise.all([
+      waitForNumericalString(this.page, FieldSelector.TotalCount, timeout),
+      this.page.waitForXPath(highCharts, { timeout, visible: true })
+    ]);
+    return count;
   }
 
   getSaveCohortButton(): Button {
@@ -144,13 +152,32 @@ export default class CohortBuildPage extends AuthenticatedPage {
    */
   findIncludeParticipantsGroup(groupName: string): CohortParticipantsGroup {
     const group = new CohortParticipantsGroup(this.page);
-    group.setXpath(`//*[@id="list-include-groups"]//*[normalize-space()="${groupName}"]`);
+    group.setXpath(`//*[@id="list-include-groups"][.//*[normalize-space()="${groupName}"]]`);
     return group;
   }
 
   findExcludeParticipantsGroup(groupName: string): CohortParticipantsGroup {
     const group = new CohortParticipantsGroup(this.page);
-    group.setXpath(`//*[@id="list-exclude-groups"]//*[normalize-space()="${groupName}"]`);
+    group.setXpath(
+      `//*[@id="list-exclude-groups"]/*[@data-test-id="excludes-search-group"][.//*[normalize-space()="${groupName}"]]`
+    );
+    return group;
+  }
+
+  findIncludeParticipantsEmptyGroup(): CohortParticipantsGroup {
+    const group = new CohortParticipantsGroup(this.page);
+    group.setXpath(
+      '//*[@id="list-include-groups"]' +
+        '/*[./*[not(@data-test-id="includes-search-group") and normalize-space()="Add Criteria"]]'
+    );
+    return group;
+  }
+
+  // Find Include Participants Group: Group 1 is index 1, Group 2 is index 2, etc.
+  findIncludeParticipantsGroupByIndex(index = 1): CohortParticipantsGroup {
+    const group = new CohortParticipantsGroup(this.page);
+    group.setXpath(`//*[@id="list-include-groups"]//div[./*[@data-test-id="item-list"]][${index}]`);
     return group;
   }
 }
+// data-test-id="includes-search-group"

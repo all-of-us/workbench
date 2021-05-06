@@ -2,7 +2,7 @@ import ConceptDomainCard, { Domain } from 'app/component/concept-domain-card';
 import Link from 'app/element/link';
 import DataResourceCard from 'app/component/data-resource-card';
 import ClrIconLink from 'app/element/clr-icon-link';
-import { MenuOption, Language, ResourceCard } from 'app/text-labels';
+import { Language, MenuOption, ResourceCard } from 'app/text-labels';
 import { ElementHandle, Page } from 'puppeteer';
 import { makeRandomName } from 'utils/str-utils';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
@@ -14,6 +14,8 @@ import NotebookPage from './notebook-page';
 import WorkspaceAnalysisPage from './workspace-analysis-page';
 import WorkspaceBase from './workspace-base';
 import ConceptSetSearchPage from './conceptset-search-page';
+import { SaveOption } from 'app/modal/conceptset-save-modal';
+import ConceptSetActionsPage from './conceptset-actions-page';
 
 const PageTitle = 'Data Page';
 
@@ -55,6 +57,16 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     return datasetPage;
   }
 
+  async clickAddCohortsButton(): Promise<CohortBuildPage> {
+    const addCohortsButton = this.getAddCohortsButton();
+    await addCohortsButton.clickAndWait();
+
+    // In Build Cohort Criteria page
+    const cohortBuildPage = new CohortBuildPage(this.page);
+    await cohortBuildPage.waitForLoad();
+    return cohortBuildPage;
+  }
+
   /**
    * Export Dataset to notebook thru the Ellipsis menu located inside the Dataset Resource card.
    * @param {string} datasetName Dataset name.
@@ -69,13 +81,12 @@ export default class WorkspaceDataPage extends WorkspaceBase {
 
   async findCohortCard(cohortName?: string): Promise<DataResourceCard> {
     await this.openCohortsSubtab();
-    if (cohortName === undefined) {
-      // if cohort name isn't specified, find any existing cohort.
-      return DataResourceCard.findAnyCard(this.page);
-    } else {
-      // find cohort matching name.
-      return DataResourceCard.findCard(this.page, cohortName, 2000);
+    if (cohortName) {
+      // find Concept Set that match specified name.
+      return new DataResourceCard(this.page).findCard(cohortName, ResourceCard.Cohort);
     }
+    // if Concept Sets name isn't specified, find an existing Concept Sets.
+    return new DataResourceCard(this.page).findAnyCard(ResourceCard.Cohort);
   }
 
   /**
@@ -83,10 +94,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
    * @param {string} cohortName New Cohort name.
    */
   async createCohort(cohortName?: string): Promise<DataResourceCard> {
-    await this.getAddCohortsButton().clickAndWait();
-    // Land on Build Cohort page.
-    const cohortBuildPage = new CohortBuildPage(this.page);
-    await cohortBuildPage.waitForLoad();
+    const cohortBuildPage = await this.clickAddCohortsButton();
     const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
     const searchPage = await group1.includeVisits();
     await searchPage.addVisits([Visits.OutpatientVisit]);
@@ -100,6 +108,27 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     const cohortCard = this.findCohortCard(name);
     console.log(`Created Cohort "${name}" from Outpatient Visit`);
     return cohortCard;
+  }
+
+  async createConceptSets(): Promise<DataResourceCard> {
+    const { conceptSearchPage, criteriaSearch } = await this.openConceptSetSearch(Domain.Procedures);
+
+    // Search Procedure name.
+    const procedureName = 'Radiologic examination';
+    await criteriaSearch.searchCriteria(procedureName);
+
+    // Select first row.
+    await criteriaSearch.resultsTableSelectRow(1, 1);
+
+    await conceptSearchPage.reviewAndSaveConceptSet();
+    const conceptName = await conceptSearchPage.saveConceptSet(SaveOption.CreateNewSet);
+
+    // Open Concept Sets page.
+    const conceptSetActionPage = new ConceptSetActionsPage(this.page);
+    await conceptSetActionPage.openConceptSet(conceptName);
+
+    await this.openConceptSetsSubtab();
+    return await this.findConceptSetsCard(conceptName);
   }
 
   /**
@@ -158,5 +187,28 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     }
     // find Concept Set that match specified name.
     return new DataResourceCard(this.page).findCard(conceptSetsName, ResourceCard.ConceptSet);
+  }
+
+  async findOrCreateCohort(): Promise<DataResourceCard> {
+    // Search for any existing Cohorts
+    const existingCohortsCard = await this.findCohortCard();
+    if (existingCohortsCard) {
+      return existingCohortsCard;
+    }
+
+    // None found, create a new Cohorts
+    const cohortsCard = await this.createCohort();
+    return cohortsCard;
+  }
+
+  async findOrCreateConceptSets(): Promise<DataResourceCard> {
+    // Search for any existing Concept Sets
+    const existingConceptSetCard = await this.findConceptSetsCard();
+    if (existingConceptSetCard) {
+      return existingConceptSetCard;
+    }
+
+    const conceptSetsCard = await this.createConceptSets();
+    return conceptSetsCard;
   }
 }

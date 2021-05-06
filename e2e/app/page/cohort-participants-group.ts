@@ -22,7 +22,7 @@ export default class CohortParticipantsGroup {
   }
 
   getAddCriteriaButtonXpath(): string {
-    return `${this.rootXpath}/ancestor::node()[1]/*[normalize-space()="Add Criteria"]/button`;
+    return `${this.rootXpath}//*[normalize-space()="Add Criteria"]/button`;
   }
 
   getGroupCountXpath(): string {
