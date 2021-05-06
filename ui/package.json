@@ -104,6 +104,7 @@
     "portable-fetch": "^3.0.0",
     "primeicons": "^1.0.0",
     "primereact": "^4.2.0",
+    "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-addons-test-utils": "^15.6.2",
     "react-calendar": "^2.18.1",
