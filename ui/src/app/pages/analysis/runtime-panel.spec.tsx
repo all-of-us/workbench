@@ -62,6 +62,7 @@ describe('RuntimePanel', () => {
     registerApiClient(ProfileApi, new ProfileApiStub());
     profileStore.set({
       profile: await profileApi().getMe(),
+      load: jest.fn(),
       reload: jest.fn(),
       updateCache: jest.fn()
     });

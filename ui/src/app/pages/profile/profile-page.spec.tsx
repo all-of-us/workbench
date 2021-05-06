@@ -39,6 +39,7 @@ describe('ProfilePageComponent', () => {
     return mount(<ProfilePage controlledTierProfile={controlledTierProfile}/>);
   };
 
+  const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();
 
@@ -51,10 +52,10 @@ describe('ProfilePageComponent', () => {
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async() => {
       const newProfile = await profileApi.getMe();
-      profileStore.set({profile: newProfile, reload, updateCache});
+      profileStore.set({profile: newProfile, load, reload, updateCache});
     });
 
-    profileStore.set({profile, reload, updateCache});
+    profileStore.set({profile, load, reload, updateCache});
 
     serverConfigStore.set({config: {
       enableDataUseAgreement: true,

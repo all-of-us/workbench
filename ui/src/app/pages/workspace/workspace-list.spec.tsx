@@ -23,6 +23,7 @@ jest.mock('app/utils/navigation', () => ({
 describe('WorkspaceList', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
   let profileApi: ProfileApiStub;
+  const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();
 
@@ -37,10 +38,10 @@ describe('WorkspaceList', () => {
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async() => {
       const newProfile = await profileApi.getMe();
-      profileStore.set({profile: newProfile, reload, updateCache});
+      profileStore.set({profile: newProfile, load, reload, updateCache});
     });
 
-    profileStore.set({profile, reload, updateCache});
+    profileStore.set({profile, load, reload, updateCache});
     serverConfigStore.set({config: {gsuiteDomain: 'abc', enableResearchReviewPrompt: true}});
   });
 

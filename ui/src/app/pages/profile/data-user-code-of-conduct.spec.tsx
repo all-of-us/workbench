@@ -18,6 +18,7 @@ const defaultConfig = {
 };
 
 describe('DataUserCodeOfConduct', () => {
+  const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
@@ -28,10 +29,10 @@ describe('DataUserCodeOfConduct', () => {
     registerApiClient(ProfileApi, new ProfileApiStub());
     reload.mockImplementation(async() => {
       const newProfile = await profileApi().getMe();
-      profileStore.set({profile: newProfile, reload, updateCache});
+      profileStore.set({profile: newProfile, load, reload, updateCache});
     });
 
-    profileStore.set({profile, reload, updateCache});
+    profileStore.set({profile, load, reload, updateCache});
   });
 
   it('should render - v2', () => {

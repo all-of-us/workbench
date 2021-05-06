@@ -26,6 +26,7 @@ describe('NotebookRedirect', () => {
     accessLevel: WorkspaceAccessLevel.OWNER,
   };
   const profile = ProfileStubVariables.PROFILE_STUB;
+  const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();
 
@@ -65,7 +66,7 @@ describe('NotebookRedirect', () => {
       creating: true
     });
     currentWorkspaceStore.next(workspace);
-    profileStore.set({profile, reload, updateCache});
+    profileStore.set({profile, load, reload, updateCache});
     runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined});
 
     jest.useFakeTimers();
