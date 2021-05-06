@@ -29,20 +29,27 @@ export const cdrVersionStore = atom<CdrVersionTiersResponse>({tiers: []});
 
 export interface ProfileStore {
   profile?: Profile;
+  load: Function;
   reload: Function;
   updateCache: Function;
 }
 
 export const profileStore = atom<ProfileStore>({
   profile: null,
+  load: async() => {
+    if (!profileStore.get().profile) {
+      await profileStore.get().reload();
+    }
+    return profileStore.get();
+  },
   reload: async() => {
     const profile = await profileApi().getMe();
     profileStore.get().updateCache(profile);
+    return profileStore.get();
   },
   updateCache: p => profileStore.set({
-    profile: p,
-    reload: profileStore.get().reload,
-    updateCache: profileStore.get().updateCache
+    ...profileStore.get(),
+    profile: p
   })
 });
 

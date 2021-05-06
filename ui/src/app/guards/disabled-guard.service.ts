@@ -1,9 +1,15 @@
 import {Injectable} from '@angular/core';
-import {ActivatedRouteSnapshot, CanActivate, CanActivateChild, Router, RouterStateSnapshot} from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  CanActivate,
+  CanActivateChild,
+  Router,
+  RouterStateSnapshot
+} from '@angular/router';
 
 import {SignInService} from 'app/services/sign-in.service';
 import {convertAPIError} from 'app/utils/errors';
-import {profileStore} from 'app/utils/stores';
+import {ProfileStore, profileStore} from 'app/utils/stores';
 import {ErrorCode} from 'generated/fetch';
 
 @Injectable()
@@ -19,7 +25,7 @@ export class DisabledGuard implements CanActivate, CanActivateChild {
       if (!isSignedIn) {
         return false;
       }
-      await profileStore.get().reload();
+      await profileStore.get().load();
       return true;
     } catch (e) {
       const errorResponse = await convertAPIError(e);
