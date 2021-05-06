@@ -204,7 +204,7 @@ public class UserServiceAccessTest {
   }
 
   @Test
-  public void test_updateUserWithRetries_access_renewal() {
+  public void testUpdateUserWithRetriesForAccessRenewal() {
     providedWorkbenchConfig.access.enableAccessRenewal = true;
     providedWorkbenchConfig.access.enableDataUseAgreement = true;
     providedWorkbenchConfig.accessRenewal.expiryDays = (long) 365;

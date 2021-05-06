@@ -127,7 +127,9 @@ public class RasLinkServiceTest {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public WorkbenchConfig getWorkbenchConfig() {
-      return WorkbenchConfig.createEmptyConfig();
+      WorkbenchConfig config = WorkbenchConfig.createEmptyConfig();
+      config.accessRenewal.expiryDays = (long) 365;
+      return config;
     }
 
     @Bean
