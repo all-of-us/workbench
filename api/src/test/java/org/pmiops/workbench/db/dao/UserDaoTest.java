@@ -143,7 +143,7 @@ public class UserDaoTest extends SpringTest {
   }
 
   @Test
-  public void test_getAdminTableUsers() {
+  public void testGetAdminTableUsers() {
     // Make sure AdminTable projection works.
     Timestamp duaByPassTime = now();
     String contactEmail  = "1@foo.com";
