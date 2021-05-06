@@ -16,14 +16,16 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
 @Import({IntegrationTestConfig.class})
+@TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
 @PropertySources({
-  @PropertySource("classpath:application-integration.properties"),
+  @PropertySource("classpath:application.properties"),
 })
 @DataJpaTest
 public abstract class BaseIntegrationTest {

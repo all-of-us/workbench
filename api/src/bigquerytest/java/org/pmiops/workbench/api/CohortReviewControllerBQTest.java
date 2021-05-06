@@ -96,42 +96,42 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({TestJpaConfig.class})
+@Import({TestJpaConfig.class, CohortReviewControllerBQTest.Configuration.class})
 public class CohortReviewControllerBQTest extends BigQueryBaseTest {
 
   @TestConfiguration
   @Import({
-      BigQueryTestService.class,
-      CohortCloningService.class,
-      CohortMapperImpl.class,
-      CohortQueryBuilder.class,
-      CohortReviewMapperImpl.class,
-      CohortReviewController.class,
-      CohortReviewServiceImpl.class,
-      CommonMappers.class,
-      CommonMappers.class,
-      ConceptSetMapperImpl.class,
-      DataSetMapperImpl.class,
-      FirecloudMapperImpl.class,
-      ParticipantCohortAnnotationMapperImpl.class,
-      ParticipantCohortStatusMapperImpl.class,
-      ReviewQueryBuilder.class,
-      SearchGroupItemQueryBuilder.class,
-      UserMapperImpl.class,
-      WorkspaceMapperImpl.class,
-      WorkspaceServiceImpl.class,
-      WorkspaceAuthService.class
+    BigQueryTestService.class,
+    CohortCloningService.class,
+    CohortMapperImpl.class,
+    CohortQueryBuilder.class,
+    CohortReviewMapperImpl.class,
+    CohortReviewController.class,
+    CohortReviewServiceImpl.class,
+    CommonMappers.class,
+    CommonMappers.class,
+    ConceptSetMapperImpl.class,
+    DataSetMapperImpl.class,
+    FirecloudMapperImpl.class,
+    ParticipantCohortAnnotationMapperImpl.class,
+    ParticipantCohortStatusMapperImpl.class,
+    ReviewQueryBuilder.class,
+    SearchGroupItemQueryBuilder.class,
+    UserMapperImpl.class,
+    WorkspaceMapperImpl.class,
+    WorkspaceServiceImpl.class,
+    WorkspaceAuthService.class
   })
   @MockBean({
-      BillingProjectAuditor.class,
-      CohortBuilderService.class,
-      CohortFactory.class,
-      CohortService.class,
-      ConceptSetService.class,
-      DataSetService.class,
-      FireCloudService.class,
-      FreeTierBillingService.class,
-      UserRecentResourceService.class,
+    BillingProjectAuditor.class,
+    CohortBuilderService.class,
+    CohortFactory.class,
+    CohortService.class,
+    ConceptSetService.class,
+    DataSetService.class,
+    FireCloudService.class,
+    FreeTierBillingService.class,
+    UserRecentResourceService.class,
   })
   static class Configuration {
 

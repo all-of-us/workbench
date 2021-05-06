@@ -130,7 +130,7 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
   Set<DbUser> findAllCreatorsByBillingStatus(@Param("status") BillingStatus status);
 
   @Query(
-      "SELECT COUNT(workspace.workspaceId) as workspaceCount, workspace.activeStatus as activeStatus, tier as tier "
+      "SELECT COUNT(workspace.workspaceId) AS workspaceCount, workspace.activeStatus AS activeStatus, tier AS tier "
           + "FROM DbWorkspace workspace "
           + "JOIN DbCdrVersion version ON workspace.cdrVersion.cdrVersionId = version.cdrVersionId "
           + "JOIN DbAccessTier tier ON version.accessTier.accessTierId = tier.accessTierId "

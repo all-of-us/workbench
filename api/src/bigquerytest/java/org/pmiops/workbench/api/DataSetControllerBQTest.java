@@ -90,7 +90,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 @RunWith(BeforeAfterSpringTestRunner.class)
-@Import({TestJpaConfig.class})
+@Import({TestJpaConfig.class, DataSetControllerBQTest.Configuration.class})
 public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   private static final FakeClock CLOCK = new FakeClock(Instant.now(), ZoneId.systemDefault());
@@ -150,7 +150,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     CdrVersionService.class,
     CohortService.class,
     ConceptSetService.class,
-    AccessTierDao.class,
     CohortQueryBuilder.class,
     ConceptBigQueryService.class,
     DataSetMapperImpl.class,
