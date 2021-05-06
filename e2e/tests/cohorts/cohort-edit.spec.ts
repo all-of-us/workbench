@@ -146,7 +146,10 @@ describe('Editing Cohort tests', () => {
 
     // Click Back to Cohort link
     const backToCohortButton = await cohortReviewPage.getBackToCohortButton();
-    await backToCohortButton.clickAndWait();
+    await backToCohortButton.click();
+
+    await cohortBuildPage.waitForLoad();
+    await cohortBuildPage.getTotalCount();
 
     // Back out to Data page
     const dataPage = new WorkspaceDataPage(page);

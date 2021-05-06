@@ -1,7 +1,7 @@
 import { Page } from 'puppeteer';
 import { LinkText } from 'app/text-labels';
 import Modal from './modal';
-import {waitForText, waitWhileLoading} from 'utils/waits-utils';
+import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import BaseElement from 'app/element/base-element';
 
 const modalTitle = 'Edit or Delete Review-Wide Annotation Fields';

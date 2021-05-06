@@ -1,6 +1,6 @@
 import Modal from './modal';
 import { Page } from 'puppeteer';
-import { waitForText, waitWhileLoading } from 'utils/waits-utils';
+import { waitForText } from 'utils/waits-utils';
 import { LinkText } from 'app/text-labels';
 
 const title = 'Warning!';
@@ -18,7 +18,6 @@ export default class WarningDiscardChangesModal extends Modal {
   async clickDiscardChangesButton(): Promise<string[]> {
     const contentText = await this.getTextContent();
     await this.clickButton(LinkText.DiscardChanges, { waitForNav: true, waitForClose: true });
-    await waitWhileLoading(this.page);
     return contentText;
   }
 }
