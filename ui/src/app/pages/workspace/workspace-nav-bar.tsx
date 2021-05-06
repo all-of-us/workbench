@@ -117,7 +117,7 @@ const CdrVersion = (props: {workspace: Workspace, cdrVersionTiersResponse: CdrVe
     {getCdrVersion(workspace, cdrVersionTiersResponse).name}
     {!hasDefaultCdrVersion(workspace, cdrVersionTiersResponse) && <NewVersionFlag/>}
     {showModal && <CdrVersionUpgradeModal
-        defaultCdrVersionName={getDefaultCdrVersionForTier(workspace, cdrVersionTiersResponse).name}
+        defaultCdrVersionName={getDefaultCdrVersionForTier(workspace.accessTierShortName, cdrVersionTiersResponse).name}
         onClose={() => setShowModal(false)}
         upgrade={() => NavStore.navigate(['/workspaces', namespace, id, 'duplicate'])}
     />}

@@ -75,13 +75,13 @@
     border-bottom: 0;
 }
 
-.extraction-data-table-container .slim-scroll-bar {
+.slim-scroll-bar {
     overflow: auto;
     height: 100%;
     margin-right: 0.1rem;
 }
 
-.extraction-data-table-container .slim-scroll-bar::-webkit-scrollbar {
+.slim-scroll-bar::-webkit-scrollbar {
     width: .3rem;
 }
 
@@ -89,7 +89,7 @@
     margin-top: 0.5rem;
 }
 
-.extraction-data-table-container .slim-scroll-bar::-webkit-scrollbar-thumb {
+.slim-scroll-bar::-webkit-scrollbar-thumb {
     background-color: darkgrey;
     border-radius: 5px;
 }

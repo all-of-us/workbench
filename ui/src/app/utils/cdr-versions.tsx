@@ -5,8 +5,8 @@ function getCdrVersionTier(accessTierShortName: string, cdrTiers: CdrVersionTier
   return cdrTiers.tiers.find(v => v.accessTierShortName === accessTierShortName);
 }
 
-function getDefaultCdrVersionForTier(workspace: Workspace, cdrTiers: CdrVersionTiersResponse): CdrVersion {
-  const tier = getCdrVersionTier(workspace.accessTierShortName, cdrTiers);
+function getDefaultCdrVersionForTier(accessTierShortName: string, cdrTiers: CdrVersionTiersResponse): CdrVersion {
+  const tier = getCdrVersionTier(accessTierShortName, cdrTiers);
   if (tier) {
     return tier.versions.find(v => v.cdrVersionId === tier.defaultCdrVersionId);
   }

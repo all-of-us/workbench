@@ -30,7 +30,7 @@ git fetch --tags
 git clean -fdx
 
 git checkout "${WORKBENCH_VERSION}"
-git submodule update --init --recursive
+git submodule update -f --init --recursive
 git status
 
 exec "$@"

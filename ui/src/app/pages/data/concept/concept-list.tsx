@@ -148,7 +148,7 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
 
     closeConceptAddModal() {
       this.setState({conceptAddModalOpen: false});
-      setSidebarActiveIconStore.next(undefined);
+      setSidebarActiveIconStore.next(null);
     }
 
     renderSelection(selection: any, index: number) {
@@ -199,7 +199,7 @@ export const  ConceptListPage = fp.flow(withCurrentWorkspace(), withCurrentConce
           </Button>
           <Button type='link'
                   style={{color: colors.primary, left: 0}}
-                  onClick={() => setSidebarActiveIconStore.next(undefined)}>
+                  onClick={() => setSidebarActiveIconStore.next(null)}>
             Close
           </Button>
         </FlexRowWrap>

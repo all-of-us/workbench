@@ -235,7 +235,9 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
       }
 
       this.setState({
-        eraCommonsLinked: !!(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile)),
+        eraCommonsLinked: (serverConfigStore.get().config.enableEraCommons ?
+            (() => !!(getRegistrationTasksMap()['eraCommons']
+              .completionTimestamp(profile)))() : true),
         dataUserCodeOfConductCompleted: (serverConfigStore.get().config.enableDataUseAgreement ?
           (() => !!(getRegistrationTasksMap()['dataUserCodeOfConduct']
             .completionTimestamp(profile)))() : true)

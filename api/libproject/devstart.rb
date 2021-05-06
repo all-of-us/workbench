@@ -46,8 +46,7 @@ ENVIRONMENTS = {
     :cdr_config_json => "cdr_config_local.json",
     :featured_workspaces_json => "featured_workspaces_local.json",
     :gae_vars => make_gae_vars,
-    :source_cdr_project => "all-of-us-ehr-dev",
-    :source_wgv_project => "all-of-us-workbench-test"
+    :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-workbench-test" => {
     :env_name => "test",
@@ -57,8 +56,7 @@ ENVIRONMENTS = {
     :cdr_config_json => "cdr_config_test.json",
     :featured_workspaces_json => "featured_workspaces_test.json",
     :gae_vars => make_gae_vars(0, 10, 'F4'),
-    :source_cdr_project => "all-of-us-ehr-dev",
-    :source_wgv_project => "all-of-us-workbench-test"
+    :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-rw-staging" => {
     :env_name => "staging",
@@ -68,8 +66,7 @@ ENVIRONMENTS = {
     :cdr_config_json => "cdr_config_staging.json",
     :featured_workspaces_json => "featured_workspaces_staging.json",
     :gae_vars => make_gae_vars(0, 10, 'F2'),
-    :source_cdr_project => "all-of-us-ehr-dev",
-    :source_wgv_project => "all-of-us-workbench-test"
+    :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-rw-perf" => {
     :env_name => "perf",
@@ -79,8 +76,7 @@ ENVIRONMENTS = {
     :cdr_config_json => "cdr_config_perf.json",
     :featured_workspaces_json => "featured_workspaces_perf.json",
     :gae_vars => make_gae_vars(20, 20),
-    :source_cdr_project => "all-of-us-ehr-dev",
-    :source_wgv_project => "all-of-us-workbench-test"
+    :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-rw-stable" => {
     :env_name => "stable",
@@ -90,8 +86,7 @@ ENVIRONMENTS = {
     :cdr_config_json => "cdr_config_stable.json",
     :featured_workspaces_json => "featured_workspaces_stable.json",
     :gae_vars => make_gae_vars,
-    :source_cdr_project => "all-of-us-ehr-dev",
-    :source_wgv_project => "all-of-us-workbench-test"
+    :source_cdr_project => "all-of-us-ehr-dev"
   },
   "all-of-us-rw-preprod" => {
     :env_name => "preprod",
@@ -101,8 +96,7 @@ ENVIRONMENTS = {
     :cdr_config_json => "cdr_config_preprod.json",
     :featured_workspaces_json => "featured_workspaces_preprod.json",
     :gae_vars => make_gae_vars,
-    :source_cdr_project => "aou-res-curation-output-prod",
-    :source_wgv_project => ""
+    :source_cdr_project => "aou-res-curation-output-prod"
   },
   "all-of-us-rw-prod" => {
     :env_name => "prod",
@@ -112,8 +106,7 @@ ENVIRONMENTS = {
     :cdr_config_json => "cdr_config_prod.json",
     :featured_workspaces_json => "featured_workspaces_prod.json",
     :gae_vars => make_gae_vars(8, 64, 'F4'),
-    :source_cdr_project => "aou-res-curation-output-prod",
-    :source_wgv_project => ""
+    :source_cdr_project => "aou-res-curation-output-prod"
   }
 }
 
@@ -803,9 +796,19 @@ def circle_build_cdr_indices(cmd_name, args)
     "BQ dataset. Required."
   )
   op.add_option(
+    "--wgv-project [wgv-project]",
+    ->(opts, v) { opts.wgv_project = v},
+    "Whole genome variant project."
+  )
+  op.add_option(
     "--wgv-dataset [wgv-dataset]",
     ->(opts, v) { opts.wgv_dataset = v},
-    "Whole genome variant dataset. Required."
+    "Whole genome variant dataset."
+  )
+  op.add_option(
+    "--wgv-table [wgv-table]",
+    ->(opts, v) { opts.wgv_table = v},
+    "Whole genome variant table."
   )
   op.add_option(
     "--cdr-version [cdr-version]",
@@ -826,7 +829,7 @@ def circle_build_cdr_indices(cmd_name, args)
   content_type = "Content-Type: application/json"
   accept = "Accept: application/json"
   circle_token = "Circle-Token: "
-  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_build_cdr_indices\": true, \"cdr_source_project\": \"#{env.fetch(:source_cdr_project)}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"wgv_source_project\": \"#{env.fetch(:source_wgv_project)}\", \"wgv_source_dataset\": \"#{op.opts.wgv_dataset}\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"data_browser\": #{op.opts.data_browser} }}"
+  payload = "{ \"branch\": \"#{op.opts.branch}\", \"parameters\": { \"wb_build_cdr_indices\": true, \"cdr_source_project\": \"#{env.fetch(:source_cdr_project)}\", \"cdr_source_dataset\": \"#{op.opts.bq_dataset}\", \"wgv_source_project\": \"#{op.opts.wgv_project}\", \"wgv_source_dataset\": \"#{op.opts.wgv_dataset}\", \"wgv_source_table\": \"#{op.opts.wgv_table}\", \"project\": \"#{op.opts.project}\", \"cdr_version_db_name\": \"#{op.opts.cdr_version}\", \"data_browser\": #{op.opts.data_browser} }}"
   common.run_inline "curl -X POST https://circleci.com/api/v2/project/github/all-of-us/cdr-indices/pipeline -H '#{content_type}' -H '#{accept}' -H \"#{circle_token}\ $(cat ~/.circle-creds/key.txt)\" -d '#{payload}'"
 end
 
@@ -885,12 +888,17 @@ def make_bq_denormalized_tables(cmd_name, *args)
   op.add_option(
     "--wgv-project [wgv-project]",
     ->(opts, v) { opts.wgv_project = v},
-    "Whole Genome Variant Project. Optional."
+    "Whole genome variant project."
   )
   op.add_option(
     "--wgv-dataset [wgv-dataset]",
     ->(opts, v) { opts.wgv_dataset = v},
-    "Whole Genome Variant Dataset. Optional."
+    "Whole genome variant dataset."
+  )
+  op.add_option(
+    "--wgv-table [wgv-table]",
+    ->(opts, v) { opts.wgv_table = v},
+    "Whole genome variant table."
   )
   op.add_option(
     "--data-browser [data-browser]",
@@ -902,7 +910,7 @@ def make_bq_denormalized_tables(cmd_name, *args)
 
   common = Common.new
   Dir.chdir('db-cdr') do
-    common.run_inline %W{./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.cdr_version} #{op.opts.data_browser}}
+    common.run_inline %W{./generate-cdr/make-bq-denormalized-tables.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.wgv_table} #{op.opts.cdr_version} #{op.opts.data_browser}}
   end
 end
 
@@ -987,18 +995,23 @@ def make_bq_denormalized_search_person(cmd_name, *args)
   op.add_option(
     "--wgv-project [wgv-project]",
     ->(opts, v) { opts.wgv_project = v},
-    "Whole Genome Variant Project. Required."
+    "Whole genome variant project."
   )
   op.add_option(
     "--wgv-dataset [wgv-dataset]",
     ->(opts, v) { opts.wgv_dataset = v},
-    "Whole Genome Variant Dataset. Required."
+    "Whole genome variant dataset."
+  )
+  op.add_option(
+    "--wgv-table [wgv-table]",
+    ->(opts, v) { opts.wgv_table = v},
+    "Whole genome variant table."
   )
   op.add_validator ->(opts) { raise ArgumentError unless opts.bq_project and opts.bq_dataset }
   op.parse.validate
 
   common = Common.new
-  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset}}
+  common.run_inline %W{docker-compose run --rm db-make-bq-tables ./generate-cdr/make-bq-denormalized-search-person.sh #{op.opts.bq_project} #{op.opts.bq_dataset} #{op.opts.wgv_project} #{op.opts.wgv_dataset} #{op.opts.wgv_table}}
 end
 
 Common.register_command({

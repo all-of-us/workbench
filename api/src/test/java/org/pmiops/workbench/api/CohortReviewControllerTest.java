@@ -108,6 +108,8 @@ public class CohortReviewControllerTest {
 
   private static final String WORKSPACE_NAMESPACE = "namespace";
   private static final String WORKSPACE_NAME = "name";
+  private static final String WORKSPACE_NAMESPACE2 = "namespace";
+  private static final String WORKSPACE_NAME2 = "name2";
   private DbCdrVersion cdrVersion;
   private DbCohortReview cohortReview;
   private DbCohort cohort;
@@ -115,6 +117,7 @@ public class CohortReviewControllerTest {
   private DbParticipantCohortStatus participantCohortStatus1;
   private DbParticipantCohortStatus participantCohortStatus2;
   private DbWorkspace workspace;
+  private DbWorkspace workspace2;
   private static final Instant NOW = Instant.now();
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
@@ -140,8 +143,6 @@ public class CohortReviewControllerTest {
   @Autowired private CohortAnnotationDefinitionDao cohortAnnotationDefinitionDao;
 
   @Autowired private ParticipantCohortAnnotationDao participantCohortAnnotationDao;
-
-  @Autowired private WorkspaceService workspaceService;
 
   @Autowired private WorkspaceAuthService workspaceAuthService;
 
@@ -312,7 +313,16 @@ public class CohortReviewControllerTest {
     workspace.setWorkspaceNamespace(WORKSPACE_NAMESPACE);
     workspace.setName(WORKSPACE_NAME);
     workspace.setFirecloudName(WORKSPACE_NAME);
+    workspace.setWorkspaceId(1L);
     workspaceDao.save(workspace);
+
+    workspace2 = new DbWorkspace();
+    workspace2.setCdrVersion(cdrVersion);
+    workspace2.setWorkspaceNamespace(WORKSPACE_NAMESPACE2);
+    workspace2.setName(WORKSPACE_NAME2);
+    workspace2.setFirecloudName(WORKSPACE_NAME2);
+    workspace2.setWorkspaceId(2L);
+    workspaceDao.save(workspace2);
 
     cohort = new DbCohort();
     cohort.setWorkspaceId(workspace.getWorkspaceId());
@@ -537,13 +547,14 @@ public class CohortReviewControllerTest {
 
   @Test
   public void updateCohortReview() {
-    when(workspaceAuthService.enforceWorkspaceAccessLevel(
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(WorkspaceAccessLevel.WRITER);
+        .thenReturn(workspace);
 
     CohortReview requestCohortReview =
         new CohortReview()
             .cohortReviewId(cohortReview.getCohortReviewId())
+            .cohortId(cohortReview.getCohortId())
             .etag(Etags.fromVersion(cohortReview.getVersion()));
     requestCohortReview.setCohortName("blahblah");
     requestCohortReview.setDescription("new desc");
@@ -562,11 +573,102 @@ public class CohortReviewControllerTest {
     assertThat(responseCohortReview.getLastModifiedTime()).isNotNull();
   }
 
+  @Test(expected = NotFoundException.class)
+  public void deleteCohortReviewWrongWorkspace() {
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            WORKSPACE_NAMESPACE2, WORKSPACE_NAME2, WorkspaceAccessLevel.WRITER))
+        .thenReturn(workspace2);
+    CohortReview requestCohortReview =
+        new CohortReview()
+            .cohortReviewId(cohortReview.getCohortReviewId())
+            .etag(Etags.fromVersion(cohortReview.getVersion()));
+    cohortReviewController.deleteCohortReview(
+        WORKSPACE_NAMESPACE2, WORKSPACE_NAME2, requestCohortReview.getCohortReviewId());
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void deleteParticipantCohortAnnotationWrongWorkspace() {
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            WORKSPACE_NAMESPACE2, WORKSPACE_NAME2, WorkspaceAccessLevel.WRITER))
+        .thenReturn(workspace2);
+
+    DbParticipantCohortAnnotation annotation =
+        new DbParticipantCohortAnnotation()
+            .cohortReviewId(cohortReview.getCohortReviewId())
+            .participantId(participantCohortStatus1.getParticipantKey().getParticipantId())
+            .annotationValueString("test")
+            .cohortAnnotationDefinitionId(
+                stringAnnotationDefinition.getCohortAnnotationDefinitionId());
+
+    cohortReviewController.deleteParticipantCohortAnnotation(
+        WORKSPACE_NAMESPACE2,
+        WORKSPACE_NAME2,
+        cohortReview.getCohortReviewId(),
+        participantCohortStatus1.getParticipantKey().getParticipantId(),
+        annotation.getAnnotationId());
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void getParticipantCohortAnnotationsWrongWorkspace() {
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            WORKSPACE_NAMESPACE2, WORKSPACE_NAME2, WorkspaceAccessLevel.READER))
+        .thenReturn(workspace2);
+    cohortReviewController.getParticipantCohortAnnotations(
+        WORKSPACE_NAMESPACE2,
+        WORKSPACE_NAME2,
+        cohortReview.getCohortReviewId(),
+        participantCohortStatus1.getParticipantKey().getParticipantId());
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void getParticipantCohortStatusWrongWorkspace() {
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            WORKSPACE_NAMESPACE2, WORKSPACE_NAME2, WorkspaceAccessLevel.READER))
+        .thenReturn(workspace2);
+    cohortReviewController.getParticipantCohortStatus(
+        WORKSPACE_NAMESPACE2,
+        WORKSPACE_NAME2,
+        cohortReview.getCohortReviewId(),
+        participantCohortStatus1.getParticipantKey().getParticipantId());
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void updateCohortReviewWrongWorkspace() {
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            WORKSPACE_NAMESPACE2, WORKSPACE_NAME2, WorkspaceAccessLevel.WRITER))
+        .thenReturn(workspace2);
+    CohortReview requestCohortReview =
+        new CohortReview()
+            .cohortReviewId(cohortReview.getCohortReviewId())
+            .cohortId(cohortReview.getCohortId())
+            .etag(Etags.fromVersion(cohortReview.getVersion()));
+    requestCohortReview.setCohortName("blahblah");
+    requestCohortReview.setDescription("new desc");
+    cohortReviewController.updateCohortReview(
+        WORKSPACE_NAMESPACE2,
+        WORKSPACE_NAME2,
+        requestCohortReview.getCohortReviewId(),
+        requestCohortReview);
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void updateParticipantCohortStatusWrongWorkspace() {
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            WORKSPACE_NAMESPACE2, WORKSPACE_NAME2, WorkspaceAccessLevel.WRITER))
+        .thenReturn(workspace2);
+    cohortReviewController.updateParticipantCohortStatus(
+        WORKSPACE_NAMESPACE2,
+        WORKSPACE_NAME2,
+        cohortReview.getCohortReviewId(),
+        participantCohortStatus1.getParticipantKey().getParticipantId(),
+        new ModifyCohortStatusRequest().status(CohortStatus.INCLUDED));
+  }
+
   @Test
   public void deleteCohortReview() {
-    when(workspaceAuthService.enforceWorkspaceAccessLevel(
+    when(workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
             WORKSPACE_NAMESPACE, WORKSPACE_NAME, WorkspaceAccessLevel.WRITER))
-        .thenReturn(WorkspaceAccessLevel.WRITER);
+        .thenReturn(workspace);
 
     CohortReview requestCohortReview =
         new CohortReview()

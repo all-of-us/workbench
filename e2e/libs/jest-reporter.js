@@ -7,9 +7,61 @@ module.exports = class JestReporter {
     if (globalConfig.verbose === true) {
       throw Error("Verbose must be false or Console messages won't be available.");
     }
-    this._options = options;
-    this.logDir = this._options.outputdir || 'logs/jest';
-    this.summaryFile = this._options.filename || 'test-results-summary.json';
+    this.logDir = options.outputdir || 'logs/jest';
+    this.summaryFile = options.filename || 'test-results-summary.json';
+  }
+
+  // Called at the beginning of every test file
+  onTestStart(test) {
+    console.info(`Running ${path.parse(test.path).name} at ${this.timeNow()}`);
+  }
+
+  // Called with the result of every test file
+  onTestResult(_testRunConfig, testResult, _runResults) {
+    const hasFailure = testResult.testResults.some((result) => {
+      return result.status === 'failed';
+    });
+    if (hasFailure) {
+      // Save logs of failed test
+      const testName = path.parse(testResult.testFilePath).name;
+      const testLogName = `${this.logDir}/${testName}-FAILED.log`;
+      const logger = this.createLogger(testLogName);
+
+      // Read jest console messages and save to a log file.
+      // Get all console logs.
+      if (testResult.console) {
+        testResult.console.forEach((log) => {
+          logger.info(log.message);
+        });
+      }
+
+      // Get failure messages.
+      logger.info('\n\nTests Summary');
+      testResult.testResults.forEach((result) => {
+        logger.info('----------------------------------------------');
+        logger.log('info', 'test name: %s', result.title);
+        logger.log('info', 'status: %s', result.status);
+        // Get failure message.
+        if (result.failureMessages) {
+          const failure = result.failureMessages;
+          logger.log('info', 'failure: %s', failure);
+        }
+        logger.info('');
+      });
+      console.log(`Saved log of failed test: ${testLogName}`);
+    }
+  }
+
+  // Called after all tests have completed
+  onRunComplete(_test, runResults) {
+    // Save test results to a file.
+    if (!fs.existsSync(this.logDir)) {
+      fs.mkdirSync(this.logDir);
+    }
+    // Save Summary log
+    fs.writeFileSync(`${this.logDir}/${this.summaryFile}`, JSON.stringify(runResults, null, 2));
+    console.info(`Save tests results summary file: ${this.logDir}/${this.summaryFile}`);
+    return runResults;
   }
 
   timeNow() {
@@ -19,21 +71,8 @@ module.exports = class JestReporter {
     });
   }
 
-  onTestStart(test) {
-    console.info(`Running ${path.parse(test.path).name} at ${this.timeNow()}`);
-  }
-
-  onTestResult(_testRunConfig, testResult, _runResults) {
-    const testName = path.parse(testResult.testFilePath).name;
-    let testLogName = `${this.logDir}/${testName}.log`;
-    testResult.testResults.forEach((result) => {
-      const status = result.status;
-      if (status === 'failed') {
-        testLogName = `${this.logDir}/${testName}-FAILED.log`;
-      }
-    });
-
-    const fileLogger = winston.createLogger({
+  createLogger(fileName) {
+    const loggerInstance = winston.createLogger({
       level: process.env.LOG_LEVEL || 'info',
       format: winston.format.combine(
         winston.format.splat(),
@@ -43,58 +82,13 @@ module.exports = class JestReporter {
       ),
       transports: [
         new winston.transports.File({
-          filename: testLogName,
+          filename: fileName,
           options: { flags: 'w' },
           handleExceptions: true
         })
       ],
       exitOnError: false
     });
-
-    // Read jest console messages and save to a log file.
-    // Get all console logs.
-    if (testResult.console) {
-      testResult.console.forEach((log) => {
-        fileLogger.info(log.message);
-      });
-    }
-
-    // Get failure messages.
-    fileLogger.info('\n\nTests Summary');
-    testResult.testResults.forEach((result) => {
-      fileLogger.info('----------------------------------------------');
-      fileLogger.log('info', 'test name: %s', result.title);
-      fileLogger.log('info', 'status: %s', result.status);
-      // Get failure message.
-      if (result.failureMessages) {
-        const failure = result.failureMessages;
-        fileLogger.log('info', 'failure: %s', failure);
-      }
-      fileLogger.info();
-    });
-    console.log(`Save test log: ${testLogName}`);
-  }
-
-  onRunComplete(_test, runResults) {
-    runResults.testResults.forEach((suite) => {
-      const testFilePath = suite.testFilePath.split('e2e/')[1];
-      const failedTests = [];
-      suite.testResults.forEach((result) => {
-        if (result.status === 'failed') {
-          failedTests.push(`yarn test ${testFilePath}`);
-        }
-      });
-      if (failedTests.length > 0) {
-        console.info(`****  To rerun failed tests:\n      ${failedTests}`);
-      }
-    });
-
-    // Save test results to a file.
-    if (!fs.existsSync(this.logDir)) {
-      fs.mkdirSync(this.logDir);
-    }
-    fs.writeFileSync(`${this.logDir}/${this.summaryFile}`, JSON.stringify(runResults, null, 2));
-    console.info(`Save tests results summary file: ${this.logDir}/${this.summaryFile}`);
-    return runResults;
+    return loggerInstance;
   }
 };

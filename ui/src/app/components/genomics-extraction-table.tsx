@@ -1,15 +1,23 @@
-import {faCheckCircle, faEllipsisV, faExclamationTriangle} from '@fortawesome/free-solid-svg-icons';
+import {
+  faBan,
+  faCheckCircle, faClipboard,
+  faEllipsisV,
+  faExclamationTriangle, faTrash
+} from '@fortawesome/free-solid-svg-icons';
 import {faSyncAlt} from '@fortawesome/free-solid-svg-icons/faSyncAlt';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
+import {faLocationCircle} from '@fortawesome/pro-solid-svg-icons';
 import {FlexRow} from 'app/components/flex';
-import {TooltipTrigger} from 'app/components/popups';
+import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
 import {TextColumn} from 'app/components/text-column';
 import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {withCurrentWorkspace} from 'app/utils';
+import {switchCase, withCurrentWorkspace} from 'app/utils';
 import {formatUsd} from 'app/utils/numbers';
+import {WorkspaceData} from 'app/utils/workspace-data';
+import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 import {GenomicExtractionJob, TerraJobStatus} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
@@ -18,6 +26,7 @@ import {DataTable} from 'primereact/datatable';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {CSSTransition, SwitchTransition} from 'react-transition-group';
+import {MenuItem} from './buttons';
 
 const getIconConfigForStatus = (status: TerraJobStatus) => {
   if (status === TerraJobStatus.RUNNING) {
@@ -64,9 +73,72 @@ const formatDuration = (durationMoment) => {
   return (hours > 0 ? hours + ' hr, ' : '') + minStr;
 };
 
+const GenomicsExtractionMenu = ({job, workspace}) => {
+  const isRunning = job.status === TerraJobStatus.RUNNING;
+  const canWrite = WorkspacePermissionsUtil.canWrite(workspace.accessLevel);
+  const tooltip = switchCase({r: isRunning, w: canWrite},
+      [{r: true, w: true}, () => ''],
+      [{r: true, w: false}, () => 'You do not have permission to modify this workspace'],
+      [{r: false, w: true}, () => 'Extraction job is not currently running'],
+      [{r: false, w: false}, () => 'Extraction job is not currently running']
+  );
+  return <PopupTrigger
+    side='bottom-left'
+    closeOnClick
+    content={
+     <React.Fragment>
+       <MenuItem
+           faIcon={faLocationCircle}
+           disabled
+           onClick={() => {}}
+       >
+        View Path
+       </MenuItem>
+       <MenuItem
+           faIcon={faClipboard}
+           disabled
+           onClick={() => {}}
+       >
+         Copy Snippet
+       </MenuItem>
+       <hr/>
+       <MenuItem
+           faIcon={faBan}
+           disabled={!isRunning || !canWrite}
+           onClick={() => {
+             dataSetApi().abortGenomicExtractionJob(workspace.namespace, workspace.id, job.genomicExtractionJobId);
+           }}
+           tooltip={tooltip}
+       >
+         Abort Extraction
+       </MenuItem>
+       <hr/>
+       <MenuItem
+         faIcon={faTrash}
+         disabled
+         onClick={() => {}}
+       >
+         Delete Extract
+       </MenuItem>
+     </React.Fragment>
+    }
+  >
+    <FontAwesomeIcon
+        icon={faEllipsisV}
+        style={{
+          color: colors.accent,
+          fontSize: '.7rem',
+          marginLeft: 0,
+          paddingRight: 0,
+          display: 'block'
+        }}
+    />
+  </PopupTrigger>;
+};
+
 const MissingCell = () => <span style={{fontSize: '.4rem'}}>&mdash;</span>;
 
-const mapJobToTableRow = (job: GenomicExtractionJob) => {
+const mapJobToTableRow = (job: GenomicExtractionJob, workspace: WorkspaceData) => {
   const iconConfig = getIconConfigForStatus(job.status);
   const durationMoment = job.completionTime && moment.duration(moment(job.completionTime).diff(moment(job.submissionDate)));
 
@@ -99,15 +171,7 @@ const mapJobToTableRow = (job: GenomicExtractionJob) => {
     cost: job.cost,
     costDisplay: job.cost === null ? // !!job.cost doesn't work here because 0 is a valid value
       <MissingCell/> : formatUsd(job.cost),
-    menuJsx: <FontAwesomeIcon
-      icon={faEllipsisV}
-      style={{
-        color: colors.accent,
-        fontSize: '.7rem',
-        marginLeft: 0,
-        paddingRight: 0,
-        display: 'block'
-      }}/>,
+    menuJsx: <GenomicsExtractionMenu job={job} workspace={workspace}/>,
   };
 };
 
@@ -157,7 +221,14 @@ export const GenomicsExtractionTable = fp.flow(withCurrentWorkspace())(({workspa
         <CSSTransition
           key={isLoading}
           classNames='switch-transition'
-          addEndListener={(node, done) => node.addEventListener('transitionend', done, false)}>
+          addEndListener={(node, done) => {
+            node.addEventListener('transitionend', (e) => {
+              if (node.isEqualNode(e.target)) {
+                done(e);
+              }
+            }, false);
+          }}
+        >
           {
             isLoading
               ? <Spinner style={{display: 'block', margin: '3rem auto'}}/>
@@ -167,7 +238,7 @@ export const GenomicsExtractionTable = fp.flow(withCurrentWorkspace())(({workspa
                          emptyMessage={<EmptyTableMessage/>}
                          sortField={extractionJobs.length !== 0 ? 'dateStarted' : ''}
                          sortOrder={-1}
-                         value={extractionJobs.map(job => mapJobToTableRow(job))}
+                         value={extractionJobs.map(job => mapJobToTableRow(job, workspace))}
                          style={{marginLeft: '0.5rem', marginRight: '0.5rem'}}>
                     <Column header='Dataset Name'
                             field='datasetNameDisplay'

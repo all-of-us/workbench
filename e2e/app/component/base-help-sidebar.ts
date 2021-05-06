@@ -1,15 +1,14 @@
 import Container from 'app/container';
 import Button from 'app/element/button';
-import { LinkText, SideBarLink } from 'app/text-labels';
-import * as fp from 'lodash/fp';
+import { SideBarLink } from 'app/text-labels';
 import { Page } from 'puppeteer';
 import { getPropValue } from 'utils/element-utils';
 import { logger } from 'libs/logger';
 
 const enum Selectors {
   rootXpath = '//*[@id="help-sidebar"]',
-  // "margin-right: 0px;" is used to determine visibility
-  contentXpath = '//*[@data-test-id="sidebar-content" and contains(normalize-space(@style), "margin-right: 0px;")]',
+  // not(contains(normalize-space(@style), "width: 0px;")) is used to determine visibility
+  contentXpath = '//*[not(contains(normalize-space(@style), "width: 0px;"))]/*[@data-test-id="sidebar-content"]',
   closeIconXpath = '//*[@role="button"][./*[@alt="Close"]]'
 }
 
@@ -52,24 +51,6 @@ export default abstract class BaseHelpSidebar extends Container {
   }
 
   /**
-   * Click a button inside the sidebar.
-   * @param {string} buttonLabel The button text label.
-   * @param waitOptions Wait for navigation or/and modal close after click button.
-   */
-  async clickButton(buttonLabel: LinkText, waitOptions: { waitForClose?: boolean } = {}): Promise<void> {
-    const { waitForClose = false } = waitOptions;
-    const button = Button.findByName(this.page, { normalizeSpace: buttonLabel }, this);
-    await button.waitUntilEnabled();
-    await Promise.all(
-      fp.flow(
-        fp.filter<{ shouldWait: boolean; waitFn: () => Promise<void> }>('shouldWait'),
-        fp.map((item) => item.waitFn()),
-        fp.concat([button.click()])
-      )([{ shouldWait: waitForClose, waitFn: () => this.waitUntilClose() }])
-    );
-  }
-
-  /**
    * Click X icon to close the Sidebar.
    */
   async close(): Promise<void> {
@@ -81,12 +62,12 @@ export default abstract class BaseHelpSidebar extends Container {
     logger.info(`Closed "${sidePanelTitle}" sidebar panel`);
   }
 
-  async isVisible(): Promise<boolean> {
+  async isVisible(timeout = 1000): Promise<boolean> {
     if (!(await super.isVisible())) return false;
     try {
       await Promise.all([
-        this.page.waitForXPath(this.getXpath(), { visible: true, timeout: 1000 }),
-        this.page.waitForXPath(this.deleteIconXpath, { visible: true, timeout: 1000 })
+        this.page.waitForXPath(this.getXpath(), { visible: true, timeout }),
+        this.page.waitForXPath(this.deleteIconXpath, { visible: true, timeout })
       ]);
       return true;
     } catch (err) {

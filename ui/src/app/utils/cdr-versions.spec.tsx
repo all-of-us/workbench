@@ -51,15 +51,15 @@ describe('cdr-versions', () => {
     });
 
     it('should correctly get the default CDR Version for the registered tier', async () => {
-        expect(getDefaultCdrVersionForTier(testWorkspace, cdrVersionTiersResponse)).toBe(defaultCdrVersion);
+        expect(getDefaultCdrVersionForTier(AccessTierShortNames.Registered, cdrVersionTiersResponse)).toBe(defaultCdrVersion);
     });
 
     it('should correctly get the default CDR Version for the controlled tier', async () => {
-        expect(getDefaultCdrVersionForTier(ctWorkspace, cdrVersionTiersResponse)).toBe(controlledCdrVersion);
+        expect(getDefaultCdrVersionForTier(AccessTierShortNames.Controlled, cdrVersionTiersResponse)).toBe(controlledCdrVersion);
     });
 
     it('should return undefined when the tier is invalid', async () => {
-        expect(getDefaultCdrVersionForTier(testWorkspaceMissingTier, cdrVersionTiersResponse)).toBeUndefined();
+        expect(getDefaultCdrVersionForTier('invalid', cdrVersionTiersResponse)).toBeUndefined();
     });
 
     it('should detect when a Workspace has the default CDR Version for its tier', async () => {

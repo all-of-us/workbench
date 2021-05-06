@@ -13,7 +13,7 @@
     "xAppIdValue": "perf-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/228353087260/servicePerimeters/terra_perf_aou_perf",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.0.23",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.2",
     "shibbolethApiBaseUrl": "",
     "shibbolethUiBaseUrl": "",
     "runtimeImages": {
@@ -123,7 +123,8 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableReportingUploadCron": false,
-    "enableRasLoginGovLinking": false
+    "enableRasLoginGovLinking": false,
+    "enableGenomicExtraction": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",

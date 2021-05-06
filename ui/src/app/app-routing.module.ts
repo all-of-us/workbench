@@ -162,7 +162,7 @@ const routes: Routes = [
                         data: {
                           title: 'Data Page',
                           breadcrumb: BreadcrumbType.Workspace,
-                          helpContentKey: 'data'
+                          pageKey: 'data'
                         }
                       },
                       {
@@ -171,7 +171,7 @@ const routes: Routes = [
                         data: {
                           title: 'Dataset Page',
                           breadcrumb: BreadcrumbType.Dataset,
-                          helpContentKey: 'datasetBuilder'
+                          pageKey: 'datasetBuilder'
                         }
                       },
                       {
@@ -180,7 +180,7 @@ const routes: Routes = [
                         data: {
                           title: 'Edit Dataset',
                           breadcrumb: BreadcrumbType.Dataset,
-                          helpContentKey: 'datasetBuilder'
+                          pageKey: 'datasetBuilder'
                         }
                       }, {
                         path: 'cohorts',
@@ -200,7 +200,7 @@ const routes: Routes = [
                                 data: {
                                   title: 'Build Cohort Criteria',
                                   breadcrumb: BreadcrumbType.CohortAdd,
-                                  helpContentKey: 'cohortBuilder'
+                                  pageKey: 'cohortBuilder'
                                 }
                               },
                             ]
@@ -242,7 +242,7 @@ const routes: Routes = [
                           data: {
                             title: 'Search Concepts',
                             breadcrumb: BreadcrumbType.SearchConcepts,
-                            helpContentKey: 'conceptSets'
+                            pageKey: 'conceptSets'
                           }
                         }]
                       },
@@ -255,7 +255,7 @@ const routes: Routes = [
                           data: {
                             title: 'Concept Set',
                             breadcrumb: BreadcrumbType.ConceptSet,
-                            helpContentKey: 'conceptSets'
+                            pageKey: 'conceptSets'
                           },
                         }, {
                           path: ':csid/actions',

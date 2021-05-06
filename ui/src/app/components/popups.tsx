@@ -114,16 +114,50 @@ export const computePopupPosition = ({side, viewport, target, element, gap}) => 
       ['top', () => ({top: target.top - element.height - gap, left})],
       ['bottom', () => ({top: target.bottom + gap, left})],
       ['left', () => ({left: target.left - element.width - gap, top})],
-      ['right', () => ({left: target.right + gap, top})]
+      ['right', () => ({left: target.right + gap, top})],
+      // Using half a gap here so the popup lines up with the snowman menu.
+      ['bottom-left', () => ({top: target.bottom + gap, left: target.left - element.width + (.5 * gap)})],
+      ['bottom-right', () => ({top: target.bottom + gap, left: target.right - (.5 * gap)})],
+      ['top-left', () => ({top: target.top - element.height - gap, left: target.left - element.width + (.5 * gap)})],
+      ['top-right', () => ({top: target.top - element.height - gap, left: target.right - (.5 * gap)})]
     );
   };
   const position = getPosition(side);
+  const overflowsTop = position.top < 0;
+  const overflowsBottom = position.top + element.height >= viewport.height;
+  const overflowsLeft = position.left < 0;
+  const overflowsRight = position.left + element.width >= viewport.width;
   const maybeFlip = d => {
     return switchCase(d,
-      ['top', () => position.top < 0 ? 'bottom' : 'top'],
-      ['bottom', () => position.top + element.height >= viewport.height ? 'top' : 'bottom'],
-      ['left', () => position.left < 0 ? 'right' : 'left'],
-      ['right', () => position.left + element.width >= viewport.width ? 'left' : 'right']
+      ['top', () => overflowsTop ? 'bottom' : 'top'],
+      ['bottom', () => overflowsBottom ? 'top' : 'bottom'],
+      ['left', () => overflowsLeft ? 'right' : 'left'],
+      ['right', () => overflowsRight ? 'left' : 'right'],
+      // Unfortunately, nested switchCase is probably the clearest way to express this.
+      ['bottom-left', () => switchCase({ob: overflowsBottom, ol: overflowsLeft},
+          [{ob: false, ol: false}, () => 'bottom-left'],
+          [{ob: false, ol: true}, () => 'bottom-right'],
+          [{ob: true, ol: false}, () => 'top-left'],
+          [{ob: true, ol: true}, () => 'top-right']
+      )],
+      ['bottom-right', () => switchCase({ob: overflowsBottom, or: overflowsRight},
+          [{ob: false, or: false}, () => 'bottom-right'],
+          [{ob: false, or: true}, () => 'bottom-left'],
+          [{ob: true, or: false}, () => 'top-right'],
+          [{ob: true, or: true}, () => 'top-left']
+      )],
+      ['top-left', () => switchCase({ot: overflowsTop, ol: overflowsLeft},
+          [{ot: false, ol: false}, () => 'top-left'],
+          [{ot: false, ol: true}, () => 'top-right'],
+          [{ot: true, ol: false}, () => 'bottom-left'],
+          [{ot: true, ol: true}, () => 'bottom-right']
+      )],
+      ['top-right', () => switchCase({ot: overflowsTop, or: overflowsRight},
+          [{ot: false, or: false}, () => 'top-right'],
+          [{ot: false, or: true}, () => 'top-left'],
+          [{ot: true, or: false}, () => 'bottom-right'],
+          [{ot: true, or: true}, () => 'bottom-left']
+      )]
     );
   };
   const finalSide = maybeFlip(side);
@@ -242,7 +276,6 @@ export const Popup = fp.flow(
     } = this.props;
 
     const {position} = computePopupPosition({side, target, element, viewport, gap: 10});
-
     return <PopupPortal>
       <div
         onClick={onClick}

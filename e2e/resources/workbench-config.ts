@@ -27,7 +27,7 @@ const local = {
   collaboratorUsername: process.env.DEV_COLLABORATOR || 'puppetmaster@fake-research-aou.org',
   writerUserName: process.env.DEV_WRITER || 'puppetmaster@fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v3',
-  altCdrVersionName: 'Synthetic Dataset v3 with Microarray'
+  altCdrVersionName: 'Synthetic Dataset v3 with WGS'
 };
 
 // workbench test environment
@@ -38,7 +38,7 @@ const test = {
   collaboratorUsername: process.env.TEST_COLLABORATOR || 'puppetmaster@fake-research-aou.org',
   writerUserName: process.env.TEST_WRITER || 'puppetmaster@fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v3',
-  altCdrVersionName: 'Synthetic Dataset v3 with Microarray'
+  altCdrVersionName: 'Synthetic Dataset v3 with WGS'
 };
 
 // workbench staging environment
@@ -61,11 +61,23 @@ const stable = {
   altCdrVersionName: 'Synthetic Dataset v3'
 };
 
+// workbench perf environment
+const perf = {
+  uiBaseUrl: process.env.PERF_LOGIN_URL || 'https://all-of-us-rw-perf.appspot.com',
+  apiBaseUrl: process.env.PERF_API_URL || 'https://api-dot-all-of-us-rw-perf.appspot.com/v1',
+  userEmailDomain: '@perf.fake-research-aou.org',
+  collaboratorUsername: process.env.PERF_COLLABORATOR || 'puppetciperfreader@perf.fake-research-aou.org',
+  writerUserName: process.env.PERF_WRITER || 'puppetciperfwriter1@perf.fake-research-aou.org',
+  defaultCdrVersionName: 'Synthetic Dataset v4',
+  altCdrVersionName: 'Synthetic Dataset v3'
+};
+
 const environment = {
   local,
   test,
   staging,
-  stable
+  stable,
+  perf
 };
 
 export const config = fp.mergeAll([environment[env], userCredential, urlPath]);

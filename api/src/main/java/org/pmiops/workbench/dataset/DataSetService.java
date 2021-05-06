@@ -1,6 +1,7 @@
 package org.pmiops.workbench.dataset;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
+import com.google.cloud.bigquery.TableResult;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import org.pmiops.workbench.model.DataDictionaryEntry;
 import org.pmiops.workbench.model.DataSet;
 import org.pmiops.workbench.model.DataSetPreviewRequest;
 import org.pmiops.workbench.model.DataSetRequest;
+import org.pmiops.workbench.model.DomainValue;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.ResourceType;
 
@@ -22,9 +24,9 @@ public interface DataSetService {
 
   DataSet saveDataSet(DbDataset dataset);
 
-  DataSet updateDataSet(DataSetRequest dataSetRequest, Long DataSetId);
+  DataSet updateDataSet(long workspaceId, long dataSetId, DataSetRequest dataSetRequest);
 
-  QueryJobConfiguration previewBigQueryJobConfig(DataSetPreviewRequest dataSetPreviewRequest);
+  TableResult previewBigQueryJobConfig(DataSetPreviewRequest dataSetPreviewRequest);
 
   Map<String, QueryJobConfiguration> domainToBigQueryConfig(DataSetRequest dataSet);
 
@@ -34,15 +36,6 @@ public interface DataSetService {
       String cdrVersionName,
       String qualifier,
       Map<String, QueryJobConfiguration> queryJobConfigurationMap);
-
-  List<String> generateMicroarrayCohortExtractCodeCells(
-      DbWorkspace dbWorkspace,
-      String qualifier,
-      Map<String, QueryJobConfiguration> queryJobConfigurationMap);
-
-  List<String> generatePlinkDemoCode(String qualifier);
-
-  List<String> generateHailDemoCode(String qualifier);
 
   DbDataset cloneDataSetToWorkspace(
       DbDataset fromDataSet,
@@ -57,17 +50,19 @@ public interface DataSetService {
 
   List<DbCohort> getCohortsForDataset(DbDataset dataSet);
 
-  List<DataSet> getDataSets(ResourceType resourceType, long resourceId);
+  List<DataSet> getDataSets(long workspaceId, ResourceType resourceType, long resourceId);
 
-  void deleteDataSet(Long dataSetId);
+  void deleteDataSet(long workspaceId, long dataSetId);
 
-  Optional<DataSet> getDataSet(Long dataSetId);
+  Optional<DataSet> getDataSet(long workspaceId, long dataSetId);
 
-  Optional<DbDataset> getDbDataSet(Long dataSetId);
+  Optional<DbDataset> getDbDataSet(long workspaceId, long dataSetId);
 
-  void markDirty(ResourceType resourceType, long resourceId);
+  void markDirty(long workspaceId, ResourceType resourceType, long resourceId);
 
   DataDictionaryEntry findDataDictionaryEntry(String fieldName, String domain);
 
   List<String> getPersonIdsWithWholeGenome(DbDataset dataSet);
+
+  List<DomainValue> getValueListFromDomain(String domain);
 }

@@ -104,11 +104,9 @@ public class WorkbenchConfig {
     public Double defaultFreeCreditsDollarLimit;
     // Thresholds for email alerting based on free tier usage, by cost
     public ArrayList<Double> freeTierCostAlertThresholds;
-    // For project garbage collection, the max # of projects allowed to be associated with each
-    // garbage-collection service account.
-    public Integer garbageCollectionUserCapacity;
-    // A list of GCP service accounts for billing project garbage collection
-    public ArrayList<String> garbageCollectionUsers;
+    // TODO(RW-6034): rm after related code removal is release.
+    @Deprecated public Integer garbageCollectionUserCapacity;
+    @Deprecated public ArrayList<String> garbageCollectionUsers;
   }
 
   public static class FireCloudConfig {
@@ -281,6 +279,9 @@ public class WorkbenchConfig {
     public boolean enableReportingUploadCron;
     // If true, user account setup requires linking eRA commons via RAS instead of Shibboleth.
     public boolean enableRasLoginGovLinking;
+    // If true, enable genomic extraction functionality for datasets which have genomics data
+    // associated with their CDRs.
+    public boolean enableGenomicExtraction;
   }
 
   public static class ActionAuditConfig {

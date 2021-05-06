@@ -5,6 +5,11 @@ export enum AccessTierShortNames {
     Controlled = 'controlled',
 }
 
+export enum AccessTierDisplayNames {
+    Registered = 'Registered Tier',
+    Controlled = 'Controlled Tier',
+}
+
 /**
  * Determine whether the given access level is Registered. This is required to do most things in the Workbench app
  * (outside of local/test development).

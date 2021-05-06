@@ -364,6 +364,37 @@ public class ConceptSetsControllerTest {
     assertThat(conceptSet.getName()).isEqualTo("concept set 1");
   }
 
+  @Test(expected = NotFoundException.class)
+  public void testGetConceptSetWrongWorkspace() {
+    ConceptSet conceptSet =
+        makeConceptSet(
+            CLIENT_CRITERIA_2, Domain.MEASUREMENT, workspace2.getNamespace(), WORKSPACE_NAME_2);
+
+    conceptSetsController.getConceptSet(
+        workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId());
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void testUpdateConceptSetWrongWorkspace() {
+    ConceptSet conceptSet =
+        makeConceptSet(
+            CLIENT_CRITERIA_2, Domain.MEASUREMENT, workspace2.getNamespace(), WORKSPACE_NAME_2);
+    conceptSetsController.updateConceptSet(
+        workspace.getNamespace(), WORKSPACE_NAME, conceptSet.getId(), makeConceptSet1());
+  }
+
+  @Test(expected = NotFoundException.class)
+  public void testUpdateConceptSetConceptsWrongWorkspace() {
+    ConceptSet conceptSet =
+        makeConceptSet(
+            CLIENT_CRITERIA_2, Domain.MEASUREMENT, workspace2.getNamespace(), WORKSPACE_NAME_2);
+    conceptSetsController.updateConceptSetConcepts(
+        workspace.getNamespace(),
+        WORKSPACE_NAME,
+        conceptSet.getId(),
+        addConceptsRequest(conceptSet.getEtag(), CLIENT_CRITERIA_1.getConceptId()));
+  }
+
   @Test
   public void testGetConceptSet() {
     ConceptSet surveyConceptSet = makeSurveyConceptSet1();
@@ -782,6 +813,25 @@ public class ConceptSetsControllerTest {
         .createConceptSet(
             workspace.getNamespace(),
             WORKSPACE_NAME,
+            new CreateConceptSetRequest()
+                .conceptSet(conceptSet)
+                .addAddedConceptSetConceptIdsItem(conceptSetConceptId))
+        .getBody();
+  }
+
+  private ConceptSet makeConceptSet(
+      Criteria criteria, Domain domain, String nameSpace, String workspaceName) {
+    ConceptSetConceptId conceptSetConceptId = new ConceptSetConceptId();
+    conceptSetConceptId.setConceptId(criteria.getConceptId());
+    conceptSetConceptId.setStandard(true);
+    ConceptSet conceptSet = new ConceptSet();
+    conceptSet.setDescription("desc 2");
+    conceptSet.setName("concept set 2");
+    conceptSet.setDomain(domain);
+    return conceptSetsController
+        .createConceptSet(
+            nameSpace,
+            workspaceName,
             new CreateConceptSetRequest()
                 .conceptSet(conceptSet)
                 .addAddedConceptSetConceptIdsItem(conceptSetConceptId))

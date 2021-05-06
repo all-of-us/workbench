@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.persistence.OptimisticLockException;
@@ -56,13 +55,12 @@ public class ConceptSetService {
   }
 
   public ConceptSet copyAndSave(
-      Long fromConceptSetId, String newConceptSetName, DbUser creator, Long toWorkspaceId) {
-    final DbConceptSet existingConceptSet =
-        Optional.ofNullable(conceptSetDao.findOne(fromConceptSetId))
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("Concept set %s does not exist", fromConceptSetId)));
+      Long fromConceptSetId,
+      Long fromWorkspaceId,
+      String newConceptSetName,
+      DbUser creator,
+      Long toWorkspaceId) {
+    final DbConceptSet existingConceptSet = getDbConceptSet(fromWorkspaceId, fromConceptSetId);
     final Timestamp now = Timestamp.from(clock.instant());
     ConceptSetContext conceptSetContext =
         new ConceptSetContext.Builder()
@@ -96,13 +94,8 @@ public class ConceptSetService {
     }
   }
 
-  public ConceptSet updateConceptSet(Long conceptSetId, ConceptSet conceptSet) {
-    DbConceptSet dbConceptSet =
-        Optional.ofNullable(conceptSetDao.findOne(conceptSetId))
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("ConceptSet not found for conceptSetId: %d", conceptSetId)));
+  public ConceptSet updateConceptSet(Long workspaceId, Long conceptSetId, ConceptSet conceptSet) {
+    DbConceptSet dbConceptSet = getDbConceptSet(workspaceId, conceptSetId);
     if (dbConceptSet.getVersion() != Etags.toVersion(conceptSet.getEtag())) {
       throw new ConflictException("Attempted to modify outdated concept set version");
     }
@@ -125,13 +118,9 @@ public class ConceptSetService {
     }
   }
 
-  public ConceptSet updateConceptSetConcepts(Long conceptSetId, UpdateConceptSetRequest request) {
-    DbConceptSet dbConceptSet =
-        Optional.ofNullable(conceptSetDao.findOne(conceptSetId))
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("ConceptSet not found for concept id: %d", conceptSetId)));
+  public ConceptSet updateConceptSetConcepts(
+      Long workspaceId, Long conceptSetId, UpdateConceptSetRequest request) {
+    DbConceptSet dbConceptSet = getDbConceptSet(workspaceId, conceptSetId);
 
     int version = Etags.toVersion(request.getEtag());
     if (dbConceptSet.getVersion() != version) {
@@ -181,13 +170,8 @@ public class ConceptSetService {
     conceptSetDao.delete(conceptSetId);
   }
 
-  public ConceptSet getConceptSet(Long conceptSetId) {
-    DbConceptSet dbConceptSet =
-        Optional.ofNullable(conceptSetDao.findOne(conceptSetId))
-            .orElseThrow(
-                () ->
-                    new NotFoundException(
-                        String.format("ConceptSet not found for concept id: %d", conceptSetId)));
+  public ConceptSet getConceptSet(Long workspaceId, Long conceptSetId) {
+    DbConceptSet dbConceptSet = getDbConceptSet(workspaceId, conceptSetId);
     return toHydratedConcepts(
         conceptSetMapper.dbModelToClient(dbConceptSet, conceptBigQueryService));
   }
@@ -225,6 +209,17 @@ public class ConceptSetService {
     // Allows for fetching concept sets for a workspace once its collection is no longer
     // bound to a session.
     return conceptSetDao.findByWorkspaceId(workspace.getWorkspaceId());
+  }
+
+  private DbConceptSet getDbConceptSet(Long workspaceId, Long conceptSetId) {
+    return conceptSetDao
+        .findByWorkspaceIdAndConceptSetId(workspaceId, conceptSetId)
+        .orElseThrow(
+            () ->
+                new NotFoundException(
+                    String.format(
+                        "ConceptSet not found for workspaceId: %d and conceptSetId: %d",
+                        workspaceId, conceptSetId)));
   }
 
   private ConceptSet toHydratedConcepts(ConceptSet conceptSet) {

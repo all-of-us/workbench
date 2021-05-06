@@ -5,7 +5,11 @@ import {act} from 'react-dom/test-utils';
 import {cohortReviewStore} from 'app/services/review-state.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {defaultRuntime, RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
-import {currentCohortCriteriaStore, currentWorkspaceStore} from 'app/utils/navigation';
+import {
+  currentCohortCriteriaStore,
+  currentWorkspaceStore,
+  setSidebarActiveIconStore
+} from 'app/utils/navigation';
 import {CdrVersionsApi, CohortAnnotationDefinitionApi, CohortReviewApi} from 'generated/fetch';
 import defaultServerConfig from 'testing/default-server-config';
 import {waitForFakeTimersAndUpdate, waitOneTickAndUpdate} from 'testing/react-test-helpers';
@@ -14,7 +18,7 @@ import {CohortReviewServiceStub, cohortReviewStubs} from 'testing/stubs/cohort-r
 import {workspaceDataStub} from 'testing/stubs/workspaces';
 import colors from 'app/styles/colors';
 import {cdrVersionStore, runtimeStore, serverConfigStore} from 'app/utils/stores';
-import {cdrVersionTiersResponse, CdrVersionsApiStub} from '../../testing/stubs/cdr-versions-api-stub';
+import {cdrVersionTiersResponse, CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
 import {HelpSidebar} from './help-sidebar';
 import {RuntimeApi, RuntimeStatus, WorkspaceAccessLevel} from "generated/fetch";
 import {WorkspacesApi} from "generated/fetch";
@@ -28,6 +32,13 @@ const criteria1 = {parameterId: '1', id: 1, parentId: 0,
 
 const criteria2 = {parameterId: '2', id: 2, parentId: 0,
   type: 'tree', name: 'Criteria 2', group: false, selectable: true, hasAttributes: false};
+
+jest.mock('react-transition-group', () => {
+  return {
+    CSSTransition: (props) => props.children,
+    TransitionGroup: (props) => props.children
+  };
+});
 
 describe('HelpSidebar', () => {
   let runtimeStub: RuntimeApiStub;
@@ -46,7 +57,7 @@ describe('HelpSidebar', () => {
   };
 
   const setRuntimeStatus = (status) => {
-    const runtime = { ...defaultRuntime(), status };
+    const runtime = {...defaultRuntime(), status};
     runtimeStub.runtime = runtime;
     runtimeStore.set({workspaceNamespace: workspaceDataStub.namespace, runtime});
   };
@@ -56,6 +67,10 @@ describe('HelpSidebar', () => {
     runtimeStore.set({workspaceNamespace: workspaceDataStub.namespace, runtime: null});
   };
 
+  const setActiveIcon = async(wrapper, activeIconKey) => {
+    setSidebarActiveIconStore.next(activeIconKey);
+    await waitOneTickAndUpdate(wrapper);
+  };
 
   beforeEach(() => {
     props = {};
@@ -85,27 +100,30 @@ describe('HelpSidebar', () => {
     expect(wrapper.exists()).toBeTruthy();
   });
 
-  it('should update content when helpContentKey prop changes', async() => {
-    props = {helpContentKey: 'data', sidebarOpen: true};
+  it('should update content when pageKey prop changes', async() => {
+    props = {pageKey: 'data'};
     const wrapper = await component();
+    await setActiveIcon(wrapper, 'help');
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.data[0].title);
-    wrapper.setProps({helpContentKey: 'cohortBuilder'});
+    wrapper.setProps({pageKey: 'cohortBuilder'});
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.cohortBuilder[0].title);
   });
 
-  it('should show a different icon and title when helpContentKey is notebookStorage', async() => {
-    props = {helpContentKey: 'notebookStorage', sidebarOpen: true};
+  it('should show a different icon and title when pageKey is notebookStorage', async() => {
+    props = {pageKey: 'notebookStorage'};
     const wrapper = await component();
+    await setActiveIcon(wrapper, 'notebooksHelp');
     expect(wrapper.find('[data-test-id="section-title-0"]').text()).toBe(sidebarContent.notebookStorage[0].title);
     expect(wrapper.find('[data-test-id="help-sidebar-icon-notebooksHelp"]').get(0).props.icon.iconName).toBe('folder-open');
   });
 
   it('should update marginRight style when sidebarOpen prop changes', async() => {
-    props = {helpContentKey: 'data', sidebarOpen: true};
     const wrapper = await component();
-    expect(wrapper.find('[data-test-id="sidebar-content"]').prop('style').marginRight).toBe(0);
-    wrapper.setProps({sidebarOpen: false});
-    expect(wrapper.find('[data-test-id="sidebar-content"]').prop('style').marginRight).toBe('calc(-14rem - 40px)');
+    await setActiveIcon(wrapper, 'help');
+    expect(wrapper.find('[data-test-id="sidebar-content"]').parent().prop('style').width).toBe('calc(14rem + 70px)');
+
+    await setActiveIcon(wrapper, null);
+    expect(wrapper.find('[data-test-id="sidebar-content"]').parent().prop('style').width).toBe(0);
   });
 
   it('should call delete method when clicked', async() => {
@@ -126,10 +144,12 @@ describe('HelpSidebar', () => {
     expect(shareSpy).toHaveBeenCalled();
   });
 
-  it('should hide workspace icon if on critera search page', async() => {
+  it('should hide workspace icon if on criteria search page', async() => {
+    props = {pageKey: 'cohortBuilder'};
     const wrapper = await component();
     currentCohortCriteriaStore.next([]);
     await waitForFakeTimersAndUpdate(wrapper);
+
     expect(wrapper.find({'data-test-id': 'workspace-menu-button'}).length).toBe(0);
     expect(wrapper.find({'data-test-id': 'criteria-count'}).length).toBe(0);
     currentCohortCriteriaStore.next([criteria1]);
@@ -138,6 +158,7 @@ describe('HelpSidebar', () => {
   });
 
   it('should update count if criteria is added', async() => {
+    props = {pageKey: 'cohortBuilder'};
     const wrapper = await component();
     currentCohortCriteriaStore.next([criteria1, criteria2]);
     await waitForFakeTimersAndUpdate(wrapper);

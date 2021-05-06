@@ -11,8 +11,8 @@
     {
       "accessTierId": 2,
       "shortName": "controlled",
-      "displayName": "Fake Controlled Tier For Staging",
-      "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_staging",
+      "displayName": "Controlled Tier",
+      "servicePerimeter": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_staging_2",
       "authDomainName": "all-of-us-controlled-staging",
       "authDomainGroupEmail": "all-of-us-controlled-staging@firecloud.org"
     }
