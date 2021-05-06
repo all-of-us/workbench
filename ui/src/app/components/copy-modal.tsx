@@ -118,7 +118,7 @@ const NotebookCdrMismatch = (props: {text: string}) =>
     </div>;
 
 const ConceptSetRestrictionText = () => <div style={styles.restriction}>
-  Concept sets can only be copied to workspaces using the same CDR version.
+  Concept sets can only be copied to workspaces using the same access tier and CDR version.
 </div>;
 
 const NotebookRestrictionText = () => <div style={styles.restriction}>
