@@ -143,6 +143,26 @@ public class UserDaoTest extends SpringTest {
   }
 
   @Test
+  public void test_getAdminTableUsers() {
+    // Make sure AdminTable projection works.
+    Timestamp duaByPassTime = now();
+    String contactEmail  = "1@foo.com";
+    DbUser user1 = new DbUser();
+    user1.setDisabled(true);
+    user1.setContactEmail(contactEmail);
+    user1.setDataUseAgreementBypassTime(duaByPassTime);
+    user1 = userDao.save(user1);
+    addUserToTier(user1, registeredTier, TierAccessStatus.DISABLED);
+
+    List<DbAdminTableUser> rows = userDao.getAdminTableUsers();
+    assertThat(rows).hasSize(1);
+    final DbAdminTableUser row = rows.get(0);
+    assertThat(row.getDisabled()).isTrue();
+    assertThat(row.getDataUseAgreementBypassTime()).isEqualTo(duaByPassTime);
+    assertThat(row.getContactEmail()).isEqualTo(contactEmail);
+  }
+
+  @Test
   public void test_getAdminTableUsers_disabledTier() {
     DbUser user1 = new DbUser();
     user1.setDisabled(false);
