@@ -53,3 +53,7 @@ export function extractNamespace(url: URL): string {
   const urlPath = url.pathname;
   return urlPath.split('/')[2];
 }
+
+export function numericalStringToNumber(value: string): number {
+  return Number(value.replace(/,/g, ''));
+}

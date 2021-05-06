@@ -67,7 +67,7 @@ describe('User can create, modify, rename and delete Cohort', () => {
     console.log(`Total Count: ${totalCountInt}`);
 
     // Save cohort.
-    const cohortName = await cohortBuildPage.saveCohortAs();
+    const cohortName = await cohortBuildPage.createCohort();
     console.log(`Created Cohort "${cohortName}"`);
 
     // Click cohort link. Open cohort build page.

@@ -10,6 +10,9 @@ import { LinkText, MenuOption } from 'app/text-labels';
 import Modal from 'app/modal/modal';
 import AuthenticatedPage from './authenticated-page';
 import CohortParticipantsGroup from './cohort-participants-group';
+import CohortSaveAsModal from 'app/modal/cohort-save-as-modal';
+import { getPropValue } from 'utils/element-utils';
+import WarningDiscardChangesModal from 'app/modal/warning-discard-changes-modal';
 
 const faker = require('faker/locale/en_US');
 const PageTitle = 'Build Cohort Criteria';
@@ -29,18 +32,40 @@ export default class CohortBuildPage extends AuthenticatedPage {
     return true;
   }
 
+  async getCohortName(): Promise<string> {
+    const h3Xpath = '//h3[./ancestor::node()[2]/*[@id="list-include-groups"]]';
+    const h3 = await this.page.waitForXPath(h3Xpath, { visible: true });
+    return getPropValue<string>(h3, 'textContent');
+  }
+
   /**
    * Save Cohort changes.
    */
-  async saveChanges(): Promise<void> {
+  async saveChanges(menuOption: MenuOption = MenuOption.Save): Promise<string> {
+    let cohortName = await this.getCohortName();
+
     const createCohortButton = Button.findByName(this.page, { normalizeSpace: LinkText.SaveCohort });
     await createCohortButton.waitUntilEnabled();
     await createCohortButton.click(); // Click dropdown trigger to open menu
     const menu = new TieredMenu(this.page);
-    await menu.select(MenuOption.Save);
+    await menu.select(menuOption);
+
+    switch (menuOption) {
+      case MenuOption.SaveAs:
+        cohortName = makeRandomName();
+        const modal = new CohortSaveAsModal(this.page);
+        await modal.waitForLoad();
+        await modal.typeCohortName(cohortName);
+        await modal.clickSaveButton();
+        break;
+      default:
+        break;
+    }
+    await waitForText(this.page, 'Cohort Saved Successfully');
+    return cohortName;
   }
 
-  async saveCohortAs(cohortName?: string, description?: string): Promise<string> {
+  async createCohort(cohortName?: string, description?: string): Promise<string> {
     const createCohortButton = this.getCreateCohortButton();
     await createCohortButton.waitUntilEnabled();
     await createCohortButton.click();
@@ -52,16 +77,11 @@ export default class CohortBuildPage extends AuthenticatedPage {
       description = faker.lorem.words(10);
     }
 
-    const modal = new Modal(this.page);
+    const modal = new CohortSaveAsModal(this.page);
     await modal.waitForLoad();
-    const nameTextbox = modal.waitForTextbox('COHORT NAME');
-    await nameTextbox.type(cohortName);
-
-    const descriptionTextarea = modal.waitForTextarea('DESCRIPTION');
-    await descriptionTextarea.type(description);
-
-    await modal.clickButton(LinkText.Save, { waitForClose: true, timeout: 2 * 60 * 1000 });
-    await waitWhileLoading(this.page);
+    await modal.typeCohortName(cohortName);
+    await modal.typeDescription(description);
+    await modal.clickSaveButton();
 
     await waitForText(this.page, 'Cohort Saved Successfully');
     console.log(`Created Cohort: "${cohortName}"`);
@@ -92,11 +112,10 @@ export default class CohortBuildPage extends AuthenticatedPage {
    * @return {string} Dialog textContent.
    */
   async discardChangesConfirmationDialog(): Promise<string[]> {
-    const modal = new Modal(this.page);
+    const modal = new WarningDiscardChangesModal(this.page);
     await modal.waitForLoad();
     const contentText = await modal.getTextContent();
-    await modal.clickButton(LinkText.DiscardChanges, { waitForNav: true, waitForClose: true });
-    await waitWhileLoading(this.page);
+    await modal.clickDiscardChangesButton();
     return contentText;
   }
 
@@ -106,10 +125,14 @@ export default class CohortBuildPage extends AuthenticatedPage {
    * @return {string} Total Count.
    */
   async getTotalCount(timeout = 60000): Promise<string> {
-    const highCharts = '//*[@class="highcharts-container "]//*[contains(@class, "highcharts-bar-series")]/*';
+    const barCssSelector = '.highcharts-container .highcharts-bar-series rect';
     const [count] = await Promise.all([
       waitForNumericalString(this.page, FieldSelector.TotalCount, timeout),
-      this.page.waitForXPath(highCharts, { timeout, visible: true })
+      this.page.waitForFunction(
+        (css) => document.querySelectorAll(css),
+        { polling: 'mutation', timeout },
+        barCssSelector
+      )
     ]);
     return count;
   }
@@ -158,9 +181,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
 
   findExcludeParticipantsGroup(groupName: string): CohortParticipantsGroup {
     const group = new CohortParticipantsGroup(this.page);
-    group.setXpath(
-      `//*[@id="list-exclude-groups"]/*[@data-test-id="excludes-search-group"][.//*[normalize-space()="${groupName}"]]`
-    );
+    group.setXpath(`//*[@id="list-exclude-groups"][.//*[normalize-space()="${groupName}"]]`);
     return group;
   }
 

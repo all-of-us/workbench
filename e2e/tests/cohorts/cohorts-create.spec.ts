@@ -62,7 +62,7 @@ describe('Cohorts', () => {
     console.log(`New Total Count: ${newTotalCountInt}`);
 
     // Save new cohort - click create cohort button
-    const cohortName = await cohortPage.saveCohortAs();
+    const cohortName = await cohortPage.createCohort();
     console.log(`Created Cohort "${cohortName}"`);
 
     // Open Cohort details.

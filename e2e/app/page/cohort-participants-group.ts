@@ -7,6 +7,8 @@ import TieredMenu from 'app/component/tiered-menu';
 import { LinkText, MenuOption } from 'app/text-labels';
 import { snowmanIconXpath } from 'app/component/snowman-menu';
 import Modal from 'app/modal/modal';
+import InputSwitch from 'app/element/input-switch';
+import Button from '../element/button';
 
 export default class CohortParticipantsGroup {
   private rootXpath: string;
@@ -21,8 +23,19 @@ export default class CohortParticipantsGroup {
     return (await this.page.$x(this.rootXpath)).length > 0;
   }
 
-  getAddCriteriaButtonXpath(): string {
-    return `${this.rootXpath}//*[normalize-space()="Add Criteria"]/button`;
+  getAddCriteriaButton(): Button {
+    const xpath = `${this.rootXpath}//*[normalize-space()="Add Criteria"]/button`;
+    return new Button(this.page, xpath);
+  }
+
+  getAnyMentionOfButton(): Button {
+    const xpath = `${this.rootXpath}//*[normalize-space()="Any mention of"]/button`;
+    return new Button(this.page, xpath);
+  }
+
+  getDuringSameEncounterAsButton(): Button {
+    const xpath = `${this.rootXpath}//*[normalize-space()="During same encounter as"]/button`;
+    return new Button(this.page, xpath);
   }
 
   getGroupCountXpath(): string {
@@ -71,7 +84,7 @@ export default class CohortParticipantsGroup {
       // Sometimes message fails to show up. Ignore error.
     }
     await waitWhileLoading(this.page);
-    return this.getGroupCriteriasList();
+    return this.getGroupCriteriaList();
   }
 
   async includePhysicalMeasurement(criteriaName: PhysicalMeasurementsCriteria, value: number): Promise<string> {
@@ -128,20 +141,54 @@ export default class CohortParticipantsGroup {
   }
 
   private async clickCriteriaMenuItems(menuItemLinks: MenuOption[]): Promise<void> {
-    const menu = await this.openTieredMenu();
+    const menu = await this.openAddCriteriaTieredMenu();
     await menu.select(menuItemLinks);
   }
 
-  private async openTieredMenu(): Promise<TieredMenu> {
-    const addCriteriaButton = await this.page.waitForXPath(this.getAddCriteriaButtonXpath(), { visible: true });
+  async openAddCriteriaTieredMenu(): Promise<TieredMenu> {
+    const addCriteriaButton = await this.getAddCriteriaButton();
+    await addCriteriaButton.waitUntilEnabled();
     await addCriteriaButton.click(); // Click dropdown trigger to open menu
     const tieredMenu = new TieredMenu(this.page);
     await tieredMenu.waitUntilVisible();
     return tieredMenu;
   }
 
-  async getGroupCriteriasList(): Promise<ElementHandle[]> {
+  async openAnyMentionOfTieredMenu(): Promise<TieredMenu> {
+    const button = await this.getAnyMentionOfButton();
+    await button.waitUntilEnabled();
+    await button.click(); // Click dropdown trigger to open menu
+    const tieredMenu = new TieredMenu(this.page);
+    await tieredMenu.waitUntilVisible();
+    return tieredMenu;
+  }
+
+  async openDuringSameEncounterAsTieredMenu(): Promise<TieredMenu> {
+    const button = await this.getDuringSameEncounterAsButton();
+    await button.waitUntilEnabled();
+    await button.click(); // Click dropdown trigger to open menu
+    const tieredMenu = new TieredMenu(this.page);
+    await tieredMenu.waitUntilVisible();
+    return tieredMenu;
+  }
+
+  async getGroupCriteriaList(): Promise<ElementHandle[]> {
     const selector = `${this.rootXpath}//*[@data-test-id="item-list"]`;
     return this.page.$x(selector);
+  }
+
+  async clickTemporalSwitch(onoff: boolean): Promise<void> {
+    // InputSwitch constructor takes xpath selector.
+    const xpath = '//*[contains(concat(" ", normalize-space(@class), " ")," p-inputswitch ")  and @role="checkbox"]';
+    const inputSwitch = new InputSwitch(this.page, xpath);
+    onoff ? await inputSwitch.check() : await inputSwitch.unCheck();
+
+    // waitForFunction takes css selector.
+    const inputSwitchCss = '.p-inputswitch.p-component[role="checkbox"]';
+    await this.page.waitForFunction(
+      (css) => document.querySelectorAll(css),
+      { polling: 'mutation', timeout: 30000 },
+      inputSwitchCss
+    );
   }
 }

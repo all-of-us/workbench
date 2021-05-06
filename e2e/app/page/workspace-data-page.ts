@@ -103,7 +103,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     await waitWhileLoading(this.page);
     await cohortBuildPage.getTotalCount();
     const name = cohortName === undefined ? makeRandomName() : cohortName;
-    await cohortBuildPage.saveCohortAs(name);
+    await cohortBuildPage.createCohort(name);
     await new CohortActionsPage(this.page).waitForLoad();
     const cohortCard = this.findCohortCard(name);
     console.log(`Created Cohort "${name}" from Outpatient Visit`);
