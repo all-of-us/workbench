@@ -3,6 +3,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
+import {faAlarmExclamation} from '@fortawesome/pro-solid-svg-icons';
 import colors from 'app/styles/colors';
 
 export const styles = {
@@ -98,3 +99,4 @@ export const Check = props => <Icon shape={faCheck} {...props}/>;
 export const Times = props => <Icon shape={faTimes} {...props}/>;
 export const ControlledTierBadge = ({size = 25, ...props}) =>
   <img style={{height: size, width: size}} src={'/assets/icons/controlled-tier-badge.svg'} {...props}/>;
+export const AlarmExclamation = props => <Icon shape={faAlarmExclamation} {...props}/>;
