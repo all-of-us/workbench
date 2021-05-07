@@ -12,23 +12,59 @@ were copied into `gs://all-of-us-workbench-test-genomics/1kg_gvcfs/`
 - reblocked data size is 1.1 TiB
 
 ### Import Genomes
-- new dataset name: `bq mk all-of-us-workbench-test:1kg_wgs`
-- input_vcfs_list: `1kg_reblocked_gvcfs_list.txt`
+- Create empty dataset to import data into
+  - `bq mk all-of-us-workbench-test:1kg_wgs`
+- Download input_vcfs
   - `gsutil ls gs://all-of-us-workbench-test-genomics/1kg_wgs/reblocked_gvcf/*.gz > 1kg_reblocked_gvcfs_list.txt`
-- sample_map: `1kg_sample_map.txt`
+- Open a Terra Dev workspace
+- Create a Terra Data Table with the following columns [1kg_sample_id, gvcf, gvcf_index]
+  - `echo -e "entity:1kg_sample_id\tgvcf\tgvcf_index" > data_table.tsv`
+  - `cat 1kg_reblocked_gvcfs_list.txt |  awk '{print NR"\t"$0"\t"$0".tbi"}' >> data_table.tsv`
+  - Go to Terra Workspace -> Data -> Click Tables (+) -> Upload data_table.tsv
+- Create sample_map
   - The first column represents sample_ids and will be incrementing by 100 in order to hit more partitions as part of this test
   - The second column represents sample_names and it will match the names in the reblocked vcf files
   - `cat 1kg_reblocked_gvcfs_list.txt | pcregrep -o1 'gvcf/(.+).haplo' | awk '{print NR*100","$0}' > 1kg_sample_map.txt`
-  - ImportGenomes wdl - https://github.com/broadinstitute/gatk/blob/75f0bd80a45ed46e171ba2125fcb6a6b825c1b74/scripts/variantstore/wdl/ImportGenomes.wdl
+  - This will be one of the workflow inputs
+- Create a GATK jar
+  - https://github.com/broadinstitute/gatk#building-gatk4 
+  - I used https://github.com/broadinstitute/gatk/commit/66ae4b451fd327061ca90e59e759b94fd65f2650 but checkout a more recent commit if newer changes need to be pulled in. 
+  - This will be one of the workflow inputs
+- Import https://github.com/broadinstitute/gatk/blob/ac1a9b65f81cb24a7349ba6226b3f0f1d91d1c11/scripts/variantstore/wdl/GvsImportGenomes.wdl as a Terra Method
+- Create Workflow with imported method
+  - Run workflow(s) with inputs defined by data table
+  - Root entity type: "1kg_sample_set"
+  - Select Data -> Select all samples
+  - Inputs (This is what I used but change what makes sense for you.)
+    - Note: The output_directory can be any empty folder but it must change from run to run because of leftover files from preexisting runs.  
+    - ```
+      {
+      "GvsImportGenomes.dataset_name": "1kg_wgs",
+      "GvsImportGenomes.gatk_override": "upload and copy from 'Create a GATK jar' step",
+      "GvsImportGenomes.input_vcf_indexes": "${this.1kg_samples.gvcf_index}",
+      "GvsImportGenomes.input_vcfs": "${this.1kg_samples.gvcf}",
+      "GvsImportGenomes.interval_list": "gs://gcp-public-data--broad-references/hg38/v0/wgs_calling_regions.hg38.noCentromeres.noTelomeres.interval_list",
+      "GvsImportGenomes.output_directory": "gs://fc-56d2f6f5-3efa-46f7-8c01-0911fd77f888/import_genomes/9",
+      "GvsImportGenomes.project_id": "all-of-us-workbench-test",
+      "GvsImportGenomes.sample_map": "upload and copy from 'Create sample_map' step",
+      }
+      ```
+- Some gotchas if it fails
+  - Your Terra pet service account needs access to the input vcfs, you can grant this through Google Cloud Console
+  - If the workflow fails towards the end and just a few shards fail, it might be a flaky error. Just try again. 
 
 ### Fixing sample_names
-- Right now, the sample_names in the `metadata` table match the sample_names in the VCFs
-- However, we need the sample_names to match participant_ids in AoU
+- Right now, the sample_names in the `sample_info` table match the sample_names in the VCFs.
+- However, we need the sample_names to match participant_ids in AoU.
+- Additionally, subsequent runs of updating the 1kg dataset should use the same sample_names from the first run so it's consistent with which participants the test CDR believes has WGS data.
 
-- ```bq query --max_rows=1000000 --format=csv --nouse_legacy_sql 'SELECT person_id FROM `all-of-us-workbench-test.synth_r_2019q4_9.cb_person`;' | sed -e 1d > ehr_sample_names.txt```
-- ```bq query --max_rows=1000000 --format=csv --nouse_legacy_sql 'SELECT sample_name FROM `all-of-us-workbench-test.wgs_demo.metadata`' | sed -e 1d > vcf_sample_names.txt```
-- ```paste -d "," <(shuf -n $(cat vcf_sample_names.txt | wc -l) ehr_sample_names.txt) vcf_sample_names.txt > new_old_sample_names_map.csv```
-- ```cat new_old_sample_names_map.csv | awk -F',' '{print "UPDATE `all-of-us-workbench-test.wgs_demo_7.metadata` set sample_name=\""$1"\" where sample_name=\""$2"\";"}'```
+- Grab sample_names (person_ids)
+  - If running for the first time 
+    - ```bq query --max_rows=1000000 --format=csv --nouse_legacy_sql 'SELECT person_id FROM `all-of-us-workbench-test.synth_r_2019q4_9.cb_person`;' | sed -e 1d > ehr_sample_names.txt```
+  - If not, grab the list from the published CDR or the test dataset that was used to publish into the CDR.
+- ```bq query --max_rows=1000000 --format=csv --nouse_legacy_sql 'SELECT sample_name FROM `all-of-us-workbench-test.1kg_wgs.sample_info`' | sed -e 1d > vcf_sample_names.txt```
+- ```paste -d "," <(shuf -n $(cat vcf_sample_names.txt | wc -l) ehr_sample_names.txt) vcf_sample_names.txt | grep -v ^, > new_old_sample_names_map.csv```
+- ```cat new_old_sample_names_map.csv | awk -F',' '{print "UPDATE `all-of-us-workbench-test.1kg_wgs.sample_info` set sample_name=\""$1"\" where sample_name=\""$2"\";"}'```
 - Run update queries in BQ console or bq CLI
 
 ### Extracting cohort
