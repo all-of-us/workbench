@@ -71,7 +71,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
       nativeQuery = true,
       value =
           "SELECT COUNT(u.user_id) AS userCount, u.disabled AS disabled, "
-              + "COALESCE(t.accessTierShortNames, 'unregistered') AS accessTierShortNames "
+              + "COALESCE(t.accessTierShortNames, '[unregistered]') AS accessTierShortNames "
               + "FROM user u "
               + "LEFT JOIN ("
               + "  SELECT u2.user_id, "

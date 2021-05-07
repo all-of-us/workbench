@@ -87,7 +87,7 @@ public class ParticipantCohortAnnotationDaoTest extends SpringTest {
 
   @Test
   public void save() {
-    assertThat(participantCohortAnnotationDao.findById(pca.getAnnotationId())).isEqualTo(pca);
+    assertThat(participantCohortAnnotationDao.findById(pca.getAnnotationId()).get()).isEqualTo(pca);
   }
 
   @Test
