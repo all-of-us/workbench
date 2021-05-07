@@ -5534,6 +5534,33 @@ definitions:
         format: int64
         description: Timestamp when the user was bypassed for completing login.gov linking
           linking.
+      renewableAccessModules:
+        modules:
+          type: array
+          items:
+            "$ref": "#/definitions/RenewableAccessModuleStatus"
+        compliance:
+          anyModuleHasExpired:
+            type: boolean
+            description: >
+              Whether any modules have expired. Each expired module will have
+              the corresponding hasExpired flag set in the modules array.
+
+  RenewableAccessModuleStatus:
+    type: object
+    properties:
+      moduleName:
+        type: string
+        enum:
+          - training
+          - dataUseAgreement
+      expirationEpochMillis:
+        type: integer
+        format: int64
+        description: When this module expired or will expire.
+      hasExpired:
+        type: boolean
+        description: Whether this module has expired according to the server's clock.
 
   DemographicSurvey:
     type: object
