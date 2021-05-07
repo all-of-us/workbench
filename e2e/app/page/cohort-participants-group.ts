@@ -44,7 +44,6 @@ export default class CohortParticipantsGroup {
 
   async clickSnowmanIcon(): Promise<void> {
     const iconXpath = `${this.rootXpath}${snowmanIconXpath}`;
-    console.log(`snowman xpath: ${iconXpath}`);
     await this.page.waitForXPath(iconXpath, { visible: true }).then((icon) => icon.click());
   }
 
@@ -149,6 +148,7 @@ export default class CohortParticipantsGroup {
   async openAddCriteriaTieredMenu(): Promise<TieredMenu> {
     const addCriteriaButton = await this.getAddCriteriaButton();
     await addCriteriaButton.waitUntilEnabled();
+    await addCriteriaButton.focus();
     await addCriteriaButton.click(); // Click dropdown trigger to open menu
     const tieredMenu = new TieredMenu(this.page);
     await tieredMenu.waitUntilVisible();
@@ -156,18 +156,20 @@ export default class CohortParticipantsGroup {
   }
 
   async openAnyMentionOfTieredMenu(): Promise<TieredMenu> {
-    const button = await this.getAnyMentionOfButton();
-    await button.waitUntilEnabled();
-    await button.click(); // Click dropdown trigger to open menu
+    const anyMentionOfButton = await this.getAnyMentionOfButton();
+    await anyMentionOfButton.waitUntilEnabled();
+    await anyMentionOfButton.focus();
+    await anyMentionOfButton.click(); // Click dropdown trigger to open menu
     const tieredMenu = new TieredMenu(this.page);
     await tieredMenu.waitUntilVisible();
     return tieredMenu;
   }
 
   async openDuringSameEncounterAsTieredMenu(): Promise<TieredMenu> {
-    const button = await this.getDuringSameEncounterAsButton();
-    await button.waitUntilEnabled();
-    await button.click(); // Click dropdown trigger to open menu
+    const duringSameEncounterButton = await this.getDuringSameEncounterAsButton();
+    await duringSameEncounterButton.waitUntilEnabled();
+    await duringSameEncounterButton.focus();
+    await duringSameEncounterButton.click(); // Click dropdown trigger to open menu
     const tieredMenu = new TieredMenu(this.page);
     await tieredMenu.waitUntilVisible();
     return tieredMenu;
@@ -191,5 +193,6 @@ export default class CohortParticipantsGroup {
       { polling: 'mutation', timeout: 30000 },
       inputSwitchCss
     );
+    await this.page.waitForTimeout(1000);
   }
 }

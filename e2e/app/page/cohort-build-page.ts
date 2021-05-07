@@ -201,4 +201,3 @@ export default class CohortBuildPage extends AuthenticatedPage {
     return group;
   }
 }
-// data-test-id="includes-search-group"
