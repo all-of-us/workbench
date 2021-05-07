@@ -1,6 +1,6 @@
 import * as fp from 'lodash/fp';
+import * as PropTypes from 'prop-types';
 import * as React from 'react';
-import * as PropTypes from 'prop-types'
 
 import { Button } from 'app/components/buttons';
 import { styles as headerStyles } from 'app/components/headers';
