@@ -34,7 +34,7 @@ export function makeWorkspaceName(): string {
 
 export function makeRandomName(prefix?: string): string {
   prefix = prefix || 'aoutest';
-  return `${prefix}-${Math.floor(Math.random() * 10000000)}`;
+  return `${prefix}-${Math.floor(Math.random() * 10000000000)}`;
 }
 
 export const extractPageName = async (page: Page): Promise<string> => {
@@ -52,4 +52,8 @@ export const extractPageName = async (page: Page): Promise<string> => {
 export function extractNamespace(url: URL): string {
   const urlPath = url.pathname;
   return urlPath.split('/')[2];
+}
+
+export function numericalStringToNumber(value: string): number {
+  return Number(value.replace(/,/g, ''));
 }

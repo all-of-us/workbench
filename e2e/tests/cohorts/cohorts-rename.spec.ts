@@ -67,7 +67,7 @@ describe('User can create, modify, rename and delete Cohort', () => {
     console.log(`Total Count: ${totalCountInt}`);
 
     // Save cohort.
-    const cohortName = await cohortBuildPage.saveCohortAs();
+    const cohortName = await cohortBuildPage.createCohort();
     console.log(`Created Cohort "${cohortName}"`);
 
     // Click cohort link. Open cohort build page.
@@ -76,8 +76,7 @@ describe('User can create, modify, rename and delete Cohort', () => {
     await waitForText(page, totalCount, { xpath: FieldSelector.TotalCount }, 60000);
 
     // Remove Exclude Group 3.
-    const groupCriteriasList = await group3.deleteGroup();
-    expect(groupCriteriasList.length).toBe(0);
+    await group3.deleteGroup();
     console.log('Removed Exclude Group 3');
 
     await cohortBuildPage.saveChanges();

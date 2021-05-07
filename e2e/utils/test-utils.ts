@@ -183,7 +183,7 @@ export async function findOrCreateWorkspace(
       await cardFound.clickWorkspaceName();
       return workspaceName; // Found Workspace card matching workspace name
     }
-    return await createWorkspace(page, { workspaceName, cdrVersion });
+    return createWorkspace(page, { workspaceName, cdrVersion });
   }
 
   // Find a suitable workspace among existing workspaces with OWNER role and older than 30 minutes.

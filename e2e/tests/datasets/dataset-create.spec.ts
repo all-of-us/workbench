@@ -53,7 +53,7 @@ describe('Dataset test', () => {
     await cohortBuildPage.getTotalCount();
 
     // Save new cohort.
-    const cohortName = await cohortBuildPage.saveCohortAs();
+    const cohortName = await cohortBuildPage.createCohort();
     await waitForText(page, 'Cohort Saved Successfully');
     console.log(`Created Cohort "${cohortName}"`);
 

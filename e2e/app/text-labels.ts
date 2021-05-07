@@ -33,6 +33,7 @@ export enum MenuOption {
   RenameDataset = 'Rename Dataset',
   Review = 'Review',
   Save = 'Save',
+  SaveAs = 'Save as',
   Share = 'Share',
   SuppressGroupFromTotalCount = 'Suppress group from total count',
   Visits = 'Visits'
