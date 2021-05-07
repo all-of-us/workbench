@@ -124,6 +124,8 @@ public interface WorkspaceDao extends CrudRepository<DbWorkspace, Long>, Workspa
                 () ->
                     new NotFoundException(
                         String.format("DbWorkspace %s does not exist", workspaceId)));
+    toUpdate.setBillingStatus(status);
+    save(toUpdate);
   }
 
   @Query("SELECT w.creator FROM DbWorkspace w WHERE w.billingStatus = (:status)")
