@@ -45,6 +45,7 @@ import java.lang.reflect.Type;
 {{#imports}}import {{import}};
 {{/imports}}
 
+{{>aouTraceImports}}
 import java.lang.reflect.Type;
 {{^fullJavaUtil}}
 import java.util.ArrayList;
@@ -55,6 +56,7 @@ import java.util.Map;
 
 {{#operations}}
 public class {{classname}} {
+    private static final Tracer tracer = Tracing.getTracer();
     private ApiClient {{localVariablePrefix}}apiClient;
 
     public {{classname}}() {
@@ -202,8 +204,7 @@ public class {{classname}} {
     @Deprecated
     {{/isDeprecated}}
     public {{#returnType}}{{{returnType}}} {{/returnType}}{{^returnType}}void {{/returnType}}{{operationId}}({{#allParams}}{{{dataType}}} {{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}) throws ApiException {
-        {{#returnType}}ApiResponse<{{{returnType}}}> {{localVariablePrefix}}resp = {{/returnType}}{{operationId}}WithHttpInfo({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}});{{#returnType}}
-        return {{localVariablePrefix}}resp.getData();{{/returnType}}
+        {{>aouTracedMethodCall}}
     }
 
     /**
