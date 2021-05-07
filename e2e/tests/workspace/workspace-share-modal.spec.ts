@@ -69,7 +69,7 @@ describe('Workspace Share Modal', () => {
     expect(accessLevel).toBe(WorkspaceAccessLevel.Writer);
   });
 
-  // Remove existing collaborators in Workspace About page.
+  // Remove existing collaborator in Workspace About page.
   async function removeCollaborator(name: string) {
     const dataPage = new WorkspaceDataPage(page);
     await dataPage.waitForLoad();
