@@ -111,7 +111,8 @@
     "enableDataUseAgreement": true,
     "enableBetaAccess": false,
     "unsafeAllowSelfBypass": true,
-    "unsafeAllowUserCreationFromGSuiteData": false
+    "unsafeAllowUserCreationFromGSuiteData": false,
+    "enableAccessRenewal": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
@@ -146,5 +147,8 @@
   "ras": {
     "host": "",
     "clientId": ""
+  },
+  "accessRenewal": {
+    "expiryDays": 365 
   }
 }

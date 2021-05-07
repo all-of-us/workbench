@@ -111,6 +111,7 @@ public class UserServiceTest {
     providedDbUser = user;
 
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
+    providedWorkbenchConfig.accessRenewal.expiryDays = (long) 365;
 
     // key UserService logic depends on the existence of the Registered Tier
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
