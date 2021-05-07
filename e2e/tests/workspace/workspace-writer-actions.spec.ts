@@ -27,17 +27,23 @@ describe('Workspace WRITER actions tests', () => {
 
     const workspaceCard = fp.shuffle(workspaceCards)[0];
     const accessLevel = await workspaceCard.getWorkspaceAccessLevel();
+
     // Verify: Share, Edit and Delete actions are not available for click.
     expect(accessLevel).toBe(WorkspaceAccessLevel.Writer);
-
     await workspaceCard.verifyWorkspaceCardMenuOptions(WorkspaceAccessLevel.Writer);
 
     const aboutPage = await workspacesPage.openAboutPage(workspaceCard);
+    await aboutPage.waitForLoad();
+
+    const accessLevel1 = await aboutPage.findUserInCollaboratorList(config.writerUserName);
+    expect(accessLevel1).toBe(WorkspaceAccessLevel.Writer);
+
     const modal = await aboutPage.openShareModal();
     const searchInput = modal.waitForSearchBox();
     // Verify: the Search input in Share modal is disabled.
     expect(await searchInput.isDisabled()).toBe(true);
     await modal.clickButton(LinkText.Cancel);
+    await aboutPage.waitForLoad();
   });
 
   /*

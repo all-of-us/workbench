@@ -6,9 +6,9 @@ import { LinkText, WorkspaceAccessLevel } from 'app/text-labels';
 import HomePage from 'app/page/home-page';
 import * as fp from 'lodash/fp';
 
-describe('Workspace READER actions tests', () => {
+describe('Workspace READER actions menu', () => {
   beforeEach(async () => {
-    await signIn(page, config.collaboratorUsername, config.userPassword);
+    await signIn(page, config.readerUserName, config.userPassword);
   });
 
   // Tests don't require creating new workspace
@@ -33,11 +33,17 @@ describe('Workspace READER actions tests', () => {
     await workspaceCard.verifyWorkspaceCardMenuOptions(WorkspaceAccessLevel.Reader);
 
     const aboutPage = await workspacesPage.openAboutPage(workspaceCard);
+    await aboutPage.waitForLoad();
+
+    const accessLevel1 = await aboutPage.findUserInCollaboratorList(config.readerUserName);
+    expect(accessLevel1).toBe(WorkspaceAccessLevel.Reader);
+
+    // Verify: the Search input in Share modal is disabled.
     const modal = await aboutPage.openShareModal();
     const searchInput = modal.waitForSearchBox();
-    // Verify: the Search input in Share modal is disabled.
     expect(await searchInput.isDisabled()).toBe(true);
     await modal.clickButton(LinkText.Cancel);
+    await aboutPage.waitForLoad();
   });
 
   /*
