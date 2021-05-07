@@ -1,3 +1,10 @@
+# A subset of the FireCloud API spec that we use to generate Java client libraries. The
+# original API spec can be found here:
+# https://github.com/broadinstitute/firecloud-orchestration/blob/develop/src/main/resources/swagger/api-docs.yaml
+# WorkspaceResponse and its children are not in the current FC API spec and can be found in the
+# Rawls spec here:
+# https://github.com/broadinstitute/rawls/blob/develop/core/src/main/resources/swagger/rawls.yaml#L5034
+
 openapi: 3.0.1
 info:
   title: FireCloud
