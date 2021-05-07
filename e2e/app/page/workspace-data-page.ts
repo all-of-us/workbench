@@ -96,12 +96,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
   async createCohort(cohortName?: string): Promise<DataResourceCard> {
     const cohortBuildPage = await this.clickAddCohortsButton();
     const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    const searchPage = await group1.includeVisits();
-    await searchPage.addVisits([Visits.OutpatientVisit]);
-    // Open selection list and click Save Criteria button
-    await searchPage.reviewAndSaveCriteria();
-    await waitWhileLoading(this.page);
-    await cohortBuildPage.getTotalCount();
+    await group1.includeVisits([Visits.OutpatientVisit]);
     const name = cohortName === undefined ? makeRandomName() : cohortName;
     await cohortBuildPage.createCohort(name);
     await new CohortActionsPage(this.page).waitForLoad();

@@ -32,7 +32,9 @@ describe('Cohorts UI tests', () => {
 
     // Include Participants Group 1
     const group1 = cohortPage.findIncludeParticipantsGroup('Group 1');
-    const group1Count = await group1.includePhysicalMeasurement(PhysicalMeasurementsCriteria.Weight, 190);
+    const group1Count = await group1.includePhysicalMeasurement(PhysicalMeasurementsCriteria.Weight, {
+      filterValue: 190
+    });
     // Checking Group 1 Count.
     expect(group1Count).toEqual(await group1.getGroupCount());
 

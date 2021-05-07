@@ -1,14 +1,15 @@
 import { ElementHandle, Page } from 'puppeteer';
-import { FieldSelector } from 'app/page/cohort-build-page';
+import CohortBuildPage, { FieldSelector } from 'app/page/cohort-build-page';
 import { waitForNumericalString, waitForText, waitWhileLoading } from 'utils/waits-utils';
 import CohortSearchPage from 'app/page/cohort-search-page';
-import CriteriaSearchPage, { FilterSign, PhysicalMeasurementsCriteria } from 'app/page/criteria-search-page';
+import CriteriaSearchPage, { FilterSign, PhysicalMeasurementsCriteria, Visits } from 'app/page/criteria-search-page';
 import TieredMenu from 'app/component/tiered-menu';
 import { LinkText, MenuOption } from 'app/text-labels';
 import { snowmanIconXpath } from 'app/component/snowman-menu';
 import Modal from 'app/modal/modal';
 import InputSwitch from 'app/element/input-switch';
 import Button from 'app/element/button';
+import ClrIconLink from 'app/element/clr-icon-link';
 
 export default class CohortParticipantsGroup {
   private rootXpath: string;
@@ -87,11 +88,14 @@ export default class CohortParticipantsGroup {
     return this.getGroupCriteriaList();
   }
 
-  async includePhysicalMeasurement(criteriaName: PhysicalMeasurementsCriteria, value: number): Promise<string> {
+  async includePhysicalMeasurement(
+    criteriaName: PhysicalMeasurementsCriteria,
+    opts?: { filterSign?: FilterSign; filterValue?: number }
+  ): Promise<string> {
     await this.clickCriteriaMenuItems([MenuOption.PhysicalMeasurements]);
     const searchPage = new CriteriaSearchPage(this.page);
     await searchPage.waitForLoad();
-    return searchPage.filterPhysicalMeasurementValue(criteriaName, FilterSign.GreaterThanOrEqualTo, value);
+    return searchPage.addPhysicalMeasurementsCriteria([criteriaName], opts);
   }
 
   async includeDemographicsDeceased(): Promise<string> {
@@ -121,7 +125,7 @@ export default class CohortParticipantsGroup {
   }
 
   async getGroupCount(): Promise<string> {
-    return waitForNumericalString(this.page, this.getGroupCountXpath(), 60000);
+    return waitForNumericalString(this.page, this.getGroupCountXpath(), 120000);
   }
 
   async includeAge(minAge: number, maxAge: number): Promise<string> {
@@ -133,11 +137,33 @@ export default class CohortParticipantsGroup {
     return results;
   }
 
-  async includeVisits(): Promise<CriteriaSearchPage> {
+  /*
+
+  async addVisits(visits: Visits[]): Promise<void> {
+    for (const visit of visits) {
+      const icon = ClrIconLink.findByName(this.page, { startsWith: visit, iconShape: 'plus-circle', ancestorLevel: 1 });
+      await icon.click();
+      await this.finishReviewAndSaveCriteria();
+    }
+  }
+
+   */
+  async includeVisits(visits: Visits[]): Promise<string> {
     await this.clickCriteriaMenuItems([MenuOption.Visits]);
     const searchPage = new CriteriaSearchPage(this.page);
     await searchPage.waitForLoad();
-    return searchPage;
+
+    for (const visit of visits) {
+      const icon = ClrIconLink.findByName(this.page, { startsWith: visit, iconShape: 'plus-circle', ancestorLevel: 1 });
+      await icon.click();
+      await searchPage.finishReviewAndSaveCriteria();
+    }
+
+    // Wait for Cohort Build page to load.
+    await waitWhileLoading(this.page);
+    const cohortBuildPage = new CohortBuildPage(this.page);
+    await cohortBuildPage.waitForLoad();
+    return cohortBuildPage.getTotalCount();
   }
 
   private async clickCriteriaMenuItems(menuItemLinks: MenuOption[]): Promise<void> {

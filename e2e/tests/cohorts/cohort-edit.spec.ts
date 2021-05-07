@@ -92,7 +92,7 @@ describe('Editing Cohort tests', () => {
 
     // Insert new group in Include Participants
     const newGroup = cohortBuildPage.findIncludeParticipantsEmptyGroup();
-    await newGroup.includePhysicalMeasurement(PhysicalMeasurementsCriteria.Weight, 200);
+    await newGroup.includePhysicalMeasurement(PhysicalMeasurementsCriteria.Weight, { filterValue: 200 });
 
     // Check Total Count and new Total Count is different
     const newTotalCount = numericalStringToNumber(await cohortBuildPage.getTotalCount());

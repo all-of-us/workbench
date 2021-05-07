@@ -1,97 +1,81 @@
-import { PhysicalMeasurementsCriteria } from 'app/page/criteria-search-page';
-import CohortBuildPage, { FieldSelector } from 'app/page/cohort-build-page';
+import { FilterSign, PhysicalMeasurementsCriteria } from 'app/page/criteria-search-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
-import { waitForText } from 'utils/waits-utils';
 import { numericalStringToNumber } from 'utils/str-utils';
-import CohortActionsPage from 'app/page/cohort-actions-page';
+import CohortActionsPage from "../../app/page/cohort-actions-page";
 
-describe('Create Cohort', () => {
+describe('Cohorts', () => {
   beforeEach(async () => {
     await signInWithAccessToken(page);
   });
 
-  const workspace = 'e2eCreateCohortsTest';
+  const workspace = 'e2eCreateCohortsTest123delete';
 
-  /**
-   * Test:
-   * Find an existing workspace or create a new workspace if none exists.
-   * Add criteria in Group 1: Physical Measurements criteria => BMI (>= 30).
-   * Add criteria in Group 2: Demographics => Deceased.
-   * Checking counts.
-   * Renaming Group 1 and 2 names.
-   */
-  test('Create cohort from BMI', async () => {
+  test('Create cohort from Physical Measurement Criteria', async () => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
-    // Wait for the Data page.
+    // Add new cohort by adding 4 categories: BMI, Weight, Height and Blood Pressure Hypotensive.
+    // There are more physical measurements categories which are not covered here.
     const dataPage = new WorkspaceDataPage(page);
+    const cohortBuildPage = await dataPage.clickAddCohortsButton();
 
-    // Click Add Cohorts button
-    const addCohortsButton = dataPage.getAddCohortsButton();
-    await addCohortsButton.clickAndWait();
+    // Group 1: Physical Measurements BMI
+    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
+    await group1.includePhysicalMeasurement(PhysicalMeasurementsCriteria.BMI, {
+      filterSign: FilterSign.GreaterThanOrEqualTo,
+      filterValue: 30
+    });
 
-    // In Build Cohort Criteria page.
-    const cohortPage = new CohortBuildPage(page);
-    await cohortPage.waitForLoad();
+    // Checking Group 1 count: should be numeric.
+    const group1Count = numericalStringToNumber(await group1.getGroupCount());
+    expect(Number.isNaN(group1Count)).toBe(false);
+    expect(group1Count).toBeGreaterThan(1);
 
-    // Include Participants Group 1.
-    const group1 = cohortPage.findIncludeParticipantsGroup('Group 1');
-    const group1Count = await group1.includePhysicalMeasurement(PhysicalMeasurementsCriteria.BMI, 30);
+    // Group 2: Physical Measurements Weight
+    const group2 = cohortBuildPage.findIncludeParticipantsGroup('Group 2');
+    await group2.includePhysicalMeasurement(PhysicalMeasurementsCriteria.Weight, {
+      filterSign: FilterSign.LessThanOrEqualTo,
+      filterValue: 300
+    });
 
-    // Checking Group 1 Count. should match Group 1 participants count.
-    const group1CountInt = Number((await group1.getGroupCount()).replace(/,/g, ''));
-    expect(group1CountInt).toBeGreaterThan(1);
-    console.log(`Group 1: Physical Measurement -> BMI count: ${group1CountInt}`);
+    // Checking Group 2 count: should be numeric.
+    const group2Count = numericalStringToNumber(await group2.getGroupCount());
+    expect(Number.isNaN(group2Count)).toBe(false);
+    expect(group2Count).toBeGreaterThan(1);
 
-    // Checking Total Count: should match Group 1 participants count.
-    expect(group1Count).toEqual(await cohortPage.getTotalCount());
+    // Group 3: Physical Measurements Height
+    const group3 = cohortBuildPage.findIncludeParticipantsGroup('Group 3');
+    await group3.includePhysicalMeasurement(PhysicalMeasurementsCriteria.Height, {
+      filterSign: FilterSign.LessThanOrEqualTo,
+      filterValue: 200
+    });
 
-    // Include Participants Group 2: Select menu Demographics -> Deceased
-    const group2 = cohortPage.findIncludeParticipantsGroup('Group 2');
-    const group2Count = await group2.includeDemographicsDeceased();
-    const group2CountInt = Number(group2Count.replace(/,/g, ''));
-    expect(group2CountInt).toBeGreaterThan(1);
-    console.log(`Group 2: Demographics -> Deceased count: ${group2CountInt}`);
+    // Checking Group 3 count: should be numeric.
+    const group3Count = numericalStringToNumber(await group3.getGroupCount());
+    expect(Number.isNaN(group3Count)).toBe(false);
+    expect(group3Count).toBeGreaterThan(1);
 
-    // Compare the new Total Count with the old Total Count.
-    const totalCount = numericalStringToNumber(await cohortPage.getTotalCount());
-    console.log(`New Total Count: ${totalCount}`);
+    // Group 4: Physical Measurements Blood Pressure Hypotensive
+    const group4 = cohortBuildPage.findIncludeParticipantsGroup('Group 4');
+    await group4.includePhysicalMeasurement(PhysicalMeasurementsCriteria.BPHypotensive);
 
-    // Save new cohort - click create cohort button
-    const cohortName = await cohortPage.createCohort();
-    console.log(`Created Cohort "${cohortName}"`);
+    // Checking Group 4 count: should be numeric.
+    const group4Count = numericalStringToNumber(await group4.getGroupCount());
+    expect(Number.isNaN(group4Count)).toBe(false);
+    expect(group4Count).toBeGreaterThan(1);
 
-    // Open Cohort details.
-    const cohortActionPage = new CohortActionsPage(page);
-    await cohortActionPage.waitForLoad();
-    await cohortActionPage.clickCohortNameLink(cohortName);
-    await waitForText(page, totalCount.toString(), { xpath: FieldSelector.TotalCount }, 60000);
+    // Checking Total Count: should be numeric.
+    const totalCount = numericalStringToNumber(await cohortBuildPage.getTotalCount());
+    expect(Number.isNaN(totalCount)).toBe(false);
 
-    // Modify Cohort: Edit Group 1 name successfully.
-    const newName1 = 'Group 1: BMI';
-    await group1.editGroupName(newName1);
-    // Check new named group
-    const groupBMI = cohortPage.findIncludeParticipantsGroup(newName1);
-    expect(await groupBMI.exists()).toBe(true);
+    // Save new cohort.
+    const cohortName = await cohortBuildPage.createCohort();
 
-    // Modify Cohort: Edit Group 2 name successfully.
-    const newName2 = 'Group 2: Deceased';
-    await group2.editGroupName(newName2);
-    // Check new name
-    const groupDeceased = cohortPage.findIncludeParticipantsGroup(newName2);
-    expect(await groupDeceased.exists()).toBe(true);
+    const cohortActionsPage = new CohortActionsPage(page);
+    await cohortActionsPage.waitForLoad();
+    await cohortActionsPage.clickCohortNameLink(cohortName);
 
-    // Check Total Count is unaffected by group name rename.
-    const newTotalCount = numericalStringToNumber(await cohortPage.getTotalCount());
-    expect(newTotalCount).toBe(newTotalCount);
-
-    await cohortPage.saveChanges();
-
-    await cohortActionPage.waitForLoad();
-    await cohortActionPage.clickCohortNameLink(cohortName);
-    await waitForText(page, totalCount.toString(), { xpath: FieldSelector.TotalCount }, 60000);
-
-    await cohortPage.deleteCohort();
+    // Delete cohort.
+    await cohortBuildPage.deleteCohort();
   });
 });

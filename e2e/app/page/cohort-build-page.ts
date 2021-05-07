@@ -13,6 +13,7 @@ import CohortParticipantsGroup from './cohort-participants-group';
 import CohortSaveAsModal from 'app/modal/cohort-save-as-modal';
 import { getPropValue } from 'utils/element-utils';
 import WarningDiscardChangesModal from 'app/modal/warning-discard-changes-modal';
+import WorkspaceDataPage from "./workspace-data-page";
 
 const faker = require('faker/locale/en_US');
 const PageTitle = 'Build Cohort Criteria';
@@ -28,7 +29,11 @@ export default class CohortBuildPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await Promise.all([waitForDocumentTitle(this.page, PageTitle), waitWhileLoading(this.page)]);
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page),
+      this.findIncludeParticipantsGroup('Group 1').getAddCriteriaButton().asElementHandle()
+    ]);
     return true;
   }
 
@@ -104,6 +109,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
     await modal.clickButton(LinkText.DeleteCohort, { waitForClose: true });
     await waitWhileLoading(this.page);
     console.log(`Delete Confirmation modal:\n${contentText}`);
+    await new WorkspaceDataPage(this.page).waitForLoad();
     return contentText;
   }
 
@@ -124,7 +130,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
    * This function also can be used to wait until participants calculation has completed.
    * @return {string} Total Count.
    */
-  async getTotalCount(timeout = 60000): Promise<string> {
+  async getTotalCount(timeout = 120000): Promise<string> {
     const barCssSelector = '.highcharts-container .highcharts-bar-series rect';
     const [count] = await Promise.all([
       waitForNumericalString(this.page, FieldSelector.TotalCount, timeout),
@@ -175,7 +181,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
    */
   findIncludeParticipantsGroup(groupName: string): CohortParticipantsGroup {
     const group = new CohortParticipantsGroup(this.page);
-    group.setXpath(`//*[@id="list-include-groups"]/div[.//*[normalize-space()="${groupName}"]]`);
+    group.setXpath(`//*[@id="list-include-groups"]//div[./*[normalize-space()="${groupName}"]]`);
     return group;
   }
 
