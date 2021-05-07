@@ -142,6 +142,7 @@ export const ConceptSetResourceCard = fp.flow(
           fromWorkspaceFirecloudName={resource.workspaceFirecloudName}
           fromResourceName={resource.conceptSet.name}
           fromCdrVersionId={resource.cdrVersionId}
+          fromAccessTierShortName={resource.accessTierShortName}
           resourceType={getType(resource)}
           onClose={() => this.setState({showCopyModal: false})}
           onCopy={() => this.props.onUpdate()}

@@ -5927,6 +5927,7 @@ definitions:
       - workspaceFirecloudName
       - workspaceBillingStatus
       - cdrVersionId
+      - accessTierShortName
       - permission
       - modifiedTime
     properties:
@@ -5940,6 +5941,8 @@ definitions:
       workspaceBillingStatus:
         "$ref": "#/definitions/BillingStatus"
       cdrVersionId:
+        type: string
+      accessTierShortName:
         type: string
       permission:
         type: string
