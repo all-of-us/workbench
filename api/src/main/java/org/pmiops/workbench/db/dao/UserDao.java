@@ -148,7 +148,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
     String getAccessTierShortNames();
   }
 
-  /** Important! Make sure add alias and it matches name in {@link DbAdminTableUser}*/
+  /** Important! Make sure add alias and it matches name in {@link DbAdminTableUser} */
   @Query(
       // JPQL doesn't allow join on subquery
       nativeQuery = true,

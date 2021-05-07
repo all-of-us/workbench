@@ -146,7 +146,7 @@ public class UserDaoTest extends SpringTest {
   public void testGetAdminTableUsers() {
     // Make sure AdminTable projection works.
     Timestamp duaByPassTime = now();
-    String contactEmail  = "1@foo.com";
+    String contactEmail = "1@foo.com";
     DbUser user1 = new DbUser();
     user1.setDisabled(true);
     user1.setContactEmail(contactEmail);
