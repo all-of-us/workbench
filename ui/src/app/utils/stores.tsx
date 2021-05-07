@@ -36,18 +36,24 @@ export interface ProfileStore {
 
 export const profileStore = atom<ProfileStore>({
   profile: null,
-  load: async() => {
+  load: async(): Promise<Profile> => {
     if (!profileStore.get().profile) {
       await profileStore.get().reload();
     }
-    return profileStore.get();
+    return profileStore.get().profile;
   },
-  reload: async() => {
-    const profile = await profileApi().getMe();
-    profileStore.get().updateCache(profile);
-    return profileStore.get();
+  reload: async(): Promise<Profile> => {
+    return new Promise<Profile>(async(resolve, reject) => {
+      try {
+        const newProfile = await profileApi().getMe();
+        profileStore.get().updateCache(newProfile);
+        return profileStore.get().profile;
+      } catch (e) {
+        reject(e);
+      }
+    });
   },
-  updateCache: p => profileStore.set({
+  updateCache: (p: Profile): void => profileStore.set({
     ...profileStore.get(),
     profile: p
   })

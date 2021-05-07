@@ -140,8 +140,7 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private async serverConfigStoreCallback() {
     this.serverConfigInitialized = true;
-    const {profile} = await profileStore.get().load();
-    this.profile = profile;
+    this.profile = await profileStore.get().load();
     setInstitutionCategoryState(this.profile.verifiedInstitutionalAffiliation);
     if (hasRegisteredAccess(this.profile.accessTierShortNames)) {
       cdrVersionsApi().getCdrVersionsByTier().then(resp => {

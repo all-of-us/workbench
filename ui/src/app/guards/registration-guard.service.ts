@@ -15,7 +15,7 @@ export class RegistrationGuard implements CanActivate, CanActivateChild {
   constructor(private router: Router) {}
 
   async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> {
-    const {profile} = await profileStore.get().load();
+    const profile = await profileStore.get().load();
     if (hasRegisteredAccess(profile.accessTierShortNames)) {
       return true;
     } else {
