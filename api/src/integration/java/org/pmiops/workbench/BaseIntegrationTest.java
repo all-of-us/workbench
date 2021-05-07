@@ -8,7 +8,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.config.WorkbenchConfig;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -20,6 +24,18 @@ import org.springframework.test.context.web.WebAppConfiguration;
 public abstract class BaseIntegrationTest {
 
   protected static WorkbenchConfig config;
+
+  @TestConfiguration
+  static class Configuration {
+    // This prototype-scoped bean override will cause all autowired services to call this method
+    // for their Provider<WorkbenchConfig>. Further modifications may be made from within each test
+    // case.
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    WorkbenchConfig getIntegrationTestConfig() throws IOException {
+      return config;
+    }
+  }
 
   @Before
   public void setUp() throws IOException {
