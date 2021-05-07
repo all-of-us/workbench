@@ -1,89 +1,80 @@
-import WorkspaceDataPage from 'app/page/workspace-data-page';
-import { WorkspaceAccessLevel } from 'app/text-labels';
-import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
+import { LinkText, WorkspaceAccessLevel } from 'app/text-labels';
+import { findOrCreateWorkspace, findWorkspaceCard, signIn, signInWithAccessToken } from 'utils/test-utils';
 import WorkspaceAboutPage from 'app/page/workspace-about-page';
 import { makeWorkspaceName } from 'utils/str-utils';
 import { config } from 'resources/workbench-config';
-import { waitWhileLoading } from 'utils/waits-utils';
-import { logger } from 'libs/logger';
+import WorkspacesPage from 'app/page/workspaces-page';
+import WorkspaceDataPage from 'app/page/workspace-data-page';
 
 describe('Workspace Share Modal', () => {
-  beforeEach(async () => {
-    await signInWithAccessToken(page);
-  });
+  const assignAccess = [
+    { accessRole: WorkspaceAccessLevel.Writer, userEmail: config.writerUserName },
+    { accessRole: WorkspaceAccessLevel.Reader, userEmail: config.readerUserName }
+  ];
 
   // Create new workspace with default CDR version
   const workspace = makeWorkspaceName();
 
-  test('Can share to another owner', async () => {
-    logger.info('Running test: Can share to another owner');
-
+  test.each(assignAccess)('Share %s', async (assign) => {
+    await signInWithAccessToken(page);
     await findOrCreateWorkspace(page, { workspaceName: workspace });
-    const ownerName = config.collaboratorUsername;
-    await removeCollaborator(ownerName);
 
     const dataPage = new WorkspaceDataPage(page);
-    await dataPage.openDataPage();
     await dataPage.waitForLoad();
-    await dataPage.verifyWorkspaceNameOnDataPage(workspace);
 
     const shareWorkspaceModal = await dataPage.shareWorkspace();
-    await shareWorkspaceModal.shareWithUser(ownerName, WorkspaceAccessLevel.Owner);
+    await shareWorkspaceModal.shareWithUser(assign.userEmail, assign.accessRole);
 
-    const aboutPage = new WorkspaceAboutPage(page);
-    await waitWhileLoading(page);
-
-    const accessLevel = await aboutPage.findUserInCollaboratorList(ownerName);
-    expect(accessLevel).toBe(WorkspaceAccessLevel.Owner);
-  });
-
-  test('Can share to reader', async () => {
-    logger.info('Running test name: Can share to reader');
-
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
-    const readerName = config.readerUserName;
-    await removeCollaborator(readerName);
-
-    const aboutPage = new WorkspaceAboutPage(page);
-    const shareModal = await aboutPage.shareWorkspace();
-    await shareModal.shareWithUser(readerName, WorkspaceAccessLevel.Reader);
-    await waitWhileLoading(page);
-
-    const accessLevel = await aboutPage.findUserInCollaboratorList(readerName);
-    expect(accessLevel).toBe(WorkspaceAccessLevel.Reader);
-  });
-
-  test('Can share to writer', async () => {
-    logger.info('Running test name: Can share to writer');
-
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
-    const writerName = config.writerUserName;
-    await removeCollaborator(writerName);
-
-    const aboutPage = new WorkspaceAboutPage(page);
-    const shareModal = await aboutPage.shareWorkspace();
-    await shareModal.shareWithUser(writerName, WorkspaceAccessLevel.Writer);
-    await waitWhileLoading(page);
-
-    const accessLevel = await aboutPage.findUserInCollaboratorList(writerName);
-    expect(accessLevel).toBe(WorkspaceAccessLevel.Writer);
-  });
-
-  // Remove existing collaborator in Workspace About page.
-  async function removeCollaborator(name: string) {
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.waitForLoad();
     await dataPage.openAboutPage();
-
     const aboutPage = new WorkspaceAboutPage(page);
     await aboutPage.waitForLoad();
 
-    let accessLevel = await aboutPage.findUserInCollaboratorList(name);
-    if (accessLevel !== null) {
-      await aboutPage.removeCollaborator(name);
-      await aboutPage.waitForLoad();
-      accessLevel = await aboutPage.findUserInCollaboratorList(name);
+    const collaborators = await aboutPage.findUsersInCollaboratorList();
+
+    // Verify OWNER (login user) information.
+    expect(collaborators.get(WorkspaceAccessLevel.Owner)).toEqual(process.env.USER_NAME);
+
+    // Verify WRITER or READER information.
+    expect(collaborators.get(assign.accessRole)).toEqual(assign.userEmail);
+  });
+
+  test.each(assignAccess)('WRITER and READER cannot share, edit or delete workspace', async (assign) => {
+    // Log in could fail if encounters Google Captcha
+    await signIn(page, assign.userEmail, config.userPassword);
+
+    // Find workspace created by previous test. If not found, test will fail.
+    const workspaceCard = await findWorkspaceCard(page, workspace);
+
+    const accessLevel = await workspaceCard.getWorkspaceAccessLevel();
+
+    // Verify: Share, Edit and Delete actions are not available for click.
+    expect(accessLevel).toBe(assign.accessRole);
+    await workspaceCard.verifyWorkspaceCardMenuOptions(assign.accessRole);
+
+    const aboutPage = await new WorkspacesPage(page).openAboutPage(workspaceCard);
+
+    const collaborators = await aboutPage.findUsersInCollaboratorList();
+
+    // Verify OWNER information in Collaborator list.
+    expect(collaborators.get(WorkspaceAccessLevel.Owner)).toEqual(process.env.USER_NAME);
+
+    // Verify WRITER or READER information in Collaborator list.
+    expect(collaborators.get(assign.accessRole)).toEqual(assign.userEmail);
+
+    switch (assign.accessRole) {
+      case WorkspaceAccessLevel.Reader:
+      case WorkspaceAccessLevel.Writer:
+        {
+          // Verify: the Search input in Share modal is disabled.
+          const modal = await aboutPage.openShareModal();
+          const searchInput = modal.waitForSearchBox();
+          expect(await searchInput.isDisabled()).toBe(true);
+          await modal.clickButton(LinkText.Cancel);
+          await aboutPage.waitForLoad();
+        }
+        break;
+      default:
+        break;
     }
-    expect(accessLevel).toBeNull();
-  }
+  });
 });

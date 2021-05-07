@@ -32,6 +32,7 @@ export default class ShareModal extends Modal {
     await ownerOpt.click();
 
     await this.clickButton(LinkText.Save, { waitForClose: true });
+    await this.waitUntilClose();
     logger.info(`Shared workspace to ${username} with role ${level}`);
   }
 
