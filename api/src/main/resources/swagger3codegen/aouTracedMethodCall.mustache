@@ -16,7 +16,7 @@
 
         try {
             // Create and execute the API request.
-            {{#returnType}}ApiResponse<{{{returnType}}}> {{localVariablePrefix}}resp = {{/returnType}}{{operationId}}WithHttpInfo({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}});
+            {{#returnType}}ApiResponse<{{{returnType}}}> {{localVariablePrefix}}resp = {{/returnType}}{{operationId}}WithHttpInfo({{#parameters}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/parameters}});
             {{#returnType}}
             span.putAttribute("http.status_code", AttributeValue.longAttributeValue(resp.getStatusCode()));
             return {{localVariablePrefix}}resp.getData();
