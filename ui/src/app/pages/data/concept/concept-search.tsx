@@ -396,7 +396,7 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
                                fromWorkspaceFirecloudName={id}
                                fromResourceName={conceptSet.name}
                                fromCdrVersionId={cdrVersionId}
-                               fromAccessTierShortName={accessTierShortName}
+                               fromAccessTierShortname={accessTierShortName}
                                resourceType={ResourceType.CONCEPTSET}
                                onClose={() => this.setState({copying: false})}
                                onCopy={() => this.setState({copySaving: false})}
