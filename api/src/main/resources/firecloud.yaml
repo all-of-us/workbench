@@ -624,7 +624,7 @@ paths:
       requestBody:
         description: Notebook ipynb file
         content:
-          '*/*':
+          'application/json':
             schema:
               type: object
         required: true
@@ -964,7 +964,7 @@ paths:
       requestBody:
         description: Submission Request
         content:
-          '*/*':
+          'application/json':
             schema:
               $ref: '#/components/schemas/SubmissionRequest'
         required: true
@@ -1077,7 +1077,7 @@ paths:
       requestBody:
         description: Method Query
         content:
-          '*/*':
+          'application/json':
             schema:
               $ref: '#/components/schemas/MethodQuery'
         required: true
@@ -1141,7 +1141,7 @@ paths:
       requestBody:
         description: Method Query
         content:
-          '*/*':
+          'application/json':
             schema:
               $ref: '#/components/schemas/MethodQuery'
         required: true
@@ -1192,7 +1192,7 @@ paths:
       requestBody:
         description: Method ID
         content:
-          '*/*':
+          'application/json':
             schema:
               $ref: '#/components/schemas/MethodID'
         required: true
@@ -1244,7 +1244,7 @@ paths:
       requestBody:
         description: Method Configuration contents
         content:
-          '*/*':
+          'application/json':
             schema:
               $ref: '#/components/schemas/MethodConfiguration'
         required: true
