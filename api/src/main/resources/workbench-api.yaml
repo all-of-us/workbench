@@ -5535,16 +5535,20 @@ definitions:
         description: Timestamp when the user was bypassed for completing login.gov linking
           linking.
       renewableAccessModules:
-        modules:
-          type: array
-          items:
-            "$ref": "#/definitions/RenewableAccessModuleStatus"
-        compliance:
-          anyModuleHasExpired:
-            type: boolean
-            description: >
-              Whether any modules have expired. Each expired module will have
-              the corresponding hasExpired flag set in the modules array.
+        type: object
+        properties:
+          modules:
+            type: array
+            items:
+              "$ref": "#/definitions/RenewableAccessModuleStatus"
+          compliance:
+            type: object
+            properties:
+              anyModuleHasExpired:
+                type: boolean
+                description: >
+                  Whether any modules have expired. Each expired module will have
+                  the corresponding hasExpired flag set in the modules array.
 
   RenewableAccessModuleStatus:
     type: object
