@@ -1,9 +1,9 @@
 package org.pmiops.workbench.profile;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -33,7 +33,6 @@ import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.institution.InstitutionService;
 import org.pmiops.workbench.institution.VerifiedInstitutionalAffiliationMapper;
-import org.pmiops.workbench.model.AccessModuleExpiration;
 import org.pmiops.workbench.model.AccountPropertyUpdate;
 import org.pmiops.workbench.model.Address;
 import org.pmiops.workbench.model.AdminTableUser;
@@ -41,6 +40,10 @@ import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.DemographicSurvey;
 import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.ProfileRenewableAccessModules;
+import org.pmiops.workbench.model.ProfileRenewableAccessModulesCompliance;
+import org.pmiops.workbench.model.RenewableAccessModuleStatus;
+import org.pmiops.workbench.model.RenewableAccessModuleStatus.ModuleNameEnum;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -124,10 +127,14 @@ public class ProfileService {
     final List<String> accessTierShortNames =
         accessTierService.getAccessTierShortNamesForUser(user);
 
-    // stubs created for RW-6617, to be filled in by RW-6667
-    final Boolean accessWillExpire = true;
-    final List<AccessModuleExpiration> modulesExpiring =
-        ImmutableList.of(new AccessModuleExpiration().accessModule("module1").expiration(0L));
+    final ProfileRenewableAccessModules renewableAccessModules =
+        new ProfileRenewableAccessModules()
+            .compliance(new ProfileRenewableAccessModulesCompliance().anyModuleHasExpired(true))
+            .addModulesItem(
+                new RenewableAccessModuleStatus()
+                    .moduleName(ModuleNameEnum.DATAUSEAGREEMENT)
+                    .expirationEpochMillis(
+                        clock.instant().plus(10, ChronoUnit.DAYS).toEpochMilli()));
 
     return profileMapper.toModel(
         user,
@@ -136,8 +143,7 @@ public class ProfileService {
         freeTierUsage,
         freeTierDollarQuota,
         accessTierShortNames,
-        accessWillExpire,
-        modulesExpiring);
+        renewableAccessModules);
   }
 
   public void validateAffiliation(Profile profile) {
