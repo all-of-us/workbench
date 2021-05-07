@@ -5552,7 +5552,7 @@ definitions:
       moduleName:
         type: string
         enum:
-          - training
+          - compolianceTraining
           - dataUseAgreement
       expirationEpochMillis:
         type: integer
