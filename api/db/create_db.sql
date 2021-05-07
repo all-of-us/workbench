@@ -12,11 +12,12 @@ SET PASSWORD FOR '${LIQUIBASE_DB_USER}'@'%' = '${LIQUIBASE_DB_PASSWORD}';
 GRANT SELECT, CREATE TEMPORARY TABLES ON *.* TO '${DEV_READONLY_DB_USER}'@'%';
 
 -- Give main db access and wildcard permission to cdr databases for workbench
--- cdr* is the older and/or local naming convention, synth_r_*, r_* is new
+-- cdr* is the older and/or local naming convention, synth_r_*, r_* is registered tier and c_* is controlled tier
 GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES ON ${DB_NAME}.* TO '${WORKBENCH_DB_USER}'@'%';
 GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES ON `cdr%`.* TO '${WORKBENCH_DB_USER}'@'%';
 GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES ON `r_%`.* TO '${WORKBENCH_DB_USER}'@'%';
 GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES ON `synth_r_%`.* TO '${WORKBENCH_DB_USER}'@'%';
+GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES ON `c_%`.* TO '${WORKBENCH_DB_USER}'@'%';
 
 -- Liquibase needs to perform schema changes on the main database.
 GRANT SELECT, INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, INDEX, REFERENCES, CREATE TEMPORARY TABLES, CREATE VIEW ON ${DB_NAME}.* TO '${LIQUIBASE_DB_USER}'@'%';

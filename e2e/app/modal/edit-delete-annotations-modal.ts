@@ -1,7 +1,7 @@
 import { Page } from 'puppeteer';
 import { LinkText } from 'app/text-labels';
 import Modal from './modal';
-import { waitForText } from 'utils/waits-utils';
+import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import BaseElement from 'app/element/base-element';
 
 const modalTitle = 'Edit or Delete Review-Wide Annotation Fields';
@@ -38,5 +38,6 @@ export default class EditDeleteAnnotationsModal extends Modal {
   async deleteAnnotationsName(): Promise<void> {
     await this.clickButton(LinkText.Delete);
     await this.clickButton(LinkText.Yes, { waitForClose: true });
+    await waitWhileLoading(this.page);
   }
 }

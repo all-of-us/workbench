@@ -4,6 +4,8 @@ import Button from 'app/element/button';
 import { LinkText } from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
 import DatasetBuildPage from './dataset-build-page';
+import Link from 'app/element/link';
+import CohortBuildPage from './cohort-build-page';
 
 const PageTitle = 'Cohort Actions';
 
@@ -38,5 +40,16 @@ export default class CohortActionsPage extends AuthenticatedPage {
 
   getCreateDatasetButton(): Button {
     return Button.findByName(this.page, { name: LinkText.CreateDataset });
+  }
+
+  async clickCohortNameLink(cohortName: string): Promise<CohortBuildPage> {
+    const cohortLink = Link.findByName(this.page, { name: cohortName });
+    await cohortLink.clickAndWait();
+
+    const cohortBuildPage = new CohortBuildPage(this.page);
+    await cohortBuildPage.waitForLoad();
+    await cohortBuildPage.getTotalCount();
+    await waitWhileLoading(this.page);
+    return cohortBuildPage;
   }
 }

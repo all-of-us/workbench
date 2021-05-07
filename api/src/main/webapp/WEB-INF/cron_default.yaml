@@ -52,17 +52,6 @@ cron:
   timezone: UTC
   target: api
 - description: >
-    Find billing projects associated with deleted workspaces and transfer ownership to
-    designated "Garbage Collection" Service Accounts. This legacy process works around the lack of
-    API support for deleting these billing projects directly.
-
-    The Terra delete Account API is now available, and this cron job is deprecated. To be removed
-    as part of RW-3627.
-  url: /v1/cron/billingProjectGarbageCollection
-  schedule: every 1 hours
-  timezone: UTC
-  target: api
-- description: >
     Sample all gauge metrics for OpenCensus Monitoring and record them. The one-minute interval is
     the highest granularity for Stackdriver Monitoring and the lowest interval for an AppEngine
     cron job.

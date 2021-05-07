@@ -1594,22 +1594,6 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/billingProjectGarbageCollection":
-    get:
-      security: []
-      tags:
-      - offlineBilling
-      - cron
-      description: Trigger a bulk transfer of ownership of billing projects associated
-        with deleted workspaces
-      operationId: billingProjectGarbageCollection
-      responses:
-        204:
-          description: Billing Project Garbage Collection was successful.
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
   "/v1/monitoring/billingProjectBufferStatus":
     get:
       tags:
@@ -4062,6 +4046,10 @@ definitions:
         type: boolean
         default: false
         description: Whether to use enable RAS-AoU linking for login.gov when user setup account.
+      enableAccessRenewal:
+        type: boolean
+        default: false
+        description: Whether to enable the access renewal, allowing users to expire.
       enableGenomicExtraction:
         type: boolean
         default: false
@@ -4069,6 +4057,9 @@ definitions:
       rasHost:
         type: string
         description: The RAS base host name.
+      accessRenewalExpiry:
+        type: number
+        description: Days a user's module completion is good for until it expires.
       rasClientId:
         type: string
         description: The RAS OAuth client id.
@@ -5936,6 +5927,7 @@ definitions:
       - workspaceFirecloudName
       - workspaceBillingStatus
       - cdrVersionId
+      - accessTierShortName
       - permission
       - modifiedTime
     properties:
@@ -5949,6 +5941,8 @@ definitions:
       workspaceBillingStatus:
         "$ref": "#/definitions/BillingStatus"
       cdrVersionId:
+        type: string
+      accessTierShortName:
         type: string
       permission:
         type: string

@@ -23,7 +23,8 @@ export default abstract class BaseModal extends Container {
   abstract isLoaded(): Promise<boolean>;
 
   async waitForLoad(): Promise<this> {
-    await this.waitUntilVisible();
+    const timeout = 30000;
+    await this.waitUntilVisible(timeout);
     await waitWhileLoading(this.page);
     await this.isLoaded();
     await this.page.waitForTimeout(1000);
@@ -40,31 +41,6 @@ export default abstract class BaseModal extends Container {
       fp.map(async (elem: ElementHandle) => (await getPropValue<string>(elem, 'textContent')).trim()),
       (contents) => Promise.all(contents)
     )(elements);
-  }
-
-  /**
-   * Click a button.
-   * @param {string} buttonLabel The button text label.
-   * @param waitOptions Wait for navigation or/and modal close after click button.
-   */
-  async clickButton(
-    buttonLabel: LinkText,
-    waitOptions: { waitForNav?: boolean; waitForClose?: boolean; timeout?: number } = {}
-  ): Promise<void> {
-    const { waitForNav = false, waitForClose = false, timeout } = waitOptions;
-    const button = this.waitForButton(buttonLabel);
-    await button.waitUntilEnabled();
-    await button.focus();
-    const handle = await button.asElementHandle();
-    await handle.hover();
-    if (waitForNav) {
-      await button.clickAndWait(timeout);
-    } else {
-      await button.click({ delay: 10 });
-    }
-    if (waitForClose) {
-      await this.waitUntilClose(timeout);
-    }
   }
 
   waitForButton(buttonLabel: LinkText): Button {

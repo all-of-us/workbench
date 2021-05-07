@@ -93,12 +93,13 @@ function convertToResource(
   inputResource: FileDetail | Cohort | CohortReview | ConceptSet | DataSet,
   resourceType: ResourceType,
   workspace: WorkspaceData): WorkspaceResource {
-  const {namespace, id, accessLevel, cdrVersionId, billingStatus} = workspace;
+  const {namespace, id, accessLevel, accessTierShortName, cdrVersionId, billingStatus} = workspace;
   return {
     workspaceNamespace: namespace,
     workspaceFirecloudName: id,
     permission: WorkspaceAccessLevel[accessLevel],
     modifiedTime: inputResource.lastModifiedTime ? new Date(inputResource.lastModifiedTime).toString() : new Date().toDateString(),
+    accessTierShortName,
     cdrVersionId,
     workspaceBillingStatus: billingStatus,
     cohort: resourceType === ResourceType.COHORT ? inputResource as Cohort : null,

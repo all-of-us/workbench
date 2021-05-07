@@ -146,7 +146,7 @@ LEFT JOIN
         union distinct
         SELECT person_id FROM \`$BQ_PROJECT.$BQ_DATASET.steps_intraday\`
     ) f on (p.person_id = f.person_id)
-LEFT JOIN \`$WGV_PROJECT.$WGV_DATASET.$WGV_TABLE\` w on (p.person_id = CAST(w.sample_name as int64))"
+LEFT JOIN \`$WGV_PROJECT.$WGV_DATASET.$WGV_TABLE\` w on (CAST(p.person_id as STRING) = w.sample_name)"
 fi
 
 ################################################
