@@ -127,6 +127,7 @@ public class ProfileService {
     final List<String> accessTierShortNames =
         accessTierService.getAccessTierShortNamesForUser(user);
 
+    // stub created for RW-6617, to be filled in by RW-6667
     final ProfileRenewableAccessModules renewableAccessModules =
         new ProfileRenewableAccessModules()
             .compliance(new ProfileRenewableAccessModulesCompliance().anyModuleHasExpired(true))
