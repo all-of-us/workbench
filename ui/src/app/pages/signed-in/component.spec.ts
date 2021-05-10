@@ -4,7 +4,6 @@ import {RouterTestingModule} from '@angular/router/testing';
 
 import {ClarityModule} from '@clr/angular';
 
-import {ProfileStorageServiceStub} from 'testing/stubs/profile-storage-service-stub';
 import {SignInServiceStub} from 'testing/stubs/sign-in-service-stub';
 
 import {
@@ -12,7 +11,6 @@ import {
   updateAndTick
 } from 'testing/test-helpers';
 
-import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {SignInService} from 'app/services/sign-in.service';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 
@@ -44,7 +42,6 @@ describe('SignedInComponent', () => {
         FooterComponent
       ],
       providers: [
-        {provide: ProfileStorageService, useValue: new ProfileStorageServiceStub()},
         {provide: SignInService, useValue: new SignInServiceStub()},
       ]
     }).compileComponents().then(() => {

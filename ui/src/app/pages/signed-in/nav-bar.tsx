@@ -6,7 +6,8 @@ import {SideNav} from 'app/components/side-nav';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
 import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {cookiesEnabled, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {cookiesEnabled} from 'app/utils/cookies';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
 

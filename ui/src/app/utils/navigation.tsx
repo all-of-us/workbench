@@ -2,7 +2,7 @@ import {ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy} from '@
 
 import {Selection} from 'app/cohort-search/selection-list/selection-list.component';
 import {WorkspaceData} from 'app/utils/workspace-data';
-import {Cohort, ConceptSet, Criteria, ErrorResponse, Profile} from 'generated/fetch';
+import {Cohort, ConceptSet, Criteria, ErrorResponse} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import {useLocation} from 'react-router';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
@@ -33,12 +33,6 @@ export const currentCohortSearchContextStore = new BehaviorSubject<any>(undefine
 export const setSidebarActiveIconStore = new BehaviorSubject<string>(null);
 export const conceptSetUpdating = new BehaviorSubject<boolean>(false);
 
-export const userProfileStore =
-  new BehaviorSubject<{ profile: Profile, reload: Function, updateCache: Function }>({
-    profile: {} as Profile,
-    reload: () => {},
-    updateCache: (profile) => {},
-  });
 export const signInStore =
   new BehaviorSubject<{
     signOut: Function,
