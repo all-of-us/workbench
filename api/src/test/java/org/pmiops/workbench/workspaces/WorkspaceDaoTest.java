@@ -3,6 +3,7 @@ package org.pmiops.workbench.workspaces;
 import static com.google.common.truth.Truth.assertThat;
 import static org.springframework.test.util.AssertionErrors.fail;
 
+import java.lang.reflect.Method;
 import java.time.Clock;
 import java.util.List;
 import org.junit.Test;
@@ -87,7 +88,7 @@ public class WorkspaceDaoTest {
   }
 
   @Test
-  public void testGetWorkspaceCountGaugeData_one() {
+  public void testGetWorkspaceCountGaugeData_one() throws Exception {
     workspaceDao.deleteAll();
     createWorkspace();
 
@@ -100,6 +101,14 @@ public class WorkspaceDaoTest {
     assertThat(count.getTier().getShortName())
         .isEqualTo(AccessTierService.REGISTERED_TIER_SHORT_NAME);
     assertThat(count.getActiveStatusEnum()).isEqualTo(WorkspaceActiveStatus.ACTIVE);
+
+    // Iterate all getter methods and make sure all return value is non-null.
+    Class<WorkspaceCountByActiveStatusAndTier> projectionClass = WorkspaceCountByActiveStatusAndTier.class;
+    for (Method method : projectionClass.getMethods()) {
+      if (method.getName().startsWith("get")) {
+        assertThat(method.invoke(count)).isNotNull();
+      }
+    }
   }
 
   private DbWorkspace createWorkspace() {

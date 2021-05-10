@@ -77,7 +77,7 @@ public class DataSetDaoTest extends SpringTest {
   }
 
   @Test
-  public void testGetInvalidToCount_nonNull() throws Exception {
+  public void testGetInvalidToCount() throws Exception {
     insertDatasetForGauge(true, workspace.getWorkspaceId());
     List<InvalidToCountResult> resultList = dataSetDao.getInvalidToCount();
     assertThat(resultList).hasSize(1);
