@@ -204,16 +204,19 @@ export default class WorkspaceCard extends CardBase {
     const links = await snowmanMenu.getAllOptionTexts();
     expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
 
-    if (accessLevel !== WorkspaceAccessLevel.Owner) {
-      expect(await snowmanMenu.isOptionDisabled(MenuOption.Share)).toBe(true);
-      expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(true);
-      expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(true);
-      expect(await snowmanMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(false);
-    } else if (accessLevel === WorkspaceAccessLevel.Owner) {
+    if (accessLevel === WorkspaceAccessLevel.Owner) {
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Share)).toBe(false);
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(false);
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(false);
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(false);
+    } else {
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Share)).toBe(true);
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(true);
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(true);
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(false);
     }
+    // Close menu
+    await this.clickSnowmanIcon();
+    await snowmanMenu.waitUntilClose();
   }
 }

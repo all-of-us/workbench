@@ -186,7 +186,7 @@ describe('Workspace UI tests', () => {
     await selectedCard.selectSnowmanMenu(MenuOption.Share, { waitForNav: false });
     const shareModal = new ShareModal(page);
     await shareModal.waitUntilVisible();
-    await shareModal.clickButton(LinkText.Cancel);
+    await shareModal.clickButton(LinkText.Cancel, { waitForClose: true });
   });
 
   /*
