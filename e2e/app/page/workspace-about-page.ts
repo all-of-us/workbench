@@ -18,18 +18,25 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
     return true;
   }
 
-  // Returns map of key: Access Role, value: User Email.
-  async findUsersInCollaboratorList(): Promise<Map<string, string>> {
+  // Returns map of key: AccessRole, value: Array[Emails].
+  async findUsersInCollaboratorList(): Promise<Map<string, Array<string>>> {
+    await waitWhileLoading(this.page);
     // At least one collaborator should eventually render, i.e. the current user.
-    const xPath = '//*[starts-with(@data-test-id,"workspaceUser-")]';
+    const xPath = './/*[starts-with(@data-test-id,"workspaceUser-") and text()]';
     await this.page.waitForXPath(xPath, { visible: true });
 
-    const users = new Map<string, string>();
+    const users = new Map<string, Array<string>>();
     const collaborators = await this.page.$x(xPath);
     for (const collaborator of collaborators) {
       const texts = await getPropValue<string>(collaborator, 'textContent');
-      const [role, email] = texts.split(' : ');
-      users.set(role, email);
+      const [splitPart1, splitPart2] = texts.split(' : ');
+      const role = splitPart1.trim();
+      const email = splitPart2.trim();
+      if (users.has(role)) {
+        users.get(role).push(email);
+      } else {
+        users.set(role, new Array(email));
+      }
     }
     return users;
   }
@@ -62,14 +69,8 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
 
   // if the collaborator is already on this workspace, just remove them before continuing.
   async removeCollaborator(name = config.collaboratorUsername): Promise<void> {
-    const collaborators = await this.findUsersInCollaboratorList();
-    for (const key of collaborators.keys()) {
-      const user = collaborators.get(key);
-      if (user === name) {
-        const modal = await this.openShareModal();
-        await modal.removeUser(name);
-        await waitWhileLoading(this.page);
-      }
-    }
+    const modal = await this.openShareModal();
+    await modal.removeUser(name);
+    await waitWhileLoading(this.page);
   }
 }

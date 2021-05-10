@@ -6,7 +6,7 @@
 const fp = require('lodash/fp');
 const puppeteer = require('puppeteer');
 const isHeadless = (process.env.PUPPETEER_HEADLESS || 'true') === 'true';
-const slowMotion = parseInt(process.env.PUPPETEER_SLOWMO, 10) || 10;
+const slowMotion = parseInt(process.env.PUPPETEER_SLOWMO, 10) || 30;
 
 const NEW_CHROME_SWITCHES = [
   // Reduce cpu and memory usage. Disables one-site-per-process security policy, dedicated processes for site origins.
