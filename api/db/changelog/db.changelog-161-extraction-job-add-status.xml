@@ -5,7 +5,7 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="als364" id="changelog-161-extraction-job-add-status">
-<!--    <addDefaultValue tableName="wgs_extract_cromwell_submission" columnName="creation_time" defaultValueComputed="CURRENT_TIMESTAMP"/>-->
+    <addDefaultValue tableName="wgs_extract_cromwell_submission" columnName="creation_time" defaultValueComputed="CURRENT_TIMESTAMP"/>
     <addColumn tableName="wgs_extract_cromwell_submission">
       <column name="terra_status" type="tinyint" />
       <column name="terra_submission_date" type="timestamp" remarks="The time at which the submission workflow began in Terra / Cromwell."/>

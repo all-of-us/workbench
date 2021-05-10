@@ -272,6 +272,7 @@ public class GenomicExtractionService {
     dbSubmission.setWorkspace(workspace);
     dbSubmission.setDataset(dataSet);
     dbSubmission.setCreator(userProvider.get());
+    dbSubmission.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
     dbSubmission.setSampleCount((long) personIds.size());
     wgsExtractCromwellSubmissionDao.save(dbSubmission);
 
