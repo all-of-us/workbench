@@ -27,7 +27,8 @@ import {
   RestrictedDuaEmailMismatchErrorMessage,
   validateEmail
 } from 'app/utils/institutions';
-import {navigate, serverConfigStore} from 'app/utils/navigation';
+import {navigate} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {
   AccountPropertyUpdate,
   CheckEmailResponse,
@@ -234,7 +235,7 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
   }
 
   async getUser() {
-    const {gsuiteDomain} = serverConfigStore.getValue();
+    const {gsuiteDomain} = serverConfigStore.get().config;
     try {
       const profile = await profileApi().getUserByUsername(this.props.urlParams.usernameWithoutGsuiteDomain + '@' + gsuiteDomain);
       this.setState({oldProfile: profile, updatedProfile: profile});
@@ -411,7 +412,7 @@ export const AdminUser = withUrlParams()(class extends React.Component<Props, St
       updatedProfile,
       verifiedInstitutionOptions
     } = this.state;
-    const {enableRasLoginGovLinking} = serverConfigStore.getValue();
+    const {enableRasLoginGovLinking} = serverConfigStore.get().config;
     const errors = validate({
       'verifiedInstitutionalAffiliation': this.validateVerifiedInstitutionalAffiliation(),
       'institutionShortName': this.validateInstitutionShortname(),

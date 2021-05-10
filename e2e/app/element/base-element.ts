@@ -1,5 +1,4 @@
 import { ClickOptions, ElementHandle, Page, WaitForSelectorOptions } from 'puppeteer';
-import Container from 'app/container';
 import { getAttrValue, getPropValue } from 'utils/element-utils';
 import { logger } from 'libs/logger';
 
@@ -7,7 +6,7 @@ import { logger } from 'libs/logger';
  * BaseElement represents a web element in the DOM.
  * It implements useful methods for querying and interacting with this element.
  */
-export default class BaseElement extends Container {
+export default class BaseElement {
   static asBaseElement(page: Page, elementHandle: ElementHandle, xpath?: string): BaseElement {
     const baseElement = new BaseElement(page, xpath);
     baseElement.setElementHandle(elementHandle);
@@ -16,9 +15,7 @@ export default class BaseElement extends Container {
 
   private element: ElementHandle;
 
-  constructor(protected readonly page: Page, protected readonly xpath?: string) {
-    super(page, xpath);
-  }
+  constructor(protected readonly page: Page, protected readonly xpath?: string) {}
 
   protected setElementHandle(element: ElementHandle): void {
     this.element = element;
@@ -42,6 +39,10 @@ export default class BaseElement extends Container {
         // await jestPuppeteer.debug();
         throw new Error(err);
       });
+  }
+
+  getXpath(): string {
+    return this.xpath;
   }
 
   /**
@@ -247,8 +248,8 @@ export default class BaseElement extends Container {
   /**
    * Calling focus() and hover() together.
    */
-  async focus(): Promise<void> {
-    const element = await this.asElementHandle();
+  async focus(timeout?: number): Promise<void> {
+    const element = await this.asElementHandle({ visible: true, timeout });
     await Promise.all([element.focus(), element.hover()]);
   }
 
@@ -366,7 +367,7 @@ export default class BaseElement extends Container {
   /**
    * Returns ElementHandle.
    */
-  async asElementHandle(): Promise<ElementHandle> {
-    return this.waitForXPath();
+  async asElementHandle(waitOptions?: WaitForSelectorOptions): Promise<ElementHandle> {
+    return this.waitForXPath(waitOptions);
   }
 }

@@ -13,7 +13,7 @@
     "xAppIdValue": "stable-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_stable",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.0.23",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.2",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
     "runtimeImages": {
@@ -107,7 +107,8 @@
     "enableDataUseAgreement": true,
     "enableBetaAccess": false,
     "unsafeAllowSelfBypass": false,
-    "unsafeAllowUserCreationFromGSuiteData": false
+    "unsafeAllowUserCreationFromGSuiteData": false,
+    "enableAccessRenewal": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
@@ -118,7 +119,8 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableReportingUploadCron": true,
-    "enableRasLoginGovLinking": false
+    "enableRasLoginGovLinking": false,
+    "enableGenomicExtraction": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-stable",
@@ -141,5 +143,8 @@
   "ras": {
     "host": "",
     "clientId": ""
+  },
+  "accessRenewal": {
+    "expiryDays": 365 
   }
 }

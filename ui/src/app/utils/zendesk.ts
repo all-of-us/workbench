@@ -19,6 +19,10 @@ const zendeskConfigs = {
     baseUrl: 'https://aousupporthelp.zendesk.com/hc',
     widgetKey: '5a7d70b9-37f9-443b-8d0e-c3bd3c2a55e3'
   },
+  [ZendeskEnv.Preprod]: {
+    baseUrl: 'https://aoupreprodsupporthelp.zendesk.com/hc',
+    widgetKey: '41815bdd-7e8f-4450-aadf-dd5957093233'
+  },
   [ZendeskEnv.Sandbox]: {
     baseUrl: 'https://aousupporthelp1580753096.zendesk.com/hc',
     widgetKey: 'df0a2e39-f8a8-482b-baf5-af82e14d38f9'
@@ -28,7 +32,7 @@ const zendeskConfigs = {
 /**
  * A set of support URLs for the current environment. These need to be
  * parameterized per environment since the Zendesk support content IDs are not
- * stable across the prod and sandbox Zendesk instances.
+ * stable across the prod, preprod  and sandbox Zendesk instances.
  */
 export const supportUrls: ZendeskUrls = ((env) => {
   const baseUrl = zendeskConfigs[env].baseUrl;
@@ -52,6 +56,16 @@ export const supportUrls: ZendeskUrls = ((env) => {
       gettingStarted: category('360002157352'),
       tableOfContents: category('360002625291'),
       researchPurpose: article('360042673211'),
+    },
+    [ZendeskEnv.Preprod]: {
+      ...commonUrls,
+      billing: section('360012893532'),
+      createBillingAccount: article('360060301171'),
+      dataDictionary: article('360058949792'),
+      faq: category('360005877792'),
+      gettingStarted: category('360005884571'),
+      tableOfContents: category('360005884591'),
+      researchPurpose: article('360058861612'),
     },
     [ZendeskEnv.Sandbox]: {
       ...commonUrls,

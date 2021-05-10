@@ -10,11 +10,10 @@ import {
   globalErrorStore,
   queryParamsStore,
   routeConfigDataStore,
-  serverConfigStore,
   urlParamsStore,
   userProfileStore
 } from 'app/utils/navigation';
-import {ConfigResponse, Domain, } from 'generated/fetch';
+import {Domain, } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -59,7 +58,7 @@ export function randomString(len): string {
 export const DEFAULT = Symbol();
 
 export const switchCase = (value, ...pairs) => {
-  const match = fp.find(([v]) => v === value || v === DEFAULT, pairs);
+  const match = fp.find(([v]) => fp.isEqual(v, value) || fp.isEqual(v, DEFAULT), pairs);
   return match && match[1]();
 };
 
@@ -383,17 +382,13 @@ export const withQueryParams = () => {
   return connectBehaviorSubject(queryParamsStore, 'queryParams');
 };
 
-// A HOC that provides a 'serverConfig' prop,
-// For similar reasons to the withCdrVersions store above, we want the serverConfig HOC to not
-// render child components until the store has a non-empty value.
-// See discussion on https://github.com/all-of-us/workbench/pull/2603/ for details on the type of
-// bugs that motivated this approach.
-export const withServerConfig = () => {
-  return connectBehaviorSubject(serverConfigStore, 'serverConfig', /* preventRenderUntilValuePresent */ true);
-};
-export interface ServerConfigProps {
-  serverConfig: ConfigResponse;
-}
+// A HOC that provides a 'serverConfig' prop
+// export const withServerConfig = () => {
+//   return withStore(serverConfigStore, 'serverConfig');
+// };
+// export interface ServerConfigProps {
+//   serverConfig: ConfigResponse;
+// }
 
 export function displayDateWithoutHours(time: number): string {
   const date = new Date(time);

@@ -30,6 +30,10 @@ describe('Duplicate workspace', () => {
     await workspaceEditPage.getWorkspaceNameTextbox().clear();
     const duplicateWorkspaceName = await workspaceEditPage.fillOutWorkspaceName();
 
+    // observe that we cannot change the Data Access Tier.
+    const accessTierSelect = workspaceEditPage.getDataAccessTierSelect();
+    expect(await accessTierSelect.isDisabled()).toEqual(true);
+
     const finishButton = workspaceEditPage.getDuplicateWorkspaceButton();
     await workspaceEditPage.requestForReviewRadiobutton(false);
     await finishButton.waitUntilEnabled();
@@ -46,6 +50,7 @@ describe('Duplicate workspace', () => {
     await workspacesPage.waitForLoad();
 
     await WorkspaceCard.deleteWorkspace(page, duplicateWorkspaceName);
+    await workspacesPage.waitForLoad();
     expect(await WorkspaceCard.findCard(page, duplicateWorkspaceName)).toBeFalsy();
   });
 
@@ -66,10 +71,14 @@ describe('Duplicate workspace', () => {
     await workspaceEditPage.fillOutWorkspaceName();
     // select "Share workspace with same set of collaborators radiobutton
     await workspaceEditPage.clickShareWithCollaboratorsCheckbox();
-
     await workspaceEditPage.requestForReviewRadiobutton(false);
     await finishButton.waitUntilEnabled();
     expect(await finishButton.isCursorNotAllowed()).toBe(false);
-    // Click Finish button to clone workspace is not needed.
+
+    // Click CANCEL button.
+    const cancelButton = workspaceEditPage.getCancelButton();
+    await cancelButton.clickAndWait();
+
+    await dataPage.waitForLoad();
   });
 });

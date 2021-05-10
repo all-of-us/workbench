@@ -16,7 +16,10 @@ import org.owasp.html.PolicyFactory;
 import org.owasp.html.Sanitizers;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
+import org.pmiops.workbench.db.model.DbWorkspace;
+import org.pmiops.workbench.exceptions.BadRequestException;
 import org.pmiops.workbench.exceptions.FailedPreconditionException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.google.CloudStorageClient;
@@ -127,22 +130,37 @@ public class NotebooksServiceImpl implements NotebooksService {
   @Override
   public FileDetail copyNotebook(
       String fromWorkspaceNamespace,
-      String fromWorkspaceName,
+      String fromWorkspaceFirecloudName,
       String fromNotebookName,
       String toWorkspaceNamespace,
-      String toWorkspaceName,
+      String toWorkspaceFirecloudName,
       String newNotebookName) {
     workspaceAuthService.enforceWorkspaceAccessLevel(
-        fromWorkspaceNamespace, fromWorkspaceName, WorkspaceAccessLevel.READER);
+        fromWorkspaceNamespace, fromWorkspaceFirecloudName, WorkspaceAccessLevel.READER);
     workspaceAuthService.enforceWorkspaceAccessLevel(
-        toWorkspaceNamespace, toWorkspaceName, WorkspaceAccessLevel.WRITER);
-    workspaceAuthService.validateActiveBilling(toWorkspaceNamespace, toWorkspaceName);
+        toWorkspaceNamespace, toWorkspaceFirecloudName, WorkspaceAccessLevel.WRITER);
+    workspaceAuthService.validateActiveBilling(toWorkspaceNamespace, toWorkspaceFirecloudName);
     newNotebookName = NotebooksService.withNotebookExtension(newNotebookName);
 
+    final DbWorkspace fromWorkspace =
+        workspaceDao.getRequired(fromWorkspaceNamespace, fromWorkspaceFirecloudName);
+    final DbAccessTier fromTier = fromWorkspace.getCdrVersion().getAccessTier();
+    final DbWorkspace toWorkspace =
+        workspaceDao.getRequired(toWorkspaceNamespace, toWorkspaceFirecloudName);
+    final DbAccessTier toTier = toWorkspace.getCdrVersion().getAccessTier();
+
+    if (!fromTier.equals(toTier)) {
+      final String msg =
+          String.format(
+              "Cannot copy between access tiers (attempted copy from %s to %s)",
+              fromTier.getDisplayName(), toTier.getDisplayName());
+      throw new BadRequestException(msg);
+    }
+
     GoogleCloudLocators fromNotebookLocators =
-        getNotebookLocators(fromWorkspaceNamespace, fromWorkspaceName, fromNotebookName);
+        getNotebookLocators(fromWorkspaceNamespace, fromWorkspaceFirecloudName, fromNotebookName);
     GoogleCloudLocators newNotebookLocators =
-        getNotebookLocators(toWorkspaceNamespace, toWorkspaceName, newNotebookName);
+        getNotebookLocators(toWorkspaceNamespace, toWorkspaceFirecloudName, newNotebookName);
 
     if (!cloudStorageClient
         .getExistingBlobIdsIn(Collections.singletonList(newNotebookLocators.blobId))
@@ -157,9 +175,7 @@ public class NotebooksServiceImpl implements NotebooksService {
     Timestamp now = new Timestamp(clock.instant().toEpochMilli());
     fileDetail.setLastModifiedTime(now.getTime());
     userRecentResourceService.updateNotebookEntry(
-        workspaceDao.getRequired(toWorkspaceNamespace, toWorkspaceName).getWorkspaceId(),
-        userProvider.get().getUserId(),
-        newNotebookLocators.fullPath);
+        toWorkspace.getWorkspaceId(), userProvider.get().getUserId(), newNotebookLocators.fullPath);
 
     return fileDetail;
   }
@@ -271,10 +287,10 @@ public class NotebooksServiceImpl implements NotebooksService {
   }
 
   private GoogleCloudLocators getNotebookLocators(
-      String workspaceNamespace, String workspaceName, String notebookName) {
+      String workspaceNamespace, String firecloudName, String notebookName) {
     String bucket =
         fireCloudService
-            .getWorkspace(workspaceNamespace, workspaceName)
+            .getWorkspace(workspaceNamespace, firecloudName)
             .getWorkspace()
             .getBucketName();
     String blobPath = NOTEBOOKS_WORKSPACE_DIRECTORY + "/" + notebookName;

@@ -4,7 +4,7 @@ import * as React from 'react';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {serverConfigStore, userProfileStore} from 'app/utils/navigation';
+import {userProfileStore} from 'app/utils/navigation';
 
 import {Homepage} from './homepage';
 import {CohortsApi, ConceptSetsApi, UserMetricsApi, WorkspacesApi} from 'generated/fetch/api';
@@ -13,7 +13,7 @@ import {UserMetricsApiStub} from 'testing/stubs/user-metrics-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {cdrVersionStore} from 'app/utils/stores';
+import {cdrVersionStore, serverConfigStore} from "app/utils/stores";
 import {cdrVersionTiersResponse} from "testing/stubs/cdr-versions-api-stub";
 
 describe('HomepageComponent', () => {
@@ -43,14 +43,14 @@ describe('HomepageComponent', () => {
     });
 
     userProfileStore.next({profile, reload, updateCache: () => {}});
-    serverConfigStore.next({
+    serverConfigStore.set({config: {
       enableDataUseAgreement: true,
       gsuiteDomain: 'fake-research-aou.org',
       projectId: 'aaa',
       publicApiKeyForErrorReports: 'aaa',
       enableEraCommons: true,
       enableV3DataUserCodeOfConduct: true
-    });
+    }});
     cdrVersionStore.set(cdrVersionTiersResponse);
   });
 
@@ -91,7 +91,7 @@ describe('HomepageComponent', () => {
       ...profile,
       accessTierShortNames: [],   // unregistered
     };
-    serverConfigStore.next({...serverConfigStore.getValue()});
+    serverConfigStore.set({config: {...serverConfigStore.get().config}});
     userProfileStore.next({profile: newProfile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -106,7 +106,7 @@ describe('HomepageComponent', () => {
       dataUseAgreementSignedVersion: 2, // Old version
       accessTierShortNames: [],   // unregistered
     };
-    serverConfigStore.next({...serverConfigStore.getValue()});
+    serverConfigStore.set({config: {...serverConfigStore.get().config}});
     userProfileStore.next({profile: newProfile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -123,7 +123,7 @@ describe('HomepageComponent', () => {
       dataUseAgreementSignedVersion: 3, // Live version
       accessTierShortNames: [],   // unregistered
     };
-    serverConfigStore.next({...serverConfigStore.getValue()});
+    serverConfigStore.set({config: {...serverConfigStore.get().config}});
     userProfileStore.next({profile: newProfile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -137,7 +137,7 @@ describe('HomepageComponent', () => {
       ...profile,
       accessTierShortNames: [],   // unregistered
     };
-    serverConfigStore.next({...serverConfigStore.getValue()});
+    serverConfigStore.set({config: {...serverConfigStore.get().config}});
     userProfileStore.next({profile: newProfile, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);

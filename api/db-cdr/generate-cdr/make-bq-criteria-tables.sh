@@ -1412,7 +1412,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     )
 SELECT
     (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS id
-    , 0
+    , -1
     , 'FITBIT'
     , 1
     , 'FITBIT'
@@ -1471,8 +1471,8 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , has_hierarchy
     )
 SELECT
-    (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS id
-    , 0
+      (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS id
+    , -1
     , 'PERSON'
     , 1
     , 'AGE'
@@ -1501,8 +1501,8 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , has_hierarchy
     )
 SELECT
-    (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS id
-    , 0
+      (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`)+1 AS id
+    , -1
     , 'PERSON'
     , 1
     , 'DECEASED'
@@ -1536,13 +1536,16 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , has_hierarchy
     )
 SELECT
-    ROW_NUMBER() OVER(ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
-    , 0
+      ROW_NUMBER() OVER(ORDER BY a.cnt DESC) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
+    , -1
     , 'PERSON'
     , 1
     , 'GENDER'
     , concept_id
-    , CASE WHEN b.concept_id = 0 THEN 'Unknown' ELSE b.concept_name END as name
+    , CASE
+          WHEN b.concept_id = 0 THEN 'Unknown'
+          ELSE regexp_replace(b.concept_name, r'^.+:\s', '')
+      END as name
     , 0
     , a.cnt
     , a.cnt
@@ -1580,13 +1583,16 @@ then
           , has_hierarchy
       )
   SELECT
-      ROW_NUMBER() OVER(ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
-      , 0
+      ROW_NUMBER() OVER(ORDER BY a.cnt DESC) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
+      , -1
       , 'PERSON'
       , 1
       , 'SEX'
       , concept_id
-      , CASE WHEN b.concept_id = 0 THEN 'Unknown' ELSE b.concept_name END as name
+      , CASE
+            WHEN b.concept_id = 0 THEN 'Unknown'
+            ELSE regexp_replace(b.concept_name, r'^.+:\s', '')
+        END as name
       , 0
       , a.cnt
       , a.cnt
@@ -1623,15 +1629,15 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , has_hierarchy
     )
 SELECT
-    ROW_NUMBER() OVER(ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
-    , 0
+    ROW_NUMBER() OVER(ORDER BY a.cnt DESC) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
+    , -1
     , 'PERSON'
     , 1
     , 'RACE'
     , concept_id
     , CASE
-        WHEN a.race_concept_id = 0 THEN 'Unknown'
-        ELSE regexp_replace(b.concept_name, r'^.+:\s', '')
+          WHEN a.race_concept_id = 0 THEN 'Unknown'
+          ELSE regexp_replace(b.concept_name, r'^.+:\s', '')
       END as name
     , 0
     , a.cnt
@@ -1669,7 +1675,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
         , has_hierarchy
     )
 SELECT
-    ROW_NUMBER() OVER(ORDER BY concept_id) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
+    ROW_NUMBER() OVER(ORDER BY a.cnt DESC) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS id
     , 0
     , 'PERSON'
     , 1
@@ -1717,7 +1723,7 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
     )
 SELECT
     ROW_NUMBER() OVER(ORDER BY concept_name) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as id
-    , 0
+    , -1
     , 'VISIT'
     , 1
     , 'VISIT'
@@ -4200,23 +4206,47 @@ where x.concept_id = y.concept_id
 echo "DRUG_EXPOSURE - ATC/RXNORM - add brand names"
 bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "INSERT INTO \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-    (id,parent_id,domain_id,is_standard,type,concept_id,code,name,is_group,is_selectable,has_attribute,has_hierarchy)
-SELECT ROW_NUMBER() OVER(ORDER BY upper(concept_name)) + (SELECT MAX(ID) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) AS ID,
-    0,'DRUG',1,'BRAND',concept_id,concept_code,concept_name,0,1,0,0
+    (
+          id
+        , parent_id
+        , domain_id
+        , is_standard
+        , type
+        , concept_id
+        , code
+        , name
+        , is_group
+        , is_selectable
+        , has_attribute
+        , has_hierarchy
+    )
+SELECT
+      ROW_NUMBER() OVER(ORDER BY upper(concept_name)) + (SELECT MAX(id) FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`) as id
+    , -1
+    , 'DRUG'
+    , 1
+    , 'BRAND'
+    , concept_id
+    , concept_code
+    , concept_name
+    , 0
+    , 1
+    , 0
+    , 0
 FROM
     (
-        select distinct b.concept_id, b.concept_name, b.concept_code
-        from \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` a
-        left join \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.CONCEPT_ID_1 = b.CONCEPT_ID --brands
-        left join \`$BQ_PROJECT.$BQ_DATASET.concept\` c on a.CONCEPT_ID_2 = c.CONCEPT_ID --ingredients
-        where b.vocabulary_id in ('RxNorm','RxNorm Extension')
+        SELECT DISTINCT b.concept_id, b.concept_name, b.concept_code
+        FROM \`$BQ_PROJECT.$BQ_DATASET.concept_relationship\` a
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` b on a.concept_id_1 = b.concept_id --brands
+        LEFT JOIN \`$BQ_PROJECT.$BQ_DATASET.concept\` c on a.concept_id_2 = c.concept_id --ingredients
+        WHERE b.vocabulary_id in ('RxNorm','RxNorm Extension')
             and b.concept_class_id = 'Brand Name'
             and b.invalid_reason is null
             and c.concept_id in
                 (
-                    select concept_id
-                    from \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
-                    where domain_id = 'DRUG'
+                    SELECT concept_id
+                    FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                    WHERE domain_id = 'DRUG'
                         and type = 'RXNORM'
                         and is_group = 0
                         and is_selectable = 1
@@ -5820,27 +5850,53 @@ bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
 "UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
 SET   x.full_text = y.full_text
     , x.synonyms = y.full_text
-    , x.display_synonyms = y.display_synonyms
 FROM
     (
         SELECT
               a.id
             , CASE
-                WHEN STRING_AGG(REPLACE(b.concept_synonym_name,'|','||'),'|') is null
-                    OR a.concept_id = 0
-                    OR a.domain_id = 'SURVEY'
-                THEN a.name
-                ELSE CONCAT(a.name,'|',STRING_AGG(REPLACE(b.concept_synonym_name,'|','||'),'|'))
+                WHEN (STRING_AGG(REPLACE(b.concept_name,'|','||'),'|') is null OR a.concept_id = 0) THEN a.name
+                ELSE STRING_AGG(REPLACE(b.concept_name,'|','||'),'|')
               END as full_text
-            , STRING_AGG(b.concept_synonym_name,'; ') as display_synonyms
         FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` a
         LEFT JOIN
             (
-                SELECT *
+                SELECT concept_id, concept_synonym_name as concept_name
                 FROM \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\`
-                WHERE NOT REGEXP_CONTAINS(concept_synonym_name, r'\p{Han}') --remove items with chinese characters
+                WHERE NOT REGEXP_CONTAINS(concept_synonym_name, r'\p{Han}') --remove items with Chinese characters
+                UNION DISTINCT
+                SELECT concept_id, concept_name
+                FROM \`$BQ_PROJECT.$BQ_DATASET.concept\`
+                WHERE concept_id is not null
             ) b on a.concept_id = b.concept_id
-        GROUP BY a.id, a.name, a.code, a.concept_id, a.domain_id
+        GROUP BY a.id, a.name, a.concept_id, a.domain_id
+    ) y
+WHERE x.id = y.id"
+
+echo "DISPLAY_SYNONYMS - adding data"
+bq --quiet --project_id=$BQ_PROJECT query --nouse_legacy_sql \
+"UPDATE \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` x
+SET   x.display_synonyms = y.display_synonyms
+FROM
+    (
+        SELECT
+              a.id
+            , CASE
+                WHEN (a.domain_id != 'SURVEY' and a.concept_id != 0) THEN STRING_AGG(b.concept_name,'; ')
+                ELSE null
+              END as display_synonyms
+        FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\` a
+        LEFT JOIN
+            (
+                SELECT concept_id, concept_synonym_name as concept_name
+                FROM \`$BQ_PROJECT.$BQ_DATASET.concept_synonym\`
+                WHERE NOT REGEXP_CONTAINS(concept_synonym_name, r'\p{Han}') --remove items with Chinese characters
+                EXCEPT DISTINCT
+                SELECT concept_id, name
+                FROM \`$BQ_PROJECT.$BQ_DATASET.cb_criteria\`
+                WHERE concept_id is not null
+            ) b on a.concept_id = b.concept_id
+        GROUP BY a.id, a.name, a.concept_id, a.domain_id
     ) y
 WHERE x.id = y.id"
 

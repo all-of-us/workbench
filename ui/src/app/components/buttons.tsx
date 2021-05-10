@@ -1,8 +1,8 @@
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {styles as cardStyles} from 'app/components/card';
-import {ClrIcon} from 'app/components/icons';
-import {SnowmanIcon} from 'app/components/icons';
+import {ClrIcon, SnowmanIcon} from 'app/components/icons';
+import {Interactive as LocalInteractive} from 'app/components/interactive';
 import {TooltipTrigger} from 'app/components/popups';
-import {IconComponent} from 'app/icons/icon';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles} from 'app/utils/index';
 import {navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
@@ -213,7 +213,7 @@ export const Button = ({type = 'primary', style = {}, disabled = false, ...props
   />;
 };
 
-export const MenuItem = ({icon = null, tooltip = '', disabled = false, children, style = {}, ...props}) => {
+export const MenuItem = ({icon = null, faIcon = null, tooltip = '', disabled = false, children, style = {}, ...props}) => {
   return <TooltipTrigger side='left' content={tooltip}>
     <Clickable
       // data-test-id is the text within the MenuItem, with whitespace removed
@@ -231,29 +231,36 @@ export const MenuItem = ({icon = null, tooltip = '', disabled = false, children,
       hover={!disabled ? {backgroundColor: colorWithWhiteness(colors.accent, 0.92)} : undefined}
       {...props}
     >
-      {icon && <ClrIcon shape={icon} style={{marginRight: 8}} size={15}/>}
+      {icon &&
+       // TODO(RW-5682): Use a consistent icon type throughout. For now, support both.
+       <ClrIcon shape={icon} style={{marginRight: 8}} size={15}/>}
+      {faIcon &&
+       // For consistency with ClrIcon: FontAwesome default icon size is ~11px.
+       // To align these, we add 2px additional margin on either side.
+       // See also https://fontawesome.com/how-to-use/on-the-web/styling/sizing-icons
+       <FontAwesomeIcon icon={faIcon} style={{marginLeft: 2, marginRight: 10}}/>}
       {children}
     </Clickable>
   </TooltipTrigger>;
 };
 
-export const IconButton = ({icon, style = {}, tooltip = '', disabled = false, ...props}) => {
+export const IconButton = ({icon: Icon, style = {}, hover = {}, tooltip = '', disabled = false, ...props}) => {
   return <TooltipTrigger side='left' content={tooltip}>
-    <Clickable
-        data-test-id={icon}
-        disabled={disabled}
-        {...props}
-    >
-      <IconComponent icon={icon} disabled={disabled} style={style}/>
-    </Clickable>
+    <LocalInteractive tagName='div'
+                 style={{
+                   color: disabled ? colors.disabled : colors.accent,
+                   cursor: disabled ? 'auto' : 'pointer',
+                   ...style
+                 }}
+                 hover={{color: !disabled && colorWithWhiteness(colors.accent, 0.2), ...hover}}
+                 disabled={disabled}
+                 {...props}>
+        <Icon disabled={disabled} style={style}/>
+    </LocalInteractive>
   </TooltipTrigger>;
 };
 
-export const SnowmanButton = ({disabled = false, style = {}, ...props}) => {
-  return <Clickable disabled={disabled} {...props} propagateDataTestId={true}>
-    <SnowmanIcon style={style} disabled={disabled}/>
-  </Clickable>;
-};
+export const SnowmanButton = ({...props}) => <IconButton icon={SnowmanIcon} {...props} propagateDataTestId={true}/>;
 
 const cardButtonBase = {
   style: {

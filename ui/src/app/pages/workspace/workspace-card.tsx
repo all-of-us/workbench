@@ -7,7 +7,7 @@ import {Button, Clickable, MenuItem, SnowmanButton} from 'app/components/buttons
 import {WorkspaceCardBase} from 'app/components/card';
 import {ConfirmDeleteModal} from 'app/components/confirm-delete-modal';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {ClrIcon} from 'app/components/icons';
+import {ClrIcon, ControlledTierBadge} from 'app/components/icons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
@@ -16,9 +16,10 @@ import {WorkspaceShare} from 'app/pages/workspace/workspace-share';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {displayDate, reactStyles} from 'app/utils';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 import {AnalyticsTracker, triggerEvent} from 'app/utils/analytics';
 import {currentWorkspaceStore, navigate} from 'app/utils/navigation';
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
 
 const EVENT_CATEGORY = 'Workspace list';
@@ -219,7 +220,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
 
   onClick() {
     const {workspace} = this.props;
-    if (serverConfigStore.getValue().enableResearchReviewPrompt && workspace.researchPurpose.needsReviewPrompt) {
+    if (serverConfigStore.get().config.enableResearchReviewPrompt && workspace.researchPurpose.needsReviewPrompt) {
       this.setState({showResearchPurposeReviewModal: true});
     } else {
       workspace.published ?
@@ -230,7 +231,7 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
   }
 
   render() {
-    const {userEmail, workspace, accessLevel} = this.props;
+    const {userEmail, workspace, workspace: {accessTierShortName}, accessLevel} = this.props;
     const {bugReportError, bugReportOpen, confirmDeleting, loadingData,
       sharing, showResearchPurposeReviewModal, userRoles} = this.state;
 
@@ -281,18 +282,25 @@ export class WorkspaceCard extends React.Component<WorkspaceCardProps, Workspace
                 </div>
               }
             </FlexColumn>
-            <div
-              style={{
-                ...styles.permissionBox,
-                backgroundColor: colors.workspacePermissionsHighlights[accessLevel]
-              }}
-             data-test-id='workspace-access-level'
-            >
-              {accessLevel}
-            </div>
-            <div style={{fontSize: 12}}>
-              Last Changed: {displayDate(workspace.lastModifiedTime)}
-            </div>
+            <FlexRow style={{justifyContent: 'space-between'}}>
+              <FlexColumn>
+                <div
+                  style={{
+                    ...styles.permissionBox,
+                    backgroundColor: colors.workspacePermissionsHighlights[accessLevel]
+                  }}
+                data-test-id='workspace-access-level'
+                >
+                  {accessLevel}
+                </div>
+                <div style={{fontSize: 12}}>
+                  Last Changed: {displayDate(workspace.lastModifiedTime)}
+                </div>
+              </FlexColumn>
+              <FlexColumn style={{justifyContent: 'flex-end'}}>
+                {accessTierShortName === AccessTierShortNames.Controlled && <ControlledTierBadge/>}
+              </FlexColumn>
+            </FlexRow>
           </FlexColumn>
         </FlexRow>
       </WorkspaceCardBase>

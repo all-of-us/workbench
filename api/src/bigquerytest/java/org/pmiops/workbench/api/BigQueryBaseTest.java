@@ -29,8 +29,10 @@ import org.pmiops.workbench.testconfig.TestWorkbenchConfig;
 import org.pmiops.workbench.testconfig.WorkbenchConfigConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(classes = {TestBigQueryConfig.class, WorkbenchConfigConfig.class})
+@TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
 public abstract class BigQueryBaseTest extends SpringTest {
 
   public static final String CB_DATA = "cbdata";

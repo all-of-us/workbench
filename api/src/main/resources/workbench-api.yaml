@@ -1594,22 +1594,6 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
-  "/v1/cron/billingProjectGarbageCollection":
-    get:
-      security: []
-      tags:
-      - offlineBilling
-      - cron
-      description: Trigger a bulk transfer of ownership of billing projects associated
-        with deleted workspaces
-      operationId: billingProjectGarbageCollection
-      responses:
-        204:
-          description: Billing Project Garbage Collection was successful.
-        500:
-          description: Internal Error
-          schema:
-            "$ref": "#/definitions/ErrorResponse"
   "/v1/monitoring/billingProjectBufferStatus":
     get:
       tags:
@@ -2356,7 +2340,7 @@ paths:
           description: A list of data sets containg cohort/concept Id passed.
           schema:
             "$ref": "#/definitions/DataSetListResponse"
-  "/v1/cdrVersionId/{cdrVersionId}/domain/{domain}/domainValue/{value}/dataDictionaryEntry":
+  "/v1/{cdrVersionId}/dataDictionaryEntry/{domain}/{value}":
     get:
       parameters:
       - in: path
@@ -2432,6 +2416,41 @@ paths:
           description: The Terra Job for the extraction workflow
           schema:
             "$ref": "#/definitions/GenomicExtractionJob"
+  "/v1/workspaces/{workspaceNamespace}/{workspaceId}/genomicExtractionJobs/{jobId}/abort":
+    post:
+      parameters:
+        - in: path
+          name: workspaceNamespace
+          description: workspaceNamespace
+          required: true
+          type: string
+        - in: path
+          name: workspaceId
+          description: workspaceId
+          required: true
+          type: string
+        - in: path
+          name: jobId
+          type: string
+          required: true
+      tags:
+        - dataSet
+      description: 'Aborts a running genome extract job. Requires WRITER access on the workspace.
+        Workspace CDR must also have access to a Wgs dataset'
+      operationId: abortGenomicExtractionJob
+      responses:
+        204:
+          description: Successful request
+          schema:
+            $ref: '#/definitions/EmptyResponse'
+        404:
+          description: Submission not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        500:
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
   "/v1/{workspaceNamespace}/{workspaceId}/data-set/exportToNotebook":
     post:
       tags:
@@ -3772,10 +3791,13 @@ definitions:
     type: object
     required:
       - accessTierShortName
+      - accessTierDisplayName
       - defaultCdrVersionId
       - versions
     properties:
       accessTierShortName:
+        type: string
+      accessTierDisplayName:
         type: string
       defaultCdrVersionId:
         type: string
@@ -3800,8 +3822,6 @@ definitions:
         type: string
       archivalStatus:
         "$ref": "#/definitions/ArchivalStatus"
-      hasMicroarrayData:
-        type: boolean
       hasWgsData:
         type: boolean
       hasFitbitData:
@@ -4026,9 +4046,20 @@ definitions:
         type: boolean
         default: false
         description: Whether to use enable RAS-AoU linking for login.gov when user setup account.
+      enableAccessRenewal:
+        type: boolean
+        default: false
+        description: Whether to enable the access renewal, allowing users to expire.
+      enableGenomicExtraction:
+        type: boolean
+        default: false
+        description: Whether to enable genomic data extraction for eligible datasets.
       rasHost:
         type: string
         description: The RAS base host name.
+      accessRenewalExpiry:
+        type: number
+        description: Days a user's module completion is good for until it expires.
       rasClientId:
         type: string
         description: The RAS OAuth client id.
@@ -4898,7 +4929,7 @@ definitions:
         default: NONE
         enum:
           - NONE
-          - MICROARRAY
+          - WHOLE_GENOME
       genomicsAnalysisTool:
         type: string
         default: NONE
@@ -5503,6 +5534,34 @@ definitions:
         format: int64
         description: Timestamp when the user was bypassed for completing login.gov linking
           linking.
+      renewableAccessModules:
+        type: object
+        properties:
+          modules:
+            type: array
+            items:
+              "$ref": "#/definitions/RenewableAccessModuleStatus"
+          anyModuleHasExpired:
+            type: boolean
+            description: >
+              Whether any modules have expired. Each expired module will have
+              the corresponding hasExpired flag set in the modules array.
+
+  RenewableAccessModuleStatus:
+    type: object
+    properties:
+      moduleName:
+        type: string
+        enum:
+          - complianceTraining
+          - dataUseAgreement
+      expirationEpochMillis:
+        type: integer
+        format: int64
+        description: When this module expired or will expire.
+      hasExpired:
+        type: boolean
+        description: Whether this module has expired according to the server's clock.
 
   DemographicSurvey:
     type: object
@@ -5896,6 +5955,7 @@ definitions:
       - workspaceFirecloudName
       - workspaceBillingStatus
       - cdrVersionId
+      - accessTierShortName
       - permission
       - modifiedTime
     properties:
@@ -5909,6 +5969,8 @@ definitions:
       workspaceBillingStatus:
         "$ref": "#/definitions/BillingStatus"
       cdrVersionId:
+        type: string
+      accessTierShortName:
         type: string
       permission:
         type: string
@@ -8865,12 +8927,21 @@ definitions:
         type: integer
         format: int64
         description: Workbench database Id for the job
+      datasetName:
+        type: string
+      cost:
+        type: number
+        format: currency
       status:
         "$ref": '#/definitions/TerraJobStatus'
       submissionDate:
         type: integer
         format: int64
         description: Submission Timestamp (epoch) according to Terra
+      completionTime:
+        type: integer
+        format: int64
+        description: Submission Completion Timestamp (epoch) according to Terra
   TerraJobStatus:
     type: string
     description: 'Terra job status. Indicates if the Terra Submission and Workflows are still running, succeeded, or failed.

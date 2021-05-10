@@ -12,6 +12,7 @@ import {
 } from 'generated/fetch';
 import {CdrVersionsStubVariables} from 'testing/stubs/cdr-versions-api-stub';
 import {WorkspaceStubVariables} from 'testing/stubs/workspaces';
+import {AccessTierShortNames} from 'app/utils/access-tiers';
 
 type InputResource = FileDetail | Cohort | CohortReview | ConceptSet | DataSet;
 export function convertToResources(
@@ -28,5 +29,6 @@ export const stubResource: WorkspaceResource = {
   modifiedTime: '2019-01-28 20:13:58.0',
   permission: 'OWNER',
   cdrVersionId: CdrVersionsStubVariables.DEFAULT_WORKSPACE_CDR_VERSION_ID,
+  accessTierShortName: AccessTierShortNames.Registered,
   workspaceBillingStatus: BillingStatus.ACTIVE,
 };

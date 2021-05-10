@@ -2,9 +2,12 @@ import { logger } from 'libs/logger';
 import * as fp from 'lodash/fp';
 import { ConsoleMessage, JSHandle, Request } from 'puppeteer';
 
+const { CIRCLE_BUILD_NUM } = process.env;
+
 const userAgent =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko)' +
-  ' Chrome/80.0.3987.149 Safari/537.36';
+  ' Chrome/80.0.3987.149 Safari/537.36' +
+  (CIRCLE_BUILD_NUM ? ` (circle-build-number/${CIRCLE_BUILD_NUM})` : '');
 
 /**
  * Set up page common properties:
@@ -31,13 +34,25 @@ beforeEach(async () => {
       const body = requestBody.length === 0 ? '' : `\n${requestBody}`;
       logger.log('info', 'Request issued: %s %s %s', request.method(), request.url(), body);
     }
-    try {
-      request.continue();
-      // tslint:disable-next-line:no-empty
-    } catch (e) {}
+    /**
+     * May encounter "Error: Request is already handled!"
+     * Workaround: https://github.com/puppeteer/puppeteer/issues/3853#issuecomment-458193921
+     */
+    return Promise.resolve()
+      .then(() => request.continue())
+      .catch(() => {
+        // Ignored
+      });
   });
 
-  /** Emitted when a request fails. */
+  // Emitted when a request fails: 4xx..5xx status codes
+  page.on('requestfailed', async (request) => {
+    if (canLogResponse(request)) {
+      await logError(request);
+    }
+  });
+
+  /** Emitted when a request finishes. */
   page.on('requestfinished', async (request: Request) => {
     let method;
     let url;
@@ -49,7 +64,6 @@ beforeEach(async () => {
         const resp = request.response();
         url = resp.url();
         status = resp.status();
-
         if (isApiFailure(request)) {
           await logError(request);
         } else {
@@ -64,11 +78,15 @@ beforeEach(async () => {
       // Try find out what the request was
       logger.log('error', '%s %s %s\n%s', status, method, url, err);
     }
-    try {
-      await request.continue();
-    } catch (e) {
-      // Ignored
-    }
+    /**
+     * May encounter "Error: Request is already handled!"
+     * Workaround: https://github.com/puppeteer/puppeteer/issues/3853#issuecomment-458193921
+     */
+    return Promise.resolve()
+      .then(() => request.continue())
+      .catch(() => {
+        // Ignored
+      });
   });
 
   /**
@@ -79,13 +97,12 @@ beforeEach(async () => {
     if (!message.args().length) return;
     const title = await getPageTitle();
     try {
-      const args = await Promise.all(message.args().map((a) => describeJsHandle(a)));
+      const args = await Promise.all(message.args().map((jsHandle) => describeJsHandle(jsHandle)));
+      const concatenatedText = args.filter((arg) => !!arg).join('\n');
       const msgType = message.type() === 'warning' ? 'warn' : message.type();
-      logger.info(`Page Console ${msgType.toUpperCase()}: "${title}"`);
-      console.log(args);
-      console.log('');
+      logger.info(`Page Console ${msgType.toUpperCase()}: "${title}"\n${concatenatedText}`);
     } catch (err) {
-      console.error(`❗ "${title}"\nException occurred when getting page console message.\n${err}\n${message.text()}`);
+      console.error(`❗ "${title}"\nException occurred when getting page console message.\n${err}`);
     }
   });
 
@@ -93,8 +110,7 @@ beforeEach(async () => {
   page.on('error', async (error: Error) => {
     const title = await getPageTitle();
     try {
-      logger.error('PAGE ERROR: "$title}"');
-      logger.error(JSON.stringify(error, null, 2));
+      logger.error(`PAGE ERROR: "${title}"\n${error}`);
     } catch (err) {
       console.error(`❗ "${title}"\nException occurred when getting page error.\n${err}`);
     }
@@ -104,8 +120,7 @@ beforeEach(async () => {
   page.on('pageerror', async (error: Error) => {
     const title = await getPageTitle();
     try {
-      logger.error('PAGEERROR: "$title}"');
-      logger.error(JSON.stringify(error, null, 2));
+      logger.error(`PAGEERROR: "${title}"\n${error}`);
     } catch (err) {
       console.error(`❗ "${title}"\nPage exception occurred when getting pageerror.\n${err}`);
     }
@@ -128,12 +143,7 @@ const getPageTitle = async () => {
 
 const describeJsHandle = async (jsHandle: JSHandle): Promise<string> => {
   return jsHandle.executionContext().evaluate((obj) => {
-    // Get error message if obj is an error. Error is not serializeable.
-    if (obj instanceof Error) {
-      return obj.message;
-    }
-    // Return JSON value of the argument or `undefined`.
-    return obj.toString();
+    return obj;
   }, jsHandle);
 };
 
@@ -203,17 +213,35 @@ const notRedirectRequest = (request: Request): boolean => {
 };
 
 const getResponseText = async (request: Request): Promise<string> => {
-  return (await request.response().buffer()).toString();
+  const REDIRECT_CODE_START = 300;
+  const REDIRECT_CODE_END = 308;
+  const NO_CONTENT_RESPONSE_CODE = 204;
+  const response = request.response();
+  // Log response if response it's not a redirect or no-content
+  const status = response && response.status();
+  if (
+    status &&
+    !(status >= REDIRECT_CODE_START && status <= REDIRECT_CODE_END) &&
+    status !== NO_CONTENT_RESPONSE_CODE
+  ) {
+    try {
+      return (await request.response().buffer()).toString();
+    } catch (err) {
+      console.error(`Puppeteer error during get response text.\n${err}`);
+      return undefined;
+    }
+  }
 };
 
 const logError = async (request: Request): Promise<void> => {
   const response = request.response();
+  const status = response ? response.status() : '';
   const failureText = request.failure() !== null ? stringifyData(request.failure().errorText) : '';
   const responseText = stringifyData(await getResponseText(request));
   logger.log(
     'error',
     'Request failed: %s %s %s\n%s %s',
-    response.status(),
+    status,
     request.method(),
     request.url(),
     responseText,

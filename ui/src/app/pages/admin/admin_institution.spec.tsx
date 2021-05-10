@@ -1,8 +1,9 @@
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {mount} from 'enzyme';
-import {InstitutionApi} from 'generated/fetch';
+import {ConfigApi, InstitutionApi} from 'generated/fetch';
 import * as React from 'react';
+import {ConfigApiStub} from 'testing/stubs/config-api-stub';
 import defaultServerConfig from 'testing/default-server-config';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {InstitutionApiStub} from 'testing/stubs/institution-api-stub';
@@ -16,7 +17,7 @@ describe('AdminInstitutionSpec', () => {
   };
 
   beforeEach(() => {
-    serverConfigStore.next(defaultServerConfig);
+    serverConfigStore.set({config: defaultServerConfig});
 
     registerApiClient(InstitutionApi, new InstitutionApiStub());
   });

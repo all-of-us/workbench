@@ -1,7 +1,7 @@
 import {mount, ReactWrapper, ShallowWrapper} from 'enzyme';
 import * as React from 'react';
 
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {ConfigApi, InstitutionApi, Profile} from 'generated/fetch';
 import {createEmptyProfile} from 'app/pages/login/sign-in';
 import {AccountCreationInstitution, Props} from './account-creation-institution';
@@ -60,7 +60,7 @@ const industrySpecificRoleOption = AccountCreationOptions.institutionalRoleOptio
 
 
 beforeEach(() => {
-  serverConfigStore.next(defaultServerConfig);
+  serverConfigStore.set({config: defaultServerConfig});
   registerApiClient(ConfigApi, new ConfigApiStub());
   registerApiClient(InstitutionApi, new InstitutionApiStub());
 

@@ -26,7 +26,6 @@ public class DbCdrVersion {
   private int numParticipants;
   private String cdrDbName;
   private String elasticIndexBaseName;
-  private String microarrayBigqueryDataset;
   private String wgsBigqueryDataset;
   private Boolean hasFitbitData;
   private Boolean hasCopeSurveyData;
@@ -150,15 +149,6 @@ public class DbCdrVersion {
     this.elasticIndexBaseName = elasticIndexBaseName;
   }
 
-  @Column(name = "microarray_bigquery_dataset")
-  public String getMicroarrayBigqueryDataset() {
-    return microarrayBigqueryDataset;
-  }
-
-  public void setMicroarrayBigqueryDataset(String microarrayBigqueryDataset) {
-    this.microarrayBigqueryDataset = microarrayBigqueryDataset;
-  }
-
   @Column(name = "wgs_bigquery_dataset")
   public String getWgsBigqueryDataset() {
     return wgsBigqueryDataset;
@@ -201,7 +191,6 @@ public class DbCdrVersion {
         numParticipants,
         cdrDbName,
         elasticIndexBaseName,
-        microarrayBigqueryDataset,
         wgsBigqueryDataset,
         hasFitbitData,
         hasCopeSurveyData);
@@ -228,7 +217,6 @@ public class DbCdrVersion {
         && Objects.equals(creationTime, that.creationTime)
         && Objects.equals(cdrDbName, that.cdrDbName)
         && Objects.equals(elasticIndexBaseName, that.elasticIndexBaseName)
-        && Objects.equals(microarrayBigqueryDataset, that.microarrayBigqueryDataset)
         && Objects.equals(wgsBigqueryDataset, that.wgsBigqueryDataset)
         && Objects.equals(hasFitbitData, that.hasFitbitData)
         && Objects.equals(hasCopeSurveyData, that.hasCopeSurveyData);

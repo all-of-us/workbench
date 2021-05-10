@@ -2,6 +2,7 @@
 // different content IDs and separate SAML integration. See also app/utils/zendesk.ts.
 export enum ZendeskEnv {
   Prod = 'prod',
+  Preprod = 'preprod',
   Sandbox = 'sandbox'
 }
 

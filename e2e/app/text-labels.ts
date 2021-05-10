@@ -33,6 +33,7 @@ export enum MenuOption {
   RenameDataset = 'Rename Dataset',
   Review = 'Review',
   Save = 'Save',
+  SaveAs = 'Save as',
   Share = 'Share',
   SuppressGroupFromTotalCount = 'Suppress group from total count',
   Visits = 'Visits'
@@ -90,6 +91,8 @@ export enum LinkText {
   RenameConceptSet = 'Rename Concept Set',
   RenameDataset = 'Rename Dataset',
   RenameNotebook = 'Rename Notebook',
+  ReviewLater = 'REVIEW LATER',
+  ReviewNow = 'REVIEW NOW',
   Save = 'Save',
   SaveCohort = 'Save Cohort',
   SaveConceptSet = 'Save Concept Set',

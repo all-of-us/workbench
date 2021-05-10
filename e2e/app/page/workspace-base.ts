@@ -157,7 +157,6 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
 
     await modal.clickButton(link, { waitForClose: true });
     await waitWhileLoading(this.page);
-
     logger.info(`Deleted ${resourceType} "${resourceName}"`);
     return modalTextContent;
   }
@@ -258,11 +257,12 @@ export default abstract class WorkspaceBase extends AuthenticatedPage {
    */
   async dismissDeleteWorkspaceModal(clickButtonText: LinkText = LinkText.DeleteWorkspace): Promise<string[]> {
     const modal = new Modal(this.page);
+    const modalText = await modal.getTextContent();
     const textBox = modal.waitForTextbox('type DELETE to confirm');
     await textBox.type('delete');
     await modal.clickButton(clickButtonText, { waitForClose: true });
     await waitWhileLoading(this.page);
-    return undefined;
+    return modalText;
   }
 
   /**

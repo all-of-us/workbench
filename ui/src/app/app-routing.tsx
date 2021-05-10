@@ -13,7 +13,7 @@ import {authStore, profileStore, useStore} from 'app/utils/stores';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 import {Redirect} from 'react-router';
-import {NOTEBOOK_HELP_CONTENT} from './components/help-sidebar';
+import {NOTEBOOK_PAGE_KEY} from './components/help-sidebar';
 import { AdminBanner } from './pages/admin/admin-banner';
 import {AdminInstitution} from './pages/admin/admin-institution';
 import {AdminInstitutionEdit} from './pages/admin/admin-institution-edit';
@@ -227,7 +227,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
                 routeData={{
                   title: 'View Workspace Details',
                   breadcrumb: BreadcrumbType.Workspace,
-                  helpContentKey: 'about'
+                  pageKey: 'about'
                 }}
             />}
         />
@@ -237,7 +237,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
                 routeData={{
                   title: 'Duplicate Workspace',
                   breadcrumb: BreadcrumbType.WorkspaceDuplicate,
-                  helpContentKey: 'duplicate'
+                  pageKey: 'duplicate'
                 }}
                 workspaceEditMode={WorkspaceEditMode.Duplicate}
             />}
@@ -248,7 +248,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
                 routeData={{
                   title: 'Edit Workspace',
                   breadcrumb: BreadcrumbType.WorkspaceEdit,
-                  helpContentKey: 'edit'
+                  pageKey: 'edit'
                 }}
                 workspaceEditMode={WorkspaceEditMode.Edit}
             />}
@@ -257,7 +257,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           path='/workspaces/:ns/:wsid/notebooks'
           component={() => <NotebookListPage routeData={{
             title: 'View Notebooks',
-            helpContentKey: 'notebooks',
+            pageKey: 'notebooks',
             breadcrumb: BreadcrumbType.Workspace
           }}/>}
         />
@@ -266,8 +266,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           component={() => <InteractiveNotebookPage routeData={{
             pathElementForTitle: 'nbName',
             breadcrumb: BreadcrumbType.Notebook,
-            helpContentKey: NOTEBOOK_HELP_CONTENT,
-            notebookHelpSidebarStyles: true,
+            pageKey: NOTEBOOK_PAGE_KEY,
             minimizeChrome: true
           }}/>}
         />
@@ -280,8 +279,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             // to the height calculation of the container, which is normally set to auto.
             // Setting this flag sets the container to 100% so that no content is clipped.
             contentFullHeightOverride: true,
-            helpContentKey: NOTEBOOK_HELP_CONTENT,
-            notebookHelpSidebarStyles: true,
+            pageKey: NOTEBOOK_PAGE_KEY,
             minimizeChrome: true
           }}/>}
         />
@@ -290,7 +288,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           component={() => <CohortActionsPage routeData={{
             title: 'Cohort Actions',
             breadcrumb: BreadcrumbType.Cohort,
-            helpContentKey: 'cohortBuilder'
+            pageKey: 'cohortBuilder'
           }}/>}
         />
         <AppRoute
@@ -298,7 +296,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           component={() => <ParticipantsTablePage routeData={{
             title: 'Review Cohort Participants',
             breadcrumb: BreadcrumbType.Cohort,
-            helpContentKey: 'reviewParticipants'
+            pageKey: 'reviewParticipants'
           }}/>}
         />
         <AppRoute
@@ -306,7 +304,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           component={() => <DetailPagePage routeData={{
             title: 'Participant Detail',
             breadcrumb: BreadcrumbType.Participant,
-            helpContentKey: 'reviewParticipantDetail'
+            pageKey: 'reviewParticipantDetail'
           }}/>}
         />
         <AppRoute
@@ -314,7 +312,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           component={() => <QueryReportPage routeData={{
             title: 'Review Cohort Description',
             breadcrumb: BreadcrumbType.Cohort,
-            helpContentKey: 'cohortDescription'
+            pageKey: 'cohortDescription'
           }}/>}
         />
         <AppRoute
@@ -322,7 +320,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           component={() => <CohortReviewPage routeData={{
             title: 'Review Cohort Participants',
             breadcrumb: BreadcrumbType.Cohort,
-            helpContentKey: 'reviewParticipants'
+            pageKey: 'reviewParticipants'
           }}/>}
         />
         <AppRoute
@@ -330,7 +328,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           component={() => <ConceptHomepagePage routeData={{
             title: 'Search Concepts',
             breadcrumb: BreadcrumbType.SearchConcepts,
-            helpContentKey: 'conceptSets'
+            pageKey: 'searchConceptSets'
           }}/>}
         />
         <AppRoute
@@ -338,7 +336,7 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           component={() => <ConceptSetActionsPage routeData={{
             title: 'Concept Set Actions',
             breadcrumb: BreadcrumbType.ConceptSet,
-            helpContentKey: 'conceptSets'
+            pageKey: 'conceptSetActions'
           }}/>}
         />
       </ProtectedRoutes>

@@ -1,13 +1,13 @@
 import {Button, IconButton} from 'app/components/buttons';
 import {FlexColumn, FlexRow} from 'app/components/flex';
-import {ClrIcon} from 'app/components/icons';
+import {Check, ClrIcon, Times} from 'app/components/icons';
 import {Toggle} from 'app/components/inputs';
 import {PopupTrigger, TooltipTrigger} from 'app/components/popups';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {profileApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {AccessModule, AdminTableUser} from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
@@ -127,7 +127,7 @@ export class AdminUserBypass extends React.Component<Props, State> {
       enableComplianceTraining,
       enableEraCommons,
       enableDataUseAgreement,
-      enableRasLoginGovLinking} = serverConfigStore.getValue();
+      enableRasLoginGovLinking} = serverConfigStore.get().config;
     return <PopupTrigger
         ref={this.popupRef}
         side='bottom'
@@ -177,10 +177,10 @@ export class AdminUserBypass extends React.Component<Props, State> {
                                              fp.xor(selectedModules, [AccessModule.RASLINKLOGINGOV])}); }}
           />}
           <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-            <IconButton icon='times'
+            <IconButton icon={Times}
                         onClick={() => this.cancel()}
                         disabled={!this.hasEdited()}/>
-            <IconButton icon='check'
+            <IconButton icon={Check}
                         data-test-id='toggle-save'
                         onClick={() => this.save()}
                         disabled={!this.hasEdited()}/>

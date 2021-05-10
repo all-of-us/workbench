@@ -24,7 +24,7 @@ function renderResourceCard(props: RenderResourceCardProps) {
       [isCohort, () => <CohortResourceCard {...props}/>],
       [isCohortReview, () => <CohortReviewResourceCard {...props}/>],
       [isConceptSet, () => <ConceptSetResourceCard {...props}/>],
-      [isDataSet, () => <DatasetResourceCard {...props} disableExportToNotebook={inactiveBilling}/>],
+      [isDataSet, () => <DatasetResourceCard {...props} inactiveBilling={inactiveBilling}/>],
       [isNotebook, () => <NotebookResourceCard {...props} disableDuplicate={inactiveBilling}/>]
   ])(resource);
 }

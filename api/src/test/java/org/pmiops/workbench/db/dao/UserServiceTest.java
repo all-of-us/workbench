@@ -1,19 +1,16 @@
 package org.pmiops.workbench.db.dao;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
@@ -22,22 +19,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.access.AccessTierServiceImpl;
-import org.pmiops.workbench.actionaudit.Agent;
 import org.pmiops.workbench.actionaudit.auditors.UserServiceAuditor;
 import org.pmiops.workbench.actionaudit.targetproperties.BypassTimeTargetProperty;
 import org.pmiops.workbench.compliance.ComplianceService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbAccessTier;
 import org.pmiops.workbench.db.model.DbUser;
-import org.pmiops.workbench.db.model.DbUserAccessTier;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.exceptions.NotFoundException;
 import org.pmiops.workbench.firecloud.FireCloudService;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.pmiops.workbench.google.DirectoryService;
 import org.pmiops.workbench.model.Authority;
-import org.pmiops.workbench.model.EmailVerificationStatus;
-import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.moodle.ApiException;
 import org.pmiops.workbench.moodle.model.BadgeDetailsV2;
 import org.pmiops.workbench.test.FakeClock;
@@ -80,7 +73,6 @@ public class UserServiceTest {
   @Autowired private UserService userService;
   @Autowired private UserDao userDao;
   @Autowired private AccessTierDao accessTierDao;
-  @Autowired private UserAccessTierDao userAccessTierDao;
 
   @Import({
     UserServiceTestConfiguration.class,
@@ -119,6 +111,7 @@ public class UserServiceTest {
     providedDbUser = user;
 
     providedWorkbenchConfig = WorkbenchConfig.createEmptyConfig();
+    providedWorkbenchConfig.accessRenewal.expiryDays = (long) 365;
 
     // key UserService logic depends on the existence of the Registered Tier
     registeredTier = TestMockFactory.createRegisteredTierForTests(accessTierDao);
@@ -447,114 +440,5 @@ public class UserServiceTest {
     for (Authority auth : Authority.values()) {
       assertThat(userService.hasAuthority(user.getUserId(), auth)).isTrue();
     }
-  }
-
-  @Test
-  public void test_updateUserWithRetries_register() {
-    DbUser dbUser = userDao.save(new DbUser());
-    assertThat(userAccessTierDao.findAll()).isEmpty();
-
-    dbUser = userService.updateUserWithRetries(this::registerUser, dbUser, Agent.asUser(dbUser));
-
-    assertThat(userAccessTierDao.findAll()).hasSize(1);
-    Optional<DbUserAccessTier> userAccessMaybe =
-        userAccessTierDao.getByUserAndAccessTier(dbUser, registeredTier);
-    assertThat(userAccessMaybe).isPresent();
-    assertThat(userAccessMaybe.get().getTierAccessStatusEnum()).isEqualTo(TierAccessStatus.ENABLED);
-  }
-
-  @Test
-  public void test_updateUserWithRetries_register_includes_others() {
-    providedWorkbenchConfig.featureFlags.unsafeAllowAccessToAllTiersForRegisteredUsers = true;
-
-    DbAccessTier controlledTier = TestMockFactory.createControlledTierForTests(accessTierDao);
-    DbAccessTier aThirdTierWhyNot =
-        accessTierDao.save(
-            new DbAccessTier()
-                .setAccessTierId(3)
-                .setShortName("three")
-                .setDisplayName("Third Tier")
-                .setAuthDomainName("Third Tier Auth Domain")
-                .setAuthDomainGroupEmail("t3-users@fake-research-aou.org")
-                .setServicePerimeter("tier/3/perimeter"));
-
-    DbUser dbUser = userDao.save(new DbUser());
-    assertThat(userAccessTierDao.findAll()).isEmpty();
-
-    dbUser = userService.updateUserWithRetries(this::registerUser, dbUser, Agent.asUser(dbUser));
-
-    List<DbAccessTier> expectedTiers =
-        ImmutableList.of(registeredTier, controlledTier, aThirdTierWhyNot);
-
-    assertThat(userAccessTierDao.findAll()).hasSize(expectedTiers.size());
-    for (DbAccessTier tier : expectedTiers) {
-      Optional<DbUserAccessTier> userAccessMaybe =
-          userAccessTierDao.getByUserAndAccessTier(dbUser, tier);
-      assertThat(userAccessMaybe).isPresent();
-      assertThat(userAccessMaybe.get().getTierAccessStatusEnum())
-          .isEqualTo(TierAccessStatus.ENABLED);
-    }
-  }
-
-  @Test
-  public void test_updateUserWithRetries_unregister() {
-    DbUser dbUser = new DbUser();
-    assertThat(userAccessTierDao.findAll()).isEmpty();
-
-    dbUser = userService.updateUserWithRetries(this::unregisterUser, dbUser, Agent.asUser(dbUser));
-
-    // the user has never been registered so they have no DbUserAccessTier entry
-
-    assertThat(userAccessTierDao.findAll()).hasSize(0);
-    Optional<DbUserAccessTier> userAccessMaybe =
-        userAccessTierDao.getByUserAndAccessTier(dbUser, registeredTier);
-    assertThat(userAccessMaybe).isEmpty();
-  }
-
-  @Test
-  public void test_updateUserWithRetries_register_then_unregister() {
-    DbUser dbUser = new DbUser();
-    assertThat(userAccessTierDao.findAll()).isEmpty();
-
-    dbUser = userService.updateUserWithRetries(this::registerUser, dbUser, Agent.asUser(dbUser));
-    dbUser = userService.updateUserWithRetries(this::unregisterUser, dbUser, Agent.asUser(dbUser));
-
-    // The user received a DbUserAccessTier when they were registered.
-    // They still have it after unregistering but now it is DISABLED.
-
-    assertThat(userAccessTierDao.findAll()).hasSize(1);
-    Optional<DbUserAccessTier> userAccessMaybe =
-        userAccessTierDao.getByUserAndAccessTier(dbUser, registeredTier);
-    assertThat(userAccessMaybe).isPresent();
-    assertThat(userAccessMaybe.get().getTierAccessStatusEnum())
-        .isEqualTo(TierAccessStatus.DISABLED);
-  }
-
-  private DbUser registerUser(DbUser user) {
-    // shouldUserBeRegistered logic:
-    //    return !user.getDisabled()
-    //        && complianceTrainingCompliant
-    //        && eraCommonsCompliant
-    //        && betaAccessGranted
-    //        && twoFactorAuthComplete
-    //        && dataUseAgreementCompliant
-    //        && EmailVerificationStatus.SUBSCRIBED.equals(user.getEmailVerificationStatusEnum());
-
-    Timestamp now = Timestamp.from(Instant.now());
-
-    user.setDisabled(false);
-    user.setEmailVerificationStatusEnum(EmailVerificationStatus.SUBSCRIBED);
-    user.setComplianceTrainingBypassTime(now);
-    user.setEraCommonsBypassTime(now);
-    user.setBetaAccessBypassTime(now);
-    user.setTwoFactorAuthBypassTime(now);
-    user.setDataUseAgreementBypassTime(now);
-
-    return userDao.save(user);
-  }
-
-  private DbUser unregisterUser(DbUser user) {
-    user.setDisabled(true);
-    return userDao.save(user);
   }
 }

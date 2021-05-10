@@ -60,28 +60,28 @@
     },
     {
       "cdrVersionId": 5,
-      "name": "All of Us Dataset v3",
+      "name": "All of Us Registered Tier Dataset v3",
+      "accessTier": "registered",
       "bigqueryProject": "fc-aou-cdr-prod",
       "bigqueryDataset": "R2019Q4R3",
       "creationTime": "2019-10-04 00:00:00Z",
       "releaseNumber": 3,
       "numParticipants": 224143,
-      "cdrDbName": "r_2019q4_10",
-      "accessTier": "registered"
+      "cdrDbName": "r_2019q4_10"
     },
     {
       "cdrVersionId": 6,
       "isDefault": true,
-      "name": "All of Us Dataset v4",
+      "name": "All of Us Registered Tier Dataset v4",
+      "accessTier": "registered",
       "bigqueryProject": "fc-aou-cdr-prod",
-      "bigqueryDataset": "R2020Q4R2",
+      "bigqueryDataset": "R2020Q4R3",
       "creationTime": "2020-10-20 00:00:00Z",
       "releaseNumber": 4,
       "numParticipants": 315297,
-      "cdrDbName": "r_2020q4_3",
+      "cdrDbName": "r_2020q4_4",
       "hasFitbitData": true,
-      "hasCopeSurveyData": true,
-      "accessTier": "registered"
+      "hasCopeSurveyData": true
     }
   ]
 }

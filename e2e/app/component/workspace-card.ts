@@ -12,7 +12,8 @@ const WorkspaceCardSelector = {
   cardRootXpath: './/*[child::*[@data-test-id="workspace-card"]]', // finds 'workspace-card' parent container node
   cardNameXpath: '@data-test-id="workspace-card-name"',
   accessLevelXpath: './/*[@data-test-id="workspace-access-level"]',
-  dateTimeXpath: './/*[@data-test-id="workspace-card"]/div[3]'
+  dateTimeXpath:
+    './/*[@data-test-id="workspace-card"]//*[@data-test-id="workspace-access-level"]/following-sibling::div'
 };
 
 /**
@@ -31,7 +32,9 @@ export default class WorkspaceCard extends CardBase {
     const card = await WorkspaceCard.findCard(page, workspaceName);
     await card.selectSnowmanMenu(MenuOption.Delete, { waitForNav: false });
     // Handle Delete Confirmation modal
-    return new WorkspaceEditPage(page).dismissDeleteWorkspaceModal();
+    const modalText = new WorkspaceEditPage(page).dismissDeleteWorkspaceModal();
+    await WorkspaceCard.waitUntilGone(page, workspaceName);
+    return modalText;
   }
 
   /**
@@ -68,8 +71,7 @@ export default class WorkspaceCard extends CardBase {
     if (cards.length === 0) {
       throw new Error('FAILED to find any Workspace card on page.');
     }
-    const anyCard = fp.shuffle(cards)[0];
-    return anyCard;
+    return fp.shuffle(cards)[0];
   }
 
   static async findCard(page: Page, workspaceName: string): Promise<WorkspaceCard | null> {
@@ -86,6 +88,13 @@ export default class WorkspaceCard extends CardBase {
     }
     logger.info(`"${workspaceName}" workspace card not found`);
     return null; // not found
+  }
+
+  static async waitUntilGone(page: Page, workspaceName: string, timeout = 60000): Promise<void> {
+    const selector =
+      `${WorkspaceCardSelector.cardRootXpath}//*[${WorkspaceCardSelector.cardNameXpath}` +
+      ` and normalize-space(text())="${workspaceName}"]`;
+    await page.waitForXPath(selector, { hidden: true, timeout });
   }
 
   constructor(page: Page) {
@@ -158,15 +167,18 @@ export default class WorkspaceCard extends CardBase {
    * @param {boolean} waitForDataPage Waiting for Data page load and ready after click on Workspace name link.
    */
   async clickWorkspaceName(waitForDataPage = true): Promise<string> {
-    const [elemt] = await this.asElementHandle().$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
-    const name = await getPropValue<string>(elemt, 'textContent');
-    await Promise.all([
-      this.page.waitForNavigation({ waitUntil: ['domcontentloaded', 'networkidle0'] }),
-      elemt.click()
-    ]);
+    const [element] = await this.asElementHandle().$x(`.//*[${WorkspaceCardSelector.cardNameXpath}]`);
+    const name = await getPropValue<string>(element, 'textContent');
     if (waitForDataPage) {
+      await Promise.all([
+        this.page.waitForNavigation({ waitUntil: ['load', 'domcontentloaded', 'networkidle0'] }),
+        element.click()
+      ]);
       const dataPage = new WorkspaceDataPage(this.page);
       await dataPage.waitForLoad();
+    } else {
+      await element.click();
+      await waitWhileLoading(this.page);
     }
     return name;
   }
@@ -184,9 +196,9 @@ export default class WorkspaceCard extends CardBase {
   }
 
   // if the snowman menu options for WRITER & READER are disabled except duplicate option and all options are enabled for OWNER.
-  async verifyWorkspaceCardMenuOptions(): Promise<void> {
+  async verifyWorkspaceCardMenuOptions(accessLevel?: string): Promise<void> {
     const snowmanMenu = await this.getSnowmanMenu();
-    const accessLevel = await this.getWorkspaceAccessLevel();
+    accessLevel = accessLevel || (await this.getWorkspaceAccessLevel());
     if (accessLevel !== WorkspaceAccessLevel.Owner) {
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Share)).toBe(true);
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(true);

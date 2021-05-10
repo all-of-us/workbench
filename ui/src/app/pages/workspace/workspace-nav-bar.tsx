@@ -20,7 +20,7 @@ import {
   hasDefaultCdrVersion
 } from 'app/utils/cdr-versions';
 import {NavStore} from 'app/utils/navigation';
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {CdrVersionTiersResponse, Workspace} from 'generated/fetch';
 import {CdrVersionUpgradeModal} from './cdr-version-upgrade-modal';
 
@@ -117,7 +117,7 @@ const CdrVersion = (props: {workspace: Workspace, cdrVersionTiersResponse: CdrVe
     {getCdrVersion(workspace, cdrVersionTiersResponse).name}
     {!hasDefaultCdrVersion(workspace, cdrVersionTiersResponse) && <NewVersionFlag/>}
     {showModal && <CdrVersionUpgradeModal
-        defaultCdrVersionName={getDefaultCdrVersionForTier(workspace, cdrVersionTiersResponse).name}
+        defaultCdrVersionName={getDefaultCdrVersionForTier(workspace.accessTierShortName, cdrVersionTiersResponse).name}
         onClose={() => setShowModal(false)}
         upgrade={() => NavStore.navigate(['/workspaces', namespace, id, 'duplicate'])}
     />}
@@ -133,7 +133,7 @@ const tabs = [
 const navSeparator = <div style={styles.separator}/>;
 
 function restrictTab(workspace, tab) {
-  return serverConfigStore.getValue().enableResearchReviewPrompt && workspace && workspace.accessLevel === 'OWNER'
+  return serverConfigStore.get().config.enableResearchReviewPrompt && workspace && workspace.accessLevel === 'OWNER'
       && workspace.researchPurpose.needsReviewPrompt && tab.name !== 'About';
 }
 

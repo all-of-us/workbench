@@ -13,7 +13,7 @@
     "xAppIdValue": "perf-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/228353087260/servicePerimeters/terra_perf_aou_perf",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.0.23",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.2",
     "shibbolethApiBaseUrl": "",
     "shibbolethUiBaseUrl": "",
     "runtimeImages": {
@@ -27,7 +27,8 @@
     "exportBigQueryTable": "all-of-us-workbench-test-bd.billing_data.rw_test_firecloud_view",
     "retryCount": 4,
     "bufferCapacityPerTier": {
-      "registered": 300
+      "registered": 300,
+      "controlled": 20
     },
     "bufferRefillProjectsPerTask": 5,
     "bufferStatusChecksPerTask": 10,
@@ -110,7 +111,8 @@
     "enableDataUseAgreement": true,
     "enableBetaAccess": false,
     "unsafeAllowSelfBypass": true,
-    "unsafeAllowUserCreationFromGSuiteData": false
+    "unsafeAllowUserCreationFromGSuiteData": false,
+    "enableAccessRenewal": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
@@ -121,7 +123,8 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableReportingUploadCron": false,
-    "enableRasLoginGovLinking": false
+    "enableRasLoginGovLinking": false,
+    "enableGenomicExtraction": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",
@@ -144,5 +147,8 @@
   "ras": {
     "host": "",
     "clientId": ""
+  },
+  "accessRenewal": {
+    "expiryDays": 365 
   }
 }

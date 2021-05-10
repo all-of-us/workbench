@@ -3,6 +3,7 @@ import {CheckCircle, ControlledTierBadge} from 'app/components/icons';
 import {styles} from 'app/pages/profile/profile-styles';
 import colors from 'app/styles/colors';
 import * as Utils from 'app/utils';
+import {AccessTierDisplayNames} from 'app/utils/access-tiers';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
@@ -17,7 +18,7 @@ const RegisteredTierSection = ({isInRegisteredTier = false}) => {
     gridTemplateAreas: `"regPrimary regAvailable"
                           "regSecondary regSecondary"`
   }}>
-    <div style={{...styles.inputLabel, gridArea: 'regPrimary', marginRight: '0.5rem'}}>Registered tier</div>
+    <div style={{...styles.inputLabel, gridArea: 'regPrimary', marginRight: '0.5rem'}}>{AccessTierDisplayNames.Registered}</div>
     {isInRegisteredTier
       ? <CheckCircle style={{gridArea: 'regAvailable'}} color={colors.success} size={23}/>
       : <div style={{ ...styles.dataAccessText, gridArea: 'regSecondary'}}>
@@ -39,7 +40,7 @@ const ControlledTierSection = ({ hasInstitutionalAgreement = false, isInControll
                           ". ctSecondary ctSecondary"`
   }}>
     <ControlledTierBadge style={{gridArea: 'ctBadge'}}/>
-    <div style={{...styles.inputLabel, gridArea: 'ctLabel'}}>Controlled tier</div>
+    <div style={{...styles.inputLabel, gridArea: 'ctLabel'}}>{AccessTierDisplayNames.Controlled}</div>
     {Utils.cond<React.ReactElement>(
       // TODO: Remove update href and remove _blank target from Anchor tags
       [hasInstitutionalAgreement && userRevoked, () => <React.Fragment>

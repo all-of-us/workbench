@@ -13,7 +13,7 @@
     "xAppIdValue": "local-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.0.23",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.2",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com/dev",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com/dev",
     "runtimeImages": {
@@ -108,7 +108,9 @@
     "enableDataUseAgreement": true,
     "enableBetaAccess": false,
     "unsafeAllowSelfBypass": true,
-    "unsafeAllowUserCreationFromGSuiteData": true
+    "unsafeAllowUserCreationFromGSuiteData": true,
+    "enableAccessRenewal": false
+
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": true,
@@ -119,7 +121,8 @@
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": true,
     "enableReportingUploadCron": true,
-    "enableRasLoginGovLinking": false
+    "enableRasLoginGovLinking": false,
+    "enableGenomicExtraction": true
   },
   "actionAudit": {
     "logName": "workbench-action-audit-local",
@@ -142,5 +145,8 @@
   "ras": {
     "host": "https:\/\/stsstg.nih.gov",
     "clientId": "e5c5d714-d597-48c8-b564-a249d729d0c9"
+  },
+  "accessRenewal": {
+    "expiryDays": 365 
   }
 }

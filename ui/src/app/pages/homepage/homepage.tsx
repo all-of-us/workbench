@@ -1,7 +1,7 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
 
-import {navigate, queryParamsStore, serverConfigStore} from 'app/utils/navigation';
+import {navigate, queryParamsStore} from 'app/utils/navigation';
 
 import {
   Clickable, StyledAnchorTag,
@@ -26,6 +26,7 @@ import {hasRegisteredAccess} from 'app/utils/access-tiers';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {buildRasRedirectUrl} from 'app/utils/ras';
 import {fetchWithGlobalErrorHandler} from 'app/utils/retry';
+import {serverConfigStore} from 'app/utils/stores';
 import {supportUrls} from 'app/utils/zendesk';
 import {Profile, WorkspaceResponseListResponse} from 'generated/fetch';
 
@@ -218,7 +219,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
         reload();
       }, 10000);
     } else {
-      if (serverConfigStore.getValue().enableBetaAccess && !profile.betaAccessRequestTime) {
+      if (serverConfigStore.get().config.enableBetaAccess && !profile.betaAccessRequestTime) {
         profileApi().requestBetaAccess();
       }
       if (profile.pageVisits) {
@@ -234,8 +235,10 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
       }
 
       this.setState({
-        eraCommonsLinked: !!(getRegistrationTasksMap()['eraCommons'].completionTimestamp(profile)),
-        dataUserCodeOfConductCompleted: (serverConfigStore.getValue().enableDataUseAgreement ?
+        eraCommonsLinked: (serverConfigStore.get().config.enableEraCommons ?
+            (() => !!(getRegistrationTasksMap()['eraCommons']
+              .completionTimestamp(profile)))() : true),
+        dataUserCodeOfConductCompleted: (serverConfigStore.get().config.enableDataUseAgreement ?
           (() => !!(getRegistrationTasksMap()['dataUserCodeOfConduct']
             .completionTimestamp(profile)))() : true)
       });

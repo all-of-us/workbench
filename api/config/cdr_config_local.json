@@ -11,7 +11,7 @@
     {
       "accessTierId": 2,
       "shortName": "controlled",
-      "displayName": "Fake Controlled Tier For Test/Local",
+      "displayName": "Controlled Tier",
       "servicePerimeter": "accessPolicies/228353087260/servicePerimeters/terra_dev_aou_test_2",
       "authDomainName": "all-of-us-test-prototype-3",
       "authDomainGroupEmail": "all-of-us-test-prototype-3@dev.test.firecloud.org"
@@ -22,6 +22,7 @@
       "cdrVersionId": 1,
       "name": "[Removed] Synthetic Dataset v1",
       "archivalStatus": 1,
+      "accessTier": "registered",
       "bigqueryProject": "",
       "bigqueryDataset": "",
       "creationTime": "2018-06-06 00:00:00Z",
@@ -30,13 +31,13 @@
       "cdrDbName": "cdr",
       "elasticIndexBaseName": "cdr",
       "hasFitbitData": false,
-      "hasCopeSurveyData": false,
-      "accessTier": "registered"
+      "hasCopeSurveyData": false
     },
     {
       "cdrVersionId": 2,
       "name": "[Removed] Synthetic Dataset v2",
       "archivalStatus": 1,
+      "accessTier": "registered",
       "bigqueryProject": "",
       "bigqueryDataset": "",
       "creationTime": "2018-06-06 00:00:00Z",
@@ -45,12 +46,12 @@
       "cdrDbName": "cdr",
       "elasticIndexBaseName": "cdr",
       "hasFitbitData": false,
-      "hasCopeSurveyData": false,
-      "accessTier": "registered"
+      "hasCopeSurveyData": false
     },
     {
       "cdrVersionId": 3,
       "isDefault": true,
+      "accessTier": "registered",
       "name": "Synthetic Dataset v3",
       "bigqueryProject": "fc-aou-cdr-synth-test",
       "bigqueryDataset": "test_R2019q4r3",
@@ -60,48 +61,46 @@
       "cdrDbName": "cdr",
       "elasticIndexBaseName": "cdr",
       "hasFitbitData": true,
-      "hasCopeSurveyData": true,
-      "accessTier": "registered"
+      "hasCopeSurveyData": true
     },
     {
       "cdrVersionId": 4,
       "isDefault": false,
-      "name": "Synthetic Dataset v3 with Microarray",
-      "bigqueryProject": "fc-aou-cdr-synth-test",
-      "bigqueryDataset": "test_R2019q4r3",
-      "microarrayBigqueryDataset": "microarray_data",
+      "archivalStatus": 1,
+      "name": "[Removed] Synthetic Dataset v3 with Microarray",
+      "accessTier": "registered",
+      "bigqueryProject": "",
+      "bigqueryDataset": "",
       "creationTime": "2020-08-26 00:09:51Z",
       "releaseNumber": 3,
-      "numParticipants": 234525,
+      "numParticipants": 0,
       "cdrDbName": "cdr",
       "elasticIndexBaseName": "cdr",
       "hasFitbitData": true,
-      "hasCopeSurveyData": true,
-      "accessTier": "registered"
+      "hasCopeSurveyData": true
     },
     {
       "cdrVersionId": 5,
       "isDefault": true,
-      "name": "CDR for Controlled Tier - DO NOT USE",
+      "accessTier": "controlled",
+      "name": "Synthetic Dataset in the Controlled Tier",
       "bigqueryProject": "fc-aou-cdr-synth-test-2",
       "bigqueryDataset": "test_R2019q4r3",
-      "microarrayBigqueryDataset": "microarray_data",
       "creationTime": "2020-08-26 00:09:51Z",
       "releaseNumber": 3,
       "numParticipants": 234525,
       "cdrDbName": "cdr",
       "elasticIndexBaseName": "cdr",
       "hasFitbitData": true,
-      "hasCopeSurveyData": true,
-      "accessTier": "controlled"
+      "hasCopeSurveyData": true
     },
     {
       "cdrVersionId": 6,
       "isDefault": false,
-      "name": "Synthetic Dataset v3 with Microarray and WGS",
+      "accessTier": "registered",
+      "name": "Synthetic Dataset v3 with WGS",
       "bigqueryProject": "fc-aou-cdr-synth-test",
       "bigqueryDataset": "test_R2019q4r3",
-      "microarrayBigqueryDataset": "microarray_data",
       "wgsBigqueryDataset": "1kg_wgs",
       "creationTime": "2020-08-26 00:09:51Z",
       "releaseNumber": 3,
@@ -109,8 +108,22 @@
       "cdrDbName": "cdr",
       "elasticIndexBaseName": "cdr",
       "hasFitbitData": true,
-      "hasCopeSurveyData": true,
-      "accessTier": "registered"
+      "hasCopeSurveyData": true
+    },
+    {
+      "cdrVersionId": 7,
+      "isDefault": false,
+      "accessTier": "controlled",
+      "name": "Outdated CT CDR",
+      "bigqueryProject": "fc-aou-cdr-synth-test-2",
+      "bigqueryDataset": "test_R2019q4r3",
+      "creationTime": "2020-08-26 00:09:51Z",
+      "releaseNumber": 3,
+      "numParticipants": 234525,
+      "cdrDbName": "cdr",
+      "elasticIndexBaseName": "cdr",
+      "hasFitbitData": false,
+      "hasCopeSurveyData": false
     }
   ]
 }

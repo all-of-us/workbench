@@ -5,10 +5,10 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { makeRandomName } from 'utils/str-utils';
 import { ResourceCard } from 'app/text-labels';
 
-// This one is going to take a long time
+// This test could take a long time to run
 jest.setTimeout(60 * 30 * 1000);
 // Retry one more when fails
-jest.retryTimes(1);
+jest.retryTimes(0);
 
 describe('Updating runtime compute type', () => {
   beforeEach(async () => {
@@ -37,14 +37,10 @@ describe('Updating runtime compute type', () => {
     expect(parseInt(cpusOutputText, 10)).toBe(4);
     // This gets the amount of memory available to Python in bytes
     const memoryOutputText = await notebook.runCodeCell(2, { codeFile: 'resources/python-code/count-memory.py' });
-    // Default memory is 15 gibibytes, we'll check that it is between 14 billion and 16 billion bytes
-    expect(parseInt(memoryOutputText, 10)).toBeGreaterThanOrEqual(14 * 1000 * 1000 * 1000);
-    expect(parseInt(memoryOutputText, 10)).toBeLessThanOrEqual(16 * 1000 * 1000 * 1000);
-    // This gets the disk space in bytes
-    const diskOutputText = await notebook.runCodeCell(3, { codeFile: 'resources/python-code/count-disk-space.py' });
-    // Default disk is 50 gibibytes, we'll check that it is between 45 and 55 billion bytes
-    expect(parseInt(diskOutputText, 10)).toBeGreaterThanOrEqual(45 * 1000 * 1000 * 1000);
-    expect(parseInt(diskOutputText, 10)).toBeLessThanOrEqual(55 * 1000 * 1000 * 1000);
+    // Default memory is 15 gibibytes, we'll check that it is between 14GiB and 16GiB
+    expect(parseFloat(memoryOutputText)).toBeGreaterThanOrEqual(14);
+    expect(parseFloat(memoryOutputText)).toBeLessThanOrEqual(16);
+
     await notebook.save();
 
     // Open runtime panel
@@ -71,7 +67,7 @@ describe('Updating runtime compute type', () => {
     await notebookPreviewPage.openEditMode(notebookName);
 
     // Run notebook to validate runtime settings
-    const workersOutputText = await notebook.runCodeCell(4, { codeFile: 'resources/python-code/count-workers.py' });
+    const workersOutputText = await notebook.runCodeCell(3, { codeFile: 'resources/python-code/count-workers.py' });
     // Spark config always seems to start at this and then scale if you need additional threads.
     expect(workersOutputText).toBe("'2'");
     await notebook.save();

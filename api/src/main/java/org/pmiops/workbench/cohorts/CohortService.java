@@ -34,4 +34,10 @@ public class CohortService {
     return ((List<DbCohort>) cohortDao.findAll(cohortIds))
         .stream().map(cohortMapper::dbModelToClient).collect(Collectors.toList());
   }
+
+  public List<Cohort> findByWorkspaceId(Long workspaceId) {
+    return cohortDao.findByWorkspaceId(workspaceId).stream()
+        .map(cohortMapper::dbModelToClient)
+        .collect(Collectors.toList());
+  }
 }

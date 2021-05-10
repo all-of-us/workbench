@@ -8,7 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface ConceptSetDao extends CrudRepository<DbConceptSet, Long> {
 
-  Optional<DbConceptSet> findByConceptSetIdAndWorkspaceId(long conceptId, long workspaceId);
+  Optional<DbConceptSet> findByWorkspaceIdAndConceptSetId(long workspaceId, long conceptId);
 
   List<DbConceptSet> findByWorkspaceId(long workspaceId);
 

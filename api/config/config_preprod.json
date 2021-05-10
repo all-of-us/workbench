@@ -13,7 +13,7 @@
     "xAppIdValue": "preprod-AoU-RW",
     "vpcServicePerimeterName": "accessPolicies/357236995176/servicePerimeters/terra_prod_aou_preprod",
     "timeoutInSeconds": 60,
-    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.0.23",
+    "jupyterDockerImage": "broadinstitute/terra-jupyter-aou:1.1.2",
     "shibbolethApiBaseUrl": "https:\/\/profile-dot-broad-shibboleth-prod.appspot.com",
     "shibbolethUiBaseUrl": "https:\/\/broad-shibboleth-prod.appspot.com",
     "runtimeImages": {
@@ -27,7 +27,8 @@
     "exportBigQueryTable": "all-of-us-rw-prod-bdata.RwProdBillingDataExport.rw_firecloud_view",
     "retryCount": 4,
     "bufferCapacityPerTier": {
-      "registered": 20
+      "registered": 20,
+      "controlled": 20
     },
     "bufferRefillProjectsPerTask": 1,
     "bufferStatusChecksPerTask": 10,
@@ -89,7 +90,7 @@
     "sendRetries": 3
   },
   "zendesk": {
-    "host": "https:\/\/aousupporthelp.zendesk.com"
+    "host": "https:\/\/aoupreprodsupporthelp.zendesk.com"
   },
   "elasticsearch": {
     "baseUrl": "",
@@ -103,22 +104,24 @@
   },
   "access": {
     "enableComplianceTraining": false,
-    "enableEraCommons": true,
+    "enableEraCommons": false,
     "enableDataUseAgreement": true,
     "enableBetaAccess": false,
     "unsafeAllowSelfBypass": false,
-    "unsafeAllowUserCreationFromGSuiteData": false
+    "unsafeAllowUserCreationFromGSuiteData": false,
+    "enableAccessRenewal": false
   },
   "featureFlags": {
     "unsafeAllowDeleteUser": false,
-    "unsafeAllowAccessToAllTiersForRegisteredUsers": false,
+    "unsafeAllowAccessToAllTiersForRegisteredUsers": true,
     "enableRdrExport": true,
     "enableBillingUpgrade": false,
     "enableV3DataUserCodeOfConduct": true,
     "enableEventDateModifier": false,
     "enableResearchPurposePrompt": false,
     "enableReportingUploadCron": true,
-    "enableRasLoginGovLinking": false
+    "enableRasLoginGovLinking": false,
+    "enableGenomicExtraction": false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-preprod",
@@ -136,5 +139,8 @@
   "ras": {
     "host": "",
     "clientId": ""
+  },
+  "accessRenewal": {
+    "expiryDays": 365 
   }
 }

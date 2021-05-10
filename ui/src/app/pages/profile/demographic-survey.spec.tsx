@@ -5,7 +5,7 @@ import {AccountCreationOptions} from 'app/pages/login/account-creation/account-c
 import {createEmptyProfile} from 'app/pages/login/sign-in';
 import {DemographicSurvey, Props} from 'app/pages/profile/demographic-survey';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {serverConfigStore} from 'app/utils/navigation';
+import {serverConfigStore} from 'app/utils/stores';
 import {Disability, Ethnicity, GenderIdentity, ProfileApi, Race, SexAtBirth} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
@@ -16,7 +16,7 @@ const defaultConfig = {gsuiteDomain: 'researchallofus.org'};
 
 
 beforeEach(() => {
-  serverConfigStore.next(defaultConfig);
+  serverConfigStore.set({config: defaultConfig});
 
   registerApiClient(ProfileApi, new ProfileApiStub());
 

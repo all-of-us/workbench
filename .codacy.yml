@@ -2,5 +2,7 @@ engines:
   tslint:
     enabled: true
     base_sub_dir: ui
-exclude_paths:	
+exclude_paths:
   - ui/karma.conf.js
+  - e2e/resources/python-code/**
+  - e2e/resources/r-code/**

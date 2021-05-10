@@ -39,6 +39,7 @@ import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
 import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DatasetConfig;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
@@ -60,6 +61,8 @@ import org.pmiops.workbench.firecloud.FireCloudServiceImpl;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspaceResponse;
 import org.pmiops.workbench.genomics.GenomicExtractionService;
 import org.pmiops.workbench.model.ArchivalStatus;
+import org.pmiops.workbench.model.Cohort;
+import org.pmiops.workbench.model.ConceptSet;
 import org.pmiops.workbench.model.DataSetRequest;
 import org.pmiops.workbench.model.Domain;
 import org.pmiops.workbench.model.DomainValue;
@@ -101,9 +104,11 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private CdrVersionService cdrVersionService;
   @Autowired private CohortDao cohortDao;
+  @Autowired private CohortService cohortService;
   @Autowired private CohortQueryBuilder cohortQueryBuilder;
   @Autowired private ConceptBigQueryService conceptBigQueryService;
   @Autowired private ConceptSetDao conceptSetDao;
+  @Autowired private ConceptSetService conceptSetService;
   @Autowired private DSLinkingDao dsLinkingDao;
   @Autowired private DataSetDao dataSetDao;
   @Autowired private DSDataDictionaryDao dsDataDictionaryDao;
@@ -112,6 +117,7 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @Autowired private NotebooksService notebooksService;
   @Autowired private Provider<DbUser> userProvider;
   @Autowired private TestWorkbenchConfig testWorkbenchConfig;
+  @Autowired private Provider<WorkbenchConfig> workbenchConfigProvider;
   @Autowired private WorkspaceDao workspaceDao;
   @Autowired private WorkspaceAuthService workspaceAuthService;
   @Autowired private GenomicExtractionService genomicExtractionService;
@@ -142,6 +148,8 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     BigQueryTestService.class,
     CdrBigQuerySchemaConfigService.class,
     CdrVersionService.class,
+    CohortService.class,
+    ConceptSetService.class,
     CohortQueryBuilder.class,
     ConceptBigQueryService.class,
     DataSetMapperImpl.class,
@@ -221,15 +229,17 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     controller =
         spy(
             new DataSetController(
-                bigQueryService,
                 cdrVersionService,
+                cohortService,
+                conceptSetService,
                 dataSetServiceImpl,
                 fireCloudService,
                 notebooksService,
                 userProvider,
                 prefixProvider,
                 genomicExtractionService,
-                workspaceAuthService));
+                workspaceAuthService,
+                workbenchConfigProvider));
 
     FirecloudWorkspaceResponse fcResponse = new FirecloudWorkspaceResponse();
     fcResponse.setAccessLevel(WorkspaceAccessLevel.OWNER.name());
@@ -248,10 +258,16 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbWorkspace.setFirecloudName(WORKSPACE_NAME);
     dbWorkspace.setCdrVersion(dbCdrVersion);
     dbWorkspace = workspaceDao.save(dbWorkspace);
+
     dbConditionConceptSet =
         conceptSetDao.save(createConceptSet(Domain.CONDITION, dbWorkspace.getWorkspaceId()));
     dbProcedureConceptSet =
         conceptSetDao.save(createConceptSet(Domain.PROCEDURE, dbWorkspace.getWorkspaceId()));
+    when(conceptSetService.findByWorkspaceId(dbWorkspace.getWorkspaceId()))
+        .thenReturn(
+            ImmutableList.of(
+                new ConceptSet().id(dbConditionConceptSet.getConceptSetId()),
+                new ConceptSet().id(dbProcedureConceptSet.getConceptSetId())));
 
     dbCohort1 = new DbCohort();
     dbCohort1.setWorkspaceId(dbWorkspace.getWorkspaceId());
@@ -263,6 +279,11 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     dbCohort2.setCriteria(new Gson().toJson(SearchRequests.icd9Codes()));
     dbCohort2 = cohortDao.save(dbCohort2);
 
+    when(cohortService.findByWorkspaceId(dbWorkspace.getWorkspaceId()))
+        .thenReturn(
+            ImmutableList.of(
+                new Cohort().id(dbCohort1.getCohortId()),
+                new Cohort().id(dbCohort2.getCohortId())));
     when(controller.generateRandomEightCharacterQualifier()).thenReturn("00000000");
 
     conditionLinking1 =

@@ -22,8 +22,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.pmiops.workbench.cohorts.CohortMapper;
 import org.pmiops.workbench.cohorts.CohortMapperImpl;
+import org.pmiops.workbench.db.dao.AccessTierDao;
+import org.pmiops.workbench.db.dao.CdrVersionDao;
 import org.pmiops.workbench.db.dao.UserRecentResourceService;
 import org.pmiops.workbench.db.dao.WorkspaceDao;
+import org.pmiops.workbench.db.model.DbCdrVersion;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbConceptSet;
 import org.pmiops.workbench.db.model.DbUser;
@@ -39,6 +42,7 @@ import org.pmiops.workbench.model.RecentResourceRequest;
 import org.pmiops.workbench.model.WorkspaceResource;
 import org.pmiops.workbench.model.WorkspaceResourceResponse;
 import org.pmiops.workbench.test.FakeClock;
+import org.pmiops.workbench.utils.TestMockFactory;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.FirecloudMapper;
 import org.pmiops.workbench.utils.mappers.FirecloudMapperImpl;
@@ -66,16 +70,15 @@ public class UserMetricsControllerTest {
   @Autowired private CohortMapper cohortMapper;
   @Autowired private CommonMappers commonMappers;
   @Autowired private FirecloudMapper firecloudMapper;
+  @Autowired private AccessTierDao accessTierDao;
+  @Autowired private CdrVersionDao cdrVersionDao;
 
-  private FakeClock fakeClock = new FakeClock(NOW);
+  private final FakeClock fakeClock = new FakeClock(NOW);
 
   private DbUser dbUser;
   private DbUserRecentResource dbUserRecentResource1;
   private DbUserRecentResource dbUserRecentResource2;
   private DbUserRecentResource dbUserRecentResource3;
-
-  private FirecloudWorkspace fcWorkspace1;
-  private FirecloudWorkspace fcWorkspace2;
 
   private DbWorkspace dbWorkspace1;
   private DbWorkspace dbWorkspace2;
@@ -87,6 +90,9 @@ public class UserMetricsControllerTest {
 
   @Before
   public void setUp() {
+    final DbCdrVersion dbCdrVersion =
+        TestMockFactory.createDefaultCdrVersion(cdrVersionDao, accessTierDao);
+
     dbUser = new DbUser();
     dbUser.setUserId(123L);
 
@@ -110,11 +116,13 @@ public class UserMetricsControllerTest {
     dbWorkspace1.setWorkspaceId(1L);
     dbWorkspace1.setWorkspaceNamespace("workspaceNamespace1");
     dbWorkspace1.setFirecloudName("firecloudname1");
+    dbWorkspace1.setCdrVersion(dbCdrVersion);
 
     dbWorkspace2 = new DbWorkspace();
     dbWorkspace2.setWorkspaceId(2L);
     dbWorkspace2.setWorkspaceNamespace("workspaceNamespace2");
     dbWorkspace2.setFirecloudName("firecloudName2");
+    dbWorkspace2.setCdrVersion(dbCdrVersion);
 
     dbUserRecentResource1 = new DbUserRecentResource();
     dbUserRecentResource1.setNotebookName("gs://bucketFile/notebooks/notebook1.ipynb");
@@ -146,17 +154,17 @@ public class UserMetricsControllerTest {
     when(workspaceDao.findActiveByWorkspaceId(dbUserRecentResource3.getWorkspaceId()))
         .thenReturn(Optional.of(dbWorkspace2));
 
-    fcWorkspace1 = new FirecloudWorkspace();
+    final FirecloudWorkspace fcWorkspace1 = new FirecloudWorkspace();
     fcWorkspace1.setNamespace(dbWorkspace1.getFirecloudName());
 
-    fcWorkspace2 = new FirecloudWorkspace();
+    final FirecloudWorkspace fcWorkspace2 = new FirecloudWorkspace();
     fcWorkspace1.setNamespace(dbWorkspace2.getFirecloudName());
 
-    FirecloudWorkspaceResponse workspaceResponse = new FirecloudWorkspaceResponse();
+    final FirecloudWorkspaceResponse workspaceResponse = new FirecloudWorkspaceResponse();
     workspaceResponse.setAccessLevel("OWNER");
     workspaceResponse.setWorkspace(fcWorkspace1);
 
-    FirecloudWorkspaceResponse workspaceResponse2 = new FirecloudWorkspaceResponse();
+    final FirecloudWorkspaceResponse workspaceResponse2 = new FirecloudWorkspaceResponse();
     workspaceResponse2.setAccessLevel("READER");
     workspaceResponse2.setWorkspace(fcWorkspace2);
 

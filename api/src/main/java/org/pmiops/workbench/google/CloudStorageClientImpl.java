@@ -1,6 +1,5 @@
 package org.pmiops.workbench.google;
 
-import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
@@ -9,8 +8,6 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.Storage.CopyRequest;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -119,18 +116,6 @@ public class CloudStorageClientImpl implements CloudStorageClient {
 
   private String readBlobAsString(Blob blob) {
     return new String(blob.getContent()).trim();
-  }
-
-  private ServiceAccountCredentials getCredentials(final String objectPath) throws IOException {
-    final String json = getCredentialsBucketString(objectPath);
-    return ServiceAccountCredentials.fromStream(new ByteArrayInputStream(json.getBytes()));
-  }
-
-  @Override
-  public ServiceAccountCredentials getGarbageCollectionServiceAccountCredentials(
-      String garbageCollectionEmail) throws IOException {
-    final String objectPath = String.format("garbage-collection/%s.json", garbageCollectionEmail);
-    return getCredentials(objectPath);
   }
 
   @Override

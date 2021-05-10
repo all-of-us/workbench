@@ -206,7 +206,7 @@ export async function waitForHidden(page: Page, cssSelector: string): Promise<bo
     const jsHandle = await page.waitForFunction(
       (selector) => {
         const elem = document.querySelector(selector);
-        const isVisible = elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length;
+        const isVisible = elem && (elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length);
         return !isVisible;
       },
       {},
@@ -378,7 +378,6 @@ export async function waitWhileLoading(
   opts: { waitForRuntime?: boolean } = {}
 ): Promise<void> {
   const { waitForRuntime = false } = opts;
-
   const notBlankPageSelector = '[data-test-id="sign-in-container"], title:not(empty), div.spinner, svg[viewBox]';
   const spinElementsSelector = `[style*="running spin"], .spinner:empty, [style*="running rotation"]${
     waitForRuntime ? '' : ':not([aria-hidden="true"]):not([data-test-id="runtime-status-icon"])'
@@ -388,20 +387,21 @@ export async function waitWhileLoading(
   await Promise.race([page.waitForSelector(notBlankPageSelector), page.waitForSelector(spinElementsSelector)]);
 
   // Wait for spinners stop and gone.
-  await page
-    .waitForFunction(
+  await Promise.all([
+    page.waitForFunction(
       (css) => {
-        const elements = document.querySelectorAll(css);
-        return elements && elements.length === 0;
+        return !document.querySelectorAll(css).length;
       },
       { polling: 'mutation', timeout },
       spinElementsSelector
-    )
-    .catch((err) => {
-      logger.error(`waitWhileLoading() failed: spinner xpath="${spinElementsSelector}"`);
-      logger.error(err);
-      throw new Error(err);
-    });
+    ),
+    page.waitForSelector(spinElementsSelector, { hidden: true, timeout })
+  ]).catch((err) => {
+    logger.error(`waitWhileLoading() failed: spinner xpath="${spinElementsSelector}"`);
+    logger.error(err);
+    logger.error(err.stack);
+    throw new Error(err);
+  });
 
   await page.waitForTimeout(500);
 }

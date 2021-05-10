@@ -26,10 +26,15 @@ cd workbench
 # though this mechanism is being phased out. In the meantime, we need
 # to run this on every clone (or on certain changes to the upstream
 # repositories). 
-git submodule update --init --recursive
+git submodule update -f --init --recursive
 ```
 
-Then set up [git secrets](#git-secrets) and fire up the [development servers](#running-the-dev-servers).
+## .npmrc
+
+In the UI, we use some [Fontawesome](https://fontawesome.com/) Pro icons. In order to install the Fontawesome Pro packages, you will need to download an `.npmrc` file with a Fontawesome license token. Copy it into the workbench root directory:
+```
+workbench$ gsutil cp gs://all-of-us-workbench-test-credentials/.npmrc .
+```
 
 ## git-secrets
 

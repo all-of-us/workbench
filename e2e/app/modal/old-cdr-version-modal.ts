@@ -21,6 +21,9 @@ const FIELD = {
   },
   continueButton: {
     textOption: { name: LinkText.Continue }
+  },
+  cancelButton: {
+    textOption: { name: LinkText.Cancel }
   }
 };
 
@@ -47,6 +50,10 @@ export default class OldCdrVersionModal extends Modal {
 
   getContinueButton(): Button {
     return Button.findByName(this.page, FIELD.continueButton.textOption, this);
+  }
+
+  getCancelButton(): Button {
+    return Button.findByName(this.page, FIELD.cancelButton.textOption, this);
   }
 
   /**
