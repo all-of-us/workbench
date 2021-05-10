@@ -175,7 +175,7 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
               .collect(Collectors.toList());
       apiClientFactory
           .workspacesApi()
-          .updateWorkspaceACL(workspace.getNamespace(), workspace.getName(), false, acls);
+          .updateWorkspaceACL(acls, workspace.getNamespace(), workspace.getName(), false);
 
       String proxyGroup = apiClientFactory.profileApi().getProxyGroup(workspace.getCreatedBy());
 

@@ -373,7 +373,7 @@ public class GenomicExtractionServiceTest {
     ArgumentCaptor<FirecloudMethodConfiguration> argument =
         ArgumentCaptor.forClass(FirecloudMethodConfiguration.class);
 
-    verify(methodConfigurationsApi).createWorkspaceMethodConfig(any(), any(), argument.capture());
+    verify(methodConfigurationsApi).createWorkspaceMethodConfig(argument.capture(), any(), any());
     String actualOutputDir = argument.getValue().getInputs().get("WgsCohortExtract.output_gcs_dir");
 
     assertThat(actualOutputDir)

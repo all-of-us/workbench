@@ -175,8 +175,6 @@ public class GenomicExtractionService {
         methodConfigurationsApiProvider
             .get()
             .createWorkspaceMethodConfig(
-                cohortExtractionConfig.operationalTerraWorkspaceNamespace,
-                cohortExtractionConfig.operationalTerraWorkspaceName,
                 new FirecloudMethodConfiguration()
                     .inputs(
                         new ImmutableMap.Builder<String, String>()
@@ -240,20 +238,22 @@ public class GenomicExtractionService {
                     .methodRepoMethod(createRepoMethodParameter(cohortExtractionConfig))
                     .name(extractionUuid)
                     .namespace(cohortExtractionConfig.extractionMethodConfigurationNamespace)
-                    .outputs(new HashMap<>()))
+                    .outputs(new HashMap<>()),
+                cohortExtractionConfig.operationalTerraWorkspaceNamespace,
+                cohortExtractionConfig.operationalTerraWorkspaceName)
             .getMethodConfiguration();
 
     FirecloudSubmissionResponse submissionResponse =
         submissionApiProvider
             .get()
             .createSubmission(
-                cohortExtractionConfig.operationalTerraWorkspaceNamespace,
-                cohortExtractionConfig.operationalTerraWorkspaceName,
                 new FirecloudSubmissionRequest()
                     .deleteIntermediateOutputFiles(false)
                     .methodConfigurationNamespace(methodConfig.getNamespace())
                     .methodConfigurationName(methodConfig.getName())
-                    .useCallCache(false));
+                    .useCallCache(false),
+                cohortExtractionConfig.operationalTerraWorkspaceNamespace,
+                cohortExtractionConfig.operationalTerraWorkspaceName);
 
     // Note: if this save fails we may have an orphaned job. Will likely need a cleanup task to
     // check for such jobs.

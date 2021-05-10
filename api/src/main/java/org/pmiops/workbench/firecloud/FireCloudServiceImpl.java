@@ -343,7 +343,7 @@ public class FireCloudServiceImpl implements FireCloudService {
                 ImmutableList.of(new FirecloudManagedGroupRef().membersGroupName(authDomainName)));
 
     return retryHandler.run(
-        (context) -> workspacesApi.cloneWorkspace(fromProject, fromName, cloneRequest));
+        (context) -> workspacesApi.cloneWorkspace(cloneRequest, fromProject, fromName));
   }
 
   @Override
@@ -358,7 +358,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     // TODO: set authorization domain here
     return retryHandler.run(
         (context) ->
-            workspacesApi.updateWorkspaceACL(projectName, workspaceName, false, aclUpdates));
+            workspacesApi.updateWorkspaceACL(aclUpdates, projectName, workspaceName, false));
   }
 
   @Override
