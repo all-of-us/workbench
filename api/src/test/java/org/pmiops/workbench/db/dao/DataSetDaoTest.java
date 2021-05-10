@@ -3,6 +3,7 @@ package org.pmiops.workbench.db.dao;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Arrays;
@@ -14,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.SpringTest;
+import org.pmiops.workbench.db.dao.DataSetDao.InvalidToCountResult;
 import org.pmiops.workbench.db.model.DbCohort;
 import org.pmiops.workbench.db.model.DbDataset;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -72,6 +74,21 @@ public class DataSetDaoTest extends SpringTest {
     assertThat(map).hasSize(Booleans.VALUE_STRINGS.size());
     assertThat(map.get(true)).isEqualTo(2L);
     assertThat(map.get(false)).isEqualTo(1L);
+  }
+
+  @Test
+  public void testGetInvalidToCount_nonNull() throws Exception {
+    insertDatasetForGauge(true, workspace.getWorkspaceId());
+    List<InvalidToCountResult> resultList = dataSetDao.getInvalidToCount();
+    assertThat(resultList).hasSize(1);
+
+    // Iterate all getter methods and make sure all return value is non-null.
+    Class<InvalidToCountResult> projectionClass = InvalidToCountResult.class;
+    for (Method method : projectionClass.getMethods()) {
+      if (method.getName().startsWith("get")) {
+        assertThat(method.invoke(resultList.get(0))).isNotNull();
+      }
+    }
   }
 
   // TODO(jaycarlton): add coverage for concept sets and domains

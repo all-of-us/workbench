@@ -57,7 +57,7 @@ public class UserDaoTest extends SpringTest {
   }
 
   @Test
-  public void testGetUserCountGaugeData_singleValue() {
+  public void testGetUserCountGaugeData_singleValue() throws Exception {
     DbUser user1 = new DbUser();
     user1.setDisabled(false);
     user1 = userDao.save(user1);
@@ -70,6 +70,15 @@ public class UserDaoTest extends SpringTest {
     assertThat(split(row.getAccessTierShortNames())).contains(registeredTier.getShortName());
     assertThat(row.getDisabled()).isFalse();
     assertThat(row.getUserCount()).isEqualTo(1L);
+
+    // Iterate all getter methods and make sure all return value is non-null.
+    Class<UserCountByDisabledAndAccessTiers> projectionClass =
+        UserCountByDisabledAndAccessTiers.class;
+    for (Method method : projectionClass.getMethods()) {
+      if (method.getName().startsWith("get")) {
+        assertThat(method.invoke(rows.get(0))).isNotNull();
+      }
+    }
   }
 
   @Test
@@ -144,7 +153,7 @@ public class UserDaoTest extends SpringTest {
   }
 
   @Test
-  public void testGetAdminTableUsers() throws Exception{
+  public void testGetAdminTableUsers() throws Exception {
     // Make sure AdminTable projection works.
     Timestamp nowTime = now();
     String contactEmail = "1@foo.com";
@@ -183,9 +192,10 @@ public class UserDaoTest extends SpringTest {
     List<DbAdminTableUser> rows = userDao.getAdminTableUsers();
     assertThat(rows).hasSize(1);
     final DbAdminTableUser row = rows.get(0);
-    Class<DbAdminTableUser> dbAdminUserClass  = DbAdminTableUser.class;
-    for(Method method : dbAdminUserClass.getMethods()) {
-      if(method.getName().startsWith("get")) {
+    Class<DbAdminTableUser> dbAdminUserClass = DbAdminTableUser.class;
+    // Iterate all getter methods and make sure all return value is non-null.
+    for (Method method : dbAdminUserClass.getMethods()) {
+      if (method.getName().startsWith("get")) {
         assertThat(method.invoke(row)).isNotNull();
       }
     }
