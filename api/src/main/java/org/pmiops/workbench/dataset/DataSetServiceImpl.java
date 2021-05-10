@@ -409,7 +409,7 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
 
     final ImmutableList<DbConceptSet> expandedSelectedConceptSets =
         getExpandedConceptSetSelections(
-            dataSetMapper.prePackagedConceptSetFromStorage(dbDataset.getPrePackagedConceptSet()),
+            dataSetMapper.prePackagedConceptSetsFromStorage(dbDataset.getPrePackagedConceptSet()),
             dbDataset.getConceptSetIds(),
             cohortsSelected,
             includesAllParticipants,

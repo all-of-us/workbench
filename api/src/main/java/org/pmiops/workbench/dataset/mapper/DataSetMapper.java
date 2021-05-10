@@ -1,12 +1,9 @@
 package org.pmiops.workbench.dataset.mapper;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
-
+import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
@@ -94,46 +91,30 @@ public interface DataSetMapper {
     }
   }
 
-  default List<PrePackagedConceptSetEnum> prePackagedConceptSetFromStorage(
-      List<Short> prePackagedConceptSet) {
-    if (prePackagedConceptSet == null) {
-      return null;
-    }
-    return prePackagedConceptSet.stream()
-        .map(DbStorageEnums::prePackagedConceptSetsFromStorage)
-        .collect(Collectors.toList());
+  List<PrePackagedConceptSetEnum> prePackagedConceptSetsFromStorage(List<Short> s);
+
+  default PrePackagedConceptSetEnum prePackagedConceptSetFromStorage(Short s) {
+    return DbStorageEnums.prePackagedConceptSetsFromStorage(s);
   }
 
-  default List<Short> toDBPrePackagedConceptSet(
-      List<PrePackagedConceptSetEnum> prePackagedConceptSetEnum) {
-    if (prePackagedConceptSetEnum == null) {
-      return null;
-    }
-    return prePackagedConceptSetEnum.stream()
-        .map(DbStorageEnums::prePackagedConceptSetsToStorage)
-        .collect(Collectors.toList());
+  default Short toDBPrePackagedConceptSet(PrePackagedConceptSetEnum p) {
+    return DbStorageEnums.prePackagedConceptSetsToStorage(p);
   }
 
   default List<DbDatasetValue> toDbDomainValuePairs(List<DomainValuePair> domainValuePairs) {
-    if (domainValuePairs != null) {
-      return domainValuePairs.stream()
-          .map(this::getDataSetValuesFromDomainValueSet)
-          .collect(toImmutableList());
+    // This override is only necessary to specify an empty list on null.
+    if (domainValuePairs == null) {
+      return ImmutableList.of();
     }
-    return new ArrayList<>();
+    return domainValuePairs.stream()
+        .map(this::getDataSetValuesFromDomainValueSet)
+        .collect(ImmutableList.toImmutableList());
   }
 
   default DbDatasetValue getDataSetValuesFromDomainValueSet(DomainValuePair domainValuePair) {
     return new DbDatasetValue(
         DbStorageEnums.domainToStorage(domainValuePair.getDomain()).toString(),
         domainValuePair.getValue());
-  }
-
-  default List<DomainValuePair> copyDomainValuePairsToClient(List<DbDatasetValue> values) {
-    if (values == null) {
-      return null;
-    }
-    return values.stream().map(this::createDomainValuePair).collect(Collectors.toList());
   }
 
   default DomainValuePair createDomainValuePair(DbDatasetValue dbDatasetValue) {
