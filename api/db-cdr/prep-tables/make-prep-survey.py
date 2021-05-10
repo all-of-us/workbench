@@ -6,7 +6,7 @@ from google.cloud import bigquery
 from google.cloud import storage
 from io import StringIO
 
-all_seq = 1
+all_id = 1
 
 home_dir = "../csv"
 
@@ -16,6 +16,13 @@ surveys = {"ENGLISHBasics_DataDictionary": "Basics",
            "ENGLISHLifestyle_DataDictionary": "Lifestyle",
            "ENGLISHOverallHealth_DataDictionary": "OverallHealth",
            "ENGLISHPersonalMedicalHistory_DataDictionary": "PersonalMedicalHistory"}
+# field annotation flags
+annotation_flags = {"REGISTERED_TOPIC_SUPPRESSED": "0",
+                    "REGISTERED_QUESTION_SUPPRESSED": "0",
+                    "REGISTERED_ANSWERS_BUCKETED": "0",
+                    "CONTROLLED_TOPIC_SUPPRESSED": "0",
+                    "CONTROLLED_QUESTION_SUPPRESSED": "0",
+                    "CONTROLLED_ANSWERS_BUCKETED": "0"}
 # these are the column names for the controlled and registered output files
 headers = ['id', 'parent_id', 'code', 'name', 'type', 'min', 'max',
            'answers_bucketed']
@@ -42,28 +49,25 @@ def main():
         rows = read_csv(name + '_' + date + '.csv')
 
         # open your file writers for this survey and write headers
-        file_prefix = home_dir + "/" + surveys.get(name)
-        csv_controlled = open(file_prefix + "_controlled.csv", 'w')
-        csv_registered = open(file_prefix + "_registered.csv", 'w')
-        csv_all = open(file_prefix + "_all.csv", 'w')
-        controlled_writer = csv.DictWriter(csv_controlled, fieldnames=headers)
-        controlled_writer.writeheader()
-        registered_writer = csv.DictWriter(csv_registered, fieldnames=headers)
-        registered_writer.writeheader()
-        all_writer = csv.DictWriter(csv_all, fieldnames=headersAll)
-        all_writer.writeheader()
+        controlled_writer, registered_writer, all_writer = \
+            open_writers_with_headers(name)
 
         for row in rows:
-            # print the first column of each row
-            print(f"First Column: {row[0]}")
 
-            # This is where your code will go
+            if not_row_to_skip(row):
+                field_annotation_array, question_label, question_code, \
+                text_validation, choices, section_header, min_value, \
+                max_value = parse_row_columns(row)
 
-            write_row_all(all_writer, 0, "question_code", "question_label",
-                          'SURVEY', None, None, None, None)
+                print(field_annotation_array)
+                print(question_label)
+                print(question_code)
+
+                write_row_all(all_writer, 0, "question_code", "question_label",
+                              'SURVEY', None, None, annotation_flags, None)
 
     # This will query the concept table using concept_name
-    results = query_concept_table(project, dataset, "Respiratory Conditions")
+    results = query_topic_code(project, dataset, "Respiratory Conditions")
     for result in results:
         print(result.concept_code)
 
@@ -92,7 +96,7 @@ def read_csv(file):
     blob = blob.download_as_string()
     blob = blob.decode('utf-8')
     blob = StringIO(blob)  # tranform bytes to string
-    return csv.reader(blob)  # then use csv library to read the content
+    return csv.DictReader(blob)  # then use csv library to read the content
 
 
 def files_exist(date):
@@ -104,6 +108,30 @@ def files_exist(date):
                             " does not exist!")
 
 
+def not_row_to_skip(row):
+    return row['Variable / Field Name'].lower() != 'record_id' \
+           and row['Field Type'].lower() != 'descriptive' \
+           and 'please specify' not in row['Field Label'].lower()
+
+
+def parse_row_columns(row):
+    field_annotation = row['Field Annotation']
+    field_annotation_array = []
+    if field_annotation != '  ':
+        [field_annotation_array.append(item.strip()) for item in
+         field_annotation.split(',')]
+    # replace all '\n' with empty string
+    question_label = row['Field Label'].replace('\n', '')
+    question_code = row['Variable / Field Name']
+    text_validation = row['Text Validation Type OR Show Slider Number']
+    choices = row['Choices, Calculations, OR Slider Labels']
+    section_header = row['Section Header']
+    min_value = row['Text Validation Min']
+    max_value = row['Text Validation Max']
+    return field_annotation_array, question_label, question_code, \
+           text_validation, choices, section_header, min_value, max_value
+
+
 def get_blob(file):
     storage_client = storage.Client.from_service_account_json(
         '../../sa-key.json')
@@ -112,7 +140,7 @@ def get_blob(file):
     return bucket.blob('cb_prep_tables/redcap/' + file)
 
 
-def query_concept_table(project, dataset, concept_name):
+def query_topic_code(project, dataset, concept_name):
     big_query_client = bigquery.Client.from_service_account_json(
         "../../sa-key.json")
     query = """
@@ -125,35 +153,43 @@ def query_concept_table(project, dataset, concept_name):
     return query_job.result()
 
 
+def open_writers_with_headers(name):
+    file_prefix = home_dir + "/" + surveys.get(name)
+    csv_controlled = open(file_prefix + "_controlled.csv", 'w')
+    csv_registered = open(file_prefix + "_registered.csv", 'w')
+    csv_all = open(file_prefix + "_all.csv", 'w')
+    controlled_writer = csv.DictWriter(csv_controlled, fieldnames=headers)
+    controlled_writer.writeheader()
+    registered_writer = csv.DictWriter(csv_registered, fieldnames=headers)
+    registered_writer.writeheader()
+    all_writer = csv.DictWriter(csv_all, fieldnames=headersAll)
+    all_writer.writeheader()
+    return controlled_writer, registered_writer, all_writer
+
+
 def write_row_all(writer, parent_id, code, name, item_type, min_val, max_val,
-    item_flags, field_names):
-    global all_seq
-    new_row = {'id': all_seq, 'parent_id': parent_id, 'code': code,
+    annotation_flags, field_names):
+    global all_id
+    new_row = {'id': all_id, 'parent_id': parent_id, 'code': code,
                'name': name, 'type': item_type, 'min': min_val, 'max': max_val,
-               'registered_topic_suppressed': '0',
-               'registered_question_suppressed': '0',
-               'registered_answer_bucketed': '0',
-               'controlled_topic_suppressed': '0',
-               'controlled_question_suppressed': '0',
-               'controlled_answer_bucketed': '0'}
-    if item_type == 'TOPIC':
-        new_row['registered_topic_suppressed'] = item_flags[
-            "REGISTERED_TOPIC_SUPPRESSED"]
-        new_row['controlled_topic_suppressed'] = item_flags[
-            "CONTROLLED_TOPIC_SUPPRESSED"]
-    elif item_type == 'QUESTION':
+               'registered_topic_suppressed': annotation_flags[
+                   "REGISTERED_TOPIC_SUPPRESSED"],
+               'registered_question_suppressed': annotation_flags[
+                   "REGISTERED_QUESTION_SUPPRESSED"],
+               'registered_answer_bucketed': annotation_flags[
+                   "REGISTERED_ANSWERS_BUCKETED"],
+               'controlled_topic_suppressed': annotation_flags[
+                   "CONTROLLED_TOPIC_SUPPRESSED"],
+               'controlled_question_suppressed': annotation_flags[
+                   "CONTROLLED_QUESTION_SUPPRESSED"],
+               'controlled_answer_bucketed': annotation_flags[
+                   "CONTROLLED_ANSWERS_BUCKETED"]}
+    if item_type == 'QUESTION':
         # we have to replace questionCode with short code in Field Annotation
         new_row['code'] = get_short_code(code, field_names)
-        new_row['registered_question_suppressed'] = item_flags[
-            "REGISTERED_QUESTION_SUPPRESSED"]
-        new_row['registered_answer_bucketed'] = item_flags[
-            "REGISTERED_ANSWERS_BUCKETED"]
-        new_row['controlled_question_suppressed'] = item_flags[
-            "CONTROLLED_QUESTION_SUPPRESSED"]
-        new_row['controlled_answer_bucketed'] = item_flags[
-            "CONTROLLED_ANSWERS_BUCKETED"]
+
     writer.writerow(new_row)
-    all_seq += 1
+    all_id += 1
 
 
 def get_short_code(code, field_names):
