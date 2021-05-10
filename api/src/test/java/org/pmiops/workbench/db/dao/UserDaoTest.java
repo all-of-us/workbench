@@ -149,6 +149,7 @@ public class UserDaoTest extends SpringTest {
     Timestamp nowTime = now();
     String contactEmail = "1@foo.com";
     DbUser user = new DbUser();
+    user.setUsername("name");
     user.setDisabled(true);
     user.setContactEmail(contactEmail);
     user.setGivenName("givenName");
@@ -165,11 +166,19 @@ public class UserDaoTest extends SpringTest {
     user.setDataUseAgreementBypassTime(nowTime);
     user.setTwoFactorAuthBypassTime(nowTime);
     user.setTwoFactorAuthCompletionTime(nowTime);
+    user.setBetaAccessBypassTime(nowTime);
+    user.setBetaAccessRequestTime(nowTime);
+    user.setEmailVerificationCompletionTime(nowTime);
+    user.setEmailVerificationBypassTime(nowTime);
+    user.setIdVerificationBypassTime(nowTime);
+    user.setIdVerificationCompletionTime(nowTime);
+    user.setCreationTime(nowTime);
+    user.setFirstSignInTime(nowTime);
 
     final DbInstitution institution = createInstitution();
     user = userDao.save(user);
     createAffiliation(user, institution);
-    addUserToTier(user, registeredTier, TierAccessStatus.DISABLED);
+    addUserToTier(user, registeredTier, TierAccessStatus.ENABLED);
 
     List<DbAdminTableUser> rows = userDao.getAdminTableUsers();
     assertThat(rows).hasSize(1);

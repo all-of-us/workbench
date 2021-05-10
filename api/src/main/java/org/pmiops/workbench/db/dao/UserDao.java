@@ -163,7 +163,7 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
               + "u.given_name AS givenName, "
               + "u.family_name AS familyName, "
               + "u.contact_email AS contactEmail, "
-              + "i.display_name AS displayName, "
+              + "i.display_name AS institutionName, "
               + "u.first_registration_completion_time AS firstRegistrationCompletionTime, "
               + "u.creation_time AS creationTime, "
               + "u.first_sign_in_time AS firstSignInTime, "
