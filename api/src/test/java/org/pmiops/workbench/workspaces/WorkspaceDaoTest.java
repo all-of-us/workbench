@@ -103,7 +103,8 @@ public class WorkspaceDaoTest {
     assertThat(count.getActiveStatusEnum()).isEqualTo(WorkspaceActiveStatus.ACTIVE);
 
     // Iterate all getter methods and make sure all return value is non-null.
-    Class<WorkspaceCountByActiveStatusAndTier> projectionClass = WorkspaceCountByActiveStatusAndTier.class;
+    Class<WorkspaceCountByActiveStatusAndTier> projectionClass =
+        WorkspaceCountByActiveStatusAndTier.class;
     for (Method method : projectionClass.getMethods()) {
       if (method.getName().startsWith("get")) {
         assertThat(method.invoke(count)).isNotNull();
