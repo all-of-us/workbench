@@ -59,6 +59,7 @@ def main():
                 text_validation, choices, section_header, min_value, \
                 max_value = parse_row_columns(row)
 
+                # zahra stuff here
                 print(field_annotation_array)
                 print(question_label)
                 print(question_code)
@@ -168,21 +169,21 @@ def open_writers_with_headers(name):
 
 
 def write_row_all(writer, parent_id, code, name, item_type, min_val, max_val,
-    annotation_flags, field_names):
+    flags, field_names):
     global all_id
     new_row = {'id': all_id, 'parent_id': parent_id, 'code': code,
                'name': name, 'type': item_type, 'min': min_val, 'max': max_val,
-               'registered_topic_suppressed': annotation_flags[
+               'registered_topic_suppressed': flags[
                    "REGISTERED_TOPIC_SUPPRESSED"],
-               'registered_question_suppressed': annotation_flags[
+               'registered_question_suppressed': flags[
                    "REGISTERED_QUESTION_SUPPRESSED"],
-               'registered_answer_bucketed': annotation_flags[
+               'registered_answer_bucketed': flags[
                    "REGISTERED_ANSWERS_BUCKETED"],
-               'controlled_topic_suppressed': annotation_flags[
+               'controlled_topic_suppressed': flags[
                    "CONTROLLED_TOPIC_SUPPRESSED"],
-               'controlled_question_suppressed': annotation_flags[
+               'controlled_question_suppressed': flags[
                    "CONTROLLED_QUESTION_SUPPRESSED"],
-               'controlled_answer_bucketed': annotation_flags[
+               'controlled_answer_bucketed': flags[
                    "CONTROLLED_ANSWERS_BUCKETED"]}
     if item_type == 'QUESTION':
         # we have to replace questionCode with short code in Field Annotation
