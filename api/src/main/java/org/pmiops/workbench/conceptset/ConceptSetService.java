@@ -74,24 +74,13 @@ public class ConceptSetService {
     DbConceptSet dbConceptSetCopy =
         conceptSetMapper.dbModelToDbModel(existingConceptSet, conceptSetContext);
 
-    try {
-      return toHydratedConcepts(
-          conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSetCopy)));
-    } catch (DataIntegrityViolationException e) {
-      throw new ConflictException(
-          String.format("Concept set %s already exists.", dbConceptSetCopy.getName()));
-    }
+    return saveDbConceptSet(dbConceptSetCopy);
   }
 
   public ConceptSet createConceptSet(
       CreateConceptSetRequest request, DbUser creator, Long workspaceId) {
     DbConceptSet dbConceptSet = conceptSetMapper.clientToDbModel(request, workspaceId, creator);
-    try {
-      return toHydratedConcepts(conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSet)));
-    } catch (DataIntegrityViolationException e) {
-      throw new ConflictException(
-          String.format("Concept set %s already exists.", dbConceptSet.getName()));
-    }
+    return saveDbConceptSet(dbConceptSet);
   }
 
   public ConceptSet updateConceptSet(Long workspaceId, Long conceptSetId, ConceptSet conceptSet) {
@@ -111,11 +100,7 @@ public class ConceptSetService {
               "Concept Set is not the same domain as: %s", conceptSet.getDomain().toString()));
     }
     dbConceptSet.setLastModifiedTime(Timestamp.from(clock.instant()));
-    try {
-      return toHydratedConcepts(conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSet)));
-    } catch (OptimisticLockException e) {
-      throw new ConflictException("Failed due to concurrent concept set modification");
-    }
+    return saveDbConceptSet(dbConceptSet);
   }
 
   public ConceptSet updateConceptSetConcepts(
@@ -159,11 +144,7 @@ public class ConceptSetService {
     }
 
     dbConceptSet.setLastModifiedTime(Timestamp.from(clock.instant()));
-    try {
-      return toHydratedConcepts(conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSet)));
-    } catch (OptimisticLockException e) {
-      throw new ConflictException("Failed due to concurrent concept set modification");
-    }
+    return saveDbConceptSet(dbConceptSet);
   }
 
   public void delete(Long conceptSetId) {
@@ -220,6 +201,17 @@ public class ConceptSetService {
                     String.format(
                         "ConceptSet not found for workspaceId: %d and conceptSetId: %d",
                         workspaceId, conceptSetId)));
+  }
+
+  private ConceptSet saveDbConceptSet(DbConceptSet dbConceptSet) {
+    try {
+      return toHydratedConcepts(conceptSetMapper.dbModelToClient(conceptSetDao.save(dbConceptSet)));
+    } catch (DataIntegrityViolationException e) {
+      throw new ConflictException(
+          String.format("Concept set %s already exists.", dbConceptSet.getName()));
+    } catch (OptimisticLockException e) {
+      throw new ConflictException("Failed due to concurrent concept set modification");
+    }
   }
 
   private ConceptSet toHydratedConcepts(ConceptSet conceptSet) {
