@@ -89,6 +89,46 @@ paths:
             - profile
             - https://www.googleapis.com/auth/cloud-billing
       x-codegen-request-body-name: createProjectRequest
+  /api/billing/v2:
+    post:
+      tags:
+        - billing_v2
+      summary: create billing project in rawls
+      description: create new billing project in rawls
+      operationId: createBillingProjectFullV2
+      requestBody:
+        description: create project request
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/CreateRawlsBillingProjectFullRequest'
+        required: true
+      responses:
+        201:
+          description: Successfully Created Billing Project in Rawls
+        400:
+          description: both you and firecloud billing user must be a user of the billing account
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        409:
+          description: project already exists in rawls
+          content: { }
+        500:
+          description: Rawls Internal Error
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+      security:
+        - authorization:
+            - openid
+            - email
+            - profile
+            - https://www.googleapis.com/auth/cloud-billing
+      x-codegen-request-body-name: createProjectRequest
+
   /api/billing/{projectId}/members:
     get:
       tags:
@@ -128,6 +168,43 @@ paths:
             - openid
             - email
             - profile
+
+  /api/billing/v2/{projectId}/members:
+    get:
+      tags:
+        - billing_v2
+      summary: list members of billing project the caller owns
+      description: list members of billing project the caller owns
+      operationId: listBillingProjectMembers
+      parameters:
+        - name: projectId
+          in: path
+          description: Project ID
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BillingProjectMember'
+        403:
+          description: You must be a project owner to view the members of a project
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          description: Rawls Internal Error
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+
   /api/billing/{projectId}/{role}/{email}:
     put:
       tags:
@@ -238,6 +315,107 @@ paths:
             - openid
             - email
             - profile
+
+  /api/billing/v2/{projectId}/members/{workbenchRole}/{email}:
+    put:
+      tags:
+        - billing_v2
+      summary: add user or group to billing project the caller owns
+      description: add user or group to billing project the caller owns
+      operationId: addUserToBillingProject
+      parameters:
+        - name: projectId
+          in: path
+          description: Project ID
+          required: true
+          schema:
+            type: string
+        - name: workbenchRole
+          in: path
+          description: role of user for project
+          required: true
+          schema:
+            type: string
+            enum:
+              - user
+              - owner
+        - name: email
+          in: path
+          description: email of user or group to add
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successfully Added User/Group To Billing Project
+        403:
+          description: You must be a project owner to add a user to a billing project
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: User not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          description: Rawls Internal Error
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    delete:
+      tags:
+        - billing_v2
+      summary: remove user or group from billing project the caller owns
+      description: remove user or group from billing project the caller owns
+      operationId: removeUserFromBillingProject
+      parameters:
+        - name: projectId
+          in: path
+          description: Project ID
+          required: true
+          schema:
+            type: string
+        - name: workbenchRole
+          in: path
+          description: role of user for project
+          required: true
+          schema:
+            type: string
+            enum:
+              - user
+              - owner
+        - name: email
+          in: path
+          description: email of user or group to remove
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successfully Removed User From Billing Project
+        403:
+          description: You must be a project owner to add a user to a billing project
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        404:
+          description: User not found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          description: Rawls Internal Error
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+
   /api/user/billing/{projectName}:
     delete:
       tags:
@@ -280,6 +458,69 @@ paths:
             - openid
             - email
             - profile
+
+  /api/billing/v2/{projectId}:
+    get:
+      tags:
+        - billing_v2
+      summary: get billing project
+      description: get billing project
+      operationId: getBillingProject
+      parameters:
+        - name: projectId
+          in: path
+          description: Id of the billing project
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/BillingProjectResponse'
+        404:
+          description: Project Not Found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          description: Internal Server Error
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+    delete:
+      tags:
+        - billing_v2
+      summary: delete billing project
+      description: delete billing project
+      operationId: deleteBillingProject
+      parameters:
+        - name: projectId
+          in: path
+          description: Id of the billing project
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: OK
+        404:
+          description: Project Not Found
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+        500:
+          description: Internal Server Error
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/ErrorReport'
+
   /api/nih/status:
     get:
       tags:
@@ -2335,6 +2576,30 @@ components:
           type: string
         name:
           type: string
+    BillingProjectResponse:
+      required:
+        - projectName
+        - invalidBillingAccount
+        - roles
+      type: object
+      properties:
+        projectName:
+          type: string
+          description: the name of the project
+        billingAccount:
+          type: string
+          description: the billing account to use in google projects
+        servicePerimeter:
+          type: string
+          description: the name of the service permeters for google project
+        invalidBillingAccount:
+          type: boolean
+          description: whether or not the billing account is usable by Terra
+        roles:
+          type: array
+          items:
+            type: string
+          description: the roles the caller has on the project
   parameters:
     workspaceNamespaceParam:
       name: workspaceNamespace
