@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
   <changeSet author="als364" id="changelog-161-extraction-job-add-status">
 <!--    <addDefaultValue tableName="wgs_extract_cromwell_submission" columnName="creation_time" defaultValueComputed="CURRENT_TIMESTAMP"/>-->
     <addColumn tableName="wgs_extract_cromwell_submission">
