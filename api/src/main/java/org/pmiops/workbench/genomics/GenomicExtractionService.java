@@ -17,6 +17,7 @@ import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.model.DbDataset;
+import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -115,27 +116,37 @@ public class GenomicExtractionService {
         .map(
             dbSubmission -> {
               try {
-                // RW-6537: Don't make a call to Terra for every submission. Submissions in a non
-                // running state will not change
-                WgsCohortExtractionConfig cohortExtractionConfig =
-                    workbenchConfigProvider.get().wgsCohortExtraction;
-                FirecloudSubmission firecloudSubmission =
-                    submissionApiProvider
-                        .get()
-                        .getSubmission(
-                            cohortExtractionConfig.operationalTerraWorkspaceNamespace,
-                            cohortExtractionConfig.operationalTerraWorkspaceName,
-                            dbSubmission.getSubmissionId());
-
-                if (genomicExtractionMapper.convertJobStatus(firecloudSubmission.getStatus())
-                    != TerraJobStatus.RUNNING) {
-                  dbSubmission.setCompletionTime(
+                // Don't bother checking if we already know the job is in a terminal status.
+                if (dbSubmission.getStatusEnum() == TerraJobStatus.RUNNING || dbSubmission.getStatusEnum() == null) {
+                  WgsCohortExtractionConfig cohortExtractionConfig =
+                      workbenchConfigProvider.get().wgsCohortExtraction;
+                  FirecloudSubmission firecloudSubmission =
+                      submissionApiProvider
+                          .get()
+                          .getSubmission(
+                              cohortExtractionConfig.operationalTerraWorkspaceNamespace,
+                              cohortExtractionConfig.operationalTerraWorkspaceName,
+                              dbSubmission.getSubmissionId());
+                  dbSubmission.setTerraSubmissionDate(
                       CommonMappers.timestamp(
-                          firecloudSubmission.getWorkflows().get(0).getStatusLastChangedDate()));
+                          firecloudSubmission.getSubmissionDate()));
+
+                  TerraJobStatus status = genomicExtractionMapper.convertJobStatus(firecloudSubmission.getStatus());
+                  dbSubmission.setTerraStatus(
+                      DbStorageEnums.terraJobStatusToStorage(
+                          genomicExtractionMapper.convertJobStatus(
+                              firecloudSubmission.getStatus()
+                          )
+                      ));
+                  if (status != TerraJobStatus.RUNNING) {
+                    dbSubmission.setCompletionTime(
+                        CommonMappers.timestamp(
+                            firecloudSubmission.getWorkflows().get(0).getStatusLastChangedDate()));
+                  }
+
                   wgsExtractCromwellSubmissionDao.save(dbSubmission);
                 }
-
-                return genomicExtractionMapper.toApi(dbSubmission, firecloudSubmission);
+                return genomicExtractionMapper.toApi(dbSubmission);
               } catch (ApiException e) {
                 throw new ServerErrorException("Could not fetch submission status from Terra", e);
               }
