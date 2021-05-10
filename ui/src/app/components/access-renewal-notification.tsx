@@ -3,11 +3,11 @@ import * as React from 'react';
 
 import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
+import {navigateByUrl} from 'app/utils/navigation';
 import {Profile, RenewableAccessModuleStatus} from 'generated/fetch';
 import {Button} from './buttons';
 import {FlexRow} from './flex';
 import {AlarmExclamation} from './icons';
-import {navigate, navigateByUrl} from "../utils/navigation";
 
 const styles = reactStyles({
   box: {
