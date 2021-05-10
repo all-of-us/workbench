@@ -333,7 +333,7 @@ sourceSets {
 
     resources {
       srcDir "tools/src/main/resources"
-      srcDir "src/main/resources"
+      srcDir "db/"
     }
     java {
       srcDirs = ['tools/src/main/java']
