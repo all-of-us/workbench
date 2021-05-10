@@ -148,7 +148,11 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
     String getAccessTierShortNames();
   }
 
-  /** Important! Make sure add alias and it matches name in {@link DbAdminTableUser} */
+  /**
+   * Important! Make sure add alias and it matches name in {@link DbAdminTableUser}, otherwise
+   * JPA will return null if the query column name does not match the variable name in interface
+   * projection.
+   */
   @Query(
       // JPQL doesn't allow join on subquery
       nativeQuery = true,

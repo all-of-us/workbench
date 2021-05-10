@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
+import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -143,23 +144,42 @@ public class UserDaoTest extends SpringTest {
   }
 
   @Test
-  public void testGetAdminTableUsers() {
+  public void testGetAdminTableUsers() throws Exception{
     // Make sure AdminTable projection works.
-    Timestamp duaByPassTime = now();
+    Timestamp nowTime = now();
     String contactEmail = "1@foo.com";
-    DbUser user1 = new DbUser();
-    user1.setDisabled(true);
-    user1.setContactEmail(contactEmail);
-    user1.setDataUseAgreementBypassTime(duaByPassTime);
-    user1 = userDao.save(user1);
-    addUserToTier(user1, registeredTier, TierAccessStatus.DISABLED);
+    DbUser user = new DbUser();
+    user.setDisabled(true);
+    user.setContactEmail(contactEmail);
+    user.setGivenName("givenName");
+    user.setFamilyName("familyName");
+    user.setFirstRegistrationCompletionTime(nowTime);
+    user.setDataUseAgreementCompletionTime(nowTime);
+    user.setDataUseAgreementBypassTime(nowTime);
+    user.setEraCommonsBypassTime(nowTime);
+    user.setEraCommonsCompletionTime(nowTime);
+    user.setRasLinkLoginGovCompletionTime(nowTime);
+    user.setRasLinkLoginGovBypassTime(nowTime);
+    user.setComplianceTrainingCompletionTime(nowTime);
+    user.setComplianceTrainingBypassTime(nowTime);
+    user.setDataUseAgreementBypassTime(nowTime);
+    user.setTwoFactorAuthBypassTime(nowTime);
+    user.setTwoFactorAuthCompletionTime(nowTime);
+
+    final DbInstitution institution = createInstitution();
+    user = userDao.save(user);
+    createAffiliation(user, institution);
+    addUserToTier(user, registeredTier, TierAccessStatus.DISABLED);
 
     List<DbAdminTableUser> rows = userDao.getAdminTableUsers();
     assertThat(rows).hasSize(1);
     final DbAdminTableUser row = rows.get(0);
-    assertThat(row.getDisabled()).isTrue();
-    assertThat(row.getDataUseAgreementBypassTime()).isEqualTo(duaByPassTime);
-    assertThat(row.getContactEmail()).isEqualTo(contactEmail);
+    Class<DbAdminTableUser> dbAdminUserClass  = DbAdminTableUser.class;
+    for(Method method : dbAdminUserClass.getMethods()) {
+      if(method.getName().startsWith("get")) {
+        assertThat(method.invoke(row)).isNotNull();
+      }
+    }
   }
 
   @Test
