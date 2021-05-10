@@ -75,7 +75,7 @@ export const maybeDaysRemaining = (profile: Profile): number | undefined => {
   const earliestExpiration: number = fp.flow(
     fp.get(['renewableAccessModules', 'modules']),
     fp.map<RenewableAccessModuleStatus, number>(m => m.expirationEpochMillis),
-      // remove the undefined expirationEpochMillis
+    // remove the undefined expirationEpochMillis
     fp.compact,
     fp.min)(profile);
 

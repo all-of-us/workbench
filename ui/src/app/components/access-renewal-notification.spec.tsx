@@ -40,8 +40,7 @@ const laterExpiration: Profile = {
             moduleName: ModuleNameEnum.ComplianceTraining,
             hasExpired: false,
             expirationEpochMillis: todayPlusDays(NOTIFICATION_THRESHOLD_DAYS + 1),
-        }
-        ]
+        }]
     }
 }
 
@@ -53,12 +52,11 @@ const expirationsInWindow: Profile = {
             hasExpired: false,
             expirationEpochMillis: todayPlusDays(5),
         },
-            {
-                moduleName: ModuleNameEnum.DataUseAgreement,
-                hasExpired: false,
-                expirationEpochMillis: todayPlusDays(10),
-            }
-        ]
+        {
+            moduleName: ModuleNameEnum.DataUseAgreement,
+            hasExpired: false,
+            expirationEpochMillis: todayPlusDays(10),
+        }]
     }
 }
 
