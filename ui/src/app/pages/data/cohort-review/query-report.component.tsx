@@ -5,17 +5,19 @@ import {ParticipantsCharts} from 'app/pages/data/cohort-review/participants-char
 import {cohortReviewStore} from 'app/services/review-state.service';
 import {cdrVersionsApi, cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {reactStyles, withCurrentWorkspace} from 'app/utils';
+import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
 import {navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
   AgeType,
+  CdrVersionTiersResponse,
   Cohort,
   CohortReview,
   Domain,
   GenderOrSexType,
   SearchRequest
 } from 'generated/fetch';
+import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 import * as React from 'react';
 
@@ -181,6 +183,7 @@ const domains = [Domain[Domain.CONDITION],
   Domain[Domain.LAB]];
 
 export interface QueryReportProps {
+  cdrVersionTiersResponse: CdrVersionTiersResponse;
   workspace: WorkspaceData;
 }
 export interface QueryReportState {
@@ -192,7 +195,7 @@ export interface QueryReportState {
   review: CohortReview;
 }
 
-export const QueryReport = withCurrentWorkspace()(
+export const QueryReport = fp.flow(withCdrVersions(), withCurrentWorkspace())(
   class extends React.Component<QueryReportProps, QueryReportState> {
     constructor(props: any) {
       super(props);
@@ -207,16 +210,14 @@ export const QueryReport = withCurrentWorkspace()(
     }
 
     componentDidMount() {
-      const {cdrVersionId} = this.props.workspace;
+      const {cdrVersionTiersResponse, workspace: {accessTierShortName, cdrVersionId}} = this.props;
       const {review} = this.state;
       const {ns, wsid, cid} = urlParamsStore.getValue();
       cohortsApi().getCohort(ns, wsid, cid).then(cohort => this.setState({cohort}));
-      cdrVersionsApi().getCdrVersions().then(resp => {
-        const cdrName = resp.items.find(
-          v => v.cdrVersionId === review.cdrVersionId.toString()
-        ).name;
-        this.setState({cdrName});
-      });
+      const cdrName = cdrVersionTiersResponse.tiers
+        .find(tier => tier.accessTierShortName === accessTierShortName).versions
+        .find(version => version.cdrVersionId === review.cdrVersionId.toString()).name;
+      this.setState({cdrName});
       const request = (JSON.parse(review.cohortDefinition)) as SearchRequest;
       cohortBuilderApi().findDemoChartInfo(+cdrVersionId, GenderOrSexType[GenderOrSexType.GENDER], AgeType[AgeType.AGE], request)
         .then(response => {
