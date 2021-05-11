@@ -1,5 +1,6 @@
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import * as OTPAuth from 'otpauth';
 
 import {navigate, queryParamsStore} from 'app/utils/navigation';
 
@@ -167,6 +168,15 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
   }
 
   async validateRasLoginGovLink() {
+    const totp = new OTPAuth.TOTP({
+      label: 'login.gov',
+      algorithm: 'SHA1',
+      secret: 'NB2W45DFOIZA'
+    });
+    const token = totp.generate();
+    console.log("~~~~~~~~~~")
+    console.log(token)
+
     const authCode = (new URL(window.location.href)).searchParams.get('code');
     const redirectUrl = buildRasRedirectUrl();
     if (authCode) {
