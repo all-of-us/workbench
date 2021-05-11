@@ -19,6 +19,7 @@ import org.apache.commons.cli.Options;
 import org.pmiops.workbench.firecloud.ApiException;
 import org.pmiops.workbench.firecloud.FirecloudTransforms;
 import org.pmiops.workbench.firecloud.api.BillingApi;
+import org.pmiops.workbench.firecloud.api.BillingV2Api;
 import org.pmiops.workbench.firecloud.api.WorkspacesApi;
 import org.pmiops.workbench.firecloud.model.FirecloudBillingProjectMember;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkspace;
@@ -85,7 +86,7 @@ public class FixDesynchronizedBillingProjectOwners {
 
   private static void clean(
       WorkspacesApi workspacesApi,
-      BillingApi billingApi,
+      BillingV2Api billingV2Api,
       Set<String> billingProjectIds,
       String researcherDomain,
       boolean dryRun)
@@ -133,7 +134,7 @@ public class FixDesynchronizedBillingProjectOwners {
       }
 
       Map<String, String> billingProjectRoles =
-          billingApi.listBillingProjectMembers(w.getNamespace()).stream()
+          billingV2Api.listBillingProjectMembers(w.getNamespace()).stream()
               .filter(m -> m.getEmail().endsWith("@" + researcherDomain))
               .collect(
                   Collectors.toMap(
@@ -170,7 +171,7 @@ public class FixDesynchronizedBillingProjectOwners {
           // This covers RW-5013, which caused incomplete owner removal.
           if (!dryRun) {
             try {
-              billingApi.removeUserFromBillingProject(w.getNamespace(), "owner", user);
+              billingV2Api.removeUserFromBillingProject(w.getNamespace(), "owner", user);
             } catch (ApiException e) {
               log.log(Level.WARNING, "failed to remove user from project", e);
             }
@@ -185,7 +186,7 @@ public class FixDesynchronizedBillingProjectOwners {
           // appear in the future.
           if (!dryRun) {
             try {
-              billingApi.addUserToBillingProject(w.getNamespace(), "owner", user);
+              billingV2Api.addUserToBillingProject(w.getNamespace(), "owner", user);
             } catch (ApiException e) {
               log.log(Level.WARNING, "failed to add user to project", e);
             }
@@ -221,7 +222,7 @@ public class FixDesynchronizedBillingProjectOwners {
 
       clean(
           apiFactory.workspacesApi(),
-          apiFactory.billingApi(),
+          apiFactory.billingV2Api(),
           billingProjectIds,
           opts.getOptionValue(researcherDomain.getLongOpt()),
           opts.hasOption(dryRunOpt.getLongOpt()));

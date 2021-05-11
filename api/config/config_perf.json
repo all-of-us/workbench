@@ -124,7 +124,8 @@
     "enableResearchPurposePrompt": false,
     "enableReportingUploadCron": false,
     "enableRasLoginGovLinking": false,
-    "enableGenomicExtraction": false
+    "enableGenomicExtraction": false,
+    "enableFireCloudV2Billing" : false
   },
   "actionAudit": {
     "logName": "workbench-action-audit-perf",

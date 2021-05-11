@@ -21,6 +21,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.model.DbWorkspace;
 import org.pmiops.workbench.exceptions.WorkbenchException;
 import org.pmiops.workbench.firecloud.api.BillingApi;
+import org.pmiops.workbench.firecloud.api.BillingV2Api;
 import org.pmiops.workbench.firecloud.api.GroupsApi;
 import org.pmiops.workbench.firecloud.api.NihApi;
 import org.pmiops.workbench.firecloud.api.ProfileApi;
@@ -55,6 +56,7 @@ public class FireCloudServiceImpl implements FireCloudService {
   private final Provider<WorkbenchConfig> configProvider;
 
   private final Provider<BillingApi> billingApiProvider;
+  private final Provider<BillingV2Api> billingV2ApiProvider;
   private final Provider<GroupsApi> groupsApiProvider;
   private final Provider<NihApi> nihApiProvider;
   private final Provider<ProfileApi> profileApiProvider;
@@ -110,6 +112,7 @@ public class FireCloudServiceImpl implements FireCloudService {
       Provider<WorkbenchConfig> configProvider,
       Provider<ProfileApi> profileApiProvider,
       Provider<BillingApi> billingApiProvider,
+      Provider<BillingV2Api> billingV2ApiProvider,
       Provider<GroupsApi> groupsApiProvider,
       Provider<NihApi> nihApiProvider,
       @Qualifier(FireCloudConfig.END_USER_WORKSPACE_API)
@@ -127,6 +130,7 @@ public class FireCloudServiceImpl implements FireCloudService {
     this.configProvider = configProvider;
     this.profileApiProvider = profileApiProvider;
     this.billingApiProvider = billingApiProvider;
+    this.billingV2ApiProvider = billingV2ApiProvider;
     this.groupsApiProvider = groupsApiProvider;
     this.nihApiProvider = nihApiProvider;
     this.endUserWorkspacesApiProvider = endUserWorkspacesApiProvider;
@@ -247,22 +251,40 @@ public class FireCloudServiceImpl implements FireCloudService {
             .privateIpGoogleAccess(true)
             .servicePerimeter(servicePerimeter);
 
-    BillingApi billingApi = billingApiProvider.get();
-    retryHandler.run(
-        (context) -> {
-          billingApi.createBillingProjectFull(request);
-          return null;
-        });
+    if(isFireCloudBillingV2ApiEnabled()) {
+      BillingV2Api billingV2Api = billingV2ApiProvider.get();
+      retryHandler.run(
+          (context) -> {
+            billingV2Api.createBillingProjectFullV2(request);
+            return null;
+          });
+    } else {
+      BillingApi billingApi = billingApiProvider.get();
+      retryHandler.run(
+          (context) -> {
+            billingApi.createBillingProjectFull(request);
+            return null;
+          });
+    }
   }
 
   @Override
   public void deleteBillingProject(String billingProject) {
-    BillingApi billingApi = billingApiProvider.get();
-    retryHandler.run(
-        (context) -> {
-          billingApi.deleteBillingProject(billingProject);
-          return null;
-        });
+    if(isFireCloudBillingV2ApiEnabled()) {
+      BillingV2Api billingV2Api = billingV2ApiProvider.get();
+      retryHandler.run(
+          (context) -> {
+            billingV2Api.deleteBillingProject(billingProject);
+            return null;
+          });
+    } else {
+      BillingApi billingApi = billingApiProvider.get();
+      retryHandler.run(
+          (context) -> {
+            billingApi.deleteBillingProject(billingProject);
+            return null;
+          });
+    }
   }
 
   @Override
@@ -492,5 +514,9 @@ public class FireCloudServiceImpl implements FireCloudService {
             }
           }
         });
+  }
+
+  private boolean isFireCloudBillingV2ApiEnabled() {
+    return configProvider.get().featureFlags.enableFireCloudV2Billing;
   }
 }

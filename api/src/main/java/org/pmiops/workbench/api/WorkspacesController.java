@@ -1,5 +1,7 @@
 package org.pmiops.workbench.api;
 
+import static org.pmiops.workbench.billing.BillingProjectUtil.createBillingProjectName;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -208,7 +210,15 @@ public class WorkspacesController implements WorkspacesApiDelegate {
     DbUser user = userProvider.get();
 
     // Note: please keep any initialization logic here in sync with cloneWorkspaceImpl().
-    final String billingProject = claimBillingProject(user, accessTier);
+    String billingProject;
+    if(workbenchConfigProvider.get().featureFlags.enableFireCloudV2Billing) {
+      // If v2 Billing is enabled, we will call FireCloud directly to create one.
+      billingProject = createBillingProjectName(workbenchConfigProvider);
+      fireCloudService.createAllOfUsBillingProject(billingProject, accessTier.getServicePerimeter());
+    } else {
+      billingProject = claimBillingProject(user, accessTier);
+    }
+
     FirecloudWorkspaceId workspaceId =
         generateFirecloudWorkspaceId(billingProject, workspace.getName());
     FirecloudWorkspace fcWorkspace =

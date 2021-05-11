@@ -1,5 +1,7 @@
 package org.pmiops.workbench.billing;
 
+import static org.pmiops.workbench.billing.BillingProjectUtil.createBillingProjectName;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -44,8 +46,6 @@ import org.springframework.stereotype.Service;
 public class BillingProjectBufferService implements GaugeDataCollector {
 
   private static final Logger log = Logger.getLogger(BillingProjectBufferService.class.getName());
-
-  private static final int PROJECT_BILLING_ID_SIZE = 8;
   @VisibleForTesting static final Duration CREATING_TIMEOUT = Duration.ofMinutes(60);
   @VisibleForTesting static final Duration ASSIGNING_TIMEOUT = Duration.ofMinutes(10);
   private static final ImmutableMap<BufferEntryStatus, Duration> STATUS_TO_GRACE_PERIOD =
@@ -131,7 +131,7 @@ public class BillingProjectBufferService implements GaugeDataCollector {
   @NotNull
   private DbBillingProjectBufferEntry makeCreatingBufferEntry(DbAccessTier accessTier) {
     final DbBillingProjectBufferEntry bufferEntry = new DbBillingProjectBufferEntry();
-    bufferEntry.setFireCloudProjectName(createBillingProjectName());
+    bufferEntry.setFireCloudProjectName(createBillingProjectName(workbenchConfigProvider));
     bufferEntry.setCreationTime(Timestamp.from(clock.instant()));
     // Note: we set the lastSyncRequestTime column to the current timestamp as an optimization.
     // If we leave this column as NULL, the sync process will prioritize this entry for immediate
@@ -298,22 +298,6 @@ public class BillingProjectBufferService implements GaugeDataCollector {
       billingProjectBufferEntryDao.releaseAssigningLock();
     }
   }
-
-  private String createBillingProjectName() {
-    String randomString =
-        Hashing.sha256()
-            .hashUnencodedChars(UUID.randomUUID().toString())
-            .toString()
-            .substring(0, PROJECT_BILLING_ID_SIZE);
-
-    String prefix = workbenchConfigProvider.get().billing.projectNamePrefix;
-    if (!prefix.endsWith("-")) {
-      prefix = prefix + "-";
-    }
-
-    return prefix + randomString;
-  }
-
   private int getUnfilledBufferSpace(DbAccessTier accessTier) {
     return getBufferMaxCapacity(accessTier.getShortName()) - (int) getCurrentBufferSize(accessTier);
   }
