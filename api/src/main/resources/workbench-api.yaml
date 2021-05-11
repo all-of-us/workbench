@@ -249,6 +249,16 @@ paths:
       responses:
         204:
           description: Request Received.
+  "/v1/confirmProfile":
+    post:
+      tags:
+        - profile
+      description: Used by users to confirm that their profile is up to date, as part of the
+        annual renewal compliance process.
+      operationId: confirmProfile
+      responses:
+        204:
+          description: Request Received.
   "/v1/is-username-taken":
     get:
       tags:

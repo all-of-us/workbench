@@ -2,7 +2,6 @@ package org.pmiops.workbench.db.model;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -243,10 +242,6 @@ public class DbUser {
   @Column(name = "first_registration_completion_time")
   public Timestamp getFirstRegistrationCompletionTime() {
     return firstRegistrationCompletionTime;
-  }
-
-  public void setFirstRegistrationCompletionTime() {
-    setFirstRegistrationCompletionTime(Timestamp.from(Instant.now()));
   }
 
   @VisibleForTesting

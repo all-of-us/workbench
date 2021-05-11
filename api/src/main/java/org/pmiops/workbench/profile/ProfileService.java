@@ -520,4 +520,11 @@ public class ProfileService {
 
     return getProfile(dbUser);
   }
+
+  /** Confirm that a user's profile is up to date, for annual renewal compliance purposes. */
+  public void confirmProfile() {
+    final DbUser dbUser = userProvider.get();
+    dbUser.setProfileLastConfirmedTime(new Timestamp(clock.instant().toEpochMilli()));
+    userDao.save(dbUser);
+  }
 }
