@@ -48,14 +48,12 @@ const styles = reactStyles({
     width: '102px',
     border: '0.8px solid #216FB4',
     borderRadius: '1.6px',
-    backgroundColor: 'rgba(38,34,98,0.08)',
     marginLeft: 'auto',
     marginRight: 'auto',
   },
   buttonText: {
     height: '20px',
     width: '79.6px',
-    color: colors.accent,
     fontFamily: 'Montserrat',
     fontSize: '11.2px',
     fontWeight: 500,
@@ -93,7 +91,7 @@ const AccessRenewalNotification = (props: {daysRemaining: number}) => {
     <AlarmExclamation style={styles.icon}/>
     <div style={styles.text}>Time for access renewal. [{props.daysRemaining}] days remaining.</div>
     {/* TODO RW-6618 navigate to Access Renewal pages */}
-    <Button style={styles.button} onClick={() => navigateByUrl('profile')}>
+    <Button type='primary' style={styles.button} onClick={() => navigateByUrl('profile')}>
       <div style={styles.buttonText}>Get Started</div>
     </Button>
   </FlexRow>;
