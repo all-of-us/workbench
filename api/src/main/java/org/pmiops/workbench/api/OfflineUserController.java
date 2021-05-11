@@ -257,6 +257,20 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     return ResponseEntity.noContent().build();
   }
 
+  @Override
+  public ResponseEntity<Void> expireNonCompliantUsers() {
+    userService.getAllUsers().stream()
+        .forEach(
+            user ->
+                userService.updateUserWithRetries(
+                    (u) -> {
+                      return u;
+                    },
+                    user,
+                    Agent.asSystem(user)));
+    return ResponseEntity.noContent().build();
+  }
+
   private int logCompletionChange(
       DbUser user, Timestamp oldTime, Timestamp newTime, AccessModule module) {
     return logChange(user, oldTime, newTime, accessModuleLogText.get(module) + " completion");

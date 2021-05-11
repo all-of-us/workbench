@@ -1594,6 +1594,21 @@ paths:
           description: Internal Error
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/cron/expireNonCompliantUsers":
+    get:
+      security: []
+      tags:
+      - offlineUser
+      - cron
+      description: Check each user to ensure they still meet compliance guidelines. If they do not mark them as expired.
+      operationId: expireNonCompliantUsers
+      responses:
+        204:
+          description: No Error
+        500:
+          description: Internal Error
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
   "/v1/monitoring/billingProjectBufferStatus":
     get:
       tags:
