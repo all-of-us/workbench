@@ -130,7 +130,7 @@
     "validate.js": "^0.12.0",
     "yarn": "^1.22.0",
     "zone.js": "0.8.26",
-    "otpauth": "7.0.2"
+    "otpauth": "6.3.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.13.10",

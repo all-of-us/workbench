@@ -8209,10 +8209,10 @@ osenv@0, osenv@^0.1.4, osenv@^0.1.5:
     os-homedir "^1.0.0"
     os-tmpdir "^1.0.0"
 
-otpauth@7.0.2:
-  version "7.0.2"
-  resolved "https://registry.yarnpkg.com/otpauth/-/otpauth-7.0.2.tgz#877c273f4b470e4b21f387457311fca018d62c65"
-  integrity sha512-PObMEO+XlHz5li7mI3PR0YVptX5uaPi29Qhj7uh8ndoTcENqGP5UUvuFVKhDBV0jFYhcvam77BZrXf7y77JaHw==
+otpauth@6.3.0:
+  version "6.3.0"
+  resolved "https://registry.yarnpkg.com/otpauth/-/otpauth-6.3.0.tgz#75d42c8a9f5a8730f827f137f49aebebda3218b1"
+  integrity sha512-71ZewE4Rwfg7br6Vh1fqEwEabYAaB6rU0AssgjhK8QwUKq3FW42gOxg7rLI4rp1sJPqj4ui34DkrRPQyzF6Rdw==
   dependencies:
     jssha "~3.2.0"
 

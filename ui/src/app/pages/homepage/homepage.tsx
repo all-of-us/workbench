@@ -171,7 +171,7 @@ export const Homepage = withUserProfile()(class extends React.Component<Props, S
     const totp = new OTPAuth.TOTP({
       label: 'login.gov',
       algorithm: 'SHA1',
-      secret: 'NB2W45DFOIZA'
+      secret: '12345'
     });
     const token = totp.generate();
     console.log("~~~~~~~~~~")
