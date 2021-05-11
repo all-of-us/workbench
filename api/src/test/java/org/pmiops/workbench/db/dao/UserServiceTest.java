@@ -441,4 +441,25 @@ public class UserServiceTest {
       assertThat(userService.hasAuthority(user.getUserId(), auth)).isTrue();
     }
   }
+
+  @Test
+  public void test_confirmProfile() {
+    assertThat(providedDbUser.getProfileLastConfirmedTime()).isNull();
+
+    // user confirms profile, so confirmation time is set to START_INSTANT
+
+    userService.confirmProfile();
+
+    DbUser retrievedUser = userDao.findUserByUserId(providedDbUser.getUserId());
+    assertThat(retrievedUser.getProfileLastConfirmedTime())
+        .isEqualTo(Timestamp.from(START_INSTANT));
+
+    // time passes, user confirms again, confirmation time is updated
+
+    tick();
+    userService.confirmProfile();
+    retrievedUser = userDao.findUserByUserId(providedDbUser.getUserId());
+    assertThat(retrievedUser.getProfileLastConfirmedTime())
+        .isGreaterThan(Timestamp.from(START_INSTANT));
+  }
 }

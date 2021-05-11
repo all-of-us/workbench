@@ -624,7 +624,7 @@ public class ProfileController implements ProfileApiDelegate {
 
   @Override
   public ResponseEntity<Void> confirmProfile() {
-    profileService.confirmProfile();
+    userService.confirmProfile();
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }
