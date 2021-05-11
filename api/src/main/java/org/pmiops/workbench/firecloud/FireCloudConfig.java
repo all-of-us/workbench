@@ -189,7 +189,7 @@ public class FireCloudConfig {
 
   @Bean
   @RequestScope(proxyMode = ScopedProxyMode.DEFAULT)
-  public BillingV2Api billingV2Api(@Qualifier(END_USER_API_CLIENT) ApiClient apiClient) {
+  public BillingV2Api billingV2Api(@Qualifier(SERVICE_ACCOUNT_API_CLIENT) ApiClient apiClient) {
     // Billing calls are made by the AllOfUs service account, rather than using the end user's
     // credentials.
     BillingV2Api api = new BillingV2Api();

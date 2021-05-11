@@ -215,6 +215,11 @@ public class WorkspacesController implements WorkspacesApiDelegate {
       // If v2 Billing is enabled, we will call FireCloud directly to create one.
       billingProject = createBillingProjectName(workbenchConfigProvider);
       fireCloudService.createAllOfUsBillingProject(billingProject, accessTier.getServicePerimeter());
+
+      // We use AoU Service Account to create the billing account then assign owner role to user.
+      // In this way, we can make sure AoU Service Account is still the owner of this billing
+      // account.
+      fireCloudService.addOwnerToBillingProject(user.getUsername(), billingProject);
     } else {
       billingProject = claimBillingProject(user, accessTier);
     }
