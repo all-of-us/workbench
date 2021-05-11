@@ -63,6 +63,7 @@ interface State {
   saveError: boolean;
   exportError: boolean;
   showRightPanel: boolean;
+  rightPanelContent: JSX.Element;
 }
 
 class NewDataSetModal extends React.Component<Props, State> {
@@ -85,7 +86,8 @@ class NewDataSetModal extends React.Component<Props, State> {
       genomicsAnalysisTool: GenomicsAnalysisToolEnum.NONE,
       saveError: false,
       exportError: false,
-      showRightPanel: false
+      showRightPanel: false,
+      rightPanelContent: null
     };
   }
 
@@ -211,12 +213,12 @@ class NewDataSetModal extends React.Component<Props, State> {
     navigateByUrl(`/workspaces/${workspaceNamespace}/${workspaceId}/data`);
   }
 
-  renderRightPanel() {
-    this.setState({showRightPanel: true});
+  renderRightPanel(children: JSX.Element) {
+    this.setState({showRightPanel: true, rightPanelContent: children});
   }
 
   hideRightPanel() {
-    this.setState({showRightPanel: false});
+    this.setState({showRightPanel: false, rightPanelContent: null});
   }
 
   render() {
@@ -245,9 +247,9 @@ class NewDataSetModal extends React.Component<Props, State> {
       }
     });
     const isApiError = conflictDataSetName || saveError || exportError;
-    return <Modal loading={loading} width={900}>
+    return <Modal loading={loading} width={!this.state.rightPanelContent ? 450 : 1200}>
       <FlexRow>
-        <div>
+        <div style={{maxWidth: 'calc(450px - 2rem)'}}>
           <ModalTitle>{this.props.dataSet ? 'Update' : 'Save'} Dataset</ModalTitle>
           <ModalBody>
             <div>
@@ -286,7 +288,10 @@ class NewDataSetModal extends React.Component<Props, State> {
                 })}
                 newNotebook={(v) => this.setState({newNotebook: v})}
                 updateNotebookName={(v) => this.setState({notebookName: v})}
-                workspaceNamespace={this.props.workspaceNamespace} workspaceFirecloudName={this.props.workspaceId}/>}
+                workspaceNamespace={this.props.workspaceNamespace} workspaceFirecloudName={this.props.workspaceId}
+                onSeeCodePreview={(children) => this.renderRightPanel(children)}
+                onHideCodePreview={() => this.hideRightPanel()}
+            />}
             </React.Fragment>
           </ModalBody>
           <ModalFooter>
@@ -306,10 +311,11 @@ class NewDataSetModal extends React.Component<Props, State> {
           </ModalFooter>
         </div>
 
-
-        <div>
-          Sidebar content
-        </div>
+        {this.state.rightPanelContent &&
+          <div style={{flex: 1, marginLeft: '1rem'}}>
+            {this.state.rightPanelContent}
+          </div>
+        }
       </FlexRow>
     </Modal>;
   }

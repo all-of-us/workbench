@@ -1,15 +1,15 @@
-import {Button, TabButton} from 'app/components/buttons';
+import {Button} from 'app/components/buttons';
 import {SmallHeader, styles as headerStyles} from 'app/components/headers';
-import {RadioButton, Select, TextArea, TextInput} from 'app/components/inputs';
+import {RadioButton, Select, TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {DataSetExportRequest, DataSetRequest, FileDetail, KernelTypeEnum} from 'generated/fetch';
 import * as React from 'react';
+import IFrame from '../../../components/IFrame';
+import IFrame2 from '../../../components/IFrame';
 import colors from '../../../styles/colors';
-import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
-import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
-import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
+import Frame from 'react-frame-component';
 import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
 
 interface Props {
@@ -19,6 +19,8 @@ interface Props {
   updateNotebookName: Function;
   workspaceNamespace: string;
   workspaceFirecloudName: string;
+  onSeeCodePreview: Function;
+  onHideCodePreview: Function;
 }
 
 interface State {
@@ -189,6 +191,21 @@ export class ExportDataSet extends React.Component<Props, State> {
                   AnalyticsTracker.DatasetBuilder.SeeCodePreview();
                 }
                 this.setState({seePreview: !seePreview});
+                if (seePreview) {
+                  // if it's currently seePreview, the user want's to hide
+                  this.props.onHideCodePreview();
+                } else {
+                  workspacesApi().readOnlyNotebook("aou-rw-local1-44385e06", "genomicsextractionworkspace", "qq.ipynb").then(html => {
+                    const placeholder = document.createElement('html');
+                    placeholder.innerHTML = html.html;
+                    placeholder.style.overflowY = 'scroll';
+                    placeholder.getElementsByTagName('body')[0].style.overflowY = 'scroll';
+                    placeholder.querySelector('#notebook').style.paddingTop = 0;
+                    placeholder.querySelectorAll('.input_prompt').forEach(e => e.remove());
+                    const iframe = <iframe scrolling="no" style={{width: '100%', height: '100%', border: 'none'}} srcDoc={placeholder.outerHTML}/>;
+                    this.props.onSeeCodePreview(iframe);
+                  });
+                }
               }}>
         {seePreview ? 'Hide Code Preview' : 'See Code Preview'}
       </Button>
