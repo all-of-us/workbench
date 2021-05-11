@@ -38,9 +38,11 @@ describe('Workspace Share Modal', () => {
     await reloadAboutPage();
     collaborators = await aboutPage.findUsersInCollaboratorList();
     // Verify OWNER (login user) information.
-    expect(collaborators.get(WorkspaceAccessLevel.Owner).some((item) => item === process.env.USER_NAME)).toBe(true);
+    expect(collaborators.get(WorkspaceAccessLevel.Owner).some((item) => item.includes(process.env.USER_NAME))).toBe(
+      true
+    );
     // Verify WRITER or READER information.
-    expect(collaborators.get(assign.accessRole).some((item) => item === assign.userEmail)).toBe(true);
+    expect(collaborators.get(assign.accessRole).some((item) => item.includes(assign.userEmail))).toBe(true);
   });
 
   // Test depends on previous test: Will fail when workspace is not found and share didn't work.
@@ -59,9 +61,11 @@ describe('Workspace Share Modal', () => {
 
     const collaborators = await aboutPage.findUsersInCollaboratorList();
     // Verify OWNER information in Collaborator list.
-    expect(collaborators.get(WorkspaceAccessLevel.Owner).some((item) => item === process.env.USER_NAME)).toBe(true);
+    expect(collaborators.get(WorkspaceAccessLevel.Owner).some((item) => item.includes(process.env.USER_NAME))).toBe(
+      true
+    );
     // Verify WRITER or READER information in Collaborator list.
-    expect(collaborators.get(assign.accessRole).some((item) => item === assign.userEmail)).toBe(true);
+    expect(collaborators.get(assign.accessRole).some((item) => item.includes(assign.userEmail))).toBe(true);
 
     // Verify Share modal: the Search input and Save button are disabled.
     const modal = await aboutPage.openShareModal();
@@ -85,7 +89,7 @@ describe('Workspace Share Modal', () => {
 
     // Verify WRITER or READER exists in Collaborator list.
     let collaborators = await aboutPage.findUsersInCollaboratorList();
-    expect(collaborators.get(assign.accessRole).some((item) => item === assign.userEmail)).toBe(true);
+    expect(collaborators.get(assign.accessRole).some((item) => item.includes(assign.userEmail))).toBe(true);
     collaborators.clear();
 
     await aboutPage.removeCollaborator(assign.userEmail);
