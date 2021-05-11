@@ -35,7 +35,7 @@ public interface WorkspaceFreeTierUsageDao extends CrudRepository<DbWorkspaceFre
   }
 
   @Query(
-      "SELECT u.user, SUM(u.cost) "
+      "SELECT u.user AS user, SUM(u.cost) AS cost "
           + "FROM DbWorkspaceFreeTierUsage u "
           + "WHERE u.cost IS NOT NULL "
           + "GROUP BY u.user")
