@@ -6,7 +6,7 @@ FROM ubuntu:18.04
 
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
-     openjdk-8-jdk \
+     adoptopenjdk-11-hotspot \
      curl \
      python \
      gcc \

@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk
+FROM adoptopenjdk:11-jre-hotspot
 ENV CLOUD_SDK_VERSION 260.0.0
 RUN cd && \
   wget https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz -O gcloud.tgz && \
