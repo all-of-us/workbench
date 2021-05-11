@@ -5,9 +5,7 @@ import { waitWhileLoading } from 'utils/waits-utils';
 import { getPropValue } from 'utils/element-utils';
 import AuthenticatedPage from './authenticated-page';
 
-
 export default class CriteriaSearchPage extends AuthenticatedPage {
-
   constructor(page: Page) {
     super(page);
   }
@@ -64,5 +62,4 @@ export default class CriteriaSearchPage extends AuthenticatedPage {
 
     return { name: nameValue, code: codeValue, vocabulary: vocabValue, rollUpCount: rollUpCountValue };
   }
-
 }

@@ -39,7 +39,8 @@ export enum MenuOption {
   SexAssignedAtBirth = 'Sex Assigned at Birth',
   Share = 'Share',
   SuppressGroupFromTotalCount = 'Suppress group from total count',
-  Visits = 'Visits'
+  Visits = 'Visits',
+  WholeGenomeVariant = 'Whole Genome Variant'
 }
 
 // Button or link text labels.
@@ -49,6 +50,7 @@ export enum LinkText {
   AllSurveys = 'All Surveys',
   ApplyModifiers = 'APPLY MODIFIERS',
   ApplyRecreate = 'APPLY & RECREATE',
+  Back = 'Back',
   BackToCohort = 'Back to cohort',
   BackToReviewSet = 'Back to review set',
   Calculate = 'Calculate',

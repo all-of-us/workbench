@@ -1,7 +1,7 @@
 import { ElementHandle, Page } from 'puppeteer';
 import CohortBuildPage, { FieldSelector } from 'app/page/cohort-build-page';
 import { waitForNumericalString, waitForText, waitWhileLoading } from 'utils/waits-utils';
-import CohortSearchPage, {Ethnicity} from 'app/page/cohort-search-page';
+import CohortSearchPage, { Ethnicity } from 'app/page/cohort-search-page';
 import CriteriaSearchPage from 'app/page/criteria-search-page';
 import TieredMenu from 'app/component/tiered-menu';
 import { LinkText, MenuOption } from 'app/text-labels';
@@ -10,13 +10,13 @@ import Modal from 'app/modal/modal';
 import InputSwitch from 'app/element/input-switch';
 import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
-import {getPropValue} from "utils/element-utils";
-import ReviewCriteriaSidebar from "app/component/review-criteria-sidebar";
-import Textbox from "app/element/textbox";
-import RadioButton from "app/element/radiobutton";
+import { getPropValue } from 'utils/element-utils';
+import ReviewCriteriaSidebar from 'app/component/review-criteria-sidebar';
+import Textbox from 'app/element/textbox';
+import RadioButton from 'app/element/radiobutton';
 
 export enum Sex {
-  FEMALE= 'Female',
+  FEMALE = 'Female',
   MALE = 'Male',
   UNKNOWN = 'Unknown',
   SKIPPED = 'Not Man Only, Not Woman Only, Prefer Not To Answer, Or Skipped'
@@ -143,11 +143,11 @@ export default class CohortParticipantsGroup {
       // Sometimes message fails to show up. Ignore error.
     }
     await waitWhileLoading(this.page);
-    return this.getGroupCriteriaList();
+    return this.findGroupCriteriaList();
   }
 
   async includePhysicalMeasurement(
-      criteriaList: PhysicalMeasurementsCriteria[],
+    criteriaList: PhysicalMeasurementsCriteria[],
     opts?: { filterSign?: FilterSign; filterValue?: number }
   ): Promise<void> {
     await this.clickCriteriaMenuItems([MenuOption.PhysicalMeasurements]);
@@ -155,7 +155,7 @@ export default class CohortParticipantsGroup {
     // Add every criteria in list.
     for (const criteria of criteriaList) {
       switch (criteria) {
-          // Blood Pressure
+        // Blood Pressure
         case PhysicalMeasurementsCriteria.BPHypotensive:
         case PhysicalMeasurementsCriteria.BPNormal:
         case PhysicalMeasurementsCriteria.BPPrehypertensive:
@@ -179,15 +179,19 @@ export default class CohortParticipantsGroup {
         case PhysicalMeasurementsCriteria.Weight:
         case PhysicalMeasurementsCriteria.BMI:
         case PhysicalMeasurementsCriteria.Height:
-        {
-          icon = ClrIconLink.findByName(this.page, { name: criteria, iconShape: 'slider', ancestorLevel: 2 });
-          await icon.click();
-          // The Review Criteria sidebar opens automatically.
-          const reviewCriteriaSidebar = new ReviewCriteriaSidebar(this.page);
-          await reviewCriteriaSidebar.waitUntilVisible();
-          const { filterSign = FilterSign.GreaterThanOrEqualTo, filterValue = 101 } = opts;
-          await reviewCriteriaSidebar.getPhysicalMeasurementParticipantResult(filterSign, filterValue);
-        }
+          {
+            icon = ClrIconLink.findByName(this.page, {
+              name: criteria,
+              iconShape: 'slider',
+              ancestorLevel: 2
+            });
+            await icon.click();
+            // The Review Criteria sidebar opens automatically.
+            const reviewCriteriaSidebar = new ReviewCriteriaSidebar(this.page);
+            await reviewCriteriaSidebar.waitUntilVisible();
+            const { filterSign = FilterSign.GreaterThanOrEqualTo, filterValue = 101 } = opts;
+            await reviewCriteriaSidebar.getPhysicalMeasurementParticipantResult(filterSign, filterValue);
+          }
           break;
         case PhysicalMeasurementsCriteria.PregnantEnrollment:
         case PhysicalMeasurementsCriteria.WheelChairUser:
@@ -199,13 +203,18 @@ export default class CohortParticipantsGroup {
           await icon.click();
           await this.finishReviewAndSaveCriteria();
           break;
-          // No default case. Force user to config for new criteria explicitly.
+        // No default case. Force user to config for new criteria explicitly.
       }
     }
   }
 
   async includeDemographicsDeceased(): Promise<string> {
     await this.clickCriteriaMenuItems([MenuOption.Demographics, MenuOption.Deceased]);
+    return this.getGroupCount();
+  }
+
+  async includeWholeGenomeVariant(): Promise<string> {
+    await this.clickCriteriaMenuItems([MenuOption.WholeGenomeVariant]);
     return this.getGroupCount();
   }
 
@@ -232,42 +241,50 @@ export default class CohortParticipantsGroup {
       await link.click();
       await this.getCriteriaAddedSuccessMessage();
     }
-    const selector = `${this.containerXpath}//*[./*[contains(text(), "Results")]]/div[contains(text(), "Number Participants:")]`;
-    return waitForNumericalString(this.page, selector);
+    return waitForNumericalString(this.page, this.numberOfParticipantsXpath());
   }
 
   async includeGenderIdentity(identities: string[]): Promise<string> {
     await this.clickCriteriaMenuItems([MenuOption.Demographics, MenuOption.GenderIdentity]);
     for (const identity of identities) {
-      const link = ClrIconLink.findByName(this.page, { startsWith: identity, iconShape: 'plus-circle', ancestorLevel: 0 });
+      const link = ClrIconLink.findByName(this.page, {
+        startsWith: identity,
+        iconShape: 'plus-circle',
+        ancestorLevel: 0
+      });
       await link.click();
       await this.getCriteriaAddedSuccessMessage();
     }
-    const selector = `${this.containerXpath}//*[./*[contains(text(), "Results")]]/div[contains(text(), "Number Participants:")]`;
-    return waitForNumericalString(this.page, selector);
+    return waitForNumericalString(this.page, this.numberOfParticipantsXpath());
   }
 
   // Demographics -> Race
   async includeRace(race: string[]): Promise<string> {
     await this.clickCriteriaMenuItems([MenuOption.Demographics, MenuOption.Race]);
     for (const r of race) {
-      const link = ClrIconLink.findByName(this.page, { startsWith: r, iconShape: 'plus-circle', ancestorLevel: 0 });
+      const link = ClrIconLink.findByName(this.page, {
+        startsWith: r,
+        iconShape: 'plus-circle',
+        ancestorLevel: 0
+      });
       await link.click();
       await this.getCriteriaAddedSuccessMessage();
     }
-    const selector = `${this.containerXpath}//*[./*[contains(text(), "Results")]]/div[contains(text(), "Number Participants:")]`;
-    return waitForNumericalString(this.page, selector);
+    return waitForNumericalString(this.page, this.numberOfParticipantsXpath());
   }
 
   async includeSexAssignedAtBirth(selections: Sex[]) {
     await this.clickCriteriaMenuItems([MenuOption.Demographics, MenuOption.SexAssignedAtBirth]);
     for (const selection of selections) {
-      const link = ClrIconLink.findByName(this.page, { startsWith: selection, iconShape: 'plus-circle', ancestorLevel: 0 });
+      const link = ClrIconLink.findByName(this.page, {
+        startsWith: selection,
+        iconShape: 'plus-circle',
+        ancestorLevel: 0
+      });
       await link.click();
       await this.getCriteriaAddedSuccessMessage();
     }
-    const selector = `${this.containerXpath}//*[./*[contains(text(), "Results")]]/div[contains(text(), "Number Participants:")]`;
-    return waitForNumericalString(this.page, selector);
+    return waitForNumericalString(this.page, this.numberOfParticipantsXpath());
   }
 
   async getGroupCount(): Promise<string> {
@@ -286,14 +303,17 @@ export default class CohortParticipantsGroup {
 
     const [lowerNumberInput, upperNumberInput] = await this.page.$x(selector);
     await Textbox.asBaseElement(this.page, lowerNumberInput)
-        .type(minAge.toString())
-        .then((input) => input.pressTab());
+      .type(minAge.toString())
+      .then((input) => input.pressTab());
     await Textbox.asBaseElement(this.page, upperNumberInput)
-        .type(maxAge.toString())
-        .then((input) => input.pressTab());
+      .type(maxAge.toString())
+      .then((input) => input.pressTab());
 
     // Select "Age at Consent" radiobutton.
-    const radio = RadioButton.findByName(this.page, {name: 'ageType', normalizeSpace: 'Age at Consent'});
+    const radio = RadioButton.findByName(this.page, {
+      name: 'ageType',
+      normalizeSpace: 'Age at Consent'
+    });
     await radio.select();
 
     // Get count from slider badge
@@ -309,11 +329,15 @@ export default class CohortParticipantsGroup {
   async includeVisits(visits: Visits[]): Promise<string> {
     await this.clickCriteriaMenuItems([MenuOption.Visits]);
     for (const visit of visits) {
-      const icon = ClrIconLink.findByName(this.page, { startsWith: visit, iconShape: 'plus-circle', ancestorLevel: 1 });
+      const icon = ClrIconLink.findByName(this.page, {
+        startsWith: visit,
+        iconShape: 'plus-circle',
+        ancestorLevel: 1
+      });
       await icon.click();
-      await this.finishReviewAndSaveCriteria();
+      await this.getCriteriaAddedSuccessMessage();
     }
-
+    await this.finishReviewAndSaveCriteria();
     // Wait for Cohort Build page to load.
     await waitWhileLoading(this.page);
     const cohortBuildPage = new CohortBuildPage(this.page);
@@ -321,7 +345,7 @@ export default class CohortParticipantsGroup {
     return cohortBuildPage.getTotalCount();
   }
 
-  private async clickCriteriaMenuItems(menuItemLinks: MenuOption[]): Promise<void> {
+  async clickCriteriaMenuItems(menuItemLinks: MenuOption[]): Promise<void> {
     const menu = await this.openAddCriteriaTieredMenu();
     await menu.select(menuItemLinks);
   }
@@ -356,9 +380,13 @@ export default class CohortParticipantsGroup {
     return tieredMenu;
   }
 
-  async getGroupCriteriaList(): Promise<ElementHandle[]> {
+  async findGroupCriteriaList(): Promise<ElementHandle[]> {
     const selector = `${this.rootXpath}//*[@data-test-id="item-list"]`;
     return this.page.$x(selector);
+  }
+
+  numberOfParticipantsXpath(): string {
+    return this.containerXpath + '//*[./*[contains(text(), "Results")]]/div[contains(text(), "Number Participants:")]';
   }
 
   async clickTemporalSwitch(onoff: boolean): Promise<void> {
@@ -378,8 +406,8 @@ export default class CohortParticipantsGroup {
   }
 
   async getCriteriaAddedSuccessMessage(): Promise<string> {
-    const css = '.p-growl-item-container.p-highlight.p-growl-message-success .p-growl-image.pi-check + .p-growl-message .p-growl-details';
-    const msg = await this.page.waitForSelector(css, {visible: true});
+    const css = '.p-growl-message-success .p-growl-image.pi-check + .p-growl-message .p-growl-details';
+    const msg = await this.page.waitForSelector(css, { visible: true, timeout: 5000 });
     return getPropValue<string>(msg, 'textContent');
   }
 
@@ -404,5 +432,4 @@ export default class CohortParticipantsGroup {
     await this.page.waitForTimeout(1000); // Short pause to wait for charts animation finish.
     return count;
   }
-
 }

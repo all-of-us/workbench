@@ -3,10 +3,10 @@ import SelectMenu from 'app/component/select-menu';
 import { LinkText } from 'app/text-labels';
 import { buildXPath } from 'app/xpath-builders';
 import { ElementType } from 'app/xpath-options';
-import {waitForNumericalString, waitWhileLoading} from 'utils/waits-utils';
+import { waitForNumericalString, waitWhileLoading } from 'utils/waits-utils';
 import BaseHelpSidebar from './base-help-sidebar';
 import { logger } from 'libs/logger';
-import {FilterSign} from "app/page/cohort-participants-group";
+import { FilterSign } from 'app/page/cohort-participants-group';
 
 enum SectionSelectors {
   AttributesForm = '//*[@id="attributes-form"]',
@@ -28,6 +28,7 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
   async waitUntilVisible(): Promise<void> {
     await super.waitUntilVisible();
     const title = await this.getTitle();
+    await this.waitUntilSectionVisible(SectionSelectors.SelectionList);
     logger.info(`"${title}" sidebar is opened`);
   }
 

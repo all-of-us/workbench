@@ -2,7 +2,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import CohortBuildPage, { FieldSelector } from 'app/page/cohort-build-page';
 import { makeRandomName, makeWorkspaceName, numericalStringToNumber } from 'utils/str-utils';
-import { PhysicalMeasurementsCriteria } from 'app/page/criteria-search-page';
+import { PhysicalMeasurementsCriteria } from 'app/page/cohort-participants-group';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import CohortReviewModal from 'app/modal/cohort-review-modal';
@@ -92,7 +92,7 @@ describe('Editing Cohort tests', () => {
 
     // Insert new group in Include Participants
     const newGroup = cohortBuildPage.findIncludeParticipantsEmptyGroup();
-    await newGroup.includePhysicalMeasurement(PhysicalMeasurementsCriteria.Weight, { filterValue: 200 });
+    await newGroup.includePhysicalMeasurement([PhysicalMeasurementsCriteria.Weight], { filterValue: 200 });
 
     // Check Total Count and new Total Count is different
     const newTotalCount = numericalStringToNumber(await cohortBuildPage.getTotalCount());
