@@ -1,10 +1,12 @@
 import { ElementHandle, Page } from 'puppeteer';
 import { LinkText, WorkspaceAccessLevel } from 'app/text-labels';
 import Textbox from 'app/element/textbox';
-import ClrIcon from 'app/element/clr-icon-link';
-import { waitForText } from 'utils/waits-utils';
+import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import Modal from './modal';
 import { logger } from 'libs/logger';
+import Button from 'app/element/button';
+import { ElementType } from 'app/xpath-options';
+import ClrIconLink from 'app/element/clr-icon-link';
 
 const modalText = 'share this workspace';
 
@@ -18,27 +20,43 @@ export default class ShareModal extends Modal {
     return true;
   }
 
-  async shareWithUser(username: string, level: WorkspaceAccessLevel): Promise<void> {
+  async shareWithUser(userName: string, level: WorkspaceAccessLevel): Promise<void> {
+    const dropDownXpath = `${this.getXpath()}//*[@data-test-id="drop-down"]`;
+    const waitForDropDown = async () => {
+      await waitWhileLoading(this.page);
+      await this.page.waitForXPath(dropDownXpath, { visible: true });
+    };
+    const waitForClose = async () => {
+      await waitWhileLoading(this.page);
+      await this.page.waitForXPath(dropDownXpath, { hidden: true });
+    };
     const searchBox = this.waitForSearchBox();
-    await searchBox.type(username);
+    await searchBox.type(userName);
 
-    const addCollab = this.waitForAddCollaboratorIcon();
+    await waitForDropDown(); // Needed for the dropdown
+    const addCollab = this.waitForAddCollaboratorIcon(userName);
     await addCollab.click();
+    await waitForClose();
 
-    const roleInput = await this.waitForRoleSelectorForUser(username);
+    const roleInput = await this.waitForRoleSelectorForUser(userName);
     await roleInput.click();
 
     const ownerOpt = await this.waitForRoleOption(level);
     await ownerOpt.click();
 
     await this.clickButton(LinkText.Save, { waitForClose: true });
-    logger.info(`Shared workspace to ${username} with role ${level}`);
+    logger.info(`Shared workspace to ${userName} with role ${level}`);
+  }
+
+  getSaveButton(): Button {
+    return Button.findByName(this.page, { name: LinkText.Save });
   }
 
   async removeUser(username: string): Promise<void> {
     const rmCollab = await this.page.waitForXPath(`${this.collabRowXPath(username)}//clr-icon[@shape="minus-circle"]`, {
       visible: true
     });
+    await rmCollab.hover();
     await rmCollab.click();
     await this.clickButton(LinkText.Save, { waitForClose: true });
   }
@@ -60,8 +78,12 @@ export default class ShareModal extends Modal {
     return Textbox.findByName(this.page, { name: 'Find Collaborators' }, this);
   }
 
-  waitForAddCollaboratorIcon(): ClrIcon {
-    return ClrIcon.findByName(this.page, { iconShape: 'plus-circle' }, this);
+  waitForAddCollaboratorIcon(email: string): ClrIconLink {
+    return ClrIconLink.findByName(
+      this.page,
+      { type: ElementType.Icon, iconShape: 'plus-circle', name: email, ancestorLevel: 2 },
+      this
+    );
   }
 
   async waitForRoleSelectorForUser(username: string): Promise<Textbox> {

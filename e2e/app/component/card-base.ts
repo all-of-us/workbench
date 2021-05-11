@@ -17,6 +17,7 @@ export default abstract class CardBase extends Container {
   async clickSnowmanIcon(): Promise<this> {
     const iconXpath = `.${snowmanIconXpath}`;
     const [snowmanIcon] = await this.asElementHandle().$x(iconXpath);
+    await snowmanIcon.hover();
     await snowmanIcon.click();
     await snowmanIcon.dispose();
     return this;
@@ -24,7 +25,9 @@ export default abstract class CardBase extends Container {
 
   async getSnowmanMenu(): Promise<SnowmanMenu> {
     await this.clickSnowmanIcon();
-    return new SnowmanMenu(this.page);
+    const snowmanMenu = new SnowmanMenu(this.page);
+    await snowmanMenu.waitUntilVisible();
+    return snowmanMenu;
   }
 
   async selectSnowmanMenu(options: MenuOption, opt: { waitForNav?: boolean } = {}): Promise<void> {
