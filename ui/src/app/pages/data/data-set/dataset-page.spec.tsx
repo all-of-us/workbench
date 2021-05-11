@@ -373,6 +373,19 @@ describe('DataSetPage', () => {
     wrapper = mount(<DataSetPage/>);
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(2);
+  });
 
+  it('should display Pre packaged concept set per genomics extraction flag', async () => {
+    cdrVersionTiersResponse.tiers[0].versions[0].hasFitbitData = true;
+    cdrVersionTiersResponse.tiers[0].versions[0].hasWgsData = true;
+
+    let wrapper = mount(<DataSetPage/>);
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(7);
+
+    serverConfigStore.set({config: {enableGenomicExtraction: false, gsuiteDomain: ''}});
+    wrapper = mount(<DataSetPage/>);
+    await waitOneTickAndUpdate(wrapper);
+    expect(wrapper.find('[data-test-id="prePackage-concept-set-item"]').length).toBe(6);
   });
 });
