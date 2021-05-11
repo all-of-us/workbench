@@ -649,7 +649,8 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         prepackagedList = prepackagedList
             .filter(prepack => !fp.startsWith('FITBIT', prepack));
       }
-      if (!getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
+      if (!serverConfigStore.get().config.enableGenomicExtraction ||
+          !getCdrVersion(this.props.workspace, this.props.cdrVersionTiersResponse).hasWgsData) {
         prepackagedList = prepackagedList.filter(prepack => prepack !== 'WHOLEGENOME');
       }
       return prepackagedList;
