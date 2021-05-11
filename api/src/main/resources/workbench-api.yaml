@@ -5555,6 +5555,8 @@ definitions:
         enum:
           - complianceTraining
           - dataUseAgreement
+          - profileConfirmation
+          - publicationConfirmation
       expirationEpochMillis:
         type: integer
         format: int64
