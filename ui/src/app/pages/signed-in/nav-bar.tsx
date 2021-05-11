@@ -20,6 +20,7 @@ const styles = reactStyles({
     boxShadow: '3px 0px 10px',
     paddingTop: '1rem',
     paddingBottom: '0.5rem',
+    paddingRight: '30px',
     backgroundColor: colors.white,
     /*
      * NOTE: if you ever need to change this number, you need to ALSO change the
