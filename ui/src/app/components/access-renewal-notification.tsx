@@ -89,7 +89,7 @@ export const maybeDaysRemaining = (profile: Profile): number | undefined => {
 const AccessRenewalNotification = (props: {daysRemaining: number}) => {
   return <FlexRow style={styles.box}>
     <AlarmExclamation style={styles.icon}/>
-    <div style={styles.text}>Time for access renewal. [{props.daysRemaining}] days remaining.</div>
+    <div style={styles.text}>Time for access renewal. {props.daysRemaining} days remaining.</div>
     {/* TODO RW-6618 navigate to Access Renewal pages */}
     <Button type='primary' style={styles.button} onClick={() => navigateByUrl('profile')}>
       <div style={styles.buttonText}>Get Started</div>
