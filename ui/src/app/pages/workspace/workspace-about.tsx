@@ -54,7 +54,8 @@ const styles = reactStyles({
     paddingBottom: '0.5rem'
   },
   infoBox: {
-    backgroundColor: colorWithWhiteness(colors.primary, 0.75), height: '2rem', width: '6rem',
+    backgroundColor: colorWithWhiteness(colors.primary, 0.75),
+    width: '6rem',
     borderRadius: '5px', padding: '0.4rem', marginRight: '0.5rem', marginBottom: '0.5rem',
     color: colors.primary, lineHeight: '14px'
   },
