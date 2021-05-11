@@ -81,7 +81,7 @@ export default class ShareModal extends Modal {
   waitForAddCollaboratorIcon(email: string): ClrIconLink {
     return ClrIconLink.findByName(
       this.page,
-      { type: ElementType.Icon, iconShape: 'plus-circle', name: email, ancestorLevel: 2 },
+      { type: ElementType.Icon, iconShape: 'plus-circle', containsText: email, ancestorLevel: 2 },
       this
     );
   }
