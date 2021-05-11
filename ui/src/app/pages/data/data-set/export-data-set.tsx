@@ -4,12 +4,13 @@ import {RadioButton, Select, TextArea, TextInput} from 'app/components/inputs';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {
-  DataSetRequest,
-  FileDetail,
-  KernelTypeEnum
-} from 'generated/fetch';
+import {DataSetExportRequest, DataSetRequest, FileDetail, KernelTypeEnum} from 'generated/fetch';
 import * as React from 'react';
+import colors from '../../../styles/colors';
+import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
+import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
+import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
+import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
 
 interface Props {
   dataSetRequest: DataSetRequest;
@@ -129,33 +130,25 @@ export class ExportDataSet extends React.Component<Props, State> {
           value: notebook.name.slice(0, -6),
           label: notebook.name.slice(0, -6)
         })));
-    return <React.Fragment>{notebooksLoading && <SpinnerOverlay />}<Button style={{marginTop: '1rem'}} data-test-id='code-preview-button'
-            onClick={() => {
-              if (!seePreview) {
-                AnalyticsTracker.DatasetBuilder.SeeCodePreview();
-              }
-              this.setState({seePreview: !seePreview});
-            }}>
-      {seePreview ? 'Hide Preview' : 'See Code Preview'}
-    </Button>
-    {seePreview && <React.Fragment>
-      {Array.from(queries.values())
-        .filter(query => query !== undefined).length === 0 && <SpinnerOverlay />}
-      <div style={styles.codePreviewSelector}>
-        {Object.keys(KernelTypeEnum).map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])
-          .map((kernelTypeEnum, i) =>
-                <TabButton onClick={() => this.setState({previewedKernelType: kernelTypeEnum})}
-                           key={i}
-                           active={previewedKernelType === kernelTypeEnum}
-                           style={styles.codePreviewSelectorTab}
-                           disabled={queries.get(kernelTypeEnum) === undefined}>
-                  {kernelTypeEnum}
-                </TabButton>)}
-      </div>
-      <TextArea disabled={true} onChange={() => {}}
-                data-test-id='code-text-box'
-                value={queries.get(previewedKernelType)} />
-    </React.Fragment>}
+    return <React.Fragment>{notebooksLoading && <SpinnerOverlay />}
+    {/*{seePreview && <React.Fragment>*/}
+    {/*  {Array.from(queries.values())*/}
+    {/*    .filter(query => query !== undefined).length === 0 && <SpinnerOverlay />}*/}
+    {/*  <div style={styles.codePreviewSelector}>*/}
+    {/*    {Object.keys(KernelTypeEnum).map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])*/}
+    {/*      .map((kernelTypeEnum, i) =>*/}
+    {/*            <TabButton onClick={() => this.setState({previewedKernelType: kernelTypeEnum})}*/}
+    {/*                       key={i}*/}
+    {/*                       active={previewedKernelType === kernelTypeEnum}*/}
+    {/*                       style={styles.codePreviewSelectorTab}*/}
+    {/*                       disabled={queries.get(kernelTypeEnum) === undefined}>*/}
+    {/*              {kernelTypeEnum}*/}
+    {/*            </TabButton>)}*/}
+    {/*  </div>*/}
+    {/*  <TextArea disabled={true} onChange={() => {}}*/}
+    {/*            data-test-id='code-text-box'*/}
+    {/*            value={queries.get(previewedKernelType)} />*/}
+    {/*</React.Fragment>}*/}
     <div style={{marginTop: '1rem'}}>
       <Select value={this.state.notebookName}
               options={selectOptions}
@@ -166,20 +159,52 @@ export class ExportDataSet extends React.Component<Props, State> {
       <TextInput onChange={(v) => this.setNotebookName(v)}
                  value={notebookName} data-test-id='notebook-name-input'/>
       <div style={headerStyles.formLabel}>
-        Programming Language:
+        Select programming language
       </div>
       {Object.keys(KernelTypeEnum).map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])
         .map((kernelTypeEnum, i) =>
-              <label key={i} style={{display: 'block'}}>
+              <label key={i} style={{display: 'inline-flex', justifyContent: 'center', alignItems: 'center', marginRight: '1rem', color: colors.primary}}>
                 <RadioButton
+                    style={{marginRight: '0.25rem'}}
                     data-test-id={'kernel-type-' + kernelTypeEnum.toLowerCase()}
                     checked={this.state.kernelType === kernelTypeEnum}
                     onChange={() => this.onKernelTypeChange(kernelTypeEnum)}
                 />
-                &nbsp;{kernelTypeEnum}
+                {kernelTypeEnum}
               </label>
           )}
-    </React.Fragment>}
+
+      <div style={headerStyles.formLabel}>
+          Select analysis tool for genetic variant data
+      </div>
+      {this.genomicsToolInput('Hail', GenomicsAnalysisToolEnum.HAIL)}
+      {this.genomicsToolInput('PLINK', GenomicsAnalysisToolEnum.PLINK)}
+      {this.genomicsToolInput('Other VCF-compatible tool', GenomicsAnalysisToolEnum.NONE)}
+    </React.Fragment>
+    }
+
+      <Button type={'secondarySmall'} style={{marginTop: '1rem'}} data-test-id='code-preview-button'
+              onClick={() => {
+                if (!seePreview) {
+                  AnalyticsTracker.DatasetBuilder.SeeCodePreview();
+                }
+                this.setState({seePreview: !seePreview});
+              }}>
+        {seePreview ? 'Hide Code Preview' : 'See Code Preview'}
+      </Button>
+
       </React.Fragment>;
+  }
+
+  genomicsToolInput(displayName: string, genomicsTool: GenomicsAnalysisToolEnum) {
+    return <label key={'genomics-tool-' + genomicsTool} style={{display: 'inline-flex', justifyContent: 'center', alignItems: 'center', marginRight: '1rem', color: colors.primary}}>
+      <RadioButton
+        style={{marginRight: '0.25rem'}}
+        data-test-id={'genomics-tool-' + genomicsTool}
+        checked={this.state.kernelType === genomicsTool}
+        onChange={() => this.onKernelTypeChange(genomicsTool)}
+      />
+      {displayName}
+    </label>;
   }
 }

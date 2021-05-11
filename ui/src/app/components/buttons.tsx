@@ -121,7 +121,7 @@ const buttonVariants = {
       ...styles.baseNew,
       backgroundColor: 'transparent',
       borderColor: colors.accent,
-      borderRadius: 0,
+      borderRadius: '5px',
       borderStyle: 'solid',
       borderWidth: '1px',
       color: colors.accent,

@@ -26,6 +26,7 @@ import * as fp from 'lodash/fp';
 import * as React from 'react';
 
 import {validate} from 'validate.js';
+import {FlexRow} from '../../../components/flex';
 import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
 import GenomicsDataTypeEnum = DataSetExportRequest.GenomicsDataTypeEnum;
 import {ExportDataSet} from './export-data-set';
@@ -61,6 +62,7 @@ interface State {
   genomicsAnalysisTool: GenomicsAnalysisToolEnum;
   saveError: boolean;
   exportError: boolean;
+  showRightPanel: boolean;
 }
 
 class NewDataSetModal extends React.Component<Props, State> {
@@ -82,7 +84,8 @@ class NewDataSetModal extends React.Component<Props, State> {
       includeRawMicroarrayData: false,
       genomicsAnalysisTool: GenomicsAnalysisToolEnum.NONE,
       saveError: false,
-      exportError: false
+      exportError: false,
+      showRightPanel: false
     };
   }
 
@@ -208,6 +211,14 @@ class NewDataSetModal extends React.Component<Props, State> {
     navigateByUrl(`/workspaces/${workspaceNamespace}/${workspaceId}/data`);
   }
 
+  renderRightPanel() {
+    this.setState({showRightPanel: true});
+  }
+
+  hideRightPanel() {
+    this.setState({showRightPanel: false});
+  }
+
   render() {
     const {
       conflictDataSetName,
@@ -234,99 +245,72 @@ class NewDataSetModal extends React.Component<Props, State> {
       }
     });
     const isApiError = conflictDataSetName || saveError || exportError;
-    return <Modal loading={loading}>
-      <ModalTitle>{this.props.dataSet ? 'Update' : 'Save'} Dataset</ModalTitle>
-      <ModalBody>
+    return <Modal loading={loading} width={900}>
+      <FlexRow>
         <div>
-          {isApiError && <AlertDanger style={{marginBottom: '0.25rem', padding: '0 0.25rem'}}>
-            {conflictDataSetName && <span>A Dataset with the same name exists</span>}
-            {saveError && <span>
+          <ModalTitle>{this.props.dataSet ? 'Update' : 'Save'} Dataset</ModalTitle>
+          <ModalBody>
+            <div>
+              {isApiError && <AlertDanger style={{marginBottom: '0.25rem', padding: '0 0.25rem'}}>
+                {conflictDataSetName && <span>A Dataset with the same name exists</span>}
+                {saveError && <span>
               The request cannot be completed. Please try again or contact Support in the left hand navigation
             </span>}
-            {exportError && <span>
+                {exportError && <span>
               The Dataset was saved but there was an error exporting to the notebook. Please try exporting from the Dataset card on the
-              &nbsp;<Link style={{display: 'inline-block'}} onClick={() => this.navigateToDataPage()}>Data Page</Link>
+                    &nbsp;<Link style={{display: 'inline-block'}} onClick={() => this.navigateToDataPage()}>Data Page</Link>
             </span>}
-          </AlertDanger>}
-          <TextInput type='text' autoFocus placeholder='Dataset Name'
-                     value={name} data-test-id='data-set-name-input'
-                     onChange={v => this.setState({
-                       name: v, conflictDataSetName: false
-                     })}/>
-        </div>
-        <TooltipTrigger content={this.props.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
-          <div style={{display: 'flex', alignItems: 'center', marginTop: '1rem', ...(this.props.billingLocked && {opacity: 0.5})}}>
-            <CheckBox style={{height: 17, width: 17}}
-                      disabled={this.props.billingLocked}
-                      data-test-id='export-to-notebook'
-                      onChange={(checked) => this.changeExportToNotebook(checked)}
-                      checked={this.state.exportToNotebook} />
-            <div style={{marginLeft: '.5rem',
-              color: colors.primary}}>Export to notebook</div>
-          </div>
-        </TooltipTrigger>
-        <React.Fragment>  {exportToNotebook && <ExportDataSet
-            dataSetRequest={this.getDataSetRequest()}
-            notebookType={(kernelTypeEnum) => this.setState({
-              kernelType: kernelTypeEnum,
-              includeRawMicroarrayData: kernelTypeEnum === KernelTypeEnum.R ? false : this.state.includeRawMicroarrayData
-            })}
-            newNotebook={(v) => this.setState({newNotebook: v})}
-            updateNotebookName={(v) => this.setState({notebookName: v})}
-            workspaceNamespace={this.props.workspaceNamespace} workspaceFirecloudName={this.props.workspaceId}/>}
-          {this.props.displayMicroarrayOptions && this.state.kernelType === KernelTypeEnum.Python &&
-          <div style={{border: '1px solid grey', padding: '.5rem', paddingTop: 0, marginTop: '.5rem'}}>
-            <TextColumn>
-              <div style={headerStyles.formLabel}>Genomics Pre-alpha</div>
-              <div>(non-production only; synthetic data)</div>
-            </TextColumn>
-
-            <div style={{display: 'flex', alignItems: 'center'}}>
-              <CheckBox style={{height: 17, width: 17}}
-                        data-test-id='include-raw-microarray-data'
-                        onChange={(checked) => this.setState({includeRawMicroarrayData: checked})}
-                        checked={this.state.includeRawMicroarrayData} />
-              <div style={{marginLeft: '.5rem', color: colors.primary}}>
-                Include raw microarray data
-              </div>
+              </AlertDanger>}
+              <TextInput type='text' autoFocus placeholder='Dataset Name'
+                         value={name} data-test-id='data-set-name-input'
+                         onChange={v => this.setState({
+                           name: v, conflictDataSetName: false
+                         })}/>
             </div>
+            <TooltipTrigger content={this.props.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
+              <div style={{display: 'flex', alignItems: 'center', marginTop: '1rem', ...(this.props.billingLocked && {opacity: 0.5})}}>
+                <CheckBox style={{height: 17, width: 17}}
+                          disabled={this.props.billingLocked}
+                          data-test-id='export-to-notebook'
+                          onChange={(checked) => this.changeExportToNotebook(checked)}
+                          checked={this.state.exportToNotebook} />
+                <div style={{marginLeft: '.5rem',
+                  color: colors.primary}}>Export to notebook</div>
+              </div>
+            </TooltipTrigger>
+            <React.Fragment>  {exportToNotebook && <ExportDataSet
+                dataSetRequest={this.getDataSetRequest()}
+                notebookType={(kernelTypeEnum) => this.setState({
+                  kernelType: kernelTypeEnum,
+                  includeRawMicroarrayData: kernelTypeEnum === KernelTypeEnum.R ? false : this.state.includeRawMicroarrayData
+                })}
+                newNotebook={(v) => this.setState({newNotebook: v})}
+                updateNotebookName={(v) => this.setState({notebookName: v})}
+                workspaceNamespace={this.props.workspaceNamespace} workspaceFirecloudName={this.props.workspaceId}/>}
+            </React.Fragment>
+          </ModalBody>
+          <ModalFooter>
+            <Button type='secondary'
+                    onClick={this.props.closeFunction}
+                    style={{marginRight: '2rem'}}>
+              Cancel
+            </Button>
+            <TooltipTrigger content={summarizeErrors(errors)}>
+              <Button type='primary'
+                      data-test-id='save-data-set'
+                      disabled={errors}
+                      onClick={() => this.onSaveClick()}>
+                {!this.props.dataSet ? 'Save' : 'Update' }{exportToNotebook && ' and Analyze'}
+              </Button>
+            </TooltipTrigger>
+          </ModalFooter>
+        </div>
 
-            {this.state.includeRawMicroarrayData && <div style={{marginTop: '.3rem'}}>
-              <p style={{color: colors.primary}}>
-                Extract genomics data for analysis using:
-              </p>
 
-              {Object.keys(GenomicsAnalysisToolEnum).map((enumKey, i) => {
-                return <React.Fragment>
-                  <label key={i} style={{display: 'block'}}>
-                    <RadioButton
-                      data-test-id={'genomics-analysis-tool-' + enumKey.toLowerCase()}
-                      checked={this.state.genomicsAnalysisTool === GenomicsAnalysisToolEnum[enumKey]}
-                      onChange={() => this.setState({genomicsAnalysisTool: GenomicsAnalysisToolEnum[enumKey]})}
-                    />
-                    &nbsp; {fp.startCase(enumKey.toLowerCase())}
-                  </label>
-                </React.Fragment>;
-              })}
-            </div>}
-          </div> }
-        </React.Fragment>
-      </ModalBody>
-      <ModalFooter>
-        <Button type='secondary'
-                onClick={this.props.closeFunction}
-                style={{marginRight: '2rem'}}>
-          Cancel
-        </Button>
-        <TooltipTrigger content={summarizeErrors(errors)}>
-          <Button type='primary'
-                  data-test-id='save-data-set'
-                  disabled={errors}
-                  onClick={() => this.onSaveClick()}>
-            {!this.props.dataSet ? 'Save' : 'Update' }{exportToNotebook && ' and Analyze'}
-          </Button>
-        </TooltipTrigger>
-      </ModalFooter>
+        <div>
+          Sidebar content
+        </div>
+      </FlexRow>
     </Modal>;
   }
 }
