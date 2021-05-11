@@ -80,7 +80,7 @@ export const maybeDaysRemaining = (profile: Profile): number | undefined => {
   if (earliestExpiration) {
     const daysRemaining = (earliestExpiration - Date.now()) / MILLIS_PER_DAY;
     if (daysRemaining < NOTIFICATION_THRESHOLD_DAYS) {
-      // note that we will show [0] days remaining if the expiration is later today
+      // note that we will show 0 days remaining if the expiration is later today
       return Math.trunc(daysRemaining);
     }
   }
