@@ -1,8 +1,8 @@
 import { ElementHandle, Page } from 'puppeteer';
 import CohortBuildPage, { FieldSelector } from 'app/page/cohort-build-page';
 import { waitForNumericalString, waitForText, waitWhileLoading } from 'utils/waits-utils';
-import CohortSearchPage from 'app/page/cohort-search-page';
-import CriteriaSearchPage, { FilterSign, PhysicalMeasurementsCriteria, Visits } from 'app/page/criteria-search-page';
+import CohortSearchPage, {Ethnicity} from 'app/page/cohort-search-page';
+import CriteriaSearchPage from 'app/page/criteria-search-page';
 import TieredMenu from 'app/component/tiered-menu';
 import { LinkText, MenuOption } from 'app/text-labels';
 import { snowmanIconXpath } from 'app/component/snowman-menu';
@@ -10,9 +10,67 @@ import Modal from 'app/modal/modal';
 import InputSwitch from 'app/element/input-switch';
 import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
+import {getPropValue} from "utils/element-utils";
+import ReviewCriteriaSidebar from "app/component/review-criteria-sidebar";
+import Textbox from "app/element/textbox";
+import RadioButton from "app/element/radiobutton";
+
+export enum Sex {
+  FEMALE= 'Female',
+  MALE = 'Male',
+  UNKNOWN = 'Unknown',
+  SKIPPED = 'Not Man Only, Not Woman Only, Prefer Not To Answer, Or Skipped'
+}
+export enum Race {
+  WHITE = 'White',
+  BLACK = 'Black Or African American',
+  UNKNOWN = 'Unknown'
+}
+
+export enum PhysicalMeasurementsCriteria {
+  BMI = 'BMI',
+  BPHypotensive = 'Hypotensive (Systolic <= 90 / Diastolic <= 60)', // BP prefix for Blood Pressure
+  BPNormal = 'Normal (Systolic <= 120 / Diastolic <= 80)', // Blood Pressure
+  BPPrehypertensive = 'Pre-Hypertensive (Systolic 121-139 / Diastolic 81-89)', // Blood Pressure
+  BPHypertensive = 'Hypertensive (Systolic >= 140 / Diastolic >= 90)', // Blood Pressure
+  HeartRate = 'Heart Rate',
+  Height = 'Height',
+  HipCircumference = 'Hip Circumference',
+  HRNoIrregularity = 'No-irregularity detected', // Heart Rhythm Status
+  HRIrregularity = 'Irregularity detected', // Heart Rhythm Status
+  PregnantEnrollment = 'Pregnant at enrollment',
+  WaistCircumference = 'Waist Circumference',
+  Weight = 'Weight',
+  WheelChairUser = 'Wheelchair user at enrollment'
+}
+
+export enum Visits {
+  AmbulanceVisit = 'Ambulance Visit',
+  AmbulatoryClinicCenter = 'Ambulatory Clinic/Center',
+  AmbulatoryRehabilitationVisit = 'Ambulatory Rehabilitation Visit',
+  EmergencyRoomVisit = 'Emergency Room Visit',
+  EmergencyRoomAndInpatientVisit = 'Emergency Room and Inpatient Visit',
+  HomeVisit = 'Home Visit',
+  InpatientVisit = 'Inpatient Visit',
+  LaboratoryVisit = 'Laboratory Visit',
+  NonhospitalInstitutionVisit = 'Non-hospital institution Visit',
+  OfficeVisit = 'Office Visit',
+  OutpatientVisit = 'Outpatient Visit',
+  PharmacyVisit = 'Pharmacy visit'
+}
+
+export enum FilterSign {
+  Any = 'Any',
+  AnyValue = 'Any value',
+  Equals = 'Equals',
+  GreaterThanOrEqualTo = 'Greater Than or Equal To',
+  LessThanOrEqualTo = 'Less Than or Equal To',
+  Between = 'Between'
+}
 
 export default class CohortParticipantsGroup {
   private rootXpath: string;
+  private containerXpath = '//*[@id="criteria-search-container"]';
 
   constructor(private readonly page: Page) {}
 
@@ -89,13 +147,61 @@ export default class CohortParticipantsGroup {
   }
 
   async includePhysicalMeasurement(
-    criteriaName: PhysicalMeasurementsCriteria,
+      criteriaList: PhysicalMeasurementsCriteria[],
     opts?: { filterSign?: FilterSign; filterValue?: number }
-  ): Promise<string> {
+  ): Promise<void> {
     await this.clickCriteriaMenuItems([MenuOption.PhysicalMeasurements]);
-    const searchPage = new CriteriaSearchPage(this.page);
-    await searchPage.waitForLoad();
-    return searchPage.addPhysicalMeasurementsCriteria([criteriaName], opts);
+    let icon: ClrIconLink;
+    // Add every criteria in list.
+    for (const criteria of criteriaList) {
+      switch (criteria) {
+          // Blood Pressure
+        case PhysicalMeasurementsCriteria.BPHypotensive:
+        case PhysicalMeasurementsCriteria.BPNormal:
+        case PhysicalMeasurementsCriteria.BPPrehypertensive:
+        case PhysicalMeasurementsCriteria.BPHypertensive:
+          // Expand Blood Pressure group.
+          icon = ClrIconLink.findByName(this.page, {
+            name: 'Blood Pressure',
+            iconShape: 'angle right',
+            ancestorLevel: 3
+          });
+          await icon.click();
+          // Click Add Criteria link.
+          icon = ClrIconLink.findByName(this.page, {
+            startsWith: criteria,
+            iconShape: 'plus-circle',
+            ancestorLevel: 1
+          });
+          await icon.click();
+          await this.finishReviewAndSaveCriteria();
+          break;
+        case PhysicalMeasurementsCriteria.Weight:
+        case PhysicalMeasurementsCriteria.BMI:
+        case PhysicalMeasurementsCriteria.Height:
+        {
+          icon = ClrIconLink.findByName(this.page, { name: criteria, iconShape: 'slider', ancestorLevel: 2 });
+          await icon.click();
+          // The Review Criteria sidebar opens automatically.
+          const reviewCriteriaSidebar = new ReviewCriteriaSidebar(this.page);
+          await reviewCriteriaSidebar.waitUntilVisible();
+          const { filterSign = FilterSign.GreaterThanOrEqualTo, filterValue = 101 } = opts;
+          await reviewCriteriaSidebar.getPhysicalMeasurementParticipantResult(filterSign, filterValue);
+        }
+          break;
+        case PhysicalMeasurementsCriteria.PregnantEnrollment:
+        case PhysicalMeasurementsCriteria.WheelChairUser:
+          icon = ClrIconLink.findByName(this.page, {
+            startsWith: criteria,
+            iconShape: 'plus-circle',
+            ancestorLevel: 1
+          });
+          await icon.click();
+          await this.finishReviewAndSaveCriteria();
+          break;
+          // No default case. Force user to config for new criteria explicitly.
+      }
+    }
   }
 
   async includeDemographicsDeceased(): Promise<string> {
@@ -117,46 +223,95 @@ export default class CohortParticipantsGroup {
     return searchPage;
   }
 
-  async includeEthnicity(): Promise<CohortSearchPage> {
+  async includeEthnicity(ethnicities: Ethnicity[]): Promise<string> {
     await this.clickCriteriaMenuItems([MenuOption.Demographics, MenuOption.Ethnicity]);
     const searchPage = new CohortSearchPage(this.page);
     await searchPage.waitForLoad();
-    return searchPage;
+    for (const ethnicity of ethnicities) {
+      const link = searchPage.waitForEthnicityCriteriaLink(ethnicity);
+      await link.click();
+      await this.getCriteriaAddedSuccessMessage();
+    }
+    const selector = `${this.containerXpath}//*[./*[contains(text(), "Results")]]/div[contains(text(), "Number Participants:")]`;
+    return waitForNumericalString(this.page, selector);
+  }
+
+  async includeGenderIdentity(identities: string[]): Promise<string> {
+    await this.clickCriteriaMenuItems([MenuOption.Demographics, MenuOption.GenderIdentity]);
+    for (const identity of identities) {
+      const link = ClrIconLink.findByName(this.page, { startsWith: identity, iconShape: 'plus-circle', ancestorLevel: 0 });
+      await link.click();
+      await this.getCriteriaAddedSuccessMessage();
+    }
+    const selector = `${this.containerXpath}//*[./*[contains(text(), "Results")]]/div[contains(text(), "Number Participants:")]`;
+    return waitForNumericalString(this.page, selector);
+  }
+
+  // Demographics -> Race
+  async includeRace(race: string[]): Promise<string> {
+    await this.clickCriteriaMenuItems([MenuOption.Demographics, MenuOption.Race]);
+    for (const r of race) {
+      const link = ClrIconLink.findByName(this.page, { startsWith: r, iconShape: 'plus-circle', ancestorLevel: 0 });
+      await link.click();
+      await this.getCriteriaAddedSuccessMessage();
+    }
+    const selector = `${this.containerXpath}//*[./*[contains(text(), "Results")]]/div[contains(text(), "Number Participants:")]`;
+    return waitForNumericalString(this.page, selector);
+  }
+
+  async includeSexAssignedAtBirth(selections: Sex[]) {
+    await this.clickCriteriaMenuItems([MenuOption.Demographics, MenuOption.SexAssignedAtBirth]);
+    for (const selection of selections) {
+      const link = ClrIconLink.findByName(this.page, { startsWith: selection, iconShape: 'plus-circle', ancestorLevel: 0 });
+      await link.click();
+      await this.getCriteriaAddedSuccessMessage();
+    }
+    const selector = `${this.containerXpath}//*[./*[contains(text(), "Results")]]/div[contains(text(), "Number Participants:")]`;
+    return waitForNumericalString(this.page, selector);
   }
 
   async getGroupCount(): Promise<string> {
     return waitForNumericalString(this.page, this.getGroupCountXpath(), 120000);
   }
 
+  /**
+   * Type age lower and upper bounds.
+   * @param {number} minAge
+   * @param {number} maxAge
+   */
   async includeAge(minAge: number, maxAge: number): Promise<string> {
     await this.clickCriteriaMenuItems([MenuOption.Demographics, MenuOption.Age]);
-    const searchPage = new CohortSearchPage(this.page);
-    await searchPage.waitForLoad();
-    const results = await searchPage.addAge(minAge, maxAge);
+    const selector = `${this.containerXpath}//input[@type="number"]`;
+    await this.page.waitForXPath(selector, { visible: true });
+
+    const [lowerNumberInput, upperNumberInput] = await this.page.$x(selector);
+    await Textbox.asBaseElement(this.page, lowerNumberInput)
+        .type(minAge.toString())
+        .then((input) => input.pressTab());
+    await Textbox.asBaseElement(this.page, upperNumberInput)
+        .type(maxAge.toString())
+        .then((input) => input.pressTab());
+
+    // Select "Age at Consent" radiobutton.
+    const radio = RadioButton.findByName(this.page, {name: 'ageType', normalizeSpace: 'Age at Consent'});
+    await radio.select();
+
+    // Get count from slider badge
+    const count = await waitForNumericalString(this.page, `${this.containerXpath}//*[@id="age-count"]`);
+
+    // Click "ADD SELECTION" button bto add selected age range
+    await Button.findByName(this.page, { name: LinkText.AddSelection }).click();
+    await this.finishReviewAndSaveCriteria();
     await waitWhileLoading(this.page);
-    return results;
+    return count;
   }
 
-  /*
-
-  async addVisits(visits: Visits[]): Promise<void> {
+  async includeVisits(visits: Visits[]): Promise<string> {
+    await this.clickCriteriaMenuItems([MenuOption.Visits]);
     for (const visit of visits) {
       const icon = ClrIconLink.findByName(this.page, { startsWith: visit, iconShape: 'plus-circle', ancestorLevel: 1 });
       await icon.click();
       await this.finishReviewAndSaveCriteria();
-    }
-  }
-
-   */
-  async includeVisits(visits: Visits[]): Promise<string> {
-    await this.clickCriteriaMenuItems([MenuOption.Visits]);
-    const searchPage = new CriteriaSearchPage(this.page);
-    await searchPage.waitForLoad();
-
-    for (const visit of visits) {
-      const icon = ClrIconLink.findByName(this.page, { startsWith: visit, iconShape: 'plus-circle', ancestorLevel: 1 });
-      await icon.click();
-      await searchPage.finishReviewAndSaveCriteria();
     }
 
     // Wait for Cohort Build page to load.
@@ -221,4 +376,33 @@ export default class CohortParticipantsGroup {
     );
     await this.page.waitForTimeout(1000);
   }
+
+  async getCriteriaAddedSuccessMessage(): Promise<string> {
+    const css = '.p-growl-item-container.p-highlight.p-growl-message-success .p-growl-image.pi-check + .p-growl-message .p-growl-details';
+    const msg = await this.page.waitForSelector(css, {visible: true});
+    return getPropValue<string>(msg, 'textContent');
+  }
+
+  // Click Finish and Review button in sidebar
+  async clickFinishAndReviewButton(): Promise<void> {
+    const finishAndReviewButton = Button.findByName(this.page, { name: LinkText.FinishAndReview });
+    await finishAndReviewButton.waitUntilEnabled();
+    await finishAndReviewButton.click();
+  }
+
+  // Handling "Add selected criteria to cohort" sidebar. Save Criteria. The sidebar contents are not checked.
+  async finishReviewAndSaveCriteria(): Promise<string> {
+    await this.clickFinishAndReviewButton();
+    const reviewCriteriaSidebar = new ReviewCriteriaSidebar(this.page);
+    await reviewCriteriaSidebar.waitUntilVisible();
+    await reviewCriteriaSidebar.clickSaveCriteriaButton();
+    // Wait for Cohort Build page to load.
+    await waitWhileLoading(this.page);
+    const cohortBuildPage = new CohortBuildPage(this.page);
+    await cohortBuildPage.waitForLoad();
+    const count = cohortBuildPage.getTotalCount();
+    await this.page.waitForTimeout(1000); // Short pause to wait for charts animation finish.
+    return count;
+  }
+
 }

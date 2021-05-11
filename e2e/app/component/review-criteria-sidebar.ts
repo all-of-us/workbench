@@ -1,12 +1,12 @@
 import { ElementHandle, Page } from 'puppeteer';
 import SelectMenu from 'app/component/select-menu';
-import { FilterSign } from 'app/page/criteria-search-page';
 import { LinkText } from 'app/text-labels';
 import { buildXPath } from 'app/xpath-builders';
 import { ElementType } from 'app/xpath-options';
-import { waitForNumericalString } from 'utils/waits-utils';
+import {waitForNumericalString, waitWhileLoading} from 'utils/waits-utils';
 import BaseHelpSidebar from './base-help-sidebar';
 import { logger } from 'libs/logger';
+import {FilterSign} from "app/page/cohort-participants-group";
 
 enum SectionSelectors {
   AttributesForm = '//*[@id="attributes-form"]',
@@ -90,6 +90,7 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
 
   async clickSaveCriteriaButton(): Promise<void> {
     await this.clickButton(LinkText.SaveCriteria, { waitForClose: true });
+    await waitWhileLoading(this.page);
   }
 
   async waitForParticipantResult(): Promise<string> {

@@ -2,9 +2,8 @@ import { Page } from 'puppeteer';
 import ReviewCriteriaSidebar from 'app/component/review-criteria-sidebar';
 import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
-import Textbox from 'app/element/textbox';
 import { centerPoint, dragDrop } from 'utils/test-utils';
-import { waitForNumericalString, waitWhileLoading } from 'utils/waits-utils';
+import { waitWhileLoading } from 'utils/waits-utils';
 import { LinkText } from 'app/text-labels';
 import AuthenticatedPage from './authenticated-page';
 
@@ -41,31 +40,6 @@ export default class CohortSearchPage extends AuthenticatedPage {
       const link = this.waitForEthnicityCriteriaLink(ethnicity);
       await link.click();
     }
-  }
-
-  /**
-   * Type age lower and upper bounds.
-   * @param {number} minAge
-   * @param {number} maxAge
-   */
-  async addAge(minAge: number, maxAge: number): Promise<string> {
-    const selector = `${this.containerXpath}//input[@type="number"]`;
-    await this.page.waitForXPath(selector, { visible: true });
-
-    const [lowerNumberInput, upperNumberInput] = await this.page.$x(selector);
-    await Textbox.asBaseElement(this.page, lowerNumberInput)
-      .type(minAge.toString())
-      .then((input) => input.pressTab());
-    await Textbox.asBaseElement(this.page, upperNumberInput)
-      .type(maxAge.toString())
-      .then((input) => input.pressTab());
-
-    // Get count from slider badge
-    const count = await waitForNumericalString(this.page, `${this.containerXpath}//*[@id="age-count"]`);
-    // Click ADD SELECTION to add selected age range
-    await Button.findByName(this.page, { name: LinkText.AddSelection }).click();
-    await this.reviewAndSaveCriteria();
-    return count;
   }
 
   async reviewAndSaveCriteria(): Promise<void> {

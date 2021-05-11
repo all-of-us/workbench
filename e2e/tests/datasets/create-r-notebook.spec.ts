@@ -31,11 +31,10 @@ describe('Create dataset and export to notebook at same time', () => {
 
     // Include Participants Group 1: Add Criteria: Ethnicity
     const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    const searchPage = await group1.includeEthnicity();
-    await searchPage.addEthnicity([Ethnicity.HispanicOrLatino, Ethnicity.NotHispanicOrLatino]);
+    await group1.includeEthnicity([Ethnicity.HispanicOrLatino, Ethnicity.NotHispanicOrLatino]);
 
     // Open selection list and click Save Criteria button
-    await searchPage.reviewAndSaveCriteria();
+    await group1.finishReviewAndSaveCriteria();
 
     // Check Group 1 Count.
     const group1Count = await group1.getGroupCount();
