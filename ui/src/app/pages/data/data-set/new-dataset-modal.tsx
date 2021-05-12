@@ -24,8 +24,10 @@ import {
 } from 'generated/fetch';
 import * as fp from 'lodash/fp';
 import * as React from 'react';
+import {useSpring} from 'react-spring';
 
 import {validate} from 'validate.js';
+import {ExpandingModal} from '../../../components/expanding-modal';
 import {FlexRow} from '../../../components/flex';
 import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
 import GenomicsDataTypeEnum = DataSetExportRequest.GenomicsDataTypeEnum;
@@ -247,6 +249,7 @@ class NewDataSetModal extends React.Component<Props, State> {
       }
     });
     const isApiError = conflictDataSetName || saveError || exportError;
+
     return <Modal loading={loading} width={!this.state.rightPanelContent ? 450 : 1200}>
       <FlexRow>
         <div style={{maxWidth: 'calc(450px - 2rem)'}}>

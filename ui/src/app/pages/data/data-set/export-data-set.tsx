@@ -6,10 +6,8 @@ import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {DataSetExportRequest, DataSetRequest, FileDetail, KernelTypeEnum} from 'generated/fetch';
 import * as React from 'react';
-import IFrame from '../../../components/IFrame';
-import IFrame2 from '../../../components/IFrame';
-import colors from '../../../styles/colors';
-import Frame from 'react-frame-component';
+import { useSpring, animated } from "react-spring";
+import colors from 'app/styles/colors';
 import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
 
 interface Props {
