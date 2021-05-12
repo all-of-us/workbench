@@ -180,13 +180,8 @@ def swagger3JavaClient(yaml, pkg, rawOptExtras = []) {
 // overlapping files/diretories may be getting written by different Swagger
 // codegen tasks.
 swaggerSources {
-<<<<<<< HEAD
-  firecloud swagger2JavaClient("firecloud.yaml", "firecloud", [
-          '--model-name-prefix', 'Firecloud'
-=======
   firecloud swagger3JavaClient("firecloud.yaml", "firecloud", [
-    '--model-name-prefix', 'Firecloud'
->>>>>>> origin/master
+          '--model-name-prefix', 'Firecloud'
   ])
   notebooks swagger2JavaClient("notebooks.yaml", "notebooks")
   jira swagger2JavaClient("jira.yaml", "jira")
@@ -224,7 +219,6 @@ swaggerSources {
     }
   }
 }
-
 
 //
 // AppEngine
