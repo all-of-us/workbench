@@ -8,6 +8,8 @@ import com.google.cloud.bigquery.TableResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+
+import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -66,6 +68,7 @@ import org.pmiops.workbench.model.GenomicExtractionJobListResponse;
 import org.pmiops.workbench.model.KernelTypeEnum;
 import org.pmiops.workbench.model.MarkDataSetRequest;
 import org.pmiops.workbench.model.PrePackagedConceptSetEnum;
+import org.pmiops.workbench.model.ReadOnlyNotebookResponse;
 import org.pmiops.workbench.model.ResourceType;
 import org.pmiops.workbench.model.WorkspaceAccessLevel;
 import org.pmiops.workbench.notebooks.NotebooksService;
@@ -281,6 +284,92 @@ public class DataSetController implements DataSetApiDelegate {
               });
       previewValue.setQueryValue(queryValues);
     }
+  }
+
+  @Override
+  public ResponseEntity<ReadOnlyNotebookResponse> previewExportToNotebook(
+      String workspaceNamespace, String workspaceId, DataSetExportRequest dataSetExportRequest) {
+    DbWorkspace dbWorkspace =
+        workspaceAuthService.getWorkspaceEnforceAccessLevelAndSetCdrVersion(
+            workspaceNamespace, workspaceId, WorkspaceAccessLevel.READER);
+
+    validateDataSetRequestResources(
+        dbWorkspace.getWorkspaceId(), dataSetExportRequest.getDataSetRequest());
+
+    JSONObject metaData = new JSONObject();
+
+    switch (dataSetExportRequest.getKernelType()) {
+      case PYTHON:
+        break;
+      case R:
+        metaData
+            .put(
+                "kernelspec",
+                new JSONObject().put("display_name", "R").put("language", "R").put("name", "ir"))
+            .put(
+                "language_info",
+                new JSONObject()
+                    .put("codemirror_mode", "r")
+                    .put("file_extension", ".r")
+                    .put("mimetype", "text/x-r-source")
+                    .put("name", "r")
+                    .put("pygments_lexer", "r")
+                    .put("version", "3.4.4"));
+        break;
+      default:
+        throw new BadRequestException(
+            "Kernel Type " + dataSetExportRequest.getKernelType() + " is not supported");
+    }
+
+    // TODO(calbach): Verify whether the request payload is ever expected to include a different
+    // workspace ID.
+    dataSetExportRequest.getDataSetRequest().setWorkspaceId(dbWorkspace.getWorkspaceId());
+    Map<String, QueryJobConfiguration> queriesByDomain =
+        dataSetService.domainToBigQueryConfig(dataSetExportRequest.getDataSetRequest());
+
+    String qualifier = generateRandomEightCharacterQualifier();
+
+    List<String> queriesAsStrings =
+        dataSetService.generateCodeCells(
+            dataSetExportRequest.getKernelType(),
+            dataSetExportRequest.getDataSetRequest().getName(),
+            dbWorkspace.getCdrVersion().getName(),
+            qualifier,
+            queriesByDomain);
+
+    if (GenomicsDataTypeEnum.WHOLE_GENOME.equals(dataSetExportRequest.getGenomicsDataType())) {
+      if (!workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+      }
+
+      if (Strings.isNullOrEmpty(dbWorkspace.getCdrVersion().getWgsBigqueryDataset())) {
+        throw new FailedPreconditionException(
+            "The workspace CDR version does not have whole genome data");
+      }
+      if (!dataSetExportRequest.getKernelType().equals(KernelTypeEnum.PYTHON)) {
+        throw new BadRequestException("Genomics code generation is only supported in Python");
+      }
+
+      // TODO(RW-6633): Add WGS codegen support.
+      return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
+
+    JSONObject notebookFile =
+        new JSONObject()
+            .put("cells", new JSONArray())
+            .put("metadata", metaData)
+            // nbformat and nbformat_minor are the notebook major and minor version we are
+            // creating.
+            // Specifically, here we create notebook version 4.2 (I believe)
+            // See https://nbformat.readthedocs.io/en/latest/api.html
+            .put("nbformat", 4)
+            .put("nbformat_minor", 2);
+    for (String query : queriesAsStrings) {
+      notebookFile.getJSONArray("cells").put(createNotebookCodeCellWithString(query));
+    }
+
+    return ResponseEntity.ok(new ReadOnlyNotebookResponse()
+        .html(notebooksService.convertNotebookToHtml(notebookFile.toString().getBytes(StandardCharsets.UTF_8))));
   }
 
   @Override

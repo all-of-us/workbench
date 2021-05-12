@@ -22,6 +22,7 @@ import {
 import * as React from 'react';
 
 import {validate} from 'validate.js';
+import {FlexRow} from '../../../components/flex';
 import {ExportDataSet} from './export-data-set';
 
 interface Props {
@@ -52,6 +53,7 @@ interface State {
   seePreview: boolean;
   saveError: boolean;
   exportError: boolean;
+  rightPanelContent: JSX.Element;
 }
 
 class NewDataSetModal extends React.Component<Props, State> {
@@ -71,7 +73,8 @@ class NewDataSetModal extends React.Component<Props, State> {
       queries: new Map([[KernelTypeEnum.Python, undefined], [KernelTypeEnum.R, undefined]]),
       seePreview: false,
       saveError: false,
-      exportError: false
+      exportError: false,
+      rightPanelContent: null
     };
   }
 
@@ -195,6 +198,14 @@ class NewDataSetModal extends React.Component<Props, State> {
     navigateByUrl(`/workspaces/${workspaceNamespace}/${workspaceId}/data`);
   }
 
+  renderRightPanel(children: JSX.Element) {
+    this.setState({rightPanelContent: children});
+  }
+
+  hideRightPanel() {
+    this.setState({rightPanelContent: null});
+  }
+
   render() {
     const {
       conflictDataSetName,
@@ -221,62 +232,75 @@ class NewDataSetModal extends React.Component<Props, State> {
       }
     });
     const isApiError = conflictDataSetName || saveError || exportError;
-    return <Modal loading={loading}>
-      <ModalTitle>{this.props.dataSet ? 'Update' : 'Save'} Dataset</ModalTitle>
-      <ModalBody>
-        <div>
-          {isApiError && <AlertDanger style={{marginBottom: '0.25rem', padding: '0 0.25rem'}}>
-            {conflictDataSetName && <span>A Dataset with the same name exists</span>}
-            {saveError && <span>
+    return <Modal loading={loading} width={!this.state.rightPanelContent ? 450 : 1200}>
+      <FlexRow>
+        <div style={{width: 'calc(450px - 2rem)'}}>
+          <ModalTitle>{this.props.dataSet ? 'Update' : 'Save'} Dataset</ModalTitle>
+          <ModalBody>
+            <div>
+              {isApiError && <AlertDanger style={{marginBottom: '0.25rem', padding: '0 0.25rem'}}>
+                {conflictDataSetName && <span>A Dataset with the same name exists</span>}
+                {saveError && <span>
               The request cannot be completed. Please try again or contact Support in the left hand navigation
             </span>}
-            {exportError && <span>
+                {exportError && <span>
               The Dataset was saved but there was an error exporting to the notebook. Please try exporting from the Dataset card on the
-              &nbsp;<Link style={{display: 'inline-block'}} onClick={() => this.navigateToDataPage()}>Data Page</Link>
+                    &nbsp;<Link style={{display: 'inline-block'}} onClick={() => this.navigateToDataPage()}>Data Page</Link>
             </span>}
-          </AlertDanger>}
-          <TextInput type='text' autoFocus placeholder='Dataset Name'
-                     value={name} data-test-id='data-set-name-input'
-                     onChange={v => this.setState({
-                       name: v, conflictDataSetName: false
-                     })}/>
+              </AlertDanger>}
+              <TextInput type='text' autoFocus placeholder='Dataset Name'
+                         value={name} data-test-id='data-set-name-input'
+                         onChange={v => this.setState({
+                           name: v, conflictDataSetName: false
+                         })}/>
+            </div>
+            <TooltipTrigger content={this.props.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
+              <div style={{display: 'flex', alignItems: 'center', marginTop: '1rem', ...(this.props.billingLocked && {opacity: 0.5})}}>
+                <CheckBox style={{height: 17, width: 17}}
+                          disabled={this.props.billingLocked}
+                          data-test-id='export-to-notebook'
+                          onChange={(checked) => this.changeExportToNotebook(checked)}
+                          checked={this.state.exportToNotebook} />
+                <div style={{marginLeft: '.5rem',
+                  color: colors.primary}}>Export to notebook</div>
+              </div>
+            </TooltipTrigger>
+            <React.Fragment>  {exportToNotebook && <ExportDataSet
+                dataSetRequest={this.getDataSetRequest()}
+                notebookType={(kernelTypeEnum) => this.setState({
+                  kernelType: kernelTypeEnum
+                })}
+                newNotebook={(v) => this.setState({newNotebook: v})}
+                updateNotebookName={(v) => this.setState({notebookName: v})}
+                workspaceNamespace={this.props.workspaceNamespace} workspaceFirecloudName={this.props.workspaceId}
+                onSeeCodePreview={(children) => this.renderRightPanel(children)}
+                onHideCodePreview={() => this.hideRightPanel()}
+            />}
+            </React.Fragment>
+          </ModalBody>
+          <ModalFooter>
+            <Button type='secondary'
+                    onClick={this.props.closeFunction}
+                    style={{marginRight: '2rem'}}>
+              Cancel
+            </Button>
+            <TooltipTrigger content={summarizeErrors(errors)}>
+              <Button type='primary'
+                      data-test-id='save-data-set'
+                      disabled={errors}
+                      onClick={() => this.onSaveClick()}>
+                {!this.props.dataSet ? 'Save' : 'Update' }{exportToNotebook && ' and Analyze'}
+              </Button>
+            </TooltipTrigger>
+          </ModalFooter>
         </div>
-        <TooltipTrigger content={this.props.billingLocked && ACTION_DISABLED_INVALID_BILLING}>
-          <div style={{display: 'flex', alignItems: 'center', marginTop: '1rem', ...(this.props.billingLocked && {opacity: 0.5})}}>
-            <CheckBox style={{height: 17, width: 17}}
-                      disabled={this.props.billingLocked}
-                      data-test-id='export-to-notebook'
-                      onChange={(checked) => this.changeExportToNotebook(checked)}
-                      checked={this.state.exportToNotebook} />
-            <div style={{marginLeft: '.5rem',
-              color: colors.primary}}>Export to notebook</div>
+
+        {this.state.rightPanelContent &&
+          <div style={{flex: 1, marginLeft: '1rem'}}>
+            {this.state.rightPanelContent}
           </div>
-        </TooltipTrigger>
-        <React.Fragment>  {exportToNotebook && <ExportDataSet
-            dataSetRequest={this.getDataSetRequest()}
-            notebookType={(kernelTypeEnum) => this.setState({
-              kernelType: kernelTypeEnum
-            })}
-            newNotebook={(v) => this.setState({newNotebook: v})}
-            updateNotebookName={(v) => this.setState({notebookName: v})}
-            workspaceNamespace={this.props.workspaceNamespace} workspaceFirecloudName={this.props.workspaceId}/>}
-        </React.Fragment>
-      </ModalBody>
-      <ModalFooter>
-        <Button type='secondary'
-                onClick={this.props.closeFunction}
-                style={{marginRight: '2rem'}}>
-          Cancel
-        </Button>
-        <TooltipTrigger content={summarizeErrors(errors)}>
-          <Button type='primary'
-                  data-test-id='save-data-set'
-                  disabled={errors}
-                  onClick={() => this.onSaveClick()}>
-            {!this.props.dataSet ? 'Save' : 'Update' }{exportToNotebook && ' and Analyze'}
-          </Button>
-        </TooltipTrigger>
-      </ModalFooter>
+        }
+      </FlexRow>
     </Modal>;
   }
 }

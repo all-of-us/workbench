@@ -1,15 +1,15 @@
-import {Button, TabButton} from 'app/components/buttons';
+import {Button} from 'app/components/buttons';
 import {SmallHeader, styles as headerStyles} from 'app/components/headers';
-import {RadioButton, Select, TextArea, TextInput} from 'app/components/inputs';
-import {SpinnerOverlay} from 'app/components/spinners';
+import {RadioButton, Select, TextInput} from 'app/components/inputs';
+import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {
-  DataSetRequest,
-  FileDetail,
-  KernelTypeEnum
-} from 'generated/fetch';
+import {DataSetExportRequest, DataSetRequest, FileDetail, KernelTypeEnum} from 'generated/fetch';
 import * as React from 'react';
+import { useSpring, animated } from "react-spring";
+import colors from 'app/styles/colors';
+import {FlexRow} from '../../../components/flex';
+import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
 
 interface Props {
   dataSetRequest: DataSetRequest;
@@ -18,6 +18,8 @@ interface Props {
   updateNotebookName: Function;
   workspaceNamespace: string;
   workspaceFirecloudName: string;
+  onSeeCodePreview?: Function;
+  onHideCodePreview?: Function;
 }
 
 interface State {
@@ -30,6 +32,7 @@ interface State {
   previewedKernelType: KernelTypeEnum;
   queries: Map<KernelTypeEnum, String>;
   seePreview: boolean;
+  loadingPreview: boolean;
 }
 const styles = {
   codePreviewSelector: {
@@ -55,6 +58,7 @@ export class ExportDataSet extends React.Component<Props, State> {
       previewedKernelType: KernelTypeEnum.Python,
       queries: new Map([[KernelTypeEnum.Python, undefined], [KernelTypeEnum.R, undefined]]),
       seePreview: false,
+      loadingPreview: false
     };
   }
 
@@ -68,7 +72,7 @@ export class ExportDataSet extends React.Component<Props, State> {
       const {workspaceNamespace, workspaceFirecloudName} = this.props;
       this.setState({notebooksLoading: true});
       const existingNotebooks =
-          await workspacesApi().getNoteBookList(workspaceNamespace, workspaceFirecloudName);
+        await workspacesApi().getNoteBookList(workspaceNamespace, workspaceFirecloudName);
       this.setState({existingNotebooks});
     } catch (error) {
       console.error(error);
@@ -84,16 +88,16 @@ export class ExportDataSet extends React.Component<Props, State> {
       workspaceFirecloudName,
       KernelTypeEnum.Python.toString(),
       dataSetRequest).then(pythonCode => {
-        this.setState(({queries}) => ({
-          queries: queries.set(KernelTypeEnum.Python, pythonCode.code)}));
-      });
+      this.setState(({queries}) => ({
+        queries: queries.set(KernelTypeEnum.Python, pythonCode.code)}));
+    });
     dataSetApi().generateCode(
       workspaceNamespace,
       workspaceFirecloudName,
       KernelTypeEnum.R.toString(),
       dataSetRequest).then(rCode => {
-        this.setState(({queries}) => ({queries: queries.set(KernelTypeEnum.R, rCode.code)}));
-      });
+      this.setState(({queries}) => ({queries: queries.set(KernelTypeEnum.R, rCode.code)}));
+    });
   }
 
   setNotebookName(notebook) {
@@ -125,61 +129,78 @@ export class ExportDataSet extends React.Component<Props, State> {
       seePreview
     } = this.state;
     const selectOptions = [{label: '(Create a new notebook)', value: ''}]
-        .concat(existingNotebooks.map(notebook => ({
-          value: notebook.name.slice(0, -6),
-          label: notebook.name.slice(0, -6)
-        })));
-    return <React.Fragment>{notebooksLoading && <SpinnerOverlay />}<Button style={{marginTop: '1rem'}} data-test-id='code-preview-button'
-            onClick={() => {
-              if (!seePreview) {
-                AnalyticsTracker.DatasetBuilder.SeeCodePreview();
-              }
-              this.setState({seePreview: !seePreview});
-            }}>
-      {seePreview ? 'Hide Preview' : 'See Code Preview'}
-    </Button>
-    {seePreview && <React.Fragment>
-      {Array.from(queries.values())
-        .filter(query => query !== undefined).length === 0 && <SpinnerOverlay />}
-      <div style={styles.codePreviewSelector}>
+      .concat(existingNotebooks.map(notebook => ({
+        value: notebook.name.slice(0, -6),
+        label: notebook.name.slice(0, -6)
+      })));
+    return <React.Fragment>{notebooksLoading && <SpinnerOverlay />}
+      <div style={{marginTop: '1rem'}}>
+        <Select value={this.state.notebookName}
+                options={selectOptions}
+                onChange={v => this.setExistingNotebook(v)}/>
+      </div>
+      {newNotebook && <React.Fragment>
+          <SmallHeader style={{fontSize: 14, marginTop: '1rem'}}>Notebook Name</SmallHeader>
+          <TextInput onChange={(v) => this.setNotebookName(v)}
+                     value={notebookName} data-test-id='notebook-name-input'/>
+          <div style={headerStyles.formLabel}>
+              Select programming language
+          </div>
         {Object.keys(KernelTypeEnum).map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])
           .map((kernelTypeEnum, i) =>
-                <TabButton onClick={() => this.setState({previewedKernelType: kernelTypeEnum})}
-                           key={i}
-                           active={previewedKernelType === kernelTypeEnum}
-                           style={styles.codePreviewSelectorTab}
-                           disabled={queries.get(kernelTypeEnum) === undefined}>
-                  {kernelTypeEnum}
-                </TabButton>)}
-      </div>
-      <TextArea disabled={true} onChange={() => {}}
-                data-test-id='code-text-box'
-                value={queries.get(previewedKernelType)} />
-    </React.Fragment>}
-    <div style={{marginTop: '1rem'}}>
-      <Select value={this.state.notebookName}
-              options={selectOptions}
-              onChange={v => this.setExistingNotebook(v)}/>
-    </div>
-    {newNotebook && <React.Fragment>
-      <SmallHeader style={{fontSize: 14, marginTop: '1rem'}}>Notebook Name</SmallHeader>
-      <TextInput onChange={(v) => this.setNotebookName(v)}
-                 value={notebookName} data-test-id='notebook-name-input'/>
-      <div style={headerStyles.formLabel}>
-        Programming Language:
-      </div>
-      {Object.keys(KernelTypeEnum).map(kernelTypeEnumKey => KernelTypeEnum[kernelTypeEnumKey])
-        .map((kernelTypeEnum, i) =>
-              <label key={i} style={{display: 'block'}}>
-                <RadioButton
-                    data-test-id={'kernel-type-' + kernelTypeEnum.toLowerCase()}
-                    checked={this.state.kernelType === kernelTypeEnum}
-                    onChange={() => this.onKernelTypeChange(kernelTypeEnum)}
-                />
-                &nbsp;{kernelTypeEnum}
-              </label>
+            <label key={i} style={{display: 'inline-flex', justifyContent: 'center', alignItems: 'center', marginRight: '1rem', color: colors.primary}}>
+              <RadioButton
+                style={{marginRight: '0.25rem'}}
+                data-test-id={'kernel-type-' + kernelTypeEnum.toLowerCase()}
+                checked={this.state.kernelType === kernelTypeEnum}
+                onChange={() => this.onKernelTypeChange(kernelTypeEnum)}
+              />
+              {kernelTypeEnum}
+            </label>
           )}
-    </React.Fragment>}
-      </React.Fragment>;
+      </React.Fragment>
+      }
+
+      <FlexRow style={{marginTop: '1rem', alignItems: 'center'}}>
+        <Button type={'secondarySmall'}
+                disabled={this.state.loadingPreview}
+                data-test-id='code-preview-button'
+                onClick={() => {
+                  if (!seePreview) {
+                    AnalyticsTracker.DatasetBuilder.SeeCodePreview();
+                  }
+                  this.setState({seePreview: !seePreview});
+                  if (seePreview) {
+                    // if it's currently seePreview, the user want's to hide
+                    this.props.onHideCodePreview();
+                  } else {
+                    this.setState({loadingPreview: true});
+                    dataSetApi().previewExportToNotebook(this.props.workspaceNamespace, this.props.workspaceFirecloudName, {
+                      dataSetRequest: this.props.dataSetRequest,
+                      kernelType: this.state.kernelType,
+                      newNotebook: false,
+                      notebookName: '',
+                    }).then(resp => {
+                      const placeholder = document.createElement('html');
+                      placeholder.innerHTML = resp.html;
+                      placeholder.style.overflowY = 'scroll';
+                      placeholder.getElementsByTagName('body')[0].style.overflowY = 'scroll';
+                      placeholder.querySelector<HTMLElement>('#notebook').style.paddingTop = 0;
+                      placeholder.querySelectorAll('.input_prompt').forEach(e => e.remove());
+                      const iframe = <iframe scrolling="no" style={{width: '100%', height: '100%', border: 'none'}} srcDoc={placeholder.outerHTML}/>;
+                      this.props.onSeeCodePreview(iframe);
+                      this.setState({loadingPreview: false});
+                    });
+                  }
+                }}>
+          {seePreview ? 'Hide Code Preview' : 'See Code Preview'}
+        </Button>
+
+        {this.state.loadingPreview && <Spinner size={24} style={{marginLeft: '0.5rem'}}/>}
+      </FlexRow>
+
+
+    </React.Fragment>;
   }
+
 }

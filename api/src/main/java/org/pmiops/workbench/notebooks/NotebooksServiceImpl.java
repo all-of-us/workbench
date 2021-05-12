@@ -252,6 +252,15 @@ public class NotebooksServiceImpl implements NotebooksService {
   }
 
   @Override
+  public String convertNotebookToHtml(byte[] notebook) {
+    // We need to send a byte array so the ApiClient attaches the body as is instead
+    // of serializing it through Gson which it will do for Strings.
+    // The default Gson serializer does not work since it strips out some null fields
+    // which are needed for nbconvert. Skip the JSON conversion here to reduce memory overhead.
+    return PREVIEW_SANITIZER.sanitize(fireCloudService.staticNotebooksConvert(notebook));
+  }
+
+  @Override
   public String getReadOnlyHtml(
       String workspaceNamespace, String workspaceName, String notebookName) {
     String bucketName =
@@ -261,11 +270,7 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getBucketName();
 
     Blob blob = getBlobWithSizeConstraint(bucketName, notebookName);
-    // We need to send a byte array so the ApiClient attaches the body as is instead
-    // of serializing it through Gson which it will do for Strings.
-    // The default Gson serializer does not work since it strips out some null fields
-    // which are needed for nbconvert. Skip the JSON conversion here to reduce memory overhead.
-    return PREVIEW_SANITIZER.sanitize(fireCloudService.staticNotebooksConvert(blob.getContent()));
+    return convertNotebookToHtml(blob.getContent());
   }
 
   @Override
@@ -278,12 +283,7 @@ public class NotebooksServiceImpl implements NotebooksService {
             .getBucketName();
 
     Blob blob = getBlobWithSizeConstraint(bucketName, notebookName);
-    // We need to send a byte array so the ApiClient attaches the body as is instead
-    // of serializing it through Gson which it will do for Strings.
-    // The default Gson serializer does not work since it strips out some null fields
-    // which are needed for nbconvert. Skip the JSON conversion here to reduce memory overhead.
-    return PREVIEW_SANITIZER.sanitize(
-        fireCloudService.staticNotebooksConvertAsService(blob.getContent()));
+    return convertNotebookToHtml(blob.getContent());
   }
 
   private GoogleCloudLocators getNotebookLocators(

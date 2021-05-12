@@ -2474,6 +2474,29 @@ paths:
           description: Invalid data set request
           schema:
             "$ref": "#/definitions/ErrorResponse"
+  "/v1/{workspaceNamespace}/{workspaceId}/data-set/exportToNotebook/preview":
+    post:
+      tags:
+        - dataSet
+      description: 'Preview notebook code generation'
+      operationId: previewExportToNotebook
+      parameters:
+        - "$ref": "#/parameters/workspaceNamespace"
+        - "$ref": "#/parameters/workspaceId"
+        - in: body
+          name: dataSetExportRequest
+          required: true
+          schema:
+            "$ref": "#/definitions/DataSetExportRequest"
+      responses:
+        200:
+          description: HTML Read Only version of the the notebook cells to be exported
+          schema:
+            "$ref": "#/definitions/ReadOnlyNotebookResponse"
+        400:
+          description: Invalid data set export request
+          schema:
+            "$ref": "#/definitions/ErrorResponse"
   "/v1/workspaces/{workspaceNamespace}/{workspaceId}/data-set/preview":
     post:
       tags:
