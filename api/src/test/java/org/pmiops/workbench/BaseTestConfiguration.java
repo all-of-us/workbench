@@ -16,11 +16,7 @@ public class BaseTestConfiguration {
   public static final FakeClock CLOCK = new FakeClock(NOW.toInstant(), ZoneId.systemDefault());
 
   @Bean
-<<<<<<< HEAD
-  Clock clock() {
-=======
   public Clock clock() {
->>>>>>> origin/master
     return CLOCK;
   }
 }
