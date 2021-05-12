@@ -44,7 +44,7 @@ describe('Create dataset and export to notebook at same time', () => {
     console.log(`Include Participants Group 1: ${group1CountInt}`);
 
     // Save new Cohort.
-    const newCohortName = await cohortBuildPage.saveCohortAs();
+    const newCohortName = await cohortBuildPage.createCohort();
     await waitForText(page, 'Cohort Saved Successfully');
     console.log(`Created Cohort "${newCohortName}"`);
 

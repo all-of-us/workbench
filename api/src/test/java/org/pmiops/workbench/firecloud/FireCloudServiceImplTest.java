@@ -184,8 +184,8 @@ public class FireCloudServiceImplTest {
     // FireCloudServiceImpl always adds the "billingAccounts/" prefix to the billing account
     // from config.
     assertThat(request.getBillingAccount()).isEqualTo("billingAccounts/test-billing-account");
-    assertThat(request.getEnableFlowLogs()).isTrue();
-    assertThat(request.getHighSecurityNetwork()).isTrue();
+    assertThat(request.isEnableFlowLogs()).isTrue();
+    assertThat(request.isHighSecurityNetwork()).isTrue();
     assertThat(request.getServicePerimeter()).isEqualTo(servicePerimeter);
   }
 }

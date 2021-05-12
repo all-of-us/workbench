@@ -195,20 +195,28 @@ export default class WorkspaceCard extends CardBase {
     );
   }
 
-  // if the snowman menu options for WRITER & READER are disabled except duplicate option and all options are enabled for OWNER.
+  // Snowman menu options are all enabled for OWNER.
+  // Snowman menu option "Duplicate" is enabled for WRITER and READER. Other options are disabled for WRITER and READER.
   async verifyWorkspaceCardMenuOptions(accessLevel?: string): Promise<void> {
-    const snowmanMenu = await this.getSnowmanMenu();
     accessLevel = accessLevel || (await this.getWorkspaceAccessLevel());
-    if (accessLevel !== WorkspaceAccessLevel.Owner) {
-      expect(await snowmanMenu.isOptionDisabled(MenuOption.Share)).toBe(true);
-      expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(true);
-      expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(true);
-      expect(await snowmanMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(false);
-    } else if (accessLevel === WorkspaceAccessLevel.Owner) {
+
+    const snowmanMenu = await this.getSnowmanMenu();
+    const links = await snowmanMenu.getAllOptionTexts();
+    expect(links).toEqual(expect.arrayContaining(['Share', 'Edit', 'Duplicate', 'Delete']));
+
+    if (accessLevel === WorkspaceAccessLevel.Owner) {
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Share)).toBe(false);
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(false);
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(false);
       expect(await snowmanMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(false);
+    } else {
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Share)).toBe(true);
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Edit)).toBe(true);
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Delete)).toBe(true);
+      expect(await snowmanMenu.isOptionDisabled(MenuOption.Duplicate)).toBe(false);
     }
+    // Close menu
+    await this.clickSnowmanIcon();
+    await snowmanMenu.waitUntilClose();
   }
 }

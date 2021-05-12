@@ -1,3 +1,4 @@
+import {profileApi} from 'app/services/swagger-fetch-clients';
 import { BreadcrumbType } from 'app/utils/navigation';
 import {atom, Atom} from 'app/utils/subscribable';
 import {CdrVersionTiersResponse, ConfigResponse, Profile, Runtime} from 'generated/fetch';
@@ -26,11 +27,31 @@ export const authStore = atom<AuthStore>({authLoaded: false, isSignedIn: false})
 
 export const cdrVersionStore = atom<CdrVersionTiersResponse>({tiers: []});
 
-interface ProfileStore {
+export interface ProfileStore {
   profile?: Profile;
+  load: Function;
+  reload: Function;
+  updateCache: Function;
 }
 
-export const profileStore = atom<ProfileStore>({});
+export const profileStore = atom<ProfileStore>({
+  profile: null,
+  load: async() => {
+    if (!profileStore.get().profile) {
+      await profileStore.get().reload();
+    }
+    return profileStore.get().profile;
+  },
+  reload: async() => {
+    const newProfile = await profileApi().getMe();
+    profileStore.get().updateCache(newProfile);
+    return profileStore.get().profile;
+  },
+  updateCache: (p: Profile): void => profileStore.set({
+    ...profileStore.get(),
+    profile: p
+  })
+});
 
 export interface CompoundRuntimeOperation {
   pendingRuntime?: Runtime;

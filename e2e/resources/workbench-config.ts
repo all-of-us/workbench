@@ -26,6 +26,7 @@ const local = {
   userEmailDomain: '@fake-research-aou.org',
   collaboratorUsername: process.env.DEV_COLLABORATOR || 'puppetmaster@fake-research-aou.org',
   writerUserName: process.env.DEV_WRITER || 'puppetmaster@fake-research-aou.org',
+  readerUserName: process.env.DEV_READER || 'puppetcitester1@fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v3',
   altCdrVersionName: 'Synthetic Dataset v3 with WGS'
 };
@@ -37,6 +38,7 @@ const test = {
   userEmailDomain: '@fake-research-aou.org',
   collaboratorUsername: process.env.TEST_COLLABORATOR || 'puppetmaster@fake-research-aou.org',
   writerUserName: process.env.TEST_WRITER || 'puppetmaster@fake-research-aou.org',
+  readerUserName: process.env.TEST_READER || 'puppetcitester2@fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v3',
   altCdrVersionName: 'Synthetic Dataset v3 with WGS'
 };
@@ -48,11 +50,12 @@ const staging = {
   userEmailDomain: '@staging.fake-research-aou.org',
   collaboratorUsername: process.env.STAGING_COLLABORATOR || 'puppetcitester4@staging.fake-research-aou.org',
   writerUserName: process.env.STAGING_WRITER || 'puppetmaster@staging.fake-research-aou.org',
+  readerUserName: process.env.STAGING_READER || 'puppetcistagingreader1@staging.fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v4',
   altCdrVersionName: 'Synthetic Dataset v3'
 };
 
-// workbench stable environment
+// NOT WORKING: workbench stable environment
 const stable = {
   uiBaseUrl: process.env.STABLE_LOGIN_URL,
   apiBaseUrl: process.env.STABLE_API_URL,
@@ -68,6 +71,7 @@ const perf = {
   userEmailDomain: '@perf.fake-research-aou.org',
   collaboratorUsername: process.env.PERF_COLLABORATOR || 'puppetciperfreader@perf.fake-research-aou.org',
   writerUserName: process.env.PERF_WRITER || 'puppetciperfwriter1@perf.fake-research-aou.org',
+  readerUserName: process.env.PERF_READER || 'puppetciperfreader@perf.fake-research-aou.org',
   defaultCdrVersionName: 'Synthetic Dataset v4',
   altCdrVersionName: 'Synthetic Dataset v3'
 };

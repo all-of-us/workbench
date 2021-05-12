@@ -8,17 +8,18 @@ import {Authority, RuntimeApi, Profile, ProfileApi, WorkspaceAccessLevel, Worksp
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
-import {currentWorkspaceStore, userProfileStore} from 'app/utils/navigation';
+import {currentWorkspaceStore} from 'app/utils/navigation';
 import {userRolesStub, workspaceStubs} from 'testing/stubs/workspaces';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {RuntimeApiStub} from 'testing/stubs/runtime-api-stub';
 import {CdrVersionsStubVariables, cdrVersionTiersResponse} from 'testing/stubs/cdr-versions-api-stub';
 import {SpecificPopulationItems} from './workspace-edit-text';
-import {cdrVersionStore, serverConfigStore} from "app/utils/stores";
+import {cdrVersionStore, profileStore, serverConfigStore} from "app/utils/stores";
 
 describe('WorkspaceAbout', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
   let profileApi: ProfileApiStub;
+  const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();
 
@@ -39,10 +40,10 @@ describe('WorkspaceAbout', () => {
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async () => {
       const newProfile = await profileApi.getMe();
-      userProfileStore.next({profile: newProfile, reload, updateCache});
+      profileStore.set({profile: newProfile, load, reload, updateCache});
     });
 
-    userProfileStore.next({profile, reload, updateCache});
+    profileStore.set({profile, load, reload, updateCache});
     currentWorkspaceStore.next(workspace);
     serverConfigStore.set({config: {
       enableDataUseAgreement: true,
@@ -124,7 +125,7 @@ describe('WorkspaceAbout', () => {
 
   it('should display Publish/Unpublish buttons with FEATUREDWORKSPACEADMIN Authority', async () => {
     const profileWithAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.FEATUREDWORKSPACEADMIN]};
-    userProfileStore.next({profile: profileWithAuth, reload, updateCache});
+    profileStore.set({profile: profileWithAuth, load, reload, updateCache});
 
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
@@ -134,7 +135,7 @@ describe('WorkspaceAbout', () => {
 
   it('should display Publish/Unpublish buttons with DEVELOPER Authority', async () => {
     const profileWithAuth = {...ProfileStubVariables.PROFILE_STUB, authorities: [Authority.DEVELOPER]};
-    userProfileStore.next({profile: profileWithAuth, reload, updateCache});
+    profileStore.set({profile: profileWithAuth, load, reload, updateCache});
 
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);

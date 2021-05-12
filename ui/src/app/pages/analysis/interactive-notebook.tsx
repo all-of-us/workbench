@@ -14,10 +14,10 @@ import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCurrentWorkspace, withUrlParams} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
-import {navigate, userProfileStore} from 'app/utils/navigation';
+import {navigate} from 'app/utils/navigation';
 import {withRuntimeStore} from 'app/utils/runtime-utils';
 import {maybeInitializeRuntime} from 'app/utils/runtime-utils';
-import {RuntimeStore} from 'app/utils/stores';
+import {profileStore, RuntimeStore} from 'app/utils/stores';
 import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {WorkspacePermissionsUtil} from 'app/utils/workspace-permissions';
@@ -253,7 +253,7 @@ export const InteractiveNotebook = fp.flow(
     private get notebookInUse() {
       const {lastLockedBy, lockExpirationTime} = this.state;
       return lastLockedBy !== null && new Date().getTime()  < lockExpirationTime
-        && lastLockedBy !== userProfileStore.getValue().profile.username;
+        && lastLockedBy !== profileStore.get().profile.username;
     }
 
     private renderNotebookText() {

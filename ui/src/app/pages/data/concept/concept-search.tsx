@@ -285,7 +285,7 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
     }
 
     render() {
-      const {cohortContext, workspace: {accessLevel, cdrVersionId, id, namespace}} = this.props;
+      const {cohortContext, workspace: {accessLevel, cdrVersionId, id, namespace, accessTierShortName}} = this.props;
       const {copying, conceptSet, editing, editDescription, editName, error, errorMessage, editSaving, deleting, loading,
         showMoreDescription, showUnsavedModal} = this.state;
       const errors = validate(
@@ -396,6 +396,7 @@ export const ConceptSearch = fp.flow(withCurrentCohortSearchContext(), withCurre
                                fromWorkspaceFirecloudName={id}
                                fromResourceName={conceptSet.name}
                                fromCdrVersionId={cdrVersionId}
+                               fromAccessTierShortName={accessTierShortName}
                                resourceType={ResourceType.CONCEPTSET}
                                onClose={() => this.setState({copying: false})}
                                onCopy={() => this.setState({copySaving: false})}

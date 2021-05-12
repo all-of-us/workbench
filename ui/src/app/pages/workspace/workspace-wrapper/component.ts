@@ -11,10 +11,9 @@ import {
   routeConfigDataStore,
   setSidebarActiveIconStore,
   urlParamsStore,
-  userProfileStore
 } from 'app/utils/navigation';
 
-import {routeDataStore, runtimeStore} from 'app/utils/stores';
+import {profileStore, routeDataStore, runtimeStore} from 'app/utils/stores';
 
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {ExceededActionCountError, LeoRuntimeInitializer} from 'app/utils/leo-runtime-initializer';
@@ -170,8 +169,8 @@ export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
         this.accessLevel = workspace.accessLevel;
       }
     }));
-    this.subscriptions.push(userProfileStore.subscribe((profileResp) => {
-      this.username = profileResp.profile.username;
+    this.subscriptions.push(profileStore.subscribe(({profile}) => {
+      this.username = profile.username;
     }));
   }
 

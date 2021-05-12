@@ -1,12 +1,10 @@
 import { Page } from 'puppeteer';
 import { waitForDocumentTitle, waitWhileLoading } from 'utils/waits-utils';
-import { LinkText, WorkspaceAccessLevel } from 'app/text-labels';
 import { getPropValue } from 'utils/element-utils';
 import WorkspaceBase from './workspace-base';
 import Button from 'app/element/button';
 import ShareModal from 'app/modal/share-modal';
 import { config } from 'resources/workbench-config';
-// import WorkspaceCard from 'app/component/workspace-card';
 
 export const PageTitle = 'View Workspace Details';
 
@@ -20,26 +18,27 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
     return true;
   }
 
-  async findUserInCollaboratorList(username: string): Promise<WorkspaceAccessLevel> {
-    // At least one collab should eventually render, i.e. the current user.
-    const collabXPath = '//*[starts-with(@data-test-id,"workspaceUser-")]';
-    await this.page.waitForXPath(collabXPath, { visible: true });
+  // Returns map of key: AccessRole, value: Array[Emails].
+  async findUsersInCollaboratorList(): Promise<Map<string, Array<string>>> {
+    await waitWhileLoading(this.page);
+    // At least one collaborator should eventually render, i.e. the current user.
+    const xPath = './/*[starts-with(@data-test-id,"workspaceUser-") and text()]';
+    await this.page.waitForXPath(xPath, { visible: true });
 
-    // Fetch all of the collabs so we can string match and parse text content.
-    const collabs = await this.page.$x(collabXPath);
-    for (const c of collabs) {
-      let collabLine = await getPropValue<string>(c, 'textContent');
-      collabLine = collabLine.toLowerCase().trim();
-      if (collabLine.includes(username.toLowerCase())) {
-        for (const level of [WorkspaceAccessLevel.Reader, WorkspaceAccessLevel.Writer, WorkspaceAccessLevel.Owner]) {
-          if (collabLine.startsWith(level.toLowerCase())) {
-            return level;
-          }
-        }
+    const users = new Map<string, Array<string>>();
+    const collaborators = await this.page.$x(xPath);
+    for (const collaborator of collaborators) {
+      const texts = await getPropValue<string>(collaborator, 'textContent');
+      const [splitPart1, splitPart2] = texts.split(' : ');
+      const role = splitPart1.trim();
+      const email = splitPart2.trim();
+      if (users.has(role)) {
+        users.get(role).push(email);
+      } else {
+        users.set(role, new Array(email));
       }
     }
-
-    return null;
+    return users;
   }
 
   async openShareModal(): Promise<ShareModal> {
@@ -69,24 +68,9 @@ export default class WorkspaceAboutPage extends WorkspaceBase {
   }
 
   // if the collaborator is already on this workspace, just remove them before continuing.
-  async removeCollab(): Promise<void> {
-    const accessLevel = await this.findUserInCollaboratorList(config.collaboratorUsername);
-    if (accessLevel !== null) {
-      await (await this.openShareModal()).removeUser(config.collaboratorUsername);
-      await waitWhileLoading(this.page);
-    }
-  }
-
-  // to verify if the search input field is disabled for Writer/reader & enabled for Owner
-  async verifyCollabInputField(): Promise<void> {
-    const accessLevel = await this.findUserInCollaboratorList(config.collaboratorUsername);
+  async removeCollaborator(name = config.collaboratorUsername): Promise<void> {
     const modal = await this.openShareModal();
-    const searchInput = modal.waitForSearchBox();
-    if (accessLevel !== WorkspaceAccessLevel.Owner) {
-      expect(await searchInput.isDisabled()).toBe(true);
-    } else if (accessLevel === WorkspaceAccessLevel.Owner) {
-      expect(await searchInput.isDisabled()).toBe(false);
-    }
-    await modal.clickButton(LinkText.Cancel);
+    await modal.removeUser(name);
+    await waitWhileLoading(this.page);
   }
 }

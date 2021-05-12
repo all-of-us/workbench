@@ -206,7 +206,7 @@ export async function waitForHidden(page: Page, cssSelector: string): Promise<bo
     const jsHandle = await page.waitForFunction(
       (selector) => {
         const elem = document.querySelector(selector);
-        const isVisible = elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length;
+        const isVisible = elem && (elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length);
         return !isVisible;
       },
       {},

@@ -5,8 +5,8 @@ import {act} from 'react-dom/test-utils';
 
 import {registerApiClient as registerApiClientNotebooks} from 'app/services/notebooks-swagger-fetch-clients';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
-import {currentWorkspaceStore, queryParamsStore, urlParamsStore, userProfileStore, NavStore} from 'app/utils/navigation';
-import {runtimeStore, serverConfigStore} from 'app/utils/stores';
+import {currentWorkspaceStore, queryParamsStore, urlParamsStore, NavStore} from 'app/utils/navigation';
+import {profileStore, runtimeStore, serverConfigStore} from 'app/utils/stores';
 import {Kernels} from 'app/utils/notebook-kernels';
 import {RuntimeApi, RuntimeStatus, WorkspaceAccessLevel} from 'generated/fetch';
 import {RuntimesApi as LeoRuntimesApi, JupyterApi, ProxyApi} from 'notebooks-generated/fetch';
@@ -26,6 +26,7 @@ describe('NotebookRedirect', () => {
     accessLevel: WorkspaceAccessLevel.OWNER,
   };
   const profile = ProfileStubVariables.PROFILE_STUB;
+  const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();
 
@@ -65,7 +66,7 @@ describe('NotebookRedirect', () => {
       creating: true
     });
     currentWorkspaceStore.next(workspace);
-    userProfileStore.next({profile, reload, updateCache});
+    profileStore.set({profile, load, reload, updateCache});
     runtimeStore.set({workspaceNamespace: workspace.namespace, runtime: undefined});
 
     jest.useFakeTimers();

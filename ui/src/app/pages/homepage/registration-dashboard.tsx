@@ -14,9 +14,9 @@ import colors from 'app/styles/colors';
 import {reactStyles} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getLiveDataUseAgreementVersion} from 'app/utils/code-of-conduct';
-import {navigate, userProfileStore} from 'app/utils/navigation';
+import {navigate} from 'app/utils/navigation';
 import {buildRasRedirectUrl} from 'app/utils/ras';
-import {serverConfigStore} from 'app/utils/stores';
+import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {environment} from 'environments/environment';
 import {AccessModule, Profile} from 'generated/fetch';
 
@@ -79,8 +79,8 @@ export function getTwoFactorSetupUrl(): string {
   const url = new URL(accountChooserBase);
   // If available, set the 'Email' param to give Google a hint that we want to access the
   // target URL as this specific G Suite user. This helps guide users when multi-login is in use.
-  if (userProfileStore.getValue()) {
-    url.searchParams.set('Email', userProfileStore.getValue().profile.username);
+  if (profileStore.get().profile) {
+    url.searchParams.set('Email', profileStore.get().profile.username);
   }
   url.searchParams.set('continue', 'https://myaccount.google.com/signinoptions/two-step-verification/enroll');
   return url.toString();

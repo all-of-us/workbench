@@ -14,6 +14,7 @@ import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbUserTermsOfService;
 import org.pmiops.workbench.model.AdminTableUser;
 import org.pmiops.workbench.model.Profile;
+import org.pmiops.workbench.model.ProfileRenewableAccessModules;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
@@ -40,7 +41,8 @@ public interface ProfileMapper {
       DbUserTermsOfService latestTermsOfService,
       Double freeTierUsage,
       Double freeTierDollarQuota,
-      List<String> accessTierShortNames);
+      List<String> accessTierShortNames,
+      ProfileRenewableAccessModules renewableAccessModules);
 
   List<AdminTableUser> adminViewToModel(List<DbAdminTableUser> adminTableUsers);
 
