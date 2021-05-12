@@ -126,11 +126,11 @@ public class DbWgsExtractCromwellSubmission {
   }
 
   @Transient
-  public TerraJobStatus getStatusEnum() {
+  public TerraJobStatus getTerraStatusEnum() {
     return DbStorageEnums.terraJobStatusFromStorage(getTerraStatus());
   }
 
-  public void setStatusEnum(TerraJobStatus terraJobStatus) {
+  public void setTerraStatusEnum(TerraJobStatus terraJobStatus) {
     setTerraStatus(DbStorageEnums.terraJobStatusToStorage(terraJobStatus));
   }
 

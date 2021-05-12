@@ -117,8 +117,8 @@ public class GenomicExtractionService {
             dbSubmission -> {
               try {
                 // Don't bother checking if we already know the job is in a terminal status.
-                if (dbSubmission.getStatusEnum() == TerraJobStatus.RUNNING
-                    || dbSubmission.getStatusEnum() == null) {
+                if (dbSubmission.getTerraStatusEnum() == TerraJobStatus.RUNNING
+                    || dbSubmission.getTerraStatusEnum() == null) {
                   WgsCohortExtractionConfig cohortExtractionConfig =
                       workbenchConfigProvider.get().wgsCohortExtraction;
                   FirecloudSubmission firecloudSubmission =
@@ -133,10 +133,9 @@ public class GenomicExtractionService {
 
                   TerraJobStatus status =
                       genomicExtractionMapper.convertJobStatus(firecloudSubmission.getStatus());
-                  dbSubmission.setTerraStatus(
-                      DbStorageEnums.terraJobStatusToStorage(
+                  dbSubmission.setTerraStatusEnum(
                           genomicExtractionMapper.convertJobStatus(
-                              firecloudSubmission.getStatus())));
+                              firecloudSubmission.getStatus()));
                   if (status != TerraJobStatus.RUNNING) {
                     dbSubmission.setCompletionTime(
                         CommonMappers.timestamp(

@@ -22,7 +22,7 @@ public interface GenomicExtractionMapper {
       source = "dbSubmission.wgsExtractCromwellSubmissionId")
   @Mapping(target = "datasetName", source = "dbSubmission.dataset.name")
   @Mapping(target = "cost", source = "dbSubmission.userCost")
-  @Mapping(target = "status", source = "dbSubmission.terraStatus")
+  @Mapping(target = "status", source = "dbSubmission.terraStatusEnum")
   @Mapping(target = "submissionDate", source = "dbSubmission.terraSubmissionDate")
   GenomicExtractionJob toApi(DbWgsExtractCromwellSubmission dbSubmission);
 
