@@ -128,8 +128,6 @@ public class GenomicExtractionService {
                               cohortExtractionConfig.operationalTerraWorkspaceNamespace,
                               cohortExtractionConfig.operationalTerraWorkspaceName,
                               dbSubmission.getSubmissionId());
-                  dbSubmission.setTerraSubmissionDate(
-                      CommonMappers.timestamp(firecloudSubmission.getSubmissionDate()));
 
                   TerraJobStatus status =
                       genomicExtractionMapper.convertJobStatus(firecloudSubmission.getStatus());
@@ -272,6 +270,7 @@ public class GenomicExtractionService {
     dbSubmission.setDataset(dataSet);
     dbSubmission.setCreator(userProvider.get());
     dbSubmission.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
+    dbSubmission.setTerraSubmissionDate(CommonMappers.timestamp(submissionResponse.getSubmissionDate()));
     dbSubmission.setSampleCount((long) personIds.size());
     wgsExtractCromwellSubmissionDao.save(dbSubmission);
 
