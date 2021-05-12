@@ -460,4 +460,23 @@ public class UserServiceTest {
     assertThat(retrievedUser.getProfileLastConfirmedTime())
         .isGreaterThan(Timestamp.from(START_INSTANT));
   }
+
+  @Test
+  public void test_confirmPublications() {
+    assertThat(providedDbUser.getPublicationsLastConfirmedTime()).isNull();
+
+    // user confirms profile, so confirmation time is set to START_INSTANT
+
+    DbUser retrievedUser = userService.confirmPublications();
+    assertThat(retrievedUser.getPublicationsLastConfirmedTime())
+        .isEqualTo(Timestamp.from(START_INSTANT));
+
+    // time passes, user confirms again, confirmation time is updated
+
+    tick();
+
+    retrievedUser = userService.confirmPublications();
+    assertThat(retrievedUser.getPublicationsLastConfirmedTime())
+        .isGreaterThan(Timestamp.from(START_INSTANT));
+  }
 }

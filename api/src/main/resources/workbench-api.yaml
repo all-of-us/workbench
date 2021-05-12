@@ -259,6 +259,16 @@ paths:
       responses:
         204:
           description: Profile Confirmed.
+  "/v1/confirmPublications":
+    post:
+      tags:
+        - profile
+      description: Used by users to confirm that they have either reported any AoU-related
+        publications, or they have none.
+      operationId: confirmPublications
+      responses:
+        204:
+          description: Publications Confirmed.
   "/v1/is-username-taken":
     get:
       tags:
