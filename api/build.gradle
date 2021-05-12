@@ -104,9 +104,9 @@ ext.SWAGGER_3_CODEGEN_DIR = "$buildDir/swagger3"
 ext.SWAGGER_2_TEMPLATE_DIR = "$projectDir/src/main/resources/swagger2codegen"
 // Raw options passed to the Swagger codegen CLI.
 ext.SWAGGER_2_RAW_OPTS = [
-        // By default, the ignore file within the output directory is used. Override
-        // as we don't track the output directory in source.
-        '--ignore-file-override', "$projectDir/.swagger2-codegen-ignore"
+  // By default, the ignore file within the output directory is used. Override
+  // as we don't track the output directory in source.
+  '--ignore-file-override', "$projectDir/.swagger2-codegen-ignore"
 ]
 
 // Helper function to define a Java client Swagger codegen targets for the Gradle
@@ -124,13 +124,13 @@ def swagger2JavaClient(yaml, pkg, rawOptExtras = []) {
       wipeOutputDir = false
       rawOptions = SWAGGER_2_RAW_OPTS + rawOptExtras
       additionalProperties = [
-              'sourceFolder'     : '',
-              'library'          : 'okhttp-gson',
-              'serializableModel': 'true',
-              'dateLibrary'      : 'java8',
-              'invokerPackage'   : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}",
-              'modelPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.model",
-              'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.api",
+        'sourceFolder'     : '',
+        'library'          : 'okhttp-gson',
+        'serializableModel': 'true',
+        'dateLibrary'      : 'java8',
+        'invokerPackage'   : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}",
+        'modelPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.model",
+        'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.api",
       ]
     }
   }
@@ -148,18 +148,18 @@ def swagger3JavaClient(yaml, pkg, rawOptExtras = []) {
       // the directory would result in task invalidation / churn.
       wipeOutputDir = false
       rawOptions = [
-              // By default, the ignore file within the output directory is used. Override
-              // as we don't track the output directory in source.
-              '--ignore-file-override', "$projectDir/.swagger3-codegen-ignore"
+        // By default, the ignore file within the output directory is used. Override
+        // as we don't track the output directory in source.
+        '--ignore-file-override', "$projectDir/.swagger3-codegen-ignore"
       ] + rawOptExtras
       additionalProperties = [
-              'sourceFolder'     : '',
-              'library'          : 'okhttp-gson',
-              'serializableModel': 'true',
-              'dateLibrary'      : 'java8',
-              'invokerPackage'   : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}",
-              'modelPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.model",
-              'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.api",
+        'sourceFolder'     : '',
+        'library'          : 'okhttp-gson',
+        'serializableModel': 'true',
+        'dateLibrary'      : 'java8',
+        'invokerPackage'   : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}",
+        'modelPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.model",
+        'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.${pkg}.api",
       ]
     }
     // Validation only works for Swagger 2 - skip.
@@ -181,7 +181,7 @@ def swagger3JavaClient(yaml, pkg, rawOptExtras = []) {
 // codegen tasks.
 swaggerSources {
   firecloud swagger3JavaClient("firecloud.yaml", "firecloud", [
-          '--model-name-prefix', 'Firecloud'
+    '--model-name-prefix', 'Firecloud'
   ])
   notebooks swagger2JavaClient("notebooks.yaml", "notebooks")
   jira swagger2JavaClient("jira.yaml", "jira")
@@ -192,7 +192,7 @@ swaggerSources {
   shibboleth swagger2JavaClient("shibboleth.yaml", "shibboleth")
 
   leonardo swagger3JavaClient("leonardo.yaml", "leonardo", [
-          '--model-name-prefix', 'Leonardo'
+    '--model-name-prefix', 'Leonardo'
   ])
 
   // Workbench needs a special configuration style, as we generate Spring server
@@ -207,14 +207,14 @@ swaggerSources {
       wipeOutputDir = false
       rawOptions = SWAGGER_2_RAW_OPTS
       additionalProperties = [
-              'sourceFolder'     : '',
-              'modelPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.model",
-              'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.api",
-              'useTags'        : 'true',
-              // Generates delegate interfaces; used to make method annotations work without
-              // having to copy them to our implementations.
-              'delegatePattern': 'true',
-              'dateLibrary': 'java8'
+        'sourceFolder'     : '',
+        'modelPackage'     : "${SWAGGER_CODEGEN_BASE_PKG}.model",
+        'apiPackage'       : "${SWAGGER_CODEGEN_BASE_PKG}.api",
+        'useTags'        : 'true',
+        // Generates delegate interfaces; used to make method annotations work without
+        // having to copy them to our implementations.
+        'delegatePattern': 'true',
+        'dateLibrary': 'java8'
       ]
     }
   }
@@ -318,7 +318,6 @@ sourceSets {
     resources {
       srcDir "src/integration/resources"
       srcDir "config/"
-      srcDir "db/"
     }
     java {
       srcDir file('src/integration/java')
@@ -561,8 +560,8 @@ tasks.withType(Test) {
       html.enabled = true
     }
   }
-  // The default max heap size was reduced in Gradle 5; override.
-  maxHeapSize = "1g"
+  // As of Q1 2021, API unit tests need a larger heap due to memory retention across individual test cases.
+  maxHeapSize = "2g"
 }
 
 appengine {  // App Engine tasks configuration
