@@ -199,7 +199,8 @@ export const ConceptAddModal = withCurrentWorkspace()
         </ModalBody>
         {addingToExistingSet ? (
             <ModalBody data-test-id='add-to-existing'>
-              <select style={{marginTop: '1rem', height: '1.5rem', width: '100%'}}
+              <select data-test-id='existing-set-select'
+                      style={{marginTop: '1rem', height: '1.5rem', width: '100%'}}
                       placeholder='Select Concept Set'
                       onChange={(e) => this.setState({selectedSet: conceptSets[e.target.value]})}>
                 {conceptSets.map((set: ConceptSet, i) =>

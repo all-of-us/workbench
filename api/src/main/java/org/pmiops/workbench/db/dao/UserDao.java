@@ -2,7 +2,6 @@ package org.pmiops.workbench.db.dao;
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Set;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
@@ -36,15 +35,6 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
   @Query(
       "SELECT user FROM DbUser user LEFT JOIN FETCH user.authorities LEFT JOIN FETCH user.pageVisits WHERE user.userId = :id")
   DbUser findUserWithAuthoritiesAndPageVisits(@Param("id") long id);
-
-  /** Returns the user with the page visits and authorities loaded. */
-  @Query(
-      "SELECT user"
-          + " FROM DbUser user"
-          + " LEFT JOIN FETCH user.authorities"
-          + " LEFT JOIN FETCH user.pageVisits"
-          + " ORDER BY NULL")
-  Set<DbUser> findAllUsersWithAuthoritiesAndPageVisits();
 
   // Find users matching the requested access tier and a (name or username) search term.
   @Query(

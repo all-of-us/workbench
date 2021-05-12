@@ -964,11 +964,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   }
 
   @Override
-  public Set<DbUser> findAllUsersWithAuthoritiesAndPageVisits() {
-    return userDao.findAllUsersWithAuthoritiesAndPageVisits();
-  }
-
-  @Override
   public DbUser updateRasLinkLoginGovStatus(String loginGovUserName) {
     DbUser dbUser = userProvider.get();
 
@@ -981,5 +976,13 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         },
         dbUser,
         Agent.asUser(dbUser));
+  }
+
+  /** Confirm that a user's profile is up to date, for annual renewal compliance purposes. */
+  @Override
+  public DbUser confirmProfile() {
+    final DbUser dbUser = userProvider.get();
+    dbUser.setProfileLastConfirmedTime(new Timestamp(clock.instant().toEpochMilli()));
+    return userDao.save(dbUser);
   }
 }
