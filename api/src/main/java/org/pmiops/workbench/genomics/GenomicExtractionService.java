@@ -130,8 +130,7 @@ public class GenomicExtractionService {
 
                   TerraJobStatus status =
                       genomicExtractionMapper.convertJobStatus(firecloudSubmission.getStatus());
-                  dbSubmission.setTerraStatusEnum(
-                      genomicExtractionMapper.convertJobStatus(firecloudSubmission.getStatus()));
+                  dbSubmission.setTerraStatusEnum(status);
                   if (status != TerraJobStatus.RUNNING) {
                     dbSubmission.setCompletionTime(
                         CommonMappers.timestamp(
