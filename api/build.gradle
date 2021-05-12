@@ -326,12 +326,13 @@ sourceSets {
 
   // AoU Tools sources
   __tools__ {
-    compileClasspath += main.output + generated.output
-    runtimeClasspath += main.output + generated.output
+    compileClasspath += main.output + generated.output + main.compileClasspath
+    runtimeClasspath += main.output + generated.output + main.runtimeClasspath
 
     resources {
       srcDir "tools/src/main/resources"
-      srcDir "db/"
+      srcDir "db"
+      srcDir "config"
     }
     java {
       srcDirs = ['tools/src/main/java']
