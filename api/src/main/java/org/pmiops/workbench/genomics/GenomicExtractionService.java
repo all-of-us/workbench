@@ -115,27 +115,31 @@ public class GenomicExtractionService {
         .map(
             dbSubmission -> {
               try {
-                // RW-6537: Don't make a call to Terra for every submission. Submissions in a non
-                // running state will not change
-                WgsCohortExtractionConfig cohortExtractionConfig =
-                    workbenchConfigProvider.get().wgsCohortExtraction;
-                FirecloudSubmission firecloudSubmission =
-                    submissionApiProvider
-                        .get()
-                        .getSubmission(
-                            cohortExtractionConfig.operationalTerraWorkspaceNamespace,
-                            cohortExtractionConfig.operationalTerraWorkspaceName,
-                            dbSubmission.getSubmissionId());
+                // Don't bother checking if we already know the job is in a terminal status.
+                if (dbSubmission.getTerraStatusEnum() == TerraJobStatus.RUNNING
+                    || dbSubmission.getTerraStatusEnum() == null) {
+                  WgsCohortExtractionConfig cohortExtractionConfig =
+                      workbenchConfigProvider.get().wgsCohortExtraction;
+                  FirecloudSubmission firecloudSubmission =
+                      submissionApiProvider
+                          .get()
+                          .getSubmission(
+                              cohortExtractionConfig.operationalTerraWorkspaceNamespace,
+                              cohortExtractionConfig.operationalTerraWorkspaceName,
+                              dbSubmission.getSubmissionId());
 
-                if (genomicExtractionMapper.convertJobStatus(firecloudSubmission.getStatus())
-                    != TerraJobStatus.RUNNING) {
-                  dbSubmission.setCompletionTime(
-                      CommonMappers.timestamp(
-                          firecloudSubmission.getWorkflows().get(0).getStatusLastChangedDate()));
+                  TerraJobStatus status =
+                      genomicExtractionMapper.convertJobStatus(firecloudSubmission.getStatus());
+                  dbSubmission.setTerraStatusEnum(status);
+                  if (status != TerraJobStatus.RUNNING) {
+                    dbSubmission.setCompletionTime(
+                        CommonMappers.timestamp(
+                            firecloudSubmission.getWorkflows().get(0).getStatusLastChangedDate()));
+                  }
+
                   wgsExtractCromwellSubmissionDao.save(dbSubmission);
                 }
-
-                return genomicExtractionMapper.toApi(dbSubmission, firecloudSubmission);
+                return genomicExtractionMapper.toApi(dbSubmission);
               } catch (ApiException e) {
                 throw new ServerErrorException("Could not fetch submission status from Terra", e);
               }
@@ -263,6 +267,8 @@ public class GenomicExtractionService {
     dbSubmission.setDataset(dataSet);
     dbSubmission.setCreator(userProvider.get());
     dbSubmission.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
+    dbSubmission.setTerraSubmissionDate(
+        CommonMappers.timestamp(submissionResponse.getSubmissionDate()));
     dbSubmission.setSampleCount((long) personIds.size());
     wgsExtractCromwellSubmissionDao.save(dbSubmission);
 
