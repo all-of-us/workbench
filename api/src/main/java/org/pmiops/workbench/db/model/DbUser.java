@@ -24,6 +24,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
@@ -626,19 +628,23 @@ public class DbUser {
   }
 
   @Column(name = "last_modified_time")
+  @UpdateTimestamp
   public Timestamp getLastModifiedTime() {
     return lastModifiedTime;
   }
 
+  @VisibleForTesting
   public void setLastModifiedTime(Timestamp lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
   }
 
   @Column(name = "creation_time")
+  @CreationTimestamp
   public Timestamp getCreationTime() {
     return creationTime;
   }
 
+  @VisibleForTesting
   public void setCreationTime(Timestamp creationTime) {
     this.creationTime = creationTime;
   }
