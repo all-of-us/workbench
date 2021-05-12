@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import com.google.cloud.storage.Blob;
 import com.google.common.collect.ImmutableList;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -189,6 +190,8 @@ public class GenomicExtractionServiceTest {
 
     FirecloudSubmissionResponse submissionResponse = new FirecloudSubmissionResponse();
     submissionResponse.setSubmissionId(FC_SUBMISSION_ID);
+    submissionResponse.setSubmissionDate(
+        CommonMappers.offsetDateTimeUtc(new Timestamp(CLOCK.instant().toEpochMilli())));
     doReturn(submissionResponse).when(submissionsApi).createSubmission(any(), any(), any());
 
     doReturn(new FirecloudWorkspaceResponse().accessLevel("READER"))
@@ -235,8 +238,6 @@ public class GenomicExtractionServiceTest {
         .isEqualTo(completionTimestamp.toInstant().toEpochMilli());
     assertThat(wgsCohortExtractionJob.getDatasetName()).isEqualTo(dataset.getName());
     assertThat(wgsCohortExtractionJob.getStatus()).isEqualTo(TerraJobStatus.SUCCEEDED);
-    assertThat(wgsCohortExtractionJob.getSubmissionDate())
-        .isEqualTo(submissionDate.toInstant().toEpochMilli());
   }
 
   @Test
@@ -363,6 +364,8 @@ public class GenomicExtractionServiceTest {
     assertThat(dbSubmissions.size()).isEqualTo(1);
     assertThat(dbSubmissions.get(0).getSubmissionId()).isEqualTo(FC_SUBMISSION_ID);
     assertThat(dbSubmissions.get(0).getSampleCount()).isEqualTo(3);
+    assertThat(dbSubmissions.get(0).getTerraSubmissionDate())
+        .isEqualTo(new Timestamp(CLOCK.instant().toEpochMilli()));
   }
 
   @Test

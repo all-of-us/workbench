@@ -249,6 +249,16 @@ paths:
       responses:
         204:
           description: Request Received.
+  "/v1/confirmProfile":
+    post:
+      tags:
+        - profile
+      description: Used by users to confirm that their profile is up to date, as part of the
+        annual renewal compliance process.
+      operationId: confirmProfile
+      responses:
+        204:
+          description: Profile Confirmed.
   "/v1/is-username-taken":
     get:
       tags:
@@ -5555,6 +5565,8 @@ definitions:
         enum:
           - complianceTraining
           - dataUseAgreement
+          - profileConfirmation
+          - publicationConfirmation
       expirationEpochMillis:
         type: integer
         format: int64

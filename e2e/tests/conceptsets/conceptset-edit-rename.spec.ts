@@ -69,7 +69,7 @@ describe('Editing and rename Concept Set', () => {
     await conceptSearchPage.reviewAndSaveConceptSet();
 
     // Save to Existing Set: Only one Concept set and it is the new Concept Set created earlier in same workspace.
-    const existingConceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.ChooseExistingSet);
+    const existingConceptSetName = await conceptSearchPage.saveConceptSet(SaveOption.ChooseExistingSet, conceptSetName);
     expect(existingConceptSetName).toBe(conceptSetName);
     console.log(`Added new Concept to existing Concept Set "${conceptSetName}"`);
 

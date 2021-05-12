@@ -2,7 +2,6 @@ package org.pmiops.workbench.db.dao;
 
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.Set;
 import org.pmiops.workbench.db.model.DbUser;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
@@ -37,15 +36,6 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
       "SELECT user FROM DbUser user LEFT JOIN FETCH user.authorities LEFT JOIN FETCH user.pageVisits WHERE user.userId = :id")
   DbUser findUserWithAuthoritiesAndPageVisits(@Param("id") long id);
 
-  /** Returns the user with the page visits and authorities loaded. */
-  @Query(
-      "SELECT user"
-          + " FROM DbUser user"
-          + " LEFT JOIN FETCH user.authorities"
-          + " LEFT JOIN FETCH user.pageVisits"
-          + " ORDER BY NULL")
-  Set<DbUser> findAllUsersWithAuthoritiesAndPageVisits();
-
   // Find users matching the requested access tier and a (name or username) search term.
   @Query(
       "SELECT dbUser FROM DbUser dbUser "
@@ -70,19 +60,19 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
       // JPQL doesn't allow join on subquery
       nativeQuery = true,
       value =
-          "SELECT COUNT(u.user_id) AS user_count, u.disabled, "
-              + "COALESCE(t.access_tier_short_names, '[unregistered]') AS access_tier_short_names "
+          "SELECT COUNT(u.user_id) AS userCount, u.disabled AS disabled, "
+              + "COALESCE(t.accessTierShortNames, '[unregistered]') AS accessTierShortNames "
               + "FROM user u "
               + "LEFT JOIN ("
               + "  SELECT u.user_id, "
-              + "  GROUP_CONCAT(DISTINCT a.short_name ORDER BY a.short_name) AS access_tier_short_names "
+              + "  GROUP_CONCAT(DISTINCT a.short_name ORDER BY a.short_name) AS accessTierShortNames "
               + "  FROM user u "
               + "  JOIN user_access_tier uat ON u.user_id = uat.user_id "
               + "  JOIN access_tier a ON a.access_tier_id = uat.access_tier_id "
               + "  WHERE uat.access_status = 1 " // ENABLED
               + "  GROUP BY u.user_id"
               + ") as t ON t.user_id = u.user_id "
-              + "GROUP BY u.disabled, access_tier_short_names ")
+              + "GROUP BY u.disabled, accessTierShortNames ")
   List<UserCountByDisabledAndAccessTiers> getUserCountGaugeData();
 
   // Note: setter methods are included only where necessary for testing. See ProfileServiceTest.
@@ -148,22 +138,41 @@ public interface UserDao extends CrudRepository<DbUser, Long> {
     String getAccessTierShortNames();
   }
 
+  /**
+   * Important! Make sure add alias and it matches name in {@link DbAdminTableUser}, otherwise JPA
+   * will return null if the query column name does not match the variable name in interface
+   * projection.
+   */
   @Query(
       // JPQL doesn't allow join on subquery
       nativeQuery = true,
       value =
-          "SELECT u.user_id, u.email AS username, u.disabled, u.given_name, u.family_name, "
-              + "u.contact_email, i.display_name AS institution_name, "
-              + "u.first_registration_completion_time, u.creation_time, u.first_sign_in_time, "
-              + "u.data_use_agreement_bypass_time, u.data_use_agreement_completion_time, "
-              + "u.compliance_training_bypass_time, u.compliance_training_completion_time, "
-              + "u.beta_access_bypass_time, "
-              + "u.email_verification_bypass_time, u.email_verification_completion_time, "
-              + "u.era_commons_bypass_time, u.era_commons_completion_time, "
-              + "u.id_verification_bypass_time, u.id_verification_completion_time, "
-              + "u.two_factor_auth_bypass_time, u.two_factor_auth_completion_time, "
-              + "u.ras_link_login_gov_bypass_time, u.ras_link_login_gov_completion_time, "
-              + "t.access_tier_short_names "
+          "SELECT u.user_id AS userId, "
+              + "u.email AS username, "
+              + "u.disabled AS disabled, "
+              + "u.given_name AS givenName, "
+              + "u.family_name AS familyName, "
+              + "u.contact_email AS contactEmail, "
+              + "i.display_name AS institutionName, "
+              + "u.first_registration_completion_time AS firstRegistrationCompletionTime, "
+              + "u.creation_time AS creationTime, "
+              + "u.first_sign_in_time AS firstSignInTime, "
+              + "u.data_use_agreement_bypass_time AS dataUseAgreementBypassTime, "
+              + "u.data_use_agreement_completion_time AS dataUseAgreementCompletionTime, "
+              + "u.compliance_training_bypass_time AS complianceTrainingBypassTime, "
+              + "u.compliance_training_completion_time AS complianceTrainingCompletionTime, "
+              + "u.beta_access_bypass_time AS betaAccessBypassTime, "
+              + "u.email_verification_bypass_time AS emailVerificationBypassTime, "
+              + "u.email_verification_completion_time AS emailVerificationCompletionTime, "
+              + "u.era_commons_bypass_time AS eraCommonsBypassTime, "
+              + "u.era_commons_completion_time AS eraCommonsCompletionTime, "
+              + "u.id_verification_bypass_time AS idVerificationBypassTime, "
+              + "u.id_verification_completion_time AS idVerificationCompletionTime, "
+              + "u.two_factor_auth_bypass_time AS twoFactorAuthBypassTime, "
+              + "u.two_factor_auth_completion_time AS twoFactorAuthCompletionTime, "
+              + "u.ras_link_login_gov_bypass_time AS rasLinkLoginGovBypassTime, "
+              + "u.ras_link_login_gov_completion_time AS rasLinkLoginGovCompletionTime, "
+              + "t.access_tier_short_names AS accessTierShortNames "
               + "FROM user u "
               + "LEFT JOIN user_verified_institutional_affiliation AS uvia ON u.user_id = uvia.user_id "
               + "LEFT JOIN institution AS i ON i.institution_id = uvia.institution_id "
