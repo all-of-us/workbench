@@ -1,9 +1,5 @@
 package org.pmiops.workbench.genomics;
 
-import com.google.common.collect.ImmutableBiMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.mapstruct.CollectionMappingStrategy;
@@ -17,7 +13,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudWorkflow;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflowStatus;
 import org.pmiops.workbench.model.GenomicExtractionJob;
 import org.pmiops.workbench.model.TerraJobStatus;
-import org.pmiops.workbench.model.TerraWorkflowStatus;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
 import org.pmiops.workbench.utils.mappers.MapStructConfig;
 
@@ -39,8 +34,10 @@ public interface GenomicExtractionMapper {
   default TerraJobStatus convertJobStatus(FirecloudSubmission submission) {
     // FirecloudSubmission.status doesn't capture the distinction between 'succeeded' and 'failed'
     // in 'done' so we have to check the workflows themselves.
-    Set<FirecloudWorkflowStatus> workflowStatuses = submission.getWorkflows().stream()
-        .map(FirecloudWorkflow::getStatus).collect(Collectors.toSet());
+    Set<FirecloudWorkflowStatus> workflowStatuses =
+        submission.getWorkflows().stream()
+            .map(FirecloudWorkflow::getStatus)
+            .collect(Collectors.toSet());
 
     if (submission.getStatus() == FirecloudSubmissionStatus.DONE) {
       if (workflowStatuses.contains(FirecloudWorkflowStatus.FAILED)) {
