@@ -24,7 +24,7 @@
     profile to be confirmed on registration and new users to not have any publications, so these
     values will also be set when new users register for the first time.
 
-    If a user has ever has registered status (membership in the registered tier) then they
+    If a user has ever had registered status (membership in the registered tier) then they
     will have a first_enabled date in the user_access_tier table.  Copy this value (if it exists)
     to the new fields created here: profile_last_confirmed_time and
     publications_last_confirmed_time.
