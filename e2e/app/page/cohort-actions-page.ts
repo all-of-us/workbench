@@ -25,9 +25,13 @@ export default class CohortActionsPage extends AuthenticatedPage {
   }
 
   async clickCreateDatasetButton(): Promise<DatasetBuildPage> {
-    const button = this.getCreateDatasetButton();
-    await button.clickAndWait();
+    await this.getCreateDatasetButton().clickAndWait();
     return new DatasetBuildPage(this.page).waitForLoad();
+  }
+
+  async clickCreateAnotherCohortButton(): Promise<CohortBuildPage> {
+    await this.getCreateAnotherCohortButton().clickAndWait();
+    return new CohortBuildPage(this.page).waitForLoad();
   }
 
   getCreateAnotherCohortButton(): Button {
@@ -42,7 +46,7 @@ export default class CohortActionsPage extends AuthenticatedPage {
     return Button.findByName(this.page, { name: LinkText.CreateDataset });
   }
 
-  async clickCohortNameLink(cohortName: string): Promise<CohortBuildPage> {
+  async clickCohortName(cohortName: string): Promise<CohortBuildPage> {
     const cohortLink = Link.findByName(this.page, { name: cohortName });
     await cohortLink.clickAndWait();
 

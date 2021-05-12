@@ -3,7 +3,7 @@ import TieredMenu from 'app/component/tiered-menu';
 import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
 import { ElementType } from 'app/xpath-options';
-import { makeRandomName } from 'utils/str-utils';
+import { makeRandomName, numericalStringToNumber } from 'utils/str-utils';
 import { waitForDocumentTitle, waitForNumericalString, waitForText, waitWhileLoading } from 'utils/waits-utils';
 import { buildXPath } from 'app/xpath-builders';
 import { LinkText, MenuOption } from 'app/text-labels';
@@ -130,7 +130,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
    * This function also can be used to wait until participants calculation has completed.
    * @return {string} Total Count.
    */
-  async getTotalCount(timeout = 120000): Promise<string> {
+  async getTotalCount(timeout = 120000): Promise<number> {
     const barCssSelector = '.highcharts-container .highcharts-bar-series rect';
     const [count] = await Promise.all([
       waitForNumericalString(this.page, FieldSelector.TotalCount, timeout),
@@ -140,7 +140,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
         barCssSelector
       )
     ]);
-    return count;
+    return numericalStringToNumber(count);
   }
 
   getSaveCohortButton(): Button {
@@ -205,5 +205,23 @@ export default class CohortBuildPage extends AuthenticatedPage {
     const group = new CohortParticipantsGroup(this.page);
     group.setXpath(`//*[@id="list-include-groups"]//div[./*[@data-test-id="item-list"]][${index}]`);
     return group;
+  }
+
+  async findGenderSelectMenu(): Promise<TieredMenu> {
+    const xpath = '//*[./div[text()="Results by"]]//button[text()][./clr-icon][1]';
+    const button = await this.page.waitForXPath(xpath, { visible: true });
+    await button.click();
+    return new TieredMenu(this.page);
+  }
+
+  async findAgeSelectMenu(): Promise<TieredMenu> {
+    const xpath = '//*[./div[text()="Results by"]]//button[text()][./clr-icon][2]';
+    const button = await this.page.waitForXPath(xpath, { visible: true });
+    await button.click();
+    return new TieredMenu(this.page);
+  }
+
+  findRefreshButton(): Button {
+    return new Button(this.page, '//*[./div[text()="Results by"]]//button[.="REFRESH"]');
   }
 }

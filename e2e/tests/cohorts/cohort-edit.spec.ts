@@ -1,7 +1,7 @@
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
-import CohortBuildPage, { FieldSelector } from 'app/page/cohort-build-page';
-import { makeRandomName, makeWorkspaceName, numericalStringToNumber } from 'utils/str-utils';
+import CohortBuildPage from 'app/page/cohort-build-page';
+import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
 import { PhysicalMeasurementsCriteria } from 'app/page/cohort-participants-group';
 import CohortActionsPage from 'app/page/cohort-actions-page';
 import { waitForText, waitWhileLoading } from 'utils/waits-utils';
@@ -32,7 +32,7 @@ describe('Editing Cohort tests', () => {
     await cohortBuildPage.waitForLoad();
 
     // Wait for Total Count that also indicates page load is ready.
-    numericalStringToNumber(await cohortBuildPage.getTotalCount());
+    await cohortBuildPage.getTotalCount();
 
     // Switch on Temporal in Group 1.
     const group1 = cohortBuildPage.findIncludeParticipantsGroupByIndex();
@@ -49,40 +49,6 @@ describe('Editing Cohort tests', () => {
     expect(await resourceCard.findCard(cohortName)).toBeTruthy();
   });
 
-  test('Rename group in cohort', async () => {
-    const cohortName = await setUpWorkspaceAndCohort().then((cohort: DataResourceCard) => cohort.clickResourceName());
-
-    const cohortBuildPage = new CohortBuildPage(page);
-    await cohortBuildPage.waitForLoad();
-
-    // Save Total Count for comparison later
-    const totalCount = numericalStringToNumber(await cohortBuildPage.getTotalCount());
-
-    // Edit Group 1 name successfully
-    const newName = makeRandomName();
-    const group1 = cohortBuildPage.findIncludeParticipantsGroupByIndex();
-    await group1.editGroupName(newName);
-
-    // Check new named group
-    const groupName = cohortBuildPage.findIncludeParticipantsGroup(newName);
-    expect(await groupName.exists()).toBe(true);
-
-    // Check Total Count is unaffected by group name rename
-    const newTotalCount = numericalStringToNumber(await cohortBuildPage.getTotalCount());
-    expect(newTotalCount).toBe(totalCount);
-
-    await cohortBuildPage.saveChanges();
-
-    const cohortActionsPage = new CohortActionsPage(page);
-    await cohortActionsPage.waitForLoad();
-    expect(await page.title()).toContain('Cohort Actions');
-
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.openDataPage();
-    await dataPage.waitForLoad();
-    await dataPage.deleteResource(cohortName, ResourceCard.Cohort);
-  });
-
   test('Insert new group in cohort', async () => {
     const cohortName = await setUpWorkspaceAndCohort().then((cohort: DataResourceCard) => cohort.clickResourceName());
 
@@ -95,7 +61,7 @@ describe('Editing Cohort tests', () => {
     await newGroup.includePhysicalMeasurement([PhysicalMeasurementsCriteria.Weight], { filterValue: 200 });
 
     // Check Total Count and new Total Count is different
-    const newTotalCount = numericalStringToNumber(await cohortBuildPage.getTotalCount());
+    const newTotalCount = await cohortBuildPage.getTotalCount();
     expect(newTotalCount).toBeGreaterThan(1);
 
     await cohortBuildPage.saveChanges();
@@ -121,7 +87,7 @@ describe('Editing Cohort tests', () => {
     const cohortBuildPage = new CohortBuildPage(page);
     await cohortBuildPage.waitForLoad();
 
-    const reviewSetsButton = await cohortBuildPage.getCopyButton();
+    const reviewSetsButton = cohortBuildPage.getCopyButton();
     await reviewSetsButton.click();
 
     const modal = new CohortReviewModal(page);
@@ -145,7 +111,7 @@ describe('Editing Cohort tests', () => {
     console.log(`Created Review Set with ${reviewSetNumberOfParticipants} participants.`);
 
     // Click Back to Cohort link
-    const backToCohortButton = await cohortReviewPage.getBackToCohortButton();
+    const backToCohortButton = cohortReviewPage.getBackToCohortButton();
     await backToCohortButton.click();
 
     await cohortBuildPage.waitForLoad();
@@ -203,7 +169,7 @@ describe('Editing Cohort tests', () => {
     await cohortLink.clickAndWait();
 
     // Total Count should be unchanged.
-    await waitForText(page, totalCount, { xpath: FieldSelector.TotalCount }, 60000);
+    expect(await cohortBuildPage.getTotalCount()).toEqual(totalCount);
 
     // Delete cohort while inside the Cohort Build page
     const modalContent = await cohortBuildPage.deleteCohort();

@@ -1,6 +1,6 @@
-import { findOrCreateWorkspace, isValidDate, signInWithAccessToken } from 'utils/test-utils';
+import { createWorkspace, isValidDate, signInWithAccessToken } from 'utils/test-utils';
 import { MenuOption, LinkText, ResourceCard } from 'app/text-labels';
-import { makeRandomName } from 'utils/str-utils';
+import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import CohortParticipantDetailPage from 'app/page/cohort-participant-detail-page';
 import CohortReviewModal from 'app/modal/cohort-review-modal';
@@ -19,7 +19,7 @@ describe('Cohort review tests', () => {
     await signInWithAccessToken(page);
   });
 
-  const workspace = 'e2eCohortsReviewTest';
+  const workspace = makeWorkspaceName();
 
   /**
    * Test:
@@ -34,7 +34,7 @@ describe('Cohort review tests', () => {
   test('Create Cohort and a Review Set for 100 participants', async () => {
     const reviewSetNumberOfParticipants = 100;
 
-    await findOrCreateWorkspace(page, { workspaceName: workspace });
+    await createWorkspace(page, { workspaceName: workspace });
 
     const dataPage = new WorkspaceDataPage(page);
     const cohortCard = await dataPage.createCohort();

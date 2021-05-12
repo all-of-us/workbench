@@ -14,6 +14,7 @@ import { getPropValue } from 'utils/element-utils';
 import ReviewCriteriaSidebar from 'app/component/review-criteria-sidebar';
 import Textbox from 'app/element/textbox';
 import RadioButton from 'app/element/radiobutton';
+import { numericalStringToNumber } from 'utils/str-utils';
 
 export enum Sex {
   FEMALE = 'Female',
@@ -82,6 +83,11 @@ export default class CohortParticipantsGroup {
     return (await this.page.$x(this.rootXpath)).length > 0;
   }
 
+  getEnableButton(): Button {
+    const xpath = `${this.rootXpath}//*[normalize-space()="ENABLE" and @role="button"]`;
+    return new Button(this.page, xpath);
+  }
+
   getAddCriteriaButton(): Button {
     const xpath = `${this.rootXpath}//*[normalize-space()="Add Criteria"]/button`;
     return new Button(this.page, xpath);
@@ -101,16 +107,26 @@ export default class CohortParticipantsGroup {
     return `${this.rootXpath}${FieldSelector.GroupCount}`;
   }
 
-  async clickSnowmanIcon(): Promise<void> {
+  getCriteriaXpath(criteriaName: string): string {
+    return (
+      this.rootXpath +
+      `//*[@data-test-id="item-list"][.//clr-icon[@shape="ellipsis-vertical"] and .//*[text()="${criteriaName}"]]`
+    );
+  }
+  async clickGroupSnowmanIcon(): Promise<void> {
     const iconXpath = `${this.rootXpath}${snowmanIconXpath}`;
     await this.page.waitForXPath(iconXpath, { visible: true }).then((icon) => icon.click());
   }
 
+  async clickCriteriaSnowmanIcon(criteriaName: string): Promise<void> {
+    await this.page.waitForXPath(this.getCriteriaXpath(criteriaName), { visible: true }).then((icon) => icon.click());
+  }
+
   /**
-   * Build Cohort Criteria page: Group snowman menu
+   * Build Cohort Criteria page: Finds the Group or Criteria Snowman menu.
    * @param {GroupMenuOption} option
    */
-  async selectGroupSnowmanMenu(option: MenuOption): Promise<void> {
+  async selectSnowmanMenu(option: MenuOption): Promise<void> {
     const menu = new TieredMenu(this.page);
     await menu.waitUntilVisible();
     return menu.select(option);
@@ -122,12 +138,34 @@ export default class CohortParticipantsGroup {
    * @return {boolean} Returns TRUE if rename was successful.
    */
   async editGroupName(newGroupName: string): Promise<void> {
-    await this.clickSnowmanIcon();
-    await this.selectGroupSnowmanMenu(MenuOption.EditGroupName);
+    await this.clickGroupSnowmanIcon();
+    await this.selectSnowmanMenu(MenuOption.EditGroupName);
     const modal = new Modal(this.page);
     const textbox = modal.waitForTextbox('New Name:');
     await textbox.type(newGroupName);
     await modal.clickButton(LinkText.Rename, { waitForClose: true });
+  }
+
+  async editCriteriaName(criteriaName: string, newName: string): Promise<void> {
+    await this.clickCriteriaSnowmanIcon(criteriaName);
+    await this.selectSnowmanMenu(MenuOption.EditCriteriaName);
+    const modal = new Modal(this.page);
+    const textbox = modal.waitForTextbox('New Name:');
+    await textbox.type(newName);
+    await modal.clickButton(LinkText.Rename, { waitForClose: true });
+  }
+
+  async suppressCriteriaFromTotalCount(criteriaName: string): Promise<void> {
+    await this.clickCriteriaSnowmanIcon(criteriaName);
+    await this.selectSnowmanMenu(MenuOption.SuppressGroupFromTotalCount);
+  }
+
+  async deleteCriteria(criteriaName: string): Promise<void> {
+    await this.clickCriteriaSnowmanIcon(criteriaName);
+    await this.selectSnowmanMenu(MenuOption.DeleteCriteria);
+    const xpath = `${this.rootXpath}//*[normalize-space()="UNDO" and @role="button"]`;
+    const undoButton = new Button(this.page, xpath);
+    await undoButton.waitForXPath(); // Find the UNDO button but do not click.
   }
 
   /**
@@ -135,8 +173,8 @@ export default class CohortParticipantsGroup {
    * @return Returns array of criterias in this group.
    */
   async deleteGroup(): Promise<ElementHandle[]> {
-    await this.clickSnowmanIcon();
-    await this.selectGroupSnowmanMenu(MenuOption.DeleteGroup);
+    await this.clickGroupSnowmanIcon();
+    await this.selectSnowmanMenu(MenuOption.DeleteGroup);
     try {
       await waitForText(this.page, 'This group has been deleted');
     } catch (err) {
@@ -208,12 +246,17 @@ export default class CohortParticipantsGroup {
     }
   }
 
-  async includeDemographicsDeceased(): Promise<string> {
+  async includeFitbit(): Promise<number> {
+    await this.clickCriteriaMenuItems([MenuOption.Fitbit]);
+    return this.getGroupCount();
+  }
+
+  async includeDemographicsDeceased(): Promise<number> {
     await this.clickCriteriaMenuItems([MenuOption.Demographics, MenuOption.Deceased]);
     return this.getGroupCount();
   }
 
-  async includeWholeGenomeVariant(): Promise<string> {
+  async includeWholeGenomeVariant(): Promise<number> {
     await this.clickCriteriaMenuItems([MenuOption.WholeGenomeVariant]);
     return this.getGroupCount();
   }
@@ -287,8 +330,9 @@ export default class CohortParticipantsGroup {
     return waitForNumericalString(this.page, this.numberOfParticipantsXpath());
   }
 
-  async getGroupCount(): Promise<string> {
-    return waitForNumericalString(this.page, this.getGroupCountXpath(), 120000);
+  async getGroupCount(): Promise<number> {
+    const count = await waitForNumericalString(this.page, this.getGroupCountXpath(), 120000);
+    return numericalStringToNumber(count);
   }
 
   /**
@@ -326,7 +370,7 @@ export default class CohortParticipantsGroup {
     return count;
   }
 
-  async includeVisits(visits: Visits[]): Promise<string> {
+  async includeVisits(visits: Visits[]): Promise<number> {
     await this.clickCriteriaMenuItems([MenuOption.Visits]);
     for (const visit of visits) {
       const icon = ClrIconLink.findByName(this.page, {
@@ -351,7 +395,7 @@ export default class CohortParticipantsGroup {
   }
 
   async openAddCriteriaTieredMenu(): Promise<TieredMenu> {
-    const addCriteriaButton = await this.getAddCriteriaButton();
+    const addCriteriaButton = this.getAddCriteriaButton();
     await addCriteriaButton.waitUntilEnabled();
     await addCriteriaButton.focus();
     await addCriteriaButton.click(); // Click dropdown trigger to open menu
@@ -361,7 +405,7 @@ export default class CohortParticipantsGroup {
   }
 
   async openAnyMentionOfTieredMenu(): Promise<TieredMenu> {
-    const anyMentionOfButton = await this.getAnyMentionOfButton();
+    const anyMentionOfButton = this.getAnyMentionOfButton();
     await anyMentionOfButton.waitUntilEnabled();
     await anyMentionOfButton.focus();
     await anyMentionOfButton.click(); // Click dropdown trigger to open menu
@@ -371,7 +415,7 @@ export default class CohortParticipantsGroup {
   }
 
   async openDuringSameEncounterAsTieredMenu(): Promise<TieredMenu> {
-    const duringSameEncounterButton = await this.getDuringSameEncounterAsButton();
+    const duringSameEncounterButton = this.getDuringSameEncounterAsButton();
     await duringSameEncounterButton.waitUntilEnabled();
     await duringSameEncounterButton.focus();
     await duringSameEncounterButton.click(); // Click dropdown trigger to open menu
@@ -419,7 +463,7 @@ export default class CohortParticipantsGroup {
   }
 
   // Handling "Add selected criteria to cohort" sidebar. Save Criteria. The sidebar contents are not checked.
-  async finishReviewAndSaveCriteria(): Promise<string> {
+  async finishReviewAndSaveCriteria(): Promise<number> {
     await this.clickFinishAndReviewButton();
     const reviewCriteriaSidebar = new ReviewCriteriaSidebar(this.page);
     await reviewCriteriaSidebar.waitUntilVisible();

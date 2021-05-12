@@ -38,9 +38,8 @@ describe('Create dataset and export to notebook at same time', () => {
 
     // Check Group 1 Count.
     const group1Count = await group1.getGroupCount();
-    const group1CountInt = Number(group1Count.replace(/,/g, ''));
-    expect(group1CountInt).toBeGreaterThan(1);
-    console.log(`Include Participants Group 1: ${group1CountInt}`);
+    expect(group1Count).toBeGreaterThan(1);
+    console.log(`Include Participants Group 1: ${group1Count}`);
 
     // Save new Cohort.
     const newCohortName = await cohortBuildPage.createCohort();

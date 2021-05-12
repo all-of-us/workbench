@@ -7,6 +7,7 @@ import { waitForNumericalString, waitWhileLoading } from 'utils/waits-utils';
 import BaseHelpSidebar from './base-help-sidebar';
 import { logger } from 'libs/logger';
 import { FilterSign } from 'app/page/cohort-participants-group';
+import { getPropValue } from '../../utils/element-utils';
 
 enum SectionSelectors {
   AttributesForm = '//*[@id="attributes-form"]',
@@ -30,6 +31,12 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
     const title = await this.getTitle();
     await this.waitUntilSectionVisible(SectionSelectors.SelectionList);
     logger.info(`"${title}" sidebar is opened`);
+  }
+
+  async getCriteriaCount(): Promise<number> {
+    const xpath = `${this.getXpath()}//*[@data-test-id="criteria-count"]`;
+    const element = await this.page.waitForXPath(xpath, { visible: true });
+    return getPropValue<number>(element, 'textContent');
   }
 
   async getPhysicalMeasurementParticipantResult(filterSign: FilterSign, filterValue: number): Promise<string> {
@@ -99,7 +106,7 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
     return waitForNumericalString(this.page, selector);
   }
 
-  waitUntilSectionVisible(xpath: string): Promise<ElementHandle> {
+  async waitUntilSectionVisible(xpath: string): Promise<ElementHandle> {
     return this.page.waitForXPath(xpath, { visible: true });
   }
 }
