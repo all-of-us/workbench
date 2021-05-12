@@ -1,33 +1,30 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {
   ActivatedRouteSnapshot,
   CanActivate,
   CanActivateChild,
-  Router, RouterStateSnapshot
+  Router,
+  RouterStateSnapshot
 } from '@angular/router';
-import {Observable} from 'rxjs/Observable';
 
-import {ProfileStorageService} from 'app/services/profile-storage.service';
 import {hasRegisteredAccess} from 'app/utils/access-tiers';
+import {profileStore} from 'app/utils/stores';
 
 @Injectable()
 export class RegistrationGuard implements CanActivate, CanActivateChild {
-  constructor(
-    private profileStorageService: ProfileStorageService,
-    private router: Router) {}
+  constructor(private router: Router) {}
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
-    return this.profileStorageService.profile$.flatMap((profile) => {
-      if (hasRegisteredAccess(profile.accessTierShortNames)) {
-        return Observable.from([true]);
-      } else {
-        this.router.navigate(['/']);
-        return Observable.from([false]);
-      }
-    });
+  async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> {
+    const profile = await profileStore.get().load();
+    if (hasRegisteredAccess(profile.accessTierShortNames)) {
+      return true;
+    } else {
+      this.router.navigate(['/']);
+      return false;
+    }
   }
 
-  canActivateChild(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
+  async canActivateChild(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> {
     return this.canActivate(route, state);
   }
 }

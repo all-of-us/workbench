@@ -20,7 +20,7 @@
  * });
  */
 
-import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from 'app/utils';
+import {cookiesEnabled, LOCAL_STORAGE_API_OVERRIDE_KEY} from 'app/utils/cookies';
 import {environment} from 'environments/environment';
 import {
   AuthDomainApi,

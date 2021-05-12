@@ -249,6 +249,16 @@ paths:
       responses:
         204:
           description: Request Received.
+  "/v1/confirmProfile":
+    post:
+      tags:
+        - profile
+      description: Used by users to confirm that their profile is up to date, as part of the
+        annual renewal compliance process.
+      operationId: confirmProfile
+      responses:
+        204:
+          description: Profile Confirmed.
   "/v1/is-username-taken":
     get:
       tags:
@@ -5534,6 +5544,36 @@ definitions:
         format: int64
         description: Timestamp when the user was bypassed for completing login.gov linking
           linking.
+      renewableAccessModules:
+        type: object
+        properties:
+          modules:
+            type: array
+            items:
+              "$ref": "#/definitions/RenewableAccessModuleStatus"
+          anyModuleHasExpired:
+            type: boolean
+            description: >
+              Whether any modules have expired. Each expired module will have
+              the corresponding hasExpired flag set in the modules array.
+
+  RenewableAccessModuleStatus:
+    type: object
+    properties:
+      moduleName:
+        type: string
+        enum:
+          - complianceTraining
+          - dataUseAgreement
+          - profileConfirmation
+          - publicationConfirmation
+      expirationEpochMillis:
+        type: integer
+        format: int64
+        description: When this module expired or will expire.
+      hasExpired:
+        type: boolean
+        description: Whether this module has expired according to the server's clock.
 
   DemographicSurvey:
     type: object

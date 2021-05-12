@@ -4,7 +4,7 @@ import * as React from 'react';
 import {
   registerApiClient, workspacesApi,
 } from 'app/services/swagger-fetch-clients';
-import {navigate, userProfileStore} from 'app/utils/navigation';
+import {navigate} from 'app/utils/navigation';
 import {Profile, ProfileApi, WorkspacesApi} from 'generated/fetch';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
 import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
@@ -12,7 +12,7 @@ import {ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {workspaceStubs, WorkspaceStubVariables} from 'testing/stubs/workspaces';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {WorkspaceList} from './workspace-list';
-import {serverConfigStore} from "app/utils/stores";
+import {profileStore, serverConfigStore} from "app/utils/stores";
 
 // Mock the navigate function but not userProfileStore
 jest.mock('app/utils/navigation', () => ({
@@ -23,6 +23,7 @@ jest.mock('app/utils/navigation', () => ({
 describe('WorkspaceList', () => {
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
   let profileApi: ProfileApiStub;
+  const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();
 
@@ -37,10 +38,10 @@ describe('WorkspaceList', () => {
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async() => {
       const newProfile = await profileApi.getMe();
-      userProfileStore.next({profile: newProfile, reload, updateCache});
+      profileStore.set({profile: newProfile, load, reload, updateCache});
     });
 
-    userProfileStore.next({profile, reload, updateCache});
+    profileStore.set({profile, load, reload, updateCache});
     serverConfigStore.set({config: {gsuiteDomain: 'abc', enableResearchReviewPrompt: true}});
   });
 

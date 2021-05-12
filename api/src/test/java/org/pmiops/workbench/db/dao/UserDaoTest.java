@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
+import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -56,7 +57,7 @@ public class UserDaoTest extends SpringTest {
   }
 
   @Test
-  public void testGetUserCountGaugeData_singleValue() {
+  public void testGetUserCountGaugeData_singleValue() throws Exception {
     DbUser user1 = new DbUser();
     user1.setDisabled(false);
     user1 = userDao.save(user1);
@@ -69,6 +70,15 @@ public class UserDaoTest extends SpringTest {
     assertThat(split(row.getAccessTierShortNames())).contains(registeredTier.getShortName());
     assertThat(row.getDisabled()).isFalse();
     assertThat(row.getUserCount()).isEqualTo(1L);
+
+    // Iterate all getter methods and make sure all return value is non-null.
+    Class<UserCountByDisabledAndAccessTiers> projectionClass =
+        UserCountByDisabledAndAccessTiers.class;
+    for (Method method : projectionClass.getMethods()) {
+      if (method.getName().startsWith("get")) {
+        assertThat(method.invoke(rows.get(0))).isNotNull();
+      }
+    }
   }
 
   @Test
@@ -139,6 +149,55 @@ public class UserDaoTest extends SpringTest {
 
   private List<String> split(String input) {
     return Splitter.on(',').splitToList(input);
+  }
+
+  @Test
+  public void testGetAdminTableUsers() throws Exception {
+    // Make sure AdminTable projection works.
+    Timestamp nowTime = now();
+    String contactEmail = "1@foo.com";
+    DbUser user = new DbUser();
+    user.setUsername("name");
+    user.setDisabled(true);
+    user.setContactEmail(contactEmail);
+    user.setGivenName("givenName");
+    user.setFamilyName("familyName");
+    user.setFirstRegistrationCompletionTime(nowTime);
+    user.setDataUseAgreementCompletionTime(nowTime);
+    user.setDataUseAgreementBypassTime(nowTime);
+    user.setEraCommonsBypassTime(nowTime);
+    user.setEraCommonsCompletionTime(nowTime);
+    user.setRasLinkLoginGovCompletionTime(nowTime);
+    user.setRasLinkLoginGovBypassTime(nowTime);
+    user.setComplianceTrainingCompletionTime(nowTime);
+    user.setComplianceTrainingBypassTime(nowTime);
+    user.setDataUseAgreementBypassTime(nowTime);
+    user.setTwoFactorAuthBypassTime(nowTime);
+    user.setTwoFactorAuthCompletionTime(nowTime);
+    user.setBetaAccessBypassTime(nowTime);
+    user.setBetaAccessRequestTime(nowTime);
+    user.setEmailVerificationCompletionTime(nowTime);
+    user.setEmailVerificationBypassTime(nowTime);
+    user.setIdVerificationBypassTime(nowTime);
+    user.setIdVerificationCompletionTime(nowTime);
+    user.setCreationTime(nowTime);
+    user.setFirstSignInTime(nowTime);
+
+    final DbInstitution institution = createInstitution();
+    user = userDao.save(user);
+    createAffiliation(user, institution);
+    addUserToTier(user, registeredTier, TierAccessStatus.ENABLED);
+
+    List<DbAdminTableUser> rows = userDao.getAdminTableUsers();
+    assertThat(rows).hasSize(1);
+    final DbAdminTableUser row = rows.get(0);
+    Class<DbAdminTableUser> dbAdminUserClass = DbAdminTableUser.class;
+    // Iterate all getter methods and make sure all return value is non-null.
+    for (Method method : dbAdminUserClass.getMethods()) {
+      if (method.getName().startsWith("get")) {
+        assertThat(method.invoke(row)).isNotNull();
+      }
+    }
   }
 
   @Test

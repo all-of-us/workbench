@@ -4,7 +4,6 @@ import * as React from 'react';
 import {registerApiClient} from 'app/services/swagger-fetch-clients';
 import {ProfileApi} from 'generated/fetch';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
-import {userProfileStore} from 'app/utils/navigation';
 
 import {Homepage} from './homepage';
 import {CohortsApi, ConceptSetsApi, UserMetricsApi, WorkspacesApi} from 'generated/fetch/api';
@@ -13,7 +12,7 @@ import {UserMetricsApiStub} from 'testing/stubs/user-metrics-api-stub';
 import {ConceptSetsApiStub} from 'testing/stubs/concept-sets-api-stub';
 import {WorkspacesApiStub} from 'testing/stubs/workspaces-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
-import {cdrVersionStore, serverConfigStore} from "app/utils/stores";
+import {cdrVersionStore, profileStore, serverConfigStore} from "app/utils/stores";
 import {cdrVersionTiersResponse} from "testing/stubs/cdr-versions-api-stub";
 
 describe('HomepageComponent', () => {
@@ -24,6 +23,7 @@ describe('HomepageComponent', () => {
     return mount(<Homepage/>);
   };
 
+  const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();
 
@@ -39,10 +39,10 @@ describe('HomepageComponent', () => {
     // mocking because we don't have access to the angular service
     reload.mockImplementation(async () => {
       const newProfile = await profileApi.getMe();
-      userProfileStore.next({profile: newProfile, reload, updateCache});
+      profileStore.set({profile: newProfile, load, reload, updateCache});
     });
 
-    userProfileStore.next({profile, reload, updateCache: () => {}});
+    profileStore.set({profile, load, reload, updateCache: () => {}});
     serverConfigStore.set({config: {
       enableDataUseAgreement: true,
       gsuiteDomain: 'fake-research-aou.org',
@@ -75,7 +75,7 @@ describe('HomepageComponent', () => {
       ...profile,
       pageVisits: [{page: 'homepage'}],
     };
-    userProfileStore.next({profile: newProfile, reload, updateCache});
+    profileStore.set({profile: newProfile, load, reload, updateCache});
     const wrapper = component();
     expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeFalsy();
   });
@@ -92,7 +92,7 @@ describe('HomepageComponent', () => {
       accessTierShortNames: [],   // unregistered
     };
     serverConfigStore.set({config: {...serverConfigStore.get().config}});
-    userProfileStore.next({profile: newProfile, reload, updateCache});
+    profileStore.set({profile: newProfile, load, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="registration-dashboard"]').length).toBeGreaterThanOrEqual(1);
@@ -107,7 +107,7 @@ describe('HomepageComponent', () => {
       accessTierShortNames: [],   // unregistered
     };
     serverConfigStore.set({config: {...serverConfigStore.get().config}});
-    userProfileStore.next({profile: newProfile, reload, updateCache});
+    profileStore.set({profile: newProfile, load, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     const duccTask = wrapper.find('[data-test-id="registration-task-dataUserCodeOfConduct"]');
@@ -124,7 +124,7 @@ describe('HomepageComponent', () => {
       accessTierShortNames: [],   // unregistered
     };
     serverConfigStore.set({config: {...serverConfigStore.get().config}});
-    userProfileStore.next({profile: newProfile, reload, updateCache});
+    profileStore.set({profile: newProfile, load, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     const duccTask = wrapper.find('[data-test-id="registration-task-dataUserCodeOfConduct"]');
@@ -138,7 +138,7 @@ describe('HomepageComponent', () => {
       accessTierShortNames: [],   // unregistered
     };
     serverConfigStore.set({config: {...serverConfigStore.get().config}});
-    userProfileStore.next({profile: newProfile, reload, updateCache});
+    profileStore.set({profile: newProfile, load, reload, updateCache});
     const wrapper = component();
     await waitOneTickAndUpdate(wrapper);
     expect(wrapper.find('[data-test-id="quick-tour-react"]').exists()).toBeFalsy();

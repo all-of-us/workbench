@@ -28,7 +28,7 @@ public interface DataSetDao extends CrudRepository<DbDataset, Long> {
   }
 
   @Query(
-      "SELECT invalid as isInvalid, count(dataSetId) AS invalidCount FROM DbDataset GROUP BY invalid ORDER BY invalid")
+      "SELECT invalid AS isInvalid, count(dataSetId) AS invalidCount FROM DbDataset GROUP BY invalid ORDER BY invalid")
   List<InvalidToCountResult> getInvalidToCount();
 
   interface InvalidToCountResult {

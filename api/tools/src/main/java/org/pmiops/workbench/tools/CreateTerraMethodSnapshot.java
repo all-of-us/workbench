@@ -133,10 +133,10 @@ public class CreateTerraMethodSnapshot {
               apiClientFactory
                   .methodRepositoryApi()
                   .createMethodSnapshot(
+                      newMethodQuery,
                       methodNamespace,
                       methodName,
                       Integer.toString(latestSnapshotId),
-                      newMethodQuery,
                       false);
         } catch (ApiException e) {
           log.warning(e.getResponseBody());
@@ -173,7 +173,7 @@ public class CreateTerraMethodSnapshot {
                               + " "
                               + input.getName()
                               + " "
-                              + (input.getOptional() ? "(optional)" : "(required)"))
+                              + (input.isOptional() ? "(optional)" : "(required)"))
                   .collect(Collectors.joining("\n"))
               + "\n\n\n");
     };

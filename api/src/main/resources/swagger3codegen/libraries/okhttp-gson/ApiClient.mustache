@@ -2,7 +2,7 @@
 
 This is an AoU-specific extension of the default Swagger-codegen okhttp API implementation template.
 
-The original template was copied from the 1.0.21 release of swagger-codegen-generators; see https://github.com/swagger-api/swagger-codegen-generators/blob/v1.0.21/src/main/resources/handlebars/Java/libraries/okhttp-gson/ApiClient.mustache
+The original template was copied from the 3.0.21 release of swagger-codegen; see https://github.com/swagger-api/swagger-codegen/blob/v3.0.21/modules/swagger-codegen/src/main/resources/Java/libraries/okhttp-gson/ApiClient.mustache
 for the original file.
 
 This file was changed from its original in order to bring in a fix for https://github.com/swagger-api/swagger-codegen/issues/8288
@@ -66,34 +66,26 @@ import {{invokerPackage}}.auth.ApiKeyAuth;
 import {{invokerPackage}}.auth.OAuth;
 
 public class ApiClient {
-
     private String basePath = "{{{basePath}}}";
     private boolean debugging = false;
     private Map<String, String> defaultHeaderMap = new HashMap<String, String>();
     private String tempFolderPath = null;
-
     private Map<String, Authentication> authentications;
-
     private DateFormat dateFormat;
     private DateFormat datetimeFormat;
     private boolean lenientDatetimeFormat;
     private int dateLength;
-
     private InputStream sslCaCert;
     private boolean verifyingSsl;
     private KeyManager[] keyManagers;
-
     private OkHttpClient httpClient;
     private JSON json;
-
     private HttpLoggingInterceptor loggingInterceptor;
-
     /*
      * Constructor for ApiClient
      */
     public ApiClient() {
         httpClient = new OkHttpClient();
-
         {{#useGzipFeature}}
         // Enable gzip request compression
         httpClient.interceptors().add(new GzipRequestInterceptor());
@@ -107,11 +99,10 @@ public class ApiClient {
         setUserAgent("{{#httpUserAgent}}{{{.}}}{{/httpUserAgent}}{{^httpUserAgent}}Swagger-Codegen/{{{artifactVersion}}}/java{{/httpUserAgent}}");
 
         // Setup authentications (key: authentication name, value: authentication).
-        authentications = new HashMap<String, Authentication>();{{#authMethods}}{{#is this 'basic'}}
-        authentications.put("{{name}}", new HttpBasicAuth());{{/is}}{{#is this 'api-key'}}
-        authentications.put("{{name}}", new ApiKeyAuth({{#is this 'key-in-header'}}"header"{{/is}}{{#isNot this 'key-in-header'}}"query"{{/isNot}}, "{{keyParamName}}"));{{/is}}{{#is this 'oauth'}}
-        authentications.put("{{name}}", new OAuth());{{/is}}{{#is this 'bearer'}}
-        authentications.put("{{name}}", new OAuth());{{/is}}{{/authMethods}}
+        authentications = new HashMap<String, Authentication>();{{#authMethods}}{{#isBasic}}
+        authentications.put("{{name}}", new HttpBasicAuth());{{/isBasic}}{{#isApiKey}}
+        authentications.put("{{name}}", new ApiKeyAuth({{#isKeyInHeader}}"header"{{/isKeyInHeader}}{{^isKeyInHeader}}"query"{{/isKeyInHeader}}, "{{keyParamName}}"));{{/isApiKey}}{{#isOAuth}}
+        authentications.put("{{name}}", new OAuth());{{/isOAuth}}{{/authMethods}}
         // Prevent the authentications from being modified.
         authentications = Collections.unmodifiableMap(authentications);
     }
@@ -463,6 +454,7 @@ public class ApiClient {
     /**
      * Sets the connect timeout (in milliseconds).
      * A value of 0 means no timeout, otherwise values must be between 1 and
+     * {@link Integer#MAX_VALUE}.
      *
      * @param connectionTimeout connection timeout in milliseconds
      * @return Api client
@@ -542,7 +534,6 @@ public class ApiClient {
             return String.valueOf(param);
         }
     }
-
     /**
      * Formats the specified query parameter to a list containing a single {@code Pair} object.
      *
@@ -554,14 +545,11 @@ public class ApiClient {
      */
     public List<Pair> parameterToPair(String name, Object value) {
         List<Pair> params = new ArrayList<Pair>();
-
         // preconditions
         if (name == null || name.isEmpty() || value == null || value instanceof Collection) return params;
-
         params.add(new Pair(name, parameterToString(value)));
         return params;
     }
-
     /**
      * Formats the specified collection query parameters to a list of {@code Pair} objects.
      *
@@ -574,12 +562,10 @@ public class ApiClient {
      */
     public List<Pair> parameterToPairs(String collectionFormat, String name, Collection value) {
         List<Pair> params = new ArrayList<Pair>();
-
         // preconditions
         if (name == null || name.isEmpty() || value == null || value.isEmpty()) {
             return params;
         }
-
         // create the params based on the collection format
         if ("multi".equals(collectionFormat)) {
             for (Object item : value) {
@@ -587,10 +573,8 @@ public class ApiClient {
             }
             return params;
         }
-
         // collectionFormat is assumed to be "csv" by default
         String delimiter = ",";
-
         // escape all delimiters except commas, which are URI reserved
         // characters
         if ("ssv".equals(collectionFormat)) {
@@ -600,18 +584,14 @@ public class ApiClient {
         } else if ("pipes".equals(collectionFormat)) {
             delimiter = escapeString("|");
         }
-
         StringBuilder sb = new StringBuilder() ;
         for (Object item : value) {
             sb.append(delimiter);
             sb.append(escapeString(parameterToString(item)));
         }
-
         params.add(new Pair(name, sb.substring(delimiter.length())));
-
         return params;
     }
-
     /**
      * Sanitize filename by removing path.
      * e.g. ../../sun.gif becomes sun.gif
@@ -622,7 +602,6 @@ public class ApiClient {
     public String sanitizeFilename(String filename) {
         return filename.replaceAll(".*[/\\\\]", "");
     }
-
     /**
      * Check if the given MIME is a JSON MIME.
      * JSON MIME examples:
@@ -638,7 +617,6 @@ public class ApiClient {
       String jsonMime = "(?i)^(application/json|[^;/ \t]+/[^;/ \t]+[+]json)[ \t]*(;.*)?$";
       return mime != null && (mime.matches(jsonMime) || mime.equals("*/*"));
     }
-
     /**
      * Select the Accept header's value from the given accepts array:
      *   if JSON exists in the given array, use it;
@@ -659,7 +637,6 @@ public class ApiClient {
         }
         return StringUtil.join(accepts, ",");
     }
-
     /**
      * Select the Content-Type header's value from the given array:
      *   if JSON exists in the given array, use it;
@@ -680,7 +657,6 @@ public class ApiClient {
         }
         return contentTypes[0];
     }
-
     /**
      * Escape the given string to be used as URL query value.
      *
@@ -694,7 +670,6 @@ public class ApiClient {
             return str;
         }
     }
-
     /**
      * Deserialize response body to Java object, according to the return type and
      * the Content-Type response header.
@@ -711,7 +686,6 @@ public class ApiClient {
         if (response == null || returnType == null) {
             return null;
         }
-
         if ("byte[]".equals(returnType.toString())) {
             // Handle binary response (byte array).
             try {
@@ -723,7 +697,6 @@ public class ApiClient {
             // Handle file downloading.
             return (T) downloadFileFromResponse(response);
         }
-
         String respBody;
         try {
             if (response.body() != null)
@@ -733,11 +706,9 @@ public class ApiClient {
         } catch (IOException e) {
             throw new ApiException(e);
         }
-
         if (respBody == null || "".equals(respBody)) {
             return null;
         }
-
         String contentType = response.headers().get("Content-Type");
         if (contentType == null) {
             // ensuring a default content type
@@ -781,10 +752,10 @@ public class ApiClient {
                 content = null;
             }
             return RequestBody.create(MediaType.parse(contentType), content);
-        {{! Begin AoUPlainTextBodyFix }}
-        } else if (obj instanceof String) {
-            return RequestBody.create(MediaType.parse(contentType), (String) obj);
-        {{! End AoUPlainTextBodyFix }}
+          {{! Begin AoUPlainTextBodyFix }}
+          } else if (obj instanceof String) {
+              return RequestBody.create(MediaType.parse(contentType), (String) obj);
+          {{! End AoUPlainTextBodyFix }}
         } else {
             throw new ApiException("Content type \"" + contentType + "\" is not supported");
         }
@@ -983,7 +954,6 @@ public class ApiClient {
      */
     public Call buildCall(String path, String method, List<Pair> queryParams, List<Pair> collectionQueryParams, Object body, Map<String, String> headerParams, Map<String, Object> formParams, String[] authNames, ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         Request request = buildRequest(path, method, queryParams, collectionQueryParams, body, headerParams, formParams, authNames, progressRequestListener);
-
         return httpClient.newCall(request);
     }
 
@@ -999,16 +969,14 @@ public class ApiClient {
      * @param formParams The form parameters
      * @param authNames The authentications to apply
      * @param progressRequestListener Progress request listener
-     * @return The HTTP request 
+     * @return The HTTP request
      * @throws ApiException If fail to serialize the request body object
      */
     public Request buildRequest(String path, String method, List<Pair> queryParams, List<Pair> collectionQueryParams, Object body, Map<String, String> headerParams, Map<String, Object> formParams, String[] authNames, ProgressRequestBody.ProgressRequestListener progressRequestListener) throws ApiException {
         updateParamsForAuth(authNames, queryParams, headerParams);
-
         final String url = buildUrl(path, queryParams, collectionQueryParams);
         final Request.Builder reqBuilder = new Request.Builder().url(url);
         processHeaderParams(headerParams, reqBuilder);
-
         String contentType = (String) headerParams.get("Content-Type");
         // ensuring a default content type
         if (contentType == null) {
@@ -1057,7 +1025,6 @@ public class ApiClient {
     public String buildUrl(String path, List<Pair> queryParams, List<Pair> collectionQueryParams) {
         final StringBuilder url = new StringBuilder();
         url.append(basePath).append(path);
-
         if (queryParams != null && !queryParams.isEmpty()) {
             // support (constant) query string in `path`, e.g. "/posts?draft=1"
             String prefix = path.contains("?") ? "&" : "?";

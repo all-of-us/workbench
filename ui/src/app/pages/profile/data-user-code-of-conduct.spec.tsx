@@ -3,8 +3,7 @@ import * as React from 'react';
 
 import {DataUserCodeOfConduct} from 'app/pages/profile/data-user-code-of-conduct';
 import {profileApi, registerApiClient} from 'app/services/swagger-fetch-clients';
-import {userProfileStore} from 'app/utils/navigation';
-import {serverConfigStore} from 'app/utils/stores';
+import {profileStore, serverConfigStore} from 'app/utils/stores';
 import {Profile, ProfileApi} from 'generated/fetch';
 import {ProfileApiStub, ProfileStubVariables} from 'testing/stubs/profile-api-stub';
 import {waitOneTickAndUpdate} from 'testing/react-test-helpers';
@@ -19,6 +18,7 @@ const defaultConfig = {
 };
 
 describe('DataUserCodeOfConduct', () => {
+  const load = jest.fn();
   const reload = jest.fn();
   const updateCache = jest.fn();
   const profile = ProfileStubVariables.PROFILE_STUB as unknown as Profile;
@@ -29,10 +29,10 @@ describe('DataUserCodeOfConduct', () => {
     registerApiClient(ProfileApi, new ProfileApiStub());
     reload.mockImplementation(async() => {
       const newProfile = await profileApi().getMe();
-      userProfileStore.next({profile: newProfile, reload, updateCache});
+      profileStore.set({profile: newProfile, load, reload, updateCache});
     });
 
-    userProfileStore.next({profile, reload, updateCache});
+    profileStore.set({profile, load, reload, updateCache});
   });
 
   it('should render - v2', () => {

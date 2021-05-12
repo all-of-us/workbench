@@ -1,6 +1,7 @@
 import { Page } from 'puppeteer';
 import { makeRandomName } from 'utils/str-utils';
 import RadioButton from 'app/element/radiobutton';
+import Select from 'app/element/select';
 import Textbox from 'app/element/textbox';
 import Textarea from 'app/element/textarea';
 import { LinkText } from 'app/text-labels';
@@ -33,11 +34,12 @@ export default class ConceptSetSaveModal extends Modal {
    *
    * Save new Concept Set: Fill in Concept name and Description.
    * @param {SaveOption} saveOption
+   * @param {string} existingConceptSetName
    * @return {string} Concept name.
    */
   async fillOutSaveModal(
     saveOption: SaveOption = SaveOption.CreateNewSet,
-    existingConceptSetName = '0'
+    existingConceptSetName: string
   ): Promise<string> {
     const createNewSetRadioButton = RadioButton.findByName(this.page, { name: saveOption }, this);
     await createNewSetRadioButton.select();
@@ -54,7 +56,13 @@ export default class ConceptSetSaveModal extends Modal {
       const descriptionTextarea = Textarea.findByName(this.page, { containsText: 'Description' }, this);
       await descriptionTextarea.type(faker.lorem.words());
     } else {
-      const [selectedValue] = await this.page.select('[data-test-id="add-to-existing"] select', existingConceptSetName);
+      let selectedValue: string;
+      if (existingConceptSetName) {
+        const existingConceptSetSelect = await new Select(this.page, '//*[@data-test-id="existing-set-select"]');
+        selectedValue = await existingConceptSetSelect.selectOption(existingConceptSetName)
+      } else {
+        [selectedValue] = await this.page.select('[data-test-id="add-to-existing"] select', '0');
+      }
       const elem = await this.page.waitForSelector(
         `[data-test-id="add-to-existing"] select option[value="${selectedValue}"]`
       );

@@ -1,4 +1,5 @@
 import {Component, Input} from '@angular/core';
+import {AccessRenewalNotificationMaybe} from 'app/components/access-renewal-notification';
 import {Breadcrumb} from 'app/components/breadcrumb';
 import {Button} from 'app/components/buttons';
 import {ClrIcon} from 'app/components/icons';
@@ -6,7 +7,8 @@ import {SideNav} from 'app/components/side-nav';
 import {StatusAlertBanner} from 'app/components/status-alert-banner';
 import {statusAlertApi} from 'app/services/swagger-fetch-clients';
 import colors from 'app/styles/colors';
-import {cookiesEnabled, reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {reactStyles, ReactWrapperBase, withUserProfile} from 'app/utils';
+import {cookiesEnabled} from 'app/utils/cookies';
 import {Profile} from 'generated/fetch';
 import * as React from 'react';
 
@@ -18,6 +20,7 @@ const styles = reactStyles({
     boxShadow: '3px 0px 10px',
     paddingTop: '1rem',
     paddingBottom: '0.5rem',
+    paddingRight: '30px',
     backgroundColor: colors.white,
     /*
      * NOTE: if you ever need to change this number, you need to ALSO change the
@@ -218,6 +221,7 @@ export const NavBar = withUserProfile()(
           }
         </div>
         <Breadcrumb/>
+        <AccessRenewalNotificationMaybe profile={this.props.profile}/>
         {
           this.state.statusAlertVisible && <StatusAlertBanner
               title={this.state.statusAlertDetails.title}

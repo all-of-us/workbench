@@ -11,6 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+import org.pmiops.workbench.model.TerraJobStatus;
 
 @Entity
 @Table(name = "wgs_extract_cromwell_submission")
@@ -25,6 +27,8 @@ public class DbWgsExtractCromwellSubmission {
   private BigDecimal userCost;
   private Timestamp creationTime;
   private Timestamp completionTime;
+  private Short terraStatus;
+  private Timestamp terraSubmissionDate;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -112,6 +116,33 @@ public class DbWgsExtractCromwellSubmission {
     this.completionTime = completionTime;
   }
 
+  @Column(name = "terra_status")
+  private Short getTerraStatus() {
+    return terraStatus;
+  }
+
+  private void setTerraStatus(Short terraStatus) {
+    this.terraStatus = terraStatus;
+  }
+
+  @Transient
+  public TerraJobStatus getTerraStatusEnum() {
+    return DbStorageEnums.terraJobStatusFromStorage(getTerraStatus());
+  }
+
+  public void setTerraStatusEnum(TerraJobStatus terraJobStatus) {
+    setTerraStatus(DbStorageEnums.terraJobStatusToStorage(terraJobStatus));
+  }
+
+  @Column(name = "terra_submission_date")
+  public Timestamp getTerraSubmissionDate() {
+    return terraSubmissionDate;
+  }
+
+  public void setTerraSubmissionDate(Timestamp terra_submission_date) {
+    this.terraSubmissionDate = terra_submission_date;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -129,7 +160,9 @@ public class DbWgsExtractCromwellSubmission {
         && Objects.equals(dataset, that.dataset)
         && Objects.equals(userCost, that.userCost)
         && Objects.equals(creationTime, that.creationTime)
-        && Objects.equals(completionTime, that.completionTime);
+        && Objects.equals(completionTime, that.completionTime)
+        && Objects.equals(terraStatus, that.terraStatus)
+        && Objects.equals(terraSubmissionDate, that.terraSubmissionDate);
   }
 
   @Override
@@ -143,6 +176,8 @@ public class DbWgsExtractCromwellSubmission {
         sampleCount,
         userCost,
         creationTime,
-        completionTime);
+        completionTime,
+        terraStatus,
+        terraSubmissionDate);
   }
 }

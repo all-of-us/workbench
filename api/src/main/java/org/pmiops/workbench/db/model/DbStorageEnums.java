@@ -28,6 +28,7 @@ import org.pmiops.workbench.model.ReviewStatus;
 import org.pmiops.workbench.model.SexAtBirth;
 import org.pmiops.workbench.model.SpecificPopulationEnum;
 import org.pmiops.workbench.model.Surveys;
+import org.pmiops.workbench.model.TerraJobStatus;
 import org.pmiops.workbench.model.TierAccessStatus;
 import org.pmiops.workbench.model.WorkspaceActiveStatus;
 
@@ -494,6 +495,21 @@ public final class DbStorageEnums {
 
   public static Short surveysToStorage(Surveys survey) {
     return CLIENT_TO_STORAGE_SURVEY.get(survey);
+  }
+
+  private static final BiMap<TerraJobStatus, Short> CLIENT_TO_STORAGE_TERRA_JOB_STATUS =
+      ImmutableBiMap.<TerraJobStatus, Short>builder()
+          .put(TerraJobStatus.RUNNING, (short) 0)
+          .put(TerraJobStatus.FAILED, (short) 1)
+          .put(TerraJobStatus.SUCCEEDED, (short) 2)
+          .build();
+
+  public static TerraJobStatus terraJobStatusFromStorage(Short terraJobStatus) {
+    return CLIENT_TO_STORAGE_TERRA_JOB_STATUS.inverse().get(terraJobStatus);
+  }
+
+  public static Short terraJobStatusToStorage(TerraJobStatus terraJobStatus) {
+    return CLIENT_TO_STORAGE_TERRA_JOB_STATUS.get(terraJobStatus);
   }
 
   // WorkspaceActiveStatus

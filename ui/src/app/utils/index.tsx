@@ -10,8 +10,7 @@ import {
   globalErrorStore,
   queryParamsStore,
   routeConfigDataStore,
-  urlParamsStore,
-  userProfileStore
+  urlParamsStore
 } from 'app/utils/navigation';
 import {Domain, } from 'generated/fetch';
 import * as fp from 'lodash/fp';
@@ -19,14 +18,11 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {ReplaySubject} from 'rxjs/ReplaySubject';
-import {cdrVersionStore, withStore} from './stores';
+import {cdrVersionStore, profileStore, withStore} from './stores';
 
 const {useEffect, useState} = React;
 
 export const WINDOW_REF = 'window-ref';
-
-// Local storage key to override the API base path.
-export const LOCAL_STORAGE_API_OVERRIDE_KEY = 'allOfUsApiUrlOverride';
 
 export function isBlank(toTest: String): boolean {
   if (toTest === null || toTest === undefined) {
@@ -133,32 +129,6 @@ export const nextSort = ({field, direction}, newField) => {
     {field, direction: direction === 'asc' ? 'desc' : 'asc'} :
     {field: newField, direction: 'asc'};
 };
-
-/**
- * See feature-detects/cookies.js in https://github.com/Modernizr
- *
- * navigator.cookieEnabled cannot detect custom or nuanced cookie blocking
- * configurations. For example, when blocking cookies via the Advanced
- * Privacy Settings in IE9, it always returns true. And there have been
- * issues in the past with site-specific exceptions.
- * Don't rely on it.
- *
- * try..catch because some in situations `document.cookie` is exposed but throws a
- * SecurityError if you try to access it; e.g. documents created from data URIs
- * or in sandboxed iframes (depending on flags/context)
- */
-export function cookiesEnabled(): boolean {
-  try {
-    // Create cookie
-    document.cookie = 'cookietest=1';
-    const ret = document.cookie.indexOf('cookietest=') !== -1;
-    // Delete cookie
-    document.cookie = 'cookietest=1; expires=Thu, 01-Jan-1970 00:00:01 GMT';
-    return ret;
-  } catch (e) {
-    return false;
-  }
-}
 
 type ReactStyles<T> = {
   readonly [P in keyof T]: React.CSSProperties;
@@ -356,7 +326,7 @@ export const withGlobalError = () => {
 
 // HOC that provides a 'profileState' prop with current profile and a reload function
 export const withUserProfile = () => {
-  return connectBehaviorSubject(userProfileStore, 'profileState');
+  return withStore(profileStore, 'profileState');
 };
 
 // HOC that provides a 'urlParams' prop with the current url params object
@@ -381,14 +351,6 @@ export const withCdrVersions = () => {
 export const withQueryParams = () => {
   return connectBehaviorSubject(queryParamsStore, 'queryParams');
 };
-
-// A HOC that provides a 'serverConfig' prop
-// export const withServerConfig = () => {
-//   return withStore(serverConfigStore, 'serverConfig');
-// };
-// export interface ServerConfigProps {
-//   serverConfig: ConfigResponse;
-// }
 
 export function displayDateWithoutHours(time: number): string {
   const date = new Date(time);
