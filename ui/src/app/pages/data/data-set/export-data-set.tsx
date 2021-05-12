@@ -1,13 +1,14 @@
 import {Button} from 'app/components/buttons';
 import {SmallHeader, styles as headerStyles} from 'app/components/headers';
 import {RadioButton, Select, TextInput} from 'app/components/inputs';
-import {SpinnerOverlay} from 'app/components/spinners';
+import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {DataSetExportRequest, DataSetRequest, FileDetail, KernelTypeEnum} from 'generated/fetch';
 import * as React from 'react';
 import { useSpring, animated } from "react-spring";
 import colors from 'app/styles/colors';
+import {FlexRow} from '../../../components/flex';
 import GenomicsAnalysisToolEnum = DataSetExportRequest.GenomicsAnalysisToolEnum;
 
 interface Props {
@@ -31,6 +32,7 @@ interface State {
   previewedKernelType: KernelTypeEnum;
   queries: Map<KernelTypeEnum, String>;
   seePreview: boolean;
+  loadingPreview: boolean;
 }
 const styles = {
   codePreviewSelector: {
@@ -56,6 +58,7 @@ export class ExportDataSet extends React.Component<Props, State> {
       previewedKernelType: KernelTypeEnum.Python,
       queries: new Map([[KernelTypeEnum.Python, undefined], [KernelTypeEnum.R, undefined]]),
       seePreview: false,
+      loadingPreview: false
     };
   }
 
@@ -183,7 +186,10 @@ export class ExportDataSet extends React.Component<Props, State> {
     </React.Fragment>
     }
 
-      <Button type={'secondarySmall'} style={{marginTop: '1rem'}} data-test-id='code-preview-button'
+    <FlexRow style={{marginTop: '1rem', alignItems: 'center'}}>
+      <Button type={'secondarySmall'}
+              disabled={this.state.loadingPreview}
+              data-test-id='code-preview-button'
               onClick={() => {
                 if (!seePreview) {
                   AnalyticsTracker.DatasetBuilder.SeeCodePreview();
@@ -193,6 +199,7 @@ export class ExportDataSet extends React.Component<Props, State> {
                   // if it's currently seePreview, the user want's to hide
                   this.props.onHideCodePreview();
                 } else {
+                  this.setState({loadingPreview: true});
                   workspacesApi().readOnlyNotebook("aou-rw-local1-44385e06", "genomicsextractionworkspace", "qq.ipynb").then(html => {
                     const placeholder = document.createElement('html');
                     placeholder.innerHTML = html.html;
@@ -202,11 +209,16 @@ export class ExportDataSet extends React.Component<Props, State> {
                     placeholder.querySelectorAll('.input_prompt').forEach(e => e.remove());
                     const iframe = <iframe scrolling="no" style={{width: '100%', height: '100%', border: 'none'}} srcDoc={placeholder.outerHTML}/>;
                     this.props.onSeeCodePreview(iframe);
+                    this.setState({loadingPreview: false});
                   });
                 }
               }}>
         {seePreview ? 'Hide Code Preview' : 'See Code Preview'}
       </Button>
+
+      {this.state.loadingPreview && <Spinner size={24} style={{marginLeft: '0.5rem'}}/>}
+    </FlexRow>
+
 
       </React.Fragment>;
   }
