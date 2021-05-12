@@ -3,9 +3,10 @@ import {SpinnerOverlay} from 'app/components/spinners';
 import {CohortDefinition} from 'app/pages/data/cohort-review/cohort-definition.component';
 import {ParticipantsCharts} from 'app/pages/data/cohort-review/participants-charts';
 import {cohortReviewStore} from 'app/services/review-state.service';
-import {cdrVersionsApi, cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
+import {cohortBuilderApi, cohortsApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
+import {findCdrVersion} from 'app/utils/cdr-versions';
 import {navigate, urlParamsStore} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';
 import {
@@ -210,13 +211,11 @@ export const QueryReport = fp.flow(withCdrVersions(), withCurrentWorkspace())(
     }
 
     componentDidMount() {
-      const {cdrVersionTiersResponse, workspace: {accessTierShortName, cdrVersionId}} = this.props;
+      const {cdrVersionTiersResponse, workspace: {cdrVersionId}} = this.props;
       const {review} = this.state;
       const {ns, wsid, cid} = urlParamsStore.getValue();
       cohortsApi().getCohort(ns, wsid, cid).then(cohort => this.setState({cohort}));
-      const cdrName = cdrVersionTiersResponse.tiers
-        .find(tier => tier.accessTierShortName === accessTierShortName).versions
-        .find(version => version.cdrVersionId === review.cdrVersionId.toString()).name;
+      const cdrName = findCdrVersion(review.cdrVersionId.toString(), cdrVersionTiersResponse).name;
       this.setState({cdrName});
       const request = (JSON.parse(review.cohortDefinition)) as SearchRequest;
       cohortBuilderApi().findDemoChartInfo(+cdrVersionId, GenderOrSexType[GenderOrSexType.GENDER], AgeType[AgeType.AGE], request)
