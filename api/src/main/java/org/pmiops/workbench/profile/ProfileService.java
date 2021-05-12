@@ -135,6 +135,12 @@ public class ProfileService {
                         .hasExpired(false),
                     new RenewableAccessModuleStatus()
                         .moduleName(ModuleNameEnum.DATAUSEAGREEMENT)
+                        .hasExpired(false),
+                    new RenewableAccessModuleStatus()
+                        .moduleName(ModuleNameEnum.PROFILECONFIRMATION)
+                        .hasExpired(false),
+                    new RenewableAccessModuleStatus()
+                        .moduleName(ModuleNameEnum.PUBLICATIONCONFIRMATION)
                         .hasExpired(false)))
             .anyModuleHasExpired(false);
 

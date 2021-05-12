@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+  <changeSet author="thibault" id="changelog-162-add-user-profile-publications-confirmed-times">
+    <addColumn tableName="user">
+      <column name="profile_last_confirmed_time" type="datetime"/>
+    </addColumn>
+    <addColumn tableName="user">
+      <column name="publications_last_confirmed_time" type="datetime"/>
+    </addColumn>
+
+    <!--
+
+    On the initial launch of the access renewal compliance feature, we don't have a record of the
+    most recent time a user confirmed their profile was correct or they confirmed to us the
+    presence or lack of any publications relating to All of Us, because we have never asked for
+    this information before.
+
+    To approximate these confirmation times for existing users, we have chosen to pre-populate
+    these fields with the user's first registration time.  For new users, we will assume the
+    profile to be confirmed on registration and new users to not have any publications, so these
+    values will also be set when new users register for the first time.
+
+    If a user has ever had registered status (membership in the registered tier) then they
+    will have a first_enabled date in the user_access_tier table.  Copy this value (if it exists)
+    to the new fields created here: profile_last_confirmed_time and
+    publications_last_confirmed_time.
+
+    -->
+
+    <sql>
+      -- not all users have access tier memberships.
+      -- update only those who do.
+      UPDATE user u
+      INNER JOIN user_access_tier uat ON u.user_id = uat.user_id
+      INNER JOIN access_tier a ON uat.access_tier_id = a.access_tier_id
+
+      SET
+      u.profile_last_confirmed_time = uat.first_enabled,
+      u.publications_last_confirmed_time = uat.first_enabled
+
+      -- at initial launch, registered tier membership is not distinct from controlled tier
+      -- membership.  So there is no need to check controlled tier.
+      WHERE a.short_name = 'registered'
+    </sql>
+  </changeSet>
+</databaseChangeLog>

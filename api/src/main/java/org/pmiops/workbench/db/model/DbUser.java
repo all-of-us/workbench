@@ -2,7 +2,6 @@ package org.pmiops.workbench.db.model;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -93,6 +92,8 @@ public class DbUser {
   private Timestamp idVerificationBypassTime;
   private Timestamp twoFactorAuthCompletionTime;
   private Timestamp twoFactorAuthBypassTime;
+  private Timestamp profileLastConfirmedTime;
+  private Timestamp publicationsLastConfirmedTime;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -241,10 +242,6 @@ public class DbUser {
   @Column(name = "first_registration_completion_time")
   public Timestamp getFirstRegistrationCompletionTime() {
     return firstRegistrationCompletionTime;
-  }
-
-  public void setFirstRegistrationCompletionTime() {
-    setFirstRegistrationCompletionTime(Timestamp.from(Instant.now()));
   }
 
   @VisibleForTesting
@@ -663,6 +660,24 @@ public class DbUser {
 
   public void setAddress(DbAddress address) {
     this.address = address;
+  }
+
+  @Column(name = "profile_last_confirmed_time")
+  public Timestamp getProfileLastConfirmedTime() {
+    return profileLastConfirmedTime;
+  }
+
+  public void setProfileLastConfirmedTime(Timestamp profileLastConfirmedTime) {
+    this.profileLastConfirmedTime = profileLastConfirmedTime;
+  }
+
+  @Column(name = "publications_last_confirmed_time")
+  public Timestamp getPublicationsLastConfirmedTime() {
+    return publicationsLastConfirmedTime;
+  }
+
+  public void setPublicationsLastConfirmedTime(Timestamp publicationsLastConfirmedTime) {
+    this.publicationsLastConfirmedTime = publicationsLastConfirmedTime;
   }
 
   // null-friendly versions of equals() and hashCode() for DbVerifiedInstitutionalAffiliation
