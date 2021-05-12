@@ -124,6 +124,10 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
           component={() => <HomepagePage routeData={{title: 'Homepage'}}/>}
       />
       <AppRoute
+        path='/profile'
+        component={() => <ProfilePagePage routeData={{title: 'Profile'}}/>}
+      />
+      <AppRoute
           path='/admin/banner'
           component={() => <AdminBannerPage routeData={{title: 'Create Banner'}}/>}
       />
@@ -200,10 +204,6 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
         <AppRoute
           path='/library'
           component={() => <WorkspaceLibraryPage routeData={{title: 'Workspace Library', minimizeChrome: false}}/>}
-        />
-        <AppRoute
-          path='/profile'
-          component={() => <ProfilePagePage routeData={{title: 'Profile'}}/>}
         />
         <AppRoute
           path='/workspaces'
