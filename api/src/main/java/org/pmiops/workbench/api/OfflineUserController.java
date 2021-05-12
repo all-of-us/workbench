@@ -267,7 +267,7 @@ public class OfflineUserController implements OfflineUserApiDelegate {
                       return u;
                     },
                     user,
-                    Agent.asSystem(user)));
+                    Agent.asAdmin(user)));
     return ResponseEntity.noContent().build();
   }
 
