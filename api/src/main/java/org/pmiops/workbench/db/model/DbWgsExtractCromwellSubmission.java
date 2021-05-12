@@ -117,17 +117,17 @@ public class DbWgsExtractCromwellSubmission {
   }
 
   @Column(name = "terra_status")
-  public Short getTerraStatus() {
+  private Short getTerraStatus() {
     return terraStatus;
   }
 
-  public void setTerraStatus(Short terraStatus) {
+  private void setTerraStatus(Short terraStatus) {
     this.terraStatus = terraStatus;
   }
 
   @Transient
   public TerraJobStatus getStatusEnum() {
-    return DbStorageEnums.terraJobStatusFromStorage(this.terraStatus);
+    return DbStorageEnums.terraJobStatusFromStorage(getTerraStatus());
   }
 
   public void setStatusEnum(TerraJobStatus terraJobStatus) {
