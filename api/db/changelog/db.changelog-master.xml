@@ -171,6 +171,7 @@
   <include file="changelog/db.changelog-159-delete-data-dictionary-entry-table.xml"/>
   <include file="changelog/db.changelog-160-extraction-job-add-completion-time-and-user-cost.xml"/>
   <include file="changelog/db.changelog-161-extraction-job-add-status.xml"/>
+  <include file="changelog/db.changelog-162-add-user-profile-publications-confirmed-times.xml"/>
   <!--
    Note: to update the DB locally, do the following:
    - Migrate schema changes: `./project.rb run-local-all-migrations`
