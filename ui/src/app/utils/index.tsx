@@ -326,6 +326,7 @@ export const withGlobalError = () => {
 
 // HOC that provides a 'profileState' prop with current profile and a reload function
 export const withUserProfile = () => {
+  console.log('withUserProfile');
   return withStore(profileStore, 'profileState');
 };
 

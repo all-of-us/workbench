@@ -107,6 +107,7 @@ export class SideNavItem extends React.Component<SideNavItemProps, SideNavItemSt
   onClick() {
     if (this.props.href && !this.props.disabled) {
       this.props.onToggleSideNav();
+      console.log('navigating to ' + this.props.href)
       navigate([this.props.href]);
     }
     if (this.props.containsSubItems) {
@@ -221,6 +222,7 @@ export interface SideNavState {
 
 export class SideNav extends React.Component<SideNavProps, SideNavState> {
   constructor(props) {
+    console.log('sidenav props = ' + JSON.stringify(props))
     super(props);
     this.state = {
       showAdminOptions: false,

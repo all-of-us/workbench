@@ -46,12 +46,18 @@ import {BreadcrumbType} from './utils/navigation';
 
 
 const signInGuard: Guard = {
-  allowed: (): boolean => authStore.get().isSignedIn,
+  allowed: (): boolean => {
+      console.log('signInGuard: ' + authStore.get().isSignedIn);
+      return authStore.get().isSignedIn;
+  },
   redirectPath: '/login'
 };
 
 const registrationGuard: Guard = {
-  allowed: (): boolean => hasRegisteredAccess(profileStore.get().profile.accessTierShortNames),
+  allowed: (): boolean => {
+      console.log('registrationGuard: ' + hasRegisteredAccess(profileStore.get().profile.accessTierShortNames));
+      return hasRegisteredAccess(profileStore.get().profile.accessTierShortNames)
+  },
   redirectPath: '/'
 };
 

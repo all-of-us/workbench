@@ -135,9 +135,9 @@ export const ProfilePage = fp.flow(
     static displayName = 'ProfilePage';
 
     constructor(props) {
+      console.log('ProfilePage constructor');
       super(props);
-
-      this.state = {
+       this.state = {
         currentProfile: this.initializeProfile(),
         institutions: [],
         showDemographicSurveyModal: false,

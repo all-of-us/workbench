@@ -37,14 +37,18 @@ export interface ProfileStore {
 export const profileStore = atom<ProfileStore>({
   profile: null,
   load: async() => {
+    console.log('profileStore load: ' + !!profileStore.get().profile);
     if (!profileStore.get().profile) {
       await profileStore.get().reload();
     }
     return profileStore.get().profile;
   },
   reload: async() => {
+    console.log('profileStore reload - await profileApi().getMe()');
     const newProfile = await profileApi().getMe();
+    console.log('profileStore reload - received: ' + JSON.stringify(newProfile));
     profileStore.get().updateCache(newProfile);
+    console.log('profileStore reload - cache updated');
     return profileStore.get().profile;
   },
   updateCache: (p: Profile): void => profileStore.set({
@@ -129,6 +133,8 @@ export function useStore<T>(theStore: Atom<T>) {
  */
 export const withStore = (theStore, name) => WrappedComponent => {
   return (props) => {
+    console.log('withStore ' + name);
+    console.log('withStore props ' + JSON.stringify(props));
     const value = useStore(theStore);
     const storeProp = {[name]: value};
     return <WrappedComponent {...props} {...storeProp}/> ;
