@@ -627,8 +627,8 @@ public class DbUser {
     this.demographicSurvey = demographicSurvey;
   }
 
-  @Column(name = "last_modified_time")
   @UpdateTimestamp
+  @Column(name = "last_modified_time")
   public Timestamp getLastModifiedTime() {
     return lastModifiedTime;
   }
@@ -638,8 +638,8 @@ public class DbUser {
     this.lastModifiedTime = lastModifiedTime;
   }
 
-  @Column(name = "creation_time")
   @CreationTimestamp
+  @Column(name = "creation_time")
   public Timestamp getCreationTime() {
     return creationTime;
   }
