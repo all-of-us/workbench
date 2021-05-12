@@ -190,7 +190,8 @@ public class GenomicExtractionServiceTest {
 
     FirecloudSubmissionResponse submissionResponse = new FirecloudSubmissionResponse();
     submissionResponse.setSubmissionId(FC_SUBMISSION_ID);
-    submissionResponse.setSubmissionDate(CommonMappers.offsetDateTimeUtc(new Timestamp(CLOCK.instant().toEpochMilli())));
+    submissionResponse.setSubmissionDate(
+        CommonMappers.offsetDateTimeUtc(new Timestamp(CLOCK.instant().toEpochMilli())));
     doReturn(submissionResponse).when(submissionsApi).createSubmission(any(), any(), any());
 
     doReturn(new FirecloudWorkspaceResponse().accessLevel("READER"))
@@ -363,7 +364,8 @@ public class GenomicExtractionServiceTest {
     assertThat(dbSubmissions.size()).isEqualTo(1);
     assertThat(dbSubmissions.get(0).getSubmissionId()).isEqualTo(FC_SUBMISSION_ID);
     assertThat(dbSubmissions.get(0).getSampleCount()).isEqualTo(3);
-    assertThat(dbSubmissions.get(0).getTerraSubmissionDate()).isEqualTo(new Timestamp(CLOCK.instant().toEpochMilli()));
+    assertThat(dbSubmissions.get(0).getTerraSubmissionDate())
+        .isEqualTo(new Timestamp(CLOCK.instant().toEpochMilli()));
   }
 
   @Test

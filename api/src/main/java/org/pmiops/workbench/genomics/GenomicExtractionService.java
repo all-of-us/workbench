@@ -17,7 +17,6 @@ import org.pmiops.workbench.config.WorkbenchConfig.WgsCohortExtractionConfig;
 import org.pmiops.workbench.dataset.DataSetService;
 import org.pmiops.workbench.db.dao.WgsExtractCromwellSubmissionDao;
 import org.pmiops.workbench.db.model.DbDataset;
-import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbUser;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
 import org.pmiops.workbench.db.model.DbWorkspace;
@@ -132,8 +131,7 @@ public class GenomicExtractionService {
                   TerraJobStatus status =
                       genomicExtractionMapper.convertJobStatus(firecloudSubmission.getStatus());
                   dbSubmission.setTerraStatusEnum(
-                          genomicExtractionMapper.convertJobStatus(
-                              firecloudSubmission.getStatus()));
+                      genomicExtractionMapper.convertJobStatus(firecloudSubmission.getStatus()));
                   if (status != TerraJobStatus.RUNNING) {
                     dbSubmission.setCompletionTime(
                         CommonMappers.timestamp(
@@ -270,7 +268,8 @@ public class GenomicExtractionService {
     dbSubmission.setDataset(dataSet);
     dbSubmission.setCreator(userProvider.get());
     dbSubmission.setCreationTime(new Timestamp(clock.instant().toEpochMilli()));
-    dbSubmission.setTerraSubmissionDate(CommonMappers.timestamp(submissionResponse.getSubmissionDate()));
+    dbSubmission.setTerraSubmissionDate(
+        CommonMappers.timestamp(submissionResponse.getSubmissionDate()));
     dbSubmission.setSampleCount((long) personIds.size());
     wgsExtractCromwellSubmissionDao.save(dbSubmission);
 
