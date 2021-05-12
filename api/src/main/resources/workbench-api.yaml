@@ -258,7 +258,7 @@ paths:
       operationId: confirmProfile
       responses:
         204:
-          description: Request Received.
+          description: Profile Confirmed.
   "/v1/is-username-taken":
     get:
       tags:
