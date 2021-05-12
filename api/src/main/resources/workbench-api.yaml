@@ -4941,6 +4941,7 @@ definitions:
         enum:
           - NONE
           - MICROARRAY
+          - WHOLE_GENOME
       genomicsAnalysisTool:
         type: string
         default: NONE

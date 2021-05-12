@@ -73,6 +73,7 @@ import org.pmiops.workbench.notebooks.NotebooksService;
 import org.pmiops.workbench.workspaces.WorkspaceAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RestController;
@@ -361,7 +362,7 @@ public class DataSetController implements DataSetApiDelegate {
             qualifier,
             queriesByDomain);
 
-    if (GenomicsDataTypeEnum.WHOLE_GENOME.equals(dataSetExportRequest.getGenomicsDataType())) {
+    if (GenomicsDataTypeEnum.MICROARRAY.equals(dataSetExportRequest.getGenomicsDataType())) {
       if (!workbenchConfigProvider.get().featureFlags.enableGenomicExtraction) {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
       }
