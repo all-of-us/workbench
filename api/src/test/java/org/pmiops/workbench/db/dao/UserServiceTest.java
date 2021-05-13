@@ -448,16 +448,16 @@ public class UserServiceTest {
 
     // user confirms profile, so confirmation time is set to START_INSTANT
 
-    DbUser retrievedUser = userService.confirmProfile();
-    assertThat(retrievedUser.getProfileLastConfirmedTime())
+    userService.confirmProfile();
+    assertThat(providedDbUser.getProfileLastConfirmedTime())
         .isEqualTo(Timestamp.from(START_INSTANT));
 
     // time passes, user confirms again, confirmation time is updated
 
     tick();
 
-    retrievedUser = userService.confirmProfile();
-    assertThat(retrievedUser.getProfileLastConfirmedTime())
+    userService.confirmProfile();
+    assertThat(providedDbUser.getProfileLastConfirmedTime())
         .isGreaterThan(Timestamp.from(START_INSTANT));
   }
 
@@ -467,16 +467,16 @@ public class UserServiceTest {
 
     // user confirms profile, so confirmation time is set to START_INSTANT
 
-    DbUser retrievedUser = userService.confirmPublications();
-    assertThat(retrievedUser.getPublicationsLastConfirmedTime())
+    userService.confirmPublications();
+    assertThat(providedDbUser.getPublicationsLastConfirmedTime())
         .isEqualTo(Timestamp.from(START_INSTANT));
 
     // time passes, user confirms again, confirmation time is updated
 
     tick();
 
-    retrievedUser = userService.confirmPublications();
-    assertThat(retrievedUser.getPublicationsLastConfirmedTime())
+    userService.confirmPublications();
+    assertThat(providedDbUser.getPublicationsLastConfirmedTime())
         .isGreaterThan(Timestamp.from(START_INSTANT));
   }
 }
