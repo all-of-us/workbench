@@ -1,15 +1,10 @@
 package org.pmiops.workbench.genomics;
 
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
-import org.pmiops.workbench.firecloud.model.FirecloudSubmission;
-import org.pmiops.workbench.firecloud.model.FirecloudSubmissionStatus;
-import org.pmiops.workbench.firecloud.model.FirecloudWorkflow;
 import org.pmiops.workbench.firecloud.model.FirecloudWorkflowStatus;
 import org.pmiops.workbench.model.GenomicExtractionJob;
 import org.pmiops.workbench.model.TerraJobStatus;
@@ -31,24 +26,15 @@ public interface GenomicExtractionMapper {
   @Mapping(target = "submissionDate", source = "dbSubmission.terraSubmissionDate")
   GenomicExtractionJob toApi(DbWgsExtractCromwellSubmission dbSubmission);
 
-  default TerraJobStatus convertJobStatus(FirecloudSubmission submission) {
-    // FirecloudSubmission.status doesn't capture the distinction between 'succeeded' and 'failed'
-    // in 'done' so we have to check the workflows themselves.
-    Set<FirecloudWorkflowStatus> workflowStatuses =
-        submission.getWorkflows().stream()
-            .map(FirecloudWorkflow::getStatus)
-            .collect(Collectors.toSet());
-
-    if (submission.getStatus() == FirecloudSubmissionStatus.DONE) {
-      if (workflowStatuses.contains(FirecloudWorkflowStatus.FAILED)) {
-        return TerraJobStatus.FAILED;
-      }
+  default TerraJobStatus convertWorkflowStatus(FirecloudWorkflowStatus status) {
+    if (status == FirecloudWorkflowStatus.SUCCEEDED) {
       return TerraJobStatus.SUCCEEDED;
-    } else if (submission.getStatus() == FirecloudSubmissionStatus.ABORTED
-        || submission.getStatus() == FirecloudSubmissionStatus.ABORTING) {
+    } else if (status == FirecloudWorkflowStatus.ABORTED
+        || status == FirecloudWorkflowStatus.ABORTING
+        || status == FirecloudWorkflowStatus.FAILED) {
       return TerraJobStatus.FAILED;
     } else {
-      // Accepted, Evaluating, Submitting, Submitted
+      // Launching, Queued, Running, Submitted
       return TerraJobStatus.RUNNING;
     }
   }
