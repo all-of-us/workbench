@@ -20,7 +20,7 @@ public class DirectoryServiceImplIntegrationTest extends BaseIntegrationTest {
 
   @TestConfiguration
   @ComponentScan(basePackageClasses = DirectoryServiceImpl.class)
-  @Import(DirectoryServiceImpl.class, BaseIntegrationTest.Configuration.class)
+  @Import({CloudStorageClientImpl.class, BaseIntegrationTest.Configuration.class})
   static class Configuration {}
 
   @Test
