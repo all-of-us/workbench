@@ -56,6 +56,14 @@ const getIconConfigForStatus = (status: TerraJobStatus) => {
         color: colors.danger
       }
     };
+  } else if (status === TerraJobStatus.ABORTED) {
+    return {
+      icon: faBan,
+      iconTooltip: 'This extraction was aborted by the user.',
+      style: {
+        color: colors.warning
+      }
+    }
   }
 };
 
@@ -151,7 +159,8 @@ const mapJobToTableRow = (job: GenomicExtractionJob, workspace: WorkspaceData) =
     statusOrdinal: // The true ordering doesn't matter so much as having RUNNING and FAILED be at both ends of the order
       job.status === TerraJobStatus.RUNNING ? 0 :
         job.status === TerraJobStatus.SUCCEEDED ? 1 :
-          job.status === TerraJobStatus.FAILED ? 2 : Number.MAX_SAFE_INTEGER,
+          job.status === TerraJobStatus.ABORTED ? 2 :
+            job.status === TerraJobStatus.FAILED ? 3 : Number.MAX_SAFE_INTEGER,
     statusDisplay: <TooltipTrigger content={iconConfig.iconTooltip}>
       <div> {/*This div wrapper is needed so the tooltip doesn't move around with the spinning icon*/}
         <FontAwesomeIcon

@@ -297,12 +297,12 @@ public class GenomicExtractionServiceTest {
         createSubmissionAndMockMonitorCall(
                 FirecloudSubmissionStatus.ABORTED, FirecloudWorkflowStatus.ABORTED)
             .getWgsExtractCromwellSubmissionId(),
-        TerraJobStatus.FAILED);
+        TerraJobStatus.ABORTED);
     expectedStatuses.put(
         createSubmissionAndMockMonitorCall(
                 FirecloudSubmissionStatus.ABORTING, FirecloudWorkflowStatus.ABORTING)
             .getWgsExtractCromwellSubmissionId(),
-        TerraJobStatus.FAILED);
+        TerraJobStatus.ABORTED);
     expectedStatuses.put(
         createSubmissionAndMockMonitorCall(
                 FirecloudSubmissionStatus.ACCEPTED, FirecloudWorkflowStatus.QUEUED)

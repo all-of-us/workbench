@@ -29,10 +29,11 @@ public interface GenomicExtractionMapper {
   default TerraJobStatus convertWorkflowStatus(FirecloudWorkflowStatus status) {
     if (status == FirecloudWorkflowStatus.SUCCEEDED) {
       return TerraJobStatus.SUCCEEDED;
-    } else if (status == FirecloudWorkflowStatus.ABORTED
-        || status == FirecloudWorkflowStatus.ABORTING
-        || status == FirecloudWorkflowStatus.FAILED) {
+    } else if (status == FirecloudWorkflowStatus.FAILED) {
       return TerraJobStatus.FAILED;
+    } else if (status == FirecloudWorkflowStatus.ABORTED
+        || status == FirecloudWorkflowStatus.ABORTING) {
+      return TerraJobStatus.ABORTED;
     } else {
       // Launching, Queued, Running, Submitted
       return TerraJobStatus.RUNNING;

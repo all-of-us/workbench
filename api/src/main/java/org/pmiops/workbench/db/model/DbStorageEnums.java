@@ -502,6 +502,7 @@ public final class DbStorageEnums {
           .put(TerraJobStatus.RUNNING, (short) 0)
           .put(TerraJobStatus.FAILED, (short) 1)
           .put(TerraJobStatus.SUCCEEDED, (short) 2)
+          .put(TerraJobStatus.ABORTED, (short) 3)
           .build();
 
   public static TerraJobStatus terraJobStatusFromStorage(Short terraJobStatus) {
