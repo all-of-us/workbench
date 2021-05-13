@@ -13,7 +13,6 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -93,6 +92,7 @@ public class CommandLineToolConfig {
     new SpringApplicationBuilder(CommandLineToolConfig.class, cliConfig)
         .web(WebApplicationType.NONE)
         .registerShutdownHook(false)
-        .run(args).close();
+        .run(args)
+        .close();
   }
 }

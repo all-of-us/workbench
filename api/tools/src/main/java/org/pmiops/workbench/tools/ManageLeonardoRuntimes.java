@@ -251,6 +251,7 @@ public class ManageLeonardoRuntimes {
     // to ensure a Cloud SQL proxy is available when this command is run.
     new SpringApplicationBuilder(ManageLeonardoRuntimes.class)
         .web(WebApplicationType.NONE)
-        .run(args).close();
+        .run(args)
+        .close();
   }
 }

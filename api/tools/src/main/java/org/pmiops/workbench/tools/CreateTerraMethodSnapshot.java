@@ -209,6 +209,7 @@ public class CreateTerraMethodSnapshot {
   public static void main(String[] args) {
     new SpringApplicationBuilder(CreateTerraMethodSnapshot.class)
         .web(WebApplicationType.NONE)
-        .run(args).close();
+        .run(args)
+        .close();
   }
 }

@@ -97,6 +97,7 @@ public class GenerateImpersonatedUserToken {
   public static void main(String[] args) throws Exception {
     new SpringApplicationBuilder(GenerateImpersonatedUserToken.class)
         .web(WebApplicationType.NONE)
-        .run(args).close();
+        .run(args)
+        .close();
   }
 }
