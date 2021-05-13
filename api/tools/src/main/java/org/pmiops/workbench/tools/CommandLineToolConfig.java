@@ -99,5 +99,7 @@ public class CommandLineToolConfig {
     System.out.println(context.isActive());
     System.out.println("~~~~~");
     context.stop();
+    System.out.println("~~~~~~~~33333333");
+    context.close();
   }
 }

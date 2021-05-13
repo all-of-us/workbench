@@ -99,5 +99,6 @@ public class ConfigLoader {
 
   public static void main(String[] args) throws Exception {
     CommandLineToolConfig.runCommandLine(ConfigLoader.class, args);
+    System.out.println("~~~~~~~~~~~~~!!!!!");
   }
 }
