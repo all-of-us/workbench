@@ -63,7 +63,7 @@ const getIconConfigForStatus = (status: TerraJobStatus) => {
       style: {
         color: colors.warning
       }
-    }
+    };
   }
 };
 
