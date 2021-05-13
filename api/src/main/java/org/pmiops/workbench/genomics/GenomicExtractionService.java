@@ -136,7 +136,8 @@ public class GenomicExtractionService {
                       genomicExtractionMapper.convertWorkflowStatus(
                           // Extraction submissions should only have one workflow.
                           firecloudSubmission.getWorkflows().get(0).getStatus());
-                  if (dbSubmission.getTerraStatusEnum() != TerraJobStatus.ABORTING || status == TerraJobStatus.ABORTED) {
+                  if (dbSubmission.getTerraStatusEnum() != TerraJobStatus.ABORTING
+                      || status == TerraJobStatus.ABORTED) {
                     dbSubmission.setTerraStatusEnum(status);
                   }
                   if (isTerminal(status)) {

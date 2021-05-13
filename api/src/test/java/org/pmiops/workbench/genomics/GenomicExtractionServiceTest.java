@@ -458,8 +458,9 @@ public class GenomicExtractionServiceTest {
 
   @Test
   public void abortGenomicExtractionJob() throws ApiException {
-    DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission = createSubmissionAndMockMonitorCall(
-        FirecloudSubmissionStatus.EVALUATING, FirecloudWorkflowStatus.RUNNING);
+    DbWgsExtractCromwellSubmission dbWgsExtractCromwellSubmission =
+        createSubmissionAndMockMonitorCall(
+            FirecloudSubmissionStatus.EVALUATING, FirecloudWorkflowStatus.RUNNING);
 
     doNothing()
         .when(submissionsApi)
@@ -480,7 +481,8 @@ public class GenomicExtractionServiceTest {
 
     GenomicExtractionJob wgsCohortExtractionJob =
         genomicExtractionService
-            .getGenomicExtractionJobs(targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName())
+            .getGenomicExtractionJobs(
+                targetWorkspace.getWorkspaceNamespace(), targetWorkspace.getFirecloudName())
             .get(0);
 
     assertThat(wgsCohortExtractionJob.getStatus()).isEqualTo(TerraJobStatus.ABORTING);
