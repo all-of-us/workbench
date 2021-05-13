@@ -436,10 +436,6 @@ dependencies {
   compile("org.apache.tomcat:tomcat-jdbc:9.0.10")
   compile("org.springframework.boot:spring-boot-starter-tomcat")
   compile("org.springframework.boot:spring-boot-starter-jdbc")
-  compile("org.springframework.boot:spring-boot-starter-actuator") {
-    exclude module: 'spring-boot-starter-tomcat'
-    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
-  }
 
   compile("org.springframework.boot:spring-boot-starter-data-jpa") {
     exclude module: 'spring-boot-starter-tomcat'

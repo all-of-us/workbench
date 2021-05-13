@@ -155,7 +155,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         return userDao.save(dbUser);
       } catch (ObjectOptimisticLockingFailureException e) {
         if (objectLockingFailureCount < MAX_RETRIES) {
-          dbUser = userDao.findById(dbUser.getUserId()).orElse(null);
+          long userId = dbUser.getUserId();
+          dbUser =
+              userDao
+                  .findById(userId)
+                  .orElseThrow(
+                      () ->
+                          new BadRequestException(
+                              String.format("User with ID %s not found", userId)));
           objectLockingFailureCount++;
         } else {
           throw new ConflictException(

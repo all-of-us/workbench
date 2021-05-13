@@ -9,7 +9,6 @@ import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.pmiops.workbench.SpringTest;
 import org.pmiops.workbench.config.CommonConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.model.DbAccessTier;
