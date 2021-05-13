@@ -91,7 +91,6 @@ public class CommandLineToolConfig {
   public static void runCommandLine(Class<?> cliConfig, String[] args) {
     new SpringApplicationBuilder(CommandLineToolConfig.class, cliConfig)
         .web(WebApplicationType.NONE)
-        .registerShutdownHook(false)
         .run(args)
         .close();
   }
