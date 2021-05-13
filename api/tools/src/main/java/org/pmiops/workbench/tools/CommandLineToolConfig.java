@@ -93,5 +93,6 @@ public class CommandLineToolConfig {
         .child(cliConfig)
         .web(WebApplicationType.NONE)
         .run(args).close();
+    return;
   }
 }
