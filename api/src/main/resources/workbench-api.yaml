@@ -4439,7 +4439,6 @@ definitions:
     enum:
     - ACTIVE
     - DELETED
-    - PENDING_DELETION_POST_1PPW_MIGRATION
   ResearchPurpose:
     type: object
     required:
