@@ -41,7 +41,7 @@ buildscript {
   // independently from the main project's application code's dependencies
   dependencies {
     classpath 'com.diffplug.spotless:spotless-plugin-gradle:3.23.0'
-    classpath 'com.google.cloud.tools:appengine-gradle-plugin:2.4.1'
+    classpath 'com.google.cloud.tools:appengine-gradle-plugin:1.3.5'
     classpath 'gradle.plugin.org.hidetake:gradle-swagger-generator-plugin:2.18.2'
     // Note: if you plan to upgrade the version of swagger-codegen beyond 2.2.3, be aware of two
     // implicit dependencies: (1) the set of "generatedCompile" Gradle dependencies need to be updated
