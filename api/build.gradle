@@ -779,12 +779,12 @@ task updateCdrConfig(type: JavaExec) {
 
 // This should be run directly
 task updateReviewDemographics(type: JavaExec) {
-  classpath sourceSets.__tools__.runtimeClasspath
-  main = "org.pmiops.workbench.tools.UpdateReviewDemographics"
-  systemProperties = commandLineSpringProperties
-  if (project.hasProperty("appArgs")) {
-    args Eval.me(appArgs)
-  }
+    classpath sourceSets.__tools__.runtimeClasspath
+    main = "org.pmiops.workbench.tools.UpdateReviewDemographics"
+    systemProperties = commandLineSpringProperties
+    if (project.hasProperty("appArgs")) {
+      args Eval.me(appArgs)
+    }
 }
 
 // See project.rb command: create-wgs-cohort-extraction-bp-workspace
