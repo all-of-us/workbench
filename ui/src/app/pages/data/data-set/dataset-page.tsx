@@ -13,7 +13,7 @@ import {TooltipTrigger} from 'app/components/popups';
 import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {CircleWithText} from 'app/icons/circleWithText';
 import {NewDataSetModal} from 'app/pages/data/data-set/new-dataset-modal';
-import {cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
+import {cohortsApi, conceptSetsApi, dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {
   formatDomain,
@@ -31,7 +31,7 @@ import {getCdrVersion} from 'app/utils/cdr-versions';
 import {
   currentWorkspaceStore,
   encodeURIComponentStrict,
-  navigateAndPreventDefaultIfNoKeysPressed, navigateByUrl
+  navigateAndPreventDefaultIfNoKeysPressed, navigateByUrl, urlParamsStore
 } from 'app/utils/navigation';
 import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
 import {serverConfigStore} from 'app/utils/stores';
@@ -52,9 +52,10 @@ import {
   DomainValuePair,
   ErrorResponse,
   PrePackagedConceptSetEnum,
-  Profile,
+  Profile, ResourceType,
   ValueSet,
 } from 'generated/fetch';
+import {CreateModal} from '../../../components/create-modal';
 import {withErrorModal, WithErrorModalProps} from '../../../components/with-error-modal';
 import {appendNotebookFileSuffix} from '../../analysis/util';
 
@@ -452,6 +453,7 @@ interface State {
   includesAllParticipants: boolean;
   loadingResources: boolean;
   openSaveModal: boolean;
+  openCreateModal: boolean;
   previewList: Map<Domain, DataSetPreviewInfo>;
   selectedCohortIds: number[];
   selectedConceptSetIds: number[];
@@ -478,6 +480,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         includesAllParticipants: false,
         loadingResources: true,
         openSaveModal: false,
+        openCreateModal: false,
         previewList: new Map(),
         selectedCohortIds: [],
         selectedConceptSetIds: [],
@@ -490,7 +493,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     }
 
     get isCreatingNewDataset() {
-      return this.props.urlParams.dataSetId === undefined;
+      return !this.state.dataSet;
     }
 
     async componentDidMount() {
@@ -511,30 +514,34 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
           ...PREPACKAGED_DOMAINS,
           ...PREPACKAGED_WITH_WHOLE_GENOME
         };
-
-      }
-      if (this.isCreatingNewDataset) {
-        return;
       }
 
-      const [, dataset] = await Promise.all([
-        resourcesPromise,
-        dataSetApi().getDataSet(namespace, id, this.props.urlParams.dataSetId)
-      ]);
+      if (this.props.urlParams.dataSetId !== undefined) {
+        const [, dataset] = await Promise.all([
+          resourcesPromise,
+          dataSetApi().getDataSet(namespace, id, this.props.urlParams.dataSetId)
+        ]);
 
-      this.loadDataset(dataset);
+        this.loadDataset(dataset);
+      }
     }
 
     loadDataset(dataset) {
-      const selectedPrepackagedConceptSets = this.apiEnumToPrePackageConceptSets(dataset.prePackagedConceptSet);
-      this.setState({
+      // This is to set the URL to reference the newly created dataset and the user is staying on the dataset page
+      // A bit of a hack but I couldn't find another way to change the URL without triggering a reload
+      if (window.location.href.endsWith('data-sets')) {
+        history.pushState({}, '', `${window.location.href}/${dataset.id}`);
+      }
+
+      return this.setState({
         dataSet: dataset,
+        dataSetTouched: false,
         includesAllParticipants: dataset.includesAllParticipants,
         selectedConceptSetIds: dataset.conceptSets.map(cs => cs.id),
         selectedCohortIds: dataset.cohorts.map(c => c.id),
         selectedDomainValuePairs: dataset.domainValuePairs,
         selectedDomains: this.getDomainsFromDataSet(dataset),
-        selectedPrepackagedConceptSets,
+        selectedPrepackagedConceptSets: this.apiEnumToPrePackageConceptSets(dataset.prePackagedConceptSet)
       });
     }
 
@@ -948,42 +955,18 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
 
     }
 
-    async onSave() {
-      // either open the create modal
-      // or just save it right now
-      if (this.isCreatingNewDataset) {
-        // open create modal
-      } else {
-        this.saveDataset();
-      }
-    }
-
-    async createDataset() {
+    async createDataset(name, desc) {
       const {namespace, id} = this.props.workspace;
 
-      try {
-          await dataSetApi().createDataSet(namespace, id, this.createDatasetRequest());
-      } catch (e) {
-        // TODO eric: handle name conflict error
-        // TODO eric: handle generic error
-        // console.error(e);
-        // if (e.status === 409) {
-        //   this.setState({conflictDataSetName: true, loading: false});
-        // } else {
-        //   this.setState({saveError: true, loading: false});
-        // }
-      }
+      return dataSetApi().createDataSet(namespace, id, this.createDatasetRequest(name, desc));
     }
 
     async saveDataset() {
       const {namespace, id} = this.props.workspace;
 
       this.setState({savingDataset: true});
-      dataSetApi().updateDataSet(namespace, id, this.state.dataSet.id, this.createDatasetRequest())
-        .then(dataset => {
-          this.loadDataset(dataset);
-          this.setState({dataSetTouched: false});
-        })
+      dataSetApi().updateDataSet(namespace, id, this.state.dataSet.id, this.updateDatasetRequest())
+        .then(dataset => this.loadDataset(dataset))
         .catch(e => {
           console.error(e);
           this.props.showErrorModal('Save Dataset Error', 'Please refresh and try again');
@@ -991,21 +974,30 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         .finally(() => this.setState({savingDataset: false}));
     }
 
-    createDatasetRequest() {
-      const request: DataSetRequest = {
-        name: name,
-        description: this.state.dataSet.description,
-        includesAllParticipants: this.state.includesAllParticipants,
-        conceptSetIds: this.state.selectedConceptSetIds,
-        cohortIds: this.state.selectedCohortIds,
-        domainValuePairs: this.state.selectedDomainValuePairs,
-        prePackagedConceptSet: this.getPrePackagedConceptSetApiEnum(),
+    createDatasetRequest(name, desc): DataSetRequest {
+      // TODO eric: verify that its OK to send over description and etag even for a create request
+      return {
+        name,
+        description: desc,
+        ...{
+          includesAllParticipants: this.state.includesAllParticipants,
+          conceptSetIds: this.state.selectedConceptSetIds,
+          cohortIds: this.state.selectedCohortIds,
+          domainValuePairs: this.state.selectedDomainValuePairs,
+          prePackagedConceptSet: this.getPrePackagedConceptSetApiEnum()
+        }
+      };
+    }
+
+    updateDatasetRequest(): DataSetRequest {
+      // TODO eric: verify that its OK to send over description and etag even for a create request
+      return {
+        ...this.createDatasetRequest(
+          this.state.dataSet.name,
+          this.state.dataSet.description
+        ),
         etag: this.state.dataSet.etag
       };
-
-      // TODO eric: verify that its OK to send over description and etag even for a create request
-
-      return request;
     }
 
     openZendeskWidget() {
@@ -1337,12 +1329,12 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                             content='Requires Owner or Writer permission' disabled={this.canWrite}>
               {this.isCreatingNewDataset ?
                 <Button style={{marginBottom: '2rem', marginRight: '1rem'}} data-test-id='save-button'
-                        onClick ={() => this.onCreate()}
+                        onClick ={() => this.setState({openCreateModal: true})}
                         disabled={this.disableSave() || !this.canWrite || !dataSetTouched}>
                   Create Dataset
                 </Button> :
                 <Button style={{marginBottom: '2rem', marginRight: '1rem'}} data-test-id='save-button'
-                        onClick ={() => this.onSave()}
+                        onClick ={() => this.saveDataset()}
                         disabled={this.state.savingDataset || this.disableSave() || !this.canWrite || !dataSetTouched}>
                   Save
                 </Button>}
@@ -1358,6 +1350,18 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
             </Button>
           </TooltipTrigger>
         </div>
+        {this.state.openCreateModal && <CreateModal entityName='Dataset'
+                                                    getExistingNames={async() => {
+                                                      const resources = await workspacesApi().getWorkspaceResources(namespace, id,
+                                                        {typesToFetch: [ResourceType.DATASET]});
+                                                      return resources.map(resource => resource.dataSet.name);
+                                                    }}
+                                                    save={(name, desc) => this.createDataset(name, desc)}
+                                                    onSaveSuccess={(dataset) => this.loadDataset(dataset)}
+                                                    close={() => {
+                                                      this.setState({openCreateModal: false});
+                                                    }}/>}
+
         {openSaveModal && <NewDataSetModal includesAllParticipants={includesAllParticipants}
                                            selectedConceptSetIds={selectedConceptSetIds}
                                            selectedCohortIds={selectedCohortIds}
