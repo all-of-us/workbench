@@ -6,7 +6,7 @@ import { makeRandomName } from 'utils/str-utils';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import { Ethnicity } from 'app/page/cohort-search-page';
+import { Ethnicity } from 'app/page/cohort-participants-group';
 import { Language, LinkText, ResourceCard } from 'app/text-labels';
 
 describe('Create dataset and export to notebook at same time', () => {
@@ -32,9 +32,8 @@ describe('Create dataset and export to notebook at same time', () => {
     // Include Participants Group 1: Add Criteria: Ethnicity
     const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
     await group1.includeEthnicity([Ethnicity.HispanicOrLatino, Ethnicity.NotHispanicOrLatino]);
-
-    // Open selection list and click Save Criteria button
-    await group1.finishReviewAndSaveCriteria();
+    await group1.finishAndReviewButton();
+    await group1.saveCriteria();
 
     // Check Group 1 Count.
     const group1Count = await group1.getGroupCount();

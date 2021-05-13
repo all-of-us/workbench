@@ -3,7 +3,7 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import { makeWorkspaceName } from 'utils/str-utils';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import { Ethnicity } from 'app/page/cohort-search-page';
+import { Ethnicity } from 'app/page/cohort-participants-group';
 import { LinkText, MenuOption, ResourceCard } from 'app/text-labels';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import ClrIconLink from 'app/element/clr-icon-link';
@@ -37,17 +37,17 @@ describe('Create Cohorts from Program Data criteria', () => {
 
     // Include Participants Group 1.
     const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
-    await group1.clickCriteriaMenuItems([MenuOption.PhysicalMeasurements]);
+    await group1.addCriteria([MenuOption.PhysicalMeasurements]);
     let addIcon = ClrIconLink.findByName(page, {
       name: PhysicalMeasurementsCriteria.WheelChairUser,
       iconShape: 'plus-circle',
       ancestorLevel: 2
     });
     await addIcon.click();
-    const message = await group1.getCriteriaAddedSuccessMessage();
+    const message = await group1.criteriaAddedMessage();
     expect(message).toEqual('Criteria Added');
+    await group1.finishAndReviewButton();
 
-    await group1.clickFinishAndReviewButton();
     const reviewCriteriaSidebar = new ReviewCriteriaSidebar(page);
     await reviewCriteriaSidebar.waitUntilVisible();
 
@@ -61,8 +61,6 @@ describe('Create Cohorts from Program Data criteria', () => {
       ancestorLevel: 2
     });
     await addIcon.click();
-    await group1.getCriteriaAddedSuccessMessage();
-
     expect(Number(await reviewCriteriaSidebar.getCriteriaCount())).toEqual(1);
 
     // Click Back button to close sidebar.
@@ -279,6 +277,59 @@ describe('Create Cohorts from Program Data criteria', () => {
     expect(Number.isNaN(group1Count)).toBe(false);
 
     // Save new cohort.
+    await cohortBuildPage.createCohort();
+
+    // Delete cohort in Cohort Build page.
+    await new CohortActionsPage(page).deleteCohort();
+  });
+
+  test('Create cohort from EKG conditions with modifiers', async () => {
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
+
+    const dataPage = new WorkspaceDataPage(page);
+    const cohortBuildPage = await dataPage.clickAddCohortsButton();
+
+    // Add Include Participants Group 1: Add a Condition
+    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
+    await group1.addCriteria([MenuOption.Conditions]);
+    // First, search for non-existent condition, expect search returns no results.
+    let searchResultsTable = await group1.searchCriteria('allergist');
+    expect(await searchResultsTable.exists()).toBe(false);
+    // Next, search for condition EKG
+    searchResultsTable = await group1.searchCriteria('EKG');
+
+    // Check cell value in column "Code" (column #2)
+    const codeValue = await searchResultsTable.getCellValue(1, 2);
+    expect(Number(codeValue)).not.toBeNaN();
+
+    // Add the condition in first row. We don't know what the condition name is, so we get the cell value first.
+    const nameValue = await searchResultsTable.getCellValue(1, 1);
+    const addIcon = ClrIconLink.findByName(
+      page,
+      { containsText: nameValue, iconShape: 'plus-circle' },
+      searchResultsTable
+    );
+    await addIcon.click();
+    await group1.finishAndReviewButton();
+
+    // Add a Condition Modifier: Age At Event >= 50
+    const helpSidebar = new ReviewCriteriaSidebar(page);
+    await helpSidebar.waitUntilVisible();
+    await helpSidebar.addAgeModifier(FilterSign.GreaterThanOrEqualTo, 50);
+
+    // Click SAVE CRITERIA button. Sidebar closes.
+    await helpSidebar.clickSaveCriteriaButton();
+
+    // Check Group 1 Count.
+    const group1Count = await group1.getGroupCount();
+    expect(group1Count).toBeGreaterThan(1);
+    expect(Number.isNaN(group1Count)).toBe(false);
+
+    // Check Total Count.
+    const totalCount = await cohortBuildPage.getTotalCount();
+    expect(totalCount).toBe(group1Count);
+
+    // Save new cohort
     await cohortBuildPage.createCohort();
 
     // Delete cohort in Cohort Build page.

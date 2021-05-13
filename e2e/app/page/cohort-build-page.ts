@@ -132,15 +132,27 @@ export default class CohortBuildPage extends AuthenticatedPage {
    */
   async getTotalCount(timeout = 120000): Promise<number> {
     const barCssSelector = '.highcharts-container .highcharts-bar-series rect';
-    const [count] = await Promise.all([
+    const count = await Promise.race([
       waitForNumericalString(this.page, FieldSelector.TotalCount, timeout),
-      this.page.waitForFunction(
-        (css) => document.querySelectorAll(css),
-        { polling: 'mutation', timeout },
-        barCssSelector
-      )
+      this.page.waitForSelector('clr-icon.is-solid[shape="exclamation-triangle"]', { visible: true, timeout })
     ]);
-    return numericalStringToNumber(count);
+    const errored = await this.page.waitForSelector(
+        'clr-icon.is-solid[shape="exclamation-triangle"]',
+        { visible: true, timeout: 1000 })
+        .catch(() => {
+          // Nothing
+        });
+    if (errored) {
+      const err = await getPropValue<string>(errored, 'textContent');
+      console.error(err);
+      throw new Error(err);
+    }
+    await this.page.waitForFunction(
+      (css) => document.querySelectorAll(css),
+      { polling: 'mutation', timeout },
+      barCssSelector
+    );
+    return numericalStringToNumber(count as string);
   }
 
   getSaveCohortButton(): Button {

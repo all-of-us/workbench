@@ -1,7 +1,6 @@
-import { createWorkspace, isValidDate, signInWithAccessToken } from 'utils/test-utils';
+import { findOrCreateWorkspace, isValidDate, signInWithAccessToken } from 'utils/test-utils';
 import { MenuOption, LinkText, ResourceCard } from 'app/text-labels';
 import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
-import CohortBuildPage from 'app/page/cohort-build-page';
 import CohortParticipantDetailPage from 'app/page/cohort-participant-detail-page';
 import CohortReviewModal from 'app/modal/cohort-review-modal';
 import CohortReviewPage from 'app/page/cohort-review-page';
@@ -11,6 +10,7 @@ import { waitForText } from 'utils/waits-utils';
 import { getPropValue } from 'utils/element-utils';
 import AnnotationsSidebar, { ReviewStatus } from 'app/component/annotations-sidebar';
 import { AnnotationType } from 'app/modal/annotation-field-modal';
+import CohortActionsPage from 'app/page/cohort-actions-page';
 
 jest.setTimeout(20 * 60 * 1000);
 
@@ -24,7 +24,7 @@ describe('Cohort review tests', () => {
   /**
    * Test:
    * Find an existing workspace or create a new workspace if none exists.
-   * Create a new Cohort from Criteria: Visits -> Out-Patient Visit.
+   * Create a new Cohort from Criteria: drug and procedure.
    * Create a Review Set for 100 participants via card's ellipsis menu.
    * Verification: on Cohort review page and the Annotations side bar.
    * Add/edit/delete annotaions fields.
@@ -34,11 +34,33 @@ describe('Cohort review tests', () => {
   test('Create Cohort and a Review Set for 100 participants', async () => {
     const reviewSetNumberOfParticipants = 100;
 
-    await createWorkspace(page, { workspaceName: workspace });
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     const dataPage = new WorkspaceDataPage(page);
-    const cohortCard = await dataPage.createCohort();
-    const cohortName = await cohortCard.getResourceName();
+    const cohortBuildPage = await dataPage.clickAddCohortsButton();
+
+    // Include Participants Group 1: Add hydroxychloroquine drug.
+    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
+    await group1.includeDrugs('hydroxychloroquine', 1);
+    // Include Participants Group 1: Add Hydrocodone drug.
+    await group1.includeDrugs('Hydrocodone', 1);
+
+    // Include Participants Group 2: Add colonoscopy procedures.
+    const group2 = cohortBuildPage.findIncludeParticipantsGroup('Group 2');
+    await group2.includeProcedures('Colonoscopy', 1);
+
+    // Include Participants Group 3: Add Red cell indices labs and measurements.
+    const group3 = cohortBuildPage.findIncludeParticipantsGroup('Group 3');
+    await group3.includeLabsAndMeasurements('Red cell indices', 1);
+
+    // Save new cohort
+    const cohortName = await cohortBuildPage.createCohort();
+
+    // Find new cohort card.
+    const cohortActionsPage = new CohortActionsPage(page);
+    await cohortActionsPage.waitForLoad();
+    await dataPage.openDataPage({ waitPageChange: true });
+    const cohortCard = await dataPage.findCohortCard(cohortName);
 
     await cohortCard.selectSnowmanMenu(MenuOption.Review, { waitForNav: true });
     const modal = new CohortReviewModal(page);
@@ -199,7 +221,6 @@ describe('Cohort review tests', () => {
     await cohortReviewPage.getBackToCohortButton().clickAndWait();
 
     // Land on Cohort Build page
-    const cohortBuildPage = new CohortBuildPage(page);
     await cohortBuildPage.waitForLoad();
 
     // Land on the Data Page & click the Cohort Reviews SubTab

@@ -2,12 +2,13 @@ import CohortActionsPage from 'app/page/cohort-actions-page';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { MenuOption, ResourceCard } from 'app/text-labels';
-import {makeRandomName, makeWorkspaceName} from 'utils/str-utils';
+import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
-import { waitForText, waitWhileLoading } from 'utils/waits-utils';
+import { waitWhileLoading } from 'utils/waits-utils';
 import { getPropValue, waitUntilChanged } from 'utils/element-utils';
 import ClrIconLink from 'app/element/clr-icon-link';
 import { PhysicalMeasurementsCriteria } from 'app/page/cohort-participants-group';
+import { Ethnicity } from 'app/page/cohort-participants-group';
 
 describe('Build cohort page actions', () => {
   beforeEach(async () => {
@@ -148,17 +149,14 @@ describe('Build cohort page actions', () => {
 
     // Should land on Cohort Actions page
     await cohortActionsPage.waitForLoad();
-
-    await waitForText(page, 'Cohort Saved Successfully', { css: 'body h3' });
-    const cohortLink = await page.waitForXPath(`//a[normalize-space()="${cohortName}"]`, { visible: true });
-    expect(cohortLink).toBeTruthy();
+    expect(await cohortActionsPage.getCohortLink().exists()).toBeTruthy();
 
     await dataPage.openDataPage();
     await dataPage.waitForLoad();
     await dataPage.deleteResource(cohortName, ResourceCard.Cohort);
   });
 
-  test('Rename, Suppress and delete criteria', async () => {
+  test('Delete, edit, rename, suppress criteria', async () => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     const dataPage = new WorkspaceDataPage(page);
@@ -189,13 +187,13 @@ describe('Build cohort page actions', () => {
     expect((await group1.findGroupCriteriaList()).length).toBe(2);
     totalCount = await cohortBuildPage.getTotalCount(); // New Total Count by 2 criteria.
 
-    // Rename Whole Genome Variant criteria name. The default criteria name is "Whole Genome Variant".
-    const newCriteriaName = 'Whole-Genome';
+    // Rename Criteria: rename "Whole Genome Variant" to "NDA Sets".
+    const newCriteriaName = 'DNA Sets';
     await group1.editCriteriaName('Whole Genome Variant', newCriteriaName);
     // New criteria name is visible in page.
     await page.waitForXPath(group1.getCriteriaXpath(newCriteriaName), { visible: true });
 
-    // Suppress Fitbit from total count.
+    // Suppress Criteria from total count: Suppress "Has any Fitbit data" criteria.
     const fitbitName = 'Has any Fitbit data';
     await group1.suppressCriteriaFromTotalCount(fitbitName);
     const suppressedTotalCount = await cohortBuildPage.getTotalCount();
@@ -221,12 +219,12 @@ describe('Build cohort page actions', () => {
     await cohortActionsPage.waitForLoad();
     await cohortActionsPage.clickCohortName();
 
-    // Delete Fitbit criteria.
+    // Delete Criteria: delete Fitbit criteria.
     await group1.deleteCriteria(fitbitName);
     // Calculated new Total Count is less than before delete criteria.
     expect(await cohortBuildPage.getTotalCount()).toBeLessThan(totalCount);
 
-    const undoDeleteButton = await group1.getUndoDeleteCriteriaButton();
+    const undoDeleteButton = group1.getUndoDeleteCriteriaButton();
     expect(await undoDeleteButton.exists()).toBe(true);
     // Wait until UNDO button is gone.
     await waitUntilChanged(page, await undoDeleteButton.asElementHandle());
@@ -234,9 +232,22 @@ describe('Build cohort page actions', () => {
     // Include Group 1 has 1 criteria after delete 1.
     expect((await group1.findGroupCriteriaList()).length).toBe(1);
 
+    // Add Exclude Group 3: add Ethnicity criteria.
+    const excludeGroup3 = cohortBuildPage.findExcludeParticipantsGroup('Group 3');
+    const excludeGroup3Count = await excludeGroup3.includeEthnicity([Ethnicity.NotHispanicOrLatino]);
+
+    // Edit Exclude Group 3: edit Ethnicity criteria.
+    await excludeGroup3.editCriteria('Contains Ethnicity Code');
+    await excludeGroup3.findAddCriteriaIcon(Ethnicity.PreferNotToAnswer).click();
+    await excludeGroup3.criteriaAddedMessage();
+    await excludeGroup3.finishAndReviewButton();
+    await excludeGroup3.saveCriteria();
+
+    const excludeGroup3NewCount = await excludeGroup3.getGroupCount();
+    expect(excludeGroup3NewCount === excludeGroup3Count).toBe(false);
+
     // Save changes.
     await cohortBuildPage.saveChanges();
-
     await cohortActionsPage.deleteCohort();
   });
 });

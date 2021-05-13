@@ -10,16 +10,25 @@ export default class CriteriaSearchPage extends AuthenticatedPage {
     super(page);
   }
 
+  /**
+   * @deprecated
+   */
   async isLoaded(): Promise<boolean> {
     await Promise.all([this.page.waitForXPath('//*[@id="criteria-search-container"]', { visible: true })]);
     await waitWhileLoading(this.page);
     return true;
   }
 
+  /**
+   * @deprecated
+   */
   getConditionSearchResultsTable(): Table {
     return new Table(this.page, '//table[@class="p-datatable"]');
   }
 
+  /**
+   * @deprecated
+   */
   async searchCriteria(searchWord: string): Promise<Table> {
     const resultsTable = new Table(this.page, '//table[@class="p-datatable"]');
     const searchFilterTextbox = Textbox.findByName(this.page, { containsText: 'by code or description' });
@@ -29,10 +38,16 @@ export default class CriteriaSearchPage extends AuthenticatedPage {
     return resultsTable;
   }
 
+  /**
+   * @deprecated
+   */
   getResultsTable(): Table {
     return new Table(this.page, '//table[@data-test-id="list-search-results-table"]');
   }
 
+  /**
+   * @deprecated
+   */
   async resultsTableSelectRow(
     rowIndex = 1,
     selectionColumnIndex = 1

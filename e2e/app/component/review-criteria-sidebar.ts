@@ -16,6 +16,8 @@ enum SectionSelectors {
 }
 
 export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
+  participantResultXpath = `${this.xpath}//*[./*[contains(text(), "Number of Participants")]]`;
+
   constructor(page: Page) {
     super(page);
   }
@@ -49,7 +51,7 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
     await numberField.type(String(filterValue));
 
     await this.clickButton(LinkText.Calculate);
-    const participantResult = await this.waitForParticipantResult();
+    const participantResult = await waitForNumericalString(this.page, this.participantResultXpath);
 
     // Find criteria in Selected Criteria Content Box.
     const removeSelectedCriteriaIconSelector = buildXPath({ type: ElementType.Icon, iconShape: 'times-circle' }, this);
@@ -85,11 +87,11 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
     let participantResult: string;
     await this.clickButton(LinkText.Calculate);
     try {
-      participantResult = await this.waitForParticipantResult();
+      participantResult = await waitForNumericalString(this.page, this.participantResultXpath);
     } catch (e) {
       // Retry one more time.
       await this.clickButton(LinkText.Calculate);
-      participantResult = await this.waitForParticipantResult();
+      participantResult = await waitForNumericalString(this.page, this.participantResultXpath);
     }
     await this.clickButton(LinkText.ApplyModifiers);
     await this.waitUntilSectionVisible(SectionSelectors.SelectionList);
@@ -99,11 +101,6 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
   async clickSaveCriteriaButton(): Promise<void> {
     await this.clickButton(LinkText.SaveCriteria, { waitForClose: true });
     await waitWhileLoading(this.page);
-  }
-
-  async waitForParticipantResult(): Promise<string> {
-    const selector = `${this.xpath}//*[./*[contains(text(), "Number of Participants")]]`;
-    return waitForNumericalString(this.page, selector);
   }
 
   async waitUntilSectionVisible(xpath: string): Promise<ElementHandle> {

@@ -29,6 +29,7 @@ export enum MenuOption {
   Drugs = 'Drugs',
   Duplicate = 'Duplicate',
   Edit = 'Edit',
+  EditCriteria = 'Edit criteria',
   EditCriteriaName = 'Edit criteria name',
   EditGroupName = 'Edit group name',
   Ethnicity = 'Ethnicity',

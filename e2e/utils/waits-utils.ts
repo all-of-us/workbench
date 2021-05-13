@@ -115,7 +115,7 @@ export async function waitForNumericalString(page: Page, xpath: string, timeout?
     )
     .catch((err) => {
       logger.error(`waitForNumericalString() failed: xpath="${xpath}"`);
-      logger.error(err);
+      logger.error(err.stack);
       throw new Error(err);
     });
 

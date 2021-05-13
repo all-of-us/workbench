@@ -66,7 +66,7 @@ export default class CohortActionsPage extends AuthenticatedPage {
   // A helper function to avoid clutter tests.
   async deleteCohort(): Promise<void> {
     await this.waitForLoad();
-    const link = await this.getCohortLink();
+    const link = this.getCohortLink();
     const cohortName = await link.getProperty<string>('textContent');
     await link.clickAndWait();
 
