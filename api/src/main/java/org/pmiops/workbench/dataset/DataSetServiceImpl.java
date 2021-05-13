@@ -39,7 +39,6 @@ import org.pmiops.workbench.cdr.model.DbDSDataDictionary;
 import org.pmiops.workbench.cdr.model.DbDSLinking;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohortbuilder.ParticipantCriteria;
-import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.db.dao.CohortDao;
 import org.pmiops.workbench.db.dao.ConceptSetDao;
@@ -190,7 +189,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   }
 
   private final BigQueryService bigQueryService;
-  private final CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   private final CohortDao cohortDao;
   private final ConceptBigQueryService conceptBigQueryService;
   private final ConceptSetDao conceptSetDao;
@@ -205,7 +203,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
   @VisibleForTesting
   public DataSetServiceImpl(
       BigQueryService bigQueryService,
-      CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService,
       CohortDao cohortDao,
       ConceptBigQueryService conceptBigQueryService,
       ConceptSetDao conceptSetDao,
@@ -216,7 +213,6 @@ public class DataSetServiceImpl implements DataSetService, GaugeDataCollector {
       DataSetMapper dataSetMapper,
       Clock clock) {
     this.bigQueryService = bigQueryService;
-    this.cdrBigQuerySchemaConfigService = cdrBigQuerySchemaConfigService;
     this.cohortDao = cohortDao;
     this.conceptBigQueryService = conceptBigQueryService;
     this.conceptSetDao = conceptSetDao;
