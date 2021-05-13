@@ -92,6 +92,6 @@ public class CommandLineToolConfig {
     new SpringApplicationBuilder(CommandLineToolConfig.class)
         .child(cliConfig)
         .web(WebApplicationType.NONE)
-        .run(args);
+        .run(args).close();
   }
 }
