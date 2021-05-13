@@ -80,7 +80,7 @@ SELECT p.person_id,
     1 as is_standard,
     co.condition_concept_id as concept_id,
     'Condition' as domain,
-    DATE_DIFF(co.condition_start_date,date(p.BIRTH_DATETIMEh), YEAR) - IF(EXTRACT(MONTH FROM date(p.BIRTH_DATETIME))*100 + EXTRACT(DAY FROM date(p.BIRTH_DATETIME)) > EXTRACT(MONTH FROM co.condition_start_date)*100 + EXTRACT(DAY FROM co.condition_start_date),1,0) as age_at_event,
+    DATE_DIFF(co.condition_start_date,date(p.BIRTH_DATETIME), YEAR) - IF(EXTRACT(MONTH FROM date(p.BIRTH_DATETIME))*100 + EXTRACT(DAY FROM date(p.BIRTH_DATETIME)) > EXTRACT(MONTH FROM co.condition_start_date)*100 + EXTRACT(DAY FROM co.condition_start_date),1,0) as age_at_event,
     vo.visit_concept_id,
     vo.visit_occurrence_id
 FROM \`$BQ_PROJECT.$BQ_DATASET.condition_occurrence\` co
