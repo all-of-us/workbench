@@ -13,6 +13,7 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -89,10 +90,14 @@ public class CommandLineToolConfig {
    * @param args command line args to pass to the program
    */
   public static void runCommandLine(Class<?> cliConfig, String[] args) {
-    new SpringApplicationBuilder(CommandLineToolConfig.class)
+    System.out.println("~~~~~~~~1111111");
+    ConfigurableApplicationContext context = new SpringApplicationBuilder(CommandLineToolConfig.class)
         .child(cliConfig)
         .web(WebApplicationType.NONE)
-        .run(args).close();
-    return;
+        .run(args);
+    System.out.println("~~~~~~~~2222222");
+    System.out.println(context.isActive());
+    System.out.println("~~~~~");
+    context.stop();
   }
 }
