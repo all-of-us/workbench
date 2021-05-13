@@ -27,7 +27,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @Import({CdrConfigVOMapperImpl.class, CommonConfig.class})
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class CdrConfigVOMapperTest extends SpringTest {
+public class CdrConfigVOMapperTest {
   @Autowired CdrConfigVOMapper mapper;
   @Autowired AccessTierDao accessTierDao;
 
