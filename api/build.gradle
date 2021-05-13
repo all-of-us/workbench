@@ -312,11 +312,7 @@ sourceSets {
 
   // Integration testing sources
   __integration__ {
-    compileClasspath += main.output + generated.output
-    runtimeClasspath += main.output + generated.output
-
     resources {
-      srcDir "src/integration/resources"
       srcDir "config/"
     }
     java {
@@ -326,13 +322,11 @@ sourceSets {
 
   // AoU Tools sources
   __tools__ {
-    compileClasspath += main.output + generated.output + main.compileClasspath
-    runtimeClasspath += main.output + generated.output + main.runtimeClasspath
+    compileClasspath += main.output + generated.output
+    runtimeClasspath += main.output + generated.output
 
     resources {
       srcDir "tools/src/main/resources"
-      srcDir "db"
-      srcDir "config"
     }
     java {
       srcDirs = ['tools/src/main/java']
