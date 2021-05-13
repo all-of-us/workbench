@@ -7,7 +7,6 @@ import java.time.ZoneId;
 import org.pmiops.workbench.test.FakeClock;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 
 @TestConfiguration
 public class BaseTestConfiguration {
@@ -17,8 +16,12 @@ public class BaseTestConfiguration {
   public static final FakeClock CLOCK = new FakeClock(NOW.toInstant(), ZoneId.systemDefault());
 
   @Bean
-  @Primary
-  public Clock clock() {
-    return CLOCK;
+  FakeClock fakeClock() {
+    return new FakeClock(NOW.toInstant(), ZoneId.systemDefault());
+  }
+
+  @Bean
+  Clock clock(FakeClock c) {
+    return c;
   }
 }

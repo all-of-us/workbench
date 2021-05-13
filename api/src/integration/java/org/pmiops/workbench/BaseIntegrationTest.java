@@ -9,7 +9,6 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -22,13 +21,12 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @WebAppConfiguration
 @Import({IntegrationTestConfig.class})
 @TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
-@DataJpaTest
 public abstract class BaseIntegrationTest {
 
   protected static WorkbenchConfig config;
 
   @TestConfiguration
-  static class Configuration {
+  public static class Configuration {
     // This prototype-scoped bean override will cause all autowired services to call this method
     // for their Provider<WorkbenchConfig>. Further modifications may be made from within each test
     // case.
