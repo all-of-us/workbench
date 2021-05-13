@@ -14,7 +14,6 @@ import org.pmiops.workbench.firecloud.model.FirecloudMe;
 import org.pmiops.workbench.firecloud.model.FirecloudNihStatus;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -27,7 +26,6 @@ import org.springframework.context.annotation.Import;
  */
 @Configuration
 @Import({FireCloudServiceImpl.class, FireCloudConfig.class})
-@ComponentScan(basePackages = "org.pmiops.workbench")
 public class FetchFireCloudUserProfile {
   private static final Logger log =
       Logger.getLogger(org.pmiops.workbench.tools.FetchFireCloudUserProfile.class.getName());

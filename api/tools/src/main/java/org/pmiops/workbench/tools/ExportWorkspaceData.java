@@ -94,7 +94,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
   UserRecentResourceServiceImpl.class
 })
 @ComponentScan(
-    value = "org.pmiops.workbench",
+    value = "org.pmiops.workbench.firecloud",
     excludeFilters =
         // The base CommandlineToolConfig also imports the retry handler, which causes conflicts.
         @Filter(type = FilterType.ASSIGNABLE_TYPE, classes = FirecloudRetryHandler.class))

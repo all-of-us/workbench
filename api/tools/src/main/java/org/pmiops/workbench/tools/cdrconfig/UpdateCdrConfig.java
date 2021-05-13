@@ -23,7 +23,6 @@ import org.pmiops.workbench.model.ArchivalStatus;
 import org.pmiops.workbench.tools.CommandLineToolConfig;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Configuration
 @Import(CdrConfigVOMapperImpl.class)
-@ComponentScan(basePackages = "org.pmiops.workbench")
 public class UpdateCdrConfig {
 
   private static final Logger logger = Logger.getLogger(UpdateCdrConfig.class.getName());
