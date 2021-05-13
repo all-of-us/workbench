@@ -232,6 +232,6 @@ public class FixDesynchronizedBillingProjectOwners {
   public static void main(String[] args) {
     new SpringApplicationBuilder(FixDesynchronizedBillingProjectOwners.class)
         .web(WebApplicationType.NONE)
-        .run(args);
+        .run(args).close();
   }
 }
