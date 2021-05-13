@@ -204,6 +204,6 @@ public class CreateWgsCohortExtractionBillingProjectWorkspace {
 
   public static void main(String[] args) {
     CommandLineToolConfig.runCommandLine(
-        CreateWgsCohortExtractionBillingProjectWorkspace.class, args).close();
+        CreateWgsCohortExtractionBillingProjectWorkspace.class, args);
   }
 }
