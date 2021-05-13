@@ -2,10 +2,8 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
-import { waitForText, waitWhileLoading } from 'utils/waits-utils';
-import CohortReviewModal from 'app/modal/cohort-review-modal';
-import { LinkText, MenuOption, ResourceCard } from 'app/text-labels';
-import CohortReviewPage from 'app/page/cohort-review-page';
+import { waitWhileLoading } from 'utils/waits-utils';
+import { MenuOption, ResourceCard } from 'app/text-labels';
 import DataResourceCard from 'app/component/data-resource-card';
 import Link from 'app/element/link';
 
@@ -45,56 +43,6 @@ describe('Editing Cohort tests', () => {
     await dataPage.waitForLoad();
     const resourceCard = new DataResourceCard(page);
     expect(await resourceCard.findCard(cohortName)).toBeTruthy();
-  });
-
-  test('Create cohort review set for 100 participants', async () => {
-    const cohortName = await setUpWorkspaceAndCohort().then((cohort: DataResourceCard) => cohort.clickResourceName());
-
-    const cohortBuildPage = new CohortBuildPage(page);
-    await cohortBuildPage.waitForLoad();
-
-    const reviewSetsButton = cohortBuildPage.getCopyButton();
-    await reviewSetsButton.click();
-
-    const modal = new CohortReviewModal(page);
-    await modal.waitForLoad();
-
-    const reviewSetNumberOfParticipants = 100;
-    await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants);
-    await modal.clickButton(LinkText.CreateSet);
-
-    const cohortReviewPage = new CohortReviewPage(page);
-    await cohortReviewPage.waitForLoad();
-
-    await waitForText(page, `Review Sets for ${cohortName}`);
-
-    // Verify table pagination records count.
-    const participantsTable = cohortReviewPage.getDataTable();
-    const records = await participantsTable.getNumRecords();
-    // Table records page numbering is in "1 - 25 of 100 records" format.
-    expect(Number(records[2])).toEqual(reviewSetNumberOfParticipants);
-
-    console.log(`Created Review Set with ${reviewSetNumberOfParticipants} participants.`);
-
-    // Click Back to Cohort link
-    const backToCohortButton = cohortReviewPage.getBackToCohortButton();
-    await backToCohortButton.click();
-
-    await cohortBuildPage.waitForLoad();
-    await cohortBuildPage.getTotalCount();
-
-    // Back out to Data page
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.openDataPage();
-    await dataPage.waitForLoad();
-
-    // Verify Cohort Review card exists
-    const resourceCard = new DataResourceCard(page);
-    const reviewCohortCard = await resourceCard.findCard(cohortName, ResourceCard.CohortReview);
-    expect(reviewCohortCard).toBeTruthy();
-
-    await dataPage.deleteResource(cohortName, ResourceCard.CohortReview);
-    await dataPage.deleteResource(cohortName, ResourceCard.Cohort);
   });
 
   test('Delete cohort', async () => {

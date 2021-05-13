@@ -11,6 +11,7 @@ import { getPropValue } from 'utils/element-utils';
 import AnnotationsSidebar, { ReviewStatus } from 'app/component/annotations-sidebar';
 import { AnnotationType } from 'app/modal/annotation-field-modal';
 import CohortActionsPage from 'app/page/cohort-actions-page';
+import {Surveys} from "app/page/cohort-participants-group";
 
 jest.setTimeout(20 * 60 * 1000);
 
@@ -20,20 +21,79 @@ describe('Cohort review tests', () => {
   });
 
   const workspace = makeWorkspaceName();
+  const reviewSetNumberOfParticipants = 100;
+
+  test('Create cohort review set in cohort build page', async () => {
+    await findOrCreateWorkspace(page, { workspaceName: workspace });
+
+    const dataPage = new WorkspaceDataPage(page);
+    let cohortBuildPage = await dataPage.clickAddCohortsButton();
+
+    // Include Participants Group 1: add a survey.
+    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
+    await group1.includeSurveys([Surveys.BASICS]);
+    await cohortBuildPage.getTotalCount();
+    await cohortBuildPage.createCohort();
+
+    const cohortActionsPage = new CohortActionsPage(page);
+    const cohortName = await cohortActionsPage.getCohortName();
+    cohortBuildPage = await cohortActionsPage.clickCohortName();
+    await cohortBuildPage.getTotalCount();
+
+    const reviewSetsButton = cohortBuildPage.getCopyButton();
+    await reviewSetsButton.click();
+
+    const modal = new CohortReviewModal(page);
+    await modal.waitForLoad();
+
+    const reviewSetNumberOfParticipants = 100;
+    await modal.fillInNumberOfParticipants(reviewSetNumberOfParticipants);
+    await modal.clickButton(LinkText.CreateSet);
+
+    const cohortReviewPage = new CohortReviewPage(page);
+    await cohortReviewPage.waitForLoad();
+
+    await waitForText(page, `Review Sets for ${cohortName}`);
+
+    // Verify table pagination records count.
+    const participantsTable = cohortReviewPage.getDataTable();
+    const records = await participantsTable.getNumRecords();
+    // Table records page numbering is in "1 - 25 of 100 records" format.
+    expect(Number(records[2])).toEqual(reviewSetNumberOfParticipants);
+
+    console.log(`Created Review Set with ${reviewSetNumberOfParticipants} participants.`);
+
+    // Click Back to Cohort link
+    const backToCohortButton = cohortReviewPage.getBackToCohortButton();
+    await backToCohortButton.click();
+
+    await cohortBuildPage.waitForLoad();
+    await cohortBuildPage.getTotalCount();
+
+    // Back out to Data page
+    await dataPage.openDataPage();
+    await dataPage.waitForLoad();
+
+    // Verify Cohort Review card exists
+    const resourceCard = new DataResourceCard(page);
+    const reviewCohortCard = await resourceCard.findCard(cohortName, ResourceCard.CohortReview);
+    expect(reviewCohortCard).toBeTruthy();
+
+    await dataPage.deleteResource(cohortName, ResourceCard.CohortReview);
+    await dataPage.deleteResource(cohortName, ResourceCard.Cohort);
+  });
 
   /**
    * Test:
-   * Find an existing workspace or create a new workspace if none exists.
+   * Create a new workspace.
    * Create a new Cohort from Criteria: drug and procedure.
    * Create a Review Set for 100 participants via card's ellipsis menu.
    * Verification: on Cohort review page and the Annotations side bar.
-   * Add/edit/delete annotaions fields.
+   * Add/edit/delete annotations fields.
    * Rename Cohort review.
    * Delete cohort review via card's ellipsis menu.
    */
-  test('Create Cohort and a Review Set for 100 participants', async () => {
-    const reviewSetNumberOfParticipants = 100;
-
+  test('Create cohort review set from cohort card', async () => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     const dataPage = new WorkspaceDataPage(page);

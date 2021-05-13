@@ -50,6 +50,7 @@ export enum MenuOption {
   Share = 'Share',
   SuppressGroupFromTotalCount = 'Suppress group from total count',
   SuppressCriteriaFromTotalCount = 'Suppress criteria from total count',
+  Surveys = 'Surveys',
   Visits = 'Visits',
   WholeGenomeVariant = 'Whole Genome Variant'
 }

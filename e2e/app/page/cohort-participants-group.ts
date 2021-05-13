@@ -24,6 +24,12 @@ export enum Ethnicity {
   Skip = 'Skip'
 }
 
+export enum Surveys {
+  BASICS = 'The Basics',
+  LIFESTYLE = 'Lifestyle',
+  OVERALLHEALTH = 'Overall Health',
+  PERSONALMEDICALHISTORY = 'Personal Medical History',
+}
 export enum Sex {
   FEMALE = 'Female',
   MALE = 'Male',
@@ -448,6 +454,16 @@ export default class CohortParticipantsGroup {
     await this.finishAndReviewButton();
     await this.saveCriteria();
     return numericalStringToNumber(count);
+  }
+
+  async includeSurveys(surveys: Surveys[]): Promise<void> {
+    await this.addCriteria([MenuOption.Surveys]);
+    for (const survey of surveys) {
+      await this.findAddCriteriaIcon(survey).click();
+      await this.criteriaAddedMessage();
+    }
+    await this.finishAndReviewButton();
+    await this.saveCriteria();
   }
 
   async includeVisits(visits: Visits[]): Promise<void> {

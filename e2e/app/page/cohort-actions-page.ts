@@ -7,6 +7,7 @@ import DatasetBuildPage from './dataset-build-page';
 import Link from 'app/element/link';
 import CohortBuildPage from './cohort-build-page';
 import WorkspaceDataPage from './workspace-data-page';
+import {getPropValue} from "../../utils/element-utils";
 
 const PageTitle = 'Cohort Actions';
 
@@ -54,6 +55,11 @@ export default class CohortActionsPage extends AuthenticatedPage {
     return new Link(this.page, xpath);
   }
 
+  async getCohortName(): Promise<string> {
+    const link = await this.getCohortLink();
+    return getPropValue<string>(await link.asElementHandle(), 'textContent');
+  }
+
   async clickCohortName(): Promise<CohortBuildPage> {
     await this.getCohortLink().clickAndWait();
     const cohortBuildPage = new CohortBuildPage(this.page);
@@ -71,7 +77,7 @@ export default class CohortActionsPage extends AuthenticatedPage {
     await link.clickAndWait();
 
     // Delete cohort in Cohort Build page.
-    const cohortBuildPage = new CohortBuildPage(page);
+    const cohortBuildPage = new CohortBuildPage(this.page);
     await cohortBuildPage.waitForLoad();
     await cohortBuildPage.getTotalCount();
 
@@ -80,6 +86,6 @@ export default class CohortActionsPage extends AuthenticatedPage {
     expect(modalText).toContain(`Are you sure you want to delete Cohort: ${cohortName}?`);
 
     // Verify Cohort card is gone after delete.
-    expect(await new WorkspaceDataPage(page).findCohortCard(cohortName)).toBeFalsy();
+    expect(await new WorkspaceDataPage(this.page).findCohortCard(cohortName)).toBeFalsy();
   }
 }
