@@ -2,7 +2,6 @@ import { ElementHandle, Page } from 'puppeteer';
 import CohortBuildPage, { FieldSelector } from 'app/page/cohort-build-page';
 import { waitForNumericalString, waitForText, waitWhileLoading } from 'utils/waits-utils';
 import CohortSearchPage, { Ethnicity } from 'app/page/cohort-search-page';
-import CriteriaSearchPage from 'app/page/criteria-search-page';
 import TieredMenu from 'app/component/tiered-menu';
 import { LinkText, MenuOption } from 'app/text-labels';
 import { snowmanIconXpath } from 'app/component/snowman-menu';
@@ -15,16 +14,17 @@ import ReviewCriteriaSidebar from 'app/component/review-criteria-sidebar';
 import Textbox from 'app/element/textbox';
 import RadioButton from 'app/element/radiobutton';
 import { numericalStringToNumber } from 'utils/str-utils';
+import Table from "app/component/table";
 
 export enum Sex {
   FEMALE = 'Female',
   MALE = 'Male',
   UNKNOWN = 'Unknown',
-  SKIPPED = 'Not Man Only, Not Woman Only, Prefer Not To Answer, Or Skipped'
+  SKIPPED = 'Not male, not female, prefer not to answer, or skipped'
 }
 export enum Race {
   WHITE = 'White',
-  BLACK = 'Black Or African American',
+  BLACK = 'Black or African American',
   UNKNOWN = 'Unknown'
 }
 
@@ -71,7 +71,8 @@ export enum FilterSign {
 
 export default class CohortParticipantsGroup {
   private rootXpath: string;
-  private containerXpath = '//*[@id="criteria-search-container"]';
+  private cohortSearchContainerXpath = '//*[@id="cohort-search-container"]';
+  private criteriaSearchContainerXpath = '//*[@id="criteria-search-container"]';
 
   constructor(private readonly page: Page) {}
 
@@ -83,8 +84,13 @@ export default class CohortParticipantsGroup {
     return (await this.page.$x(this.rootXpath)).length > 0;
   }
 
-  getEnableButton(): Button {
+  getEnableCriteriaButton(): Button {
     const xpath = `${this.rootXpath}//*[normalize-space()="ENABLE" and @role="button"]`;
+    return new Button(this.page, xpath);
+  }
+
+  getUndoDeleteCriteriaButton(): Button {
+    const xpath = `${this.rootXpath}//*[normalize-space()="UNDO" and @role="button"]`;
     return new Button(this.page, xpath);
   }
 
@@ -108,10 +114,7 @@ export default class CohortParticipantsGroup {
   }
 
   getCriteriaXpath(criteriaName: string): string {
-    return (
-      this.rootXpath +
-      `//*[@data-test-id="item-list"][.//clr-icon[@shape="ellipsis-vertical"] and .//*[text()="${criteriaName}"]]`
-    );
+    return `${this.rootXpath}//*[@data-test-id="item-list"][.//*[text()="${criteriaName}"]]${snowmanIconXpath}`;
   }
   async clickGroupSnowmanIcon(): Promise<void> {
     const iconXpath = `${this.rootXpath}${snowmanIconXpath}`;
@@ -119,7 +122,8 @@ export default class CohortParticipantsGroup {
   }
 
   async clickCriteriaSnowmanIcon(criteriaName: string): Promise<void> {
-    await this.page.waitForXPath(this.getCriteriaXpath(criteriaName), { visible: true }).then((icon) => icon.click());
+    const snowmanIcon = new ClrIconLink(this.page, this.getCriteriaXpath(criteriaName));
+    await snowmanIcon.click();
   }
 
   /**
@@ -153,11 +157,12 @@ export default class CohortParticipantsGroup {
     const textbox = modal.waitForTextbox('New Name:');
     await textbox.type(newName);
     await modal.clickButton(LinkText.Rename, { waitForClose: true });
+    await waitWhileLoading(this.page);
   }
 
   async suppressCriteriaFromTotalCount(criteriaName: string): Promise<void> {
     await this.clickCriteriaSnowmanIcon(criteriaName);
-    await this.selectSnowmanMenu(MenuOption.SuppressGroupFromTotalCount);
+    await this.selectSnowmanMenu(MenuOption.SuppressCriteriaFromTotalCount);
   }
 
   async deleteCriteria(criteriaName: string): Promise<void> {
@@ -261,18 +266,104 @@ export default class CohortParticipantsGroup {
     return this.getGroupCount();
   }
 
-  async includeConditions(): Promise<CriteriaSearchPage> {
+  async includeConditions(condition: string, addTotal = 5): Promise<void> {
     await this.clickCriteriaMenuItems([MenuOption.Conditions]);
-    const searchPage = new CriteriaSearchPage(this.page);
-    await searchPage.waitForLoad();
-    return searchPage;
+    await waitWhileLoading(this.page);
+
+    const searchResultsTable = await this.searchCriteria(condition);
+
+    // Add addTotal rows.
+    const rows = await searchResultsTable.getRows();
+    for (let i=0; i < rows.length; i++)  {
+      const cellValue = await searchResultsTable.getCellValue(i, 1);
+      const addIcon = ClrIconLink.findByName(
+          this.page,
+          { containsText: cellValue, iconShape: 'plus-circle' },
+          searchResultsTable
+      );
+      await addIcon.click();
+      console.log(`Added condition: ${cellValue}`);
+      if (i == addTotal) {
+        break;
+      }
+    }
+
+    await this.finishReviewAndSaveCriteria();
   }
 
-  async includeDrugs(): Promise<CriteriaSearchPage> {
+  async includeDrugs(drug: string, addTotal = 5): Promise<void> {
     await this.clickCriteriaMenuItems([MenuOption.Drugs]);
-    const searchPage = new CriteriaSearchPage(this.page);
-    await searchPage.waitForLoad();
-    return searchPage;
+    await waitWhileLoading(this.page);
+
+    // Search for drug.
+    const searchResultsTable = await this.searchCriteria(drug);
+
+    // Add addTotal rows.
+    const rows = await searchResultsTable.getRows();
+    for (let i=0; i < rows.length; i++) {
+      const cellValue = await searchResultsTable.getCellValue(1, 1);
+      const addIcon = ClrIconLink.findByName(
+          this.page,
+          { containsText: cellValue, iconShape: 'plus-circle' },
+          searchResultsTable
+      );
+      await addIcon.click();
+      if (i == addTotal) {
+        break;
+      }
+    }
+
+    await this.finishReviewAndSaveCriteria();
+  }
+
+  async includeProcedures(procedure: string, addTotal = 5): Promise<void> {
+    await this.clickCriteriaMenuItems([MenuOption.Procedures]);
+    await waitWhileLoading(this.page);
+
+    // Search for procedure.
+    const searchResultsTable = await this.searchCriteria(procedure);
+
+    // Add addTotal rows.
+    const rows = await searchResultsTable.getRows();
+    for (let i=0; i < rows.length; i++) {
+      const cellValue = await searchResultsTable.getCellValue(1, 1);
+      const addIcon = ClrIconLink.findByName(
+          this.page,
+          { containsText: cellValue, iconShape: 'plus-circle' },
+          searchResultsTable
+      );
+      await addIcon.click();
+      if (i == addTotal) {
+        break;
+      }
+    }
+
+    await this.finishReviewAndSaveCriteria();
+  }
+
+  async includeLabsAndMeasurements(lab: string, addTotal = 5): Promise<void> {
+    await this.clickCriteriaMenuItems([MenuOption.LabsAndMeasurements]);
+    await waitWhileLoading(this.page);
+
+    // Search for procedure.
+    const searchResultsTable = await this.searchCriteria(lab);
+
+    // Add addTotal rows.
+    const rows = await searchResultsTable.getRows();
+    for (let i=0; i < rows.length; i++) {
+      const cellValue = await searchResultsTable.getCellValue(1, 1);
+      const addIcon = ClrIconLink.findByName(
+          this.page,
+          { containsText: cellValue, iconShape: 'plus-circle' },
+          searchResultsTable
+      );
+      await addIcon.click();
+      if (i == addTotal) {
+        break;
+      }
+    }
+
+    await this.finishReviewAndSaveCriteria();
   }
 
   async includeEthnicity(ethnicities: Ethnicity[]): Promise<string> {
@@ -284,7 +375,9 @@ export default class CohortParticipantsGroup {
       await link.click();
       await this.getCriteriaAddedSuccessMessage();
     }
-    return waitForNumericalString(this.page, this.numberOfParticipantsXpath());
+    const count = waitForNumericalString(this.page, this.numberOfParticipantsXpath());
+    await this.finishReviewAndSaveCriteria();
+    return count;
   }
 
   async includeGenderIdentity(identities: string[]): Promise<string> {
@@ -298,7 +391,9 @@ export default class CohortParticipantsGroup {
       await link.click();
       await this.getCriteriaAddedSuccessMessage();
     }
-    return waitForNumericalString(this.page, this.numberOfParticipantsXpath());
+    const count = waitForNumericalString(this.page, this.numberOfParticipantsXpath());
+    await this.finishReviewAndSaveCriteria();
+    return count;
   }
 
   // Demographics -> Race
@@ -313,7 +408,9 @@ export default class CohortParticipantsGroup {
       await link.click();
       await this.getCriteriaAddedSuccessMessage();
     }
-    return waitForNumericalString(this.page, this.numberOfParticipantsXpath());
+    const count = waitForNumericalString(this.page, this.numberOfParticipantsXpath());
+    await this.finishReviewAndSaveCriteria();
+    return count;
   }
 
   async includeSexAssignedAtBirth(selections: Sex[]) {
@@ -327,11 +424,16 @@ export default class CohortParticipantsGroup {
       await link.click();
       await this.getCriteriaAddedSuccessMessage();
     }
-    return waitForNumericalString(this.page, this.numberOfParticipantsXpath());
+    const count = waitForNumericalString(this.page, this.numberOfParticipantsXpath());
+    await this.finishReviewAndSaveCriteria();
+    return count;
   }
 
   async getGroupCount(): Promise<number> {
-    const count = await waitForNumericalString(this.page, this.getGroupCountXpath(), 120000);
+    const [count] = await Promise.all([
+      waitForNumericalString(this.page, this.getGroupCountXpath(), 120000),
+      waitWhileLoading(this.page, 120000)
+    ]);
     return numericalStringToNumber(count);
   }
 
@@ -342,7 +444,8 @@ export default class CohortParticipantsGroup {
    */
   async includeAge(minAge: number, maxAge: number): Promise<string> {
     await this.clickCriteriaMenuItems([MenuOption.Demographics, MenuOption.Age]);
-    const selector = `${this.containerXpath}//input[@type="number"]`;
+    await waitWhileLoading(this.page);
+    const selector = `${this.cohortSearchContainerXpath}//input[@type="number"]`;
     await this.page.waitForXPath(selector, { visible: true });
 
     const [lowerNumberInput, upperNumberInput] = await this.page.$x(selector);
@@ -355,15 +458,14 @@ export default class CohortParticipantsGroup {
 
     // Select "Age at Consent" radiobutton.
     const radio = RadioButton.findByName(this.page, {
-      name: 'ageType',
-      normalizeSpace: 'Age at Consent'
+      name: 'Age at Consent'
     });
     await radio.select();
 
     // Get count from slider badge
-    const count = await waitForNumericalString(this.page, `${this.containerXpath}//*[@id="age-count"]`);
+    const count = await waitForNumericalString(this.page, `${this.cohortSearchContainerXpath}//*[@id="age-count"]`);
 
-    // Click "ADD SELECTION" button bto add selected age range
+    // Click "ADD SELECTION" button to add selected age range
     await Button.findByName(this.page, { name: LinkText.AddSelection }).click();
     await this.finishReviewAndSaveCriteria();
     await waitWhileLoading(this.page);
@@ -392,6 +494,7 @@ export default class CohortParticipantsGroup {
   async clickCriteriaMenuItems(menuItemLinks: MenuOption[]): Promise<void> {
     const menu = await this.openAddCriteriaTieredMenu();
     await menu.select(menuItemLinks);
+    await waitWhileLoading(this.page);
   }
 
   async openAddCriteriaTieredMenu(): Promise<TieredMenu> {
@@ -430,7 +533,10 @@ export default class CohortParticipantsGroup {
   }
 
   numberOfParticipantsXpath(): string {
-    return this.containerXpath + '//*[./*[contains(text(), "Results")]]/div[contains(text(), "Number Participants:")]';
+    return (
+      this.cohortSearchContainerXpath +
+      '//*[./*[contains(text(), "Results")]]/div[contains(text(), "Number Participants:")]'
+    );
   }
 
   async clickTemporalSwitch(onoff: boolean): Promise<void> {
@@ -476,4 +582,50 @@ export default class CohortParticipantsGroup {
     await this.page.waitForTimeout(1000); // Short pause to wait for charts animation finish.
     return count;
   }
+
+  async searchCriteria(searchWord: string): Promise<Table> {
+    const resultsTable = new Table(this.page, `${this.criteriaSearchContainerXpath}//table[@class="p-datatable"]`);
+    await resultsTable.waitForVisible();
+    const searchFilterTextbox = Textbox.findByName(this.page, { containsText: 'by code or description' }, resultsTable);
+    await searchFilterTextbox.type(searchWord);
+    await searchFilterTextbox.pressReturn();
+    await waitWhileLoading(this.page);
+    return resultsTable;
+  }
+
+  async resultsTableSelectRow(
+      rowIndex = 1,
+      selectionColumnIndex = 1
+  ): Promise<{ name: string; code: string; vocabulary: string; rollUpCount: string }> {
+    const resultsTable = this.getSearchResultsTable();
+
+    // Name column #1
+    const nameCell = await resultsTable.getCell(rowIndex, 1);
+    const nameElem = (await nameCell.$x('.//div[@data-test-id="name-column-value"]'))[0];
+    const nameValue = await getPropValue<string>(nameElem, 'textContent');
+
+    // Code column #2
+    const codeCell = await resultsTable.getCell(rowIndex, 2);
+    const codeValue = await getPropValue<string>(codeCell, 'textContent');
+
+    // Vocabulary column #3
+    const vocabularyCell = await resultsTable.getCell(rowIndex, 3);
+    const vocabValue = await getPropValue<string>(vocabularyCell, 'textContent');
+
+    // Roll-up Count column #6
+    const rollUpCountCell = await resultsTable.getCell(rowIndex, 6);
+    const rollUpCountValue = await getPropValue<string>(rollUpCountCell, 'textContent');
+
+    const selectCheckCell = await resultsTable.getCell(rowIndex, selectionColumnIndex);
+    const elemt = (await selectCheckCell.$x('.//*[@shape="plus-circle"]'))[0];
+    await elemt.click();
+
+    return { name: nameValue, code: codeValue, vocabulary: vocabValue, rollUpCount: rollUpCountValue };
+  }
+
+  getSearchResultsTable(): Table {
+    return new Table(this.page,
+        `${this.criteriaSearchContainerXpath}//table[@data-test-id="list-search-results-table"]`);
+  }
+
 }

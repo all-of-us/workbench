@@ -4,10 +4,10 @@ import { LinkText } from 'app/text-labels';
 import { buildXPath } from 'app/xpath-builders';
 import { ElementType } from 'app/xpath-options';
 import { waitForNumericalString, waitWhileLoading } from 'utils/waits-utils';
-import BaseHelpSidebar from './base-help-sidebar';
+import BaseHelpSidebar, { Selectors } from './base-help-sidebar';
 import { logger } from 'libs/logger';
 import { FilterSign } from 'app/page/cohort-participants-group';
-import { getPropValue } from '../../utils/element-utils';
+import { getPropValue } from 'utils/element-utils';
 
 enum SectionSelectors {
   AttributesForm = '//*[@id="attributes-form"]',
@@ -34,7 +34,7 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
   }
 
   async getCriteriaCount(): Promise<number> {
-    const xpath = `${this.getXpath()}//*[@data-test-id="criteria-count"]`;
+    const xpath = `${Selectors.rootXpath}//*[@data-test-id="criteria-count"]`;
     const element = await this.page.waitForXPath(xpath, { visible: true });
     return getPropValue<number>(element, 'textContent');
   }
@@ -108,5 +108,20 @@ export default class ReviewCriteriaSidebar extends BaseHelpSidebar {
 
   async waitUntilSectionVisible(xpath: string): Promise<ElementHandle> {
     return this.page.waitForXPath(xpath, { visible: true });
+  }
+
+  async removeSelectedCriteria(criteriaName: string): Promise<void> {
+    const removeSelectedCriteriaIcon = buildXPath(
+      {
+        type: ElementType.Icon,
+        iconShape: 'times-circle',
+        containsText: criteriaName,
+        ancestorLevel: 2
+      },
+      this
+    );
+    const removeIcon = await this.page.waitForXPath(removeSelectedCriteriaIcon, { visible: true });
+    await removeIcon.click();
+    await this.page.waitForXPath(removeSelectedCriteriaIcon, { hidden: true });
   }
 }

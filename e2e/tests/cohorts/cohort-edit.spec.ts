@@ -2,8 +2,6 @@ import WorkspaceDataPage from 'app/page/workspace-data-page';
 import { findOrCreateWorkspace, signInWithAccessToken } from 'utils/test-utils';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import { makeRandomName, makeWorkspaceName } from 'utils/str-utils';
-import { PhysicalMeasurementsCriteria } from 'app/page/cohort-participants-group';
-import CohortActionsPage from 'app/page/cohort-actions-page';
 import { waitForText, waitWhileLoading } from 'utils/waits-utils';
 import CohortReviewModal from 'app/modal/cohort-review-modal';
 import { LinkText, MenuOption, ResourceCard } from 'app/text-labels';
@@ -49,39 +47,7 @@ describe('Editing Cohort tests', () => {
     expect(await resourceCard.findCard(cohortName)).toBeTruthy();
   });
 
-  test('Insert new group in cohort', async () => {
-    const cohortName = await setUpWorkspaceAndCohort().then((cohort: DataResourceCard) => cohort.clickResourceName());
-
-    const cohortBuildPage = new CohortBuildPage(page);
-    await cohortBuildPage.waitForLoad();
-    await cohortBuildPage.getTotalCount();
-
-    // Insert new group in Include Participants
-    const newGroup = cohortBuildPage.findIncludeParticipantsEmptyGroup();
-    await newGroup.includePhysicalMeasurement([PhysicalMeasurementsCriteria.Weight], { filterValue: 200 });
-
-    // Check Total Count and new Total Count is different
-    const newTotalCount = await cohortBuildPage.getTotalCount();
-    expect(newTotalCount).toBeGreaterThan(1);
-
-    await cohortBuildPage.saveChanges();
-
-    // Should land on Cohort Actions page
-    const cohortActionsPage = new CohortActionsPage(page);
-    await cohortActionsPage.waitForLoad();
-
-    await waitForText(page, 'Cohort Saved Successfully', { css: 'body h3' });
-    const cohortLink = await page.waitForXPath(`//a[normalize-space()="${cohortName}"]`, { visible: true });
-    expect(cohortLink).toBeTruthy();
-
-    const dataPage = new WorkspaceDataPage(page);
-    await dataPage.openCohortsSubtab();
-    await waitWhileLoading(page);
-
-    await dataPage.deleteResource(cohortName, ResourceCard.Cohort);
-  });
-
-  test('Create cohort Review Set', async () => {
+  test('Create cohort review set for 100 participants', async () => {
     const cohortName = await setUpWorkspaceAndCohort().then((cohort: DataResourceCard) => cohort.clickResourceName());
 
     const cohortBuildPage = new CohortBuildPage(page);
@@ -218,6 +184,7 @@ describe('Editing Cohort tests', () => {
     await dataPage.renameResource(duplicateCohortName, newCohortName, ResourceCard.Cohort);
     // Verify rename successful.
     expect(await DataResourceCard.findCard(page, newCohortName)).toBeTruthy();
+    expect(await DataResourceCard.findCard(page, cohortName)).toBeTruthy();
     return dataPage.findCohortCard(newCohortName);
   }
 

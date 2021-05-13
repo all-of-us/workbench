@@ -6,6 +6,7 @@ import AuthenticatedPage from './authenticated-page';
 import DatasetBuildPage from './dataset-build-page';
 import Link from 'app/element/link';
 import CohortBuildPage from './cohort-build-page';
+import WorkspaceDataPage from './workspace-data-page';
 
 const PageTitle = 'Cohort Actions';
 
@@ -46,14 +47,39 @@ export default class CohortActionsPage extends AuthenticatedPage {
     return Button.findByName(this.page, { name: LinkText.CreateDataset });
   }
 
-  async clickCohortName(cohortName: string): Promise<CohortBuildPage> {
-    const cohortLink = Link.findByName(this.page, { name: cohortName });
-    await cohortLink.clickAndWait();
+  getCohortLink(): Link {
+    const xpath =
+      '//*[starts-with(text(), "The cohort") and ' +
+      'substring(text(), string-length(text()) - string-length("has been saved.") +1)]/a';
+    return new Link(this.page, xpath);
+  }
 
+  async clickCohortName(): Promise<CohortBuildPage> {
+    await this.getCohortLink().clickAndWait();
     const cohortBuildPage = new CohortBuildPage(this.page);
     await cohortBuildPage.waitForLoad();
     await cohortBuildPage.getTotalCount();
     await waitWhileLoading(this.page);
     return cohortBuildPage;
+  }
+
+  // A helper function to avoid clutter tests.
+  async deleteCohort(): Promise<void> {
+    await this.waitForLoad();
+    const link = await this.getCohortLink();
+    const cohortName = await link.getProperty<string>('textContent');
+    await link.clickAndWait();
+
+    // Delete cohort in Cohort Build page.
+    const cohortBuildPage = new CohortBuildPage(page);
+    await cohortBuildPage.waitForLoad();
+    await cohortBuildPage.getTotalCount();
+
+    const modalText = await cohortBuildPage.deleteCohort();
+    // Verify Delete dialog content text
+    expect(modalText).toContain(`Are you sure you want to delete Cohort: ${cohortName}?`);
+
+    // Verify Cohort card is gone after delete.
+    expect(await new WorkspaceDataPage(page).findCohortCard(cohortName)).toBeFalsy();
   }
 }

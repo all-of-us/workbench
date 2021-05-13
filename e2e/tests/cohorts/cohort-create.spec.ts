@@ -8,8 +8,6 @@ import { LinkText, MenuOption, ResourceCard } from 'app/text-labels';
 import CohortBuildPage from 'app/page/cohort-build-page';
 import ClrIconLink from 'app/element/clr-icon-link';
 import ReviewCriteriaSidebar from 'app/component/review-criteria-sidebar';
-import { buildXPath } from 'app/xpath-builders';
-import { ElementType } from 'app/xpath-options';
 
 describe('Create Cohorts from Program Data criteria', () => {
   beforeEach(async () => {
@@ -40,10 +38,10 @@ describe('Create Cohorts from Program Data criteria', () => {
     // Include Participants Group 1.
     const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
     await group1.clickCriteriaMenuItems([MenuOption.PhysicalMeasurements]);
-    const addIcon = ClrIconLink.findByName(page, {
-      startsWith: PhysicalMeasurementsCriteria.WheelChairUser,
+    let addIcon = ClrIconLink.findByName(page, {
+      name: PhysicalMeasurementsCriteria.WheelChairUser,
       iconShape: 'plus-circle',
-      ancestorLevel: 1
+      ancestorLevel: 2
     });
     await addIcon.click();
     const message = await group1.getCriteriaAddedSuccessMessage();
@@ -53,16 +51,19 @@ describe('Create Cohorts from Program Data criteria', () => {
     const reviewCriteriaSidebar = new ReviewCriteriaSidebar(page);
     await reviewCriteriaSidebar.waitUntilVisible();
 
-    // Find the Remove Selected Criteria icon next to the added criteria in sidebar.
-    const removeSelectedCriteriaIcon = buildXPath(
-      {
-        type: ElementType.Icon,
-        iconShape: 'times-circle',
-        containsText: PhysicalMeasurementsCriteria.WheelChairUser
-      },
-      reviewCriteriaSidebar
-    );
-    expect(await page.waitForXPath(removeSelectedCriteriaIcon, { visible: true, timeout: 2000 })).toBeTruthy();
+    // Remove Selected Criteria in sidebar.
+    await reviewCriteriaSidebar.removeSelectedCriteria(PhysicalMeasurementsCriteria.WheelChairUser);
+
+    // Add a different criteria.
+    addIcon = ClrIconLink.findByName(page, {
+      name: PhysicalMeasurementsCriteria.PregnantEnrollment,
+      iconShape: 'plus-circle',
+      ancestorLevel: 2
+    });
+    await addIcon.click();
+    await group1.getCriteriaAddedSuccessMessage();
+
+    expect(Number(await reviewCriteriaSidebar.getCriteriaCount())).toEqual(1);
 
     // Click Back button to close sidebar.
     await reviewCriteriaSidebar.clickButton(LinkText.Back);
@@ -71,18 +72,19 @@ describe('Create Cohorts from Program Data criteria', () => {
     // Click Data tab, Warning (Discard Changes) modal should open. Finish discarding changes.
     await dataPage.openDataPage({ waitPageChange: false });
     const warning = await cohortBuildPage.discardChangesConfirmationDialog();
-    const warningText =
+    const expectedWarningText =
       'Your cohort has not been saved. If you’d like to save your cohort criteria,' +
       ' please click CANCEL and save your changes';
-    expect(warning).toContain(warningText);
+
+    const foundMatch = warning.some((item) => item.indexOf(expectedWarningText) !== -1);
+    expect(foundMatch).toBe(true);
 
     // Changes are discarded, back to the Data page.
     await dataPage.waitForLoad();
   });
 
-  // Add new cohort by including 4 categories: BMI; Weight; Height; Blood Pressure Hypotensive.
+  // Add new cohort includes 4 categories: BMI; Weight; Height; Blood Pressure Hypotensive.
   // There are more physical measurements categories but they are not tested here.
-
   test('Create cohort from physical measurement criteria', async () => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
@@ -96,12 +98,12 @@ describe('Create Cohorts from Program Data criteria', () => {
       filterValue: 30
     });
 
-    // Checking Group 1 count: should be numeric.
+    // Checking Group 1 count: should be numeric and greater than 1.
     const group1Count = await group1.getGroupCount();
     expect(Number.isNaN(group1Count)).toBe(false);
     expect(group1Count).toBeGreaterThan(1);
 
-    // Before add a second group, perform UI checks.
+    // Before add a second group, perform basic UI checks.
     // Copy button exists but is disabled
     expect(await cohortBuildPage.getCopyButton().isDisabled()).toBe(true);
     // Trash (Delete) button exists but is disabled
@@ -109,13 +111,13 @@ describe('Create Cohorts from Program Data criteria', () => {
     // Export button exists but is disabled
     expect(await cohortBuildPage.getExportButton().isDisabled()).toBe(true);
     // "Results by" REFRESH button is disabled
-    expect(await cohortBuildPage.findRefreshButton().isDisabled()).toBe(true);
+    expect(await cohortBuildPage.findRefreshButton().isCursorNotAllowed()).toBe(true);
     // Include Group 2 is visible and empty.
     const group2 = cohortBuildPage.findIncludeParticipantsGroup('Group 2');
-    expect(await group2.findGroupCriteriaList()).toBe(0);
+    expect((await group2.findGroupCriteriaList()).length).toBe(0);
     // Exclude Participants Group 3 is visible and empty.
     const excludeGroup = cohortBuildPage.findExcludeParticipantsGroup('Group 3');
-    expect(await excludeGroup.findGroupCriteriaList()).toBe(0);
+    expect((await excludeGroup.findGroupCriteriaList()).length).toBe(0);
 
     // Add Group 2: Physical Measurements Weight.
     await group2.includePhysicalMeasurement([PhysicalMeasurementsCriteria.Weight], {
@@ -154,10 +156,10 @@ describe('Create Cohorts from Program Data criteria', () => {
     expect(Number.isNaN(totalCount)).toBe(false);
 
     // Save new cohort.
-    const cohortName = await cohortBuildPage.createCohort();
+    await cohortBuildPage.createCohort();
 
     // Delete cohort in Cohort Build page.
-    await deleteCohort(cohortName);
+    await new CohortActionsPage(page).deleteCohort();
   });
 
   test('Create cohort from demographics criteria', async () => {
@@ -178,7 +180,7 @@ describe('Create Cohorts from Program Data criteria', () => {
     expect(group1Count).toEqual(totalCount);
 
     // Include Group 2: Demographics Deceased.
-    const group2 = cohortBuildPage.findExcludeParticipantsGroup('Group 2');
+    const group2 = cohortBuildPage.findIncludeParticipantsGroup('Group 2');
     await group2.includeDemographicsDeceased();
     const group2Count = await group2.getGroupCount();
     expect(Number.isNaN(group2Count)).toBe(false);
@@ -229,13 +231,13 @@ describe('Create Cohorts from Program Data criteria', () => {
     expect(await dataPage.findCohortCard(cohortName)).toBeFalsy();
   });
 
-  xtest('Create cohort from whole genome variant', async () => {
+  test('Create cohort from whole genome variant', async () => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     const dataPage = new WorkspaceDataPage(page);
     const cohortBuildPage = await dataPage.clickAddCohortsButton();
 
-    const group1 = cohortBuildPage.findIncludeParticipantsGroupByIndex(1);
+    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
     await group1.includeWholeGenomeVariant();
     const group1Count = await group1.getGroupCount();
     const totalCount = await cohortBuildPage.getTotalCount();
@@ -243,10 +245,10 @@ describe('Create Cohorts from Program Data criteria', () => {
     expect(Number.isNaN(group1Count)).toBe(false);
 
     // Save new cohort.
-    const cohortName = await cohortBuildPage.createCohort();
+    await cohortBuildPage.createCohort();
 
     // Delete cohort in Cohort Build page.
-    await deleteCohort(cohortName);
+    await new CohortActionsPage(page).deleteCohort();
   });
 
   // Include all visit types in a single Include Group.
@@ -256,7 +258,7 @@ describe('Create Cohorts from Program Data criteria', () => {
     const dataPage = new WorkspaceDataPage(page);
     const cohortBuildPage = await dataPage.clickAddCohortsButton();
 
-    const group1 = cohortBuildPage.findIncludeParticipantsGroupByIndex(1);
+    const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
     await group1.includeVisits([
       Visits.AmbulanceVisit,
       Visits.AmbulatoryClinicCenter,
@@ -277,28 +279,9 @@ describe('Create Cohorts from Program Data criteria', () => {
     expect(Number.isNaN(group1Count)).toBe(false);
 
     // Save new cohort.
-    const cohortName = await cohortBuildPage.createCohort();
+    await cohortBuildPage.createCohort();
 
     // Delete cohort in Cohort Build page.
-    await deleteCohort(cohortName);
+    await new CohortActionsPage(page).deleteCohort();
   });
-
-  async function deleteCohort(cohortName: string): Promise<void> {
-    // Open Cohort build page in Cohort Build page.
-    const cohortActionsPage = new CohortActionsPage(page);
-    await cohortActionsPage.waitForLoad();
-    await cohortActionsPage.clickCohortName(cohortName);
-
-    // Delete cohort in Cohort Build page.
-    const cohortBuildPage = new CohortBuildPage(page);
-    await cohortBuildPage.waitForLoad();
-    await cohortBuildPage.getTotalCount();
-
-    const modalText = await cohortBuildPage.deleteCohort();
-    // Verify Delete dialog content text
-    expect(modalText).toContain(`Are you sure you want to delete Cohort: ${cohortName}?`);
-
-    // Verify Cohort card is gone after delete.
-    expect(await new WorkspaceDataPage(page).findCohortCard(cohortName)).toBeFalsy();
-  }
 });

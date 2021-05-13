@@ -195,7 +195,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
     const group = new CohortParticipantsGroup(this.page);
     group.setXpath(
       '//*[@id="list-include-groups"]' +
-        '/*[./*[not(@data-test-id="includes-search-group") and normalize-space()="Add Criteria"]]'
+        '/*[./*[not(@data-test-id="includes-search-group")][./button[normalize-space()="Add Criteria"]]]'
     );
     return group;
   }
@@ -209,7 +209,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
 
   async findGenderSelectMenu(): Promise<TieredMenu> {
     const xpath = '//*[./div[text()="Results by"]]//button[text()][./clr-icon][1]';
-    const button = await this.page.waitForXPath(xpath, { visible: true });
+    const button = new Button(this.page, xpath);
     await button.click();
     return new TieredMenu(this.page);
   }

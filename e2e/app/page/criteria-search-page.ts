@@ -21,7 +21,7 @@ export default class CriteriaSearchPage extends AuthenticatedPage {
   }
 
   async searchCriteria(searchWord: string): Promise<Table> {
-    const resultsTable = this.getConditionSearchResultsTable();
+    const resultsTable = new Table(this.page, '//table[@class="p-datatable"]');
     const searchFilterTextbox = Textbox.findByName(this.page, { containsText: 'by code or description' });
     await searchFilterTextbox.type(searchWord);
     await searchFilterTextbox.pressReturn();

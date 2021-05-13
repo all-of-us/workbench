@@ -19,7 +19,7 @@ export default class TieredMenu extends BaseMenu {
   }
 
   async getAllOptionTexts(): Promise<string[]> {
-    const selector = `${this.getXpath()}/ul/li/a[@role="menuitem"]/text()`;
+    const selector = `${this.getXpath()}/ul/li/a[@role="menuitem"]`;
     return this.getMenuItemTexts(selector);
   }
 }

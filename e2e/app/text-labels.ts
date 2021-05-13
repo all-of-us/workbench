@@ -17,10 +17,10 @@ export enum WorkspaceAccessLevel {
 export enum MenuOption {
   Age = 'Age',
   AgeAtCDR = 'Age at CDR',
-  AgeAtConsent = 'Age at Consent',
+  AgeAtConsent = 'Age  at Consent',
   Conditions = 'Conditions',
   CopyToAnotherWorkspace = 'Copy to another Workspace',
-  CurrentAge = 'Current Age,',
+  CurrentAge = 'Current Age',
   Deceased = 'Deceased',
   Delete = 'Delete',
   DeleteCriteria = 'Delete criteria',
@@ -35,7 +35,9 @@ export enum MenuOption {
   ExportToNotebook = 'Export to Notebook',
   Fitbit = 'Fitbit',
   GenderIdentity = 'Gender Identity',
+  LabsAndMeasurements = 'Labs and Measurements',
   PhysicalMeasurements = 'Physical Measurements',
+  Procedures = 'Procedures',
   Race = 'Race',
   Rename = 'Rename',
   RenameDataset = 'Rename Dataset',
@@ -46,6 +48,7 @@ export enum MenuOption {
   SexAtBirth = 'Sex at Birth',
   Share = 'Share',
   SuppressGroupFromTotalCount = 'Suppress group from total count',
+  SuppressCriteriaFromTotalCount = 'Suppress criteria from total count',
   Visits = 'Visits',
   WholeGenomeVariant = 'Whole Genome Variant'
 }
