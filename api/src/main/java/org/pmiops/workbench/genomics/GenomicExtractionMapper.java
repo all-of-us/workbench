@@ -5,7 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.pmiops.workbench.db.model.DbStorageEnums;
 import org.pmiops.workbench.db.model.DbWgsExtractCromwellSubmission;
-import org.pmiops.workbench.firecloud.model.FirecloudSubmissionStatus;
+import org.pmiops.workbench.firecloud.model.FirecloudWorkflowStatus;
 import org.pmiops.workbench.model.GenomicExtractionJob;
 import org.pmiops.workbench.model.TerraJobStatus;
 import org.pmiops.workbench.utils.mappers.CommonMappers;
@@ -26,13 +26,15 @@ public interface GenomicExtractionMapper {
   @Mapping(target = "submissionDate", source = "dbSubmission.terraSubmissionDate")
   GenomicExtractionJob toApi(DbWgsExtractCromwellSubmission dbSubmission);
 
-  default TerraJobStatus convertJobStatus(FirecloudSubmissionStatus status) {
-    if (status == FirecloudSubmissionStatus.DONE) {
+  default TerraJobStatus convertWorkflowStatus(FirecloudWorkflowStatus status) {
+    if (status == FirecloudWorkflowStatus.SUCCEEDED) {
       return TerraJobStatus.SUCCEEDED;
-    } else if (status == FirecloudSubmissionStatus.ABORTED
-        || status == FirecloudSubmissionStatus.ABORTING) {
+    } else if (status == FirecloudWorkflowStatus.ABORTED
+        || status == FirecloudWorkflowStatus.ABORTING
+        || status == FirecloudWorkflowStatus.FAILED) {
       return TerraJobStatus.FAILED;
     } else {
+      // Launching, Queued, Running, Submitted
       return TerraJobStatus.RUNNING;
     }
   }
