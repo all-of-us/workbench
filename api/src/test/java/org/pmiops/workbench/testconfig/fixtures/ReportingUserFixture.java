@@ -121,7 +121,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     assertTimeApprox(
         user.getComplianceTrainingExpirationTime(), USER__COMPLIANCE_TRAINING_EXPIRATION_TIME);
     assertThat(user.getContactEmail()).isEqualTo(USER__CONTACT_EMAIL);
-    assertTimeApprox(user.getCreationTime(), USER__CREATION_TIME);
     assertThat(user.getCurrentPosition()).isEqualTo(USER__CURRENT_POSITION);
     assertThat(user.getAccessTierShortNames()).isEqualTo(USER__ACCESS_TIER_SHORT_NAMES);
     assertTimeApprox(user.getDataUseAgreementBypassTime(), USER__DATA_USE_AGREEMENT_BYPASS_TIME);
@@ -141,7 +140,6 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     assertThat(user.getFreeTierCreditsLimitDollarsOverride())
         .isEqualTo(USER__FREE_TIER_CREDITS_LIMIT_DOLLARS_OVERRIDE);
     assertThat(user.getGivenName()).isEqualTo(USER__GIVEN_NAME);
-    assertTimeApprox(user.getLastModifiedTime(), USER__LAST_MODIFIED_TIME);
     assertThat(user.getProfessionalUrl()).isEqualTo(USER__PROFESSIONAL_URL);
     assertTimeApprox(user.getTwoFactorAuthBypassTime(), USER__TWO_FACTOR_AUTH_BYPASS_TIME);
     assertTimeApprox(user.getTwoFactorAuthCompletionTime(), USER__TWO_FACTOR_AUTH_COMPLETION_TIME);
@@ -159,6 +157,12 @@ public class ReportingUserFixture implements ReportingTestFixture<DbUser, Report
     assertThat(user.getGenderIdentities()).isEqualTo(USER__GENDER_IDENTITY.toString());
     assertThat(user.getIdentifiesAsLgbtq()).isEqualTo(USER__IDENTIFIES_AS_LGBTQ);
     assertThat(user.getLgbtqIdentity()).isEqualTo(USER__LGBTQ_IDENTITY);
+
+    // Simple null check only. These are autopopulated by Hibernate, so if the entity is saved to
+    // the database, these values will not match what was specified in this text fixture. We
+    // populate values when creating the DTO to support tests that may not persist to the DB layer.
+    assertThat(user.getCreationTime()).isNotNull();
+    assertThat(user.getLastModifiedTime()).isNotNull();
   }
 
   @Override
