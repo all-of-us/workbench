@@ -90,16 +90,9 @@ public class CommandLineToolConfig {
    * @param args command line args to pass to the program
    */
   public static void runCommandLine(Class<?> cliConfig, String[] args) {
-    System.out.println("~~~~~~~~1111111");
-    ConfigurableApplicationContext context = new SpringApplicationBuilder(CommandLineToolConfig.class, cliConfig)
+    new SpringApplicationBuilder(CommandLineToolConfig.class, cliConfig)
         .web(WebApplicationType.NONE)
         .registerShutdownHook(false)
         .run(args);
-    System.out.println("~~~~~~~~2222222");
-    System.out.println(context.isActive());
-    System.out.println("~~~~~");
-    context.stop();
-    System.out.println("~~~~~~~~33333333");
-    context.close();
   }
 }

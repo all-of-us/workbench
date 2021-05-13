@@ -34,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Configuration
 @Import(CdrConfigVOMapperImpl.class)
-@SpringBootApplication
 public class UpdateCdrConfig {
 
   private static final Logger logger = Logger.getLogger(UpdateCdrConfig.class.getName());

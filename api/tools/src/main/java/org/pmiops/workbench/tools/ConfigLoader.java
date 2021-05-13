@@ -27,7 +27,6 @@ import org.springframework.context.annotation.Configuration;
  * <p>Run by api/project.rb update-cloud-config and (locally) docker-compose run api-scripts
  * ./gradlew loadConfig, which is automatically invoked during api/project.rb dev-up.
  */
-@SpringBootApplication
 public class ConfigLoader {
 
   private static final Logger log = Logger.getLogger(ConfigLoader.class.getName());
@@ -101,6 +100,5 @@ public class ConfigLoader {
 
   public static void main(String[] args) throws Exception {
     CommandLineToolConfig.runCommandLine(ConfigLoader.class, args);
-    System.out.println("~~~~~~~~~~~~~!!!!!");
   }
 }
