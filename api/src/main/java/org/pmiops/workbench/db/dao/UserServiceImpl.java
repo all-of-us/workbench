@@ -982,15 +982,25 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
   @Override
   public DbUser confirmProfile() {
     final DbUser dbUser = userProvider.get();
-    dbUser.setProfileLastConfirmedTime(new Timestamp(clock.instant().toEpochMilli()));
-    return userDao.save(dbUser);
+    return updateUserWithRetries(
+        user -> {
+          user.setProfileLastConfirmedTime(new Timestamp(clock.instant().toEpochMilli()));
+          return user;
+        },
+        dbUser,
+        Agent.asUser(dbUser));
   }
 
   /** Confirm that a user has either reported any AoU-related publications, or has none. */
   @Override
   public DbUser confirmPublications() {
     final DbUser dbUser = userProvider.get();
-    dbUser.setPublicationsLastConfirmedTime(new Timestamp(clock.instant().toEpochMilli()));
-    return userDao.save(dbUser);
+    return updateUserWithRetries(
+        user -> {
+          user.setPublicationsLastConfirmedTime(new Timestamp(clock.instant().toEpochMilli()));
+          return user;
+        },
+        dbUser,
+        Agent.asUser(dbUser));
   }
 }
