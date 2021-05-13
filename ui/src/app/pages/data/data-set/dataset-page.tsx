@@ -10,7 +10,7 @@ import {FlexColumn, FlexRow} from 'app/components/flex';
 import {ClrIcon} from 'app/components/icons';
 import {CheckBox} from 'app/components/inputs';
 import {TooltipTrigger} from 'app/components/popups';
-import {Spinner} from 'app/components/spinners';
+import {Spinner, SpinnerOverlay} from 'app/components/spinners';
 import {CircleWithText} from 'app/icons/circleWithText';
 import {NewDataSetModal} from 'app/pages/data/data-set/new-dataset-modal';
 import {cohortsApi, conceptSetsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
@@ -28,7 +28,11 @@ import {
 } from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {getCdrVersion} from 'app/utils/cdr-versions';
-import {currentWorkspaceStore, navigateAndPreventDefaultIfNoKeysPressed} from 'app/utils/navigation';
+import {
+  currentWorkspaceStore,
+  encodeURIComponentStrict,
+  navigateAndPreventDefaultIfNoKeysPressed, navigateByUrl
+} from 'app/utils/navigation';
 import {apiCallWithGatewayTimeoutRetries} from 'app/utils/retry';
 import {serverConfigStore} from 'app/utils/stores';
 import {WorkspaceData} from 'app/utils/workspace-data';
@@ -42,7 +46,7 @@ import {
   DataDictionaryEntry,
   DataSet,
   DataSetPreviewRequest,
-  DataSetPreviewValueList,
+  DataSetPreviewValueList, DataSetRequest,
   Domain,
   DomainValue,
   DomainValuePair,
@@ -51,6 +55,8 @@ import {
   Profile,
   ValueSet,
 } from 'generated/fetch';
+import {withErrorModal, WithErrorModalProps} from '../../../components/with-error-modal';
+import {appendNotebookFileSuffix} from '../../analysis/util';
 
 export const styles = reactStyles({
   dataDictionaryHeader: {
@@ -421,7 +427,7 @@ interface DataSetPreviewInfo {
   values?: Array<DataSetPreviewValueList>;
 }
 
-interface Props {
+interface Props extends WithErrorModalProps {
   workspace: WorkspaceData;
   cdrVersionTiersResponse: CdrVersionTiersResponse;
   urlParams: any;
@@ -453,9 +459,10 @@ interface State {
   selectedDomainValuePairs: DomainValuePair[];
   selectedPrepackagedConceptSets: Set<PrepackagedConceptSet>;
   selectedPreviewDomain: Domain;
+  savingDataset: boolean;
 }
 
-const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlParams(), withCdrVersions())(
+const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlParams(), withCdrVersions(), withErrorModal())(
   class extends React.Component<Props, State> {
     dt: any;
     constructor(props) {
@@ -478,11 +485,12 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         selectedPreviewDomain: Domain.CONDITION,
         selectedPrepackagedConceptSets: new Set(),
         selectedDomainValuePairs: [],
+        savingDataset: false
       };
     }
 
-    get editing() {
-      return this.props.urlParams.dataSetId !== undefined;
+    get isCreatingNewDataset() {
+      return this.props.urlParams.dataSetId === undefined;
     }
 
     async componentDidMount() {
@@ -505,23 +513,27 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         };
 
       }
-      if (!this.editing) {
+      if (this.isCreatingNewDataset) {
         return;
       }
 
-      const [, dataSet] = await Promise.all([
+      const [, dataset] = await Promise.all([
         resourcesPromise,
         dataSetApi().getDataSet(namespace, id, this.props.urlParams.dataSetId)
       ]);
 
-      const selectedPrepackagedConceptSets = this.apiEnumToPrePackageConceptSets(dataSet.prePackagedConceptSet);
+      this.loadDataset(dataset);
+    }
+
+    loadDataset(dataset) {
+      const selectedPrepackagedConceptSets = this.apiEnumToPrePackageConceptSets(dataset.prePackagedConceptSet);
       this.setState({
-        dataSet,
-        includesAllParticipants: dataSet.includesAllParticipants,
-        selectedConceptSetIds: dataSet.conceptSets.map(cs => cs.id),
-        selectedCohortIds: dataSet.cohorts.map(c => c.id),
-        selectedDomainValuePairs: dataSet.domainValuePairs,
-        selectedDomains: this.getDomainsFromDataSet(dataSet),
+        dataSet: dataset,
+        includesAllParticipants: dataset.includesAllParticipants,
+        selectedConceptSetIds: dataset.conceptSets.map(cs => cs.id),
+        selectedCohortIds: dataset.cohorts.map(c => c.id),
+        selectedDomainValuePairs: dataset.domainValuePairs,
+        selectedDomains: this.getDomainsFromDataSet(dataset),
         selectedPrepackagedConceptSets,
       });
     }
@@ -598,7 +610,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         // existing dataset which already covers the domain. This avoids having
         // us overwrite the selected pairs on initial load.
         let morePairs = [];
-        if (!this.editing || !this.getDomainsFromDataSet(dataSet).has(domain)) {
+        if (this.isCreatingNewDataset || !this.getDomainsFromDataSet(dataSet).has(domain)) {
           morePairs = values.items.map(v => ({domain, value: v.value}));
         }
 
@@ -932,6 +944,70 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       this.setState(state => ({previewList: state.previewList.set(domain, newPreviewInformation)}));
     }
 
+    async onCreate() {
+
+    }
+
+    async onSave() {
+      // either open the create modal
+      // or just save it right now
+      if (this.isCreatingNewDataset) {
+        // open create modal
+      } else {
+        this.saveDataset();
+      }
+    }
+
+    async createDataset() {
+      const {namespace, id} = this.props.workspace;
+
+      try {
+          await dataSetApi().createDataSet(namespace, id, this.createDatasetRequest());
+      } catch (e) {
+        // TODO eric: handle name conflict error
+        // TODO eric: handle generic error
+        // console.error(e);
+        // if (e.status === 409) {
+        //   this.setState({conflictDataSetName: true, loading: false});
+        // } else {
+        //   this.setState({saveError: true, loading: false});
+        // }
+      }
+    }
+
+    async saveDataset() {
+      const {namespace, id} = this.props.workspace;
+
+      this.setState({savingDataset: true});
+      dataSetApi().updateDataSet(namespace, id, this.state.dataSet.id, this.createDatasetRequest())
+        .then(dataset => {
+          this.loadDataset(dataset);
+          this.setState({dataSetTouched: false});
+        })
+        .catch(e => {
+          console.error(e);
+          this.props.showErrorModal('Save Dataset Error', 'Please refresh and try again');
+        })
+        .finally(() => this.setState({savingDataset: false}));
+    }
+
+    createDatasetRequest() {
+      const request: DataSetRequest = {
+        name: name,
+        description: this.state.dataSet.description,
+        includesAllParticipants: this.state.includesAllParticipants,
+        conceptSetIds: this.state.selectedConceptSetIds,
+        cohortIds: this.state.selectedCohortIds,
+        domainValuePairs: this.state.selectedDomainValuePairs,
+        prePackagedConceptSet: this.getPrePackagedConceptSetApiEnum(),
+        etag: this.state.dataSet.etag
+      };
+
+      // TODO eric: verify that its OK to send over description and etag even for a create request
+
+      return request;
+    }
+
     openZendeskWidget() {
       const {profile} = this.props.profileState;
       openZendeskWidget(profile.givenName, profile.familyName, profile.username, profile.contactEmail);
@@ -1065,8 +1141,10 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
         selectedPrepackagedConceptSets
       } = this.state;
       return <React.Fragment>
+        {this.state.savingDataset && <SpinnerOverlay opacity={0.3}/>}
+
         <FadeBox style={{paddingTop: '1rem'}}>
-          <h2 style={{paddingTop: 0, marginTop: 0}}>Datasets{this.editing &&
+          <h2 style={{paddingTop: 0, marginTop: 0}}>Datasets{!this.isCreatingNewDataset &&
             dataSet !== undefined && ' - ' + dataSet.name}</h2>
           <div style={{color: colors.primary, fontSize: '14px'}}>Build a dataset by selecting the
             variables and values for one or more of your cohorts. Then export the completed dataset
@@ -1255,14 +1333,29 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
           </div>
         </FadeBox>
         <div style={styles.stickyFooter}>
+            <TooltipTrigger data-test-id='save-tooltip'
+                            content='Requires Owner or Writer permission' disabled={this.canWrite}>
+              {this.isCreatingNewDataset ?
+                <Button style={{marginBottom: '2rem', marginRight: '1rem'}} data-test-id='save-button'
+                        onClick ={() => this.onCreate()}
+                        disabled={this.disableSave() || !this.canWrite || !dataSetTouched}>
+                  Create Dataset
+                </Button> :
+                <Button style={{marginBottom: '2rem', marginRight: '1rem'}} data-test-id='save-button'
+                        onClick ={() => this.onSave()}
+                        disabled={this.state.savingDataset || this.disableSave() || !this.canWrite || !dataSetTouched}>
+                  Save
+                </Button>}
+            </TooltipTrigger>
+
           <TooltipTrigger data-test-id='save-tooltip'
-            content='Requires Owner or Writer permission' disabled={this.canWrite}>
-          <Button style={{marginBottom: '2rem'}} data-test-id='save-button'
-            onClick ={() => this.setState({openSaveModal: true})}
-            disabled={this.disableSave() || !this.canWrite}>
-              {this.editing ? !(dataSetTouched && this.canWrite) ? 'Analyze' :
+                          content='Requires Owner or Writer permission' disabled={this.canWrite}>
+            <Button style={{marginBottom: '2rem'}} data-test-id='save-button'
+                    onClick ={() => this.setState({openSaveModal: true})}
+                    disabled={this.disableSave() || !this.canWrite}>
+              {!this.isCreatingNewDataset ? !(dataSetTouched && this.canWrite) ? 'Analyze' :
                 'Update and Analyze' : 'Save and Analyze'}
-          </Button>
+            </Button>
           </TooltipTrigger>
         </div>
         {openSaveModal && <NewDataSetModal includesAllParticipants={includesAllParticipants}
