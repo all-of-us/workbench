@@ -49,6 +49,8 @@ import org.pmiops.workbench.model.AccessBypassRequest;
 import org.pmiops.workbench.model.Authority;
 import org.pmiops.workbench.model.Degree;
 import org.pmiops.workbench.model.EmailVerificationStatus;
+import org.pmiops.workbench.model.RenewableAccessModuleStatus;
+import org.pmiops.workbench.model.RenewableAccessModuleStatus.ModuleNameEnum;
 import org.pmiops.workbench.monitoring.GaugeDataCollector;
 import org.pmiops.workbench.monitoring.MeasurementBundle;
 import org.pmiops.workbench.monitoring.labels.MetricLabel;
@@ -211,14 +213,40 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     tiersForRemoval.forEach(tier -> accessTierService.removeUserFromTier(dbUser, tier));
   }
 
-  public boolean isCompleteAndNotExpired(Timestamp completionTime) {
-    Timestamp expirationTime =
-        new Timestamp(
-            clock.millis()
-                - TimeUnit.MILLISECONDS.convert(
-                    configProvider.get().accessRenewal.expiryDays, TimeUnit.DAYS));
+  public List<RenewableAccessModuleStatus> getRenewableAccessModuleStatus(DbUser dbUser) {
+    return ImmutableList.of(
+      new RenewableAccessModuleStatus()
+          .moduleName(ModuleNameEnum.COMPLIANCETRAINING)
+          .hasExpired(false),
+      new RenewableAccessModuleStatus()
+          .moduleName(ModuleNameEnum.DATAUSEAGREEMENT)
+          .expirationEpochMillis(getExpirationMsSinceEpoch(dbUser.getDataUseAgreementCompletionTime()))
+          .hasExpired(!isDataUseAgreementCompliant(dbUser)),
+      new RenewableAccessModuleStatus()
+          .moduleName(ModuleNameEnum.PROFILECONFIRMATION)
+          .hasExpired(false),
+      new RenewableAccessModuleStatus()
+          .moduleName(ModuleNameEnum.PUBLICATIONCONFIRMATION)
+          .hasExpired(false));
+  }
+
+  private Timestamp getExpiration(Timestamp completionTime) {
+    if (completionTime == null) { return null; }
+    Long expiryDays = configProvider.get().accessRenewal.expiryDays;
+    if (expiryDays == null) { return null; }
+    long expiryDaysInMs = TimeUnit.MILLISECONDS.convert(expiryDays, TimeUnit.DAYS);
+    return new Timestamp(completionTime.getTime() + expiryDaysInMs);
+  }
+
+  private Long getExpirationMsSinceEpoch(Timestamp completionTime) {
+    final Timestamp expiration = getExpiration(completionTime);
+    return expiration == null ? null : expiration.getTime();
+  }
+
+  private boolean isCompleteAndNotExpired(Timestamp completionTime) {
     if (configProvider.get().access.enableAccessRenewal) {
-      return completionTime != null && expirationTime.before(completionTime);
+      final Timestamp now = new Timestamp(clock.millis());
+      return completionTime != null && getExpiration(completionTime).after(now);
     }
     return completionTime != null;
   }

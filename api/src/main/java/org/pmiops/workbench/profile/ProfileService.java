@@ -126,23 +126,13 @@ public class ProfileService {
     final List<String> accessTierShortNames =
         accessTierService.getAccessTierShortNamesForUser(user);
 
+    final List<RenewableAccessModuleStatus> modulesStatus =
+      this.userService.getRenewableAccessModuleStatus(userLite);
+
     final ProfileRenewableAccessModules renewableAccessModules =
         new ProfileRenewableAccessModules()
-            .modules(
-                ImmutableList.of(
-                    new RenewableAccessModuleStatus()
-                        .moduleName(ModuleNameEnum.COMPLIANCETRAINING)
-                        .hasExpired(false),
-                    new RenewableAccessModuleStatus()
-                        .moduleName(ModuleNameEnum.DATAUSEAGREEMENT)
-                        .hasExpired(false),
-                    new RenewableAccessModuleStatus()
-                        .moduleName(ModuleNameEnum.PROFILECONFIRMATION)
-                        .hasExpired(false),
-                    new RenewableAccessModuleStatus()
-                        .moduleName(ModuleNameEnum.PUBLICATIONCONFIRMATION)
-                        .hasExpired(false)))
-            .anyModuleHasExpired(false);
+            .modules(modulesStatus)
+            .anyModuleHasExpired(modulesStatus.stream().anyMatch(x -> x.getHasExpired()));
 
     return profileMapper.toModel(
         user,
