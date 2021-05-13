@@ -7,7 +7,7 @@ import DatasetBuildPage from './dataset-build-page';
 import Link from 'app/element/link';
 import CohortBuildPage from './cohort-build-page';
 import WorkspaceDataPage from './workspace-data-page';
-import {getPropValue} from "../../utils/element-utils";
+import {getPropValue} from "utils/element-utils";
 
 const PageTitle = 'Cohort Actions';
 

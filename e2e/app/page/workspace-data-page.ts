@@ -98,6 +98,7 @@ export default class WorkspaceDataPage extends WorkspaceBase {
     const cohortBuildPage = await this.clickAddCohortsButton();
     const group1 = cohortBuildPage.findIncludeParticipantsGroup('Group 1');
     await group1.includeVisits([Visits.OutpatientVisit]);
+    await cohortBuildPage.getTotalCount();
     const name = cohortName === undefined ? makeRandomName() : cohortName;
     await cohortBuildPage.createCohort(name);
     await new CohortActionsPage(this.page).waitForLoad();
