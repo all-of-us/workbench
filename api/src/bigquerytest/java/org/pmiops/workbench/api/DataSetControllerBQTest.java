@@ -38,7 +38,6 @@ import org.pmiops.workbench.cohorts.CohortCloningService;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
 import org.pmiops.workbench.conceptset.mapper.ConceptSetMapperImpl;
-import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DatasetConfig;
@@ -100,7 +99,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
 
   @Autowired private AccessTierDao accessTierDao;
   @Autowired private BigQueryService bigQueryService;
-  @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   @Autowired private CdrVersionDao cdrVersionDao;
   @Autowired private CdrVersionService cdrVersionService;
   @Autowired private CohortDao cohortDao;
@@ -146,7 +144,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
   @TestConfiguration
   @Import({
     BigQueryTestService.class,
-    CdrBigQuerySchemaConfigService.class,
     CdrVersionService.class,
     CohortService.class,
     ConceptSetService.class,
@@ -216,7 +213,6 @@ public class DataSetControllerBQTest extends BigQueryBaseTest {
     DataSetServiceImpl dataSetServiceImpl =
         new DataSetServiceImpl(
             bigQueryService,
-            cdrBigQuerySchemaConfigService,
             cohortDao,
             conceptBigQueryService,
             conceptSetDao,
