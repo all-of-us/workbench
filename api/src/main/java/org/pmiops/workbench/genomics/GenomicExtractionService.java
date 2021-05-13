@@ -105,6 +105,10 @@ public class GenomicExtractionService {
         .build();
   }
 
+  private boolean isTerminal(TerraJobStatus status) {
+    return !(status == TerraJobStatus.RUNNING || status == TerraJobStatus.ABORTING);
+  }
+
   public List<GenomicExtractionJob> getGenomicExtractionJobs(
       String workspaceNamespace, String workspaceId) {
     DbWorkspace dbWorkspace =
@@ -117,7 +121,7 @@ public class GenomicExtractionService {
               try {
                 // Don't bother checking if we already know the job is in a terminal status.
                 if (dbSubmission.getTerraStatusEnum() == null
-                    || dbSubmission.getTerraStatusEnum() == TerraJobStatus.RUNNING) {
+                    || !isTerminal(dbSubmission.getTerraStatusEnum())) {
                   WgsCohortExtractionConfig cohortExtractionConfig =
                       workbenchConfigProvider.get().wgsCohortExtraction;
                   FirecloudSubmission firecloudSubmission =
@@ -132,8 +136,10 @@ public class GenomicExtractionService {
                       genomicExtractionMapper.convertWorkflowStatus(
                           // Extraction submissions should only have one workflow.
                           firecloudSubmission.getWorkflows().get(0).getStatus());
-                  dbSubmission.setTerraStatusEnum(status);
-                  if (status != TerraJobStatus.RUNNING) {
+                  if (dbSubmission.getTerraStatusEnum() != TerraJobStatus.ABORTING || status == TerraJobStatus.ABORTED) {
+                    dbSubmission.setTerraStatusEnum(status);
+                  }
+                  if (isTerminal(status)) {
                     dbSubmission.setCompletionTime(
                         CommonMappers.timestamp(
                             firecloudSubmission.getWorkflows().get(0).getStatusLastChangedDate()));
@@ -303,5 +309,8 @@ public class GenomicExtractionService {
             cohortExtractionConfig.operationalTerraWorkspaceNamespace,
             cohortExtractionConfig.operationalTerraWorkspaceName,
             dbSubmission.get().getSubmissionId());
+
+    dbSubmission.get().setTerraStatusEnum(TerraJobStatus.ABORTING);
+    wgsExtractCromwellSubmissionDao.save(dbSubmission.get());
   }
 }

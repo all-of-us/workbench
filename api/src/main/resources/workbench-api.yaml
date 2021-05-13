@@ -8963,6 +8963,7 @@ definitions:
       - FAILED
       - SUCCEEDED
       - ABORTED
+      - ABORTING
   TierAccessStatus:
     type: string
     description: 'Whether a user currently has access to a tier'
