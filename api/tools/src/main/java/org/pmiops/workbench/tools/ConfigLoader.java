@@ -15,6 +15,7 @@ import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.ConfigDao;
 import org.pmiops.workbench.db.model.DbConfig;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -26,6 +27,7 @@ import org.springframework.context.annotation.Configuration;
  * <p>Run by api/project.rb update-cloud-config and (locally) docker-compose run api-scripts
  * ./gradlew loadConfig, which is automatically invoked during api/project.rb dev-up.
  */
+@SpringBootApplication
 public class ConfigLoader {
 
   private static final Logger log = Logger.getLogger(ConfigLoader.class.getName());

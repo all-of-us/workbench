@@ -91,9 +91,9 @@ public class CommandLineToolConfig {
    */
   public static void runCommandLine(Class<?> cliConfig, String[] args) {
     System.out.println("~~~~~~~~1111111");
-    ConfigurableApplicationContext context = new SpringApplicationBuilder(CommandLineToolConfig.class)
-        .child(cliConfig)
+    ConfigurableApplicationContext context = new SpringApplicationBuilder(CommandLineToolConfig.class, cliConfig)
         .web(WebApplicationType.NONE)
+        .registerShutdownHook(false)
         .run(args);
     System.out.println("~~~~~~~~2222222");
     System.out.println(context.isActive());
