@@ -518,7 +518,6 @@ public final class DbStorageEnums {
           ImmutableBiMap.<WorkspaceActiveStatus, Short>builder()
               .put(WorkspaceActiveStatus.ACTIVE, (short) 0)
               .put(WorkspaceActiveStatus.DELETED, (short) 1)
-              .put(WorkspaceActiveStatus.PENDING_DELETION_POST_1PPW_MIGRATION, (short) 2)
               .build();
 
   public static WorkspaceActiveStatus workspaceActiveStatusFromStorage(Short s) {
