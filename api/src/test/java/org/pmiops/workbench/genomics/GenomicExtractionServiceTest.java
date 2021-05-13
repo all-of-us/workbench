@@ -225,7 +225,10 @@ public class GenomicExtractionServiceTest {
         new FirecloudSubmission()
             .submissionId(dbWgsExtractCromwellSubmission.getSubmissionId())
             .status(FirecloudSubmissionStatus.DONE)
-            .addWorkflowsItem(new FirecloudWorkflow().statusLastChangedDate(completionTimestamp))
+            .addWorkflowsItem(
+                new FirecloudWorkflow()
+                    .statusLastChangedDate(completionTimestamp)
+                    .status(FirecloudWorkflowStatus.SUCCEEDED))
             .submissionDate(submissionDate));
 
     GenomicExtractionJob wgsCohortExtractionJob =
