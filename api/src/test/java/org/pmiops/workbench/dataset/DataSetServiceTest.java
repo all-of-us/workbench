@@ -1,4 +1,4 @@
-package org.pmiops.workbench.db.dao;
+package org.pmiops.workbench.dataset;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,9 +49,7 @@ import org.pmiops.workbench.cdr.model.DbDSLinking;
 import org.pmiops.workbench.cohortbuilder.CohortQueryBuilder;
 import org.pmiops.workbench.cohorts.CohortService;
 import org.pmiops.workbench.conceptset.ConceptSetService;
-import org.pmiops.workbench.config.CdrBigQuerySchemaConfigService;
 import org.pmiops.workbench.config.WorkbenchConfig;
-import org.pmiops.workbench.dataset.DataSetServiceImpl;
 import org.pmiops.workbench.dataset.DataSetServiceImpl.QueryAndParameters;
 import org.pmiops.workbench.dataset.mapper.DataSetMapper;
 import org.pmiops.workbench.dataset.mapper.DataSetMapperImpl;
@@ -105,7 +103,6 @@ public class DataSetServiceTest {
   private static final FakeClock CLOCK = new FakeClock(NOW, ZoneId.systemDefault());
 
   @Autowired private BigQueryService bigQueryService;
-  @Autowired private CdrBigQuerySchemaConfigService cdrBigQuerySchemaConfigService;
   @Autowired private CohortDao cohortDao;
   @Autowired private ConceptSetDao conceptSetDao;
   @Autowired private ConceptBigQueryService conceptBigQueryService;
@@ -124,7 +121,6 @@ public class DataSetServiceTest {
   @TestConfiguration
   @Import({DataSetMapperImpl.class})
   @MockBean({
-    CdrBigQuerySchemaConfigService.class,
     CommonMappers.class,
     CohortService.class,
     ConceptBigQueryService.class,
@@ -151,7 +147,6 @@ public class DataSetServiceTest {
     dataSetServiceImpl =
         new DataSetServiceImpl(
             bigQueryService,
-            cdrBigQuerySchemaConfigService,
             cohortDao,
             conceptBigQueryService,
             conceptSetDao,
