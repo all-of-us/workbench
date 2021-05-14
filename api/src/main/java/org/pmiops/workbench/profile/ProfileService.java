@@ -1,7 +1,6 @@
 package org.pmiops.workbench.profile;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.List;
@@ -42,7 +41,6 @@ import org.pmiops.workbench.model.InstitutionalRole;
 import org.pmiops.workbench.model.Profile;
 import org.pmiops.workbench.model.ProfileRenewableAccessModules;
 import org.pmiops.workbench.model.RenewableAccessModuleStatus;
-import org.pmiops.workbench.model.RenewableAccessModuleStatus.ModuleNameEnum;
 import org.pmiops.workbench.model.VerifiedInstitutionalAffiliation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -127,7 +125,7 @@ public class ProfileService {
         accessTierService.getAccessTierShortNamesForUser(user);
 
     final List<RenewableAccessModuleStatus> modulesStatus =
-      userService.getRenewableAccessModuleStatus(userLite);
+        userService.getRenewableAccessModuleStatus(userLite);
 
     final ProfileRenewableAccessModules renewableAccessModules =
         new ProfileRenewableAccessModules()
