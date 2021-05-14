@@ -55,7 +55,7 @@ describe('Editing and rename Concept Set', () => {
     const conceptSetActionsPage = new ConceptSetActionsPage(page);
     conceptSearchPage = await conceptSetActionsPage.openConceptSearch();
 
-    const procedures = await ConceptDomainCard.findDomainCard(page, Domain.Procedures);
+    const procedures = ConceptDomainCard.findDomainCard(page, Domain.Procedures);
     criteriaSearch = await procedures.clickSelectConceptButton();
 
     // Search in Procedures domain

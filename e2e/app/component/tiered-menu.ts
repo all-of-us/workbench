@@ -17,4 +17,9 @@ export default class TieredMenu extends BaseMenu {
       `[./*[@role="menuitem" and normalize-space()="${menuItemText}"]]`
     );
   }
+
+  async getAllOptionTexts(): Promise<string[]> {
+    const selector = `${this.getXpath()}/ul/li/a[@role="menuitem"]`;
+    return this.getMenuItemTexts(selector);
+  }
 }
