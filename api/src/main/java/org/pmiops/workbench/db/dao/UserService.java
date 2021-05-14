@@ -21,10 +21,6 @@ import org.springframework.data.domain.Sort;
 public interface UserService {
   DbUser updateUserWithRetries(Function<DbUser, DbUser> userModifier, DbUser dbUser, Agent agent);
 
-  // Timestamp getExpiration(Timestamp completionTime);
-  // Long getExpirationMsSinceEpoch(Timestamp completionTime);
-  // boolean isCompleteAndNotExpired(Timestamp completionTime);
-  // boolean isDataUseAgreementCompliant(DbUser user);
   List<RenewableAccessModuleStatus> getRenewableAccessModuleStatus(DbUser dbUser);
 
   DbUser createServiceAccountUser(String email);
