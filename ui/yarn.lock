@@ -72,7 +72,27 @@
     webpack-subresource-integrity "1.1.0-rc.6"
     worker-plugin "3.2.0"
 
-"@angular-devkit/core@8.3.29", "@angular-devkit/core@^8.3.29":
+"@angular-devkit/build-optimizer@0.803.29":
+  version "0.803.29"
+  resolved "https://registry.yarnpkg.com/@angular-devkit/build-optimizer/-/build-optimizer-0.803.29.tgz#91c033e6ab3313d338ec9c3d4c40d64ce1b324bc"
+  integrity sha512-E/MXtKc3oaP7UvQm0g4ayfH8ImEoQnRWseKD4jjYG6TbTIqfIyHCZRcKIr3svY28hzASbro5IZI6SugG+llvFw==
+  dependencies:
+    loader-utils "1.2.3"
+    source-map "0.7.3"
+    tslib "1.10.0"
+    typescript "3.5.3"
+    webpack-sources "1.4.3"
+
+"@angular-devkit/build-webpack@0.803.29":
+  version "0.803.29"
+  resolved "https://registry.yarnpkg.com/@angular-devkit/build-webpack/-/build-webpack-0.803.29.tgz#ceaee658f0b71a0fee4f10b574b49e192d333a7c"
+  integrity sha512-3dJ3iEGU6AFT8VFTe72T9uNLobfd18Sq5Hz22UCCYji9K3ZyVc/bn5uXVVX+/Yj91MFtXuhOjLj7Z+XDeNy+OQ==
+  dependencies:
+    "@angular-devkit/architect" "0.803.29"
+    "@angular-devkit/core" "8.3.29"
+    rxjs "6.4.0"
+
+"@angular-devkit/core@8.3.29":
   version "8.3.29"
   resolved "https://registry.yarnpkg.com/@angular-devkit/core/-/core-8.3.29.tgz#3477edd6458653f83e6d78684b100c1bef81382f"
   integrity sha512-4jdja9QPwR6XG14ZSunyyOWT3nE2WtZC5IMDIBZADxujXvhzOU0n4oWpy6/JVHLUAxYNNgzLz+/LQORRWndcPg==
@@ -82,6 +102,47 @@
     magic-string "0.25.3"
     rxjs "6.4.0"
     source-map "0.7.3"
+
+"@angular-devkit/schematics@8.3.29":
+  version "8.3.29"
+  resolved "https://registry.yarnpkg.com/@angular-devkit/schematics/-/schematics-8.3.29.tgz#b3ba658b90fb3226a80ff12977be7dd583e99c49"
+  integrity sha512-AFJ9EK0XbcNlO5Dm9vr0OlBo1Nw6AaFXPR+DmHGBdcDDHxqEmYYLWfT+JU/8U2YFIdgrtlwvdtf6UQ3V2jdz1g==
+  dependencies:
+    "@angular-devkit/core" "8.3.29"
+    rxjs "6.4.0"
+
+"@angular/animations@^8.2.14":
+  version "8.2.14"
+  resolved "https://registry.yarnpkg.com/@angular/animations/-/animations-8.2.14.tgz#76736b21e56165e6ca4925fb69605bdcc56aba7d"
+  integrity sha512-3Vc9TnNpKdtvKIXcWDFINSsnwgEMiDmLzjceWg1iYKwpeZGQahUXPoesLwQazBMmxJzQiA4HOMj0TTXKZ+Jzkg==
+  dependencies:
+    tslib "^1.9.0"
+
+"@angular/cli@^8.3.29":
+  version "8.3.29"
+  resolved "https://registry.yarnpkg.com/@angular/cli/-/cli-8.3.29.tgz#481eb04a8240932adfb19049a5fb524f85453037"
+  integrity sha512-pW+iU0eKHIae+A1b9W5g8DKefMQcehZ+drGKs4Hryh8G+XGFS00BIWkmh6c1mydWTEhdsFlhdjD/rXCem7MAQQ==
+  dependencies:
+    "@angular-devkit/architect" "0.803.29"
+    "@angular-devkit/core" "8.3.29"
+    "@angular-devkit/schematics" "8.3.29"
+    "@schematics/angular" "8.3.29"
+    "@schematics/update" "0.803.29"
+    "@yarnpkg/lockfile" "1.1.0"
+    ansi-colors "4.1.1"
+    debug "^4.1.1"
+    ini "1.3.5"
+    inquirer "6.5.1"
+    npm-package-arg "6.1.0"
+    npm-pick-manifest "3.0.2"
+    open "6.4.0"
+    pacote "9.5.5"
+    read-package-tree "5.3.1"
+    rimraf "3.0.0"
+    semver "6.3.0"
+    symbol-observable "1.2.0"
+    universal-analytics "^0.4.20"
+    uuid "^3.3.2"
 
 "@angular/common@^8.2.14":
   version "8.2.14"
@@ -105,6 +166,34 @@
     source-map "^0.6.1"
     tslib "^1.9.0"
     yargs "13.1.0"
+
+"@angular/compiler@^8.2.14":
+  version "8.2.14"
+  resolved "https://registry.yarnpkg.com/@angular/compiler/-/compiler-8.2.14.tgz#46db7a9d1c17f236126518ff26480c160d5a6183"
+  integrity sha512-ABZO4E7eeFA1QyJ2trDezxeQM5ZFa1dXw1Mpl/+1vuXDKNjJgNyWYwKp/NwRkLmrsuV0yv4UDCDe4kJOGbPKnw==
+  dependencies:
+    tslib "^1.9.0"
+
+"@angular/core@^8.2.14":
+  version "8.2.14"
+  resolved "https://registry.yarnpkg.com/@angular/core/-/core-8.2.14.tgz#35566f5b19480369229477e7e0e0fde740bd5204"
+  integrity sha512-zeePkigi+hPh3rN7yoNENG/YUBUsIvUXdxx+AZq+QPaFeKEA2FBSrKn36ojHFrdJUjKzl0lPMEiGC2b6a6bo6g==
+  dependencies:
+    tslib "^1.9.0"
+
+"@angular/forms@^8.2.14":
+  version "8.2.14"
+  resolved "https://registry.yarnpkg.com/@angular/forms/-/forms-8.2.14.tgz#7d357c346a3884881beb044c50ec4a09d3d7ee8e"
+  integrity sha512-zhyKL3CFIqcyHJ/TQF/h1OZztK611a6rxuPHCrt/5Sn1SuBTJJQ1pPTkOYIDy6IrCrtyANc8qB6P17Mao71DNQ==
+  dependencies:
+    tslib "^1.9.0"
+
+"@angular/platform-browser-dynamic@^8.2.14":
+  version "8.2.14"
+  resolved "https://registry.yarnpkg.com/@angular/platform-browser-dynamic/-/platform-browser-dynamic-8.2.14.tgz#4439a79fe10ec45170e6940a28835e9ff0918950"
+  integrity sha512-mO2JPR5kLU/A3AQngy9+R/Q5gaF9csMStBQjwsCRI0wNtlItOIGL6+wTYpiTuh/ux+WVN1F2sLcEYU4Zf1ud9A==
+  dependencies:
+    tslib "^1.9.0"
 
 "@angular/platform-browser@^8.2.14":
   version "8.2.14"
@@ -2157,6 +2246,31 @@ ajv-errors@^1.0.0:
 ajv-keywords@^3.1.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/ajv-keywords/-/ajv-keywords-3.2.0.tgz#e86b819c602cf8821ad637413698f1dec021847a"
+
+ajv-keywords@^3.4.1, ajv-keywords@^3.5.2:
+  version "3.5.2"
+  resolved "https://registry.yarnpkg.com/ajv-keywords/-/ajv-keywords-3.5.2.tgz#31f29da5ab6e00d1c2d329acf7b5929614d5014d"
+  integrity sha512-5p6WTN0DdTGVQk6VjcEju19IgaHudalcfabD7yhDGeA6bcQnmL+CpveLJq/3hvfwd1aof6L386Ougkx6RfyMIQ==
+
+ajv@6.12.3:
+  version "6.12.3"
+  resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.12.3.tgz#18c5af38a111ddeb4f2697bd78d68abc1cabd706"
+  integrity sha512-4K0cK3L1hsqk9xIb2z9vs/XU+PGJZ9PNpJRDS9YLzmNdX6jmVPfamLvTJr0aDAusnHyCHO6MjzlkAsgtqp9teA==
+  dependencies:
+    fast-deep-equal "^3.1.1"
+    fast-json-stable-stringify "^2.0.0"
+    json-schema-traverse "^0.4.1"
+    uri-js "^4.2.2"
+
+ajv@^6.1.0, ajv@^6.10.0, ajv@^6.10.2, ajv@^6.12.3, ajv@^6.12.4, ajv@^6.5.5:
+  version "6.12.6"
+  resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.12.6.tgz#baf5a62e802b07d977034586f8c3baf5adf26df4"
+  integrity sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==
+  dependencies:
+    fast-deep-equal "^3.1.1"
+    fast-json-stable-stringify "^2.0.0"
+    json-schema-traverse "^0.4.1"
+    uri-js "^4.2.2"
 
 amdefine@>=0.0.4:
   version "1.0.1"
@@ -5195,10 +5309,6 @@ extsprintf@1.3.0:
 extsprintf@^1.2.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/extsprintf/-/extsprintf-1.4.0.tgz#e2689f8f356fad62cca65a3a91c5df5f9551692f"
-
-fast-deep-equal@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-2.0.1.tgz#7b05218ddf9667bf7f370bf7fdb2cb15fdd0aa49"
 
 fast-deep-equal@^3.1.1:
   version "3.1.1"
