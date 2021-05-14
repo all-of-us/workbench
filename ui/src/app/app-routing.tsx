@@ -33,6 +33,8 @@ import {ParticipantsTable} from './pages/data/cohort-review/table-page';
 import {CohortActions} from './pages/data/cohort/cohort-actions';
 import {ConceptHomepage} from './pages/data/concept/concept-homepage';
 import {ConceptSetActions} from './pages/data/concept/concept-set-actions';
+import {DataPage} from './pages/data/data-page';
+import {DataSetPage} from './pages/data/data-set/dataset-page';
 import {Homepage} from './pages/homepage/homepage';
 import {SignIn} from './pages/login/sign-in';
 import {ProfilePage} from './pages/profile/profile-page';
@@ -43,8 +45,6 @@ import {WorkspaceList} from './pages/workspace/workspace-list';
 import {hasRegisteredAccess} from './utils/access-tiers';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
-import {DataPage} from "./pages/data/data-page";
-import {DataSetPage} from "./pages/data/data-set/dataset-page";
 
 
 const signInGuard: Guard = {

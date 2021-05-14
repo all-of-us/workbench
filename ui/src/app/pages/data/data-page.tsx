@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 
 import * as React from 'react';
 
@@ -10,7 +9,7 @@ import {renderResourceCard} from 'app/components/render-resource-card';
 import {SpinnerOverlay} from 'app/components/spinners';
 import {workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {ReactWrapperBase, withCurrentWorkspace} from 'app/utils';
+import {withCurrentWorkspace} from 'app/utils';
 import {AnalyticsTracker} from 'app/utils/analytics';
 import {navigate} from 'app/utils/navigation';
 import {WorkspaceData} from 'app/utils/workspace-data';

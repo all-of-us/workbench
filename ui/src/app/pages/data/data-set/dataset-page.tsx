@@ -1,4 +1,3 @@
-import {Component} from '@angular/core';
 import * as fp from 'lodash/fp';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
@@ -19,7 +18,6 @@ import {
   formatDomain,
   formatDomainString,
   reactStyles,
-  ReactWrapperBase,
   toggleIncludes,
   withCdrVersions,
   withCurrentWorkspace,
