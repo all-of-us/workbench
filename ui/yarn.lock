@@ -136,6 +136,7 @@
 "@angular/animations@^5.2.2":
   version "5.2.11"
   resolved "https://registry.yarnpkg.com/@angular/animations/-/animations-5.2.11.tgz#2bd3fe9e72916ca28de9bfaaddf0cb936565a0b8"
+  integrity sha512-J7wKHkFn3wV28/Y1Qm4yjGXVCwXzj1JR5DRjGDTFnxTRacUFx7Nj0ApGhN0b2+V0NOvgxQOvEW415Y22kGoblw==
   dependencies:
     tslib "^1.7.1"
 
@@ -194,12 +195,6 @@
 "@angular/forms@^5.2.2":
   version "5.2.11"
   resolved "https://registry.yarnpkg.com/@angular/forms/-/forms-5.2.11.tgz#712534fa317e194caa452d0c1a8efc72f5e040d6"
-  dependencies:
-    tslib "^1.7.1"
-
-"@angular/http@^5.2.2":
-  version "5.2.11"
-  resolved "https://registry.yarnpkg.com/@angular/http/-/http-5.2.11.tgz#2b649983c954ae754f6f39060e2d83da0bf352ad"
   dependencies:
     tslib "^1.7.1"
 
