@@ -22,8 +22,8 @@ import {SignedInComponent} from 'app/pages/signed-in/component';
 import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
 import {CdrVersionsApi, ProfileApi, StatusAlertApi} from 'generated/fetch';
 import {CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
+import {ProfileApiStub} from 'testing/stubs/profile-api-stub';
 import {StatusAlertApiStub} from 'testing/stubs/status-alert-api-stub';
-import {ProfileApiStub} from "../../../testing/stubs/profile-api-stub";
 
 describe('SignedInComponent', () => {
   let fixture: ComponentFixture<SignedInComponent>;
