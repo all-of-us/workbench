@@ -177,7 +177,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             .getMessage()
             .equals("Statement closed.")) {
           if (statementClosedCount < MAX_RETRIES) {
-            dbUser = userDao.findById(dbUser.getUserId()).orElse(null);
+            long userId = dbUser.getUserId();
+            dbUser =
+                userDao
+                    .findById(userId)
+                    .orElseThrow(
+                        () ->
+                            new BadRequestException(
+                                String.format("User with ID %s not found", userId)));
             statementClosedCount++;
           } else {
             throw new ConflictException(
