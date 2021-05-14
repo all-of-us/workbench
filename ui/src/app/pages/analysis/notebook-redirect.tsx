@@ -150,7 +150,7 @@ const progressCardStates: Map<ProgressCardState, Array<Progress>> = new Map([
   [ProgressCardState.UnknownInitializingResuming, [Progress.Unknown, Progress.Initializing, Progress.Resuming]],
   [ProgressCardState.Authenticating, [Progress.Authenticating]],
   [ProgressCardState.CopyingCreating, [Progress.Creating, Progress.Copying]],
-  [ProgressCardState.Redirecting, 
+  [ProgressCardState.Redirecting,
     [Progress.Redirecting] as Array<Progress> /* this version of Typescript can't infer - bug?  */]
 ]);
 
