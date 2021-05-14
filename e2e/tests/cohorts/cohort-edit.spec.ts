@@ -16,7 +16,7 @@ describe('Editing Cohort tests', () => {
   const workspace = makeWorkspaceName();
   let workspaceUrl;
 
-  test('Discard changes in cohort', async () => {
+  test('Discard changes', async () => {
     await findAWorkspace();
 
     const dataPage = new WorkspaceDataPage(page);

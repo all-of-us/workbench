@@ -17,7 +17,7 @@ describe('Build cohort page actions', () => {
 
   const workspace = makeWorkspaceName();
 
-  test('Refresh results by', async () => {
+  test('Refresh results', async () => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     const dataPage = new WorkspaceDataPage(page);
@@ -156,7 +156,7 @@ describe('Build cohort page actions', () => {
     await dataPage.deleteResource(cohortName, ResourceCard.Cohort);
   });
 
-  test('Delete, edit, rename, suppress criteria', async () => {
+  test('Delete, edit, rename and suppress criteria', async () => {
     await findOrCreateWorkspace(page, { workspaceName: workspace });
 
     const dataPage = new WorkspaceDataPage(page);

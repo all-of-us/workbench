@@ -11,7 +11,7 @@ import { getPropValue } from 'utils/element-utils';
 import AnnotationsSidebar, { ReviewStatus } from 'app/component/annotations-sidebar';
 import { AnnotationType } from 'app/modal/annotation-field-modal';
 import CohortActionsPage from 'app/page/cohort-actions-page';
-import {Surveys} from "app/page/cohort-participants-group";
+import { Surveys } from 'app/page/cohort-participants-group';
 
 jest.setTimeout(20 * 60 * 1000);
 
