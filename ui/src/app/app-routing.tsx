@@ -43,6 +43,8 @@ import {WorkspaceList} from './pages/workspace/workspace-list';
 import {hasRegisteredAccess} from './utils/access-tiers';
 import {AnalyticsTracker} from './utils/analytics';
 import {BreadcrumbType} from './utils/navigation';
+import {DataPage} from "./pages/data/data-page";
+import {DataSetPage} from "./pages/data/data-set/dataset-page";
 
 
 const signInGuard: Guard = {
@@ -281,6 +283,30 @@ export const AppRoutingComponent: React.FunctionComponent<RoutingProps> = ({onSi
             contentFullHeightOverride: true,
             pageKey: NOTEBOOK_PAGE_KEY,
             minimizeChrome: true
+          }}/>}
+        />
+        <AppRoute
+          path='/workspaces/:ns/:wsid/data'
+          component={() => <DataPage routeData={{
+            title: 'Data Page',
+            breadcrumb: BreadcrumbType.Workspace,
+            pageKey: 'data'
+          }}/>}
+        />
+        <AppRoute
+          path='/workspaces/:ns/:wsid/data/data-sets'
+          component={() => <DataSetPage routeData={{
+            title: 'Dataset Page',
+            breadcrumb: BreadcrumbType.Dataset,
+            pageKey: 'datasetBuilder'
+          }}/>}
+        />
+        <AppRoute
+          path='/workspaces/:ns/:wsid/data/data-sets/:dataSetId'
+          component={() => <DataSetPage routeData={{
+            title: 'Edit Dataset',
+            breadcrumb: BreadcrumbType.Dataset,
+            pageKey: 'datasetBuilder'
           }}/>}
         />
         <AppRoute

@@ -278,12 +278,3 @@ export const DataPage = withCurrentWorkspace()(class extends React.Component<
     </React.Fragment>;
   }
 });
-
-@Component({
-  template: '<div #root></div>'
-})
-export class DataPageComponent extends ReactWrapperBase {
-  constructor() {
-    super(DataPage, []);
-  }
-}

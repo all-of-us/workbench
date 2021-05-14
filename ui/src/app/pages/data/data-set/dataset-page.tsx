@@ -455,7 +455,7 @@ interface State {
   selectedPreviewDomain: Domain;
 }
 
-const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlParams(), withCdrVersions())(
+export const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlParams(), withCdrVersions())(
   class extends React.Component<Props, State> {
     dt: any;
     constructor(props) {
@@ -1281,16 +1281,3 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       </React.Fragment>;
     }
   });
-
-export {
-  DataSetPage
-};
-
-@Component({
-  template: '<div #root></div>'
-})
-export class DataSetPageComponent extends ReactWrapperBase {
-  constructor() {
-    super(DataSetPage, []);
-  }
-}
