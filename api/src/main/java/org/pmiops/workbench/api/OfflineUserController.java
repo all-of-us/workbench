@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -262,12 +263,9 @@ public class OfflineUserController implements OfflineUserApiDelegate {
     userService.getAllUsers().stream()
         .forEach(
             user ->
-                userService.updateUserWithRetries(
-                    (u) -> {
-                      return u;
-                    },
-                    user,
-                    Agent.asAdmin(user)));
+                // This will update the access tiers for a given user, based on compliance rules
+                // If a user is no longer compliant it will remove them from an access tier
+                userService.updateUserWithRetries(Function.identity(), user, Agent.asAdmin(user)));
     return ResponseEntity.noContent().build();
   }
 
