@@ -348,6 +348,7 @@ export default class CohortParticipantsGroup {
     return addedNames;
   }
 
+  // TODO Make add-modifiers a callback function.
   async includePhysicalMeasurement(
     criteriaList: PhysicalMeasurementsCriteria[],
     opts?: { filterSign?: FilterSign; filterValue?: number }
