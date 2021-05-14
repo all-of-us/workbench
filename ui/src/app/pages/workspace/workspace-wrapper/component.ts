@@ -25,7 +25,7 @@ import {ResourceType, UserRole, Workspace, WorkspaceAccessLevel} from 'generated
   templateUrl: './component.html',
 })
 export class WorkspaceWrapperComponent implements OnInit, OnDestroy {
-  @ViewChild(WorkspaceShareComponent, {static: false})
+  @ViewChild(WorkspaceShareComponent, {static: true})
   shareModal: WorkspaceShareComponent;
 
   workspace: Workspace;

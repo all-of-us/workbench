@@ -24,7 +24,7 @@ import {routeDataStore} from 'app/utils/stores';
   styleUrls: ['./component.css'],
 })
 export class RoutingSpinnerComponent implements OnInit {
-  @ViewChild('pageSpinner', {static: false}) pageSpinner: ElementRef;
+  @ViewChild('pageSpinner', {static: true}) pageSpinner: ElementRef;
   @Input('alwaysShow') alwaysShow = false;
 
   constructor(

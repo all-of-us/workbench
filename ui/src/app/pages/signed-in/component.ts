@@ -78,9 +78,9 @@ export class SignedInComponent implements OnInit, OnDestroy, AfterViewInit {
 
   footerTypeEnum = FooterTypeEnum;
 
-  @ViewChild('sidenavToggleElement', {static: false}) sidenavToggleElement: ElementRef;
+  @ViewChild('sidenavToggleElement', {static: true}) sidenavToggleElement: ElementRef;
 
-  @ViewChild('sidenav', {static: false}) sidenav: ElementRef;
+  @ViewChild('sidenav', {static: true}) sidenav: ElementRef;
 
   constructor(
     /* Ours */
