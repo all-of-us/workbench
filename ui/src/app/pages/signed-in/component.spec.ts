@@ -20,9 +20,10 @@ import {RoutingSpinnerComponent} from 'app/components/routing-spinner/component'
 import {TextModalComponent} from 'app/components/text-modal';
 import {SignedInComponent} from 'app/pages/signed-in/component';
 import {NavBarComponent} from 'app/pages/signed-in/nav-bar';
-import {CdrVersionsApi, StatusAlertApi} from 'generated/fetch';
+import {CdrVersionsApi, ProfileApi, StatusAlertApi} from 'generated/fetch';
 import {CdrVersionsApiStub} from 'testing/stubs/cdr-versions-api-stub';
 import {StatusAlertApiStub} from 'testing/stubs/status-alert-api-stub';
+import {ProfileApiStub} from "../../../testing/stubs/profile-api-stub";
 
 describe('SignedInComponent', () => {
   let fixture: ComponentFixture<SignedInComponent>;
@@ -52,6 +53,7 @@ describe('SignedInComponent', () => {
   }));
 
   beforeEach(() => {
+    registerApiClient(ProfileApi, new ProfileApiStub());
     registerApiClient(CdrVersionsApi, new CdrVersionsApiStub());
     registerApiClient(StatusAlertApi, new StatusAlertApiStub());
   });
