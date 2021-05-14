@@ -1,4 +1,4 @@
-import {Response, ResponseOptions} from '@angular/http';
+import {Response, ResponseOptions} from '@angular/common/http';
 import {Observable} from 'rxjs/Observable';
 
 export class NotebooksServiceStub {
