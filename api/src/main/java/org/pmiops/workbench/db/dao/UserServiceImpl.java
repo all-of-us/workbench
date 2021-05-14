@@ -149,8 +149,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     while (true) {
       dbUser = userModifier.apply(dbUser);
       updateUserAccessTiers(dbUser, agent);
-      Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-      dbUser.setLastModifiedTime(now);
       try {
         return userDao.save(dbUser);
       } catch (ObjectOptimisticLockingFailureException e) {
@@ -380,9 +378,6 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
       dbUser.setDegreesEnum(degrees);
     }
     dbUser.setDemographicSurvey(dbDemographicSurvey);
-    Timestamp now = new Timestamp(clock.instant().toEpochMilli());
-    dbUser.setCreationTime(now);
-    dbUser.setLastModifiedTime(now);
 
     // For existing user that do not have address
     if (dbAddress != null) {

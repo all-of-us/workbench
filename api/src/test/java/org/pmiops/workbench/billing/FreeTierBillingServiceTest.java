@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.mail.MessagingException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,6 +63,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DataJpaTest
 public class FreeTierBillingServiceTest {
 
+  private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
+  private static final FakeClock CLOCK = new FakeClock(START_INSTANT);
+
   private static final double DEFAULT_PERCENTAGE_TOLERANCE = 0.000001;
 
   @MockBean private UserServiceAuditor mockUserServiceAuditor;
@@ -81,16 +83,11 @@ public class FreeTierBillingServiceTest {
   private static final String SINGLE_WORKSPACE_TEST_USER = "test@test.com";
   private static final String SINGLE_WORKSPACE_TEST_PROJECT = "aou-test-123";
 
-  // An arbitrary timestamp to use as the anchor time for tests.
-  private static final Instant START_INSTANT = Instant.parse("2000-01-01T00:00:00.00Z");
-  private static final FakeClock CLOCK = new FakeClock(START_INSTANT);
-
   @TestConfiguration
   @Import({FreeTierBillingService.class})
   @MockBean({BigQueryService.class, MailService.class})
   static class Configuration {
     @Bean
-    @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public Clock clock() {
       return CLOCK;
     }
@@ -111,11 +108,6 @@ public class FreeTierBillingServiceTest {
 
     // by default we have 0 spend
     doReturn(mockBQTableSingleResult(0.0)).when(bigQueryService).executeQuery(any());
-  }
-
-  @After
-  public void resetClock() {
-    CLOCK.setInstant(START_INSTANT);
   }
 
   @Test
@@ -338,29 +330,16 @@ public class FreeTierBillingServiceTest {
   public void maybeSetDollarLimitOverride_true() {
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 100.0;
     final DbUser user = createUser(SINGLE_WORKSPACE_TEST_USER);
-    assertThat(user.getLastModifiedTime()).isNull();
-
-    // we update the user and should see this last modified time
-    final Instant time2 = START_INSTANT.plusSeconds(1000);
-    CLOCK.setInstant(time2);
 
     assertThat(freeTierBillingService.maybeSetDollarLimitOverride(user, 200.0)).isTrue();
     verify(mockUserServiceAuditor)
         .fireSetFreeTierDollarLimitOverride(user.getUserId(), null, 200.0);
     assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 200.0);
-    assertThat(userDao.findUserByUserId(user.getUserId()).getLastModifiedTime())
-        .isEqualTo(new Timestamp(time2.toEpochMilli()));
-
-    // we update the user again and should see this new last modified time
-    final Instant time3 = START_INSTANT.plusSeconds(2000);
-    CLOCK.setInstant(time3);
 
     assertThat(freeTierBillingService.maybeSetDollarLimitOverride(user, 100.0)).isTrue();
     verify(mockUserServiceAuditor)
         .fireSetFreeTierDollarLimitOverride(user.getUserId(), 200.0, 100.0);
     assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 100.0);
-    assertThat(userDao.findUserByUserId(user.getUserId()).getLastModifiedTime())
-        .isEqualTo(new Timestamp(time3.toEpochMilli()));
   }
 
   @Test
@@ -371,7 +350,6 @@ public class FreeTierBillingServiceTest {
     assertThat(freeTierBillingService.maybeSetDollarLimitOverride(user, 100.0)).isFalse();
     verify(mockUserServiceAuditor, never())
         .fireSetFreeTierDollarLimitOverride(anyLong(), anyDouble(), anyDouble());
-    assertThat(user.getLastModifiedTime()).isNull();
     assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 100.0);
 
     workbenchConfig.billing.defaultFreeCreditsDollarLimit = 200.0;
@@ -380,7 +358,6 @@ public class FreeTierBillingServiceTest {
     assertThat(freeTierBillingService.maybeSetDollarLimitOverride(user, 200.0)).isFalse();
     verify(mockUserServiceAuditor, never())
         .fireSetFreeTierDollarLimitOverride(anyLong(), anyDouble(), anyDouble());
-    assertThat(user.getLastModifiedTime()).isNull();
     assertWithinBillingTolerance(freeTierBillingService.getUserFreeTierDollarLimit(user), 200.0);
   }
 

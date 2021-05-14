@@ -3,7 +3,7 @@ import TieredMenu from 'app/component/tiered-menu';
 import Button from 'app/element/button';
 import ClrIconLink from 'app/element/clr-icon-link';
 import { ElementType } from 'app/xpath-options';
-import { makeRandomName } from 'utils/str-utils';
+import { makeRandomName, numericalStringToNumber } from 'utils/str-utils';
 import { waitForDocumentTitle, waitForNumericalString, waitForText, waitWhileLoading } from 'utils/waits-utils';
 import { buildXPath } from 'app/xpath-builders';
 import { LinkText, MenuOption } from 'app/text-labels';
@@ -13,6 +13,7 @@ import CohortParticipantsGroup from './cohort-participants-group';
 import CohortSaveAsModal from 'app/modal/cohort-save-as-modal';
 import { getPropValue } from 'utils/element-utils';
 import WarningDiscardChangesModal from 'app/modal/warning-discard-changes-modal';
+import WorkspaceDataPage from './workspace-data-page';
 
 const faker = require('faker/locale/en_US');
 const PageTitle = 'Build Cohort Criteria';
@@ -28,7 +29,11 @@ export default class CohortBuildPage extends AuthenticatedPage {
   }
 
   async isLoaded(): Promise<boolean> {
-    await Promise.all([waitForDocumentTitle(this.page, PageTitle), waitWhileLoading(this.page)]);
+    await Promise.all([
+      waitForDocumentTitle(this.page, PageTitle),
+      waitWhileLoading(this.page),
+      this.findIncludeParticipantsGroup('Group 1').getAddCriteriaButton().asElementHandle()
+    ]);
     return true;
   }
 
@@ -104,6 +109,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
     await modal.clickButton(LinkText.DeleteCohort, { waitForClose: true });
     await waitWhileLoading(this.page);
     console.log(`Delete Confirmation modal:\n${contentText}`);
+    await new WorkspaceDataPage(this.page).waitForLoad();
     return contentText;
   }
 
@@ -124,17 +130,15 @@ export default class CohortBuildPage extends AuthenticatedPage {
    * This function also can be used to wait until participants calculation has completed.
    * @return {string} Total Count.
    */
-  async getTotalCount(timeout = 60000): Promise<string> {
-    const barCssSelector = '.highcharts-container .highcharts-bar-series rect';
-    const [count] = await Promise.all([
-      waitForNumericalString(this.page, FieldSelector.TotalCount, timeout),
-      this.page.waitForFunction(
-        (css) => document.querySelectorAll(css),
-        { polling: 'mutation', timeout },
-        barCssSelector
-      )
-    ]);
-    return count;
+  async getTotalCount(timeout = 120000): Promise<number> {
+    const chartsCss = '.highcharts-container .highcharts-bar-series rect';
+    const count = await waitForNumericalString(this.page, FieldSelector.TotalCount, timeout);
+    await this.page.waitForFunction(
+      (css) => document.querySelectorAll(css),
+      { polling: 'mutation', timeout },
+      chartsCss
+    );
+    return numericalStringToNumber(count);
   }
 
   getSaveCohortButton(): Button {
@@ -175,7 +179,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
    */
   findIncludeParticipantsGroup(groupName: string): CohortParticipantsGroup {
     const group = new CohortParticipantsGroup(this.page);
-    group.setXpath(`//*[@id="list-include-groups"]/div[.//*[normalize-space()="${groupName}"]]`);
+    group.setXpath(`//*[@id="list-include-groups"]//div[./*[normalize-space()="${groupName}"]]`);
     return group;
   }
 
@@ -189,7 +193,7 @@ export default class CohortBuildPage extends AuthenticatedPage {
     const group = new CohortParticipantsGroup(this.page);
     group.setXpath(
       '//*[@id="list-include-groups"]' +
-        '/*[./*[not(@data-test-id="includes-search-group") and normalize-space()="Add Criteria"]]'
+        '/*[./*[not(@data-test-id="includes-search-group")][./button[normalize-space()="Add Criteria"]]]'
     );
     return group;
   }
@@ -199,5 +203,23 @@ export default class CohortBuildPage extends AuthenticatedPage {
     const group = new CohortParticipantsGroup(this.page);
     group.setXpath(`//*[@id="list-include-groups"]//div[./*[@data-test-id="item-list"]][${index}]`);
     return group;
+  }
+
+  async findGenderSelectMenu(): Promise<TieredMenu> {
+    const xpath = '//*[./div[text()="Results by"]]//button[text()][./clr-icon][1]';
+    const button = new Button(this.page, xpath);
+    await button.click();
+    return new TieredMenu(this.page);
+  }
+
+  async findAgeSelectMenu(): Promise<TieredMenu> {
+    const xpath = '//*[./div[text()="Results by"]]//button[text()][./clr-icon][2]';
+    const button = await this.page.waitForXPath(xpath, { visible: true });
+    await button.click();
+    return new TieredMenu(this.page);
+  }
+
+  findRefreshButton(): Button {
+    return new Button(this.page, '//*[./div[text()="Results by"]]//button[.="REFRESH"]');
   }
 }

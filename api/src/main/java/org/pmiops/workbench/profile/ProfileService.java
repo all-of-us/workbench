@@ -247,9 +247,6 @@ public class ProfileService {
       dbDemographicSurvey.setUser(user);
     }
     user.setDemographicSurvey(dbDemographicSurvey);
-
-    user.setLastModifiedTime(now);
-
     userService.updateUserWithConflictHandling(user);
 
     // FIXME: why not do a getOrCreateAffiliation() here and then update that object & save?

@@ -5,20 +5,27 @@ import { ElementType, XPathOptions } from 'app/xpath-options';
 import { getPropValue } from 'utils/element-utils';
 import BaseMenu from './base-menu';
 
-const defaultMenuXpath =
-  '//*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown ")]' +
-  '[.//*[contains(concat(" ", normalize-space(@class), " "), " p-input-overlay-visible ")]]';
+const defaultMenuXpath = '//*[contains(concat(" ", normalize-space(@class), " "), " p-dropdown ")]';
 
 export default class SelectMenu extends BaseMenu {
-  static findByName(page: Page, xOpt: XPathOptions = {}, container?: Container): SelectMenu {
-    xOpt.type = ElementType.Dropdown;
-    const menuXpath = buildXPath(xOpt, container);
+  static findByName(page: Page, xOpt?: XPathOptions, container?: Container): SelectMenu {
+    let menuXpath;
+    if (xOpt) {
+      xOpt.type = ElementType.Dropdown;
+      menuXpath = buildXPath(xOpt, container);
+    } else {
+      menuXpath = defaultMenuXpath;
+    }
     const selectMenu = new SelectMenu(page, menuXpath);
     return selectMenu;
   }
 
+  visibleXpath;
+
   constructor(page: Page, xpath: string = defaultMenuXpath) {
     super(page, xpath);
+    this.visibleXpath =
+      xpath + '[.//*[contains(concat(" ", normalize-space(@class), " "), " p-input-overlay-visible ")]]';
   }
 
   /**
@@ -69,7 +76,7 @@ export default class SelectMenu extends BaseMenu {
   }
 
   private async toggle(): Promise<void> {
-    const selector = this.xpath + '/*[@class="p-dropdown-trigger"]';
+    const selector = this.xpath + '/*[@class="p-dropdown-trigger" and @role="button"]';
     const dropdownTrigger = await this.page.waitForXPath(selector, { visible: true });
     await dropdownTrigger.hover();
     await dropdownTrigger.click();
@@ -78,5 +85,23 @@ export default class SelectMenu extends BaseMenu {
 
   getMenuItemXpath(menuItemText: string): string {
     return `//*[@role="option" and normalize-space()="${menuItemText}"]`;
+  }
+
+  async waitUntilVisible(): Promise<void> {
+    await super.waitUntilVisible();
+    await this.page.waitForXPath(this.visibleXpath, { visible: true });
+  }
+
+  async waitUntilClose(timeout = 60000): Promise<void> {
+    await this.page.waitForXPath(this.visibleXpath, { hidden: true, timeout });
+  }
+
+  protected async isOpen(): Promise<boolean> {
+    try {
+      await this.page.waitForXPath(this.visibleXpath, { visible: true, timeout: 2000 });
+      return true;
+    } catch (err) {
+      return false;
+    }
   }
 }

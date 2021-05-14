@@ -231,19 +231,6 @@ public class WorkspaceServiceTest {
   }
 
   @Test
-  public void getWorkspaces_skipPending() {
-    int currentWorkspacesSize = workspaceService.getWorkspaces().size();
-
-    addMockedWorkspace(
-        workspaceIdIncrementer.getAndIncrement(),
-        "inactive",
-        DEFAULT_WORKSPACE_NAMESPACE,
-        WorkspaceAccessLevel.OWNER,
-        WorkspaceActiveStatus.PENDING_DELETION_POST_1PPW_MIGRATION);
-    assertThat(workspaceService.getWorkspaces().size()).isEqualTo(currentWorkspacesSize);
-  }
-
-  @Test
   public void getWorkspaces_skipDeleted() {
     int currentWorkspacesSize = workspaceService.getWorkspaces().size();
 

@@ -68,11 +68,11 @@ describe('OldCdrVersion Modal restrictions', () => {
     expect(await duplicateButton.isCursorNotAllowed()).toBe(true);
 
     const modal = new OldCdrVersionModal(page);
-    const cancelButton = await modal.getCancelButton();
+    const cancelButton = modal.getCancelButton();
     await cancelButton.click();
 
     // the CDR version is forcibly reverted back to the default
-    const cdrVersionSelect = await workspaceEditPage.getCdrVersionSelect();
+    const cdrVersionSelect = workspaceEditPage.getCdrVersionSelect();
     expect(await cdrVersionSelect.getSelectedValue()).toBe(config.defaultCdrVersionName);
   });
 });

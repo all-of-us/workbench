@@ -58,8 +58,8 @@ export default class ConceptSetSaveModal extends Modal {
     } else {
       let selectedValue: string;
       if (existingConceptSetName) {
-        const existingConceptSetSelect = await new Select(this.page, '//*[@data-test-id="existing-set-select"]');
-        selectedValue = await existingConceptSetSelect.selectOption(existingConceptSetName)
+        const existingConceptSetSelect = new Select(this.page, '//*[@data-test-id="existing-set-select"]');
+        selectedValue = await existingConceptSetSelect.selectOption(existingConceptSetName);
       } else {
         [selectedValue] = await this.page.select('[data-test-id="add-to-existing"] select', '0');
       }
