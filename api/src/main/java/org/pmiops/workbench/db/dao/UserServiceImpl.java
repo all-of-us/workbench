@@ -231,13 +231,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
     }
 
     public Optional<Timestamp> getExpiration() {
-      if (isBypassed()) {
-        return Optional.empty();
-      }
-      if (!completion.isPresent()) {
-        return Optional.empty();
-      }
-      if (!configProvider.get().access.enableAccessRenewal) {
+      if (isBypassed() || !configProvider.get().access.enableAccessRenewal) {
         return Optional.empty();
       }
       Long expiryDays = configProvider.get().accessRenewal.expiryDays;
@@ -245,23 +239,19 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         throw new RuntimeException("config value accessRenewal.expiryDays.expiryDays is null");
       }
       long expiryDaysInMs = TimeUnit.MILLISECONDS.convert(expiryDays, TimeUnit.DAYS);
-      return Optional.of(new Timestamp(completion.get().getTime() + expiryDaysInMs));
+      return completion.map(c -> new Timestamp(c.getTime() + expiryDaysInMs));
     }
 
     public boolean hasExpired() {
       final Timestamp now = new Timestamp(clock.millis());
       return getExpiration().map(x -> x.before(now)).orElse(false);
     }
-
-    public boolean areCompliant() {
-      return isBypassed() || (isComplete() && !hasExpired());
-    }
   }
 
   private RenewableAccessModuleStatus mkStatus(ModuleNameEnum name, ModuleTimes times) {
     return new RenewableAccessModuleStatus()
         .moduleName(name)
-        .expirationEpochMillis(times.getExpiration().map(x -> x.getTime()).orElse(null))
+        .expirationEpochMillis(times.getExpiration().map(Timestamp::getTime).orElse(null))
         .hasExpired(times.hasExpired());
   }
 
