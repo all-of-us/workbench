@@ -10083,9 +10083,10 @@ rxjs@6.4.0:
   dependencies:
     tslib "^1.9.0"
 
-rxjs@^5.5.6:
-  version "5.5.12"
-  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-5.5.12.tgz#6fa61b8a77c3d793dbaf270bee2f43f652d741cc"
+rxjs@^5.6.0-forward-compat.5:
+  version "5.6.0-forward-compat.5"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-5.6.0-forward-compat.5.tgz#b804784be4209eb34ca43b648062f343ae640f48"
+  integrity sha512-CJ9UIV5LlcyGhKWOVvZa4PcVbJJbGNcTunG29cflNo+Y2jAZgvMdZVl4xwYNiYK5gmley/0QuAFVJ0M4GO+GNQ==
   dependencies:
     symbol-observable "1.0.1"
 
