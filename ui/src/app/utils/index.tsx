@@ -169,7 +169,7 @@ export function reactStyles<T extends {[key: string]: React.CSSProperties }>(t: 
  *    (usually these are also annotated as Angular @Inputs)
  */
 export class ReactWrapperBase implements OnChanges, OnInit, OnDestroy {
-  @ViewChild('root') rootElement: ElementRef;
+  @ViewChild('root', {static: false}) rootElement: ElementRef;
 
   constructor(private WrappedComponent: React.ComponentType, private propNames: string[]) {}
 
