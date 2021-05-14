@@ -110,7 +110,9 @@ public class UserController implements UserApiDelegate {
     // also TODO RW-6190: add access tier parameter to this call and check that tier's
     // membership specifically
 
-    verifyUserIsInRegisteredTier();
+    if (!isUserInRegisteredTier()) {
+      throw new ForbiddenException("user search requires registered data access");
+    }
 
     Sort.Direction direction =
         Optional.ofNullable(Sort.Direction.fromStringOrNull(sortOrder)).orElse(Sort.Direction.ASC);
@@ -153,15 +155,13 @@ public class UserController implements UserApiDelegate {
   }
 
   // check that a user has registered tier membership according to both our DB and Terra/Firecloud
-  private void verifyUserIsInRegisteredTier() {
-    accessTierService.getAccessTiersForUser(userProvider.get()).stream()
-        .filter(
+  private boolean isUserInRegisteredTier() {
+    return accessTierService.getAccessTiersForUser(userProvider.get()).stream()
+        .anyMatch(
             tier ->
                 tier.getShortName().equals(AccessTierService.REGISTERED_TIER_SHORT_NAME)
                     && fireCloudService.isUserMemberOfGroup(
-                        userProvider.get().getUsername(), tier.getAuthDomainName()))
-        .findFirst()
-        .orElseThrow(() -> new ForbiddenException("user search requires registered data access"));
+                        userProvider.get().getUsername(), tier.getAuthDomainName()));
   }
 
   @Override
