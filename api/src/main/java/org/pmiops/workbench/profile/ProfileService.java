@@ -127,7 +127,7 @@ public class ProfileService {
         accessTierService.getAccessTierShortNamesForUser(user);
 
     final List<RenewableAccessModuleStatus> modulesStatus =
-      this.userService.getRenewableAccessModuleStatus(userLite);
+      userService.getRenewableAccessModuleStatus(userLite);
 
     final ProfileRenewableAccessModules renewableAccessModules =
         new ProfileRenewableAccessModules()
