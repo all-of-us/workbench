@@ -11,7 +11,6 @@ public class WorkbenchConfigConfig {
   public WorkbenchConfig workbenchConfig() {
     WorkbenchConfig workbenchConfig = WorkbenchConfig.createEmptyConfig();
     workbenchConfig.cdr.debugQueries = true;
-    workbenchConfig.firecloud.registeredDomainName = "all-of-us-registered-test";
     return workbenchConfig;
   }
 }
