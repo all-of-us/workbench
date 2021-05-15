@@ -1353,6 +1353,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
           </TooltipTrigger>
         </div>
         {this.state.openCreateModal && <CreateModal entityName='Dataset'
+                                                    title='asdasd'
                                                     getExistingNames={async() => {
                                                       const resources = await workspacesApi().getWorkspaceResources(namespace, id,
                                                         {typesToFetch: [ResourceType.DATASET]});

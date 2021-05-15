@@ -1,43 +1,12 @@
-import {AlertDanger} from 'app/components/alert';
-import {Button, Link} from 'app/components/buttons';
-import {CheckBox, TextArea, TextInput} from 'app/components/inputs';
+import {Button} from 'app/components/buttons';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
-import {TooltipTrigger} from 'app/components/popups';
-import {appendNotebookFileSuffix} from 'app/pages/analysis/util';
-
-import {dataSetApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
-import {summarizeErrors} from 'app/utils';
-import {AnalyticsTracker} from 'app/utils/analytics';
-import {encodeURIComponentStrict, navigateByUrl} from 'app/utils/navigation';
-import {ACTION_DISABLED_INVALID_BILLING} from 'app/utils/strings';
-import {
-  DataSet,
-  DataSetRequest,
-  DomainValuePair,
-  FileDetail,
-  KernelTypeEnum,
-  PrePackagedConceptSetEnum
-} from 'generated/fetch';
 import {useEffect, useState} from 'react';
 import * as React from 'react';
 
-import {validate} from 'validate.js';
-import {FlexRow} from './flex';
 import {ClrIcon} from './icons';
+import {TextArea, TextInput} from './inputs';
 import {Spinner} from './spinners';
-import {ExportDataSet} from '../pages/data/data-set/export-data-set';
-
-interface Props {
-  entityName: string;
-  getExistingNames: () => string[];
-  onSave: Function; // function that takes in name, description
-  onCancel: Function;
-}
-
-// Name is required
-// Cannot conflict with existing names
-// handle save errors
 
 const styles = {
   error: {
@@ -60,7 +29,15 @@ const styles = {
   }
 };
 
-export const CreateModal = ({entityName, title, getExistingNames, save, close}) => {
+interface Props {
+  entityName: string;
+  title?: string;
+  getExistingNames: () => Promise<string[]>;
+  save: Function;
+  close: Function;
+}
+
+export const CreateModal = ({entityName, title, getExistingNames, save, close}: Props) => {
   const [description, setDescription] = useState('');
   const [saving, setSaving] = useState(false); // saving refers to the loading request time
   const [name, setName] = useState('');
@@ -74,9 +51,7 @@ export const CreateModal = ({entityName, title, getExistingNames, save, close}) 
   const invalidNameInput = nameTouched && (!name || !name.trim());
   const nameConflict = !!name && existingNames.includes(name.trim());
   const inputErrorMsg = invalidNameInput ? `${entityName} name is required` :
-    nameConflict ? nameConflictMsg :
-    '';
-
+    nameConflict ? nameConflictMsg : '';
   const disableSaveButton = nameConflict || invalidNameInput || !name || saving;
 
   const onSave = async() => {
@@ -128,3 +103,4 @@ export const CreateModal = ({entityName, title, getExistingNames, save, close}) 
     </ModalFooter>
   </Modal>;
 };
+

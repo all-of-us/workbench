@@ -96,24 +96,6 @@ const styles = reactStyles({
     marginLeft: 'calc(50% - 50px)',
     marginTop: 'calc(50% - 75px)',
   },
-  error: {
-    background: colors.warning,
-    color: colors.white,
-    fontSize: '11px',
-    border: '1px solid #ebafa6',
-    borderRadius: '3px',
-    marginBottom: '0.25rem',
-    padding: '3px 5px'
-  },
-  invalid: {
-    background: colorWithWhiteness(colors.danger, .7),
-    color: colorWithWhiteness(colors.dark, .1),
-    fontSize: '11px',
-    border: '1px solid #ebafa6',
-    borderRadius: '3px',
-    marginBottom: '0.25rem',
-    padding: '3px 5px'
-  },
   menuButton: {
     background: colors.white,
     border: `1px solid ${colorWithWhiteness(colors.black, .8)}`,
@@ -158,15 +140,10 @@ interface State {
     genderOrSexType: GenderOrSexType
   };
   deleting: boolean;
-  description: string;
-  existingCohorts: Array<string>;
   genderOrSexType: GenderOrSexType;
   initializing: boolean;
   loading: boolean;
-  name: string;
-  nameTouched: boolean;
   refreshing: boolean;
-  saveError: boolean;
   saveModalOpen: boolean;
   saving: boolean;
   stackChart: boolean;
@@ -188,15 +165,10 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
         chartData: undefined,
         currentGraphOptions: {ageType: AgeType.AGE, genderOrSexType: GenderOrSexType.GENDER},
         deleting: false,
-        description: undefined,
-        existingCohorts: [],
         genderOrSexType: GenderOrSexType.GENDER,
         initializing: true,
         loading: false,
-        name: undefined,
-        nameTouched: false,
         refreshing: false,
-        saveError: false,
         saveModalOpen: false,
         saving: false,
         stackChart: true,
@@ -310,7 +282,7 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
       triggerEvent('Click icon', 'Click', 'Icon - Save - Cohort Builder');
       const {cohort, updating} = this.props;
       cohort.criteria = this.criteria;
-      this.setState({saving: true, saveError: false});
+      this.setState({saving: true});
       const {ns, wsid} = urlParamsStore.getValue();
       const cid = cohort.id;
       cohortsApi().updateCohort(ns, wsid, cid, cohort)
@@ -321,13 +293,13 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
         })
         .catch(error => {
           console.error(error);
-          this.setState({saving: false, saveError: true});
+          this.setState({saving: false});
         });
     }
 
     createCohort(name, description) {
       triggerEvent('Click icon', 'Click', 'Icon - Save As - Cohort Builder');
-      this.setState({saving: true, saveError: false});
+      this.setState({saving: true});
       const {ns, wsid} = urlParamsStore.getValue();
       const {updating} = this.props;
       const cohort = {name, description, criteria: this.criteria, type: COHORT_TYPE};
@@ -337,26 +309,6 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
           navigate(['workspaces', ns, wsid, 'data', 'cohorts', c.id, 'actions']);
         })
         .finally(() => this.setState({saving: false}));
-    }
-
-    // TODO eric typescript: why doesn't this show as not used?
-    submit() {
-      triggerEvent('Click icon', 'Click', 'Icon - Save As - Cohort Builder');
-      this.setState({saving: true, saveError: false});
-      const {ns, wsid} = urlParamsStore.getValue();
-      const {name, description} = this.state;
-      const {updating} = this.props;
-      const cohort = {name, description, criteria: this.criteria, type: COHORT_TYPE};
-      cohortsApi().createCohort(ns, wsid, cohort)
-        .then((c) => {
-          updating(true);
-          navigate(['workspaces', ns, wsid, 'data', 'cohorts', c.id, 'actions']);
-        })
-        .finally(() => this.setState({saving: false}))
-        .catch(error => {
-          console.error(error);
-          this.setState({saving: false, saveError: true});
-        });
     }
 
     delete = () => {
@@ -373,10 +325,6 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
 
     cancelDelete = () => {
       this.setState({deleting: false});
-    }
-
-    cancelSave = () => {
-      this.setState({saveModalOpen: false, name: undefined, description: undefined, saveError: false, nameTouched: false});
     }
 
     navigateTo(action: string) {
@@ -404,10 +352,6 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
 
     openSaveModal() {
       this.setState({saveModalOpen: true});
-      const {ns, wsid} = urlParamsStore.getValue();
-      cohortsApi().getCohortsInWorkspace(ns, wsid)
-        .then(response => this.setState({existingCohorts: response.items.map(cohort => cohort.name)}))
-        .catch(error => console.error(error));
     }
 
     async getCohortNames() {
@@ -454,24 +398,9 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
       return loading || saving || this.definitionErrors || !total;
     }
 
-    get disableModalSaveButton() {
-      const {name, saving} = this.state;
-      return this.cohortNameConflict || this.invalidNameInput || !name || saving;
-    }
-
     get disableRefreshButton() {
       const {ageType, currentGraphOptions, genderOrSexType} = this.state;
       return ageType === currentGraphOptions.ageType && genderOrSexType === currentGraphOptions.genderOrSexType;
-    }
-
-    get cohortNameConflict() {
-      const {existingCohorts, name} = this.state;
-      return !!name && existingCohorts.includes(name.trim());
-    }
-
-    get invalidNameInput() {
-      const {name, nameTouched} = this.state;
-      return nameTouched && (!name || !name.trim());
     }
 
     get showTotalCount() {
@@ -480,8 +409,8 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
 
     render() {
       const {cohort} = this.props;
-      const {ageType, apiError, chartData, currentGraphOptions, deleting, description, genderOrSexType, loading, refreshing,
-        saveError, saveModalOpen, saving, stackChart, total} = this.state;
+      const {ageType, apiError, chartData, currentGraphOptions, deleting, genderOrSexType, loading, refreshing,
+        saveModalOpen, stackChart, total} = this.state;
       return <React.Fragment>
         <div>
           <div style={styles.overviewHeader}>
@@ -597,7 +526,7 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
                                        title='Save Cohort as'
                                        getExistingNames={() => this.getCohortNames()}
                                        save={(name, desc) => this.createCohort(name, desc)}
-                                       close={() => this.cancelSave()}/>}
+                                       close={() => this.setState({saveModalOpen: false})}/>}
 
         {deleting && <ConfirmDeleteModal closeFunction={this.cancelDelete}
           resourceType={ResourceType.COHORT}
