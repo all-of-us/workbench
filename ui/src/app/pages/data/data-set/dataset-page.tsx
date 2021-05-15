@@ -958,7 +958,9 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     async createDataset(name, desc) {
       const {namespace, id} = this.props.workspace;
 
-      return dataSetApi().createDataSet(namespace, id, this.createDatasetRequest(name, desc));
+      return dataSetApi()
+        .createDataSet(namespace, id, this.createDatasetRequest(name, desc))
+        .then(dataset => this.loadDataset(dataset));
     }
 
     async saveDataset() {
@@ -1357,10 +1359,7 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
                                                       return resources.map(resource => resource.dataSet.name);
                                                     }}
                                                     save={(name, desc) => this.createDataset(name, desc)}
-                                                    onSaveSuccess={(dataset) => this.loadDataset(dataset)}
-                                                    close={() => {
-                                                      this.setState({openCreateModal: false});
-                                                    }}/>}
+                                                    close={() => this.setState({openCreateModal: false})}/>}
 
         {openSaveModal && <NewDataSetModal includesAllParticipants={includesAllParticipants}
                                            selectedConceptSetIds={selectedConceptSetIds}

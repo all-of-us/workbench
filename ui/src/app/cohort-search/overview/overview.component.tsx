@@ -13,7 +13,7 @@ import {TextArea, TextInput} from 'app/components/inputs';
 import {Modal, ModalBody, ModalFooter, ModalTitle} from 'app/components/modals';
 import {TooltipTrigger} from 'app/components/popups';
 import {Spinner} from 'app/components/spinners';
-import {cohortBuilderApi, cohortsApi, dataSetApi} from 'app/services/swagger-fetch-clients';
+import {cohortBuilderApi, cohortsApi, dataSetApi, workspacesApi} from 'app/services/swagger-fetch-clients';
 import colors, {colorWithWhiteness} from 'app/styles/colors';
 import {reactStyles, withCdrVersions, withCurrentWorkspace} from 'app/utils';
 import {triggerEvent} from 'app/utils/analytics';
@@ -29,6 +29,7 @@ import {
   TemporalTime,
   WorkspaceAccessLevel
 } from 'generated/fetch';
+import {CreateModal} from '../../components/create-modal';
 
 const COHORT_TYPE = 'AoU_Discover';
 
@@ -324,6 +325,21 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
         });
     }
 
+    createCohort(name, description) {
+      triggerEvent('Click icon', 'Click', 'Icon - Save As - Cohort Builder');
+      this.setState({saving: true, saveError: false});
+      const {ns, wsid} = urlParamsStore.getValue();
+      const {updating} = this.props;
+      const cohort = {name, description, criteria: this.criteria, type: COHORT_TYPE};
+      return cohortsApi().createCohort(ns, wsid, cohort)
+        .then((c) => {
+          updating(true);
+          navigate(['workspaces', ns, wsid, 'data', 'cohorts', c.id, 'actions']);
+        })
+        .finally(() => this.setState({saving: false}));
+    }
+
+    // TODO eric typescript: why doesn't this show as not used?
     submit() {
       triggerEvent('Click icon', 'Click', 'Icon - Save As - Cohort Builder');
       this.setState({saving: true, saveError: false});
@@ -336,6 +352,7 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
           updating(true);
           navigate(['workspaces', ns, wsid, 'data', 'cohorts', c.id, 'actions']);
         })
+        .finally(() => this.setState({saving: false}))
         .catch(error => {
           console.error(error);
           this.setState({saving: false, saveError: true});
@@ -391,6 +408,12 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
       cohortsApi().getCohortsInWorkspace(ns, wsid)
         .then(response => this.setState({existingCohorts: response.items.map(cohort => cohort.name)}))
         .catch(error => console.error(error));
+    }
+
+    async getCohortNames() {
+      const {ns, wsid} = urlParamsStore.getValue();
+      const response = await cohortsApi().getCohortsInWorkspace(ns, wsid);
+      return response.items.map(cohort => cohort.name);
     }
 
     get ageItems() {
@@ -457,7 +480,7 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
 
     render() {
       const {cohort} = this.props;
-      const {ageType, apiError, chartData, currentGraphOptions, deleting, description, genderOrSexType, loading, name, refreshing,
+      const {ageType, apiError, chartData, currentGraphOptions, deleting, description, genderOrSexType, loading, refreshing,
         saveError, saveModalOpen, saving, stackChart, total} = this.state;
       return <React.Fragment>
         <div>
@@ -569,42 +592,13 @@ export const ListOverview = fp.flow(withCurrentWorkspace(), withCdrVersions()) (
             </div>
           }
         </div>
-        {saveModalOpen && <Modal>
-          <ModalTitle style={this.invalidNameInput ? {marginBottom: 0} : {}}>Save Cohort as</ModalTitle>
-          <ModalBody style={{marginTop: '0.2rem'}}>
-            {saveError && <div style={styles.error}>
-              <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
-              Data cannot be saved. Please try again.
-            </div>}
-            {this.invalidNameInput && <div style={styles.invalid}>Cohort name is required</div>}
-            {this.cohortNameConflict && <div style={styles.invalid}>
-              A cohort with this name already exists. Please choose a different name.
-            </div>}
-            <TextInput style={{marginBottom: '0.5rem'}}
-              value={name}
-              placeholder='COHORT NAME'
-              onChange={(v) => this.setState({name: v, nameTouched: true})}
-              disabled={saving}/>
-            <TextArea value={description}
-              placeholder='DESCRIPTION'
-              disabled={saving}
-              onChange={(v) => this.setState({description: v})}/>
-          </ModalBody>
-          <ModalFooter>
-            <Button style={{color: colors.primary}}
-              type='link'
-              onClick={() => this.cancelSave()}
-              disabled={saving}>
-              Cancel
-            </Button>
-            <Button type='primary'
-              disabled={this.disableModalSaveButton}
-              onClick={() => this.submit()}>
-              {saving && <Spinner style={{marginRight: '0.25rem'}} size={18} />}
-               Save
-            </Button>
-          </ModalFooter>
-        </Modal>}
+
+        {saveModalOpen && <CreateModal entityName='Cohort'
+                                       title='Save Cohort as'
+                                       getExistingNames={() => this.getCohortNames()}
+                                       save={(name, desc) => this.createCohort(name, desc)}
+                                       close={() => this.cancelSave()}/>}
+
         {deleting && <ConfirmDeleteModal closeFunction={this.cancelDelete}
           resourceType={ResourceType.COHORT}
           receiveDelete={this.delete}

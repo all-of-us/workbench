@@ -60,7 +60,7 @@ const styles = {
   }
 };
 
-export const CreateModal = ({entityName, getExistingNames, save, onSaveSuccess, close}) => {
+export const CreateModal = ({entityName, title, getExistingNames, save, close}) => {
   const [description, setDescription] = useState('');
   const [saving, setSaving] = useState(false); // saving refers to the loading request time
   const [name, setName] = useState('');
@@ -82,18 +82,16 @@ export const CreateModal = ({entityName, getExistingNames, save, onSaveSuccess, 
   const onSave = async() => {
     setSaving(true);
     setSaveErrorMsg('');
-    try {
-      const resource = await save(name, description);
-      await onSaveSuccess(resource);
-      close();
-    } catch (e) {
-      setSaveErrorMsg(e.status === 409 ? nameConflictMsg : 'Data cannot be saved. Please try again.');
-      setSaving(false);
-    }
+    save(name, description)
+      .then(() => close())
+      .catch(e => {
+        setSaveErrorMsg(e.status === 409 ? nameConflictMsg : 'Data cannot be saved. Please try again.');
+        setSaving(false);
+      });
   };
 
   return <Modal>
-    <ModalTitle style={inputErrorMsg ? {marginBottom: 0} : {}}>Create {entityName}</ModalTitle>
+    <ModalTitle style={inputErrorMsg ? {marginBottom: 0} : {}}>{title || `Create ${entityName}`}</ModalTitle>
     <ModalBody style={{marginTop: '0.2rem'}}>
       {saveErrorMsg && <div style={styles.error}>
           <ClrIcon className='is-solid' shape='exclamation-triangle' size={22} />
@@ -117,7 +115,7 @@ export const CreateModal = ({entityName, getExistingNames, save, onSaveSuccess, 
     <ModalFooter>
       <Button style={{color: colors.primary}}
               type='link'
-              onClick={() => onCancel()}
+              onClick={() => close()}
               disabled={saving}>
         Cancel
       </Button>
