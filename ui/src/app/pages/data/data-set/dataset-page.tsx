@@ -951,10 +951,6 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
       this.setState(state => ({previewList: state.previewList.set(domain, newPreviewInformation)}));
     }
 
-    async onCreate() {
-
-    }
-
     async createDataset(name, desc) {
       const {namespace, id} = this.props.workspace;
 
@@ -977,7 +973,6 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     }
 
     createDatasetRequest(name, desc): DataSetRequest {
-      // TODO eric: verify that its OK to send over description and etag even for a create request
       return {
         name,
         description: desc,
@@ -992,7 +987,6 @@ const DataSetPage = fp.flow(withUserProfile(), withCurrentWorkspace(), withUrlPa
     }
 
     updateDatasetRequest(): DataSetRequest {
-      // TODO eric: verify that its OK to send over description and etag even for a create request
       return {
         ...this.createDatasetRequest(
           this.state.dataSet.name,
