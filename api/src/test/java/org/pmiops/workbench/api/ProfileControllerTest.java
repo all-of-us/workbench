@@ -44,6 +44,7 @@ import org.pmiops.workbench.captcha.ApiException;
 import org.pmiops.workbench.captcha.CaptchaVerificationService;
 import org.pmiops.workbench.compliance.ComplianceServiceImpl;
 import org.pmiops.workbench.config.CommonConfig;
+import org.pmiops.workbench.config.WorkbenchConfig;
 import org.pmiops.workbench.db.dao.AccessTierDao;
 import org.pmiops.workbench.db.dao.UserDao;
 import org.pmiops.workbench.db.dao.UserDataUseAgreementDao;
@@ -217,6 +218,12 @@ public class ProfileControllerTest extends BaseControllerTest {
     @Primary
     Random getRandom() {
       return new FakeLongRandom(NONCE_LONG);
+    }
+
+    @Bean
+    @Scope("prototype")
+    public WorkbenchConfig workbenchConfig() {
+      return config;
     }
   }
 

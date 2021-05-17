@@ -48,7 +48,4 @@ public class CommandLineToolApplicationRunListener implements SpringApplicationR
 
   @Override
   public void contextLoaded(ConfigurableApplicationContext context) {}
-
-  @Override
-  public void finished(ConfigurableApplicationContext context, Throwable exception) {}
 }

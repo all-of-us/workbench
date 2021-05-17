@@ -181,7 +181,7 @@ public class CBCriteriaDaoTest extends SpringTest {
 
   @Test
   public void findSurveyQuestionCriteriaByDomainAndIdAndFullText() {
-    PageRequest pageRequest = new PageRequest(0, 100);
+    PageRequest pageRequest = PageRequest.of(0, 100);
     assertThat(
             cbCriteriaDao
                 .findSurveyQuestionCriteriaByDomainAndIdAndFullText(
@@ -201,7 +201,7 @@ public class CBCriteriaDaoTest extends SpringTest {
 
   @Test
   public void findCriteriaByDomainAndTypeAndCode() {
-    PageRequest page = new PageRequest(0, 10);
+    PageRequest page = PageRequest.of(0, 10);
     List<DbCriteria> criteriaList =
         cbCriteriaDao
             .findCriteriaByDomainAndTypeAndCode(Domain.CONDITION.toString(), "00", page)
@@ -211,7 +211,7 @@ public class CBCriteriaDaoTest extends SpringTest {
 
   @Test
   public void findCriteriaByDomainAndFullText() {
-    PageRequest page = new PageRequest(0, 10);
+    PageRequest page = PageRequest.of(0, 10);
     List<DbCriteria> measurements =
         cbCriteriaDao
             .findCriteriaByDomainAndFullText(Domain.MEASUREMENT.toString(), "001", page)
@@ -221,7 +221,7 @@ public class CBCriteriaDaoTest extends SpringTest {
 
   @Test
   public void findCriteriaTopCounts() {
-    PageRequest page = new PageRequest(0, 10);
+    PageRequest page = PageRequest.of(0, 10);
     List<DbCriteria> measurements =
         cbCriteriaDao.findCriteriaTopCounts(Domain.MEASUREMENT.toString(), page).getContent();
     assertThat(measurements).containsExactly(measurementCriteria);
@@ -249,7 +249,7 @@ public class CBCriteriaDaoTest extends SpringTest {
 
   @Test
   public void findCriteriaByDomainAndTypeAndStandardAndCode() {
-    PageRequest page = new PageRequest(0, 10);
+    PageRequest page = PageRequest.of(0, 10);
     List<DbCriteria> labs =
         cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndCode(
             Domain.MEASUREMENT.toString(), CriteriaType.LOINC.toString(), true, "LP123", page);
@@ -258,7 +258,7 @@ public class CBCriteriaDaoTest extends SpringTest {
 
   @Test
   public void findCriteriaByDomainAndTypeAndStandardAndFullText() {
-    PageRequest page = new PageRequest(0, 10);
+    PageRequest page = PageRequest.of(0, 10);
     List<DbCriteria> conditions =
         cbCriteriaDao.findCriteriaByDomainAndTypeAndStandardAndFullText(
             Domain.CONDITION.toString(), CriteriaType.SNOMED.toString(), true, "myMatch", page);
@@ -301,14 +301,14 @@ public class CBCriteriaDaoTest extends SpringTest {
 
   @Test
   public void findByDomainIdAndType() {
-    Sort sort = new Sort(Direction.ASC, "name");
+    Sort sort = Sort.by(Direction.ASC, "name");
     List<DbCriteria> criteriaList =
         cbCriteriaDao.findByDomainIdAndType(
             Domain.PERSON.toString(), FilterColumns.RACE.toString(), sort);
     assertThat(criteriaList).containsExactly(raceAsian, raceWhite).inOrder();
 
     // reverse
-    sort = new Sort(Direction.DESC, "name");
+    sort = Sort.by(Direction.DESC, "name");
     criteriaList =
         cbCriteriaDao.findByDomainIdAndType(
             Domain.PERSON.toString(), FilterColumns.RACE.toString(), sort);

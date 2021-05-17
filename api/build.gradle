@@ -19,7 +19,8 @@ buildscript {
     OKHTTP_VERSION = '2.7.5'
     OPENCENSUS_VERSION = '0.23.0'
     SPRINGFOX_VERSION = '2.6.1'
-    SPRING_BOOT_VERSION = '1.5.22.RELEASE'
+    SPRING_BOOT_VERSION = '2.3.9.RELEASE'
+    SPRING_DEPENDENCY_MANAGEMENT_VERSION = '1.0.11.RELEASE'
     SPRING_SECURITY_VERSION = '4.2.18.RELEASE'
     SWAGGER_2_CODEGEN_VERSION = '2.2.3'
     SWAGGER_3_CODEGEN_VERSION = '3.0.21'
@@ -52,10 +53,13 @@ buildscript {
     classpath "org.jetbrains.kotlin:kotlin-noarg:$project.ext.KOTLIN_VERSION"
     classpath 'org.owasp:dependency-check-gradle:6.0.1'
     classpath "org.springframework.boot:spring-boot-gradle-plugin:$project.ext.SPRING_BOOT_VERSION"
+    classpath "io.spring.gradle:dependency-management-plugin:$project.ext.SPRING_DEPENDENCY_MANAGEMENT_VERSION"
   }
 }
 
 // TODO(jaycarlton): migrate to new plugin DSL (RW-4772)
+//apply plugin: 'org.springframework.boot:spring-boot-properties-migrator'
+apply plugin: 'io.spring.dependency-management'
 apply plugin: 'com.diffplug.gradle.spotless'
 apply plugin: 'com.google.cloud.tools.appengine-standard'  // App Engine tasks
 apply plugin: 'eclipse'
@@ -216,7 +220,6 @@ swaggerSources {
   }
 }
 
-
 //
 // AppEngine
 //
@@ -348,8 +351,8 @@ project.tasks.ideaModule.dependsOn(generateSwaggerCode)
 // Swagger sources, per the swaggerSources tuple above.
 project.tasks.compileGeneratedJava.dependsOn(generateSwaggerCode)
 
-project.tasks.war.dependsOn(['compileGeneratedJava', 'generate_appengine_web_xml',
-        'generate_appengine_cron_yaml'])
+project.tasks.bootWar.dependsOn(['compileGeneratedJava', 'generate_appengine_web_xml',
+                             'generate_appengine_cron_yaml'])
 
 // Clear out generated Java sorces before cleaning the project.
 clean.doFirst {
@@ -408,11 +411,13 @@ dependencies {
   compile "io.swagger:swagger-annotations:1.5.16"
   compile "javax.inject:javax.inject:1"
   compile "joda-time:joda-time:$project.ext.JODA_VERSION"
+  compile "org.liquibase:liquibase-core:3.10.0"
   compile "mysql:mysql-connector-java:8.0.16"
   compile "org.apache.commons:commons-collections4:4.4"
   compile "org.apache.commons:commons-lang3:3.6"
   compile "org.apache.commons:commons-text:1.8"
   compile "org.apache.httpcomponents:httpclient:4.5.13"
+  compile 'org.springframework.boot:spring-boot-starter-validation'
   compile "commons-codec:commons-codec:1.15"
   compile 'com.auth0:java-jwt:3.14.0'
 
@@ -428,24 +433,26 @@ dependencies {
 
   compile "org.json:json:20160810"
 
-  compile("org.springframework.boot:spring-boot-starter-actuator:$project.ext.SPRING_BOOT_VERSION") {
+  compile("org.apache.tomcat:tomcat-jdbc:9.0.10")
+  compile("org.springframework.boot:spring-boot-starter-tomcat")
+  compile("org.springframework.boot:spring-boot-starter-jdbc") {
+    exclude group: 'com.zaxxer', module: 'HikariCP'
+  }
+
+  compile("org.springframework.boot:spring-boot-starter-data-jpa") {
+    exclude module: 'spring-boot-starter-tomcat'
+    exclude group: 'com.zaxxer', module: 'HikariCP'
+    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
+  }
+
+  compile("org.springframework.boot:spring-boot-starter-web") {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
 
-  compile("org.springframework.boot:spring-boot-starter-data-jpa:$project.ext.SPRING_BOOT_VERSION") {
-    exclude module: 'spring-boot-starter-tomcat'
-    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
-  }
-
-  compile("org.springframework.boot:spring-boot-starter-web:$project.ext.SPRING_BOOT_VERSION") {
-    exclude module: 'spring-boot-starter-tomcat'
-    exclude group: 'org.slf4j', module: 'jul-to-slf4j'
-  }
-
-  compile "org.springframework.retry:spring-retry:1.1.5.RELEASE"
-  compile "org.springframework.security:spring-security-core:$project.ext.SPRING_SECURITY_VERSION"
-  compile "org.springframework.security:spring-security-web:$project.ext.SPRING_SECURITY_VERSION"
+  compile "org.springframework.retry:spring-retry"
+  compile "org.springframework.security:spring-security-core"
+  compile "org.springframework.security:spring-security-web"
 
   implementation "org.mapstruct:mapstruct:$project.ext.MAPSTRUCT_VERSION"
   testAnnotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
@@ -453,9 +460,10 @@ dependencies {
   // Dependencies for Swagger codegen-generated sources. This should include all dependencies required by Swagger's
   // default okhttp API codegen templates (see https://github.com/swagger-api/swagger-codegen/blob/v2.2.3/samples/client/petstore/spring-stubs/pom.xml)
   // plus any custom templates included in our repo under the SWAGGER_2_TEMPLATE_DIR.
-  generatedCompile "org.springframework.boot:spring-boot-starter-data-rest:$project.ext.SPRING_BOOT_VERSION"
+  generatedCompile "org.springframework.boot:spring-boot-starter-data-rest"
   generatedCompile "io.springfox:springfox-swagger2:$project.ext.SPRINGFOX_VERSION"
   generatedCompile "io.springfox:springfox-swagger-ui:$project.ext.SPRINGFOX_VERSION"
+  generatedCompile 'org.springframework.boot:spring-boot-starter-validation'
   generatedCompile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
   generatedCompile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
   generatedCompile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
@@ -491,9 +499,9 @@ dependencies {
   testCompile "com.google.appengine:appengine-tools-sdk:$project.ext.GAE_VERSION"
   testCompile 'com.google.truth:truth:0.42'
   testCompile 'com.google.truth.extensions:truth-java8-extension:1.0.1'
-  testCompile "org.springframework.boot:spring-boot-starter-test:$project.ext.SPRING_BOOT_VERSION"
+  testCompile "org.springframework.boot:spring-boot-starter-test"
   testCompile 'com.h2database:h2:1.4.194'
-  testCompile 'org.liquibase:liquibase-core:3.5.3'
+  testCompile 'org.liquibase:liquibase-core:3.10.0'
   testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
   testCompile "org.jetbrains.kotlin:kotlin-test:1.3.21"
 
@@ -605,7 +613,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 task incrementalHotSwap(type: IncrementalHotSwapTask, dependsOn: 'compileJava') {
-    inputDir = sourceSets.main.java.outputDir
+  inputDir = sourceSets.main.java.outputDir
 }
 
 task listProjectAPIs(type: GenerateAPIListingTask)
@@ -774,7 +782,7 @@ task updateReviewDemographics(type: JavaExec) {
     main = "org.pmiops.workbench.tools.UpdateReviewDemographics"
     systemProperties = commandLineSpringProperties
     if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
+      args Eval.me(appArgs)
     }
 }
 

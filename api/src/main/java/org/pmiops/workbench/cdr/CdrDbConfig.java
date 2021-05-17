@@ -4,9 +4,9 @@ import com.google.common.cache.LoadingCache;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
-import org.apache.log4j.Logger;
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.pmiops.workbench.access.AccessTierService;
@@ -18,8 +18,8 @@ import org.pmiops.workbench.exceptions.ServerErrorException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,7 +44,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * of the current request. Applies to the model and DAO objects within this package.
  */
 public class CdrDbConfig {
-  private static final Logger log = Logger.getLogger(CdrDbConfig.class);
+  private static final Logger log = Logger.getLogger(CdrDbConfig.class.getName());
 
   @Service
   public static class CdrDataSource extends AbstractRoutingDataSource {
@@ -113,7 +113,7 @@ public class CdrDbConfig {
           // verification that the DB settings in application.properties are actually being loaded.
           log.info("using Tomcat pool for CDR data source, with minIdle: " + cdrPool.getMinIdle());
         } else {
-          log.warn(
+          log.warning(
               "not using Tomcat pool or initializing pool configuration; "
                   + "this should only happen within tests");
         }

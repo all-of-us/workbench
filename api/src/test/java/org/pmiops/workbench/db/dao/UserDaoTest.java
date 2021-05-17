@@ -87,7 +87,6 @@ public class UserDaoTest extends SpringTest {
     user1.setDisabled(false);
     user1 = userDao.save(user1);
     addUserToTier(user1, registeredTier, TierAccessStatus.DISABLED);
-
     List<UserCountByDisabledAndAccessTiers> rows = userDao.getUserCountGaugeData();
     assertThat(rows).hasSize(1);
     final UserCountByDisabledAndAccessTiers row = rows.get(0);
@@ -217,7 +216,7 @@ public class UserDaoTest extends SpringTest {
 
   @Test
   public void test_findUsersBySearchStringAndTier_empty() {
-    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    final Sort ascendingByUsername = Sort.by(Sort.Direction.ASC, "username");
     assertThat(userDao.findUsersBySearchStringAndTier("any", ascendingByUsername, "any")).isEmpty();
   }
 
@@ -228,7 +227,7 @@ public class UserDaoTest extends SpringTest {
     user = userDao.save(user);
     addUserToTier(user, registeredTier);
 
-    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    final Sort ascendingByUsername = Sort.by(Sort.Direction.ASC, "username");
     List<DbUser> result =
         userDao.findUsersBySearchStringAndTier(
             "A", ascendingByUsername, registeredTier.getShortName());
@@ -247,7 +246,7 @@ public class UserDaoTest extends SpringTest {
     user = userDao.save(user);
     addUserToTier(user, registeredTier);
 
-    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    final Sort ascendingByUsername = Sort.by(Sort.Direction.ASC, "username");
     List<DbUser> result =
         userDao.findUsersBySearchStringAndTier(
             "Le", ascendingByUsername, registeredTier.getShortName());
@@ -266,7 +265,7 @@ public class UserDaoTest extends SpringTest {
     user = userDao.save(user);
     addUserToTier(user, registeredTier);
 
-    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    final Sort ascendingByUsername = Sort.by(Sort.Direction.ASC, "username");
     List<DbUser> result =
         userDao.findUsersBySearchStringAndTier(
             "sci", ascendingByUsername, registeredTier.getShortName());
@@ -288,7 +287,7 @@ public class UserDaoTest extends SpringTest {
     // this also won't match
     TestMockFactory.createControlledTierForTests(accessTierDao);
 
-    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    final Sort ascendingByUsername = Sort.by(Sort.Direction.ASC, "username");
     List<DbUser> result =
         userDao.findUsersBySearchStringAndTier("A", ascendingByUsername, "wrong-tier");
     assertThat(result).isEmpty();
@@ -317,7 +316,7 @@ public class UserDaoTest extends SpringTest {
     taylor = userDao.save(taylor);
     addUserToTier(taylor, registeredTier);
 
-    final Sort ascendingByUsername = new Sort(Sort.Direction.ASC, "username");
+    final Sort ascendingByUsername = Sort.by(Sort.Direction.ASC, "username");
 
     // 'a' matches 'afunk123' and all of Taylor's fields
     List<DbUser> result =

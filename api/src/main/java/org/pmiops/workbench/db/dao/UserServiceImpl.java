@@ -155,7 +155,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
         return userDao.save(dbUser);
       } catch (ObjectOptimisticLockingFailureException e) {
         if (objectLockingFailureCount < MAX_RETRIES) {
-          dbUser = userDao.findOne(dbUser.getUserId());
+          long userId = dbUser.getUserId();
+          dbUser =
+              userDao
+                  .findById(userId)
+                  .orElseThrow(
+                      () ->
+                          new BadRequestException(
+                              String.format("User with ID %s not found", userId)));
           objectLockingFailureCount++;
         } else {
           throw new ConflictException(
@@ -170,7 +177,14 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             .getMessage()
             .equals("Statement closed.")) {
           if (statementClosedCount < MAX_RETRIES) {
-            dbUser = userDao.findOne(dbUser.getUserId());
+            long userId = dbUser.getUserId();
+            dbUser =
+                userDao
+                    .findById(userId)
+                    .orElseThrow(
+                        () ->
+                            new BadRequestException(
+                                String.format("User with ID %s not found", userId)));
             statementClosedCount++;
           } else {
             throw new ConflictException(
@@ -502,7 +516,7 @@ public class UserServiceImpl implements UserService, GaugeDataCollector {
             dua.setUserNameOutOfDate(
                 !dua.getUserGivenName().equalsIgnoreCase(newGivenName)
                     || !dua.getUserFamilyName().equalsIgnoreCase(newFamilyName)));
-    userDataUseAgreementDao.save(dataUseAgreements);
+    userDataUseAgreementDao.saveAll(dataUseAgreements);
   }
 
   @Override
