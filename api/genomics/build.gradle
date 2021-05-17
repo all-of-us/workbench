@@ -10,10 +10,10 @@ repositories {
 
 dependencies {
     // Genomics dependencies
-    compile "org.broadinstitute:gatk:4.1.8.0"
-    compile "com.github.samtools:htsjdk:2.1.1"
-    compile "com.google.guava:guava:30.0-jre"
-    testCompile "com.google.truth:truth:0.42"
+    implementation "org.broadinstitute:gatk:4.1.8.0"
+    implementation "com.github.samtools:htsjdk:2.1.1"
+    implementation "com.google.guava:guava:30.0-jre"
+    testImplementation "com.google.truth:truth:0.42"
 }
 
 task randomizeVcf(type: JavaExec) {

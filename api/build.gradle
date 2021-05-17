@@ -76,11 +76,11 @@ apply plugin: 'war'
 // are concatenated by the Java plugin.
 // https://docs.gradle.org/current/userguide/java_plugin.html#java_source_set_configurations
 configurations {
-  __bigQueryTest__Compile.extendsFrom testCompile
-  __bigQueryTest__Runtime.extendsFrom testRuntime
+  __bigQueryTest__Compile.extendsFrom testImplementation
+  __bigQueryTest__Runtime.extendsFrom testImplementation
 
-  __integration__Compile.extendsFrom testCompile
-  __integration__Runtime.extendsFrom testRuntime
+  __integration__Compile.extendsFrom testImplementation
+  __integration__Runtime.extendsFrom testImplementation
 
   __tools__Implementation.extendsFrom implementation
   __tools__RuntimeOnly.extendsFrom runtimeOnly
@@ -371,88 +371,88 @@ dependencies {
   __swaggerCodegenV2__ "io.swagger:swagger-codegen-cli:$project.ext.SWAGGER_2_CODEGEN_VERSION"
   __swaggerCodegenV3__ "io.swagger.codegen.v3:swagger-codegen-cli:$project.ext.SWAGGER_3_CODEGEN_VERSION"
 
-  compile "ch.qos.logback:logback-classic:1.2.3"
-  compile "com.fasterxml.jackson.core:jackson-annotations:$project.ext.JACKSON_VERSION"
-  compile "com.fasterxml.jackson.core:jackson-core:$project.ext.JACKSON_VERSION"
-  compile "com.fasterxml.jackson.core:jackson-databind:$project.ext.JACKSON_DATABIND_VERSION"
-  compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$project.ext.JACKSON_VERSION"
-  compile "com.fasterxml.jackson.module:jackson-module-kotlin:$project.ext.JACKSON_VERSION"
-  compile "com.github.java-json-tools:json-patch:1.13"
-  compile "com.github.rholder:guava-retrying:2.0.0"
-  compile "org.javers:javers-core:5.10.1"
-  compile "com.google.api-client:google-api-client-appengine:1.30.0"
-  compile "com.google.apis:google-api-services-admin-directory:directory_v1-rev20190806-1.30.3"
-  compile "com.google.apis:google-api-services-cloudbilling:v1-rev48-1.25.0"
-  compile "com.google.apis:google-api-services-cloudresourcemanager:v1-rev549-1.25.0"
-  compile "com.google.apis:google-api-services-oauth2:v2-rev139-1.23.0"
-  compile "com.google.appengine:appengine-api-1.0-sdk:$project.ext.GAE_VERSION"
-  compile "com.google.appengine:appengine:$project.ext.GAE_VERSION"
-  compile "com.google.auth:google-auth-library-appengine:0.19.0"
-  compile "com.google.auth:google-auth-library-oauth2-http:0.19.0"
-  compile "com.google.cloud.sql:mysql-socket-factory:1.0.10"
-  compile "com.google.cloud:google-cloud-bigquery:1.122.2"
-  compile "com.google.cloud:google-cloud-iamcredentials:0.44.1"
-  compile "com.google.cloud:google-cloud-logging:1.102.0"
-  compile "com.google.cloud:google-cloud-monitoring:1.100.1"
-  compile "com.google.cloud:google-cloud-storage:1.113.1"
-  compile "com.google.cloud:google-cloud-tasks:1.30.4"
-  compile "com.google.code.gson:gson:$project.ext.GSON_VERSION"
-  compile "com.google.guava:guava:30.0-jre"
-  compile "com.google.http-client:google-http-client-apache:2.0.0"
-  compile "com.google.oauth-client:google-oauth-client-jetty:1.30.6"
-  compile "com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1"
-  compile "com.opsgenie.integration:sdk:2+"
-  compile "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
-  compile "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
-  compile "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
-  compile "io.opencensus:opencensus-exporter-stats-stackdriver:$project.ext.OPENCENSUS_VERSION"
-  compile "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
-  compile "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
-  compile "io.swagger:swagger-annotations:1.5.16"
-  compile "javax.inject:javax.inject:1"
-  compile "joda-time:joda-time:$project.ext.JODA_VERSION"
-  compile "org.liquibase:liquibase-core:3.10.0"
-  compile "mysql:mysql-connector-java:8.0.16"
-  compile "org.apache.commons:commons-collections4:4.4"
-  compile "org.apache.commons:commons-lang3:3.6"
-  compile "org.apache.commons:commons-text:1.8"
-  compile "org.apache.httpcomponents:httpclient:4.5.13"
-  compile 'org.springframework.boot:spring-boot-starter-validation'
-  compile "commons-codec:commons-codec:1.15"
-  compile 'com.auth0:java-jwt:3.14.0'
+  implementation "ch.qos.logback:logback-classic:1.2.3"
+  implementation "com.fasterxml.jackson.core:jackson-annotations:$project.ext.JACKSON_VERSION"
+  implementation "com.fasterxml.jackson.core:jackson-core:$project.ext.JACKSON_VERSION"
+  implementation "com.fasterxml.jackson.core:jackson-databind:$project.ext.JACKSON_DATABIND_VERSION"
+  implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$project.ext.JACKSON_VERSION"
+  implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$project.ext.JACKSON_VERSION"
+  implementation "com.github.java-json-tools:json-patch:1.13"
+  implementation "com.github.rholder:guava-retrying:2.0.0"
+  implementation "org.javers:javers-core:5.10.1"
+  implementation "com.google.api-client:google-api-client-appengine:1.30.0"
+  implementation "com.google.apis:google-api-services-admin-directory:directory_v1-rev20190806-1.30.3"
+  implementation "com.google.apis:google-api-services-cloudbilling:v1-rev48-1.25.0"
+  implementation "com.google.apis:google-api-services-cloudresourcemanager:v1-rev549-1.25.0"
+  implementation "com.google.apis:google-api-services-oauth2:v2-rev139-1.23.0"
+  implementation "com.google.appengine:appengine-api-1.0-sdk:$project.ext.GAE_VERSION"
+  implementation "com.google.appengine:appengine:$project.ext.GAE_VERSION"
+  implementation "com.google.auth:google-auth-library-appengine:0.19.0"
+  implementation "com.google.auth:google-auth-library-oauth2-http:0.19.0"
+  implementation "com.google.cloud.sql:mysql-socket-factory:1.0.10"
+  implementation "com.google.cloud:google-cloud-bigquery:1.122.2"
+  implementation "com.google.cloud:google-cloud-iamcredentials:0.44.1"
+  implementation "com.google.cloud:google-cloud-logging:1.102.0"
+  implementation "com.google.cloud:google-cloud-monitoring:1.100.1"
+  implementation "com.google.cloud:google-cloud-storage:1.113.1"
+  implementation "com.google.cloud:google-cloud-tasks:1.30.4"
+  implementation "com.google.code.gson:gson:$project.ext.GSON_VERSION"
+  implementation "com.google.guava:guava:30.0-jre"
+  implementation "com.google.http-client:google-http-client-apache:2.0.0"
+  implementation "com.google.oauth-client:google-oauth-client-jetty:1.30.6"
+  implementation "com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1"
+  implementation "com.opsgenie.integration:sdk:2+"
+  implementation "com.squareup.okhttp:logging-interceptor:$project.ext.OKHTTP_VERSION"
+  implementation "com.squareup.okhttp:okhttp:$project.ext.OKHTTP_VERSION"
+  implementation "io.opencensus:opencensus-api:$project.ext.OPENCENSUS_VERSION"
+  implementation "io.opencensus:opencensus-exporter-stats-stackdriver:$project.ext.OPENCENSUS_VERSION"
+  implementation "io.opencensus:opencensus-exporter-trace-stackdriver:$project.ext.OPENCENSUS_VERSION"
+  implementation "io.opencensus:opencensus-impl:$project.ext.OPENCENSUS_VERSION"
+  implementation "io.swagger:swagger-annotations:1.5.16"
+  implementation "javax.inject:javax.inject:1"
+  implementation "joda-time:joda-time:$project.ext.JODA_VERSION"
+  implementation "org.liquibase:liquibase-core:3.10.0"
+  implementation "mysql:mysql-connector-java:8.0.16"
+  implementation "org.apache.commons:commons-collections4:4.4"
+  implementation "org.apache.commons:commons-lang3:3.6"
+  implementation "org.apache.commons:commons-text:1.8"
+  implementation "org.apache.httpcomponents:httpclient:4.5.13"
+  implementation 'org.springframework.boot:spring-boot-starter-validation'
+  implementation "commons-codec:commons-codec:1.15"
+  implementation 'com.auth0:java-jwt:3.14.0'
 
   // Elasticsearch client
-  compile "org.elasticsearch.client:elasticsearch-rest-high-level-client:$project.ext.ELASTICSEARCH_VERSION"
-  compile "org.elasticsearch:elasticsearch:$project.ext.ELASTICSEARCH_VERSION"
+  implementation "org.elasticsearch.client:elasticsearch-rest-high-level-client:$project.ext.ELASTICSEARCH_VERSION"
+  implementation "org.elasticsearch:elasticsearch:$project.ext.ELASTICSEARCH_VERSION"
 
-  compile "org.hibernate:hibernate-core:${project.ext['hibernate.version']}"
+  implementation "org.hibernate:hibernate-core:${project.ext['hibernate.version']}"
 
   // Force the Kotlin version, otherwise the Kotlin plugin conflicts with Jackson's
   // Kotlin dep, resulting in massive logspam.
-  compile "org.jetbrains.kotlin:kotlin-reflect:$project.ext.KOTLIN_VERSION"
+  implementation "org.jetbrains.kotlin:kotlin-reflect:$project.ext.KOTLIN_VERSION"
 
-  compile "org.json:json:20160810"
+  implementation "org.json:json:20160810"
 
-  compile("org.apache.tomcat:tomcat-jdbc:9.0.10")
-  compile("org.springframework.boot:spring-boot-starter-tomcat")
-  compile("org.springframework.boot:spring-boot-starter-jdbc") {
+  implementation("org.apache.tomcat:tomcat-jdbc:9.0.10")
+  implementation("org.springframework.boot:spring-boot-starter-tomcat")
+  implementation("org.springframework.boot:spring-boot-starter-jdbc") {
     exclude group: 'com.zaxxer', module: 'HikariCP'
   }
 
-  compile("org.springframework.boot:spring-boot-starter-data-jpa") {
+  implementation("org.springframework.boot:spring-boot-starter-data-jpa") {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'com.zaxxer', module: 'HikariCP'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
 
-  compile("org.springframework.boot:spring-boot-starter-web") {
+  implementation("org.springframework.boot:spring-boot-starter-web") {
     exclude module: 'spring-boot-starter-tomcat'
     exclude group: 'org.slf4j', module: 'jul-to-slf4j'
   }
 
-  compile "org.springframework.retry:spring-retry"
-  compile "org.springframework.security:spring-security-core"
-  compile "org.springframework.security:spring-security-web"
+  implementation "org.springframework.retry:spring-retry"
+  implementation "org.springframework.security:spring-security-core"
+  implementation "org.springframework.security:spring-security-web"
 
   implementation "org.mapstruct:mapstruct:$project.ext.MAPSTRUCT_VERSION"
   testAnnotationProcessor "org.mapstruct:mapstruct-processor:$project.ext.MAPSTRUCT_VERSION"
@@ -478,9 +478,9 @@ dependencies {
   // Swagger3 codegen deps
   // TODO(calbach): The duplicated deps here are highly suspect. Investigate
   // removing the generated sourceSet, or else fixing the runtime deps.
-  compile 'io.swagger.core.v3:swagger-annotations:2.0.0'
-  compile 'io.gsonfire:gson-fire:1.8.3'
-  compile 'org.threeten:threetenbp:1.3.5'
+  implementation 'io.swagger.core.v3:swagger-annotations:2.0.0'
+  implementation 'io.gsonfire:gson-fire:1.8.3'
+  implementation 'org.threeten:threetenbp:1.3.5'
   generatedCompile 'io.swagger.core.v3:swagger-annotations:2.0.0'
   generatedCompile 'io.gsonfire:gson-fire:1.8.3'
   generatedCompile 'org.threeten:threetenbp:1.3.5'
@@ -493,20 +493,20 @@ dependencies {
   __tools__Compile 'commons-cli:commons-cli:1.4'
   __tools__Compile 'com.opencsv:opencsv:4.6'
 
-  testCompile 'org.junit.jupiter:junit-jupiter:5.6.1'
-  testCompile 'org.mockito:mockito-core:2.18.3'
-  testCompile "com.google.appengine:appengine-api-stubs:$project.ext.GAE_VERSION"
-  testCompile "com.google.appengine:appengine-tools-sdk:$project.ext.GAE_VERSION"
-  testCompile 'com.google.truth:truth:0.42'
-  testCompile 'com.google.truth.extensions:truth-java8-extension:1.0.1'
-  testCompile "org.springframework.boot:spring-boot-starter-test"
-  testCompile 'com.h2database:h2:1.4.194'
-  testCompile 'org.liquibase:liquibase-core:3.10.0'
-  testCompile 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
-  testCompile "org.jetbrains.kotlin:kotlin-test:1.3.21"
+  testImplementation 'org.junit.jupiter:junit-jupiter:5.6.1'
+  testImplementation 'org.mockito:mockito-core:2.18.3'
+  testImplementation "com.google.appengine:appengine-api-stubs:$project.ext.GAE_VERSION"
+  testImplementation "com.google.appengine:appengine-tools-sdk:$project.ext.GAE_VERSION"
+  testImplementation 'com.google.truth:truth:0.42'
+  testImplementation 'com.google.truth.extensions:truth-java8-extension:1.0.1'
+  testImplementation "org.springframework.boot:spring-boot-starter-test"
+  testImplementation 'com.h2database:h2:1.4.194'
+  testImplementation 'org.liquibase:liquibase-core:3.10.0'
+  testImplementation 'org.bitbucket.radistao.test:before-after-spring-test-runner:0.1.0'
+  testImplementation "org.jetbrains.kotlin:kotlin-test:1.3.21"
 
-  testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.4.0'
-  testRuntime 'org.junit.vintage:junit-vintage-engine:5.4.0'
+  testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.4.0'
+  testImplementation 'org.junit.vintage:junit-vintage-engine:5.4.0'
 
   // Use Mockito for testing only.
   testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$project.ext.MOCKITO_KOTLIN_VERSION"
